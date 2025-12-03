@@ -119,58 +119,78 @@
 
 \newcommand{\DRVHTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers
+% Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,5} {
-    \node[sp-annotation] at (\i*1.5 + 1.5, 4.5) {\i};
+    \node[font=\normalsize] at (\i + 1.0, 4.8) {\i};
 }
 
-% System Clock label and waveform
-\node[sp-label] at (-0.5, 3.8) {System Clock};
-\draw[sp-signal] (0.5, 3.5) -- (0.75, 3.5);
+% System Clock label and waveform (higher up, with space below)
+\node[sp-label] at (-0.8, 4.2) {System Clock};
+% Lead-in: short underscore before clock 0
+\draw[sp-signal] (0.0, 3.9) -- (0.5, 3.9);
+% Main clock cycles 0-5
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
-    \draw[sp-signal] (\x, 3.5) -- (\x, 4) -- (\x+0.75, 4) -- (\x+0.75, 3.5) -- (\x+1.5, 3.5);
+    \pgfmathsetmacro{\x}{0.5 + \i}
+    \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\x+0.5, 4.4) -- (\x+0.5, 3.9) -- (\x+1.0, 3.9);
 }
+% Lead-out: rising edge after 5, short high section
+\draw[sp-signal] (6.5, 3.9) -- (6.5, 4.4) -- (6.8, 4.4);
 
-% DIRA label and signal - increased horizontal spacing
-\node[sp-label] at (-0.5, 2.5) {DIRA:};
-\draw[sp-signal] (0.5, 2.5) -- (1.5, 2.5);
-\draw[sp-signal] (1.5, 2.5) -- (1.5, 2.8);
-\node[sp-annotation, anchor=west] at (1.7, 2.8) {DIRA};
-\draw[sp-signal, ->] (2.5, 2.8) -- (3.0, 2.8);
-\draw[sp-signal] (3.0, 2.65) -- (3.0, 2.95);
-\draw[sp-signal, ->] (3.0, 2.8) -- (4.5, 2.8);
-\draw[sp-signal] (4.5, 2.65) -- (4.5, 2.95);
-\draw[sp-signal, ->] (4.5, 2.8) -- (6.0, 2.8);
-\draw[sp-signal] (6.0, 2.65) -- (6.0, 2.95);
-\draw[sp-signal, ->] (6.0, 2.8) -- (7.5, 2.8);
-\draw[sp-signal] (7.5, 2.65) -- (7.5, 2.95);
-\draw[sp-signal, ->] (7.5, 2.8) -- (8.5, 2.8);
-\node[sp-annotation, anchor=west] at (8.7, 2.8) {P0 DRIV};
+% SEPARATE vertical ticks at clock 0 for each row (with gaps between)
+% DIRA tick
+\draw[sp-signal] (0.5, 2.85) -- (0.5, 3.15);
+% OUTA tick
+\draw[sp-signal] (0.5, 2.2) -- (0.5, 2.5);
+% Instruction tick
+\draw[sp-signal] (0.5, 1.55) -- (0.5, 1.85);
 
-% OUTA label and signal
-\node[sp-label] at (-0.5, 1.8) {OUTA:};
-\draw[sp-signal] (0.5, 1.8) -- (1.5, 1.8);
-\draw[sp-signal] (1.5, 1.8) -- (1.5, 2.1);
-\node[sp-annotation, anchor=west] at (1.7, 2.1) {OUTA};
-\draw[sp-signal, ->] (2.5, 2.1) -- (8.5, 2.1);
-\node[sp-annotation, anchor=west] at (8.7, 2.1) {P0 HIGH};
+% DIRA label and signal with arrows and ticks
+\node[sp-label] at (-0.3, 3.0) {DIRA:};
+% After first tick, DIRA label with extra space before arrow
+\node[font=\small, anchor=west] at (0.6, 3.0) {DIRA};
+\draw[sp-signal, ->] (1.35, 3.0) -- (1.45, 3.0);
+\draw[sp-signal] (1.5, 2.85) -- (1.5, 3.15);
+\draw[sp-signal, ->] (1.55, 3.0) -- (2.45, 3.0);
+\draw[sp-signal] (2.5, 2.85) -- (2.5, 3.15);
+\draw[sp-signal, ->] (2.55, 3.0) -- (3.45, 3.0);
+\draw[sp-signal] (3.5, 2.85) -- (3.5, 3.15);
+\draw[sp-signal, ->] (3.55, 3.0) -- (4.45, 3.0);
+\draw[sp-signal] (4.5, 2.85) -- (4.5, 3.15);
+\draw[sp-signal, ->] (4.55, 3.0) -- (5.45, 3.0);
+\draw[sp-signal] (5.5, 2.85) -- (5.5, 3.15);
+\draw[sp-signal, ->] (5.55, 3.0) -- (6.0, 3.0);
+\node[font=\small, anchor=west] at (6.05, 3.0) {P0 DRIV};
+\draw[sp-signal] (6.8, 2.85) -- (6.8, 3.15);
 
-% Register transfer annotations - moved down for more whitespace
-\node[sp-annotation] at (3.75, 2.45) {Reg*};
-\node[sp-annotation] at (5.25, 2.45) {Reg*};
-\node[sp-annotation] at (6.75, 2.45) {Reg*};
+% OUTA label and signal with arrows and ticks (same pattern as DIRA)
+\node[sp-label] at (-0.3, 2.35) {OUTA:};
+\node[font=\small, anchor=west] at (0.6, 2.35) {OUTA};
+\draw[sp-signal, ->] (1.35, 2.35) -- (1.45, 2.35);
+\draw[sp-signal] (1.5, 2.2) -- (1.5, 2.5);
+\draw[sp-signal, ->] (1.55, 2.35) -- (2.45, 2.35);
+\draw[sp-signal] (2.5, 2.2) -- (2.5, 2.5);
+\draw[sp-signal, ->] (2.55, 2.35) -- (3.45, 2.35);
+\draw[sp-signal] (3.5, 2.2) -- (3.5, 2.5);
+\draw[sp-signal, ->] (3.55, 2.35) -- (4.45, 2.35);
+\draw[sp-signal] (4.5, 2.2) -- (4.5, 2.5);
+\draw[sp-signal, ->] (4.55, 2.35) -- (5.45, 2.35);
+\draw[sp-signal] (5.5, 2.2) -- (5.5, 2.5);
+\draw[sp-signal, ->] (5.55, 2.35) -- (6.0, 2.35);
+\node[font=\small, anchor=west] at (6.05, 2.35) {P0 HIGH};
+\draw[sp-signal] (6.8, 2.2) -- (6.8, 2.5);
+
+% Register transfer annotations in BLUE (between DIRA and OUTA)
+\node[font=\small, color=sp-annotation] at (2.0, 2.68) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.0, 2.68) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.0, 2.68) {Reg*};
 
 % Instruction label and signal
-\node[sp-label] at (-0.5, 0.8) {Instruction:};
-\draw[sp-signal] (0.5, 0.8) -- (0.75, 0.8);
-\draw[sp-signal] (0.75, 0.65) -- (0.75, 0.95);
-\node[sp-annotation, anchor=west] at (0.95, 0.8) {DRVH \#0};
-
-% Footnote - repositioned
-\node[sp-annotation, anchor=west] at (5.5, 0.1) {Reg*: Internal register transfers};
+\node[sp-label] at (-0.3, 1.7) {Instruction:};
+\node[font=\small, anchor=west] at (0.6, 1.7) {DRVH \#0};
+\draw[sp-signal, ->] (1.45, 1.7) -- (1.5, 1.7);
+\draw[sp-signal] (1.5, 1.55) -- (1.5, 1.85);
 
 \end{tikzpicture}
 \par}
@@ -182,48 +202,58 @@
 
 \newcommand{\TESTBINATimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers
+% Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,5} {
-    \node[sp-annotation] at (\i*1.5 + 1.5, 3.8) {\i};
+    \node[font=\normalsize] at (\i + 1.0, 4.3) {\i};
 }
 
-% Clock label and waveform
-\node[sp-label] at (-0.5, 3.0) {Clock:};
-\draw[sp-signal] (0.5, 2.8) -- (0.75, 2.8);
+% Clock label and waveform (higher up, with space below)
+\node[sp-label] at (-0.3, 3.7) {Clock:};
+% Lead-in: short underscore before clock 0
+\draw[sp-signal] (0.0, 3.4) -- (0.5, 3.4);
+% Main clock cycles 0-5
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
-    \draw[sp-signal] (\x, 2.8) -- (\x, 3.3) -- (\x+0.75, 3.3) -- (\x+0.75, 2.8) -- (\x+1.5, 2.8);
+    \pgfmathsetmacro{\x}{0.5 + \i}
+    \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
 }
+% Lead-out: rising edge after 5, short high then dashed
+\draw[sp-signal] (6.5, 3.4) -- (6.5, 3.9) -- (6.6, 3.9);
+\draw[dashed, sp-signal] (6.6, 3.9) -- (6.9, 3.9);
 
-% INA label and signal - increased spacing between label and content
-\node[sp-label] at (-0.5, 1.8) {INA:};
-\draw[sp-signal] (0.5, 1.65) -- (0.5, 1.95);
-\node[sp-annotation, anchor=west] at (0.65, 1.8) {P0 IN};
-\draw[sp-signal, ->] (1.4, 1.8) -- (3.0, 1.8);
-% Register transfers - moved down for whitespace
-\node[sp-annotation] at (2.25, 1.4) {Reg};
-\draw[sp-signal] (3.0, 1.65) -- (3.0, 1.95);
-\draw[sp-signal, ->] (3.0, 1.8) -- (4.5, 1.8);
-\node[sp-annotation] at (3.75, 1.4) {Reg};
-\draw[sp-signal] (4.5, 1.65) -- (4.5, 1.95);
-\draw[sp-signal, ->] (4.5, 1.8) -- (6.0, 1.8);
-\node[sp-annotation] at (5.25, 1.4) {Reg};
-\draw[sp-signal] (6.0, 1.65) -- (6.0, 1.95);
-\node[sp-annotation, anchor=west] at (6.2, 1.8) {ALU};
-\draw[sp-signal] (6.8, 1.65) -- (6.8, 1.95);
-\draw[sp-signal, ->] (6.8, 1.8) -- (7.8, 1.8);
-\node[sp-annotation, anchor=west] at (8.0, 1.8) {C/Z};
-\draw[sp-signal, ->] (8.5, 1.8) -- (9.0, 1.8);
+% NO vertical sync line for this diagram (per original)
 
-% Internal register transfers annotation - repositioned below
-\node[sp-annotation, color=sp-annotation] at (4.5, 0.9) {Internal register transfers};
+% INA label and signal with tick marks and arrows (with gap from clock)
+\node[sp-label] at (-0.3, 2.4) {INA:};
+% Initial tick, then P0 IN label with more space, arrow to first tick
+\draw[sp-signal] (0.5, 2.25) -- (0.5, 2.55);
+\node[font=\small, anchor=west] at (0.6, 2.4) {P0 IN};
+\draw[sp-signal, ->] (1.35, 2.4) -- (1.45, 2.4);
+\draw[sp-signal] (1.5, 2.25) -- (1.5, 2.55);
+\draw[sp-signal, ->] (1.55, 2.4) -- (2.45, 2.4);
+\draw[sp-signal] (2.5, 2.25) -- (2.5, 2.55);
+\draw[sp-signal, ->] (2.55, 2.4) -- (3.45, 2.4);
+\draw[sp-signal] (3.5, 2.25) -- (3.5, 2.55);
+\draw[sp-signal, ->] (3.55, 2.4) -- (4.45, 2.4);
+\draw[sp-signal] (4.5, 2.25) -- (4.5, 2.55);
+\node[font=\small, anchor=west] at (4.6, 2.4) {ALU};
+\draw[sp-signal] (5.1, 2.25) -- (5.1, 2.55);
+\node[font=\small, anchor=west] at (5.2, 2.4) {C/Z};
+\draw[sp-signal, ->] (5.7, 2.4) -- (6.7, 2.4);
 
-% Instruction label
-\node[sp-label] at (-0.5, 0.3) {Instruction:};
-\draw[sp-signal] (5.25, 0.15) -- (5.25, 0.45);
-\node[sp-annotation, anchor=west] at (5.5, 0.3) {TESTB INA, \#0};
+% Register transfer annotations in BLUE (below INA line)
+\node[font=\small, color=sp-annotation] at (2.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.0, 1.85) {Reg*};
+
+% Instruction label and signal
+\node[sp-label] at (-0.3, 1.0) {Instruction:};
+% Horizontal line, then tick, then label with arrow (more space)
+\draw[sp-signal] (0.5, 1.0) -- (4.45, 1.0);
+\draw[sp-signal] (4.5, 0.85) -- (4.5, 1.15);
+\node[font=\small, anchor=west] at (4.6, 1.0) {TESTB INA, \#0};
+\draw[sp-signal, ->] (6.35, 1.0) -- (6.7, 1.0);
 
 \end{tikzpicture}
 \par}
@@ -235,42 +265,56 @@
 
 \newcommand{\TESTPTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers
+% Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,4} {
-    \node[sp-annotation] at (\i*1.5 + 1.5, 3.5) {\i};
+    \node[font=\normalsize] at (\i + 1.0, 4.3) {\i};
 }
 
-% Clock label and waveform
-\node[sp-label] at (-0.5, 2.8) {Clock:};
-\draw[sp-signal] (0.5, 2.5) -- (0.75, 2.5);
+% Clock label and waveform (higher up, with space below)
+\node[sp-label] at (-0.3, 3.7) {Clock:};
+% Lead-in: short underscore before clock 0
+\draw[sp-signal] (0.0, 3.4) -- (0.5, 3.4);
+% Main clock cycles 0-4
 \foreach \i in {0,...,4} {
-    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
-    \draw[sp-signal] (\x, 2.5) -- (\x, 3.0) -- (\x+0.75, 3.0) -- (\x+0.75, 2.5) -- (\x+1.5, 2.5);
+    \pgfmathsetmacro{\x}{0.5 + \i}
+    \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
 }
+% Lead-out: rising edge after 4, short high then dashed
+\draw[sp-signal] (5.5, 3.4) -- (5.5, 3.9) -- (5.6, 3.9);
+\draw[dashed, sp-signal] (5.6, 3.9) -- (5.9, 3.9);
 
-% INA label and signal - increased spacing
-\node[sp-label] at (-0.5, 1.6) {INA:};
-\draw[sp-signal] (0.5, 1.45) -- (0.5, 1.75);
-\node[sp-annotation, anchor=west] at (0.65, 1.6) {P0 IN};
-\draw[sp-signal, ->] (1.4, 1.6) -- (3.0, 1.6);
-% Register transfers - moved down for whitespace
-\node[sp-annotation] at (2.25, 1.2) {Reg};
-\draw[sp-signal] (3.0, 1.45) -- (3.0, 1.75);
-\draw[sp-signal, ->] (3.0, 1.6) -- (4.5, 1.6);
-\node[sp-annotation] at (3.75, 1.2) {Reg};
-\draw[sp-signal] (4.5, 1.45) -- (4.5, 1.75);
-\draw[sp-signal, ->] (4.5, 1.6) -- (6.0, 1.6);
-\node[sp-annotation] at (5.25, 1.2) {Reg};
-\draw[sp-signal] (6.0, 1.45) -- (6.0, 1.75);
-\node[sp-annotation, anchor=west] at (6.2, 1.6) {C/Z};
-\draw[sp-signal, ->] (6.7, 1.6) -- (7.2, 1.6);
+% NO vertical sync line for this diagram (per original)
 
-% Instruction
-\node[sp-label] at (-0.5, 0.3) {Instruction:};
-\draw[sp-signal] (4.5, 0.15) -- (4.5, 0.45);
-\node[sp-annotation, anchor=west] at (4.7, 0.3) {TESTP \#0};
+% INA label and signal with tick marks and arrows (with gap from clock)
+\node[sp-label] at (-0.3, 2.4) {INA:};
+% Initial tick, then P0 IN label with more space, arrow to first tick
+\draw[sp-signal] (0.5, 2.25) -- (0.5, 2.55);
+\node[font=\small, anchor=west] at (0.6, 2.4) {P0 IN};
+\draw[sp-signal, ->] (1.35, 2.4) -- (1.45, 2.4);
+\draw[sp-signal] (1.5, 2.25) -- (1.5, 2.55);
+\draw[sp-signal, ->] (1.55, 2.4) -- (2.45, 2.4);
+\draw[sp-signal] (2.5, 2.25) -- (2.5, 2.55);
+\draw[sp-signal, ->] (2.55, 2.4) -- (3.45, 2.4);
+\draw[sp-signal] (3.5, 2.25) -- (3.5, 2.55);
+\draw[sp-signal, ->] (3.55, 2.4) -- (4.45, 2.4);
+\draw[sp-signal] (4.5, 2.25) -- (4.5, 2.55);
+\node[font=\small, anchor=west] at (4.6, 2.4) {C/Z};
+\draw[sp-signal, ->] (5.15, 2.4) -- (5.7, 2.4);
+
+% Register transfer annotations in BLUE (below INA line)
+\node[font=\small, color=sp-annotation] at (2.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.0, 1.85) {Reg*};
+
+% Instruction label and signal
+\node[sp-label] at (-0.3, 1.0) {Instruction:};
+% Horizontal line, then tick, then label with arrow (more space)
+\draw[sp-signal] (0.5, 1.0) -- (3.45, 1.0);
+\draw[sp-signal] (3.5, 0.85) -- (3.5, 1.15);
+\node[font=\small, anchor=west] at (3.6, 1.0) {TESTP \#0};
+\draw[sp-signal, ->] (4.85, 1.0) -- (5.7, 1.0);
 
 \end{tikzpicture}
 \par}
@@ -1254,6 +1298,686 @@
 % 0 bit
 \draw[thin] (31.5, 0.8) -- (31.5, 0.4);
 \node[sp-annotation, font=\scriptsize] at (31.5, 0.0) {0};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% SINGLE-PHASE ENCODER TIMING DIAGRAM
+% ============================================================================
+% Shows incremental encoder with single-phase (one channel) counting
+
+\newcommand{\SinglePhaseEncoderDiagram}{%
+{\centering
+\begin{tikzpicture}[x=0.9cm, y=1cm]
+
+% Channel A waveform
+\node[sp-label] at (-0.8, 2.5) {Channel A};
+\draw[sp-signal] (0.0, 2.2) -- (0.8, 2.2) -- (0.8, 2.8) -- (1.6, 2.8) -- (1.6, 2.2) -- (2.4, 2.2) -- (2.4, 2.8) -- (3.2, 2.8) -- (3.2, 2.2) -- (4.0, 2.2) -- (4.0, 2.8) -- (4.8, 2.8) -- (4.8, 2.2) -- (5.6, 2.2) -- (5.6, 2.8) -- (6.4, 2.8) -- (6.4, 2.2) -- (7.2, 2.2);
+
+% Channel B waveform (90° phase shifted)
+\node[sp-label] at (-0.8, 1.5) {Channel B};
+\draw[sp-signal] (0.0, 1.2) -- (0.4, 1.2) -- (0.4, 1.8) -- (1.2, 1.8) -- (1.2, 1.2) -- (2.0, 1.2) -- (2.0, 1.8) -- (2.8, 1.8) -- (2.8, 1.2) -- (3.6, 1.2) -- (3.6, 1.8) -- (4.4, 1.8) -- (4.4, 1.2) -- (5.2, 1.2) -- (5.2, 1.8) -- (6.0, 1.8) -- (6.0, 1.2) -- (6.8, 1.2) -- (6.8, 1.8) -- (7.2, 1.8);
+
+% Count markers on Channel A rising edges only
+\foreach \x/\n in {0.8/1, 2.4/2, 4.0/3, 5.6/4} {
+    \draw[sp-signal, ->] (\x, 2.9) -- (\x, 3.2);
+    \node[sp-annotation, font=\footnotesize] at (\x, 3.4) {\n};
+}
+
+% Single-phase label
+\node[sp-annotation] at (3.6, 3.7) {Single-Phase: Count A Rising Edges Only};
+
+% Direction indicator
+\draw[sp-arrow, thick, ->] (7.5, 2.0) -- (8.3, 2.0);
+\node[sp-annotation, anchor=west] at (8.4, 2.0) {CW};
+
+% Note about B for direction
+\node[sp-annotation, font=\footnotesize, text width=3cm, align=left] at (8.5, 1.2) {B level at A edge\\determines direction};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% ADC SAMPLE-HOLD TIMING DIAGRAM
+% ============================================================================
+% Shows ADC sampling phases: sample, hold, convert
+
+\newcommand{\ADCSampleHoldDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Input signal (analog)
+\node[sp-label] at (-1.0, 3.0) {Analog In};
+\draw[sp-signal, thick] (0.0, 2.7) sin (0.5, 3.3) cos (1.0, 2.7) sin (1.5, 3.3) cos (2.0, 2.7) sin (2.5, 3.3) cos (3.0, 2.7) sin (3.5, 3.3) cos (4.0, 2.7) sin (4.5, 3.3) cos (5.0, 2.7) sin (5.5, 3.3) cos (6.0, 2.7);
+
+% Sample/Hold signal
+\node[sp-label] at (-1.0, 1.8) {S/H};
+\draw[sp-signal] (0.0, 1.5) -- (0.5, 1.5) -- (0.5, 2.1) -- (1.5, 2.1) -- (1.5, 1.5) -- (2.5, 1.5) -- (2.5, 2.1) -- (3.5, 2.1) -- (3.5, 1.5) -- (4.5, 1.5) -- (4.5, 2.1) -- (5.5, 2.1) -- (5.5, 1.5) -- (6.0, 1.5);
+
+% Phase labels
+\node[sp-annotation, font=\footnotesize] at (1.0, 2.3) {Hold};
+\node[sp-annotation, font=\footnotesize] at (2.0, 1.3) {Sample};
+\node[sp-annotation, font=\footnotesize] at (3.0, 2.3) {Hold};
+
+% Convert signal
+\node[sp-label] at (-1.0, 0.6) {Convert};
+\draw[sp-signal] (0.0, 0.3) -- (0.7, 0.3) -- (0.7, 0.9) -- (1.3, 0.9) -- (1.3, 0.3) -- (2.7, 0.3) -- (2.7, 0.9) -- (3.3, 0.9) -- (3.3, 0.3) -- (4.7, 0.3) -- (4.7, 0.9) -- (5.3, 0.9) -- (5.3, 0.3) -- (6.0, 0.3);
+
+% Data ready pulses
+\node[sp-label] at (-1.0, -0.4) {Data Ready};
+\draw[sp-signal] (0.0, -0.7) -- (1.3, -0.7) -- (1.3, -0.1) -- (1.5, -0.1) -- (1.5, -0.7) -- (3.3, -0.7) -- (3.3, -0.1) -- (3.5, -0.1) -- (3.5, -0.7) -- (5.3, -0.7) -- (5.3, -0.1) -- (5.5, -0.1) -- (5.5, -0.7) -- (6.0, -0.7);
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% CLOCK DISTRIBUTION / TIMING NETWORK DIAGRAM
+% ============================================================================
+% Shows master clock with divided clock outputs
+
+\newcommand{\ClockDistributionDiagram}{%
+{\centering
+\begin{tikzpicture}[x=0.8cm, y=1cm]
+
+% Master clock (fastest)
+\node[sp-label] at (-1.2, 3.5) {Master\\(CLK)};
+\foreach \i in {0,...,15} {
+    \pgfmathsetmacro{\x}{0.0 + \i*0.5}
+    \draw[sp-signal] (\x, 3.2) -- (\x, 3.8) -- (\x+0.25, 3.8) -- (\x+0.25, 3.2) -- (\x+0.5, 3.2);
+}
+
+% CLK/2
+\node[sp-label] at (-1.2, 2.5) {CLK/2};
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\x}{0.0 + \i*1.0}
+    \draw[sp-signal] (\x, 2.2) -- (\x, 2.8) -- (\x+0.5, 2.8) -- (\x+0.5, 2.2) -- (\x+1.0, 2.2);
+}
+
+% CLK/4
+\node[sp-label] at (-1.2, 1.5) {CLK/4};
+\foreach \i in {0,...,3} {
+    \pgfmathsetmacro{\x}{0.0 + \i*2.0}
+    \draw[sp-signal] (\x, 1.2) -- (\x, 1.8) -- (\x+1.0, 1.8) -- (\x+1.0, 1.2) -- (\x+2.0, 1.2);
+}
+
+% CLK/8
+\node[sp-label] at (-1.2, 0.5) {CLK/8};
+\foreach \i in {0,...,1} {
+    \pgfmathsetmacro{\x}{0.0 + \i*4.0}
+    \draw[sp-signal] (\x, 0.2) -- (\x, 0.8) -- (\x+2.0, 0.8) -- (\x+2.0, 0.2) -- (\x+4.0, 0.2);
+}
+
+% Alignment markers at time 0
+\draw[dashed, thin, gray] (0.0, -0.0) -- (0.0, 4.0);
+\node[sp-annotation, font=\footnotesize] at (0.0, -0.3) {Aligned};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% FEEDBACK CONTROL LOOP BLOCK DIAGRAM
+% ============================================================================
+% Generic feedback loop: output generation -> measurement -> adjustment
+
+\newcommand{\FeedbackLoopDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Setpoint
+\node[sp-annotation] at (-0.5, 2.0) {Setpoint};
+\draw[sp-arrow, ->] (0.2, 2.0) -- (1.0, 2.0);
+
+% Summing junction (circle with +/-)
+\draw (1.3, 2.0) circle (0.3);
+\node[sp-annotation, font=\footnotesize] at (1.1, 2.2) {+};
+\node[sp-annotation, font=\footnotesize] at (1.3, 1.8) {--};
+
+% Controller
+\draw[sp-arrow, ->] (1.6, 2.0) -- (2.2, 2.0);
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (3.0, 2.0) {Controller};
+
+% Output stage (Smart Pin)
+\draw[sp-arrow, ->] (3.8, 2.0) -- (4.4, 2.0);
+\node[sp-block, minimum width=1.8cm, minimum height=0.8cm] at (5.5, 2.0) {Smart Pin\\Output};
+
+% Output
+\draw[sp-arrow, ->] (6.4, 2.0) -- (7.5, 2.0);
+\node[sp-annotation] at (8.0, 2.0) {Output};
+
+% Feedback path - measurement
+\draw[sp-signal] (7.0, 2.0) -- (7.0, 0.5) -- (3.0, 0.5);
+\node[sp-block, minimum width=1.8cm, minimum height=0.8cm] at (3.0, 0.5) {Smart Pin\\Measure};
+
+% Feedback to summing junction
+\draw[sp-arrow, ->] (2.1, 0.5) -- (1.3, 0.5) -- (1.3, 1.7);
+
+% Feedback label
+\node[sp-annotation, font=\footnotesize] at (5.0, 0.2) {Feedback Path};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% STATE MACHINE DIAGRAM
+% ============================================================================
+% Generic state machine with states and transitions
+
+\newcommand{\StateMachineDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm,
+    state/.style={circle, draw=sp-block-border, fill=sp-block-fill, minimum size=1.2cm, font=\small},
+    trans/.style={->, >=Stealth, thick}]
+
+% States
+\node[state] (idle) at (0, 2) {IDLE};
+\node[state] (config) at (3, 2) {CONFIG};
+\node[state] (run) at (6, 2) {RUN};
+\node[state] (done) at (6, 0) {DONE};
+\node[state] (error) at (3, 0) {ERROR};
+
+% Transitions
+\draw[trans] (idle) -- node[above, font=\footnotesize] {start} (config);
+\draw[trans] (config) -- node[above, font=\footnotesize] {ready} (run);
+\draw[trans] (run) -- node[right, font=\footnotesize] {complete} (done);
+\draw[trans] (done) -- node[below, font=\footnotesize] {reset} (idle);
+\draw[trans] (config) -- node[left, font=\footnotesize] {fail} (error);
+\draw[trans] (run) -- node[above, font=\footnotesize] {fail} (error);
+\draw[trans] (error) -- node[below, font=\footnotesize] {reset} (idle);
+
+% Initial arrow
+\draw[trans] (-1.2, 2) -- (idle);
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% MOTOR CONTROLLER BLOCK DIAGRAM
+% ============================================================================
+% Shows PWM outputs and encoder inputs for motor control
+
+\newcommand{\MotorControllerDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% P2 Cog block
+\node[sp-block, minimum width=2cm, minimum height=3cm] at (0, 1.5) {};
+\node[sp-annotation, font=\bfseries] at (0, 2.8) {P2 COG};
+
+% Smart Pins for PWM
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm, fill=blue!10] at (3, 2.5) {PWM A};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm, fill=blue!10] at (3, 1.8) {PWM B};
+
+% Smart Pins for Encoder
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm, fill=green!10] at (3, 0.8) {ENC A};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm, fill=green!10] at (3, 0.1) {ENC B};
+
+% Motor Driver
+\node[sp-block, minimum width=1.5cm, minimum height=1.5cm] at (5.5, 2.15) {Motor\\Driver};
+
+% Motor
+\draw (7.2, 2.15) circle (0.5);
+\node[sp-annotation, font=\footnotesize] at (7.2, 2.15) {M};
+
+% Encoder disc
+\draw (7.2, 0.45) circle (0.4);
+\draw[dashed] (7.2, 0.45) -- (7.5, 0.65);
+\draw[dashed] (7.2, 0.45) -- (7.5, 0.25);
+\node[sp-annotation, font=\footnotesize] at (7.2, -0.2) {Encoder};
+
+% Connections - PWM to driver
+\draw[sp-arrow, ->] (1.0, 2.5) -- (2.2, 2.5);
+\draw[sp-arrow, ->] (1.0, 1.8) -- (2.2, 1.8);
+\draw[sp-arrow, ->] (3.8, 2.5) -- (4.7, 2.5);
+\draw[sp-arrow, ->] (3.8, 1.8) -- (4.7, 1.8);
+
+% Driver to motor
+\draw[sp-arrow, ->] (6.3, 2.15) -- (6.7, 2.15);
+
+% Motor shaft to encoder
+\draw[dashed] (7.2, 1.65) -- (7.2, 0.85);
+
+% Encoder to Smart Pins
+\draw[sp-arrow, <-] (1.0, 0.8) -- (2.2, 0.8);
+\draw[sp-arrow, <-] (1.0, 0.1) -- (2.2, 0.1);
+\draw[sp-arrow, <-] (3.8, 0.8) -- (6.8, 0.8) -- (6.8, 0.45);
+\draw[sp-arrow, <-] (3.8, 0.1) -- (7.6, 0.1) -- (7.6, 0.45);
+
+% Labels
+\node[sp-annotation, font=\footnotesize, color=blue] at (3, 3.0) {Output};
+\node[sp-annotation, font=\footnotesize, color=green!50!black] at (3, -0.4) {Input};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% SYNCHRONIZED SAMPLING DIAGRAM
+% ============================================================================
+% Shows trigger signal and simultaneous capture on multiple channels
+
+\newcommand{\SynchronizedSamplingDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Trigger signal
+\node[sp-label] at (-1.0, 3.5) {Trigger};
+\draw[sp-signal] (0.0, 3.2) -- (2.0, 3.2) -- (2.0, 3.8) -- (2.3, 3.8) -- (2.3, 3.2) -- (5.0, 3.2) -- (5.0, 3.8) -- (5.3, 3.8) -- (5.3, 3.2) -- (7.0, 3.2);
+
+% Channel 1
+\node[sp-label] at (-1.0, 2.5) {ADC 1};
+\draw[sp-signal, blue] (0.0, 2.3) -- (0.5, 2.5) -- (1.0, 2.2) -- (1.5, 2.7) -- (2.0, 2.4) -- (2.5, 2.6) -- (3.0, 2.3) -- (3.5, 2.5) -- (4.0, 2.2) -- (4.5, 2.7) -- (5.0, 2.4) -- (5.5, 2.6) -- (6.0, 2.3) -- (6.5, 2.5) -- (7.0, 2.4);
+
+% Channel 2
+\node[sp-label] at (-1.0, 1.5) {ADC 2};
+\draw[sp-signal, red] (0.0, 1.5) -- (0.5, 1.3) -- (1.0, 1.6) -- (1.5, 1.4) -- (2.0, 1.7) -- (2.5, 1.3) -- (3.0, 1.5) -- (3.5, 1.4) -- (4.0, 1.6) -- (4.5, 1.3) -- (5.0, 1.7) -- (5.5, 1.4) -- (6.0, 1.5) -- (6.5, 1.3) -- (7.0, 1.5);
+
+% Sample markers (vertical dashed lines at trigger)
+\draw[dashed, thick, green!50!black] (2.0, 1.0) -- (2.0, 4.0);
+\draw[dashed, thick, green!50!black] (5.0, 1.0) -- (5.0, 4.0);
+
+% Sample points
+\fill[blue] (2.0, 2.4) circle (0.08);
+\fill[red] (2.0, 1.7) circle (0.08);
+\fill[blue] (5.0, 2.4) circle (0.08);
+\fill[red] (5.0, 1.7) circle (0.08);
+
+% Labels
+\node[sp-annotation, font=\footnotesize, green!50!black] at (2.0, 0.7) {Sample 1};
+\node[sp-annotation, font=\footnotesize, green!50!black] at (5.0, 0.7) {Sample 2};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% USB DIFFERENTIAL SIGNALING DIAGRAM
+% ============================================================================
+% Shows D+ and D- differential signaling for USB
+
+\newcommand{\USBDifferentialDiagram}{%
+{\centering
+\begin{tikzpicture}[x=0.8cm, y=1cm]
+
+% D+ signal
+\node[sp-label] at (-0.8, 3.0) {D+};
+\draw[sp-signal, blue, thick] (0.0, 2.7) -- (0.5, 2.7) -- (0.5, 3.3) -- (1.5, 3.3) -- (1.5, 2.7) -- (2.0, 2.7) -- (2.0, 3.3) -- (2.5, 3.3) -- (2.5, 2.7) -- (3.5, 2.7) -- (3.5, 3.3) -- (4.5, 3.3) -- (4.5, 2.7) -- (5.0, 2.7) -- (5.0, 3.3) -- (5.5, 3.3) -- (5.5, 2.7) -- (6.5, 2.7) -- (6.5, 3.3) -- (7.5, 3.3) -- (7.5, 2.7) -- (8.0, 2.7);
+
+% D- signal (inverted)
+\node[sp-label] at (-0.8, 1.5) {D-};
+\draw[sp-signal, red, thick] (0.0, 1.8) -- (0.5, 1.8) -- (0.5, 1.2) -- (1.5, 1.2) -- (1.5, 1.8) -- (2.0, 1.8) -- (2.0, 1.2) -- (2.5, 1.2) -- (2.5, 1.8) -- (3.5, 1.8) -- (3.5, 1.2) -- (4.5, 1.2) -- (4.5, 1.8) -- (5.0, 1.8) -- (5.0, 1.2) -- (5.5, 1.2) -- (5.5, 1.8) -- (6.5, 1.8) -- (6.5, 1.2) -- (7.5, 1.2) -- (7.5, 1.8) -- (8.0, 1.8);
+
+% Bit annotations
+\node[sp-annotation, font=\footnotesize] at (1.0, 3.6) {J};
+\node[sp-annotation, font=\footnotesize] at (2.25, 3.6) {K};
+\node[sp-annotation, font=\footnotesize] at (3.0, 3.6) {J};
+\node[sp-annotation, font=\footnotesize] at (4.0, 3.6) {K};
+\node[sp-annotation, font=\footnotesize] at (5.25, 3.6) {K};
+\node[sp-annotation, font=\footnotesize] at (6.0, 3.6) {J};
+\node[sp-annotation, font=\footnotesize] at (7.0, 3.6) {K};
+
+% Data bits below
+\node[sp-annotation, font=\footnotesize] at (1.0, 0.8) {1};
+\node[sp-annotation, font=\footnotesize] at (2.25, 0.8) {0};
+\node[sp-annotation, font=\footnotesize] at (3.0, 0.8) {0};
+\node[sp-annotation, font=\footnotesize] at (4.0, 0.8) {1};
+\node[sp-annotation, font=\footnotesize] at (5.25, 0.8) {1};
+\node[sp-annotation, font=\footnotesize] at (6.0, 0.8) {0};
+\node[sp-annotation, font=\footnotesize] at (7.0, 0.8) {1};
+
+% Legend
+\node[sp-annotation, font=\footnotesize, text width=4cm] at (4.0, 0.3) {NRZI: Transition = 0, No change = 1};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% PROTOCOL BRIDGE BLOCK DIAGRAM
+% ============================================================================
+% Shows input protocol translation to output protocol
+
+\newcommand{\ProtocolBridgeDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Input side
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (0, 2.5) {UART\\RX};
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (0, 1.5) {SPI\\RX};
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (0, 0.5) {I2C\\RX};
+
+% Input arrows
+\draw[sp-arrow, <-] (-1.5, 2.5) -- (-0.8, 2.5);
+\draw[sp-arrow, <-] (-1.5, 1.5) -- (-0.8, 1.5);
+\draw[sp-arrow, <-] (-1.5, 0.5) -- (-0.8, 0.5);
+
+% Translation block
+\node[sp-block, minimum width=2.5cm, minimum height=3cm, fill=blue!10] at (3, 1.5) {};
+\node[sp-annotation, font=\bfseries] at (3, 2.5) {Protocol};
+\node[sp-annotation, font=\bfseries] at (3, 2.0) {Translator};
+\node[sp-annotation, font=\footnotesize] at (3, 1.0) {Smart Pin};
+\node[sp-annotation, font=\footnotesize] at (3, 0.6) {Processing};
+
+% Connection to translator
+\draw[sp-arrow, ->] (0.8, 2.5) -- (1.7, 2.5) -- (1.7, 1.5);
+\draw[sp-arrow, ->] (0.8, 1.5) -- (1.7, 1.5);
+\draw[sp-arrow, ->] (0.8, 0.5) -- (1.7, 0.5) -- (1.7, 1.5);
+
+% Output side
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (6, 2.5) {UART\\TX};
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (6, 1.5) {SPI\\TX};
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm] at (6, 0.5) {I2C\\TX};
+
+% Connection from translator
+\draw[sp-arrow, ->] (4.3, 1.5) -- (4.8, 1.5) -- (4.8, 2.5) -- (5.2, 2.5);
+\draw[sp-arrow, ->] (4.3, 1.5) -- (5.2, 1.5);
+\draw[sp-arrow, ->] (4.3, 1.5) -- (4.8, 1.5) -- (4.8, 0.5) -- (5.2, 0.5);
+
+% Output arrows
+\draw[sp-arrow, ->] (6.8, 2.5) -- (7.5, 2.5);
+\draw[sp-arrow, ->] (6.8, 1.5) -- (7.5, 1.5);
+\draw[sp-arrow, ->] (6.8, 0.5) -- (7.5, 0.5);
+
+% Labels
+\node[sp-annotation, font=\footnotesize] at (-1.5, 3.0) {Input};
+\node[sp-annotation, font=\footnotesize] at (7.5, 3.0) {Output};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% DATA ACQUISITION SYSTEM DIAGRAM
+% ============================================================================
+% Shows multiple ADC channels with timing and buffering
+
+\newcommand{\DataAcquisitionDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Input signals (analog)
+\node[sp-annotation] at (-1.0, 3.5) {CH1};
+\node[sp-annotation] at (-1.0, 2.5) {CH2};
+\node[sp-annotation] at (-1.0, 1.5) {CH3};
+\node[sp-annotation] at (-1.0, 0.5) {CH4};
+
+% ADC blocks
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm, fill=green!10] at (0.5, 3.5) {ADC};
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm, fill=green!10] at (0.5, 2.5) {ADC};
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm, fill=green!10] at (0.5, 1.5) {ADC};
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm, fill=green!10] at (0.5, 0.5) {ADC};
+
+% Arrows to ADCs
+\draw[sp-arrow, ->] (-0.5, 3.5) -- (-0.1, 3.5);
+\draw[sp-arrow, ->] (-0.5, 2.5) -- (-0.1, 2.5);
+\draw[sp-arrow, ->] (-0.5, 1.5) -- (-0.1, 1.5);
+\draw[sp-arrow, ->] (-0.5, 0.5) -- (-0.1, 0.5);
+
+% Sample timing block
+\node[sp-block, minimum width=1.5cm, minimum height=2cm, fill=blue!10] at (2.5, 2.0) {};
+\node[sp-annotation, font=\footnotesize] at (2.5, 2.5) {Sample};
+\node[sp-annotation, font=\footnotesize] at (2.5, 2.0) {Timing};
+\node[sp-annotation, font=\footnotesize] at (2.5, 1.5) {Control};
+
+% Connections to timing
+\draw[sp-arrow, ->] (1.1, 3.5) -- (1.7, 3.5) -- (1.7, 2.5);
+\draw[sp-arrow, ->] (1.1, 2.5) -- (1.7, 2.5);
+\draw[sp-arrow, ->] (1.1, 1.5) -- (1.7, 1.5) -- (1.7, 2.0);
+\draw[sp-arrow, ->] (1.1, 0.5) -- (1.7, 0.5) -- (1.7, 1.5);
+
+% Buffer block
+\node[sp-block, minimum width=1.5cm, minimum height=2.5cm, fill=orange!10] at (4.5, 2.0) {};
+\node[sp-annotation, font=\footnotesize] at (4.5, 2.8) {Data};
+\node[sp-annotation, font=\footnotesize] at (4.5, 2.3) {Buffer};
+\node[sp-annotation, font=\footnotesize] at (4.5, 1.5) {(Hub};
+\node[sp-annotation, font=\footnotesize] at (4.5, 1.1) {RAM)};
+
+% Connection to buffer
+\draw[sp-arrow, ->] (3.3, 2.0) -- (3.7, 2.0);
+
+% Output to processor
+\node[sp-block, minimum width=1.2cm, minimum height=1cm] at (6.5, 2.0) {COG};
+\draw[sp-arrow, ->] (5.3, 2.0) -- (5.9, 2.0);
+
+% Trigger input
+\draw[sp-arrow, ->] (2.5, -0.2) -- (2.5, 1.0);
+\node[sp-annotation, font=\footnotesize] at (2.5, -0.5) {Trigger};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% COMMUNICATION HUB DIAGRAM
+% ============================================================================
+% Shows multi-protocol communication routing
+
+\newcommand{\CommunicationHubDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Central hub
+\draw[thick, fill=blue!5] (3, 2) circle (1.2);
+\node[sp-annotation, font=\bfseries] at (3, 2.3) {Comm};
+\node[sp-annotation, font=\bfseries] at (3, 1.8) {Hub};
+
+% UART 1 (top left)
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm] at (0.5, 3.5) {UART1};
+\draw[sp-arrow, <->] (1.1, 3.5) -- (2.0, 2.8);
+
+% UART 2 (bottom left)
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm] at (0.5, 0.5) {UART2};
+\draw[sp-arrow, <->] (1.1, 0.5) -- (2.0, 1.2);
+
+% SPI (top right)
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm] at (5.5, 3.5) {SPI};
+\draw[sp-arrow, <->] (4.9, 3.5) -- (4.0, 2.8);
+
+% I2C (bottom right)
+\node[sp-block, minimum width=1.2cm, minimum height=0.6cm] at (5.5, 0.5) {I2C};
+\draw[sp-arrow, <->] (4.9, 0.5) -- (4.0, 1.2);
+
+% External connections
+\draw[sp-arrow, <-] (-0.5, 3.5) -- (-0.1, 3.5);
+\draw[sp-arrow, <-] (-0.5, 0.5) -- (-0.1, 0.5);
+\draw[sp-arrow, ->] (6.1, 3.5) -- (6.5, 3.5);
+\draw[sp-arrow, ->] (6.1, 0.5) -- (6.5, 0.5);
+
+% Labels
+\node[sp-annotation, font=\footnotesize] at (-0.5, 3.8) {PC};
+\node[sp-annotation, font=\footnotesize] at (-0.5, 0.8) {GPS};
+\node[sp-annotation, font=\footnotesize] at (6.5, 3.8) {Flash};
+\node[sp-annotation, font=\footnotesize] at (6.5, 0.8) {Sensor};
+
+% P2 COG connection (top)
+\draw[sp-arrow, <->] (3, 3.2) -- (3, 3.8);
+\node[sp-annotation, font=\footnotesize] at (3, 4.1) {P2 COG};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% OSCILLOSCOPE ARCHITECTURE DIAGRAM
+% ============================================================================
+% Shows oscilloscope input, ADC, trigger, display chain
+
+\newcommand{\OscilloscopeArchDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Input conditioning
+\node[sp-block, minimum width=1.5cm, minimum height=1cm] at (0, 2) {Input\\Cond.};
+\draw[sp-arrow, <-] (-1.2, 2) -- (-0.8, 2);
+\node[sp-annotation, font=\footnotesize] at (-1.5, 2) {Signal};
+
+% ADC
+\node[sp-block, minimum width=1.2cm, minimum height=1cm, fill=green!10] at (2, 2) {ADC};
+\draw[sp-arrow, ->] (0.8, 2) -- (1.4, 2);
+
+% Trigger detection
+\node[sp-block, minimum width=1.5cm, minimum height=0.8cm, fill=yellow!10] at (2, 0.5) {Trigger\\Detect};
+\draw[sp-arrow, ->] (2, 1.5) -- (2, 0.9);
+
+% Buffer
+\node[sp-block, minimum width=1.5cm, minimum height=1cm, fill=orange!10] at (4, 2) {Sample\\Buffer};
+\draw[sp-arrow, ->] (2.6, 2) -- (3.2, 2);
+
+% Trigger control
+\draw[sp-arrow, ->] (2.8, 0.5) -- (4, 0.5) -- (4, 1.5);
+
+% Processing
+\node[sp-block, minimum width=1.5cm, minimum height=1cm, fill=blue!10] at (6, 2) {Process\\\& FFT};
+\draw[sp-arrow, ->] (4.8, 2) -- (5.2, 2);
+
+% Display
+\node[sp-block, minimum width=1.2cm, minimum height=1cm] at (8, 2) {Display\\Output};
+\draw[sp-arrow, ->] (6.8, 2) -- (7.4, 2);
+
+% Timebase
+\node[sp-block, minimum width=1cm, minimum height=0.6cm] at (4, -0.5) {Timebase};
+\draw[dashed] (4, -0.2) -- (4, 0.1) -- (2.8, 0.5);
+\draw[dashed] (4, -0.2) -- (4, 0.5) -- (4, 1.5);
+
+% Label
+\node[sp-annotation, font=\footnotesize] at (4, 3.0) {Smart Pin ADC Scope Mode};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% ROBOT SYSTEM ARCHITECTURE DIAGRAM
+% ============================================================================
+% Shows robot controller with motors, sensors, communication
+
+\newcommand{\RobotSystemDiagram}{%
+{\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Central P2 block
+\node[sp-block, minimum width=2cm, minimum height=2cm, fill=blue!10] at (3, 2) {};
+\node[sp-annotation, font=\bfseries] at (3, 2.5) {P2};
+\node[sp-annotation, font=\bfseries] at (3, 1.8) {Controller};
+
+% Motor section (left)
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (0, 3.2) {Motor L};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (0, 2.4) {Motor R};
+\draw[sp-arrow, ->] (2, 3.0) -- (0.8, 3.0) -- (0.8, 3.2);
+\draw[sp-arrow, ->] (2, 2.6) -- (0.8, 2.6) -- (0.8, 2.4);
+
+% PWM labels
+\node[sp-annotation, font=\footnotesize, color=blue] at (1.2, 3.4) {PWM};
+\node[sp-annotation, font=\footnotesize, color=blue] at (1.2, 2.2) {PWM};
+
+% Encoders (left bottom)
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (0, 1.6) {Enc L};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (0, 0.8) {Enc R};
+\draw[sp-arrow, <-] (2, 1.4) -- (0.8, 1.4) -- (0.8, 1.6);
+\draw[sp-arrow, <-] (2, 1.0) -- (0.8, 1.0) -- (0.8, 0.8);
+
+% Quad labels
+\node[sp-annotation, font=\footnotesize, color=green!50!black] at (1.2, 1.8) {Quad};
+\node[sp-annotation, font=\footnotesize, color=green!50!black] at (1.2, 0.6) {Quad};
+
+% Sensors (right top)
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (6, 3.2) {Distance};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (6, 2.4) {IMU};
+\draw[sp-arrow, <-] (4, 3.0) -- (5.2, 3.0) -- (5.2, 3.2);
+\draw[sp-arrow, <-] (4, 2.6) -- (5.2, 2.6) -- (5.2, 2.4);
+
+% Sensor labels
+\node[sp-annotation, font=\footnotesize, color=red] at (4.8, 3.4) {ADC};
+\node[sp-annotation, font=\footnotesize, color=red] at (4.8, 2.2) {I2C};
+
+% Communication (right bottom)
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (6, 1.2) {Radio};
+\node[sp-block, minimum width=1.5cm, minimum height=0.6cm] at (6, 0.4) {Debug};
+\draw[sp-arrow, <->] (4, 1.4) -- (5.2, 1.4) -- (5.2, 1.2);
+\draw[sp-arrow, <->] (4, 0.6) -- (5.2, 0.6) -- (5.2, 0.4);
+
+% Comm labels
+\node[sp-annotation, font=\footnotesize, color=orange] at (4.8, 1.0) {SPI};
+\node[sp-annotation, font=\footnotesize, color=orange] at (4.8, 0.2) {UART};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% COMPLETE SYSTEM ARCHITECTURE DIAGRAM
+% ============================================================================
+% Shows full data acquisition and control system with all subsystems
+
+\newcommand{\CompleteSystemDiagram}{%
+{\centering
+\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+
+% Central P2 block
+\node[sp-block, minimum width=3cm, minimum height=4cm, fill=blue!5] at (4, 2.5) {};
+\node[sp-annotation, font=\bfseries\large] at (4, 4.0) {P2};
+\node[sp-annotation, font=\small] at (4, 3.5) {8 COGs};
+\node[sp-annotation, font=\small] at (4, 3.0) {512KB RAM};
+
+% Smart Pins label inside
+\draw[dashed, thick, blue!50] (2.7, 0.8) rectangle (5.3, 2.4);
+\node[sp-annotation, font=\footnotesize, color=blue!70] at (4, 2.1) {Smart Pins};
+
+% Sensor inputs (left top)
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=green!10] at (0, 4.5) {ADC 1-4};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=green!10] at (0, 3.8) {Encoders};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=green!10] at (0, 3.1) {Digital In};
+
+% Arrows from sensors
+\draw[sp-arrow, ->] (0.7, 4.5) -- (2.5, 4.5) -- (2.5, 3.5);
+\draw[sp-arrow, ->] (0.7, 3.8) -- (2.0, 3.8) -- (2.0, 3.0);
+\draw[sp-arrow, ->] (0.7, 3.1) -- (2.5, 3.1);
+
+% Output section (left bottom)
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=red!10] at (0, 1.5) {PWM 1-4};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=red!10] at (0, 0.8) {DAC Out};
+
+% Arrows to outputs
+\draw[sp-arrow, <-] (0.7, 1.5) -- (2.5, 1.5);
+\draw[sp-arrow, <-] (0.7, 0.8) -- (2.5, 0.8) -- (2.5, 1.2);
+
+% Communication section (right)
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=orange!10] at (8, 4.2) {UART};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=orange!10] at (8, 3.5) {SPI};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=orange!10] at (8, 2.8) {I2C};
+
+% Arrows for communication
+\draw[sp-arrow, <->] (5.5, 3.8) -- (7.3, 3.8) -- (7.3, 4.2);
+\draw[sp-arrow, <->] (5.5, 3.3) -- (7.3, 3.3) -- (7.3, 3.5);
+\draw[sp-arrow, <->] (5.5, 2.8) -- (7.3, 2.8);
+
+% Timing section (right bottom)
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=yellow!10] at (8, 1.5) {NCO Clk};
+\node[sp-block, minimum width=1.4cm, minimum height=0.5cm, fill=yellow!10] at (8, 0.8) {Counters};
+
+% Arrows for timing
+\draw[sp-arrow, <->] (5.5, 1.5) -- (7.3, 1.5);
+\draw[sp-arrow, <->] (5.5, 1.0) -- (7.3, 1.0) -- (7.3, 0.8);
+
+% Labels
+\node[sp-annotation, font=\footnotesize, color=green!50!black] at (0, 5.0) {Inputs};
+\node[sp-annotation, font=\footnotesize, color=red] at (0, 2.0) {Outputs};
+\node[sp-annotation, font=\footnotesize, color=orange] at (8, 4.8) {Comm};
+\node[sp-annotation, font=\footnotesize, color=yellow!60!black] at (8, 2.1) {Timing};
+
+% External connections
+\draw[sp-arrow, <-] (-1.2, 4.5) -- (-0.7, 4.5);
+\node[sp-annotation, font=\tiny] at (-1.5, 4.5) {Sensors};
+\draw[sp-arrow, ->] (-1.2, 1.5) -- (-0.7, 1.5);
+\node[sp-annotation, font=\tiny] at (-1.5, 1.5) {Motors};
+\draw[sp-arrow, <->] (9.2, 3.5) -- (8.7, 3.5);
+\node[sp-annotation, font=\tiny] at (9.5, 3.5) {Host};
 
 \end{tikzpicture}
 \par}

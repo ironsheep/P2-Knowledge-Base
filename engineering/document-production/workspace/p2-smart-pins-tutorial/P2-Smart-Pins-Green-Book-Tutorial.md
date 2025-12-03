@@ -114,11 +114,10 @@ You'll make mistakes. Your first pin might not toggle. Your first Smart Pin migh
 
 Ready? Let's start with the basics and build up to the amazing!
 
----
 
 # Part I: Understanding P2 I/O - From Basic to Smart
 
-## Chapter 0: P2 I/O Fundamentals - Before Smart Pins
+## Chapter 0: P2 I/O Fundamentals
 
 ### Why Start Here?
 
@@ -203,6 +202,8 @@ PUB read_multiple_inputs() | value, button1, button2, sensor, i
 
 ### 0.3 Understanding Pin Timing (Simplified)
 
+> **Note:** In the timing diagrams below, **Reg\*** (shown in blue) indicates internal register transfers that occur during instruction execution.
+
 When you control pins, there's a tiny delay between your instruction and the pin actually changing:
 
 ```{=latex}
@@ -241,6 +242,7 @@ Now that you've mastered the essential four, let's understand the full pattern. 
 4. **DRV** - Drive pins (make output and set level simultaneously)
 
 **The Eight Variants (for each operation):**
+
 - **L** - Low (0) - *You'll use this constantly*
 - **H** - High (1) - *You'll use this constantly*
 - **C** - Copy from Carry flag
@@ -402,16 +404,17 @@ For your convenience, here's the complete basic I/O instruction set in both lang
 | Read pin state | `pinread(pin)` | **INA[pin]** or **INB[pin]** | Read sensor/button |
 
 **Reading Multiple Pins:**
+
 - **Spin2**: `value := INA & $FF` (read P0-P7), individual: `pinread(pin)`
 - **PASM2**: `MOV value, INA` then mask, or use `TESTB INA, #pin`
 
 **Controlling Multiple Pins:**
+
 - **Spin2**: Use loops with pin methods, or direct register access `OUTA := value`
 - **PASM2**: Use `ADDPINS n` suffix to control consecutive pins
 
 > 💡 **Tip**: This table covers 90% of your basic I/O needs. The other variants (C, NC, Z, NZ, RND) are in Appendix F for when you need them.
 
----
 
 ## Chapter 1: The Smart Pin Revolution
 
@@ -474,12 +477,15 @@ Each Smart Pin contains sophisticated hardware that operates independently once 
 Each Smart Pin contains:
 
 **Three 32-bit Registers:**
+
 - **X Register**: Usually holds timing/period information
 - **Y Register**: Usually holds value/duty cycle information
 - **Z Register**: Holds results (what you read back)
 
 **Mode Logic:**
+
 The 6-bit mode field (%000000 to %111111) selects what the Smart Pin does. We'll explore all 32 modes, but they fall into categories:
+
 - Digital I/O modes (repository, logic)
 - Analog modes (DAC, ADC)
 - Timing modes (PWM, NCO, pulse)
@@ -487,6 +493,7 @@ The 6-bit mode field (%000000 to %111111) selects what the Smart Pin does. We'll
 - Communication modes (serial, USB)
 
 **Input Selector:**
+
 This is where it gets interesting - a Smart Pin can monitor ANY other pin, not just itself! Want Pin 20 to count pulses from Pin 5? No problem. Want Pin 30 to measure the frequency on Pin 10? Easy.
 
 ### The Configuration Dance
@@ -601,7 +608,6 @@ Before we move on, let's cement the key concepts:
 
 Ready to explore all 32 modes? Let's go!
 
----
 
 ## Chapter 2: The Smart Pin Configuration Protocol
 
@@ -671,16 +677,19 @@ wrpin(pin, P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE)  ' DAC with dithering and ou
 In most modes, X controls timing:
 
 **For Output Modes:**
+
 - NCO frequency: X = frequency value
 - PWM period: X = period in clocks
 - Pulse length: X = pulse width
 
 **For Measurement Modes:**
+
 - Count window: X = measurement period
 - Timeout: X = maximum wait time
 - Sample period: X = sampling interval
 
 **For Serial Modes:**
+
 - Baud rate: X = clock divider
 - Bit period: X = clocks per bit
 
@@ -704,15 +713,18 @@ wxpin(pin, (clkfreq / 115200) << 16 | 7)  ' Baud generator
 Y typically holds the value or data:
 
 **For Output Modes:**
+
 - DAC: Y = output value (0..$FFFF)
 - PWM: Y = duty cycle
 - Digital: Y = output state
 
 **For Communication:**
+
 - TX: Y = byte to transmit
 - Pin groups: Y = pin mask
 
 **For Measurement:**
+
 - Often unused or holds configuration
 
 Example uses:
@@ -750,6 +762,7 @@ char := rdpin(serial_pin)
 But there's a crucial distinction:
 
 **RDPIN vs RQPIN:**
+
 - `rdpin()` - Reads AND acknowledges (clears IN flag)
 - `rqpin()` - Reads WITHOUT acknowledging (preserves IN flag)
 
@@ -897,6 +910,7 @@ pinstart(10, P_REG_UP | P_PLUS1_B, 0, 0)
 
 ::: tip
 **Common Patterns:**
+
 - For SPI: Data pins use P_PLUS1_B or P_MINUS1_B to reference the adjacent clock pin
 - For gated counting: Use B-input to select the gate signal
 - For quadrature encoders: A and B inputs are automatically configured by the mode
@@ -1083,7 +1097,6 @@ Before we dive into specific modes, remember these golden rules:
 
 Ready to explore all 32 modes? Let's start with the digital I/O modes!
 
----
 
 # Part II: Progressive Mode Tutorials
 
@@ -1096,6 +1109,7 @@ Let's start with the simplest modes and build our understanding progressively. T
 This is where every Smart Pin begins - turned off, acting like a normal I/O pin.
 
 **When to Use:**
+
 - Normal GPIO operations
 - Resetting a misconfigured Smart Pin
 - Power-sensitive applications where Smart Pins aren't needed
@@ -1135,6 +1149,7 @@ WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0],
 Now for our first real Smart Pin mode - Repository. Think of it as a mailbox where any COG can leave a 32-bit value and any COG can read it.
 
 **When to Use:**
+
 - Inter-COG communication without hub RAM
 - Storing configuration values
 - Creating flags or semaphores
@@ -1194,6 +1209,7 @@ read_value
 :::
 
 **Important Notes:**
+
 - No IN flag is raised when value changes
 - Reading doesn't clear the value
 - Writing overwrites immediately
@@ -1232,6 +1248,7 @@ DAC configuration involves TWO separate aspects:
 | P_DAC_75R_2V | 75Ω | 2.0V | Video output (75Ω termination) |
 
 **When to Use:**
+
 - Generating analog voltages
 - Audio output (use PRNG dithering)
 - Video generation (75Ω mode with PWM dithering)
@@ -1308,6 +1325,7 @@ This mode generates precise pulses or continuous cycles with programmable high a
 ```
 
 **When to Use:**
+
 - Servo control pulses
 - Stepper motor control
 - Custom protocol generation
@@ -1381,6 +1399,7 @@ pulse_gen
 Transition output mode generates edges at programmable intervals - perfect for clocks and timing references.
 
 **When to Use:**
+
 - Clock generation
 - Baud rate generation
 - Timing references
@@ -1433,6 +1452,7 @@ NCO (Numerically Controlled Oscillator) mode generates precise frequencies using
 ```
 
 **When to Use:**
+
 - Clock generation
 - Frequency synthesis
 - Audio tone generation
@@ -1524,6 +1544,7 @@ The internal architecture shows how the Z accumulator controls duty cycle:
 ```
 
 **When to Use:**
+
 - PWM with specific frequency AND duty
 - LED brightness control at fixed frequency
 - Motor control with precise timing
@@ -1584,6 +1605,7 @@ PWM Triangle mode provides phase-correct PWM using a symmetric triangle wave com
 ```
 
 **When to Use:**
+
 - Phase-correct PWM needed
 - Audio applications
 - Symmetric PWM requirements
@@ -1641,6 +1663,7 @@ PWM Sawtooth mode provides high-resolution PWM using a sawtooth (ramp-reset) com
 ```
 
 **When to Use:**
+
 - Motor speed control
 - LED dimming
 - Power control
@@ -1709,6 +1732,7 @@ update_duty
 This specialized mode is designed for switch-mode power supply control with current feedback.
 
 **When to Use:**
+
 - DC-DC converters
 - Buck/Boost regulators
 - LED drivers with current control
@@ -1757,7 +1781,6 @@ smps_setup
 ```
 :::
 
----
 
 ### Choosing the Right Output Generation Mode
 
@@ -1780,12 +1803,14 @@ With seven different output generation modes available, how do you pick the righ
 Both modes generate square waves, but they work differently:
 
 **P_PULSE (%00100):**
+
 - Generates precise pulses with configurable high AND low times
 - X sets base period, Y[31:16] and Y[15:0] set high/low times
 - Best for: Servo control, asymmetric pulses, one-shot timing
 - Can generate a single pulse or continuous stream
 
 **P_TRANSITION (%00101):**
+
 - Toggles output at fixed intervals
 - X sets the toggle period (half the output period)
 - Best for: Clock generation, baud rate clocks, simple square waves
@@ -1810,12 +1835,14 @@ pinstart(pin, P_PULSE | P_OE, 1, 100 << 16 | 100)
 Both use Numerically Controlled Oscillator (NCO) for precise frequency generation:
 
 **P_NCO_FREQ (%00110):**
+
 - Output frequency = (X × ClockFreq) / 2^32
 - 50% duty cycle always
 - Resolution: Sub-Hz precision at any frequency
 - Best for: Clocks, carriers, audio tones, DDS applications
 
 **P_NCO_DUTY (%00111):**
+
 - Same frequency formula as NCO_FREQ
 - Y sets duty cycle threshold (0-$FFFFFFFF)
 - Best for: PWM at precise frequencies, LED dimming at specific rates
@@ -1838,6 +1865,7 @@ pinstart(pin, P_NCO_DUTY | P_OE, x, $40000000)  ' 25% threshold
 Both generate PWM, but with different counter behavior:
 
 **P_PWM_TRIANGLE (%01000):**
+
 - Counter counts UP to X, then DOWN to 0
 - Output changes state when counter crosses Y
 - Period = 2 × X clocks
@@ -1845,6 +1873,7 @@ Both generate PWM, but with different counter behavior:
 - Best for: Audio DAC, motor H-bridges, reduced EMI
 
 **P_PWM_SAWTOOTH (%01001):**
+
 - Counter counts UP to X, then resets to 0
 - Output is HIGH when counter < Y
 - Period = X clocks
@@ -1867,6 +1896,7 @@ pinstart(pin, P_PWM_TRIANGLE | P_OE, 5_000, 2_500)
 **P_PWM_SMPS: Special Case for Power Supplies**
 
 **P_PWM_SMPS (%01010):**
+
 - Designed for switch-mode power supply control
 - Uses A-input as ADC feedback (current sense)
 - Automatically adjusts duty cycle to maintain target
@@ -1924,6 +1954,7 @@ PUB compare_modes()
 :::
 
 **Key Differences to Remember:**
+
 - **TRANSITION**: Simplest, just counts and toggles
 - **NCO_FREQ**: Best frequency resolution, fixed 50% duty
 - **NCO_DUTY**: Precise frequency + variable duty
@@ -1932,7 +1963,6 @@ PUB compare_modes()
 - **PULSE**: Most flexible timing control
 - **SMPS**: Only mode with feedback control
 
----
 
 ## Chapter 4: Measurement Modes - Precision Timing
 
@@ -1947,6 +1977,7 @@ This mode decodes quadrature encoder signals for position and rotation sensing.
 ```
 
 **When to Use:**
+
 - Rotary encoder reading
 - Linear encoder tracking
 - Motor position feedback
@@ -2027,6 +2058,7 @@ Count rising edges on the input - your basic pulse counter.
 ```
 
 **When to Use:**
+
 - Event counting
 - Frequency measurement (with time base)
 - RPM measurement
@@ -2088,6 +2120,7 @@ PUB gated_counter(pin, gate_ms) | period
 Counts transitions on A input, with B input controlling direction.
 
 **When to Use:**
+
 - Step/direction motor feedback
 - Up/down counters
 - Manual pulse generators
@@ -2121,13 +2154,12 @@ PUB step_dir_counter() | count
 
 ### Mode %01110 - Incremental Encoder
 
-::: needs-diagram
-Incremental encoder timing showing single-phase counting
-:::
+\SinglePhaseEncoderDiagram
 
 Single-phase encoder counting with optional direction control.
 
 **When to Use:**
+
 - Simple encoders
 - Tachometers
 - Single-phase position sensing
@@ -2161,6 +2193,7 @@ PUB incremental_encoder() | count
 Compares input against threshold with optional hysteresis.
 
 **When to Use:**
+
 - Level detection
 - Zero-crossing detection
 - Threshold monitoring
@@ -2392,14 +2425,10 @@ The P2's Smart Pins include sophisticated ADC capabilities for analog measuremen
 **Mode %11001 (P_ADC_EXT): ADC Sample/Filter with External Clock**
 **Mode %11010 (P_ADC_SCOPE): ADC Scope with Trigger**
 
-::: needs-diagram
-ADC modes showing:
-- Sample/hold timing
-- Filter configurations (SINC1/2/3)
-- Scope trigger conditions
-:::
+\ADCSampleHoldDiagram
 
 **ADC Sub-modes (via X register configuration):**
+
 - SINC1 filtering (fastest, least noise reduction)
 - SINC2 filtering (balanced speed and filtering)
 - SINC3 filtering (smoothest, best noise reduction)
@@ -2457,12 +2486,7 @@ PUB continuous_adc() | voltage
 
 USB host/device mode provides low-level USB 1.1 physical layer support. Full USB protocol implementation requires additional software stack (not covered in this tutorial).
 
-::: needs-diagram
-USB communication showing:
-- D+ and D- differential signaling
-- Packet structure
-- Host/device negotiation
-:::
+\USBDifferentialDiagram
 
 **Mode %11011 (P_USB_PAIR): USB Host/Device (pair mode)**
 
@@ -2644,7 +2668,6 @@ receive_byte
 ```
 :::
 
----
 
 ## Chapter 5: Advanced Techniques
 
@@ -2705,6 +2728,7 @@ rx_data         long    0
 :::
 
 **Polling Characteristics:**
+
 - **CPU Utilization**: 100% - the COG executes instructions continuously
 - **Response Latency**: Very low - typically 2-8 clock cycles from event to response
 - **Power**: Maximum consumption - COG never sleeps
@@ -2765,6 +2789,7 @@ rx_data         long    0
 :::
 
 **Event-Driven Characteristics:**
+
 - **CPU Utilization**: 0% during wait - COG is suspended
 - **Response Latency**: Zero clock cycles after event (instant wake)
 - **Power**: Minimal during wait - COG is sleeping
@@ -2803,12 +2828,14 @@ setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
 | Best for... | Time-critical, short waits | Power-sensitive, long waits |
 
 **Use Polling When:**
+
 - Response latency is absolutely critical (real-time control)
 - Wait times are very short (microseconds)
 - The COG has nothing else to do anyway
 - Simplicity is more important than efficiency
 
 **Use Event-Driven When:**
+
 - Power consumption matters
 - Wait times are longer (milliseconds or more)
 - The COG could be doing other work
@@ -2982,12 +3009,7 @@ PUB signal_distribution()
 
 Create closed-loop control systems using Smart Pins.
 
-::: needs-diagram
-Feedback loop showing:
-- Output generation
-- Measurement
-- Adjustment cycle
-:::
+\FeedbackLoopDiagram
 
 ::: spin2
 ```
@@ -3020,12 +3042,7 @@ PUB pwm_with_current_feedback() | current, duty
 
 Build complex timing relationships using multiple Smart Pins.
 
-::: needs-diagram
-Timing network showing:
-- Master clock
-- Divided clocks
-- Phase relationships
-:::
+\ClockDistributionDiagram
 
 ::: spin2
 ```
@@ -3051,12 +3068,7 @@ PUB timing_network()
 
 Use Smart Pins to translate between different protocols.
 
-::: needs-diagram
-Protocol bridge showing:
-- Input protocol
-- Translation logic
-- Output protocol
-:::
+\ProtocolBridgeDiagram
 
 ::: spin2
 ```
@@ -3083,12 +3095,7 @@ PUB uart_to_spi_bridge() | data
 
 Build complex state machines using Smart Pin feedback.
 
-::: needs-diagram
-State machine showing:
-- States
-- Transitions
-- Smart Pin interactions
-:::
+\StateMachineDiagram
 
 ::: spin2
 ```
@@ -3264,6 +3271,7 @@ PUB double_buffered_transmit(data_ptr, count) | bit_period, byte_val, idx
 :::
 
 **Why Double-Buffering Helps:**
+
 - Standard single-pin TX: `[SEND][wait][SEND][wait][SEND]...`
 - Double-buffered: `[A:SEND][B:SEND][A:SEND][B:SEND]...`
 
@@ -3838,7 +3846,6 @@ repeat
 | Check if data ready | TESTP / pinread() | Doesn't affect IN flag |
 | Peek at data, decide later | RQPIN + AKPIN | Two-step consume |
 
----
 
 ## Chapter 6: Multi-Pin Coordination
 
@@ -3848,13 +3855,7 @@ The true power of Smart Pins emerges when you coordinate multiple pins to create
 
 Let's combine multiple Smart Pin modes to create a sophisticated motor controller.
 
-::: needs-diagram
-Motor controller showing:
-- PWM outputs
-- Encoder inputs
-- Current sensing
-- Control loop
-:::
+\MotorControllerDiagram
 
 ::: spin2
 ```
@@ -3937,12 +3938,7 @@ PUB position_control(target_pos) | current_pos, error, output
 
 Combine multiple ADC channels with timing and storage.
 
-::: needs-diagram
-Data acquisition showing:
-- Multiple ADC channels
-- Sample timing
-- Buffer management
-:::
+\DataAcquisitionDiagram
 
 ::: spin2
 ```
@@ -4002,13 +3998,7 @@ PUB process_data() | chan, sample, min, max, avg
 
 Create a multi-protocol communication system.
 
-::: needs-diagram
-Communication hub showing:
-- Multiple UART channels
-- SPI interface
-- I2C interface
-- Protocol routing
-:::
+\CommunicationHubDiagram
 
 ::: spin2
 ```
@@ -4081,12 +4071,7 @@ PRI process_spi_message(data)
 
 Create a system where multiple inputs are sampled simultaneously.
 
-::: needs-diagram
-Synchronized sampling showing:
-- Sample trigger
-- Simultaneous capture
-- Data alignment
-:::
+\SynchronizedSamplingDiagram
 
 ::: spin2
 ```
@@ -4111,7 +4096,6 @@ PUB synchronized_sampling() | trigger_time
 ```
 :::
 
----
 
 ## Chapter 7: Troubleshooting and Optimization
 
@@ -4329,7 +4313,6 @@ PUB triggered_adc()
 ```
 :::
 
----
 
 ## Chapter 8: Real-World Applications
 
@@ -4337,13 +4320,7 @@ Let's build complete, practical applications using Smart Pins.
 
 ### Digital Oscilloscope
 
-::: needs-diagram
-Oscilloscope architecture showing:
-- Input conditioning
-- ADC sampling
-- Trigger detection
-- Display output
-:::
+\OscilloscopeArchDiagram
 
 ::: spin2
 ```
@@ -4462,13 +4439,7 @@ PRI lookup(delta) : multiplier
 
 ### Complete Robot Controller
 
-::: needs-diagram
-Robot system architecture showing:
-- Motor control
-- Sensor inputs
-- Communication
-- Navigation logic
-:::
+\RobotSystemDiagram
 
 ::: spin2
 ```
@@ -4584,7 +4555,6 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 ```
 :::
 
----
 
 # Part III: System Integration
 
@@ -4594,9 +4564,7 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 
 Now let's create a complete data acquisition and control system that showcases the full power of Smart Pins working together.
 
-::: needs-diagram
-Complete system architecture showing all subsystems and interconnections
-:::
+\CompleteSystemDiagram
 
 ::: spin2
 ```
@@ -4737,7 +4705,6 @@ PRI measure_response_latency() | start, latency
 ```
 :::
 
----
 
 # Part IV: Reference
 
@@ -5016,49 +4983,48 @@ pinstart(ADC_PIN, mode, 0, 0)
 
 | Configuration | Constants | Combined Hex |
 |---------------|-----------|--------------|
-| Basic PWM | P_PWM_SAWTOOTH \| P_OE | $00000052 |
-| UART TX | P_ASYNC_TX \| P_OE | $0000007C |
+| Basic PWM | P_PWM_SAWTOOTH + P_OE | $00000052 |
+| UART TX | P_ASYNC_TX + P_OE | $0000007C |
 | UART RX | P_ASYNC_RX | $0000003E |
-| SPI TX (clk on pin+1) | P_SYNC_TX \| P_OE \| P_PLUS1_B | $01000078 |
-| SPI RX (clk on pin-1) | P_SYNC_RX \| P_MINUS1_B | $070000BA |
-| ADC basic | P_ADC \| P_ADC_1X | $00000030 |
-| NCO frequency | P_NCO_FREQ \| P_OE | $0000004C |
-| DAC 8-bit | P_DAC_DITHER_RND \| P_DAC_124R_3V \| P_OE | $00020044 |
+| SPI TX (clk on pin+1) | P_SYNC_TX + P_OE + P_PLUS1_B | $01000078 |
+| SPI RX (clk on pin-1) | P_SYNC_RX + P_MINUS1_B | $070000BA |
+| ADC basic | P_ADC + P_ADC_1X | $00000030 |
+| NCO frequency | P_NCO_FREQ + P_OE | $0000004C |
+| DAC 8-bit | P_DAC_DITHER_RND + P_DAC_124R_3V + P_OE | $00020044 |
 
 ## Appendix C: Timing Formulas
 
 ### Frequency Calculations
 
 **NCO Frequency:**
-```
-Frequency = (X * ClockFreq) / 2^32
-X = (Frequency * 2^32) / ClockFreq
-```
+
+$$\text{Frequency} = \frac{X \times \text{ClockFreq}}{2^{32}}$$
+
+$$X = \frac{\text{Frequency} \times 2^{32}}{\text{ClockFreq}}$$
 
 **PWM Frequency:**
-```
-PWM_Freq = ClockFreq / Period
-Period = ClockFreq / PWM_Freq
-```
+
+$$\text{PWM\_Freq} = \frac{\text{ClockFreq}}{\text{Period}}$$
+
+$$\text{Period} = \frac{\text{ClockFreq}}{\text{PWM\_Freq}}$$
 
 **Transition Rate:**
-```
-Toggle_Rate = ClockFreq / (2 * X)
-X = ClockFreq / (2 * Toggle_Rate)
-```
+
+$$\text{Toggle\_Rate} = \frac{\text{ClockFreq}}{2 \times X}$$
+
+$$X = \frac{\text{ClockFreq}}{2 \times \text{Toggle\_Rate}}$$
 
 ### Time Measurements
 
 **Pulse Width:**
-```
-Width_Seconds = Count / ClockFreq
-Width_Microseconds = Count / (ClockFreq / 1_000_000)
-```
+
+$$\text{Width\_Seconds} = \frac{\text{Count}}{\text{ClockFreq}}$$
+
+$$\text{Width\_Microseconds} = \frac{\text{Count}}{\text{ClockFreq} / 1{,}000{,}000}$$
 
 **Frequency from Count:**
-```
-Frequency = Count / Measurement_Time
-```
+
+$$\text{Frequency} = \frac{\text{Count}}{\text{Measurement\_Time}}$$
 
 ## Appendix D: Code Examples Summary
 
@@ -5096,7 +5062,6 @@ For the most comprehensive examples, see:
 4. **Use Debug Output**
 5. **Scope the Signals**
 
----
 
 ## Conclusion: Your Smart Pin Journey
 
@@ -5116,6 +5081,7 @@ The P2 community is always discovering new Smart Pin techniques. Join the forums
 :::
 
 **Advanced Topics to Explore:**
+
 - Custom protocol implementation
 - High-speed data acquisition
 - Precision measurement systems
@@ -5130,29 +5096,10 @@ Remember: Smart Pins are tools. Like any tool, they become more powerful as you 
 
 Happy coding, and welcome to the Smart Pin revolution!
 
----
 
 ## About This Tutorial
 
-**Version:** 3.0 - Green Book Edition with Enhanced Visual Coverage
-**Created:** 2025-08-30 | Enhanced: 2025-08-31
-**Pages:** ~140 (estimated for PDF)
-**Examples:** 150+
-**Diagrams:** 19+ (enhanced from 11)
-**Visual Coverage:** 73% (enhanced from 42%)
-
-**Version 3.0 Enhancements:**
-- Added 8 authoritative technical diagrams from Titus SmartPins documentation
-- Enhanced visual coverage from 42% to 73% using official P2 sources
-- Maintained complete v2.0 content with visual improvements
-- Preserved all semantic environments and tutorial structure
-
 This tutorial represents the collective knowledge of the Propeller 2 community, with special thanks to Jon Titus for the original Smart Pins documentation and all the contributors who have shared their expertise.
-
----
-
-*End of P2 Smart Pins Complete Tutorial - Green Book Edition with Enhanced Visual Coverage*
----
 
 
 ### A
@@ -5314,15 +5261,3 @@ This tutorial represents the collective knowledge of the Propeller 2 community, 
 ### Z
 - Z register: Ch 1, all mode chapters
 - Zero flag operations: Ch 0.4, p. 6
-
----
-
-## About This Tutorial
-
-This tutorial represents the collective knowledge of the Propeller 2 community, with special thanks to Jon Titus for the original Smart Pins documentation and all the contributors who have shared their expertise.
-
----
-
-# Index
-
-*[Index content would be generated here by LaTeX]*
