@@ -162,6 +162,21 @@ PUB blink_basic()
 ```
 :::
 
+::: sidetrack
+### The Clock Preamble
+
+Notice the `CON` section at the top of that example? Every Spin2 program needs to configure its system clock:
+
+```spin2
+CON
+  _clkfreq = 200_000_000  ' 200 MHz system clock
+```
+
+This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs at a sluggish ~20 MHz on its internal RC oscillator---and timing-dependent code (including serial communication and `waitms()` delays) won't behave as expected.
+
+**From here on, we'll omit this preamble from most examples to keep them focused on the Smart Pin concepts being taught.** When you create your own programs, always include `_clkfreq` in your `CON` section. The examples that do timing calculations (like baud rate divisors) will show it explicitly since the math depends on knowing the clock frequency.
+:::
+
 Simple, right? Now let's read a button:
 
 ::: spin2
@@ -3488,6 +3503,313 @@ repeat 1000
 | Double-buffered | 80-95% | Medium | Continuous data streams |
 | Multi-COG | Scales with COGs | High | Complex systems |
 | Pipelined | 30-60% | Medium | Multi-stage processing |
+
+### Task-Based I/O: Managing Multiple Smart Pins from One COG
+
+So far we've discussed two approaches to managing multiple Smart Pins: polling loops within a single COG, and dedicating separate COGs to different I/O functions. But there's a third approach that sits between these extremes: **Spin2 tasks**---lightweight threads that run cooperatively within a single COG.
+
+Tasks let you structure your code as if you had multiple independent handlers, while consuming only one COG. This is particularly valuable when you have several low-to-medium bandwidth peripherals that don't justify dedicated COGs.
+
+#### COGs vs Tasks: Choosing the Right Approach
+
+The P2 provides 8 COGs and up to 32 tasks per COG. Understanding when to use each is crucial for efficient system design.
+
+| Aspect | Dedicated COG | Spin2 Task |
+|--------|---------------|------------|
+| Execution | True parallel (simultaneous) | Time-sliced (cooperative) |
+| Response latency | 0-2 clocks (hardware wake) | 20-40+ clocks (task switch) |
+| Resource cost | Full COG + stack | Stack only (~64-128 longs) |
+| Maximum count | 8 total | 32 per COG |
+| Isolation | Complete (separate interpreter) | Shared (same COG context) |
+| Best for | High-speed, time-critical | Multiple low-bandwidth |
+
+**Use Dedicated COGs When:**
+
+- Response time must be under 100 clock cycles
+- Data rates exceed what task switching can handle
+- Operations require sustained, uninterrupted processing
+- You need true parallelism (simultaneous execution)
+
+**Use Tasks When:**
+
+- Managing multiple similar peripherals (several UARTs, sensors)
+- Data rates are low enough to tolerate task-switching latency
+- COGs are precious and you want to consolidate
+- Peripherals naturally idle (waiting for data, conversion times)
+
+#### The Task Switching Reality
+
+Tasks use *cooperative multitasking*---a task runs until it voluntarily yields control via `TASKNEXT()`, or until it blocks on a wait operation. The task switching overhead is approximately 20-40 clock cycles.
+
+At 200 MHz, this means:
+
+- **Task switch time**: ~100-200 nanoseconds
+- **Maximum task switches per second**: ~5-10 million
+- **Minimum guaranteed response**: Sum of all other tasks' execution time
+
+This matters for Smart Pin I/O because while Task A is executing, Tasks B, C, and D are frozen. If a Smart Pin completes while its handler task is frozen, the data sits in the Z register until that task runs again.
+
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+
+VAR
+  long  task1_stack[64]
+  long  task2_stack[64]
+
+PUB main()
+  ' Start two tasks in addition to main
+  taskspin(NEWTASK, sensor_handler(), @task1_stack)
+  taskspin(NEWTASK, uart_handler(), @task2_stack)
+
+  ' Main task continues with its own work
+  repeat
+    do_main_work()
+    tasknext()                    ' Yield to other tasks
+
+PUB sensor_handler()
+  repeat
+    if pinread(SENSOR_PIN)
+      process_sensor(rdpin(SENSOR_PIN))
+    tasknext()                    ' MUST yield or other tasks starve!
+
+PUB uart_handler()
+  repeat
+    if pinread(UART_RX)
+      process_uart(rdpin(UART_RX))
+    tasknext()                    ' Cooperative yielding
+```
+:::
+
+**Critical Rule**: Every task must call `TASKNEXT()` regularly. A task that enters a tight loop without yielding will starve all other tasks in that COG.
+
+#### Practical Example: Four-Channel UART Manager
+
+Here's a real-world example: managing four UART channels from a single COG using tasks. Each UART operates at 9600 baud---far too slow to justify a dedicated COG, but fast enough to need prompt service.
+
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  BAUD = 9600
+  BIT_PERIOD = (_clkfreq / BAUD) << 16 | 8
+
+  ' UART pins
+  UART0_RX = 0
+  UART1_RX = 2
+  UART2_RX = 4
+  UART3_RX = 6
+
+VAR
+  ' Per-channel receive buffers
+  byte  rx_buffer[4][64]
+  byte  rx_head[4], rx_tail[4]
+
+  ' Task stacks
+  long  uart_stack[4][48]
+
+PUB main() | ch
+  ' Configure all four UART Smart Pins
+  repeat ch from 0 to 3
+    pinstart(UART0_RX + ch * 2, P_ASYNC_RX, BIT_PERIOD, 0)
+
+  ' Start a handler task for each channel
+  taskspin(NEWTASK, uart_handler(0), @uart_stack[0])
+  taskspin(NEWTASK, uart_handler(1), @uart_stack[1])
+  taskspin(NEWTASK, uart_handler(2), @uart_stack[2])
+  taskspin(NEWTASK, uart_handler(3), @uart_stack[3])
+
+  ' Main task: process received data
+  repeat
+    repeat ch from 0 to 3
+      if rx_head[ch] <> rx_tail[ch]
+        process_byte(ch, get_byte(ch))
+    tasknext()
+
+PUB uart_handler(channel) | pin, b
+  pin := UART0_RX + channel * 2
+
+  repeat
+    if pinread(pin)                 ' Check IN flag
+      b := rdpin(pin) >> 24         ' Extract received byte
+      put_byte(channel, b)          ' Buffer it
+    tasknext()                      ' Yield to other handlers
+
+PRI put_byte(ch, b) | next_head
+  next_head := (rx_head[ch] + 1) & 63
+  if next_head <> rx_tail[ch]       ' Buffer not full?
+    rx_buffer[ch][rx_head[ch]] := b
+    rx_head[ch] := next_head
+
+PRI get_byte(ch) : b
+  b := rx_buffer[ch][rx_tail[ch]]
+  rx_tail[ch] := (rx_tail[ch] + 1) & 63
+```
+:::
+
+**Why This Works at 9600 Baud:**
+
+- Bit time at 9600 baud: ~104 microseconds
+- Frame time (10 bits): ~1.04 milliseconds
+- Task round-trip (4 tasks): ~400-800 nanoseconds worst case
+- **Safety margin**: Over 1000x faster than needed
+
+The Smart Pin buffers each complete byte in its Z register. As long as the handler task runs before the *next* byte arrives (1+ ms later), no data is lost.
+
+#### When Tasks Fall Short
+
+Tasks are unsuitable when the inter-arrival time of data approaches the task-switching overhead. Consider these scenarios:
+
+**High-Speed Serial (1 Mbaud)**
+
+::: spin2
+```
+' DON'T use tasks for high-speed serial!
+'
+' At 1 Mbaud:
+'   - Bit time: 1 microsecond
+'   - Byte time: ~10 microseconds (10 bits)
+'   - Bytes per second: 100,000
+'
+' With 4 tasks averaging 50 clocks each between yields:
+'   - Round-trip: 200 clocks = 1 microsecond
+'   - This is 10% of the byte time - marginal!
+'   - Any task taking longer causes data loss
+'
+' Solution: Dedicate a COG to high-speed serial
+```
+:::
+
+**Time-Critical Events**
+
+::: spin2
+```
+' DON'T use tasks when timing is critical!
+'
+' If you need sub-microsecond response to a Smart Pin event,
+' tasks cannot guarantee this. Other tasks may be executing
+' when your event occurs.
+'
+' Example: Pulse measurement where you must respond within
+' 500ns of the IN flag rising.
+'
+' Solution: Use event-driven wake (WAITSE) in a dedicated COG,
+' or polling in an uninterrupted loop
+```
+:::
+
+#### Task-Based vs Event-Driven: Latency Comparison
+
+| Approach | Wake Latency | Best For |
+|----------|--------------|----------|
+| Event-driven (WAITSE) | 0 clocks | Single high-priority source |
+| Polling loop | 2-8 clocks | Multiple sources, tight timing |
+| Task-based | 20-40+ clocks | Multiple low-bandwidth sources |
+| Multi-COG | 0 clocks each | Independent high-speed channels |
+
+#### Advanced Task Patterns
+
+**Pattern: Priority Through Frequency**
+
+Give higher-priority channels more frequent service by calling their handlers more often:
+
+::: spin2
+```
+PUB main()
+  repeat
+    high_priority_handler()       ' Check every iteration
+    tasknext()
+    high_priority_handler()       ' Check again
+    medium_priority_handler()
+    tasknext()
+    high_priority_handler()       ' And again
+    low_priority_handler()
+    tasknext()
+```
+:::
+
+**Pattern: Conditional Task Suspension**
+
+Pause tasks that have nothing to do:
+
+::: spin2
+```
+VAR
+  long  uart_task_id[4]
+
+PUB uart_handler(channel) | pin
+  uart_task_id[channel] := taskid()
+  pin := UART0_RX + channel * 2
+
+  repeat
+    if pinread(pin)
+      process_byte(channel, rdpin(pin) >> 24)
+    else
+      taskhalt(THISTASK)          ' Suspend until woken
+      ' Task resumes here when taskresume() called
+
+PUB main_monitor() | ch
+  repeat
+    repeat ch from 0 to 3
+      if pinread(UART0_RX + ch * 2)
+        taskresume(uart_task_id[ch])  ' Wake the handler
+    tasknext()
+```
+:::
+
+**Pattern: Task Pools for Burst Handling**
+
+Pre-create tasks that activate on demand:
+
+::: spin2
+```
+VAR
+  long  worker_stacks[4][48]
+  long  work_queue[16]
+  byte  queue_head, queue_tail
+
+PUB main()
+  ' Pre-start worker tasks (they immediately suspend)
+  repeat i from 0 to 3
+    taskspin(NEWTASK, worker(i), @worker_stacks[i])
+
+  repeat
+    if pinread(DATA_PIN)
+      enqueue_work(rdpin(DATA_PIN))
+      taskresume(find_idle_worker())
+    tasknext()
+
+PUB worker(id)
+  repeat
+    taskhalt(THISTASK)            ' Wait for work
+    process(dequeue_work())        ' Do the work
+```
+:::
+
+#### Task Method Summary
+
+| Method | Purpose | Parameters |
+|--------|---------|------------|
+| `TASKSPIN(id, method(), @stack)` | Start new task | Task ID or NEWTASK, method to run, stack address |
+| `TASKNEXT()` | Yield to next task | None |
+| `TASKID()` | Get current task ID | None, returns 0-31 |
+| `TASKCHK(id)` | Check if task running | Task ID, returns TRUE/FALSE |
+| `TASKHALT(id)` | Pause a task | Task ID or THISTASK |
+| `TASKRESUME(id)` | Resume paused task | Task ID |
+| `TASKSTOP(id)` | Terminate task | Task ID or THISTASK |
+
+#### Design Guidelines
+
+1. **Budget your timing**: Calculate worst-case task round-trip time and ensure it's well under your fastest peripheral's inter-event time.
+
+2. **Yield frequently**: Every task should yield at least once per logical operation. Long computations should yield periodically.
+
+3. **Don't block in tasks**: Avoid `WAITMS()` or tight polling loops within tasks---they freeze all other tasks.
+
+4. **Size stacks appropriately**: Each task needs its own stack. Start with 48-64 longs and increase if you see crashes.
+
+5. **Consider hybrid approaches**: Use tasks for slow peripherals, dedicated COGs for fast ones. One COG with 4 tasks + one dedicated COG often beats 5 separate COGs.
 
 ### IN Flag Management - RDPIN, RQPIN, and AKPIN
 
