@@ -73,11 +73,11 @@ function Div(div)
     })
     
     if code_block then
-      -- Return complete LaTeX block with proper lstlisting settings
+      -- Return complete LaTeX block with lstlisting options inline (not global lstset)
       local latex_block = '\\begin{PASM2Block}\n' ..
-                         '\\lstset{language=pasm2,basicstyle=\\ttfamily,keywordstyle=\\bfseries\\uppercase,' ..
-                         'numbers=left,numberstyle=\\tiny,numbersep=8pt,xleftmargin=-10pt,frame=none,backgroundcolor={}}\n' ..
-                         '\\begin{lstlisting}\n' ..
+                         '\\begin{lstlisting}[language=pasm2,basicstyle=\\ttfamily\\color{black},' ..
+                         'keywordstyle=\\bfseries,numbers=left,numberstyle=\\tiny\\color{gray},' ..
+                         'numbersep=8pt,xleftmargin=-10pt,frame=none,backgroundcolor=]\n' ..
                          code_block.text .. '\n' ..
                          '\\end{lstlisting}\n' ..
                          '\\end{PASM2Block}'

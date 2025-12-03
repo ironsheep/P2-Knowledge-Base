@@ -126,7 +126,10 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-% Note: Actual header/footer content defined in presentation layers
+% Header/footer for regular pages (non-chapter-start pages)
+\fancyhead[L]{\nouppercase{\leftmark}}%  % Left: chapter title
+\fancyhead[R]{\thepage}%  % Right: page number
+\renewcommand{\headrulewidth}{0.4pt}%  % Header rule
 
 % ==================== INDEX SETUP ====================
 % Standard index support

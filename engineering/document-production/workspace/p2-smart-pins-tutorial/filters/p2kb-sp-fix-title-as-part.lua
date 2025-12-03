@@ -10,9 +10,20 @@ local is_first_h2 = true
 
 function Header(header)
   -- The first level 1 header is the document title
+  -- BUT: Skip if it's a "Part" header - those are real parts, not titles
   if header.level == 1 and is_first_h1 then
-    is_first_h1 = false
     local title = pandoc.utils.stringify(header)
+
+    -- Don't treat Part headers as document title - let them be real \part{}
+    if title:match("^Part ") then
+      -- This is a Part header, not a title - pass through unchanged
+      -- Don't set is_first_h1 = false, in case there's a title later (unlikely)
+      -- Actually, if Part is first, there's no separate title, so set flag
+      is_first_h1 = false
+      return header
+    end
+
+    is_first_h1 = false
     -- Escape LaTeX special characters
     local escaped_title = title:gsub('&', '\\&')
     -- Don't change the level, but replace with custom formatting

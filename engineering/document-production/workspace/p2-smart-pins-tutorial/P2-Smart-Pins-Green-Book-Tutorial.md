@@ -772,14 +772,8 @@ Here's where Smart Pins get really powerful - each Smart Pin has TWO independent
 
 **Understanding the WRPIN D Parameter Format**
 
-```
-%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
- │    │    │   │              │  └── Mode (5 bits)
- │    │    │   │              └── DIR/OUT control (2 bits)
- │    │    │   └── Low-level control M bits (13 bits)
- │    │    └── Filter selection (3 bits)
- │    └── B-input selector (4 bits)
- └── A-input selector (4 bits)
+```{=latex}
+\WRPINFormatDiagram
 ```
 
 **Why A/B Routing Matters**
