@@ -119,78 +119,71 @@
 
 \newcommand{\DRVHTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
+\begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
 % Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,5} {
-    \node[font=\normalsize] at (\i + 1.0, 4.8) {\i};
+    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.8) {\i};
 }
 
-% System Clock label and waveform (higher up, with space below)
-\node[sp-label] at (-0.8, 4.2) {System Clock};
-% Lead-in: short underscore before clock 0
-\draw[sp-signal] (0.0, 3.9) -- (0.5, 3.9);
+% System Clock label and waveform
+\node[sp-label] at (-0.5, 4.2) {System Clock};
+% Lead-in: DASHED line before clock 0
+\draw[dashed, sp-signal] (-0.2, 3.9) -- (0.5, 3.9);
+\draw[sp-signal] (0.5, 3.9) -- (1.0, 3.9);
 % Main clock cycles 0-5
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{0.5 + \i}
+    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
     \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\x+0.5, 4.4) -- (\x+0.5, 3.9) -- (\x+1.0, 3.9);
 }
-% Lead-out: rising edge after 5, short high section
-\draw[sp-signal] (6.5, 3.9) -- (6.5, 4.4) -- (6.8, 4.4);
+% Lead-out: DASHED line after clock 5
+\draw[dashed, sp-signal] (7.0, 3.9) -- (7.5, 3.9);
 
-% SEPARATE vertical ticks at clock 0 for each row (with gaps between)
-% DIRA tick
-\draw[sp-signal] (0.5, 2.85) -- (0.5, 3.15);
-% OUTA tick
-\draw[sp-signal] (0.5, 2.2) -- (0.5, 2.5);
-% Instruction tick
-\draw[sp-signal] (0.5, 1.55) -- (0.5, 1.85);
+% DIRA row
+\node[sp-label] at (-0.5, 3.0) {DIRA:};
+\draw[sp-signal] (1.0, 2.85) -- (1.0, 3.15);  % Initial tick
+\node[font=\small, anchor=west] at (1.1, 3.0) {DIRA};
+\draw[sp-signal, ->] (1.7, 3.0) -- (1.95, 3.0);
+\draw[sp-signal] (2.0, 2.85) -- (2.0, 3.15);
+\draw[sp-signal, ->] (2.05, 3.0) -- (2.95, 3.0);
+\draw[sp-signal] (3.0, 2.85) -- (3.0, 3.15);
+\draw[sp-signal, ->] (3.05, 3.0) -- (3.95, 3.0);
+\draw[sp-signal] (4.0, 2.85) -- (4.0, 3.15);
+\draw[sp-signal, ->] (4.05, 3.0) -- (4.95, 3.0);
+\draw[sp-signal] (5.0, 2.85) -- (5.0, 3.15);
+\draw[sp-signal, ->] (5.05, 3.0) -- (5.95, 3.0);
+\draw[sp-signal] (6.0, 2.85) -- (6.0, 3.15);
+\draw[sp-signal, ->] (6.05, 3.0) -- (6.95, 3.0);
+\draw[sp-signal] (7.0, 2.85) -- (7.0, 3.15);
+\node[font=\small, anchor=west] at (7.1, 3.0) {P0 DRIVEN};
 
-% DIRA label and signal with arrows and ticks
-\node[sp-label] at (-0.3, 3.0) {DIRA:};
-% After first tick, DIRA label with extra space before arrow
-\node[font=\small, anchor=west] at (0.6, 3.0) {DIRA};
-\draw[sp-signal, ->] (1.35, 3.0) -- (1.45, 3.0);
-\draw[sp-signal] (1.5, 2.85) -- (1.5, 3.15);
-\draw[sp-signal, ->] (1.55, 3.0) -- (2.45, 3.0);
-\draw[sp-signal] (2.5, 2.85) -- (2.5, 3.15);
-\draw[sp-signal, ->] (2.55, 3.0) -- (3.45, 3.0);
-\draw[sp-signal] (3.5, 2.85) -- (3.5, 3.15);
-\draw[sp-signal, ->] (3.55, 3.0) -- (4.45, 3.0);
-\draw[sp-signal] (4.5, 2.85) -- (4.5, 3.15);
-\draw[sp-signal, ->] (4.55, 3.0) -- (5.45, 3.0);
-\draw[sp-signal] (5.5, 2.85) -- (5.5, 3.15);
-\draw[sp-signal, ->] (5.55, 3.0) -- (6.0, 3.0);
-\node[font=\small, anchor=west] at (6.05, 3.0) {P0 DRIV};
-\draw[sp-signal] (6.8, 2.85) -- (6.8, 3.15);
+% OUTA row
+\node[sp-label] at (-0.5, 2.2) {OUTA:};
+\draw[sp-signal] (1.0, 2.05) -- (1.0, 2.35);  % Initial tick
+\node[font=\small, anchor=west] at (1.1, 2.2) {OUTA};
+\draw[sp-signal, ->] (1.7, 2.2) -- (1.95, 2.2);
+\draw[sp-signal] (2.0, 2.05) -- (2.0, 2.35);
+\draw[sp-signal, ->] (2.05, 2.2) -- (2.95, 2.2);
+\draw[sp-signal] (3.0, 2.05) -- (3.0, 2.35);
+\draw[sp-signal, ->] (3.05, 2.2) -- (3.95, 2.2);
+\draw[sp-signal] (4.0, 2.05) -- (4.0, 2.35);
+\draw[sp-signal, ->] (4.05, 2.2) -- (4.95, 2.2);
+\draw[sp-signal] (5.0, 2.05) -- (5.0, 2.35);
+\draw[sp-signal, ->] (5.05, 2.2) -- (5.95, 2.2);
+\draw[sp-signal] (6.0, 2.05) -- (6.0, 2.35);
+\draw[sp-signal, ->] (6.05, 2.2) -- (6.95, 2.2);
+\draw[sp-signal] (7.0, 2.05) -- (7.0, 2.35);
+\node[font=\small, anchor=west] at (7.1, 2.2) {P0 HIGH};
 
-% OUTA label and signal with arrows and ticks (same pattern as DIRA)
-\node[sp-label] at (-0.3, 2.35) {OUTA:};
-\node[font=\small, anchor=west] at (0.6, 2.35) {OUTA};
-\draw[sp-signal, ->] (1.35, 2.35) -- (1.45, 2.35);
-\draw[sp-signal] (1.5, 2.2) -- (1.5, 2.5);
-\draw[sp-signal, ->] (1.55, 2.35) -- (2.45, 2.35);
-\draw[sp-signal] (2.5, 2.2) -- (2.5, 2.5);
-\draw[sp-signal, ->] (2.55, 2.35) -- (3.45, 2.35);
-\draw[sp-signal] (3.5, 2.2) -- (3.5, 2.5);
-\draw[sp-signal, ->] (3.55, 2.35) -- (4.45, 2.35);
-\draw[sp-signal] (4.5, 2.2) -- (4.5, 2.5);
-\draw[sp-signal, ->] (4.55, 2.35) -- (5.45, 2.35);
-\draw[sp-signal] (5.5, 2.2) -- (5.5, 2.5);
-\draw[sp-signal, ->] (5.55, 2.35) -- (6.0, 2.35);
-\node[font=\small, anchor=west] at (6.05, 2.35) {P0 HIGH};
-\draw[sp-signal] (6.8, 2.2) -- (6.8, 2.5);
+% Register transfer annotations in BLUE (between DIRA and OUTA rows)
+\node[font=\small, color=sp-annotation] at (2.5, 2.6) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.5, 2.6) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.5, 2.6) {Reg*};
 
-% Register transfer annotations in BLUE (between DIRA and OUTA)
-\node[font=\small, color=sp-annotation] at (2.0, 2.68) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.0, 2.68) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.0, 2.68) {Reg*};
-
-% Instruction label and signal
-\node[sp-label] at (-0.3, 1.7) {Instruction:};
-\node[font=\small, anchor=west] at (0.6, 1.7) {DRVH \#0};
-\draw[sp-signal, ->] (1.45, 1.7) -- (1.5, 1.7);
-\draw[sp-signal] (1.5, 1.55) -- (1.5, 1.85);
+% Instruction row
+\node[sp-label] at (-0.5, 1.4) {Instruction:};
+\draw[sp-signal] (1.0, 1.25) -- (1.0, 1.55);  % Initial tick
+\node[font=\small, anchor=west] at (1.1, 1.4) {DRVH \#0};
 
 \end{tikzpicture}
 \par}
@@ -202,58 +195,55 @@
 
 \newcommand{\TESTBINATimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
+\begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
 % Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,5} {
-    \node[font=\normalsize] at (\i + 1.0, 4.3) {\i};
+    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.3) {\i};
 }
 
-% Clock label and waveform (higher up, with space below)
-\node[sp-label] at (-0.3, 3.7) {Clock:};
-% Lead-in: short underscore before clock 0
-\draw[sp-signal] (0.0, 3.4) -- (0.5, 3.4);
+% Clock label and waveform
+\node[sp-label] at (-0.5, 3.7) {Clock:};
+% Lead-in: DASHED line before clock 0
+\draw[dashed, sp-signal] (-0.2, 3.4) -- (0.5, 3.4);
+\draw[sp-signal] (0.5, 3.4) -- (1.0, 3.4);
 % Main clock cycles 0-5
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{0.5 + \i}
+    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
     \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
 }
-% Lead-out: rising edge after 5, short high then dashed
-\draw[sp-signal] (6.5, 3.4) -- (6.5, 3.9) -- (6.6, 3.9);
-\draw[dashed, sp-signal] (6.6, 3.9) -- (6.9, 3.9);
+% Lead-out: DASHED line after clock 5
+\draw[dashed, sp-signal] (7.0, 3.4) -- (7.5, 3.4);
 
-% NO vertical sync line for this diagram (per original)
-
-% INA label and signal with tick marks and arrows (with gap from clock)
-\node[sp-label] at (-0.3, 2.4) {INA:};
-% Initial tick, then P0 IN label with more space, arrow to first tick
-\draw[sp-signal] (0.5, 2.25) -- (0.5, 2.55);
-\node[font=\small, anchor=west] at (0.6, 2.4) {P0 IN};
-\draw[sp-signal, ->] (1.35, 2.4) -- (1.45, 2.4);
-\draw[sp-signal] (1.5, 2.25) -- (1.5, 2.55);
-\draw[sp-signal, ->] (1.55, 2.4) -- (2.45, 2.4);
-\draw[sp-signal] (2.5, 2.25) -- (2.5, 2.55);
-\draw[sp-signal, ->] (2.55, 2.4) -- (3.45, 2.4);
-\draw[sp-signal] (3.5, 2.25) -- (3.5, 2.55);
-\draw[sp-signal, ->] (3.55, 2.4) -- (4.45, 2.4);
-\draw[sp-signal] (4.5, 2.25) -- (4.5, 2.55);
-\node[font=\small, anchor=west] at (4.6, 2.4) {ALU};
-\draw[sp-signal] (5.1, 2.25) -- (5.1, 2.55);
-\node[font=\small, anchor=west] at (5.2, 2.4) {C/Z};
-\draw[sp-signal, ->] (5.7, 2.4) -- (6.7, 2.4);
+% INA row
+\node[sp-label] at (-0.5, 2.5) {INA:};
+\draw[sp-signal] (1.0, 2.35) -- (1.0, 2.65);  % Initial tick
+\node[font=\small, anchor=west] at (1.1, 2.5) {P0 IN};
+\draw[sp-signal, ->] (1.75, 2.5) -- (1.95, 2.5);
+\draw[sp-signal] (2.0, 2.35) -- (2.0, 2.65);
+\draw[sp-signal, ->] (2.05, 2.5) -- (2.95, 2.5);
+\draw[sp-signal] (3.0, 2.35) -- (3.0, 2.65);
+\draw[sp-signal, ->] (3.05, 2.5) -- (3.95, 2.5);
+\draw[sp-signal] (4.0, 2.35) -- (4.0, 2.65);
+\draw[sp-signal, ->] (4.05, 2.5) -- (4.95, 2.5);
+\draw[sp-signal] (5.0, 2.35) -- (5.0, 2.65);
+\node[font=\small, anchor=west] at (5.1, 2.5) {ALU};
+\draw[sp-signal] (5.6, 2.35) -- (5.6, 2.65);
+\node[font=\small, anchor=west] at (5.7, 2.5) {C/Z};
+\draw[sp-signal, ->] (6.15, 2.5) -- (7.5, 2.5);
 
 % Register transfer annotations in BLUE (below INA line)
-\node[font=\small, color=sp-annotation] at (2.0, 1.85) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.0, 1.85) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (2.5, 1.95) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.5, 1.95) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.5, 1.95) {Reg*};
 
-% Instruction label and signal
-\node[sp-label] at (-0.3, 1.0) {Instruction:};
-% Horizontal line, then tick, then label with arrow (more space)
-\draw[sp-signal] (0.5, 1.0) -- (4.45, 1.0);
-\draw[sp-signal] (4.5, 0.85) -- (4.5, 1.15);
-\node[font=\small, anchor=west] at (4.6, 1.0) {TESTB INA, \#0};
-\draw[sp-signal, ->] (6.35, 1.0) -- (6.7, 1.0);
+% Instruction row
+\node[sp-label] at (-0.5, 1.2) {Instruction:};
+% Horizontal line leading up to instruction
+\draw[sp-signal] (1.0, 1.2) -- (4.95, 1.2);
+\draw[sp-signal] (5.0, 1.05) -- (5.0, 1.35);  % Tick mark
+\node[font=\small, anchor=west] at (5.1, 1.2) {TESTB INA, \#0};
+\draw[sp-signal, ->] (7.0, 1.2) -- (7.5, 1.2);
 
 \end{tikzpicture}
 \par}
@@ -265,56 +255,53 @@
 
 \newcommand{\TESTPTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.2cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
+\begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
 % Clock cycle numbers (positioned above clock waveform)
 \foreach \i in {0,...,4} {
-    \node[font=\normalsize] at (\i + 1.0, 4.3) {\i};
+    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.3) {\i};
 }
 
-% Clock label and waveform (higher up, with space below)
-\node[sp-label] at (-0.3, 3.7) {Clock:};
-% Lead-in: short underscore before clock 0
-\draw[sp-signal] (0.0, 3.4) -- (0.5, 3.4);
+% Clock label and waveform
+\node[sp-label] at (-0.5, 3.7) {Clock:};
+% Lead-in: DASHED line before clock 0
+\draw[dashed, sp-signal] (-0.2, 3.4) -- (0.5, 3.4);
+\draw[sp-signal] (0.5, 3.4) -- (1.0, 3.4);
 % Main clock cycles 0-4
 \foreach \i in {0,...,4} {
-    \pgfmathsetmacro{\x}{0.5 + \i}
+    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
     \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
 }
-% Lead-out: rising edge after 4, short high then dashed
-\draw[sp-signal] (5.5, 3.4) -- (5.5, 3.9) -- (5.6, 3.9);
-\draw[dashed, sp-signal] (5.6, 3.9) -- (5.9, 3.9);
+% Lead-out: DASHED line after clock 4
+\draw[dashed, sp-signal] (6.0, 3.4) -- (6.5, 3.4);
 
-% NO vertical sync line for this diagram (per original)
-
-% INA label and signal with tick marks and arrows (with gap from clock)
-\node[sp-label] at (-0.3, 2.4) {INA:};
-% Initial tick, then P0 IN label with more space, arrow to first tick
-\draw[sp-signal] (0.5, 2.25) -- (0.5, 2.55);
-\node[font=\small, anchor=west] at (0.6, 2.4) {P0 IN};
-\draw[sp-signal, ->] (1.35, 2.4) -- (1.45, 2.4);
-\draw[sp-signal] (1.5, 2.25) -- (1.5, 2.55);
-\draw[sp-signal, ->] (1.55, 2.4) -- (2.45, 2.4);
-\draw[sp-signal] (2.5, 2.25) -- (2.5, 2.55);
-\draw[sp-signal, ->] (2.55, 2.4) -- (3.45, 2.4);
-\draw[sp-signal] (3.5, 2.25) -- (3.5, 2.55);
-\draw[sp-signal, ->] (3.55, 2.4) -- (4.45, 2.4);
-\draw[sp-signal] (4.5, 2.25) -- (4.5, 2.55);
-\node[font=\small, anchor=west] at (4.6, 2.4) {C/Z};
-\draw[sp-signal, ->] (5.15, 2.4) -- (5.7, 2.4);
+% INA row
+\node[sp-label] at (-0.5, 2.5) {INA:};
+\draw[sp-signal] (1.0, 2.35) -- (1.0, 2.65);  % Initial tick
+\node[font=\small, anchor=west] at (1.1, 2.5) {P0 IN};
+\draw[sp-signal, ->] (1.75, 2.5) -- (1.95, 2.5);
+\draw[sp-signal] (2.0, 2.35) -- (2.0, 2.65);
+\draw[sp-signal, ->] (2.05, 2.5) -- (2.95, 2.5);
+\draw[sp-signal] (3.0, 2.35) -- (3.0, 2.65);
+\draw[sp-signal, ->] (3.05, 2.5) -- (3.95, 2.5);
+\draw[sp-signal] (4.0, 2.35) -- (4.0, 2.65);
+\draw[sp-signal, ->] (4.05, 2.5) -- (4.95, 2.5);
+\draw[sp-signal] (5.0, 2.35) -- (5.0, 2.65);
+\node[font=\small, anchor=west] at (5.1, 2.5) {C/Z};
+\draw[sp-signal, ->] (5.6, 2.5) -- (6.5, 2.5);
 
 % Register transfer annotations in BLUE (below INA line)
-\node[font=\small, color=sp-annotation] at (2.0, 1.85) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.0, 1.85) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.0, 1.85) {Reg*};
+\node[font=\small, color=sp-annotation] at (2.5, 1.95) {Reg*};
+\node[font=\small, color=sp-annotation] at (3.5, 1.95) {Reg*};
+\node[font=\small, color=sp-annotation] at (4.5, 1.95) {Reg*};
 
-% Instruction label and signal
-\node[sp-label] at (-0.3, 1.0) {Instruction:};
-% Horizontal line, then tick, then label with arrow (more space)
-\draw[sp-signal] (0.5, 1.0) -- (3.45, 1.0);
-\draw[sp-signal] (3.5, 0.85) -- (3.5, 1.15);
-\node[font=\small, anchor=west] at (3.6, 1.0) {TESTP \#0};
-\draw[sp-signal, ->] (4.85, 1.0) -- (5.7, 1.0);
+% Instruction row
+\node[sp-label] at (-0.5, 1.2) {Instruction:};
+% Horizontal line leading up to instruction
+\draw[sp-signal] (1.0, 1.2) -- (3.95, 1.2);
+\draw[sp-signal] (4.0, 1.05) -- (4.0, 1.35);  % Tick mark
+\node[font=\small, anchor=west] at (4.1, 1.2) {TESTP \#0};
+\draw[sp-signal, ->] (5.4, 1.2) -- (6.5, 1.2);
 
 \end{tikzpicture}
 \par}
@@ -1217,87 +1204,193 @@
 % WRPIN D PARAMETER FORMAT DIAGRAM - Bit Field Layout
 % ============================================================================
 % Shows the 32-bit WRPIN D parameter format with labeled bit fields
+% Color-coded fields for visual distinction
+
+% Define field colors
+\definecolor{sp-field-A}{HTML}{E8F4E8}      % Light green for A-input
+\definecolor{sp-field-B}{HTML}{E8E8F4}      % Light blue for B-input
+\definecolor{sp-field-F}{HTML}{F4F4E8}      % Light yellow for Filter
+\definecolor{sp-field-M}{HTML}{F4E8E8}      % Light red for Mode control
+\definecolor{sp-field-T}{HTML}{E8F4F4}      % Light cyan for TT
+\definecolor{sp-field-S}{HTML}{F4E8F4}      % Light magenta for Mode select
+\definecolor{sp-field-0}{HTML}{E8E8E8}      % Light gray for reserved
 
 \newcommand{\WRPINFormatDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.38cm, y=1cm]
+\begin{tikzpicture}[x=0.42cm, y=1cm]
 
-% Define field widths (total 32 bits, scaled)
-% AAAA=4, BBBB=4, FFF=3, M=13, TT=2, SSSSS=5, 0=1
-% Positions: 0=start, cumulative widths
+% Bit position labels (top) - spaced clearly above field boundaries
+% Use single numbers at field edges, not pairs that overlap
+\node[font=\scriptsize] at (0, 2.0) {31};
+\node[font=\scriptsize] at (4, 2.0) {28};
+\node[font=\scriptsize] at (5, 2.0) {27};
+\node[font=\scriptsize] at (9, 2.0) {24};
+\node[font=\scriptsize] at (10, 2.0) {23};
+\node[font=\scriptsize] at (13.5, 2.0) {20};
+\node[font=\scriptsize] at (27.5, 2.0) {8};
+\node[font=\scriptsize] at (28.5, 2.0) {7};
+\node[font=\scriptsize] at (31, 2.0) {6};
+\node[font=\scriptsize] at (32, 2.0) {5};
+\node[font=\scriptsize] at (37.5, 2.0) {1};
+\node[font=\scriptsize] at (38.5, 2.0) {0};
 
-% Bit position labels (top) - show key bit numbers
-\node[sp-annotation, font=\scriptsize] at (0.5, 1.8) {31};
-\node[sp-annotation, font=\scriptsize] at (4, 1.8) {28};
-\node[sp-annotation, font=\scriptsize] at (4.5, 1.8) {27};
-\node[sp-annotation, font=\scriptsize] at (8, 1.8) {24};
-\node[sp-annotation, font=\scriptsize] at (8.5, 1.8) {23};
-\node[sp-annotation, font=\scriptsize] at (11, 1.8) {21};
-\node[sp-annotation, font=\scriptsize] at (11.5, 1.8) {20};
-\node[sp-annotation, font=\scriptsize] at (24, 1.8) {8};
-\node[sp-annotation, font=\scriptsize] at (24.5, 1.8) {7};
-\node[sp-annotation, font=\scriptsize] at (26.5, 1.8) {6};
-\node[sp-annotation, font=\scriptsize] at (27, 1.8) {5};
-\node[sp-annotation, font=\scriptsize] at (31.5, 1.8) {1};
-\node[sp-annotation, font=\scriptsize] at (32, 1.8) {0};
-
-% Main register box - draw all field boxes
+% Main register boxes with colored fills
 % AAAA (bits 31:28) - 4 bits
-\draw[thick] (0, 0.8) rectangle (4, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (2, 1.15) {AAAA};
+\draw[thick, fill=sp-field-A] (0, 1.0) rectangle (4.5, 1.7);
+\node[font=\small\bfseries] at (2.25, 1.35) {AAAA};
 
 % BBBB (bits 27:24) - 4 bits
-\draw[thick] (4, 0.8) rectangle (8, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (6, 1.15) {BBBB};
+\draw[thick, fill=sp-field-B] (4.5, 1.0) rectangle (9.5, 1.7);
+\node[font=\small\bfseries] at (7, 1.35) {BBBB};
 
 % FFF (bits 23:21) - 3 bits
-\draw[thick] (8, 0.8) rectangle (11, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (9.5, 1.15) {FFF};
+\draw[thick, fill=sp-field-F] (9.5, 1.0) rectangle (13.5, 1.7);
+\node[font=\small\bfseries] at (11.5, 1.35) {FFF};
 
 % M bits (bits 20:8) - 13 bits
-\draw[thick] (11, 0.8) rectangle (24, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (17.5, 1.15) {MMMMMMMMMMMMM};
+\draw[thick, fill=sp-field-M] (13.5, 1.0) rectangle (28, 1.7);
+\node[font=\small\bfseries] at (20.75, 1.35) {MMMMMMMMMMMMM};
 
 % TT (bits 7:6) - 2 bits
-\draw[thick] (24, 0.8) rectangle (26, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (25, 1.15) {TT};
+\draw[thick, fill=sp-field-T] (28, 1.0) rectangle (31.5, 1.7);
+\node[font=\small\bfseries] at (29.75, 1.35) {TT};
 
 % SSSSS (bits 5:1) - 5 bits
-\draw[thick] (26, 0.8) rectangle (31, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (28.5, 1.15) {SSSSS};
+\draw[thick, fill=sp-field-S] (31.5, 1.0) rectangle (38, 1.7);
+\node[font=\small\bfseries] at (34.75, 1.35) {SSSSS};
 
 % 0 (bit 0) - 1 bit (always 0)
-\draw[thick] (31, 0.8) rectangle (32, 1.5);
-\node[sp-annotation, font=\small\bfseries] at (31.5, 1.15) {0};
+\draw[thick, fill=sp-field-0] (38, 1.0) rectangle (39, 1.7);
+\node[font=\small\bfseries] at (38.5, 1.35) {0};
 
-% Description labels with arrows pointing up to fields
+% Description labels below - more space from bottom of boxes
 % AAAA
-\draw[thin] (2, 0.8) -- (2, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=2.5cm, align=center] at (2, 0.0) {A-input\\selector\\(4 bits)};
+\draw[thin] (2.25, 1.0) -- (2.25, 0.5);
+\node[font=\scriptsize, text width=2.5cm, align=center] at (2.25, 0.0) {A-input\\selector\\(4 bits)};
 
 % BBBB
-\draw[thin] (6, 0.8) -- (6, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=2.5cm, align=center] at (6, 0.0) {B-input\\selector\\(4 bits)};
+\draw[thin] (7, 1.0) -- (7, 0.5);
+\node[font=\scriptsize, text width=2.5cm, align=center] at (7, 0.0) {B-input\\selector\\(4 bits)};
 
 % FFF
-\draw[thin] (9.5, 0.8) -- (9.5, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=2cm, align=center] at (9.5, 0.0) {Filter\\(3 bits)};
+\draw[thin] (11.5, 1.0) -- (11.5, 0.5);
+\node[font=\scriptsize, text width=2cm, align=center] at (11.5, 0.0) {Filter\\(3 bits)};
 
 % M bits
-\draw[thin] (17.5, 0.8) -- (17.5, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=3cm, align=center] at (17.5, 0.0) {Low-level\\control\\(13 bits)};
+\draw[thin] (20.75, 1.0) -- (20.75, 0.5);
+\node[font=\scriptsize, text width=3cm, align=center] at (20.75, 0.0) {Low-level\\control\\(13 bits)};
 
 % TT
-\draw[thin] (25, 0.8) -- (25, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=2cm, align=center] at (25, 0.0) {DIR/OUT\\(2 bits)};
+\draw[thin] (29.75, 1.0) -- (29.75, 0.5);
+\node[font=\scriptsize, text width=2cm, align=center] at (29.75, 0.0) {DIR/OUT\\(2 bits)};
 
 % SSSSS
-\draw[thin] (28.5, 0.8) -- (28.5, 0.4);
-\node[sp-annotation, font=\scriptsize, text width=2cm, align=center] at (28.5, 0.0) {Mode\\(5 bits)};
+\draw[thin] (34.75, 1.0) -- (34.75, 0.5);
+\node[font=\scriptsize, text width=2cm, align=center] at (34.75, 0.0) {Mode\\(5 bits)};
 
 % 0 bit
-\draw[thin] (31.5, 0.8) -- (31.5, 0.4);
-\node[sp-annotation, font=\scriptsize] at (31.5, 0.0) {0};
+\draw[thin] (38.5, 1.0) -- (38.5, 0.5);
+\node[font=\scriptsize] at (38.5, 0.0) {0};
+
+\end{tikzpicture}
+\par}
+}
+
+% ============================================================================
+% OUTPUT MODE DECISION FLOWCHART
+% ============================================================================
+% Helps users select the appropriate output mode based on requirements
+
+% Flowchart colors
+\definecolor{sp-decision}{HTML}{FFF8E0}     % Light yellow for decision nodes
+\definecolor{sp-result}{HTML}{E0F0E8}       % Light green for result nodes
+\definecolor{sp-start}{HTML}{E8E8F8}        % Light blue for start node
+
+\newcommand{\OutputModeFlowchart}{%
+{\centering
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    >={Stealth[length=2mm]},
+    decision/.style={
+        diamond,
+        draw=black,
+        fill=sp-decision,
+        text width=3.5cm,
+        align=center,
+        inner sep=2pt,
+        font=\small,
+        aspect=2
+    },
+    result/.style={
+        rectangle,
+        rounded corners=3pt,
+        draw=black,
+        fill=sp-result,
+        text width=2.8cm,
+        align=center,
+        minimum height=0.8cm,
+        font=\small\bfseries
+    },
+    start/.style={
+        rectangle,
+        rounded corners=5pt,
+        draw=black,
+        fill=sp-start,
+        text width=4cm,
+        align=center,
+        minimum height=1cm,
+        font=\normalsize\bfseries
+    },
+    arrow/.style={
+        ->,
+        thick
+    },
+    yeslabel/.style={
+        font=\scriptsize,
+        fill=white,
+        inner sep=1pt
+    }
+]
+
+% Start node
+\node[start] (start) at (0, 0) {Need to generate\\an output signal?};
+
+% Decision nodes (flowing down and right)
+\node[decision] (freq) at (0, -2.5) {Need precise frequency\\(sub-Hz resolution)?};
+\node[decision] (asym) at (0, -5.5) {Need asymmetric\\pulse widths?};
+\node[decision] (clock) at (0, -8.5) {Need simple clock/\\square wave?};
+\node[decision] (pwm) at (0, -11.5) {Need PWM for\\motor/LED?};
+\node[decision] (phase) at (4, -13) {Phase-correct\\needed?};
+\node[decision] (power) at (0, -14.5) {Need power supply\\with feedback?};
+
+% Result nodes (to the right)
+\node[result] (nco) at (6, -2.5) {P\_NCO\_FREQ\\or P\_NCO\_DUTY};
+\node[result] (pulse) at (6, -5.5) {P\_PULSE};
+\node[result] (trans) at (6, -8.5) {P\_TRANSITION};
+\node[result] (tri) at (8, -13) {P\_PWM\_TRIANGLE};
+\node[result] (saw) at (4, -15.5) {P\_PWM\_SAWTOOTH};
+\node[result] (smps) at (6, -14.5) {P\_PWM\_SMPS};
+
+% Arrows from start
+\draw[arrow] (start) -- (freq);
+
+% Decision arrows with Yes/No labels
+\draw[arrow] (freq) -- node[yeslabel, right] {Yes} (nco);
+\draw[arrow] (freq) -- node[yeslabel, left] {No} (asym);
+
+\draw[arrow] (asym) -- node[yeslabel, right] {Yes} (pulse);
+\draw[arrow] (asym) -- node[yeslabel, left] {No} (clock);
+
+\draw[arrow] (clock) -- node[yeslabel, right] {Yes} (trans);
+\draw[arrow] (clock) -- node[yeslabel, left] {No} (pwm);
+
+\draw[arrow] (pwm) -- node[yeslabel, above] {Yes} (phase);
+\draw[arrow] (pwm) -- node[yeslabel, left] {No} (power);
+
+\draw[arrow] (phase) -- node[yeslabel, right] {Yes} (tri);
+\draw[arrow] (phase) -- node[yeslabel, below] {No} (saw);
+
+\draw[arrow] (power) -- node[yeslabel, right] {Yes} (smps);
 
 \end{tikzpicture}
 \par}

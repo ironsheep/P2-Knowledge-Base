@@ -2753,19 +2753,21 @@ setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
 | Response time | 2-8 clocks | 0 clocks (instant) |
 | Power consumption | Maximum | Minimum during wait |
 | Code complexity | Simple | Moderate |
-| Best for... | Time-critical, short waits | Power-sensitive, long waits |
-
-**Use Polling When:**
-- Response latency is absolutely critical (real-time control)
-- Wait times are very short (microseconds)
-- The COG has nothing else to do anyway
-- Simplicity is more important than efficiency
+| Best for... | Multi-tasking loops, simple code | Lowest latency, power-sensitive |
 
 **Use Event-Driven When:**
+- Response latency is absolutely critical (hardware wake is instant - 0 clocks)
 - Power consumption matters
 - Wait times are longer (milliseconds or more)
-- The COG could be doing other work
+- You want deterministic, minimal-latency response
 - You want to coordinate multiple Smart Pin operations
+
+**Use Polling When:**
+- You need to do other work between checks (polling in a larger loop)
+- You're monitoring multiple conditions that can't be combined into one event
+- You need timeout handling or other conditional logic during the wait
+- Wait times are very short and COG has nothing else to do anyway
+- Simplicity is more important than efficiency
 
 #### Hybrid Approach: Multi-Event Monitoring
 

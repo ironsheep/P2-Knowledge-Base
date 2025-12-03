@@ -39,10 +39,18 @@
 % When numbering is on, format chapters and sections properly
 \RequirePackage{titlesec}
 
-% REMOVED: Chapter titleformat - markdown already has "Chapter N:" in text
-% LaTeX adding its own would create double numbering
+% Chapter format - LEFT ALIGNED (raggedright)
+% NOTE: Even though we don't add chapter numbers (markdown has them),
+% we MUST define titleformat to control alignment. Without this,
+% titlesec uses default justified alignment.
+\titleformat{\chapter}[block]
+  {\normalfont\Huge\bfseries\raggedright}  % LEFT-ALIGNED via \raggedright
+  {}  % No prefix (chapter number already in markdown text)
+  {0pt}  % No separation between number and title
+  {}  % No code before title
+  [\vspace{12pt}]  % Space after chapter title
 
-% Section format when numbered  
+% Section format when numbered
 \titleformat{\section}
   {\normalfont\Large\bfseries}
   {\thesection} % Section number (1.1, 1.2, etc.)

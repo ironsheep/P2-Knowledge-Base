@@ -203,15 +203,15 @@
 \makeatletter
 \renewcommand{\@makechapterhead}[1]{%
   \vspace*{6pt}% Space before chapter (minimal when on same page as Part)
-  {\parindent 0pt \normalfont\Huge\bfseries
-   #1\par\nobreak}% Chapter title - Huge (same as Part)
+  {\parindent 0pt \raggedright \normalfont\Huge\bfseries
+   #1\par\nobreak}% Chapter title - Huge (same as Part), LEFT-ALIGNED
   \vspace{12pt}% Space after chapter (about 1 line)
 }
 % Also handle starred chapters
 \renewcommand{\@makeschapterhead}[1]{%
   \vspace*{6pt}%
-  {\parindent 0pt \normalfont\Huge\bfseries
-   #1\par\nobreak}%
+  {\parindent 0pt \raggedright \normalfont\Huge\bfseries
+   #1\par\nobreak}% LEFT-ALIGNED
   \vspace{12pt}%
 }
 \makeatother
@@ -316,7 +316,7 @@
   % NO \cleardoublepage here - \clearpage already done in \part command
   \thispagestyle{plain}%  % Show headers
   \vspace*{12pt}%  % Modest space from top of page (about 1 line)
-  {\normalfont\Huge\bfseries #1\par}%  % Left-aligned, Huge font (same as chapter)
+  {\raggedright\normalfont\Huge\bfseries #1\par}%  % LEFT-ALIGNED, Huge font (same as chapter)
   \vspace{18pt}%  % Space after part title before first chapter (1.5 lines)
   % First chapter should follow on same page
 }
