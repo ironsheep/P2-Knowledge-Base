@@ -75,13 +75,17 @@
     "streamer": {
       "description": "Streamer operations for continuous data flow",
       "files": ["getxacc", "setxfrq", "xcont", "xinit", "xstop", "xzero"]
+    },
+    "registers": {
+      "description": "Special register definitions",
+      "files": ["pr-registers"]
     }
   },
 
   "architecture": {
     "core": {
       "description": "Core processor and memory systems",
-      "files": ["cog", "hub", "lookup_ram", "cog_attention"]
+      "files": ["cog", "hub", "lookup_ram", "cog_attention", "fifo"]
     },
     "math": {
       "description": "Math acceleration hardware",
@@ -188,6 +192,10 @@
     "lookup": {
       "description": "Lookup table methods",
       "files": ["lookup", "lookupz", "lookdown", "lookdownz"]
+    },
+    "registers": {
+      "description": "Special register definitions",
+      "files": ["pr-registers"]
     }
   },
 

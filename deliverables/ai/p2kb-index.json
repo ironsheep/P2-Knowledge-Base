@@ -1,28 +1,29 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-04T22:48:02.267773",
+    "generated": "2025-12-04T22:52:18.236888",
     "total_entries": 969,
-    "total_categories": 45,
+    "total_categories": 47,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
     "pasm2_directives": [
-      "p2kbSpin2AsmAlignl",
-      "p2kbSpin2AsmAlignw",
-      "p2kbSpin2AsmDitto",
-      "p2kbSpin2AsmFit",
-      "p2kbSpin2AsmOrg",
-      "p2kbSpin2AsmOrgf",
-      "p2kbSpin2AsmOrgh",
-      "p2kbSpin2AsmRes",
-      "p2kbSpin2Byte",
-      "p2kbSpin2KwBYTEFIT",
-      "p2kbSpin2KwWORDFIT",
-      "p2kbSpin2Long",
-      "p2kbSpin2Word"
+      "p2kbPasm2Alignl",
+      "p2kbPasm2Alignw",
+      "p2kbPasm2Byte",
+      "p2kbPasm2Bytefit",
+      "p2kbPasm2Ditto",
+      "p2kbPasm2Fit",
+      "p2kbPasm2Long",
+      "p2kbPasm2Org",
+      "p2kbPasm2Orgf",
+      "p2kbPasm2Orgh",
+      "p2kbPasm2Res",
+      "p2kbPasm2Word",
+      "p2kbPasm2Wordfit"
     ],
     "pasm2_branch": [
+      "p2kbPasm2Call",
       "p2kbPasm2Calla",
       "p2kbPasm2Callb",
       "p2kbPasm2Calld",
@@ -57,20 +58,19 @@
       "p2kbPasm2Tjnz",
       "p2kbPasm2Tjs",
       "p2kbPasm2Tjv",
-      "p2kbPasm2Tjz",
-      "p2kbSpin2Call"
+      "p2kbPasm2Tjz"
     ],
     "pasm2_cordic": [
       "p2kbPasm2Getqx",
       "p2kbPasm2Getqy",
       "p2kbPasm2Qdiv",
+      "p2kbPasm2Qexp",
       "p2kbPasm2Qfrac",
+      "p2kbPasm2Qlog",
       "p2kbPasm2Qmul",
       "p2kbPasm2Qrotate",
       "p2kbPasm2Qsqrt",
-      "p2kbPasm2Qvector",
-      "p2kbSpin2Qexp",
-      "p2kbSpin2Qlog"
+      "p2kbPasm2Qvector"
     ],
     "pasm2_colorspace": [
       "p2kbPasm2Setcfrq",
@@ -90,6 +90,7 @@
       "p2kbPasm2Addct1",
       "p2kbPasm2Addct2",
       "p2kbPasm2Addct3",
+      "p2kbPasm2Cogatn",
       "p2kbPasm2Jatn",
       "p2kbPasm2Jct1",
       "p2kbPasm2Jct2",
@@ -122,6 +123,7 @@
       "p2kbPasm2Jxmt",
       "p2kbPasm2Jxrl",
       "p2kbPasm2Jxro",
+      "p2kbPasm2Pollatn",
       "p2kbPasm2Pollct1",
       "p2kbPasm2Pollct2",
       "p2kbPasm2Pollct3",
@@ -142,6 +144,7 @@
       "p2kbPasm2Setse2",
       "p2kbPasm2Setse3",
       "p2kbPasm2Setse4",
+      "p2kbPasm2Waitatn",
       "p2kbPasm2Waitct1",
       "p2kbPasm2Waitct2",
       "p2kbPasm2Waitct3",
@@ -155,20 +158,17 @@
       "p2kbPasm2Waitxfi",
       "p2kbPasm2Waitxmt",
       "p2kbPasm2Waitxrl",
-      "p2kbPasm2Waitxro",
-      "p2kbSpin2Cogatn",
-      "p2kbSpin2Pollatn",
-      "p2kbSpin2Waitatn"
+      "p2kbPasm2Waitxro"
     ],
     "pasm2_hub_control": [
-      "p2kbSpin2Cogid",
-      "p2kbSpin2Coginit",
-      "p2kbSpin2Cogstop",
-      "p2kbSpin2Hubset",
-      "p2kbSpin2Locknew",
-      "p2kbSpin2Lockrel",
-      "p2kbSpin2Lockret",
-      "p2kbSpin2Locktry"
+      "p2kbPasm2Cogid",
+      "p2kbPasm2Coginit",
+      "p2kbPasm2Cogstop",
+      "p2kbPasm2Hubset",
+      "p2kbPasm2Locknew",
+      "p2kbPasm2Lockrel",
+      "p2kbPasm2Lockret",
+      "p2kbPasm2Locktry"
     ],
     "pasm2_hub_fifo": [
       "p2kbPasm2Fblock",
@@ -219,6 +219,7 @@
       "p2kbPasm2Wrlut"
     ],
     "pasm2_math": [
+      "p2kbPasm2Abs",
       "p2kbPasm2Add",
       "p2kbPasm2Adds",
       "p2kbPasm2Addsx",
@@ -327,20 +328,19 @@
       "p2kbPasm2Wrz",
       "p2kbPasm2Xor",
       "p2kbPasm2Xoro32",
-      "p2kbPasm2Zerox",
-      "p2kbSpin2Abs"
+      "p2kbPasm2Zerox"
     ],
     "pasm2_misc": [
       "p2kbPasm2Augd",
       "p2kbPasm2Augs",
+      "p2kbPasm2Getct",
+      "p2kbPasm2Getrnd",
       "p2kbPasm2Nop",
       "p2kbPasm2Pop",
       "p2kbPasm2Push",
       "p2kbPasm2Setq",
       "p2kbPasm2Setq2",
-      "p2kbPasm2Waitx",
-      "p2kbSpin2Getct",
-      "p2kbSpin2Getrnd"
+      "p2kbPasm2Waitx"
     ],
     "pasm2_pin": [
       "p2kbPasm2Dirc",
@@ -400,15 +400,15 @@
       "p2kbPasm2Altsw"
     ],
     "pasm2_smart_pin": [
+      "p2kbPasm2Akpin",
       "p2kbPasm2Getscp",
+      "p2kbPasm2Rdpin",
+      "p2kbPasm2Rqpin",
       "p2kbPasm2Setdacs",
       "p2kbPasm2Setscp",
-      "p2kbSpin2Akpin",
-      "p2kbSpin2Rdpin",
-      "p2kbSpin2Rqpin",
-      "p2kbSpin2Wrpin",
-      "p2kbSpin2Wxpin",
-      "p2kbSpin2Wypin"
+      "p2kbPasm2Wrpin",
+      "p2kbPasm2Wxpin",
+      "p2kbPasm2Wypin"
     ],
     "pasm2_streamer": [
       "p2kbPasm2Getxacc",
@@ -418,9 +418,13 @@
       "p2kbPasm2Xstop",
       "p2kbPasm2Xzero"
     ],
+    "pasm2_registers": [
+      "p2kbPasm2PrRegisters"
+    ],
     "architecture_core": [
       "p2kbArchCog",
       "p2kbArchCogAttention",
+      "p2kbArchFifo",
       "p2kbArchHub",
       "p2kbArchLookupRam"
     ],
@@ -589,6 +593,9 @@
       "p2kbSpin2Lookdownz",
       "p2kbSpin2Lookup",
       "p2kbSpin2Lookupz"
+    ],
+    "spin2_registers": [
+      "p2kbSpin2RegPrRegisters"
     ],
     "guides_getting_started": [
       "p2kbGuidePasm2GettingStarted",

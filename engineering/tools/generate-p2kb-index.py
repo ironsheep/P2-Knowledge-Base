@@ -194,14 +194,20 @@ def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[st
 
             if 'files' in cat_info:
                 for filename in cat_info['files']:
-                    # Try to find matching key
-                    key = file_to_key.get(filename.lower())
-                    if not key:
-                        # Try with Pasm2 prefix
-                        potential_key = f"p2kbPasm2{to_camel_case(filename)}"
+                    # Try PASM2-specific prefixes first to avoid matching Spin2 keys
+                    potential_keys = [
+                        f"p2kbPasm2{to_camel_case(filename)}",
+                        f"p2kbPasm2Reg{to_camel_case(filename)}"  # For registers/ subdirectory
+                    ]
+                    key = None
+                    for potential_key in potential_keys:
                         if potential_key in files:
                             key = potential_key
-                    if key:
+                            break
+                    # Fallback to file_to_key lookup only if no PASM2 prefix match
+                    if not key:
+                        key = file_to_key.get(filename.lower())
+                    if key and key.startswith('p2kbPasm2'):  # Only add PASM2 keys
                         categories[full_cat_name].append(key)
 
     # Process architecture categories
@@ -250,7 +256,8 @@ def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[st
                         f"p2kbSpin2{to_camel_case(filename)}",
                         f"p2kbSpin2Kw{to_camel_case(filename)}",
                         f"p2kbSpin2Op{to_camel_case(filename)}",
-                        f"p2kbSpin2Dbg{to_camel_case(filename)}"
+                        f"p2kbSpin2Dbg{to_camel_case(filename)}",
+                        f"p2kbSpin2Reg{to_camel_case(filename)}"
                     ]
                     for potential_key in potential_keys:
                         if potential_key in files:
