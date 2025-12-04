@@ -1,0 +1,230 @@
+component_name: "Hub FIFO Interface"
+component_type: "hardware_subsystem"
+
+description: |
+  The Hub FIFO (First-In-First-Out) Interface provides high-speed sequential data
+  transfer between Hub RAM and COG registers. Each COG has its own independent
+  FIFO interface that can be configured for either reading or writing.
+
+  The FIFO operates on 64-byte blocks and uses a streaming model where data flows
+  continuously from/to Hub RAM. This is significantly faster than individual
+  RDLONG/WRLONG operations for sequential data access.
+
+  Key features:
+  - Block-based transfers (64-byte granularity)
+  - Automatic address incrementing
+  - Block wrap events for circular buffer support
+  - Variable-length encoding support (RFVAR/RFVARS)
+
+architecture:
+  per_cog: true
+  block_size: 64  # bytes
+  modes:
+    - read: "RDFAST initiates reading from Hub to COG"
+    - write: "WRFAST initiates writing from COG to Hub"
+
+  internal_state:
+    - pointer: "Current hub address (20-bit)"
+    - block_count: "Remaining 64-byte blocks"
+    - block_start: "Block start address for wrap reload"
+    - direction: "Read or write mode"
+
+configuration:
+  rdfast:
+    purpose: "Initialize FIFO for fast sequential reads from Hub RAM"
+    parameters:
+      D_bits_31: "No-wait flag (1 = don't wait for prior WRFAST)"
+      D_bits_13_0: "Block size in 64-byte units (0 = 16384 blocks max)"
+      S_bits_19_0: "Block start address in Hub RAM"
+    timing: "2 clocks, or waits for prior WRFAST to finish + 10-17 clocks"
+
+  wrfast:
+    purpose: "Initialize FIFO for fast sequential writes to Hub RAM"
+    parameters:
+      D_bits_31: "No-wait flag (1 = don't wait for prior WRFAST)"
+      D_bits_13_0: "Block size in 64-byte units (0 = 16384 blocks max)"
+      S_bits_19_0: "Block start address in Hub RAM"
+    timing: "2 clocks, or waits for prior WRFAST to finish + 3 clocks"
+
+  fblock:
+    purpose: "Set next block parameters for circular buffer operation"
+    parameters:
+      D: "Block size in 64-byte units"
+      S: "Block start address"
+    usage: "Called before block wrap occurs to set next block parameters"
+
+instructions:
+  setup:
+    - instruction: "RDFAST"
+      description: "Begin fast hub read via FIFO"
+      category: "FIFO Setup"
+
+    - instruction: "WRFAST"
+      description: "Begin fast hub write via FIFO"
+      category: "FIFO Setup"
+
+    - instruction: "FBLOCK"
+      description: "Set next block for FIFO wrap"
+      category: "FIFO Setup"
+
+    - instruction: "GETPTR"
+      description: "Get current FIFO hub pointer"
+      category: "FIFO Status"
+
+  read_operations:
+    - instruction: "RFBYTE"
+      description: "Read zero-extended byte from FIFO"
+      size: 1
+      extension: "zero"
+
+    - instruction: "RFWORD"
+      description: "Read zero-extended word from FIFO"
+      size: 2
+      extension: "zero"
+
+    - instruction: "RFLONG"
+      description: "Read long from FIFO"
+      size: 4
+
+    - instruction: "RFVAR"
+      description: "Read variable-size (1-4 byte) zero-extended value"
+      size: "1-4"
+      extension: "zero"
+
+    - instruction: "RFVARS"
+      description: "Read variable-size (1-4 byte) sign-extended value"
+      size: "1-4"
+      extension: "sign"
+
+  write_operations:
+    - instruction: "WFBYTE"
+      description: "Write byte to FIFO"
+      size: 1
+
+    - instruction: "WFWORD"
+      description: "Write word to FIFO"
+      size: 2
+
+    - instruction: "WFLONG"
+      description: "Write long to FIFO"
+      size: 4
+
+  event_monitoring:
+    - instruction: "POLLFBW"
+      description: "Poll FIFO block wrap event flag"
+      event: "fifo_block_wrap"
+
+    - instruction: "WAITFBW"
+      description: "Wait for FIFO block wrap event"
+      event: "fifo_block_wrap"
+
+    - instruction: "JFBW"
+      description: "Jump if FIFO block wrap flag set"
+      event: "fifo_block_wrap"
+
+    - instruction: "JNFBW"
+      description: "Jump if FIFO block wrap flag clear"
+      event: "fifo_block_wrap"
+
+block_wrap_event:
+  description: |
+    The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO
+    interface exhausts its block count and reloads from FBLOCK parameters.
+
+    This enables circular buffer patterns where:
+    1. RDFAST/WRFAST initializes the first block
+    2. FBLOCK sets up the next block parameters
+    3. When block exhausts, event fires and FBLOCK params are loaded
+    4. Process continues indefinitely for streaming applications
+
+  triggering: "Block count reaches zero"
+  clearing: "Executing POLLFBW, WAITFBW, JFBW, or JNFBW"
+
+programming_patterns:
+  - pattern: "sequential_read"
+    description: "Read sequential data from Hub RAM"
+    code: |
+      ' Read 256 bytes from hub_buffer into COG RAM
+              rdfast  #0, ##hub_buffer     ' Start FIFO read, unlimited blocks
+              rep     @.end, #64           ' Repeat 64 times
+              rflong  temp                 ' Read 4 bytes
+              mov     dest, temp           ' Store in COG RAM
+              add     dest, #1             ' Next COG location
+      .end
+
+  - pattern: "sequential_write"
+    description: "Write sequential data to Hub RAM"
+    code: |
+      ' Write COG array to Hub RAM
+              wrfast  #0, ##hub_dest       ' Start FIFO write
+              rep     @.end, #count
+              mov     temp, source         ' Get COG value
+              wflong  temp                 ' Write to FIFO
+              add     source, #1           ' Next COG location
+      .end
+
+  - pattern: "circular_buffer"
+    description: "Continuous circular buffer reading"
+    code: |
+      ' Set up circular buffer
+              rdfast  ##buf_size, ##buffer_start
+              fblock  ##buf_size, ##buffer_start  ' Set wrap params
+
+      .loop   rflong  data                 ' Read data
+              ' Process data...
+              jmp     #.loop               ' Continue forever
+
+      ' Buffer automatically wraps when exhausted
+
+  - pattern: "double_buffer"
+    description: "Double-buffered streaming"
+    code: |
+      ' Ping-pong between two buffers
+              rdfast  ##buf_size, ##buffer_a
+              fblock  ##buf_size, ##buffer_b  ' Next buffer
+
+      .loop   rflong  data
+              ' Process...
+              pollfbw wc                   ' Check for wrap
+      if_c    fblock  ##buf_size, ##buffer_a  ' Toggle back
+              jmp     #.loop
+
+timing:
+  rdfast: "2 clocks (or wait for prior WRFAST + 10-17 clocks)"
+  wrfast: "2 clocks (or wait for prior WRFAST + 3 clocks)"
+  rfbyte: "2 clocks"
+  rfword: "2 clocks"
+  rflong: "2 clocks"
+  rfvar: "2 clocks"
+  rfvars: "2 clocks"
+  wfbyte: "2 clocks"
+  wfword: "2 clocks"
+  wflong: "2 clocks"
+  fblock: "2 clocks"
+  getptr: "2 clocks"
+
+notes:
+  - "Each COG has independent FIFO - no sharing between COGs"
+  - "FIFO must be in correct mode (read/write) for operations"
+  - "WRFAST must complete before starting new FIFO operation"
+  - "Block size of 0 means maximum (16384 blocks = 1MB)"
+  - "FIFO is also used internally by hub execution mode"
+  - "Variable-length reads (RFVAR/RFVARS) use continuation bit encoding"
+
+limitations:
+  - "Cannot read and write simultaneously"
+  - "Minimum transfer granularity is 64-byte blocks"
+  - "Hub execution mode uses FIFO, limiting availability"
+
+related:
+  - streamer: "Streamer also uses hub data transfers"
+  - hub_memory: "FIFO operates on hub RAM"
+  - events: "Block wrap generates monitorable event"
+
+cross_references:
+  - rdfast_instruction: "language/pasm2/rdfast"
+  - wrfast_instruction: "language/pasm2/wrfast"
+  - streamer_system: "architecture/streamer"
+
+documentation_source: "PASM2 Manual 2022/11/01, Silicon Doc v35"
+last_updated: "2025-12-04"
