@@ -24,10 +24,16 @@
 \definecolor{pasm2-glance-bg}{HTML}{E3F2FD}         % Light blue
 \definecolor{pasm2-glance-border}{HTML}{1976D2}     % Blue border
 
-% Encoding table colors
+% Encoding table colors (legacy - kept for compatibility)
 \definecolor{pasm2-encoding-header}{HTML}{E8E8E8}   % Gray header row
 \definecolor{pasm2-encoding-cond}{HTML}{F5F5F5}     % Condition field
 \definecolor{pasm2-encoding-op}{HTML}{EEEEEE}       % Opcode field
+
+% Encoding table header zone colors (new - for colored column groups)
+\definecolor{pasm2-enc-instruction}{HTML}{E3F2FD}   % Light blue - cols 1-3 (EEEE, Opcode, CZI)
+\definecolor{pasm2-enc-operand}{HTML}{E8F5E9}       % Light green - cols 4-5 (D, S)
+\definecolor{pasm2-enc-flags}{HTML}{FFF3E0}         % Light orange - cols 6-7 (C, Z)
+\definecolor{pasm2-enc-result}{HTML}{F5F5F5}        % Light gray - cols 8-9 (Result, Clks)
 
 % Callout colors
 \definecolor{pasm2-warning-bg}{HTML}{FFF3E0}        % Light orange
@@ -98,20 +104,22 @@
 % 9 columns: EEEE | Opcode | CZI | D | S | C | Z | Result | Clks
 % Fixed widths for encoding fields, flexible for result columns
 %
-% Uses environ package with tabularray's expand key for proper macro expansion
+% NOTE: We use a simple approach - the row macros expand directly inside tblr
+% No environ/expand needed because tblr handles & correctly when entered normally
 \DefTblrTemplate{contfoot-text}{default}{}
 \DefTblrTemplate{conthead-text}{default}{}
 
 % Row macros that expand to tblr row syntax
+% These must be used INSIDE a tblr environment where & is the column separator
 \newcommand{\encodingrow}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
 \newcommand{\encodingrowcont}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
 
-% Environment for encoding tables using environ + tabularray expand key
-% The expand=\BODY tells tabularray to expand \BODY before parsing table structure
-\NewEnviron{encodingtable}{%
+% Environment for encoding tables - simple wrapper around tblr
+% The content must be written directly, not captured and re-expanded
+\newenvironment{encodingtable}{%
   \par\vspace{6pt}%
   \noindent
-  \begin{tblr}[expand=\BODY]{
+  \begin{tblr}{
     width=\linewidth,
     rowsep=2pt,
     colsep=4pt,
@@ -129,7 +137,7 @@
     vlines,
   }
     EEEE & Opcode & CZI & D & S & C & Z & Result & Clks \\
-    \BODY
+}{%
   \end{tblr}%
   \par\vspace{6pt}%
 }
