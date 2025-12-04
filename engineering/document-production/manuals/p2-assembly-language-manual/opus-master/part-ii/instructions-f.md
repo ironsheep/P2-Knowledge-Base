@@ -190,14 +190,7 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 
 ---
 
-**Result:** The I/O pins are set to input direction with output preset according to flag state:
-
-| Instruction | Presets output high when |
-|-------------|--------------------------|
-| FLTC | C = 1 |
-| FLTNC | C = 0 |
-| FLTZ | Z = 1 |
-| FLTNZ | Z = 0 |
+**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets Z to original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
@@ -215,9 +208,16 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 
 **Explanation:**
 
-These instructions set pin(s) to input direction (floating) while pre-setting the output register based on flag state. When the pin is later driven as output, it will immediately be at the desired level.
+These instructions set pin(s) to input direction (floating) while pre-setting the output register based on flag state:
 
-FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
+| Instruction | Presets output high when |
+|-------------|--------------------------|
+| FLTC | C = 1 |
+| FLTNC | C = 0 |
+| FLTZ | Z = 1 |
+| FLTNZ | Z = 0 |
+
+When the pin is later driven as output, it will immediately be at the desired level. FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
 
 If WCZ is specified, the Z flag is set to the original output state of the base pin.
 
