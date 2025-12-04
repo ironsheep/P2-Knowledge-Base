@@ -131,10 +131,11 @@ local function handle_encoding_table(el)
   table.insert(latex, string.format("  column{8}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[8]))
   table.insert(latex, string.format("  column{9}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[9]))
   -- Header row styling with color zones and inner padding
+  -- Add padding to narrow columns (EEEE, CZI) so text doesn't butt against borders
   table.insert(latex, "  row{1}={font=\\bfseries\\small},")
-  table.insert(latex, "  cell{1}{1}={bg=pasm2-enc-instruction, preto={\\hspace{2pt}}, appto={\\hspace{2pt}}},")
+  table.insert(latex, "  cell{1}{1}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")
   table.insert(latex, "  cell{1}{2}={bg=pasm2-enc-instruction},")
-  table.insert(latex, "  cell{1}{3}={bg=pasm2-enc-instruction, preto={\\hspace{2pt}}, appto={\\hspace{2pt}}},")
+  table.insert(latex, "  cell{1}{3}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")
   table.insert(latex, "  cell{1}{4-5}={bg=pasm2-enc-operand},")
   table.insert(latex, "  cell{1}{6-7}={bg=pasm2-enc-flags},")
   table.insert(latex, "  cell{1}{8-9}={bg=pasm2-enc-result},")
@@ -321,22 +322,56 @@ function Table(el)
 
     local total = len1 + len2 + len3
 
-    -- Pure proportional calculation
-    local w1 = (len1 / total) * 0.95
-    local w2 = (len2 / total) * 0.95
-    local w3 = (len3 / total) * 0.95
+    -- Check for "long description" pattern: one column much longer than others
+    -- Example: CORDIC table has col3 = 53 chars, col1 = 17, col2 = 8
+    -- In this case, short columns should get tight widths, long column gets rest
+    local max_len = math.max(len1, len2, len3)
+    local short_threshold = 20  -- Columns under this are "short"
+    local long_threshold = 40   -- Columns over this are "long descriptions"
 
-    -- Apply minimums
-    w1 = math.max(0.08, w1)
-    w2 = math.max(0.08, w2)
-    w3 = math.max(0.08, w3)
+    local w1, w2, w3
 
-    -- Normalize to 0.95 total
-    local sum = w1 + w2 + w3
-    local scale = 0.95 / sum
-    w1 = w1 * scale
-    w2 = w2 * scale
-    w3 = w3 * scale
+    -- If one column is very long (>40) and others are relatively short (<20)
+    -- give the long column maximum space
+    if len3 > long_threshold and len1 < short_threshold and len2 < short_threshold then
+      -- Col 3 is long description, cols 1+2 are short
+      -- Calculate tight widths for short columns based on content
+      w1 = math.max(0.10, len1 * 0.008)  -- ~0.8% per char
+      w2 = math.max(0.08, len2 * 0.008)
+      w3 = 0.95 - w1 - w2
+    elseif len1 > long_threshold and len2 < short_threshold and len3 < short_threshold then
+      -- Col 1 is long description
+      w2 = math.max(0.08, len2 * 0.008)
+      w3 = math.max(0.08, len3 * 0.008)
+      w1 = 0.95 - w2 - w3
+    elseif len2 > long_threshold and len1 < short_threshold and len3 < short_threshold then
+      -- Col 2 is long description
+      w1 = math.max(0.10, len1 * 0.008)
+      w3 = math.max(0.08, len3 * 0.008)
+      w2 = 0.95 - w1 - w3
+    else
+      -- Normal proportional calculation
+      local total = len1 + len2 + len3
+      w1 = (len1 / total) * 0.95
+      w2 = (len2 / total) * 0.95
+      w3 = (len3 / total) * 0.95
+
+      -- Apply minimums - use smaller minimum (0.06) for short columns
+      local min1 = (len1 <= 12) and 0.06 or 0.08
+      local min2 = (len2 <= 12) and 0.06 or 0.08
+      local min3 = (len3 <= 12) and 0.06 or 0.08
+
+      w1 = math.max(min1, w1)
+      w2 = math.max(min2, w2)
+      w3 = math.max(min3, w3)
+
+      -- Normalize to 0.95 total
+      local sum = w1 + w2 + w3
+      local scale = 0.95 / sum
+      w1 = w1 * scale
+      w2 = w2 * scale
+      w3 = w3 * scale
+    end
 
     el.colspecs[1] = {pandoc.AlignLeft, w1}
     el.colspecs[2] = {pandoc.AlignLeft, w2}
