@@ -176,3 +176,4 @@ engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-
 
 # DOD validation local state
 engineering/tools/.dod-validation-history.json
+*.backup-encoding-conversion
