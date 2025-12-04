@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter I.
 
 
 
+::: instrheader
 ## IJZ / IJNZ {#ijz}
-
-Increment and jump if zero / not zero {#ijnz}
-
-[Branch](#branch) - Increment a register and jump based on zero/non-zero result.
+Increment and Jump If Zero {#ijnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **IJZ**  *Dest, {#}Src*
 **IJNZ**  *Dest, {#}Src*
@@ -48,11 +48,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## INCMOD {#incmod}
-
-Increment with modulus
-
-[Math and Logic](#math-and-logic) - Increment a value with automatic wrap-around at a specified modulus.
+Increment Modulus
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 

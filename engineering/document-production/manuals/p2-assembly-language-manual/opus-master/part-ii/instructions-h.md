@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter H.
 
 
 
+::: instrheader
 ## HUBSET {#hubset}
-
-Set hub configuration
-
-[Hub Control](#hub-control) - Configure system clock and hub parameters.
+Set Hub Configuration
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **HUBSET**  *{#}D*
 

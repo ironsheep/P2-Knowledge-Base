@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 
 
 
+::: instrheader
 ## XCONT {#xcont}
-
-Execute continue
-
-[Streamer](#streamer-category) - Buffer new streamer command to continue from current phase.
+Execute Continue
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XCONT**  *{#}Dest, {#}Src*
 
@@ -37,11 +37,11 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 
 
 
+::: instrheader
 ## XINIT {#xinit}
-
-Execute initialize
-
-[Streamer](#streamer-category) - Issue streamer command immediately, zeroing phase.
+Execute Initialize
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XINIT**  *{#}Dest, {#}Src*
 
@@ -83,11 +83,11 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 
 
 
+::: instrheader
 ## XOR {#xor}
-
-Exclusive or
-
-[Math and Logic](#math-and-logic) - Bitwise XOR a value with another.
+Exclusive Or
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
@@ -125,11 +125,11 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 
 
 
+::: instrheader
 ## XORO32 {#xoro32}
-
 Xoroshiro 32
-
-[Math and Logic](#math-and-logic) - Iterate Dest with xoroshiro32+ PRNG algorithm.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **XORO32**  *Dest*
 
@@ -171,11 +171,11 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 
 
 
+::: instrheader
 ## XSTOP {#xstop}
-
-Execute stop
-
-[Streamer](#streamer-category) - Stop streamer immediately.
+Execute Stop
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XSTOP**
 
@@ -208,11 +208,11 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 
 
 
+::: instrheader
 ## XZERO {#xzero}
-
-Execute zero
-
-[Streamer](#streamer-category) - Buffer new streamer command, zeroing phase.
+Execute Zero
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XZERO**  *{#}Dest, {#}Src*
 

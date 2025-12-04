@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter L.
 
 
 
+::: instrheader
 ## LOC {#loc}
-
-Load address
-
-[Hub RAM](#hub-ram) - Load address into PA, PB, PTRA, or PTRB.
+Load Address
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
@@ -27,7 +27,7 @@ Load address
 | EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
 
 
-**Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](instructions-c.md#calld), [CALLPA](instructions-c.md#callpa), [CALLPB](instructions-c.md#callpb)
+**Related:** [PA](special-registers.md#pa), [PB](special-registers.md#pb), [PTRA](special-registers.md#ptra), [PTRB](special-registers.md#ptrb), [CALLD](instructions-c.md#calld), [CALLPA](instructions-c.md#callpa), [CALLPB](instructions-c.md#callpb)
 
 **Explanation:**
 
@@ -41,11 +41,11 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 
 
 
+::: instrheader
 ## LOCKNEW {#locknew}
-
-Allocate new lock
-
-[Hub Control](#hub-control) - Request a new LOCK from the hardware lock pool.
+Allocate New Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKNEW**  *D*  **{WC}**
 
@@ -76,11 +76,11 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 
 
 
+::: instrheader
 ## LOCKREL {#lockrel}
-
-Release lock
-
-[Hub Control](#hub-control) - Release a previously acquired LOCK.
+Release Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKREL**  *{#}D*  **{WC}**
 
@@ -111,11 +111,11 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 
 
 
+::: instrheader
 ## LOCKRET {#lockret}
-
-Return lock to pool
-
-[Hub Control](#hub-control) - Return a LOCK to the pool for reallocation.
+Return Lock To Pool
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKRET**  *{#}D*
 
@@ -145,11 +145,11 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 
 
 
+::: instrheader
 ## LOCKTRY {#locktry}
-
-Try to acquire lock
-
-[Hub Control](#hub-control) - Attempt to acquire a LOCK with atomic test-and-set.
+Try To Acquire Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKTRY**  *{#}D*  **{WC}**
 

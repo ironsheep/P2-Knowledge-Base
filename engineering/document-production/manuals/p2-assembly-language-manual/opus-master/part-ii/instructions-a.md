@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter A.
 
 
 
+::: instrheader
 ## ABS {#abs}
-
-Absolute
-
-[Math and Logic](#math-and-logic) - Get the absolute value of a number.
+Absolute Value
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
@@ -42,11 +42,11 @@ Literal Src values are zero-extended, so ABS is best used with register Src (or 
 
 
 
+::: instrheader
 ## ADD {#add}
-
-Add
-
-[Math and Logic](#math-and-logic) - Add two unsigned values.
+Add Unsigned
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -85,11 +85,11 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 
 
 
+::: instrheader
 ## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
-
-Add and set counter event trigger (1, 2, or 3)
-
-[Event](#event) - Set CTn counter event trigger time.
+Add and Set Counter Event Trigger
+Category: [Event](instruction-categories.md#event)
+:::
 
 **ADDCT1**  *Dest, {#}Src*
 **ADDCT2**  *Dest, {#}Src*
@@ -120,11 +120,11 @@ The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowi
 
 
 
+::: instrheader
 ## ADDPIX {#addpix}
-
-Add pixels
-
-[Pixel Mixer](#pixel-mixer) - Add RGB colors with full saturation.
+Add Pixels
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **ADDPIX**  *Dest, {#}Src*
 
@@ -141,7 +141,7 @@ Add pixels
 | EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [SUBPIX](#subpix), [MULPIX](instructions-m.md#mulpix), [BLNPIX](instructions-b.md#blnpix)
+**Related:** [MULPIX](instructions-m.md#mulpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](instructions-m.md#mixpix)
 
 **Explanation:**
 
@@ -153,11 +153,11 @@ The instruction processes all three color channels (and alpha if present) in par
 
 
 
+::: instrheader
 ## ADDS {#adds}
-
-Add signed
-
-[Math and Logic](#math-and-logic) - Add two signed values.
+Add Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -191,11 +191,11 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 
 
 
+::: instrheader
 ## ADDSX {#addsx}
-
-Add signed, extended
-
-[Math and Logic](#math-and-logic) - Add two signed extended values.
+Add Signed Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -227,11 +227,11 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 
 
 
+::: instrheader
 ## ADDX {#addx}
-
-Add extended
-
-[Math and Logic](#math-and-logic) - Add two unsigned extended values.
+Add Unsigned Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -263,11 +263,11 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 
 
 
+::: instrheader
 ## AKPIN {#akpin}
-
-Acknowledge pin
-
-[Smart Pin](#smart-pin) - Acknowledge smart pin(s).
+Acknowledge Smart Pin
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **AKPIN**  *{#}Src*
 
@@ -299,11 +299,11 @@ The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the 
 
 
 
+::: instrheader
 ## ALLOWI {#allowi}
-
-Allow interrupts
-
-[Interrupt](#interrupt) - Allow interrupts.
+Allow Interrupts
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **ALLOWI**
 
@@ -327,11 +327,11 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 
 
 
+::: instrheader
 ## ALTB {#altb}
-
-Alter bit
-
-[Register Indirection](#register-indirection) - Alter subsequent BITxxx instruction.
+Alter Bit
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTB**  *Dest, {#}Src*
 **ALTB**  *Dest*
@@ -374,11 +374,11 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 
 
 
+::: instrheader
 ## ALTD {#altd}
-
-Alter destination
-
-[Register Indirection](#register-indirection) - Alter D field of next instruction.
+Alter Destination
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTD**  *Dest, {#}Src*
 **ALTD**  *Dest*
@@ -415,11 +415,11 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 
 
 
+::: instrheader
 ## ALTGB {#altgb}
-
-Alter get byte
-
-[Register Indirection](#register-indirection) - Alter subsequent GETBYTE / ROLBYTE instruction.
+Alter Get Byte
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGB**  *Dest, {#}Src*
 **ALTGB**  *Dest*
@@ -460,11 +460,11 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTGN {#altgn}
-
-Alter get nibble
-
-[Register Indirection](#register-indirection) - Alter subsequent GETNIB / ROLNIB instruction.
+Alter Get Nibble
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGN**  *Dest, {#}Src*
 **ALTGN**  *Dest*
@@ -505,11 +505,11 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTGW {#altgw}
-
-Alter get word
-
-[Register Indirection](#register-indirection) - Alter subsequent GETWORD / ROLWORD instruction.
+Alter Get Word
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGW**  *Dest, {#}Src*
 **ALTGW**  *Dest*
@@ -550,11 +550,11 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTI {#alti}
-
-Alter instruction
-
-[Register Indirection](#register-indirection) - Substitute next instruction's field values from template, per configuration.
+Alter Instruction
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTI**  *Dest, {#}Src*
 **ALTI**  *Dest*
@@ -589,11 +589,11 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 
 
 
+::: instrheader
 ## ALTR {#altr}
-
-Alter result
-
-[Register Indirection](#register-indirection) - Alter Result register address of next instruction.
+Alter Result
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTR**  *Dest, {#}Src*
 **ALTR**  *Dest*
@@ -632,11 +632,11 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 
 
 
+::: instrheader
 ## ALTS {#alts}
-
-Alter source
-
-[Register Indirection](#register-indirection) - Alter S field of next instruction.
+Alter Source
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTS**  *Dest, {#}Src*
 **ALTS**  *Dest*
@@ -673,11 +673,11 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 
 
 
+::: instrheader
 ## ALTSB {#altsb}
-
-Alter set byte
-
-[Register Indirection](#register-indirection) - Alter subsequent SETBYTE instruction.
+Alter Set Byte
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSB**  *Dest, {#}Src*
 **ALTSB**  *Dest*
@@ -716,11 +716,11 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 
 
 
+::: instrheader
 ## ALTSN {#altsn}
-
-Alter set nibble
-
-[Register Indirection](#register-indirection) - Alter subsequent SETNIB instruction.
+Alter Set Nibble
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSN**  *Dest, {#}Src*
 **ALTSN**  *Dest*
@@ -761,11 +761,11 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 
 
 
+::: instrheader
 ## ALTSW {#altsw}
-
-Alter set word
-
-[Register Indirection](#register-indirection) - Alter subsequent SETWORD instruction.
+Alter Set Word
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSW**  *Dest, {#}Src*
 **ALTSW**  *Dest*
@@ -806,11 +806,11 @@ The instruction following ALTSW is shielded from interrupt. ALTSW alters the nex
 
 
 
+::: instrheader
 ## AND {#and}
-
-Bitwise AND
-
-[Math and Logic](#math-and-logic) - Bitwise AND a value with another, or with the NOT of another.
+Bitwise And
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -840,11 +840,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## ANDN {#andn}
-
-And not
-
-[Math and Logic](#math-and-logic) - Bitwise AND a value with the NOT of another.
+And Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -876,11 +876,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## ASMCLK {#asmclk}
-
-Set clock mode (pseudo-instruction)
-
-[System Control](#system-control) - Set clock mode from CON symbols in PASM-only programs.
+Set Clock Mode
+Category: [System Control](instruction-categories.md#system-control)
+:::
 
 **ASMCLK**
 
@@ -911,7 +911,7 @@ WAITX   ##20_000_000/100     ' Wait ~10ms for clock stabilization
 HUBSET  ##clkmode_           ' Switch to target clock mode
 ```
 
-**Related:** [HUBSET](instructions-h.md#hubset), [CLKSET](instructions-c.md#clkset), [WAITX](instructions-w.md#waitx)
+**Related:** [HUBSET](instructions-h.md#hubset), [WAITX](instructions-w.md#waitx)
 
 **Explanation:**
 
@@ -951,11 +951,11 @@ DAT
 
 
 
+::: instrheader
 ## AUGD {#augd}
-
-Augment destination
-
-[Miscellaneous](#miscellaneous) - Augment next literal Dest to 32-bits.
+Augment Destination
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **AUGD**  *#Dest*
 
@@ -985,11 +985,11 @@ Though AUGD may be manually entered wherever needed, the Parallax P2 compiler su
 
 
 
+::: instrheader
 ## AUGS {#augs}
-
-Augment source
-
-[Miscellaneous](#miscellaneous) - Augment next literal Src to 32-bits.
+Augment Source
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **AUGS**  *#Src*
 

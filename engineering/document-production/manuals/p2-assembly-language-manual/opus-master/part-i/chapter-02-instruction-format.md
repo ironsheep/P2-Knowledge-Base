@@ -373,7 +373,27 @@ Augmentation is needed when:
 6. **Read Related** instructions for alternatives and family members
 7. **Study Explanation** for complete behavioral description
 
-### 2.8.2 Example: Understanding ADD
+### 2.8.2 Visual Anchors: Color Bars
+
+Each entry in Part II has a colored bar on the left edge of its header block. These color bars serve as visual anchors, making it easy to locate entry boundaries when scanning through pages.
+
+The colors indicate entry type:
+
+| Color | Entry Type | Description |
+|-------|------------|-------------|
+| **Red** | Instruction | PASM2 machine instructions (the majority of entries) |
+| **Amber** | Directive | Assembler directives like ORG, BYTE, LONG |
+| **Violet** | Constant | Pre-defined constants like smart pin mode values |
+
+The color bar spans the three-line identity block at the top of each entry:
+
+1. **Mnemonic** --- The instruction, directive, or constant name
+2. **Expansion** --- What the mnemonic stands for (e.g., "Add Signed, Extended")
+3. **Category** --- The functional category with a brief description
+
+When flipping through Part II, these color bars help you quickly identify entry boundaries and distinguish between instructions, directives, and constants.
+
+### 2.8.3 Example: Understanding ADD
 
 Consider the ADD instruction entry:
 
@@ -404,7 +424,7 @@ From this entry:
 - **C Flag:** Set if addition overflows (unsigned carry)
 - **Z Flag:** Set if result is zero
 
-### 2.8.3 Using Categories for Discovery
+### 2.8.4 Using Categories for Discovery
 
 Instructions are grouped by category in Appendix B. When looking for "an instruction that does X," consult the categorical index:
 
@@ -413,7 +433,7 @@ Instructions are grouped by category in Appendix B. When looking for "an instruc
 - **Branch/Jump Instructions:** JMP, CALL, DJNZ, etc.
 - **Hub Memory Instructions:** RDLONG, WRLONG, etc.
 
-### 2.8.4 Using Related Instructions
+### 2.8.5 Using Related Instructions
 
 The Related line shows instructions in the same family or with similar purpose:
 

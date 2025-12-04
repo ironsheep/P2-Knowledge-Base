@@ -189,11 +189,11 @@ The P2 includes a hardware FIFO (First In, First Out) buffer that provides the h
 
 **FIFO Architecture:**
 
-Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO holds 16 longs (64 bytes) of data, providing substantial buffering to smooth out hub access timing. When reading, the FIFO stays filled by automatically fetching ahead; when writing, the FIFO drains to hub memory during available hub windows.
+Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO contains (cogs+11) stages—with all 8 COGs active, this provides 19 stages of buffering. When in read mode, the FIFO loads continuously whenever fewer than (cogs+7) stages are filled, after which up to 5 more longs may stream in, potentially filling all stages. These metrics ensure the FIFO never underflows under any reading scenario.
 
 **Setting Up the Read FIFO:**
 
-RDFAST configures the FIFO for reading from hub memory. The instruction takes two parameters: a block count (or 0 for continuous operation) and the starting hub address:
+RDFAST configures the FIFO for reading from hub memory. The D operand provides a block count (number of 64-byte blocks before wrapping), and the S operand provides the starting hub address:
 
 ```pasm
         rdfast  #0, ptr                 ' Start continuous read FIFO
@@ -204,6 +204,17 @@ loop
 ```
 
 The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
+
+**Wait Mode vs. No-Wait Mode:**
+
+RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
+
+| D[31] | Behavior |
+|-------|----------|
+| 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
+| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
+
+The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
 
 **Setting Up the Write FIFO:**
 
@@ -219,15 +230,43 @@ loop
 
 The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
 
+**Important:** If a COG has been writing to hub via WRFAST and wants to immediately COGSTOP itself, execute `WAITX #20` first to allow time for any lingering FIFO data to be written to hub memory.
+
 **Circular Buffer Mode:**
 
-The FIFO supports circular buffer operation for continuous streaming. When configured with a block count, the FIFO wraps back to the starting address after transferring the specified number of longs:
+The FIFO supports circular buffer operation for continuous streaming. When configured with a non-zero block count, the FIFO wraps back to the starting address after transferring the specified number of 64-byte blocks:
 
 ```pasm
-        rdfast  #256, audio_buffer      ' Read 256 longs, then wrap to start
+        rdfast  #16, audio_buffer       ' Read 16 blocks (1KB), then wrap
 ```
 
-This creates a 1KB circular buffer. The program can continuously read from the FIFO while another process (perhaps on a different COG) refills the buffer behind the read pointer. Circular buffers enable double-buffering and continuous streaming without explicit pointer management.
+For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count when you don't want wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
+
+**Dynamic Buffer Management with FBLOCK:**
+
+The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. It sets a new start address and block count that take effect when the current blocks are fully read or written:
+
+```pasm
+        rdfast  #16, buffer_a           ' Start reading from buffer A
+        ' ... reading proceeds ...
+        fblock  #16, buffer_b           ' Queue buffer B for when A completes
+        ' ... FIFO seamlessly transitions to buffer B on wrap
+```
+
+FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity enables dynamic, seamless streaming between hub RAM and pins/DACs—essential for continuous audio/video output where buffer switches must be glitch-free.
+
+**Variable-Length Data: RFVAR and RFVARS:**
+
+For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. The encoding uses the MSB of each byte to indicate whether more bytes follow:
+
+| First Byte | Additional Bytes | RFVAR Returns | RFVARS Returns |
+|------------|------------------|---------------|----------------|
+| %0xxxxxxx | none | 7-bit value, zero-extended | 7-bit value, sign-extended |
+| %1xxxxxxx | 1 more (%0xxxxxxx) | 14-bit value, zero-extended | 14-bit value, sign-extended |
+| %1xxxxxxx | 2 more | 21-bit value, zero-extended | 21-bit value, sign-extended |
+| %1xxxxxxx | 3 more | 28-bit value, zero-extended | 28-bit value, sign-extended |
+
+This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values.
 
 **FIFO Events:**
 
@@ -236,6 +275,17 @@ The FIFO generates events that programs can monitor for buffer management:
 - **EVENT_FBW** (FIFO Block Wrap) signals when the FIFO wraps around in circular buffer mode. Programs use this event to know when to refill the next section of a circular buffer or to synchronize with buffer boundaries.
 
 Programs can wait for this event using WAITSE or poll it using POLLSE after configuring a selectable event source. This enables efficient ping-pong buffering where one COG fills buffers while another consumes them.
+
+**Hub Execution Restriction:**
+
+The FIFO cannot be used while the COG is executing from hub RAM. During hub execution mode, the FIFO hardware is dedicated to spooling instructions, so these instructions cannot be used:
+
+- RDFAST / WRFAST / FBLOCK
+- RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS
+- WFBYTE / WFWORD / WFLONG
+- XINIT / XZERO / XCONT (when streamer mode engages the FIFO)
+
+To use FIFO operations, ensure your code executes from COG or LUT RAM.
 
 **FIFO and the Streamer:**
 

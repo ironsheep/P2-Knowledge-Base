@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter T.
 
 
 
+::: instrheader
 ## TEST {#test}
-
 Test
-
-[Math and Logic](#math-and-logic) - Test the parity and zero state of a register value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -47,11 +47,11 @@ TEST is non-destructive—it does not modify Dest.
 
 
 
+::: instrheader
 ## TESTB {#testb}
-
-Test bit
-
-[Math and Logic](#math-and-logic) - Test a single bit in a register and write the result to C or Z.
+Test Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
 **TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -93,11 +93,11 @@ TESTB is useful for examining individual bits without modifying the register val
 
 
 
+::: instrheader
 ## TESTBN {#testbn}
-
-Test bit negated
-
-[Math and Logic](#math-and-logic) - Test a single bit in a register, invert the result, and write to C or Z.
+Test Bit Negated
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
 **TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -134,11 +134,11 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 
 
 
+::: instrheader
 ## TESTN {#testn}
-
-Test not
-
-[Math and Logic](#math-and-logic) - Test the parity and zero state of a register ANDed with an inverted value.
+Test Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -170,11 +170,11 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 
 
 
+::: instrheader
 ## TESTP / TESTPN {#testp}
-
-Test pin / Test pin negated {#testpn}
-
-[Pin](#pin) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
+Test Pin / Test Pin Negated {#testpn}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **TESTP**  *{#}Dest*  **WC/WZ**
 **TESTP**  *{#}Dest*  **ANDC/ANDZ**
@@ -227,11 +227,11 @@ Both instructions read the actual pin state from the IN register, not the output
 
 
 
+::: instrheader
 ## TJF / TJNF {#tjf}
-
-Test and jump if full / not full {#tjnf}
-
-[Branch](#branch) - Test a register value and jump based on full ($FFFF_FFFF) state.
+Test And Jump If Full / Not Full {#tjnf}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJF**  *Dest, {#}Src*
 **TJNF**  *Dest, {#}Src*
@@ -267,11 +267,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## TJS / TJNS {#tjs}
-
-Test and jump if signed / not signed {#tjns}
-
-[Branch](#branch) - Test a register value and jump based on sign bit state.
+Test And Jump If Signed / Not Signed {#tjns}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJS**  *Dest, {#}Src*
 **TJNS**  *Dest, {#}Src*
@@ -307,11 +307,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## TJZ / TJNZ {#tjz}
-
-Test and jump if zero / not zero {#tjnz}
-
-[Branch](#branch) - Test a register value and jump based on zero/non-zero result.
+Test And Jump If Zero / Not Zero {#tjnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJZ**  *Dest, {#}Src*
 **TJNZ**  *Dest, {#}Src*
@@ -356,11 +356,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## TJV {#tjv}
-
-Test and jump if overflow
-
-[Branch](#branch) - Test a register value against the C flag and jump if overflow occurred.
+Test And Jump If Overflow
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJV**  *Dest, {#}Src*
 
@@ -395,11 +395,11 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 
 
+::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
-
-Trigger interrupt (1, 2, or 3) {#trgint2} {#trgint3}
-
-[Interrupt](#interrupt) - Software-trigger interrupt handler.
+Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **TRGINT1**
 **TRGINT2**

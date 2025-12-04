@@ -4,7 +4,11 @@ PASM2 provides a set of predefined constants that the assembler substitutes at c
 
 ## Boolean Constants
 
-### TRUE
+::: constheader
+### TRUE {#true}
+Logical True Constant
+Category: [Boolean Constants](instruction-categories.md#boolean-constants)
+:::
 
 Logical true constant with all bits set.
 
@@ -36,7 +40,11 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 
 
 
-### FALSE
+::: constheader
+### FALSE {#false}
+Logical False Constant
+Category: [Boolean Constants](instruction-categories.md#boolean-constants)
+:::
 
 Logical false constant with all bits cleared.
 
@@ -71,7 +79,11 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 
 ## Numeric Limit Constants
 
-### NEGX
+::: constheader
+### NEGX {#negx}
+Maximum Negative Integer
+Category: [Numeric Limit Constants](instruction-categories.md#numeric-limit-constants)
+:::
 
 Most negative value in 32-bit signed integer representation.
 
@@ -107,7 +119,11 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 
 
 
-### POSX
+::: constheader
+### POSX {#posx}
+Maximum Positive Integer
+Category: [Numeric Limit Constants](instruction-categories.md#numeric-limit-constants)
+:::
 
 Most positive value in 32-bit signed integer representation.
 
@@ -145,7 +161,11 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 
 ## Mathematical Constants
 
-### PI
+::: constheader
+### PI {#pi}
+Mathematical Pi Constant
+Category: [Mathematical Constants](instruction-categories.md#mathematical-constants)
+:::
 
 IEEE 754 single-precision floating-point representation of π.
 
@@ -186,7 +206,11 @@ None (unique mathematical constant)
 
 ## Execution Mode Constants
 
-### COGEXEC
+::: constheader
+### COGEXEC {#cogexec}
+Cog Execution Mode
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
 Execution mode constant for loading code from hub RAM to cog RAM.
 
@@ -228,7 +252,11 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 
 
-### HUBEXEC
+::: constheader
+### HUBEXEC {#hubexec}
+Hub Execution Mode
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
 Execution mode constant for executing code directly from hub RAM.
 
@@ -275,17 +303,37 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 The execution mode constants include additional variants for automatic cog selection:
 
-### COGEXEC_NEW
-Value: Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+::: constheader
+### COGEXEC_NEW {#cogexec_new}
+Auto-Select Cog For Cog Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
-### COGEXEC_NEW_PAIR
-Value: Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
 
-### HUBEXEC_NEW
-Value: Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+::: constheader
+### COGEXEC_NEW_PAIR {#cogexec_new_pair}
+Auto-Select Cog Pair For Cog Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
-### HUBEXEC_NEW_PAIR
-Value: Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
+Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+
+::: constheader
+### HUBEXEC_NEW {#hubexec_new}
+Auto-Select Cog For Hub Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
+
+Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+
+::: constheader
+### HUBEXEC_NEW_PAIR {#hubexec_new_pair}
+Auto-Select Cog Pair For Hub Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
+
+Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
 
 These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
 

@@ -380,45 +380,122 @@ The P2 includes a hardware bytecode execution engine called XBYTE that accelerat
 
 XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
 
-The execution cycle proceeds through eight clock phases: fetch bytecode from FIFO, write bytecode to the PA register, read routine address from LUT, begin EXECF dispatch, write FIFO pointer to PB register, flush pipeline, reload pipeline, and execute the first instruction of the bytecode routine. This overlapped operation achieves the 6-cycle dispatch overhead.
+XBYTE is like a phantom instruction that executes on a hardware stack return (RET/\_RET\_) to address $1FF. Such a return does not pop the stack, so each additional RET/\_RET\_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
 
-When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves.
+The execution cycle proceeds through eight clock phases:
 
-### 5.7.2 Configuration Options
+| Clock | Phase | Activity | Description |
+|-------|-------|----------|-------------|
+| 1 | go | RFBYTE bytecode, SKIPF #0 | Fetch bytecode from FIFO, cancel any prior skip pattern |
+| 2 | get | MOV PA,bytecode, RDLUT | Write bytecode to PA ($1F6), start LUT read |
+| 3 | go | RDLUT (data → D) | Complete LUT read, get routine address and skip pattern |
+| 4 | get | EXECF D (begin) | Start EXECF dispatch |
+| 5 | go | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB ($1F7), optionally set C/Z, branch |
+| 6 | get | flush pipeline | Pipeline flush for branch |
+| 7 | go | reload pipeline | Pipeline reload |
+| 8 | get | first instruction | First instruction of bytecode routine executes |
 
-XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements:
+When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a \_RET\_ prefix, making the total XBYTE loop take only 8 clocks.
 
-| Mode | Bytecodes | LUT Usage | Index Calculation |
-|------|-----------|-----------|-------------------|
-| Full | 256 | 256 longs | bytecode[7:0] |
-| Half | 128 | 128 longs | bytecode[6:0] |
-| Quarter | 64 | 64 longs | bytecode[5:0] |
-| Eighth | 32 | 32 longs | bytecode[4:0] |
-| Sixteenth | 16 | 16 longs | bytecode[3:0] |
+### 5.7.2 LUT Table Format
 
-The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code. A compressed mode also exists that provides 16 primary bytecodes with full dispatch plus 240 extended bytecodes using a secondary lookup, balancing bytecode variety against LUT consumption.
+The bytecode translation table in LUT memory consists of long values that EXECF uses for dispatch. Each 32-bit LUT entry contains two fields:
 
-### 5.7.3 Starting XBYTE
+- **Bits [9:0]**: Jump address in COG/LUT RAM ($000-$3FF)
+- **Bits [31:10]**: SKIPF pattern (22 bits) applied after the jump
 
-XBYTE mode begins through a specific instruction sequence. The SETQ instruction configures the bytecode mode and LUT base address. A RET instruction with $1FF on the hardware stack triggers XBYTE activation:
+When XBYTE dispatches to a bytecode routine, EXECF simultaneously jumps to the routine address and applies the skip pattern. This allows compact bytecode routines where common instruction sequences are shared and skip patterns select which instructions execute.
+
+### 5.7.3 Configuration Options
+
+XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements. The SETQ/SETQ2 D value controls the mode:
+
+| Bits | SETQ D Pattern | LUT Base | Index Calculation | Bytecodes |
+|------|----------------|----------|-------------------|-----------|
+| 8 | %A0000000F | %A00000000 | I = bytecode[7:0] | 256 |
+| 7 | %AAxx0010F | %AA0000000 | I = bytecode[6:0] | 128 |
+| 7 | %AAxx0011F | %AA0000000 | I = bytecode[7:1] | 128 |
+| 6 | %AAAx1010F | %AAA000000 | I = bytecode[5:0] | 64 |
+| 6 | %AAAx1011F | %AAA000000 | I = bytecode[7:2] | 64 |
+| 5 | %AAAAx100F | %AAAA00000 | I = bytecode[4:0] | 32 |
+| 5 | %AAAAx101F | %AAAA00000 | I = bytecode[7:3] | 32 |
+| 4 | %AAAAA110F | %AAAAA0000 | I = bytecode[3:0] | 16 |
+| 4 | %AAAAA111F | %AAAAA0000 | I = bytecode[7:4] | 16 |
+
+The A bits specify the LUT base address where the dispatch table begins. The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code.
+
+A compressed mode (%ABBBB00xF where BBBB > 0) provides efficient handling of bytecode families:
+
+- If bytecode[7:4] < BBBB: Use full bytecode as index (individual handlers)
+- If bytecode[7:4] >= BBBB: Use bytecode[7:4] - BBBB as index (shared handlers)
+
+This allows 16 primary bytecodes with full dispatch plus up to 240 extended bytecodes using shared handlers, balancing bytecode variety against LUT consumption. When bytecodes share a handler, the full bytecode value in PA differentiates behavior within the routine.
+
+### 5.7.4 Flag Control
+
+The F bit (bit 0) of the SETQ/SETQ2 D value controls whether XBYTE writes the bytecode's index bits to the C and Z flags:
+
+| F Bit | Behavior |
+|-------|----------|
+| 0 | Do not affect flags on XBYTE dispatch |
+| 1 | Write bytecode index bit 1 to C, bit 0 to Z |
+
+This flag option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families. For example, four related bytecodes can share a single routine that uses conditional execution based on C and Z to differentiate behavior—useful for cases where a SKIPF pattern alone would be insufficient.
+
+### 5.7.5 Starting XBYTE
+
+XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute \_RET\_ SETQ to configure the mode and trigger XBYTE:
 
 ```pasm
-        call    #xbyte_start            ' Push $1FF to stack
-        ' ... XBYTE runs until stopped ...
+                                        ' Setup before starting XBYTE:
+        setq2   #256-1                  ' Load 256 longs into LUT
+        rdlong  $100, #bytetable        ' Bytecode table at LUT $100
 
-xbyte_start
-_RET_   setq    #%00000001              ' Configure 256 bytecodes, set flags
+        rdfast  #0, #bytecodes          ' Init FIFO at bytecode stream
+
+        push    #$1FF                   ' Push $1FF for XBYTE returns
+_RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
 ```
 
-The configuration value in SETQ specifies the LUT base address, bytecode count, and whether bytecode bits should set the C and Z flags. The flags option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families.
+The \_RET\_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or \_RET\_, returning to $1FF to fetch the next bytecode.
 
-### 5.7.4 XBYTE Applications
+To alter the XBYTE mode for all subsequent bytecodes, execute another \_RET\_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use \_RET\_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
+
+### 5.7.6 Bytecode Routine Requirements
+
+Bytecode routines must follow these constraints:
+
+- **Location**: Must reside in COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
+- **Exit**: Must end with RET or \_RET\_ to return control to XBYTE
+- **Stack**: Hardware stack must not overflow (8 levels maximum)
+
+The PA register ($1F6) contains the current bytecode value, available as an immediate operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode using RFBYTE, RFWORD, or RFLONG.
+
+For maximum performance, use the \_RET\_ prefix on the final instruction:
+
+```pasm
+toggle_pin0
+_RET_   drvnot  #0                      ' Toggle pin 0, return to XBYTE (2 clocks)
+```
+
+This executes in just 2 clocks, making the complete XBYTE cycle only 8 clocks total.
+
+### 5.7.7 XBYTE Applications
 
 XBYTE enables efficient implementation of virtual machines and interpreters. Java bytecode interpreters, Forth threaded code systems, BASIC interpreters, and custom scripting languages all benefit from the reduced dispatch overhead. At 160 MHz, XBYTE can dispatch over 26 million bytecodes per second (considering only dispatch overhead), making interpreted languages practical for real-time applications.
 
-Bytecode routines reside in COG or LUT RAM and must end with RET or _RET_ to return control to the XBYTE engine. The PA register ($1F6) contains the current bytecode value, available as an operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode.
+| Dispatch Method | Overhead | Relative Speed |
+|-----------------|----------|----------------|
+| Software dispatch | 20-40 clocks | 1× (baseline) |
+| XBYTE dispatch | 6 clocks | 3-7× faster |
 
-Complete XBYTE programming details, including LUT table construction, skip pattern usage, and advanced dispatch techniques, appear in specialized virtual machine documentation.
+XBYTE is particularly effective for:
+
+- **Virtual machines**: Java, Python, or custom bytecode interpreters
+- **Threaded interpreters**: Forth direct/indirect threaded code
+- **Command processors**: Parsing and executing token streams
+- **Compression**: Executing compressed instruction sequences
+- **Protocol handling**: Processing token-based communication protocols
 
 
 ```{=latex}

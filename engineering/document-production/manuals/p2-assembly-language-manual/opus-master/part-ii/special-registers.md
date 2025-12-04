@@ -6,7 +6,7 @@ The P2 provides a set of special-purpose registers that enable critical system f
 
 The P2's special register architecture provides a balance between functionality and flexibility. Each cog has its own independent copy of all special registers, allowing parallel operation without interference. Changes to these registers take effect immediately, enabling precise control over timing-critical operations.
 
-### Memory Map ($1F0-$1FF)
+### Memory Map ($1F0-$1FF) {#special-registers-map}
 
 The top 16 locations of cog RAM are reserved for special registers:
 
@@ -37,9 +37,9 @@ The top 16 locations of cog RAM are reserved for special registers:
 
 ## Dual-Purpose Registers
 
-### IJMP3 — Address $1F0
+### IJMP3 {#ijmp3}
 
-Interrupt 3 call address. Stores the address where execution jumps when interrupt 3 is triggered.
+Address $1F0. Interrupt 3 call address. Stores the address where execution jumps when interrupt 3 is triggered.
 
 **Access**: Read/Write
 
@@ -51,13 +51,13 @@ Interrupt 3 call address. Stores the address where execution jumps when interrup
         setint3 #event_ct1              ' Enable INT3 for CT1 event
 ```
 
-**Related**: [IRET3](#iret3--address-1f1), SETINT3, RETI3
+**Related**: [IRET3](#iret3), SETINT3, RETI3
 
 
 
-### IRET3 — Address $1F1
+### IRET3 {#iret3}
 
-Interrupt 3 return address. Stores the return address when interrupt 3 is triggered.
+Address $1F1. Interrupt 3 return address. Stores the return address when interrupt 3 is triggered.
 
 **Access**: Read/Write
 
@@ -70,13 +70,13 @@ int3_handler
         reti3                           ' Return to saved address in IRET3
 ```
 
-**Related**: [IJMP3](#ijmp3--address-1f0), SETINT3, RETI3
+**Related**: [IJMP3](#ijmp3), SETINT3, RETI3
 
 
 
-### IJMP2 — Address $1F2
+### IJMP2 {#ijmp2}
 
-Interrupt 2 call address. Stores the address where execution jumps when interrupt 2 is triggered.
+Address $1F2. Interrupt 2 call address. Stores the address where execution jumps when interrupt 2 is triggered.
 
 **Access**: Read/Write
 
@@ -88,13 +88,13 @@ Interrupt 2 call address. Stores the address where execution jumps when interrup
         setint2 #event_ct2              ' Enable INT2 for CT2 event
 ```
 
-**Related**: [IRET2](#iret2--address-1f3), SETINT2, RETI2
+**Related**: [IRET2](#iret2), SETINT2, RETI2
 
 
 
-### IRET2 — Address $1F3
+### IRET2 {#iret2}
 
-Interrupt 2 return address. Stores the return address when interrupt 2 is triggered.
+Address $1F3. Interrupt 2 return address. Stores the return address when interrupt 2 is triggered.
 
 **Access**: Read/Write
 
@@ -107,13 +107,13 @@ int2_handler
         reti2                           ' Return to saved address in IRET2
 ```
 
-**Related**: [IJMP2](#ijmp2--address-1f2), SETINT2, RETI2
+**Related**: [IJMP2](#ijmp2), SETINT2, RETI2
 
 
 
-### IJMP1 — Address $1F4
+### IJMP1 {#ijmp1}
 
-Interrupt 1 call address. Stores the address where execution jumps when interrupt 1 is triggered.
+Address $1F4. Interrupt 1 call address. Stores the address where execution jumps when interrupt 1 is triggered.
 
 **Access**: Read/Write
 
@@ -125,13 +125,13 @@ Interrupt 1 call address. Stores the address where execution jumps when interrup
         setint1 #event_ct3              ' Enable INT1 for CT3 event
 ```
 
-**Related**: [IRET1](#iret1--address-1f5), SETINT1, RETI1
+**Related**: [IRET1](#iret1), SETINT1, RETI1
 
 
 
-### IRET1 — Address $1F5
+### IRET1 {#iret1}
 
-Interrupt 1 return address. Stores the return address when interrupt 1 is triggered.
+Address $1F5. Interrupt 1 return address. Stores the return address when interrupt 1 is triggered.
 
 **Access**: Read/Write
 
@@ -144,13 +144,13 @@ int1_handler
         reti1                           ' Return to saved address in IRET1
 ```
 
-**Related**: [IJMP1](#ijmp1--address-1f4), SETINT1, RETI1
+**Related**: [IJMP1](#ijmp1), SETINT1, RETI1
 
 
 
-### PA — Address $1F6
+### PA {#pa}
 
-Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
+Address $1F6. Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
 
 **Access**: Read/Write
 
@@ -172,13 +172,13 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
         mov     PA, #42                 ' Regular register usage
 ```
 
-**Related**: [PB](#pb--address-1f7), CALLD, CALLPA, LOC
+**Related**: [PB](#pb), CALLD, CALLPA, LOC
 
 
 
-### PB — Address $1F7
+### PB {#pb}
 
-Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
+Address $1F7. Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
 
 **Access**: Read/Write
 
@@ -200,15 +200,15 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
         mov     PB, ##hub_addr          ' Regular register usage
 ```
 
-**Related**: [PA](#pa--address-1f6), CALLD, CALLPB, LOC
+**Related**: [PA](#pa), CALLD, CALLPB, LOC
 
 
 
 ## Fixed Special Registers
 
-### PTRA — Address $1F8
+### PTRA {#ptra}
 
-Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
@@ -232,13 +232,13 @@ Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic
         rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
 ```
 
-**Related**: [PTRB](#ptrb--address-1f9), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
+**Related**: [PTRB](#ptrb), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
 
 
 
-### PTRB — Address $1F9
+### PTRB {#ptrb}
 
-Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
@@ -261,13 +261,13 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
 ```
 
-**Related**: [PTRA](#ptra--address-1f8), RDLONG, WRLONG, COGINIT
+**Related**: [PTRA](#ptra), RDLONG, WRLONG, COGINIT
 
 
 
-### DIRA — Address $1FA
+### DIRA {#dira}
 
-Direction register A for pins 0-31. Controls whether each pin is an input or output.
+Address $1FA. Direction register A for pins 0-31. Controls whether each pin is an input or output.
 
 **Access**: Read/Write
 
@@ -288,13 +288,13 @@ Direction register A for pins 0-31. Controls whether each pin is an input or out
         mov     DIRA, new_directions    ' Change all 32 directions
 ```
 
-**Related**: [DIRB](#dirb--address-1fb), [OUTA](#outa--address-1fc), [INA](#ina--address-1fe), DIRC, DIRH, DIRL
+**Related**: [DIRB](#dirb), [OUTA](#outa), [INA](#ina), DIRC, DIRH, DIRL
 
 
 
-### DIRB — Address $1FB
+### DIRB {#dirb}
 
-Direction register B for pins 32-63. Controls whether each pin is an input or output.
+Address $1FB. Direction register B for pins 32-63. Controls whether each pin is an input or output.
 
 **Access**: Read/Write
 
@@ -312,13 +312,13 @@ Direction register B for pins 32-63. Controls whether each pin is an input or ou
         andn    DIRB, ##$0000_FFFF      ' Set pins 32-47 as inputs
 ```
 
-**Related**: [DIRA](#dira--address-1fa), [OUTB](#outb--address-1fd), [INB](#inb--address-1ff)
+**Related**: [DIRA](#dira), [OUTB](#outb), [INB](#inb)
 
 
 
-### OUTA — Address $1FC
+### OUTA {#outa}
 
-Output register A for pins 0-31. Sets the output state for pins configured as outputs.
+Address $1FC. Output register A for pins 0-31. Sets the output state for pins configured as outputs.
 
 **Access**: Read/Write
 
@@ -340,13 +340,13 @@ Output register A for pins 0-31. Sets the output state for pins configured as ou
         mov     OUTA, new_pattern       ' Change all 32 outputs atomically
 ```
 
-**Related**: [OUTB](#outb--address-1fd), [DIRA](#dira--address-1fa), [INA](#ina--address-1fe), OUTC, OUTH, OUTL
+**Related**: [OUTB](#outb), [DIRA](#dira), [INA](#ina), OUTC, OUTH, OUTL
 
 
 
-### OUTB — Address $1FD
+### OUTB {#outb}
 
-Output register B for pins 32-63. Sets the output state for pins configured as outputs.
+Address $1FD. Output register B for pins 32-63. Sets the output state for pins configured as outputs.
 
 **Access**: Read/Write
 
@@ -365,13 +365,13 @@ Output register B for pins 32-63. Sets the output state for pins configured as o
         xor     OUTB, toggle_mask       ' Toggle specific pins
 ```
 
-**Related**: [OUTA](#outa--address-1fc), [DIRB](#dirb--address-1fb), [INB](#inb--address-1ff)
+**Related**: [OUTA](#outa), [DIRB](#dirb), [INB](#inb)
 
 
 
-### INA — Address $1FE
+### INA {#ina}
 
-Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
+Address $1FE. Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
 
 **Access**: Read-only for pin states (also serves as debug interrupt call address)
 
@@ -395,13 +395,13 @@ Input register A for pins 0-31. Reads the current state of pins regardless of di
         if_z    jmp     #.wait
 ```
 
-**Related**: [INB](#inb--address-1ff), [DIRA](#dira--address-1fa), [OUTA](#outa--address-1fc)
+**Related**: [INB](#inb), [DIRA](#dira), [OUTA](#outa)
 
 
 
-### INB — Address $1FF
+### INB {#inb}
 
-Input register B for pins 32-63. Reads the current state of pins regardless of direction setting.
+Address $1FF. Input register B for pins 32-63. Reads the current state of pins regardless of direction setting.
 
 **Access**: Read-only for pin states (also serves as debug interrupt return address)
 
@@ -422,7 +422,7 @@ Input register B for pins 32-63. Reads the current state of pins regardless of d
                 mov     OUTB, INB
 ```
 
-**Related**: [INA](#ina--address-1fe), [DIRB](#dirb--address-1fb), [OUTB](#outb--address-1fd)
+**Related**: [INA](#ina), [DIRB](#dirb), [OUTB](#outb)
 
 
 

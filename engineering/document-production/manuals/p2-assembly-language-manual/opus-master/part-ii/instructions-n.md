@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter N.
 
 
 
+::: instrheader
 ## NEG {#neg}
-
 Negate
-
-[Math and Logic](#math-and-logic) - Negate a value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
@@ -42,11 +42,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
-
-Conditional negate {#negnc} {#negz} {#negnz}
-
-[Math and Logic](#math-and-logic) - Negate value according to C, NC, Z, or NZ flag.
+Conditional Negate {#negnc} {#negz} {#negnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
@@ -104,11 +104,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 
 
+::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-
-Cancel interrupt (1, 2, or 3)
-
-[Event](#event) - Cancel INTn interrupt.
+Cancel Interrupt {#nixint2} {#nixint3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **NIXINT1**
 **NIXINT2**
@@ -136,11 +136,11 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 
 
 
+::: instrheader
 ## NOP {#nop}
-
-No operation
-
-[Miscellaneous](#miscellaneous) - No operation, just elapse two cycles.
+No Operation
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **NOP**
 
@@ -154,7 +154,7 @@ No operation
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [WAITX](instructions-w.md#waitx), [WAITCNT](#waitcnt)
+**Related:** [WAITX](instructions-w.md#waitx), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 
@@ -164,11 +164,11 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 
 
 
+::: instrheader
 ## NOT {#not}
-
-Not
-
-[Math and Logic](#math-and-logic) - Bitwise NOT a value.
+Bitwise Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NOT**  *Dest*  **{WC|WZ|WCZ}**

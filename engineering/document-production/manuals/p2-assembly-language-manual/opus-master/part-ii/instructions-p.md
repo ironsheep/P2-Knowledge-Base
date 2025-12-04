@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter P.
 
 
 
+::: instrheader
 ## POLLATN {#pollatn}
-
-Poll attention event
-
-[Event](#event) - Check attention event flag without waiting.
+Poll Attention Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLATN**  **{WC|WZ|WCZ}**
 
@@ -36,11 +36,11 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 
 
+::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
-
-Poll counter event (1, 2, or 3)
-
-[Event](#event) - Check counter event flag without waiting.
+Poll Counter Event {#pollct2} {#pollct3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLCT1**  **{WC|WZ|WCZ}**
 **POLLCT2**  **{WC|WZ|WCZ}**
@@ -72,11 +72,11 @@ These instructions enable time-based event polling without blocking execution. T
 
 
 
+::: instrheader
 ## POLLFBW {#pollfbw}
-
-Poll FIFO block wrap event
-
-[Event](#event) - Check FIFO block wrap event flag without waiting.
+Poll FIFO Block Wrap Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLFBW**  **{WC|WZ|WCZ}**
 
@@ -104,11 +104,11 @@ This instruction enables circular buffer management for high-speed Hub RAM trans
 
 
 
+::: instrheader
 ## POLLINT {#pollint}
-
-Poll interrupt event
-
-[Event](#event) - Check interrupt event flag without waiting.
+Poll Interrupt Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLINT**  **{WC|WZ|WCZ}**
 
@@ -136,11 +136,11 @@ This instruction enables non-blocking interrupt handling.
 
 
 
+::: instrheader
 ## POLLPAT {#pollpat}
-
-Poll pin pattern event
-
-[Event](#event) - Check pin pattern event flag without waiting.
+Poll Pin Pattern Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLPAT**  **{WC|WZ|WCZ}**
 
@@ -168,11 +168,11 @@ This instruction enables non-blocking pattern detection on input pins.
 
 
 
+::: instrheader
 ## POLLQMT {#pollqmt}
-
-Poll CORDIC empty event
-
-[Event](#event) - Check CORDIC-read-but-empty event flag without waiting.
+Poll CORDIC Empty Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLQMT**  **{WC|WZ|WCZ}**
 
@@ -200,11 +200,11 @@ This instruction enables error detection for CORDIC operations.
 
 
 
+::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
-
-Poll selectable event (1, 2, 3, or 4)
-
-[Event](#event) - Check selectable event flag without waiting.
+Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLSE1**  **{WC|WZ|WCZ}**
 **POLLSE2**  **{WC|WZ|WCZ}**
@@ -238,11 +238,11 @@ The P2 provides four independent selectable event generators that can be configu
 
 
 
+::: instrheader
 ## POLLXFI {#pollxfi}
-
-Poll streamer finished event
-
-[Event](#event) - Check streamer-finished event flag without waiting.
+Poll Streamer Finished Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXFI**  **{WC|WZ|WCZ}**
 
@@ -270,11 +270,11 @@ This instruction enables non-blocking management of the streamer subsystem.
 
 
 
+::: instrheader
 ## POLLXMT {#pollxmt}
-
-Poll streamer empty event
-
-[Event](#event) - Check streamer-empty event flag without waiting.
+Poll Streamer Empty Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXMT**  **{WC|WZ|WCZ}**
 
@@ -302,11 +302,11 @@ This instruction enables pipelined streamer operations.
 
 
 
+::: instrheader
 ## POLLXRL {#pollxrl}
-
-Poll streamer LUT rollover event
-
-[Event](#event) - Check streamer LUT rollover event flag without waiting.
+Poll Streamer LUT Rollover Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXRL**  **{WC|WZ|WCZ}**
 
@@ -334,11 +334,11 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 
 
 
+::: instrheader
 ## POLLXRO {#pollxro}
-
-Poll streamer NCO rollover event
-
-[Event](#event) - Check streamer NCO rollover event flag without waiting.
+Poll Streamer NCO Rollover Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXRO**  **{WC|WZ|WCZ}**
 
@@ -366,11 +366,11 @@ This instruction enables precise timing control for streamer operations that use
 
 
 
+::: instrheader
 ## POP {#pop}
-
-Pop from internal stack
-
-[Miscellaneous](#miscellaneous) - Pop a value from the internal K register stack.
+Pop From Internal Stack
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -401,11 +401,11 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 
 
 
+::: instrheader
 ## POPA {#popa}
-
-Pop from Hub stack A
-
-[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRA as stack pointer.
+Pop From Hub Stack A
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -436,11 +436,11 @@ This instruction enables Hub RAM-based stacks for deep subroutine nesting and la
 
 
 
+::: instrheader
 ## POPB {#popb}
-
-Pop from Hub stack B
-
-[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRB as stack pointer.
+Pop From Hub Stack B
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -471,11 +471,11 @@ Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage
 
 
 
+::: instrheader
 ## PUSH {#push}
-
-Push to internal stack
-
-[Miscellaneous](#miscellaneous) - Push a value onto the internal K register stack.
+Push To Internal Stack
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **PUSH**  *{#}Dest*
 
@@ -501,11 +501,11 @@ The P2 provides a single-level internal stack register K that is automatically u
 
 
 
+::: instrheader
 ## PUSHA {#pusha}
-
-Push to Hub stack A
-
-[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRA as stack pointer.
+Push To Hub Stack A
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **PUSHA**  *{#}Dest*
 
@@ -533,11 +533,11 @@ PUSHA paired with POPA implements a descending stack in Hub RAM.
 
 
 
+::: instrheader
 ## PUSHB {#pushb}
-
-Push to Hub stack B
-
-[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRB as stack pointer.
+Push To Hub Stack B
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **PUSHB**  *{#}Dest*
 

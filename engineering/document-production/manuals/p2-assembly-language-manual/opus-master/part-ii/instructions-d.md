@@ -6,11 +6,11 @@ This section contains all PASM2 instructions beginning with the letter D.
 
 
 
+::: instrheader
 ## DECMOD {#decmod}
-
-Decrement modulus
-
-[Math and Logic](#math-and-logic) - Decrement with modulus wrapping.
+Decrement Modulus
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -42,11 +42,11 @@ DECMOD does not limit Dest within the specified range—if Dest begins as greate
 
 
 
+::: instrheader
 ## DECOD {#decod}
-
-Decode bit position to single-bit mask
-
-[Math and Logic](#math-and-logic) - Decode value (0-31) into single-high-bit long.
+Decode Bit Position
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **DECOD**  *Dest, {#}Src*
 **DECOD**  *Dest*
@@ -82,11 +82,11 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 
 
 
+::: instrheader
 ## DIRC / DIRNC {#dirc}
-
-Set pin direction if C / not C
-
-[Pin](#pin) - Set pin(s) direction to input/output according to C or !C.
+Set Pin Direction by C Flag {#dirnc}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRC**  *{#}Dest*  **{WCZ}**
 **DIRNC**  *{#}Dest*  **{WCZ}**
@@ -125,11 +125,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRH {#dirh}
-
-Set pin direction high
-
-[Pin](#pin) - Set pin(s) direction to output (high; 1).
+Set Pin Direction High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRH**  *{#}Dest*  **{WCZ}**
 
@@ -160,11 +160,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the direction 
 
 
 
+::: instrheader
 ## DIRL {#dirl}
-
-Set pin direction low
-
-[Pin](#pin) - Set pin(s) direction to input (low; 0).
+Set Pin Direction Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
 
@@ -195,11 +195,11 @@ If the WCZ effect is specified, the Z flag is updated to the original state of t
 
 
 
+::: instrheader
 ## DIRNOT {#dirnot}
-
-Direction not
-
-[Pin](#pin) - Toggle pin(s) to the opposite direction.
+Direction Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
 
@@ -234,11 +234,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRZ / DIRNZ {#dirz}
-
-Set pin direction if Z / not Z
-
-[Pin](#pin) - Set pin(s) direction to input/output according to Z or !Z.
+Set Pin Direction by Z Flag {#dirnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRZ**  *{#}Dest*  **{WCZ}**
 **DIRNZ**  *{#}Dest*  **{WCZ}**
@@ -277,11 +277,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRRND {#dirrnd}
-
-Direction random
-
-[Pin](#pin) - Set pin(s) direction to random input/output.
+Direction Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
 
@@ -316,11 +316,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DJF {#djf}
-
-Decrement and jump if full
-
-[Branch](#branch) - Decrement value and jump if full (-1; $FFFF_FFFF).
+Decrement and Jump If Full
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJF**  *Dest, {#}Src*
 
@@ -349,11 +349,11 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 
 
 
+::: instrheader
 ## DJNF {#djnf}
-
-Decrement and jump if not full
-
-[Branch](#branch) - Decrement value and jump if not full (<> -1; <> $FFFF_FFFF).
+Decrement and Jump If Not Full
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJNF**  *Dest, {#}Src*
 
@@ -384,11 +384,11 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 
 
 
+::: instrheader
 ## DJZ / DJNZ {#djz}
-
-Decrement and jump if zero / not zero {#djnz}
-
-[Branch](#branch) - Decrement a register and jump based on zero/non-zero result.
+Decrement and Jump If Zero {#djnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJZ**  *Dest, {#}Src*
 **DJNZ**  *Dest, {#}Src*
@@ -435,11 +435,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## DRVC / DRVNC {#drvc}
-
-Drive pins if C / not C
-
-[Pin](#pin) - Set pin(s) direction to output and output level to low/high according to C or !C.
+Drive Pins by C Flag {#drvnc}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVC**  *{#}Dest*  **{WCZ}**
 **DRVNC**  *{#}Dest*  **{WCZ}**
@@ -476,11 +476,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVH {#drvh}
-
-Drive pins high
-
-[Pin](#pin) - Set pin(s) direction to output and output level high (1).
+Drive Pins High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVH**  *{#}Dest*  **{WCZ}**
 
@@ -513,11 +513,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVL {#drvl}
-
-Drive pins low
-
-[Pin](#pin) - Set pin(s) direction to output and output level low (0).
+Drive Pins Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
 
@@ -552,11 +552,11 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 
 
+::: instrheader
 ## DRVNOT {#drvnot}
-
-Drive not
-
-[Pin](#pin) - Set pin(s) direction to output and toggle to the opposite output level.
+Drive Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
 
@@ -593,11 +593,11 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 
 
+::: instrheader
 ## DRVZ / DRVNZ {#drvz}
-
-Drive pins if Z / not Z
-
-[Pin](#pin) - Set pin(s) direction to output and output level to low/high according to Z or !Z.
+Drive Pins by Z Flag {#drvnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVZ**  *{#}Dest*  **{WCZ}**
 **DRVNZ**  *{#}Dest*  **{WCZ}**
@@ -634,11 +634,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVRND {#drvrnd}
-
-Drive random
-
-[Pin](#pin) - Set pin(s) direction to output and output level to random low/high.
+Drive Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**
 

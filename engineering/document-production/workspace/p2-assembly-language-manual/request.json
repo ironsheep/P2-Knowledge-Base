@@ -16,6 +16,7 @@
         "p2kb-pasm2-mnemonic-bold",
         "p2kb-pasm2-code-coloring",
         "p2kb-pasm2-entry-format",
+        "p2kb-pasm2-entry-headers",
         "p2kb-pasm2-pagination"
       ],
       "metadata": {

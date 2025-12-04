@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter F.
 
 
 
+::: instrheader
 ## FBLOCK {#fblock}
-
-Set next block for when block wraps
-
-[Hub FIFO](#hub-fifo) - Configure the next Hub memory block for FIFO wraparound.
+Set Next FIFO Block
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **FBLOCK**  *{#}Dest, {#}Src*
 
@@ -39,11 +39,11 @@ FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-t
 
 
 
+::: instrheader
 ## FGE {#fge}
-
-Force greater or equal
-
-[Math and Logic](#math-and-logic) - Force unsigned value to be greater than or equal to another.
+Force Greater or Equal
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -75,11 +75,11 @@ FGE is useful for clamping values to a minimum threshold, ensuring that a value 
 
 
 
+::: instrheader
 ## FGES {#fges}
-
-Force greater or equal, signed
-
-[Math and Logic](#math-and-logic) - Force signed value to be greater than or equal to another.
+Force Greater or Equal Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -111,11 +111,11 @@ FGES is the signed counterpart to FGE and is used when working with signed value
 
 
 
+::: instrheader
 ## FLE {#fle}
-
-Force lesser or equal
-
-[Math and Logic](#math-and-logic) - Force unsigned value to be less than or equal to another.
+Force Less or Equal
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -147,11 +147,11 @@ FLE is useful for clamping values to a maximum threshold, ensuring that a value 
 
 
 
+::: instrheader
 ## FLES {#fles}
-
-Force lesser or equal, signed
-
-[Math and Logic](#math-and-logic) - Force signed value to be less than or equal to another.
+Force Less or Equal Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -183,11 +183,11 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 
 
+::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-
-Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
-
-[Pin](#pin) - Set pin(s) to input direction with output preset according to C, NC, Z, or NZ flag.
+Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTC**  *{#}Dest*  **{WCZ}**
 **FLTNC**  *{#}Dest*  **{WCZ}**
@@ -229,11 +229,11 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 
 
 
+::: instrheader
 ## FLTH {#flth}
-
-Float high
-
-[Pin](#pin) - Set pin(s) direction to input and to an output level of high.
+Float High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
 
@@ -266,11 +266,11 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 
 
 
+::: instrheader
 ## FLTL {#fltl}
-
-Float low
-
-[Pin](#pin) - Set pin(s) direction to input and to an output level of low.
+Float Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
 
@@ -303,11 +303,11 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 
 
 
+::: instrheader
 ## FLTNOT {#fltnot}
-
-Float not
-
-[Pin](#pin) - Set pin(s) direction to input and toggle to the opposite output level.
+Float Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
 
@@ -342,11 +342,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## FLTRND {#fltrnd}
-
-Float random
-
-[Pin](#pin) - Set pin(s) direction to input and to an output level of random low/high.
+Float Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**
 

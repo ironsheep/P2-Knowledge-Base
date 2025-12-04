@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter G.
 
 
 
+::: instrheader
 ## GETBRK {#getbrk}
-
-Get breakpoint status
-
-[Miscellaneous](#miscellaneous) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
+Get Breakpoint Status
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -43,11 +43,11 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 
 
 
+::: instrheader
 ## GETBYTE {#getbyte}
-
-Get byte
-
-[Math and Logic](#math-and-logic) - Get a byte from a value.
+Get Byte
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETBYTE**  *Dest, {#}Src, #Num*
 **GETBYTE**  *Dest*
@@ -79,11 +79,11 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 
 
 
+::: instrheader
 ## GETCT {#getct}
-
-Get system counter
-
-[Miscellaneous](#miscellaneous) - Get the current system counter value into D.
+Get System Counter
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETCT**  *Dest*  **{WC}**
 
@@ -114,11 +114,11 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 
 
 
+::: instrheader
 ## GETNIB {#getnib}
-
-Get nibble
-
-[Math and Logic](#math-and-logic) - Get a nibble from a value.
+Get Nibble
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETNIB**  *Dest, {#}Src, #Num*
 **GETNIB**  *Dest*
@@ -150,11 +150,11 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 
 
 
+::: instrheader
 ## GETPTR {#getptr}
-
-Get FIFO hub pointer
-
-[Hub RAM](#hub-ram) - Get current FIFO hub pointer into D.
+Get FIFO Hub Pointer
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **GETPTR**  *Dest*
 
@@ -182,11 +182,11 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 
 
 
+::: instrheader
 ## GETQX {#getqx}
-
-Get CORDIC X result
-
-[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result X into D.
+Get CORDIC X Result
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -219,11 +219,11 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 
 
 
+::: instrheader
 ## GETQY {#getqy}
-
-Get CORDIC Y result
-
-[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result Y into D.
+Get CORDIC Y Result
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -256,11 +256,11 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 
 
 
+::: instrheader
 ## GETRND {#getrnd}
-
-Get random value
-
-[Miscellaneous](#miscellaneous) - Get RND into D or C/Z flags.
+Get Random Value
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
 **GETRND**  **{WC|WZ|WCZ}**
@@ -297,11 +297,11 @@ The random number generator uses a maximal-length linear feedback shift register
 
 
 
+::: instrheader
 ## GETSCP {#getscp}
-
-Get oscilloscope samples
-
-[Smart Pin](#smart-pin) - Get four-channel oscilloscope samples into D.
+Get Oscilloscope Samples
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **GETSCP**  *Dest*
 
@@ -331,11 +331,11 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 
 
 
+::: instrheader
 ## GETWORD {#getword}
-
-Get word
-
-[Math and Logic](#math-and-logic) - Get a word from a value.
+Get Word
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETWORD**  *Dest, {#}Src, #Num*
 **GETWORD**  *Dest*
@@ -367,11 +367,11 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 
 
 
+::: instrheader
 ## GETXACC {#getxacc}
-
-Get Goertzel accumulators
-
-[Streamer](#streamer-category) - Get streamer's Goertzel X/Y accumulators into D and next S.
+Get Goertzel Accumulators
+Category: [Streamer](instruction-categories.md#streamer)
+:::
 
 **GETXACC**  *Dest*
 

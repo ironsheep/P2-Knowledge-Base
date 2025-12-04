@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter C.
 
 
 
+::: instrheader
 ## CALL {#call}
-
-Call subroutine
-
-[Branch](#branch) - Call a subroutine; store return context on the stack.
+Call Subroutine
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALL**  *#Addr*
 **CALL**  *#\Addr*
@@ -47,11 +47,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLA {#calla}
-
-Call subroutine via PTRA
-
-[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRA++.
+Call Subroutine via PTRA
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLA**  *#Addr*
 **CALLA**  *#\Addr*
@@ -90,11 +90,11 @@ CALLA is used for subroutine calls when Hub RAM is being used as the call stack 
 
 
 
+::: instrheader
 ## CALLB {#callb}
-
-Call subroutine via PTRB
-
-[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRB++.
+Call Subroutine via PTRB
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLB**  *#Addr*
 **CALLB**  *#\Addr*
@@ -133,11 +133,11 @@ CALLB operates identically to CALLA except it uses PTRB as the stack pointer ins
 
 
 
+::: instrheader
 ## CALLD {#calld}
-
-Call with destination register
-
-[Branch](#branch) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
+Call with Destination Register
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLD**  *PA|PB|PTRA|PTRB, #Addr*
 **CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
@@ -160,7 +160,7 @@ Call with destination register
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](instructions-r.md#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](instructions-r.md#ret), [PA](special-registers.md#pa), [PB](special-registers.md#pb), [PTRA](special-registers.md#ptra), [PTRB](special-registers.md#ptrb)
 
 **Explanation:**
 
@@ -180,11 +180,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLPA {#callpa}
-
-Call subroutine with PA parameter
-
-[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PA.
+Call Subroutine with PA Parameter
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLPA**  *{#}Dest, {#}Src*
 
@@ -201,7 +201,7 @@ Call subroutine with PA parameter
 | EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](instructions-r.md#ret), [PA](#pa)
+**Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](instructions-r.md#ret), [PA](special-registers.md#pa)
 
 **Explanation:**
 
@@ -215,11 +215,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLPB {#callpb}
-
-Call subroutine with PB parameter
-
-[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PB.
+Call Subroutine with PB Parameter
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLPB**  *{#}Dest, {#}Src*
 
@@ -236,7 +236,7 @@ Call subroutine with PB parameter
 | EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](instructions-r.md#ret), [PB](#pb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](instructions-r.md#ret), [PB](special-registers.md#pb)
 
 **Explanation:**
 
@@ -250,11 +250,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CMP {#cmp}
-
-Compare
-
-[Math and Logic](#math-and-logic) - Compare two unsigned values.
+Compare Unsigned
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -294,11 +294,11 @@ CMP is fundamental for implementing conditional logic and control flow based on 
 
 
 
+::: instrheader
 ## CMPM {#cmpm}
-
-Compare most significant bit
-
-[Math and Logic](#math-and-logic) - Compare two unsigned values, get MSB of difference.
+Compare Most Significant Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -330,11 +330,11 @@ CMPM is useful when the most significant bit of the difference carries semantic 
 
 
 
+::: instrheader
 ## CMPR {#cmpr}
-
-Compare reverse
-
-[Math and Logic](#math-and-logic) - Compare two unsigned values (in reverse order to CMP).
+Compare Reverse
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -366,11 +366,11 @@ CMPR is useful when the natural order of operands in your code is reversed from 
 
 
 
+::: instrheader
 ## CMPS {#cmps}
-
-Compare signed
-
-[Math and Logic](#math-and-logic) - Compare two signed values.
+Compare Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -408,11 +408,11 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 
 
 
+::: instrheader
 ## CMPSUB {#cmpsub}
-
-Compare and subtract
-
-[Math and Logic](#math-and-logic) - Compare two unsigned values and subtract the second if it is lesser or equal.
+Compare and Subtract
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -448,11 +448,11 @@ CMPSUB is particularly useful for implementing division algorithms, modulo opera
 
 
 
+::: instrheader
 ## CMPSX {#cmpsx}
-
-Compare signed, extended
-
-[Math and Logic](#math-and-logic) - Compare two signed values plus carry flag.
+Compare Signed Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -490,11 +490,11 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 
 
 
+::: instrheader
 ## CMPX {#cmpx}
-
-Compare extended
-
-[Math and Logic](#math-and-logic) - Compare two unsigned values plus carry flag.
+Compare Unsigned Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -532,11 +532,11 @@ For unsigned multi-long comparisons, use CMP for the least significant long, the
 
 
 
+::: instrheader
 ## COGATN {#cogatn}
-
-Cog attention
-
-[Event](#event) - Get the attention of one or more other cogs.
+Cog Attention
+Category: [Event](instruction-categories.md#event)
+:::
 
 **COGATN**  *{#}Dest*
 
@@ -576,11 +576,11 @@ COGATN is useful for implementing inter-cog communication, synchronization, and 
 
 
 
+::: instrheader
 ## COGBRK {#cogbrk}
-
-Cog break
-
-[Miscellaneous](#miscellaneous) - Trigger breakpoint in specified cog.
+Cog Breakpoint
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **COGBRK**  *{#}Dest*
 
@@ -614,11 +614,11 @@ COGBRK is a specialized instruction primarily used by development and debugging 
 
 
 
+::: instrheader
 ## COGID {#cogid}
-
-Cog identification
-
-[Hub Control](#hub-control) - Get current cog's ID or any cog's status by ID.
+Cog Identification
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGID**  *{#}Dest*  **{WC}**
 
@@ -659,11 +659,11 @@ To check if cog 3 is running:
 
 
 
+::: instrheader
 ## COGINIT {#coginit}
-
-Cog initialize
-
-[Hub Control](#hub-control) - Start an available cog, or restart a cog by ID.
+Cog Initialize
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGINIT**  *{#}Dest, {#}Src*  **{WC}**
 
@@ -725,11 +725,11 @@ Start a cog pair for LUT sharing:
 
 
 
+::: instrheader
 ## COGSTOP {#cogstop}
-
-Cog stop
-
-[Hub Control](#hub-control) - Stop a cog by ID.
+Cog Stop
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGSTOP**  *{#}Dest*
 
@@ -770,11 +770,11 @@ COGSTOP is useful for managing cog resources dynamically, shutting down cogs tha
 
 
 
+::: instrheader
 ## CRCBIT {#crcbit}
-
-CRC iterate bit
-
-[Math and Logic](#math-and-logic) - Iterate CRC value in D using C and polynomial in S.
+CRC Iterate Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CRCBIT**  *Dest, {#}Src*
 
@@ -816,11 +816,11 @@ For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
 
 
+::: instrheader
 ## CRCNIB {#crcnib}
-
-CRC iterate nibble
-
-[Math and Logic](#math-and-logic) - Iterate CRC value in D for a nibble using polynomial in S.
+CRC Iterate Nibble
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CRCNIB**  *Dest, {#}Src*
 

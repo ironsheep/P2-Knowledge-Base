@@ -4,11 +4,11 @@ This section contains all PASM2 instructions beginning with the letter O.
 
 
 
+::: instrheader
 ## ONES {#ones}
-
 Ones
-
-[Math and Logic](#math-and-logic) - Count the number of high bits (1s) in a value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
@@ -44,11 +44,11 @@ ONES is useful for analyzing bit patterns, counting enabled flags, and implement
 
 
 
+::: instrheader
 ## OR {#or}
-
-Or
-
-[Math and Logic](#math-and-logic) - Perform bitwise OR operation.
+Bitwise Or
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -90,11 +90,11 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 
 
 
+::: instrheader
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
-
-Output by flag state {#outnc} {#outz} {#outnz}
-
-[Pin](#pin) - Set pin output level according to C, NC, Z, or NZ flag state.
+Output By Flag State {#outnc} {#outz} {#outnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTC**  *{#}Dest*  **{WCZ}**
 **OUTNC**  *{#}Dest*  **{WCZ}**
@@ -136,11 +136,11 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 
 
 
+::: instrheader
 ## OUTH {#outh}
-
-Output high
-
-[Pin](#pin) - Set pin output level to high.
+Output High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTH**  *{#}Dest*  **{WCZ}**
 
@@ -173,11 +173,11 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 
 
 
+::: instrheader
 ## OUTL {#outl}
-
-Output low
-
-[Pin](#pin) - Set pin output level to low.
+Output Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
 
@@ -210,11 +210,11 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 
 
 
+::: instrheader
 ## OUTNOT {#outnot}
-
-Output not (toggle)
-
-[Pin](#pin) - Toggle pin output level to opposite state.
+Output Not (Toggle)
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
 
@@ -247,11 +247,11 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 
 
 
+::: instrheader
 ## OUTRND {#outrnd}
-
-Output random
-
-[Pin](#pin) - Set pin output level(s) to random values.
+Output Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**
 
