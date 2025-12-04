@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter N.
 ## NEG {#neg}
 
 Negate
+
 [Math and Logic](#math-and-logic) - Negate a value.
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -27,7 +28,7 @@ Negate
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
 
 
-**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
+**Related:** [ABS](instructions-a.md#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
 **Explanation:**
 
@@ -44,6 +45,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
 
 Conditional negate {#negnc} {#negz} {#negnz}
+
 [Math and Logic](#math-and-logic) - Negate value according to C, NC, Z, or NZ flag.
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -60,14 +62,7 @@ Conditional negate {#negnc} {#negz} {#negnz}
 
 ---
 
-**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest.
-
-| Instruction | Negates when |
-|-------------|--------------|
-| NEGC | C = 1 |
-| NEGNC | C = 0 |
-| NEGZ | Z = 1 |
-| NEGNZ | Z = 0 |
+**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest. Optionally sets C to sign and Z if result is zero.
 
 - Dest is a register to receive the result.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal.
@@ -90,7 +85,16 @@ Conditional negate {#negnc} {#negz} {#negnz}
 
 **Explanation:**
 
-These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition. If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
+These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition:
+
+| Instruction | Negates when |
+|-------------|--------------|
+| NEGC | C = 1 |
+| NEGNC | C = 0 |
+| NEGZ | Z = 1 |
+| NEGNZ | Z = 0 |
+
+If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
 NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior.
 
@@ -103,6 +107,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 
 Cancel interrupt (1, 2, or 3)
+
 [Event](#event) - Cancel INTn interrupt.
 
 **NIXINT1**
@@ -134,6 +139,7 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 ## NOP {#nop}
 
 No operation
+
 [Miscellaneous](#miscellaneous) - No operation, just elapse two cycles.
 
 **NOP**
@@ -148,7 +154,7 @@ No operation
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [WAITX](#waitx), [WAITCNT](#waitcnt)
+**Related:** [WAITX](instructions-w.md#waitx), [WAITCNT](#waitcnt)
 
 **Explanation:**
 
@@ -161,6 +167,7 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 ## NOT {#not}
 
 Not
+
 [Math and Logic](#math-and-logic) - Bitwise NOT a value.
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -181,7 +188,7 @@ Not
 | EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
 
 
-**Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
+**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn)
 
 **Explanation:**
 

@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter O.
 ## ONES {#ones}
 
 Ones
+
 [Math and Logic](#math-and-logic) - Count the number of high bits (1s) in a value.
 
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -27,7 +28,7 @@ Ones
 | EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
 
 
-**Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
+**Related:** [TEST](instructions-t.md#test), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn), [BITNOT](instructions-b.md#bitnot)
 
 **Explanation:**
 
@@ -46,6 +47,7 @@ ONES is useful for analyzing bit patterns, counting enabled flags, and implement
 ## OR {#or}
 
 Or
+
 [Math and Logic](#math-and-logic) - Perform bitwise OR operation.
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -64,7 +66,7 @@ Or
 | EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
 
 
-**Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
+**Related:** [AND](instructions-a.md#and), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn), [NOT](instructions-n.md#not)
 
 **Explanation:**
 
@@ -91,6 +93,7 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 
 Output by flag state {#outnc} {#outz} {#outnz}
+
 [Pin](#pin) - Set pin output level according to C, NC, Z, or NZ flag state.
 
 **OUTC**  *{#}Dest*  **{WCZ}**
@@ -100,14 +103,7 @@ Output by flag state {#outnc} {#outz} {#outnz}
 
 ---
 
-**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state:
-
-| Instruction | Drives high when |
-|-------------|------------------|
-| OUTC | C = 1 |
-| OUTNC | C = 0 |
-| OUTZ | Z = 1 |
-| OUTNZ | Z = 0 |
+**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets Z to original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
@@ -125,7 +121,16 @@ Output by flag state {#outnc} {#outz} {#outnz}
 
 **Explanation:**
 
-These instructions set pin output level(s) based on flag state. OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
+These instructions set pin output level(s) based on flag state:
+
+| Instruction | Drives high when |
+|-------------|------------------|
+| OUTC | C = 1 |
+| OUTNC | C = 0 |
+| OUTZ | Z = 1 |
+| OUTNZ | Z = 0 |
+
+OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
 If WCZ is specified, the Z flag is set to the original output state of the base pin before modification.
 
@@ -134,6 +139,7 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ## OUTH {#outh}
 
 Output high
+
 [Pin](#pin) - Set pin output level to high.
 
 **OUTH**  *{#}Dest*  **{WCZ}**
@@ -151,7 +157,7 @@ Output high
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
+**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](instructions-d.md#dirh)
 
 **Explanation:**
 
@@ -170,6 +176,7 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 ## OUTL {#outl}
 
 Output low
+
 [Pin](#pin) - Set pin output level to low.
 
 **OUTL**  *{#}Dest*  **{WCZ}**
@@ -187,7 +194,7 @@ Output low
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
+**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](instructions-d.md#dirl)
 
 **Explanation:**
 
@@ -206,6 +213,7 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 ## OUTNOT {#outnot}
 
 Output not (toggle)
+
 [Pin](#pin) - Toggle pin output level to opposite state.
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
@@ -223,7 +231,7 @@ Output not (toggle)
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
+**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](instructions-n.md#not), [DRVNOT](instructions-d.md#drvnot)
 
 **Explanation:**
 
@@ -242,6 +250,7 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 ## OUTRND {#outrnd}
 
 Output random
+
 [Pin](#pin) - Set pin output level(s) to random values.
 
 **OUTRND**  *{#}Dest*  **{WCZ}**

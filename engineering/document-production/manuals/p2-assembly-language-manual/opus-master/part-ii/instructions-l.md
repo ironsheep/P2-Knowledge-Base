@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter L.
 ## LOC {#loc}
 
 Load address
+
 [Hub RAM](#hub-ram) - Load address into PA, PB, PTRA, or PTRB.
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
@@ -26,7 +27,7 @@ Load address
 | EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
 
 
-**Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
+**Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](instructions-c.md#calld), [CALLPA](instructions-c.md#callpa), [CALLPB](instructions-c.md#callpb)
 
 **Explanation:**
 
@@ -43,6 +44,7 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 ## LOCKNEW {#locknew}
 
 Allocate new lock
+
 [Hub Control](#hub-control) - Request a new LOCK from the hardware lock pool.
 
 **LOCKNEW**  *D*  **{WC}**
@@ -77,6 +79,7 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 ## LOCKREL {#lockrel}
 
 Release lock
+
 [Hub Control](#hub-control) - Release a previously acquired LOCK.
 
 **LOCKREL**  *{#}D*  **{WC}**
@@ -94,7 +97,7 @@ Release lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
+**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
 
 **Explanation:**
 
@@ -111,6 +114,7 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 ## LOCKRET {#lockret}
 
 Return lock to pool
+
 [Hub Control](#hub-control) - Return a LOCK to the pool for reallocation.
 
 **LOCKRET**  *{#}D*
@@ -144,6 +148,7 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 ## LOCKTRY {#locktry}
 
 Try to acquire lock
+
 [Hub Control](#hub-control) - Attempt to acquire a LOCK with atomic test-and-set.
 
 **LOCKTRY**  *{#}D*  **{WC}**
@@ -161,7 +166,7 @@ Try to acquire lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
+**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
 
 **Explanation:**
 

@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter H.
 ## HUBSET {#hubset}
 
 Set hub configuration
+
 [Hub Control](#hub-control) - Configure system clock and hub parameters.
 
 **HUBSET**  *{#}D*
@@ -23,7 +24,7 @@ Set hub configuration
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [COGINIT](#coginit), [COGID](#cogid), [CLKSET](#clkset)
+**Related:** [COGINIT](instructions-c.md#coginit), [COGID](instructions-c.md#cogid), [CLKSET](#clkset)
 
 **Explanation:**
 

@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter I.
 ## IJZ / IJNZ {#ijz}
 
 Increment and jump if zero / not zero {#ijnz}
+
 [Branch](#branch) - Increment a register and jump based on zero/non-zero result.
 
 **IJZ**  *Dest, {#}Src*
@@ -14,12 +15,7 @@ Increment and jump if zero / not zero {#ijnz}
 
 ---
 
-**Result:** Dest is incremented by 1, and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| IJZ | Result = 0 |
-| IJNZ | Result ≠ 0 |
+**Result:** Dest is incremented by 1, and conditionally jumps based on the result.
 
 - Dest is a register whose value is incremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
@@ -35,11 +31,16 @@ Increment and jump if zero / not zero {#ijnz}
 ```
 
 
-**Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
 
 **Explanation:**
 
-IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero.
+IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| IJZ | Result = 0 |
+| IJNZ | Result ≠ 0 |
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
@@ -50,6 +51,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## INCMOD {#incmod}
 
 Increment with modulus
+
 [Math and Logic](#math-and-logic) - Increment a value with automatic wrap-around at a specified modulus.
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -68,7 +70,7 @@ Increment with modulus
 | EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
 
 
-**Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
+**Related:** [DECMOD](instructions-d.md#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 
 **Explanation:**
 

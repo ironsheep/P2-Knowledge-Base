@@ -9,6 +9,7 @@ This section contains all PASM2 instructions beginning with the letter D.
 ## DECMOD {#decmod}
 
 Decrement modulus
+
 [Math and Logic](#math-and-logic) - Decrement with modulus wrapping.
 
 **DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -27,7 +28,7 @@ Decrement modulus
 | EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
 
 
-**Related:** [INCMOD](#incmod)
+**Related:** [INCMOD](instructions-i.md#incmod)
 
 **Explanation:**
 
@@ -44,6 +45,7 @@ DECMOD does not limit Dest within the specified range—if Dest begins as greate
 ## DECOD {#decod}
 
 Decode bit position to single-bit mask
+
 [Math and Logic](#math-and-logic) - Decode value (0-31) into single-high-bit long.
 
 **DECOD**  *Dest, {#}Src*
@@ -63,7 +65,7 @@ Decode bit position to single-bit mask
 | EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](#encod), [BMASK](#bmask)
+**Related:** [ENCOD](instructions-e.md#encod), [BMASK](instructions-b.md#bmask)
 
 **Explanation:**
 
@@ -83,6 +85,7 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 ## DIRC / DIRNC {#dirc}
 
 Set pin direction if C / not C
+
 [Pin](#pin) - Set pin(s) direction to input/output according to C or !C.
 
 **DIRC**  *{#}Dest*  **{WCZ}**
@@ -125,6 +128,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRH {#dirh}
 
 Set pin direction high
+
 [Pin](#pin) - Set pin(s) direction to output (high; 1).
 
 **DIRH**  *{#}Dest*  **{WCZ}**
@@ -159,6 +163,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the direction 
 ## DIRL {#dirl}
 
 Set pin direction low
+
 [Pin](#pin) - Set pin(s) direction to input (low; 0).
 
 **DIRL**  *{#}Dest*  **{WCZ}**
@@ -193,6 +198,7 @@ If the WCZ effect is specified, the Z flag is updated to the original state of t
 ## DIRNOT {#dirnot}
 
 Direction not
+
 [Pin](#pin) - Toggle pin(s) to the opposite direction.
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
@@ -231,6 +237,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRZ / DIRNZ {#dirz}
 
 Set pin direction if Z / not Z
+
 [Pin](#pin) - Set pin(s) direction to input/output according to Z or !Z.
 
 **DIRZ**  *{#}Dest*  **{WCZ}**
@@ -273,6 +280,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRRND {#dirrnd}
 
 Direction random
+
 [Pin](#pin) - Set pin(s) direction to random input/output.
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
@@ -311,6 +319,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DJF {#djf}
 
 Decrement and jump if full
+
 [Branch](#branch) - Decrement value and jump if full (-1; $FFFF_FFFF).
 
 **DJF**  *Dest, {#}Src*
@@ -343,6 +352,7 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 ## DJNF {#djnf}
 
 Decrement and jump if not full
+
 [Branch](#branch) - Decrement value and jump if not full (<> -1; <> $FFFF_FFFF).
 
 **DJNF**  *Dest, {#}Src*
@@ -377,6 +387,7 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 ## DJZ / DJNZ {#djz}
 
 Decrement and jump if zero / not zero {#djnz}
+
 [Branch](#branch) - Decrement a register and jump based on zero/non-zero result.
 
 **DJZ**  *Dest, {#}Src*
@@ -384,12 +395,7 @@ Decrement and jump if zero / not zero {#djnz}
 
 ---
 
-**Result:** Dest is decremented by 1, and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| DJZ | Result = 0 |
-| DJNZ | Result ≠ 0 |
+**Result:** Dest is decremented by 1, and conditionally jumps based on the result.
 
 - Dest is a register whose value is decremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
@@ -405,11 +411,16 @@ Decrement and jump if zero / not zero {#djnz}
 ```
 
 
-**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](instructions-i.md#ijz), [IJNZ](instructions-i.md#ijnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
 
 **Explanation:**
 
-DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero.
+DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| DJZ | Result = 0 |
+| DJNZ | Result ≠ 0 |
 
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
@@ -427,6 +438,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## DRVC / DRVNC {#drvc}
 
 Drive pins if C / not C
+
 [Pin](#pin) - Set pin(s) direction to output and output level to low/high according to C or !C.
 
 **DRVC**  *{#}Dest*  **{WCZ}**
@@ -467,6 +479,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVH {#drvh}
 
 Drive pins high
+
 [Pin](#pin) - Set pin(s) direction to output and output level high (1).
 
 **DRVH**  *{#}Dest*  **{WCZ}**
@@ -503,6 +516,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVL {#drvl}
 
 Drive pins low
+
 [Pin](#pin) - Set pin(s) direction to output and output level low (0).
 
 **DRVL**  *{#}Dest*  **{WCZ}**
@@ -541,6 +555,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVNOT {#drvnot}
 
 Drive not
+
 [Pin](#pin) - Set pin(s) direction to output and toggle to the opposite output level.
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
@@ -581,6 +596,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVZ / DRVNZ {#drvz}
 
 Drive pins if Z / not Z
+
 [Pin](#pin) - Set pin(s) direction to output and output level to low/high according to Z or !Z.
 
 **DRVZ**  *{#}Dest*  **{WCZ}**
@@ -621,6 +637,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVRND {#drvrnd}
 
 Drive random
+
 [Pin](#pin) - Set pin(s) direction to output and output level to random low/high.
 
 **DRVRND**  *{#}Dest*  **{WCZ}**

@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ## XCONT {#xcont}
 
 Execute continue
+
 [Streamer](#streamer-category) - Buffer new streamer command to continue from current phase.
 
 **XCONT**  *{#}Dest, {#}Src*
@@ -24,7 +25,7 @@ Execute continue
 | EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 
@@ -39,6 +40,7 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ## XINIT {#xinit}
 
 Execute initialize
+
 [Streamer](#streamer-category) - Issue streamer command immediately, zeroing phase.
 
 **XINIT**  *{#}Dest, {#}Src*
@@ -56,7 +58,7 @@ Execute initialize
 | EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
+**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi), [SETXFRQ](instructions-s.md#setxfrq)
 
 **Explanation:**
 
@@ -84,6 +86,7 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 ## XOR {#xor}
 
 Exclusive or
+
 [Math and Logic](#math-and-logic) - Bitwise XOR a value with another.
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
@@ -104,7 +107,7 @@ Exclusive or
 | EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
 
 
-**Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
+**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [ANDN](instructions-a.md#andn), [TEST](instructions-t.md#test)
 
 **Explanation:**
 
@@ -125,6 +128,7 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 ## XORO32 {#xoro32}
 
 Xoroshiro 32
+
 [Math and Logic](#math-and-logic) - Iterate Dest with xoroshiro32+ PRNG algorithm.
 
 **XORO32**  *Dest*
@@ -141,7 +145,7 @@ Xoroshiro 32
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
 
 
-**Related:** [GETRND](#getrnd), [SETQ](#setq)
+**Related:** [GETRND](instructions-g.md#getrnd), [SETQ](instructions-s.md#setq)
 
 **Explanation:**
 
@@ -170,6 +174,7 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ## XSTOP {#xstop}
 
 Execute stop
+
 [Streamer](#streamer-category) - Stop streamer immediately.
 
 **XSTOP**
@@ -186,7 +191,7 @@ Execute stop
 | EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 
@@ -206,6 +211,7 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 ## XZERO {#xzero}
 
 Execute zero
+
 [Streamer](#streamer-category) - Buffer new streamer command, zeroing phase.
 
 **XZERO**  *{#}Dest, {#}Src*
@@ -223,7 +229,7 @@ Execute zero
 | EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 

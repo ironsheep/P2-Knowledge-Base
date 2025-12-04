@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter Q. The Q 
 ## QDIV {#qdiv}
 
 Queue divide
+
 [CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned division with 32-bit quotient and remainder.
 
 **QDIV**  *{#}Dest, {#}Src*
@@ -25,7 +26,7 @@ Queue divide
 | EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -47,6 +48,7 @@ Division by zero produces undefined results. Each cog can issue one CORDIC instr
 ## QEXP {#qexp}
 
 Queue exponential
+
 [CORDIC Solver](#cordic-solver) - Convert 5:27-bit logarithm to 32-bit unsigned integer.
 
 **QEXP**  *{#}Dest*
@@ -63,7 +65,7 @@ Queue exponential
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -84,6 +86,7 @@ QEXP is the complement of QLOG and is commonly used together with QLOG to perfor
 ## QFRAC {#qfrac}
 
 Queue fractional divide
+
 [CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned fractional division.
 
 **QFRAC**  *{#}Dest, {#}Src*
@@ -102,7 +105,7 @@ Queue fractional divide
 | EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -123,6 +126,7 @@ The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC par
 ## QLOG {#qlog}
 
 Queue logarithm
+
 [CORDIC Solver](#cordic-solver) - Convert 32-bit unsigned integer to 5:27-bit logarithm.
 
 **QLOG**  *{#}Dest*
@@ -139,7 +143,7 @@ Queue logarithm
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QEXP](#qexp)
+**Related:** [GETQX](instructions-g.md#getqx), [QEXP](#qexp)
 
 **Explanation:**
 
@@ -158,6 +162,7 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 ## QMUL {#qmul}
 
 Queue multiply
+
 [CORDIC Solver](#cordic-solver) - Perform 32×32 unsigned multiplication producing 64-bit result.
 
 **QMUL**  *{#}Dest, {#}Src*
@@ -175,7 +180,7 @@ Queue multiply
 | EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
 **Explanation:**
 
@@ -197,6 +202,7 @@ Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allow
 ## QROTATE {#qrotate}
 
 Queue rotate
+
 [CORDIC Solver](#cordic-solver) - Rotate a 32-bit signed (X, Y) point around origin by specified angle.
 
 **QROTATE**  *{#}Dest, {#}Src*
@@ -215,7 +221,7 @@ Queue rotate
 | EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QVECTOR](#qvector)
 
 **Explanation:**
 
@@ -238,6 +244,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ## QSQRT {#qsqrt}
 
 Queue square root
+
 [CORDIC Solver](#cordic-solver) - Calculate square root of 64-bit unsigned number.
 
 **QSQRT**  *{#}Dest, {#}Src*
@@ -255,7 +262,7 @@ Queue square root
 | EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -278,6 +285,7 @@ For 32-bit square roots, use Src=0.
 ## QVECTOR {#qvector}
 
 Queue vector
+
 [CORDIC Solver](#cordic-solver) - Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
 
 **QVECTOR**  *{#}Dest, {#}Src*
@@ -295,7 +303,7 @@ Queue vector
 | EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QROTATE](#qrotate)
 
 **Explanation:**
 

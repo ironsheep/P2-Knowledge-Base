@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter T.
 ## TEST {#test}
 
 Test
+
 [Math and Logic](#math-and-logic) - Test the parity and zero state of a register value.
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
@@ -49,6 +50,7 @@ TEST is non-destructive—it does not modify Dest.
 ## TESTB {#testb}
 
 Test bit
+
 [Math and Logic](#math-and-logic) - Test a single bit in a register and write the result to C or Z.
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
@@ -94,6 +96,7 @@ TESTB is useful for examining individual bits without modifying the register val
 ## TESTBN {#testbn}
 
 Test bit negated
+
 [Math and Logic](#math-and-logic) - Test a single bit in a register, invert the result, and write to C or Z.
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
@@ -134,6 +137,7 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 ## TESTN {#testn}
 
 Test not
+
 [Math and Logic](#math-and-logic) - Test the parity and zero state of a register ANDed with an inverted value.
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -169,6 +173,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 
 Test pin / Test pin negated {#testpn}
+
 [Pin](#pin) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
 
 **TESTP**  *{#}Dest*  **WC/WZ**
@@ -206,7 +211,7 @@ Test pin / Test pin negated {#testpn}
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
-**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](#drvl), [DRVH](#drvh)
+**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](instructions-d.md#drvl), [DRVH](instructions-d.md#drvh)
 
 **Explanation:**
 
@@ -222,80 +227,58 @@ Both instructions read the actual pin state from the IN register, not the output
 
 
 
-## TJF {#tjf}
+## TJF / TJNF {#tjf}
 
-Test and jump if full
-[Branch](#branch) - Test a register value and jump if it equals $FFFF_FFFF.
+Test and jump if full / not full {#tjnf}
+
+[Branch](#branch) - Test a register value and jump based on full ($FFFF_FFFF) state.
 
 **TJF**  *Dest, {#}Src*
+**TJNF**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is tested and if it is full ($FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
+**Result:** Dest is tested and conditionally jumps based on full state.
 
-- Dest is a register whose value is tested for full.
+- Dest is a register whose value is tested for full state.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
-
-**Related:** [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-TJF tests the value in Dest and jumps to the address described by Src if the result is full (= -1; = $FFFF_FFFF).
-
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJF.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (13-20 cycles for Hub execution when taken).
-
-
-
-## TJNF {#tjnf}
-
-Test and jump if not full
-[Branch](#branch) - Test a register value and jump if it does not equal $FFFF_FFFF.
-
-**TJNF**  *Dest, {#}Src*
-
----
-
-**Result:** Dest is tested and if it is not full (<> $FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
-
-- Dest is a register whose value is tested for not full.
-- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [TJF](#tjf), [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns)
+**Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv)
 
 **Explanation:**
 
-TJNF tests the value in Dest and jumps to the address described by Src if the result is not full (<> -1; <> $FFFF_FFFF).
+TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and conditionally jump:
 
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNF.
+| Instruction | Jumps when |
+|-------------|------------|
+| TJF | Dest = $FFFF_FFFF (full) |
+| TJNF | Dest ≠ $FFFF_FFFF (not full) |
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
+
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
-## TJNS {#tjns}
+## TJS / TJNS {#tjs}
 
-Test and jump if not signed
-[Branch](#branch) - Test a register value and jump if bit 31 is clear (positive/unsigned).
+Test and jump if signed / not signed {#tjns}
 
+[Branch](#branch) - Test a register value and jump based on sign bit state.
+
+**TJS**  *Dest, {#}Src*
 **TJNS**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is tested and if it is not signed (Dest[31] = 0), PC is set to a new relative (#Src) or absolute (Src) address.
+**Result:** Dest is tested and conditionally jumps based on sign bit state.
 
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
@@ -303,22 +286,31 @@ Test and jump if not signed
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [TJS](#tjs), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJF](#tjf), [TJNF](#tjnf), [TJV](#tjv)
 
 **Explanation:**
 
-TJNS tests the value in Dest and jumps to the address described by Src if the value is not signed (Dest[31] = 0). The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNS.
+TJS and TJNS test the sign bit (bit 31) of Dest and conditionally jump:
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+| Instruction | Jumps when |
+|-------------|------------|
+| TJS | Dest[31] = 1 (negative/signed) |
+| TJNS | Dest[31] = 0 (positive/unsigned) |
+
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS/TJNS.
+
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
 ## TJZ / TJNZ {#tjz}
 
 Test and jump if zero / not zero {#tjnz}
+
 [Branch](#branch) - Test a register value and jump based on zero/non-zero result.
 
 **TJZ**  *Dest, {#}Src*
@@ -326,12 +318,7 @@ Test and jump if zero / not zero {#tjnz}
 
 ---
 
-**Result:** Dest is tested (not modified), and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| TJZ | Dest = 0 |
-| TJNZ | Dest ≠ 0 |
+**Result:** Dest is tested (not modified), and conditionally jumps based on zero/non-zero result.
 
 - Dest is a register whose value is tested (unchanged).
 - Src is the jump address: use # for relative, omit for absolute.
@@ -347,11 +334,16 @@ Test and jump if zero / not zero {#tjnz}
 ```
 
 
-**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
+**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz)
 
 **Explanation:**
 
-TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on whether the value is zero or non-zero.
+TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on whether the value is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| TJZ | Dest = 0 |
+| TJNZ | Dest ≠ 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
@@ -364,45 +356,10 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
-## TJS {#tjs}
-
-Test and jump if signed
-[Branch](#branch) - Test a register value and jump if bit 31 is set (negative).
-
-**TJS**  *Dest, {#}Src*
-
----
-
-**Result:** Dest is tested and if it is signed (Dest[31] = 1), PC is set to a new relative (#Src) or absolute (Src) address.
-
-- Dest is a register whose value is tested for sign bit.
-- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
-
-**Related:** [TJNS](#tjns), [TJF](#tjf), [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-TJS tests the value in Dest and jumps to the address described by Src if the result is signed (Dest[31] = 1).
-
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
-
-::: pasm2
-        TJS     value, #negative_handler  ' Jump if negative
-:::
-
-
-
 ## TJV {#tjv}
 
 Test and jump if overflow
+
 [Branch](#branch) - Test a register value against the C flag and jump if overflow occurred.
 
 **TJV**  *Dest, {#}Src*
@@ -420,7 +377,7 @@ Test and jump if overflow
 | EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
+**Related:** [ADDS](instructions-a.md#adds), [ADDSX](instructions-a.md#addsx), [SUBS](instructions-s.md#subs), [SUBSX](instructions-s.md#subsx)
 
 **Explanation:**
 
@@ -438,76 +395,33 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 
 
-## TRGINT1 {#trgint1}
+## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
 
-Trigger interrupt 1
-[Interrupt](#interrupt) - Software-trigger interrupt handler 1.
+Trigger interrupt (1, 2, or 3) {#trgint2} {#trgint3}
+
+[Interrupt](#interrupt) - Software-trigger interrupt handler.
 
 **TRGINT1**
+**TRGINT2**
+**TRGINT3**
 
 ---
 
-**Result:** The INT1 interrupt handler is triggered regardless of STALLI mode.
+**Result:** The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
-
-
-**Related:** [TRGINT2](#trgint2), [TRGINT3](#trgint3), [SETINT1](#setint1), [NIXINT1](#nixint1), [RETI0](#reti0)
-
-**Explanation:**
-
-TRGINT1 software-triggers interrupt handler 1, regardless of STALLI mode. This allows code to explicitly invoke the INT1 service routine without waiting for external events.
-
-
-
-## TRGINT2 {#trgint2}
-
-Trigger interrupt 2
-[Interrupt](#interrupt) - Software-trigger interrupt handler 2.
-
-**TRGINT2**
-
----
-
-**Result:** The INT2 interrupt handler is triggered regardless of STALLI mode.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |
-
-
-**Related:** [TRGINT1](#trgint1), [TRGINT3](#trgint3), [SETINT2](#setint2), [NIXINT2](#nixint2), [RETI0](#reti0)
-
-**Explanation:**
-
-TRGINT2 software-triggers interrupt handler 2, regardless of STALLI mode. This allows code to explicitly invoke the INT2 service routine without waiting for external events.
-
-
-
-## TRGINT3 {#trgint3}
-
-Trigger interrupt 3
-[Interrupt](#interrupt) - Software-trigger interrupt handler 3.
-
-**TRGINT3**
-
----
-
-**Result:** The INT3 interrupt handler is triggered regardless of STALLI mode.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100100 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [TRGINT1](#trgint1), [TRGINT2](#trgint2), [SETINT3](#setint3), [NIXINT3](#nixint3), [RETI0](#reti0)
+**Related:** [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
 **Explanation:**
 
-TRGINT3 software-triggers interrupt handler 3, regardless of STALLI mode. This allows code to explicitly invoke the INT3 service routine without waiting for external events.
+TRGINT1, TRGINT2, and TRGINT3 software-trigger their respective interrupt handlers, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
+
+The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions when you need to invoke an interrupt handler programmatically.
 

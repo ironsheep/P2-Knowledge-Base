@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter G.
 ## GETBRK {#getbrk}
 
 Get breakpoint status
+
 [Miscellaneous](#miscellaneous) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
@@ -24,7 +25,7 @@ Get breakpoint status
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
 
 
-**Related:** [BRK](#brk), [SETBRK](#setbrk), [COGBRK](#cogbrk)
+**Related:** [BRK](instructions-b.md#brk), [SETBRK](#setbrk), [COGBRK](instructions-c.md#cogbrk)
 
 **Explanation:**
 
@@ -45,6 +46,7 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 ## GETBYTE {#getbyte}
 
 Get byte
+
 [Math and Logic](#math-and-logic) - Get a byte from a value.
 
 **GETBYTE**  *Dest, {#}Src, #Num*
@@ -65,7 +67,7 @@ Get byte
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
+**Related:** [ALTGB](instructions-a.md#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](instructions-s.md#setbyte), [ROLBYTE](instructions-r.md#rolbyte)
 
 **Explanation:**
 
@@ -80,6 +82,7 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 ## GETCT {#getct}
 
 Get system counter
+
 [Miscellaneous](#miscellaneous) - Get the current system counter value into D.
 
 **GETCT**  *Dest*  **{WC}**
@@ -114,6 +117,7 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 ## GETNIB {#getnib}
 
 Get nibble
+
 [Math and Logic](#math-and-logic) - Get a nibble from a value.
 
 **GETNIB**  *Dest, {#}Src, #Num*
@@ -134,7 +138,7 @@ Get nibble
 | EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
+**Related:** [ALTGN](instructions-a.md#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](instructions-s.md#setnib), [ROLNIB](instructions-r.md#rolnib)
 
 **Explanation:**
 
@@ -149,6 +153,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 
 Get FIFO hub pointer
+
 [Hub RAM](#hub-ram) - Get current FIFO hub pointer into D.
 
 **GETPTR**  *Dest*
@@ -165,7 +170,7 @@ Get FIFO hub pointer
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFBYTE](instructions-r.md#rfbyte), [RFWORD](instructions-r.md#rfword), [RFLONG](instructions-r.md#rflong), [WFBYTE](instructions-w.md#wfbyte), [WFWORD](instructions-w.md#wfword), [WFLONG](instructions-w.md#wflong)
 
 **Explanation:**
 
@@ -180,6 +185,7 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 ## GETQX {#getqx}
 
 Get CORDIC X result
+
 [CORDIC Solver](#cordic-solver) - Retrieve CORDIC result X into D.
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
@@ -197,7 +203,7 @@ Get CORDIC X result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
+**Related:** [GETQY](#getqy), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
 
 **Explanation:**
 
@@ -216,6 +222,7 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 ## GETQY {#getqy}
 
 Get CORDIC Y result
+
 [CORDIC Solver](#cordic-solver) - Retrieve CORDIC result Y into D.
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
@@ -233,7 +240,7 @@ Get CORDIC Y result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
+**Related:** [GETQX](#getqx), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
 
 **Explanation:**
 
@@ -252,6 +259,7 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 ## GETRND {#getrnd}
 
 Get random value
+
 [Miscellaneous](#miscellaneous) - Get RND into D or C/Z flags.
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
@@ -271,7 +279,7 @@ Get random value
 | EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
 
 
-**Related:** [SETQ](#setq), [SETQ2](#setq2)
+**Related:** [SETQ](instructions-s.md#setq), [SETQ2](instructions-s.md#setq2)
 
 **Explanation:**
 
@@ -292,6 +300,7 @@ The random number generator uses a maximal-length linear feedback shift register
 ## GETSCP {#getscp}
 
 Get oscilloscope samples
+
 [Smart Pin](#smart-pin) - Get four-channel oscilloscope samples into D.
 
 **GETSCP**  *Dest*
@@ -308,7 +317,7 @@ Get oscilloscope samples
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
 
 
-**Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
+**Related:** [SETSCP](instructions-s.md#setscp), [RDPIN](instructions-r.md#rdpin), [WXPIN](instructions-w.md#wxpin)
 
 **Explanation:**
 
@@ -325,6 +334,7 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 ## GETWORD {#getword}
 
 Get word
+
 [Math and Logic](#math-and-logic) - Get a word from a value.
 
 **GETWORD**  *Dest, {#}Src, #Num*
@@ -345,7 +355,7 @@ Get word
 | EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
+**Related:** [ALTGW](instructions-a.md#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](instructions-s.md#setword), [ROLWORD](instructions-r.md#rolword)
 
 **Explanation:**
 
@@ -360,6 +370,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 
 Get Goertzel accumulators
+
 [Streamer](#streamer-category) - Get streamer's Goertzel X/Y accumulators into D and next S.
 
 **GETXACC**  *Dest*
@@ -376,7 +387,7 @@ Get Goertzel accumulators
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
 
 
-**Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
+**Related:** [XCONT](instructions-x.md#xcont), [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero)
 
 **Explanation:**
 

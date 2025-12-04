@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter M.
 ## MERGEB {#mergeb}
 
 Merge bits of bytes
+
 [Math and Logic](#math-and-logic) - Rearrange bits from each byte into a merged pattern.
 
 **MERGEB**  *D*
@@ -23,7 +24,7 @@ Merge bits of bytes
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
+**Related:** [MERGEW](#mergew), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
 
 **Explanation:**
 
@@ -38,6 +39,7 @@ MERGEB is useful for bit-plane conversions, graphics operations, and data transf
 ## MERGEW {#mergew}
 
 Merge bits of words
+
 [Math and Logic](#math-and-logic) - Rearrange bits from each word into a merged pattern.
 
 **MERGEW**  *D*
@@ -54,7 +56,7 @@ Merge bits of words
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
+**Related:** [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
 
 **Explanation:**
 
@@ -69,6 +71,7 @@ MERGEW is useful for word-level bit-plane conversions, graphics operations requi
 ## MIXPIX {#mixpix}
 
 Mix pixels
+
 [Pixel Mixer](#pixel-mixer) - Blend bytes of source into destination using pixel mixer configuration.
 
 **MIXPIX**  *D,{#}S*
@@ -86,7 +89,7 @@ Mix pixels
 | EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
+**Related:** [SETPIX](instructions-s.md#setpix), [SETPIV](instructions-s.md#setpiv), [ADDPIX](instructions-a.md#addpix), [MULPIX](#mulpix), [BLNPIX](instructions-b.md#blnpix)
 
 **Explanation:**
 
@@ -103,6 +106,7 @@ MIXPIX is essential for high-performance graphics operations, enabling real-time
 ## MODC {#modc}
 
 Modify C flag
+
 [Math and Logic](#math-and-logic) - Set or clear the C flag based on a modifier and current flag state.
 
 **MODC**  *c*  **{WC}**
@@ -120,7 +124,7 @@ Modify C flag
 | EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
 
 
-**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -139,6 +143,7 @@ If the WC effect is specified, the flag modification becomes visible to subseque
 ## MODCZ {#modcz}
 
 Modify C and Z flags
+
 [Math and Logic](#math-and-logic) - Set or clear both C and Z flags based on modifiers and current flag states.
 
 **MODCZ**  *c,z*  **{WC/WZ/WCZ}**
@@ -157,7 +162,7 @@ Modify C and Z flags
 | EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -178,6 +183,7 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 ## MODZ {#modz}
 
 Modify Z flag
+
 [Math and Logic](#math-and-logic) - Set or clear the Z flag based on a modifier and current flag state.
 
 **MODZ**  *z*  **{WZ}**
@@ -195,7 +201,7 @@ Modify Z flag
 | EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -214,6 +220,7 @@ If the WZ effect is specified, the flag modification becomes visible to subseque
 ## MOV {#mov}
 
 Move
+
 [Math and Logic](#math-and-logic) - Copy a value from source to destination.
 
 **MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -232,7 +239,7 @@ Move
 | EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
+**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](instructions-s.md#setq)
 
 **Explanation:**
 
@@ -271,6 +278,7 @@ When combined with flag effects, MOV enables efficient value testing:
 ## MOVBYTS {#movbyts}
 
 Move bytes
+
 [Math and Logic](#math-and-logic) - Rearrange bytes within a register according to a control pattern.
 
 **MOVBYTS**  *D,{#}S*
@@ -288,7 +296,7 @@ Move bytes
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
+**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [ROLBYTE](instructions-r.md#rolbyte)
 
 **Explanation:**
 
@@ -311,6 +319,7 @@ Common patterns include:
 ## MUL {#mul}
 
 Multiply
+
 [Math and Logic](#math-and-logic) - Multiply two unsigned 16-bit values to produce a 32-bit result.
 
 **MUL**  *Dest, {#}Src*  **{WZ}**
@@ -329,7 +338,7 @@ Multiply
 | EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
+**Related:** [MULS](#muls), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
 
 **Explanation:**
 
@@ -363,6 +372,7 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ## MULPIX {#mulpix}
 
 Multiply pixels
+
 [Pixel Mixer](#pixel-mixer) - Multiply corresponding bytes treating them as fractional values.
 
 **MULPIX**  *D,{#}S*
@@ -380,7 +390,7 @@ Multiply pixels
 | EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
+**Related:** [ADDPIX](instructions-a.md#addpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](#mixpix), [SETPIX](instructions-s.md#setpix)
 
 **Explanation:**
 
@@ -405,6 +415,7 @@ The instruction treats all bytes independently, so it can be used for any four-b
 ## MULS {#muls}
 
 Multiply signed
+
 [Math and Logic](#math-and-logic) - Multiply two signed 16-bit values to produce a signed 32-bit result.
 
 **MULS**  *Dest, {#}Src*  **{WZ}**
@@ -423,7 +434,7 @@ Multiply signed
 | EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
+**Related:** [MUL](#mul), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
 
 **Explanation:**
 
@@ -460,6 +471,7 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
 
 Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
+
 [Math and Logic](#math-and-logic) - Set selected bits of destination to C, NC, Z, or NZ flag value.
 
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
@@ -469,14 +481,7 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 
 ---
 
-**Result:** Each bit position in D where S has a 1 is set to the specified flag value:
-
-| Instruction | Sets bits to |
-|-------------|--------------|
-| MUXC | C flag value |
-| MUXNC | !C (inverted C) |
-| MUXZ | Z flag value |
-| MUXNZ | !Z (inverted Z) |
+**Result:** Each bit position in D where S has a 1 is set to the specified flag value. Optionally sets C to parity and Z if result is zero.
 
 - D is a register whose bits will be set to the flag value where S has 1 bits.
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
@@ -491,11 +496,20 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 | EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
 
 
-**Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MUXQ](#muxq), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
-These instructions modify selected bits in D based on a flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
+These instructions modify selected bits in D based on a flag value:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| MUXC | C flag value |
+| MUXNC | !C (inverted C) |
+| MUXZ | Z flag value |
+| MUXNZ | !Z (inverted Z) |
+
+For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
 
 MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag value.
 
@@ -516,6 +530,7 @@ These instructions provide an efficient alternative to conditional branches when
 ## MUXNIBS {#muxnibs}
 
 Multiplex nibbles
+
 [Math and Logic](#math-and-logic) - Copy non-zero nibbles from source to destination.
 
 **MUXNIBS**  *Dest, {#}Src*
@@ -533,7 +548,7 @@ Multiplex nibbles
 | EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
+**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
 
 **Explanation:**
 
@@ -558,6 +573,7 @@ The instruction treats nibbles independently, enabling parallel conditional upda
 ## MUXNITS {#muxnits}
 
 Multiplex nits
+
 [Math and Logic](#math-and-logic) - Copy non-zero bit pairs from source to destination.
 
 **MUXNITS**  *Dest, {#}Src*
@@ -575,7 +591,7 @@ Multiplex nits
 | EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
+**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
 
 **Explanation:**
 
@@ -600,6 +616,7 @@ The name "nits" comes from "nibble bits" or 2-bit fields, representing the next 
 ## MUXQ {#muxq}
 
 Multiplex Q
+
 [Math and Logic](#math-and-logic) - Copy selected bits from source to destination based on Q register mask.
 
 **MUXQ**  *Dest, {#}Src*
@@ -617,7 +634,7 @@ Multiplex Q
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Related:** [SETQ](instructions-s.md#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
 **Explanation:**
 

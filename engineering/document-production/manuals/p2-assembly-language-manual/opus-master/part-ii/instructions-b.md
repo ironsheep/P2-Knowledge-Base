@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter B.
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
 
 Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
+
 [Math and Logic](#math-and-logic) - Set bit(s) to C, NC, Z, or NZ flag state.
 
 **BITC**  *Dest, {#}Src*  **{WCZ}**
@@ -55,6 +56,7 @@ If WCZ is specified, the Z flag is set (1) if the original base bit was set, or 
 ## BITH {#bith}
 
 Bit high
+
 [Math and Logic](#math-and-logic) - Set bit(s) to high (1).
 
 **BITH**  *Dest, {#}Src*  **{WCZ}**
@@ -90,6 +92,7 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ## BITL {#bitl}
 
 Bit low
+
 [Math and Logic](#math-and-logic) - Set bit(s) to low (0).
 
 **BITL**  *Dest, {#}Src*  **{WCZ}**
@@ -125,6 +128,7 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ## BITNOT {#bitnot}
 
 Bit not
+
 [Math and Logic](#math-and-logic) - Toggle bit(s) to the opposite state.
 
 **BITNOT**  *Dest, {#}Src*  **{WCZ}**
@@ -160,6 +164,7 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 ## BITRND {#bitrnd}
 
 Bit random
+
 [Math and Logic](#math-and-logic) - Set bit(s) to random low or high values.
 
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
@@ -197,6 +202,7 @@ Each bit in the range is set independently from the PRNG, producing true random 
 ## BLNPIX {#blnpix}
 
 Blend pixels
+
 [Pixel Mixer](#pixel-mixer) - Alpha-blend RGB bytes using SETPIV value.
 
 **BLNPIX**  *Dest, {#}Src*
@@ -214,7 +220,7 @@ Blend pixels
 | EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](#addpix), [SUBPIX](#subpix), [MULPIX](#mulpix), [SETPIV](#setpiv)
+**Related:** [ADDPIX](instructions-a.md#addpix), [SUBPIX](#subpix), [MULPIX](instructions-m.md#mulpix), [SETPIV](instructions-s.md#setpiv)
 
 **Explanation:**
 
@@ -229,6 +235,7 @@ The instruction processes all three color channels (and alpha if present) in par
 ## BMASK {#bmask}
 
 Bit mask
+
 [Math and Logic](#math-and-logic) - Generate an LSB-justified bit mask.
 
 **BMASK**  *Dest, {#}Src*
@@ -248,7 +255,7 @@ Bit mask
 | EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
+**Related:** [ENCOD](instructions-e.md#encod), [DECOD](instructions-d.md#decod), [ONES](instructions-o.md#ones), [ZEROX](instructions-z.md#zerox)
 
 **Explanation:**
 
@@ -270,6 +277,7 @@ The first syntax form uses Src to specify the size, while the second syntax form
 ## BRK {#brk}
 
 Break
+
 [Interrupt](#interrupt) - Trigger breakpoint in current COG.
 
 **BRK**  *{#}Dest*
@@ -286,7 +294,7 @@ Break
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
 
-**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
+**Related:** [GETBRK](instructions-g.md#getbrk), [COGBRK](instructions-c.md#cogbrk)
 
 **Explanation:**
 

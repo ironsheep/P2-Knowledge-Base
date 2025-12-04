@@ -7,6 +7,7 @@ This section contains all PASM2 instructions beginning with the letter F.
 ## FBLOCK {#fblock}
 
 Set next block for when block wraps
+
 [Hub FIFO](#hub-fifo) - Configure the next Hub memory block for FIFO wraparound.
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -24,7 +25,7 @@ Set next block for when block wraps
 | EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFLONG](instructions-r.md#rflong), [WFLONG](instructions-w.md#wflong)
 
 **Explanation:**
 
@@ -41,6 +42,7 @@ FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-t
 ## FGE {#fge}
 
 Force greater or equal
+
 [Math and Logic](#math-and-logic) - Force unsigned value to be greater than or equal to another.
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -76,6 +78,7 @@ FGE is useful for clamping values to a minimum threshold, ensuring that a value 
 ## FGES {#fges}
 
 Force greater or equal, signed
+
 [Math and Logic](#math-and-logic) - Force signed value to be greater than or equal to another.
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -111,6 +114,7 @@ FGES is the signed counterpart to FGE and is used when working with signed value
 ## FLE {#fle}
 
 Force lesser or equal
+
 [Math and Logic](#math-and-logic) - Force unsigned value to be less than or equal to another.
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -146,6 +150,7 @@ FLE is useful for clamping values to a maximum threshold, ensuring that a value 
 ## FLES {#fles}
 
 Force lesser or equal, signed
+
 [Math and Logic](#math-and-logic) - Force signed value to be less than or equal to another.
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -181,6 +186,7 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 
 Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
+
 [Pin](#pin) - Set pin(s) to input direction with output preset according to C, NC, Z, or NZ flag.
 
 **FLTC**  *{#}Dest*  **{WCZ}**
@@ -226,6 +232,7 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ## FLTH {#flth}
 
 Float high
+
 [Pin](#pin) - Set pin(s) direction to input and to an output level of high.
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -262,6 +269,7 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ## FLTL {#fltl}
 
 Float low
+
 [Pin](#pin) - Set pin(s) direction to input and to an output level of low.
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -298,6 +306,7 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ## FLTNOT {#fltnot}
 
 Float not
+
 [Pin](#pin) - Set pin(s) direction to input and toggle to the opposite output level.
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -336,6 +345,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## FLTRND {#fltrnd}
 
 Float random
+
 [Pin](#pin) - Set pin(s) direction to input and to an output level of random low/high.
 
 **FLTRND**  *{#}Dest*  **{WCZ}**
