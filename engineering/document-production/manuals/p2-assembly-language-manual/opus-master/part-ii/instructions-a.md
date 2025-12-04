@@ -296,9 +296,9 @@ The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the 
 Allow interrupts
 [Interrupt](#interrupt) - Allow interrupts.
 
-```
-ALLOWI
-```
+**ALLOWI**
+
+---
 
 **Result:** Any stalled and future interrupts are allowed.
 
@@ -859,9 +859,9 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 Assembly clock instruction
 [System Control](#system-control) - Assembly clock instruction.
 
-```
-ASMCLK
-```
+**ASMCLK**
+
+---
 
 **Result:** Controls assembly-time clock operations.
 
