@@ -228,7 +228,7 @@ Part II instruction entries include encoding tables with the following columns:
 
 This manual uses consistent cross-reference formats:
 
-**[INSTRUCTION](#instruction)** — Hyperlink to a Part II instruction entry (in digital versions)
+**[MOV](#mov)** — Hyperlink to a Part II instruction entry (in digital versions)
 
 **"See Chapter X"** — Reference to Part I chapters for architectural context
 

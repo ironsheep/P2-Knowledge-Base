@@ -1,4 +1,4 @@
-# Appendix E: Reserved Words Reference
+# Appendix G: Reserved Words Reference
 
 This appendix lists all reserved words in PASM2. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 

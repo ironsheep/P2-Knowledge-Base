@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter T.
 ## TEST {#test}
 Test
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Tests parity and zero state of a value.
+[Arithmetic Operations](#arithmetic-operations) - Tests parity and zero state of a value.
 :::
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
@@ -52,7 +52,7 @@ TEST is non-destructive—it does not modify Dest.
 ## TESTB {#testb}
 Test Bit
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Tests a specific bit and optionally combines with flag.
+[Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
@@ -99,7 +99,7 @@ TESTB is useful for examining individual bits without modifying the register val
 ## TESTBN {#testbn}
 Test Bit Negated
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Tests a specific bit inverted and optionally combines with flag.
+[Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
@@ -141,7 +141,7 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 ## TESTN {#testn}
 Test Not
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Tests parity and zero state with inverted mask.
+[Arithmetic Operations](#arithmetic-operations) - Tests parity and zero state with inverted mask.
 :::
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -178,7 +178,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 Test Pin / Test Pin Negated {#testpn}
 
-[Pin](instruction-categories.md#pin) - Tests I/O pin state and optionally combines with flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
 **TESTP**  *{#}Dest*  **WC/WZ**
@@ -216,7 +216,7 @@ Test Pin / Test Pin Negated {#testpn}
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
-**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](instructions-d.md#drvl), [DRVH](instructions-d.md#drvh)
+**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](#drvl), [DRVH](#drvh)
 
 **Explanation:**
 
@@ -236,7 +236,7 @@ Both instructions read the actual pin state from the IN register, not the output
 ## TJF / TJNF {#tjf}
 Test And Jump If Full / Not Full {#tjnf}
 
-[Branch](instruction-categories.md#branch) - Tests for all bits set and conditionally jumps.
+[Branching and Flow Control](#branching-and-flow-control) - Tests for all bits set and conditionally jumps.
 :::
 
 **TJF**  *Dest, {#}Src*
@@ -277,7 +277,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## TJS / TJNS {#tjs}
 Test And Jump If Signed / Not Signed {#tjns}
 
-[Branch](instruction-categories.md#branch) - Tests sign bit and conditionally jumps.
+[Branching and Flow Control](#branching-and-flow-control) - Tests sign bit and conditionally jumps.
 :::
 
 **TJS**  *Dest, {#}Src*
@@ -318,7 +318,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## TJZ / TJNZ {#tjz}
 Test And Jump If Zero / Not Zero {#tjnz}
 
-[Branch](instruction-categories.md#branch) - Tests for zero and conditionally jumps.
+[Branching and Flow Control](#branching-and-flow-control) - Tests for zero and conditionally jumps.
 :::
 
 **TJZ**  *Dest, {#}Src*
@@ -342,7 +342,7 @@ Test And Jump If Zero / Not Zero {#tjnz}
 ```
 
 
-**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz)
+**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
 **Explanation:**
 
@@ -368,7 +368,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## TJV {#tjv}
 Test And Jump If Overflow
 
-[Branch](instruction-categories.md#branch) - Tests for signed overflow and conditionally jumps.
+[Branching and Flow Control](#branching-and-flow-control) - Tests for signed overflow and conditionally jumps.
 :::
 
 **TJV**  *Dest, {#}Src*
@@ -386,7 +386,7 @@ Test And Jump If Overflow
 | EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [ADDS](instructions-a.md#adds), [ADDSX](instructions-a.md#addsx), [SUBS](instructions-s.md#subs), [SUBSX](instructions-s.md#subsx)
+**Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
 
 **Explanation:**
 
@@ -408,7 +408,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
 Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
 
-[Interrupt](instruction-categories.md#interrupt) - Software-triggers an interrupt handler.
+[Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
 
 **TRGINT1**
@@ -427,7 +427,7 @@ Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
 | EEEE | 1101011 | 000 | 000100100 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
+**Related:** [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1), [RETI0/1/2/3](#reti0), [RESI0/1/2/3](#resi0)
 
 **Explanation:**
 

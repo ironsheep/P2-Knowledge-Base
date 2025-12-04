@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter N.
 ## NEG {#neg}
 Negate
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Negates a value, flipping its sign.
+[Arithmetic Operations](#arithmetic-operations) - Negates a value, flipping its sign.
 :::
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -29,7 +29,7 @@ Negate
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
 
 
-**Related:** [ABS](instructions-a.md#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
+**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
 **Explanation:**
 
@@ -47,7 +47,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
 Conditional Negate {#negnc} {#negz} {#negnz}
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Conditionally negates a value based on flag state.
+[Arithmetic Operations](#arithmetic-operations) - Conditionally negates a value based on flag state.
 :::
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -110,7 +110,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 Cancel Interrupt {#nixint2} {#nixint3}
 
-[Event](instruction-categories.md#event) - Cancels any pending interrupt event for the specified level.
+[Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
 
 **NIXINT1**
@@ -129,7 +129,7 @@ Cancel Interrupt {#nixint2} {#nixint3}
 | EEEE | 1101011 | 000 | 000100111 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [SETINT1/2/3](instructions-s.md#setint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
+**Related:** [SETINT1/2/3](#setint1), [TRGINT1/2/3](#trgint1), [RETI0/1/2/3](#reti0), [RESI0/1/2/3](#resi0)
 
 **Explanation:**
 
@@ -143,7 +143,7 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 ## NOP {#nop}
 No Operation
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Consumes two clock cycles without any operation.
+[Miscellaneous](#miscellaneous) - Consumes two clock cycles without any operation.
 :::
 
 **NOP**
@@ -158,7 +158,7 @@ No Operation
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [WAITX](instructions-w.md#waitx), [WAITCT1/2/3](instructions-w.md#waitct1)
+**Related:** [WAITX](#waitx), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
@@ -172,7 +172,7 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 ## NOT {#not}
 Bitwise Not
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Inverts all bits in a value.
+[Arithmetic Operations](#arithmetic-operations) - Inverts all bits in a value.
 :::
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -193,7 +193,7 @@ Bitwise Not
 | EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
 
 
-**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn)
+**Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
 
 **Explanation:**
 

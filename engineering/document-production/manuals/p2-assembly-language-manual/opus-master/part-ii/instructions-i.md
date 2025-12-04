@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter I.
 ## IJZ / IJNZ {#ijz}
 Increment and Jump If Zero {#ijnz}
 
-[Branch](instruction-categories.md#branch) - Increments and conditionally jumps based on the result.
+[Branching and Flow Control](#branching-and-flow-control) - Increments and conditionally jumps based on the result.
 :::
 
 **IJZ**  *Dest, {#}Src*
@@ -32,7 +32,7 @@ Increment and Jump If Zero {#ijnz}
 ```
 
 
-**Related:** [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
+**Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
@@ -53,7 +53,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## INCMOD {#incmod}
 Increment Modulus
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Increments with modulus wrap-around.
+[Arithmetic Operations](#arithmetic-operations) - Increments with modulus wrap-around.
 :::
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -72,7 +72,7 @@ Increment Modulus
 | EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
 
 
-**Related:** [DECMOD](instructions-d.md#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
+**Related:** [DECMOD](#decmod), [ADDCT1/2/3](#addct1)
 
 **Explanation:**
 

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter Q. The Q 
 ## QDIV {#qdiv}
 Queue Divide
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Divides 64-bit by 32-bit, producing quotient and remainder.
+[CORDIC Coprocessor](#cordic-coprocessor) - Divides 64-bit by 32-bit, producing quotient and remainder.
 :::
 
 **QDIV**  *{#}Dest, {#}Src*
@@ -27,7 +27,7 @@ Queue Divide
 | EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QFRAC](#qfrac), [QMUL](#qmul)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -50,7 +50,7 @@ Division by zero produces undefined results. Each cog can issue one CORDIC instr
 ## QEXP {#qexp}
 Queue Exponential
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts logarithm to integer (antilog/exponential).
+[CORDIC Coprocessor](#cordic-coprocessor) - Converts logarithm to integer (antilog/exponential).
 :::
 
 **QEXP**  *{#}Dest*
@@ -67,7 +67,7 @@ Queue Exponential
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [QLOG](#qlog), [QMUL](#qmul)
+**Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -89,7 +89,7 @@ QEXP is the complement of QLOG and is commonly used together with QLOG to perfor
 ## QFRAC {#qfrac}
 Queue Fractional Divide
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Divides 64-bit by 32-bit with reversed operand arrangement.
+[CORDIC Coprocessor](#cordic-coprocessor) - Divides 64-bit by 32-bit with reversed operand arrangement.
 :::
 
 **QFRAC**  *{#}Dest, {#}Src*
@@ -108,7 +108,7 @@ Queue Fractional Divide
 | EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QDIV](#qdiv), [QMUL](#qmul)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -130,7 +130,7 @@ The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC par
 ## QLOG {#qlog}
 Queue Logarithm
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts 32-bit integer to logarithm format.
+[CORDIC Coprocessor](#cordic-coprocessor) - Converts 32-bit integer to logarithm format.
 :::
 
 **QLOG**  *{#}Dest*
@@ -147,7 +147,7 @@ Queue Logarithm
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [QEXP](#qexp)
+**Related:** [GETQX](#getqx), [QEXP](#qexp)
 
 **Explanation:**
 
@@ -167,7 +167,7 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 ## QMUL {#qmul}
 Queue Multiply
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Multiplies two 32-bit values, producing 64-bit result.
+[CORDIC Coprocessor](#cordic-coprocessor) - Multiplies two 32-bit values, producing 64-bit result.
 :::
 
 **QMUL**  *{#}Dest, {#}Src*
@@ -185,7 +185,7 @@ Queue Multiply
 | EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
 **Explanation:**
 
@@ -208,7 +208,7 @@ Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allow
 ## QROTATE {#qrotate}
 Queue Rotate
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Rotates coordinate pair around origin by specified angle.
+[CORDIC Coprocessor](#cordic-coprocessor) - Rotates coordinate pair around origin by specified angle.
 :::
 
 **QROTATE**  *{#}Dest, {#}Src*
@@ -227,7 +227,7 @@ Queue Rotate
 | EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QVECTOR](#qvector)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
 
 **Explanation:**
 
@@ -251,7 +251,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ## QSQRT {#qsqrt}
 Queue Square Root
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Calculates square root of a 64-bit value.
+[CORDIC Coprocessor](#cordic-coprocessor) - Calculates square root of a 64-bit value.
 :::
 
 **QSQRT**  *{#}Dest, {#}Src*
@@ -269,7 +269,7 @@ Queue Square Root
 | EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [QMUL](#qmul)
+**Related:** [GETQX](#getqx), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -293,7 +293,7 @@ For 32-bit square roots, use Src=0.
 ## QVECTOR {#qvector}
 Queue Vector
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts cartesian coordinates to polar form.
+[CORDIC Coprocessor](#cordic-coprocessor) - Converts cartesian coordinates to polar form.
 :::
 
 **QVECTOR**  *{#}Dest, {#}Src*
@@ -311,7 +311,7 @@ Queue Vector
 | EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QROTATE](#qrotate)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
 
 **Explanation:**
 

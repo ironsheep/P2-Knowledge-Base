@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter B.
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
 Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets bits to match flag state.
+[Arithmetic Operations](#arithmetic-operations) - Sets bits to match flag state.
 :::
 
 **BITC**  *Dest, {#}Src*  **{WCZ}**
@@ -58,7 +58,7 @@ If WCZ is specified, the Z flag is set (1) if the original base bit was set, or 
 ## BITH {#bith}
 Bit High
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to high (1).
+[Arithmetic Operations](#arithmetic-operations) - Sets specified bits to high (1).
 :::
 
 **BITH**  *Dest, {#}Src*  **{WCZ}**
@@ -95,7 +95,7 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ## BITL {#bitl}
 Bit Low
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to low (0).
+[Arithmetic Operations](#arithmetic-operations) - Sets specified bits to low (0).
 :::
 
 **BITL**  *Dest, {#}Src*  **{WCZ}**
@@ -132,7 +132,7 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ## BITNOT {#bitnot}
 Bit Not
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Toggles specified bits to opposite state.
+[Arithmetic Operations](#arithmetic-operations) - Toggles specified bits to opposite state.
 :::
 
 **BITNOT**  *Dest, {#}Src*  **{WCZ}**
@@ -169,7 +169,7 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 ## BITRND {#bitrnd}
 Bit Random
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to random states.
+[Arithmetic Operations](#arithmetic-operations) - Sets specified bits to random states.
 :::
 
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
@@ -208,7 +208,7 @@ Each bit in the range is set independently from the PRNG, producing true random 
 ## BLNPIX {#blnpix}
 Blend Pixels
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Alpha-blends color values using SETPIV factor.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Alpha-blends color values using SETPIV factor.
 :::
 
 **BLNPIX**  *Dest, {#}Src*
@@ -226,7 +226,7 @@ Blend Pixels
 | EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](instructions-a.md#addpix), [MULPIX](instructions-m.md#mulpix), [MIXPIX](instructions-m.md#mixpix), [SETPIV](instructions-s.md#setpiv)
+**Related:** [ADDPIX](#addpix), [MULPIX](#mulpix), [MIXPIX](#mixpix), [SETPIV](#setpiv)
 
 **Explanation:**
 
@@ -242,7 +242,7 @@ The instruction processes all three color channels (and alpha if present) in par
 ## BMASK {#bmask}
 Bit Mask
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Generates an LSB-justified bit mask.
+[Arithmetic Operations](#arithmetic-operations) - Generates an LSB-justified bit mask.
 :::
 
 **BMASK**  *Dest, {#}Src*
@@ -262,7 +262,7 @@ Bit Mask
 | EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](instructions-e.md#encod), [DECOD](instructions-d.md#decod), [ONES](instructions-o.md#ones), [ZEROX](instructions-z.md#zerox)
+**Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
 
 **Explanation:**
 
@@ -285,7 +285,7 @@ The first syntax form uses Src to specify the size, while the second syntax form
 ## BRK {#brk}
 Breakpoint
 
-[Interrupt](instruction-categories.md#interrupt) - Triggers a debug breakpoint in the current COG.
+[Interrupts](#interrupts) - Triggers a debug breakpoint in the current COG.
 :::
 
 **BRK**  *{#}Dest*
@@ -302,7 +302,7 @@ Breakpoint
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
 
-**Related:** [GETBRK](instructions-g.md#getbrk), [COGBRK](instructions-c.md#cogbrk)
+**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
 
 **Explanation:**
 

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter L.
 ## LOC {#loc}
 Load Address
 
-[Hub RAM](instruction-categories.md#hub-ram) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
+[Hub Memory Access](#hub-memory-access) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
 :::
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
@@ -28,7 +28,7 @@ Load Address
 | EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
 
 
-**Related:** [PA](special-registers.md#pa), [PB](special-registers.md#pb), [PTRA](special-registers.md#ptra), [PTRB](special-registers.md#ptrb), [CALLD](instructions-c.md#calld), [CALLPA](instructions-c.md#callpa), [CALLPB](instructions-c.md#callpb)
+**Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
 
 **Explanation:**
 
@@ -46,7 +46,7 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 ## LOCKNEW {#locknew}
 Allocate New Lock
 
-[Hub Control](instruction-categories.md#hub-control) - Requests an available lock from the hardware pool.
+[COG Control and Locks](#cog-control-and-locks) - Requests an available lock from the hardware pool.
 :::
 
 **LOCKNEW**  *D*  **{WC}**
@@ -82,7 +82,7 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 ## LOCKREL {#lockrel}
 Release Lock
 
-[Hub Control](instruction-categories.md#hub-control) - Releases a lock for other COGs to acquire.
+[COG Control and Locks](#cog-control-and-locks) - Releases a lock for other COGs to acquire.
 :::
 
 **LOCKREL**  *{#}D*  **{WC}**
@@ -100,7 +100,7 @@ Release Lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
+**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
 
 **Explanation:**
 
@@ -118,7 +118,7 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 ## LOCKRET {#lockret}
 Return Lock To Pool
 
-[Hub Control](instruction-categories.md#hub-control) - Returns a lock to the pool for reallocation by LOCKNEW.
+[COG Control and Locks](#cog-control-and-locks) - Returns a lock to the pool for reallocation by LOCKNEW.
 :::
 
 **LOCKRET**  *{#}D*
@@ -153,7 +153,7 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 ## LOCKTRY {#locktry}
 Try To Acquire Lock
 
-[Hub Control](instruction-categories.md#hub-control) - Attempts to acquire a lock using atomic test-and-set.
+[COG Control and Locks](#cog-control-and-locks) - Attempts to acquire a lock using atomic test-and-set.
 :::
 
 **LOCKTRY**  *{#}D*  **{WC}**
@@ -171,7 +171,7 @@ Try To Acquire Lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
+**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
 
 **Explanation:**
 

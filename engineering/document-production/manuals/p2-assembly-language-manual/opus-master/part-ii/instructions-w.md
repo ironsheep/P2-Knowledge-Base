@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter W.
 ## WAITATN {#waitatn}
 Wait For Attention
 
-[Event](instruction-categories.md#event) - Waits for an attention event from another cog.
+[Events and Timing](#events-and-timing) - Waits for an attention event from another cog.
 :::
 
 **WAITATN**  **{WC|WZ|WCZ}**
@@ -25,7 +25,7 @@ Wait For Attention
 | EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn), [JATN](instructions-j.md#jatn), [JNATN](instructions-j.md#jnatn)
+**Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
 
 **Explanation:**
 
@@ -45,7 +45,7 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
 Wait For Counter Event {#waitct2} {#waitct3}
 
-[Event](instruction-categories.md#event) - Waits for a counter event flag to be set.
+[Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
 
 **WAITCT1**  **{WC|WZ|WCZ}**
@@ -66,7 +66,7 @@ Wait For Counter Event {#waitct2} {#waitct3}
 | EEEE | 1101011 | CZ0 | 000010011 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [ADDCT1](instructions-a.md#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](instructions-p.md#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](instructions-j.md#jct1), [JCT2](#jct2), [JCT3](#jct3)
+**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
 **Explanation:**
 
@@ -82,7 +82,7 @@ To set an optional timeout, insert a SETQ instruction immediately before the WAI
 ## WAITFBW {#waitfbw}
 Wait For FIFO Block Wrap
 
-[Event](instruction-categories.md#event) - Waits for a FIFO block wrap event.
+[Events and Timing](#events-and-timing) - Waits for a FIFO block wrap event.
 :::
 
 **WAITFBW**  **{WC|WZ|WCZ}**
@@ -99,7 +99,7 @@ Wait For FIFO Block Wrap
 | EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](#wrfast), [FBLOCK](instructions-f.md#fblock), [POLLFBW](instructions-p.md#pollfbw)
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
 
 **Explanation:**
 
@@ -113,7 +113,7 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 ## WAITINT {#waitint}
 Wait For Interrupt
 
-[Event](instruction-categories.md#event) - Waits for an interrupt event to occur.
+[Events and Timing](#events-and-timing) - Waits for an interrupt event to occur.
 :::
 
 **WAITINT**  **{WC|WZ|WCZ}**
@@ -130,7 +130,7 @@ Wait For Interrupt
 | EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [POLLINT](instructions-p.md#pollint), [JINT](instructions-j.md#jint), [JNINT](instructions-j.md#jnint)
+**Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
 
 **Explanation:**
 
@@ -144,7 +144,7 @@ The interrupt-occurred event flag is cleared upon cog start or execution of POLL
 ## WAITPAT {#waitpat}
 Wait For Pattern
 
-[Event](instruction-categories.md#event) - Waits for a pin pattern match event.
+[Events and Timing](#events-and-timing) - Waits for a pin pattern match event.
 :::
 
 **WAITPAT**  **{WC|WZ|WCZ}**
@@ -161,7 +161,7 @@ Wait For Pattern
 | EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat), [JPAT](instructions-j.md#jpat), [JNPAT](instructions-j.md#jnpat)
+**Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
 **Explanation:**
 
@@ -180,7 +180,7 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
 Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
 
-[Event](instruction-categories.md#event) - Waits for a selectable event flag to be set.
+[Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
 
 **WAITSE1**  **{WC|WZ|WCZ}**
@@ -203,7 +203,7 @@ Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
 | EEEE | 1101011 | CZ0 | 000010111 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
+**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -217,7 +217,7 @@ Each selectable event flag is cleared by execution of its respective SETSEn, POL
 ## WAITX {#waitx}
 Wait Cycles
 
-[Event](instruction-categories.md#event) - Stalls the cog for a precise number of clock cycles.
+[Events and Timing](#events-and-timing) - Stalls the cog for a precise number of clock cycles.
 :::
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
@@ -253,7 +253,7 @@ WAITX blocks cog execution completely—no instructions execute and no interrupt
 ## WAITXFI {#waitxfi}
 Wait For Streamer Finished
 
-[Event](instruction-categories.md#event) - Waits for the streamer to finish all commands.
+[Events and Timing](#events-and-timing) - Waits for the streamer to finish all commands.
 :::
 
 **WAITXFI**  **{WC|WZ|WCZ}**
@@ -270,7 +270,7 @@ Wait For Streamer Finished
 | EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
+**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
 **Explanation:**
 
@@ -284,7 +284,7 @@ The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCON
 ## WAITXMT {#waitxmt}
 Wait For Streamer Empty
 
-[Event](instruction-categories.md#event) - Waits for the streamer to be ready for a new command.
+[Events and Timing](#events-and-timing) - Waits for the streamer to be ready for a new command.
 :::
 
 **WAITXMT**  **{WC|WZ|WCZ}**
@@ -301,7 +301,7 @@ Wait For Streamer Empty
 | EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
+**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
 **Explanation:**
 
@@ -315,7 +315,7 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 ## WAITXRL {#waitxrl}
 Wait For Streamer LUT Rollover
 
-[Event](instruction-categories.md#event) - Waits for the streamer LUT RAM rollover event.
+[Events and Timing](#events-and-timing) - Waits for the streamer LUT RAM rollover event.
 :::
 
 **WAITXRL**  **{WC|WZ|WCZ}**
@@ -332,7 +332,7 @@ Wait For Streamer LUT Rollover
 | EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](instructions-p.md#pollxrl)
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
 
 **Explanation:**
 
@@ -346,7 +346,7 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 ## WAITXRO {#waitxro}
 Wait For Streamer NCO Rollover
 
-[Event](instruction-categories.md#event) - Waits for the streamer NCO rollover event.
+[Events and Timing](#events-and-timing) - Waits for the streamer NCO rollover event.
 :::
 
 **WAITXRO**  **{WC|WZ|WCZ}**
@@ -363,7 +363,7 @@ Wait For Streamer NCO Rollover
 | EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](instructions-p.md#pollxro)
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
 
 **Explanation:**
 
@@ -377,7 +377,7 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ## WFBYTE {#wfbyte}
 Write FIFO Byte
 
-[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a byte to the Hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to the Hub FIFO interface.
 :::
 
 **WFBYTE**  *{#}Dest*
@@ -408,7 +408,7 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ## WFLONG {#wflong}
 Write FIFO Long
 
-[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a long to the Hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a long to the Hub FIFO interface.
 :::
 
 **WFLONG**  *{#}Dest*
@@ -439,7 +439,7 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ## WFWORD {#wfword}
 Write FIFO Word
 
-[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a word to the Hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a word to the Hub FIFO interface.
 :::
 
 **WFWORD**  *{#}Dest*
@@ -470,7 +470,7 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ## WMLONG {#wmlong}
 Write Masked Long
 
-[Hub RAM](instruction-categories.md#hub-ram) - Writes only non-zero bytes to Hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes only non-zero bytes to Hub RAM.
 :::
 
 **WMLONG**  *Dest, {#}Src/P*
@@ -504,7 +504,7 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 ## WRBYTE {#wrbyte}
 Write Byte
 
-[Hub RAM](instruction-categories.md#hub-ram) - Writes a byte to Hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to Hub RAM.
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
@@ -522,7 +522,7 @@ Write Byte
 | EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](instructions-r.md#rdbyte)
+**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
 
 **Explanation:**
 
@@ -540,7 +540,7 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
 Write Flag To Register {#wrnc} {#wrz} {#wrnz}
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Writes 0 or 1 to register based on flag state.
+[Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
 
 **WRC**  *Dest*
@@ -582,7 +582,7 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ## WRFAST {#wrfast}
 Write FIFO Setup
 
-[Hub FIFO](instruction-categories.md#hub-fifo) - Configures the Hub FIFO for fast writes.
+[Hub Memory Access](#hub-memory-access) - Configures the Hub FIFO for fast writes.
 :::
 
 **WRFAST**  *{#}Dest, {#}Src*
@@ -600,7 +600,7 @@ Write FIFO Setup
 | EEEE | 1100100 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 3 |
 
 
-**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](instructions-r.md#rdfast)
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](#rdfast)
 
 **Explanation:**
 
@@ -621,7 +621,7 @@ Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increme
 ## WRLONG {#wrlong}
 Write Long
 
-[Hub RAM](instruction-categories.md#hub-ram) - Writes a long to Hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a long to Hub RAM.
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
@@ -639,7 +639,7 @@ Write Long
 | EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](instructions-r.md#rdlong)
+**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
 
 **Explanation:**
 
@@ -660,7 +660,7 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
 ## WRLUT {#wrlut}
 Write LUT
 
-[Lookup Table](instruction-categories.md#lookup-table) - Writes a value to Lookup Table RAM.
+[Lookup Table](#lookup-table) - Writes a value to Lookup Table RAM.
 :::
 
 **WRLUT**  *{#}Dest, {#}Src/P*
@@ -678,7 +678,7 @@ Write LUT
 | EEEE | 1100001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [RDLUT](instructions-r.md#rdlut), [WRLONG](#wrlong), [SETQ](instructions-s.md#setq)
+**Related:** [RDLUT](#rdlut), [WRLONG](#wrlong), [SETQ](#setq)
 
 **Explanation:**
 
@@ -698,7 +698,7 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ## WRPIN {#wrpin}
 Write Pin Mode
 
-[Smart Pin](instruction-categories.md#smart-pin) - Configures the operating mode of a Smart Pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the operating mode of a Smart Pin.
 :::
 
 **WRPIN**  *{#}Dest, {#}Src*
@@ -716,7 +716,7 @@ Write Pin Mode
 | EEEE | 1100000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](instructions-r.md#rdpin), [AKPIN](instructions-a.md#akpin)
+**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin), [AKPIN](#akpin)
 
 **Explanation:**
 
@@ -746,7 +746,7 @@ WRPIN #0, pin clears all smart pin configuration.
 ## WRWORD {#wrword}
 Write Word
 
-[Hub RAM](instruction-categories.md#hub-ram) - Writes a word to Hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a word to Hub RAM.
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
@@ -764,7 +764,7 @@ Write Word
 | EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](instructions-r.md#rdword)
+**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
 
 **Explanation:**
 
@@ -778,7 +778,7 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ## WXPIN {#wxpin}
 Write Pin X Parameter
 
-[Smart Pin](instruction-categories.md#smart-pin) - Sets the X parameter of a Smart Pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the X parameter of a Smart Pin.
 :::
 
 **WXPIN**  *{#}Dest, {#}Src*
@@ -796,7 +796,7 @@ Write Pin X Parameter
 | EEEE | 1100000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](instructions-r.md#rdpin)
+**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
 **Explanation:**
 
@@ -815,7 +815,7 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ## WYPIN {#wypin}
 Write Pin Y Parameter
 
-[Smart Pin](instruction-categories.md#smart-pin) - Sets the Y parameter of a Smart Pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the Y parameter of a Smart Pin.
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*
@@ -833,7 +833,7 @@ Write Pin Y Parameter
 | EEEE | 1100001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](instructions-r.md#rdpin)
+**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](#rdpin)
 
 **Explanation:**
 

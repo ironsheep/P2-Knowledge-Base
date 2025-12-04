@@ -1,4 +1,4 @@
-# Streamer Configuration Constants
+# Appendix F: Streamer Mode Constants
 
 PASM2 provides predefined constants for configuring the P2's Streamer—a powerful DMA-like engine that transfers data between hub RAM, LUT RAM, pins, and DAC outputs. These constants replace complex bit patterns with readable symbolic names.
 
@@ -305,11 +305,11 @@ The Streamer supports various data packing/unpacking modes:
 
 ## Related Instructions
 
-- [XINIT](instructions-x.md#xinit) — Initialize Streamer with mode and NCO rate
-- [XCONT](instructions-x.md#xcont) — Continue Streamer with new parameters
-- [XSTOP](instructions-x.md#xstop) — Stop Streamer operation
-- [XZERO](instructions-x.md#xzero) — Zero Streamer and stop
-- [RDFAST](instructions-r.md#rdfast) — Set up hub-to-FIFO reading
-- [WRFAST](instructions-w.md#wrfast) — Set up FIFO-to-hub writing
-- [SETLUTS](instructions-s.md#setluts) — Configure LUT for Streamer use
+- [XINIT](#xinit) — Initialize Streamer with mode and NCO rate
+- [XCONT](#xcont) — Continue Streamer with new parameters
+- [XSTOP](#xstop) — Stop Streamer operation
+- [XZERO](#xzero) — Zero Streamer and stop
+- [RDFAST](#rdfast) — Set up hub-to-FIFO reading
+- [WRFAST](#wrfast) — Set up FIFO-to-hub writing
+- [SETLUTS](#setluts) — Configure LUT for Streamer use
 

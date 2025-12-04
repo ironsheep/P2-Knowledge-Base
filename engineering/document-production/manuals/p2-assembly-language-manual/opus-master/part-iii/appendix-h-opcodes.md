@@ -1,4 +1,4 @@
-# Appendix F: Opcode Bit Patterns Reference
+# Appendix H: Opcode Bit Patterns Reference
 
 ## Instruction Word Format
 

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter M.
 ## MERGEB {#mergeb}
 Merge Bits Of Bytes
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bits by extracting one bit from each byte and merging them.
+[Arithmetic Operations](#arithmetic-operations) - Rearranges bits by extracting one bit from each byte and merging them.
 :::
 
 **MERGEB**  *D*
@@ -25,7 +25,7 @@ Merge Bits Of Bytes
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEW](#mergew), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
+**Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
 
 **Explanation:**
 
@@ -41,7 +41,7 @@ MERGEB is useful for bit-plane conversions, graphics operations, and data transf
 ## MERGEW {#mergew}
 Merge Bits Of Words
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bits by interleaving from the two 16-bit words.
+[Arithmetic Operations](#arithmetic-operations) - Rearranges bits by interleaving from the two 16-bit words.
 :::
 
 **MERGEW**  *D*
@@ -58,7 +58,7 @@ Merge Bits Of Words
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
+**Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
 
 **Explanation:**
 
@@ -74,7 +74,7 @@ MERGEW is useful for word-level bit-plane conversions, graphics operations requi
 ## MIXPIX {#mixpix}
 Mix Pixels
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Blends pixel bytes according to SETPIX and SETPIV configuration.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Blends pixel bytes according to SETPIX and SETPIV configuration.
 :::
 
 **MIXPIX**  *D,{#}S*
@@ -92,7 +92,7 @@ Mix Pixels
 | EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [SETPIX](instructions-s.md#setpix), [SETPIV](instructions-s.md#setpiv), [ADDPIX](instructions-a.md#addpix), [MULPIX](#mulpix), [BLNPIX](instructions-b.md#blnpix)
+**Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
 
 **Explanation:**
 
@@ -110,7 +110,7 @@ MIXPIX is essential for high-performance graphics operations, enabling real-time
 ## MODC {#modc}
 Modify C Flag
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears C flag based on a modifier and current flag states.
+[Arithmetic Operations](#arithmetic-operations) - Sets or clears C flag based on a modifier and current flag states.
 :::
 
 **MODC**  *c*  **{WC}**
@@ -128,7 +128,7 @@ Modify C Flag
 | EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
 
 
-**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
+**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
@@ -148,7 +148,7 @@ If the WC effect is specified, the flag modification becomes visible to subseque
 ## MODCZ {#modcz}
 Modify C And Z Flags
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears both C and Z flags based on modifiers.
+[Arithmetic Operations](#arithmetic-operations) - Sets or clears both C and Z flags based on modifiers.
 :::
 
 **MODCZ**  *c,z*  **{WC/WZ/WCZ}**
@@ -167,7 +167,7 @@ Modify C And Z Flags
 | EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
+**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
@@ -189,7 +189,7 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 ## MODZ {#modz}
 Modify Z Flag
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears Z flag based on a modifier and current flag states.
+[Arithmetic Operations](#arithmetic-operations) - Sets or clears Z flag based on a modifier and current flag states.
 :::
 
 **MODZ**  *z*  **{WZ}**
@@ -207,7 +207,7 @@ Modify Z Flag
 | EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
+**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
@@ -227,7 +227,7 @@ If the WZ effect is specified, the flag modification becomes visible to subseque
 ## MOV {#mov}
 Move
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Copies a value from source to destination register.
+[Arithmetic Operations](#arithmetic-operations) - Copies a value from source to destination register.
 :::
 
 **MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -246,7 +246,7 @@ Move
 | EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](instructions-s.md#setq)
+**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
 
 **Explanation:**
 
@@ -286,7 +286,7 @@ When combined with flag effects, MOV enables efficient value testing:
 ## MOVBYTS {#movbyts}
 Move Bytes
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bytes within a register according to a selection pattern.
+[Arithmetic Operations](#arithmetic-operations) - Rearranges bytes within a register according to a selection pattern.
 :::
 
 **MOVBYTS**  *D,{#}S*
@@ -304,7 +304,7 @@ Move Bytes
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [ROLBYTE](instructions-r.md#rolbyte)
+**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
 
 **Explanation:**
 
@@ -328,7 +328,7 @@ Common patterns include:
 ## MUL {#mul}
 Multiply
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Multiplies two 16-bit unsigned values, producing 32-bit result.
+[Arithmetic Operations](#arithmetic-operations) - Multiplies two 16-bit unsigned values, producing 32-bit result.
 :::
 
 **MUL**  *Dest, {#}Src*  **{WZ}**
@@ -347,7 +347,7 @@ Multiply
 | EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MULS](#muls), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
+**Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
 **Explanation:**
 
@@ -382,7 +382,7 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ## MULPIX {#mulpix}
 Multiply Pixels
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Multiplies corresponding pixel bytes in parallel.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Multiplies corresponding pixel bytes in parallel.
 :::
 
 **MULPIX**  *D,{#}S*
@@ -400,7 +400,7 @@ Multiply Pixels
 | EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](instructions-a.md#addpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](#mixpix), [SETPIX](instructions-s.md#setpix)
+**Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
 
 **Explanation:**
 
@@ -426,7 +426,7 @@ The instruction treats all bytes independently, so it can be used for any four-b
 ## MULS {#muls}
 Multiply Signed
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Multiplies two signed 16-bit values, producing signed 32-bit result.
+[Arithmetic Operations](#arithmetic-operations) - Multiplies two signed 16-bit values, producing signed 32-bit result.
 :::
 
 **MULS**  *Dest, {#}Src*  **{WZ}**
@@ -445,7 +445,7 @@ Multiply Signed
 | EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MUL](#mul), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
+**Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
 **Explanation:**
 
@@ -483,7 +483,7 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
 Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sets selected bits to a flag value based on mask.
+[Arithmetic Operations](#arithmetic-operations) - Sets selected bits to a flag value based on mask.
 :::
 
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
@@ -508,7 +508,7 @@ Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
 | EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
 
 
-**Related:** [MUXQ](#muxq), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
+**Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
@@ -543,7 +543,7 @@ These instructions provide an efficient alternative to conditional branches when
 ## MUXNIBS {#muxnibs}
 Multiplex Nibbles
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Replaces nibbles in Dest where Src nibbles are non-zero.
+[Arithmetic Operations](#arithmetic-operations) - Replaces nibbles in Dest where Src nibbles are non-zero.
 :::
 
 **MUXNIBS**  *Dest, {#}Src*
@@ -561,7 +561,7 @@ Multiplex Nibbles
 | EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
+**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
 **Explanation:**
 
@@ -587,7 +587,7 @@ The instruction treats nibbles independently, enabling parallel conditional upda
 ## MUXNITS {#muxnits}
 Multiplex Nits
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Replaces bit pairs in Dest where Src bit pairs are non-zero.
+[Arithmetic Operations](#arithmetic-operations) - Replaces bit pairs in Dest where Src bit pairs are non-zero.
 :::
 
 **MUXNITS**  *Dest, {#}Src*
@@ -605,7 +605,7 @@ Multiplex Nits
 | EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
+**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
 **Explanation:**
 
@@ -631,7 +631,7 @@ The name "nits" comes from "nibble bits" or 2-bit fields, representing the next 
 ## MUXQ {#muxq}
 Multiplex Q
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Copies bits from Src to Dest at positions where Q has 1 bits.
+[Arithmetic Operations](#arithmetic-operations) - Copies bits from Src to Dest at positions where Q has 1 bits.
 :::
 
 **MUXQ**  *Dest, {#}Src*
@@ -649,7 +649,7 @@ Multiplex Q
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETQ](instructions-s.md#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
 **Explanation:**
 

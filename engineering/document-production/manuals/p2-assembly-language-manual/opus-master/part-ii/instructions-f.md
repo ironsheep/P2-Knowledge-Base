@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter F.
 ## FBLOCK {#fblock}
 Set Next FIFO Block
 
-[Hub FIFO](instruction-categories.md#hub-fifo) - Configures the next block for FIFO wraparound operations.
+[Hub Memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
 :::
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -26,7 +26,7 @@ Set Next FIFO Block
 | EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFLONG](instructions-r.md#rflong), [WFLONG](instructions-w.md#wflong)
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
 
 **Explanation:**
 
@@ -44,7 +44,7 @@ FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-t
 ## FGE {#fge}
 Force Greater or Equal
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Forces unsigned Dest to be at least Src (minimum clamp).
+[Arithmetic Operations](#arithmetic-operations) - Forces unsigned Dest to be at least Src (minimum clamp).
 :::
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -81,7 +81,7 @@ FGE is useful for clamping values to a minimum threshold, ensuring that a value 
 ## FGES {#fges}
 Force Greater or Equal Signed
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Forces signed Dest to be at least Src (minimum clamp).
+[Arithmetic Operations](#arithmetic-operations) - Forces signed Dest to be at least Src (minimum clamp).
 :::
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -118,7 +118,7 @@ FGES is the signed counterpart to FGE and is used when working with signed value
 ## FLE {#fle}
 Force Less or Equal
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Forces unsigned Dest to be at most Src (maximum clamp).
+[Arithmetic Operations](#arithmetic-operations) - Forces unsigned Dest to be at most Src (maximum clamp).
 :::
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -155,7 +155,7 @@ FLE is useful for clamping values to a maximum threshold, ensuring that a value 
 ## FLES {#fles}
 Force Less or Equal Signed
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Forces signed Dest to be at most Src (maximum clamp).
+[Arithmetic Operations](#arithmetic-operations) - Forces signed Dest to be at most Src (maximum clamp).
 :::
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -192,7 +192,7 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset by flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
 **FLTC**  *{#}Dest*  **{WCZ}**
@@ -239,7 +239,7 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ## FLTH {#flth}
 Float High
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset high.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
 :::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -277,7 +277,7 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ## FLTL {#fltl}
 Float Low
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset low.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
 :::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -315,7 +315,7 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ## FLTNOT {#fltnot}
 Float Not
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction with output toggled.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -355,7 +355,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## FLTRND {#fltrnd}
 Float Random
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction with random output levels.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**

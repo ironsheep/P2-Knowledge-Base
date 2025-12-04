@@ -1,4 +1,4 @@
-# SmartPin Configuration Constants
+# Appendix E: Smart Pin Mode Constants
 
 PASM2 provides an extensive set of predefined constants for configuring the P2's 64 Smart Pins. These constants replace complex 32-bit configuration patterns with readable symbolic names, making SmartPin programming practical and maintainable.
 
@@ -336,10 +336,10 @@ SmartPin constants are designed to be combined using OR operations. The bit fiel
 
 ## Related Instructions
 
-- [WRPIN](instructions-w.md#wrpin) — Write SmartPin mode register
-- [WXPIN](instructions-w.md#wxpin) — Write SmartPin X register (period, bit timing, etc.)
-- [WYPIN](instructions-w.md#wypin) — Write SmartPin Y register (duty, data, etc.)
-- [RDPIN](instructions-r.md#rdpin) — Read SmartPin result and clear flag
-- [RQPIN](instructions-r.md#rqpin) — Read SmartPin result without clearing flag
-- [AKPIN](instructions-a.md#akpin) — Acknowledge SmartPin (clear flag only)
+- [WRPIN](#wrpin) — Write SmartPin mode register
+- [WXPIN](#wxpin) — Write SmartPin X register (period, bit timing, etc.)
+- [WYPIN](#wypin) — Write SmartPin Y register (duty, data, etc.)
+- [RDPIN](#rdpin) — Read SmartPin result and clear flag
+- [RQPIN](#rqpin) — Read SmartPin result without clearing flag
+- [AKPIN](#akpin) — Acknowledge SmartPin (clear flag only)
 

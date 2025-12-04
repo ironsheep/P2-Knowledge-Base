@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter S.
 ## SAL {#sal}
 Shift Arithmetic Left
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left, extending the original LSB into new rightmost bits.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits left, extending the original LSB into new rightmost bits.
 :::
 
 **SAL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -43,7 +43,7 @@ SAL shifts the destination's binary value left by the source number of places (0
 ## SAR {#sar}
 Shift Arithmetic Right
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right, preserving the sign bit for signed division.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits right, preserving the sign bit for signed division.
 :::
 
 **SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -78,7 +78,7 @@ SAR shifts the destination's binary value right by the source number of places (
 ## SCA {#sca}
 Scale
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Scales unsigned 16-bit values by multiplying and right-shifting.
+[Arithmetic Operations](#arithmetic-operations) - Scales unsigned 16-bit values by multiplying and right-shifting.
 :::
 
 **SCA**  *Dest, {#}Src*  **{WZ}**
@@ -114,7 +114,7 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 ## SCAS {#scas}
 Scale Signed
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Scales signed 16-bit values by multiplying and right-shifting.
+[Arithmetic Operations](#arithmetic-operations) - Scales signed 16-bit values by multiplying and right-shifting.
 :::
 
 **SCAS**  *Dest, {#}Src*  **{WZ}**
@@ -145,7 +145,7 @@ SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right
 ## SETBYTE {#setbyte}
 Set Byte
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Writes an 8-bit value to a specific byte position within a register.
+[Arithmetic Operations](#arithmetic-operations) - Writes an 8-bit value to a specific byte position within a register.
 :::
 
 **SETBYTE**  *Dest, {#}Src, #N*
@@ -168,7 +168,7 @@ Set Byte
 
 *Dest and byte ID specified by prior ALTSB instruction.
 
-**Related:** [ALTSB](instructions-a.md#altsb), [SETNIB](#setnib), [SETWORD](#setword), [GETBYTE](instructions-g.md#getbyte)
+**Related:** [ALTSB](#altsb), [SETNIB](#setnib), [SETWORD](#setword), [GETBYTE](#getbyte)
 
 **Explanation:**
 
@@ -184,7 +184,7 @@ SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte a
 ## SETCFRQ {#setcfrq}
 Set Colorspace Converter Frequency
 
-[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the frequency parameter for colorspace conversion hardware.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the frequency parameter for colorspace conversion hardware.
 :::
 
 **SETCFRQ**  *{#}Dest*
@@ -213,7 +213,7 @@ Sets the colorspace converter CFRQ parameter to the value in Dest. This instruct
 ## SETCI {#setci}
 Set Colorspace Converter CI
 
-[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CI parameter for colorspace conversion hardware.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the CI parameter for colorspace conversion hardware.
 :::
 
 **SETCI**  *{#}Dest*
@@ -242,7 +242,7 @@ Sets the colorspace converter CI parameter to the value in Dest. This instructio
 ## SETCMOD {#setcmod}
 Set Colorspace Converter Mode
 
-[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the mode parameter for colorspace conversion hardware.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the mode parameter for colorspace conversion hardware.
 :::
 
 **SETCMOD**  *{#}Dest*
@@ -271,7 +271,7 @@ Sets the colorspace converter CMOD parameter to Dest[8:0]. This instruction conf
 ## SETCQ {#setcq}
 Set Colorspace Converter CQ
 
-[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CQ parameter for colorspace conversion hardware.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the CQ parameter for colorspace conversion hardware.
 :::
 
 **SETCQ**  *{#}Dest*
@@ -300,7 +300,7 @@ Sets the colorspace converter CQ parameter to the value in Dest. This instructio
 ## SETCY {#setcy}
 Set Colorspace Converter CY
 
-[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CY parameter for colorspace conversion hardware.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the CY parameter for colorspace conversion hardware.
 :::
 
 **SETCY**  *{#}Dest*
@@ -329,7 +329,7 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 ## SETD {#setd}
 Set Destination Field
 
-[Register Indirection](instruction-categories.md#register-indirection) - Sets the D field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the D field of a template for use with ALTI instruction.
 :::
 
 **SETD**  *Dest, {#}Src*
@@ -347,7 +347,7 @@ Set Destination Field
 | EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETS](#sets), [SETR](#setr), [ALTI](instructions-a.md#alti)
+**Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
 
 **Explanation:**
 
@@ -361,7 +361,7 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETDACS {#setdacs}
 Set DACs
 
-[Smart Pin](instruction-categories.md#smart-pin) - Sets all four DAC channels simultaneously from a single register.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
 :::
 
 **SETDACS**  *{#}Dest*
@@ -388,7 +388,7 @@ Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 rece
 ## SETINT1 / SETINT2 / SETINT3 {#setint1}
 Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
 
-[Interrupt](instruction-categories.md#interrupt) - Configures which event triggers the specified interrupt level.
+[Interrupts](#interrupts) - Configures which event triggers the specified interrupt level.
 :::
 
 **SETINT1**  *{#}Dest*
@@ -409,7 +409,7 @@ Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100111 | --- | --- | --- | 2 |
 
 
-**Related:** [NIXINT1/2/3](instructions-n.md#nixint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
+**Related:** [NIXINT1/2/3](#nixint1), [TRGINT1/2/3](#trgint1), [RETI0/1/2/3](#reti0), [RESI0/1/2/3](#resi0)
 
 **Explanation:**
 
@@ -423,7 +423,7 @@ The P2 provides three configurable interrupt levels (INT1-INT3), each of which c
 ## SETLUTS {#setluts}
 Set LUT Sharing
 
-[Lookup Table](instruction-categories.md#lookup-table) - Enables or disables LUT sharing between adjacent cog pairs.
+[Lookup Table](#lookup-table) - Enables or disables LUT sharing between adjacent cog pairs.
 :::
 
 **SETLUTS**  *{#}Dest*
@@ -440,7 +440,7 @@ Set LUT Sharing
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110111 | --- | --- | --- | 2 |
 
 
-**Related:** [RDLUT](instructions-r.md#rdlut), [WRLUT](instructions-w.md#wrlut)
+**Related:** [RDLUT](#rdlut), [WRLUT](#wrlut)
 
 **Explanation:**
 
@@ -452,7 +452,7 @@ Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LU
 ## SETNIB {#setnib}
 Set Nibble
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Writes a 4-bit value to a specific nibble position within a register.
+[Arithmetic Operations](#arithmetic-operations) - Writes a 4-bit value to a specific nibble position within a register.
 :::
 
 **SETNIB**  *Dest, {#}Src, #N*
@@ -475,7 +475,7 @@ Set Nibble
 
 *Dest and nibble ID specified by prior ALTSN instruction.
 
-**Related:** [ALTSN](instructions-a.md#altsn), [SETBYTE](#setbyte), [SETWORD](#setword), [GETNIB](instructions-g.md#getnib)
+**Related:** [ALTSN](#altsn), [SETBYTE](#setbyte), [SETWORD](#setword), [GETNIB](#getnib)
 
 **Explanation:**
 
@@ -491,7 +491,7 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 ## SETPAT {#setpat}
 Set Pin Pattern
 
-[Pin](instruction-categories.md#pin) - Configures pin pattern matching for PAT event detection.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
 :::
 
 **SETPAT**  *{#}Dest, {#}Src*
@@ -509,7 +509,7 @@ Set Pin Pattern
 | EEEE | 1011111 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [POLLPAT](instructions-p.md#pollpat), [WAITPAT](instructions-w.md#waitpat)
+**Related:** [POLLPAT](#pollpat), [WAITPAT](#waitpat)
 
 **Explanation:**
 
@@ -521,7 +521,7 @@ Sets pin pattern for PAT event detection. The C flag selects INA or INB for moni
 ## SETPIV {#setpiv}
 Set Pixel Blend Factor
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Sets the blend factor for BLNPIX and MIXPIX pixel operations.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Sets the blend factor for BLNPIX and MIXPIX pixel operations.
 :::
 
 **SETPIV**  *{#}Dest*
@@ -538,7 +538,7 @@ Set Pixel Blend Factor
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111101 | --- | --- | --- | 2 |
 
 
-**Related:** [SETPIX](#setpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](instructions-m.md#mixpix)
+**Related:** [SETPIX](#setpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
 
 **Explanation:**
 
@@ -550,7 +550,7 @@ Sets the blend factor for BLNPIX and MIXPIX operations to Dest[7:0]. This contro
 ## SETPIX {#setpix}
 Set Pixel Mixer Mode
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Configures the MIXPIX operating mode for pixel combining.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Configures the MIXPIX operating mode for pixel combining.
 :::
 
 **SETPIX**  *{#}Dest*
@@ -567,7 +567,7 @@ Set Pixel Mixer Mode
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111110 | --- | --- | --- | 2 |
 
 
-**Related:** [SETPIV](#setpiv), [MIXPIX](instructions-m.md#mixpix)
+**Related:** [SETPIV](#setpiv), [MIXPIX](#mixpix)
 
 **Explanation:**
 
@@ -579,7 +579,7 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 ## SETQ {#setq}
 Set Q Register
 
-[Hub RAM](instruction-categories.md#hub-ram) - Loads the Q register for block transfers and multi-parameter instructions.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
@@ -596,7 +596,7 @@ Set Q Register
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101000 | --- | --- | --- | 2 |
 
 
-**Related:** [SETQ2](#setq2), [RDLONG](instructions-r.md#rdlong), [WRLONG](instructions-w.md#wrlong)
+**Related:** [SETQ2](#setq2), [RDLONG](#rdlong), [WRLONG](#wrlong)
 
 **Explanation:**
 
@@ -613,7 +613,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
 ## SETQ2 {#setq2}
 Set Q For LUT Transfers
 
-[Hub RAM](instruction-categories.md#hub-ram) - Loads the Q register for LUT-to-hub block transfers.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
 :::
 
 **SETQ2**  *{#}Dest*
@@ -630,7 +630,7 @@ Set Q For LUT Transfers
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101001 | --- | --- | --- | 2 |
 
 
-**Related:** [SETQ](#setq), [RDLONG](instructions-r.md#rdlong), [WRLONG](instructions-w.md#wrlong), [RDLUT](instructions-r.md#rdlut), [WRLUT](instructions-w.md#wrlut)
+**Related:** [SETQ](#setq), [RDLONG](#rdlong), [WRLONG](#wrlong), [RDLUT](#rdlut), [WRLUT](#wrlut)
 
 **Explanation:**
 
@@ -647,7 +647,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 ## SETR {#setr}
 Set Result Field
 
-[Register Indirection](instruction-categories.md#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
 :::
 
 **SETR**  *Dest, {#}Src*
@@ -665,7 +665,7 @@ Set Result Field
 | EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETD](#setd), [SETS](#sets), [ALTI](instructions-a.md#alti)
+**Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
 
 **Explanation:**
 
@@ -679,7 +679,7 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 ## SETS {#sets}
 Set Source Field
 
-[Register Indirection](instruction-categories.md#register-indirection) - Sets the S field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the S field of a template for use with ALTI instruction.
 :::
 
 **SETS**  *Dest, {#}Src*
@@ -697,7 +697,7 @@ Set Source Field
 | EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETD](#setd), [SETR](#setr), [ALTI](instructions-a.md#alti)
+**Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
 
 **Explanation:**
 
@@ -711,7 +711,7 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETSCP {#setscp}
 Set Oscilloscope
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Configures the four-channel hardware oscilloscope for debugging.
+[Miscellaneous](#miscellaneous) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -738,7 +738,7 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
 Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
 
-[Event](instruction-categories.md#event) - Configures the detection criteria for selectable events.
+[Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
 
 **SETSE1**  *{#}Dest*
@@ -761,7 +761,7 @@ Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100011 | --- | --- | --- | 2 |
 
 
-**Related:** [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
+**Related:** [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -775,7 +775,7 @@ The P2 provides four independent selectable events, each of which can be configu
 ## SETWORD {#setword}
 Set Word
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Writes a 16-bit value to a specific word position within a register.
+[Arithmetic Operations](#arithmetic-operations) - Writes a 16-bit value to a specific word position within a register.
 :::
 
 **SETWORD**  *Dest, {#}Src, #N*
@@ -798,7 +798,7 @@ Set Word
 
 *Dest and word ID specified by prior ALTSW instruction.
 
-**Related:** [ALTSW](instructions-a.md#altsw), [SETNIB](#setnib), [SETBYTE](#setbyte), [GETWORD](instructions-g.md#getword)
+**Related:** [ALTSW](#altsw), [SETNIB](#setnib), [SETBYTE](#setbyte), [GETWORD](#getword)
 
 **Explanation:**
 
@@ -814,7 +814,7 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 ## SETXFRQ {#setxfrq}
 Set Streamer Frequency
 
-[Streamer](instruction-categories.md#streamer-category) - Sets the NCO frequency that controls streamer data output rate.
+[Streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
 :::
 
 **SETXFRQ**  *{#}Dest*
@@ -831,7 +831,7 @@ Set Streamer Frequency
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011101 | --- | --- | --- | 2 |
 
 
-**Related:** [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
+**Related:** [XINIT](#xinit), [XCONT](#xcont)
 
 **Explanation:**
 
@@ -843,7 +843,7 @@ Sets the streamer NCO (Numerically Controlled Oscillator) frequency to Dest. Thi
 ## SEUSSF {#seussf}
 Seuss Forward
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Transforms bits by relocating and inverting for pseudo-random scrambling.
+[Arithmetic Operations](#arithmetic-operations) - Transforms bits by relocating and inverting for pseudo-random scrambling.
 :::
 
 **SEUSSF**  *Dest*
@@ -872,7 +872,7 @@ Relocates and periodically inverts bits within Dest using a forward pattern. The
 ## SEUSSR {#seussr}
 Seuss Reverse
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Reverse transforms bits for pseudo-random scrambling, inverse of SEUSSF.
+[Arithmetic Operations](#arithmetic-operations) - Reverse transforms bits for pseudo-random scrambling, inverse of SEUSSF.
 :::
 
 **SEUSSR**  *Dest*
@@ -901,7 +901,7 @@ Relocates and periodically inverts bits within Dest using a reverse pattern. The
 ## SHL {#shl}
 Shift Left
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left, inserting zeros for fast multiplication by powers of two.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits left, inserting zeros for fast multiplication by powers of two.
 :::
 
 **SHL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -920,7 +920,7 @@ Shift Left
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](instructions-r.md#rol)
+**Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
 **Explanation:**
 
@@ -936,7 +936,7 @@ SHL shifts the destination's binary value left by the source number of places (0
 ## SHR {#shr}
 Shift Right
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right, inserting zeros for fast unsigned division.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits right, inserting zeros for fast unsigned division.
 :::
 
 **SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -955,7 +955,7 @@ Shift Right
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [SHL](#shl), [SAR](#sar), [ROR](instructions-r.md#ror)
+**Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
 **Explanation:**
 
@@ -971,7 +971,7 @@ SHR shifts the destination's binary value right by the source number of places (
 ## SIGNX {#signx}
 Sign Extend
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Sign-extends a value above the specified bit position.
+[Arithmetic Operations](#arithmetic-operations) - Sign-extends a value above the specified bit position.
 :::
 
 **SIGNX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -990,7 +990,7 @@ Sign Extend
 | EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
 
 
-**Related:** [ZEROX](instructions-z.md#zerox)
+**Related:** [ZEROX](#zerox)
 
 **Explanation:**
 
@@ -1006,7 +1006,7 @@ SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value 
 ## SKIP {#skip}
 Skip Instructions
 
-[Branch](instruction-categories.md#branch) - Cancels subsequent instructions based on a bitmask pattern.
+[Branching and Flow Control](#branching-and-flow-control) - Cancels subsequent instructions based on a bitmask pattern.
 :::
 
 **SKIP**  *{#}Dest*
@@ -1042,7 +1042,7 @@ Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cance
 ## SKIPF {#skipf}
 Skip Instructions Fast
 
-[Branch](instruction-categories.md#branch) - Leaps over instructions based on a bitmask for faster skipping.
+[Branching and Flow Control](#branching-and-flow-control) - Leaps over instructions based on a bitmask for faster skipping.
 :::
 
 **SKIPF**  *{#}Dest*
@@ -1071,7 +1071,7 @@ Like SKIP, but instead of cancelling instructions, the PC leaps over them. This 
 ## SPLITB {#splitb}
 Split Bits To Bytes
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Redistributes every 4th bit into separate bytes.
+[Arithmetic Operations](#arithmetic-operations) - Redistributes every 4th bit into separate bytes.
 :::
 
 **SPLITB**  *Dest*
@@ -1088,7 +1088,7 @@ Split Bits To Bytes
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
 
 
-**Related:** [SPLITW](#splitw), [MERGEB](instructions-m.md#mergeb)
+**Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
 
 **Explanation:**
 
@@ -1100,7 +1100,7 @@ Splits every 4th bit of Dest into bytes. The bits at positions 0, 4, 8, 12, 16, 
 ## SPLITW {#splitw}
 Split Bits To Words
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Separates odd and even bits into separate words.
+[Arithmetic Operations](#arithmetic-operations) - Separates odd and even bits into separate words.
 :::
 
 **SPLITW**  *Dest*
@@ -1117,7 +1117,7 @@ Split Bits To Words
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
 
 
-**Related:** [SPLITB](#splitb), [MERGEW](instructions-m.md#mergew)
+**Related:** [SPLITB](#splitb), [MERGEW](#mergew)
 
 **Explanation:**
 
@@ -1129,7 +1129,7 @@ Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ..
 ## STALLI {#stalli}
 Disallow Interrupts
 
-[Interrupt](instruction-categories.md#interrupt) - Disables interrupt branching to protect critical code sections.
+[Interrupts](#interrupts) - Disables interrupt branching to protect critical code sections.
 :::
 
 **STALLI**
@@ -1144,7 +1144,7 @@ Disallow Interrupts
 | EEEE | 1101011 | 000 | 000100001 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [ALLOWI](instructions-a.md#allowi)
+**Related:** [ALLOWI](#allowi)
 
 **Explanation:**
 
@@ -1162,7 +1162,7 @@ STALLI disables interrupt branching. STALLI is the complement of the ALLOWI inst
 ## SUB {#sub}
 Subtract
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Src from unsigned Dest.
+[Arithmetic Operations](#arithmetic-operations) - Subtracts unsigned Src from unsigned Dest.
 :::
 
 **SUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1181,7 +1181,7 @@ Subtract
 | EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
 
 
-**Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](instructions-a.md#add)
+**Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
 
 **Explanation:**
 
@@ -1197,7 +1197,7 @@ SUB subtracts the unsigned Src from the unsigned Dest and stores the result into
 ## SUBR {#subr}
 Subtract Reverse
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Dest from unsigned Src (reverse order).
+[Arithmetic Operations](#arithmetic-operations) - Subtracts unsigned Dest from unsigned Src (reverse order).
 :::
 
 **SUBR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1228,7 +1228,7 @@ SUBR subtracts the unsigned Dest from the unsigned Src and stores the result int
 ## SUBS {#subs}
 Subtract Signed
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts signed Src from signed Dest.
+[Arithmetic Operations](#arithmetic-operations) - Subtracts signed Src from signed Dest.
 :::
 
 **SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1259,7 +1259,7 @@ SUBS subtracts the signed Src from the signed Dest and stores the result into th
 ## SUBSX {#subsx}
 Subtract Signed Extended
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts signed Src plus C from signed Dest for multi-long operations.
+[Arithmetic Operations](#arithmetic-operations) - Subtracts signed Src plus C from signed Dest for multi-long operations.
 :::
 
 **SUBSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1290,7 +1290,7 @@ SUBSX subtracts the signed value of Src plus C from the signed Dest and stores t
 ## SUBX {#subx}
 Subtract Extended
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Src plus C from unsigned Dest for multi-long operations.
+[Arithmetic Operations](#arithmetic-operations) - Subtracts unsigned Src plus C from unsigned Dest for multi-long operations.
 :::
 
 **SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1321,7 +1321,7 @@ SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and store
 ## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
 Conditional Sum {#sumnc} {#sumz} {#sumnz}
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Conditionally adds or subtracts based on flag state.
+[Arithmetic Operations](#arithmetic-operations) - Conditionally adds or subtracts based on flag state.
 :::
 
 **SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**

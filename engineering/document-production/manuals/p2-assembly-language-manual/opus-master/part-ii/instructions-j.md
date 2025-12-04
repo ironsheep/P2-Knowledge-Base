@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter J.
 ## JATN {#jatn}
 Jump If Attention Set
 
-[Event](instruction-categories.md#event) - Jumps if the ATN event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the ATN event flag is set.
 :::
 
 **JATN**  *{#}S*
@@ -25,7 +25,7 @@ Jump If Attention Set
 | EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNATN](#jnatn), [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn)
+**Related:** [JNATN](#jnatn), [COGATN](#cogatn), [POLLATN](#pollatn)
 
 **Explanation:**
 
@@ -43,7 +43,7 @@ JATN is useful for implementing inter-cog communication mechanisms where one cog
 ## JCT1 / JCT2 / JCT3 {#jct1}
 Jump If Counter Event Set {#jct2} {#jct3}
 
-[Event](instruction-categories.md#event) - Jumps if the counter event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the counter event flag is set.
 :::
 
 **JCT1**  *{#}S*
@@ -68,7 +68,7 @@ Jump If Counter Event Set {#jct2} {#jct3}
 ```
 
 
-**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](instructions-a.md#addct1), [POLLCT1/2/3](instructions-p.md#pollct1), [WAITCT1/2/3](instructions-w.md#waitct1)
+**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
@@ -86,7 +86,7 @@ The P2 provides three independent hardware counters for timing operations, allow
 ## JFBW {#jfbw}
 Jump If FIFO Block Wrap Set
 
-[Event](instruction-categories.md#event) - Jumps if the FIFO block wrap event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the FIFO block wrap event flag is set.
 :::
 
 **JFBW**  *{#}S*
@@ -103,7 +103,7 @@ Jump If FIFO Block Wrap Set
 | EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNFBW](#jnfbw), [RFBYTE](instructions-r.md#rfbyte), [WFBYTE](instructions-w.md#wfbyte), [SETQ2](instructions-s.md#setq2)
+**Related:** [JNFBW](#jnfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
 **Explanation:**
 
@@ -121,7 +121,7 @@ JFBW is useful for implementing circular buffer operations and managing block-ba
 ## JINT {#jint}
 Jump If Interrupt Set
 
-[Event](instruction-categories.md#event) - Jumps if the INT event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the INT event flag is set.
 :::
 
 **JINT**  *{#}S*
@@ -138,7 +138,7 @@ Jump If Interrupt Set
 | EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNINT](#jnint), [POLLINT](instructions-p.md#pollint), [SETINT1/2/3](instructions-s.md#setint1)
+**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](#setint1)
 
 **Explanation:**
 
@@ -156,7 +156,7 @@ JINT provides a polling-based mechanism for handling hardware interrupts, allowi
 ## JMP {#jmp}
 Jump
 
-[Branch](instruction-categories.md#branch) - Unconditionally jumps to a new address.
+[Branching and Flow Control](#branching-and-flow-control) - Unconditionally jumps to a new address.
 :::
 
 **JMP**  *D*  **{WC/WZ/WCZ}**
@@ -178,7 +178,7 @@ Jump
 | EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
 
 
-**Related:** [CALL](instructions-c.md#call), [RET](instructions-r.md#ret), [JMPREL](#jmprel), [CALLD](instructions-c.md#calld)
+**Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
 
 **Explanation:**
 
@@ -198,7 +198,7 @@ The instruction executes in 4 clock cycles in COG execution mode. In Hub executi
 ## JMPREL {#jmprel}
 Jump Relative
 
-[Branch](instruction-categories.md#branch) - Jumps by adding a signed offset to the PC.
+[Branching and Flow Control](#branching-and-flow-control) - Jumps by adding a signed offset to the PC.
 :::
 
 **JMPREL**  *{#}D*
@@ -215,7 +215,7 @@ Jump Relative
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
 
 
-**Related:** [JMP](#jmp), [CALL](instructions-c.md#call), [DJNZ](instructions-d.md#djnz), [IJMP1/2/3](special-registers.md#ijmp1)
+**Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP1/2/3](#ijmp1)
 
 **Explanation:**
 
@@ -235,7 +235,7 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 ## JNATN {#jnatn}
 Jump If Attention Clear
 
-[Event](instruction-categories.md#event) - Jumps if the ATN event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the ATN event flag is clear.
 :::
 
 **JNATN**  *{#}S*
@@ -252,7 +252,7 @@ Jump If Attention Clear
 | EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JATN](#jatn), [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn)
+**Related:** [JATN](#jatn), [COGATN](#cogatn), [POLLATN](#pollatn)
 
 **Explanation:**
 
@@ -270,7 +270,7 @@ JNATN is useful for implementing polling loops that wait until the ATN flag is c
 ## JNCT1 / JNCT2 / JNCT3 {#jnct1}
 Jump If Counter Event Clear {#jnct2} {#jnct3}
 
-[Event](instruction-categories.md#event) - Jumps if the counter event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the counter event flag is clear.
 :::
 
 **JNCT1**  *{#}S*
@@ -295,7 +295,7 @@ Jump If Counter Event Clear {#jnct2} {#jnct3}
 ```
 
 
-**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](instructions-a.md#addct1), [POLLCT1/2/3](instructions-p.md#pollct1), [WAITCT1/2/3](instructions-w.md#waitct1)
+**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
@@ -313,7 +313,7 @@ These instructions are useful for implementing polling loops that continue until
 ## JNFBW {#jnfbw}
 Jump If FIFO Block Wrap Clear
 
-[Event](instruction-categories.md#event) - Jumps if the FIFO block wrap event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the FIFO block wrap event flag is clear.
 :::
 
 **JNFBW**  *{#}S*
@@ -330,7 +330,7 @@ Jump If FIFO Block Wrap Clear
 | EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JFBW](#jfbw), [RFBYTE](instructions-r.md#rfbyte), [WFBYTE](instructions-w.md#wfbyte), [SETQ2](instructions-s.md#setq2)
+**Related:** [JFBW](#jfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
 **Explanation:**
 
@@ -348,7 +348,7 @@ JNFBW is useful for polling loops that wait until a block wrap occurs, or for co
 ## JNINT {#jnint}
 Jump If Interrupt Clear
 
-[Event](instruction-categories.md#event) - Jumps if the INT event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the INT event flag is clear.
 :::
 
 **JNINT**  *{#}S*
@@ -365,7 +365,7 @@ Jump If Interrupt Clear
 | EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JINT](#jint), [POLLINT](instructions-p.md#pollint), [SETINT1/2/3](instructions-s.md#setint1)
+**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](#setint1)
 
 **Explanation:**
 
@@ -383,7 +383,7 @@ JNINT is useful for polling loops that wait until an interrupt occurs, or for im
 ## JNPAT {#jnpat}
 Jump If Pattern Match Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the PAT event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the PAT event flag is clear.
 :::
 
 **JNPAT**  *{#}S*
@@ -400,7 +400,7 @@ Jump If Pattern Match Event Clear
 | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JPAT](#jpat), [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat)
+**Related:** [JPAT](#jpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
 **Explanation:**
 
@@ -418,7 +418,7 @@ JNPAT is useful for polling loops that wait until a specific pattern appears on 
 ## JNQMT {#jnqmt}
 Jump If CORDIC Empty Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the CORDIC-read-but-empty event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the CORDIC-read-but-empty event flag is clear.
 :::
 
 **JNQMT**  *{#}S*
@@ -435,7 +435,7 @@ Jump If CORDIC Empty Event Clear
 | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JQMT](#jqmt), [QMUL](instructions-q.md#qmul), [QROTATE](instructions-q.md#qrotate), [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy)
+**Related:** [JQMT](#jqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
 **Explanation:**
 
@@ -453,7 +453,7 @@ JNQMT is useful for ensuring CORDIC results are read at the correct time, helpin
 ## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
 Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
 
-[Event](instruction-categories.md#event) - Jumps if the selectable event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the selectable event flag is clear.
 :::
 
 **JNSE1**  *{#}S*
@@ -480,7 +480,7 @@ Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
 ```
 
 
-**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1)
+**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
@@ -498,7 +498,7 @@ The P2 provides four selectable event sources, each configurable via SETSE instr
 ## JNXFI {#jnxfi}
 Jump If Streamer Finished Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the XFI event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the XFI event flag is clear.
 :::
 
 **JNXFI**  *{#}S*
@@ -515,7 +515,7 @@ Jump If Streamer Finished Event Clear
 | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXFI](#jxfi), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXFI](instructions-p.md#pollxfi)
+**Related:** [JXFI](#jxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
 **Explanation:**
 
@@ -533,7 +533,7 @@ JNXFI is useful for polling loops that wait until the streamer completes its ope
 ## JNXMT {#jnxmt}
 Jump If Streamer Empty Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the XMT event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the XMT event flag is clear.
 :::
 
 **JNXMT**  *{#}S*
@@ -550,7 +550,7 @@ Jump If Streamer Empty Event Clear
 | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXMT](#jxmt), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXMT](instructions-p.md#pollxmt)
+**Related:** [JXMT](#jxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
 **Explanation:**
 
@@ -568,7 +568,7 @@ JNXMT is useful for maintaining continuous streamer operation by reloading data 
 ## JNXRL {#jnxrl}
 Jump If Streamer LUT Rollover Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the XRL event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the XRL event flag is clear.
 :::
 
 **JNXRL**  *{#}S*
@@ -585,7 +585,7 @@ Jump If Streamer LUT Rollover Event Clear
 | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRL](#jxrl), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRL](instructions-p.md#pollxrl)
+**Related:** [JXRL](#jxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
 **Explanation:**
 
@@ -603,7 +603,7 @@ JNXRL is useful for implementing circular buffer management for streamer operati
 ## JNXRO {#jnxro}
 Jump If Streamer NCO Rollover Event Clear
 
-[Event](instruction-categories.md#event) - Jumps if the XRO event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps if the XRO event flag is clear.
 :::
 
 **JNXRO**  *{#}S*
@@ -620,7 +620,7 @@ Jump If Streamer NCO Rollover Event Clear
 | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRO](#jxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRO](instructions-p.md#pollxro)
+**Related:** [JXRO](#jxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
 **Explanation:**
 
@@ -638,7 +638,7 @@ JNXRO is useful for timing-sensitive streamer applications where code needs to s
 ## JPAT {#jpat}
 Jump If Pattern Match Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the PAT event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the PAT event flag is set.
 :::
 
 **JPAT**  *{#}S*
@@ -655,7 +655,7 @@ Jump If Pattern Match Event Set
 | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNPAT](#jnpat), [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat)
+**Related:** [JNPAT](#jnpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
 **Explanation:**
 
@@ -673,7 +673,7 @@ JPAT is useful for implementing hardware-triggered control flow where code execu
 ## JQMT {#jqmt}
 Jump If CORDIC Empty Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the CORDIC-read-but-empty event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the CORDIC-read-but-empty event flag is set.
 :::
 
 **JQMT**  *{#}S*
@@ -690,7 +690,7 @@ Jump If CORDIC Empty Event Set
 | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNQMT](#jnqmt), [QMUL](instructions-q.md#qmul), [QROTATE](instructions-q.md#qrotate), [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy)
+**Related:** [JNQMT](#jnqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
 **Explanation:**
 
@@ -708,7 +708,7 @@ JQMT is useful for error handling in CORDIC operations, allowing code to detect 
 ## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
 Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
 
-[Event](instruction-categories.md#event) - Jumps if the selectable event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the selectable event flag is set.
 :::
 
 **JSE1**  *{#}S*
@@ -735,7 +735,7 @@ Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
 ```
 
 
-**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1)
+**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
@@ -753,7 +753,7 @@ The P2 provides four independent selectable event sources, enabling multiple con
 ## JXFI {#jxfi}
 Jump If Streamer Finished Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the XFI event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the XFI event flag is set.
 :::
 
 **JXFI**  *{#}S*
@@ -770,7 +770,7 @@ Jump If Streamer Finished Event Set
 | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXFI](#jnxfi), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXFI](instructions-p.md#pollxfi)
+**Related:** [JNXFI](#jnxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
 **Explanation:**
 
@@ -788,7 +788,7 @@ JXFI is useful for chaining streamer operations or triggering code execution imm
 ## JXMT {#jxmt}
 Jump If Streamer Empty Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the XMT event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the XMT event flag is set.
 :::
 
 **JXMT**  *{#}S*
@@ -805,7 +805,7 @@ Jump If Streamer Empty Event Set
 | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXMT](#jnxmt), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXMT](instructions-p.md#pollxmt)
+**Related:** [JNXMT](#jnxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
 **Explanation:**
 
@@ -823,7 +823,7 @@ JXMT is useful for implementing continuous streaming operations where the code n
 ## JXRL {#jxrl}
 Jump If Streamer LUT Rollover Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the XRL event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the XRL event flag is set.
 :::
 
 **JXRL**  *{#}S*
@@ -840,7 +840,7 @@ Jump If Streamer LUT Rollover Event Set
 | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXRL](#jnxrl), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRL](instructions-p.md#pollxrl)
+**Related:** [JNXRL](#jnxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
 **Explanation:**
 
@@ -858,7 +858,7 @@ JXRL is useful for implementing circular buffer operations with the streamer usi
 ## JXRO {#jxro}
 Jump If Streamer NCO Rollover Event Set
 
-[Event](instruction-categories.md#event) - Jumps if the XRO event flag is set.
+[Events and Timing](#events-and-timing) - Jumps if the XRO event flag is set.
 :::
 
 **JXRO**  *{#}S*
@@ -875,7 +875,7 @@ Jump If Streamer NCO Rollover Event Set
 | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXRO](#jnxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRO](instructions-p.md#pollxro)
+**Related:** [JNXRO](#jnxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
 **Explanation:**
 

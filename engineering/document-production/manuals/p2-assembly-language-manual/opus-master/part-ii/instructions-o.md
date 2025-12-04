@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter O.
 ## ONES {#ones}
 Ones
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Counts the number of high bits (1s) in a value.
+[Arithmetic Operations](#arithmetic-operations) - Counts the number of high bits (1s) in a value.
 :::
 
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -29,7 +29,7 @@ Ones
 | EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
 
 
-**Related:** [TEST](instructions-t.md#test), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn), [BITNOT](instructions-b.md#bitnot)
+**Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
 
 **Explanation:**
 
@@ -49,7 +49,7 @@ ONES is useful for analyzing bit patterns, counting enabled flags, and implement
 ## OR {#or}
 Bitwise Or
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Performs bitwise OR between two values.
+[Arithmetic Operations](#arithmetic-operations) - Performs bitwise OR between two values.
 :::
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -68,7 +68,7 @@ Bitwise Or
 | EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
 
 
-**Related:** [AND](instructions-a.md#and), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn), [NOT](instructions-n.md#not)
+**Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
 
 **Explanation:**
 
@@ -96,7 +96,7 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 Output By Flag State {#outnc} {#outz} {#outnz}
 
-[Pin](instruction-categories.md#pin) - Sets pin output level based on flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
 **OUTC**  *{#}Dest*  **{WCZ}**
@@ -143,7 +143,7 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ## OUTH {#outh}
 Output High
 
-[Pin](instruction-categories.md#pin) - Sets pin output level to high (1).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to high (1).
 :::
 
 **OUTH**  *{#}Dest*  **{WCZ}**
@@ -161,7 +161,7 @@ Output High
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](instructions-d.md#dirh)
+**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
 **Explanation:**
 
@@ -181,7 +181,7 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 ## OUTL {#outl}
 Output Low
 
-[Pin](instruction-categories.md#pin) - Sets pin output level to low (0).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to low (0).
 :::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
@@ -199,7 +199,7 @@ Output Low
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](instructions-d.md#dirl)
+**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
 **Explanation:**
 
@@ -219,7 +219,7 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 ## OUTNOT {#outnot}
 Output Not (Toggle)
 
-[Pin](instruction-categories.md#pin) - Toggles pin output level to opposite state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin output level to opposite state.
 :::
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
@@ -237,7 +237,7 @@ Output Not (Toggle)
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](instructions-n.md#not), [DRVNOT](instructions-d.md#drvnot)
+**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
 **Explanation:**
 
@@ -257,7 +257,7 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 ## OUTRND {#outrnd}
 Output Random
 
-[Pin](instruction-categories.md#pin) - Sets pin output level to random state from PRNG.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to random state from PRNG.
 :::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**

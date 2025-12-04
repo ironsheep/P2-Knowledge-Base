@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter Z. There 
 ## ZEROX {#zerox}
 Zero Extend
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Zero-extends a value above the specified bit position.
+[Arithmetic Operations](#arithmetic-operations) - Zero-extends a value above the specified bit position.
 :::
 
 **ZEROX**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
@@ -29,7 +29,7 @@ Zero Extend
 | EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
 
 
-**Related:** [SIGNX](instructions-s.md#signx)
+**Related:** [SIGNX](#signx)
 
 **Explanation:**
 

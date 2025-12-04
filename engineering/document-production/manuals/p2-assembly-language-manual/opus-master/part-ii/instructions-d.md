@@ -10,7 +10,7 @@ This section contains all PASM2 instructions beginning with the letter D.
 ## DECMOD {#decmod}
 Decrement Modulus
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Decrements with modulus wrap-around from zero to a maximum.
+[Arithmetic Operations](#arithmetic-operations) - Decrements with modulus wrap-around from zero to a maximum.
 :::
 
 **DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -29,7 +29,7 @@ Decrement Modulus
 | EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
 
 
-**Related:** [INCMOD](instructions-i.md#incmod)
+**Related:** [INCMOD](#incmod)
 
 **Explanation:**
 
@@ -47,7 +47,7 @@ DECMOD does not limit Dest within the specified range—if Dest begins as greate
 ## DECOD {#decod}
 Decode Bit Position
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Generates a bitmask with a single bit set at the specified position.
+[Arithmetic Operations](#arithmetic-operations) - Generates a bitmask with a single bit set at the specified position.
 :::
 
 **DECOD**  *Dest, {#}Src*
@@ -67,7 +67,7 @@ Decode Bit Position
 | EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](instructions-e.md#encod), [BMASK](instructions-b.md#bmask)
+**Related:** [ENCOD](#encod), [BMASK](#bmask)
 
 **Explanation:**
 
@@ -88,7 +88,7 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 ## DIRC / DIRNC {#dirc}
 Set Pin Direction by C Flag {#dirnc}
 
-[Pin](instruction-categories.md#pin) - Sets pin direction based on C flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
 **DIRC**  *{#}Dest*  **{WCZ}**
@@ -132,7 +132,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRH {#dirh}
 Set Pin Direction High
 
-[Pin](instruction-categories.md#pin) - Sets pins to output direction.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction.
 :::
 
 **DIRH**  *{#}Dest*  **{WCZ}**
@@ -168,7 +168,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the direction 
 ## DIRL {#dirl}
 Set Pin Direction Low
 
-[Pin](instruction-categories.md#pin) - Sets pins to input direction.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction.
 :::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
@@ -204,7 +204,7 @@ If the WCZ effect is specified, the Z flag is updated to the original state of t
 ## DIRNOT {#dirnot}
 Direction Not
 
-[Pin](instruction-categories.md#pin) - Toggles pin direction to opposite state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin direction to opposite state.
 :::
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
@@ -244,7 +244,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRZ / DIRNZ {#dirz}
 Set Pin Direction by Z Flag {#dirnz}
 
-[Pin](instruction-categories.md#pin) - Sets pin direction based on Z flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
 **DIRZ**  *{#}Dest*  **{WCZ}**
@@ -288,7 +288,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRRND {#dirrnd}
 Direction Random
 
-[Pin](instruction-categories.md#pin) - Sets pin direction to random state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction to random state.
 :::
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
@@ -328,7 +328,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DJF {#djf}
 Decrement and Jump If Full
 
-[Branch](instruction-categories.md#branch) - Decrements and jumps if result wraps to $FFFFFFFF.
+[Branching and Flow Control](#branching-and-flow-control) - Decrements and jumps if result wraps to $FFFFFFFF.
 :::
 
 **DJF**  *Dest, {#}Src*
@@ -362,7 +362,7 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 ## DJNF {#djnf}
 Decrement and Jump If Not Full
 
-[Branch](instruction-categories.md#branch) - Decrements and jumps if result does not wrap.
+[Branching and Flow Control](#branching-and-flow-control) - Decrements and jumps if result does not wrap.
 :::
 
 **DJNF**  *Dest, {#}Src*
@@ -398,7 +398,7 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 ## DJZ / DJNZ {#djz}
 Decrement and Jump If Zero {#djnz}
 
-[Branch](instruction-categories.md#branch) - Decrements and conditionally jumps based on zero result.
+[Branching and Flow Control](#branching-and-flow-control) - Decrements and conditionally jumps based on zero result.
 :::
 
 **DJZ**  *Dest, {#}Src*
@@ -422,7 +422,7 @@ Decrement and Jump If Zero {#djnz}
 ```
 
 
-**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](instructions-i.md#ijz), [IJNZ](instructions-i.md#ijnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
+**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
@@ -450,7 +450,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## DRVC / DRVNC {#drvc}
 Drive Pins by C Flag {#drvnc}
 
-[Pin](instruction-categories.md#pin) - Drives pins high or low based on C flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
 **DRVC**  *{#}Dest*  **{WCZ}**
@@ -492,7 +492,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVH {#drvh}
 Drive Pins High
 
-[Pin](instruction-categories.md#pin) - Sets pins to output direction and drives high.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives high.
 :::
 
 **DRVH**  *{#}Dest*  **{WCZ}**
@@ -530,7 +530,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVL {#drvl}
 Drive Pins Low
 
-[Pin](instruction-categories.md#pin) - Sets pins to output direction and drives low.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives low.
 :::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
@@ -570,7 +570,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVNOT {#drvnot}
 Drive Not
 
-[Pin](instruction-categories.md#pin) - Sets pins to output direction and toggles output level.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and toggles output level.
 :::
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
@@ -612,7 +612,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVZ / DRVNZ {#drvz}
 Drive Pins by Z Flag {#drvnz}
 
-[Pin](instruction-categories.md#pin) - Drives pins high or low based on Z flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
 **DRVZ**  *{#}Dest*  **{WCZ}**
@@ -654,7 +654,7 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 ## DRVRND {#drvrnd}
 Drive Random
 
-[Pin](instruction-categories.md#pin) - Sets pins to output direction with random output levels.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction with random output levels.
 :::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**

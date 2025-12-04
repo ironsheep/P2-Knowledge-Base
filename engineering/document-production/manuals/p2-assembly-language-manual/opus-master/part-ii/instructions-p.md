@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter P.
 ## POLLATN {#pollatn}
 Poll Attention Event
 
-[Event](instruction-categories.md#event) - Polls and clears the inter-cog attention event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the inter-cog attention event flag.
 :::
 
 **POLLATN**  **{WC|WZ|WCZ}**
@@ -25,7 +25,7 @@ Poll Attention Event
 | EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
 
 
-**Related:** [COGATN](instructions-c.md#cogatn), [WAITATN](instructions-w.md#waitatn), [JATN](instructions-j.md#jatn), [JNATN](instructions-j.md#jnatn)
+**Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
 
 **Explanation:**
 
@@ -41,7 +41,7 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
 Poll Counter Event {#pollct2} {#pollct3}
 
-[Event](instruction-categories.md#event) - Polls and clears the system counter event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
 
 **POLLCT1**  **{WC|WZ|WCZ}**
@@ -62,7 +62,7 @@ Poll Counter Event {#pollct2} {#pollct3}
 | EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
 
 
-**Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1), [JCT1/2/3](instructions-j.md#jct1), [JNCT1/2/3](instructions-j.md#jnct1)
+**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
@@ -78,7 +78,7 @@ These instructions enable time-based event polling without blocking execution. T
 ## POLLFBW {#pollfbw}
 Poll FIFO Block Wrap Event
 
-[Event](instruction-categories.md#event) - Polls and clears the FIFO block wrap event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the FIFO block wrap event flag.
 :::
 
 **POLLFBW**  **{WC|WZ|WCZ}**
@@ -95,7 +95,7 @@ Poll FIFO Block Wrap Event
 | EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
 
 
-**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [FBLOCK](instructions-f.md#fblock), [WAITFBW](instructions-w.md#waitfbw), [JFBW](instructions-j.md#jfbw), [JNFBW](instructions-j.md#jnfbw)
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
 
 **Explanation:**
 
@@ -111,7 +111,7 @@ This instruction enables circular buffer management for high-speed Hub RAM trans
 ## POLLINT {#pollint}
 Poll Interrupt Event
 
-[Event](instruction-categories.md#event) - Polls and clears the interrupt-occurred event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the interrupt-occurred event flag.
 :::
 
 **POLLINT**  **{WC|WZ|WCZ}**
@@ -128,7 +128,7 @@ Poll Interrupt Event
 | EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
 
 
-**Related:** [WAITINT](instructions-w.md#waitint), [JINT](instructions-j.md#jint), [JNINT](instructions-j.md#jnint)
+**Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
 
 **Explanation:**
 
@@ -144,7 +144,7 @@ This instruction enables non-blocking interrupt handling.
 ## POLLPAT {#pollpat}
 Poll Pin Pattern Event
 
-[Event](instruction-categories.md#event) - Polls and clears the pin pattern match event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the pin pattern match event flag.
 :::
 
 **POLLPAT**  **{WC|WZ|WCZ}**
@@ -161,7 +161,7 @@ Poll Pin Pattern Event
 | EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
 
 
-**Related:** [SETPAT](instructions-s.md#setpat), [WAITPAT](instructions-w.md#waitpat), [JPAT](instructions-j.md#jpat), [JNPAT](instructions-j.md#jnpat)
+**Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
 **Explanation:**
 
@@ -177,7 +177,7 @@ This instruction enables non-blocking pattern detection on input pins.
 ## POLLQMT {#pollqmt}
 Poll CORDIC Empty Event
 
-[Event](instruction-categories.md#event) - Polls and clears the CORDIC empty event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the CORDIC empty event flag.
 :::
 
 **POLLQMT**  **{WC|WZ|WCZ}**
@@ -194,7 +194,7 @@ Poll CORDIC Empty Event
 | EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
 
 
-**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [JQMT](instructions-j.md#jqmt), [JNQMT](instructions-j.md#jnqmt)
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
 
 **Explanation:**
 
@@ -210,7 +210,7 @@ This instruction enables error detection for CORDIC operations.
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
 Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
 
-[Event](instruction-categories.md#event) - Polls and clears a configurable selectable event flag.
+[Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
 
 **POLLSE1**  **{WC|WZ|WCZ}**
@@ -233,7 +233,7 @@ Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
 | EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
 
 
-**Related:** [SETSE1/2/3/4](instructions-s.md#setse1), [WAITSE1/2/3/4](instructions-w.md#waitse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
+**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -249,7 +249,7 @@ The P2 provides four independent selectable event generators that can be configu
 ## POLLXFI {#pollxfi}
 Poll Streamer Finished Event
 
-[Event](instruction-categories.md#event) - Polls and clears the streamer finished event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the streamer finished event flag.
 :::
 
 **POLLXFI**  **{WC|WZ|WCZ}**
@@ -266,7 +266,7 @@ Poll Streamer Finished Event
 | EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
 
 
-**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXFI](instructions-w.md#waitxfi), [JXFI](instructions-j.md#jxfi), [JNXFI](instructions-j.md#jnxfi)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
 
 **Explanation:**
 
@@ -282,7 +282,7 @@ This instruction enables non-blocking management of the streamer subsystem.
 ## POLLXMT {#pollxmt}
 Poll Streamer Empty Event
 
-[Event](instruction-categories.md#event) - Polls and clears the streamer empty event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the streamer empty event flag.
 :::
 
 **POLLXMT**  **{WC|WZ|WCZ}**
@@ -299,7 +299,7 @@ Poll Streamer Empty Event
 | EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
 
 
-**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXMT](instructions-w.md#waitxmt), [JXMT](instructions-j.md#jxmt), [JNXMT](instructions-j.md#jnxmt)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
 
 **Explanation:**
 
@@ -315,7 +315,7 @@ This instruction enables pipelined streamer operations.
 ## POLLXRL {#pollxrl}
 Poll Streamer LUT Rollover Event
 
-[Event](instruction-categories.md#event) - Polls and clears the streamer LUT rollover event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the streamer LUT rollover event flag.
 :::
 
 **POLLXRL**  **{WC|WZ|WCZ}**
@@ -332,7 +332,7 @@ Poll Streamer LUT Rollover Event
 | EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
 
 
-**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXRL](instructions-w.md#waitxrl), [JXRL](instructions-j.md#jxrl), [JNXRL](instructions-j.md#jnxrl)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
 
 **Explanation:**
 
@@ -348,7 +348,7 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 ## POLLXRO {#pollxro}
 Poll Streamer NCO Rollover Event
 
-[Event](instruction-categories.md#event) - Polls and clears the streamer NCO rollover event flag.
+[Events and Timing](#events-and-timing) - Polls and clears the streamer NCO rollover event flag.
 :::
 
 **POLLXRO**  **{WC|WZ|WCZ}**
@@ -365,7 +365,7 @@ Poll Streamer NCO Rollover Event
 | EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
 
 
-**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXRO](instructions-w.md#waitxro), [JXRO](instructions-j.md#jxro), [JNXRO](instructions-j.md#jnxro)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
 
 **Explanation:**
 
@@ -381,7 +381,7 @@ This instruction enables precise timing control for streamer operations that use
 ## POP {#pop}
 Pop From Internal Stack
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Pops a value from the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pops a value from the internal K register stack.
 :::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
@@ -417,7 +417,7 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 ## POPA {#popa}
 Pop From Hub Stack A
 
-[Hub RAM](instruction-categories.md#hub-ram) - Pops a long from Hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from Hub memory using PTRA as stack pointer.
 :::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
@@ -453,7 +453,7 @@ This instruction enables Hub RAM-based stacks for deep subroutine nesting and la
 ## POPB {#popb}
 Pop From Hub Stack B
 
-[Hub RAM](instruction-categories.md#hub-ram) - Pops a long from Hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from Hub memory using PTRB as stack pointer.
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
@@ -489,7 +489,7 @@ Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage
 ## PUSH {#push}
 Push To Internal Stack
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Pushes a value onto the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pushes a value onto the internal K register stack.
 :::
 
 **PUSH**  *{#}Dest*
@@ -520,7 +520,7 @@ The P2 provides a single-level internal stack register K that is automatically u
 ## PUSHA {#pusha}
 Push To Hub Stack A
 
-[Hub RAM](instruction-categories.md#hub-ram) - Pushes a long to Hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to Hub memory using PTRA as stack pointer.
 :::
 
 **PUSHA**  *{#}Dest*
@@ -553,7 +553,7 @@ PUSHA paired with POPA implements a descending stack in Hub RAM.
 ## PUSHB {#pushb}
 Push To Hub Stack B
 
-[Hub RAM](instruction-categories.md#hub-ram) - Pushes a long to Hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to Hub memory using PTRB as stack pointer.
 :::
 
 **PUSHB**  *{#}Dest*

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter R.
 ## RCL {#rcl}
 Rotate Carry Left
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left, inserting carry flag as new LSBs.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits left, inserting carry flag as new LSBs.
 :::
 
 **RCL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -45,7 +45,7 @@ This instruction is useful for multi-precision arithmetic operations where the c
 ## RCR {#rcr}
 Rotate Carry Right
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right, inserting carry flag as new MSBs.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits right, inserting carry flag as new MSBs.
 :::
 
 **RCR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -82,7 +82,7 @@ This instruction is useful for multi-precision arithmetic operations where the c
 ## RCZL {#rczl}
 Rotate Carry And Zero Left
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left by two, inserting C and Z as new LSBs.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits left by two, inserting C and Z as new LSBs.
 :::
 
 **RCZL**  *Dest*  **{WC|WZ|WCZ}**
@@ -118,7 +118,7 @@ This instruction provides a compact way to shift two flag states into a register
 ## RCZR {#rczr}
 Rotate Carry And Zero Right
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right by two, inserting C and Z as new MSBs.
+[Arithmetic Operations](#arithmetic-operations) - Shifts bits right by two, inserting C and Z as new MSBs.
 :::
 
 **RCZR**  *Dest*  **{WC|WZ|WCZ}**
@@ -154,7 +154,7 @@ This instruction provides a compact way to shift two flag states into a register
 ## RDBYTE {#rdbyte}
 Read Byte From Hub
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a zero-extended byte from Hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from Hub memory into a register.
 :::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -173,7 +173,7 @@ Read Byte From Hub
 | EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
 
 
-**Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](instructions-w.md#wrbyte)
+**Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
 **Explanation:**
 
@@ -193,7 +193,7 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 ## RDFAST {#rdfast}
 Read Fast Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Begins fast Hub read operation via FIFO for high-throughput streaming.
+[Hub Memory Access](#hub-memory-access) - Begins fast Hub read operation via FIFO for high-throughput streaming.
 :::
 
 **RDFAST**  *{#}Dest, {#}Src*
@@ -211,7 +211,7 @@ Read Fast Via FIFO
 | EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
 
 
-**Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](instructions-w.md#wrfast), [FBLOCK](instructions-f.md#fblock)
+**Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
 **Explanation:**
 
@@ -227,7 +227,7 @@ After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read
 ## RDLONG {#rdlong}
 Read Long From Hub
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a 32-bit long from Hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from Hub memory into a register.
 :::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -246,7 +246,7 @@ Read Long From Hub
 | EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
 
 
-**Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](instructions-w.md#wrlong)
+**Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
 **Explanation:**
 
@@ -264,7 +264,7 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 ## RDLUT {#rdlut}
 Read From LUT
 
-[Lookup Table](instruction-categories.md#lookup-table) - Reads data from the cog's lookup table memory.
+[Lookup Table](#lookup-table) - Reads data from the cog's lookup table memory.
 :::
 
 **RDLUT**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -283,7 +283,7 @@ Read From LUT
 | EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
 
 
-**Related:** [WRLUT](instructions-w.md#wrlut), [RDLONG](#rdlong)
+**Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
 
 **Explanation:**
 
@@ -301,7 +301,7 @@ The LUT provides fast local memory access for frequently accessed data structure
 ## RDPIN {#rdpin}
 Read Smart Pin
 
-[Smart Pin](instruction-categories.md#smart-pin) - Reads Smart Pin result and acknowledges, clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads Smart Pin result and acknowledges, clearing the ready flag.
 :::
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
@@ -320,7 +320,7 @@ Read Smart Pin
 | EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
 
-**Related:** [RQPIN](#rqpin), [WRPIN](instructions-w.md#wrpin), [WXPIN](instructions-w.md#wxpin), [WYPIN](instructions-w.md#wypin)
+**Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
 **Explanation:**
 
@@ -336,7 +336,7 @@ Smart Pins are powerful autonomous I/O processors that can measure timing, count
 ## RDWORD {#rdword}
 Read Word From Hub
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a zero-extended word from Hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from Hub memory into a register.
 :::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -355,7 +355,7 @@ Read Word From Hub
 | EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
 
 
-**Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](instructions-w.md#wrword)
+**Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
 **Explanation:**
 
@@ -373,7 +373,7 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 ## REP {#rep}
 Repeat Block
 
-[Branch](instruction-categories.md#branch) - Creates a zero-overhead hardware loop for repeated execution.
+[Branching and Flow Control](#branching-and-flow-control) - Creates a zero-overhead hardware loop for repeated execution.
 :::
 
 **REP**  *{#}Dest, {#}Src*
@@ -391,7 +391,7 @@ Repeat Block
 | EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [DJNZ](instructions-d.md#djnz), [JNCT1/2/3](instructions-j.md#jnct1)
+**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
@@ -407,7 +407,7 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
 Resume From Interrupt {#resi1} {#resi2} {#resi3}
 
-[Interrupt](instruction-categories.md#interrupt) - Resumes execution from an interrupted location.
+[Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
 
 **RESI0**
@@ -428,7 +428,7 @@ Resume From Interrupt {#resi1} {#resi2} {#resi3}
 | EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 
 
-**Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1)
+**Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
 **Explanation:**
 
@@ -442,7 +442,7 @@ Unlike RETIx instructions which return from the interrupt handler, RESIx instruc
 ## RET {#ret}
 Return From Subroutine
 
-[Branch](instruction-categories.md#branch) - Returns from subroutine by popping the hardware stack.
+[Branching and Flow Control](#branching-and-flow-control) - Returns from subroutine by popping the hardware stack.
 :::
 
 **RET**  **{WC|WZ|WCZ}**
@@ -459,7 +459,7 @@ Return From Subroutine
 | EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
 
 
-**Related:** [CALL](instructions-c.md#call), [CALLA](instructions-c.md#calla), [CALLB](instructions-c.md#callb), [RETA](#reta), [RETB](#retb)
+**Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
 
 **Explanation:**
 
@@ -479,7 +479,7 @@ The P2 provides an 8-level hardware stack for fast subroutine calls. RET is pair
 ## RETA {#reta}
 Return Via PTRA Stack
 
-[Branch](instruction-categories.md#branch) - Returns from subroutine using PTRA as software stack pointer.
+[Branching and Flow Control](#branching-and-flow-control) - Returns from subroutine using PTRA as software stack pointer.
 :::
 
 **RETA**  **{WC|WZ|WCZ}**
@@ -496,7 +496,7 @@ Return Via PTRA Stack
 | EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
 
 
-**Related:** [CALLA](instructions-c.md#calla), [RET](#ret), [RETB](#retb)
+**Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
 **Explanation:**
 
@@ -514,7 +514,7 @@ RETA is paired with CALLA for implementing software stacks in Hub memory, enabli
 ## RETB {#retb}
 Return Via PTRB Stack
 
-[Branch](instruction-categories.md#branch) - Returns from subroutine using PTRB as software stack pointer.
+[Branching and Flow Control](#branching-and-flow-control) - Returns from subroutine using PTRB as software stack pointer.
 :::
 
 **RETB**  **{WC|WZ|WCZ}**
@@ -531,7 +531,7 @@ Return Via PTRB Stack
 | EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
 
 
-**Related:** [CALLB](instructions-c.md#callb), [RET](#ret), [RETA](#reta)
+**Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
 **Explanation:**
 
@@ -549,7 +549,7 @@ RETB is paired with CALLB for implementing software stacks in Hub memory, enabli
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
 Return From Interrupt {#reti1} {#reti2} {#reti3}
 
-[Interrupt](instruction-categories.md#interrupt) - Returns from interrupt handler to interrupted location.
+[Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
 
 **RETI0**
@@ -570,7 +570,7 @@ Return From Interrupt {#reti1} {#reti2} {#reti3}
 | EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 
 
-**Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1)
+**Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
 **Explanation:**
 
@@ -584,7 +584,7 @@ The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest pr
 ## REV {#rev}
 Reverse Bits
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Reverses all 32 bits in a register.
+[Arithmetic Operations](#arithmetic-operations) - Reverses all 32 bits in a register.
 :::
 
 **REV**  *Dest*
@@ -601,7 +601,7 @@ Reverse Bits
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
 
 
-**Related:** [ROL](#rol), [ROR](#ror), [ZEROX](instructions-z.md#zerox)
+**Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
 
 **Explanation:**
 
@@ -615,7 +615,7 @@ This instruction is useful for processing binary data in different MSB/LSB order
 ## RFBYTE {#rfbyte}
 Read Byte Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a zero-extended byte from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
 :::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
@@ -651,7 +651,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFLONG {#rflong}
 Read Long Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a 32-bit long from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
 :::
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
@@ -687,7 +687,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFVAR {#rfvar}
 Read Variable Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
@@ -723,7 +723,7 @@ The length of each value read is determined by the streamer configuration set up
 ## RFVARS {#rfvars}
 Read Signed Variable Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
@@ -757,7 +757,7 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 ## RFWORD {#rfword}
 Read Word Via FIFO
 
-[Hub RAM](instruction-categories.md#hub-ram) - Reads a zero-extended word from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
 :::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
@@ -793,7 +793,7 @@ The operation takes 2 cycles when the FIFO has data available.
 ## RGBEXP {#rgbexp}
 Expand RGB Color
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Expands 5:6:5 RGB color to 8:8:8 format.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Expands 5:6:5 RGB color to 8:8:8 format.
 :::
 
 **RGBEXP**  *Dest*
@@ -824,7 +824,7 @@ This instruction is useful when converting between 16-bit and 24-bit color forma
 ## RGBSQZ {#rgbsqz}
 Squeeze RGB Color
 
-[Pixel Mixer](instruction-categories.md#pixel-mixer) - Compresses 8:8:8 RGB color to 5:6:5 format.
+[Color Space and Pixel Operations](#color-space-and-pixel-operations) - Compresses 8:8:8 RGB color to 5:6:5 format.
 :::
 
 **RGBSQZ**  *Dest*
@@ -855,7 +855,7 @@ This instruction is useful when converting from 24-bit to 16-bit color formats f
 ## ROL {#rol}
 Rotate Left
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rotates bits left, wrapping MSBs to LSBs.
+[Arithmetic Operations](#arithmetic-operations) - Rotates bits left, wrapping MSBs to LSBs.
 :::
 
 **ROL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -874,7 +874,7 @@ Rotate Left
 | EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](instructions-s.md#shl)
+**Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
 **Explanation:**
 
@@ -892,7 +892,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 ## ROLBYTE {#rolbyte}
 Rotate Byte Left Into Register
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rotates a byte from source into destination register.
+[Arithmetic Operations](#arithmetic-operations) - Rotates a byte from source into destination register.
 :::
 
 **ROLBYTE**  *Dest, {#}Src, #N*
@@ -913,7 +913,7 @@ Rotate Byte Left Into Register
 | EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](instructions-g.md#getbyte), [SETBYTE](instructions-s.md#setbyte), [ALTGB](instructions-a.md#altgb)
+**Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
 
 **Explanation:**
 
@@ -927,7 +927,7 @@ The second syntax form is intended for use after an ALTGB instruction in a loop 
 ## ROLNIB {#rolnib}
 Rotate Nibble Left Into Register
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rotates a nibble from source into destination register.
+[Arithmetic Operations](#arithmetic-operations) - Rotates a nibble from source into destination register.
 :::
 
 **ROLNIB**  *Dest, {#}Src, #N*
@@ -948,7 +948,7 @@ Rotate Nibble Left Into Register
 | EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](instructions-g.md#getnib), [SETNIB](instructions-s.md#setnib), [ALTGN](instructions-a.md#altgn)
+**Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
 
 **Explanation:**
 
@@ -962,7 +962,7 @@ The second syntax form is intended for use after an ALTGN instruction in a loop 
 ## ROLWORD {#rolword}
 Rotate Word Left Into Register
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rotates a word from source into destination register.
+[Arithmetic Operations](#arithmetic-operations) - Rotates a word from source into destination register.
 :::
 
 **ROLWORD**  *Dest, {#}Src, #N*
@@ -983,7 +983,7 @@ Rotate Word Left Into Register
 | EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](instructions-g.md#getword), [SETWORD](instructions-s.md#setword), [ALTGW](instructions-a.md#altgw)
+**Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
 
 **Explanation:**
 
@@ -997,7 +997,7 @@ The second syntax form is intended for use after an ALTGW instruction in a loop 
 ## ROR {#ror}
 Rotate Right
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Rotates bits right, wrapping LSBs to MSBs.
+[Arithmetic Operations](#arithmetic-operations) - Rotates bits right, wrapping LSBs to MSBs.
 :::
 
 **ROR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1016,7 +1016,7 @@ Rotate Right
 | EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](instructions-s.md#shr)
+**Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
 **Explanation:**
 
@@ -1034,7 +1034,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 ## RQPIN {#rqpin}
 Read Smart Pin Without Acknowledge
 
-[Smart Pin](instruction-categories.md#smart-pin) - Reads Smart Pin result without clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads Smart Pin result without clearing the ready flag.
 :::
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**
@@ -1053,7 +1053,7 @@ Read Smart Pin Without Acknowledge
 | EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
 
-**Related:** [RDPIN](#rdpin), [WRPIN](instructions-w.md#wrpin), [WXPIN](instructions-w.md#wxpin), [WYPIN](instructions-w.md#wypin)
+**Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
 **Explanation:**
 

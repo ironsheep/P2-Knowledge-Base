@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter G.
 ## GETBRK {#getbrk}
 Get Breakpoint Status
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves breakpoint or COG status information.
+[Miscellaneous](#miscellaneous) - Retrieves breakpoint or COG status information.
 :::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
@@ -26,7 +26,7 @@ Get Breakpoint Status
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
 
 
-**Related:** [BRK](instructions-b.md#brk), [SETBRK](#setbrk), [COGBRK](instructions-c.md#cogbrk)
+**Related:** [BRK](#brk), [COGBRK](#cogbrk)
 
 **Explanation:**
 
@@ -48,7 +48,7 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 ## GETBYTE {#getbyte}
 Get Byte
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified byte from a 32-bit value.
+[Arithmetic Operations](#arithmetic-operations) - Extracts a specified byte from a 32-bit value.
 :::
 
 **GETBYTE**  *Dest, {#}Src, #Num*
@@ -69,7 +69,7 @@ Get Byte
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGB](instructions-a.md#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](instructions-s.md#setbyte), [ROLBYTE](instructions-r.md#rolbyte)
+**Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
 
 **Explanation:**
 
@@ -85,7 +85,7 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 ## GETCT {#getct}
 Get System Counter
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves the current value of the system counter.
+[Miscellaneous](#miscellaneous) - Retrieves the current value of the system counter.
 :::
 
 **GETCT**  *Dest*  **{WC}**
@@ -103,7 +103,7 @@ Get System Counter
 | EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
 
 
-**Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1)
+**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
@@ -121,7 +121,7 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 ## GETNIB {#getnib}
 Get Nibble
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified nibble from a 32-bit value.
+[Arithmetic Operations](#arithmetic-operations) - Extracts a specified nibble from a 32-bit value.
 :::
 
 **GETNIB**  *Dest, {#}Src, #Num*
@@ -142,7 +142,7 @@ Get Nibble
 | EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGN](instructions-a.md#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](instructions-s.md#setnib), [ROLNIB](instructions-r.md#rolnib)
+**Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
 
 **Explanation:**
 
@@ -158,7 +158,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 Get FIFO Hub Pointer
 
-[Hub RAM](instruction-categories.md#hub-ram) - Retrieves the current FIFO hub pointer position.
+[Hub Memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
 :::
 
 **GETPTR**  *Dest*
@@ -175,7 +175,7 @@ Get FIFO Hub Pointer
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
 
 
-**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFBYTE](instructions-r.md#rfbyte), [RFWORD](instructions-r.md#rfword), [RFLONG](instructions-r.md#rflong), [WFBYTE](instructions-w.md#wfbyte), [WFWORD](instructions-w.md#wfword), [WFLONG](instructions-w.md#wflong)
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
 
 **Explanation:**
 
@@ -191,7 +191,7 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 ## GETQX {#getqx}
 Get CORDIC X Result
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Retrieves the X result from the CORDIC solver.
+[CORDIC Coprocessor](#cordic-coprocessor) - Retrieves the X result from the CORDIC solver.
 :::
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
@@ -209,7 +209,7 @@ Get CORDIC X Result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQY](#getqy), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
+**Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
 **Explanation:**
 
@@ -229,7 +229,7 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 ## GETQY {#getqy}
 Get CORDIC Y Result
 
-[CORDIC Solver](instruction-categories.md#cordic-solver) - Retrieves the Y result from the CORDIC solver.
+[CORDIC Coprocessor](#cordic-coprocessor) - Retrieves the Y result from the CORDIC solver.
 :::
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
@@ -247,7 +247,7 @@ Get CORDIC Y Result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQX](#getqx), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
+**Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
 **Explanation:**
 
@@ -267,7 +267,7 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 ## GETRND {#getrnd}
 Get Random Value
 
-[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
+[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
 :::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
@@ -287,7 +287,7 @@ Get Random Value
 | EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
 
 
-**Related:** [SETQ](instructions-s.md#setq), [SETQ2](instructions-s.md#setq2)
+**Related:** [SETQ](#setq), [SETQ2](#setq2)
 
 **Explanation:**
 
@@ -309,7 +309,7 @@ The random number generator uses a maximal-length linear feedback shift register
 ## GETSCP {#getscp}
 Get Oscilloscope Samples
 
-[Smart Pin](instruction-categories.md#smart-pin) - Retrieves four 8-bit oscilloscope samples.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
 :::
 
 **GETSCP**  *Dest*
@@ -326,7 +326,7 @@ Get Oscilloscope Samples
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
 
 
-**Related:** [SETSCP](instructions-s.md#setscp), [RDPIN](instructions-r.md#rdpin), [WXPIN](instructions-w.md#wxpin)
+**Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
 
 **Explanation:**
 
@@ -344,7 +344,7 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 ## GETWORD {#getword}
 Get Word
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified word from a 32-bit value.
+[Arithmetic Operations](#arithmetic-operations) - Extracts a specified word from a 32-bit value.
 :::
 
 **GETWORD**  *Dest, {#}Src, #Num*
@@ -365,7 +365,7 @@ Get Word
 | EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGW](instructions-a.md#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](instructions-s.md#setword), [ROLWORD](instructions-r.md#rolword)
+**Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
 
 **Explanation:**
 
@@ -381,7 +381,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 Get Goertzel Accumulators
 
-[Streamer](instruction-categories.md#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
+[Streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
 :::
 
 **GETXACC**  *Dest*
@@ -398,7 +398,7 @@ Get Goertzel Accumulators
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
 
 
-**Related:** [XCONT](instructions-x.md#xcont), [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero)
+**Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
 
 **Explanation:**
 

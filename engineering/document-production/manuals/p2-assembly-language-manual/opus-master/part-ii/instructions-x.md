@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ## XCONT {#xcont}
 Execute Continue
 
-[Streamer](instruction-categories.md#streamer-category) - Buffers a streamer command continuing from current phase.
+[Streamer](#streamer) - Buffers a streamer command continuing from current phase.
 :::
 
 **XCONT**  *{#}Dest, {#}Src*
@@ -26,7 +26,7 @@ Execute Continue
 | EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
 **Explanation:**
 
@@ -42,7 +42,7 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ## XINIT {#xinit}
 Execute Initialize
 
-[Streamer](instruction-categories.md#streamer-category) - Issues a streamer command immediately with phase reset to zero.
+[Streamer](#streamer) - Issues a streamer command immediately with phase reset to zero.
 :::
 
 **XINIT**  *{#}Dest, {#}Src*
@@ -60,7 +60,7 @@ Execute Initialize
 | EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi), [SETXFRQ](instructions-s.md#setxfrq)
+**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
 
 **Explanation:**
 
@@ -89,7 +89,7 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 ## XOR {#xor}
 Exclusive Or
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Performs bitwise exclusive OR of Dest and Src.
+[Arithmetic Operations](#arithmetic-operations) - Performs bitwise exclusive OR of Dest and Src.
 :::
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
@@ -110,7 +110,7 @@ Exclusive Or
 | EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
 
 
-**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [ANDN](instructions-a.md#andn), [TEST](instructions-t.md#test)
+**Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
 
 **Explanation:**
 
@@ -132,7 +132,7 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 ## XORO32 {#xoro32}
 Xoroshiro 32
 
-[Math and Logic](instruction-categories.md#math-and-logic) - Generates next pseudo-random number using xoroshiro32+ algorithm.
+[Arithmetic Operations](#arithmetic-operations) - Generates next pseudo-random number using xoroshiro32+ algorithm.
 :::
 
 **XORO32**  *Dest*
@@ -149,7 +149,7 @@ Xoroshiro 32
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
 
 
-**Related:** [GETRND](instructions-g.md#getrnd), [SETQ](instructions-s.md#setq)
+**Related:** [GETRND](#getrnd), [SETQ](#setq)
 
 **Explanation:**
 
@@ -179,7 +179,7 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ## XSTOP {#xstop}
 Execute Stop
 
-[Streamer](instruction-categories.md#streamer-category) - Immediately halts the active streamer operation.
+[Streamer](#streamer) - Immediately halts the active streamer operation.
 :::
 
 **XSTOP**
@@ -196,7 +196,7 @@ Execute Stop
 | EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](instructions-w.md#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
 
 **Explanation:**
 
@@ -217,7 +217,7 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 ## XZERO {#xzero}
 Execute Zero
 
-[Streamer](instruction-categories.md#streamer-category) - Buffers a streamer command with phase reset to zero.
+[Streamer](#streamer) - Buffers a streamer command with phase reset to zero.
 :::
 
 **XZERO**  *{#}Dest, {#}Src*
@@ -235,7 +235,7 @@ Execute Zero
 | EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
 **Explanation:**
 
