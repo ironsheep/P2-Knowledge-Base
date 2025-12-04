@@ -16,14 +16,7 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 
 ---
 
-**Result:** Dest bit(s) designated by Src are set to the specified flag state:
-
-| Instruction | Sets bits to |
-|-------------|--------------|
-| BITC | C flag value |
-| BITNC | !C (inverted C) |
-| BITZ | Z flag value |
-| BITNZ | !Z (inverted Z) |
+**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates Z to the original bit state.
 
 - Dest is a register whose value will have bit(s) set to the flag state.
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
@@ -42,7 +35,16 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 
 **Explanation:**
 
-These instructions set designated bit(s) in Dest to the specified flag value. BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
+These instructions set designated bit(s) in Dest to the specified flag value:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| BITC | C flag value |
+| BITNC | !C (inverted C) |
+| BITZ | Z flag value |
+| BITNZ | !Z (inverted Z) |
+
+BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
 
 Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
