@@ -1,34 +1,96 @@
 instruction: ASMCLK
 syntax: ASMCLK
 compiler_syntax: ASMCLK
-encoding: TBD
+encoding: pseudo-instruction
 compiler_encoding:
-  bits: 32
-  opcode: 0
+  bits: variable
+  opcode: none
   effects: 0
   operandFormat: 35
-  rawValue: 71680
+  rawValue: 0
+  note: ASMCLK is a pseudo-instruction that expands to 1-6 real instructions depending on clock mode
 timing:
-  cycles: TBD
-  type: TBD
-description: Assembly clock instruction. Controls assembly-time clock operations.
+  cycles: variable
+  type: macro
+  note: Expands to 1-6 instructions; 1 for RCFAST/RCSLOW, 6 for external clock modes with PLL stabilization wait
+description: >
+  Pseudo-instruction that sets the P2 clock mode in PASM-only programs. ASMCLK reads the clock
+  configuration from CON symbols (_clkfreq, _xtlfreq, _xinfreq, etc.) and expands to the appropriate
+  HUBSET/WAITX sequence to configure the system clock. As of compiler v35v, ASMCLK is typically
+  unnecessary since a 16-long clock-setter is automatically prepended to PASM-only programs using
+  non-RCFAST clock modes. Set _AUTOCLK = 0 to disable automatic clock setup and use ASMCLK manually.
 compiler_category: Miscellaneous
 examples:
-- code: 'ASMCLK
+- code: |
+    CON
+      _clkfreq = 200_000_000
+      _xtlfreq = 20_000_000
 
-    '
-  description: Basic assembly clock operation
+    DAT
+      ORG 0
+      ASMCLK              ' Sets clock to 200MHz using external crystal
+      ' ... rest of program
+  description: Set clock using external crystal with PLL - expands to HUBSET/WAITX/HUBSET sequence
+- code: |
+    CON
+      _AUTOCLK = 0        ' Disable automatic clock-setter
+      _clkfreq = 200_000_000
+      _xtlfreq = 20_000_000
+
+    DAT
+      ORG 0
+      ASMCLK              ' Manually set clock since auto-clock disabled
+  description: Manual clock setup with automatic clock-setter disabled
+- code: |
+    CON
+      _rcfast             ' Use internal fast RC oscillator (default)
+
+    DAT
+      ORG 0
+      ASMCLK              ' Expands to single HUBSET #0 instruction
+  description: RCFAST mode - expands to single instruction
 operand_details:
-  none: No operands required
+  none: No operands. Clock configuration comes from CON symbols (_clkfreq, _xtlfreq, _xinfreq, _rcslow, _rcfast).
+  conditional: Can be used with conditional prefix (IF_C, IF_NC, etc.)
 compiler_operand_format:
   name: operand_asmclk
   pattern: ''
-  description: Assembly clock instruction - no operands
+  description: Pseudo-instruction with no operands - configuration from CON symbols
   valueType: 35
 compiler_effects: []
-documentation_source: PNUT_TS_compiler_analysis
-documentation_level: minimal
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
-last_updated: '2025-09-19T16:04:17.451058'
+expansion_details:
+  external_clock:
+    description: For crystal/external clock modes with PLL
+    expands_to:
+      - "HUBSET ##clkmode_ & !%11    ' Start external clock, stay in RCFAST"
+      - "WAITX ##20_000_000/100      ' Wait ~10ms for clock stabilization"
+      - "HUBSET ##clkmode_           ' Switch to target clock mode"
+  rcslow:
+    description: For internal slow RC oscillator
+    expands_to:
+      - "HUBSET #1                   ' Switch to RCSLOW mode"
+  rcfast:
+    description: For internal fast RC oscillator (default)
+    expands_to:
+      - "HUBSET #0                   ' Stay in/switch to RCFAST mode"
+related_symbols:
+  - _clkfreq
+  - _xtlfreq
+  - _xinfreq
+  - _rcslow
+  - _rcfast
+  - _AUTOCLK
+  - clkmode
+  - clkfreq
+related_instructions:
+  - HUBSET
+  - CLKSET
+  - WAITX
+version_notes:
+  v35v: "ASMCLK no longer needed at start of PASM-only programs; automatic 16-long clock-setter prepended"
+  v46: "_AUTOCLK = 0 can inhibit automatic clock-setter, allowing manual ASMCLK use"
+documentation_source: Spin2_v51_documentation
+documentation_level: complete
+last_updated: '2025-12-04'
 category: System Control
-oneliner: Assembly clock instruction
+oneliner: Pseudo-instruction that sets clock mode from CON symbols in PASM-only programs
