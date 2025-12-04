@@ -80,46 +80,23 @@ All 314 entries updated with appropriate color bars.
 
 ---
 
-## DEBUG Instruction Chapter
+## ~~DEBUG Instruction Chapter~~ ✅ COMPLETED
 
-**Location:** New chapter needed (Part I Chapter 6 or dedicated section)
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** DEBUG instruction removed from Part II instruction reference. It requires special treatment beyond a standard instruction entry because DEBUG is not a single instruction but a family of debugging directives with complex syntax.
+**Location:** Part I Chapter 5, Section 5.9
 
-**Needed:** Create a dedicated narrative chapter covering:
-
-### Core DEBUG Functionality
-- DEBUG instruction syntax overview
-- DEBUG vs DEBUG() - statement vs expression forms
-- Compile-time behavior (code generation for serial output)
-- Runtime behavior (serial communication with host)
-
-### Output Formatting
-- Basic value display: `DEBUG(udec(x), uhex(y))`
-- Signed vs unsigned: `sdec`, `udec`, `shex`, `uhex`
-- Binary output: `ubin`, `sbin`
-- String output and labels
-- Formatting options: field width, padding, separators
-
-### Visual Debugging Tools
-- `DEBUG(`\`SCOPE)` - Oscilloscope display
-- `DEBUG(`\`PLOT)` - XY plotting
-- `DEBUG(`\`TERM)` - Terminal window
-- `DEBUG(`\`BITMAP)` - Bitmap display
-- Configuration parameters for each visual mode
-
-### Practical Debugging Patterns
-- Watching register values in loops
-- Timing measurement with DEBUG
-- Conditional debugging (debug only when condition met)
-- Multi-COG debugging considerations
-- Performance impact of DEBUG statements
-
-### Development Environment Integration
-- PropTool DEBUG window configuration
-- FlexProp/FlexGUI integration
-- Serial port requirements and baud rates
-- Disabling DEBUG for production builds
+**What was added:**
+- ✅ 5.9.1 DEBUG Fundamentals - Compile-time directive, basic syntax
+- ✅ 5.9.2 Value Formatters - UDEC/SDEC/UHEX/SHEX/UBIN/SBIN/FDEC with underscore convention
+- ✅ 5.9.3 Sized Formatters - _BYTE/_WORD/_LONG suffixes
+- ✅ 5.9.4 Array Formatters - BYTE_ARRAY, WORD_ARRAY, LONG_ARRAY, REG_ARRAY
+- ✅ 5.9.5 Special Formatters - ZSTR, LSTR, BOOL, C_Z, IF/IFNOT
+- ✅ 5.9.6 Visual Debug Displays - SCOPE, PLOT, TERM, LOGIC, BITMAP
+- ✅ 5.9.7 Practical DEBUG Patterns - Loop watching, conditional, timing, memory dump
+- ✅ 5.9.8 DEBUG Performance Considerations - Timing impact, mitigation, production builds
+- ✅ 5.9.9 DEBUG and Multi-COG Programs - Interleaving, strategies
+- ✅ Updated Key Concepts box with DEBUG-related items
 
 ---
 
@@ -241,4 +218,5 @@ All 314 entries updated with appropriate color bars.
 - ✅ Processor Boot Sequence Section (2025-12-04)
 - ✅ CORDIC Pipelining (2025-12-04)
 - ✅ Missing Diagrams - Part I (2025-12-04)
+- ✅ DEBUG Instruction Chapter (2025-12-04)
 - ⊘ FIFO Knowledge Base Content - Not for this manual (YAML upgrade task)
