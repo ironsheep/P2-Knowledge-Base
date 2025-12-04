@@ -13,7 +13,8 @@ Origin directives set the memory address where subsequent code or data will be a
 ::: dirheader
 ### ORG {#org}
 Set Origin
-Category: [Origin Control](instruction-categories.md#origin-control)
+
+[Origin Control](instruction-categories.md#origin-control) - Sets assembly origin to a specific cog RAM address.
 :::
 
 Set the assembly origin to a specific cog RAM address. All subsequent instructions assemble starting from this address.
@@ -56,7 +57,8 @@ table   long    1, 2, 3         ' Data table at specific address
 ::: dirheader
 ### ORGF {#orgf}
 Set Origin With Fill
-Category: [Origin Control](instruction-categories.md#origin-control)
+
+[Origin Control](instruction-categories.md#origin-control) - Advances to specified address, filling with zeros.
 :::
 
 Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which simply sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
@@ -110,7 +112,8 @@ block_end
 ::: dirheader
 ### ORGH {#orgh}
 Set Hub Origin
-Category: [Origin Control](instruction-categories.md#origin-control)
+
+[Origin Control](instruction-categories.md#origin-control) - Sets assembly origin to a hub RAM address.
 :::
 
 Set the assembly origin to a hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
@@ -156,7 +159,8 @@ Memory definition directives allocate and initialize data in memory. Each direct
 ::: dirheader
 ### BYTE {#byte}
 Declare Byte Data
-Category: [Memory Definition](instruction-categories.md#memory-definition)
+
+[Memory Definition](instruction-categories.md#memory-definition) - Stores 8-bit values at the current address.
 :::
 
 Declare byte data in memory. Stores 8-bit values at the current address.
@@ -198,7 +202,8 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 ::: dirheader
 ### LONG {#long}
 Declare Long Data
-Category: [Memory Definition](instruction-categories.md#memory-definition)
+
+[Memory Definition](instruction-categories.md#memory-definition) - Stores 32-bit values at the current address.
 :::
 
 Declare long data in memory. Stores 32-bit values at the current address.
@@ -240,7 +245,8 @@ ptrs    long    @start, @end    ' Address pointers
 ::: dirheader
 ### WORD {#word}
 Declare Word Data
-Category: [Memory Definition](instruction-categories.md#memory-definition)
+
+[Memory Definition](instruction-categories.md#memory-definition) - Stores 16-bit values at the current address.
 :::
 
 Declare word data in memory. Stores 16-bit values at the current address.
@@ -285,7 +291,8 @@ Size verification directives provide compile-time checking that values fit withi
 ::: dirheader
 ### BYTEFIT {#bytefit}
 Constrain To Byte Range
-Category: [Size Verification](instruction-categories.md#size-verification)
+
+[Size Verification](instruction-categories.md#size-verification) - Generates error if expression exceeds byte range.
 :::
 
 Constrain expression to fit within byte range (0-255). Generates assembly error if expression value exceeds byte range.
@@ -330,7 +337,8 @@ DAT
 ::: dirheader
 ### WORDFIT {#wordfit}
 Constrain To Word Range
-Category: [Size Verification](instruction-categories.md#size-verification)
+
+[Size Verification](instruction-categories.md#size-verification) - Generates error if expression exceeds word range.
 :::
 
 Constrain expression to fit within word range (0-65535). Generates assembly error if expression value exceeds word range.
@@ -379,7 +387,8 @@ Alignment directives insert padding bytes to align the next data or instruction 
 ::: dirheader
 ### ALIGNL {#alignl}
 Align To Long Boundary
-Category: [Alignment](instruction-categories.md#alignment)
+
+[Alignment](instruction-categories.md#alignment) - Inserts padding bytes for 4-byte alignment.
 :::
 
 Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a long boundary.
@@ -414,7 +423,8 @@ mydata  long    0               ' This starts on a long-aligned address
 ::: dirheader
 ### ALIGNW {#alignw}
 Align To Word Boundary
-Category: [Alignment](instruction-categories.md#alignment)
+
+[Alignment](instruction-categories.md#alignment) - Inserts padding bytes for 2-byte alignment.
 :::
 
 Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a word boundary.
@@ -452,7 +462,8 @@ Space management directives control memory allocation and verify size constraint
 ::: dirheader
 ### DITTO {#ditto}
 Repeat Previous Instruction
-Category: [Space Management](instruction-categories.md#space-management)
+
+[Space Management](instruction-categories.md#space-management) - Inserts a copy of the preceding instruction.
 :::
 
 Repeat the previous instruction. Inserts a copy of the immediately preceding instruction at the current location.
@@ -504,7 +515,8 @@ Use DITTO to create repeated instruction sequences without copy-paste. Useful fo
 ::: dirheader
 ### FIT {#fit}
 Verify Code Fits
-Category: [Space Management](instruction-categories.md#space-management)
+
+[Space Management](instruction-categories.md#space-management) - Generates error if current address exceeds limit.
 :::
 
 Verify that code fits within specified address limit. Generates assembly error if current address exceeds specified limit.
@@ -549,7 +561,8 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 ::: dirheader
 ### RES {#res}
 Reserve Space
-Category: [Space Management](instruction-categories.md#space-management)
+
+[Space Management](instruction-categories.md#space-management) - Allocates cog RAM without initialization.
 :::
 
 Reserve space in cog RAM without initializing. Allocates memory space but doesn't generate any data.

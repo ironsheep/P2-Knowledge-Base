@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter T.
 ::: instrheader
 ## TEST {#test}
 Test
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Tests parity and zero state of a value.
 :::
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
@@ -50,7 +51,8 @@ TEST is non-destructive—it does not modify Dest.
 ::: instrheader
 ## TESTB {#testb}
 Test Bit
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Tests a specific bit and optionally combines with flag.
 :::
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
@@ -96,7 +98,8 @@ TESTB is useful for examining individual bits without modifying the register val
 ::: instrheader
 ## TESTBN {#testbn}
 Test Bit Negated
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
@@ -137,7 +140,8 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 ::: instrheader
 ## TESTN {#testn}
 Test Not
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Tests parity and zero state with inverted mask.
 :::
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -173,7 +177,8 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ::: instrheader
 ## TESTP / TESTPN {#testp}
 Test Pin / Test Pin Negated {#testpn}
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Tests I/O pin state and optionally combines with flag.
 :::
 
 **TESTP**  *{#}Dest*  **WC/WZ**
@@ -230,7 +235,8 @@ Both instructions read the actual pin state from the IN register, not the output
 ::: instrheader
 ## TJF / TJNF {#tjf}
 Test And Jump If Full / Not Full {#tjnf}
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Tests for all bits set and conditionally jumps.
 :::
 
 **TJF**  *Dest, {#}Src*
@@ -270,7 +276,8 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ::: instrheader
 ## TJS / TJNS {#tjs}
 Test And Jump If Signed / Not Signed {#tjns}
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Tests sign bit and conditionally jumps.
 :::
 
 **TJS**  *Dest, {#}Src*
@@ -310,7 +317,8 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ::: instrheader
 ## TJZ / TJNZ {#tjz}
 Test And Jump If Zero / Not Zero {#tjnz}
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Tests for zero and conditionally jumps.
 :::
 
 **TJZ**  *Dest, {#}Src*
@@ -359,7 +367,8 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ::: instrheader
 ## TJV {#tjv}
 Test And Jump If Overflow
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Tests for signed overflow and conditionally jumps.
 :::
 
 **TJV**  *Dest, {#}Src*
@@ -398,7 +407,8 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
 Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
-Category: [Interrupt](instruction-categories.md#interrupt)
+
+[Interrupt](instruction-categories.md#interrupt) - Software-triggers an interrupt handler.
 :::
 
 **TRGINT1**

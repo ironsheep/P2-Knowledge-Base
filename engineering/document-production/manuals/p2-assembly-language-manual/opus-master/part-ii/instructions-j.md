@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter J.
 ::: instrheader
 ## JATN {#jatn}
 Jump If Attention Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the ATN event flag is set.
 :::
 
 **JATN**  *{#}S*
@@ -41,7 +42,8 @@ JATN is useful for implementing inter-cog communication mechanisms where one cog
 ::: instrheader
 ## JCT1 / JCT2 / JCT3 {#jct1}
 Jump If Counter Event Set {#jct2} {#jct3}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the counter event flag is set.
 :::
 
 **JCT1**  *{#}S*
@@ -83,7 +85,8 @@ The P2 provides three independent hardware counters for timing operations, allow
 ::: instrheader
 ## JFBW {#jfbw}
 Jump If FIFO Block Wrap Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the FIFO block wrap event flag is set.
 :::
 
 **JFBW**  *{#}S*
@@ -117,7 +120,8 @@ JFBW is useful for implementing circular buffer operations and managing block-ba
 ::: instrheader
 ## JINT {#jint}
 Jump If Interrupt Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the INT event flag is set.
 :::
 
 **JINT**  *{#}S*
@@ -151,7 +155,8 @@ JINT provides a polling-based mechanism for handling hardware interrupts, allowi
 ::: instrheader
 ## JMP {#jmp}
 Jump
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Unconditionally jumps to a new address.
 :::
 
 **JMP**  *D*  **{WC/WZ/WCZ}**
@@ -192,7 +197,8 @@ The instruction executes in 4 clock cycles in COG execution mode. In Hub executi
 ::: instrheader
 ## JMPREL {#jmprel}
 Jump Relative
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Jumps by adding a signed offset to the PC.
 :::
 
 **JMPREL**  *{#}D*
@@ -228,7 +234,8 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 ::: instrheader
 ## JNATN {#jnatn}
 Jump If Attention Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the ATN event flag is clear.
 :::
 
 **JNATN**  *{#}S*
@@ -262,7 +269,8 @@ JNATN is useful for implementing polling loops that wait until the ATN flag is c
 ::: instrheader
 ## JNCT1 / JNCT2 / JNCT3 {#jnct1}
 Jump If Counter Event Clear {#jnct2} {#jnct3}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the counter event flag is clear.
 :::
 
 **JNCT1**  *{#}S*
@@ -304,7 +312,8 @@ These instructions are useful for implementing polling loops that continue until
 ::: instrheader
 ## JNFBW {#jnfbw}
 Jump If FIFO Block Wrap Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the FIFO block wrap event flag is clear.
 :::
 
 **JNFBW**  *{#}S*
@@ -338,7 +347,8 @@ JNFBW is useful for polling loops that wait until a block wrap occurs, or for co
 ::: instrheader
 ## JNINT {#jnint}
 Jump If Interrupt Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the INT event flag is clear.
 :::
 
 **JNINT**  *{#}S*
@@ -372,7 +382,8 @@ JNINT is useful for polling loops that wait until an interrupt occurs, or for im
 ::: instrheader
 ## JNPAT {#jnpat}
 Jump If Pattern Match Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the PAT event flag is clear.
 :::
 
 **JNPAT**  *{#}S*
@@ -406,7 +417,8 @@ JNPAT is useful for polling loops that wait until a specific pattern appears on 
 ::: instrheader
 ## JNQMT {#jnqmt}
 Jump If CORDIC Empty Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the CORDIC-read-but-empty event flag is clear.
 :::
 
 **JNQMT**  *{#}S*
@@ -440,7 +452,8 @@ JNQMT is useful for ensuring CORDIC results are read at the correct time, helpin
 ::: instrheader
 ## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
 Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the selectable event flag is clear.
 :::
 
 **JNSE1**  *{#}S*
@@ -484,7 +497,8 @@ The P2 provides four selectable event sources, each configurable via SETSE instr
 ::: instrheader
 ## JNXFI {#jnxfi}
 Jump If Streamer Finished Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XFI event flag is clear.
 :::
 
 **JNXFI**  *{#}S*
@@ -518,7 +532,8 @@ JNXFI is useful for polling loops that wait until the streamer completes its ope
 ::: instrheader
 ## JNXMT {#jnxmt}
 Jump If Streamer Empty Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XMT event flag is clear.
 :::
 
 **JNXMT**  *{#}S*
@@ -552,7 +567,8 @@ JNXMT is useful for maintaining continuous streamer operation by reloading data 
 ::: instrheader
 ## JNXRL {#jnxrl}
 Jump If Streamer LUT Rollover Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XRL event flag is clear.
 :::
 
 **JNXRL**  *{#}S*
@@ -586,7 +602,8 @@ JNXRL is useful for implementing circular buffer management for streamer operati
 ::: instrheader
 ## JNXRO {#jnxro}
 Jump If Streamer NCO Rollover Event Clear
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XRO event flag is clear.
 :::
 
 **JNXRO**  *{#}S*
@@ -620,7 +637,8 @@ JNXRO is useful for timing-sensitive streamer applications where code needs to s
 ::: instrheader
 ## JPAT {#jpat}
 Jump If Pattern Match Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the PAT event flag is set.
 :::
 
 **JPAT**  *{#}S*
@@ -654,7 +672,8 @@ JPAT is useful for implementing hardware-triggered control flow where code execu
 ::: instrheader
 ## JQMT {#jqmt}
 Jump If CORDIC Empty Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the CORDIC-read-but-empty event flag is set.
 :::
 
 **JQMT**  *{#}S*
@@ -688,7 +707,8 @@ JQMT is useful for error handling in CORDIC operations, allowing code to detect 
 ::: instrheader
 ## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
 Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the selectable event flag is set.
 :::
 
 **JSE1**  *{#}S*
@@ -732,7 +752,8 @@ The P2 provides four independent selectable event sources, enabling multiple con
 ::: instrheader
 ## JXFI {#jxfi}
 Jump If Streamer Finished Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XFI event flag is set.
 :::
 
 **JXFI**  *{#}S*
@@ -766,7 +787,8 @@ JXFI is useful for chaining streamer operations or triggering code execution imm
 ::: instrheader
 ## JXMT {#jxmt}
 Jump If Streamer Empty Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XMT event flag is set.
 :::
 
 **JXMT**  *{#}S*
@@ -800,7 +822,8 @@ JXMT is useful for implementing continuous streaming operations where the code n
 ::: instrheader
 ## JXRL {#jxrl}
 Jump If Streamer LUT Rollover Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XRL event flag is set.
 :::
 
 **JXRL**  *{#}S*
@@ -834,7 +857,8 @@ JXRL is useful for implementing circular buffer operations with the streamer usi
 ::: instrheader
 ## JXRO {#jxro}
 Jump If Streamer NCO Rollover Event Set
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Jumps if the XRO event flag is set.
 :::
 
 **JXRO**  *{#}S*

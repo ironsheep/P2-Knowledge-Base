@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter A.
 ::: instrheader
 ## ABS {#abs}
 Absolute Value
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Returns the absolute (non-negative) value of a signed number.
 :::
 
 **ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -45,7 +46,8 @@ Literal Src values are zero-extended, so ABS is best used with register Src (or 
 ::: instrheader
 ## ADD {#add}
 Add Unsigned
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Adds two unsigned 32-bit values.
 :::
 
 **ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -88,7 +90,8 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 ::: instrheader
 ## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 Add and Set Counter Event Trigger
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Sets counter event trigger to Dest + Src for time-based events.
 :::
 
 **ADDCT1**  *Dest, {#}Src*
@@ -123,7 +126,8 @@ The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowi
 ::: instrheader
 ## ADDPIX {#addpix}
 Add Pixels
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Adds color channel bytes with saturation.
 :::
 
 **ADDPIX**  *Dest, {#}Src*
@@ -156,7 +160,8 @@ The instruction processes all three color channels (and alpha if present) in par
 ::: instrheader
 ## ADDS {#adds}
 Add Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Adds two signed 32-bit values.
 :::
 
 **ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -194,7 +199,8 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 ::: instrheader
 ## ADDSX {#addsx}
 Add Signed Extended
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Extended signed addition for multi-long values.
 :::
 
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -230,7 +236,8 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 ::: instrheader
 ## ADDX {#addx}
 Add Unsigned Extended
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Extended unsigned addition for multi-long values.
 :::
 
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -266,7 +273,8 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 ::: instrheader
 ## AKPIN {#akpin}
 Acknowledge Smart Pin
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Acknowledges Smart Pin(s) to allow future events.
 :::
 
 **AKPIN**  *{#}Src*
@@ -302,7 +310,8 @@ The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the 
 ::: instrheader
 ## ALLOWI {#allowi}
 Allow Interrupts
-Category: [Interrupt](instruction-categories.md#interrupt)
+
+[Interrupt](instruction-categories.md#interrupt) - Re-enables interrupt handling after STALLI.
 :::
 
 **ALLOWI**
@@ -330,7 +339,8 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 ::: instrheader
 ## ALTB {#altb}
 Alter Bit
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next BITxxx instruction's target bit address.
 :::
 
 **ALTB**  *Dest, {#}Src*
@@ -377,7 +387,8 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 ::: instrheader
 ## ALTD {#altd}
 Alter Destination
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next instruction's Dest field.
 :::
 
 **ALTD**  *Dest, {#}Src*
@@ -418,7 +429,8 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 ::: instrheader
 ## ALTGB {#altgb}
 Alter Get Byte
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
 **ALTGB**  *Dest, {#}Src*
@@ -463,7 +475,8 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 ::: instrheader
 ## ALTGN {#altgn}
 Alter Get Nibble
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
 **ALTGN**  *Dest, {#}Src*
@@ -508,7 +521,8 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 ::: instrheader
 ## ALTGW {#altgw}
 Alter Get Word
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
 **ALTGW**  *Dest, {#}Src*
@@ -553,7 +567,8 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 ::: instrheader
 ## ALTI {#alti}
 Alter Instruction
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters multiple fields of the next instruction.
 :::
 
 **ALTI**  *Dest, {#}Src*
@@ -592,7 +607,8 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 ::: instrheader
 ## ALTR {#altr}
 Alter Result
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next instruction's result write address.
 :::
 
 **ALTR**  *Dest, {#}Src*
@@ -635,7 +651,8 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 ::: instrheader
 ## ALTS {#alts}
 Alter Source
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next instruction's Src field.
 :::
 
 **ALTS**  *Dest, {#}Src*
@@ -676,7 +693,8 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 ::: instrheader
 ## ALTSB {#altsb}
 Alter Set Byte
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next SETBYTE instruction's target byte.
 :::
 
 **ALTSB**  *Dest, {#}Src*
@@ -719,7 +737,8 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 ::: instrheader
 ## ALTSN {#altsn}
 Alter Set Nibble
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next SETNIB instruction's target nibble.
 :::
 
 **ALTSN**  *Dest, {#}Src*
@@ -764,7 +783,8 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 ::: instrheader
 ## ALTSW {#altsw}
 Alter Set Word
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Alters next SETWORD instruction's target word.
 :::
 
 **ALTSW**  *Dest, {#}Src*
@@ -809,7 +829,8 @@ The instruction following ALTSW is shielded from interrupt. ALTSW alters the nex
 ::: instrheader
 ## AND {#and}
 Bitwise And
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Performs bitwise AND between two values.
 :::
 
 **AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -843,7 +864,8 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ::: instrheader
 ## ANDN {#andn}
 And Not
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Clears bits in Dest where Src bits are set.
 :::
 
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -879,7 +901,8 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ::: instrheader
 ## ASMCLK {#asmclk}
 Set Clock Mode
-Category: [System Control](instruction-categories.md#system-control)
+
+[System Control](instruction-categories.md#system-control) - Configures system clock from CON symbols.
 :::
 
 **ASMCLK**
@@ -954,7 +977,8 @@ DAT
 ::: instrheader
 ## AUGD {#augd}
 Augment Destination
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Extends next literal Dest to 32 bits.
 :::
 
 **AUGD**  *#Dest*
@@ -988,7 +1012,8 @@ Though AUGD may be manually entered wherever needed, the Parallax P2 compiler su
 ::: instrheader
 ## AUGS {#augs}
 Augment Source
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Extends next literal Src to 32 bits.
 :::
 
 **AUGS**  *#Src*

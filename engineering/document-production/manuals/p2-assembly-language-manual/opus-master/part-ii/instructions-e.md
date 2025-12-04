@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter E.
 ::: instrheader
 ## ENCOD {#encod}
 Encode Bit Position
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Returns the position of the highest set bit.
 :::
 
 **ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -53,7 +54,8 @@ ENCOD is the complement of DECOD. Where DECOD converts a bit position (0-31) int
 ::: instrheader
 ## EXECF {#execf}
 Execute with Skip Pattern
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Jumps to address with skip pattern for conditional execution.
 :::
 
 **EXECF**  *{#}Dest*

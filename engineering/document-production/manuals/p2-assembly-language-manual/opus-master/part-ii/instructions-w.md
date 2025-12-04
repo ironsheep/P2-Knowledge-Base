@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter W.
 ::: instrheader
 ## WAITATN {#waitatn}
 Wait For Attention
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for an attention event from another cog.
 :::
 
 **WAITATN**  **{WC|WZ|WCZ}**
@@ -43,7 +44,8 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 ::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
 Wait For Counter Event {#waitct2} {#waitct3}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for a counter event flag to be set.
 :::
 
 **WAITCT1**  **{WC|WZ|WCZ}**
@@ -79,7 +81,8 @@ To set an optional timeout, insert a SETQ instruction immediately before the WAI
 ::: instrheader
 ## WAITFBW {#waitfbw}
 Wait For FIFO Block Wrap
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for a FIFO block wrap event.
 :::
 
 **WAITFBW**  **{WC|WZ|WCZ}**
@@ -109,7 +112,8 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 ::: instrheader
 ## WAITINT {#waitint}
 Wait For Interrupt
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for an interrupt event to occur.
 :::
 
 **WAITINT**  **{WC|WZ|WCZ}**
@@ -139,7 +143,8 @@ The interrupt-occurred event flag is cleared upon cog start or execution of POLL
 ::: instrheader
 ## WAITPAT {#waitpat}
 Wait For Pattern
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for a pin pattern match event.
 :::
 
 **WAITPAT**  **{WC|WZ|WCZ}**
@@ -174,7 +179,8 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 ::: instrheader
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
 Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for a selectable event flag to be set.
 :::
 
 **WAITSE1**  **{WC|WZ|WCZ}**
@@ -210,7 +216,8 @@ Each selectable event flag is cleared by execution of its respective SETSEn, POL
 ::: instrheader
 ## WAITX {#waitx}
 Wait Cycles
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Stalls the cog for a precise number of clock cycles.
 :::
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
@@ -245,7 +252,8 @@ WAITX blocks cog execution completely—no instructions execute and no interrupt
 ::: instrheader
 ## WAITXFI {#waitxfi}
 Wait For Streamer Finished
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for the streamer to finish all commands.
 :::
 
 **WAITXFI**  **{WC|WZ|WCZ}**
@@ -275,7 +283,8 @@ The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCON
 ::: instrheader
 ## WAITXMT {#waitxmt}
 Wait For Streamer Empty
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for the streamer to be ready for a new command.
 :::
 
 **WAITXMT**  **{WC|WZ|WCZ}**
@@ -305,7 +314,8 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 ::: instrheader
 ## WAITXRL {#waitxrl}
 Wait For Streamer LUT Rollover
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for the streamer LUT RAM rollover event.
 :::
 
 **WAITXRL**  **{WC|WZ|WCZ}**
@@ -335,7 +345,8 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 ::: instrheader
 ## WAITXRO {#waitxro}
 Wait For Streamer NCO Rollover
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Waits for the streamer NCO rollover event.
 :::
 
 **WAITXRO**  **{WC|WZ|WCZ}**
@@ -365,7 +376,8 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ::: instrheader
 ## WFBYTE {#wfbyte}
 Write FIFO Byte
-Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+
+[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a byte to the Hub FIFO interface.
 :::
 
 **WFBYTE**  *{#}Dest*
@@ -395,7 +407,8 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ::: instrheader
 ## WFLONG {#wflong}
 Write FIFO Long
-Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+
+[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a long to the Hub FIFO interface.
 :::
 
 **WFLONG**  *{#}Dest*
@@ -425,7 +438,8 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ::: instrheader
 ## WFWORD {#wfword}
 Write FIFO Word
-Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+
+[Hub FIFO](instruction-categories.md#hub-fifo) - Writes a word to the Hub FIFO interface.
 :::
 
 **WFWORD**  *{#}Dest*
@@ -455,7 +469,8 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ::: instrheader
 ## WMLONG {#wmlong}
 Write Masked Long
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Writes only non-zero bytes to Hub RAM.
 :::
 
 **WMLONG**  *Dest, {#}Src/P*
@@ -488,7 +503,8 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 ::: instrheader
 ## WRBYTE {#wrbyte}
 Write Byte
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Writes a byte to Hub RAM.
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
@@ -523,7 +539,8 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
 Write Flag To Register {#wrnc} {#wrz} {#wrnz}
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Writes 0 or 1 to register based on flag state.
 :::
 
 **WRC**  *Dest*
@@ -564,7 +581,8 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ::: instrheader
 ## WRFAST {#wrfast}
 Write FIFO Setup
-Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+
+[Hub FIFO](instruction-categories.md#hub-fifo) - Configures the Hub FIFO for fast writes.
 :::
 
 **WRFAST**  *{#}Dest, {#}Src*
@@ -602,7 +620,8 @@ Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increme
 ::: instrheader
 ## WRLONG {#wrlong}
 Write Long
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Writes a long to Hub RAM.
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
@@ -640,7 +659,8 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
 ::: instrheader
 ## WRLUT {#wrlut}
 Write LUT
-Category: [Lookup Table](instruction-categories.md#lookup-table)
+
+[Lookup Table](instruction-categories.md#lookup-table) - Writes a value to Lookup Table RAM.
 :::
 
 **WRLUT**  *{#}Dest, {#}Src/P*
@@ -677,7 +697,8 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ::: instrheader
 ## WRPIN {#wrpin}
 Write Pin Mode
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Configures the operating mode of a Smart Pin.
 :::
 
 **WRPIN**  *{#}Dest, {#}Src*
@@ -724,7 +745,8 @@ WRPIN #0, pin clears all smart pin configuration.
 ::: instrheader
 ## WRWORD {#wrword}
 Write Word
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Writes a word to Hub RAM.
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
@@ -755,7 +777,8 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ::: instrheader
 ## WXPIN {#wxpin}
 Write Pin X Parameter
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Sets the X parameter of a Smart Pin.
 :::
 
 **WXPIN**  *{#}Dest, {#}Src*
@@ -791,7 +814,8 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ::: instrheader
 ## WYPIN {#wypin}
 Write Pin Y Parameter
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Sets the Y parameter of a Smart Pin.
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*

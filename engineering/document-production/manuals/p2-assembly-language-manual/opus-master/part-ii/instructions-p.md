@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter P.
 ::: instrheader
 ## POLLATN {#pollatn}
 Poll Attention Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the inter-cog attention event flag.
 :::
 
 **POLLATN**  **{WC|WZ|WCZ}**
@@ -39,7 +40,8 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 ::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
 Poll Counter Event {#pollct2} {#pollct3}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the system counter event flag.
 :::
 
 **POLLCT1**  **{WC|WZ|WCZ}**
@@ -75,7 +77,8 @@ These instructions enable time-based event polling without blocking execution. T
 ::: instrheader
 ## POLLFBW {#pollfbw}
 Poll FIFO Block Wrap Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the FIFO block wrap event flag.
 :::
 
 **POLLFBW**  **{WC|WZ|WCZ}**
@@ -107,7 +110,8 @@ This instruction enables circular buffer management for high-speed Hub RAM trans
 ::: instrheader
 ## POLLINT {#pollint}
 Poll Interrupt Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the interrupt-occurred event flag.
 :::
 
 **POLLINT**  **{WC|WZ|WCZ}**
@@ -139,7 +143,8 @@ This instruction enables non-blocking interrupt handling.
 ::: instrheader
 ## POLLPAT {#pollpat}
 Poll Pin Pattern Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the pin pattern match event flag.
 :::
 
 **POLLPAT**  **{WC|WZ|WCZ}**
@@ -171,7 +176,8 @@ This instruction enables non-blocking pattern detection on input pins.
 ::: instrheader
 ## POLLQMT {#pollqmt}
 Poll CORDIC Empty Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the CORDIC empty event flag.
 :::
 
 **POLLQMT**  **{WC|WZ|WCZ}**
@@ -203,7 +209,8 @@ This instruction enables error detection for CORDIC operations.
 ::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
 Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears a configurable selectable event flag.
 :::
 
 **POLLSE1**  **{WC|WZ|WCZ}**
@@ -241,7 +248,8 @@ The P2 provides four independent selectable event generators that can be configu
 ::: instrheader
 ## POLLXFI {#pollxfi}
 Poll Streamer Finished Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the streamer finished event flag.
 :::
 
 **POLLXFI**  **{WC|WZ|WCZ}**
@@ -273,7 +281,8 @@ This instruction enables non-blocking management of the streamer subsystem.
 ::: instrheader
 ## POLLXMT {#pollxmt}
 Poll Streamer Empty Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the streamer empty event flag.
 :::
 
 **POLLXMT**  **{WC|WZ|WCZ}**
@@ -305,7 +314,8 @@ This instruction enables pipelined streamer operations.
 ::: instrheader
 ## POLLXRL {#pollxrl}
 Poll Streamer LUT Rollover Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the streamer LUT rollover event flag.
 :::
 
 **POLLXRL**  **{WC|WZ|WCZ}**
@@ -337,7 +347,8 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 ::: instrheader
 ## POLLXRO {#pollxro}
 Poll Streamer NCO Rollover Event
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Polls and clears the streamer NCO rollover event flag.
 :::
 
 **POLLXRO**  **{WC|WZ|WCZ}**
@@ -369,7 +380,8 @@ This instruction enables precise timing control for streamer operations that use
 ::: instrheader
 ## POP {#pop}
 Pop From Internal Stack
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Pops a value from the internal K register stack.
 :::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
@@ -404,7 +416,8 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 ::: instrheader
 ## POPA {#popa}
 Pop From Hub Stack A
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Pops a long from Hub memory using PTRA as stack pointer.
 :::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
@@ -439,7 +452,8 @@ This instruction enables Hub RAM-based stacks for deep subroutine nesting and la
 ::: instrheader
 ## POPB {#popb}
 Pop From Hub Stack B
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Pops a long from Hub memory using PTRB as stack pointer.
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
@@ -474,7 +488,8 @@ Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage
 ::: instrheader
 ## PUSH {#push}
 Push To Internal Stack
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Pushes a value onto the internal K register stack.
 :::
 
 **PUSH**  *{#}Dest*
@@ -504,7 +519,8 @@ The P2 provides a single-level internal stack register K that is automatically u
 ::: instrheader
 ## PUSHA {#pusha}
 Push To Hub Stack A
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Pushes a long to Hub memory using PTRA as stack pointer.
 :::
 
 **PUSHA**  *{#}Dest*
@@ -536,7 +552,8 @@ PUSHA paired with POPA implements a descending stack in Hub RAM.
 ::: instrheader
 ## PUSHB {#pushb}
 Push To Hub Stack B
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Pushes a long to Hub memory using PTRB as stack pointer.
 :::
 
 **PUSHB**  *{#}Dest*

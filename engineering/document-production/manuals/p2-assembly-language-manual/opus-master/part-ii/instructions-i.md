@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter I.
 ::: instrheader
 ## IJZ / IJNZ {#ijz}
 Increment and Jump If Zero {#ijnz}
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Increments and conditionally jumps based on the result.
 :::
 
 **IJZ**  *Dest, {#}Src*
@@ -51,7 +52,8 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ::: instrheader
 ## INCMOD {#incmod}
 Increment Modulus
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Increments with modulus wrap-around.
 :::
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**

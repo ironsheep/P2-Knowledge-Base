@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter H.
 ::: instrheader
 ## HUBSET {#hubset}
 Set Hub Configuration
-Category: [Hub Control](instruction-categories.md#hub-control)
+
+[Hub Control](instruction-categories.md#hub-control) - Configures hub clock system, crystal, and PLL settings.
 :::
 
 **HUBSET**  *{#}D*

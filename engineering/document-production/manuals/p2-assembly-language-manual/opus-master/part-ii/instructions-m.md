@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter M.
 ::: instrheader
 ## MERGEB {#mergeb}
 Merge Bits Of Bytes
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bits by extracting one bit from each byte and merging them.
 :::
 
 **MERGEB**  *D*
@@ -39,7 +40,8 @@ MERGEB is useful for bit-plane conversions, graphics operations, and data transf
 ::: instrheader
 ## MERGEW {#mergew}
 Merge Bits Of Words
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bits by interleaving from the two 16-bit words.
 :::
 
 **MERGEW**  *D*
@@ -71,7 +73,8 @@ MERGEW is useful for word-level bit-plane conversions, graphics operations requi
 ::: instrheader
 ## MIXPIX {#mixpix}
 Mix Pixels
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Blends pixel bytes according to SETPIX and SETPIV configuration.
 :::
 
 **MIXPIX**  *D,{#}S*
@@ -106,7 +109,8 @@ MIXPIX is essential for high-performance graphics operations, enabling real-time
 ::: instrheader
 ## MODC {#modc}
 Modify C Flag
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears C flag based on a modifier and current flag states.
 :::
 
 **MODC**  *c*  **{WC}**
@@ -143,7 +147,8 @@ If the WC effect is specified, the flag modification becomes visible to subseque
 ::: instrheader
 ## MODCZ {#modcz}
 Modify C And Z Flags
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears both C and Z flags based on modifiers.
 :::
 
 **MODCZ**  *c,z*  **{WC/WZ/WCZ}**
@@ -183,7 +188,8 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 ::: instrheader
 ## MODZ {#modz}
 Modify Z Flag
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets or clears Z flag based on a modifier and current flag states.
 :::
 
 **MODZ**  *z*  **{WZ}**
@@ -220,7 +226,8 @@ If the WZ effect is specified, the flag modification becomes visible to subseque
 ::: instrheader
 ## MOV {#mov}
 Move
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Copies a value from source to destination register.
 :::
 
 **MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -278,7 +285,8 @@ When combined with flag effects, MOV enables efficient value testing:
 ::: instrheader
 ## MOVBYTS {#movbyts}
 Move Bytes
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Rearranges bytes within a register according to a selection pattern.
 :::
 
 **MOVBYTS**  *D,{#}S*
@@ -319,7 +327,8 @@ Common patterns include:
 ::: instrheader
 ## MUL {#mul}
 Multiply
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Multiplies two 16-bit unsigned values, producing 32-bit result.
 :::
 
 **MUL**  *Dest, {#}Src*  **{WZ}**
@@ -372,7 +381,8 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ::: instrheader
 ## MULPIX {#mulpix}
 Multiply Pixels
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Multiplies corresponding pixel bytes in parallel.
 :::
 
 **MULPIX**  *D,{#}S*
@@ -415,7 +425,8 @@ The instruction treats all bytes independently, so it can be used for any four-b
 ::: instrheader
 ## MULS {#muls}
 Multiply Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Multiplies two signed 16-bit values, producing signed 32-bit result.
 :::
 
 **MULS**  *Dest, {#}Src*  **{WZ}**
@@ -471,7 +482,8 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 ::: instrheader
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
 Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets selected bits to a flag value based on mask.
 :::
 
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
@@ -530,7 +542,8 @@ These instructions provide an efficient alternative to conditional branches when
 ::: instrheader
 ## MUXNIBS {#muxnibs}
 Multiplex Nibbles
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Replaces nibbles in Dest where Src nibbles are non-zero.
 :::
 
 **MUXNIBS**  *Dest, {#}Src*
@@ -573,7 +586,8 @@ The instruction treats nibbles independently, enabling parallel conditional upda
 ::: instrheader
 ## MUXNITS {#muxnits}
 Multiplex Nits
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Replaces bit pairs in Dest where Src bit pairs are non-zero.
 :::
 
 **MUXNITS**  *Dest, {#}Src*
@@ -616,7 +630,8 @@ The name "nits" comes from "nibble bits" or 2-bit fields, representing the next 
 ::: instrheader
 ## MUXQ {#muxq}
 Multiplex Q
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Copies bits from Src to Dest at positions where Q has 1 bits.
 :::
 
 **MUXQ**  *Dest, {#}Src*

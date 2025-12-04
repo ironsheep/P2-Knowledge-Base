@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter G.
 ::: instrheader
 ## GETBRK {#getbrk}
 Get Breakpoint Status
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves breakpoint or COG status information.
 :::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
@@ -46,7 +47,8 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 ::: instrheader
 ## GETBYTE {#getbyte}
 Get Byte
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified byte from a 32-bit value.
 :::
 
 **GETBYTE**  *Dest, {#}Src, #Num*
@@ -82,7 +84,8 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 ::: instrheader
 ## GETCT {#getct}
 Get System Counter
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves the current value of the system counter.
 :::
 
 **GETCT**  *Dest*  **{WC}**
@@ -117,7 +120,8 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 ::: instrheader
 ## GETNIB {#getnib}
 Get Nibble
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified nibble from a 32-bit value.
 :::
 
 **GETNIB**  *Dest, {#}Src, #Num*
@@ -153,7 +157,8 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ::: instrheader
 ## GETPTR {#getptr}
 Get FIFO Hub Pointer
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Retrieves the current FIFO hub pointer position.
 :::
 
 **GETPTR**  *Dest*
@@ -185,7 +190,8 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 ::: instrheader
 ## GETQX {#getqx}
 Get CORDIC X Result
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Retrieves the X result from the CORDIC solver.
 :::
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
@@ -222,7 +228,8 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 ::: instrheader
 ## GETQY {#getqy}
 Get CORDIC Y Result
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Retrieves the Y result from the CORDIC solver.
 :::
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
@@ -259,7 +266,8 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 ::: instrheader
 ## GETRND {#getrnd}
 Get Random Value
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
 :::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
@@ -300,7 +308,8 @@ The random number generator uses a maximal-length linear feedback shift register
 ::: instrheader
 ## GETSCP {#getscp}
 Get Oscilloscope Samples
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Retrieves four 8-bit oscilloscope samples.
 :::
 
 **GETSCP**  *Dest*
@@ -334,7 +343,8 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 ::: instrheader
 ## GETWORD {#getword}
 Get Word
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Extracts a specified word from a 32-bit value.
 :::
 
 **GETWORD**  *Dest, {#}Src, #Num*
@@ -370,7 +380,8 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ::: instrheader
 ## GETXACC {#getxacc}
 Get Goertzel Accumulators
-Category: [Streamer](instruction-categories.md#streamer)
+
+[Streamer](instruction-categories.md#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
 :::
 
 **GETXACC**  *Dest*

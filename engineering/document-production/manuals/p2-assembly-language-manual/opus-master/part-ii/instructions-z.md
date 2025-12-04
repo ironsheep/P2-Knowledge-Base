@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter Z. There 
 ::: instrheader
 ## ZEROX {#zerox}
 Zero Extend
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Zero-extends a value above the specified bit position.
 :::
 
 **ZEROX**  *Dest, {#}Src*  **{WC/WZ/WCZ}**

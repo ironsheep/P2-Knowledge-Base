@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter N.
 ::: instrheader
 ## NEG {#neg}
 Negate
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Negates a value, flipping its sign.
 :::
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -45,7 +46,8 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ::: instrheader
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
 Conditional Negate {#negnc} {#negz} {#negnz}
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Conditionally negates a value based on flag state.
 :::
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -107,7 +109,8 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 Cancel Interrupt {#nixint2} {#nixint3}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Cancels any pending interrupt event for the specified level.
 :::
 
 **NIXINT1**
@@ -139,7 +142,8 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 ::: instrheader
 ## NOP {#nop}
 No Operation
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Consumes two clock cycles without any operation.
 :::
 
 **NOP**
@@ -167,7 +171,8 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 ::: instrheader
 ## NOT {#not}
 Bitwise Not
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Inverts all bits in a value.
 :::
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**

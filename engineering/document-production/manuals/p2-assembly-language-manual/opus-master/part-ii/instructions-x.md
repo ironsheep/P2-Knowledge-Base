@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ::: instrheader
 ## XCONT {#xcont}
 Execute Continue
-Category: [Streamer](instruction-categories.md#streamer-category)
+
+[Streamer](instruction-categories.md#streamer-category) - Buffers a streamer command continuing from current phase.
 :::
 
 **XCONT**  *{#}Dest, {#}Src*
@@ -40,7 +41,8 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ::: instrheader
 ## XINIT {#xinit}
 Execute Initialize
-Category: [Streamer](instruction-categories.md#streamer-category)
+
+[Streamer](instruction-categories.md#streamer-category) - Issues a streamer command immediately with phase reset to zero.
 :::
 
 **XINIT**  *{#}Dest, {#}Src*
@@ -86,7 +88,8 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 ::: instrheader
 ## XOR {#xor}
 Exclusive Or
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Performs bitwise exclusive OR of Dest and Src.
 :::
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
@@ -128,7 +131,8 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 ::: instrheader
 ## XORO32 {#xoro32}
 Xoroshiro 32
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Generates next pseudo-random number using xoroshiro32+ algorithm.
 :::
 
 **XORO32**  *Dest*
@@ -174,7 +178,8 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ::: instrheader
 ## XSTOP {#xstop}
 Execute Stop
-Category: [Streamer](instruction-categories.md#streamer-category)
+
+[Streamer](instruction-categories.md#streamer-category) - Immediately halts the active streamer operation.
 :::
 
 **XSTOP**
@@ -211,7 +216,8 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 ::: instrheader
 ## XZERO {#xzero}
 Execute Zero
-Category: [Streamer](instruction-categories.md#streamer-category)
+
+[Streamer](instruction-categories.md#streamer-category) - Buffers a streamer command with phase reset to zero.
 :::
 
 **XZERO**  *{#}Dest, {#}Src*

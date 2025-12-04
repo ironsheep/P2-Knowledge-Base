@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter F.
 ::: instrheader
 ## FBLOCK {#fblock}
 Set Next FIFO Block
-Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+
+[Hub FIFO](instruction-categories.md#hub-fifo) - Configures the next block for FIFO wraparound operations.
 :::
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -42,7 +43,8 @@ FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-t
 ::: instrheader
 ## FGE {#fge}
 Force Greater or Equal
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Forces unsigned Dest to be at least Src (minimum clamp).
 :::
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -78,7 +80,8 @@ FGE is useful for clamping values to a minimum threshold, ensuring that a value 
 ::: instrheader
 ## FGES {#fges}
 Force Greater or Equal Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Forces signed Dest to be at least Src (minimum clamp).
 :::
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -114,7 +117,8 @@ FGES is the signed counterpart to FGE and is used when working with signed value
 ::: instrheader
 ## FLE {#fle}
 Force Less or Equal
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Forces unsigned Dest to be at most Src (maximum clamp).
 :::
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -150,7 +154,8 @@ FLE is useful for clamping values to a maximum threshold, ensuring that a value 
 ::: instrheader
 ## FLES {#fles}
 Force Less or Equal Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Forces signed Dest to be at most Src (maximum clamp).
 :::
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -186,7 +191,8 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 ::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset by flag state.
 :::
 
 **FLTC**  *{#}Dest*  **{WCZ}**
@@ -232,7 +238,8 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ::: instrheader
 ## FLTH {#flth}
 Float High
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset high.
 :::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -269,7 +276,8 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ::: instrheader
 ## FLTL {#fltl}
 Float Low
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Sets pins to input direction with output preset low.
 :::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -306,7 +314,8 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 ::: instrheader
 ## FLTNOT {#fltnot}
 Float Not
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Sets pins to input direction with output toggled.
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -345,7 +354,8 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ::: instrheader
 ## FLTRND {#fltrnd}
 Float Random
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Sets pins to input direction with random output levels.
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**

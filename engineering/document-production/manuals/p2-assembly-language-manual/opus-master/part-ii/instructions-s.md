@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter S.
 ::: instrheader
 ## SAL {#sal}
 Shift Arithmetic Left
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left, extending the original LSB into new rightmost bits.
 :::
 
 **SAL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -41,7 +42,8 @@ SAL shifts the destination's binary value left by the source number of places (0
 ::: instrheader
 ## SAR {#sar}
 Shift Arithmetic Right
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right, preserving the sign bit for signed division.
 :::
 
 **SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -75,7 +77,8 @@ SAR shifts the destination's binary value right by the source number of places (
 ::: instrheader
 ## SCA {#sca}
 Scale
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Scales unsigned 16-bit values by multiplying and right-shifting.
 :::
 
 **SCA**  *Dest, {#}Src*  **{WZ}**
@@ -110,7 +113,8 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 ::: instrheader
 ## SCAS {#scas}
 Scale Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Scales signed 16-bit values by multiplying and right-shifting.
 :::
 
 **SCAS**  *Dest, {#}Src*  **{WZ}**
@@ -140,7 +144,8 @@ SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right
 ::: instrheader
 ## SETBYTE {#setbyte}
 Set Byte
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Writes an 8-bit value to a specific byte position within a register.
 :::
 
 **SETBYTE**  *Dest, {#}Src, #N*
@@ -178,7 +183,8 @@ SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte a
 ::: instrheader
 ## SETCFRQ {#setcfrq}
 Set Colorspace Converter Frequency
-Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+
+[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the frequency parameter for colorspace conversion hardware.
 :::
 
 **SETCFRQ**  *{#}Dest*
@@ -206,7 +212,8 @@ Sets the colorspace converter CFRQ parameter to the value in Dest. This instruct
 ::: instrheader
 ## SETCI {#setci}
 Set Colorspace Converter CI
-Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+
+[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CI parameter for colorspace conversion hardware.
 :::
 
 **SETCI**  *{#}Dest*
@@ -234,7 +241,8 @@ Sets the colorspace converter CI parameter to the value in Dest. This instructio
 ::: instrheader
 ## SETCMOD {#setcmod}
 Set Colorspace Converter Mode
-Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+
+[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the mode parameter for colorspace conversion hardware.
 :::
 
 **SETCMOD**  *{#}Dest*
@@ -262,7 +270,8 @@ Sets the colorspace converter CMOD parameter to Dest[8:0]. This instruction conf
 ::: instrheader
 ## SETCQ {#setcq}
 Set Colorspace Converter CQ
-Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+
+[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CQ parameter for colorspace conversion hardware.
 :::
 
 **SETCQ**  *{#}Dest*
@@ -290,7 +299,8 @@ Sets the colorspace converter CQ parameter to the value in Dest. This instructio
 ::: instrheader
 ## SETCY {#setcy}
 Set Colorspace Converter CY
-Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+
+[Color Space Converter](instruction-categories.md#color-space-converter) - Configures the CY parameter for colorspace conversion hardware.
 :::
 
 **SETCY**  *{#}Dest*
@@ -318,7 +328,8 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 ::: instrheader
 ## SETD {#setd}
 Set Destination Field
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Sets the D field of a template for use with ALTI instruction.
 :::
 
 **SETD**  *Dest, {#}Src*
@@ -349,7 +360,8 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ::: instrheader
 ## SETDACS {#setdacs}
 Set DACs
-Category: [Smart Pin](instruction-categories.md#smart-pin)
+
+[Smart Pin](instruction-categories.md#smart-pin) - Sets all four DAC channels simultaneously from a single register.
 :::
 
 **SETDACS**  *{#}Dest*
@@ -375,7 +387,8 @@ Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 rece
 ::: instrheader
 ## SETINT1 / SETINT2 / SETINT3 {#setint1}
 Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
-Category: [Interrupt](instruction-categories.md#interrupt)
+
+[Interrupt](instruction-categories.md#interrupt) - Configures which event triggers the specified interrupt level.
 :::
 
 **SETINT1**  *{#}Dest*
@@ -409,7 +422,8 @@ The P2 provides three configurable interrupt levels (INT1-INT3), each of which c
 ::: instrheader
 ## SETLUTS {#setluts}
 Set LUT Sharing
-Category: [Lookup Table](instruction-categories.md#lookup-table)
+
+[Lookup Table](instruction-categories.md#lookup-table) - Enables or disables LUT sharing between adjacent cog pairs.
 :::
 
 **SETLUTS**  *{#}Dest*
@@ -437,7 +451,8 @@ Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LU
 ::: instrheader
 ## SETNIB {#setnib}
 Set Nibble
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Writes a 4-bit value to a specific nibble position within a register.
 :::
 
 **SETNIB**  *Dest, {#}Src, #N*
@@ -475,7 +490,8 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 ::: instrheader
 ## SETPAT {#setpat}
 Set Pin Pattern
-Category: [Pin](instruction-categories.md#pin)
+
+[Pin](instruction-categories.md#pin) - Configures pin pattern matching for PAT event detection.
 :::
 
 **SETPAT**  *{#}Dest, {#}Src*
@@ -504,7 +520,8 @@ Sets pin pattern for PAT event detection. The C flag selects INA or INB for moni
 ::: instrheader
 ## SETPIV {#setpiv}
 Set Pixel Blend Factor
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Sets the blend factor for BLNPIX and MIXPIX pixel operations.
 :::
 
 **SETPIV**  *{#}Dest*
@@ -532,7 +549,8 @@ Sets the blend factor for BLNPIX and MIXPIX operations to Dest[7:0]. This contro
 ::: instrheader
 ## SETPIX {#setpix}
 Set Pixel Mixer Mode
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Configures the MIXPIX operating mode for pixel combining.
 :::
 
 **SETPIX**  *{#}Dest*
@@ -560,7 +578,8 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 ::: instrheader
 ## SETQ {#setq}
 Set Q Register
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
@@ -593,7 +612,8 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
 ::: instrheader
 ## SETQ2 {#setq2}
 Set Q For LUT Transfers
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Loads the Q register for LUT-to-hub block transfers.
 :::
 
 **SETQ2**  *{#}Dest*
@@ -626,7 +646,8 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 ::: instrheader
 ## SETR {#setr}
 Set Result Field
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
 :::
 
 **SETR**  *Dest, {#}Src*
@@ -657,7 +678,8 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 ::: instrheader
 ## SETS {#sets}
 Set Source Field
-Category: [Register Indirection](instruction-categories.md#register-indirection)
+
+[Register Indirection](instruction-categories.md#register-indirection) - Sets the S field of a template for use with ALTI instruction.
 :::
 
 **SETS**  *Dest, {#}Src*
@@ -688,7 +710,8 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ::: instrheader
 ## SETSCP {#setscp}
 Set Oscilloscope
-Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+
+[Miscellaneous](instruction-categories.md#miscellaneous) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -714,7 +737,8 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 ::: instrheader
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
 Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
-Category: [Event](instruction-categories.md#event)
+
+[Event](instruction-categories.md#event) - Configures the detection criteria for selectable events.
 :::
 
 **SETSE1**  *{#}Dest*
@@ -750,7 +774,8 @@ The P2 provides four independent selectable events, each of which can be configu
 ::: instrheader
 ## SETWORD {#setword}
 Set Word
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Writes a 16-bit value to a specific word position within a register.
 :::
 
 **SETWORD**  *Dest, {#}Src, #N*
@@ -788,7 +813,8 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 ::: instrheader
 ## SETXFRQ {#setxfrq}
 Set Streamer Frequency
-Category: [Streamer](instruction-categories.md#streamer-category)
+
+[Streamer](instruction-categories.md#streamer-category) - Sets the NCO frequency that controls streamer data output rate.
 :::
 
 **SETXFRQ**  *{#}Dest*
@@ -816,7 +842,8 @@ Sets the streamer NCO (Numerically Controlled Oscillator) frequency to Dest. Thi
 ::: instrheader
 ## SEUSSF {#seussf}
 Seuss Forward
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Transforms bits by relocating and inverting for pseudo-random scrambling.
 :::
 
 **SEUSSF**  *Dest*
@@ -844,7 +871,8 @@ Relocates and periodically inverts bits within Dest using a forward pattern. The
 ::: instrheader
 ## SEUSSR {#seussr}
 Seuss Reverse
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Reverse transforms bits for pseudo-random scrambling, inverse of SEUSSF.
 :::
 
 **SEUSSR**  *Dest*
@@ -872,7 +900,8 @@ Relocates and periodically inverts bits within Dest using a reverse pattern. The
 ::: instrheader
 ## SHL {#shl}
 Shift Left
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits left, inserting zeros for fast multiplication by powers of two.
 :::
 
 **SHL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -906,7 +935,8 @@ SHL shifts the destination's binary value left by the source number of places (0
 ::: instrheader
 ## SHR {#shr}
 Shift Right
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Shifts bits right, inserting zeros for fast unsigned division.
 :::
 
 **SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -940,7 +970,8 @@ SHR shifts the destination's binary value right by the source number of places (
 ::: instrheader
 ## SIGNX {#signx}
 Sign Extend
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sign-extends a value above the specified bit position.
 :::
 
 **SIGNX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -974,7 +1005,8 @@ SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value 
 ::: instrheader
 ## SKIP {#skip}
 Skip Instructions
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Cancels subsequent instructions based on a bitmask pattern.
 :::
 
 **SKIP**  *{#}Dest*
@@ -1009,7 +1041,8 @@ Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cance
 ::: instrheader
 ## SKIPF {#skipf}
 Skip Instructions Fast
-Category: [Branch](instruction-categories.md#branch)
+
+[Branch](instruction-categories.md#branch) - Leaps over instructions based on a bitmask for faster skipping.
 :::
 
 **SKIPF**  *{#}Dest*
@@ -1037,7 +1070,8 @@ Like SKIP, but instead of cancelling instructions, the PC leaps over them. This 
 ::: instrheader
 ## SPLITB {#splitb}
 Split Bits To Bytes
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Redistributes every 4th bit into separate bytes.
 :::
 
 **SPLITB**  *Dest*
@@ -1065,7 +1099,8 @@ Splits every 4th bit of Dest into bytes. The bits at positions 0, 4, 8, 12, 16, 
 ::: instrheader
 ## SPLITW {#splitw}
 Split Bits To Words
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Separates odd and even bits into separate words.
 :::
 
 **SPLITW**  *Dest*
@@ -1093,7 +1128,8 @@ Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ..
 ::: instrheader
 ## STALLI {#stalli}
 Disallow Interrupts
-Category: [Interrupt](instruction-categories.md#interrupt)
+
+[Interrupt](instruction-categories.md#interrupt) - Disables interrupt branching to protect critical code sections.
 :::
 
 **STALLI**
@@ -1125,7 +1161,8 @@ STALLI disables interrupt branching. STALLI is the complement of the ALLOWI inst
 ::: instrheader
 ## SUB {#sub}
 Subtract
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Src from unsigned Dest.
 :::
 
 **SUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1159,7 +1196,8 @@ SUB subtracts the unsigned Src from the unsigned Dest and stores the result into
 ::: instrheader
 ## SUBR {#subr}
 Subtract Reverse
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Dest from unsigned Src (reverse order).
 :::
 
 **SUBR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1189,7 +1227,8 @@ SUBR subtracts the unsigned Dest from the unsigned Src and stores the result int
 ::: instrheader
 ## SUBS {#subs}
 Subtract Signed
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts signed Src from signed Dest.
 :::
 
 **SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1219,7 +1258,8 @@ SUBS subtracts the signed Src from the signed Dest and stores the result into th
 ::: instrheader
 ## SUBSX {#subsx}
 Subtract Signed Extended
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts signed Src plus C from signed Dest for multi-long operations.
 :::
 
 **SUBSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1249,7 +1289,8 @@ SUBSX subtracts the signed value of Src plus C from the signed Dest and stores t
 ::: instrheader
 ## SUBX {#subx}
 Subtract Extended
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Subtracts unsigned Src plus C from unsigned Dest for multi-long operations.
 :::
 
 **SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -1279,7 +1320,8 @@ SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and store
 ::: instrheader
 ## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
 Conditional Sum {#sumnc} {#sumz} {#sumnz}
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Conditionally adds or subtracts based on flag state.
 :::
 
 **SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**

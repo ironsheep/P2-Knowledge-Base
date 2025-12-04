@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter L.
 ::: instrheader
 ## LOC {#loc}
 Load Address
-Category: [Hub RAM](instruction-categories.md#hub-ram)
+
+[Hub RAM](instruction-categories.md#hub-ram) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
 :::
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
@@ -44,7 +45,8 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 ::: instrheader
 ## LOCKNEW {#locknew}
 Allocate New Lock
-Category: [Hub Control](instruction-categories.md#hub-control)
+
+[Hub Control](instruction-categories.md#hub-control) - Requests an available lock from the hardware pool.
 :::
 
 **LOCKNEW**  *D*  **{WC}**
@@ -79,7 +81,8 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 ::: instrheader
 ## LOCKREL {#lockrel}
 Release Lock
-Category: [Hub Control](instruction-categories.md#hub-control)
+
+[Hub Control](instruction-categories.md#hub-control) - Releases a lock for other COGs to acquire.
 :::
 
 **LOCKREL**  *{#}D*  **{WC}**
@@ -114,7 +117,8 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 ::: instrheader
 ## LOCKRET {#lockret}
 Return Lock To Pool
-Category: [Hub Control](instruction-categories.md#hub-control)
+
+[Hub Control](instruction-categories.md#hub-control) - Returns a lock to the pool for reallocation by LOCKNEW.
 :::
 
 **LOCKRET**  *{#}D*
@@ -148,7 +152,8 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 ::: instrheader
 ## LOCKTRY {#locktry}
 Try To Acquire Lock
-Category: [Hub Control](instruction-categories.md#hub-control)
+
+[Hub Control](instruction-categories.md#hub-control) - Attempts to acquire a lock using atomic test-and-set.
 :::
 
 **LOCKTRY**  *{#}D*  **{WC}**

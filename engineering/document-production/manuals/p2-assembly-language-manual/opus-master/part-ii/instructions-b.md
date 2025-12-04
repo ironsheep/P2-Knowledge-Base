@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter B.
 ::: instrheader
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
 Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets bits to match flag state.
 :::
 
 **BITC**  *Dest, {#}Src*  **{WCZ}**
@@ -56,7 +57,8 @@ If WCZ is specified, the Z flag is set (1) if the original base bit was set, or 
 ::: instrheader
 ## BITH {#bith}
 Bit High
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to high (1).
 :::
 
 **BITH**  *Dest, {#}Src*  **{WCZ}**
@@ -92,7 +94,8 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ::: instrheader
 ## BITL {#bitl}
 Bit Low
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to low (0).
 :::
 
 **BITL**  *Dest, {#}Src*  **{WCZ}**
@@ -128,7 +131,8 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 ::: instrheader
 ## BITNOT {#bitnot}
 Bit Not
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Toggles specified bits to opposite state.
 :::
 
 **BITNOT**  *Dest, {#}Src*  **{WCZ}**
@@ -164,7 +168,8 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 ::: instrheader
 ## BITRND {#bitrnd}
 Bit Random
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Sets specified bits to random states.
 :::
 
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
@@ -202,7 +207,8 @@ Each bit in the range is set independently from the PRNG, producing true random 
 ::: instrheader
 ## BLNPIX {#blnpix}
 Blend Pixels
-Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+
+[Pixel Mixer](instruction-categories.md#pixel-mixer) - Alpha-blends color values using SETPIV factor.
 :::
 
 **BLNPIX**  *Dest, {#}Src*
@@ -235,7 +241,8 @@ The instruction processes all three color channels (and alpha if present) in par
 ::: instrheader
 ## BMASK {#bmask}
 Bit Mask
-Category: [Math and Logic](instruction-categories.md#math-and-logic)
+
+[Math and Logic](instruction-categories.md#math-and-logic) - Generates an LSB-justified bit mask.
 :::
 
 **BMASK**  *Dest, {#}Src*
@@ -277,7 +284,8 @@ The first syntax form uses Src to specify the size, while the second syntax form
 ::: instrheader
 ## BRK {#brk}
 Breakpoint
-Category: [Interrupt](instruction-categories.md#interrupt)
+
+[Interrupt](instruction-categories.md#interrupt) - Triggers a debug breakpoint in the current COG.
 :::
 
 **BRK**  *{#}Dest*

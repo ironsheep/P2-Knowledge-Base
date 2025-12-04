@@ -7,7 +7,8 @@ This section contains all PASM2 instructions beginning with the letter Q. The Q 
 ::: instrheader
 ## QDIV {#qdiv}
 Queue Divide
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Divides 64-bit by 32-bit, producing quotient and remainder.
 :::
 
 **QDIV**  *{#}Dest, {#}Src*
@@ -48,7 +49,8 @@ Division by zero produces undefined results. Each cog can issue one CORDIC instr
 ::: instrheader
 ## QEXP {#qexp}
 Queue Exponential
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts logarithm to integer (antilog/exponential).
 :::
 
 **QEXP**  *{#}Dest*
@@ -86,7 +88,8 @@ QEXP is the complement of QLOG and is commonly used together with QLOG to perfor
 ::: instrheader
 ## QFRAC {#qfrac}
 Queue Fractional Divide
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Divides 64-bit by 32-bit with reversed operand arrangement.
 :::
 
 **QFRAC**  *{#}Dest, {#}Src*
@@ -126,7 +129,8 @@ The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC par
 ::: instrheader
 ## QLOG {#qlog}
 Queue Logarithm
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts 32-bit integer to logarithm format.
 :::
 
 **QLOG**  *{#}Dest*
@@ -162,7 +166,8 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 ::: instrheader
 ## QMUL {#qmul}
 Queue Multiply
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Multiplies two 32-bit values, producing 64-bit result.
 :::
 
 **QMUL**  *{#}Dest, {#}Src*
@@ -202,7 +207,8 @@ Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allow
 ::: instrheader
 ## QROTATE {#qrotate}
 Queue Rotate
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Rotates coordinate pair around origin by specified angle.
 :::
 
 **QROTATE**  *{#}Dest, {#}Src*
@@ -244,7 +250,8 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ::: instrheader
 ## QSQRT {#qsqrt}
 Queue Square Root
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Calculates square root of a 64-bit value.
 :::
 
 **QSQRT**  *{#}Dest, {#}Src*
@@ -285,7 +292,8 @@ For 32-bit square roots, use Src=0.
 ::: instrheader
 ## QVECTOR {#qvector}
 Queue Vector
-Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+
+[CORDIC Solver](instruction-categories.md#cordic-solver) - Converts cartesian coordinates to polar form.
 :::
 
 **QVECTOR**  *{#}Dest, {#}Src*
