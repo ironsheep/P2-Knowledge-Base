@@ -2125,20 +2125,109 @@ The 54-cycle computation period is fixed for all CORDIC operations. Efficient co
 
 ### 5.1.3 CORDIC Pipelining
 
-The CORDIC queue depth is one operation—queueing a second operation before retrieving the first operation's results discards the first results. However, the queue-and-wait pattern enables a form of software pipelining:
+The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clock cycles. With a 54-stage pipeline and 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
+
+### 5.1.4 The Pipeline Phases
+
+Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and drain.
+
+**Fill Phase:** Submit multiple operations before expecting any results. During this phase, you queue operations without retrieving results, filling the pipeline:
 
 ```pasm
-loop    qmul    current_a, current_b        ' Start operation N
-        ' ... process previous results ...
-        getqx   prev_lo                     ' Get operation N-1 results
-        getqy   prev_hi
-        ' ... prepare next operands ...
-        jmp     #loop                       ' Cycle repeats
+        ' Fill phase - queue first 6 operations
+        qmul    a0, b0                      ' Operation 0 enters pipeline
+        qmul    a1, b1                      ' Operation 1 (8 clocks later)
+        qmul    a2, b2                      ' Operation 2
+        qmul    a3, b3                      ' Operation 3
+        qmul    a4, b4                      ' Operation 4
+        qmul    a5, b5                      ' Operation 5
+        ' Pipeline now filling, first result not ready yet
 ```
 
-This pattern maintains one CORDIC operation in flight while processing previous results and preparing next operands. The 54-cycle latency becomes hidden when operations repeat in a loop structure.
+**Steady-State Phase:** Once the pipeline fills, retrieve one result and submit one new operation each access slot. This phase achieves maximum throughput—one result per 8 clocks:
 
-### 5.1.4 CORDIC Instructions Reference
+```pasm
+        ' Steady state - retrieve previous, submit next
+.loop   getqx   result_lo                   ' Get result from ~54 clocks ago
+        getqy   result_hi
+        qmul    a_next, b_next              ' Submit next operation
+        ' ... process result, prepare next operands ...
+        djnz    count, #.loop
+```
+
+**Drain Phase:** After submitting the final operation, continue retrieving remaining results without submitting new operations:
+
+```pasm
+        ' Drain phase - retrieve final results
+        getqx   result_lo                   ' Get remaining results
+        getqy   result_hi
+        ' ... repeat for each operation still in pipeline ...
+```
+
+### 5.1.5 Result Retrieval Timing
+
+The GETQX and GETQY instructions retrieve results in submission order. If a result is not yet ready when GETQX or GETQY executes, the COG stalls until the result becomes available. This automatic stalling simplifies programming—you need not count cycles precisely—but can impact performance if you retrieve too early.
+
+For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
+
+```pasm
+        pollqmt             wc              ' C=1 if pipeline empty, C=0 if results pending
+        if_nc getqx result                  ' Only retrieve if results available
+```
+
+The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
+
+### 5.1.6 Practical Pipelining Example
+
+This example processes an array of coordinate pairs, rotating each by a fixed angle. The pipeline keeps multiple rotations in flight:
+
+```pasm
+' Rotate 16 coordinate pairs by angle
+' Input: point_array (pairs of X,Y longs), angle
+' Output: rotated coordinates written back to array
+rotate_points
+        mov     count, #16
+        mov     ptra, ##point_array         ' Read pointer
+        mov     ptrb, ##point_array         ' Write pointer (same array)
+
+        ' Fill phase - start first 6 rotations
+        call    #queue_rotation             ' Queue op 0
+        call    #queue_rotation             ' Queue op 1
+        call    #queue_rotation             ' Queue op 2
+        call    #queue_rotation             ' Queue op 3
+        call    #queue_rotation             ' Queue op 4
+        call    #queue_rotation             ' Queue op 5
+        sub     count, #6
+
+        ' Steady state - retrieve one, queue one
+.loop   getqx   rotated_x                   ' Get previous result
+        getqy   rotated_y
+        wrlong  rotated_x, ptrb++           ' Store result
+        wrlong  rotated_y, ptrb++
+        call    #queue_rotation             ' Queue next
+        djnz    count, #.loop
+
+        ' Drain phase - retrieve final 6 results
+        rep     @.drain_end, #6
+        getqx   rotated_x
+        getqy   rotated_y
+        wrlong  rotated_x, ptrb++
+        wrlong  rotated_y, ptrb++
+.drain_end
+        ret
+
+' Helper: queue one rotation from point array
+queue_rotation
+        rdlong  x, ptra++
+        rdlong  y, ptra++
+        setq    y                           ' Y coordinate to Q register
+        qrotate x, angle                    ' Start rotation
+        ret
+```
+
+This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 54 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
+
+### 5.1.7 CORDIC Instructions Reference
 
 **Queue Operations:** QMUL, QDIV, QFRAC, QSQRT, QROTATE, QVECTOR, QLOG, QEXP
 
@@ -2584,6 +2673,161 @@ XBYTE is particularly effective for:
 - **Protocol handling**: Processing token-based communication protocols
 
 
+## 5.8 Boot Process
+
+When the P2 powers on or receives a hardware reset, it begins a deterministic boot sequence that loads and executes user code. Understanding this sequence is essential for embedded applications—it explains why programs must configure the clock, how the chip finds your code, and what state the hardware is in when your program starts executing.
+
+### 5.8.1 Initial Chip State
+
+At reset, the P2 initializes to a known state before any user code executes:
+
+| Resource | Initial State |
+|----------|---------------|
+| Clock source | RCFAST (~20-25 MHz internal RC oscillator) |
+| All COGs | Stopped (except COG 0) |
+| Hub RAM | Undefined contents |
+| I/O pins | High-impedance (floating) |
+| 64-bit counter | Cleared to zero |
+| PRNG | Seeded with thermal noise |
+
+The internal RC oscillator (RCFAST) provides the initial clock. This oscillator is guaranteed to run at least 20 MHz under all conditions, ensuring reliable serial communication during boot. The exact frequency varies with temperature and manufacturing, typically 20-25 MHz. Programs requiring precise timing must configure an external crystal or the PLL after boot.
+
+The boot ROM seeds the Xoroshiro128** pseudo-random number generator with true random data. The ROM reads thermal noise from pin 63 (configured in ADC calibration mode) fifty times, using each 31-bit sample to seed the PRNG through HUBSET. This establishes high-quality randomness available immediately when user code starts—there is no need to seed the PRNG again, though programs may do so if desired.
+
+### 5.8.2 Boot Source Selection
+
+The P2 determines its boot source by sensing external pull-up resistors on pins P59-P61. This hardware detection occurs automatically and requires no software configuration.
+
+| P61 | P60 | P59 | Boot Behavior |
+|-----|-----|-----|---------------|
+| none | none | none | Serial only (60s window) |
+| pull-up | none | none | SPI flash, then serial (60s) on failure |
+| pull-up | pull-up | none | SPI flash only (fast boot), shutdown on failure |
+| none | pull-up | none | SD card, then serial (60s) on failure |
+| none | pull-up | pull-down | SD card only, shutdown on failure |
+| pull-up | ignored | ignored | Serial override (60s window) |
+
+The pull-up detection uses internal sensing—no software reads these pins. The boot ROM checks pin states immediately after reset and branches to the appropriate loader. Development boards typically include jumpers or switches to select boot mode; production designs hard-wire the appropriate resistor configuration.
+
+### 5.8.3 Boot Pin Assignments
+
+The boot process uses pins P58-P63 for communication with external boot sources:
+
+**Serial Boot (P62-P63):**
+
+| Pin | Function | Direction |
+|-----|----------|-----------|
+| P63 | Serial RX | Input |
+| P62 | Serial TX | Output |
+
+**SPI Flash Boot (P58-P61):**
+
+| Pin | Function | Direction |
+|-----|----------|-----------|
+| P61 | Chip Select (active low) | Output |
+| P60 | Clock | Output |
+| P59 | Data Out (MOSI) | Output |
+| P58 | Data In (MISO) | Input |
+
+**SD Card Boot (P58-P61):**
+
+| Pin | Function | Direction |
+|-----|----------|-----------|
+| P61 | Chip Select (directly active low) | Output |
+| P60 | Clock | Output |
+| P59 | Data Out (MOSI) | Output |
+| P58 | Data In (MISO) | Input |
+
+After boot completes, these pins return to general-purpose I/O. Programs can reconfigure them for any purpose once execution begins.
+
+### 5.8.4 The Boot Sequence
+
+After reset, COG 0 loads and executes the boot ROM program (ROM_Booter.spin2). The boot sequence proceeds as follows:
+
+**Step 1: Check for SPI Flash**
+
+If an external pull-up is detected on P61, the booter attempts SPI flash boot:
+
+1. Load the first 1024 bytes (256 longs) from SPI flash into hub RAM at $00000
+2. Compute the 32-bit sum of these 256 longs
+3. If the sum equals "Prop" ($706F7250), the data is valid:
+   - Copy the 256 longs from hub to COG 0 registers $000-$0FF
+   - If P60 also has a pull-up: execute immediately (`JMP #$000`)
+   - Otherwise: wait for serial commands (100ms timeout), then execute
+
+**Step 2: Serial Loader Window**
+
+If SPI boot is not configured or fails checksum validation, the booter enters serial loader mode:
+
+1. Wait for serial commands on P63 (RX pin)
+2. Auto-detect baud rate from incoming data (9600 to 2,000,000 baud)
+3. Accept commands for up to 60 seconds
+4. If a valid program loads: execute via `COGINIT #0,#0`
+5. If timeout expires with no valid program: switch to RCSLOW (~20 kHz) and halt COG 0
+
+**Step 3: Program Execution**
+
+Once valid code is loaded, the booter launches it:
+
+- For SPI/SD boot: `JMP #$000` executes code now in COG 0's registers
+- For serial boot: `COGINIT #0,#0` relaunches COG 0 from hub address $00000
+
+In both cases, user code begins executing with the clock still in RCFAST mode. The program must configure the desired clock source if different timing is required.
+
+### 5.8.5 Serial Loading Protocol
+
+The serial loader provides a text-based protocol for loading code during development. The protocol auto-detects baud rate by measuring bit timing from received characters, supporting rates from 9,600 to 2,000,000 baud.
+
+**Auto-Baud Detection:**
+
+The loader calibrates timing from ">" characters ($3E) in the data stream. Send "> " (greater-than followed by space) before the first command and periodically throughout data to maintain accurate baud detection against the drifting internal RC oscillator.
+
+**Commands:**
+
+| Command | Purpose |
+|---------|---------|
+| `Prop_Chk` | Verify communication, returns chip version |
+| `Prop_Clk` | Configure clock source before loading |
+| `Prop_Hex` | Load program data in hexadecimal format |
+| `Prop_Txt` | Load program data in Base64 format |
+
+Each command includes mask fields for selecting specific chips when multiple P2s share a serial bus. For single-chip loading, use zero masks: `Prop_Chk 0 0 0 0`.
+
+**Data Validation:**
+
+Loaded programs must include a validation header. The loader computes a 32-bit sum of all loaded longs; if the sum equals "Prop" ($706F7250), the data is considered valid and execution proceeds. Compilers and loaders automatically generate this checksum.
+
+### 5.8.6 Clock Configuration After Boot
+
+User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-25 MHz. For applications requiring precise timing, configure an external crystal or the PLL early in your program:
+
+```pasm
+' Configure 20 MHz crystal with PLL for 160 MHz operation
+                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal, 15pF caps
+                waitx   ##20_000_000/100                          ' Wait 10ms for crystal
+                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to crystal
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1 = 160MHz
+                waitx   ##20_000_000/10000                        ' Wait 100µs for PLL lock
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL output
+```
+
+The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
+
+**Why Clock Setup Is Required:**
+
+The boot ROM cannot know what clock source your hardware provides. Some boards use 20 MHz crystals, others use 25 MHz, and some applications run directly from the internal oscillator. By starting in RCFAST mode, the P2 boots reliably on any hardware. Your program then configures the actual clock source appropriate for your design.
+
+### 5.8.7 Rebooting from Software
+
+The HUBSET instruction can trigger a hardware reset, returning the chip to the boot sequence:
+
+```pasm
+                hubset  ##$1000_0000                ' Generate reset pulse, reboot chip
+```
+
+This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
+
+
 ```{=latex}
 \begin{keyconcepts}
 \item The CORDIC coprocessor provides 54-cycle hardware math (multiply, divide, sqrt, trig)
@@ -2593,6 +2837,9 @@ XBYTE is particularly effective for:
 \item 16 hardware locks enable safe inter-COG synchronization
 \item DEBUG instruction provides built-in debugging output
 \item XBYTE provides 6-cycle bytecode dispatch for interpreters and virtual machines
+\item The P2 boots from RCFAST (\textasciitilde20 MHz) and detects boot source via pin pull-ups
+\item Serial, SPI flash, and SD card boot modes support different deployment scenarios
+\item User code must configure the desired clock source after boot
 \item The 8-COG architecture often eliminates the need for interrupts
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
