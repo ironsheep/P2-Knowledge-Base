@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-11-30T21:48:29.427056",
+    "generated": "2025-12-04T05:35:05.072219",
     "total_entries": 974,
     "total_categories": 45,
     "source": "deliverables/ai/P2/"
@@ -1555,7 +1555,7 @@
     },
     "p2kbPasm2Asmclk": {
       "path": "deliverables/ai/P2/language/pasm2/asmclk.yaml",
-      "mtime": 1764449566
+      "mtime": 1764826476
     },
     "p2kbPasm2Augd": {
       "path": "deliverables/ai/P2/language/pasm2/augd.yaml",
