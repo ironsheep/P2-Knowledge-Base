@@ -33,25 +33,19 @@ All 314 entries updated with appropriate color bars.
 
 ---
 
-## Missing Diagrams (Part I)
+## ~~Missing Diagrams (Part I)~~ ✅ COMPLETED
 
-**Location:** Part I chapters - currently marked with `<!-- DIAGRAM: ... -->` placeholder comments
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** Six diagrams are referenced but not implemented. These are HTML comments that get stripped during processing.
+### Implemented Diagrams:
+- ✅ 8-COG overview
+- ✅ COG memory map ($000-$1FF)
+- ✅ Special register map ($1F0-$1FF)
+- ✅ Hub memory map (512KB)
+- ✅ LUT memory layout
 
-**Needed diagrams:**
-
-### Chapter 1: The P2 Execution Model
-1. **8-COG overview** (line 10) - Parallel processors with shared Hub memory
-2. **COG memory map** (line 42) - $000-$1FF address regions showing general vs special registers
-3. **Special register map** (line 54) - DIRA, DIRB, OUTA, OUTB, INA, INB layout at $1F0-$1FF
-4. **Hub memory map** (line 86) - 512KB layout showing address space organization
-5. **LUT memory layout** (line 113) - 512 longs per COG, relationship to COG RAM
-
-### Chapter 4: Timing
-6. **Egg beater timing** (line 145) - 8 COGs and hub access slot rotation pattern
-
-**Implementation:** Create TikZ diagrams using the diagram macros in p2kb-pasm2-diagrams.sty, or create PNG/SVG assets in the assets folder.
+### Not Needed:
+- ⊘ Egg beater timing - Text explanation in section 4.3.1 is sufficiently clear; diagram would be redundant
 
 ---
 
@@ -129,7 +123,9 @@ All 314 entries updated with appropriate color bars.
 
 ---
 
-## FIFO Knowledge Base Content
+## FIFO Knowledge Base Content ⊘ NOT FOR THIS MANUAL
+
+**Status:** ⊘ YAML knowledge base upgrade - not part of this manual
 
 **Location:** `engineering/knowledge-base/P2-support/components/fifo.yaml` and `deliverables/ai/P2/`
 
@@ -148,6 +144,8 @@ All 314 entries updated with appropriate color bars.
 - Include WAITX cleanup requirement before COGSTOP after WRFAST
 
 **Source:** Silicon Doc v35 (p2-documentation.txt lines 6660-6850)
+
+**Tracking:** This item belongs in knowledge base maintenance, not the P2 Assembly Language Manual punch list.
 
 ---
 
@@ -242,3 +240,5 @@ All 314 entries updated with appropriate color bars.
 - ✅ XBYTE Bytecode Engine (2025-12-04)
 - ✅ Processor Boot Sequence Section (2025-12-04)
 - ✅ CORDIC Pipelining (2025-12-04)
+- ✅ Missing Diagrams - Part I (2025-12-04)
+- ⊘ FIFO Knowledge Base Content - Not for this manual (YAML upgrade task)
