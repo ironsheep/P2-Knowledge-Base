@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-04T22:52:18.236888",
+    "generated": "2025-12-04T23:16:26.762425",
     "total_entries": 969,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -2566,7 +2566,7 @@
     },
     "p2kbPasm2PrRegisters": {
       "path": "deliverables/ai/P2/language/pasm2/registers/pr-registers.yaml",
-      "mtime": 1764888448
+      "mtime": 1764890148
     },
     "p2kbPasm2Rep": {
       "path": "deliverables/ai/P2/language/pasm2/rep.yaml",
@@ -4386,7 +4386,7 @@
     },
     "p2kbSpin2RegPrRegisters": {
       "path": "deliverables/ai/P2/language/spin2/registers/pr-registers.yaml",
-      "mtime": 1764888448
+      "mtime": 1764890148
     },
     "p2kbSpin2RegPtra": {
       "path": "deliverables/ai/P2/language/spin2/registers/ptra.yaml",
