@@ -4,89 +4,32 @@ This document catalogues narrative improvements to add more detail in future rev
 
 ---
 
-## Instruction Entry Header Format Audit
+## ~~Instruction Entry Header Format Audit~~ ✅ COMPLETED
 
-**Location:** All Part II instruction, directive, and constant entries
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** Most entries appear to follow the correct format, but consistency has not been verified across all ~300 entries. Category links were defined, and entries were partially updated to use them, but the work was not completed.
-
-**Required format for every entry:**
-1. **Line 1:** `## MNEMONIC {#anchor}` - All-uppercase mnemonic as heading (title font)
-2. **Line 2:** Mnemonic expansion - English words as memory hook (e.g., "Add Signed, Extended")
-3. **Line 3:** `[Category](#link) - Single-line description`
-4. **Line 4+:** Parameter form(s) - `**MNEMONIC** *params* **{flags}**`
-5. **Separator:** `---` before Result section
-
-**Defined categories (17 total):**
-- Branch, CORDIC Solver, Color Space Converter, Event
-- Hub Control, Hub FIFO, Hub RAM, Interrupt
-- Lookup Table, Math and Logic, Miscellaneous, Pin
-- Pixel Mixer, Register Indirection, Smart Pin, Streamer, System Control
-
-**Needed:** Audit all entries to ensure:
-- Every entry has all 4 required header components
-- Mnemonic expansions are present and meaningful (not just repeating the mnemonic)
-- Category links use ONLY the 17 defined categories above
-- Category link anchors match exactly (e.g., `#streamer-category` not `#streamer`)
-- Parameter forms match actual instruction syntax
-- Capitalization is consistent (Title Case for mnemonic expansion)
-
-**Status:** Category link targets are defined in `instruction-categories.md`. Instruction entries have been partially updated but some may still have incorrect/missing category links.
-
-**Implementation:** Create a validation script to check all entries against the format spec and category list.
+All 314 PASM2 manual entries audited and updated with correct header format including color bar headers.
 
 ---
 
-## Related Links Audit
+## ~~Related Links Audit~~ ✅ COMPLETED
 
-**Location:** All Part II instruction entries with **Related:** sections
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** Some related instruction links point to anchors that don't exist. This occurs when:
-- Multiple related instructions share a single block (e.g., BITC/BITNC/BITZ/BITNZ)
-- The related link targets a secondary instruction (e.g., `#bitnc`) but only the primary instruction has an anchor (e.g., `#bitc`)
-- The link text shows the instruction name but the target anchor doesn't match
-
-**Problem example:**
-```markdown
-**Related:** [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
-```
-But the actual block anchor is only `## BITC {#bitc}` - the other anchors don't exist.
-
-**Needed:** Full audit of all Related links to ensure:
-- Every `[MNEMONIC](#anchor)` link resolves to an existing anchor
-- Links to multi-instruction blocks point to the block's single anchor
-
-**Decision:** Each block has ONE anchor (the primary instruction). All related links to any instruction in that block point to that single anchor. Example:
-- Block: `## BITC / BITNC / BITZ / BITNZ {#bitc}`
-- Related links: `[BITNC](#bitc)`, `[BITZ](#bitc)`, `[BITNZ](#bitc)` - all point to `#bitc`
-
-This is many-to-one mapping: multiple instruction names can link to one block anchor.
-
-**Implementation:**
-1. Identify all multi-instruction blocks and their primary anchors
-2. Create mapping table: instruction name → block anchor
-3. Audit all Related links and fix any that target non-existent anchors
-4. Create validation script to prevent future broken links
+Related links audited and fixed to use correct anchor targets for multi-instruction blocks.
 
 ---
 
-## Colored Vertical Bars for Entry Types
+## ~~Colored Vertical Bars for Entry Types~~ ✅ COMPLETED
 
-**Location:** Part II instruction entries, directives, and constants
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** All reference entries (instructions, directives, constants) use identical visual styling. There's no quick visual indicator to distinguish entry types when scanning the document.
+Color bar headers implemented:
+- **Instructions** - Red (`\colorbar{red}`)
+- **Directives** - Amber (`\colorbar{amber}`)
+- **Constants** - Violet (`\colorbar{violet}`)
 
-**Needed:** Add a colored vertical bar on the left edge of each entry block to visually differentiate the three entry types:
-- **Instructions** - One color (e.g., blue/teal)
-- **Directives** - Different color (e.g., green)
-- **Constants** - Third color (e.g., gold/amber)
-
-**Implementation approach:**
-1. Update `p2kb-pasm2-content.sty` to define three entry environments with left border colors
-2. Update Lua filter or markdown to wrap entries in appropriate environment
-3. Or use a simpler approach with `tcolorbox` left bar styling
-
-**Benefit:** Readers can quickly identify entry type at a glance when flipping through Part II, improving navigation and lookup efficiency.
+All 314 entries updated with appropriate color bars.
 
 ---
 
@@ -112,17 +55,19 @@ This is many-to-one mapping: multiple instruction names can link to one block an
 
 ---
 
-## CORDIC Pipelining
+## ~~CORDIC Pipelining~~ ✅ COMPLETED
 
-**Location:** Part I Chapter 5 (Hardware) and CORDIC instruction entries (QDIV, QMUL, QFRAC, QROTATE, QVECTOR, QSQRT, QLOG, QEXP)
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** Basic CORDIC usage is documented, but pipelining techniques are not covered in depth.
+**Location:** Part I Chapter 5, Sections 5.1.3-5.1.6
 
-**Needed:** Add a paragraph or section describing tight timing techniques for multiple CORDIC requests:
-- Pipelining multiple operations (issuing new request every 8 clocks while previous results are still in flight)
-- Interleaving different CORDIC operations
-- Timing constraints for maximum throughput
-- Example showing pipelined CORDIC operations with proper result retrieval timing
+**What was added:**
+- ✅ 5.1.3 CORDIC Pipelining - Hub rotation access (8 clocks per COG), 6-7 ops in flight
+- ✅ 5.1.4 The Pipeline Phases - Fill/steady-state/drain pattern with code examples
+- ✅ 5.1.5 Result Retrieval Timing - GETQX/GETQY stalling, POLLQMT for non-blocking check, Event 15
+- ✅ 5.1.6 Practical Pipelining Example - Complete rotate_points example with all three phases
+- ✅ Performance comparison (3× speedup for pipelined vs sequential)
+- ✅ Corrected previous misinformation about "queue depth of one"
 
 ---
 
@@ -230,23 +175,24 @@ This is many-to-one mapping: multiple instruction names can link to one block an
 
 ---
 
-## Processor Boot Sequence Section
+## ~~Processor Boot Sequence Section~~ ✅ COMPLETED
 
-**Location:** Part I (new chapter or section in Chapter 1)
+**Status:** ✅ Completed 2025-12-04
 
-**Current state:** No dedicated coverage of how the P2 boots itself.
+**Location:** Part I Chapter 5, Section 5.8
 
-**Needed:** Add a section summarizing the P2 boot sequence from power-on to user code execution:
-- ROM execution phase
-- Clock initialization (starts in RCFAST mode)
-- Hub RAM clearing behavior
-- Cog 0 startup sequence
-- Handoff to user code
-- Why ASMCLK exists and when it's needed
+**What was added:**
+- ✅ Section 5.8 Boot Process with 7 subsections
+- ✅ 5.8.1 Initial Chip State (clock, COGs, RAM, pins, counter, PRNG)
+- ✅ 5.8.2 Boot Source Selection (resistor pull-up detection table)
+- ✅ 5.8.3 Boot Pin Assignments (serial, SPI, SD card pinouts)
+- ✅ 5.8.4 The Boot Sequence (step-by-step ROM booter flow)
+- ✅ 5.8.5 Serial Loading Protocol (auto-baud, commands, validation)
+- ✅ 5.8.6 Clock Configuration After Boot (code example, ASMCLK explanation)
+- ✅ 5.8.7 Rebooting from Software (HUBSET reset)
+- ✅ Updated Key Concepts box with boot-related items
 
-**Source:** Silicon documentation ingestion source (p2-documentation.txt boot sequence sections)
-
-**Benefit:** Understanding boot behavior is foundational for PASM2 programmers - explains chip state when user code starts, why clock setup is needed, and ROM/RAM initialization.
+**Source:** Silicon Doc v35 (p2-documentation.txt lines 9200-9500)
 
 ---
 
@@ -288,3 +234,11 @@ This is many-to-one mapping: multiple instruction names can link to one block an
 
 *Created: 2025-12-02*
 *Last updated: 2025-12-04*
+
+**Completion Summary:**
+- ✅ Instruction Entry Header Format Audit (2025-12-04)
+- ✅ Related Links Audit (2025-12-04)
+- ✅ Colored Vertical Bars for Entry Types (2025-12-04)
+- ✅ XBYTE Bytecode Engine (2025-12-04)
+- ✅ Processor Boot Sequence Section (2025-12-04)
+- ✅ CORDIC Pipelining (2025-12-04)
