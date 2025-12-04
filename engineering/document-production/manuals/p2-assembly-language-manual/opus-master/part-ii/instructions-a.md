@@ -878,27 +878,76 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 ## ASMCLK {#asmclk}
 
-Assembly clock instruction
+Set clock mode (pseudo-instruction)
 
-[System Control](#system-control) - Assembly clock instruction.
+[System Control](#system-control) - Set clock mode from CON symbols in PASM-only programs.
 
 **ASMCLK**
 
 ---
 
-**Result:** Controls assembly-time clock operations.
+**Result:** Configures the P2 system clock according to clock setup CON symbols.
 
+- No operands. Clock configuration is read from CON symbols (`_clkfreq`, `_xtlfreq`, `_xinfreq`, `_rcslow`, `_rcfast`).
+- Can be used with conditional prefix (IF_C, IF_NC, etc.).
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
+::: {.note}
+**Note:** ASMCLK is a pseudo-instruction (macro) that expands to 1–6 real PASM instructions depending on the clock mode. It is not a hardware instruction with a fixed encoding.
+:::
 
+**Expansion:**
 
-**Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
+| Clock Mode | Expands To | Instructions |
+|:-----------|:-----------|:------------:|
+| External crystal/oscillator with PLL | HUBSET, WAITX, HUBSET | 3–6 |
+| RCSLOW (internal slow RC) | HUBSET #1 | 1 |
+| RCFAST (internal fast RC) | HUBSET #0 | 1 |
+
+For external clock modes, the expansion sequence is:
+
+```pasm2
+HUBSET  ##clkmode_ & !%11    ' Start external clock, stay in RCFAST
+WAITX   ##20_000_000/100     ' Wait ~10ms for clock stabilization
+HUBSET  ##clkmode_           ' Switch to target clock mode
+```
+
+**Related:** [HUBSET](instructions-h.md#hubset), [CLKSET](instructions-c.md#clkset), [WAITX](instructions-w.md#waitx)
 
 **Explanation:**
 
-ASMCLK controls assembly-time clock operations. This instruction is used during the assembly process to manage timing-related assembly directives.
+ASMCLK is a pseudo-instruction for PASM-only programs that sets the system clock mode based on clock configuration symbols defined in a CON block. When assembled, ASMCLK expands to the appropriate HUBSET and WAITX instructions needed to configure the clock.
+
+The clock configuration is determined by these CON symbols:
+
+- `_clkfreq` — Target clock frequency in Hz
+- `_xtlfreq` — External crystal frequency (for crystal modes)
+- `_xinfreq` — External clock input frequency (for external oscillator modes)
+- `_rcslow` — Use internal slow RC oscillator (~20 kHz)
+- `_rcfast` — Use internal fast RC oscillator (~20 MHz, default)
+
+**Modern Usage (v35v and later):**
+
+As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. The compiler automatically prepends a 16-long clock-setter program to PASM-only programs that use non-RCFAST clock modes. This clock-setter configures the clock, relocates your program down by 16 longs, then executes it via `COGINIT #0,#0`.
+
+To disable the automatic clock-setter and use ASMCLK manually, define:
+
+```spin2
+CON
+  _AUTOCLK = 0    ' Disable automatic clock-setter
+```
+
+**Example:**
+
+```spin2
+CON
+  _clkfreq = 200_000_000    ' 200 MHz target
+  _xtlfreq = 20_000_000     ' 20 MHz crystal
+
+DAT
+        ORG 0
+        ASMCLK              ' Set clock to 200 MHz
+        ' ... program continues
+```
 
 
 
