@@ -108,10 +108,23 @@
 \linespread{1.3}
 
 % ==================== LIST SPACING ====================
-% Reduce space before/after lists to avoid double-spacing effect
-% (parskip + topsep was creating excessive gaps)
-\setlength{\topsep}{0pt}
-\setlength{\partopsep}{0pt}
+% Use enumitem package for precise control over list spacing
+% Goal: Standard line gap before lists, not a blank line
+% The global \topsep approach doesn't work reliably with parskip
+
+\RequirePackage{enumitem}
+
+% Set global defaults for all lists:
+% - topsep=0pt removes extra space before first item (parskip provides spacing)
+% - partopsep=0pt removes extra space when list starts a paragraph
+% - itemsep=2pt gives slight breathing room between items
+% - parsep=0pt keeps multi-paragraph items tight
+\setlist{
+  topsep=0pt,
+  partopsep=0pt,
+  itemsep=2pt,
+  parsep=0pt
+}
 
 
 % ==================== TABLE OF CONTENTS ====================
@@ -216,33 +229,35 @@
 % ==================== TITLESEC HEADING CONTROL ====================
 % Using titlesec for explicit, predictable spacing control
 % All dimensions are explicit - no inherited book class surprises
+%
+% CRITICAL: \raggedright prevents justified (spread-out) text in long titles
+% This fixes the "Chapter 0: P2 I/O Fundamentals" justified title bug
 
 % PART: Starts new page, minimal vertical space
-% Format: [display] means label on separate line (but we show no label)
-% Args: {command}{format}{label}{sep}{before-code}[after-code]
-\titleformat{\part}[display]
-  {\normalfont\Huge\bfseries\raggedright}% format
+% Format: [block] allows inline title without label line
+\titleformat{\part}[block]
+  {\clearpage\thispagestyle{empty}\normalfont\Huge\bfseries\raggedright}% format includes page break
   {}% label (empty - headings already have numbers)
   {0pt}% sep between label and title
   {}% before-code
 \titlespacing*{\part}
   {0pt}% left margin
-  {0pt}% vertical space before (after page break)
+  {0pt}% vertical space before (minimal after page break)
   {18pt}% vertical space after
 
-% CHAPTER: No page break by default (we control this), minimal spacing
-\titleformat{\chapter}[display]
-  {\normalfont\Huge\bfseries\raggedright}% format
+% CHAPTER: [block] format, controlled page breaks via hook
+\titleformat{\chapter}[block]
+  {\normalfont\Huge\bfseries\raggedright}% format - raggedright prevents justified titles
   {}% label (empty)
   {0pt}% sep
   {}% before-code
 \titlespacing*{\chapter}
   {0pt}% left margin
-  {0pt}% space before
+  {0pt}% space before (minimal)
   {12pt}% space after
 
 % SECTION: Normal flow within chapters
-\titleformat{\section}
+\titleformat{\section}[block]
   {\normalfont\Large\bfseries\raggedright}% format
   {}% label (empty)
   {0pt}% sep
@@ -253,7 +268,7 @@
   {8pt}% after
 
 % SUBSECTION
-\titleformat{\subsection}
+\titleformat{\subsection}[block]
   {\normalfont\large\bfseries\raggedright}% format
   {}% label
   {0pt}% sep
@@ -270,6 +285,12 @@
 %   ## (markdown) → \chapter{} (LaTeX)
 %   ### (markdown) → \section{} (LaTeX)
 %   #### (markdown) → \subsection{} (LaTeX)
+%
+% LAYOUT RULES:
+% 1. Parts always start on new pages (handled by titleformat above)
+% 2. First chapter in a part stays on same page as part title
+% 3. Subsequent chapters start on new pages
+% 4. In Part II, sections also get page breaks (one mode per page)
 
 \newif\iffirstchapterinpart
 \newif\iffirstsectioninchapter
@@ -278,55 +299,38 @@
 \firstsectioninchapterfalse
 \setcounter{currentpart}{0}
 
-% Apply pagination hooks at document begin
+% Hook into titlesec's chapter command to control page breaks
+% We use etoolbox's \pretocmd to add logic BEFORE the chapter runs
+\RequirePackage{etoolbox}
+
 \makeatletter
-\AtBeginDocument{%
-  % Save original commands (titlesec has already redefined them)
-  \let\origpart\part
-  \let\origchapter\chapter
-  \let\origsection\section
+% Track when we enter a new part
+\pretocmd{\part}{%
+  \stepcounter{currentpart}%
+  \global\firstchapterinparttrue%
+  \global\firstsectioninchapterfalse%
+}{}{}
 
-  % PART: Always starts new page, first chapter stays on same page
-  \renewcommand{\part}[1]{%
+% Chapter page break control: break EXCEPT for first chapter after part
+\pretocmd{\chapter}{%
+  \iffirstchapterinpart%
+    \global\firstchapterinpartfalse%
+  \else%
     \clearpage%
-    \thispagestyle{plain}%
-    \stepcounter{currentpart}%
-    \origpart{##1}%
-    \firstchapterinparttrue%
-    \firstsectioninchapterfalse%
-  }
+  \fi%
+  \global\firstsectioninchaptertrue%
+}{}{}
 
-  % CHAPTER: Page break except for first chapter in part
-  \RenewDocumentCommand{\chapter}{s o m}{%
-    \iffirstchapterinpart%
-      \firstchapterinpartfalse%
+% Section page break control: In Part II, sections break (except first in chapter)
+\pretocmd{\section}{%
+  \ifnum\value{currentpart}=2\relax%
+    \iffirstsectioninchapter%
+      \global\firstsectioninchapterfalse%
     \else%
       \clearpage%
     \fi%
-    \IfBooleanTF{#1}%
-      {\origchapter*{##3}}%
-      {\IfValueTF{##2}%
-        {\origchapter[##2]{##3}}%
-        {\origchapter{##3}}}%
-    \firstsectioninchaptertrue%
-  }
-
-  % SECTION: In Part II, sections get page breaks (except first in chapter)
-  \RenewDocumentCommand{\section}{s o m}{%
-    \ifnum\value{currentpart}=2\relax%
-      \iffirstsectioninchapter%
-        \firstsectioninchapterfalse%
-      \else%
-        \clearpage%
-      \fi%
-    \fi%
-    \IfBooleanTF{#1}%
-      {\origsection*{##3}}%
-      {\IfValueTF{##2}%
-        {\origsection[##2]{##3}}%
-        {\origsection{##3}}}%
-  }
-}
+  \fi%
+}{}{}
 \makeatother
 
 % ==================== HEADER CONFIGURATION ====================

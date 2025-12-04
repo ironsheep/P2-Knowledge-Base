@@ -5419,7 +5419,7 @@ This tutorial represents the collective knowledge of the Propeller 2 community, 
 *End of P2 Smart Pins Complete Tutorial - Green Book Edition with Enhanced Visual Coverage*
 ---
 
-## Index
+## INDEX
 
 ### A
 - ADC modes: Ch 18-19, pp. 95-105

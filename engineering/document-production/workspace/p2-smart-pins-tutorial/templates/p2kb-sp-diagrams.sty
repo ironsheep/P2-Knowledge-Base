@@ -1355,21 +1355,21 @@
 % Start node
 \node[start] (start) at (0, 0) {Need to generate\\an output signal?};
 
-% Decision nodes - tighter vertical spacing
+% Decision nodes - rearranged to avoid crossing arrows
 \node[decision] (freq) at (0, -2.0) {Precise freq?\\(sub-Hz)};
 \node[decision] (asym) at (0, -4.2) {Asymmetric\\pulses?};
 \node[decision] (clock) at (0, -6.4) {Simple clock/\\square wave?};
 \node[decision] (pwm) at (0, -8.6) {PWM for\\motor/LED?};
-\node[decision] (phase) at (3.5, -10.0) {Phase-correct?};
-\node[decision] (power) at (0, -11.2) {Power supply\\feedback?};
+\node[decision] (phase) at (0, -11.0) {Phase-correct?};
+\node[decision] (power) at (0, -13.4) {Power supply\\feedback?};
 
-% Result nodes - wider boxes for mode names
+% Result nodes - positioned to avoid crossing
 \node[result] (nco) at (5.5, -2.0) {P\_NCO\_FREQ\\P\_NCO\_DUTY};
 \node[result] (pulse) at (5.5, -4.2) {P\_PULSE};
 \node[result] (trans) at (5.5, -6.4) {P\_TRANSITION};
-\node[result] (tri) at (7.0, -10.0) {P\_PWM\_TRIANGLE};
-\node[result] (saw) at (3.5, -12.2) {P\_PWM\_SAWTOOTH};
-\node[result] (smps) at (5.5, -11.2) {P\_PWM\_SMPS};
+\node[result] (tri) at (5.5, -11.0) {P\_PWM\_TRIANGLE};
+\node[result] (saw) at (5.5, -13.4) {P\_PWM\_SAWTOOTH};
+\node[result] (smps) at (5.5, -15.4) {P\_PWM\_SMPS};
 
 % Arrows from start
 \draw[arrow] (start) -- (freq);

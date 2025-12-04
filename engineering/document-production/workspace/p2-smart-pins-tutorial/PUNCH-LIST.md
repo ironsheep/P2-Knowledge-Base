@@ -28,14 +28,96 @@
 
 ## Pending - Diagram Fixes
 
-- [ ] Review remaining diagrams (4-18) for similar spacing issues
-- [ ] (Add specific diagram issues as discovered)
+**TikZ Diagram Review Checklist** - Verify each diagram accurately represents its source PNG
+
+### Timing & Signal Diagrams (Chapter 0)
+- [ ] `\DRVHTimingDiagram` (line 229) - Basic I/O output timing
+- [ ] `\TESTBINATimingDiagram` (line 237) - Basic I/O input sampling
+- [ ] `\TESTPTimingDiagram` (line 243) - TESTP timing
+
+### Configuration Diagrams (Chapter 2)
+- [ ] `\WRPINFormatDiagram` (lines 683, 812, 5069) - WRPIN D format bit fields
+
+### Mode-Specific Diagrams (Chapters 3-4)
+- [ ] `\DACPWMPeriodDiagram` (line 1246) - DAC PWM period
+- [ ] `\PulseWidthMeasurementDiagram` (line 1351) - Pulse width measurement
+- [ ] `\NCOFrequencyDiagram` (line 1478) - NCO frequency
+- [ ] `\NCODutyTimingDiagram` (line 1563) - NCO duty timing
+- [ ] `\NCODutyBlockDiagram` (line 1569) - NCO duty block
+- [ ] `\TrianglePWMDiagram` (line 1631) - Triangle PWM
+- [ ] `\SawtoothPWMDiagram` (line 1689) - Sawtooth PWM
+- [ ] `\QuadEncoderDiagram` (line 1987) - Quadrature encoder
+- [ ] `\PeriodMeasurementDiagram` (line 2068) - Period measurement
+- [ ] `\SinglePhaseEncoderDiagram` (line 2168) - Single phase encoder
+- [ ] `\ComparatorDiagram` (line 2201) - Comparator
+- [ ] `\ContinuousPeriodDiagram` (line 2253) - Continuous period
+- [ ] `\TimeoutWatchdogDiagram` (line 2325) - Timeout watchdog
+- [ ] `\DualInputTimeDiagram` (line 2331) - Dual input time
+- [ ] `\ADCSampleHoldDiagram` (line 2439) - ADC sample/hold
+- [ ] `\USBDifferentialDiagram` (line 2500) - USB differential
+- [ ] `\SyncSerialFallingDiagram` (line 2530) - Sync serial falling edge
+- [ ] `\SyncSerialRisingDiagram` (line 2536) - Sync serial rising edge
+
+### Advanced Technique Diagrams (Chapter 5)
+- [ ] `\FeedbackLoopDiagram` (line 3027) - Feedback loop
+- [ ] `\ClockDistributionDiagram` (line 3060) - Clock distribution
+- [ ] `\ProtocolBridgeDiagram` (line 3086) - Protocol bridge
+- [ ] `\StateMachineDiagram` (line 3113) - State machine
+
+### Application Diagrams (Part III)
+- [ ] `\MotorControllerDiagram` (line 4168) - Motor controller
+- [ ] `\DataAcquisitionDiagram` (line 4251) - Data acquisition
+- [ ] `\CommunicationHubDiagram` (line 4311) - Communication hub
+- [ ] `\SynchronizedSamplingDiagram` (line 4384) - Synchronized sampling
+- [ ] `\OscilloscopeArchDiagram` (line 4633) - Oscilloscope architecture
+- [ ] `\RobotSystemDiagram` (line 4752) - Robot system
+- [ ] `\CompleteSystemDiagram` (line 4877) - Complete system
+
+**Total: 31 unique diagrams to review**
 
 ---
 
 ## Pending - Content
 
-- [ ] (Add content issues as discovered)
+- [ ] **Code line overflow** - Audit all PASM2 and Spin2 code blocks for lines exceeding ~76 characters
+  - Lines longer than 76 chars overflow the code box boundaries in PDF
+  - Need document-wide pass to identify and wrap/shorten offending lines
+  - Similar fix applied successfully to other documents
+
+- [ ] **PASM2 instruction mnemonic uppercasing** - Adopt the Lua filter from De Silva Manual
+  - De Silva Manual has a Lua filter that uppercases instruction mnemonics in PASM2 code blocks
+  - Port that filter to Smart Pins for consistent presentation
+  - Reference: `p2-pasm-desilva-style` workspace Lua filters
+
+- [ ] **Missing mode narratives** - Ensure all 32 Smart Pin modes have full tutorial content
+  - Mode %10000 (P_TIME_STATES) - Currently stub, needs full narrative
+  - Mode %10001 (P_TIME_HIGHS) - Currently stub, needs full narrative
+  - Mode %10100 (P_PERIODS_STATES) - Currently stub, needs full narrative
+  - Mode %10101 (P_COUNTER_TICKS) - Currently stub, needs full narrative
+  - Mode %10110 (P_COUNTER_STATES) - Currently stub, needs full narrative
+  - Mode %10111 (P_TIME_COUNT) - Currently stub, needs full narrative
+  - Audit all modes for completeness (Quick Reference, explanation, use cases, code examples)
+  - Use P2 Knowledge Base YAMLs as source for accurate technical details
+
+---
+
+## Pending - Tooling
+
+- [ ] **LaTeX escape script: Add `$$...$$` math protection**
+  - Location: `/engineering/tools/conversion/latex_escape_processor.py`
+  - Problem: Script escapes `$` to `\$` which breaks LaTeX display math
+  - Current workaround: Wrap math in ```` ```{=latex} ```` raw blocks
+  - Script already protects `\(...\)` and `\[...\]` (lines 211-212) but not `$$`
+  - **Test case to add to regression suite:**
+    ```markdown
+    **NCO Frequency:**
+
+    $$\text{Frequency} = \frac{X \times \text{ClockFreq}}{2^{32}}$$
+    ```
+  - Expected: `$$` delimiters and content pass through unchanged
+  - Current failure: `$` becomes `\$`, breaking the math
+  - Fix approach: Add pattern to protect `$$...$$` blocks similar to how `\[...\]` is protected
+  - Related: May also want to protect inline math `$...$` (single dollar signs)
 
 ---
 

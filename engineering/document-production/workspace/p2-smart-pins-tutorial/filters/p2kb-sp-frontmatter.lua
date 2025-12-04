@@ -41,24 +41,16 @@ function Header(header)
     seen_part_one = true  -- Mark that we're done
     in_frontmatter = false
     in_preface = false
-    -- Insert command to switch from Roman to Arabic page numbering
-    -- Let style sheet handle the clearpage for parts
-    return {
-      pandoc.RawBlock('latex', '\\mainmatter'),
-      pandoc.RawBlock('latex', '\\setcounter{page}{1}'),
-      header
-    }
+    -- Option B: Continuous page numbering - no reset, no mainmatter
+    -- Just return the header, let style sheet handle the clearpage for parts
+    return header
   end
-  
+
   -- Special handling for "Chapter 1:" if it appears before Part I
   if header.level == 2 and title:match("^Chapter 1:") then
     in_frontmatter = false
-    -- Insert command to switch to Arabic page numbering
-    return {
-      pandoc.RawBlock('latex', '\\mainmatter'),
-      pandoc.RawBlock('latex', '\\setcounter{page}{1}'),
-      header
-    }
+    -- Option B: Continuous page numbering - no reset
+    return header
   end
   
   -- Handle front matter sections
