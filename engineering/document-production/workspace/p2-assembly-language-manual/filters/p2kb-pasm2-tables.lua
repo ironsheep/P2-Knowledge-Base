@@ -231,95 +231,158 @@ function Table(el)
   end
 
   if num_cols == 2 then
-    -- 2-column tables: adjust based on first column size
-    -- Total must be <= 0.95 to leave room for column separators
-    local c1 = col_classes[1]
+    -- 2-column tables: proportional based on actual content lengths
+    -- Give more space to the column that needs it
+    local len1 = get_max_column_length(el, 1)
+    local len2 = get_max_column_length(el, 2)
+    local total = len1 + len2
 
-    if c1 == "tiny" then
-      -- Very short first column (codes, single words): 15/75
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.75}
-    elseif c1 == "small" then
-      -- Short first column: 20/70
-      el.colspecs[1] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.70}
-    elseif c1 == "medium" then
-      -- Medium first column: 30/60
-      el.colspecs[1] = {pandoc.AlignLeft, 0.30}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.60}
-    else
-      -- Large first column: 40/50
-      el.colspecs[1] = {pandoc.AlignLeft, 0.40}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.50}
+    -- Calculate proportional widths with constraints
+    -- Min width 0.10 for any column, max 0.85 for description column
+    local w1 = math.max(0.10, math.min(0.35, (len1 / total) * 0.95))
+    local w2 = 0.95 - w1
+
+    -- If col1 data is very short (like 3-char codes), shrink further
+    -- Check data rows only (not header) for this
+    local data_len1 = 0
+    for _, body in ipairs(el.bodies) do
+      if body.body then
+        for _, row in ipairs(body.body) do
+          if row.cells and row.cells[1] then
+            local text = pandoc.utils.stringify(row.cells[1].contents)
+            if #text > data_len1 then data_len1 = #text end
+          end
+        end
+      end
     end
+
+    -- If data is much shorter than header, use data length for sizing
+    if data_len1 < len1 * 0.5 and data_len1 <= 10 then
+      w1 = math.max(0.10, (data_len1 + 2) * 0.01)  -- ~1% per char + padding
+      w2 = 0.95 - w1
+    end
+
+    el.colspecs[1] = {pandoc.AlignLeft, w1}
+    el.colspecs[2] = {pandoc.AlignLeft, w2}
 
   elseif num_cols == 3 then
-    -- 3-column tables: more generous minimum widths
-    local c1 = col_classes[1]
-    local c2 = col_classes[2]
+    -- 3-column tables: proportional based on DATA content (not headers)
+    -- Headers can wrap, but data determines visual "right size"
 
-    if c1 == "tiny" and c2 == "tiny" then
-      -- Both short: 15/15/65 (was 10/10/75 - too cramped)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.65}
-    elseif c1 == "tiny" and c2 == "small" then
-      -- Short + medium: 15/20/60 (was 10/18/67)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.60}
-    elseif c1 == "small" and c2 == "tiny" then
-      -- Medium + short: 20/15/60 (was 18/10/67)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.60}
-    elseif c1 == "small" and c2 == "small" then
-      -- Both medium: 20/20/55 (was 15/15/65)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.55}
-    elseif c1 == "tiny" then
-      -- Short first, larger second: 15/30/50 (was 10/30/55)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.30}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.50}
-    elseif c2 == "tiny" then
-      -- Larger first, short second: 30/15/50 (was 30/10/55)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.30}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.50}
-    else
-      -- Default balanced: 25/25/45
-      el.colspecs[1] = {pandoc.AlignLeft, 0.25}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.25}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.45}
+    -- Get header lengths
+    local hdr1, hdr2, hdr3 = 0, 0, 0
+    if el.head and el.head.rows and #el.head.rows > 0 then
+      local hrow = el.head.rows[1]
+      if hrow.cells then
+        if hrow.cells[1] then hdr1 = #pandoc.utils.stringify(hrow.cells[1].contents) end
+        if hrow.cells[2] then hdr2 = #pandoc.utils.stringify(hrow.cells[2].contents) end
+        if hrow.cells[3] then hdr3 = #pandoc.utils.stringify(hrow.cells[3].contents) end
+      end
     end
 
+    -- Get max data lengths (body rows only)
+    local data1, data2, data3 = 0, 0, 0
+    for _, body in ipairs(el.bodies) do
+      if body.body then
+        for _, row in ipairs(body.body) do
+          if row.cells then
+            if row.cells[1] then
+              local len = #pandoc.utils.stringify(row.cells[1].contents)
+              if len > data1 then data1 = len end
+            end
+            if row.cells[2] then
+              local len = #pandoc.utils.stringify(row.cells[2].contents)
+              if len > data2 then data2 = len end
+            end
+            if row.cells[3] then
+              local len = #pandoc.utils.stringify(row.cells[3].contents)
+              if len > data3 then data3 = len end
+            end
+          end
+        end
+      end
+    end
+
+    -- Use data length for sizing, but ensure header fits (with some wrapping allowed)
+    -- If header is much longer than data, use data length + small buffer
+    local len1 = data1
+    local len2 = data2
+    local len3 = data3
+
+    -- If header is > 1.5x data, header can wrap - use data length + buffer
+    if hdr1 > data1 * 1.5 and data1 > 0 then len1 = data1 + 3 else len1 = math.max(data1, hdr1) end
+    if hdr2 > data2 * 1.5 and data2 > 0 then len2 = data2 + 3 else len2 = math.max(data2, hdr2) end
+    if hdr3 > data3 * 1.5 and data3 > 0 then len3 = data3 + 3 else len3 = math.max(data3, hdr3) end
+
+    -- Ensure minimums
+    len1 = math.max(len1, 5)
+    len2 = math.max(len2, 5)
+    len3 = math.max(len3, 5)
+
+    local total = len1 + len2 + len3
+
+    -- Pure proportional calculation
+    local w1 = (len1 / total) * 0.95
+    local w2 = (len2 / total) * 0.95
+    local w3 = (len3 / total) * 0.95
+
+    -- Apply minimums
+    w1 = math.max(0.08, w1)
+    w2 = math.max(0.08, w2)
+    w3 = math.max(0.08, w3)
+
+    -- Normalize to 0.95 total
+    local sum = w1 + w2 + w3
+    local scale = 0.95 / sum
+    w1 = w1 * scale
+    w2 = w2 * scale
+    w3 = w3 * scale
+
+    el.colspecs[1] = {pandoc.AlignLeft, w1}
+    el.colspecs[2] = {pandoc.AlignLeft, w2}
+    el.colspecs[3] = {pandoc.AlignLeft, w3}
+
   elseif num_cols == 4 then
-    -- 4-column tables: more generous minimum widths to avoid overlap
-    -- Even "tiny" columns need enough space for monospace text like "DDDDDDDDD"
+    -- 4-column tables: content-aware widths to avoid overlap
     local c1 = col_classes[1]
     local c2 = col_classes[2]
     local c3 = col_classes[3]
 
+    -- Get actual content lengths for more precise sizing
+    local len1 = get_max_column_length(el, 1)
+    local len2 = get_max_column_length(el, 2)
+    local len3 = get_max_column_length(el, 3)
+    local len4 = get_max_column_length(el, 4)
+
     if c1 == "tiny" and c2 == "tiny" and c3 == "tiny" then
-      -- Three short columns: 15/15/15/50 (was 10/10/10/65 - too cramped)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[4] = {pandoc.AlignLeft, 0.50}
+      -- All three leading columns are short
+      -- But check if col2 is at the upper edge of "tiny" (10-12 chars)
+      -- Example: Condition Code Table has IF_NC_AND_NZ (12 chars)
+      if len2 >= 10 then
+        -- Col2 needs more room: 10/18/12/55
+        el.colspecs[1] = {pandoc.AlignLeft, 0.10}
+        el.colspecs[2] = {pandoc.AlignLeft, 0.18}
+        el.colspecs[3] = {pandoc.AlignLeft, 0.12}
+        el.colspecs[4] = {pandoc.AlignLeft, 0.55}
+      else
+        -- Truly short columns: 12/12/12/59
+        el.colspecs[1] = {pandoc.AlignLeft, 0.12}
+        el.colspecs[2] = {pandoc.AlignLeft, 0.12}
+        el.colspecs[3] = {pandoc.AlignLeft, 0.12}
+        el.colspecs[4] = {pandoc.AlignLeft, 0.59}
+      end
     elseif c1 == "tiny" and c2 == "tiny" then
-      -- Two short columns: 15/15/20/45 (was 10/10/25/50)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
+      -- Two short columns, third is longer: 12/12/20/51
+      el.colspecs[1] = {pandoc.AlignLeft, 0.12}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.12}
       el.colspecs[3] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[4] = {pandoc.AlignLeft, 0.45}
+      el.colspecs[4] = {pandoc.AlignLeft, 0.51}
     elseif c1 == "tiny" then
-      -- One short column: 15/20/20/40 (was 10/22/22/41)
-      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      -- One short column: 12/20/20/43
+      el.colspecs[1] = {pandoc.AlignLeft, 0.12}
       el.colspecs[2] = {pandoc.AlignLeft, 0.20}
       el.colspecs[3] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[4] = {pandoc.AlignLeft, 0.40}
+      el.colspecs[4] = {pandoc.AlignLeft, 0.43}
     else
       -- Default: roughly equal
       el.colspecs[1] = {pandoc.AlignLeft, 0.20}
