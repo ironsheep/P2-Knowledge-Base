@@ -51,7 +51,6 @@ examples:
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG
-- SETBRK: Configure breakpoint conditions
 - NIXINT1/2/3: Disable interrupt sources
 notes:
 - Requires debug interrupts enabled to function

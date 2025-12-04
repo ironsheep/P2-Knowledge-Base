@@ -92,17 +92,6 @@ instructions:
     usage_example: |
       GETBRK  break_config WC ' Get config, C = enabled
   
-  - instruction: "SETBRK"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 000100110"
-    description: "Set break configuration"
-    operation: |
-      Set break address and conditions from D
-      Bits [19:0] = break address
-      Bits [31:20] = break mode and flags
-    usage_example: |
-      SETBRK  ##$1_00000      ' Enable single-step mode
-      SETBRK  #$200           ' Break at address $200
-  
   - instruction: "NIXINT0"
     encoding: "EEEE 1101011 00L DDDDDDDDD 100110010"
     description: "Cancel pending debug interrupt"
@@ -120,7 +109,7 @@ instructions:
 debug_modes:
   - mode: "single_step"
     configuration: |
-      SETBRK  ##$1_00000      ' Enable single-step
+      BRK     ##$1_00000      ' Enable single-step (inside Debug ISR)
       ALLOWI                  ' Allow interrupts
     
     handler: |
@@ -138,7 +127,7 @@ debug_modes:
   
   - mode: "address_breakpoint"
     configuration: |
-      SETBRK  #break_addr     ' Set break address
+      BRK     #break_addr     ' Set break address (inside Debug ISR)
       ALLOWI                  ' Allow interrupts
     
     handler: |
@@ -157,7 +146,7 @@ debug_modes:
   
   - mode: "instruction_break"
     configuration: |
-      SETBRK  ##$2_00000 | instruction_pattern
+      BRK     ##$2_00000 | instruction_pattern  ' Inside Debug ISR
       ALLOWI
     
     handler: |
@@ -178,7 +167,7 @@ programming_patterns:
       ' Setup execution trace
               MOV     IJMP0, #trace_isr    ' Debug ISR
               MOV     trace_ptr, ##TRACE_BUFFER
-              SETBRK  ##$1_00000           ' Single-step mode
+              BRK     ##$1_00000           ' Single-step mode (inside Debug ISR)
               ALLOWI                       ' Start tracing
               
       trace_isr:

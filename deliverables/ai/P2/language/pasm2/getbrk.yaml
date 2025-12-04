@@ -62,9 +62,8 @@ examples:
     \ per pattern\n        ' Instructions that may be skipped...\n"
   source: conditional_execution
 related_instructions:
-- BRK: Trigger breakpoint with code
+- BRK: Trigger breakpoint with code (also configures breakpoint conditions when in Debug ISR)
 - COGBRK: Trigger breakpoint in another COG
-- SETBRK: Configure breakpoint conditions
 - NIXINT1/2/3: Disable interrupt sources
 notes:
 - Critical for debugger implementation

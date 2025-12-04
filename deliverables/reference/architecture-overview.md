@@ -137,7 +137,7 @@ The P2 uses a unique rotating slice mechanism:
 
 ### Hardware Debug
 - **DEBUG interrupt**: Hidden 4th interrupt level
-- **SETBRK instruction**: Hardware breakpoints
+- **BRK instruction**: Hardware breakpoints (configures conditions when in Debug ISR)
 - **Pin monitoring**: Real-time pin state observation
 
 ### Software Debug

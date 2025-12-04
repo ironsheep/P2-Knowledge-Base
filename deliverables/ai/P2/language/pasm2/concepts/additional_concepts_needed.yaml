@@ -90,7 +90,7 @@ nice_to_have_concepts:
   debug_system:
     priority: LOW
     reason: "Development support"
-    instructions: ["BRK", "COGBRK", "GETBRK", "SETBRK"]
+    instructions: ["BRK", "COGBRK", "GETBRK"]
     topics:
       - "Hardware breakpoints"
       - "Debug interrupt routing"
