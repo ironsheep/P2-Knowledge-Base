@@ -657,12 +657,12 @@ When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction ge
 
 **DIRZ / DIRNZ**
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001000100}{D}{---}{Orig bit}{2}
-\encodingrow{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001000101}{D}{---}{Orig bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001000100 | D | --- | Orig bit | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001000101 | D | --- | Orig bit | 2 |
+
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
 
@@ -676,12 +676,12 @@ Syntax 1: `GETBYTE  Dest, {#}Src, #Num`
 
 Syntax 2: `GETBYTE  Dest`
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{D}{2}
-\encodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{---}{---}{D}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
+
 
 The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row shows the ALTGB-compatible form where Dest is both read and written.
 
@@ -855,9 +855,11 @@ Consider the ADD instruction entry:
 - WC, WZ, or WCZ are optional effects to update flags.
 :::
 
-```{=latex}
-\simpleencoding{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
+
 
 From this entry:
 
@@ -2485,12 +2487,12 @@ Absolute
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute value is written to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S[31]}{Result = 0}{2}
-\encodingrow{EEEE}{0110010}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{D[31]}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
+| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
+
 
 **Related:** [NEG](#neg)
 
@@ -2521,9 +2523,11 @@ Add
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
+
 
 **Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
 
@@ -2562,13 +2566,13 @@ Add and set counter event trigger (1, 2, or 3)
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrowcont{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
@@ -2594,9 +2598,11 @@ Add pixels
 - Dest is a register containing the RGB color value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added into Dest.
 
-```{=latex}
-\simpleencoding{EEEE}{1010010}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+
 
 **Related:** [SUBPIX](#subpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
 
@@ -2625,9 +2631,11 @@ Add signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{sign of (D + S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
+
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
 
@@ -2660,9 +2668,11 @@ Add signed, extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{sign of (D+S+C)}{Z AND (Result = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
+
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
 
@@ -2693,9 +2703,11 @@ Add extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S + C)}{Z AND (Result = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
+
 
 **Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
 
@@ -2724,9 +2736,11 @@ Acknowledge pin
 
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s) to acknowledge.
 
-```{=latex}
-\simpleencoding{EEEE}{1100000}{01I}{000000001}{SSSSSSSSS}{Ack Bus}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
+
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
@@ -2755,9 +2769,11 @@ ALLOWI
 
 **Result:** Any stalled and future interrupts are allowed.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100000}{000100100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100000 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [STALLI](#stalli)
 
@@ -2784,14 +2800,16 @@ Alter bit
 - Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001100}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001100}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTD](#altd), [ALTS](#alts), [ALTR](#altr), [ALTI](#alti)
 
@@ -2828,14 +2846,16 @@ Alter destination
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001100}{011}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTS](#alts), [ALTR](#altr), [ALTB](#altb), [ALTI](#alti)
 
@@ -2866,14 +2886,16 @@ Alter get byte
 - Dest is the register whose 11-bit value is the index, or the full byte address, for the GETBYTE / ROLBYTE instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001011}{011}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGN](#altgn), [ALTGW](#altgw), [ALTSB](#altsb), [GETBYTE](#getbyte), [ROLBYTE](#rolbyte)
 
@@ -2908,14 +2930,16 @@ Alter get nibble
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the next GETNIB / ROLNIB instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB / ROLNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001010}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001010}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGB](#altgb), [ALTGW](#altgw), [ALTSN](#altsn), [GETNIB](#getnib), [ROLNIB](#rolnib)
 
@@ -2950,14 +2974,16 @@ Alter get word
 - Dest is the register whose 10-bit value is the index, or the full word address for the GETWORD / ROLWORD instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001011}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001011}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGB](#altgb), [ALTGN](#altgn), [ALTSW](#altsw), [GETWORD](#getword), [ROLWORD](#rolword)
 
@@ -2992,12 +3018,12 @@ Alter instruction
 - Dest is the register whose value contains one or more of the next instruction's field substitutes or an entire 32-bit opcode for full substitution.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions and Dest modifications to perform.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001101}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001101}{001}{DDDDDDDDD}{101100100}{---}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
+
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
 
@@ -3030,14 +3056,16 @@ Alter result
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001100}{001}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTD](#altd), [ALTS](#alts), [ALTB](#altb), [ALTI](#alti)
 
@@ -3070,14 +3098,16 @@ Alter source
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001100}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001100}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTD](#altd), [ALTR](#altr), [ALTB](#altb), [ALTI](#alti)
 
@@ -3108,14 +3138,16 @@ Alter set byte
 - Dest is the register whose 11-bit value is the index (Dest[10:2] = long address, Dest[1:0] = byte ID) or the full byte address for SETBYTE to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal containing base long address (Src[8:0]) and optional auto-indexer value (Src[17:9]).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001011}{001}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGB](#altgb), [ALTSN](#altsn), [ALTSW](#altsw), [SETBYTE](#setbyte)
 
@@ -3148,14 +3180,16 @@ Alter set nibble
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the SETNIB instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001010}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001010}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGN](#altgn), [ALTSB](#altsb), [ALTSW](#altsw), [SETNIB](#setnib)
 
@@ -3190,14 +3224,16 @@ Alter set word
 - Dest is the register whose 10-bit value is the index, or the full word address, for the SETWORD instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
-\encodingrow{EEEE}{1001011}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+
+```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
+
 
 **Related:** [ALTGW](#altgw), [ALTSB](#altsb), [ALTSN](#altsn), [SETWORD](#setword)
 
@@ -3232,9 +3268,11 @@ Bitwise AND
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0101000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+
 
 **Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
 
@@ -3263,9 +3301,11 @@ And not
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose inverse value will be bitwise ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0101001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)
 
@@ -3292,9 +3332,11 @@ ASMCLK
 
 **Result:** Controls assembly-time clock operations.
 
-```{=latex}
-\simpleencoding{EEEE}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
+
 
 **Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
 
@@ -3317,9 +3359,11 @@ Augment destination
 
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
 
-```{=latex}
-\simpleencoding{EEEE}{11111DD}{DDD}{DDDDDDDDD}{DDDDDDDDD}{Hidden D Queue}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
+
 
 **Related:** [AUGS](#augs)
 
@@ -3348,9 +3392,11 @@ Augment source
 
 - Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
 
-```{=latex}
-\simpleencoding{EEEE}{11110SS}{SSS}{SSSSSSSSS}{SSSSSSSSS}{Hidden S Queue}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
+
 
 **Related:** [AUGD](#augd)
 
@@ -3397,14 +3443,14 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
 - WCZ is an optional effect to update the Z flag to the original bit state.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
-\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
-\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
-\encodingrow{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
 
@@ -3433,9 +3479,11 @@ Bit high
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{0100001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+
 
 **Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
@@ -3466,9 +3514,11 @@ Bit low
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{0100000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+
 
 **Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
@@ -3499,9 +3549,11 @@ Bit not
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the C and Z flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0100111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
 
@@ -3532,9 +3584,11 @@ Bit random
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the C and Z flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0100110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{original D[S[4:0]]}{original D[S[4:0]]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
+
 
 **Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
 
@@ -3566,9 +3620,11 @@ Blend pixels
 - Dest is a register containing the RGB color value to blend Src into, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are blended into Dest.
 
-```{=latex}
-\simpleencoding{EEEE}{1010010}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+
 
 **Related:** [ADDPIX](#addpix), [SUBPIX](#subpix), [MULPIX](#mulpix), [SETPIV](#setpiv)
 
@@ -3597,12 +3653,12 @@ Bit mask
 - Dest is a register in which to store the generated bit mask and optionally contains the 5-bit mask size (second syntax).
 - Src is a register or 5-bit literal whose value is the size of the bit mask to generate.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001110}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001110}{010}{DDDDDDDDD}{DDDDDDDDD}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+
 
 **Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
 
@@ -3636,9 +3692,11 @@ Break
 
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code or condition depending on the state of execution (outside or inside of a Debug ISR).
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110110}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
+
 
 **Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
 
@@ -3679,12 +3737,12 @@ Call subroutine
 - Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101101}{RAA}{AAAAAAAAA}{AAAAAAAAA}{K and PC}{---}{---}{4 / 13-20}
-\encodingrow{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101101}{K and PC}{D[31]}{D[30]}{4 / 13-20}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | K and PC | --- | --- | 4 / 13-20 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
+
 
 **Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
 
@@ -3721,12 +3779,12 @@ Call subroutine via PTRA
 - Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101110}{RAA}{AAAAAAAAA}{AAAAAAAAA}{---}{---}{---}{5...12}
-\encodingrow{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101110}{---}{D[31]}{D[30]}{5...12}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5...12 |
+
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
 
@@ -3763,12 +3821,12 @@ Call subroutine via PTRB
 - Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101111}{RAA}{AAAAAAAAA}{AAAAAAAAA}{---}{---}{---}{5...12}
-\encodingrow{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101111}{---}{D[31]}{D[30]}{5...12}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5...12 |
+
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
 
@@ -3807,12 +3865,12 @@ Call with destination register
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to and optional new C and Z states. Use # for relative addressing; omit # for absolute addressing.
 - WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit states.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{11100WW}{RAA}{AAAAAAAAA}{AAAAAAAAA}{Pxxx and PC}{---}{---}{4 / 13-20}
-\encodingrow{EEEE}{1011001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D and PC}{S[31]}{S[30]}{4 / 13-20}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | Pxxx and PC | --- | --- | 4 / 13-20 |
+| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
+
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
 
@@ -3848,9 +3906,11 @@ Call subroutine with PA parameter
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PA.
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{K, PA and PC}{---}{---}{4 / 13-20}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
+
 
 **Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](#ret), [PA](#pa)
 
@@ -3880,9 +3940,11 @@ Call subroutine with PB parameter
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PB.
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{K, PB and PC}{---}{---}{4 / 13-20}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
+
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](#ret), [PB](#pb)
 
@@ -3913,9 +3975,11 @@ Compare
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Unsigned (D < S)}{D=S}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Unsigned (D < S) | D=S | 2 |
+
 
 **Related:** [CMPR](#cmpr), [CMPX](#cmpx), [CMPS](#cmps), [CMPSX](#cmpsx), [CMPM](#cmpm)
 
@@ -3954,9 +4018,11 @@ Compare most significant bit
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Result[31]}{D=S}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Result[31] | D=S | 2 |
+
 
 **Related:** [CMP](#cmp), [CMPS](#cmps)
 
@@ -3987,9 +4053,11 @@ Compare reverse
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{borrow of (S - D)}{D == S}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (S - D) | D == S | 2 |
+
 
 **Related:** [CMP](#cmp)
 
@@ -4020,9 +4088,11 @@ Compare signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Signed (D < S)}{D=S}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Signed (D < S) | D=S | 2 |
+
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
 
@@ -4059,9 +4129,11 @@ Compare and subtract
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared with and possibly subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{Unsigned(D >= S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | Unsigned(D >= S) | Result = 0 | 2 |
+
 
 \textsuperscript{1} Dest is only written if Dest >= Src (subtraction was performed).
 
@@ -4096,9 +4168,11 @@ Compare signed, extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{correct sign of (D - (S + C))}{Z AND (D == S + C)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | correct sign of (D - (S + C)) | Z AND (D == S + C) | 2 |
+
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPS](#cmps)
 
@@ -4135,9 +4209,11 @@ Compare extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is compared to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{borrow of (D - (S + C))}{Z AND (D == S + C)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (D - (S + C)) | Z AND (D == S + C) | 2 |
+
 
 **Related:** [CMP](#cmp), [CMPS](#cmps), [CMPSX](#cmpsx)
 
@@ -4172,9 +4248,11 @@ Cog attention
 
 - Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111111}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111111 | --- | --- | --- | 2 |
+
 
 **Related:** [POLLATN](#pollatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
 
@@ -4213,9 +4291,11 @@ Cog break
 
 - Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110101}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110101 | --- | --- | --- | 2 |
+
 
 **Related:** [CALLD](#calld), [BRK](#brk)
 
@@ -4249,9 +4329,11 @@ Cog identification
 - Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status for.
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C0L}{DDDDDDDDD}{000000001}{D if reg and !WC}{Cog Running}{---}{2-9, +2 if result}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | D if reg and !WC | Cog Running | --- | 2-9, +2 if result |
+
 
 **Related:** [COGINIT](#coginit), [COGSTOP](#cogstop)
 
@@ -4292,9 +4374,11 @@ Cog initialize
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value (lower 20 bits) is the target RAM address (for code) and the new cog's PTRB value.
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status and triggers Dest to be overwritten with new cog's ID.
 
-```{=latex}
-\simpleencoding{EEEE}{1100111}{CLI}{DDDDDDDDD}{SSSSSSSSS}{D if reg and WC}{No cog available}{---}{2-9, +2 if result}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | D if reg and WC | No cog available | --- | 2-9, +2 if result |
+
 
 **Related:** [COGID](#cogid), [COGSTOP](#cogstop)
 
@@ -4353,9 +4437,11 @@ Cog stop
 
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000000011}{---}{---}{---}{2-9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000000011 | --- | --- | --- | 2-9 |
+
 
 **Related:** [COGINIT](#coginit), [COGID](#cogid)
 
@@ -4396,9 +4482,11 @@ CRC iterate bit
 - Dest is a register containing the current CRC value and is where the updated CRC is written.
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
-```{=latex}
-\simpleencoding{EEEE}{1001110}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [CRCNIB](#crcnib), [REV](#rev)
 
@@ -4439,9 +4527,11 @@ CRC iterate nibble
 - Dest is a register containing the current CRC value and is where the updated CRC is written.
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
-```{=latex}
-\simpleencoding{EEEE}{1001110}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [CRCBIT](#crcbit), [REV](#rev)
 
@@ -4488,9 +4578,11 @@ Decrement modulus
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply to Dest's decrement operation.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0111001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Modulus triggered}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
+
 
 **Related:** [INCMOD](#incmod)
 
@@ -4521,12 +4613,12 @@ Decode bit position to single-bit mask
 - Dest is the register in which to store the decoded value and optionally begins by containing the 5-bit bit position value it is requesting (syntax 2).
 - Src is an optional register or 5-bit literal whose value is the bit position to set high in the decoded value.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001110}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001110}{000}{DDDDDDDDD}{DDDDDDDDD}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+
 
 **Related:** [ENCOD](#encod), [BMASK](#bmask)
 
@@ -4560,12 +4652,12 @@ Set pin direction if C / not C
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000010}{DIRx}{---}{DIR bit}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000011}{DIRx}{---}{DIR bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIRx | --- | DIR bit | 2 |
+
 
 **Related:** [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRL](#dirl), [DIRH](#dirh), [DIRNOT](#dirnot), [DIRRND](#dirrnd)
 
@@ -4601,9 +4693,11 @@ Set pin direction high
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000001}{DIRx}{---}{DIR bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | --- | DIR bit | 2 |
+
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -4633,9 +4727,11 @@ Set pin direction low
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000000}{DIRx}{---}{DIR bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | --- | DIR bit | 2 |
+
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -4665,9 +4761,11 @@ Direction not
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle to the opposite direction.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000111}{DIRx}{---}{DIR bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | --- | DIR bit | 2 |
+
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -4702,12 +4800,12 @@ Set pin direction if Z / not Z
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000100}{DIRx}{---}{DIR bit}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000101}{DIRx}{---}{DIR bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
+
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -4743,9 +4841,11 @@ Direction random
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set randomly to input or output.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000110}{DIRx}{Original DIRx base bit}{Original DIRx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIRx | Original DIRx base bit | Original DIRx base bit | 2 |
+
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRNOT](#dirnot), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -4779,9 +4879,11 @@ Decrement and jump if full
 - Dest is a register whose value is decremented and tested for full or not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -4809,9 +4911,11 @@ Decrement and jump if not full
 - Dest is a register whose value is decremented and tested for full or not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011011}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -4847,14 +4951,16 @@ Decrement and jump if zero / not zero {#djnz}
 - Dest is a register whose value is decremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+
+```{=latex}
 *PC is written only when the jump condition is met.
 ```
+
 
 **Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -4890,12 +4996,12 @@ Drive pins if C / not C
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011010}{DIRx* + OUTx}{---}{OUT bit}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011011}{DIRx* + OUTx}{---}{OUT bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | DIRx* + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -4929,9 +5035,11 @@ Drive pins high
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and high output level.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011001}{DIRx* + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -4963,9 +5071,11 @@ Drive pins low
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and low output level.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011000}{DIRx* + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -4999,9 +5109,11 @@ Drive not
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011111}{DIRx* + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -5038,12 +5150,12 @@ Drive pins if Z / not Z
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011100}{DIRx* + OUTx}{---}{OUT bit}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011101}{DIRx* + OUTx}{---}{OUT bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | DIRx* + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [DRVC](#drvc), [DRVNC](#drvnc), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -5077,9 +5189,11 @@ Drive random
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and with output level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011110}{DIRx + OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+
 
 **Related:** [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVNOT](#drvnot)
 
@@ -5125,12 +5239,12 @@ Encode
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is to be encoded into a bit position.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0111100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S != 0}{Result = 0}{2}
-\encodingrow{EEEE}{0111100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Original D != 0}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | D | S != 0 | Result = 0 | 2 |
+| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
+
 
 **Related:** [DECOD](#decod)
 
@@ -5167,9 +5281,11 @@ Call and skip
 
 - Dest is a register or 10-bit literal specifying the target address in bits [9:0] and the skip pattern in bits [31:10].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00I}{DDDDDDDDD}{000110011}{---}{---}{---}{4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
+
 
 **Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)
 
@@ -5207,9 +5323,11 @@ Set next block for when block wraps
 - Dest is a register or 9-bit literal whose value specifies the block size in 64-byte units (0 = maximum size).
 - Src is a register or 9-bit literal whose value specifies the block start address in Hub memory.
 
-```{=latex}
-\simpleencoding{EEEE}{1100100}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
 
@@ -5240,9 +5358,11 @@ Force greater or equal
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
 
@@ -5273,9 +5393,11 @@ Force greater or equal, signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the lower limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0011010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
 
@@ -5306,9 +5428,11 @@ Force lesser or equal
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0011001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
 
@@ -5339,9 +5463,11 @@ Force lesser or equal, signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0011011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
 
@@ -5381,14 +5507,14 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010010}{DIRx + OUTx}{---}{OUT bit}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010011}{DIRx + OUTx}{---}{OUT bit}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010100}{DIRx + OUTx}{---}{OUT bit}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010101}{DIRx + OUTx}{---}{OUT bit}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | DIRx + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
@@ -5416,9 +5542,11 @@ Float high
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010001}{DIRx + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | DIRx + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -5450,9 +5578,11 @@ Float low
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of low.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010000}{DIRx + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | DIRx + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -5484,9 +5614,11 @@ Float not
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010111}{DIRx + OUTx}{---}{OUT bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | DIRx + OUTx | --- | OUT bit | 2 |
+
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
 
@@ -5520,9 +5652,11 @@ Float random
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and with output level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010110}{DIRx + OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 
@@ -5565,9 +5699,11 @@ Get breakpoint status
 - Dest is a register where the status information is written.
 - WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000110101}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
+
 
 **Related:** [BRK](#brk), [SETBRK](#setbrk), [COGBRK](#cogbrk)
 
@@ -5603,12 +5739,12 @@ Get byte
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to read.
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
 
@@ -5636,9 +5772,11 @@ Get system counter
 - Dest is a register where the system counter value is written.
 - WC is an optional effect that preserves the current C flag state.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C00}{DDDDDDDDD}{000011010}{D}{same}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
+
 
 **Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
@@ -5670,12 +5808,12 @@ Get nibble
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble to read.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{100001N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000010}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
 
@@ -5702,9 +5840,11 @@ Get FIFO hub pointer
 
 - Dest is a register where the FIFO hub pointer is written.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{000110100}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
 
@@ -5732,9 +5872,11 @@ Get CORDIC X result
 - Dest is a register where the CORDIC X result is written.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011000}{D}{X[31]}{Result = 0}{2...58}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
+
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
@@ -5766,9 +5908,11 @@ Get CORDIC Y result
 - Dest is a register where the CORDIC Y result is written.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011001}{D}{Y[31]}{Result = 0}{2...58}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
+
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
@@ -5801,12 +5945,12 @@ Get random value
 - Dest is a register where the full 32-bit random value is written (first syntax).
 - WC, WZ, or WCZ are optional effects to retrieve random bits into flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011011}{D}{RND[31]}{RND[30], unique per cog}{2}
-\encodingrow{EEEE}{1101011}{CZ1}{000000000}{000011011}{---}{RND[31]}{RND[30], unique per cog}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
+
 
 **Related:** [SETQ](#setq), [SETQ2](#setq2)
 
@@ -5839,9 +5983,11 @@ Get oscilloscope samples
 
 - Dest is a register where the four oscilloscope samples are written.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001110001}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
+
 
 **Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
 
@@ -5873,12 +6019,12 @@ Get word
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target word to read.
 - Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001001}{1NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001001}{100}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
 
@@ -5905,9 +6051,11 @@ Get Goertzel accumulators
 
 - Dest is a register where the Goertzel X accumulator value is written.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{000011110}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
+
 
 **Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
 
@@ -5942,9 +6090,11 @@ Set hub configuration
 
 - D is a register or 9-bit literal (or 32-bit augmented literal) containing the configuration value for the hub system.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000000000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
+
 
 **Related:** [COGINIT](#coginit), [COGID](#cogid), [CLKSET](#clkset)
 
@@ -6029,14 +6179,16 @@ Increment and jump if zero / not zero {#ijnz}
 - Dest is a register whose value is incremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+
+```{=latex}
 *PC is written only when the jump condition is met.
 ```
+
 
 **Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -6065,9 +6217,11 @@ Increment with modulus
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply to Dest's increment operation.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0111000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{D = S, set D = 0 and C = 1, else D = D + 1 and C = 0}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
+
 
 **Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 
@@ -6131,11 +6285,11 @@ Jump if ATN event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the ATN event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNATN](#jnatn), [COGATN](#cogatn), [POLLATT](#pollatt)
 
@@ -6166,15 +6320,17 @@ Jump if counter event flag is set (1, 2, or 3)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+```{=latex}
 \textsuperscript{1} PC is written only when the CTn event flag is set.
 ```
+
 
 **Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
@@ -6203,11 +6359,11 @@ Jump if FIFO block wrap event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the FIFO interface block wrap event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNFBW](#jnfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
@@ -6236,11 +6392,11 @@ Jump if INT event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the INT event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
@@ -6273,12 +6429,12 @@ Jump
 - A is a 20-bit absolute or PC-relative address. Use \ prefix to force absolute addressing when using #.
 - WC, WZ, or WCZ are optional effects to set C flag to D[31] and/or Z flag to D[30].
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101100}{PC}{D[31]}{D[30]}{4}
-\encodingrow{EEEE}{1101100}{RAA}{AAAAAAAAA}{AAAAAAAAA}{PC}{---}{---}{4}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | PC | D[31] | D[30] | 4 |
+| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
+
 
 **Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
 
@@ -6309,9 +6465,11 @@ Jump relative
 
 - D is a register or 9-bit literal specifying the signed offset in instructions. For COG execution, PC += D[19:0]. For Hub execution, PC += D[17:0] << 2.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110000}{PC}{---}{---}{4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
+
 
 **Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP](#ijmp)
 
@@ -6342,11 +6500,11 @@ Jump if ATN event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the ATN event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JATN](#jatn), [COGATN](#cogatn), [POLLATT](#pollatt)
 
@@ -6377,15 +6535,17 @@ Jump if counter event flag is clear (1, 2, or 3)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+```{=latex}
 \textsuperscript{1} PC is written only when the CTn event flag is clear.
 ```
+
 
 **Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
@@ -6414,11 +6574,11 @@ Jump if FIFO block wrap event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the FIFO interface block wrap event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JFBW](#jfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
@@ -6447,11 +6607,11 @@ Jump if INT event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the INT event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
@@ -6480,11 +6640,11 @@ Jump if pattern match event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the PAT event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JPAT](#jpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
@@ -6513,11 +6673,11 @@ Jump if CORDIC empty event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the CORDIC-read-but-empty event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JQMT](#jqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
@@ -6549,16 +6709,18 @@ Jump if selectable event flag is clear (1, 2, 3, or 4)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+```{=latex}
 \textsuperscript{1} PC is written only when the SEn event flag is clear.
 ```
+
 
 **Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
@@ -6587,11 +6749,11 @@ Jump if streamer finished event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XFI event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JXFI](#jxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
@@ -6620,11 +6782,11 @@ Jump if streamer empty event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XMT event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JXMT](#jxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
@@ -6653,11 +6815,11 @@ Jump if streamer LUT rollover event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XRL event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JXRL](#jxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
@@ -6686,11 +6848,11 @@ Jump if streamer NCO rollover event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000011100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XRO event flag is clear.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JXRO](#jxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
@@ -6719,11 +6881,11 @@ Jump if pattern match event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the PAT event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNPAT](#jnpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
@@ -6752,11 +6914,11 @@ Jump if CORDIC empty event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the CORDIC-read-but-empty event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNQMT](#jnqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
@@ -6788,16 +6950,18 @@ Jump if selectable event flag is set (1, 2, 3, or 4)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrowcont{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+```{=latex}
 \textsuperscript{1} PC is written only when the SEn event flag is set.
 ```
+
 
 **Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
@@ -6826,11 +6990,11 @@ Jump if streamer finished event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XFI event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNXFI](#jnxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
@@ -6859,11 +7023,11 @@ Jump if streamer empty event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XMT event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNXMT](#jnxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
@@ -6892,11 +7056,11 @@ Jump if streamer LUT rollover event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XRL event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNXRL](#jnxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
@@ -6925,11 +7089,11 @@ Jump if streamer NCO rollover event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000001100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-\textsuperscript{1} PC is written only when the XRO event flag is set.
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
 
 **Related:** [JNXRO](#jnxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
@@ -6967,9 +7131,11 @@ Load address
 - A is a 20-bit address value.
 - The optional backslash (\) prefix forces absolute addressing (R=0). Without it, relative addressing is used (R=1).
 
-```{=latex}
-\simpleencoding{EEEE}{11101WW}{RAA}{AAAAAAAAA}{AAAAAAAAA}{Per W}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
+
 
 **Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
 
@@ -6999,9 +7165,11 @@ Allocate new lock
 - D is a register where the allocated lock number is written.
 - WC is an optional effect to update the C flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C00}{DDDDDDDDD}{000000100}{D}{1 if no LOCK available}{---}{4...11}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | D | 1 if no LOCK available | --- | 4...11 |
+
 
 **Related:** [LOCKTRY](#locktry), [LOCKREL](#lockrel), [LOCKRET](#lockret)
 
@@ -7031,9 +7199,11 @@ Release lock
 - D is a register or 4-bit literal (0-15) specifying the lock number to release.
 - When D is a register and WC is specified, D is written with the previous owner's COG ID and the C flag indicates lock status.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C0L}{DDDDDDDDD}{000000111}{---}{---}{---}{2...9, +2 if result}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
+
 
 **Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
 
@@ -7062,9 +7232,11 @@ Return lock to pool
 
 - D is a register or 4-bit literal (0-15) specifying the lock number to return.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000000101}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000000101 | --- | --- | --- | 2...9 |
+
 
 **Related:** [LOCKNEW](#locknew), [LOCKTRY](#locktry), [LOCKREL](#lockrel)
 
@@ -7094,9 +7266,11 @@ Try to acquire lock
 - D is a register or 4-bit literal (0-15) specifying the lock number to acquire.
 - WC is an optional effect to update the C flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C0L}{DDDDDDDDD}{000000110}{---}{1 if got LOCK}{---}{2...9, +2 if result}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
+
 
 **Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
 
@@ -7131,9 +7305,11 @@ Merge bits of bytes
 
 - D is a register containing the value whose byte bits will be merged.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100001}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
+
 
 **Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
 
@@ -7160,9 +7336,11 @@ Merge bits of words
 
 - D is a register containing the value whose word bits will be merged.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100011}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
+
 
 **Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
 
@@ -7190,9 +7368,11 @@ Mix pixels
 - D is a register containing the destination pixel bytes to be modified.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the source pixel bytes.
 
-```{=latex}
-\simpleencoding{EEEE}{1010010}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+
 
 **Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
 
@@ -7222,9 +7402,11 @@ Modify C flag
 - c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
 - WC is an optional effect to make the modification visible to subsequent flag reads.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{C01}{0cccc0000}{001101111}{---}{cccc[\{C,Z\}]}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
+
 
 **Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -7257,9 +7439,11 @@ Modify C and Z flags
 - z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
 - WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ1}{0cccczzzz}{001101111}{---}{cccc[\{C,Z\}]}{zzzz[\{C,Z\}]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
+
 
 **Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -7293,9 +7477,11 @@ Modify Z flag
 - z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
 - WZ is an optional effect to make the modification visible to subsequent flag reads.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{0Z1}{00000zzzz}{001101111}{---}{---}{zzzz[\{C,Z\}]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
+
 
 **Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -7328,9 +7514,11 @@ Move
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0110000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S[31]}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
+
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
 
@@ -7382,9 +7570,11 @@ Move bytes
 - D is a register containing the bytes to be rearranged.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the byte selection pattern.
 
-```{=latex}
-\simpleencoding{EEEE}{1001111}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
 
@@ -7421,9 +7611,11 @@ Multiply
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose lower 16 bits are multiplied with Dest.
 - WZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1010000}{0ZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{(D = 0) | (S = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
@@ -7470,9 +7662,11 @@ Multiply pixels
 - D is a register containing four pixel bytes to be multiplied.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing four pixel bytes as multipliers.
 
-```{=latex}
-\simpleencoding{EEEE}{1010010}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+
 
 **Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
 
@@ -7511,9 +7705,11 @@ Multiply signed
 - Src is a register, 9-bit literal, or signed 16-bit augmented literal whose lower 16 bits are multiplied with Dest.
 - WZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1010000}{1ZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{(D = 0) | (S = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
@@ -7574,14 +7770,14 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
-\encodingrowcont{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
-\encodingrowcont{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
-\encodingrow{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -7619,9 +7815,11 @@ Multiplex nibbles
 - Dest is a register whose nibbles will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing nibble values to copy.
 
-```{=latex}
-\simpleencoding{EEEE}{1001111}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
@@ -7659,9 +7857,11 @@ Multiplex nits
 - Dest is a register whose bit pairs will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit pair values to copy.
 
-```{=latex}
-\simpleencoding{EEEE}{1001111}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
@@ -7699,9 +7899,11 @@ Multiplex Q
 - Dest is a register whose bits will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit values to copy.
 
-```{=latex}
-\simpleencoding{EEEE}{1001111}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
@@ -7774,12 +7976,12 @@ Negate
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated value is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110011}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of result | Result = 0 | 2 |
+| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
+
 
 **Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
@@ -7827,18 +8029,18 @@ Conditional negate {#negnc} {#negz} {#negnz}
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
+| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
+| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
+| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
+
 
 **Related:** [NEG](#neg)
 
@@ -7867,13 +8069,13 @@ Cancel interrupt (1, 2, or 3)
 
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
-\encodingrowcont{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
-\encodingrow{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100101 | 000100100 | --- | --- | --- | 2 |
+| EEEE | 1101011 | 000 | 000100110 | 000100100 | --- | --- | --- | 2 |
+| EEEE | 1101011 | 000 | 000100111 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [SETINT1/2/3](instructions-s.md#setint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
@@ -7896,9 +8098,11 @@ No operation
 
 **Result:** Two clock cycles are consumed.
 
-```{=latex}
-\simpleencoding{0000}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
+
 
 **Related:** [WAITX](#waitx), [WAITCNT](#waitcnt)
 
@@ -7926,12 +8130,12 @@ Not
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise NOTed and stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{!S[31]}{Result = 0}{2}
-\encodingrow{EEEE}{0110001}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{!D[31]}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | D | !S[31] | Result = 0 | 2 |
+| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
+
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
 
@@ -7969,12 +8173,12 @@ Ones
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is checked for ones.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0111101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Result is odd}{Result = 0}{2}
-\encodingrow{EEEE}{0111101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Result is odd}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Result is odd | Result = 0 | 2 |
+| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
+
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
 
@@ -8007,9 +8211,11 @@ Or
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is bitwise ORed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0101010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity of Result}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
+
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
 
@@ -8059,14 +8265,14 @@ Output by flag state {#outnc} {#outz} {#outnz}
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{orig out}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{orig out}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{orig out}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{orig out}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUTx | --- | orig out | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUTx | --- | orig out | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | OUTx | --- | orig out | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | OUTx | --- | orig out | 2 |
+
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
@@ -8092,9 +8298,11 @@ Output high
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set high.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001001}{OUTx}{---}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
+
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
@@ -8126,9 +8334,11 @@ Output low
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set low.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001000}{OUTx}{---}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
+
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
@@ -8160,9 +8370,11 @@ Output not (toggle)
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001111}{OUTx}{---}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
+
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
@@ -8194,9 +8406,11 @@ Output random
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to random output levels.
 - WCZ is an optional effect to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001110}{OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 
@@ -8236,9 +8450,11 @@ Poll attention event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001110}{000100100}{---}{ATN Event}{ATN Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
+
 
 **Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
 
@@ -8267,13 +8483,13 @@ Poll counter event (1, 2, or 3)
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000000001}{000100100}{---}{CT1 Event}{CT1 Event}{2}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000000010}{000100100}{---}{CT2 Event}{CT2 Event}{2}
-\encodingrow{EEEE}{1101011}{CZ0}{000000011}{000100100}{---}{CT3 Event}{CT3 Event}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | --- | CT1 Event | CT1 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | --- | CT2 Event | CT2 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
+
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
@@ -8300,9 +8516,11 @@ Poll FIFO block wrap event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001001}{000100100}{---}{FBW Event}{FBW Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
 
@@ -8329,9 +8547,11 @@ Poll interrupt event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000000000}{000100100}{---}{INT Event}{INT Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
+
 
 **Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
 
@@ -8358,9 +8578,11 @@ Poll pin pattern event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001000}{000100100}{---}{PAT Event}{PAT Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
+
 
 **Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
@@ -8387,9 +8609,11 @@ Poll CORDIC empty event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001111}{000100100}{---}{QMT Event}{QMT Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
 
@@ -8419,14 +8643,14 @@ Poll selectable event (1, 2, 3, or 4)
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000000100}{000100100}{---}{SE1 Event}{SE1 Event}{2}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000000101}{000100100}{---}{SE2 Event}{SE2 Event}{2}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000000110}{000100100}{---}{SE3 Event}{SE3 Event}{2}
-\encodingrow{EEEE}{1101011}{CZ0}{000000111}{000100100}{---}{SE4 Event}{SE4 Event}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | --- | SE1 Event | SE1 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | --- | SE2 Event | SE2 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | --- | SE3 Event | SE3 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
+
 
 **Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
@@ -8453,9 +8677,11 @@ Poll streamer finished event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001011}{000100100}{---}{XFI Event}{XFI Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
+
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
 
@@ -8482,9 +8708,11 @@ Poll streamer empty event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001010}{000100100}{---}{XMT Event}{XMT Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
+
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
 
@@ -8511,9 +8739,11 @@ Poll streamer LUT rollover event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001101}{000100100}{---}{XRL Event}{XRL Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
+
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
 
@@ -8540,9 +8770,11 @@ Poll streamer NCO rollover event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000001100}{000100100}{---}{XRO Event}{XRO Event}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
+
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
 
@@ -8570,9 +8802,11 @@ Pop from internal stack
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101011}{D}{K[31]}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2 |
+
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
 
@@ -8602,9 +8836,11 @@ Pop from Hub stack A
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{101011111}{D}{MSB of long}{Result = 0}{9...16}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16 |
+
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
 
@@ -8634,9 +8870,11 @@ Pop from Hub stack B
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{111011111}{D}{MSB of long}{Result = 0}{9...16}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16 |
+
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)
 
@@ -8665,9 +8903,11 @@ Push to internal stack
 
 - Dest is a register or 9-bit immediate value (0-511) to push.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101010}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000101010 | --- | --- | --- | 2 |
+
 
 **Related:** [POP](#pop), [PUSHA](#pusha), [PUSHB](#pushb)
 
@@ -8692,9 +8932,11 @@ Push to Hub stack A
 
 - Dest is a register or 9-bit immediate value to push.
 
-```{=latex}
-\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{101100001}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100011 | 0L1 | DDDDDDDDD | 101100001 | --- | --- | --- | 3...10 |
+
 
 **Related:** [POPA](#popa), [PUSHB](#pushb), [PUSH](#push)
 
@@ -8721,9 +8963,11 @@ Push to Hub stack B
 
 - Dest is a register or 9-bit immediate value to push.
 
-```{=latex}
-\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{111100001}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100011 | 0L1 | DDDDDDDDD | 111100001 | --- | --- | --- | 3...10 |
+
 
 **Related:** [POPB](#popb), [PUSHA](#pusha), [PUSH](#push)
 
@@ -8757,9 +9001,11 @@ Queue divide
 - Src is a register or literal containing the 32-bit denominator (divisor).
 - Use SETQ before QDIV to specify the upper 32 bits of the numerator (defaults to 0 if not used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
@@ -8793,9 +9039,11 @@ Queue exponential
 
 - Dest is a register or literal containing the 5:27-bit logarithm (5-bit exponent in bits [31:27], 27-bit fraction in bits [26:0]).
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001111}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
@@ -8830,9 +9078,11 @@ Queue fractional divide
 - Src is a register or literal containing the 32-bit denominator (divisor).
 - Use SETQ before QFRAC to specify the lower 32 bits of the numerator (defaults to 0 if not used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
@@ -8865,9 +9115,11 @@ Queue logarithm
 
 - Dest is a register or literal containing the 32-bit unsigned integer input.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001110}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [QEXP](#qexp)
 
@@ -8899,9 +9151,11 @@ Queue multiply
 - Dest is a register or literal containing the first 32-bit multiplicand.
 - Src is a register or literal containing the second 32-bit multiplicand.
 
-```{=latex}
-\simpleencoding{EEEE}{1101000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
@@ -8937,9 +9191,11 @@ Queue rotate
 - Src is a register or literal containing the rotation angle in P2 angle units ($00000000 = 0°, $40000000 = 90°, $80000000 = 180°, $C0000000 = 270°).
 - Use SETQ before QROTATE to specify the Y coordinate (defaults to 0 if not used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
 
@@ -8975,9 +9231,11 @@ Queue square root
 - Dest is a register or literal containing the lower 32 bits of the 64-bit input value.
 - Src is a register or literal containing the upper 32 bits of the 64-bit input value.
 
-```{=latex}
-\simpleencoding{EEEE}{1101001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [QMUL](#qmul)
 
@@ -9013,9 +9271,11 @@ Queue vector
 - Dest is a register or literal containing the X coordinate (32-bit signed).
 - Src is a register or literal containing the Y coordinate (32-bit signed).
 
-```{=latex}
-\simpleencoding{EEEE}{1101010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
+
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
 
@@ -9058,11 +9318,11 @@ Rotate carry left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
@@ -9093,11 +9353,11 @@ Rotate carry right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
@@ -9127,9 +9387,11 @@ Rotate carry and zero left
 - Dest is a register containing the value to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101011}{D}{D[31]}{D[30]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D | D[31] | D[30] | 2 |
+
 
 **Related:** [RCZR](#rczr), [RCL](#rcl), [RCR](#rcr)
 
@@ -9159,9 +9421,11 @@ Rotate carry and zero right
 - Dest is a register containing the value to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101010}{D}{D[1]}{D[0]}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D | D[1] | D[0] | 2 |
+
 
 **Related:** [RCZL](#rczl), [RCL](#rcl), [RCR](#rcr)
 
@@ -9192,9 +9456,11 @@ Read byte from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1010110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of byte}{Result = 0}{9...16}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
+
 
 **Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
@@ -9226,9 +9492,11 @@ Read fast via FIFO
 - Dest is a configuration value: Dest[31] = no-wait mode, Dest[13:0] = block size in 64-byte units (0 = maximum).
 - Src is the Hub memory start address (Src[19:0]) for the read operation.
 
-```{=latex}
-\simpleencoding{EEEE}{1100011}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 10...17}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
+
 
 **Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
@@ -9257,9 +9525,11 @@ Read long from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of long}{---}{9...16}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
+
 
 **Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
@@ -9290,9 +9560,11 @@ Read from LUT
 - Src/Ptr is a LUT address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1010101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of data}{Result = 0}{3}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
+
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
 
@@ -9323,9 +9595,11 @@ Read Smart Pin
 - Src is a register or literal identifying the pin number (Src[5:0]) to read from.
 - WC is an optional effect to write the modal result to C.
 
-```{=latex}
-\simpleencoding{EEEE}{1010100}{C1I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+
 
 **Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
@@ -9354,9 +9628,11 @@ Read word from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1010111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of word}{Result = 0}{9...16}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
+
 
 **Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
@@ -9386,9 +9662,11 @@ Repeat block
 - Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
 - Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
 
-```{=latex}
-\simpleencoding{EEEE}{1100110}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
 
@@ -9416,14 +9694,14 @@ Resume from interrupt (0, 1, 2, or 3)
 
 **Result:** Execution resumes from the interrupted location for the specified interrupt level.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011001}{110}{111111110}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrowcont{EEEE}{1011001}{110}{111110100}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrowcont{EEEE}{1011001}{110}{111110010}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrow{EEEE}{1011001}{110}{111110000}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+
 
 **Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
@@ -9448,9 +9726,11 @@ Return from subroutine
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101101}{---}{K[31]}{K[30]}{4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
+
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
 
@@ -9481,9 +9761,11 @@ Return via PTRA stack
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101110}{---}{L[31]}{L[30]}{11...18}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
+
 
 **Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
@@ -9512,9 +9794,11 @@ Return via PTRB stack
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101111}{---}{L[31]}{L[30]}{11...18}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
+
 
 **Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
@@ -9544,14 +9828,14 @@ Return from interrupt (0, 1, 2, or 3)
 
 **Result:** Execution returns from the specified interrupt level to the interrupted location.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011001}{110}{111111111}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\encodingrow{EEEE}{1011001}{110}{111111111}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
+
 
 **Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
@@ -9576,9 +9860,11 @@ Reverse bits
 
 - Dest is the register containing the bit pattern to reverse.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101001}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
+
 
 **Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
 
@@ -9604,9 +9890,11 @@ Read byte via FIFO
 - Dest is the register to receive the byte value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010000}{D}{MSB of byte}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | D | MSB of byte | Result = 0 | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
 
@@ -9636,9 +9924,11 @@ Read long via FIFO
 - Dest is the register to receive the long value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010010}{D}{MSB of long}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | D | MSB of long | Result = 0 | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
 
@@ -9668,9 +9958,11 @@ Read variable via FIFO
 - Dest is the register to receive the variable-length value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010011}{D}{0}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | D | 0 | Result = 0 | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
 
@@ -9700,9 +9992,11 @@ Read signed variable via FIFO
 - Dest is the register to receive the sign-extended value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010100}{D}{MSB of value}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | D | MSB of value | Result = 0 | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
 
@@ -9730,9 +10024,11 @@ Read word via FIFO
 - Dest is the register to receive the word value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010001}{D}{MSB of word}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | D | MSB of word | Result = 0 | 2 |
+
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
 
@@ -9761,9 +10057,11 @@ Expand RGB color
 
 - Dest contains 5:6:5 RGB in Dest[15:0], receives 8:8:8 RGB in Dest[31:8].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100111}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | D | --- | --- | 2 |
+
 
 **Related:** [RGBSQZ](#rgbsqz)
 
@@ -9788,9 +10086,11 @@ Squeeze RGB color
 
 - Dest contains 8:8:8 RGB in Dest[31:8], receives 5:6:5 RGB in Dest[15:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100110}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | D | --- | --- | 2 |
+
 
 **Related:** [RGBEXP](#rgbexp)
 
@@ -9817,11 +10117,11 @@ Rotate left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[31]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -9853,12 +10153,12 @@ Rotate byte left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target byte.
 - N is a 2-bit literal (0-3) identifying the byte position in Src.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001000}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001000}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
 
@@ -9886,12 +10186,12 @@ Rotate nibble left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target nibble.
 - N is a 3-bit literal (0-7) identifying the nibble position in Src.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{100010N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000100}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
 
@@ -9919,12 +10219,12 @@ Rotate word left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target word.
 - N is a 1-bit literal (0-1) identifying the word position in Src.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001010}{0NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001010}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+
 
 **Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
 
@@ -9951,11 +10251,11 @@ Rotate right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[0]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
@@ -9986,9 +10286,11 @@ Read Smart Pin without acknowledge
 - Src is a register or literal identifying the pin number (Src[5:0]) to read from.
 - WC is an optional effect to write the modal result to C.
 
-```{=latex}
-\simpleencoding{EEEE}{1010100}{C0I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+
 
 **Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
@@ -10022,11 +10324,11 @@ Shift arithmetic left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -10055,11 +10357,11 @@ Shift arithmetic right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
@@ -10088,9 +10390,11 @@ Scale
 - Src is a register, 9-bit literal, or 16-bit augmented literal to multiply with Dest.
 - WZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1010001}{0ZI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{Product = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Product = 0 | 2 |
+
 
 **Related:** [SCAS](#scas)
 
@@ -10120,9 +10424,11 @@ Scale signed
 - Src is a register, 9-bit literal, or signed 16-bit augmented literal to multiply with Dest.
 - WZ is an optional effect to update the Z flag.
 
-```{=latex}
-\simpleencoding{EEEE}{1010001}{1ZI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Result = 0 | 2 |
+
 
 **Related:** [SCA](#sca)
 
@@ -10148,12 +10454,12 @@ Set byte
 - Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.
 - N is a 2-bit literal (0-3) identifying the byte of Dest to modify.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1000110}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000110}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+
 
 *Dest and byte ID specified by prior ALTSB instruction.
 
@@ -10182,9 +10488,11 @@ Set colorspace converter frequency
 
 - Dest is a register or literal value (0-511) to set as CFRQ parameter.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111011}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111011 | --- | --- | --- | 2 |
+
 
 **Related:** [SETCI](#setci), [SETCMOD](#setcmod), [SETCQ](#setcq), [SETCY](#setcy)
 
@@ -10207,9 +10515,11 @@ Set colorspace converter CI
 
 - Dest is a register or literal value (0-511) to set as CI parameter.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111001}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111001 | --- | --- | --- | 2 |
+
 
 **Related:** [SETCFRQ](#setcfrq), [SETCMOD](#setcmod), [SETCQ](#setcq), [SETCY](#setcy)
 
@@ -10232,9 +10542,11 @@ Set colorspace converter mode
 
 - Dest is a register or literal value (0-511) to set as CMOD parameter.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111100 | --- | --- | --- | 2 |
+
 
 **Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCQ](#setcq), [SETCY](#setcy)
 
@@ -10257,9 +10569,11 @@ Set colorspace converter CQ
 
 - Dest is a register or literal value (0-511) to set as CQ parameter.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111010}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111010 | --- | --- | --- | 2 |
+
 
 **Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCMOD](#setcmod), [SETCY](#setcy)
 
@@ -10282,9 +10596,11 @@ Set colorspace converter CY
 
 - Dest is a register or literal value (0-511) to set as CY parameter.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111000 | --- | --- | --- | 2 |
+
 
 **Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCMOD](#setcmod), [SETCQ](#setcq)
 
@@ -10308,9 +10624,11 @@ Set destination field
 - Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field of Dest.
 
-```{=latex}
-\simpleencoding{EEEE}{1001101}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
 
@@ -10335,9 +10653,11 @@ Set DACs
 
 - Dest is a register or literal value (0-511) containing four 8-bit DAC values.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000011100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000011100 | --- | --- | --- | 2 |
+
 
 **Explanation:**
 
@@ -10358,9 +10678,11 @@ Set interrupt 1 source
 
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100101}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100101 | --- | --- | --- | 2 |
+
 
 **Related:** [SETINT2](#setint2), [SETINT3](#setint3), [NIXINT1](#nixint1), [TRGINT1](#trgint1), [RETI0](#reti0)
 
@@ -10383,9 +10705,11 @@ Set interrupt 2 source
 
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100110}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100110 | --- | --- | --- | 2 |
+
 
 **Related:** [SETINT1](#setint1), [SETINT3](#setint3), [NIXINT2](#nixint2), [TRGINT2](#trgint2), [RETI0](#reti0)
 
@@ -10408,9 +10732,11 @@ Set interrupt 3 source
 
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100111}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100111 | --- | --- | --- | 2 |
+
 
 **Related:** [SETINT1](#setint1), [SETINT2](#setint2), [NIXINT3](#nixint3), [TRGINT3](#trgint3), [RETI0](#reti0)
 
@@ -10433,9 +10759,11 @@ Set LUT sharing
 
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110111}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110111 | --- | --- | --- | 2 |
+
 
 **Related:** [RDLUT](#rdlut), [WRLUT](#wrlut)
 
@@ -10461,12 +10789,12 @@ Set nibble
 - Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
 - N is a 3-bit literal (0-7) identifying the nibble of Dest to modify.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{100000N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000000}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+
 
 *Dest and nibble ID specified by prior ALTSN instruction.
 
@@ -10496,9 +10824,11 @@ Set pin pattern
 - Dest is a register or immediate containing mask value.
 - Src is a register or immediate containing match value.
 
-```{=latex}
-\simpleencoding{EEEE}{1011111}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011111 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [POLLPAT](#pollpat), [WAITPAT](#waitpat)
 
@@ -10521,9 +10851,11 @@ Set pixel blend factor
 
 - Dest is a register or literal value (0-511) containing 8-bit blend factor in bits [7:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111101}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111101 | --- | --- | --- | 2 |
+
 
 **Related:** [SETPIX](#setpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
 
@@ -10546,9 +10878,11 @@ Set pixel mixer mode
 
 - Dest is a register or literal value (0-511) containing 6-bit mode in bits [5:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111110}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000111110 | --- | --- | --- | 2 |
+
 
 **Related:** [SETPIV](#setpiv), [MIXPIX](#mixpix)
 
@@ -10571,9 +10905,11 @@ Set Q register
 
 - Dest is a register or literal value (0-511) to load into Q.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000101000 | --- | --- | --- | 2 |
+
 
 **Related:** [SETQ2](#setq2), [RDLONG](#rdlong), [WRLONG](#wrlong)
 
@@ -10601,9 +10937,11 @@ Set Q for LUT transfers
 
 - Dest is a register or literal value (0-511) to load into Q.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101001}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000101001 | --- | --- | --- | 2 |
+
 
 **Related:** [SETQ](#setq), [RDLONG](#rdlong), [WRLONG](#wrlong), [RDLUT](#rdlut), [WRLUT](#wrlut)
 
@@ -10632,9 +10970,11 @@ Set result field
 - Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the Result field of Dest.
 
-```{=latex}
-\simpleencoding{EEEE}{1001101}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
 
@@ -10660,9 +11000,11 @@ Set source field
 - Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field of Dest.
 
-```{=latex}
-\simpleencoding{EEEE}{1001101}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+
 
 **Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
 
@@ -10687,9 +11029,11 @@ Set oscilloscope
 
 - Dest is a register or literal value (0-511) containing enable bit [6] and pin base [5:2].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{001110000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 001110000 | --- | --- | --- | 2 |
+
 
 **Explanation:**
 
@@ -10710,9 +11054,11 @@ Set selectable event 1
 
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100000 | --- | --- | --- | 2 |
+
 
 **Related:** [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE1](#pollse1), [WAITSE1](#waitse1)
 
@@ -10737,9 +11083,11 @@ Set selectable event 2
 
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100001}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100001 | --- | --- | --- | 2 |
+
 
 **Related:** [SETSE1](#setse1), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE2](#pollse2), [WAITSE2](#waitse2)
 
@@ -10762,9 +11110,11 @@ Set selectable event 3
 
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100010}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100010 | --- | --- | --- | 2 |
+
 
 **Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE4](#setse4), [POLLSE3](#pollse3), [WAITSE3](#waitse3)
 
@@ -10787,9 +11137,11 @@ Set selectable event 4
 
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100011}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000100011 | --- | --- | --- | 2 |
+
 
 **Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [POLLSE4](#pollse4), [WAITSE4](#waitse4)
 
@@ -10815,12 +11167,12 @@ Set word
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0] will be stored in the designated location.
 - N is a 1-bit literal (0-1) identifying the word of Dest to modify.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1001001}{0NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1001001}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+
 
 *Dest and word ID specified by prior ALTSW instruction.
 
@@ -10849,9 +11201,11 @@ Set streamer frequency
 
 - Dest is a register or literal value (0-511) containing frequency value.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000011101}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000011101 | --- | --- | --- | 2 |
+
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont)
 
@@ -10874,9 +11228,11 @@ Seuss forward
 
 - Dest is a register to transform.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100100}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | D | --- | --- | 2 |
+
 
 **Related:** [SEUSSR](#seussr)
 
@@ -10899,9 +11255,11 @@ Seuss reverse
 
 - Dest is a register to transform.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100101}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | D | --- | --- | 2 |
+
 
 **Related:** [SEUSSF](#seussf)
 
@@ -10926,11 +11284,11 @@ Shift left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -10959,11 +11317,11 @@ Shift right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0000010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
-```
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -10992,9 +11350,11 @@ Sign extend
 - Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to sign-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0111011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of result}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
+
 
 **Related:** [ZEROX](#zerox)
 
@@ -11021,9 +11381,11 @@ Skip instructions
 
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110001}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110001 | --- | --- | --- | 2 |
+
 
 **Related:** [SKIPF](#skipf)
 
@@ -11053,9 +11415,11 @@ Skip instructions fast
 
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110010}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110010 | --- | --- | --- | 2 |
+
 
 **Related:** [SKIP](#skip)
 
@@ -11078,9 +11442,11 @@ Split bits to bytes
 
 - Dest is a register to transform.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100000}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
+
 
 **Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
 
@@ -11103,9 +11469,11 @@ Split bits to words
 
 - Dest is a register to transform.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100010}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
+
 
 **Related:** [SPLITB](#splitb), [MERGEW](#mergew)
 
@@ -11126,9 +11494,11 @@ Disallow interrupts
 
 **Result:** All future interrupts are disallowed.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100001}{000100100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100001 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [ALLOWI](#allowi)
 
@@ -11159,9 +11529,11 @@ Subtract
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (D - S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
+
 
 **Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
 
@@ -11190,9 +11562,11 @@ Subtract reverse
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted by Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0010110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (S - D)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2 |
+
 
 **Related:** [SUB](#sub)
 
@@ -11217,9 +11591,11 @@ Subtract signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of (D - S)}{Result = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2 |
+
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
 
@@ -11244,9 +11620,11 @@ Subtract signed extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of D-(S+C)}{Z AND (Result = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2 |
+
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
 
@@ -11271,9 +11649,11 @@ Subtract extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0001101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (D - (S + C))}{Z AND (result = 0)}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2 |
+
 
 **Related:** [SUB](#sub), [SUBSX](#subsx)
 
@@ -11308,14 +11688,14 @@ Conditional sum {#sumnc} {#sumz} {#sumnz}
 - Src is a register, 9-bit literal, or 32-bit augmented literal.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0011100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0011101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrowcont{EEEE}{0011110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\encodingrow{EEEE}{0011111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+
 
 **Explanation:**
 
@@ -11346,12 +11726,12 @@ Test
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal to AND with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0111110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{---}{Parity of D}{D = 0}{2}
-\encodingrow{EEEE}{0111110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& S)}{(D \& S) = 0}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
+| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
+
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -11393,14 +11773,14 @@ Test bit
 - ORC/ORZ ORs bit state with C or Z flag.
 - XORC/XORZ XORs bit state with C or Z flag.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0100000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{D[S[4:0]]}{D[S[4:0]]}{2}
-\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND D[S[4:0]]}{C/Z AND D[S[4:0]]}{2}
-\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR D[S[4:0]]}{C/Z OR D[S[4:0]]}{2}
-\encodingrow{EEEE}{0100110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR D[S[4:0]]}{C/Z XOR D[S[4:0]]}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | 2 |
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | 2 |
+
 
 **Related:** [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -11438,14 +11818,14 @@ Test bit negated
 - ORC/ORZ ORs inverted bit state with C or Z flag.
 - XORC/XORZ XORs inverted bit state with C or Z flag.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0100001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{!D[S[4:0]]}{!D[S[4:0]]}{2}
-\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND !D[S[4:0]]}{C/Z AND !D[S[4:0]]}{2}
-\encodingrowcont{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR !D[S[4:0]]}{C/Z OR !D[S[4:0]]}{2}
-\encodingrow{EEEE}{0100111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR !D[S[4:0]]}{C/Z XOR !D[S[4:0]]}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | 2 |
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | 2 |
+
 
 **Related:** [TESTB](#testb), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -11472,9 +11852,11 @@ Test not
 - Src is a register, 9-bit literal, or 32-bit augmented literal to invert and AND with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-```{=latex}
-\simpleencoding{EEEE}{0111111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& !S)}{(D \& !S) = 0}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
+
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -11515,18 +11897,18 @@ Test pin / Test pin negated {#testpn}
 - ORC/ORZ ORs pin state with C or Z flag.
 - XORC/XORZ XORs pin state with C or Z flag.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000000}{---}{IN}{IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000001}{---}{!IN}{!IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000010}{---}{C/Z AND IN}{C/Z AND IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000011}{---}{C/Z AND !IN}{C/Z AND !IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000100}{---}{C/Z OR IN}{C/Z OR IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000101}{---}{C/Z OR !IN}{C/Z OR !IN}{2}
-\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000110}{---}{C/Z XOR IN}{C/Z XOR IN}{2}
-\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000111}{---}{C/Z XOR !IN}{C/Z XOR !IN}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | --- | C/Z AND IN | C/Z AND IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | --- | C/Z AND !IN | C/Z AND !IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | --- | C/Z OR IN | C/Z OR IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | --- | C/Z OR !IN | C/Z OR !IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | --- | C/Z XOR IN | C/Z XOR IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | --- | C/Z XOR !IN | C/Z XOR !IN | 2 |
+
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
@@ -11560,9 +11942,11 @@ Test and jump if full
 - Dest is a register whose value is tested for full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-```{=latex}
-\simpleencoding{EEEE}{1011101}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+
 
 **Related:** [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -11590,9 +11974,11 @@ Test and jump if not full
 - Dest is a register whose value is tested for not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-```{=latex}
-\simpleencoding{EEEE}{1011101}{01I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+
 
 **Related:** [TJF](#tjf), [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns)
 
@@ -11620,9 +12006,11 @@ Test and jump if not signed
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-```{=latex}
-\simpleencoding{EEEE}{1011101}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+
 
 **Related:** [TJS](#tjs), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -11654,14 +12042,16 @@ Test and jump if zero / not zero {#tjnz}
 - Dest is a register whose value is tested (unchanged).
 - Src is the jump address: use # for relative, omit for absolute.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1011100}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
-\encodingrow{EEEE}{1011100}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
-\end{encodingtable}
 
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
+
+```{=latex}
 *PC is written only when the jump condition is met.
 ```
+
 
 **Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -11694,9 +12084,11 @@ Test and jump if signed
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-```{=latex}
-\simpleencoding{EEEE}{1011101}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+
 
 **Related:** [TJNS](#tjns), [TJF](#tjf), [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -11728,9 +12120,11 @@ Test and jump if overflow
 - Dest is a register whose value is tested for overflow.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+
 
 **Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
 
@@ -11761,9 +12155,11 @@ Trigger interrupt 1
 
 **Result:** The INT1 interrupt handler is triggered regardless of STALLI mode.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100010}{000100100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [TRGINT2](#trgint2), [TRGINT3](#trgint3), [SETINT1](#setint1), [NIXINT1](#nixint1), [RETI0](#reti0)
 
@@ -11784,9 +12180,11 @@ Trigger interrupt 2
 
 **Result:** The INT2 interrupt handler is triggered regardless of STALLI mode.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100011}{000100100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [TRGINT1](#trgint1), [TRGINT3](#trgint3), [SETINT2](#setint2), [NIXINT2](#nixint2), [RETI0](#reti0)
 
@@ -11807,9 +12205,11 @@ Trigger interrupt 3
 
 **Result:** The INT3 interrupt handler is triggered regardless of STALLI mode.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100100}{000100100}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | 000100100 | 000100100 | --- | --- | --- | 2 |
+
 
 **Related:** [TRGINT1](#trgint1), [TRGINT2](#trgint2), [SETINT3](#setint3), [NIXINT3](#nixint3), [RETI0](#reti0)
 
@@ -11837,9 +12237,11 @@ Wait for attention
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011110}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
 
@@ -11872,13 +12274,13 @@ Wait for counter event {#waitct2} {#waitct3}
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000010001}{000100100}{---}{Timeout}{Timeout}{2+}
-\encodingrowcont{EEEE}{1101011}{CZ0}{000010010}{000100100}{---}{Timeout}{Timeout}{2+}
-\encodingrow{EEEE}{1101011}{CZ0}{000010011}{000100100}{---}{Timeout}{Timeout}{2+}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010001 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010010 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010011 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
@@ -11905,9 +12307,11 @@ Wait for FIFO block wrap
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011001}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
 
@@ -11932,9 +12336,11 @@ Wait for interrupt
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000010000}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
 
@@ -11959,9 +12365,11 @@ Wait for pattern
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011000}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
@@ -11991,9 +12399,11 @@ Wait for selectable event 1
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000010100}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010100 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE1](#setse1), [POLLSE1](#pollse1)
 
@@ -12016,9 +12426,11 @@ Wait for selectable event 2
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000010101}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010101 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITSE1](#waitse1), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE2](#setse2), [POLLSE2](#pollse2)
 
@@ -12041,9 +12453,11 @@ Wait for selectable event 3
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000010110}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010110 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE4](#waitse4), [SETSE3](#setse3), [POLLSE3](#pollse3)
 
@@ -12066,9 +12480,11 @@ Wait for selectable event 4
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000010111}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000010111 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [SETSE4](#setse4), [POLLSE4](#pollse4)
 
@@ -12092,9 +12508,11 @@ Wait cycles
 - Dest is the number of cycles minus 1 to wait (0-511 for immediate).
 - WC, WZ, or WCZ are optional; always set to 0 after completion.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{000011111}{---}{0}{0}{2 + D}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | --- | 0 | 0 | 2 + D |
+
 
 **Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
 
@@ -12123,9 +12541,11 @@ Wait for streamer finished
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011011}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
@@ -12150,9 +12570,11 @@ Wait for streamer empty
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011010}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
@@ -12177,9 +12599,11 @@ Wait for streamer LUT rollover
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011101}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
 
@@ -12204,9 +12628,11 @@ Wait for streamer NCO rollover
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZ0}{000011100}{000100100}{---}{Timeout}{Timeout}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
+
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
 
@@ -12231,9 +12657,11 @@ Write FIFO byte
 
 - Dest is the byte value to write (bits 7:0 used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010101}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000010101 | --- | --- | --- | 2 |
+
 
 **Related:** [WFWORD](#wfword), [WFLONG](#wflong), [WRFAST](#wrfast)
 
@@ -12258,9 +12686,11 @@ Write FIFO long
 
 - Dest is the long value to write (all 32 bits used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010111}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000010111 | --- | --- | --- | 2 |
+
 
 **Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WRFAST](#wrfast)
 
@@ -12285,9 +12715,11 @@ Write FIFO word
 
 - Dest is the word value to write (bits 15:0 used).
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010110}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000010110 | --- | --- | --- | 2 |
+
 
 **Related:** [WFBYTE](#wfbyte), [WFLONG](#wflong), [WRFAST](#wrfast)
 
@@ -12313,9 +12745,11 @@ Write masked long
 - Dest is the long value with bytes to write (non-zero bytes only).
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
-```{=latex}
-\simpleencoding{EEEE}{1010011}{11I}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1010011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+
 
 **Related:** [WRLONG](#wrlong), [WRBYTE](#wrbyte), [WRWORD](#wrword)
 
@@ -12343,9 +12777,11 @@ Write byte
 - Dest is the byte value to write (bits 7:0 used).
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
-```{=latex}
-\simpleencoding{EEEE}{1100010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+
 
 **Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
 
@@ -12384,14 +12820,14 @@ Write flag to register {#wrnc} {#wrz} {#wrnz}
 
 - Dest is the destination register. Upper 31 bits are cleared to zero.
 
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101100}{D}{---}{---}{2}
-\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101101}{D}{---}{---}{2}
-\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101110}{D}{---}{---}{2}
-\encodingrow{EEEE}{1101011}{000}{DDDDDDDDD}{001101111}{D}{---}{---}{2}
-\end{encodingtable}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101110 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101111 | D | --- | --- | 2 |
+
 
 **Explanation:**
 
@@ -12415,9 +12851,11 @@ Write FIFO setup
 - Dest contains configuration: bit 31 = nowait, bits 13:0 = block size.
 - Src contains Hub RAM start address (bits 19:0).
 
-```{=latex}
-\simpleencoding{EEEE}{1100100}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 3}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100100 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 3 |
+
 
 **Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](#rdfast)
 
@@ -12450,9 +12888,11 @@ Write long
 - Dest is the long value to write (all 32 bits used).
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
-```{=latex}
-\simpleencoding{EEEE}{1100011}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+
 
 **Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
 
@@ -12485,9 +12925,11 @@ Write LUT
 - Dest is the value to write.
 - Src/P is the LUT address or pointer (PTRA/PTRB).
 
-```{=latex}
-\simpleencoding{EEEE}{1100001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [RDLUT](#rdlut), [WRLONG](#wrlong), [SETQ](#setq)
 
@@ -12519,9 +12961,11 @@ Write pin mode
 - Dest is the smart pin mode configuration.
 - Src is the pin number or pin range.
 
-```{=latex}
-\simpleencoding{EEEE}{1100000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin), [AKPIN](#akpin)
 
@@ -12563,9 +13007,11 @@ Write word
 - Dest is the word value to write (bits 15:0 used).
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
-```{=latex}
-\simpleencoding{EEEE}{1100010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+
 
 **Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
 
@@ -12591,9 +13037,11 @@ Write pin X parameter
 - Dest is the X parameter value.
 - Src is the pin number or pin range.
 
-```{=latex}
-\simpleencoding{EEEE}{1100000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
@@ -12624,9 +13072,11 @@ Write pin Y parameter
 - Dest is the Y parameter value.
 - Src is the pin number or pin range.
 
-```{=latex}
-\simpleencoding{EEEE}{1100001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](#rdpin)
 
@@ -12666,9 +13116,11 @@ Execute continue
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-```{=latex}
-\simpleencoding{EEEE}{1100110}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
+
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
@@ -12696,9 +13148,11 @@ Execute initialize
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-```{=latex}
-\simpleencoding{EEEE}{1100101}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
+
 
 **Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
 
@@ -12742,9 +13196,11 @@ Exclusive or
 - WZ sets Z if the result equals zero.
 - WCZ sets both C and Z.
 
-```{=latex}
-\simpleencoding{EEEE}{0101011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Zero}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
+
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
 
@@ -12777,9 +13233,11 @@ Xoroshiro 32
 
 - Dest is the register containing the 32-bit PRNG state.
 
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101000}{D}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
+
 
 **Related:** [GETRND](#getrnd), [SETQ](#setq)
 
@@ -12820,9 +13278,11 @@ Execute stop
 
 - Takes no operands.
 
-```{=latex}
-\simpleencoding{EEEE}{1100101}{011}{000000000}{000000000}{---}{---}{---}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
+
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
 
@@ -12855,9 +13315,11 @@ Execute zero
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-```{=latex}
-\simpleencoding{EEEE}{1100101}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
+
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
@@ -12895,9 +13357,11 @@ Zero extend
 - WZ sets Z if the result equals zero.
 - WCZ sets both C and Z.
 
-```{=latex}
-\simpleencoding{EEEE}{0111010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB}{Zero}{2}
-```
+
+| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
+
 
 **Related:** [SIGNX](#signx)
 
