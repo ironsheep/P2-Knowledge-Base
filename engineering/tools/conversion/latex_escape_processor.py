@@ -123,7 +123,8 @@ def process_latex_escaping(input_file, output_file):
             line = line.replace(match.group(0), placeholder, 1)
         
         # Find and protect other LaTeX commands
-        for pattern in [r'\\textit\{([^}]*)\}', r'\\texttt\{([^}]*)\}', r'\\emph\{([^}]*)\}', r'\\underline\{([^}]*)\}']:
+        for pattern in [r'\\textit\{([^}]*)\}', r'\\texttt\{([^}]*)\}', r'\\emph\{([^}]*)\}', r'\\underline\{([^}]*)\}',
+                        r'\\textsuperscript\{([^}]*)\}', r'\\textsubscript\{([^}]*)\}']:
             while True:
                 match = re.search(pattern, line)
                 if not match:
