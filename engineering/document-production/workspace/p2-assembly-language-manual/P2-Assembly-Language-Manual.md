@@ -839,7 +839,27 @@ Augmentation is needed when:
 6. **Read Related** instructions for alternatives and family members
 7. **Study Explanation** for complete behavioral description
 
-### 2.8.2 Example: Understanding ADD
+### 2.8.2 Visual Anchors: Color Bars
+
+Each entry in Part II has a colored bar on the left edge of its header block. These color bars serve as visual anchors, making it easy to locate entry boundaries when scanning through pages.
+
+The colors indicate entry type:
+
+| Color | Entry Type | Description |
+|-------|------------|-------------|
+| **Red** | Instruction | PASM2 machine instructions (the majority of entries) |
+| **Amber** | Directive | Assembler directives like ORG, BYTE, LONG |
+| **Violet** | Constant | Pre-defined constants like smart pin mode values |
+
+The color bar spans the three-line identity block at the top of each entry:
+
+1. **Mnemonic** --- The instruction, directive, or constant name
+2. **Expansion** --- What the mnemonic stands for (e.g., "Add Signed, Extended")
+3. **Category** --- The functional category with a brief description
+
+When flipping through Part II, these color bars help you quickly identify entry boundaries and distinguish between instructions, directives, and constants.
+
+### 2.8.3 Example: Understanding ADD
 
 Consider the ADD instruction entry:
 
@@ -870,7 +890,7 @@ From this entry:
 - **C Flag:** Set if addition overflows (unsigned carry)
 - **Z Flag:** Set if result is zero
 
-### 2.8.3 Using Categories for Discovery
+### 2.8.4 Using Categories for Discovery
 
 Instructions are grouped by category in Appendix B. When looking for "an instruction that does X," consult the categorical index:
 
@@ -879,7 +899,7 @@ Instructions are grouped by category in Appendix B. When looking for "an instruc
 - **Branch/Jump Instructions:** JMP, CALL, DJNZ, etc.
 - **Hub Memory Instructions:** RDLONG, WRLONG, etc.
 
-### 2.8.4 Using Related Instructions
+### 2.8.5 Using Related Instructions
 
 The Related line shows instructions in the same family or with similar purpose:
 
@@ -1565,11 +1585,11 @@ The P2 includes a hardware FIFO (First In, First Out) buffer that provides the h
 
 **FIFO Architecture:**
 
-Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO holds 16 longs (64 bytes) of data, providing substantial buffering to smooth out hub access timing. When reading, the FIFO stays filled by automatically fetching ahead; when writing, the FIFO drains to hub memory during available hub windows.
+Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO contains (cogs+11) stages—with all 8 COGs active, this provides 19 stages of buffering. When in read mode, the FIFO loads continuously whenever fewer than (cogs+7) stages are filled, after which up to 5 more longs may stream in, potentially filling all stages. These metrics ensure the FIFO never underflows under any reading scenario.
 
 **Setting Up the Read FIFO:**
 
-RDFAST configures the FIFO for reading from hub memory. The instruction takes two parameters: a block count (or 0 for continuous operation) and the starting hub address:
+RDFAST configures the FIFO for reading from hub memory. The D operand provides a block count (number of 64-byte blocks before wrapping), and the S operand provides the starting hub address:
 
 ```pasm
         rdfast  #0, ptr                 ' Start continuous read FIFO
@@ -1580,6 +1600,17 @@ loop
 ```
 
 The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
+
+**Wait Mode vs. No-Wait Mode:**
+
+RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
+
+| D[31] | Behavior |
+|-------|----------|
+| 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
+| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
+
+The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
 
 **Setting Up the Write FIFO:**
 
@@ -1595,15 +1626,43 @@ loop
 
 The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
 
+**Important:** If a COG has been writing to hub via WRFAST and wants to immediately COGSTOP itself, execute `WAITX #20` first to allow time for any lingering FIFO data to be written to hub memory.
+
 **Circular Buffer Mode:**
 
-The FIFO supports circular buffer operation for continuous streaming. When configured with a block count, the FIFO wraps back to the starting address after transferring the specified number of longs:
+The FIFO supports circular buffer operation for continuous streaming. When configured with a non-zero block count, the FIFO wraps back to the starting address after transferring the specified number of 64-byte blocks:
 
 ```pasm
-        rdfast  #256, audio_buffer      ' Read 256 longs, then wrap to start
+        rdfast  #16, audio_buffer       ' Read 16 blocks (1KB), then wrap
 ```
 
-This creates a 1KB circular buffer. The program can continuously read from the FIFO while another process (perhaps on a different COG) refills the buffer behind the read pointer. Circular buffers enable double-buffering and continuous streaming without explicit pointer management.
+For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count when you don't want wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
+
+**Dynamic Buffer Management with FBLOCK:**
+
+The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. It sets a new start address and block count that take effect when the current blocks are fully read or written:
+
+```pasm
+        rdfast  #16, buffer_a           ' Start reading from buffer A
+        ' ... reading proceeds ...
+        fblock  #16, buffer_b           ' Queue buffer B for when A completes
+        ' ... FIFO seamlessly transitions to buffer B on wrap
+```
+
+FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity enables dynamic, seamless streaming between hub RAM and pins/DACs—essential for continuous audio/video output where buffer switches must be glitch-free.
+
+**Variable-Length Data: RFVAR and RFVARS:**
+
+For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. The encoding uses the MSB of each byte to indicate whether more bytes follow:
+
+| First Byte | Additional Bytes | RFVAR Returns | RFVARS Returns |
+|------------|------------------|---------------|----------------|
+| %0xxxxxxx | none | 7-bit value, zero-extended | 7-bit value, sign-extended |
+| %1xxxxxxx | 1 more (%0xxxxxxx) | 14-bit value, zero-extended | 14-bit value, sign-extended |
+| %1xxxxxxx | 2 more | 21-bit value, zero-extended | 21-bit value, sign-extended |
+| %1xxxxxxx | 3 more | 28-bit value, zero-extended | 28-bit value, sign-extended |
+
+This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values.
 
 **FIFO Events:**
 
@@ -1612,6 +1671,17 @@ The FIFO generates events that programs can monitor for buffer management:
 - **EVENT_FBW** (FIFO Block Wrap) signals when the FIFO wraps around in circular buffer mode. Programs use this event to know when to refill the next section of a circular buffer or to synchronize with buffer boundaries.
 
 Programs can wait for this event using WAITSE or poll it using POLLSE after configuring a selectable event source. This enables efficient ping-pong buffering where one COG fills buffers while another consumes them.
+
+**Hub Execution Restriction:**
+
+The FIFO cannot be used while the COG is executing from hub RAM. During hub execution mode, the FIFO hardware is dedicated to spooling instructions, so these instructions cannot be used:
+
+- RDFAST / WRFAST / FBLOCK
+- RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS
+- WFBYTE / WFWORD / WFLONG
+- XINIT / XZERO / XCONT (when streamer mode engages the FIFO)
+
+To use FIFO operations, ensure your code executes from COG or LUT RAM.
 
 **FIFO and the Streamer:**
 
@@ -2404,45 +2474,122 @@ The P2 includes a hardware bytecode execution engine called XBYTE that accelerat
 
 XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
 
-The execution cycle proceeds through eight clock phases: fetch bytecode from FIFO, write bytecode to the PA register, read routine address from LUT, begin EXECF dispatch, write FIFO pointer to PB register, flush pipeline, reload pipeline, and execute the first instruction of the bytecode routine. This overlapped operation achieves the 6-cycle dispatch overhead.
+XBYTE is like a phantom instruction that executes on a hardware stack return (RET/\_RET\_) to address $1FF. Such a return does not pop the stack, so each additional RET/\_RET\_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
 
-When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves.
+The execution cycle proceeds through eight clock phases:
 
-### 5.7.2 Configuration Options
+| Clock | Phase | Activity | Description |
+|-------|-------|----------|-------------|
+| 1 | go | RFBYTE bytecode, SKIPF #0 | Fetch bytecode from FIFO, cancel any prior skip pattern |
+| 2 | get | MOV PA,bytecode, RDLUT | Write bytecode to PA ($1F6), start LUT read |
+| 3 | go | RDLUT (data → D) | Complete LUT read, get routine address and skip pattern |
+| 4 | get | EXECF D (begin) | Start EXECF dispatch |
+| 5 | go | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB ($1F7), optionally set C/Z, branch |
+| 6 | get | flush pipeline | Pipeline flush for branch |
+| 7 | go | reload pipeline | Pipeline reload |
+| 8 | get | first instruction | First instruction of bytecode routine executes |
 
-XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements:
+When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a \_RET\_ prefix, making the total XBYTE loop take only 8 clocks.
 
-| Mode | Bytecodes | LUT Usage | Index Calculation |
-|------|-----------|-----------|-------------------|
-| Full | 256 | 256 longs | bytecode[7:0] |
-| Half | 128 | 128 longs | bytecode[6:0] |
-| Quarter | 64 | 64 longs | bytecode[5:0] |
-| Eighth | 32 | 32 longs | bytecode[4:0] |
-| Sixteenth | 16 | 16 longs | bytecode[3:0] |
+### 5.7.2 LUT Table Format
 
-The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code. A compressed mode also exists that provides 16 primary bytecodes with full dispatch plus 240 extended bytecodes using a secondary lookup, balancing bytecode variety against LUT consumption.
+The bytecode translation table in LUT memory consists of long values that EXECF uses for dispatch. Each 32-bit LUT entry contains two fields:
 
-### 5.7.3 Starting XBYTE
+- **Bits [9:0]**: Jump address in COG/LUT RAM ($000-$3FF)
+- **Bits [31:10]**: SKIPF pattern (22 bits) applied after the jump
 
-XBYTE mode begins through a specific instruction sequence. The SETQ instruction configures the bytecode mode and LUT base address. A RET instruction with $1FF on the hardware stack triggers XBYTE activation:
+When XBYTE dispatches to a bytecode routine, EXECF simultaneously jumps to the routine address and applies the skip pattern. This allows compact bytecode routines where common instruction sequences are shared and skip patterns select which instructions execute.
+
+### 5.7.3 Configuration Options
+
+XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements. The SETQ/SETQ2 D value controls the mode:
+
+| Bits | SETQ D Pattern | LUT Base | Index Calculation | Bytecodes |
+|------|----------------|----------|-------------------|-----------|
+| 8 | %A0000000F | %A00000000 | I = bytecode[7:0] | 256 |
+| 7 | %AAxx0010F | %AA0000000 | I = bytecode[6:0] | 128 |
+| 7 | %AAxx0011F | %AA0000000 | I = bytecode[7:1] | 128 |
+| 6 | %AAAx1010F | %AAA000000 | I = bytecode[5:0] | 64 |
+| 6 | %AAAx1011F | %AAA000000 | I = bytecode[7:2] | 64 |
+| 5 | %AAAAx100F | %AAAA00000 | I = bytecode[4:0] | 32 |
+| 5 | %AAAAx101F | %AAAA00000 | I = bytecode[7:3] | 32 |
+| 4 | %AAAAA110F | %AAAAA0000 | I = bytecode[3:0] | 16 |
+| 4 | %AAAAA111F | %AAAAA0000 | I = bytecode[7:4] | 16 |
+
+The A bits specify the LUT base address where the dispatch table begins. The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code.
+
+A compressed mode (%ABBBB00xF where BBBB > 0) provides efficient handling of bytecode families:
+
+- If bytecode[7:4] < BBBB: Use full bytecode as index (individual handlers)
+- If bytecode[7:4] >= BBBB: Use bytecode[7:4] - BBBB as index (shared handlers)
+
+This allows 16 primary bytecodes with full dispatch plus up to 240 extended bytecodes using shared handlers, balancing bytecode variety against LUT consumption. When bytecodes share a handler, the full bytecode value in PA differentiates behavior within the routine.
+
+### 5.7.4 Flag Control
+
+The F bit (bit 0) of the SETQ/SETQ2 D value controls whether XBYTE writes the bytecode's index bits to the C and Z flags:
+
+| F Bit | Behavior |
+|-------|----------|
+| 0 | Do not affect flags on XBYTE dispatch |
+| 1 | Write bytecode index bit 1 to C, bit 0 to Z |
+
+This flag option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families. For example, four related bytecodes can share a single routine that uses conditional execution based on C and Z to differentiate behavior—useful for cases where a SKIPF pattern alone would be insufficient.
+
+### 5.7.5 Starting XBYTE
+
+XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute \_RET\_ SETQ to configure the mode and trigger XBYTE:
 
 ```pasm
-        call    #xbyte_start            ' Push $1FF to stack
-        ' ... XBYTE runs until stopped ...
+                                        ' Setup before starting XBYTE:
+        setq2   #256-1                  ' Load 256 longs into LUT
+        rdlong  $100, #bytetable        ' Bytecode table at LUT $100
 
-xbyte_start
-_RET_   setq    #%00000001              ' Configure 256 bytecodes, set flags
+        rdfast  #0, #bytecodes          ' Init FIFO at bytecode stream
+
+        push    #$1FF                   ' Push $1FF for XBYTE returns
+_RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
 ```
 
-The configuration value in SETQ specifies the LUT base address, bytecode count, and whether bytecode bits should set the C and Z flags. The flags option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families.
+The \_RET\_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or \_RET\_, returning to $1FF to fetch the next bytecode.
 
-### 5.7.4 XBYTE Applications
+To alter the XBYTE mode for all subsequent bytecodes, execute another \_RET\_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use \_RET\_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
+
+### 5.7.6 Bytecode Routine Requirements
+
+Bytecode routines must follow these constraints:
+
+- **Location**: Must reside in COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
+- **Exit**: Must end with RET or \_RET\_ to return control to XBYTE
+- **Stack**: Hardware stack must not overflow (8 levels maximum)
+
+The PA register ($1F6) contains the current bytecode value, available as an immediate operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode using RFBYTE, RFWORD, or RFLONG.
+
+For maximum performance, use the \_RET\_ prefix on the final instruction:
+
+```pasm
+toggle_pin0
+_RET_   drvnot  #0                      ' Toggle pin 0, return to XBYTE (2 clocks)
+```
+
+This executes in just 2 clocks, making the complete XBYTE cycle only 8 clocks total.
+
+### 5.7.7 XBYTE Applications
 
 XBYTE enables efficient implementation of virtual machines and interpreters. Java bytecode interpreters, Forth threaded code systems, BASIC interpreters, and custom scripting languages all benefit from the reduced dispatch overhead. At 160 MHz, XBYTE can dispatch over 26 million bytecodes per second (considering only dispatch overhead), making interpreted languages practical for real-time applications.
 
-Bytecode routines reside in COG or LUT RAM and must end with RET or _RET_ to return control to the XBYTE engine. The PA register ($1F6) contains the current bytecode value, available as an operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode.
+| Dispatch Method | Overhead | Relative Speed |
+|-----------------|----------|----------------|
+| Software dispatch | 20-40 clocks | 1× (baseline) |
+| XBYTE dispatch | 6 clocks | 3-7× faster |
 
-Complete XBYTE programming details, including LUT table construction, skip pattern usage, and advanced dispatch techniques, appear in specialized virtual machine documentation.
+XBYTE is particularly effective for:
+
+- **Virtual machines**: Java, Python, or custom bytecode interpreters
+- **Threaded interpreters**: Forth direct/indirect threaded code
+- **Command processors**: Parsing and executing token streams
+- **Compression**: Executing compressed instruction sequences
+- **Protocol handling**: Processing token-based communication protocols
 
 
 ```{=latex}
@@ -2471,10 +2618,11 @@ This section contains all PASM2 instructions beginning with the letter A.
 
 
 
+::: instrheader
 ## ABS {#abs}
-
-Absolute
-[Math and Logic](#math-and-logic) - Get the absolute value of a number.
+Absolute Value
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
@@ -2494,7 +2642,7 @@ Absolute
 | EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
 
 
-**Related:** [NEG](#neg)
+**Related:** [NEG](instructions-n.md#neg)
 
 **Explanation:**
 
@@ -2508,10 +2656,11 @@ Literal Src values are zero-extended, so ABS is best used with register Src (or 
 
 
 
+::: instrheader
 ## ADD {#add}
-
-Add
-[Math and Logic](#math-and-logic) - Add two unsigned values.
+Add Unsigned
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -2529,7 +2678,7 @@ Add
 | EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
 
 
-**Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
+**Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](instructions-s.md#sub)
 
 **Explanation:**
 
@@ -2550,10 +2699,11 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 
 
 
+::: instrheader
 ## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
-
-Add and set counter event trigger (1, 2, or 3)
-[Event](#event) - Set CTn counter event trigger time.
+Add and Set Counter Event Trigger
+Category: [Event](instruction-categories.md#event)
+:::
 
 **ADDCT1**  *Dest, {#}Src*
 **ADDCT2**  *Dest, {#}Src*
@@ -2574,7 +2724,7 @@ Add and set counter event trigger (1, 2, or 3)
 | EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
+**Related:** [POLLCT1/2/3](instructions-p.md#pollct1), [WAITCT1/2/3](instructions-w.md#waitct1), [JCT1/2/3](instructions-j.md#jct1), [JNCT1/2/3](instructions-j.md#jnct1)
 
 **Explanation:**
 
@@ -2584,10 +2734,11 @@ The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowi
 
 
 
+::: instrheader
 ## ADDPIX {#addpix}
-
-Add pixels
-[Pixel Mixer](#pixel-mixer) - Add RGB colors with full saturation.
+Add Pixels
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **ADDPIX**  *Dest, {#}Src*
 
@@ -2604,7 +2755,7 @@ Add pixels
 | EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [SUBPIX](#subpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
+**Related:** [MULPIX](instructions-m.md#mulpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](instructions-m.md#mixpix)
 
 **Explanation:**
 
@@ -2616,10 +2767,11 @@ The instruction processes all three color channels (and alpha if present) in par
 
 
 
+::: instrheader
 ## ADDS {#adds}
-
-Add signed
-[Math and Logic](#math-and-logic) - Add two signed values.
+Add Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -2637,7 +2789,7 @@ Add signed
 | EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
 
 
-**Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
+**Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](instructions-s.md#subs)
 
 **Explanation:**
 
@@ -2653,10 +2805,11 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 
 
 
+::: instrheader
 ## ADDSX {#addsx}
-
-Add signed, extended
-[Math and Logic](#math-and-logic) - Add two signed extended values.
+Add Signed Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -2674,7 +2827,7 @@ Add signed, extended
 | EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
 
 
-**Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
+**Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](instructions-s.md#subsx)
 
 **Explanation:**
 
@@ -2688,10 +2841,11 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 
 
 
+::: instrheader
 ## ADDX {#addx}
-
-Add extended
-[Math and Logic](#math-and-logic) - Add two unsigned extended values.
+Add Unsigned Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -2709,7 +2863,7 @@ Add extended
 | EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
 
 
-**Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
+**Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](instructions-s.md#subx)
 
 **Explanation:**
 
@@ -2723,10 +2877,11 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 
 
 
+::: instrheader
 ## AKPIN {#akpin}
-
-Acknowledge pin
-[Smart Pin](#smart-pin) - Acknowledge smart pin(s).
+Acknowledge Smart Pin
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **AKPIN**  *{#}Src*
 
@@ -2742,7 +2897,7 @@ Acknowledge pin
 | EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
 
 
-**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
+**Related:** [WRPIN](instructions-w.md#wrpin), [WXPIN](instructions-w.md#wxpin), [WYPIN](instructions-w.md#wypin), [RDPIN](instructions-r.md#rdpin)
 
 **Explanation:**
 
@@ -2758,14 +2913,15 @@ The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the 
 
 
 
+::: instrheader
 ## ALLOWI {#allowi}
+Allow Interrupts
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
-Allow interrupts
-[Interrupt](#interrupt) - Allow interrupts.
+**ALLOWI**
 
-```
-ALLOWI
-```
+---
 
 **Result:** Any stalled and future interrupts are allowed.
 
@@ -2775,7 +2931,7 @@ ALLOWI
 | EEEE | 1101011 | 000 | 000100000 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [STALLI](#stalli)
+**Related:** [STALLI](instructions-s.md#stalli)
 
 **Explanation:**
 
@@ -2785,10 +2941,11 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 
 
 
+::: instrheader
 ## ALTB {#altb}
-
-Alter bit
-[Register Indirection](#register-indirection) - Alter subsequent BITxxx instruction.
+Alter Bit
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTB**  *Dest, {#}Src*
 **ALTB**  *Dest*
@@ -2831,10 +2988,11 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 
 
 
+::: instrheader
 ## ALTD {#altd}
-
-Alter destination
-[Register Indirection](#register-indirection) - Alter D field of next instruction.
+Alter Destination
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTD**  *Dest, {#}Src*
 **ALTD**  *Dest*
@@ -2871,10 +3029,11 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 
 
 
+::: instrheader
 ## ALTGB {#altgb}
-
-Alter get byte
-[Register Indirection](#register-indirection) - Alter subsequent GETBYTE / ROLBYTE instruction.
+Alter Get Byte
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGB**  *Dest, {#}Src*
 **ALTGB**  *Dest*
@@ -2897,7 +3056,7 @@ Alter get byte
 ```
 
 
-**Related:** [ALTGN](#altgn), [ALTGW](#altgw), [ALTSB](#altsb), [GETBYTE](#getbyte), [ROLBYTE](#rolbyte)
+**Related:** [ALTGN](#altgn), [ALTGW](#altgw), [ALTSB](#altsb), [GETBYTE](instructions-g.md#getbyte), [ROLBYTE](instructions-r.md#rolbyte)
 
 **Explanation:**
 
@@ -2915,10 +3074,11 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTGN {#altgn}
-
-Alter get nibble
-[Register Indirection](#register-indirection) - Alter subsequent GETNIB / ROLNIB instruction.
+Alter Get Nibble
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGN**  *Dest, {#}Src*
 **ALTGN**  *Dest*
@@ -2941,7 +3101,7 @@ Alter get nibble
 ```
 
 
-**Related:** [ALTGB](#altgb), [ALTGW](#altgw), [ALTSN](#altsn), [GETNIB](#getnib), [ROLNIB](#rolnib)
+**Related:** [ALTGB](#altgb), [ALTGW](#altgw), [ALTSN](#altsn), [GETNIB](instructions-g.md#getnib), [ROLNIB](instructions-r.md#rolnib)
 
 **Explanation:**
 
@@ -2959,10 +3119,11 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTGW {#altgw}
-
-Alter get word
-[Register Indirection](#register-indirection) - Alter subsequent GETWORD / ROLWORD instruction.
+Alter Get Word
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTGW**  *Dest, {#}Src*
 **ALTGW**  *Dest*
@@ -2985,7 +3146,7 @@ Alter get word
 ```
 
 
-**Related:** [ALTGB](#altgb), [ALTGN](#altgn), [ALTSW](#altsw), [GETWORD](#getword), [ROLWORD](#rolword)
+**Related:** [ALTGB](#altgb), [ALTGN](#altgn), [ALTSW](#altsw), [GETWORD](instructions-g.md#getword), [ROLWORD](instructions-r.md#rolword)
 
 **Explanation:**
 
@@ -3003,10 +3164,11 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 
 
 
+::: instrheader
 ## ALTI {#alti}
-
-Alter instruction
-[Register Indirection](#register-indirection) - Substitute next instruction's field values from template, per configuration.
+Alter Instruction
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTI**  *Dest, {#}Src*
 **ALTI**  *Dest*
@@ -3025,7 +3187,7 @@ Alter instruction
 | EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
 
 
-**Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
+**Related:** [SETD](instructions-s.md#setd), [SETS](instructions-s.md#sets), [SETR](instructions-s.md#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
 
 **Explanation:**
 
@@ -3041,10 +3203,11 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 
 
 
+::: instrheader
 ## ALTR {#altr}
-
-Alter result
-[Register Indirection](#register-indirection) - Alter Result register address of next instruction.
+Alter Result
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTR**  *Dest, {#}Src*
 **ALTR**  *Dest*
@@ -3083,10 +3246,11 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 
 
 
+::: instrheader
 ## ALTS {#alts}
-
-Alter source
-[Register Indirection](#register-indirection) - Alter S field of next instruction.
+Alter Source
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTS**  *Dest, {#}Src*
 **ALTS**  *Dest*
@@ -3123,10 +3287,11 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 
 
 
+::: instrheader
 ## ALTSB {#altsb}
-
-Alter set byte
-[Register Indirection](#register-indirection) - Alter subsequent SETBYTE instruction.
+Alter Set Byte
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSB**  *Dest, {#}Src*
 **ALTSB**  *Dest*
@@ -3149,7 +3314,7 @@ Alter set byte
 ```
 
 
-**Related:** [ALTGB](#altgb), [ALTSN](#altsn), [ALTSW](#altsw), [SETBYTE](#setbyte)
+**Related:** [ALTGB](#altgb), [ALTSN](#altsn), [ALTSW](#altsw), [SETBYTE](instructions-s.md#setbyte)
 
 **Explanation:**
 
@@ -3165,10 +3330,11 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 
 
 
+::: instrheader
 ## ALTSN {#altsn}
-
-Alter set nibble
-[Register Indirection](#register-indirection) - Alter subsequent SETNIB instruction.
+Alter Set Nibble
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSN**  *Dest, {#}Src*
 **ALTSN**  *Dest*
@@ -3191,7 +3357,7 @@ Alter set nibble
 ```
 
 
-**Related:** [ALTGN](#altgn), [ALTSB](#altsb), [ALTSW](#altsw), [SETNIB](#setnib)
+**Related:** [ALTGN](#altgn), [ALTSB](#altsb), [ALTSW](#altsw), [SETNIB](instructions-s.md#setnib)
 
 **Explanation:**
 
@@ -3209,10 +3375,11 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 
 
 
+::: instrheader
 ## ALTSW {#altsw}
-
-Alter set word
-[Register Indirection](#register-indirection) - Alter subsequent SETWORD instruction.
+Alter Set Word
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **ALTSW**  *Dest, {#}Src*
 **ALTSW**  *Dest*
@@ -3235,7 +3402,7 @@ Alter set word
 ```
 
 
-**Related:** [ALTGW](#altgw), [ALTSB](#altsb), [ALTSN](#altsn), [SETWORD](#setword)
+**Related:** [ALTGW](#altgw), [ALTSB](#altsb), [ALTSN](#altsn), [SETWORD](instructions-s.md#setword)
 
 **Explanation:**
 
@@ -3253,10 +3420,11 @@ The instruction following ALTSW is shielded from interrupt. ALTSW alters the nex
 
 
 
+::: instrheader
 ## AND {#and}
-
-Bitwise AND
-[Math and Logic](#math-and-logic) - Bitwise AND a value with another, or with the NOT of another.
+Bitwise And
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -3274,7 +3442,7 @@ Bitwise AND
 | EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
 
-**Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
+**Related:** [ANDN](#andn), [OR](instructions-o.md#or), [XOR](instructions-x.md#xor), [TEST](instructions-t.md#test)
 
 **Explanation:**
 
@@ -3286,10 +3454,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## ANDN {#andn}
-
-And not
-[Math and Logic](#math-and-logic) - Bitwise AND a value with the NOT of another.
+And Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -3307,7 +3476,7 @@ And not
 | EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
 
-**Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)
+**Related:** [AND](#and), [OR](instructions-o.md#or), [XOR](instructions-x.md#xor), [TEST](instructions-t.md#test)
 
 **Explanation:**
 
@@ -3321,35 +3490,86 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## ASMCLK {#asmclk}
+Set Clock Mode
+Category: [System Control](instruction-categories.md#system-control)
+:::
 
-Assembly clock instruction
-[System Control](#system-control) - Assembly clock instruction.
+**ASMCLK**
 
+---
+
+**Result:** Configures the P2 system clock according to clock setup CON symbols.
+
+- No operands. Clock configuration is read from CON symbols (`_clkfreq`, `_xtlfreq`, `_xinfreq`, `_rcslow`, `_rcfast`).
+- Can be used with conditional prefix (IF_C, IF_NC, etc.).
+
+::: {.note}
+**Note:** ASMCLK is a pseudo-instruction (macro) that expands to 1–6 real PASM instructions depending on the clock mode. It is not a hardware instruction with a fixed encoding.
+:::
+
+**Expansion:**
+
+| Clock Mode | Expands To | Instructions |
+|:-----------|:-----------|:------------:|
+| External crystal/oscillator with PLL | HUBSET, WAITX, HUBSET | 3–6 |
+| RCSLOW (internal slow RC) | HUBSET #1 | 1 |
+| RCFAST (internal fast RC) | HUBSET #0 | 1 |
+
+For external clock modes, the expansion sequence is:
+
+```pasm2
+HUBSET  ##clkmode_ & !%11    ' Start external clock, stay in RCFAST
+WAITX   ##20_000_000/100     ' Wait ~10ms for clock stabilization
+HUBSET  ##clkmode_           ' Switch to target clock mode
 ```
-ASMCLK
-```
 
-**Result:** Controls assembly-time clock operations.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
-
-
-**Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
+**Related:** [HUBSET](instructions-h.md#hubset), [WAITX](instructions-w.md#waitx)
 
 **Explanation:**
 
-ASMCLK controls assembly-time clock operations. This instruction is used during the assembly process to manage timing-related assembly directives.
+ASMCLK is a pseudo-instruction for PASM-only programs that sets the system clock mode based on clock configuration symbols defined in a CON block. When assembled, ASMCLK expands to the appropriate HUBSET and WAITX instructions needed to configure the clock.
+
+The clock configuration is determined by these CON symbols:
+
+- `_clkfreq` — Target clock frequency in Hz
+- `_xtlfreq` — External crystal frequency (for crystal modes)
+- `_xinfreq` — External clock input frequency (for external oscillator modes)
+- `_rcslow` — Use internal slow RC oscillator (~20 kHz)
+- `_rcfast` — Use internal fast RC oscillator (~20 MHz, default)
+
+**Modern Usage (v35v and later):**
+
+As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. The compiler automatically prepends a 16-long clock-setter program to PASM-only programs that use non-RCFAST clock modes. This clock-setter configures the clock, relocates your program down by 16 longs, then executes it via `COGINIT #0,#0`.
+
+To disable the automatic clock-setter and use ASMCLK manually, define:
+
+```spin2
+CON
+  _AUTOCLK = 0    ' Disable automatic clock-setter
+```
+
+**Example:**
+
+```spin2
+CON
+  _clkfreq = 200_000_000    ' 200 MHz target
+  _xtlfreq = 20_000_000     ' 20 MHz crystal
+
+DAT
+        ORG 0
+        ASMCLK              ' Set clock to 200 MHz
+        ' ... program continues
+```
 
 
 
+::: instrheader
 ## AUGD {#augd}
-
-Augment destination
-[Miscellaneous](#miscellaneous) - Augment next literal Dest to 32-bits.
+Augment Destination
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **AUGD**  *#Dest*
 
@@ -3379,10 +3599,11 @@ Though AUGD may be manually entered wherever needed, the Parallax P2 compiler su
 
 
 
+::: instrheader
 ## AUGS {#augs}
-
-Augment source
-[Miscellaneous](#miscellaneous) - Augment next literal Src to 32-bits.
+Augment Source
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **AUGS**  *#Src*
 
@@ -3418,10 +3639,11 @@ This section contains all PASM2 instructions beginning with the letter B.
 
 
 
+::: instrheader
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
-
-Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
-[Math and Logic](#math-and-logic) - Set bit(s) to C, NC, Z, or NZ flag state.
+Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BITC**  *Dest, {#}Src*  **{WCZ}**
 **BITNC**  *Dest, {#}Src*  **{WCZ}**
@@ -3430,14 +3652,7 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 
 ---
 
-**Result:** Dest bit(s) designated by Src are set to the specified flag state:
-
-| Instruction | Sets bits to |
-|-------------|--------------|
-| BITC | C flag value |
-| BITNC | !C (inverted C) |
-| BITZ | Z flag value |
-| BITNZ | !Z (inverted Z) |
+**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates Z to the original bit state.
 
 - Dest is a register whose value will have bit(s) set to the flag state.
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
@@ -3456,7 +3671,16 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 
 **Explanation:**
 
-These instructions set designated bit(s) in Dest to the specified flag value. BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
+These instructions set designated bit(s) in Dest to the specified flag value:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| BITC | C flag value |
+| BITNC | !C (inverted C) |
+| BITZ | Z flag value |
+| BITNZ | !Z (inverted Z) |
+
+BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
 
 Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
@@ -3464,10 +3688,11 @@ If WCZ is specified, the Z flag is set (1) if the original base bit was set, or 
 
 
 
+::: instrheader
 ## BITH {#bith}
-
-Bit high
-[Math and Logic](#math-and-logic) - Set bit(s) to high (1).
+Bit High
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BITH**  *Dest, {#}Src*  **{WCZ}**
 
@@ -3499,10 +3724,11 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 
 
 
+::: instrheader
 ## BITL {#bitl}
-
-Bit low
-[Math and Logic](#math-and-logic) - Set bit(s) to low (0).
+Bit Low
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BITL**  *Dest, {#}Src*  **{WCZ}**
 
@@ -3534,10 +3760,11 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 
 
 
+::: instrheader
 ## BITNOT {#bitnot}
-
-Bit not
-[Math and Logic](#math-and-logic) - Toggle bit(s) to the opposite state.
+Bit Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BITNOT**  *Dest, {#}Src*  **{WCZ}**
 
@@ -3569,10 +3796,11 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 
 
 
+::: instrheader
 ## BITRND {#bitrnd}
-
-Bit random
-[Math and Logic](#math-and-logic) - Set bit(s) to random low or high values.
+Bit Random
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BITRND**  *Dest, {#}Src*  **{WCZ}**
 
@@ -3606,10 +3834,11 @@ Each bit in the range is set independently from the PRNG, producing true random 
 
 
 
+::: instrheader
 ## BLNPIX {#blnpix}
-
-Blend pixels
-[Pixel Mixer](#pixel-mixer) - Alpha-blend RGB bytes using SETPIV value.
+Blend Pixels
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **BLNPIX**  *Dest, {#}Src*
 
@@ -3626,7 +3855,7 @@ Blend pixels
 | EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](#addpix), [SUBPIX](#subpix), [MULPIX](#mulpix), [SETPIV](#setpiv)
+**Related:** [ADDPIX](instructions-a.md#addpix), [MULPIX](instructions-m.md#mulpix), [MIXPIX](instructions-m.md#mixpix), [SETPIV](instructions-s.md#setpiv)
 
 **Explanation:**
 
@@ -3638,10 +3867,11 @@ The instruction processes all three color channels (and alpha if present) in par
 
 
 
+::: instrheader
 ## BMASK {#bmask}
-
-Bit mask
-[Math and Logic](#math-and-logic) - Generate an LSB-justified bit mask.
+Bit Mask
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **BMASK**  *Dest, {#}Src*
 **BMASK**  *Dest*
@@ -3660,7 +3890,7 @@ Bit mask
 | EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
+**Related:** [ENCOD](instructions-e.md#encod), [DECOD](instructions-d.md#decod), [ONES](instructions-o.md#ones), [ZEROX](instructions-z.md#zerox)
 
 **Explanation:**
 
@@ -3679,10 +3909,11 @@ The first syntax form uses Src to specify the size, while the second syntax form
 
 
 
+::: instrheader
 ## BRK {#brk}
-
-Break
-[Interrupt](#interrupt) - Trigger breakpoint in current COG.
+Breakpoint
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **BRK**  *{#}Dest*
 
@@ -3698,7 +3929,7 @@ Break
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
 
-**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
+**Related:** [GETBRK](instructions-g.md#getbrk), [COGBRK](instructions-c.md#cogbrk)
 
 **Explanation:**
 
@@ -3720,10 +3951,11 @@ This section contains all PASM2 instructions beginning with the letter C.
 
 
 
+::: instrheader
 ## CALL {#call}
-
-Call subroutine
-[Branch](#branch) - Call a subroutine; store return context on the stack.
+Call Subroutine
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALL**  *#Addr*
 **CALL**  *#\Addr*
@@ -3744,7 +3976,7 @@ Call subroutine
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
 
 
-**Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
+**Related:** [RET](instructions-r.md#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
 
 **Explanation:**
 
@@ -3762,10 +3994,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLA {#calla}
-
-Call subroutine via PTRA
-[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRA++.
+Call Subroutine via PTRA
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLA**  *#Addr*
 **CALLA**  *#\Addr*
@@ -3786,7 +4019,7 @@ Call subroutine via PTRA
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5...12 |
 
 
-**Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
+**Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](instructions-r.md#reta)
 
 **Explanation:**
 
@@ -3804,10 +4037,11 @@ CALLA is used for subroutine calls when Hub RAM is being used as the call stack 
 
 
 
+::: instrheader
 ## CALLB {#callb}
-
-Call subroutine via PTRB
-[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRB++.
+Call Subroutine via PTRB
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLB**  *#Addr*
 **CALLB**  *#\Addr*
@@ -3828,7 +4062,7 @@ Call subroutine via PTRB
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5...12 |
 
 
-**Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
+**Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](instructions-r.md#retb)
 
 **Explanation:**
 
@@ -3846,10 +4080,11 @@ CALLB operates identically to CALLA except it uses PTRB as the stack pointer ins
 
 
 
+::: instrheader
 ## CALLD {#calld}
-
-Call with destination register
-[Branch](#branch) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
+Call with Destination Register
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLD**  *PA|PB|PTRA|PTRB, #Addr*
 **CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
@@ -3872,7 +4107,7 @@ Call with destination register
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](instructions-r.md#ret), [PA](special-registers.md#pa), [PB](special-registers.md#pb), [PTRA](special-registers.md#ptra), [PTRB](special-registers.md#ptrb)
 
 **Explanation:**
 
@@ -3892,10 +4127,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLPA {#callpa}
-
-Call subroutine with PA parameter
-[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PA.
+Call Subroutine with PA Parameter
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLPA**  *{#}Dest, {#}Src*
 
@@ -3912,7 +4148,7 @@ Call subroutine with PA parameter
 | EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](#ret), [PA](#pa)
+**Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](instructions-r.md#ret), [PA](special-registers.md#pa)
 
 **Explanation:**
 
@@ -3926,10 +4162,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CALLPB {#callpb}
-
-Call subroutine with PB parameter
-[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PB.
+Call Subroutine with PB Parameter
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **CALLPB**  *{#}Dest, {#}Src*
 
@@ -3946,7 +4183,7 @@ Call subroutine with PB parameter
 | EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](#ret), [PB](#pb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](instructions-r.md#ret), [PB](special-registers.md#pb)
 
 **Explanation:**
 
@@ -3960,10 +4197,11 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 
 
 
+::: instrheader
 ## CMP {#cmp}
-
-Compare
-[Math and Logic](#math-and-logic) - Compare two unsigned values.
+Compare Unsigned
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4003,10 +4241,11 @@ CMP is fundamental for implementing conditional logic and control flow based on 
 
 
 
+::: instrheader
 ## CMPM {#cmpm}
-
-Compare most significant bit
-[Math and Logic](#math-and-logic) - Compare two unsigned values, get MSB of difference.
+Compare Most Significant Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4038,10 +4277,11 @@ CMPM is useful when the most significant bit of the difference carries semantic 
 
 
 
+::: instrheader
 ## CMPR {#cmpr}
-
-Compare reverse
-[Math and Logic](#math-and-logic) - Compare two unsigned values (in reverse order to CMP).
+Compare Reverse
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4073,10 +4313,11 @@ CMPR is useful when the natural order of operands in your code is reversed from 
 
 
 
+::: instrheader
 ## CMPS {#cmps}
-
-Compare signed
-[Math and Logic](#math-and-logic) - Compare two signed values.
+Compare Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4114,10 +4355,11 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 
 
 
+::: instrheader
 ## CMPSUB {#cmpsub}
-
-Compare and subtract
-[Math and Logic](#math-and-logic) - Compare two unsigned values and subtract the second if it is lesser or equal.
+Compare and Subtract
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4137,7 +4379,7 @@ Compare and subtract
 
 \textsuperscript{1} Dest is only written if Dest >= Src (subtraction was performed).
 
-**Related:** [CMP](#cmp), [SUB](#sub)
+**Related:** [CMP](#cmp), [SUB](instructions-s.md#sub)
 
 **Explanation:**
 
@@ -4153,10 +4395,11 @@ CMPSUB is particularly useful for implementing division algorithms, modulo opera
 
 
 
+::: instrheader
 ## CMPSX {#cmpsx}
-
-Compare signed, extended
-[Math and Logic](#math-and-logic) - Compare two signed values plus carry flag.
+Compare Signed Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4194,10 +4437,11 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 
 
 
+::: instrheader
 ## CMPX {#cmpx}
-
-Compare extended
-[Math and Logic](#math-and-logic) - Compare two unsigned values plus carry flag.
+Compare Unsigned Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4235,10 +4479,11 @@ For unsigned multi-long comparisons, use CMP for the least significant long, the
 
 
 
+::: instrheader
 ## COGATN {#cogatn}
-
-Cog attention
-[Event](#event) - Get the attention of one or more other cogs.
+Cog Attention
+Category: [Event](instruction-categories.md#event)
+:::
 
 **COGATN**  *{#}Dest*
 
@@ -4254,7 +4499,7 @@ Cog attention
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111111 | --- | --- | --- | 2 |
 
 
-**Related:** [POLLATN](#pollatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
+**Related:** [POLLATN](instructions-p.md#pollatn), [WAITATN](instructions-w.md#waitatn), [JATN](instructions-j.md#jatn), [JNATN](instructions-j.md#jnatn)
 
 **Explanation:**
 
@@ -4278,10 +4523,11 @@ COGATN is useful for implementing inter-cog communication, synchronization, and 
 
 
 
+::: instrheader
 ## COGBRK {#cogbrk}
-
-Cog break
-[Miscellaneous](#miscellaneous) - Trigger breakpoint in specified cog.
+Cog Breakpoint
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **COGBRK**  *{#}Dest*
 
@@ -4297,7 +4543,7 @@ Cog break
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110101 | --- | --- | --- | 2 |
 
 
-**Related:** [CALLD](#calld), [BRK](#brk)
+**Related:** [CALLD](#calld), [BRK](instructions-b.md#brk)
 
 **Explanation:**
 
@@ -4315,10 +4561,11 @@ COGBRK is a specialized instruction primarily used by development and debugging 
 
 
 
+::: instrheader
 ## COGID {#cogid}
-
-Cog identification
-[Hub Control](#hub-control) - Get current cog's ID or any cog's status by ID.
+Cog Identification
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGID**  *{#}Dest*  **{WC}**
 
@@ -4359,10 +4606,11 @@ To check if cog 3 is running:
 
 
 
+::: instrheader
 ## COGINIT {#coginit}
-
-Cog initialize
-[Hub Control](#hub-control) - Start an available cog, or restart a cog by ID.
+Cog Initialize
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGINIT**  *{#}Dest, {#}Src*  **{WC}**
 
@@ -4424,10 +4672,11 @@ Start a cog pair for LUT sharing:
 
 
 
+::: instrheader
 ## COGSTOP {#cogstop}
-
-Cog stop
-[Hub Control](#hub-control) - Stop a cog by ID.
+Cog Stop
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **COGSTOP**  *{#}Dest*
 
@@ -4468,10 +4717,11 @@ COGSTOP is useful for managing cog resources dynamically, shutting down cogs tha
 
 
 
+::: instrheader
 ## CRCBIT {#crcbit}
-
-CRC iterate bit
-[Math and Logic](#math-and-logic) - Iterate CRC value in D using C and polynomial in S.
+CRC Iterate Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CRCBIT**  *Dest, {#}Src*
 
@@ -4488,7 +4738,7 @@ CRC iterate bit
 | EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [CRCNIB](#crcnib), [REV](#rev)
+**Related:** [CRCNIB](#crcnib), [REV](instructions-r.md#rev)
 
 **Explanation:**
 
@@ -4513,10 +4763,11 @@ For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
 
 
+::: instrheader
 ## CRCNIB {#crcnib}
-
-CRC iterate nibble
-[Math and Logic](#math-and-logic) - Iterate CRC value in D for a nibble using polynomial in S.
+CRC Iterate Nibble
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **CRCNIB**  *Dest, {#}Src*
 
@@ -4533,7 +4784,7 @@ CRC iterate nibble
 | EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [CRCBIT](#crcbit), [REV](#rev)
+**Related:** [CRCBIT](#crcbit), [REV](instructions-r.md#rev)
 
 **Explanation:**
 
@@ -4563,10 +4814,11 @@ This section contains all PASM2 instructions beginning with the letter D.
 
 
 
+::: instrheader
 ## DECMOD {#decmod}
-
-Decrement modulus
-[Math and Logic](#math-and-logic) - Decrement with modulus wrapping.
+Decrement Modulus
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -4584,7 +4836,7 @@ Decrement modulus
 | EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
 
 
-**Related:** [INCMOD](#incmod)
+**Related:** [INCMOD](instructions-i.md#incmod)
 
 **Explanation:**
 
@@ -4598,10 +4850,11 @@ DECMOD does not limit Dest within the specified range—if Dest begins as greate
 
 
 
+::: instrheader
 ## DECOD {#decod}
-
-Decode bit position to single-bit mask
-[Math and Logic](#math-and-logic) - Decode value (0-31) into single-high-bit long.
+Decode Bit Position
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **DECOD**  *Dest, {#}Src*
 **DECOD**  *Dest*
@@ -4620,7 +4873,7 @@ Decode bit position to single-bit mask
 | EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
 
 
-**Related:** [ENCOD](#encod), [BMASK](#bmask)
+**Related:** [ENCOD](instructions-e.md#encod), [BMASK](instructions-b.md#bmask)
 
 **Explanation:**
 
@@ -4637,10 +4890,11 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 
 
 
+::: instrheader
 ## DIRC / DIRNC {#dirc}
-
-Set pin direction if C / not C
-[Pin](#pin) - Set pin(s) direction to input/output according to C or !C.
+Set Pin Direction by C Flag {#dirnc}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRC**  *{#}Dest*  **{WCZ}**
 **DIRNC**  *{#}Dest*  **{WCZ}**
@@ -4679,10 +4933,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRH {#dirh}
-
-Set pin direction high
-[Pin](#pin) - Set pin(s) direction to output (high; 1).
+Set Pin Direction High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRH**  *{#}Dest*  **{WCZ}**
 
@@ -4713,10 +4968,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the direction 
 
 
 
+::: instrheader
 ## DIRL {#dirl}
-
-Set pin direction low
-[Pin](#pin) - Set pin(s) direction to input (low; 0).
+Set Pin Direction Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
 
@@ -4747,10 +5003,11 @@ If the WCZ effect is specified, the Z flag is updated to the original state of t
 
 
 
+::: instrheader
 ## DIRNOT {#dirnot}
-
-Direction not
-[Pin](#pin) - Toggle pin(s) to the opposite direction.
+Direction Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
 
@@ -4785,10 +5042,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRZ / DIRNZ {#dirz}
-
-Set pin direction if Z / not Z
-[Pin](#pin) - Set pin(s) direction to input/output according to Z or !Z.
+Set Pin Direction by Z Flag {#dirnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRZ**  *{#}Dest*  **{WCZ}**
 **DIRNZ**  *{#}Dest*  **{WCZ}**
@@ -4827,10 +5085,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DIRRND {#dirrnd}
-
-Direction random
-[Pin](#pin) - Set pin(s) direction to random input/output.
+Direction Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
 
@@ -4865,10 +5124,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## DJF {#djf}
-
-Decrement and jump if full
-[Branch](#branch) - Decrement value and jump if full (-1; $FFFF_FFFF).
+Decrement and Jump If Full
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJF**  *Dest, {#}Src*
 
@@ -4897,10 +5157,11 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 
 
 
+::: instrheader
 ## DJNF {#djnf}
-
-Decrement and jump if not full
-[Branch](#branch) - Decrement value and jump if not full (<> -1; <> $FFFF_FFFF).
+Decrement and Jump If Not Full
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJNF**  *Dest, {#}Src*
 
@@ -4931,22 +5192,18 @@ The instruction executes in 2 clock cycles when the branch is not taken, and 4 c
 
 
 
+::: instrheader
 ## DJZ / DJNZ {#djz}
-
-Decrement and jump if zero / not zero {#djnz}
-[Branch](#branch) - Decrement a register and jump based on zero/non-zero result.
+Decrement and Jump If Zero {#djnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **DJZ**  *Dest, {#}Src*
 **DJNZ**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is decremented by 1, and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| DJZ | Result = 0 |
-| DJNZ | Result ≠ 0 |
+**Result:** Dest is decremented by 1, and conditionally jumps based on the result.
 
 - Dest is a register whose value is decremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
@@ -4962,11 +5219,16 @@ Decrement and jump if zero / not zero {#djnz}
 ```
 
 
-**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](instructions-i.md#ijz), [IJNZ](instructions-i.md#ijnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
 
 **Explanation:**
 
-DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero.
+DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| DJZ | Result = 0 |
+| DJNZ | Result ≠ 0 |
 
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
@@ -4981,10 +5243,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## DRVC / DRVNC {#drvc}
-
-Drive pins if C / not C
-[Pin](#pin) - Set pin(s) direction to output and output level to low/high according to C or !C.
+Drive Pins by C Flag {#drvnc}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVC**  *{#}Dest*  **{WCZ}**
 **DRVNC**  *{#}Dest*  **{WCZ}**
@@ -5021,10 +5284,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVH {#drvh}
-
-Drive pins high
-[Pin](#pin) - Set pin(s) direction to output and output level high (1).
+Drive Pins High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVH**  *{#}Dest*  **{WCZ}**
 
@@ -5057,10 +5321,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVL {#drvl}
-
-Drive pins low
-[Pin](#pin) - Set pin(s) direction to output and output level low (0).
+Drive Pins Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
 
@@ -5095,10 +5360,11 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 
 
+::: instrheader
 ## DRVNOT {#drvnot}
-
-Drive not
-[Pin](#pin) - Set pin(s) direction to output and toggle to the opposite output level.
+Drive Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
 
@@ -5135,10 +5401,11 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 
 
+::: instrheader
 ## DRVZ / DRVNZ {#drvz}
-
-Drive pins if Z / not Z
-[Pin](#pin) - Set pin(s) direction to output and output level to low/high according to Z or !Z.
+Drive Pins by Z Flag {#drvnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVZ**  *{#}Dest*  **{WCZ}**
 **DRVNZ**  *{#}Dest*  **{WCZ}**
@@ -5175,10 +5442,11 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 
 
+::: instrheader
 ## DRVRND {#drvrnd}
-
-Drive random
-[Pin](#pin) - Set pin(s) direction to output and output level to random low/high.
+Drive Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**
 
@@ -5223,10 +5491,11 @@ This section contains all PASM2 instructions beginning with the letter E.
 
 
 
+::: instrheader
 ## ENCOD {#encod}
-
-Encode
-[Math and Logic](#math-and-logic) - Get bit position of top-most 1 of Src or Dest into Dest.
+Encode Bit Position
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ENCOD**  *Dest*  **{WC|WZ|WCZ}**
@@ -5246,7 +5515,7 @@ Encode
 | EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
 
 
-**Related:** [DECOD](#decod)
+**Related:** [DECOD](instructions-d.md#decod)
 
 **Explanation:**
 
@@ -5268,10 +5537,11 @@ ENCOD is the complement of DECOD. Where DECOD converts a bit position (0-31) int
 
 
 
+::: instrheader
 ## EXECF {#execf}
-
-Call and skip
-[Branch](#branch) - Jump to address in COG/LUT and set SKIPF pattern.
+Execute with Skip Pattern
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **EXECF**  *{#}Dest*
 
@@ -5287,7 +5557,7 @@ Call and skip
 | EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 
 
-**Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)
+**Related:** [CALL](instructions-c.md#call), [SKIPF](instructions-s.md#skipf), [SKIP](instructions-s.md#skip)
 
 **Explanation:**
 
@@ -5309,10 +5579,11 @@ This section contains all PASM2 instructions beginning with the letter F.
 
 
 
+::: instrheader
 ## FBLOCK {#fblock}
-
-Set next block for when block wraps
-[Hub FIFO](#hub-fifo) - Configure the next Hub memory block for FIFO wraparound.
+Set Next FIFO Block
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **FBLOCK**  *{#}Dest, {#}Src*
 
@@ -5329,7 +5600,7 @@ Set next block for when block wraps
 | EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFLONG](instructions-r.md#rflong), [WFLONG](instructions-w.md#wflong)
 
 **Explanation:**
 
@@ -5343,10 +5614,11 @@ FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-t
 
 
 
+::: instrheader
 ## FGE {#fge}
-
-Force greater or equal
-[Math and Logic](#math-and-logic) - Force unsigned value to be greater than or equal to another.
+Force Greater or Equal
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -5378,10 +5650,11 @@ FGE is useful for clamping values to a minimum threshold, ensuring that a value 
 
 
 
+::: instrheader
 ## FGES {#fges}
-
-Force greater or equal, signed
-[Math and Logic](#math-and-logic) - Force signed value to be greater than or equal to another.
+Force Greater or Equal Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -5413,10 +5686,11 @@ FGES is the signed counterpart to FGE and is used when working with signed value
 
 
 
+::: instrheader
 ## FLE {#fle}
-
-Force lesser or equal
-[Math and Logic](#math-and-logic) - Force unsigned value to be less than or equal to another.
+Force Less or Equal
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -5448,10 +5722,11 @@ FLE is useful for clamping values to a maximum threshold, ensuring that a value 
 
 
 
+::: instrheader
 ## FLES {#fles}
-
-Force lesser or equal, signed
-[Math and Logic](#math-and-logic) - Force signed value to be less than or equal to another.
+Force Less or Equal Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -5483,10 +5758,11 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 
 
+::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-
-Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
-[Pin](#pin) - Set pin(s) to input direction with output preset according to C, NC, Z, or NZ flag.
+Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTC**  *{#}Dest*  **{WCZ}**
 **FLTNC**  *{#}Dest*  **{WCZ}**
@@ -5495,14 +5771,7 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 
 ---
 
-**Result:** The I/O pins are set to input direction with output preset according to flag state:
-
-| Instruction | Presets output high when |
-|-------------|--------------------------|
-| FLTC | C = 1 |
-| FLTNC | C = 0 |
-| FLTZ | Z = 1 |
-| FLTNZ | Z = 0 |
+**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets Z to original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
@@ -5520,18 +5789,26 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 
 **Explanation:**
 
-These instructions set pin(s) to input direction (floating) while pre-setting the output register based on flag state. When the pin is later driven as output, it will immediately be at the desired level.
+These instructions set pin(s) to input direction (floating) while pre-setting the output register based on flag state:
 
-FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
+| Instruction | Presets output high when |
+|-------------|--------------------------|
+| FLTC | C = 1 |
+| FLTNC | C = 0 |
+| FLTZ | Z = 1 |
+| FLTNZ | Z = 0 |
+
+When the pin is later driven as output, it will immediately be at the desired level. FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
 
 If WCZ is specified, the Z flag is set to the original output state of the base pin.
 
 
 
+::: instrheader
 ## FLTH {#flth}
-
-Float high
-[Pin](#pin) - Set pin(s) direction to input and to an output level of high.
+Float High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
 
@@ -5564,10 +5841,11 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 
 
 
+::: instrheader
 ## FLTL {#fltl}
-
-Float low
-[Pin](#pin) - Set pin(s) direction to input and to an output level of low.
+Float Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
 
@@ -5600,10 +5878,11 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 
 
 
+::: instrheader
 ## FLTNOT {#fltnot}
-
-Float not
-[Pin](#pin) - Set pin(s) direction to input and toggle to the opposite output level.
+Float Not
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
 
@@ -5638,10 +5917,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 
 
+::: instrheader
 ## FLTRND {#fltrnd}
-
-Float random
-[Pin](#pin) - Set pin(s) direction to input and to an output level of random low/high.
+Float Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**
 
@@ -5685,10 +5965,11 @@ This section contains all PASM2 instructions beginning with the letter G.
 
 
 
+::: instrheader
 ## GETBRK {#getbrk}
-
-Get breakpoint status
-[Miscellaneous](#miscellaneous) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
+Get Breakpoint Status
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -5705,7 +5986,7 @@ Get breakpoint status
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
 
 
-**Related:** [BRK](#brk), [SETBRK](#setbrk), [COGBRK](#cogbrk)
+**Related:** [BRK](instructions-b.md#brk), [SETBRK](#setbrk), [COGBRK](instructions-c.md#cogbrk)
 
 **Explanation:**
 
@@ -5723,10 +6004,11 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 
 
 
+::: instrheader
 ## GETBYTE {#getbyte}
-
-Get byte
-[Math and Logic](#math-and-logic) - Get a byte from a value.
+Get Byte
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETBYTE**  *Dest, {#}Src, #Num*
 **GETBYTE**  *Dest*
@@ -5746,7 +6028,7 @@ Get byte
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
+**Related:** [ALTGB](instructions-a.md#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](instructions-s.md#setbyte), [ROLBYTE](instructions-r.md#rolbyte)
 
 **Explanation:**
 
@@ -5758,10 +6040,11 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 
 
 
+::: instrheader
 ## GETCT {#getct}
-
-Get system counter
-[Miscellaneous](#miscellaneous) - Get the current system counter value into D.
+Get System Counter
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETCT**  *Dest*  **{WC}**
 
@@ -5792,10 +6075,11 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 
 
 
+::: instrheader
 ## GETNIB {#getnib}
-
-Get nibble
-[Math and Logic](#math-and-logic) - Get a nibble from a value.
+Get Nibble
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETNIB**  *Dest, {#}Src, #Num*
 **GETNIB**  *Dest*
@@ -5815,7 +6099,7 @@ Get nibble
 | EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
+**Related:** [ALTGN](instructions-a.md#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](instructions-s.md#setnib), [ROLNIB](instructions-r.md#rolnib)
 
 **Explanation:**
 
@@ -5827,10 +6111,11 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 
 
 
+::: instrheader
 ## GETPTR {#getptr}
-
-Get FIFO hub pointer
-[Hub RAM](#hub-ram) - Get current FIFO hub pointer into D.
+Get FIFO Hub Pointer
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **GETPTR**  *Dest*
 
@@ -5846,7 +6131,7 @@ Get FIFO hub pointer
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [RFBYTE](instructions-r.md#rfbyte), [RFWORD](instructions-r.md#rfword), [RFLONG](instructions-r.md#rflong), [WFBYTE](instructions-w.md#wfbyte), [WFWORD](instructions-w.md#wfword), [WFLONG](instructions-w.md#wflong)
 
 **Explanation:**
 
@@ -5858,10 +6143,11 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 
 
 
+::: instrheader
 ## GETQX {#getqx}
-
-Get CORDIC X result
-[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result X into D.
+Get CORDIC X Result
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -5878,7 +6164,7 @@ Get CORDIC X result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
+**Related:** [GETQY](#getqy), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
 
 **Explanation:**
 
@@ -5894,10 +6180,11 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 
 
 
+::: instrheader
 ## GETQY {#getqy}
-
-Get CORDIC Y result
-[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result Y into D.
+Get CORDIC Y Result
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -5914,7 +6201,7 @@ Get CORDIC Y result
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
 
 
-**Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
+**Related:** [GETQX](#getqx), [QROTATE](instructions-q.md#qrotate), [QVECTOR](instructions-q.md#qvector), [QMUL](instructions-q.md#qmul), [QDIV](instructions-q.md#qdiv), [QFRAC](instructions-q.md#qfrac), [QSQRT](instructions-q.md#qsqrt), [QLOG](instructions-q.md#qlog), [QEXP](instructions-q.md#qexp)
 
 **Explanation:**
 
@@ -5930,10 +6217,11 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 
 
 
+::: instrheader
 ## GETRND {#getrnd}
-
-Get random value
-[Miscellaneous](#miscellaneous) - Get RND into D or C/Z flags.
+Get Random Value
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
 **GETRND**  **{WC|WZ|WCZ}**
@@ -5952,7 +6240,7 @@ Get random value
 | EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
 
 
-**Related:** [SETQ](#setq), [SETQ2](#setq2)
+**Related:** [SETQ](instructions-s.md#setq), [SETQ2](instructions-s.md#setq2)
 
 **Explanation:**
 
@@ -5970,10 +6258,11 @@ The random number generator uses a maximal-length linear feedback shift register
 
 
 
+::: instrheader
 ## GETSCP {#getscp}
-
-Get oscilloscope samples
-[Smart Pin](#smart-pin) - Get four-channel oscilloscope samples into D.
+Get Oscilloscope Samples
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **GETSCP**  *Dest*
 
@@ -5989,7 +6278,7 @@ Get oscilloscope samples
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
 
 
-**Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
+**Related:** [SETSCP](instructions-s.md#setscp), [RDPIN](instructions-r.md#rdpin), [WXPIN](instructions-w.md#wxpin)
 
 **Explanation:**
 
@@ -6003,10 +6292,11 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 
 
 
+::: instrheader
 ## GETWORD {#getword}
-
-Get word
-[Math and Logic](#math-and-logic) - Get a word from a value.
+Get Word
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **GETWORD**  *Dest, {#}Src, #Num*
 **GETWORD**  *Dest*
@@ -6026,7 +6316,7 @@ Get word
 | EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
+**Related:** [ALTGW](instructions-a.md#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](instructions-s.md#setword), [ROLWORD](instructions-r.md#rolword)
 
 **Explanation:**
 
@@ -6038,10 +6328,11 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 
 
 
+::: instrheader
 ## GETXACC {#getxacc}
-
-Get Goertzel accumulators
-[Streamer](#streamer-category) - Get streamer's Goertzel X/Y accumulators into D and next S.
+Get Goertzel Accumulators
+Category: [Streamer](instruction-categories.md#streamer)
+:::
 
 **GETXACC**  *Dest*
 
@@ -6057,7 +6348,7 @@ Get Goertzel accumulators
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
 
 
-**Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
+**Related:** [XCONT](instructions-x.md#xcont), [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero)
 
 **Explanation:**
 
@@ -6077,10 +6368,11 @@ This section contains all PASM2 instructions beginning with the letter H.
 
 
 
+::: instrheader
 ## HUBSET {#hubset}
-
-Set hub configuration
-[Hub Control](#hub-control) - Configure system clock and hub parameters.
+Set Hub Configuration
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **HUBSET**  *{#}D*
 
@@ -6096,7 +6388,7 @@ Set hub configuration
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [COGINIT](#coginit), [COGID](#cogid), [CLKSET](#clkset)
+**Related:** [COGINIT](instructions-c.md#coginit), [COGID](instructions-c.md#cogid), [CLKSET](#clkset)
 
 **Explanation:**
 
@@ -6159,22 +6451,18 @@ This section contains all PASM2 instructions beginning with the letter I.
 
 
 
+::: instrheader
 ## IJZ / IJNZ {#ijz}
-
-Increment and jump if zero / not zero {#ijnz}
-[Branch](#branch) - Increment a register and jump based on zero/non-zero result.
+Increment and Jump If Zero {#ijnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **IJZ**  *Dest, {#}Src*
 **IJNZ**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is incremented by 1, and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| IJZ | Result = 0 |
-| IJNZ | Result ≠ 0 |
+**Result:** Dest is incremented by 1, and conditionally jumps based on the result.
 
 - Dest is a register whose value is incremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
@@ -6190,11 +6478,16 @@ Increment and jump if zero / not zero {#ijnz}
 ```
 
 
-**Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz), [TJZ](instructions-t.md#tjz), [TJNZ](instructions-t.md#tjnz)
 
 **Explanation:**
 
-IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero.
+IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| IJZ | Result = 0 |
+| IJNZ | Result ≠ 0 |
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
@@ -6202,10 +6495,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## INCMOD {#incmod}
-
-Increment with modulus
-[Math and Logic](#math-and-logic) - Increment a value with automatic wrap-around at a specified modulus.
+Increment Modulus
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -6223,7 +6517,7 @@ Increment with modulus
 | EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
 
 
-**Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
+**Related:** [DECMOD](instructions-d.md#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 
 **Explanation:**
 
@@ -6272,10 +6566,11 @@ This section contains all PASM2 instructions beginning with the letter J.
 
 
 
+::: instrheader
 ## JATN {#jatn}
-
-Jump if ATN event flag is set
-[Event](#event) - Jump to S if ATN (attention) event flag is set.
+Jump If Attention Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JATN**  *{#}S*
 
@@ -6291,7 +6586,7 @@ Jump if ATN event flag is set
 | EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNATN](#jnatn), [COGATN](#cogatn), [POLLATT](#pollatt)
+**Related:** [JNATN](#jnatn), [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn)
 
 **Explanation:**
 
@@ -6305,10 +6600,11 @@ JATN is useful for implementing inter-cog communication mechanisms where one cog
 
 
 
+::: instrheader
 ## JCT1 / JCT2 / JCT3 {#jct1}
-
-Jump if counter event flag is set (1, 2, or 3)
-[Event](#event) - Jump to S if CTn event flag is set.
+Jump If Counter Event Set {#jct2} {#jct3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JCT1**  *{#}S*
 **JCT2**  *{#}S*
@@ -6332,7 +6628,7 @@ Jump if counter event flag is set (1, 2, or 3)
 ```
 
 
-**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
+**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](instructions-a.md#addct1), [POLLCT1/2/3](instructions-p.md#pollct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 
@@ -6346,10 +6642,11 @@ The P2 provides three independent hardware counters for timing operations, allow
 
 
 
+::: instrheader
 ## JFBW {#jfbw}
-
-Jump if FIFO block wrap event flag is set
-[Event](#event) - Jump to S if FIFO interface block wrap event flag is set.
+Jump If FIFO Block Wrap Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JFBW**  *{#}S*
 
@@ -6365,7 +6662,7 @@ Jump if FIFO block wrap event flag is set
 | EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNFBW](#jnfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
+**Related:** [JNFBW](#jnfbw), [RFBYTE](instructions-r.md#rfbyte), [WFBYTE](instructions-w.md#wfbyte), [SETQ2](instructions-s.md#setq2)
 
 **Explanation:**
 
@@ -6379,10 +6676,11 @@ JFBW is useful for implementing circular buffer operations and managing block-ba
 
 
 
+::: instrheader
 ## JINT {#jint}
-
-Jump if INT event flag is set
-[Event](#event) - Jump to S if INT (interrupt) event flag is set.
+Jump If Interrupt Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JINT**  *{#}S*
 
@@ -6398,7 +6696,7 @@ Jump if INT event flag is set
 | EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
+**Related:** [JNINT](#jnint), [POLLINT](instructions-p.md#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -6412,10 +6710,11 @@ JINT provides a polling-based mechanism for handling hardware interrupts, allowi
 
 
 
+::: instrheader
 ## JMP {#jmp}
-
 Jump
-[Branch](#branch) - Unconditional jump to address.
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **JMP**  *D*  **{WC/WZ/WCZ}**
 **JMP**  *#A*
@@ -6436,7 +6735,7 @@ Jump
 | EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
 
 
-**Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
+**Related:** [CALL](instructions-c.md#call), [RET](instructions-r.md#ret), [JMPREL](#jmprel), [CALLD](instructions-c.md#calld)
 
 **Explanation:**
 
@@ -6452,10 +6751,11 @@ The instruction executes in 4 clock cycles in COG execution mode. In Hub executi
 
 
 
+::: instrheader
 ## JMPREL {#jmprel}
-
-Jump relative
-[Branch](#branch) - Jump ahead or back by D instructions.
+Jump Relative
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **JMPREL**  *{#}D*
 
@@ -6471,7 +6771,7 @@ Jump relative
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
 
 
-**Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP](#ijmp)
+**Related:** [JMP](#jmp), [CALL](instructions-c.md#call), [DJNZ](instructions-d.md#djnz), [IJMP1/2/3](special-registers.md#ijmp1)
 
 **Explanation:**
 
@@ -6487,10 +6787,11 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 
 
 
+::: instrheader
 ## JNATN {#jnatn}
-
-Jump if ATN event flag is clear
-[Event](#event) - Jump to S if ATN (attention) event flag is clear.
+Jump If Attention Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNATN**  *{#}S*
 
@@ -6506,7 +6807,7 @@ Jump if ATN event flag is clear
 | EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JATN](#jatn), [COGATN](#cogatn), [POLLATT](#pollatt)
+**Related:** [JATN](#jatn), [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn)
 
 **Explanation:**
 
@@ -6520,10 +6821,11 @@ JNATN is useful for implementing polling loops that wait until the ATN flag is c
 
 
 
+::: instrheader
 ## JNCT1 / JNCT2 / JNCT3 {#jnct1}
-
-Jump if counter event flag is clear (1, 2, or 3)
-[Event](#event) - Jump to S if CTn event flag is clear.
+Jump If Counter Event Clear {#jnct2} {#jnct3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNCT1**  *{#}S*
 **JNCT2**  *{#}S*
@@ -6547,7 +6849,7 @@ Jump if counter event flag is clear (1, 2, or 3)
 ```
 
 
-**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
+**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](instructions-a.md#addct1), [POLLCT1/2/3](instructions-p.md#pollct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 
@@ -6561,10 +6863,11 @@ These instructions are useful for implementing polling loops that continue until
 
 
 
+::: instrheader
 ## JNFBW {#jnfbw}
-
-Jump if FIFO block wrap event flag is clear
-[Event](#event) - Jump to S if FIFO interface block wrap event flag is clear.
+Jump If FIFO Block Wrap Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNFBW**  *{#}S*
 
@@ -6580,7 +6883,7 @@ Jump if FIFO block wrap event flag is clear
 | EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JFBW](#jfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
+**Related:** [JFBW](#jfbw), [RFBYTE](instructions-r.md#rfbyte), [WFBYTE](instructions-w.md#wfbyte), [SETQ2](instructions-s.md#setq2)
 
 **Explanation:**
 
@@ -6594,10 +6897,11 @@ JNFBW is useful for polling loops that wait until a block wrap occurs, or for co
 
 
 
+::: instrheader
 ## JNINT {#jnint}
-
-Jump if INT event flag is clear
-[Event](#event) - Jump to S if INT (interrupt) event flag is clear.
+Jump If Interrupt Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNINT**  *{#}S*
 
@@ -6613,7 +6917,7 @@ Jump if INT event flag is clear
 | EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
+**Related:** [JINT](#jint), [POLLINT](instructions-p.md#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -6627,10 +6931,11 @@ JNINT is useful for polling loops that wait until an interrupt occurs, or for im
 
 
 
+::: instrheader
 ## JNPAT {#jnpat}
-
-Jump if pattern match event flag is clear
-[Event](#event) - Jump to S if PAT (pattern match) event flag is clear.
+Jump If Pattern Match Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNPAT**  *{#}S*
 
@@ -6646,7 +6951,7 @@ Jump if pattern match event flag is clear
 | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JPAT](#jpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
+**Related:** [JPAT](#jpat), [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat)
 
 **Explanation:**
 
@@ -6660,10 +6965,11 @@ JNPAT is useful for polling loops that wait until a specific pattern appears on 
 
 
 
+::: instrheader
 ## JNQMT {#jnqmt}
-
-Jump if CORDIC empty event flag is clear
-[Event](#event) - Jump to S if CORDIC-read-but-empty event flag is clear.
+Jump If CORDIC Empty Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNQMT**  *{#}S*
 
@@ -6679,7 +6985,7 @@ Jump if CORDIC empty event flag is clear
 | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JQMT](#jqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
+**Related:** [JQMT](#jqmt), [QMUL](instructions-q.md#qmul), [QROTATE](instructions-q.md#qrotate), [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy)
 
 **Explanation:**
 
@@ -6693,10 +6999,11 @@ JNQMT is useful for ensuring CORDIC results are read at the correct time, helpin
 
 
 
+::: instrheader
 ## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
-
-Jump if selectable event flag is clear (1, 2, 3, or 4)
-[Event](#event) - Jump to S if SEn event flag is clear.
+Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNSE1**  *{#}S*
 **JNSE2**  *{#}S*
@@ -6722,7 +7029,7 @@ Jump if selectable event flag is clear (1, 2, 3, or 4)
 ```
 
 
-**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
+**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1)
 
 **Explanation:**
 
@@ -6736,10 +7043,11 @@ The P2 provides four selectable event sources, each configurable via SETSE instr
 
 
 
+::: instrheader
 ## JNXFI {#jnxfi}
-
-Jump if streamer finished event flag is clear
-[Event](#event) - Jump to S if XFI (streamer finished) event flag is clear.
+Jump If Streamer Finished Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNXFI**  *{#}S*
 
@@ -6755,7 +7063,7 @@ Jump if streamer finished event flag is clear
 | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXFI](#jxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
+**Related:** [JXFI](#jxfi), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXFI](instructions-p.md#pollxfi)
 
 **Explanation:**
 
@@ -6769,10 +7077,11 @@ JNXFI is useful for polling loops that wait until the streamer completes its ope
 
 
 
+::: instrheader
 ## JNXMT {#jnxmt}
-
-Jump if streamer empty event flag is clear
-[Event](#event) - Jump to S if XMT (streamer empty) event flag is clear.
+Jump If Streamer Empty Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNXMT**  *{#}S*
 
@@ -6788,7 +7097,7 @@ Jump if streamer empty event flag is clear
 | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXMT](#jxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
+**Related:** [JXMT](#jxmt), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXMT](instructions-p.md#pollxmt)
 
 **Explanation:**
 
@@ -6802,10 +7111,11 @@ JNXMT is useful for maintaining continuous streamer operation by reloading data 
 
 
 
+::: instrheader
 ## JNXRL {#jnxrl}
-
-Jump if streamer LUT rollover event flag is clear
-[Event](#event) - Jump to S if XRL (streamer LUT RAM rollover) event flag is clear.
+Jump If Streamer LUT Rollover Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNXRL**  *{#}S*
 
@@ -6821,7 +7131,7 @@ Jump if streamer LUT rollover event flag is clear
 | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRL](#jxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
+**Related:** [JXRL](#jxrl), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRL](instructions-p.md#pollxrl)
 
 **Explanation:**
 
@@ -6835,10 +7145,11 @@ JNXRL is useful for implementing circular buffer management for streamer operati
 
 
 
+::: instrheader
 ## JNXRO {#jnxro}
-
-Jump if streamer NCO rollover event flag is clear
-[Event](#event) - Jump to S if XRO (streamer NCO rollover) event flag is clear.
+Jump If Streamer NCO Rollover Event Clear
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JNXRO**  *{#}S*
 
@@ -6854,7 +7165,7 @@ Jump if streamer NCO rollover event flag is clear
 | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRO](#jxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
+**Related:** [JXRO](#jxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRO](instructions-p.md#pollxro)
 
 **Explanation:**
 
@@ -6868,10 +7179,11 @@ JNXRO is useful for timing-sensitive streamer applications where code needs to s
 
 
 
+::: instrheader
 ## JPAT {#jpat}
-
-Jump if pattern match event flag is set
-[Event](#event) - Jump to S if PAT (pattern match) event flag is set.
+Jump If Pattern Match Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JPAT**  *{#}S*
 
@@ -6887,7 +7199,7 @@ Jump if pattern match event flag is set
 | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNPAT](#jnpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
+**Related:** [JNPAT](#jnpat), [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat)
 
 **Explanation:**
 
@@ -6901,10 +7213,11 @@ JPAT is useful for implementing hardware-triggered control flow where code execu
 
 
 
+::: instrheader
 ## JQMT {#jqmt}
-
-Jump if CORDIC empty event flag is set
-[Event](#event) - Jump to S if CORDIC-read-but-empty event flag is set.
+Jump If CORDIC Empty Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JQMT**  *{#}S*
 
@@ -6920,7 +7233,7 @@ Jump if CORDIC empty event flag is set
 | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNQMT](#jnqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
+**Related:** [JNQMT](#jnqmt), [QMUL](instructions-q.md#qmul), [QROTATE](instructions-q.md#qrotate), [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy)
 
 **Explanation:**
 
@@ -6934,10 +7247,11 @@ JQMT is useful for error handling in CORDIC operations, allowing code to detect 
 
 
 
+::: instrheader
 ## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
-
-Jump if selectable event flag is set (1, 2, 3, or 4)
-[Event](#event) - Jump to S if SEn event flag is set.
+Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JSE1**  *{#}S*
 **JSE2**  *{#}S*
@@ -6963,7 +7277,7 @@ Jump if selectable event flag is set (1, 2, 3, or 4)
 ```
 
 
-**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
+**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1)
 
 **Explanation:**
 
@@ -6977,10 +7291,11 @@ The P2 provides four independent selectable event sources, enabling multiple con
 
 
 
+::: instrheader
 ## JXFI {#jxfi}
-
-Jump if streamer finished event flag is set
-[Event](#event) - Jump to S if XFI (streamer finished) event flag is set.
+Jump If Streamer Finished Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JXFI**  *{#}S*
 
@@ -6996,7 +7311,7 @@ Jump if streamer finished event flag is set
 | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXFI](#jnxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
+**Related:** [JNXFI](#jnxfi), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXFI](instructions-p.md#pollxfi)
 
 **Explanation:**
 
@@ -7010,10 +7325,11 @@ JXFI is useful for chaining streamer operations or triggering code execution imm
 
 
 
+::: instrheader
 ## JXMT {#jxmt}
-
-Jump if streamer empty event flag is set
-[Event](#event) - Jump to S if XMT (streamer empty) event flag is set.
+Jump If Streamer Empty Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JXMT**  *{#}S*
 
@@ -7029,7 +7345,7 @@ Jump if streamer empty event flag is set
 | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXMT](#jnxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
+**Related:** [JNXMT](#jnxmt), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXMT](instructions-p.md#pollxmt)
 
 **Explanation:**
 
@@ -7043,10 +7359,11 @@ JXMT is useful for implementing continuous streaming operations where the code n
 
 
 
+::: instrheader
 ## JXRL {#jxrl}
-
-Jump if streamer LUT rollover event flag is set
-[Event](#event) - Jump to S if XRL (streamer LUT RAM rollover) event flag is set.
+Jump If Streamer LUT Rollover Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JXRL**  *{#}S*
 
@@ -7062,7 +7379,7 @@ Jump if streamer LUT rollover event flag is set
 | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXRL](#jnxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
+**Related:** [JNXRL](#jnxrl), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRL](instructions-p.md#pollxrl)
 
 **Explanation:**
 
@@ -7076,10 +7393,11 @@ JXRL is useful for implementing circular buffer operations with the streamer usi
 
 
 
+::: instrheader
 ## JXRO {#jxro}
-
-Jump if streamer NCO rollover event flag is set
-[Event](#event) - Jump to S if XRO (streamer NCO rollover) event flag is set.
+Jump If Streamer NCO Rollover Event Set
+Category: [Event](instruction-categories.md#event)
+:::
 
 **JXRO**  *{#}S*
 
@@ -7095,7 +7413,7 @@ Jump if streamer NCO rollover event flag is set
 | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JNXRO](#jnxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
+**Related:** [JNXRO](#jnxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont), [POLLXRO](instructions-p.md#pollxro)
 
 **Explanation:**
 
@@ -7115,10 +7433,11 @@ This section contains all PASM2 instructions beginning with the letter L.
 
 
 
+::: instrheader
 ## LOC {#loc}
-
-Load address
-[Hub RAM](#hub-ram) - Load address into PA, PB, PTRA, or PTRB.
+Load Address
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
@@ -7137,7 +7456,7 @@ Load address
 | EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
 
 
-**Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
+**Related:** [PA](special-registers.md#pa), [PB](special-registers.md#pb), [PTRA](special-registers.md#ptra), [PTRB](special-registers.md#ptrb), [CALLD](instructions-c.md#calld), [CALLPA](instructions-c.md#callpa), [CALLPB](instructions-c.md#callpb)
 
 **Explanation:**
 
@@ -7151,10 +7470,11 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 
 
 
+::: instrheader
 ## LOCKNEW {#locknew}
-
-Allocate new lock
-[Hub Control](#hub-control) - Request a new LOCK from the hardware lock pool.
+Allocate New Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKNEW**  *D*  **{WC}**
 
@@ -7185,10 +7505,11 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 
 
 
+::: instrheader
 ## LOCKREL {#lockrel}
-
-Release lock
-[Hub Control](#hub-control) - Release a previously acquired LOCK.
+Release Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKREL**  *{#}D*  **{WC}**
 
@@ -7205,7 +7526,7 @@ Release lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
+**Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
 
 **Explanation:**
 
@@ -7219,10 +7540,11 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 
 
 
+::: instrheader
 ## LOCKRET {#lockret}
-
-Return lock to pool
-[Hub Control](#hub-control) - Return a LOCK to the pool for reallocation.
+Return Lock To Pool
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKRET**  *{#}D*
 
@@ -7252,10 +7574,11 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 
 
 
+::: instrheader
 ## LOCKTRY {#locktry}
-
-Try to acquire lock
-[Hub Control](#hub-control) - Attempt to acquire a LOCK with atomic test-and-set.
+Try To Acquire Lock
+Category: [Hub Control](instruction-categories.md#hub-control)
+:::
 
 **LOCKTRY**  *{#}D*  **{WC}**
 
@@ -7272,7 +7595,7 @@ Try to acquire lock
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
 
 
-**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
+**Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](instructions-c.md#cogid)
 
 **Explanation:**
 
@@ -7292,10 +7615,11 @@ This section contains all PASM2 instructions beginning with the letter M.
 
 
 
+::: instrheader
 ## MERGEB {#mergeb}
-
-Merge bits of bytes
-[Math and Logic](#math-and-logic) - Rearrange bits from each byte into a merged pattern.
+Merge Bits Of Bytes
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MERGEB**  *D*
 
@@ -7311,7 +7635,7 @@ Merge bits of bytes
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
+**Related:** [MERGEW](#mergew), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
 
 **Explanation:**
 
@@ -7323,10 +7647,11 @@ MERGEB is useful for bit-plane conversions, graphics operations, and data transf
 
 
 
+::: instrheader
 ## MERGEW {#mergew}
-
-Merge bits of words
-[Math and Logic](#math-and-logic) - Rearrange bits from each word into a merged pattern.
+Merge Bits Of Words
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MERGEW**  *D*
 
@@ -7342,7 +7667,7 @@ Merge bits of words
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
 
 
-**Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
+**Related:** [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [SPLITW](instructions-s.md#splitw)
 
 **Explanation:**
 
@@ -7354,10 +7679,11 @@ MERGEW is useful for word-level bit-plane conversions, graphics operations requi
 
 
 
+::: instrheader
 ## MIXPIX {#mixpix}
-
-Mix pixels
-[Pixel Mixer](#pixel-mixer) - Blend bytes of source into destination using pixel mixer configuration.
+Mix Pixels
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **MIXPIX**  *D,{#}S*
 
@@ -7374,7 +7700,7 @@ Mix pixels
 | EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
+**Related:** [SETPIX](instructions-s.md#setpix), [SETPIV](instructions-s.md#setpiv), [ADDPIX](instructions-a.md#addpix), [MULPIX](#mulpix), [BLNPIX](instructions-b.md#blnpix)
 
 **Explanation:**
 
@@ -7388,10 +7714,11 @@ MIXPIX is essential for high-performance graphics operations, enabling real-time
 
 
 
+::: instrheader
 ## MODC {#modc}
-
-Modify C flag
-[Math and Logic](#math-and-logic) - Set or clear the C flag based on a modifier and current flag state.
+Modify C Flag
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MODC**  *c*  **{WC}**
 
@@ -7408,7 +7735,7 @@ Modify C flag
 | EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
 
 
-**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -7424,10 +7751,11 @@ If the WC effect is specified, the flag modification becomes visible to subseque
 
 
 
+::: instrheader
 ## MODCZ {#modcz}
-
-Modify C and Z flags
-[Math and Logic](#math-and-logic) - Set or clear both C and Z flags based on modifiers and current flag states.
+Modify C And Z Flags
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MODCZ**  *c,z*  **{WC/WZ/WCZ}**
 
@@ -7445,7 +7773,7 @@ Modify C and Z flags
 | EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODC](#modc), [MODZ](#modz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -7463,10 +7791,11 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 
 
 
+::: instrheader
 ## MODZ {#modz}
-
-Modify Z flag
-[Math and Logic](#math-and-logic) - Set or clear the Z flag based on a modifier and current flag state.
+Modify Z Flag
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MODZ**  *z*  **{WZ}**
 
@@ -7483,7 +7812,7 @@ Modify Z flag
 | EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
 
 
-**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
@@ -7499,10 +7828,11 @@ If the WZ effect is specified, the flag modification becomes visible to subseque
 
 
 
+::: instrheader
 ## MOV {#mov}
-
 Move
-[Math and Logic](#math-and-logic) - Copy a value from source to destination.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -7520,7 +7850,7 @@ Move
 | EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
+**Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](instructions-s.md#setq)
 
 **Explanation:**
 
@@ -7556,10 +7886,11 @@ When combined with flag effects, MOV enables efficient value testing:
 
 
 
+::: instrheader
 ## MOVBYTS {#movbyts}
-
-Move bytes
-[Math and Logic](#math-and-logic) - Rearrange bytes within a register according to a control pattern.
+Move Bytes
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MOVBYTS**  *D,{#}S*
 
@@ -7576,7 +7907,7 @@ Move bytes
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
+**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](instructions-s.md#splitb), [ROLBYTE](instructions-r.md#rolbyte)
 
 **Explanation:**
 
@@ -7596,10 +7927,11 @@ Common patterns include:
 
 
 
+::: instrheader
 ## MUL {#mul}
-
 Multiply
-[Math and Logic](#math-and-logic) - Multiply two unsigned 16-bit values to produce a 32-bit result.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MUL**  *Dest, {#}Src*  **{WZ}**
 
@@ -7617,7 +7949,7 @@ Multiply
 | EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
+**Related:** [MULS](#muls), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
 
 **Explanation:**
 
@@ -7648,10 +7980,11 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 
 
 
+::: instrheader
 ## MULPIX {#mulpix}
-
-Multiply pixels
-[Pixel Mixer](#pixel-mixer) - Multiply corresponding bytes treating them as fractional values.
+Multiply Pixels
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **MULPIX**  *D,{#}S*
 
@@ -7668,7 +8001,7 @@ Multiply pixels
 | EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
 
-**Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
+**Related:** [ADDPIX](instructions-a.md#addpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](#mixpix), [SETPIX](instructions-s.md#setpix)
 
 **Explanation:**
 
@@ -7690,10 +8023,11 @@ The instruction treats all bytes independently, so it can be used for any four-b
 
 
 
+::: instrheader
 ## MULS {#muls}
-
-Multiply signed
-[Math and Logic](#math-and-logic) - Multiply two signed 16-bit values to produce a signed 32-bit result.
+Multiply Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MULS**  *Dest, {#}Src*  **{WZ}**
 
@@ -7711,7 +8045,7 @@ Multiply signed
 | EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
 
-**Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
+**Related:** [MUL](#mul), [QMUL](instructions-q.md#qmul), [SCA](instructions-s.md#sca), [SCAS](instructions-s.md#scas)
 
 **Explanation:**
 
@@ -7745,10 +8079,11 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 
 
 
+::: instrheader
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
-
-Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
-[Math and Logic](#math-and-logic) - Set selected bits of destination to C, NC, Z, or NZ flag value.
+Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
 **MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**
@@ -7757,14 +8092,7 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 
 ---
 
-**Result:** Each bit position in D where S has a 1 is set to the specified flag value:
-
-| Instruction | Sets bits to |
-|-------------|--------------|
-| MUXC | C flag value |
-| MUXNC | !C (inverted C) |
-| MUXZ | Z flag value |
-| MUXNZ | !Z (inverted Z) |
+**Result:** Each bit position in D where S has a 1 is set to the specified flag value. Optionally sets C to parity and Z if result is zero.
 
 - D is a register whose bits will be set to the flag value where S has 1 bits.
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
@@ -7779,11 +8107,20 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 | EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
 
 
-**Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
+**Related:** [MUXQ](#muxq), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn)
 
 **Explanation:**
 
-These instructions modify selected bits in D based on a flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
+These instructions modify selected bits in D based on a flag value:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| MUXC | C flag value |
+| MUXNC | !C (inverted C) |
+| MUXZ | Z flag value |
+| MUXNZ | !Z (inverted Z) |
+
+For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
 
 MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag value.
 
@@ -7801,10 +8138,11 @@ These instructions provide an efficient alternative to conditional branches when
 
 
 
+::: instrheader
 ## MUXNIBS {#muxnibs}
-
-Multiplex nibbles
-[Math and Logic](#math-and-logic) - Copy non-zero nibbles from source to destination.
+Multiplex Nibbles
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MUXNIBS**  *Dest, {#}Src*
 
@@ -7821,7 +8159,7 @@ Multiplex nibbles
 | EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
+**Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
 
 **Explanation:**
 
@@ -7843,10 +8181,11 @@ The instruction treats nibbles independently, enabling parallel conditional upda
 
 
 
+::: instrheader
 ## MUXNITS {#muxnits}
-
-Multiplex nits
-[Math and Logic](#math-and-logic) - Copy non-zero bit pairs from source to destination.
+Multiplex Nits
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MUXNITS**  *Dest, {#}Src*
 
@@ -7863,7 +8202,7 @@ Multiplex nits
 | EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
+**Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](instructions-s.md#splitb)
 
 **Explanation:**
 
@@ -7885,10 +8224,11 @@ The name "nits" comes from "nibble bits" or 2-bit fields, representing the next 
 
 
 
+::: instrheader
 ## MUXQ {#muxq}
-
 Multiplex Q
-[Math and Logic](#math-and-logic) - Copy selected bits from source to destination based on Q register mask.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **MUXQ**  *Dest, {#}Src*
 
@@ -7905,7 +8245,7 @@ Multiplex Q
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Related:** [SETQ](instructions-s.md#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
 **Explanation:**
 
@@ -7960,10 +8300,11 @@ This section contains all PASM2 instructions beginning with the letter N.
 
 
 
+::: instrheader
 ## NEG {#neg}
-
 Negate
-[Math and Logic](#math-and-logic) - Negate a value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
@@ -7983,7 +8324,7 @@ Negate
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
 
 
-**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
+**Related:** [ABS](instructions-a.md#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
 **Explanation:**
 
@@ -7997,10 +8338,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 
 
+::: instrheader
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
-
-Conditional negate {#negnc} {#negz} {#negnz}
-[Math and Logic](#math-and-logic) - Negate value according to C, NC, Z, or NZ flag.
+Conditional Negate {#negnc} {#negz} {#negnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
@@ -8016,14 +8358,7 @@ Conditional negate {#negnc} {#negz} {#negnz}
 
 ---
 
-**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest.
-
-| Instruction | Negates when |
-|-------------|--------------|
-| NEGC | C = 1 |
-| NEGNC | C = 0 |
-| NEGZ | Z = 1 |
-| NEGNZ | Z = 0 |
+**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest. Optionally sets C to sign and Z if result is zero.
 
 - Dest is a register to receive the result.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal.
@@ -8046,7 +8381,16 @@ Conditional negate {#negnc} {#negz} {#negnz}
 
 **Explanation:**
 
-These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition. If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
+These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition:
+
+| Instruction | Negates when |
+|-------------|--------------|
+| NEGC | C = 1 |
+| NEGNC | C = 0 |
+| NEGZ | Z = 1 |
+| NEGNZ | Z = 0 |
+
+If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
 NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior.
 
@@ -8056,10 +8400,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 
 
+::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-
-Cancel interrupt (1, 2, or 3)
-[Event](#event) - Cancel INTn interrupt.
+Cancel Interrupt {#nixint2} {#nixint3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **NIXINT1**
 **NIXINT2**
@@ -8087,10 +8432,11 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 
 
 
+::: instrheader
 ## NOP {#nop}
-
-No operation
-[Miscellaneous](#miscellaneous) - No operation, just elapse two cycles.
+No Operation
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **NOP**
 
@@ -8104,7 +8450,7 @@ No operation
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [WAITX](#waitx), [WAITCNT](#waitcnt)
+**Related:** [WAITX](instructions-w.md#waitx), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 
@@ -8114,10 +8460,11 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 
 
 
+::: instrheader
 ## NOT {#not}
-
-Not
-[Math and Logic](#math-and-logic) - Bitwise NOT a value.
+Bitwise Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NOT**  *Dest*  **{WC|WZ|WCZ}**
@@ -8137,7 +8484,7 @@ Not
 | EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
 
 
-**Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
+**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn)
 
 **Explanation:**
 
@@ -8157,10 +8504,11 @@ This section contains all PASM2 instructions beginning with the letter O.
 
 
 
+::: instrheader
 ## ONES {#ones}
-
 Ones
-[Math and Logic](#math-and-logic) - Count the number of high bits (1s) in a value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
@@ -8180,7 +8528,7 @@ Ones
 | EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
 
 
-**Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
+**Related:** [TEST](instructions-t.md#test), [TESTB](instructions-t.md#testb), [TESTBN](instructions-t.md#testbn), [BITNOT](instructions-b.md#bitnot)
 
 **Explanation:**
 
@@ -8196,10 +8544,11 @@ ONES is useful for analyzing bit patterns, counting enabled flags, and implement
 
 
 
+::: instrheader
 ## OR {#or}
-
-Or
-[Math and Logic](#math-and-logic) - Perform bitwise OR operation.
+Bitwise Or
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -8217,7 +8566,7 @@ Or
 | EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
 
 
-**Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
+**Related:** [AND](instructions-a.md#and), [XOR](instructions-x.md#xor), [ANDN](instructions-a.md#andn), [NOT](instructions-n.md#not)
 
 **Explanation:**
 
@@ -8241,10 +8590,11 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 
 
 
+::: instrheader
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
-
-Output by flag state {#outnc} {#outz} {#outnz}
-[Pin](#pin) - Set pin output level according to C, NC, Z, or NZ flag state.
+Output By Flag State {#outnc} {#outz} {#outnz}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTC**  *{#}Dest*  **{WCZ}**
 **OUTNC**  *{#}Dest*  **{WCZ}**
@@ -8253,14 +8603,7 @@ Output by flag state {#outnc} {#outz} {#outnz}
 
 ---
 
-**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state:
-
-| Instruction | Drives high when |
-|-------------|------------------|
-| OUTC | C = 1 |
-| OUTNC | C = 0 |
-| OUTZ | Z = 1 |
-| OUTNZ | Z = 0 |
+**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets Z to original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
@@ -8278,16 +8621,26 @@ Output by flag state {#outnc} {#outz} {#outnz}
 
 **Explanation:**
 
-These instructions set pin output level(s) based on flag state. OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
+These instructions set pin output level(s) based on flag state:
+
+| Instruction | Drives high when |
+|-------------|------------------|
+| OUTC | C = 1 |
+| OUTNC | C = 0 |
+| OUTZ | Z = 1 |
+| OUTNZ | Z = 0 |
+
+OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
 If WCZ is specified, the Z flag is set to the original output state of the base pin before modification.
 
 
 
+::: instrheader
 ## OUTH {#outh}
-
-Output high
-[Pin](#pin) - Set pin output level to high.
+Output High
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTH**  *{#}Dest*  **{WCZ}**
 
@@ -8304,7 +8657,7 @@ Output high
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
+**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](instructions-d.md#dirh)
 
 **Explanation:**
 
@@ -8320,10 +8673,11 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 
 
 
+::: instrheader
 ## OUTL {#outl}
-
-Output low
-[Pin](#pin) - Set pin output level to low.
+Output Low
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
 
@@ -8340,7 +8694,7 @@ Output low
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
+**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](instructions-d.md#dirl)
 
 **Explanation:**
 
@@ -8356,10 +8710,11 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 
 
 
+::: instrheader
 ## OUTNOT {#outnot}
-
-Output not (toggle)
-[Pin](#pin) - Toggle pin output level to opposite state.
+Output Not (Toggle)
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
 
@@ -8376,7 +8731,7 @@ Output not (toggle)
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
 
 
-**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
+**Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](instructions-n.md#not), [DRVNOT](instructions-d.md#drvnot)
 
 **Explanation:**
 
@@ -8392,10 +8747,11 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 
 
 
+::: instrheader
 ## OUTRND {#outrnd}
-
-Output random
-[Pin](#pin) - Set pin output level(s) to random values.
+Output Random
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**
 
@@ -8437,10 +8793,11 @@ This section contains all PASM2 instructions beginning with the letter P.
 
 
 
+::: instrheader
 ## POLLATN {#pollatn}
-
-Poll attention event
-[Event](#event) - Check attention event flag without waiting.
+Poll Attention Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLATN**  **{WC|WZ|WCZ}**
 
@@ -8456,7 +8813,7 @@ Poll attention event
 | EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
 
 
-**Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
+**Related:** [COGATN](instructions-c.md#cogatn), [WAITATN](instructions-w.md#waitatn), [JATN](instructions-j.md#jatn), [JNATN](instructions-j.md#jnatn)
 
 **Explanation:**
 
@@ -8468,10 +8825,11 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 
 
+::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
-
-Poll counter event (1, 2, or 3)
-[Event](#event) - Check counter event flag without waiting.
+Poll Counter Event {#pollct2} {#pollct3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLCT1**  **{WC|WZ|WCZ}**
 **POLLCT2**  **{WC|WZ|WCZ}**
@@ -8491,7 +8849,7 @@ Poll counter event (1, 2, or 3)
 | EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
 
 
-**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
+**Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1), [JCT1/2/3](instructions-j.md#jct1), [JNCT1/2/3](instructions-j.md#jnct1)
 
 **Explanation:**
 
@@ -8503,10 +8861,11 @@ These instructions enable time-based event polling without blocking execution. T
 
 
 
+::: instrheader
 ## POLLFBW {#pollfbw}
-
-Poll FIFO block wrap event
-[Event](#event) - Check FIFO block wrap event flag without waiting.
+Poll FIFO Block Wrap Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLFBW**  **{WC|WZ|WCZ}**
 
@@ -8522,7 +8881,7 @@ Poll FIFO block wrap event
 | EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](instructions-w.md#wrfast), [FBLOCK](instructions-f.md#fblock), [WAITFBW](instructions-w.md#waitfbw), [JFBW](instructions-j.md#jfbw), [JNFBW](instructions-j.md#jnfbw)
 
 **Explanation:**
 
@@ -8534,10 +8893,11 @@ This instruction enables circular buffer management for high-speed Hub RAM trans
 
 
 
+::: instrheader
 ## POLLINT {#pollint}
-
-Poll interrupt event
-[Event](#event) - Check interrupt event flag without waiting.
+Poll Interrupt Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLINT**  **{WC|WZ|WCZ}**
 
@@ -8553,7 +8913,7 @@ Poll interrupt event
 | EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
 
 
-**Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
+**Related:** [WAITINT](instructions-w.md#waitint), [JINT](instructions-j.md#jint), [JNINT](instructions-j.md#jnint)
 
 **Explanation:**
 
@@ -8565,10 +8925,11 @@ This instruction enables non-blocking interrupt handling.
 
 
 
+::: instrheader
 ## POLLPAT {#pollpat}
-
-Poll pin pattern event
-[Event](#event) - Check pin pattern event flag without waiting.
+Poll Pin Pattern Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLPAT**  **{WC|WZ|WCZ}**
 
@@ -8584,7 +8945,7 @@ Poll pin pattern event
 | EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
 
 
-**Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
+**Related:** [SETPAT](instructions-s.md#setpat), [WAITPAT](instructions-w.md#waitpat), [JPAT](instructions-j.md#jpat), [JNPAT](instructions-j.md#jnpat)
 
 **Explanation:**
 
@@ -8596,10 +8957,11 @@ This instruction enables non-blocking pattern detection on input pins.
 
 
 
+::: instrheader
 ## POLLQMT {#pollqmt}
-
-Poll CORDIC empty event
-[Event](#event) - Check CORDIC-read-but-empty event flag without waiting.
+Poll CORDIC Empty Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLQMT**  **{WC|WZ|WCZ}**
 
@@ -8615,7 +8977,7 @@ Poll CORDIC empty event
 | EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [JQMT](instructions-j.md#jqmt), [JNQMT](instructions-j.md#jnqmt)
 
 **Explanation:**
 
@@ -8627,10 +8989,11 @@ This instruction enables error detection for CORDIC operations.
 
 
 
+::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
-
-Poll selectable event (1, 2, 3, or 4)
-[Event](#event) - Check selectable event flag without waiting.
+Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLSE1**  **{WC|WZ|WCZ}**
 **POLLSE2**  **{WC|WZ|WCZ}**
@@ -8652,7 +9015,7 @@ Poll selectable event (1, 2, 3, or 4)
 | EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
 
 
-**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
+**Related:** [SETSE1/2/3/4](instructions-s.md#setse1), [WAITSE1/2/3/4](instructions-w.md#waitse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
 
 **Explanation:**
 
@@ -8664,10 +9027,11 @@ The P2 provides four independent selectable event generators that can be configu
 
 
 
+::: instrheader
 ## POLLXFI {#pollxfi}
-
-Poll streamer finished event
-[Event](#event) - Check streamer-finished event flag without waiting.
+Poll Streamer Finished Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXFI**  **{WC|WZ|WCZ}**
 
@@ -8683,7 +9047,7 @@ Poll streamer finished event
 | EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
+**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXFI](instructions-w.md#waitxfi), [JXFI](instructions-j.md#jxfi), [JNXFI](instructions-j.md#jnxfi)
 
 **Explanation:**
 
@@ -8695,10 +9059,11 @@ This instruction enables non-blocking management of the streamer subsystem.
 
 
 
+::: instrheader
 ## POLLXMT {#pollxmt}
-
-Poll streamer empty event
-[Event](#event) - Check streamer-empty event flag without waiting.
+Poll Streamer Empty Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXMT**  **{WC|WZ|WCZ}**
 
@@ -8714,7 +9079,7 @@ Poll streamer empty event
 | EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
+**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXMT](instructions-w.md#waitxmt), [JXMT](instructions-j.md#jxmt), [JNXMT](instructions-j.md#jnxmt)
 
 **Explanation:**
 
@@ -8726,10 +9091,11 @@ This instruction enables pipelined streamer operations.
 
 
 
+::: instrheader
 ## POLLXRL {#pollxrl}
-
-Poll streamer LUT rollover event
-[Event](#event) - Check streamer LUT rollover event flag without waiting.
+Poll Streamer LUT Rollover Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXRL**  **{WC|WZ|WCZ}**
 
@@ -8745,7 +9111,7 @@ Poll streamer LUT rollover event
 | EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
+**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXRL](instructions-w.md#waitxrl), [JXRL](instructions-j.md#jxrl), [JNXRL](instructions-j.md#jnxrl)
 
 **Explanation:**
 
@@ -8757,10 +9123,11 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 
 
 
+::: instrheader
 ## POLLXRO {#pollxro}
-
-Poll streamer NCO rollover event
-[Event](#event) - Check streamer NCO rollover event flag without waiting.
+Poll Streamer NCO Rollover Event
+Category: [Event](instruction-categories.md#event)
+:::
 
 **POLLXRO**  **{WC|WZ|WCZ}**
 
@@ -8776,7 +9143,7 @@ Poll streamer NCO rollover event
 | EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
+**Related:** [XINIT](instructions-x.md#xinit), [XZERO](instructions-x.md#xzero), [XCONT](instructions-x.md#xcont), [WAITXRO](instructions-w.md#waitxro), [JXRO](instructions-j.md#jxro), [JNXRO](instructions-j.md#jnxro)
 
 **Explanation:**
 
@@ -8788,10 +9155,11 @@ This instruction enables precise timing control for streamer operations that use
 
 
 
+::: instrheader
 ## POP {#pop}
-
-Pop from internal stack
-[Miscellaneous](#miscellaneous) - Pop a value from the internal K register stack.
+Pop From Internal Stack
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -8822,10 +9190,11 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 
 
 
+::: instrheader
 ## POPA {#popa}
-
-Pop from Hub stack A
-[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRA as stack pointer.
+Pop From Hub Stack A
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -8856,10 +9225,11 @@ This instruction enables Hub RAM-based stacks for deep subroutine nesting and la
 
 
 
+::: instrheader
 ## POPB {#popb}
-
-Pop from Hub stack B
-[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRB as stack pointer.
+Pop From Hub Stack B
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -8890,10 +9260,11 @@ Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage
 
 
 
+::: instrheader
 ## PUSH {#push}
-
-Push to internal stack
-[Miscellaneous](#miscellaneous) - Push a value onto the internal K register stack.
+Push To Internal Stack
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **PUSH**  *{#}Dest*
 
@@ -8919,10 +9290,11 @@ The P2 provides a single-level internal stack register K that is automatically u
 
 
 
+::: instrheader
 ## PUSHA {#pusha}
-
-Push to Hub stack A
-[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRA as stack pointer.
+Push To Hub Stack A
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **PUSHA**  *{#}Dest*
 
@@ -8950,10 +9322,11 @@ PUSHA paired with POPA implements a descending stack in Hub RAM.
 
 
 
+::: instrheader
 ## PUSHB {#pushb}
-
-Push to Hub stack B
-[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRB as stack pointer.
+Push To Hub Stack B
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **PUSHB**  *{#}Dest*
 
@@ -8986,10 +9359,11 @@ This section contains all PASM2 instructions beginning with the letter Q. The Q 
 
 
 
+::: instrheader
 ## QDIV {#qdiv}
-
-Queue divide
-[CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned division with 32-bit quotient and remainder.
+Queue Divide
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QDIV**  *{#}Dest, {#}Src*
 
@@ -9007,7 +9381,7 @@ Queue divide
 | EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -9026,10 +9400,11 @@ Division by zero produces undefined results. Each cog can issue one CORDIC instr
 
 
 
+::: instrheader
 ## QEXP {#qexp}
-
-Queue exponential
-[CORDIC Solver](#cordic-solver) - Convert 5:27-bit logarithm to 32-bit unsigned integer.
+Queue Exponential
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QEXP**  *{#}Dest*
 
@@ -9045,7 +9420,7 @@ Queue exponential
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -9063,10 +9438,11 @@ QEXP is the complement of QLOG and is commonly used together with QLOG to perfor
 
 
 
+::: instrheader
 ## QFRAC {#qfrac}
-
-Queue fractional divide
-[CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned fractional division.
+Queue Fractional Divide
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QFRAC**  *{#}Dest, {#}Src*
 
@@ -9084,7 +9460,7 @@ Queue fractional divide
 | EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -9102,10 +9478,11 @@ The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC par
 
 
 
+::: instrheader
 ## QLOG {#qlog}
-
-Queue logarithm
-[CORDIC Solver](#cordic-solver) - Convert 32-bit unsigned integer to 5:27-bit logarithm.
+Queue Logarithm
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QLOG**  *{#}Dest*
 
@@ -9121,7 +9498,7 @@ Queue logarithm
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QEXP](#qexp)
+**Related:** [GETQX](instructions-g.md#getqx), [QEXP](#qexp)
 
 **Explanation:**
 
@@ -9137,10 +9514,11 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 
 
 
+::: instrheader
 ## QMUL {#qmul}
-
-Queue multiply
-[CORDIC Solver](#cordic-solver) - Perform 32×32 unsigned multiplication producing 64-bit result.
+Queue Multiply
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QMUL**  *{#}Dest, {#}Src*
 
@@ -9157,7 +9535,7 @@ Queue multiply
 | EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
 **Explanation:**
 
@@ -9176,10 +9554,11 @@ Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allow
 
 
 
+::: instrheader
 ## QROTATE {#qrotate}
-
-Queue rotate
-[CORDIC Solver](#cordic-solver) - Rotate a 32-bit signed (X, Y) point around origin by specified angle.
+Queue Rotate
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QROTATE**  *{#}Dest, {#}Src*
 
@@ -9197,7 +9576,7 @@ Queue rotate
 | EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [SETQ](instructions-s.md#setq), [QVECTOR](#qvector)
 
 **Explanation:**
 
@@ -9217,10 +9596,11 @@ This instruction can also be used for polar to cartesian conversion by setting X
 
 
 
+::: instrheader
 ## QSQRT {#qsqrt}
-
-Queue square root
-[CORDIC Solver](#cordic-solver) - Calculate square root of 64-bit unsigned number.
+Queue Square Root
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QSQRT**  *{#}Dest, {#}Src*
 
@@ -9237,7 +9617,7 @@ Queue square root
 | EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [QMUL](#qmul)
+**Related:** [GETQX](instructions-g.md#getqx), [QMUL](#qmul)
 
 **Explanation:**
 
@@ -9257,10 +9637,11 @@ For 32-bit square roots, use Src=0.
 
 
 
+::: instrheader
 ## QVECTOR {#qvector}
-
-Queue vector
-[CORDIC Solver](#cordic-solver) - Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
+Queue Vector
+Category: [CORDIC Solver](instruction-categories.md#cordic-solver)
+:::
 
 **QVECTOR**  *{#}Dest, {#}Src*
 
@@ -9277,7 +9658,7 @@ Queue vector
 | EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
 
-**Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
+**Related:** [GETQX](instructions-g.md#getqx), [GETQY](instructions-g.md#getqy), [QROTATE](#qrotate)
 
 **Explanation:**
 
@@ -9303,10 +9684,11 @@ This section contains all PASM2 instructions beginning with the letter R.
 
 
 
+::: instrheader
 ## RCL {#rcl}
-
-Rotate carry left
-[Math and Logic](#math-and-logic) - Rotate bits left, inserting carry flag as new LSBs.
+Rotate Carry Left
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **RCL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -9338,10 +9720,11 @@ This instruction is useful for multi-precision arithmetic operations where the c
 
 
 
+::: instrheader
 ## RCR {#rcr}
-
-Rotate carry right
-[Math and Logic](#math-and-logic) - Rotate bits right, inserting carry flag as new MSBs.
+Rotate Carry Right
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **RCR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -9373,10 +9756,11 @@ This instruction is useful for multi-precision arithmetic operations where the c
 
 
 
+::: instrheader
 ## RCZL {#rczl}
-
-Rotate carry and zero left
-[Math and Logic](#math-and-logic) - Rotate left by two bits, inserting C and Z flags as new LSBs.
+Rotate Carry And Zero Left
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **RCZL**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -9407,10 +9791,11 @@ This instruction provides a compact way to shift two flag states into a register
 
 
 
+::: instrheader
 ## RCZR {#rczr}
-
-Rotate carry and zero right
-[Math and Logic](#math-and-logic) - Rotate right by two bits, inserting C and Z flags as new MSBs.
+Rotate Carry And Zero Right
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **RCZR**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -9441,10 +9826,11 @@ This instruction provides a compact way to shift two flag states into a register
 
 
 
+::: instrheader
 ## RDBYTE {#rdbyte}
-
-Read byte from Hub
-[Hub RAM](#hub-ram) - Read a zero-extended byte from Hub memory into a register.
+Read Byte From Hub
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
@@ -9462,7 +9848,7 @@ Read byte from Hub
 | EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
 
 
-**Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
+**Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](instructions-w.md#wrbyte)
 
 **Explanation:**
 
@@ -9478,10 +9864,11 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 
 
 
+::: instrheader
 ## RDFAST {#rdfast}
-
-Read fast via FIFO
-[Hub RAM](#hub-ram) - Begin fast sequential read from Hub memory into FIFO buffer.
+Read Fast Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RDFAST**  *{#}Dest, {#}Src*
 
@@ -9498,7 +9885,7 @@ Read fast via FIFO
 | EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
 
 
-**Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
+**Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](instructions-w.md#wrfast), [FBLOCK](instructions-f.md#fblock)
 
 **Explanation:**
 
@@ -9510,10 +9897,11 @@ After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read
 
 
 
+::: instrheader
 ## RDLONG {#rdlong}
-
-Read long from Hub
-[Hub RAM](#hub-ram) - Read a long (32-bit value) from Hub memory into a register.
+Read Long From Hub
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
@@ -9531,7 +9919,7 @@ Read long from Hub
 | EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
 
 
-**Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
+**Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](instructions-w.md#wrlong)
 
 **Explanation:**
 
@@ -9545,10 +9933,11 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 
 
 
+::: instrheader
 ## RDLUT {#rdlut}
-
-Read from LUT
-[Lookup Table](#lookup-table) - Read a long from the Lookup Table into a register.
+Read From LUT
+Category: [Lookup Table](instruction-categories.md#lookup-table)
+:::
 
 **RDLUT**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
@@ -9566,7 +9955,7 @@ Read from LUT
 | EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
 
 
-**Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
+**Related:** [WRLUT](instructions-w.md#wrlut), [RDLONG](#rdlong)
 
 **Explanation:**
 
@@ -9580,10 +9969,11 @@ The LUT provides fast local memory access for frequently accessed data structure
 
 
 
+::: instrheader
 ## RDPIN {#rdpin}
-
 Read Smart Pin
-[Smart Pin](#smart-pin) - Read a Smart Pin's result value and acknowledge the pin.
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
 
@@ -9601,7 +9991,7 @@ Read Smart Pin
 | EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
 
-**Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+**Related:** [RQPIN](#rqpin), [WRPIN](instructions-w.md#wrpin), [WXPIN](instructions-w.md#wxpin), [WYPIN](instructions-w.md#wypin)
 
 **Explanation:**
 
@@ -9613,10 +10003,11 @@ Smart Pins are powerful autonomous I/O processors that can measure timing, count
 
 
 
+::: instrheader
 ## RDWORD {#rdword}
-
-Read word from Hub
-[Hub RAM](#hub-ram) - Read a zero-extended word (16-bit value) from Hub memory into a register.
+Read Word From Hub
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
 
@@ -9634,7 +10025,7 @@ Read word from Hub
 | EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
 
 
-**Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
+**Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](instructions-w.md#wrword)
 
 **Explanation:**
 
@@ -9648,10 +10039,11 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 
 
+::: instrheader
 ## REP {#rep}
-
-Repeat block
-[Branch](#branch) - Execute a block of instructions repeatedly with hardware loop.
+Repeat Block
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **REP**  *{#}Dest, {#}Src*
 
@@ -9668,7 +10060,7 @@ Repeat block
 | EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
+**Related:** [DJNZ](instructions-d.md#djnz), [JNCT1/2/3](instructions-j.md#jnct1)
 
 **Explanation:**
 
@@ -9680,10 +10072,11 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 
 
+::: instrheader
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
-
-Resume from interrupt (0, 1, 2, or 3)
-[Interrupt](#interrupt) - Resume execution after returning from interrupt.
+Resume From Interrupt {#resi1} {#resi2} {#resi3}
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **RESI0**
 **RESI1**
@@ -9703,7 +10096,7 @@ Resume from interrupt (0, 1, 2, or 3)
 | EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 
 
-**Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
+**Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1)
 
 **Explanation:**
 
@@ -9713,10 +10106,11 @@ Unlike RETIx instructions which return from the interrupt handler, RESIx instruc
 
 
 
+::: instrheader
 ## RET {#ret}
-
-Return from subroutine
-[Branch](#branch) - Return from subroutine by popping the hardware stack.
+Return From Subroutine
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **RET**  **{WC|WZ|WCZ}**
 
@@ -9732,7 +10126,7 @@ Return from subroutine
 | EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
 
 
-**Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
+**Related:** [CALL](instructions-c.md#call), [CALLA](instructions-c.md#calla), [CALLB](instructions-c.md#callb), [RETA](#reta), [RETB](#retb)
 
 **Explanation:**
 
@@ -9748,10 +10142,11 @@ The P2 provides an 8-level hardware stack for fast subroutine calls. RET is pair
 
 
 
+::: instrheader
 ## RETA {#reta}
-
-Return via PTRA stack
-[Branch](#branch) - Return from subroutine by reading return address from Hub via PTRA.
+Return Via PTRA Stack
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **RETA**  **{WC|WZ|WCZ}**
 
@@ -9767,7 +10162,7 @@ Return via PTRA stack
 | EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
 
 
-**Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
+**Related:** [CALLA](instructions-c.md#calla), [RET](#ret), [RETB](#retb)
 
 **Explanation:**
 
@@ -9781,10 +10176,11 @@ RETA is paired with CALLA for implementing software stacks in Hub memory, enabli
 
 
 
+::: instrheader
 ## RETB {#retb}
-
-Return via PTRB stack
-[Branch](#branch) - Return from subroutine by reading return address from Hub via PTRB.
+Return Via PTRB Stack
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **RETB**  **{WC|WZ|WCZ}**
 
@@ -9800,7 +10196,7 @@ Return via PTRB stack
 | EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
 
 
-**Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
+**Related:** [CALLB](instructions-c.md#callb), [RET](#ret), [RETA](#reta)
 
 **Explanation:**
 
@@ -9814,10 +10210,11 @@ RETB is paired with CALLB for implementing software stacks in Hub memory, enabli
 
 
 
+::: instrheader
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
-
-Return from interrupt (0, 1, 2, or 3)
-[Interrupt](#interrupt) - Return from interrupt handler, restoring execution to interrupted code.
+Return From Interrupt {#reti1} {#reti2} {#reti3}
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **RETI0**
 **RETI1**
@@ -9837,7 +10234,7 @@ Return from interrupt (0, 1, 2, or 3)
 | EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 
 
-**Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
+**Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1)
 
 **Explanation:**
 
@@ -9847,10 +10244,11 @@ The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest pr
 
 
 
+::: instrheader
 ## REV {#rev}
-
-Reverse bits
-[Math and Logic](#math-and-logic) - Reverse the bit pattern in a register.
+Reverse Bits
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **REV**  *Dest*
 
@@ -9866,7 +10264,7 @@ Reverse bits
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
 
 
-**Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
+**Related:** [ROL](#rol), [ROR](#ror), [ZEROX](instructions-z.md#zerox)
 
 **Explanation:**
 
@@ -9876,10 +10274,11 @@ This instruction is useful for processing binary data in different MSB/LSB order
 
 
 
+::: instrheader
 ## RFBYTE {#rfbyte}
-
-Read byte via FIFO
-[Hub RAM](#hub-ram) - Read a zero-extended byte from the FIFO after RDFAST.
+Read Byte Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -9910,10 +10309,11 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 
 
 
+::: instrheader
 ## RFLONG {#rflong}
-
-Read long via FIFO
-[Hub RAM](#hub-ram) - Read a long (32-bit value) from the FIFO after RDFAST.
+Read Long Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -9944,10 +10344,11 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 
 
 
+::: instrheader
 ## RFVAR {#rfvar}
-
-Read variable via FIFO
-[Hub RAM](#hub-ram) - Read a zero-extended 1-4 byte variable-length value from the FIFO.
+Read Variable Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -9978,10 +10379,11 @@ The length of each value read is determined by the streamer configuration set up
 
 
 
+::: instrheader
 ## RFVARS {#rfvars}
-
-Read signed variable via FIFO
-[Hub RAM](#hub-ram) - Read a sign-extended 1-4 byte variable-length value from the FIFO.
+Read Signed Variable Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -10010,10 +10412,11 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 
 
+::: instrheader
 ## RFWORD {#rfword}
-
-Read word via FIFO
-[Hub RAM](#hub-ram) - Read a zero-extended word (16-bit value) from the FIFO after RDFAST.
+Read Word Via FIFO
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -10044,10 +10447,11 @@ The operation takes 2 cycles when the FIFO has data available.
 
 
 
+::: instrheader
 ## RGBEXP {#rgbexp}
-
-Expand RGB color
-[Pixel Mixer](#pixel-mixer) - Expand a 5:6:5 RGB color value into 8:8:8 format.
+Expand RGB Color
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **RGBEXP**  *Dest*
 
@@ -10073,10 +10477,11 @@ This instruction is useful when converting between 16-bit and 24-bit color forma
 
 
 
+::: instrheader
 ## RGBSQZ {#rgbsqz}
-
-Squeeze RGB color
-[Pixel Mixer](#pixel-mixer) - Compress an 8:8:8 RGB color value into 5:6:5 format.
+Squeeze RGB Color
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **RGBSQZ**  *Dest*
 
@@ -10102,10 +10507,11 @@ This instruction is useful when converting from 24-bit to 16-bit color formats f
 
 
 
+::: instrheader
 ## ROL {#rol}
-
-Rotate left
-[Math and Logic](#math-and-logic) - Rotate the bits of a register left.
+Rotate Left
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ROL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -10123,7 +10529,7 @@ Rotate left
 | EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
+**Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](instructions-s.md#shl)
 
 **Explanation:**
 
@@ -10137,10 +10543,11 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 
 
 
+::: instrheader
 ## ROLBYTE {#rolbyte}
-
-Rotate byte left into register
-[Math and Logic](#math-and-logic) - Read a byte from source and rotate it left into destination.
+Rotate Byte Left Into Register
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ROLBYTE**  *Dest, {#}Src, #N*
 **ROLBYTE**  *Dest*
@@ -10160,7 +10567,7 @@ Rotate byte left into register
 | EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
+**Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](instructions-g.md#getbyte), [SETBYTE](instructions-s.md#setbyte), [ALTGB](instructions-a.md#altgb)
 
 **Explanation:**
 
@@ -10170,10 +10577,11 @@ The second syntax form is intended for use after an ALTGB instruction in a loop 
 
 
 
+::: instrheader
 ## ROLNIB {#rolnib}
-
-Rotate nibble left into register
-[Math and Logic](#math-and-logic) - Read a nibble from source and rotate it left into destination.
+Rotate Nibble Left Into Register
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ROLNIB**  *Dest, {#}Src, #N*
 **ROLNIB**  *Dest*
@@ -10193,7 +10601,7 @@ Rotate nibble left into register
 | EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
+**Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](instructions-g.md#getnib), [SETNIB](instructions-s.md#setnib), [ALTGN](instructions-a.md#altgn)
 
 **Explanation:**
 
@@ -10203,10 +10611,11 @@ The second syntax form is intended for use after an ALTGN instruction in a loop 
 
 
 
+::: instrheader
 ## ROLWORD {#rolword}
-
-Rotate word left into register
-[Math and Logic](#math-and-logic) - Read a word from source and rotate it left into destination.
+Rotate Word Left Into Register
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ROLWORD**  *Dest, {#}Src, #N*
 **ROLWORD**  *Dest*
@@ -10226,7 +10635,7 @@ Rotate word left into register
 | EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
 
 
-**Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
+**Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](instructions-g.md#getword), [SETWORD](instructions-s.md#setword), [ALTGW](instructions-a.md#altgw)
 
 **Explanation:**
 
@@ -10236,10 +10645,11 @@ The second syntax form is intended for use after an ALTGW instruction in a loop 
 
 
 
+::: instrheader
 ## ROR {#ror}
-
-Rotate right
-[Math and Logic](#math-and-logic) - Rotate the bits of a register right.
+Rotate Right
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ROR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -10257,7 +10667,7 @@ Rotate right
 | EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
+**Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](instructions-s.md#shr)
 
 **Explanation:**
 
@@ -10271,10 +10681,11 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 
 
 
+::: instrheader
 ## RQPIN {#rqpin}
-
-Read Smart Pin without acknowledge
-[Smart Pin](#smart-pin) - Read a Smart Pin's result value without clearing its ready flag.
+Read Smart Pin Without Acknowledge
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**
 
@@ -10292,7 +10703,7 @@ Read Smart Pin without acknowledge
 | EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
 
-**Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+**Related:** [RDPIN](#rdpin), [WRPIN](instructions-w.md#wrpin), [WXPIN](instructions-w.md#wxpin), [WYPIN](instructions-w.md#wypin)
 
 **Explanation:**
 
@@ -10309,10 +10720,11 @@ This section contains all PASM2 instructions beginning with the letter S.
 
 
 
+::: instrheader
 ## SAL {#sal}
-
-Shift arithmetic left
-[Math and Logic](#math-and-logic) - Shift bits left, extending original LSB into new rightmost positions.
+Shift Arithmetic Left
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SAL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -10342,10 +10754,11 @@ SAL shifts the destination's binary value left by the source number of places (0
 
 
 
+::: instrheader
 ## SAR {#sar}
-
-Shift arithmetic right
-[Math and Logic](#math-and-logic) - Shift bits right, extending sign bit into new leftmost positions.
+Shift Arithmetic Right
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -10375,10 +10788,11 @@ SAR shifts the destination's binary value right by the source number of places (
 
 
 
+::: instrheader
 ## SCA {#sca}
-
 Scale
-[Math and Logic](#math-and-logic) - Multiply 16-bit values and scale result for next instruction.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SCA**  *Dest, {#}Src*  **{WZ}**
 
@@ -10409,10 +10823,11 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 
 
 
+::: instrheader
 ## SCAS {#scas}
-
-Scale signed
-[Math and Logic](#math-and-logic) - Multiply signed 16-bit values and scale result for next instruction.
+Scale Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SCAS**  *Dest, {#}Src*  **{WZ}**
 
@@ -10438,10 +10853,11 @@ SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right
 
 
 
+::: instrheader
 ## SETBYTE {#setbyte}
-
-Set byte
-[Math and Logic](#math-and-logic) - Store an 8-bit value into a specified byte position within a register.
+Set Byte
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SETBYTE**  *Dest, {#}Src, #N*
 **SETBYTE**  *{#}Src*
@@ -10463,7 +10879,7 @@ Set byte
 
 *Dest and byte ID specified by prior ALTSB instruction.
 
-**Related:** [ALTSB](#altsb), [SETNIB](#setnib), [SETWORD](#setword), [GETBYTE](#getbyte)
+**Related:** [ALTSB](instructions-a.md#altsb), [SETNIB](#setnib), [SETWORD](#setword), [GETBYTE](instructions-g.md#getbyte)
 
 **Explanation:**
 
@@ -10475,10 +10891,11 @@ SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte a
 
 
 
+::: instrheader
 ## SETCFRQ {#setcfrq}
-
-Set colorspace converter frequency
-[Color Space Converter](#color-space-converter) - Configure the colorspace converter CFRQ parameter.
+Set Colorspace Converter Frequency
+Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+:::
 
 **SETCFRQ**  *{#}Dest*
 
@@ -10502,10 +10919,11 @@ Sets the colorspace converter CFRQ parameter to the value in Dest. This instruct
 
 
 
+::: instrheader
 ## SETCI {#setci}
-
-Set colorspace converter CI
-[Color Space Converter](#color-space-converter) - Configure the colorspace converter CI parameter.
+Set Colorspace Converter CI
+Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+:::
 
 **SETCI**  *{#}Dest*
 
@@ -10529,10 +10947,11 @@ Sets the colorspace converter CI parameter to the value in Dest. This instructio
 
 
 
+::: instrheader
 ## SETCMOD {#setcmod}
-
-Set colorspace converter mode
-[Color Space Converter](#color-space-converter) - Configure the colorspace converter mode parameter.
+Set Colorspace Converter Mode
+Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+:::
 
 **SETCMOD**  *{#}Dest*
 
@@ -10556,10 +10975,11 @@ Sets the colorspace converter CMOD parameter to Dest[8:0]. This instruction conf
 
 
 
+::: instrheader
 ## SETCQ {#setcq}
-
-Set colorspace converter CQ
-[Color Space Converter](#color-space-converter) - Configure the colorspace converter CQ parameter.
+Set Colorspace Converter CQ
+Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+:::
 
 **SETCQ**  *{#}Dest*
 
@@ -10583,10 +11003,11 @@ Sets the colorspace converter CQ parameter to the value in Dest. This instructio
 
 
 
+::: instrheader
 ## SETCY {#setcy}
-
-Set colorspace converter CY
-[Color Space Converter](#color-space-converter) - Configure the colorspace converter CY parameter.
+Set Colorspace Converter CY
+Category: [Color Space Converter](instruction-categories.md#color-space-converter)
+:::
 
 **SETCY**  *{#}Dest*
 
@@ -10610,10 +11031,11 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 
 
 
+::: instrheader
 ## SETD {#setd}
-
-Set destination field
-[Register Indirection](#register-indirection) - Modify the D field of an instruction template for use with ALTI.
+Set Destination Field
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **SETD**  *Dest, {#}Src*
 
@@ -10630,7 +11052,7 @@ Set destination field
 | EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
+**Related:** [SETS](#sets), [SETR](#setr), [ALTI](instructions-a.md#alti)
 
 **Explanation:**
 
@@ -10640,10 +11062,11 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 
 
 
+::: instrheader
 ## SETDACS {#setdacs}
-
 Set DACs
-[Smart Pin](#smart-pin) - Simultaneously set all four DAC channels.
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **SETDACS**  *{#}Dest*
 
@@ -10665,16 +11088,19 @@ Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 rece
 
 
 
-## SETINT1 {#setint1}
-
-Set interrupt 1 source
-[Interrupt](#interrupt) - Configure the interrupt 1 source.
+::: instrheader
+## SETINT1 / SETINT2 / SETINT3 {#setint1}
+Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **SETINT1**  *{#}Dest*
+**SETINT2**  *{#}Dest*
+**SETINT3**  *{#}Dest*
 
 ---
 
-**Result:** The INT1 interrupt source is set to Dest[3:0].
+**Result:** The specified interrupt source (INT1, INT2, or INT3) is set to Dest[3:0].
 
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
@@ -10682,74 +11108,25 @@ Set interrupt 1 source
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100101 | --- | --- | --- | 2 |
-
-
-**Related:** [SETINT2](#setint2), [SETINT3](#setint3), [NIXINT1](#nixint1), [TRGINT1](#trgint1), [RETI0](#reti0)
-
-**Explanation:**
-
-SETINT1 configures which event will trigger interrupt 1. The interrupt source is specified in Dest[3:0]. The P2 provides three configurable interrupt levels (INT1-INT3), each of which can be independently configured to respond to different event sources.
-
-
-
-## SETINT2 {#setint2}
-
-Set interrupt 2 source
-[Interrupt](#interrupt) - Configure the interrupt 2 source.
-
-**SETINT2**  *{#}Dest*
-
----
-
-**Result:** The INT2 interrupt source is set to Dest[3:0].
-
-- Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100110 | --- | --- | --- | 2 |
-
-
-**Related:** [SETINT1](#setint1), [SETINT3](#setint3), [NIXINT2](#nixint2), [TRGINT2](#trgint2), [RETI0](#reti0)
-
-**Explanation:**
-
-SETINT2 configures which event will trigger interrupt 2. The interrupt source is specified in Dest[3:0].
-
-
-
-## SETINT3 {#setint3}
-
-Set interrupt 3 source
-[Interrupt](#interrupt) - Configure the interrupt 3 source.
-
-**SETINT3**  *{#}Dest*
-
----
-
-**Result:** The INT3 interrupt source is set to Dest[3:0].
-
-- Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100111 | --- | --- | --- | 2 |
 
 
-**Related:** [SETINT1](#setint1), [SETINT2](#setint2), [NIXINT3](#nixint3), [TRGINT3](#trgint3), [RETI0](#reti0)
+**Related:** [NIXINT1/2/3](instructions-n.md#nixint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
 **Explanation:**
 
-SETINT3 configures which event will trigger interrupt 3. The interrupt source is specified in Dest[3:0].
+SETINT1, SETINT2, and SETINT3 configure which event will trigger their respective interrupt levels. The interrupt source is specified in Dest[3:0].
+
+The P2 provides three configurable interrupt levels (INT1-INT3), each of which can be independently configured to respond to different event sources.
 
 
 
+::: instrheader
 ## SETLUTS {#setluts}
-
-Set LUT sharing
-[Lookup Table](#lookup-table) - Enable or disable LUT sharing between adjacent cogs.
+Set LUT Sharing
+Category: [Lookup Table](instruction-categories.md#lookup-table)
+:::
 
 **SETLUTS**  *{#}Dest*
 
@@ -10765,7 +11142,7 @@ Set LUT sharing
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110111 | --- | --- | --- | 2 |
 
 
-**Related:** [RDLUT](#rdlut), [WRLUT](#wrlut)
+**Related:** [RDLUT](instructions-r.md#rdlut), [WRLUT](instructions-w.md#wrlut)
 
 **Explanation:**
 
@@ -10773,10 +11150,11 @@ Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LU
 
 
 
+::: instrheader
 ## SETNIB {#setnib}
-
-Set nibble
-[Math and Logic](#math-and-logic) - Store a 4-bit value into a specified nibble position within a register.
+Set Nibble
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SETNIB**  *Dest, {#}Src, #N*
 **SETNIB**  *{#}Src*
@@ -10798,7 +11176,7 @@ Set nibble
 
 *Dest and nibble ID specified by prior ALTSN instruction.
 
-**Related:** [ALTSN](#altsn), [SETBYTE](#setbyte), [SETWORD](#setword), [GETNIB](#getnib)
+**Related:** [ALTSN](instructions-a.md#altsn), [SETBYTE](#setbyte), [SETWORD](#setword), [GETNIB](instructions-g.md#getnib)
 
 **Explanation:**
 
@@ -10810,10 +11188,11 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 
 
 
+::: instrheader
 ## SETPAT {#setpat}
-
-Set pin pattern
-[Pin](#pin) - Configure pin pattern matching for PAT event detection.
+Set Pin Pattern
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **SETPAT**  *{#}Dest, {#}Src*
 
@@ -10830,7 +11209,7 @@ Set pin pattern
 | EEEE | 1011111 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [POLLPAT](#pollpat), [WAITPAT](#waitpat)
+**Related:** [POLLPAT](instructions-p.md#pollpat), [WAITPAT](instructions-w.md#waitpat)
 
 **Explanation:**
 
@@ -10838,10 +11217,11 @@ Sets pin pattern for PAT event detection. The C flag selects INA or INB for moni
 
 
 
+::: instrheader
 ## SETPIV {#setpiv}
-
-Set pixel blend factor
-[Pixel Mixer](#pixel-mixer) - Set the blend factor for pixel mixing operations.
+Set Pixel Blend Factor
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **SETPIV**  *{#}Dest*
 
@@ -10857,7 +11237,7 @@ Set pixel blend factor
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111101 | --- | --- | --- | 2 |
 
 
-**Related:** [SETPIX](#setpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
+**Related:** [SETPIX](#setpix), [BLNPIX](instructions-b.md#blnpix), [MIXPIX](instructions-m.md#mixpix)
 
 **Explanation:**
 
@@ -10865,10 +11245,11 @@ Sets the blend factor for BLNPIX and MIXPIX operations to Dest[7:0]. This contro
 
 
 
+::: instrheader
 ## SETPIX {#setpix}
-
-Set pixel mixer mode
-[Pixel Mixer](#pixel-mixer) - Configure the pixel mixer operating mode.
+Set Pixel Mixer Mode
+Category: [Pixel Mixer](instruction-categories.md#pixel-mixer)
+:::
 
 **SETPIX**  *{#}Dest*
 
@@ -10884,7 +11265,7 @@ Set pixel mixer mode
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111110 | --- | --- | --- | 2 |
 
 
-**Related:** [SETPIV](#setpiv), [MIXPIX](#mixpix)
+**Related:** [SETPIV](#setpiv), [MIXPIX](instructions-m.md#mixpix)
 
 **Explanation:**
 
@@ -10892,10 +11273,11 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 
 
 
+::: instrheader
 ## SETQ {#setq}
-
-Set Q register
-[Hub RAM](#hub-ram) - Set the Q register for use by subsequent instructions.
+Set Q Register
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **SETQ**  *{#}Dest*
 
@@ -10911,7 +11293,7 @@ Set Q register
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101000 | --- | --- | --- | 2 |
 
 
-**Related:** [SETQ2](#setq2), [RDLONG](#rdlong), [WRLONG](#wrlong)
+**Related:** [SETQ2](#setq2), [RDLONG](instructions-r.md#rdlong), [WRLONG](instructions-w.md#wrlong)
 
 **Explanation:**
 
@@ -10924,10 +11306,11 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
 
 
 
+::: instrheader
 ## SETQ2 {#setq2}
-
-Set Q for LUT transfers
-[Hub RAM](#hub-ram) - Set the Q register for LUT block transfers.
+Set Q For LUT Transfers
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **SETQ2**  *{#}Dest*
 
@@ -10943,7 +11326,7 @@ Set Q for LUT transfers
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101001 | --- | --- | --- | 2 |
 
 
-**Related:** [SETQ](#setq), [RDLONG](#rdlong), [WRLONG](#wrlong), [RDLUT](#rdlut), [WRLUT](#wrlut)
+**Related:** [SETQ](#setq), [RDLONG](instructions-r.md#rdlong), [WRLONG](instructions-w.md#wrlong), [RDLUT](instructions-r.md#rdlut), [WRLUT](instructions-w.md#wrlut)
 
 **Explanation:**
 
@@ -10956,10 +11339,11 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 
 
 
+::: instrheader
 ## SETR {#setr}
-
-Set result field
-[Register Indirection](#register-indirection) - Modify the Result field of an instruction template for use with ALTI.
+Set Result Field
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **SETR**  *Dest, {#}Src*
 
@@ -10976,7 +11360,7 @@ Set result field
 | EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
+**Related:** [SETD](#setd), [SETS](#sets), [ALTI](instructions-a.md#alti)
 
 **Explanation:**
 
@@ -10986,10 +11370,11 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 
 
 
+::: instrheader
 ## SETS {#sets}
-
-Set source field
-[Register Indirection](#register-indirection) - Modify the S field of an instruction template for use with ALTI.
+Set Source Field
+Category: [Register Indirection](instruction-categories.md#register-indirection)
+:::
 
 **SETS**  *Dest, {#}Src*
 
@@ -11006,7 +11391,7 @@ Set source field
 | EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
 
-**Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
+**Related:** [SETD](#setd), [SETR](#setr), [ALTI](instructions-a.md#alti)
 
 **Explanation:**
 
@@ -11016,10 +11401,11 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 
 
 
+::: instrheader
 ## SETSCP {#setscp}
-
-Set oscilloscope
-[Miscellaneous](#miscellaneous) - Configure the four-channel oscilloscope.
+Set Oscilloscope
+Category: [Miscellaneous](instruction-categories.md#miscellaneous)
+:::
 
 **SETSCP**  *{#}Dest*
 
@@ -11041,16 +11427,20 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 
 
 
-## SETSE1 {#setse1}
-
-Set selectable event 1
-[Event](#event) - Configure selectable event 1 detection.
+::: instrheader
+## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
+Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **SETSE1**  *{#}Dest*
+**SETSE2**  *{#}Dest*
+**SETSE3**  *{#}Dest*
+**SETSE4**  *{#}Dest*
 
 ---
 
-**Result:** The SE1 selectable event configuration is set to Dest[8:0].
+**Result:** The specified selectable event configuration (SE1-SE4) is set to Dest[8:0].
 
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
@@ -11058,103 +11448,26 @@ Set selectable event 1
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100000 | --- | --- | --- | 2 |
-
-
-**Related:** [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE1](#pollse1), [WAITSE1](#waitse1)
-
-**Explanation:**
-
-SETSE1 configures selectable event 1's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
-
-The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSE1, waited upon with WAITSE1, or used for conditional jumps with JSE1 and JNSE1.
-
-
-
-## SETSE2 {#setse2}
-
-Set selectable event 2
-[Event](#event) - Configure selectable event 2 detection.
-
-**SETSE2**  *{#}Dest*
-
----
-
-**Result:** The SE2 selectable event configuration is set to Dest[8:0].
-
-- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100001 | --- | --- | --- | 2 |
-
-
-**Related:** [SETSE1](#setse1), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE2](#pollse2), [WAITSE2](#waitse2)
-
-**Explanation:**
-
-SETSE2 configures selectable event 2's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
-
-
-
-## SETSE3 {#setse3}
-
-Set selectable event 3
-[Event](#event) - Configure selectable event 3 detection.
-
-**SETSE3**  *{#}Dest*
-
----
-
-**Result:** The SE3 selectable event configuration is set to Dest[8:0].
-
-- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100010 | --- | --- | --- | 2 |
-
-
-**Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE4](#setse4), [POLLSE3](#pollse3), [WAITSE3](#waitse3)
-
-**Explanation:**
-
-SETSE3 configures selectable event 3's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
-
-
-
-## SETSE4 {#setse4}
-
-Set selectable event 4
-[Event](#event) - Configure selectable event 4 detection.
-
-**SETSE4**  *{#}Dest*
-
----
-
-**Result:** The SE4 selectable event configuration is set to Dest[8:0].
-
-- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100011 | --- | --- | --- | 2 |
 
 
-**Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [POLLSE4](#pollse4), [WAITSE4](#waitse4)
+**Related:** [POLLSE1/2/3/4](instructions-p.md#pollse1), [WAITSE1/2/3/4](instructions-w.md#waitse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
 
 **Explanation:**
 
-SETSE4 configures selectable event 4's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
+SETSE1, SETSE2, SETSE3, and SETSE4 configure their respective selectable event's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
+
+The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
 
 
 
+::: instrheader
 ## SETWORD {#setword}
-
-Set word
-[Math and Logic](#math-and-logic) - Store a 16-bit value into a specified word position within a register.
+Set Word
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SETWORD**  *Dest, {#}Src, #N*
 **SETWORD**  *{#}Src*
@@ -11176,7 +11489,7 @@ Set word
 
 *Dest and word ID specified by prior ALTSW instruction.
 
-**Related:** [ALTSW](#altsw), [SETNIB](#setnib), [SETBYTE](#setbyte), [GETWORD](#getword)
+**Related:** [ALTSW](instructions-a.md#altsw), [SETNIB](#setnib), [SETBYTE](#setbyte), [GETWORD](instructions-g.md#getword)
 
 **Explanation:**
 
@@ -11188,10 +11501,11 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 
 
 
+::: instrheader
 ## SETXFRQ {#setxfrq}
-
-Set streamer frequency
-[Streamer](#streamer-category) - Set the streamer NCO frequency.
+Set Streamer Frequency
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **SETXFRQ**  *{#}Dest*
 
@@ -11207,7 +11521,7 @@ Set streamer frequency
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011101 | --- | --- | --- | 2 |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont)
+**Related:** [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
 
 **Explanation:**
 
@@ -11215,10 +11529,11 @@ Sets the streamer NCO (Numerically Controlled Oscillator) frequency to Dest. Thi
 
 
 
+::: instrheader
 ## SEUSSF {#seussf}
-
-Seuss forward
-[Math and Logic](#math-and-logic) - Relocate and periodically invert bits using forward pattern.
+Seuss Forward
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SEUSSF**  *Dest*
 
@@ -11242,10 +11557,11 @@ Relocates and periodically inverts bits within Dest using a forward pattern. The
 
 
 
+::: instrheader
 ## SEUSSR {#seussr}
-
-Seuss reverse
-[Math and Logic](#math-and-logic) - Relocate and periodically invert bits using reverse pattern.
+Seuss Reverse
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SEUSSR**  *Dest*
 
@@ -11269,10 +11585,11 @@ Relocates and periodically inverts bits within Dest using a reverse pattern. The
 
 
 
+::: instrheader
 ## SHL {#shl}
-
-Shift left
-[Math and Logic](#math-and-logic) - Shift bits left, inserting zeros as new rightmost bits.
+Shift Left
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SHL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11290,7 +11607,7 @@ Shift left
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
+**Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](instructions-r.md#rol)
 
 **Explanation:**
 
@@ -11302,10 +11619,11 @@ SHL shifts the destination's binary value left by the source number of places (0
 
 
 
+::: instrheader
 ## SHR {#shr}
-
-Shift right
-[Math and Logic](#math-and-logic) - Shift bits right, inserting zeros as new leftmost bits.
+Shift Right
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11323,7 +11641,7 @@ Shift right
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
 
-**Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
+**Related:** [SHL](#shl), [SAR](#sar), [ROR](instructions-r.md#ror)
 
 **Explanation:**
 
@@ -11335,10 +11653,11 @@ SHR shifts the destination's binary value right by the source number of places (
 
 
 
+::: instrheader
 ## SIGNX {#signx}
-
-Sign extend
-[Math and Logic](#math-and-logic) - Sign-extend a value beyond a designated bit position.
+Sign Extend
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SIGNX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11356,7 +11675,7 @@ Sign extend
 | EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
 
 
-**Related:** [ZEROX](#zerox)
+**Related:** [ZEROX](instructions-z.md#zerox)
 
 **Explanation:**
 
@@ -11368,10 +11687,11 @@ SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value 
 
 
 
+::: instrheader
 ## SKIP {#skip}
-
-Skip instructions
-[Branch](#branch) - Skip subsequent instructions based on a bitmask.
+Skip Instructions
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **SKIP**  *{#}Dest*
 
@@ -11402,10 +11722,11 @@ Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cance
 
 
 
+::: instrheader
 ## SKIPF {#skipf}
-
-Skip instructions fast
-[Branch](#branch) - Rapidly skip over instructions by jumping the program counter.
+Skip Instructions Fast
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **SKIPF**  *{#}Dest*
 
@@ -11429,10 +11750,11 @@ Like SKIP, but instead of cancelling instructions, the PC leaps over them. This 
 
 
 
+::: instrheader
 ## SPLITB {#splitb}
-
-Split bits to bytes
-[Math and Logic](#math-and-logic) - Reorganize bits by extracting every 4th bit into separate bytes.
+Split Bits To Bytes
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SPLITB**  *Dest*
 
@@ -11448,7 +11770,7 @@ Split bits to bytes
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
 
 
-**Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
+**Related:** [SPLITW](#splitw), [MERGEB](instructions-m.md#mergeb)
 
 **Explanation:**
 
@@ -11456,10 +11778,11 @@ Splits every 4th bit of Dest into bytes. The bits at positions 0, 4, 8, 12, 16, 
 
 
 
+::: instrheader
 ## SPLITW {#splitw}
-
-Split bits to words
-[Math and Logic](#math-and-logic) - Reorganize bits by separating odd and even bits into separate words.
+Split Bits To Words
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SPLITW**  *Dest*
 
@@ -11475,7 +11798,7 @@ Split bits to words
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
 
 
-**Related:** [SPLITB](#splitb), [MERGEW](#mergew)
+**Related:** [SPLITB](#splitb), [MERGEW](instructions-m.md#mergew)
 
 **Explanation:**
 
@@ -11483,10 +11806,11 @@ Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ..
 
 
 
+::: instrheader
 ## STALLI {#stalli}
-
-Disallow interrupts
-[Interrupt](#interrupt) - Disable interrupt branching to protect critical code sections.
+Disallow Interrupts
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **STALLI**
 
@@ -11500,7 +11824,7 @@ Disallow interrupts
 | EEEE | 1101011 | 000 | 000100001 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [ALLOWI](#allowi)
+**Related:** [ALLOWI](instructions-a.md#allowi)
 
 **Explanation:**
 
@@ -11514,10 +11838,11 @@ STALLI disables interrupt branching. STALLI is the complement of the ALLOWI inst
 
 
 
+::: instrheader
 ## SUB {#sub}
-
 Subtract
-[Math and Logic](#math-and-logic) - Subtract one unsigned value from another.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11535,7 +11860,7 @@ Subtract
 | EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
 
 
-**Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
+**Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](instructions-a.md#add)
 
 **Explanation:**
 
@@ -11547,10 +11872,11 @@ SUB subtracts the unsigned Src from the unsigned Dest and stores the result into
 
 
 
+::: instrheader
 ## SUBR {#subr}
-
-Subtract reverse
-[Math and Logic](#math-and-logic) - Subtract the destination from the source (reverse order).
+Subtract Reverse
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUBR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11576,10 +11902,11 @@ SUBR subtracts the unsigned Dest from the unsigned Src and stores the result int
 
 
 
+::: instrheader
 ## SUBS {#subs}
-
-Subtract signed
-[Math and Logic](#math-and-logic) - Subtract one signed value from another.
+Subtract Signed
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11605,10 +11932,11 @@ SUBS subtracts the signed Src from the signed Dest and stores the result into th
 
 
 
+::: instrheader
 ## SUBSX {#subsx}
-
-Subtract signed extended
-[Math and Logic](#math-and-logic) - Subtract one signed extended value from another using carry.
+Subtract Signed Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUBSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11634,10 +11962,11 @@ SUBSX subtracts the signed value of Src plus C from the signed Dest and stores t
 
 
 
+::: instrheader
 ## SUBX {#subx}
-
-Subtract extended
-[Math and Logic](#math-and-logic) - Subtract one unsigned extended value from another using carry.
+Subtract Extended
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11663,10 +11992,11 @@ SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and store
 
 
 
+::: instrheader
 ## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
-
-Conditional sum {#sumnc} {#sumz} {#sumnz}
-[Math and Logic](#math-and-logic) - Conditionally add or subtract based on C, NC, Z, or NZ flag.
+Conditional Sum {#sumnc} {#sumz} {#sumnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -11675,14 +12005,7 @@ Conditional sum {#sumnc} {#sumz} {#sumnz}
 
 ---
 
-**Result:** Conditionally adds or subtracts Src from Dest based on flag state:
-
-| Instruction | Subtracts when | Adds when |
-|-------------|----------------|-----------|
-| SUMC | C = 1 | C = 0 |
-| SUMNC | C = 0 | C = 1 |
-| SUMZ | Z = 1 | Z = 0 |
-| SUMNZ | Z = 0 | Z = 1 |
+**Result:** Conditionally adds or subtracts Src from Dest based on flag state.
 
 - Dest is a register containing the value to adjust.
 - Src is a register, 9-bit literal, or 32-bit augmented literal.
@@ -11699,7 +12022,16 @@ Conditional sum {#sumnc} {#sumz} {#sumnz}
 
 **Explanation:**
 
-These instructions conditionally add or subtract Src from Dest based on the specified flag state. The C flag (with WC) is updated to reflect the correct sign of the result.
+These instructions conditionally add or subtract Src from Dest based on the specified flag state:
+
+| Instruction | Subtracts when | Adds when |
+|-------------|----------------|-----------|
+| SUMC | C = 1 | C = 0 |
+| SUMNC | C = 0 | C = 1 |
+| SUMZ | Z = 1 | Z = 0 |
+| SUMNZ | Z = 0 | Z = 1 |
+
+The C flag (with WC) is updated to reflect the correct sign of the result.
 
 SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when their flag is clear (0), providing complementary behavior.
 
@@ -11710,10 +12042,11 @@ This section contains all PASM2 instructions beginning with the letter T.
 
 
 
+::: instrheader
 ## TEST {#test}
-
 Test
-[Math and Logic](#math-and-logic) - Test the parity and zero state of a register value.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -11752,10 +12085,11 @@ TEST is non-destructive—it does not modify Dest.
 
 
 
+::: instrheader
 ## TESTB {#testb}
-
-Test bit
-[Math and Logic](#math-and-logic) - Test a single bit in a register and write the result to C or Z.
+Test Bit
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
 **TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -11797,10 +12131,11 @@ TESTB is useful for examining individual bits without modifying the register val
 
 
 
+::: instrheader
 ## TESTBN {#testbn}
-
-Test bit negated
-[Math and Logic](#math-and-logic) - Test a single bit in a register, invert the result, and write to C or Z.
+Test Bit Negated
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
 **TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -11837,10 +12172,11 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 
 
 
+::: instrheader
 ## TESTN {#testn}
-
-Test not
-[Math and Logic](#math-and-logic) - Test the parity and zero state of a register ANDed with an inverted value.
+Test Not
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -11872,10 +12208,11 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 
 
 
+::: instrheader
 ## TESTP / TESTPN {#testp}
-
-Test pin / Test pin negated {#testpn}
-[Pin](#pin) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
+Test Pin / Test Pin Negated {#testpn}
+Category: [Pin](instruction-categories.md#pin)
+:::
 
 **TESTP**  *{#}Dest*  **WC/WZ**
 **TESTP**  *{#}Dest*  **ANDC/ANDZ**
@@ -11912,7 +12249,7 @@ Test pin / Test pin negated {#testpn}
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
-**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](#drvl), [DRVH](#drvh)
+**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](instructions-d.md#drvl), [DRVH](instructions-d.md#drvh)
 
 **Explanation:**
 
@@ -11928,80 +12265,58 @@ Both instructions read the actual pin state from the IN register, not the output
 
 
 
-## TJF {#tjf}
-
-Test and jump if full
-[Branch](#branch) - Test a register value and jump if it equals $FFFF_FFFF.
+::: instrheader
+## TJF / TJNF {#tjf}
+Test And Jump If Full / Not Full {#tjnf}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJF**  *Dest, {#}Src*
+**TJNF**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is tested and if it is full ($FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
+**Result:** Dest is tested and conditionally jumps based on full state.
 
-- Dest is a register whose value is tested for full.
+- Dest is a register whose value is tested for full state.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
-
-**Related:** [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-TJF tests the value in Dest and jumps to the address described by Src if the result is full (= -1; = $FFFF_FFFF).
-
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJF.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (13-20 cycles for Hub execution when taken).
-
-
-
-## TJNF {#tjnf}
-
-Test and jump if not full
-[Branch](#branch) - Test a register value and jump if it does not equal $FFFF_FFFF.
-
-**TJNF**  *Dest, {#}Src*
-
----
-
-**Result:** Dest is tested and if it is not full (<> $FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
-
-- Dest is a register whose value is tested for not full.
-- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [TJF](#tjf), [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns)
+**Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv)
 
 **Explanation:**
 
-TJNF tests the value in Dest and jumps to the address described by Src if the result is not full (<> -1; <> $FFFF_FFFF).
+TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and conditionally jump:
 
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNF.
+| Instruction | Jumps when |
+|-------------|------------|
+| TJF | Dest = $FFFF_FFFF (full) |
+| TJNF | Dest ≠ $FFFF_FFFF (not full) |
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
+
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
-## TJNS {#tjns}
+::: instrheader
+## TJS / TJNS {#tjs}
+Test And Jump If Signed / Not Signed {#tjns}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
-Test and jump if not signed
-[Branch](#branch) - Test a register value and jump if bit 31 is clear (positive/unsigned).
-
+**TJS**  *Dest, {#}Src*
 **TJNS**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is tested and if it is not signed (Dest[31] = 0), PC is set to a new relative (#Src) or absolute (Src) address.
+**Result:** Dest is tested and conditionally jumps based on sign bit state.
 
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
@@ -12009,35 +12324,39 @@ Test and jump if not signed
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [TJS](#tjs), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJF](#tjf), [TJNF](#tjnf), [TJV](#tjv)
 
 **Explanation:**
 
-TJNS tests the value in Dest and jumps to the address described by Src if the value is not signed (Dest[31] = 0). The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNS.
+TJS and TJNS test the sign bit (bit 31) of Dest and conditionally jump:
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+| Instruction | Jumps when |
+|-------------|------------|
+| TJS | Dest[31] = 1 (negative/signed) |
+| TJNS | Dest[31] = 0 (positive/unsigned) |
+
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS/TJNS.
+
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
+::: instrheader
 ## TJZ / TJNZ {#tjz}
-
-Test and jump if zero / not zero {#tjnz}
-[Branch](#branch) - Test a register value and jump based on zero/non-zero result.
+Test And Jump If Zero / Not Zero {#tjnz}
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJZ**  *Dest, {#}Src*
 **TJNZ**  *Dest, {#}Src*
 
 ---
 
-**Result:** Dest is tested (not modified), and conditionally jumps:
-
-| Instruction | Jumps when |
-|-------------|------------|
-| TJZ | Dest = 0 |
-| TJNZ | Dest ≠ 0 |
+**Result:** Dest is tested (not modified), and conditionally jumps based on zero/non-zero result.
 
 - Dest is a register whose value is tested (unchanged).
 - Src is the jump address: use # for relative, omit for absolute.
@@ -12053,11 +12372,16 @@ Test and jump if zero / not zero {#tjnz}
 ```
 
 
-**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
+**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](instructions-d.md#djz), [DJNZ](instructions-d.md#djnz)
 
 **Explanation:**
 
-TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on whether the value is zero or non-zero.
+TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on whether the value is zero or non-zero:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| TJZ | Dest = 0 |
+| TJNZ | Dest ≠ 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
@@ -12070,46 +12394,11 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
 
-## TJS {#tjs}
-
-Test and jump if signed
-[Branch](#branch) - Test a register value and jump if bit 31 is set (negative).
-
-**TJS**  *Dest, {#}Src*
-
----
-
-**Result:** Dest is tested and if it is signed (Dest[31] = 1), PC is set to a new relative (#Src) or absolute (Src) address.
-
-- Dest is a register whose value is tested for sign bit.
-- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
-
-**Related:** [TJNS](#tjns), [TJF](#tjf), [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-TJS tests the value in Dest and jumps to the address described by Src if the result is signed (Dest[31] = 1).
-
-The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
-
-::: pasm2
-        TJS     value, #negative_handler  ' Jump if negative
-:::
-
-
-
+::: instrheader
 ## TJV {#tjv}
-
-Test and jump if overflow
-[Branch](#branch) - Test a register value against the C flag and jump if overflow occurred.
+Test And Jump If Overflow
+Category: [Branch](instruction-categories.md#branch)
+:::
 
 **TJV**  *Dest, {#}Src*
 
@@ -12126,7 +12415,7 @@ Test and jump if overflow
 | EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
 
-**Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
+**Related:** [ADDS](instructions-a.md#adds), [ADDSX](instructions-a.md#addsx), [SUBS](instructions-s.md#subs), [SUBSX](instructions-s.md#subsx)
 
 **Explanation:**
 
@@ -12144,78 +12433,35 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 
 
-## TRGINT1 {#trgint1}
-
-Trigger interrupt 1
-[Interrupt](#interrupt) - Software-trigger interrupt handler 1.
+::: instrheader
+## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
+Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
+Category: [Interrupt](instruction-categories.md#interrupt)
+:::
 
 **TRGINT1**
+**TRGINT2**
+**TRGINT3**
 
 ---
 
-**Result:** The INT1 interrupt handler is triggered regardless of STALLI mode.
+**Result:** The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
-
-
-**Related:** [TRGINT2](#trgint2), [TRGINT3](#trgint3), [SETINT1](#setint1), [NIXINT1](#nixint1), [RETI0](#reti0)
-
-**Explanation:**
-
-TRGINT1 software-triggers interrupt handler 1, regardless of STALLI mode. This allows code to explicitly invoke the INT1 service routine without waiting for external events.
-
-
-
-## TRGINT2 {#trgint2}
-
-Trigger interrupt 2
-[Interrupt](#interrupt) - Software-trigger interrupt handler 2.
-
-**TRGINT2**
-
----
-
-**Result:** The INT2 interrupt handler is triggered regardless of STALLI mode.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |
-
-
-**Related:** [TRGINT1](#trgint1), [TRGINT3](#trgint3), [SETINT2](#setint2), [NIXINT2](#nixint2), [RETI0](#reti0)
-
-**Explanation:**
-
-TRGINT2 software-triggers interrupt handler 2, regardless of STALLI mode. This allows code to explicitly invoke the INT2 service routine without waiting for external events.
-
-
-
-## TRGINT3 {#trgint3}
-
-Trigger interrupt 3
-[Interrupt](#interrupt) - Software-trigger interrupt handler 3.
-
-**TRGINT3**
-
----
-
-**Result:** The INT3 interrupt handler is triggered regardless of STALLI mode.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100100 | 000100100 | --- | --- | --- | 2 |
 
 
-**Related:** [TRGINT1](#trgint1), [TRGINT2](#trgint2), [SETINT3](#setint3), [NIXINT3](#nixint3), [RETI0](#reti0)
+**Related:** [SETINT1/2/3](instructions-s.md#setint1), [NIXINT1/2/3](instructions-n.md#nixint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
 **Explanation:**
 
-TRGINT3 software-triggers interrupt handler 3, regardless of STALLI mode. This allows code to explicitly invoke the INT3 service routine without waiting for external events.
+TRGINT1, TRGINT2, and TRGINT3 software-trigger their respective interrupt handlers, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
+
+The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions when you need to invoke an interrupt handler programmatically.
 
 
 # Instructions: W
@@ -12224,10 +12470,11 @@ This section contains all PASM2 instructions beginning with the letter W.
 
 
 
+::: instrheader
 ## WAITATN {#waitatn}
-
-Wait for attention
-[Event](#event) - Wait for attention event from another cog.
+Wait For Attention
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITATN**  **{WC|WZ|WCZ}**
 
@@ -12243,7 +12490,7 @@ Wait for attention
 | EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
+**Related:** [COGATN](instructions-c.md#cogatn), [POLLATN](instructions-p.md#pollatn), [JATN](instructions-j.md#jatn), [JNATN](instructions-j.md#jnatn)
 
 **Explanation:**
 
@@ -12259,10 +12506,11 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 
 
+::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
-
-Wait for counter event {#waitct2} {#waitct3}
-[Event](#event) - Wait for counter event 1, 2, or 3 flag.
+Wait For Counter Event {#waitct2} {#waitct3}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITCT1**  **{WC|WZ|WCZ}**
 **WAITCT2**  **{WC|WZ|WCZ}**
@@ -12282,7 +12530,7 @@ Wait for counter event {#waitct2} {#waitct3}
 | EEEE | 1101011 | CZ0 | 000010011 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
+**Related:** [ADDCT1](instructions-a.md#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](instructions-p.md#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](instructions-j.md#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
 **Explanation:**
 
@@ -12294,10 +12542,11 @@ To set an optional timeout, insert a SETQ instruction immediately before the WAI
 
 
 
+::: instrheader
 ## WAITFBW {#waitfbw}
-
-Wait for FIFO block wrap
-[Event](#event) - Wait for FIFO-interface-block-wrap event.
+Wait For FIFO Block Wrap
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITFBW**  **{WC|WZ|WCZ}**
 
@@ -12313,7 +12562,7 @@ Wait for FIFO block wrap
 | EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
+**Related:** [RDFAST](instructions-r.md#rdfast), [WRFAST](#wrfast), [FBLOCK](instructions-f.md#fblock), [POLLFBW](instructions-p.md#pollfbw)
 
 **Explanation:**
 
@@ -12323,10 +12572,11 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 
 
 
+::: instrheader
 ## WAITINT {#waitint}
-
-Wait for interrupt
-[Event](#event) - Wait for interrupt-occurred event.
+Wait For Interrupt
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITINT**  **{WC|WZ|WCZ}**
 
@@ -12342,7 +12592,7 @@ Wait for interrupt
 | EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
+**Related:** [POLLINT](instructions-p.md#pollint), [JINT](instructions-j.md#jint), [JNINT](instructions-j.md#jnint)
 
 **Explanation:**
 
@@ -12352,10 +12602,11 @@ The interrupt-occurred event flag is cleared upon cog start or execution of POLL
 
 
 
+::: instrheader
 ## WAITPAT {#waitpat}
-
-Wait for pattern
-[Event](#event) - Wait for pin-pattern-detected event.
+Wait For Pattern
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITPAT**  **{WC|WZ|WCZ}**
 
@@ -12371,7 +12622,7 @@ Wait for pattern
 | EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
+**Related:** [SETPAT](instructions-s.md#setpat), [POLLPAT](instructions-p.md#pollpat), [JPAT](instructions-j.md#jpat), [JNPAT](instructions-j.md#jnpat)
 
 **Explanation:**
 
@@ -12386,16 +12637,20 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 
 
 
-## WAITSE1 {#waitse1}
-
-Wait for selectable event 1
-[Event](#event) - Wait for selectable event 1 flag.
+::: instrheader
+## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
+Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITSE1**  **{WC|WZ|WCZ}**
+**WAITSE2**  **{WC|WZ|WCZ}**
+**WAITSE3**  **{WC|WZ|WCZ}**
+**WAITSE4**  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** Waits for the SE1 selectable event flag to be set, then clears the flag and resumes execution.
+**Result:** Waits for the specified selectable event flag (SE1-SE4) to be set, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
@@ -12403,101 +12658,26 @@ Wait for selectable event 1
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010100 | 000100100 | --- | Timeout | Timeout | 2+ |
-
-
-**Related:** [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE1](#setse1), [POLLSE1](#pollse1)
-
-**Explanation:**
-
-WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the SE1 event flag is set. The flag is cleared by execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
-
-
-
-## WAITSE2 {#waitse2}
-
-Wait for selectable event 2
-[Event](#event) - Wait for selectable event 2 flag.
-
-**WAITSE2**  **{WC|WZ|WCZ}**
-
----
-
-**Result:** Waits for the SE2 selectable event flag to be set, then clears the flag and resumes execution.
-
-- WC, WZ, or WCZ are optional effects to set flags on timeout.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010101 | 000100100 | --- | Timeout | Timeout | 2+ |
-
-
-**Related:** [WAITSE1](#waitse1), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE2](#setse2), [POLLSE2](#pollse2)
-
-**Explanation:**
-
-WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the SE2 event flag is set. The flag is cleared by execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
-
-
-
-## WAITSE3 {#waitse3}
-
-Wait for selectable event 3
-[Event](#event) - Wait for selectable event 3 flag.
-
-**WAITSE3**  **{WC|WZ|WCZ}**
-
----
-
-**Result:** Waits for the SE3 selectable event flag to be set, then clears the flag and resumes execution.
-
-- WC, WZ, or WCZ are optional effects to set flags on timeout.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010110 | 000100100 | --- | Timeout | Timeout | 2+ |
-
-
-**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE4](#waitse4), [SETSE3](#setse3), [POLLSE3](#pollse3)
-
-**Explanation:**
-
-WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the SE3 event flag is set. The flag is cleared by execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
-
-
-
-## WAITSE4 {#waitse4}
-
-Wait for selectable event 4
-[Event](#event) - Wait for selectable event 4 flag.
-
-**WAITSE4**  **{WC|WZ|WCZ}**
-
----
-
-**Result:** Waits for the SE4 selectable event flag to be set, then clears the flag and resumes execution.
-
-- WC, WZ, or WCZ are optional effects to set flags on timeout.
-
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010111 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [SETSE4](#setse4), [POLLSE4](#pollse4)
+**Related:** [SETSE1/2/3/4](instructions-s.md#setse1), [POLLSE1/2/3/4](instructions-p.md#pollse1), [JSE1/2/3/4](instructions-j.md#jse1), [JNSE1/2/3/4](instructions-j.md#jnse1)
 
 **Explanation:**
 
-WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the SE4 event flag is set. The flag is cleared by execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
+WAITSE1, WAITSE2, WAITSE3, and WAITSE4 wait for their respective selectable events to occur, stalling the pipeline until the corresponding SE flag is set.
+
+Each selectable event flag is cleared by execution of its respective SETSEn, POLLSEn, WAITSEn, JSEn, or JNSEn instruction.
 
 
 
+::: instrheader
 ## WAITX {#waitx}
-
-Wait cycles
-[Event](#event) - Wait for Dest+1 clock cycles.
+Wait Cycles
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
 
@@ -12528,10 +12708,11 @@ WAITX blocks cog execution completely—no instructions execute and no interrupt
 
 
 
+::: instrheader
 ## WAITXFI {#waitxfi}
-
-Wait for streamer finished
-[Event](#event) - Wait for streamer-finished event.
+Wait For Streamer Finished
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITXFI**  **{WC|WZ|WCZ}**
 
@@ -12547,7 +12728,7 @@ Wait for streamer finished
 | EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
+**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
 
 **Explanation:**
 
@@ -12557,10 +12738,11 @@ The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCON
 
 
 
+::: instrheader
 ## WAITXMT {#waitxmt}
-
-Wait for streamer empty
-[Event](#event) - Wait for streamer-empty event.
+Wait For Streamer Empty
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITXMT**  **{WC|WZ|WCZ}**
 
@@ -12576,7 +12758,7 @@ Wait for streamer empty
 | EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
+**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](instructions-x.md#xinit), [XCONT](instructions-x.md#xcont)
 
 **Explanation:**
 
@@ -12586,10 +12768,11 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 
 
 
+::: instrheader
 ## WAITXRL {#waitxrl}
-
-Wait for streamer LUT rollover
-[Event](#event) - Wait for streamer-LUT-RAM-rollover event.
+Wait For Streamer LUT Rollover
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITXRL**  **{WC|WZ|WCZ}**
 
@@ -12605,7 +12788,7 @@ Wait for streamer LUT rollover
 | EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](instructions-p.md#pollxrl)
 
 **Explanation:**
 
@@ -12615,10 +12798,11 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 
 
 
+::: instrheader
 ## WAITXRO {#waitxro}
-
-Wait for streamer NCO rollover
-[Event](#event) - Wait for streamer-NCO-rollover event.
+Wait For Streamer NCO Rollover
+Category: [Event](instruction-categories.md#event)
+:::
 
 **WAITXRO**  **{WC|WZ|WCZ}**
 
@@ -12634,7 +12818,7 @@ Wait for streamer NCO rollover
 | EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
 
 
-**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](instructions-p.md#pollxro)
 
 **Explanation:**
 
@@ -12644,10 +12828,11 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 
 
 
+::: instrheader
 ## WFBYTE {#wfbyte}
-
-Write FIFO byte
-[Hub FIFO](#hub-fifo) - Write byte to FIFO.
+Write FIFO Byte
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **WFBYTE**  *{#}Dest*
 
@@ -12673,10 +12858,11 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 
 
 
+::: instrheader
 ## WFLONG {#wflong}
-
-Write FIFO long
-[Hub FIFO](#hub-fifo) - Write long to FIFO.
+Write FIFO Long
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **WFLONG**  *{#}Dest*
 
@@ -12702,10 +12888,11 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 
 
 
+::: instrheader
 ## WFWORD {#wfword}
-
-Write FIFO word
-[Hub FIFO](#hub-fifo) - Write word to FIFO.
+Write FIFO Word
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **WFWORD**  *{#}Dest*
 
@@ -12731,10 +12918,11 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 
 
 
+::: instrheader
 ## WMLONG {#wmlong}
-
-Write masked long
-[Hub RAM](#hub-ram) - Write masked long to hub RAM (non-zero bytes only).
+Write Masked Long
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **WMLONG**  *Dest, {#}Src/P*
 
@@ -12763,10 +12951,11 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 
 
 
+::: instrheader
 ## WRBYTE {#wrbyte}
-
-Write byte
-[Hub RAM](#hub-ram) - Write byte to hub RAM.
+Write Byte
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
 
@@ -12783,7 +12972,7 @@ Write byte
 | EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
+**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](instructions-r.md#rdbyte)
 
 **Explanation:**
 
@@ -12797,10 +12986,11 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 
 
+::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
-
-Write flag to register {#wrnc} {#wrz} {#wrnz}
-[Math and Logic](#math-and-logic) - Write C, NC, Z, or NZ flag value to register.
+Write Flag To Register {#wrnc} {#wrz} {#wrnz}
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **WRC**  *Dest*
 **WRNC**  *Dest*
@@ -12837,10 +13027,11 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 
 
 
+::: instrheader
 ## WRFAST {#wrfast}
-
-Write FIFO setup
-[Hub FIFO](#hub-fifo) - Begin new fast hub write via FIFO.
+Write FIFO Setup
+Category: [Hub FIFO](instruction-categories.md#hub-fifo)
+:::
 
 **WRFAST**  *{#}Dest, {#}Src*
 
@@ -12857,7 +13048,7 @@ Write FIFO setup
 | EEEE | 1100100 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 3 |
 
 
-**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](#rdfast)
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](instructions-r.md#rdfast)
 
 **Explanation:**
 
@@ -12874,10 +13065,11 @@ Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increme
 
 
 
+::: instrheader
 ## WRLONG {#wrlong}
-
-Write long
-[Hub RAM](#hub-ram) - Write long to hub RAM.
+Write Long
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
 
@@ -12894,7 +13086,7 @@ Write long
 | EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
+**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](instructions-r.md#rdlong)
 
 **Explanation:**
 
@@ -12911,10 +13103,11 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
 
 
 
+::: instrheader
 ## WRLUT {#wrlut}
-
 Write LUT
-[Lookup Table](#lookup-table) - Write Dest to LUT address.
+Category: [Lookup Table](instruction-categories.md#lookup-table)
+:::
 
 **WRLUT**  *{#}Dest, {#}Src/P*
 
@@ -12931,7 +13124,7 @@ Write LUT
 | EEEE | 1100001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [RDLUT](#rdlut), [WRLONG](#wrlong), [SETQ](#setq)
+**Related:** [RDLUT](instructions-r.md#rdlut), [WRLONG](#wrlong), [SETQ](instructions-s.md#setq)
 
 **Explanation:**
 
@@ -12947,10 +13140,11 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 
 
 
+::: instrheader
 ## WRPIN {#wrpin}
-
-Write pin mode
-[Smart Pin](#smart-pin) - Configure smart pin mode.
+Write Pin Mode
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **WRPIN**  *{#}Dest, {#}Src*
 
@@ -12967,7 +13161,7 @@ Write pin mode
 | EEEE | 1100000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin), [AKPIN](#akpin)
+**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](instructions-r.md#rdpin), [AKPIN](instructions-a.md#akpin)
 
 **Explanation:**
 
@@ -12993,10 +13187,11 @@ WRPIN #0, pin clears all smart pin configuration.
 
 
 
+::: instrheader
 ## WRWORD {#wrword}
-
-Write word
-[Hub RAM](#hub-ram) - Write word to hub RAM.
+Write Word
+Category: [Hub RAM](instruction-categories.md#hub-ram)
+:::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
 
@@ -13013,7 +13208,7 @@ Write word
 | EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
 
-**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
+**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](instructions-r.md#rdword)
 
 **Explanation:**
 
@@ -13023,10 +13218,11 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 
 
+::: instrheader
 ## WXPIN {#wxpin}
-
-Write pin X parameter
-[Smart Pin](#smart-pin) - Set smart pin X parameter.
+Write Pin X Parameter
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **WXPIN**  *{#}Dest, {#}Src*
 
@@ -13043,7 +13239,7 @@ Write pin X parameter
 | EEEE | 1100000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](#rdpin)
+**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](instructions-r.md#rdpin)
 
 **Explanation:**
 
@@ -13058,10 +13254,11 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 
 
 
+::: instrheader
 ## WYPIN {#wypin}
-
-Write pin Y parameter
-[Smart Pin](#smart-pin) - Set smart pin Y parameter.
+Write Pin Y Parameter
+Category: [Smart Pin](instruction-categories.md#smart-pin)
+:::
 
 **WYPIN**  *{#}Dest, {#}Src*
 
@@ -13078,7 +13275,7 @@ Write pin Y parameter
 | EEEE | 1100001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](#rdpin)
+**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](instructions-r.md#rdpin)
 
 **Explanation:**
 
@@ -13102,10 +13299,11 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 
 
 
+::: instrheader
 ## XCONT {#xcont}
-
-Execute continue
-[Streamer](#streamer-category) - Buffer new streamer command to continue from current phase.
+Execute Continue
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XCONT**  *{#}Dest, {#}Src*
 
@@ -13122,7 +13320,7 @@ Execute continue
 | EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 
@@ -13134,10 +13332,11 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 
 
 
+::: instrheader
 ## XINIT {#xinit}
-
-Execute initialize
-[Streamer](#streamer-category) - Issue streamer command immediately, zeroing phase.
+Execute Initialize
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XINIT**  *{#}Dest, {#}Src*
 
@@ -13154,7 +13353,7 @@ Execute initialize
 | EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
+**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi), [SETXFRQ](instructions-s.md#setxfrq)
 
 **Explanation:**
 
@@ -13179,10 +13378,11 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 
 
 
+::: instrheader
 ## XOR {#xor}
-
-Exclusive or
-[Math and Logic](#math-and-logic) - Bitwise XOR a value with another.
+Exclusive Or
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
@@ -13202,7 +13402,7 @@ Exclusive or
 | EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
 
 
-**Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
+**Related:** [AND](instructions-a.md#and), [OR](instructions-o.md#or), [ANDN](instructions-a.md#andn), [TEST](instructions-t.md#test)
 
 **Explanation:**
 
@@ -13220,10 +13420,11 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 
 
 
+::: instrheader
 ## XORO32 {#xoro32}
-
 Xoroshiro 32
-[Math and Logic](#math-and-logic) - Iterate Dest with xoroshiro32+ PRNG algorithm.
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **XORO32**  *Dest*
 
@@ -13239,7 +13440,7 @@ Xoroshiro 32
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
 
 
-**Related:** [GETRND](#getrnd), [SETQ](#setq)
+**Related:** [GETRND](instructions-g.md#getrnd), [SETQ](instructions-s.md#setq)
 
 **Explanation:**
 
@@ -13265,10 +13466,11 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 
 
 
+::: instrheader
 ## XSTOP {#xstop}
-
-Execute stop
-[Streamer](#streamer-category) - Stop streamer immediately.
+Execute Stop
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XSTOP**
 
@@ -13284,7 +13486,7 @@ Execute stop
 | EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 
@@ -13301,10 +13503,11 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 
 
 
+::: instrheader
 ## XZERO {#xzero}
-
-Execute zero
-[Streamer](#streamer-category) - Buffer new streamer command, zeroing phase.
+Execute Zero
+Category: [Streamer](instruction-categories.md#streamer-category)
+:::
 
 **XZERO**  *{#}Dest, {#}Src*
 
@@ -13321,7 +13524,7 @@ Execute zero
 | EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
 
-**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](instructions-w.md#waitxfi)
 
 **Explanation:**
 
@@ -13340,10 +13543,11 @@ This section contains all PASM2 instructions beginning with the letter Z. There 
 
 
 
+::: instrheader
 ## ZEROX {#zerox}
-
-Zero extend
-[Math and Logic](#math-and-logic) - Zero-extend a value beyond a designated bit.
+Zero Extend
+Category: [Math and Logic](instruction-categories.md#math-and-logic)
+:::
 
 **ZEROX**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
@@ -13363,7 +13567,7 @@ Zero extend
 | EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
 
 
-**Related:** [SIGNX](#signx)
+**Related:** [SIGNX](instructions-s.md#signx)
 
 **Explanation:**
 
@@ -13396,7 +13600,11 @@ The P2 assembler provides 13 directives organized into five functional categorie
 
 Origin directives set the memory address where subsequent code or data will be assembled. The P2 distinguishes between cog RAM (0-$1FF) and hub RAM addresses.
 
-### ORG
+::: dirheader
+### ORG {#org}
+Set Origin
+Category: [Origin Control](instruction-categories.md#origin-control)
+:::
 
 Set the assembly origin to a specific cog RAM address. All subsequent instructions assemble starting from this address.
 
@@ -13435,7 +13643,11 @@ table   long    1, 2, 3         ' Data table at specific address
 
 
 
-### ORGF
+::: dirheader
+### ORGF {#orgf}
+Set Origin With Fill
+Category: [Origin Control](instruction-categories.md#origin-control)
+:::
 
 Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which simply sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
 
@@ -13485,7 +13697,11 @@ block_end
 
 
 
-### ORGH
+::: dirheader
+### ORGH {#orgh}
+Set Hub Origin
+Category: [Origin Control](instruction-categories.md#origin-control)
+:::
 
 Set the assembly origin to a hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
 
@@ -13527,7 +13743,11 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
 
 Memory definition directives allocate and initialize data in memory. Each directive specifies the size of data elements (byte, word, or long) and their initial values.
 
-### BYTE
+::: dirheader
+### BYTE {#byte}
+Declare Byte Data
+Category: [Memory Definition](instruction-categories.md#memory-definition)
+:::
 
 Declare byte data in memory. Stores 8-bit values at the current address.
 
@@ -13565,7 +13785,11 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 
 
 
-### LONG
+::: dirheader
+### LONG {#long}
+Declare Long Data
+Category: [Memory Definition](instruction-categories.md#memory-definition)
+:::
 
 Declare long data in memory. Stores 32-bit values at the current address.
 
@@ -13603,7 +13827,11 @@ ptrs    long    @start, @end    ' Address pointers
 
 
 
-### WORD
+::: dirheader
+### WORD {#word}
+Declare Word Data
+Category: [Memory Definition](instruction-categories.md#memory-definition)
+:::
 
 Declare word data in memory. Stores 16-bit values at the current address.
 
@@ -13644,7 +13872,11 @@ addr    word    @buffer             ' Address reference (lower 16 bits)
 
 Size verification directives provide compile-time checking that values fit within specified bit ranges. These directives generate assembly errors when constraints are violated, catching overflow errors before runtime.
 
-### BYTEFIT
+::: dirheader
+### BYTEFIT {#bytefit}
+Constrain To Byte Range
+Category: [Size Verification](instruction-categories.md#size-verification)
+:::
 
 Constrain expression to fit within byte range (0-255). Generates assembly error if expression value exceeds byte range.
 
@@ -13685,7 +13917,11 @@ DAT
 
 
 
-### WORDFIT
+::: dirheader
+### WORDFIT {#wordfit}
+Constrain To Word Range
+Category: [Size Verification](instruction-categories.md#size-verification)
+:::
 
 Constrain expression to fit within word range (0-65535). Generates assembly error if expression value exceeds word range.
 
@@ -13730,7 +13966,11 @@ DAT
 
 Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Proper alignment improves memory access efficiency and is required for certain P2 operations.
 
-### ALIGNL
+::: dirheader
+### ALIGNL {#alignl}
+Align To Long Boundary
+Category: [Alignment](instruction-categories.md#alignment)
+:::
 
 Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a long boundary.
 
@@ -13761,7 +14001,11 @@ mydata  long    0               ' This starts on a long-aligned address
 
 
 
-### ALIGNW
+::: dirheader
+### ALIGNW {#alignw}
+Align To Word Boundary
+Category: [Alignment](instruction-categories.md#alignment)
+:::
 
 Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a word boundary.
 
@@ -13795,7 +14039,11 @@ myword  word    0               ' This starts on a word-aligned address
 
 Space management directives control memory allocation and verify size constraints. These directives either reserve space without initialization or verify that code fits within specified limits.
 
-### DITTO
+::: dirheader
+### DITTO {#ditto}
+Repeat Previous Instruction
+Category: [Space Management](instruction-categories.md#space-management)
+:::
 
 Repeat the previous instruction. Inserts a copy of the immediately preceding instruction at the current location.
 
@@ -13843,7 +14091,11 @@ Use DITTO to create repeated instruction sequences without copy-paste. Useful fo
 
 
 
-### FIT
+::: dirheader
+### FIT {#fit}
+Verify Code Fits
+Category: [Space Management](instruction-categories.md#space-management)
+:::
 
 Verify that code fits within specified address limit. Generates assembly error if current address exceeds specified limit.
 
@@ -13884,7 +14136,11 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 
 
 
-### RES
+::: dirheader
+### RES {#res}
+Reserve Space
+Category: [Space Management](instruction-categories.md#space-management)
+:::
 
 Reserve space in cog RAM without initializing. Allocates memory space but doesn't generate any data.
 
@@ -13939,7 +14195,11 @@ PASM2 provides a set of predefined constants that the assembler substitutes at c
 
 ## Boolean Constants
 
-### TRUE
+::: constheader
+### TRUE {#true}
+Logical True Constant
+Category: [Boolean Constants](instruction-categories.md#boolean-constants)
+:::
 
 Logical true constant with all bits set.
 
@@ -13971,7 +14231,11 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 
 
 
-### FALSE
+::: constheader
+### FALSE {#false}
+Logical False Constant
+Category: [Boolean Constants](instruction-categories.md#boolean-constants)
+:::
 
 Logical false constant with all bits cleared.
 
@@ -14006,7 +14270,11 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 
 ## Numeric Limit Constants
 
-### NEGX
+::: constheader
+### NEGX {#negx}
+Maximum Negative Integer
+Category: [Numeric Limit Constants](instruction-categories.md#numeric-limit-constants)
+:::
 
 Most negative value in 32-bit signed integer representation.
 
@@ -14042,7 +14310,11 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 
 
 
-### POSX
+::: constheader
+### POSX {#posx}
+Maximum Positive Integer
+Category: [Numeric Limit Constants](instruction-categories.md#numeric-limit-constants)
+:::
 
 Most positive value in 32-bit signed integer representation.
 
@@ -14080,7 +14352,11 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 
 ## Mathematical Constants
 
-### PI
+::: constheader
+### PI {#pi}
+Mathematical Pi Constant
+Category: [Mathematical Constants](instruction-categories.md#mathematical-constants)
+:::
 
 IEEE 754 single-precision floating-point representation of π.
 
@@ -14121,7 +14397,11 @@ None (unique mathematical constant)
 
 ## Execution Mode Constants
 
-### COGEXEC
+::: constheader
+### COGEXEC {#cogexec}
+Cog Execution Mode
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
 Execution mode constant for loading code from hub RAM to cog RAM.
 
@@ -14163,7 +14443,11 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 
 
-### HUBEXEC
+::: constheader
+### HUBEXEC {#hubexec}
+Hub Execution Mode
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
 Execution mode constant for executing code directly from hub RAM.
 
@@ -14210,17 +14494,37 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 The execution mode constants include additional variants for automatic cog selection:
 
-### COGEXEC_NEW
-Value: Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+::: constheader
+### COGEXEC_NEW {#cogexec_new}
+Auto-Select Cog For Cog Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
-### COGEXEC_NEW_PAIR
-Value: Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
 
-### HUBEXEC_NEW
-Value: Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+::: constheader
+### COGEXEC_NEW_PAIR {#cogexec_new_pair}
+Auto-Select Cog Pair For Cog Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
 
-### HUBEXEC_NEW_PAIR
-Value: Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
+Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+
+::: constheader
+### HUBEXEC_NEW {#hubexec_new}
+Auto-Select Cog For Hub Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
+
+Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+
+::: constheader
+### HUBEXEC_NEW_PAIR {#hubexec_new_pair}
+Auto-Select Cog Pair For Hub Execution
+Category: [Execution Mode Constants](instruction-categories.md#execution-mode-constants)
+:::
+
+Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
 
 These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
 
@@ -14266,7 +14570,7 @@ The P2 provides a set of special-purpose registers that enable critical system f
 
 The P2's special register architecture provides a balance between functionality and flexibility. Each cog has its own independent copy of all special registers, allowing parallel operation without interference. Changes to these registers take effect immediately, enabling precise control over timing-critical operations.
 
-### Memory Map ($1F0-$1FF)
+### Memory Map ($1F0-$1FF) {#special-registers-map}
 
 The top 16 locations of cog RAM are reserved for special registers:
 
@@ -14297,9 +14601,9 @@ The top 16 locations of cog RAM are reserved for special registers:
 
 ## Dual-Purpose Registers
 
-### IJMP3 — Address $1F0
+### IJMP3 {#ijmp3}
 
-Interrupt 3 call address. Stores the address where execution jumps when interrupt 3 is triggered.
+Address $1F0. Interrupt 3 call address. Stores the address where execution jumps when interrupt 3 is triggered.
 
 **Access**: Read/Write
 
@@ -14311,13 +14615,13 @@ Interrupt 3 call address. Stores the address where execution jumps when interrup
         setint3 #event_ct1              ' Enable INT3 for CT1 event
 ```
 
-**Related**: [IRET3](#iret3--address-1f1), SETINT3, RETI3
+**Related**: [IRET3](#iret3), SETINT3, RETI3
 
 
 
-### IRET3 — Address $1F1
+### IRET3 {#iret3}
 
-Interrupt 3 return address. Stores the return address when interrupt 3 is triggered.
+Address $1F1. Interrupt 3 return address. Stores the return address when interrupt 3 is triggered.
 
 **Access**: Read/Write
 
@@ -14330,13 +14634,13 @@ int3_handler
         reti3                           ' Return to saved address in IRET3
 ```
 
-**Related**: [IJMP3](#ijmp3--address-1f0), SETINT3, RETI3
+**Related**: [IJMP3](#ijmp3), SETINT3, RETI3
 
 
 
-### IJMP2 — Address $1F2
+### IJMP2 {#ijmp2}
 
-Interrupt 2 call address. Stores the address where execution jumps when interrupt 2 is triggered.
+Address $1F2. Interrupt 2 call address. Stores the address where execution jumps when interrupt 2 is triggered.
 
 **Access**: Read/Write
 
@@ -14348,13 +14652,13 @@ Interrupt 2 call address. Stores the address where execution jumps when interrup
         setint2 #event_ct2              ' Enable INT2 for CT2 event
 ```
 
-**Related**: [IRET2](#iret2--address-1f3), SETINT2, RETI2
+**Related**: [IRET2](#iret2), SETINT2, RETI2
 
 
 
-### IRET2 — Address $1F3
+### IRET2 {#iret2}
 
-Interrupt 2 return address. Stores the return address when interrupt 2 is triggered.
+Address $1F3. Interrupt 2 return address. Stores the return address when interrupt 2 is triggered.
 
 **Access**: Read/Write
 
@@ -14367,13 +14671,13 @@ int2_handler
         reti2                           ' Return to saved address in IRET2
 ```
 
-**Related**: [IJMP2](#ijmp2--address-1f2), SETINT2, RETI2
+**Related**: [IJMP2](#ijmp2), SETINT2, RETI2
 
 
 
-### IJMP1 — Address $1F4
+### IJMP1 {#ijmp1}
 
-Interrupt 1 call address. Stores the address where execution jumps when interrupt 1 is triggered.
+Address $1F4. Interrupt 1 call address. Stores the address where execution jumps when interrupt 1 is triggered.
 
 **Access**: Read/Write
 
@@ -14385,13 +14689,13 @@ Interrupt 1 call address. Stores the address where execution jumps when interrup
         setint1 #event_ct3              ' Enable INT1 for CT3 event
 ```
 
-**Related**: [IRET1](#iret1--address-1f5), SETINT1, RETI1
+**Related**: [IRET1](#iret1), SETINT1, RETI1
 
 
 
-### IRET1 — Address $1F5
+### IRET1 {#iret1}
 
-Interrupt 1 return address. Stores the return address when interrupt 1 is triggered.
+Address $1F5. Interrupt 1 return address. Stores the return address when interrupt 1 is triggered.
 
 **Access**: Read/Write
 
@@ -14404,13 +14708,13 @@ int1_handler
         reti1                           ' Return to saved address in IRET1
 ```
 
-**Related**: [IJMP1](#ijmp1--address-1f4), SETINT1, RETI1
+**Related**: [IJMP1](#ijmp1), SETINT1, RETI1
 
 
 
-### PA — Address $1F6
+### PA {#pa}
 
-Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
+Address $1F6. Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
 
 **Access**: Read/Write
 
@@ -14432,13 +14736,13 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
         mov     PA, #42                 ' Regular register usage
 ```
 
-**Related**: [PB](#pb--address-1f7), CALLD, CALLPA, LOC
+**Related**: [PB](#pb), CALLD, CALLPA, LOC
 
 
 
-### PB — Address $1F7
+### PB {#pb}
 
-Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
+Address $1F7. Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
 
 **Access**: Read/Write
 
@@ -14460,15 +14764,15 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
         mov     PB, ##hub_addr          ' Regular register usage
 ```
 
-**Related**: [PA](#pa--address-1f6), CALLD, CALLPB, LOC
+**Related**: [PA](#pa), CALLD, CALLPB, LOC
 
 
 
 ## Fixed Special Registers
 
-### PTRA — Address $1F8
+### PTRA {#ptra}
 
-Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
@@ -14492,13 +14796,13 @@ Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic
         rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
 ```
 
-**Related**: [PTRB](#ptrb--address-1f9), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
+**Related**: [PTRB](#ptrb), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
 
 
 
-### PTRB — Address $1F9
+### PTRB {#ptrb}
 
-Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automatic increment/decrement support.
+Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automatic increment/decrement support.
 
 **Access**: Read/Write
 
@@ -14521,13 +14825,13 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
 ```
 
-**Related**: [PTRA](#ptra--address-1f8), RDLONG, WRLONG, COGINIT
+**Related**: [PTRA](#ptra), RDLONG, WRLONG, COGINIT
 
 
 
-### DIRA — Address $1FA
+### DIRA {#dira}
 
-Direction register A for pins 0-31. Controls whether each pin is an input or output.
+Address $1FA. Direction register A for pins 0-31. Controls whether each pin is an input or output.
 
 **Access**: Read/Write
 
@@ -14548,13 +14852,13 @@ Direction register A for pins 0-31. Controls whether each pin is an input or out
         mov     DIRA, new_directions    ' Change all 32 directions
 ```
 
-**Related**: [DIRB](#dirb--address-1fb), [OUTA](#outa--address-1fc), [INA](#ina--address-1fe), DIRC, DIRH, DIRL
+**Related**: [DIRB](#dirb), [OUTA](#outa), [INA](#ina), DIRC, DIRH, DIRL
 
 
 
-### DIRB — Address $1FB
+### DIRB {#dirb}
 
-Direction register B for pins 32-63. Controls whether each pin is an input or output.
+Address $1FB. Direction register B for pins 32-63. Controls whether each pin is an input or output.
 
 **Access**: Read/Write
 
@@ -14572,13 +14876,13 @@ Direction register B for pins 32-63. Controls whether each pin is an input or ou
         andn    DIRB, ##$0000_FFFF      ' Set pins 32-47 as inputs
 ```
 
-**Related**: [DIRA](#dira--address-1fa), [OUTB](#outb--address-1fd), [INB](#inb--address-1ff)
+**Related**: [DIRA](#dira), [OUTB](#outb), [INB](#inb)
 
 
 
-### OUTA — Address $1FC
+### OUTA {#outa}
 
-Output register A for pins 0-31. Sets the output state for pins configured as outputs.
+Address $1FC. Output register A for pins 0-31. Sets the output state for pins configured as outputs.
 
 **Access**: Read/Write
 
@@ -14600,13 +14904,13 @@ Output register A for pins 0-31. Sets the output state for pins configured as ou
         mov     OUTA, new_pattern       ' Change all 32 outputs atomically
 ```
 
-**Related**: [OUTB](#outb--address-1fd), [DIRA](#dira--address-1fa), [INA](#ina--address-1fe), OUTC, OUTH, OUTL
+**Related**: [OUTB](#outb), [DIRA](#dira), [INA](#ina), OUTC, OUTH, OUTL
 
 
 
-### OUTB — Address $1FD
+### OUTB {#outb}
 
-Output register B for pins 32-63. Sets the output state for pins configured as outputs.
+Address $1FD. Output register B for pins 32-63. Sets the output state for pins configured as outputs.
 
 **Access**: Read/Write
 
@@ -14625,13 +14929,13 @@ Output register B for pins 32-63. Sets the output state for pins configured as o
         xor     OUTB, toggle_mask       ' Toggle specific pins
 ```
 
-**Related**: [OUTA](#outa--address-1fc), [DIRB](#dirb--address-1fb), [INB](#inb--address-1ff)
+**Related**: [OUTA](#outa), [DIRB](#dirb), [INB](#inb)
 
 
 
-### INA — Address $1FE
+### INA {#ina}
 
-Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
+Address $1FE. Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
 
 **Access**: Read-only for pin states (also serves as debug interrupt call address)
 
@@ -14655,13 +14959,13 @@ Input register A for pins 0-31. Reads the current state of pins regardless of di
         if_z    jmp     #.wait
 ```
 
-**Related**: [INB](#inb--address-1ff), [DIRA](#dira--address-1fa), [OUTA](#outa--address-1fc)
+**Related**: [INB](#inb), [DIRA](#dira), [OUTA](#outa)
 
 
 
-### INB — Address $1FF
+### INB {#inb}
 
-Input register B for pins 32-63. Reads the current state of pins regardless of direction setting.
+Address $1FF. Input register B for pins 32-63. Reads the current state of pins regardless of direction setting.
 
 **Access**: Read-only for pin states (also serves as debug interrupt return address)
 
@@ -14682,7 +14986,7 @@ Input register B for pins 32-63. Reads the current state of pins regardless of d
                 mov     OUTB, INB
 ```
 
-**Related**: [INA](#ina--address-1fe), [DIRB](#dirb--address-1fb), [OUTB](#outb--address-1fd)
+**Related**: [INA](#ina), [DIRB](#dirb), [OUTB](#outb)
 
 
 
