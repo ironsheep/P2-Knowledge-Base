@@ -24,16 +24,14 @@ Increment and jump if zero / not zero {#ijnz}
 - Dest is a register whose value is incremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
 *PC is written only when the jump condition is met.
 ```
-
 
 **Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -62,11 +60,9 @@ Increment with modulus
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply to Dest's increment operation.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0111000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{D = S, set D = 0 and C = 1, else D = D + 1 and C = 0}{Result = 0}{2}
+```
 
 **Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 

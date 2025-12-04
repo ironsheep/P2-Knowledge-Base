@@ -20,12 +20,12 @@ Encode
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is to be encoded into a bit position.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | D | S != 0 | Result = 0 | 2 |
-| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0111100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S != 0}{Result = 0}{2}
+\encodingrow{EEEE}{0111100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Original D != 0}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [DECOD](#decod)
 
@@ -62,11 +62,9 @@ Call and skip
 
 - Dest is a register or 10-bit literal specifying the target address in bits [9:0] and the skip pattern in bits [31:10].
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00I}{DDDDDDDDD}{000110011}{---}{---}{---}{4}
+```
 
 **Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)
 

@@ -17,11 +17,11 @@ Jump if ATN event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the ATN event flag is set.
+```
 
 **Related:** [JNATN](#jnatn), [COGATN](#cogatn), [POLLATT](#pollatt)
 
@@ -52,17 +52,15 @@ Jump if counter event flag is set (1, 2, or 3)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
+
 \textsuperscript{1} PC is written only when the CTn event flag is set.
 ```
-
 
 **Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
@@ -91,11 +89,11 @@ Jump if FIFO block wrap event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the FIFO interface block wrap event flag is set.
+```
 
 **Related:** [JNFBW](#jnfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
@@ -124,11 +122,11 @@ Jump if INT event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000000000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the INT event flag is set.
+```
 
 **Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
@@ -161,12 +159,12 @@ Jump
 - A is a 20-bit absolute or PC-relative address. Use \ prefix to force absolute addressing when using #.
 - WC, WZ, or WCZ are optional effects to set C flag to D[31] and/or Z flag to D[30].
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | PC | D[31] | D[30] | 4 |
-| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101100}{PC}{D[31]}{D[30]}{4}
+\encodingrow{EEEE}{1101100}{RAA}{AAAAAAAAA}{AAAAAAAAA}{PC}{---}{---}{4}
+\end{encodingtable}
+```
 
 **Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
 
@@ -197,11 +195,9 @@ Jump relative
 
 - D is a register or 9-bit literal specifying the signed offset in instructions. For COG execution, PC += D[19:0]. For Hub execution, PC += D[17:0] << 2.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110000}{PC}{---}{---}{4}
+```
 
 **Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP](#ijmp)
 
@@ -232,11 +228,11 @@ Jump if ATN event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the ATN event flag is clear.
+```
 
 **Related:** [JATN](#jatn), [COGATN](#cogatn), [POLLATT](#pollatt)
 
@@ -267,17 +263,15 @@ Jump if counter event flag is clear (1, 2, or 3)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
+
 \textsuperscript{1} PC is written only when the CTn event flag is clear.
 ```
-
 
 **Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
@@ -306,11 +300,11 @@ Jump if FIFO block wrap event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the FIFO interface block wrap event flag is clear.
+```
 
 **Related:** [JFBW](#jfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
@@ -339,11 +333,11 @@ Jump if INT event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000010000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the INT event flag is clear.
+```
 
 **Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
@@ -372,11 +366,11 @@ Jump if pattern match event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the PAT event flag is clear.
+```
 
 **Related:** [JPAT](#jpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
@@ -405,11 +399,11 @@ Jump if CORDIC empty event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the CORDIC-read-but-empty event flag is clear.
+```
 
 **Related:** [JQMT](#jqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
@@ -441,18 +435,16 @@ Jump if selectable event flag is clear (1, 2, 3, or 4)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
+
 \textsuperscript{1} PC is written only when the SEn event flag is clear.
 ```
-
 
 **Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
@@ -481,11 +473,11 @@ Jump if streamer finished event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XFI event flag is clear.
+```
 
 **Related:** [JXFI](#jxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
@@ -514,11 +506,11 @@ Jump if streamer empty event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XMT event flag is clear.
+```
 
 **Related:** [JXMT](#jxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
@@ -547,11 +539,11 @@ Jump if streamer LUT rollover event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XRL event flag is clear.
+```
 
 **Related:** [JXRL](#jxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
@@ -580,11 +572,11 @@ Jump if streamer NCO rollover event flag is clear
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000011100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XRO event flag is clear.
+```
 
 **Related:** [JXRO](#jxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
@@ -613,11 +605,11 @@ Jump if pattern match event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001000}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the PAT event flag is set.
+```
 
 **Related:** [JNPAT](#jnpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
 
@@ -646,11 +638,11 @@ Jump if CORDIC empty event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the CORDIC-read-but-empty event flag is set.
+```
 
 **Related:** [JNQMT](#jnqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
 
@@ -682,18 +674,16 @@ Jump if selectable event flag is set (1, 2, 3, or 4)
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
+
 \textsuperscript{1} PC is written only when the SEn event flag is set.
 ```
-
 
 **Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
@@ -722,11 +712,11 @@ Jump if streamer finished event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XFI event flag is set.
+```
 
 **Related:** [JNXFI](#jnxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
@@ -755,11 +745,11 @@ Jump if streamer empty event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XMT event flag is set.
+```
 
 **Related:** [JNXMT](#jnxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
@@ -788,11 +778,11 @@ Jump if streamer LUT rollover event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XRL event flag is set.
+```
 
 **Related:** [JNXRL](#jnxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
@@ -821,11 +811,11 @@ Jump if streamer NCO rollover event flag is set
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
+```{=latex}
+\simpleencoding{EEEE}{1011110}{01I}{000001100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
+\textsuperscript{1} PC is written only when the XRO event flag is set.
+```
 
 **Related:** [JNXRO](#jnxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 

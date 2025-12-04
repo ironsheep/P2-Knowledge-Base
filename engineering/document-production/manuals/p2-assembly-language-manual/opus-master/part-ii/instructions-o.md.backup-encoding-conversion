@@ -20,12 +20,12 @@ Ones
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is checked for ones.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Result is odd | Result = 0 | 2 |
-| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0111101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Result is odd}{Result = 0}{2}
+\encodingrow{EEEE}{0111101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Result is odd}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
 
@@ -58,11 +58,9 @@ Or
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is bitwise ORed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0101010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity of Result}{Result = 0}{2}
+```
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
 
@@ -112,14 +110,14 @@ Output by flag state {#outnc} {#outz} {#outnz}
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | OUTx | --- | orig out | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{orig out}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{orig out}{2}
+\end{encodingtable}
+```
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
@@ -145,11 +143,9 @@ Output high
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001001}{OUTx}{---}{Original OUTx base bit}{2}
+```
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
@@ -181,11 +177,9 @@ Output low
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set low.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001000}{OUTx}{---}{Original OUTx base bit}{2}
+```
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
@@ -217,11 +211,9 @@ Output not (toggle)
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001111}{OUTx}{---}{Original OUTx base bit}{2}
+```
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
@@ -253,11 +245,9 @@ Output random
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to random output levels.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001110}{OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
+```
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 

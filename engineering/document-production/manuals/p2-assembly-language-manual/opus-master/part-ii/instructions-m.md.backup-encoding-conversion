@@ -17,11 +17,9 @@ Merge bits of bytes
 
 - D is a register containing the value whose byte bits will be merged.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100001}{D}{---}{---}{2}
+```
 
 **Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
 
@@ -48,11 +46,9 @@ Merge bits of words
 
 - D is a register containing the value whose word bits will be merged.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100011}{D}{---}{---}{2}
+```
 
 **Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
 
@@ -80,11 +76,9 @@ Mix pixels
 - D is a register containing the destination pixel bytes to be modified.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the source pixel bytes.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010010}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
+```
 
 **Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
 
@@ -114,11 +108,9 @@ Modify C flag
 - c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
 - WC is an optional effect to make the modification visible to subsequent flag reads.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{C01}{0cccc0000}{001101111}{---}{cccc[\{C,Z\}]}{---}{2}
+```
 
 **Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -151,11 +143,9 @@ Modify C and Z flags
 - z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
 - WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{0cccczzzz}{001101111}{---}{cccc[\{C,Z\}]}{zzzz[\{C,Z\}]}{2}
+```
 
 **Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -189,11 +179,9 @@ Modify Z flag
 - z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
 - WZ is an optional effect to make the modification visible to subsequent flag reads.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{0Z1}{00000zzzz}{001101111}{---}{---}{zzzz[\{C,Z\}]}{2}
+```
 
 **Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -226,11 +214,9 @@ Move
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0110000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S[31]}{Result = 0}{2}
+```
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
 
@@ -282,11 +268,9 @@ Move bytes
 - D is a register containing the bytes to be rearranged.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the byte selection pattern.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1001111}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+```
 
 **Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
 
@@ -323,11 +307,9 @@ Multiply
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose lower 16 bits are multiplied with Dest.
 - WZ is an optional effect to update the Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010000}{0ZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{(D = 0) | (S = 0)}{2}
+```
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
@@ -374,11 +356,9 @@ Multiply pixels
 - D is a register containing four pixel bytes to be multiplied.
 - S is a register, 9-bit literal, or 32-bit augmented literal containing four pixel bytes as multipliers.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010010}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
+```
 
 **Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
 
@@ -417,11 +397,9 @@ Multiply signed
 - Src is a register, 9-bit literal, or signed 16-bit augmented literal whose lower 16 bits are multiplied with Dest.
 - WZ is an optional effect to update the Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010000}{1ZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{(D = 0) | (S = 0)}{2}
+```
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
 
@@ -482,14 +460,14 @@ Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrow{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -527,11 +505,9 @@ Multiplex nibbles
 - Dest is a register whose nibbles will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing nibble values to copy.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1001111}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+```
 
 **Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
@@ -569,11 +545,9 @@ Multiplex nits
 - Dest is a register whose bit pairs will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit pair values to copy.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1001111}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+```
 
 **Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
 
@@ -611,11 +585,9 @@ Multiplex Q
 - Dest is a register whose bits will be updated from Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit values to copy.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1001111}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+```
 
 **Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 

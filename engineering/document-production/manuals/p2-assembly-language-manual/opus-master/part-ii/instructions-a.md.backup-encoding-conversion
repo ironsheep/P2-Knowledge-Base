@@ -20,12 +20,12 @@ Absolute
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute value is written to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
-| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0110010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{S[31]}{Result = 0}{2}
+\encodingrow{EEEE}{0110010}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{D[31]}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [NEG](#neg)
 
@@ -56,11 +56,9 @@ Add
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S)}{Result = 0}{2}
+```
 
 **Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
 
@@ -99,13 +97,13 @@ Add and set counter event trigger (1, 2, or 3)
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
@@ -131,11 +129,9 @@ Add pixels
 - Dest is a register containing the RGB color value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added into Dest.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010010}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
+```
 
 **Related:** [SUBPIX](#subpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
 
@@ -164,11 +160,9 @@ Add signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0001010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{sign of (D + S)}{Result = 0}{2}
+```
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
 
@@ -201,11 +195,9 @@ Add signed, extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0001011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{sign of (D+S+C)}{Z AND (Result = 0)}{2}
+```
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
 
@@ -236,11 +228,9 @@ Add extended
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0001001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S + C)}{Z AND (Result = 0)}{2}
+```
 
 **Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
 
@@ -269,11 +259,9 @@ Acknowledge pin
 
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s) to acknowledge.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100000}{01I}{000000001}{SSSSSSSSS}{Ack Bus}{---}{---}{2}
+```
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
@@ -302,11 +290,9 @@ ALLOWI
 
 **Result:** Any stalled and future interrupts are allowed.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | 000100000 | 000100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100000}{000100100}{---}{---}{---}{2}
+```
 
 **Related:** [STALLI](#stalli)
 
@@ -333,16 +319,14 @@ Alter bit
 - Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001100}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001100}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTD](#altd), [ALTS](#alts), [ALTR](#altr), [ALTI](#alti)
 
@@ -379,16 +363,14 @@ Alter destination
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001100}{011}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTS](#alts), [ALTR](#altr), [ALTB](#altb), [ALTI](#alti)
 
@@ -419,16 +401,14 @@ Alter get byte
 - Dest is the register whose 11-bit value is the index, or the full byte address, for the GETBYTE / ROLBYTE instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001011}{011}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGN](#altgn), [ALTGW](#altgw), [ALTSB](#altsb), [GETBYTE](#getbyte), [ROLBYTE](#rolbyte)
 
@@ -463,16 +443,14 @@ Alter get nibble
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the next GETNIB / ROLNIB instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB / ROLNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001010}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001010}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGB](#altgb), [ALTGW](#altgw), [ALTSN](#altsn), [GETNIB](#getnib), [ROLNIB](#rolnib)
 
@@ -507,16 +485,14 @@ Alter get word
 - Dest is the register whose 10-bit value is the index, or the full word address for the GETWORD / ROLWORD instruction to read.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001011}{11I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001011}{111}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGB](#altgb), [ALTGN](#altgn), [ALTSW](#altsw), [GETWORD](#getword), [ROLWORD](#rolword)
 
@@ -551,12 +527,12 @@ Alter instruction
 - Dest is the register whose value contains one or more of the next instruction's field substitutes or an entire 32-bit opcode for full substitution.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions and Dest modifications to perform.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001101}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001101}{001}{DDDDDDDDD}{101100100}{---}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
 
@@ -589,16 +565,14 @@ Alter result
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001100}{001}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTD](#altd), [ALTS](#alts), [ALTB](#altb), [ALTI](#alti)
 
@@ -631,16 +605,14 @@ Alter source
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001100}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001100}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTD](#altd), [ALTR](#altr), [ALTB](#altb), [ALTI](#alti)
 
@@ -671,16 +643,14 @@ Alter set byte
 - Dest is the register whose 11-bit value is the index (Dest[10:2] = long address, Dest[1:0] = byte ID) or the full byte address for SETBYTE to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal containing base long address (Src[8:0]) and optional auto-indexer value (Src[17:9]).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001011}{001}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGB](#altgb), [ALTSN](#altsn), [ALTSW](#altsw), [SETBYTE](#setbyte)
 
@@ -713,16 +683,14 @@ Alter set nibble
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the SETNIB instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001010}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001010}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGN](#altgn), [ALTSB](#altsb), [ALTSW](#altsw), [SETNIB](#setnib)
 
@@ -757,16 +725,14 @@ Alter set word
 - Dest is the register whose 10-bit value is the index, or the full word address, for the SETWORD instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D\textsuperscript{1}}{---}{---}{2}
+\encodingrow{EEEE}{1001011}{101}{DDDDDDDDD}{000000000}{D\textsuperscript{1}}{---}{---}{2}
+\end{encodingtable}
+
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
-
 
 **Related:** [ALTGW](#altgw), [ALTSB](#altsb), [ALTSN](#altsn), [SETWORD](#setword)
 
@@ -801,11 +767,9 @@ Bitwise AND
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0101000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
+```
 
 **Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
 
@@ -834,11 +798,9 @@ And not
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose inverse value will be bitwise ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0101001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
+```
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)
 
@@ -865,11 +827,9 @@ ASMCLK
 
 **Result:** Controls assembly-time clock operations.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
+```
 
 **Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
 
@@ -892,11 +852,9 @@ Augment destination
 
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{11111DD}{DDD}{DDDDDDDDD}{DDDDDDDDD}{Hidden D Queue}{---}{---}{2}
+```
 
 **Related:** [AUGS](#augs)
 
@@ -925,11 +883,9 @@ Augment source
 
 - Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{11110SS}{SSS}{SSSSSSSSS}{SSSSSSSSS}{Hidden S Queue}{---}{---}{2}
+```
 
 **Related:** [AUGD](#augd)
 

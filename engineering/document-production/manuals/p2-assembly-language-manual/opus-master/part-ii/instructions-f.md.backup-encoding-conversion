@@ -18,11 +18,9 @@ Set next block for when block wraps
 - Dest is a register or 9-bit literal whose value specifies the block size in 64-byte units (0 = maximum size).
 - Src is a register or 9-bit literal whose value specifies the block start address in Hub memory.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100100}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
 
@@ -53,11 +51,9 @@ Force greater or equal
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
 
@@ -88,11 +84,9 @@ Force greater or equal, signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the lower limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0011010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
 
@@ -123,11 +117,9 @@ Force lesser or equal
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0011001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
 
@@ -158,11 +150,9 @@ Force lesser or equal, signed
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0011011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
 
@@ -202,14 +192,14 @@ Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
 - WCZ is an optional effect to set Z to the original output state.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | DIRx + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010010}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010011}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010100}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010101}{DIRx + OUTx}{---}{OUT bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
@@ -237,11 +227,9 @@ Float high
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | DIRx + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010001}{DIRx + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -273,11 +261,9 @@ Float low
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of low.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | DIRx + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010000}{DIRx + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -309,11 +295,9 @@ Float not
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | DIRx + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010111}{DIRx + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
 
@@ -347,11 +331,9 @@ Float random
 - Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and with output level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010110}{DIRx + OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
+```
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 

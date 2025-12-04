@@ -18,11 +18,9 @@ Execute continue
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
-
+```{=latex}
+\simpleencoding{EEEE}{1100110}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
+```
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
@@ -50,11 +48,9 @@ Execute initialize
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100101}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
+```
 
 **Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
 
@@ -98,11 +94,9 @@ Exclusive or
 - WZ sets Z if the result equals zero.
 - WCZ sets both C and Z.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0101011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Zero}{2}
+```
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
 
@@ -135,11 +129,9 @@ Xoroshiro 32
 
 - Dest is the register containing the 32-bit PRNG state.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101000}{D}{---}{---}{2}
+```
 
 **Related:** [GETRND](#getrnd), [SETQ](#setq)
 
@@ -180,11 +172,9 @@ Execute stop
 
 - Takes no operands.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100101}{011}{000000000}{000000000}{---}{---}{---}{2}
+```
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
 
@@ -217,11 +207,9 @@ Execute zero
 - Dest is the streamer mode configuration.
 - Src is the data value or hub address for the streamer operation.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
-
+```{=latex}
+\simpleencoding{EEEE}{1100101}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
+```
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 

@@ -18,11 +18,9 @@ Get breakpoint status
 - Dest is a register where the status information is written.
 - WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000110101}{D}{---}{---}{2}
+```
 
 **Related:** [BRK](#brk), [SETBRK](#setbrk), [COGBRK](#cogbrk)
 
@@ -58,12 +56,12 @@ Get byte
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to read.
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
 
@@ -91,11 +89,9 @@ Get system counter
 - Dest is a register where the system counter value is written.
 - WC is an optional effect that preserves the current C flag state.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{C00}{DDDDDDDDD}{000011010}{D}{same}{---}{2}
+```
 
 **Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
@@ -127,12 +123,12 @@ Get nibble
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble to read.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{100001N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000010}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
 
@@ -159,11 +155,9 @@ Get FIFO hub pointer
 
 - Dest is a register where the FIFO hub pointer is written.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{000110100}{D}{---}{---}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
 
@@ -191,11 +185,9 @@ Get CORDIC X result
 - Dest is a register where the CORDIC X result is written.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011000}{D}{X[31]}{Result = 0}{2...58}
+```
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
@@ -227,11 +219,9 @@ Get CORDIC Y result
 - Dest is a register where the CORDIC Y result is written.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011001}{D}{Y[31]}{Result = 0}{2...58}
+```
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
 
@@ -264,12 +254,12 @@ Get random value
 - Dest is a register where the full 32-bit random value is written (first syntax).
 - WC, WZ, or WCZ are optional effects to retrieve random bits into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
-| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000011011}{D}{RND[31]}{RND[30], unique per cog}{2}
+\encodingrow{EEEE}{1101011}{CZ1}{000000000}{000011011}{---}{RND[31]}{RND[30], unique per cog}{2}
+\end{encodingtable}
+```
 
 **Related:** [SETQ](#setq), [SETQ2](#setq2)
 
@@ -302,11 +292,9 @@ Get oscilloscope samples
 
 - Dest is a register where the four oscilloscope samples are written.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001110001}{D}{---}{---}{2}
+```
 
 **Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
 
@@ -338,12 +326,12 @@ Get word
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target word to read.
 - Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001001}{1NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001001}{100}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
 
@@ -370,11 +358,9 @@ Get Goertzel accumulators
 
 - Dest is a register where the Goertzel X accumulator value is written.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{000011110}{D}{---}{---}{2}
+```
 
 **Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
 

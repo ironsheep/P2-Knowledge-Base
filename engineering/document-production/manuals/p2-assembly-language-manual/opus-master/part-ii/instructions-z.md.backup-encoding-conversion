@@ -21,11 +21,9 @@ Zero extend
 - WZ sets Z if the result equals zero.
 - WCZ sets both C and Z.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0111010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB}{Zero}{2}
+```
 
 **Related:** [SIGNX](#signx)
 

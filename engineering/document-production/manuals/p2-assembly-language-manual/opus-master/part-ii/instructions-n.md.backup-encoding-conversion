@@ -20,12 +20,12 @@ Negate
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated value is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of result | Result = 0 | 2 |
-| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0110011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
+\encodingrow{EEEE}{0110011}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
@@ -73,18 +73,18 @@ Conditional negate {#negnc} {#negz} {#negnz}
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [NEG](#neg)
 
@@ -113,13 +113,13 @@ Cancel interrupt (1, 2, or 3)
 
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | 000100101 | 000100100 | --- | --- | --- | 2 |
-| EEEE | 1101011 | 000 | 000100110 | 000100100 | --- | --- | --- | 2 |
-| EEEE | 1101011 | 000 | 000100111 | 000100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
+\encodingrow{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [SETINT1/2/3](instructions-s.md#setint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
@@ -142,11 +142,9 @@ No operation
 
 **Result:** Two clock cycles are consumed.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{0000}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
+```
 
 **Related:** [WAITX](#waitx), [WAITCNT](#waitcnt)
 
@@ -174,12 +172,12 @@ Not
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise NOTed and stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | D | !S[31] | Result = 0 | 2 |
-| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0110001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{!S[31]}{Result = 0}{2}
+\encodingrow{EEEE}{0110001}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{!D[31]}{Result = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
 

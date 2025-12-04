@@ -20,12 +20,12 @@ Test
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal to AND with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
-| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0111110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{---}{Parity of D}{D = 0}{2}
+\encodingrow{EEEE}{0111110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& S)}{(D \& S) = 0}{2}
+\end{encodingtable}
+```
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -67,14 +67,14 @@ Test bit
 - ORC/ORZ ORs bit state with C or Z flag.
 - XORC/XORZ XORs bit state with C or Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | 2 |
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{D[S[4:0]]}{D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND D[S[4:0]]}{C/Z AND D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR D[S[4:0]]}{C/Z OR D[S[4:0]]}{2}
+\encodingrow{EEEE}{0100110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR D[S[4:0]]}{C/Z XOR D[S[4:0]]}{2}
+\end{encodingtable}
+```
 
 **Related:** [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -112,14 +112,14 @@ Test bit negated
 - ORC/ORZ ORs inverted bit state with C or Z flag.
 - XORC/XORZ XORs inverted bit state with C or Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | 2 |
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{!D[S[4:0]]}{!D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND !D[S[4:0]]}{C/Z AND !D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR !D[S[4:0]]}{C/Z OR !D[S[4:0]]}{2}
+\encodingrow{EEEE}{0100111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR !D[S[4:0]]}{C/Z XOR !D[S[4:0]]}{2}
+\end{encodingtable}
+```
 
 **Related:** [TESTB](#testb), [TESTP](#testp), [TESTPN](#testpn)
 
@@ -146,11 +146,9 @@ Test not
 - Src is a register, 9-bit literal, or 32-bit augmented literal to invert and AND with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0111111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& !S)}{(D \& !S) = 0}{2}
+```
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
 
@@ -191,18 +189,18 @@ Test pin / Test pin negated {#testpn}
 - ORC/ORZ ORs pin state with C or Z flag.
 - XORC/XORZ XORs pin state with C or Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | --- | C/Z AND IN | C/Z AND IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | --- | C/Z AND !IN | C/Z AND !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | --- | C/Z OR IN | C/Z OR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | --- | C/Z OR !IN | C/Z OR !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | --- | C/Z XOR IN | C/Z XOR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | --- | C/Z XOR !IN | C/Z XOR !IN | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000000}{---}{IN}{IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000001}{---}{!IN}{!IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000010}{---}{C/Z AND IN}{C/Z AND IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000011}{---}{C/Z AND !IN}{C/Z AND !IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000100}{---}{C/Z OR IN}{C/Z OR IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000101}{---}{C/Z OR !IN}{C/Z OR !IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000110}{---}{C/Z XOR IN}{C/Z XOR IN}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000111}{---}{C/Z XOR !IN}{C/Z XOR !IN}{2}
+\end{encodingtable}
+```
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
@@ -236,11 +234,9 @@ Test and jump if full
 - Dest is a register whose value is tested for full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011101}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
+```
 
 **Related:** [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -268,11 +264,9 @@ Test and jump if not full
 - Dest is a register whose value is tested for not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011101}{01I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
+```
 
 **Related:** [TJF](#tjf), [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns)
 
@@ -300,11 +294,9 @@ Test and jump if not signed
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011101}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
+```
 
 **Related:** [TJS](#tjs), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -336,16 +328,14 @@ Test and jump if zero / not zero {#tjnz}
 - Dest is a register whose value is tested (unchanged).
 - Src is the jump address: use # for relative, omit for absolute.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011100}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011100}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
 *PC is written only when the jump condition is met.
 ```
-
 
 **Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -378,11 +368,9 @@ Test and jump if signed
 - Dest is a register whose value is tested for sign bit.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011101}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
+```
 
 **Related:** [TJNS](#tjns), [TJF](#tjf), [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -414,11 +402,9 @@ Test and jump if overflow
 - Dest is a register whose value is tested for overflow.
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011110}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
+```
 
 **Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
 
@@ -449,11 +435,9 @@ Trigger interrupt 1
 
 **Result:** The INT1 interrupt handler is triggered regardless of STALLI mode.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100010}{000100100}{---}{---}{---}{2}
+```
 
 **Related:** [TRGINT2](#trgint2), [TRGINT3](#trgint3), [SETINT1](#setint1), [NIXINT1](#nixint1), [RETI0](#reti0)
 
@@ -474,11 +458,9 @@ Trigger interrupt 2
 
 **Result:** The INT2 interrupt handler is triggered regardless of STALLI mode.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100011}{000100100}{---}{---}{---}{2}
+```
 
 **Related:** [TRGINT1](#trgint1), [TRGINT3](#trgint3), [SETINT2](#setint2), [NIXINT2](#nixint2), [RETI0](#reti0)
 
@@ -499,11 +481,9 @@ Trigger interrupt 3
 
 **Result:** The INT3 interrupt handler is triggered regardless of STALLI mode.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | 000100100 | 000100100 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100100}{000100100}{---}{---}{---}{2}
+```
 
 **Related:** [TRGINT1](#trgint1), [TRGINT2](#trgint2), [SETINT3](#setint3), [NIXINT3](#nixint3), [RETI0](#reti0)
 

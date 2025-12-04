@@ -29,14 +29,14 @@ Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
 - WCZ is an optional effect to update the Z flag to the original bit state.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrow{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
 
@@ -65,11 +65,9 @@ Bit high
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0100001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
+```
 
 **Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
@@ -100,11 +98,9 @@ Bit low
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the Z flag.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0100000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
+```
 
 **Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
@@ -135,11 +131,9 @@ Bit not
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the C and Z flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0100111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
+```
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
 
@@ -170,11 +164,9 @@ Bit random
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 - WCZ is an optional effect to update the C and Z flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0100110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{original D[S[4:0]]}{original D[S[4:0]]}{2}
+```
 
 **Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
 
@@ -206,11 +198,9 @@ Blend pixels
 - Dest is a register containing the RGB color value to blend Src into, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are blended into Dest.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010010}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{7}
+```
 
 **Related:** [ADDPIX](#addpix), [SUBPIX](#subpix), [MULPIX](#mulpix), [SETPIV](#setpiv)
 
@@ -239,12 +229,12 @@ Bit mask
 - Dest is a register in which to store the generated bit mask and optionally contains the 5-bit mask size (second syntax).
 - Src is a register or 5-bit literal whose value is the size of the bit mask to generate.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001110}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001110}{010}{DDDDDDDDD}{DDDDDDDDD}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
 
@@ -278,11 +268,9 @@ Break
 
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code or condition depending on the state of execution (outside or inside of a Debug ISR).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110110}{---}{---}{---}{2}
+```
 
 **Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
 

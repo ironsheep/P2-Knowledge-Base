@@ -17,11 +17,9 @@ Poll attention event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001110}{000100100}{---}{ATN Event}{ATN Event}{2}
+```
 
 **Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
 
@@ -50,13 +48,13 @@ Poll counter event (1, 2, or 3)
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | --- | CT1 Event | CT1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | --- | CT2 Event | CT2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000001}{000100100}{---}{CT1 Event}{CT1 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000010}{000100100}{---}{CT2 Event}{CT2 Event}{2}
+\encodingrow{EEEE}{1101011}{CZ0}{000000011}{000100100}{---}{CT3 Event}{CT3 Event}{2}
+\end{encodingtable}
+```
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
@@ -83,11 +81,9 @@ Poll FIFO block wrap event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001001}{000100100}{---}{FBW Event}{FBW Event}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
 
@@ -114,11 +110,9 @@ Poll interrupt event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000000000}{000100100}{---}{INT Event}{INT Event}{2}
+```
 
 **Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
 
@@ -145,11 +139,9 @@ Poll pin pattern event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001000}{000100100}{---}{PAT Event}{PAT Event}{2}
+```
 
 **Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
@@ -176,11 +168,9 @@ Poll CORDIC empty event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001111}{000100100}{---}{QMT Event}{QMT Event}{2}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
 
@@ -210,14 +200,14 @@ Poll selectable event (1, 2, 3, or 4)
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | --- | SE1 Event | SE1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | --- | SE2 Event | SE2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | --- | SE3 Event | SE3 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000100}{000100100}{---}{SE1 Event}{SE1 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000101}{000100100}{---}{SE2 Event}{SE2 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000110}{000100100}{---}{SE3 Event}{SE3 Event}{2}
+\encodingrow{EEEE}{1101011}{CZ0}{000000111}{000100100}{---}{SE4 Event}{SE4 Event}{2}
+\end{encodingtable}
+```
 
 **Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
@@ -244,11 +234,9 @@ Poll streamer finished event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001011}{000100100}{---}{XFI Event}{XFI Event}{2}
+```
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
 
@@ -275,11 +263,9 @@ Poll streamer empty event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001010}{000100100}{---}{XMT Event}{XMT Event}{2}
+```
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
 
@@ -306,11 +292,9 @@ Poll streamer LUT rollover event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001101}{000100100}{---}{XRL Event}{XRL Event}{2}
+```
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
 
@@ -337,11 +321,9 @@ Poll streamer NCO rollover event
 
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001100}{000100100}{---}{XRO Event}{XRO Event}{2}
+```
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
 
@@ -369,11 +351,9 @@ Pop from internal stack
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101011}{D}{K[31]}{Result = 0}{2}
+```
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
 
@@ -403,11 +383,9 @@ Pop from Hub stack A
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{101011111}{D}{MSB of long}{Result = 0}{9...16}
+```
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
 
@@ -437,11 +415,9 @@ Pop from Hub stack B
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{111011111}{D}{MSB of long}{Result = 0}{9...16}
+```
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)
 
@@ -470,11 +446,9 @@ Push to internal stack
 
 - Dest is a register or 9-bit immediate value (0-511) to push.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000101010 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101010}{---}{---}{---}{2}
+```
 
 **Related:** [POP](#pop), [PUSHA](#pusha), [PUSHB](#pushb)
 
@@ -499,11 +473,9 @@ Push to Hub stack A
 
 - Dest is a register or 9-bit immediate value to push.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 0L1 | DDDDDDDDD | 101100001 | --- | --- | --- | 3...10 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{101100001}{---}{---}{---}{3...10}
+```
 
 **Related:** [POPA](#popa), [PUSHB](#pushb), [PUSH](#push)
 
@@ -530,11 +502,9 @@ Push to Hub stack B
 
 - Dest is a register or 9-bit immediate value to push.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 0L1 | DDDDDDDDD | 111100001 | --- | --- | --- | 3...10 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{111100001}{---}{---}{---}{3...10}
+```
 
 **Related:** [POPB](#popb), [PUSHA](#pusha), [PUSH](#push)
 

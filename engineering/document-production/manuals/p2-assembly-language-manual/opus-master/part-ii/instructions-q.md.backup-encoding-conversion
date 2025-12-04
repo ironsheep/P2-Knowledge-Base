@@ -19,11 +19,9 @@ Queue divide
 - Src is a register or literal containing the 32-bit denominator (divisor).
 - Use SETQ before QDIV to specify the upper 32 bits of the numerator (defaults to 0 if not used).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
@@ -57,11 +55,9 @@ Queue exponential
 
 - Dest is a register or literal containing the 5:27-bit logarithm (5-bit exponent in bits [31:27], 27-bit fraction in bits [26:0]).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001111}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
@@ -96,11 +92,9 @@ Queue fractional divide
 - Src is a register or literal containing the 32-bit denominator (divisor).
 - Use SETQ before QFRAC to specify the lower 32 bits of the numerator (defaults to 0 if not used).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
@@ -133,11 +127,9 @@ Queue logarithm
 
 - Dest is a register or literal containing the 32-bit unsigned integer input.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001110}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [QEXP](#qexp)
 
@@ -169,11 +161,9 @@ Queue multiply
 - Dest is a register or literal containing the first 32-bit multiplicand.
 - Src is a register or literal containing the second 32-bit multiplicand.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
@@ -209,11 +199,9 @@ Queue rotate
 - Src is a register or literal containing the rotation angle in P2 angle units ($00000000 = 0°, $40000000 = 90°, $80000000 = 180°, $C0000000 = 270°).
 - Use SETQ before QROTATE to specify the Y coordinate (defaults to 0 if not used).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
 
@@ -249,11 +237,9 @@ Queue square root
 - Dest is a register or literal containing the lower 32 bits of the 64-bit input value.
 - Src is a register or literal containing the upper 32 bits of the 64-bit input value.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [QMUL](#qmul)
 
@@ -289,11 +275,9 @@ Queue vector
 - Dest is a register or literal containing the X coordinate (32-bit signed).
 - Src is a register or literal containing the Y coordinate (32-bit signed).
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
+```
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
 

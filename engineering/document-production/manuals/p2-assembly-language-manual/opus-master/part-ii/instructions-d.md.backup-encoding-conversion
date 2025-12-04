@@ -21,11 +21,9 @@ Decrement modulus
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply to Dest's decrement operation.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{0111001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Modulus triggered}{Result = 0}{2}
+```
 
 **Related:** [INCMOD](#incmod)
 
@@ -56,12 +54,12 @@ Decode bit position to single-bit mask
 - Dest is the register in which to store the decoded value and optionally begins by containing the 5-bit bit position value it is requesting (syntax 2).
 - Src is an optional register or 5-bit literal whose value is the bit position to set high in the decoded value.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001110}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001110}{000}{DDDDDDDDD}{DDDDDDDDD}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ENCOD](#encod), [BMASK](#bmask)
 
@@ -95,12 +93,12 @@ Set pin direction if C / not C
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIRx | --- | DIR bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000010}{DIRx}{---}{DIR bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000011}{DIRx}{---}{DIR bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRL](#dirl), [DIRH](#dirh), [DIRNOT](#dirnot), [DIRRND](#dirrnd)
 
@@ -136,11 +134,9 @@ Set pin direction high
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | --- | DIR bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000001}{DIRx}{---}{DIR bit}{2}
+```
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -170,11 +166,9 @@ Set pin direction low
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | --- | DIR bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000000}{DIRx}{---}{DIR bit}{2}
+```
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -204,11 +198,9 @@ Direction not
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle to the opposite direction.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | --- | DIR bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000111}{DIRx}{---}{DIR bit}{2}
+```
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -243,12 +235,12 @@ Set pin direction if Z / not Z
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000100}{DIRx}{---}{DIR bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000101}{DIRx}{---}{DIR bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -284,11 +276,9 @@ Direction random
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set randomly to input or output.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIRx | Original DIRx base bit | Original DIRx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000110}{DIRx}{Original DIRx base bit}{Original DIRx base bit}{2}
+```
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRNOT](#dirnot), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -322,11 +312,9 @@ Decrement and jump if full
 - Dest is a register whose value is decremented and tested for full or not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
+```
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -354,11 +342,9 @@ Decrement and jump if not full
 - Dest is a register whose value is decremented and tested for full or not full.
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011011}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
+```
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
 
@@ -394,16 +380,14 @@ Decrement and jump if zero / not zero {#djnz}
 - Dest is a register whose value is decremented and tested.
 - Src is the jump address: use # for relative, omit for absolute.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-
 ```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
 *PC is written only when the jump condition is met.
 ```
-
 
 **Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
@@ -439,12 +423,12 @@ Drive pins if C / not C
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | DIRx* + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011010}{DIRx* + OUTx}{---}{OUT bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011011}{DIRx* + OUTx}{---}{OUT bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -478,11 +462,9 @@ Drive pins high
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and high output level.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011001}{DIRx* + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -514,11 +496,9 @@ Drive pins low
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and low output level.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011000}{DIRx* + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -552,11 +532,9 @@ Drive not
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011111}{DIRx* + OUTx}{---}{OUT bit}{2}
+```
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -593,12 +571,12 @@ Drive pins if Z / not Z
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | DIRx* + OUTx | --- | OUT bit | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011100}{DIRx* + OUTx}{---}{OUT bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011101}{DIRx* + OUTx}{---}{OUT bit}{2}
+\end{encodingtable}
+```
 
 **Related:** [DRVC](#drvc), [DRVNC](#drvnc), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -632,11 +610,9 @@ Drive random
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and with output level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001011110}{DIRx + OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
+```
 
 **Related:** [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVNOT](#drvnot)
 

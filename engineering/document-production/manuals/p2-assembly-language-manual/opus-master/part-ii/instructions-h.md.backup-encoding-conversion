@@ -17,11 +17,9 @@ Set hub configuration
 
 - D is a register or 9-bit literal (or 32-bit augmented literal) containing the configuration value for the hub system.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000000000}{---}{---}{---}{2}
+```
 
 **Related:** [COGINIT](#coginit), [COGID](#cogid), [CLKSET](#clkset)
 

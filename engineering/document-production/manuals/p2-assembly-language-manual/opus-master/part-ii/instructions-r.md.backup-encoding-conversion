@@ -19,11 +19,11 @@ Rotate carry left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
+```{=latex}
+\simpleencoding{EEEE}{0000101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
-
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
+```
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
@@ -54,11 +54,11 @@ Rotate carry right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
+```{=latex}
+\simpleencoding{EEEE}{0000100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
-
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
+```
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
@@ -88,11 +88,9 @@ Rotate carry and zero left
 - Dest is a register containing the value to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D | D[31] | D[30] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101011}{D}{D[31]}{D[30]}{2}
+```
 
 **Related:** [RCZR](#rczr), [RCL](#rcl), [RCR](#rcr)
 
@@ -122,11 +120,9 @@ Rotate carry and zero right
 - Dest is a register containing the value to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D | D[1] | D[0] | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101010}{D}{D[1]}{D[0]}{2}
+```
 
 **Related:** [RCZL](#rczl), [RCL](#rcl), [RCR](#rcr)
 
@@ -157,11 +153,9 @@ Read byte from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of byte}{Result = 0}{9...16}
+```
 
 **Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
@@ -193,11 +187,9 @@ Read fast via FIFO
 - Dest is a configuration value: Dest[31] = no-wait mode, Dest[13:0] = block size in 64-byte units (0 = maximum).
 - Src is the Hub memory start address (Src[19:0]) for the read operation.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100011}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 10...17}
+```
 
 **Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
@@ -226,11 +218,9 @@ Read long from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
-
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of long}{---}{9...16}
+```
 
 **Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
@@ -261,11 +251,9 @@ Read from LUT
 - Src/Ptr is a LUT address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of data}{Result = 0}{3}
+```
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
 
@@ -296,11 +284,9 @@ Read Smart Pin
 - Src is a register or literal identifying the pin number (Src[5:0]) to read from.
 - WC is an optional effect to write the modal result to C.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010100}{C1I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
+```
 
 **Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
@@ -329,11 +315,9 @@ Read word from Hub
 - Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of word}{Result = 0}{9...16}
+```
 
 **Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
@@ -363,11 +347,9 @@ Repeat block
 - Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
 - Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1100110}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
+```
 
 **Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
 
@@ -395,14 +377,14 @@ Resume from interrupt (0, 1, 2, or 3)
 
 **Result:** Execution resumes from the interrupted location for the specified interrupt level.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011001}{110}{111111110}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111110100}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111110010}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrow{EEEE}{1011001}{110}{111110000}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\end{encodingtable}
+```
 
 **Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
@@ -427,11 +409,9 @@ Return from subroutine
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101101}{---}{K[31]}{K[30]}{4}
+```
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
 
@@ -462,11 +442,9 @@ Return via PTRA stack
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101110}{---}{L[31]}{L[30]}{11...18}
+```
 
 **Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
@@ -495,11 +473,9 @@ Return via PTRB stack
 
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101111}{---}{L[31]}{L[30]}{11...18}
+```
 
 **Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
@@ -529,14 +505,14 @@ Return from interrupt (0, 1, 2, or 3)
 
 **Result:** Execution returns from the specified interrupt level to the interrupted location.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrow{EEEE}{1011001}{110}{111111111}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\end{encodingtable}
+```
 
 **Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
@@ -561,11 +537,9 @@ Reverse bits
 
 - Dest is the register containing the bit pattern to reverse.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101001}{D}{---}{---}{2}
+```
 
 **Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
 
@@ -591,11 +565,9 @@ Read byte via FIFO
 - Dest is the register to receive the byte value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | D | MSB of byte | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010000}{D}{MSB of byte}{Result = 0}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
 
@@ -625,11 +597,9 @@ Read long via FIFO
 - Dest is the register to receive the long value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | D | MSB of long | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010010}{D}{MSB of long}{Result = 0}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
 
@@ -659,11 +629,9 @@ Read variable via FIFO
 - Dest is the register to receive the variable-length value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | D | 0 | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010011}{D}{0}{Result = 0}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
 
@@ -693,11 +661,9 @@ Read signed variable via FIFO
 - Dest is the register to receive the sign-extended value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | D | MSB of value | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010100}{D}{MSB of value}{Result = 0}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
 
@@ -725,11 +691,9 @@ Read word via FIFO
 - Dest is the register to receive the word value.
 - WC, WZ, or WCZ are optional effects to update flags.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | D | MSB of word | Result = 0 | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010001}{D}{MSB of word}{Result = 0}{2}
+```
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
 
@@ -758,11 +722,9 @@ Expand RGB color
 
 - Dest contains 5:6:5 RGB in Dest[15:0], receives 8:8:8 RGB in Dest[31:8].
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100111}{D}{---}{---}{2}
+```
 
 **Related:** [RGBSQZ](#rgbsqz)
 
@@ -787,11 +749,9 @@ Squeeze RGB color
 
 - Dest contains 8:8:8 RGB in Dest[31:8], receives 5:6:5 RGB in Dest[15:0].
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | D | --- | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100110}{D}{---}{---}{2}
+```
 
 **Related:** [RGBEXP](#rgbexp)
 
@@ -818,11 +778,11 @@ Rotate left
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
+```{=latex}
+\simpleencoding{EEEE}{0000001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
-
+\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[31]
+```
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -854,12 +814,12 @@ Rotate byte left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target byte.
 - N is a 2-bit literal (0-3) identifying the byte position in Src.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001000}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001000}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
 
@@ -887,12 +847,12 @@ Rotate nibble left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target nibble.
 - N is a 3-bit literal (0-7) identifying the nibble position in Src.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{100010N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000100}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
 
@@ -920,12 +880,12 @@ Rotate word left into register
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing the target word.
 - N is a 1-bit literal (0-1) identifying the word position in Src.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
-
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1001010}{0NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001010}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
+\end{encodingtable}
+```
 
 **Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
 
@@ -952,11 +912,11 @@ Rotate right
 - Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 
+```{=latex}
+\simpleencoding{EEEE}{0000000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
-
+\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[0]
+```
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
@@ -987,11 +947,9 @@ Read Smart Pin without acknowledge
 - Src is a register or literal identifying the pin number (Src[5:0]) to read from.
 - WC is an optional effect to write the modal result to C.
 
-
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
-
+```{=latex}
+\simpleencoding{EEEE}{1010100}{C0I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
+```
 
 **Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
