@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-04T05:35:05.072219",
-    "total_entries": 974,
+    "generated": "2025-12-04T22:48:02.267773",
+    "total_entries": 969,
     "total_categories": 45,
     "source": "deliverables/ai/P2/"
   },
@@ -619,11 +619,15 @@
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
-      "mtime": 1764449566
+      "mtime": 1764888070
     },
     "p2kbArchEventSystem": {
       "path": "deliverables/ai/P2/architecture/event_system.yaml",
       "mtime": 1764449566
+    },
+    "p2kbArchFifo": {
+      "path": "deliverables/ai/P2/architecture/fifo.yaml",
+      "mtime": 1764888448
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
@@ -1607,7 +1611,7 @@
     },
     "p2kbPasm2Brk": {
       "path": "deliverables/ai/P2/language/pasm2/brk.yaml",
-      "mtime": 1764449566
+      "mtime": 1764888070
     },
     "p2kbPasm2Byte": {
       "path": "deliverables/ai/P2/language/pasm2/byte.yaml",
@@ -1695,7 +1699,7 @@
     },
     "p2kbPasm2AdditionalConceptsNeeded": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/additional_concepts_needed.yaml",
-      "mtime": 1764449566
+      "mtime": 1764888070
     },
     "p2kbPasm2AddressingModes": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/addressing_modes.yaml",
@@ -1939,7 +1943,7 @@
     },
     "p2kbPasm2Getbrk": {
       "path": "deliverables/ai/P2/language/pasm2/getbrk.yaml",
-      "mtime": 1764449566
+      "mtime": 1764888070
     },
     "p2kbPasm2Getbyte": {
       "path": "deliverables/ai/P2/language/pasm2/getbyte.yaml",
@@ -2552,6 +2556,10 @@
     "p2kbPasm2Rdword": {
       "path": "deliverables/ai/P2/language/pasm2/rdword.yaml",
       "mtime": 1764449566
+    },
+    "p2kbPasm2PrRegisters": {
+      "path": "deliverables/ai/P2/language/pasm2/registers/pr-registers.yaml",
+      "mtime": 1764888448
     },
     "p2kbPasm2Rep": {
       "path": "deliverables/ai/P2/language/pasm2/rep.yaml",
@@ -4369,37 +4377,9 @@
       "path": "deliverables/ai/P2/language/spin2/registers/pb.yaml",
       "mtime": 1764449566
     },
-    "p2kbSpin2RegPr0": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr0.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr1": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr1.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr2": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr2.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr3": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr3.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr4": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr4.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr5": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr5.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr6": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr6.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2RegPr7": {
-      "path": "deliverables/ai/P2/language/spin2/registers/pr7.yaml",
-      "mtime": 1764449566
+    "p2kbSpin2RegPrRegisters": {
+      "path": "deliverables/ai/P2/language/spin2/registers/pr-registers.yaml",
+      "mtime": 1764888448
     },
     "p2kbSpin2RegPtra": {
       "path": "deliverables/ai/P2/language/spin2/registers/ptra.yaml",
