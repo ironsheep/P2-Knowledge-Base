@@ -4,12 +4,12 @@ category: PASM2-Spin2 Communication
 count: 8
 
 description: |
-  General purpose registers PR0-PR7, shared between PASM2 and Spin2 code.
+  Communication registers PR0-PR7, shared between PASM2 and Spin2 code.
 
-  These 8 registers provide a communication mechanism between inline PASM2
-  code and Spin2 methods. When PASM2 code is inline (within a Spin2 method)
-  or called by a Spin2 method, these registers are accessible by both
-  languages using the same symbols.
+  For PASM2 code that is either inline (within a Spin2 method) or called
+  by a Spin2 method, registers $1D8-$1DF are readable and writable by both
+  languages using the symbols PR0-PR7. This provides a communication
+  mechanism between Spin2 and PASM2 code running in the same COG.
 
   IMPORTANT: PASM2 code launched into another COG does NOT share this
   register space with Spin2. Each COG has its own independent PR0-PR7.
@@ -19,95 +19,67 @@ registers:
     address: 472
     hex_address: "$1D8"
     access: read_write
-    inline_role: "First parameter / return value"
-    alias: "a (in some contexts)"
 
   PR1:
     address: 473
     hex_address: "$1D9"
     access: read_write
-    inline_role: "Second parameter"
-    alias: "b (in some contexts)"
 
   PR2:
     address: 474
     hex_address: "$1DA"
     access: read_write
-    inline_role: "Third parameter / local variable"
-    alias: "c (in some contexts)"
 
   PR3:
     address: 475
     hex_address: "$1DB"
     access: read_write
-    inline_role: "Fourth parameter / local variable"
 
   PR4:
     address: 476
     hex_address: "$1DC"
     access: read_write
-    inline_role: "Local variable"
 
   PR5:
     address: 477
     hex_address: "$1DD"
     access: read_write
-    inline_role: "Local variable"
 
   PR6:
     address: 478
     hex_address: "$1DE"
     access: read_write
-    inline_role: "Local variable"
 
   PR7:
     address: 479
     hex_address: "$1DF"
     access: read_write
-    inline_role: "Local variable"
-
-inline_pasm_conventions:
-  parameter_passing:
-    - "PR0: First parameter, also return value"
-    - "PR1: Second parameter"
-    - "PR2: Third parameter or local"
-    - "PR3-PR7: Additional parameters or locals"
-  return_value: "PR0 (by convention)"
 
 usage: |
-  In inline PASM2:
-  - Parameters from Spin2 methods arrive in PR0, PR1, PR2, etc.
-  - Return value is placed in PR0
-  - Remaining registers serve as local working storage
+  PR0-PR7 provide a communication mechanism between Spin2 and PASM2 code
+  running in the same COG. Both languages can read and write these registers
+  using the same symbols.
 
   In standalone PASM2 (separate COG):
   - These are simply general-purpose COG RAM locations
   - No sharing with Spin2 (each COG has independent memory)
 
 examples:
-  - name: "Multi-parameter inline function"
+  - name: "Spin2 and inline PASM2 sharing registers"
     code: |
-      PUB add_three(a, b, c) : result
-        org
-          add   PR0, PR1      ' PR0 = a + b
-          add   PR0, PR2      ' PR0 = (a + b) + c
-                              ' Result in PR0
-        end
-    description: "Three parameters in PR0-PR2, result returned in PR0"
+      ' Spin2 can read/write PR registers
+      PR0 := 100
+      value := PR1
 
-  - name: "Using PR registers as locals"
-    code: |
-      PUB complex_calc(value) : result
-        org
-          mov   PR1, PR0      ' Save original value
-          shl   PR0, #2       ' value * 4
-          add   PR0, PR1      ' value * 4 + value = value * 5
-        end
-    description: "PR1 used as temporary storage"
+      ' Inline PASM2 can access same registers
+      org
+        mov   PR2, PR0           ' Copy PR0 to PR2
+        add   PR0, #1            ' Increment PR0
+      end
+    description: "Both Spin2 and inline PASM2 access the same PR registers"
 
 notes:
   - "All 8 registers are functionally identical, differing only in address"
-  - "Convention determines their role in parameter passing"
   - "NOT shared across COGs - each COG has independent copies"
   - "Located in COG RAM at addresses $1D8-$1DF"
   - "Available in both PASM2 and Spin2 syntax"

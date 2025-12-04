@@ -4,17 +4,15 @@ category: Spin2-PASM2 Communication
 count: 8
 
 description: |
-  General purpose registers PR0-PR7, shared between Spin2 and inline PASM2.
+  Communication registers PR0-PR7, shared between Spin2 and PASM2 code.
 
-  These 8 registers provide a communication mechanism between Spin2 methods
-  and inline PASM2 code blocks. They are the primary way to pass parameters
-  to inline assembly and receive return values.
+  For PASM2 code that is either inline (within a Spin2 method) or called
+  by a Spin2 method, registers $1D8-$1DF are readable and writable by both
+  languages using the symbols PR0-PR7. This provides a communication
+  mechanism between Spin2 and PASM2 code running in the same COG.
 
-  In Spin2 syntax, these registers can be read and written directly using
-  their symbolic names (PR0, PR1, etc.).
-
-  IMPORTANT: When PASM2 code runs in a separate COG (via COGSPIN/COGNEW),
-  it does NOT share these registers with the launching Spin2 code.
+  IMPORTANT: PASM2 code launched into another COG does NOT share this
+  register space with Spin2. Each COG has its own independent PR0-PR7.
 
 registers:
   PR0:
@@ -22,112 +20,75 @@ registers:
     hex_address: "$1D8"
     access: read_write
     spin2_syntax: "PR0 := value"
-    inline_role: "First parameter / return value"
 
   PR1:
     address: 473
     hex_address: "$1D9"
     access: read_write
     spin2_syntax: "PR1 := value"
-    inline_role: "Second parameter"
 
   PR2:
     address: 474
     hex_address: "$1DA"
     access: read_write
     spin2_syntax: "PR2 := value"
-    inline_role: "Third parameter / local variable"
 
   PR3:
     address: 475
     hex_address: "$1DB"
     access: read_write
     spin2_syntax: "PR3 := value"
-    inline_role: "Fourth parameter / local variable"
 
   PR4:
     address: 476
     hex_address: "$1DC"
     access: read_write
     spin2_syntax: "PR4 := value"
-    inline_role: "Local variable"
 
   PR5:
     address: 477
     hex_address: "$1DD"
     access: read_write
     spin2_syntax: "PR5 := value"
-    inline_role: "Local variable"
 
   PR6:
     address: 478
     hex_address: "$1DE"
     access: read_write
     spin2_syntax: "PR6 := value"
-    inline_role: "Local variable"
 
   PR7:
     address: 479
     hex_address: "$1DF"
     access: read_write
     spin2_syntax: "PR7 := value"
-    inline_role: "Local variable"
 
 spin2_usage:
   reading: "value := PR0"
   writing: "PR0 := expression"
-  parameter_passing:
-    - "Method parameters automatically map to PR0, PR1, PR2, etc."
-    - "Return value comes from PR0"
-    - "RESULT keyword is alias for PR0 in inline PASM"
 
 examples:
-  - name: "Reading register in Spin2"
+  - name: "Spin2 and inline PASM2 sharing registers"
     code: |
-      result := PR0              ' Read PR0 into result
-      debug("PR0 = ", sdec(PR0)) ' Display PR0 value
-    description: "Direct access to PR registers from Spin2"
+      ' Spin2 can read/write PR registers
+      PR0 := 100
+      value := PR1
 
-  - name: "Writing register in Spin2"
-    code: |
-      PR0 := 100                 ' Set PR0 to immediate value
-      PR1 := some_variable       ' Set PR1 from variable
-    description: "Assigning values to PR registers"
-
-  - name: "Parameter passing to inline PASM"
-    code: |
-      PUB multiply(x, y) : product
-        ' x arrives in PR0, y in PR1
-        ' product returns via PR0
-        org
-          qmul  PR0, PR1         ' Start multiply
-          getqx PR0              ' Get result into PR0
-        end
-    description: "Spin2 parameters automatically populate PR registers"
-
-  - name: "Explicit register setup before inline PASM"
-    code: |
-      PUB custom_op(value)
-        PR1 := 42                ' Pre-set PR1 before inline block
-        org
-          add   PR0, PR1         ' PR0 = value + 42
-        end
-        return PR0               ' Return the result
-    description: "Manually setting PR registers before assembly"
+      ' Inline PASM2 can access same registers
+      org
+        mov   PR2, PR0           ' Copy PR0 to PR2
+        add   PR0, #1            ' Increment PR0
+      end
+    description: "Both Spin2 and inline PASM2 access the same PR registers"
 
 notes:
-  - "PR0-PR7 are the standard Spin2/PASM2 interface registers"
-  - "Method parameters automatically populate PR0, PR1, PR2..."
-  - "Return values are taken from PR0 (or RESULT keyword)"
-  - "NOT shared with code running in separate COGs"
-  - "Located at COG RAM addresses $1D8-$1DF"
-
-related:
-  - REG
-  - RESULT
+  - "All 8 registers are functionally identical, differing only in address"
+  - "NOT shared across COGs - each COG has independent copies"
+  - "Located in COG RAM at addresses $1D8-$1DF"
+  - "Available in both PASM2 and Spin2 syntax"
 
 cross_references:
   - pasm2_pr_registers: "language/pasm2/registers/pr-registers"
 
-documentation_source: "Spin2 Language Documentation"
+documentation_source: "PASM2 Manual 2022/11/01 Page 118"
 last_updated: "2025-12-04"
