@@ -26,13 +26,14 @@ syntax:
   label_form:
     - instruction: "REP @end_label, #count"
     - parameters:
-      - end_label: Label marking end of block
+      - end_label: Label marking end of block (typically local label)
       - count: Number of iterations
     - example: |
         REP @.loop_end, #100
         ADD sum, value
         SHL value, #1
         .loop_end
+    - note: "Label must be within same local scope. See concepts/labels.yaml for scoping rules."
 
 key_features:
   zero_overhead:
@@ -187,3 +188,6 @@ references:
   - silicon_doc: REP instruction details
   - optimization_guide: Loop optimization techniques
   - timing_doc: Cycle-accurate execution
+
+related:
+  - language/pasm2/concepts/labels.yaml

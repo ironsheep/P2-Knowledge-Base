@@ -150,8 +150,9 @@ common_patterns:
     code: |
       .loop
         ' Loop body
-        DJNZ counter, #@.loop   # Decrement and jump if not zero
-    description: "Efficient loop with counter"
+        DJNZ counter, #.loop    ' Decrement and jump if not zero
+    description: "Efficient loop with local label counter"
+    note: "Local labels (.loop) can be reused in different routines. See concepts/labels.yaml"
 
   subroutine_call:
     code: |
@@ -204,3 +205,6 @@ references:
   - silicon_doc: Branch Addressing section
   - instruction_set: Branch instruction encodings
   - optimization_guide: Control flow optimization
+
+related:
+  - language/pasm2/concepts/labels.yaml

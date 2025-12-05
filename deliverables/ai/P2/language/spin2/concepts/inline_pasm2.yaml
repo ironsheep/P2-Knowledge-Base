@@ -37,7 +37,10 @@ limitations:
   no_jumps_outside: "Cannot jump outside ORG/END block"
   no_hub_exec: "Runs in COG RAM only"
   no_calls: "Cannot CALL subroutines outside block"
-  local_labels: "Labels must start with dot (.label)"
+  local_labels:
+    rule: "Labels must start with dot (.label) or colon (:label)"
+    reason: "Inline PASM2 has no global label context - all labels are local"
+    reference: "language/pasm2/concepts/labels.yaml"
 
 examples:
   basic_pin_control:
@@ -245,3 +248,6 @@ references:
   - hub75_driver: RGB panel output patterns
   - flash_fs: Timing-critical operations
   - optimization_guide: When to use inline PASM2
+
+related:
+  - language/pasm2/concepts/labels.yaml

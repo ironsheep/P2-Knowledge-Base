@@ -390,22 +390,42 @@ inline_pasm2_in_spin2:
         END
 
 labels_and_symbols:
-  local_labels:
-    syntax: ".labelname"
-    scope: "Local to current subroutine"
-    example: |
-      process
-      .loop
-      DJNZ  count, #.loop
-      RET
-      
+  overview: |
+    PASM2 uses global and local labels for code organization. Local labels enable
+    reuse of common names (.loop, .done) without collision. See concepts/labels.yaml
+    for complete scoping rules and reference operators.
+
   global_labels:
     syntax: "labelname"
-    scope: "Available throughout program"
+    scope: "Visible throughout entire DAT block"
+    creates_scope: "Defining a global label resets local label scope"
     example: |
       main_loop
       CALL  #process
       JMP   #main_loop
+
+  local_labels:
+    syntax: ".labelname or :labelname"
+    scope: "Local to preceding global label only"
+    reusable: "Same name can exist under different global labels"
+    example: |
+      send_byte               ' Global label - new scope
+      .loop                   ' Local to send_byte
+      DJNZ  count, #.loop
+      RET
+
+      recv_byte               ' Global label - new scope
+      .loop                   ' Different .loop - local to recv_byte
+      DJNZ  count, #.loop
+      RET
+
+  reference_operators:
+    "#label": "Immediate COG address (for jumps/calls)"
+    "#.local": "Immediate reference to local label"
+    "@label": "Hub address of label"
+    "$": "Current COG address"
+
+  detailed_reference: "concepts/labels.yaml"
 
 assembler_directives:
   ORG:
@@ -495,8 +515,9 @@ timing_considerations:
 next_steps:
   essential_reading:
     - "concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "concepts/labels.yaml - Label scoping rules and reference operators"
     - "Full PASM2 instruction reference - for detailed documentation"
-  
+
   advanced_features:
     - "Smart Pin modes - autonomous hardware operations"
     - "CORDIC solver - math coprocessor functions"

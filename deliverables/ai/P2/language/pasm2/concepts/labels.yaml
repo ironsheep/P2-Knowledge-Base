@@ -1,0 +1,225 @@
+# PASM2 Labels and Symbol Scoping
+# Source: PNut compiler implementation, Spin2/PASM2 documentation
+# Critical for: Code organization, subroutine structure, avoiding naming collisions
+
+concept: labels
+title: PASM2 Labels and Symbol Scoping
+category: pasm2_syntax
+importance: fundamental
+
+metadata:
+  query_tags: ["label", "local_label", "global_label", "scope", "symbol", ".label", ":label", "@label"]
+  complexity: beginner
+  use_cases: ["code_organization", "subroutine_structure", "loop_targets", "branch_destinations"]
+  common_questions:
+    - "What is the difference between global and local labels?"
+    - "How do I use local labels in PASM2?"
+    - "Why can I reuse .loop in different routines?"
+    - "What does the @ symbol mean before a label?"
+    - "How do I reference a label in a jump or call?"
+
+overview: |
+  PASM2 supports two scoping levels for labels within DAT blocks: global labels and local labels.
+  This scoping mechanism enables reuse of common label names (loop, done, exit) without naming
+  collisions across different routines. Understanding label scoping is essential for writing
+  maintainable assembly code.
+
+label_types:
+  global_labels:
+    syntax: "labelname"
+    definition: "Identifier at start of line without prefix character"
+    characteristics:
+      - "Visible throughout the entire DAT block"
+      - "Can be referenced from Spin2 code using @labelname"
+      - "Defining a new global label resets the local label scope"
+      - "Must begin with letter (A-Z, a-z) or underscore (_)"
+      - "May contain letters, digits (0-9), and underscores"
+      - "Maximum length: 30 characters (PNut compatibility)"
+    example: |
+      DAT             org
+
+      init_routine    mov     x, #0           ' Global label
+                      add     x, #1
+                      ret
+
+      data_table      long    $DEAD_BEEF      ' Global label for data
+                      long    $CAFE_BABE
+
+      math_helper     abs     x               ' Another global label
+                      ret
+
+  local_labels:
+    syntax: ".labelname or :labelname"
+    definition: "Identifier prefixed with dot (.) or colon (:)"
+    note: "Both prefix characters are functionally equivalent"
+    characteristics:
+      - "Visible only within scope of preceding global label"
+      - "Scope ends when next global label is defined"
+      - "Same local name can be reused under different global labels"
+      - "Internally mangled by compiler (e.g., loop'0001) for uniqueness"
+      - "Must begin with letter or underscore after prefix"
+    example: |
+      DAT             org
+
+      send_byte       rdbyte  x, ptr          ' Global: send_byte
+                      call    #.wait          ' Reference local .wait
+      .loop           testp   tx_pin    wc    ' Local: .loop (scope: send_byte)
+              if_nc   jmp     #.loop
+                      wypin   x, tx_pin
+      .wait           testp   tx_pin    wc    ' Local: .wait (scope: send_byte)
+              if_c    jmp     #.wait
+                      ret
+
+      recv_byte       testp   rx_pin    wc    ' Global: recv_byte (NEW scope)
+              if_nc   jmp     #.wait          ' This .wait is DIFFERENT
+      .wait           testp   rx_pin    wc    ' Local: .wait (scope: recv_byte)
+              if_nc   jmp     #.wait
+                      rdpin   x, rx_pin
+      .loop           shr     x, #24          ' Local: .loop (scope: recv_byte)
+                      ret
+
+    key_insight: |
+      The same local label names (.loop, .wait) can exist in both send_byte and recv_byte
+      without collision. Each global label creates a new local scope.
+
+reference_operators:
+  description: "Operators for referencing labels in different contexts"
+  operators:
+    immediate_cog:
+      syntax: "#label"
+      meaning: "Immediate value (COG address)"
+      context: "PASM instructions - jumps, calls, branches"
+      example: "JMP #main_loop"
+
+    immediate_local:
+      syntax: "#.local"
+      meaning: "Immediate reference to local label"
+      context: "PASM instructions within same scope"
+      example: "DJNZ counter, #.loop"
+
+    absolute_cog:
+      syntax: "#\\label"
+      meaning: "Absolute COG-relative address (forces 9-bit)"
+      context: "When absolute address required"
+      example: "CALL #\\helper"
+
+    hub_address:
+      syntax: "@label"
+      meaning: "Hub address of label"
+      context: "Spin2 or PASM - getting hub memory address"
+      example: "MOV ptr, @hub_data"
+
+    object_relative:
+      syntax: "@@label"
+      meaning: "Object-relative address"
+      context: "Spin2 or PASM - object method tables"
+      example: "LONG @@method_table"
+
+    current_cog_address:
+      syntax: "$"
+      meaning: "Current COG address"
+      context: "PASM in ORG mode - relative references"
+      example: "JMP #$-1           ' Jump back one instruction"
+
+    current_hub_address:
+      syntax: "$$"
+      meaning: "Current Hub address"
+      context: "PASM in ORGH mode"
+      example: "LONG $$ + 4        ' Address of next long"
+
+scope_boundaries:
+  description: "Events that create new local label scopes"
+  boundaries:
+    - event: "Global label definition"
+      effect: "Starts a new local scope"
+      example: "my_routine    mov x, #0    ' New scope begins"
+
+    - event: "Storage directive with label"
+      effect: "Also starts a new local scope"
+      example: "data_block    long 0, 0    ' New scope begins"
+
+    - event: "End of DAT block"
+      effect: "Terminates all label scopes"
+
+  example: |
+    DAT             org
+
+    func_a          mov     x, #1           ' Scope #1 begins
+    .loop           djnz    x, #.loop       ' .loop in scope #1
+
+    data_block      long    0, 0, 0, 0      ' Scope #2 begins
+
+    func_b          mov     y, #2           ' Scope #3 begins
+    .loop           djnz    y, #.loop       ' .loop in scope #3 (DIFFERENT)
+    .done           ret                     ' .done in scope #3
+
+rep_instruction_usage:
+  description: "REP instruction can use @.label to calculate instruction count"
+  syntax: "REP @.label, count"
+  benefit: "Automatically calculates block size - stays correct when code changes"
+  example: |
+    process_data    rep     @.end, count    ' Count instructions to .end
+                    rdlong  x, ptr
+                    add     ptr, #4
+                    add     sum, x
+    .end                                    ' Label marks end of REP block
+  warning: "Label must be within same local scope as REP instruction"
+
+best_practices:
+  naming:
+    global: "Use descriptive names for routine entry points: send_packet, init_uart, calc_crc"
+    local: "Use short names for flow control: .loop, .done, .retry, .skip, .exit"
+
+  convention:
+    preferred: "Dot notation (.label) over colon notation (:label)"
+    reason: "More widely used in modern P2 code"
+
+  organization:
+    - "Keep local labels near their references"
+    - "Use local labels for internal loop/branch targets"
+    - "Use global labels only for routine entry points and shared data"
+
+  limits:
+    symbol_length: "30 characters maximum for PNut compatibility"
+    dat_symbols: "Maximum 10,000 DAT symbols per file"
+
+common_patterns:
+  loop_with_local:
+    description: "Standard loop using local label"
+    code: |
+      process         mov     count, #100
+      .loop           ' Loop body here
+                      djnz    count, #.loop
+                      ret
+
+  multiple_exits:
+    description: "Routine with multiple local labels"
+    code: |
+      search          mov     count, #256
+      .loop           rdlong  value, PTRA++
+                      cmp     value, target   wz
+              if_z    jmp     #.found
+                      djnz    count, #.loop
+      .notfound       mov     result, #0
+                      ret
+      .found          mov     result, #1
+                      ret
+
+  rep_with_label:
+    description: "REP using label for block size"
+    code: |
+      fill_buffer     rep     @.end, #256
+                      wrbyte  pattern, PTRA++
+      .end
+                      ret
+
+related:
+  - language/pasm2/concepts/branch_addressing.yaml
+  - language/pasm2/concepts/rep_instruction.yaml
+  - language/pasm2/concepts/addressing_modes.yaml
+
+see_also:
+  - jmp.yaml
+  - call.yaml
+  - djnz.yaml
+  - rep.yaml
