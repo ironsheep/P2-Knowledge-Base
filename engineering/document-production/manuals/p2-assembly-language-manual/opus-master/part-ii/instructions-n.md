@@ -23,7 +23,7 @@ Negate
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of result | Result = 0 | 2 |
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
@@ -71,7 +71,7 @@ Conditional Negate {#negnc} {#negz} {#negnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
 | EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
@@ -122,7 +122,7 @@ Cancel Interrupt {#nixint2} {#nixint3}
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100101 | 000100100 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 000 | 000100110 | 000100100 | --- | --- | --- | 2 |
@@ -153,7 +153,7 @@ No Operation
 **Result:** Two clock cycles are consumed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
@@ -187,7 +187,7 @@ Bitwise Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | D | !S[31] | Result = 0 | 2 |
 | EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |

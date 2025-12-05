@@ -526,9 +526,9 @@ Color space and pixel instructions provide hardware-accelerated graphics process
 | [SETPIX](#setpix) | Set MIXPIX mode |
 
 
-## Register Indirection {#register-indirection-ref}
+## Instruction Modification {#instruction-modification-ref}
 
-Register indirection instructions modify subsequent instructions by dynamically altering their source, destination, or bit index fields. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
+Instruction modification instructions (also known as register indirection) dynamically alter subsequent instructions by changing their source, destination, or bit index fields before execution. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
 
 | Instruction | Description |
 |-------------|-------------|

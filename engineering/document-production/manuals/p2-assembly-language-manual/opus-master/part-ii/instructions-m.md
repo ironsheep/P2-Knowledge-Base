@@ -20,7 +20,7 @@ Merge Bits Of Bytes
 - D is a register containing the value whose byte bits will be merged.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
 
@@ -53,7 +53,7 @@ Merge Bits Of Words
 - D is a register containing the value whose word bits will be merged.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
 
@@ -87,7 +87,7 @@ Mix Pixels
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the source pixel bytes.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -123,7 +123,7 @@ Modify C Flag
 - WC is an optional effect to make the modification visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
 
@@ -162,7 +162,7 @@ Modify C And Z Flags
 - WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
 
@@ -202,7 +202,7 @@ Modify Z Flag
 - WZ is an optional effect to make the modification visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
 
@@ -241,7 +241,7 @@ Move
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 
@@ -299,7 +299,7 @@ Move Bytes
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the byte selection pattern.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -342,7 +342,7 @@ Multiply
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
@@ -395,7 +395,7 @@ Multiply Pixels
 - S is a register, 9-bit literal, or 32-bit augmented literal containing four pixel bytes as multipliers.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -440,7 +440,7 @@ Multiply Signed
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
@@ -500,7 +500,7 @@ Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
 | EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
@@ -556,7 +556,7 @@ Multiplex Nibbles
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing nibble values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -600,7 +600,7 @@ Multiplex Nits
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit pair values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -644,7 +644,7 @@ Multiplex Q
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 

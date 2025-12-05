@@ -596,7 +596,7 @@ After a multi-long comparison:
 \item The Z flag indicates a zero result or equality across nearly all instructions
 \item Flags persist until explicitly modified—instructions without WC/WZ/WCZ preserve flag values
 \item WC, WZ, and WCZ effects control which flags are updated; the operation always executes
-\item Any instruction can be conditional using IF\_x prefixes for deterministic branchless programming
+\item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
 \item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing
 \item Multi-precision arithmetic chains flag results between instructions using ADDX and SUBX

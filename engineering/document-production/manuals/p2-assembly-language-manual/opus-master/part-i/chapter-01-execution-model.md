@@ -53,6 +53,23 @@ The first 496 longs ($000-$1EF) serve as general-purpose registers available for
 
 Programs can use this space flexibly. A small program might dedicate most of the space to data storage and lookup tables. A larger program uses more space for code and less for data. The programmer controls this allocation through the assembler's ORG directive and RES directive for reserving data space.
 
+#### Parameter Registers ($1D8-$1DF)
+
+Within the general-purpose range, registers $1D8-$1DF have predefined names PR0-PR7 for Spin2/PASM2 interoperability:
+
+| Address | Register | Purpose |
+|:--------|:---------|:------------------------------------------------|
+| $1D8 | PR0 | Parameter/result register 0 |
+| $1D9 | PR1 | Parameter/result register 1 |
+| $1DA | PR2 | Parameter/result register 2 |
+| $1DB | PR3 | Parameter/result register 3 |
+| $1DC | PR4 | Parameter/result register 4 |
+| $1DD | PR5 | Parameter/result register 5 |
+| $1DE | PR6 | Parameter/result register 6 |
+| $1DF | PR7 | Parameter/result register 7 |
+
+These registers provide a communication mechanism between Spin2 and PASM2 code running in the same COG. Spin2 methods can read and write PR0-PR7, and inline PASM2 code can access the same values. For standalone PASM2 programs or code launched into a separate COG, these are simply general-purpose registers with convenient predefined names.
+
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
 ```{=latex}
@@ -62,7 +79,7 @@ Programs can use this space flexibly. A small program might dedicate most of the
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
 | Address | Register | Purpose |
-|---------|----------|---------|
+|:--------|:---------|:------------------------------------------------|
 | $1F0 | IJMP3 | Interrupt 3 jump address |
 | $1F1 | IRET3 | Interrupt 3 return address |
 | $1F2 | IJMP2 | Interrupt 2 jump address |

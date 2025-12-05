@@ -24,7 +24,7 @@ Zero Extend
 - WCZ sets both C and Z.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
 

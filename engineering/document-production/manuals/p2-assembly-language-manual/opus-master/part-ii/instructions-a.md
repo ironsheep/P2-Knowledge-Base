@@ -23,7 +23,7 @@ Absolute Value
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 | EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
@@ -61,7 +61,7 @@ Add Unsigned
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
 
@@ -106,7 +106,7 @@ Add and Set Counter Event Trigger
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
@@ -140,7 +140,7 @@ Add Pixels
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -175,7 +175,7 @@ Add Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
 
@@ -214,7 +214,7 @@ Add Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
 
@@ -251,7 +251,7 @@ Add Unsigned Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
 
@@ -286,7 +286,7 @@ Acknowledge Smart Pin
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s) to acknowledge.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
 
@@ -321,7 +321,7 @@ Allow Interrupts
 **Result:** Any stalled and future interrupts are allowed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100000 | 000100100 | --- | --- | --- | 2 |
 
@@ -354,7 +354,7 @@ Alter Bit
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -402,7 +402,7 @@ Alter Destination
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -444,7 +444,7 @@ Alter Get Byte
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -490,7 +490,7 @@ Alter Get Nibble
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB / ROLNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -536,7 +536,7 @@ Alter Get Word
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -582,7 +582,7 @@ Alter Instruction
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions and Dest modifications to perform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
@@ -622,7 +622,7 @@ Alter Result
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -666,7 +666,7 @@ Alter Source
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -708,7 +708,7 @@ Alter Set Byte
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal containing base long address (Src[8:0]) and optional auto-indexer value (Src[17:9]).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -752,7 +752,7 @@ Alter Set Nibble
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -798,7 +798,7 @@ Alter Set Word
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -844,7 +844,7 @@ Bitwise And
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
@@ -879,7 +879,7 @@ And Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
@@ -990,7 +990,7 @@ Augment Destination
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
 
@@ -1025,7 +1025,7 @@ Augment Source
 - Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
 

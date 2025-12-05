@@ -22,7 +22,7 @@ Increment and Jump If Zero {#ijnz}
 - Src is the jump address: use # for relative, omit for absolute.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
 | EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
@@ -67,7 +67,7 @@ Increment Modulus
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
 
@@ -84,7 +84,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Dest was equal to
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
-INCMOD does not limit Dest within the specified range. If Dest begins at a value greater than Src, iterations of INCMOD will continue to increment it through the 32-bit rollover point ($FFFF\_FFFF wrapping to $0000\_0000) before it will effectively cycle from 0 to Src.
+INCMOD does not limit Dest within the specified range. If Dest begins at a value greater than Src, iterations of INCMOD will continue to increment it through the 32-bit rollover point ($FFFF_FFFF wrapping to $0000_0000) before it will effectively cycle from 0 to Src.
 
 A common usage pattern for INCMOD is managing circular buffers:
 

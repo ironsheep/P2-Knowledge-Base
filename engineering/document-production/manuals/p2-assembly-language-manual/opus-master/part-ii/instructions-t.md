@@ -23,7 +23,7 @@ Test
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
 | EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
@@ -72,7 +72,7 @@ Test Bit
 - XORC/XORZ XORs bit state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
 | EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
@@ -119,7 +119,7 @@ Test Bit Negated
 - XORC/XORZ XORs inverted bit state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
 | EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
@@ -155,7 +155,7 @@ Test Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
 
@@ -202,7 +202,7 @@ Test Pin / Test Pin Negated {#testpn}
 - XORC/XORZ XORs pin state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
@@ -250,7 +250,7 @@ Test And Jump If Full / Not Full {#tjnf}
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
@@ -291,7 +291,7 @@ Test And Jump If Signed / Not Signed {#tjns}
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
@@ -332,7 +332,7 @@ Test And Jump If Zero / Not Zero {#tjnz}
 - Src is the jump address: use # for relative, omit for absolute.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
 | EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
@@ -381,7 +381,7 @@ Test And Jump If Overflow
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
@@ -420,7 +420,7 @@ Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
 **Result:** The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |

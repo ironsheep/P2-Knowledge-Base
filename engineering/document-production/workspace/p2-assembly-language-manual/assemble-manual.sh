@@ -58,8 +58,7 @@ declare -a REQUIRED_FILES=(
     "part-iii/appendix-e-smartpin-constants.md"
     "part-iii/appendix-f-streamer-constants.md"
     "part-iii/appendix-g-reserved-words.md"
-    "part-iii/appendix-h-opcodes.md"
-    "part-iii/appendix-i-glossary.md"
+    "part-iii/appendix-h-glossary.md"
 )
 
 # Verify all required files exist
@@ -173,8 +172,7 @@ assemble_section "part-iii/appendix-d-constants.md" "Appendix D: Predefined Cons
 assemble_section "part-iii/appendix-e-smartpin-constants.md" "Appendix E: Smart Pin Mode Constants"
 assemble_section "part-iii/appendix-f-streamer-constants.md" "Appendix F: Streamer Mode Constants"
 assemble_section "part-iii/appendix-g-reserved-words.md" "Appendix G: Reserved Words"
-assemble_section "part-iii/appendix-h-opcodes.md" "Appendix H: Opcodes"
-assemble_section "part-iii/appendix-i-glossary.md" "Appendix I: Glossary"
+assemble_section "part-iii/appendix-h-glossary.md" "Appendix H: Glossary"
 
 echo ""
 echo "========================================"
@@ -196,7 +194,7 @@ echo "Document Structure:"
 echo "  - Front Matter: 1 file"
 echo "  - Part I (Architectural Foundation): 5 chapters"
 echo "  - Part II (Instruction Set Reference): 24 instruction files + 2 reference sections"
-echo "  - Part III (Reference Tables): 9 appendices"
+echo "  - Part III (Reference Tables): 8 appendices"
 echo ""
 
 # File size

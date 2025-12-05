@@ -124,11 +124,11 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
 
-- Chapter 1: P2 Architecture Overview
-- Chapter 2: Instruction Format and Encoding
-- Chapter 3: Addressing Modes and Register Usage
-- Chapter 4: Flags and Conditional Execution
-- Chapter 5: Program Flow and Subroutines
+- Chapter 1: The P2 Execution Model
+- Chapter 2: The Instruction Format
+- Chapter 3: Flags and Conditional Execution
+- Chapter 4: Timing and Determinism
+- Chapter 5: Special Hardware Overview
 
 **Part II: Language Reference** — Complete documentation of all PASM2 elements:
 
@@ -146,8 +146,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 - Appendix E: Smart Pin Mode Constants
 - Appendix F: Streamer Mode Constants
 - Appendix G: Reserved Words Reference
-- Appendix H: Opcode Bit Patterns
-- Appendix I: Glossary of Encoding Terms
+- Appendix H: Glossary of Encoding Terms
 
 ### Quick Navigation Guide
 
@@ -155,15 +154,15 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **"I need to understand the architecture"** → Part I, read Chapters 1-2 sequentially
 
-**"I need encoding details"** → Appendix A (summary tables) or Appendix F (complete opcode map)
+**"I need encoding details"** → Appendix A (encoding summary tables)
 
 **"I need to find instructions by category"** → Appendix B (grouped by function: arithmetic, logic, memory, etc.)
 
 **"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix C (summary table)
 
-**"I need Smart Pin configuration values"** → Appendix D
+**"I need Smart Pin configuration values"** → Appendix E (Smart Pin Mode Constants)
 
-**"I need CORDIC function codes"** → Appendix E
+**"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 
 
 ## Conventions Used in This Manual
@@ -207,23 +206,23 @@ Throughout this manual, special markers highlight important information:
 
 Part II instruction entries include encoding tables with the following columns:
 
-**COND** — Condition code field (4 bits, EEEE). Determines when instruction executes based on flag states.
+**EEEE** — Condition code field (4 bits). Determines when instruction executes based on flag states.
 
-**INSTR** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
+**Opcode** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
 
-**FX** — Flag effects field (3 bits, CZI). Controls which flags are updated and how.
+**CZI** — Flag effects field (3 bits). Controls which flags are updated and how.
 
-**DEST** — Destination register (9 bits). Where the result is written.
+**Dest** — Destination register (9 bits). Where the result is written.
 
-**SRC** — Source register or immediate value (9 bits). Second operand for the instruction.
+**Src** — Source register or immediate value (9 bits). Second operand for the instruction.
 
-**Write** — What value gets written to the destination register.
+**C** — Effect on the Carry flag: set (1), cleared (0), modified based on result, or unchanged (---).
 
-**C Flag** — Effect on the Carry flag: set (1), cleared (0), modified based on result, or unchanged (-).
+**Z** — Effect on the Zero flag: set (1), cleared (0), modified based on result, or unchanged (---).
 
-**Z Flag** — Effect on the Zero flag: set (1), cleared (0), modified based on result, or unchanged (-).
+**Result** — What value gets written to the destination register.
 
-**Clocks** — Execution time in system clock cycles.
+**Clks** — Execution time in system clock cycles.
 
 ### Cross-References
 
@@ -322,6 +321,23 @@ The first 496 longs ($000-$1EF) serve as general-purpose registers available for
 
 Programs can use this space flexibly. A small program might dedicate most of the space to data storage and lookup tables. A larger program uses more space for code and less for data. The programmer controls this allocation through the assembler's ORG directive and RES directive for reserving data space.
 
+#### Parameter Registers ($1D8-$1DF)
+
+Within the general-purpose range, registers $1D8-$1DF have predefined names PR0-PR7 for Spin2/PASM2 interoperability:
+
+| Address | Register | Purpose |
+|:--------|:---------|:------------------------------------------------|
+| $1D8 | PR0 | Parameter/result register 0 |
+| $1D9 | PR1 | Parameter/result register 1 |
+| $1DA | PR2 | Parameter/result register 2 |
+| $1DB | PR3 | Parameter/result register 3 |
+| $1DC | PR4 | Parameter/result register 4 |
+| $1DD | PR5 | Parameter/result register 5 |
+| $1DE | PR6 | Parameter/result register 6 |
+| $1DF | PR7 | Parameter/result register 7 |
+
+These registers provide a communication mechanism between Spin2 and PASM2 code running in the same COG. Spin2 methods can read and write PR0-PR7, and inline PASM2 code can access the same values. For standalone PASM2 programs or code launched into a separate COG, these are simply general-purpose registers with convenient predefined names.
+
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
 ```{=latex}
@@ -331,7 +347,7 @@ Programs can use this space flexibly. A small program might dedicate most of the
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
 | Address | Register | Purpose |
-|---------|----------|---------|
+|:--------|:---------|:------------------------------------------------|
 | $1F0 | IJMP3 | Interrupt 3 jump address |
 | $1F1 | IRET3 | Interrupt 3 return address |
 | $1F2 | IJMP2 | Interrupt 2 jump address |
@@ -481,7 +497,7 @@ Every PASM2 instruction occupies exactly one 32-bit long with this structure:
 ### 2.1.1 Field Summary
 
 | Field | Bits | Width | Purpose |
-|-------|------|-------|---------|
+|:----------|:------|:------|:-----------------------------------------------|
 | EEEE | 31-28 | 4 | Condition code for conditional execution |
 | OOOOOOO | 27-21 | 7 | Opcode identifying the instruction |
 | CZI | 20-18 | 3 | Flag effects and immediate mode |
@@ -493,7 +509,7 @@ Every PASM2 instruction occupies exactly one 32-bit long with this structure:
 The three bits at positions 20-18 control flag behavior and operand mode:
 
 | Bit | Position | Purpose |
-|-----|----------|---------|
+|:----|:---------|:-------------------------------------------------|
 | C | 20 | C flag write enable (1 = update C flag) |
 | Z | 19 | Z flag write enable (1 = update Z flag) |
 | I | 18 | Immediate mode (1 = S is immediate value) |
@@ -508,7 +524,7 @@ The condition field enables conditional execution of any instruction. The instru
 ### 2.2.1 Condition Code Table
 
 | EEEE | Mnemonic | Condition | Description |
-|------|----------|-----------|-------------|
+|:-----|:-------------|:-------------|:------------------------------------------|
 | 0000 | _RET_ | (special) | Return from subroutine |
 | 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Neither carry nor zero |
 | 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
@@ -592,7 +608,7 @@ Each instruction entry in Part II includes an encoding table with nine columns. 
 The left five columns show the 32-bit instruction encoding:
 
 | Column | Content | Description |
-|--------|---------|-------------|
+|:-------|:-------------|:---------------------------------------------------------------|
 | COND | EEEE | Condition field (4 bits, always EEEE for conditional instructions) |
 | INSTR | 7 bits | The instruction's unique opcode (positions 27-21) |
 | FX | CZI variant | Flag modification and immediate bits (positions 20-18) |
@@ -604,7 +620,7 @@ The left five columns show the 32-bit instruction encoding:
 The right four columns describe instruction effects:
 
 | Column | Content | Description |
-|--------|---------|-------------|
+|:-------|:---------------|:----------------------------------------------------|
 | Write | What's written | Which register(s) receive output (D, PC, etc.) |
 | C Flag | C behavior | How C flag is affected, or "---" for no change |
 | Z Flag | Z behavior | How Z flag is affected, or "---" for no change |
@@ -615,7 +631,7 @@ The right four columns describe instruction effects:
 The FX column shows which flag and immediate options are available:
 
 | FX Pattern | Meaning |
-|------------|---------|
+|:-----------|:----------------------------------------------------------------------------|
 | CZI | C modifiable (WC), Z modifiable (WZ), Immediate allowed (#) |
 | 0ZI | C not modifiable, Z modifiable, Immediate allowed |
 | C0I | C modifiable, Z not modifiable, Immediate allowed |
@@ -629,23 +645,32 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 ### 2.3.4 Special Values in Columns
 
 **Write column:**
-- `D` - Destination register is written
-- `D and PC` - Both destination and program counter written (for jumps/calls)
-- `PC` - Only PC written
-- `---` - Nothing written (compare, test instructions)
-- `LUT` - LUT memory written
-- `Hub` - Hub memory written
+
+| Value | Meaning |
+|-------|---------|
+| `D` | Destination register is written |
+| `D and PC` | Both destination and program counter written (for jumps/calls) |
+| `PC` | Only PC written |
+| `---` | Nothing written (compare, test instructions) |
+| `LUT` | LUT memory written |
+| `Hub` | Hub memory written |
 
 **Flag columns:**
-- `---` - Flag is not changed
-- Descriptive text - Describes condition that sets/clears the flag
+
+| Value | Meaning |
+|-------|---------|
+| `---` | Flag is not changed |
+| Descriptive text | Describes condition that sets/clears the flag |
 
 **Clocks column:**
-- `2` - Always 2 clock cycles
-- `2+` - Minimum 2 cycles, may be more
-- `2 or 4` - 2 if condition false/not taken, 4 if true/taken
-- `2 / 8-23` - COG mode cycles / Hub mode cycles
-- `9..35` - Variable range depending on operands
+
+| Value | Meaning |
+|-------|---------|
+| `2` | Always 2 clock cycles |
+| `2+` | Minimum 2 cycles, may be more |
+| `2 or 4` | 2 if condition false/not taken, 4 if true/taken |
+| `2 / 8-23` | COG mode cycles / Hub mode cycles |
+| `9..35` | Variable range depending on operands |
 
 
 ## 2.4 Understanding Multiple Encoding Rows
@@ -847,7 +872,7 @@ Each entry in Part II has a colored bar on the left edge of its header block. Th
 The colors indicate entry type:
 
 | Color | Entry Type | Description |
-|-------|------------|-------------|
+|:----------|:-----------|:--------------------------------------------------------|
 | **Red** | Instruction | PASM2 machine instructions (the majority of entries) |
 | **Amber** | Directive | Assembler directives like ORG, BYTE, LONG |
 | **Violet** | Constant | Pre-defined constants like smart pin mode values |
@@ -1056,7 +1081,7 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 \item AUGS/AUGD extend immediates to full 32 bits by inserting an extra instruction before the target
 \item Encoding tables show both the bit pattern (left 5 columns) and the effects (right 4 columns)
 \item Multiple table rows indicate instruction families or syntax variants with different encodings
-\item The \_RET\_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item The _RET_ condition (EEEE=0000) transforms any instruction into a subroutine return
 \end{keyconcepts}
 ```
 
@@ -1661,7 +1686,7 @@ After a multi-long comparison:
 \item The Z flag indicates a zero result or equality across nearly all instructions
 \item Flags persist until explicitly modified—instructions without WC/WZ/WCZ preserve flag values
 \item WC, WZ, and WCZ effects control which flags are updated; the operation always executes
-\item Any instruction can be conditional using IF\_x prefixes for deterministic branchless programming
+\item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
 \item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing
 \item Multi-precision arithmetic chains flag results between instructions using ADDX and SUBX
@@ -2386,16 +2411,16 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 
 | Operation | Instruction | Output |
 |-----------|-------------|--------|
-| Multiply | QMUL | 64-bit product (low 32 bits in X, high 32 bits in Y) |
-| Divide | QDIV | Quotient in X, remainder in Y |
-| Fractional divide | QFRAC | Fractional quotient in X, remainder in Y |
-| Square root | QSQRT | Integer square root in X |
-| Rotate | QROTATE | Rotated X coordinate, rotated Y coordinate |
-| Vector | QVECTOR | Magnitude in X, angle in Y (Cartesian to polar) |
-| Logarithm | QLOG | Natural log approximation in X |
-| Exponential | QEXP | e^x approximation in X |
+| Multiply | [QMUL](#qmul) | 64-bit product (low 32 bits in X, high 32 bits in Y) |
+| Divide | [QDIV](#qdiv) | Quotient in X, remainder in Y |
+| Fractional divide | [QFRAC](#qfrac) | Fractional quotient in X, remainder in Y |
+| Square root | [QSQRT](#qsqrt) | Integer square root in X |
+| Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
+| Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
+| Logarithm | [QLOG](#qlog) | Natural log approximation in X |
+| Exponential | [QEXP](#qexp) | e^x approximation in X |
 
-Each operation produces one or two 32-bit results, retrieved through GETQX and GETQY instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
+Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
 
 ### 5.1.2 CORDIC Operation Flow
 
@@ -2516,9 +2541,9 @@ This pattern achieves one rotation result every ~20 instructions (the loop body)
 
 ### 5.1.7 CORDIC Instructions Reference
 
-**Queue Operations:** QMUL, QDIV, QFRAC, QSQRT, QROTATE, QVECTOR, QLOG, QEXP
+**Queue Operations:** [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QROTATE](#qrotate), [QVECTOR](#qvector), [QLOG](#qlog), [QEXP](#qexp)
 
-**Result Retrieval:** GETQX, GETQY
+**Result Retrieval:** [GETQX](#getqx), [GETQY](#getqy)
 
 Full instruction details, including operand formats and result interpretations, appear in Part II under each instruction's entry.
 
@@ -2720,7 +2745,14 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 - **POLLATN** - Poll attention status
 - **POLLPAT** - Poll pattern match status
 
-Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event. The pattern `POLLSE1 WC; IF_C JMP #handler` branches to handler code only when the event occurred.
+Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
+
+```pasm
+                pollse1         wc              ' Test event 1, set C if occurred
+        if_c    jmp     #handler                ' Branch to handler only if event fired
+```
+
+This pattern branches to handler code only when the event occurred.
 
 ### 5.4.5 Interrupt Philosophy
 
@@ -2822,7 +2854,7 @@ The P2 includes a hardware bytecode execution engine called XBYTE that accelerat
 
 XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
 
-XBYTE is like a phantom instruction that executes on a hardware stack return (RET/\_RET\_) to address $1FF. Such a return does not pop the stack, so each additional RET/\_RET\_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
+XBYTE is like a phantom instruction that executes on a hardware stack return (RET/_RET_) to address $1FF. Such a return does not pop the stack, so each additional RET/_RET_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
 
 The execution cycle proceeds through eight clock phases:
 
@@ -2837,7 +2869,7 @@ The execution cycle proceeds through eight clock phases:
 | 7 | go | reload pipeline | Pipeline reload |
 | 8 | get | first instruction | First instruction of bytecode routine executes |
 
-When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a \_RET\_ prefix, making the total XBYTE loop take only 8 clocks.
+When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks.
 
 ### 5.6.2 LUT Table Format
 
@@ -2886,7 +2918,7 @@ This flag option allows bytecode routines to receive up to 4 states encoded in t
 
 ### 5.6.5 Starting XBYTE
 
-XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute \_RET\_ SETQ to configure the mode and trigger XBYTE:
+XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute _RET_ SETQ to configure the mode and trigger XBYTE:
 
 ```pasm
                                         ' Setup before starting XBYTE:
@@ -2899,21 +2931,21 @@ XBYTE mode begins through a specific instruction sequence. First, push $1FF onto
 _RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
 ```
 
-The \_RET\_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or \_RET\_, returning to $1FF to fetch the next bytecode.
+The _RET_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or _RET_, returning to $1FF to fetch the next bytecode.
 
-To alter the XBYTE mode for all subsequent bytecodes, execute another \_RET\_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use \_RET\_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
+To alter the XBYTE mode for all subsequent bytecodes, execute another _RET_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use _RET_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
 
 ### 5.6.6 Bytecode Routine Requirements
 
 Bytecode routines must follow these constraints:
 
 - **Location**: Must reside in COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
-- **Exit**: Must end with RET or \_RET\_ to return control to XBYTE
+- **Exit**: Must end with RET or _RET_ to return control to XBYTE
 - **Stack**: Hardware stack must not overflow (8 levels maximum)
 
 The PA register ($1F6) contains the current bytecode value, available as an immediate operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode using RFBYTE, RFWORD, or RFLONG.
 
-For maximum performance, use the \_RET\_ prefix on the final instruction:
+For maximum performance, use the _RET_ prefix on the final instruction:
 
 ```pasm
 toggle_pin0
@@ -3197,28 +3229,47 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 
 ### 5.8.6 Visual Debug Displays
 
-Beyond text output, DEBUG supports graphical display windows that visualize data in real time. These displays open automatically when the corresponding DEBUG statement executes.
+Beyond text output, DEBUG supports graphical display windows that visualize data in real time. Visual displays use a two-phase pattern: one statement **creates** the display window, and subsequent statements **update** it with new data.
+
+**Window Creation vs. Update:**
+
+The first DEBUG statement with a display name creates and configures the window. Inside loops, you update the existing window using the backtick-name syntax:
+
+```pasm
+                debug(`scope MySignal)              ' CREATE window (before loop)
+
+.loop           rdlong  adc_value, adc_ptr
+                debug(`MySignal adc_value)          ' UPDATE window (in loop)
+                waitms  #1
+                jmp     #.loop
+```
+
+The creation statement (with the display type keyword) establishes the window. Update statements (using just the backtick and name) send data points to the existing window. This separation is critical—creating windows inside loops would be extremely slow and waste resources.
 
 **SCOPE — Oscilloscope Display:**
 
 The SCOPE display provides multi-channel waveform visualization, similar to a digital oscilloscope:
 
 ```pasm
+                debug(`scope MySignal)              ' Create scope window
+
 .loop           rdlong  adc_value, adc_ptr
-                debug(`scope MySignal, adc_value)
+                debug(`MySignal adc_value)          ' Send sample to scope
                 waitms  #1
                 jmp     #.loop
 ```
 
-SCOPE supports up to 8 channels, auto-scaling, triggering modes, and time base adjustment. Each DEBUG call adds one sample point; the display scrolls as new data arrives.
+SCOPE supports up to 8 channels, auto-scaling, triggering modes, and time base adjustment. Each update call adds one sample point; the display scrolls as new data arrives.
 
 **PLOT — Data Plotting:**
 
 The PLOT display creates line graphs, scatter plots, and trend charts:
 
 ```pasm
+                debug(`plot Temperature)            ' Create plot window
+
 .loop           call    #read_temperature
-                debug(`plot Temperature, temp_value)
+                debug(`Temperature temp_value)      ' Send data point to plot
                 waitms  #1000
                 jmp     #.loop
 ```
@@ -3230,8 +3281,9 @@ PLOT provides rolling or accumulating display modes, multiple data series, and s
 The TERM display provides a dedicated text terminal window, separate from the default debug output:
 
 ```pasm
-                debug(`term Status, "System initialized", 13)
-                debug(`term Status, "Temperature: ", sdec_(temp), "°C", 13)
+                debug(`term Status)                           ' Create terminal window
+                debug(`Status "System initialized", 13)       ' Send text to terminal
+                debug(`Status "Temperature: ", sdec_(temp), "°C", 13)
 ```
 
 TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen) and provides a scrolling text buffer.
@@ -3241,8 +3293,10 @@ TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen
 The LOGIC display shows digital signal timing as a logic analyzer view:
 
 ```pasm
+                debug(`logic PortA)                 ' Create logic analyzer window
+
 .loop           rdbyte  port_state, port_addr
-                debug(`logic PortA, port_state)
+                debug(`PortA port_state)            ' Send sample to analyzer
                 waitx   ##100
                 jmp     #.loop
 ```
@@ -3254,7 +3308,8 @@ LOGIC displays multiple digital channels with timing relationships, useful for d
 The BITMAP display renders pixel data as an image:
 
 ```pasm
-                debug(`bitmap Display, 320, 240, @framebuffer)
+                debug(`bitmap Display, 320, 240)              ' Create bitmap window
+                debug(`Display @framebuffer)                  ' Send pixel data
 ```
 
 BITMAP creates a window showing raw pixel data, useful for graphics and video debugging.
@@ -3302,20 +3357,44 @@ BITMAP creates a window showing raw pixel data, useful for graphics and video de
 
 ### 5.8.8 DEBUG Performance Considerations
 
-DEBUG statements execute at runtime, consuming clock cycles for formatting and serial transmission. While typically negligible for occasional debug output, intensive debugging can affect timing-critical code.
+**CRITICAL WARNING:** Never place DEBUG statements inside performance-critical loops. DEBUG is a serial transmission mechanism—each statement can take thousands of clock cycles to format and transmit data. A tight loop with DEBUG inside will run orders of magnitude slower than the same loop without DEBUG. This isn't a subtle performance concern; it will fundamentally change your code's timing behavior.
 
-**Timing Impact:**
+**What DEBUG Actually Costs:**
 
 - Each DEBUG statement requires cycles for formatting and transmission
-- Serial transmission at 2 Mbaud limits throughput
-- Visual displays (SCOPE, PLOT) add host-side processing
+- Serial transmission at 2 Mbaud limits throughput to roughly 200,000 characters per second
+- A single `debug(udec(value))` statement may consume 100+ microseconds
+- Visual display updates (SCOPE, PLOT) add host-side processing overhead
+- In a loop running at 1 MHz, adding DEBUG drops effective frequency to kilohertz range
+
+**Safe DEBUG Patterns:**
+
+```pasm
+                ' WRONG - DEBUG inside tight loop destroys timing
+.bad_loop       rdlong  value, ptr
+                debug(udec_(value))                 ' This kills performance!
+                djnz    count, #.bad_loop
+
+                ' RIGHT - DEBUG outside performant loop
+.fast_loop      rdlong  value, ptr
+                call    #process_value
+                djnz    count, #.fast_loop
+                debug("Final value: ", udec_(value))  ' Debug after loop completes
+
+                ' RIGHT - Conditional debug for occasional sampling
+.sample_loop    rdlong  value, ptr
+                incmod  sample_cnt, #999    wz
+        if_z    debug(udec_(value))                 ' Only every 1000th iteration
+                djnz    count, #.sample_loop
+```
 
 **Mitigation Strategies:**
 
-- Use conditional DEBUG to output only when conditions warrant
-- Remove or disable DEBUG in timing-critical inner loops
+- Debug before or after performance-critical loops, never inside
+- Use conditional DEBUG with counters to sample infrequently
+- Remove DEBUG from timing-critical code paths entirely during development
 - Use the compiler's debug-disable option for production builds
-- Aggregate multiple values into single DEBUG statements
+- For real-time monitoring, use hardware methods (pin toggles, scope probes)
 
 **Production Builds:**
 
@@ -3325,12 +3404,23 @@ The compiler provides options to disable DEBUG entirely. When disabled, DEBUG st
 
 When multiple COGs execute DEBUG statements, output interleaves in the debug window. Each COG's output appears as it transmits, which can create confusing mixed output when COGs debug simultaneously.
 
+**Automatic COG Identification:**
+
+For standard DEBUG output (not routed to a visual display window), the debug system automatically prefixes each message with the COG number (Cog0: through Cog7:). You do not need to manually add COG identification—it's built into the debug protocol:
+
+```pasm
+                debug("Starting motor control")     ' Output: Cog2: Starting motor control
+                debug(udec(speed))                  ' Output: Cog2: speed = 1500
+```
+
+This automatic prefixing applies only to text output. Visual displays (SCOPE, PLOT, TERM, etc.) do not receive the COG prefix because they're typically dedicated to specific COGs or purposes.
+
 **Strategies for Multi-COG Debugging:**
 
-- Prefix messages with COG identification: `debug("COG", udec_(cog_id), ": message")`
+- Rely on automatic COG prefixes for text debug output—no manual prefix needed
 - Use separate TERM windows for each COG: `debug(`term COG0, ...)`, `debug(`term COG1, ...)`
-- Add brief delays between DEBUG calls in different COGs
-- Debug one COG at a time during initial development
+- Add brief delays between DEBUG calls in different COGs if message interleaving is problematic
+- Debug one COG at a time during initial development for clearest output
 
 The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access across COGs, ensuring atomic message transmission, but message ordering depends on execution timing.
 
@@ -3370,7 +3460,47 @@ This chapter defines the instruction categories used throughout Part II. Each ca
 
 Arithmetic instructions perform mathematical and logical operations on register values. This includes addition, subtraction, multiplication, comparisons, bitwise operations (AND, OR, XOR), bit manipulation, shifts, rotates, and data movement. This is the largest instruction category.
 
-[ABS](#abs), [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [AND](#and), [ANDN](#andn), [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [BMASK](#bmask), [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [CRCBIT](#crcbit), [CRCNIB](#crcnib), [DECMOD](#decmod), [DECOD](#decod), [ENCOD](#encod), [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles), [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [INCMOD](#incmod), [LOC](#loc), [MERGEB](#mergeb), [MERGEW](#mergew), [MODC](#modc), [MODCZ](#modcz), [MODZ](#modz), [MOV](#mov), [MOVBYTS](#movbyts), [MUL](#mul), [MULS](#muls), [MUXC](#muxc), [MUXNC](#muxnc), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [MUXNZ](#muxnz), [MUXQ](#muxq), [MUXZ](#muxz), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz), [NOT](#not), [ONES](#ones), [OR](#or), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr), [REV](#rev), [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz), [ROL](#rol), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword), [ROR](#ror), [SAL](#sal), [SAR](#sar), [SCA](#sca), [SCAS](#scas), [SETBYTE](#setbyte), [SETD](#setd), [SETNIB](#setnib), [SETR](#setr), [SETS](#sets), [SETWORD](#setword), [SEUSSF](#seussf), [SEUSSR](#seussr), [SHL](#shl), [SHR](#shr), [SIGNX](#signx), [SPLITB](#splitb), [SPLITW](#splitw), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx), [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz), [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [TESTN](#testn), [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [XOR](#xor), [XORO32](#xoro32), [ZEROX](#zerox)
+*Data Movement:* [MOV](#mov), [LOC](#loc)
+
+*Addition/Subtraction:* [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
+
+*Negation/Absolute:* [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
+
+*Multiplication:* [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
+
+*Comparisons:* [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [TEST](#test), [TESTN](#testn)
+
+*Min/Max:* [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles)
+
+*Modular Arithmetic:* [INCMOD](#incmod), [DECMOD](#decmod)
+
+*Bitwise Logic:* [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
+
+*Bit Field Operations:* [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
+
+*Bit Utilities:* [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
+
+*Shifts:* [SHL](#shl), [SHR](#shr), [SAL](#sal), [SAR](#sar)
+
+*Rotates:* [ROL](#rol), [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr)
+
+*Byte/Word/Nibble Access:* [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [SETNIB](#setnib), [SETWORD](#setword), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword)
+
+*Byte/Word Packing:* [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
+
+*Mux Operations:* [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+
+*Conditional Sum:* [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
+
+*Flag Operations:* [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
+
+*Instruction Field Modification:* [SETD](#setd), [SETS](#sets), [SETR](#setr)
+
+*CRC:* [CRCBIT](#crcbit), [CRCNIB](#crcnib)
+
+*Graphics:* [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz)
+
+*Shuffling:* [SEUSSF](#seussf), [SEUSSR](#seussr)
 
 ---
 
@@ -3402,7 +3532,19 @@ Lookup table (LUT) instructions access the 512-long LUT memory private to each c
 
 Pin instructions control the P2's 64 I/O pins. Basic pin operations set direction (input/output) and output level (high/low). Smart pin instructions configure and communicate with the autonomous smart pin state machines that can perform complex I/O functions independent of cog processing.
 
-[AKPIN](#akpin), [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz), [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz), [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz), [GETSCP](#getscp), [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz), [RDPIN](#rdpin), [RQPIN](#rqpin), [SETDACS](#setdacs), [SETSCP](#setscp), [TESTP](#testp), [TESTPN](#testpn), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+*Direction Control:* [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
+
+*Output Control:* [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
+
+*Drive (Direction + Output):* [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
+
+*Float (Input with Preset):* [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
+
+*Pin Testing:* [TESTP](#testp), [TESTPN](#testpn)
+
+*Smart Pin Control:* [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+
+*Oscilloscope/DAC:* [GETSCP](#getscp), [SETSCP](#setscp), [SETDACS](#setdacs)
 
 ---
 
@@ -3410,7 +3552,17 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 
 Event instructions monitor and respond to system events including counter/timer triggers, smart pin signals, FIFO status, streamer conditions, and inter-cog attention signals. They provide configuration, polling, waiting, and conditional branching mechanisms for synchronization.
 
-[ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [COGATN](#cogatn), [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro), [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4), [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
+*Configuration:* [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
+
+*Inter-COG:* [COGATN](#cogatn)
+
+*Polling:* [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
+
+*Waiting:* [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
+
+*Branch on Event Set:* [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
+
+*Branch on Event Clear:* [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
 
 ---
 
@@ -3454,9 +3606,9 @@ Color space and pixel instructions provide hardware-accelerated graphics process
 
 ---
 
-## Register Indirection {#register-indirection}
+## Instruction Modification {#instruction-modification}
 
-Register indirection instructions modify subsequent instructions by dynamically altering their source, destination, or bit index fields. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
+Instruction modification instructions (also known as register indirection) dynamically alter subsequent instructions by changing their source, destination, or bit index fields before execution. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
 
 [ALTB](#altb), [ALTD](#altd), [ALTGB](#altgb), [ALTGN](#altgn), [ALTGW](#altgw), [ALTI](#alti), [ALTR](#altr), [ALTS](#alts), [ALTSB](#altsb), [ALTSN](#altsn), [ALTSW](#altsw)
 
@@ -3493,7 +3645,7 @@ Absolute Value
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 | EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
@@ -3531,7 +3683,7 @@ Add Unsigned
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
 
@@ -3576,7 +3728,7 @@ Add and Set Counter Event Trigger
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
@@ -3610,7 +3762,7 @@ Add Pixels
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -3645,7 +3797,7 @@ Add Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
 
@@ -3684,7 +3836,7 @@ Add Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
 
@@ -3721,7 +3873,7 @@ Add Unsigned Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
 
@@ -3756,7 +3908,7 @@ Acknowledge Smart Pin
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s) to acknowledge.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
 
@@ -3791,7 +3943,7 @@ Allow Interrupts
 **Result:** Any stalled and future interrupts are allowed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100000 | 000100100 | --- | --- | --- | 2 |
 
@@ -3824,7 +3976,7 @@ Alter Bit
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -3872,7 +4024,7 @@ Alter Destination
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -3914,7 +4066,7 @@ Alter Get Byte
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -3960,7 +4112,7 @@ Alter Get Nibble
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB / ROLNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4006,7 +4158,7 @@ Alter Get Word
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4052,7 +4204,7 @@ Alter Instruction
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions and Dest modifications to perform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
@@ -4092,7 +4244,7 @@ Alter Result
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4136,7 +4288,7 @@ Alter Source
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4178,7 +4330,7 @@ Alter Set Byte
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal containing base long address (Src[8:0]) and optional auto-indexer value (Src[17:9]).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4222,7 +4374,7 @@ Alter Set Nibble
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4268,7 +4420,7 @@ Alter Set Word
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
 | EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
@@ -4314,7 +4466,7 @@ Bitwise And
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
@@ -4349,7 +4501,7 @@ And Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
 
@@ -4460,7 +4612,7 @@ Augment Destination
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
 
@@ -4495,7 +4647,7 @@ Augment Source
 - Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
 
@@ -4541,7 +4693,7 @@ Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
 - WCZ is an optional effect to update the Z flag to the original bit state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
 | EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
@@ -4588,7 +4740,7 @@ Bit High
 - WCZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -4625,7 +4777,7 @@ Bit Low
 - WCZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -4662,7 +4814,7 @@ Bit Not
 - WCZ is an optional effect to update the C and Z flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -4699,7 +4851,7 @@ Bit Random
 - WCZ is an optional effect to update the C and Z flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
 
@@ -4737,7 +4889,7 @@ Blend Pixels
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are blended into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -4772,7 +4924,7 @@ Bit Mask
 - Src is a register or 5-bit literal whose value is the size of the bit mask to generate.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
@@ -4813,7 +4965,7 @@ Breakpoint
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code or condition depending on the state of execution (outside or inside of a Debug ISR).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
@@ -4860,7 +5012,7 @@ Call Subroutine
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | K and PC | --- | --- | 4 / 13-20 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
@@ -4904,7 +5056,7 @@ Call Subroutine via PTRA
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5...12 |
@@ -4948,7 +5100,7 @@ Call Subroutine via PTRB
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5...12 |
@@ -4994,7 +5146,7 @@ Call with Destination Register
 - WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | Pxxx and PC | --- | --- | 4 / 13-20 |
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
@@ -5037,7 +5189,7 @@ Call Subroutine with PA Parameter
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
 
@@ -5073,7 +5225,7 @@ Call Subroutine with PB Parameter
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
 
@@ -5110,7 +5262,7 @@ Compare Unsigned
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Unsigned (D < S) | D=S | 2 |
 
@@ -5155,7 +5307,7 @@ Compare Most Significant Bit
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Result[31] | D=S | 2 |
 
@@ -5192,7 +5344,7 @@ Compare Reverse
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (S - D) | D == S | 2 |
 
@@ -5229,7 +5381,7 @@ Compare Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Signed (D < S) | D=S | 2 |
 
@@ -5272,7 +5424,7 @@ Compare and Subtract
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | Unsigned(D >= S) | Result = 0 | 2 |
 
@@ -5313,7 +5465,7 @@ Compare Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | correct sign of (D - (S + C)) | Z AND (D == S + C) | 2 |
 
@@ -5356,7 +5508,7 @@ Compare Unsigned Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (D - (S + C)) | Z AND (D == S + C) | 2 |
 
@@ -5397,7 +5549,7 @@ Cog Attention
 - Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111111 | --- | --- | --- | 2 |
 
@@ -5442,7 +5594,7 @@ Cog Breakpoint
 - Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110101 | --- | --- | --- | 2 |
 
@@ -5482,7 +5634,7 @@ Cog Identification
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | D if reg and !WC | Cog Running | --- | 2-9, +2 if result |
 
@@ -5529,7 +5681,7 @@ Cog Initialize
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status and triggers Dest to be overwritten with new cog's ID.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | D if reg and WC | No cog available | --- | 2-9, +2 if result |
 
@@ -5594,7 +5746,7 @@ Cog Stop
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000011 | --- | --- | --- | 2-9 |
 
@@ -5641,7 +5793,7 @@ CRC Iterate Bit
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -5688,7 +5840,7 @@ CRC Iterate Nibble
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -5741,7 +5893,7 @@ Decrement Modulus
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
 
@@ -5778,7 +5930,7 @@ Decode Bit Position
 - Src is an optional register or 5-bit literal whose value is the bit position to set high in the decoded value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
@@ -5819,7 +5971,7 @@ Set Pin Direction by C Flag {#dirnc}
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIRx | --- | DIR bit | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIRx | --- | DIR bit | 2 |
@@ -5862,7 +6014,7 @@ Set Pin Direction High
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | --- | DIR bit | 2 |
 
@@ -5898,7 +6050,7 @@ Set Pin Direction Low
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | --- | DIR bit | 2 |
 
@@ -5934,7 +6086,7 @@ Direction Not
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | --- | DIR bit | 2 |
 
@@ -5975,7 +6127,7 @@ Set Pin Direction by Z Flag {#dirnz}
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
@@ -6018,7 +6170,7 @@ Direction Random
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIRx | Original DIRx base bit | Original DIRx base bit | 2 |
 
@@ -6058,7 +6210,7 @@ Decrement and Jump If Full
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
 
@@ -6092,7 +6244,7 @@ Decrement and Jump If Not Full
 - Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
 
@@ -6129,7 +6281,7 @@ Decrement and Jump If Zero {#djnz}
 - Src is the jump address: use # for relative, omit for absolute.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
 | EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
@@ -6181,7 +6333,7 @@ Drive Pins by C Flag {#drvnc}
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | DIRx* + OUTx | --- | OUT bit | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | DIRx* + OUTx | --- | OUT bit | 2 |
@@ -6222,7 +6374,7 @@ Drive Pins High
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | --- | OUT bit | 2 |
 
@@ -6260,7 +6412,7 @@ Drive Pins Low
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | --- | OUT bit | 2 |
 
@@ -6300,7 +6452,7 @@ Drive Not
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | --- | OUT bit | 2 |
 
@@ -6343,7 +6495,7 @@ Drive Pins by Z Flag {#drvnz}
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | DIRx* + OUTx | --- | OUT bit | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | DIRx* + OUTx | --- | OUT bit | 2 |
@@ -6384,7 +6536,7 @@ Drive Random
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
 
@@ -6436,7 +6588,7 @@ Encode Bit Position
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | D | S != 0 | Result = 0 | 2 |
 | EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
@@ -6480,7 +6632,7 @@ Execute with Skip Pattern
 - Dest is a register or 10-bit literal specifying the target address in bits [9:0] and the skip pattern in bits [31:10].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 
@@ -6524,7 +6676,7 @@ Set Next FIFO Block
 - Src is a register or 9-bit literal whose value specifies the block start address in Hub memory.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100100 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -6561,7 +6713,7 @@ Force Greater or Equal
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
 
@@ -6598,7 +6750,7 @@ Force Greater or Equal Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
 
@@ -6635,7 +6787,7 @@ Force Less or Equal
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
 
@@ -6672,7 +6824,7 @@ Force Less or Equal Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
 
@@ -6711,7 +6863,7 @@ Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
 - WCZ is an optional effect to set Z to the original output state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | DIRx + OUTx | --- | OUT bit | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | DIRx + OUTx | --- | OUT bit | 2 |
@@ -6755,7 +6907,7 @@ Float High
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | DIRx + OUTx | --- | OUT bit | 2 |
 
@@ -6793,7 +6945,7 @@ Float Low
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | DIRx + OUTx | --- | OUT bit | 2 |
 
@@ -6831,7 +6983,7 @@ Float Not
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | DIRx + OUTx | --- | OUT bit | 2 |
 
@@ -6871,7 +7023,7 @@ Float Random
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
 
@@ -6920,7 +7072,7 @@ Get Breakpoint Status
 - WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
 
@@ -6962,7 +7114,7 @@ Get Byte
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -6997,7 +7149,7 @@ Get System Counter
 - WC is an optional effect that preserves the current C flag state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
 
@@ -7035,7 +7187,7 @@ Get Nibble
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -7069,7 +7221,7 @@ Get FIFO Hub Pointer
 - Dest is a register where the FIFO hub pointer is written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
 
@@ -7103,7 +7255,7 @@ Get CORDIC X Result
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
 
@@ -7141,7 +7293,7 @@ Get CORDIC Y Result
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
 
@@ -7180,7 +7332,7 @@ Get Random Value
 - WC, WZ, or WCZ are optional effects to retrieve random bits into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
 | EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
@@ -7220,7 +7372,7 @@ Get Oscilloscope Samples
 - Dest is a register where the four oscilloscope samples are written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
 
@@ -7258,7 +7410,7 @@ Get Word
 - Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -7292,7 +7444,7 @@ Get Goertzel Accumulators
 - Dest is a register where the Goertzel X accumulator value is written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
 
@@ -7333,7 +7485,7 @@ Set Hub Configuration
 - D is a register or 9-bit literal (or 32-bit augmented literal) containing the configuration value for the hub system.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
 
@@ -7419,7 +7571,7 @@ Increment and Jump If Zero {#ijnz}
 - Src is the jump address: use # for relative, omit for absolute.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
 | EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
@@ -7464,7 +7616,7 @@ Increment Modulus
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
 
@@ -7481,7 +7633,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Dest was equal to
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
-INCMOD does not limit Dest within the specified range. If Dest begins at a value greater than Src, iterations of INCMOD will continue to increment it through the 32-bit rollover point ($FFFF\_FFFF wrapping to $0000\_0000) before it will effectively cycle from 0 to Src.
+INCMOD does not limit Dest within the specified range. If Dest begins at a value greater than Src, iterations of INCMOD will continue to increment it through the 32-bit rollover point ($FFFF_FFFF wrapping to $0000_0000) before it will effectively cycle from 0 to Src.
 
 A common usage pattern for INCMOD is managing circular buffers:
 
@@ -7534,7 +7686,7 @@ Jump If Attention Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7571,7 +7723,7 @@ Jump If Counter Event Set {#jct2} {#jct3}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 | EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
@@ -7612,7 +7764,7 @@ Jump If FIFO Block Wrap Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7647,7 +7799,7 @@ Jump If Interrupt Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7686,7 +7838,7 @@ Jump
 - WC, WZ, or WCZ are optional effects to set C flag to D[31] and/or Z flag to D[30].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | PC | D[31] | D[30] | 4 |
 | EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
@@ -7724,7 +7876,7 @@ Jump Relative
 - D is a register or 9-bit literal specifying the signed offset in instructions. For COG execution, PC += D[19:0]. For Hub execution, PC += D[17:0] << 2.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
 
@@ -7761,7 +7913,7 @@ Jump If Attention Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7798,7 +7950,7 @@ Jump If Counter Event Clear {#jnct2} {#jnct3}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 | EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
@@ -7839,7 +7991,7 @@ Jump If FIFO Block Wrap Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7874,7 +8026,7 @@ Jump If Interrupt Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7909,7 +8061,7 @@ Jump If Pattern Match Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7944,7 +8096,7 @@ Jump If CORDIC Empty Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -7982,7 +8134,7 @@ Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 | EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
@@ -8024,7 +8176,7 @@ Jump If Streamer Finished Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8059,7 +8211,7 @@ Jump If Streamer Empty Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8094,7 +8246,7 @@ Jump If Streamer LUT Rollover Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8129,7 +8281,7 @@ Jump If Streamer NCO Rollover Event Clear
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8164,7 +8316,7 @@ Jump If Pattern Match Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8199,7 +8351,7 @@ Jump If CORDIC Empty Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8237,7 +8389,7 @@ Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 | EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
@@ -8279,7 +8431,7 @@ Jump If Streamer Finished Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8314,7 +8466,7 @@ Jump If Streamer Empty Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8349,7 +8501,7 @@ Jump If Streamer LUT Rollover Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8384,7 +8536,7 @@ Jump If Streamer NCO Rollover Event Set
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
@@ -8428,7 +8580,7 @@ Load Address
 - The optional backslash (\) prefix forces absolute addressing (R=0). Without it, relative addressing is used (R=1).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
 
@@ -8464,7 +8616,7 @@ Allocate New Lock
 - WC is an optional effect to update the C flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | D | 1 if no LOCK available | --- | 4...11 |
 
@@ -8500,7 +8652,7 @@ Release Lock
 - When D is a register and WC is specified, D is written with the previous owner's COG ID and the C flag indicates lock status.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
 
@@ -8535,7 +8687,7 @@ Return Lock To Pool
 - D is a register or 4-bit literal (0-15) specifying the lock number to return.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000101 | --- | --- | --- | 2...9 |
 
@@ -8571,7 +8723,7 @@ Try To Acquire Lock
 - WC is an optional effect to update the C flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
 
@@ -8612,7 +8764,7 @@ Merge Bits Of Bytes
 - D is a register containing the value whose byte bits will be merged.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
 
@@ -8645,7 +8797,7 @@ Merge Bits Of Words
 - D is a register containing the value whose word bits will be merged.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
 
@@ -8679,7 +8831,7 @@ Mix Pixels
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the source pixel bytes.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -8715,7 +8867,7 @@ Modify C Flag
 - WC is an optional effect to make the modification visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
 
@@ -8754,7 +8906,7 @@ Modify C And Z Flags
 - WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
 
@@ -8794,7 +8946,7 @@ Modify Z Flag
 - WZ is an optional effect to make the modification visible to subsequent flag reads.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
 
@@ -8833,7 +8985,7 @@ Move
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
 
@@ -8891,7 +9043,7 @@ Move Bytes
 - S is a register, 9-bit literal, or 32-bit augmented literal containing the byte selection pattern.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -8934,7 +9086,7 @@ Multiply
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
@@ -8987,7 +9139,7 @@ Multiply Pixels
 - S is a register, 9-bit literal, or 32-bit augmented literal containing four pixel bytes as multipliers.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -9032,7 +9184,7 @@ Multiply Signed
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
 
@@ -9092,7 +9244,7 @@ Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
 | EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
@@ -9148,7 +9300,7 @@ Multiplex Nibbles
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing nibble values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -9192,7 +9344,7 @@ Multiplex Nits
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit pair values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -9236,7 +9388,7 @@ Multiplex Q
 - Src is a register, 9-bit literal, or 32-bit augmented literal containing bit values to copy.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -9315,7 +9467,7 @@ Negate
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of result | Result = 0 | 2 |
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
@@ -9363,7 +9515,7 @@ Conditional Negate {#negnc} {#negz} {#negnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
 | EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
@@ -9414,7 +9566,7 @@ Cancel Interrupt {#nixint2} {#nixint3}
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100101 | 000100100 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 000 | 000100110 | 000100100 | --- | --- | --- | 2 |
@@ -9445,7 +9597,7 @@ No Operation
 **Result:** Two clock cycles are consumed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | 0000 | 0000000 | 000 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
@@ -9479,7 +9631,7 @@ Bitwise Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | D | !S[31] | Result = 0 | 2 |
 | EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
@@ -9524,7 +9676,7 @@ Ones
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Result is odd | Result = 0 | 2 |
 | EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
@@ -9564,7 +9716,7 @@ Bitwise Or
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
 
@@ -9613,7 +9765,7 @@ Output By Flag State {#outnc} {#outz} {#outnz}
 - WCZ is an optional effect to set Z to the original output state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUTx | --- | orig out | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUTx | --- | orig out | 2 |
@@ -9657,7 +9809,7 @@ Output High
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
 
@@ -9695,7 +9847,7 @@ Output Low
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
 
@@ -9733,7 +9885,7 @@ Output Not (Toggle)
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
 
@@ -9771,7 +9923,7 @@ Output Random
 - WCZ is an optional effect to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
 
@@ -9817,7 +9969,7 @@ Poll Attention Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
 
@@ -9852,7 +10004,7 @@ Poll Counter Event {#pollct2} {#pollct3}
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000000001 | 000100100 | --- | CT1 Event | CT1 Event | 2 |
 | EEEE | 1101011 | CZ0 | 000000010 | 000100100 | --- | CT2 Event | CT2 Event | 2 |
@@ -9887,7 +10039,7 @@ Poll FIFO Block Wrap Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
 
@@ -9920,7 +10072,7 @@ Poll Interrupt Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
 
@@ -9953,7 +10105,7 @@ Poll Pin Pattern Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
 
@@ -9986,7 +10138,7 @@ Poll CORDIC Empty Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
 
@@ -10022,7 +10174,7 @@ Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000000100 | 000100100 | --- | SE1 Event | SE1 Event | 2 |
 | EEEE | 1101011 | CZ0 | 000000101 | 000100100 | --- | SE2 Event | SE2 Event | 2 |
@@ -10058,7 +10210,7 @@ Poll Streamer Finished Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
 
@@ -10091,7 +10243,7 @@ Poll Streamer Empty Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
 
@@ -10124,7 +10276,7 @@ Poll Streamer LUT Rollover Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
 
@@ -10157,7 +10309,7 @@ Poll Streamer NCO Rollover Event
 - WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
 
@@ -10191,7 +10343,7 @@ Pop From Internal Stack
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2 |
 
@@ -10227,7 +10379,7 @@ Pop From Hub Stack A
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16 |
 
@@ -10263,7 +10415,7 @@ Pop From Hub Stack B
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16 |
 
@@ -10298,7 +10450,7 @@ Push To Internal Stack
 - Dest is a register or 9-bit immediate value (0-511) to push.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101010 | --- | --- | --- | 2 |
 
@@ -10329,7 +10481,7 @@ Push To Hub Stack A
 - Dest is a register or 9-bit immediate value to push.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100011 | 0L1 | DDDDDDDDD | 101100001 | --- | --- | --- | 3...10 |
 
@@ -10362,7 +10514,7 @@ Push To Hub Stack B
 - Dest is a register or 9-bit immediate value to push.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100011 | 0L1 | DDDDDDDDD | 111100001 | --- | --- | --- | 3...10 |
 
@@ -10402,7 +10554,7 @@ Queue Divide
 - Use SETQ before QDIV to specify the upper 32 bits of the numerator (defaults to 0 if not used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10442,7 +10594,7 @@ Queue Exponential
 - Dest is a register or literal containing the 5:27-bit logarithm (5-bit exponent in bits [31:27], 27-bit fraction in bits [26:0]).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001111 | --- | --- | --- | 2...9 |
 
@@ -10483,7 +10635,7 @@ Queue Fractional Divide
 - Use SETQ before QFRAC to specify the lower 32 bits of the numerator (defaults to 0 if not used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10522,7 +10674,7 @@ Queue Logarithm
 - Dest is a register or literal containing the 32-bit unsigned integer input.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000001110 | --- | --- | --- | 2...9 |
 
@@ -10560,7 +10712,7 @@ Queue Multiply
 - Src is a register or literal containing the second 32-bit multiplicand.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10602,7 +10754,7 @@ Queue Rotate
 - Use SETQ before QROTATE to specify the Y coordinate (defaults to 0 if not used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10644,7 +10796,7 @@ Queue Square Root
 - Src is a register or literal containing the upper 32 bits of the 64-bit input value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10686,7 +10838,7 @@ Queue Vector
 - Src is a register or literal containing the Y coordinate (32-bit signed).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2...9 |
 
@@ -10735,7 +10887,7 @@ Rotate Carry Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -10772,7 +10924,7 @@ Rotate Carry Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -10808,7 +10960,7 @@ Rotate Carry And Zero Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D | D[31] | D[30] | 2 |
 
@@ -10844,7 +10996,7 @@ Rotate Carry And Zero Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D | D[1] | D[0] | 2 |
 
@@ -10881,7 +11033,7 @@ Read Byte From Hub
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
 
@@ -10919,7 +11071,7 @@ Read Fast Via FIFO
 - Src is the Hub memory start address (Src[19:0]) for the read operation.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
 
@@ -10954,7 +11106,7 @@ Read Long From Hub
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
 
@@ -10991,7 +11143,7 @@ Read From LUT
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
 
@@ -11028,7 +11180,7 @@ Read Smart Pin
 - WC is an optional effect to write the modal result to C.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
@@ -11063,7 +11215,7 @@ Read Word From Hub
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
 
@@ -11099,7 +11251,7 @@ Repeat Block
 - Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -11133,7 +11285,7 @@ Resume From Interrupt {#resi1} {#resi2} {#resi3}
 **Result:** Execution resumes from the interrupted location for the specified interrupt level.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 | EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
@@ -11167,7 +11319,7 @@ Return From Subroutine
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
 
@@ -11204,7 +11356,7 @@ Return Via PTRA Stack
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
 
@@ -11239,7 +11391,7 @@ Return Via PTRB Stack
 - WC, WZ, or WCZ are optional effects to restore flags from the stack.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
 
@@ -11275,7 +11427,7 @@ Return From Interrupt {#reti1} {#reti2} {#reti3}
 **Result:** Execution returns from the specified interrupt level to the interrupted location.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
 | EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (COG), 13...20 (Hub) |
@@ -11309,7 +11461,7 @@ Reverse Bits
 - Dest is the register containing the bit pattern to reverse.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
 
@@ -11341,7 +11493,7 @@ Read Byte Via FIFO
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | D | MSB of byte | Result = 0 | 2 |
 
@@ -11377,7 +11529,7 @@ Read Long Via FIFO
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | D | MSB of long | Result = 0 | 2 |
 
@@ -11413,7 +11565,7 @@ Read Variable Via FIFO
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | D | 0 | Result = 0 | 2 |
 
@@ -11449,7 +11601,7 @@ Read Signed Variable Via FIFO
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | D | MSB of value | Result = 0 | 2 |
 
@@ -11483,7 +11635,7 @@ Read Word Via FIFO
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | D | MSB of word | Result = 0 | 2 |
 
@@ -11518,7 +11670,7 @@ Expand RGB Color
 - Dest contains 5:6:5 RGB in Dest[15:0], receives 8:8:8 RGB in Dest[31:8].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | D | --- | --- | 2 |
 
@@ -11549,7 +11701,7 @@ Squeeze RGB Color
 - Dest contains 8:8:8 RGB in Dest[31:8], receives 5:6:5 RGB in Dest[15:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | D | --- | --- | 2 |
 
@@ -11582,7 +11734,7 @@ Rotate Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -11620,7 +11772,7 @@ Rotate Byte Left Into Register
 - N is a 2-bit literal (0-3) identifying the byte position in Src.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -11655,7 +11807,7 @@ Rotate Nibble Left Into Register
 - N is a 3-bit literal (0-7) identifying the nibble position in Src.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -11690,7 +11842,7 @@ Rotate Word Left Into Register
 - N is a 1-bit literal (0-1) identifying the word position in Src.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -11724,7 +11876,7 @@ Rotate Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -11761,7 +11913,7 @@ Read Smart Pin Without Acknowledge
 - WC is an optional effect to write the modal result to C.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
 
@@ -11801,7 +11953,7 @@ Shift Arithmetic Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -11836,7 +11988,7 @@ Shift Arithmetic Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -11871,7 +12023,7 @@ Scale
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Product = 0 | 2 |
 
@@ -11907,7 +12059,7 @@ Scale Signed
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Result = 0 | 2 |
 
@@ -11939,7 +12091,7 @@ Set Byte
 - N is a 2-bit literal (0-3) identifying the byte of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -11975,7 +12127,7 @@ Set Colorspace Converter Frequency
 - Dest is a register or literal value (0-511) to set as CFRQ parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111011 | --- | --- | --- | 2 |
 
@@ -12004,7 +12156,7 @@ Set Colorspace Converter CI
 - Dest is a register or literal value (0-511) to set as CI parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111001 | --- | --- | --- | 2 |
 
@@ -12033,7 +12185,7 @@ Set Colorspace Converter Mode
 - Dest is a register or literal value (0-511) to set as CMOD parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111100 | --- | --- | --- | 2 |
 
@@ -12062,7 +12214,7 @@ Set Colorspace Converter CQ
 - Dest is a register or literal value (0-511) to set as CQ parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111010 | --- | --- | --- | 2 |
 
@@ -12091,7 +12243,7 @@ Set Colorspace Converter CY
 - Dest is a register or literal value (0-511) to set as CY parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111000 | --- | --- | --- | 2 |
 
@@ -12121,7 +12273,7 @@ Set Destination Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -12152,7 +12304,7 @@ Set DACs
 - Dest is a register or literal value (0-511) containing four 8-bit DAC values.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011100 | --- | --- | --- | 2 |
 
@@ -12181,7 +12333,7 @@ Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100101 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100110 | --- | --- | --- | 2 |
@@ -12214,7 +12366,7 @@ Set LUT Sharing
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110111 | --- | --- | --- | 2 |
 
@@ -12246,7 +12398,7 @@ Set Nibble
 - N is a 3-bit literal (0-7) identifying the nibble of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -12283,7 +12435,7 @@ Set Pin Pattern
 - Src is a register or immediate containing match value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011111 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -12312,7 +12464,7 @@ Set Pixel Blend Factor
 - Dest is a register or literal value (0-511) containing 8-bit blend factor in bits [7:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111101 | --- | --- | --- | 2 |
 
@@ -12341,7 +12493,7 @@ Set Pixel Mixer Mode
 - Dest is a register or literal value (0-511) containing 6-bit mode in bits [5:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111110 | --- | --- | --- | 2 |
 
@@ -12370,7 +12522,7 @@ Set Q Register
 - Dest is a register or literal value (0-511) to load into Q.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101000 | --- | --- | --- | 2 |
 
@@ -12404,7 +12556,7 @@ Set Q For LUT Transfers
 - Dest is a register or literal value (0-511) to load into Q.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101001 | --- | --- | --- | 2 |
 
@@ -12439,7 +12591,7 @@ Set Result Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the Result field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -12471,7 +12623,7 @@ Set Source Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -12502,7 +12654,7 @@ Set Oscilloscope
 - Dest is a register or literal value (0-511) containing enable bit [6] and pin base [5:2].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 001110000 | --- | --- | --- | 2 |
 
@@ -12532,7 +12684,7 @@ Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100000 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100001 | --- | --- | --- | 2 |
@@ -12569,7 +12721,7 @@ Set Word
 - N is a 1-bit literal (0-1) identifying the word of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -12605,7 +12757,7 @@ Set Streamer Frequency
 - Dest is a register or literal value (0-511) containing frequency value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011101 | --- | --- | --- | 2 |
 
@@ -12634,7 +12786,7 @@ Seuss Forward
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | D | --- | --- | 2 |
 
@@ -12663,7 +12815,7 @@ Seuss Reverse
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | D | --- | --- | 2 |
 
@@ -12694,7 +12846,7 @@ Shift Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -12729,7 +12881,7 @@ Shift Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -12764,7 +12916,7 @@ Sign Extend
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
 
@@ -12797,7 +12949,7 @@ Skip Instructions
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110001 | --- | --- | --- | 2 |
 
@@ -12833,7 +12985,7 @@ Skip Instructions Fast
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110010 | --- | --- | --- | 2 |
 
@@ -12862,7 +13014,7 @@ Split Bits To Bytes
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
 
@@ -12891,7 +13043,7 @@ Split Bits To Words
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
 
@@ -12918,7 +13070,7 @@ Disallow Interrupts
 **Result:** All future interrupts are disallowed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100001 | 000100100 | --- | --- | --- | 2 |
 
@@ -12955,7 +13107,7 @@ Subtract
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
 
@@ -12990,7 +13142,7 @@ Subtract Reverse
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2 |
 
@@ -13021,7 +13173,7 @@ Subtract Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2 |
 
@@ -13052,7 +13204,7 @@ Subtract Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2 |
 
@@ -13083,7 +13235,7 @@ Subtract Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2 |
 
@@ -13117,7 +13269,7 @@ Conditional Sum {#sumnc} {#sumz} {#sumnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
 | EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
@@ -13166,7 +13318,7 @@ Test
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
 | EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
@@ -13215,7 +13367,7 @@ Test Bit
 - XORC/XORZ XORs bit state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
 | EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
@@ -13262,7 +13414,7 @@ Test Bit Negated
 - XORC/XORZ XORs inverted bit state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
 | EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
@@ -13298,7 +13450,7 @@ Test Not
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
 
@@ -13345,7 +13497,7 @@ Test Pin / Test Pin Negated {#testpn}
 - XORC/XORZ XORs pin state with C or Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
 | EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
@@ -13393,7 +13545,7 @@ Test And Jump If Full / Not Full {#tjnf}
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
@@ -13434,7 +13586,7 @@ Test And Jump If Signed / Not Signed {#tjns}
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 | EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
@@ -13475,7 +13627,7 @@ Test And Jump If Zero / Not Zero {#tjnz}
 - Src is the jump address: use # for relative, omit for absolute.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
 | EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
@@ -13524,7 +13676,7 @@ Test And Jump If Overflow
 - Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
 
@@ -13563,7 +13715,7 @@ Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
 **Result:** The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100010 | 000100100 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 000 | 000100011 | 000100100 | --- | --- | --- | 2 |
@@ -13601,7 +13753,7 @@ Wait For Attention
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13640,7 +13792,7 @@ Wait For Counter Event {#waitct2} {#waitct3}
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010001 | 000100100 | --- | Timeout | Timeout | 2+ |
 | EEEE | 1101011 | CZ0 | 000010010 | 000100100 | --- | Timeout | Timeout | 2+ |
@@ -13675,7 +13827,7 @@ Wait For FIFO Block Wrap
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13706,7 +13858,7 @@ Wait For Interrupt
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13737,7 +13889,7 @@ Wait For Pattern
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13776,7 +13928,7 @@ Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000010100 | 000100100 | --- | Timeout | Timeout | 2+ |
 | EEEE | 1101011 | CZ0 | 000010101 | 000100100 | --- | Timeout | Timeout | 2+ |
@@ -13811,7 +13963,7 @@ Wait Cycles
 - WC, WZ, or WCZ are optional; always set to 0 after completion.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | --- | 0 | 0 | 2 + D |
 
@@ -13846,7 +13998,7 @@ Wait For Streamer Finished
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13877,7 +14029,7 @@ Wait For Streamer Empty
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13908,7 +14060,7 @@ Wait For Streamer LUT Rollover
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13939,7 +14091,7 @@ Wait For Streamer NCO Rollover
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
 
@@ -13970,7 +14122,7 @@ Write FIFO Byte
 - Dest is the byte value to write (bits 7:0 used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000010101 | --- | --- | --- | 2 |
 
@@ -14001,7 +14153,7 @@ Write FIFO Long
 - Dest is the long value to write (all 32 bits used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000010111 | --- | --- | --- | 2 |
 
@@ -14032,7 +14184,7 @@ Write FIFO Word
 - Dest is the word value to write (bits 15:0 used).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000010110 | --- | --- | --- | 2 |
 
@@ -14064,7 +14216,7 @@ Write Masked Long
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
@@ -14098,7 +14250,7 @@ Write Byte
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
@@ -14143,7 +14295,7 @@ Write Flag To Register {#wrnc} {#wrz} {#wrnz}
 - Dest is the destination register. Upper 31 bits are cleared to zero.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | D | --- | --- | 2 |
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | D | --- | --- | 2 |
@@ -14176,7 +14328,7 @@ Write FIFO Setup
 - Src contains Hub RAM start address (bits 19:0).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100100 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 3 |
 
@@ -14215,7 +14367,7 @@ Write Long
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
@@ -14254,7 +14406,7 @@ Write LUT
 - Src/P is the LUT address or pointer (PTRA/PTRB).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100001 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -14292,7 +14444,7 @@ Write Pin Mode
 - Src is the pin number or pin range.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100000 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -14340,7 +14492,7 @@ Write Word
 - Src/P is the hub address or pointer (PTRA/PTRB).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
 
@@ -14372,7 +14524,7 @@ Write Pin X Parameter
 - Src is the pin number or pin range.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100000 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -14409,7 +14561,7 @@ Write Pin Y Parameter
 - Src is the pin number or pin range.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100001 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -14455,7 +14607,7 @@ Execute Continue
 - Src is the data value or hub address for the streamer operation.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
@@ -14489,7 +14641,7 @@ Execute Initialize
 - Src is the data value or hub address for the streamer operation.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -14539,7 +14691,7 @@ Exclusive Or
 - WCZ sets both C and Z.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
 
@@ -14578,7 +14730,7 @@ Xoroshiro 32
 - Dest is the register containing the 32-bit PRNG state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
 
@@ -14625,7 +14777,7 @@ Execute Stop
 - Takes no operands.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100101 | 011 | 000000000 | 000000000 | --- | --- | --- | 2 |
 
@@ -14664,7 +14816,7 @@ Execute Zero
 - Src is the data value or hub address for the streamer operation.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2+ |
 
@@ -14708,7 +14860,7 @@ Zero Extend
 - WCZ sets both C and Z.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
 
@@ -17003,9 +17155,9 @@ Color space and pixel instructions provide hardware-accelerated graphics process
 | [SETPIX](#setpix) | Set MIXPIX mode |
 
 
-## Register Indirection {#register-indirection-ref}
+## Instruction Modification {#instruction-modification-ref}
 
-Register indirection instructions modify subsequent instructions by dynamically altering their source, destination, or bit index fields. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
+Instruction modification instructions (also known as register indirection) dynamically alter subsequent instructions by changing their source, destination, or bit index fields before execution. They enable register arrays, computed addressing, and self-modifying code patterns essential for efficient data structure access.
 
 | Instruction | Description |
 |-------------|-------------|
@@ -18485,507 +18637,9 @@ PASM2 reserves **449 identifiers** across six categories:
 
 **Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 449-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
-**Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). When writing inline PASM2 within Spin2 code, both sets of reserved words apply. Pure PASM2 files need only consider the words listed in this appendix plus the P_* and X_* constants.
+**Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). Since there is a single compiler for both Spin2 and PASM2, all reserved words from both languages always apply regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
 
-# Appendix H: Opcode Bit Patterns Reference
-
-## Instruction Word Format
-
-The P2 uses a fixed 32-bit instruction word with five distinct fields that encode all instruction information:
-
-```{=latex}
-\InstructionEncoding{Generic}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
-```
-
-This compact encoding allows:
-- 16 execution conditions
-- 128 primary opcodes
-- 512 register addresses (COG and LUT)
-- Immediate mode selection
-- Flag effect control
-
-## Field Definitions
-
-### Condition Field (EEEE) - Bits 31:28
-
-The condition field determines whether an instruction executes based on the current state of the C and Z flags:
-
-| EEEE | Mnemonic | Execute When | Description |
-|------|----------|--------------|-------------|
-| 0000 | IF_ALWAYS | Always | Unconditional execution (default) |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Above (unsigned) |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | Not carry and zero |
-| 0011 | IF_NC | C=0 | Not carry (also IF_AE, IF_GE) |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | Z=0 | Not zero (also IF_NE) |
-| 0110 | IF_C_NE_Z | C≠Z | Carry not equal zero |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not (carry and zero) |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Carry and zero |
-| 1001 | IF_C_EQ_Z | C=Z | Carry equals zero |
-| 1010 | IF_Z | Z=1 | Zero (also IF_E) |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | Not carry or zero |
-| 1100 | IF_C | C=1 | Carry (also IF_B, IF_LT) |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Carry or zero (also IF_BE, IF_LE) |
-| 1111 | IF_NEVER | Never | Never executes (used for padding) |
-
-When a condition is false, the instruction is skipped with no effect on registers or flags.
-
-### CZI Field - Bits 23:21
-
-The CZI field controls flag updates and addressing mode:
-
-| Bit | Name | Meaning |
-|-----|------|---------|
-| 23 | C | Write C flag if set (WC effect) |
-| 22 | Z | Write Z flag if set (WZ effect) |
-| 21 | I | Source is immediate if set (#) |
-
-**Examples:**
-- `CZI = 000`: No flag writes, S is register address
-- `CZI = 001`: No flag writes, S is immediate value
-- `CZI = 100`: Write C only, S is register address
-- `CZI = 101`: Write C only, S is immediate value
-- `CZI = 110`: Write C and Z, S is register address
-- `CZI = 111`: Write C and Z, S is immediate value
-
-### Destination Field (D) - Bits 18:9
-
-9-bit field specifying the destination register address:
-
-| Range | Region |
-|-------|--------|
-| $000-$1EF | COG RAM (496 registers) |
-| $1F0-$1FF | Special registers (16 registers) |
-| $200-$3FF | LUT RAM (512 longs) |
-
-The D field always references a register, never an immediate value.
-
-### Source Field (S) - Bits 8:0
-
-9-bit field specifying either:
-- **Register address** (when I=0): Same address space as D field
-- **Immediate value** (when I=1): Unsigned 0-511, or extended by AUGS
-
-When used as immediate, negative values or values >511 require AUGS prefix.
-
-### Opcode Field (OOOOOOO) - Bits 27:21
-
-7-bit field encoding the instruction operation. See Opcode Organization section below.
-
-## Opcode Field Organization
-
-The 7-bit opcode space (128 possible opcodes) is organized by instruction category:
-
-### Basic Operations (0000000-0001111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 0000000 | ROR | Rotate/shift |
-| 0000001 | ROL | Rotate/shift |
-| 0000010 | SHR | Rotate/shift |
-| 0000011 | SHL | Rotate/shift |
-| 0000100 | RCR | Rotate/shift |
-| 0000101 | RCL | Rotate/shift |
-| 0000110 | SAR | Rotate/shift |
-| 0000111 | SAL | Rotate/shift |
-| 0001000 | ADD | Arithmetic |
-| 0001001 | ADDX | Arithmetic |
-| 0001010 | ADDS | Arithmetic |
-| 0001011 | ADDSX | Arithmetic |
-| 0001100 | SUB | Arithmetic |
-| 0001101 | SUBX | Arithmetic |
-| 0001110 | SUBS | Arithmetic |
-| 0001111 | SUBSX | Arithmetic |
-
-### Comparison and Logic (0010000-0011111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 0010000 | CMP | Comparison |
-| 0010001 | CMPX | Comparison |
-| 0010010 | CMPS | Comparison |
-| 0010011 | CMPSX | Comparison |
-| 0010100 | CMPR | Comparison |
-| 0010101 | CMPM | Comparison |
-| 0010110 | SUBR | Arithmetic |
-| 0010111 | CMPSUB | Comparison |
-| 0011000 | FGE | Min/max |
-| 0011001 | FLE | Min/max |
-| 0011010 | FGES | Min/max |
-| 0011011 | FLES | Min/max |
-| 0011100 | SUMC | Summation |
-| 0011101 | SUMNC | Summation |
-| 0011110 | SUMZ | Summation |
-| 0011111 | SUMNZ | Summation |
-
-### Bit Operations (0100000-0101111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 0100000 | TESTB | Bit test |
-| 0100001 | TESTBN | Bit test |
-| 0100010-0100011 | Reserved | - |
-| 0100100 | BITL | Bit write |
-| 0100101 | BITH | Bit write |
-| 0100110 | BITC | Bit write |
-| 0100111 | BITNC | Bit write |
-| 0101000 | BITZ | Bit write |
-| 0101001 | BITNZ | Bit write |
-| 0101010 | BITRND | Bit write |
-| 0101011 | BITNOT | Bit write |
-| 0101100 | AND | Logic |
-| 0101101 | ANDN | Logic |
-| 0101110 | OR | Logic |
-| 0101111 | XOR | Logic |
-
-### Move and Multiply (0110000-0111111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 0110000 | MUXC | Multiplex |
-| 0110001 | MUXNC | Multiplex |
-| 0110010 | MUXZ | Multiplex |
-| 0110011 | MUXNZ | Multiplex |
-| 0110100 | MOV | Data movement |
-| 0110101 | NOT | Logic |
-| 0110110 | ABS | Arithmetic |
-| 0110111 | NEG | Arithmetic |
-| 0111000 | NEGC | Arithmetic |
-| 0111001 | NEGNC | Arithmetic |
-| 0111010 | NEGZ | Arithmetic |
-| 0111011 | NEGNZ | Arithmetic |
-| 0111100 | INCMOD | Modulo |
-| 0111101 | DECMOD | Modulo |
-| 0111110 | ZEROX | Bit field |
-| 0111111 | SIGNX | Bit field |
-
-### Extended Math (1000000-1001111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 1000000 | ENCOD | Encoding |
-| 1000001 | ONES | Bit counting |
-| 1000010 | TEST | Testing |
-| 1000011 | TESTN | Testing |
-| 1000100 | SETNIB | Nibble/byte |
-| 1000101 | GETNIB | Nibble/byte |
-| 1000110 | ROLNIB | Nibble/byte |
-| 1000111 | SETBYTE | Nibble/byte |
-| 1001000 | GETBYTE | Nibble/byte |
-| 1001001 | ROLBYTE | Nibble/byte |
-| 1001010 | SETWORD | Word operations |
-| 1001011 | GETWORD | Word operations |
-| 1001100 | ROLWORD | Word operations |
-| 1001101 | ALTSN | Indirection |
-| 1001110 | ALTGN | Indirection |
-| 1001111 | ALTSB | Indirection |
-
-### Memory and Multiply (1010000-1011111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 1010000 | ALTGB | Indirection |
-| 1010001 | ALTSW | Indirection |
-| 1010010 | ALTGW | Indirection |
-| 1010011 | ALTR | Indirection |
-| 1010100 | ALTD | Indirection |
-| 1010101 | ALTS | Indirection |
-| 1010110 | ALTB | Indirection |
-| 1010111 | ALTI | Indirection |
-| 1011000 | SETR | Register control |
-| 1011001 | SETD | Register control |
-| 1011010 | SETS | Register control |
-| 1011011 | DECOD | Decoding |
-| 1011100 | BMASK | Bit mask |
-| 1011101 | CRCBIT | CRC |
-| 1011110 | CRCNIB | CRC |
-| 1011111 | MUXNITS | Multiplex |
-
-### Multiply Operations (1100000-1100111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 1100000 | MUXNIBS | Multiplex |
-| 1100001 | MUXQ | Multiplex |
-| 1100010 | MOVBYTS | Data movement |
-| 1100011 | MUL | Multiply (U×U) |
-| 1100100 | MULS | Multiply (S×S) |
-| 1100101 | SCA | Multiply (U×U, scaled) |
-| 1100110 | SCAS | Multiply (S×S, scaled) |
-| 1100111 | ADDPIX | Pixel operations |
-
-### Control Flow (1101000-1101111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 1101000 | MULPIX | Pixel operations |
-| 1101001 | BLNPIX | Pixel operations |
-| 1101010 | MIXPIX | Pixel operations |
-| 1101011 | ADDCT1 | Event control |
-| 1101100 | ADDCT2 | Event control |
-| 1101101 | ADDCT3 | Event control |
-| 1101110 | WMLONG | Hub write |
-| 1101111 | RQPIN | Smart Pins |
-
-### Hub and Special (1110000-1111111)
-
-| Opcode | Instruction | Category |
-|--------|-------------|----------|
-| 1110000 | RDPIN | Smart Pins |
-| 1110001 | RDLUT | LUT read |
-| 1110010 | RDBYTE | Hub read |
-| 1110011 | RDWORD | Hub read |
-| 1110100 | RDLONG | Hub read |
-| 1110101 | CALLD | Call/return |
-| 1110110-1110111 | Reserved | - |
-| 1111000 | CALLPA | Call with parameter |
-| 1111001 | CALLPB | Call with parameter |
-| 1111010 | DJZ | Loop control |
-| 1111011 | DJNZ | Loop control |
-| 1111100 | DJF | Loop control |
-| 1111101 | DJNF | Loop control |
-| 1111110 | IJZ | Loop control |
-| 1111111 | IJNZ | Loop control |
-
-*Note: This is a representative subset. Complete opcode tables appear in Appendix A.*
-
-## Special Encoding Forms
-
-### AUGS/AUGD (Immediate Extension)
-
-When immediate values exceed 9 bits, AUGS and AUGD instructions extend the next instruction's operands:
-
-| Instruction | Bit Pattern | Extended Field |
-|-------------|-------------|----------------|
-| AUGS | `1111_000x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | S becomes 32 bits |
-| AUGD | `1111_100x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | D becomes 32 bits |
-
-**Extension mechanism:**
-
-- Bits 31:9 come from the AUG instruction (x bits above)
-- Bits 8:0 come from the following instruction's S or D field
-- Combined value used for that instruction only
-
-**Example:**
-
-```pasm
-AUGS    #$1234      ' Bits 31:9 = $1234
-MOV     result, #$56 ' S = $1234_056 = $2468AC
-```
-
-### NOP Encoding
-
-NOP is encoded as all zeros: `0000_0000_000_000000000_000000000`
-
-This decodes as `IF_ALWAYS ROR $000, $000` - a useless rotate with no effect.
-
-### Hub Instruction Extensions
-
-Some hub instructions use extended encoding:
-
-**WRLONG D, #\S (WC, WZ, WCZ):**
-- Uses special OOOOOOO values to indicate hub write variants
-- Additional mode bits in S field select FIFO vs direct addressing
-
-**RDXXXX/WRXXXX with PTRx:**
-- Uses PTRA/PTRB selection bit
-- Auto-increment/decrement encoding
-- Index register selection
-
-See Appendix A for complete hub instruction encoding details.
-
-## Encoding Examples
-
-### Example 1: ADD D, #5
-
-```
-ADD     result, #5      ' Add immediate 5 to result
-
-Encoding breakdown:
-  Condition: 0000 (IF_ALWAYS - unconditional)
-  Opcode: 0001000 (ADD operation)
-  CZI: 001 (no WC, no WZ, immediate mode)
-  D: [9-bit register address of 'result']
-  S: 000000101 (immediate value 5)
-
-32-bit pattern:
-  0000_0001000_001_DDDDDDDDD_000000101
-  ││││ │││││││ │││ │││││││││ │││││││││
-  ││││ │││││││ │││ └────┬───┘ └───┬───┘
-  ││││ │││││││ │││      │         └─ S = 5
-  ││││ │││││││ │││      └─ D = result address
-  ││││ │││││││ └┴┴─ I=1, Z=0, C=0
-  ││││ └─────┴─ ADD opcode
-  └──┴─ IF_ALWAYS
-```
-
-### Example 2: IF_Z MOV D, S WC
-
-```
-  IF_Z    MOV     dest, source    WC
-
-Encoding breakdown:
-  Condition: 1010 (IF_Z - execute only if Z=1)
-  Opcode: 0110100 (MOV operation)
-  CZI: 100 (WC=yes, WZ=no, register mode)
-  D: [9-bit register address of 'dest']
-  S: [9-bit register address of 'source']
-
-32-bit pattern:
-  1010_0110100_100_DDDDDDDDD_SSSSSSSSS
-  ││││ │││││││ │││ │││││││││ │││││││││
-  ││││ │││││││ │││ └────┬───┘ └───┬───┘
-  ││││ │││││││ │││      │         └─ S = source address
-  ││││ │││││││ │││      └─ D = dest address
-  ││││ │││││││ └┴┴─ I=0, Z=0, C=1 (WC)
-  ││││ └─────┴─ MOV opcode
-  └──┴─ IF_Z
-```
-
-### Example 3: DJNZ loop, #label WC
-
-```
-DJNZ    counter, #target    WC
-
-Encoding breakdown:
-  Condition: 0000 (IF_ALWAYS)
-  Opcode: 1111011 (DJNZ operation)
-  CZI: 101 (WC=yes, WZ=no, immediate mode)
-  D: [9-bit register address of 'counter']
-  S: [9-bit relative branch offset]
-
-Notes:
-  - S field contains signed relative offset
-  - Offset is from next instruction PC
-  - WC sets C flag based on counter=0 after decrement
-  - D register decremented before branch decision
-
-32-bit pattern:
-  0000_1111011_101_DDDDDDDDD_SSSSSSSSS
-```
-
-### Example 4: CALLD return_reg, #subroutine WC, WZ
-
-```
-CALLD   return_addr, #subroutine    WC, WZ
-
-Encoding breakdown:
-  Condition: 0000 (IF_ALWAYS)
-  Opcode: 1110101 (CALLD operation)
-  CZI: 111 (WC=yes, WZ=yes, immediate mode)
-  D: [9-bit register address for return address]
-  S: [9-bit absolute branch target]
-
-Effect:
-  - D ← PC+1 (return address)
-  - PC ← S (jump to subroutine)
-  - Flags updated based on operation
-```
-
-### Example 5: Extended Immediate with AUGS
-
-```
-MOV     result, ##$12345678
-
-Assembler generates two instructions:
-
-1) AUGS #$12345678 >> 9:
-   1111_000_[23-bit value = $91A2B]
-   Provides bits 31:9 = $91A2B
-
-2) MOV result, #$12345678 & $1FF:
-   0000_0110100_001_[result]_078
-   Uses bits 8:0 = $078
-
-Combined: result ← $91A2B_078 = $12345678
-```
-
-## Decoding Process
-
-To decode a 32-bit instruction word:
-
-1. **Extract condition field** (bits 31:28)
-   - Check against C and Z flags
-   - Skip instruction if condition false
-
-2. **Extract opcode** (bits 27:21)
-   - Lookup instruction mnemonic
-   - Determine operation category
-
-3. **Extract CZI field** (bits 23:21)
-   - Determine immediate vs register mode
-   - Identify which flags will be updated
-
-4. **Extract D field** (bits 18:9)
-   - Decode destination register address
-   - May be modified by prior AUGD
-
-5. **Extract S field** (bits 8:0)
-   - If I=1: immediate value (possibly extended by AUGS)
-   - If I=0: source register address
-
-6. **Execute instruction**
-   - Perform opcode operation
-   - Write result to D register
-   - Update flags per CZI setting
-
-## Special Register Encoding
-
-The special register range ($1F0-$1FF) uses specific D/S field values:
-
-| Address | Register | Purpose |
-|---------|----------|---------|
-| $1F0 | IJMP3 | Interrupt jump 3 |
-| $1F1 | IRET3 | Interrupt return 3 |
-| $1F2 | IJMP2 | Interrupt jump 2 |
-| $1F3 | IRET2 | Interrupt return 2 |
-| $1F4 | IJMP1 | Interrupt jump 1 |
-| $1F5 | IRET1 | Interrupt return 1 |
-| $1F6 | PA | Pin A control |
-| $1F7 | PB | Pin B control |
-| $1F8 | PTRA | Hub pointer A |
-| $1F9 | PTRB | Hub pointer B |
-| $1FA | DIRA | Pin direction A |
-| $1FB | DIRB | Pin direction B |
-| $1FC | OUTA | Pin output A |
-| $1FD | OUTB | Pin output B |
-| $1FE | INA | Pin input A |
-| $1FF | INB | Pin input B |
-
-Reading these addresses accesses hardware registers. Writing to some (like INA/INB) has no effect.
-
-## Bit Field Summary
-
-Quick reference for manual instruction encoding:
-
-| Field | Bits | Width | Purpose |
-|-------|------|-------|---------|
-| Condition (EEEE) | 31:28 | 4 | Execution condition |
-| Opcode (OOOOOOO) | 27:21 | 7 | Instruction operation |
-| C flag write | 23 | 1 | Update C if set |
-| Z flag write | 22 | 1 | Update Z if set |
-| Immediate mode | 21 | 1 | S is immediate if set |
-| Destination (D) | 18:9 | 9 | Register address |
-| Source (S) | 8:0 | 9 | Register or immediate |
-
-**Total:** 32 bits (4 + 7 + 3 + 9 + 9)
-
-## Notes
-
-- **Instruction alignment:** All instructions are 32-bit aligned in COG/LUT memory
-- **Execution time:** Most instructions execute in 2 clock cycles
-- **Hub instructions:** RDLONG/WRLONG may take additional cycles for hub access
-- **SKIPF pattern:** Uses special encoding for multi-instruction skip patterns
-- **Reserved opcodes:** Some opcode values are reserved for future use
-
-For complete instruction encoding details, see **Appendix A: Instruction Set Reference**.
-
-For instruction timing and pipeline behavior, see **Chapter 4: Instruction Execution**.
-
-For condition code usage patterns, see **Chapter 6: Control Flow**.
-
-# Appendix I: Glossary of Encoding Terms
+# Appendix H: Glossary of Encoding Terms
 
 This glossary defines the terms used throughout the instruction encoding tables, syntax descriptions, and opcode documentation in this manual.
 
@@ -19067,6 +18721,5 @@ This glossary defines the terms used throughout the instruction encoding tables,
 - **Chapter 2** — Detailed explanation of instruction encoding format
 - **Chapter 3** — Complete coverage of flag behavior and conditional execution
 - **Appendix A** — Encoding summary tables
-- **Appendix H** — Complete opcode bit patterns for all instructions
 
 

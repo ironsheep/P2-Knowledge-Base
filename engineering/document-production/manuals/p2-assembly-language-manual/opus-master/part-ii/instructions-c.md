@@ -24,7 +24,7 @@ Call Subroutine
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | K and PC | --- | --- | 4 / 13-20 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
@@ -68,7 +68,7 @@ Call Subroutine via PTRA
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5...12 |
@@ -112,7 +112,7 @@ Call Subroutine via PTRB
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5...12 |
@@ -158,7 +158,7 @@ Call with Destination Register
 - WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit states.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | Pxxx and PC | --- | --- | 4 / 13-20 |
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
@@ -201,7 +201,7 @@ Call Subroutine with PA Parameter
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
 
@@ -237,7 +237,7 @@ Call Subroutine with PB Parameter
 - Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
 
@@ -274,7 +274,7 @@ Compare Unsigned
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Unsigned (D < S) | D=S | 2 |
 
@@ -319,7 +319,7 @@ Compare Most Significant Bit
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Result[31] | D=S | 2 |
 
@@ -356,7 +356,7 @@ Compare Reverse
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (S - D) | D == S | 2 |
 
@@ -393,7 +393,7 @@ Compare Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Signed (D < S) | D=S | 2 |
 
@@ -436,7 +436,7 @@ Compare and Subtract
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | Unsigned(D >= S) | Result = 0 | 2 |
 
@@ -477,7 +477,7 @@ Compare Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | correct sign of (D - (S + C)) | Z AND (D == S + C) | 2 |
 
@@ -520,7 +520,7 @@ Compare Unsigned Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (D - (S + C)) | Z AND (D == S + C) | 2 |
 
@@ -561,7 +561,7 @@ Cog Attention
 - Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111111 | --- | --- | --- | 2 |
 
@@ -606,7 +606,7 @@ Cog Breakpoint
 - Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110101 | --- | --- | --- | 2 |
 
@@ -646,7 +646,7 @@ Cog Identification
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | D if reg and !WC | Cog Running | --- | 2-9, +2 if result |
 
@@ -693,7 +693,7 @@ Cog Initialize
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status and triggers Dest to be overwritten with new cog's ID.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | D if reg and WC | No cog available | --- | 2-9, +2 if result |
 
@@ -758,7 +758,7 @@ Cog Stop
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000011 | --- | --- | --- | 2-9 |
 
@@ -805,7 +805,7 @@ CRC Iterate Bit
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -852,7 +852,7 @@ CRC Iterate Nibble
 - Src is a register or 9-bit literal containing the CRC polynomial.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 

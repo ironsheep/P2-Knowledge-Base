@@ -1,4 +1,4 @@
-# Appendix I: Glossary of Encoding Terms
+# Appendix H: Glossary of Encoding Terms
 
 This glossary defines the terms used throughout the instruction encoding tables, syntax descriptions, and opcode documentation in this manual.
 

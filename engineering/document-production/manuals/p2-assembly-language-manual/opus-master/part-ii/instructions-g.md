@@ -21,7 +21,7 @@ Get Breakpoint Status
 - WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
 
@@ -63,7 +63,7 @@ Get Byte
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -98,7 +98,7 @@ Get System Counter
 - WC is an optional effect that preserves the current C flag state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
 
@@ -136,7 +136,7 @@ Get Nibble
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -170,7 +170,7 @@ Get FIFO Hub Pointer
 - Dest is a register where the FIFO hub pointer is written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
 
@@ -204,7 +204,7 @@ Get CORDIC X Result
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
 
@@ -242,7 +242,7 @@ Get CORDIC Y Result
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
 
@@ -281,7 +281,7 @@ Get Random Value
 - WC, WZ, or WCZ are optional effects to retrieve random bits into flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
 | EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
@@ -321,7 +321,7 @@ Get Oscilloscope Samples
 - Dest is a register where the four oscilloscope samples are written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
 
@@ -359,7 +359,7 @@ Get Word
 - Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
@@ -393,7 +393,7 @@ Get Goertzel Accumulators
 - Dest is a register where the Goertzel X accumulator value is written.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
 

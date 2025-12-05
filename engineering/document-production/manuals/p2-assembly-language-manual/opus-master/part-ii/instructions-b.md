@@ -25,7 +25,7 @@ Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
 - WCZ is an optional effect to update the Z flag to the original bit state.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
 | EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
@@ -72,7 +72,7 @@ Bit High
 - WCZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -109,7 +109,7 @@ Bit Low
 - WCZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -146,7 +146,7 @@ Bit Not
 - WCZ is an optional effect to update the C and Z flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
 
@@ -183,7 +183,7 @@ Bit Random
 - WCZ is an optional effect to update the C and Z flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
 
@@ -221,7 +221,7 @@ Blend Pixels
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are blended into Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
 
@@ -256,7 +256,7 @@ Bit Mask
 - Src is a register or 5-bit literal whose value is the size of the bit mask to generate.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
@@ -297,7 +297,7 @@ Breakpoint
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code or condition depending on the state of execution (outside or inside of a Debug ISR).
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 

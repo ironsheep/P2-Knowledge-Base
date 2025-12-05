@@ -20,7 +20,7 @@ Set Hub Configuration
 - D is a register or 9-bit literal (or 32-bit augmented literal) containing the configuration value for the hub system.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
 

@@ -14,7 +14,7 @@ Every PASM2 instruction occupies exactly one 32-bit long with this structure:
 ### 2.1.1 Field Summary
 
 | Field | Bits | Width | Purpose |
-|-------|------|-------|---------|
+|:----------|:------|:------|:-----------------------------------------------|
 | EEEE | 31-28 | 4 | Condition code for conditional execution |
 | OOOOOOO | 27-21 | 7 | Opcode identifying the instruction |
 | CZI | 20-18 | 3 | Flag effects and immediate mode |
@@ -26,7 +26,7 @@ Every PASM2 instruction occupies exactly one 32-bit long with this structure:
 The three bits at positions 20-18 control flag behavior and operand mode:
 
 | Bit | Position | Purpose |
-|-----|----------|---------|
+|:----|:---------|:-------------------------------------------------|
 | C | 20 | C flag write enable (1 = update C flag) |
 | Z | 19 | Z flag write enable (1 = update Z flag) |
 | I | 18 | Immediate mode (1 = S is immediate value) |
@@ -41,7 +41,7 @@ The condition field enables conditional execution of any instruction. The instru
 ### 2.2.1 Condition Code Table
 
 | EEEE | Mnemonic | Condition | Description |
-|------|----------|-----------|-------------|
+|:-----|:-------------|:-------------|:------------------------------------------|
 | 0000 | _RET_ | (special) | Return from subroutine |
 | 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Neither carry nor zero |
 | 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
@@ -125,7 +125,7 @@ Each instruction entry in Part II includes an encoding table with nine columns. 
 The left five columns show the 32-bit instruction encoding:
 
 | Column | Content | Description |
-|--------|---------|-------------|
+|:-------|:-------------|:---------------------------------------------------------------|
 | COND | EEEE | Condition field (4 bits, always EEEE for conditional instructions) |
 | INSTR | 7 bits | The instruction's unique opcode (positions 27-21) |
 | FX | CZI variant | Flag modification and immediate bits (positions 20-18) |
@@ -137,7 +137,7 @@ The left five columns show the 32-bit instruction encoding:
 The right four columns describe instruction effects:
 
 | Column | Content | Description |
-|--------|---------|-------------|
+|:-------|:---------------|:----------------------------------------------------|
 | Write | What's written | Which register(s) receive output (D, PC, etc.) |
 | C Flag | C behavior | How C flag is affected, or "---" for no change |
 | Z Flag | Z behavior | How Z flag is affected, or "---" for no change |
@@ -148,7 +148,7 @@ The right four columns describe instruction effects:
 The FX column shows which flag and immediate options are available:
 
 | FX Pattern | Meaning |
-|------------|---------|
+|:-----------|:----------------------------------------------------------------------------|
 | CZI | C modifiable (WC), Z modifiable (WZ), Immediate allowed (#) |
 | 0ZI | C not modifiable, Z modifiable, Immediate allowed |
 | C0I | C modifiable, Z not modifiable, Immediate allowed |
@@ -162,23 +162,32 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 ### 2.3.4 Special Values in Columns
 
 **Write column:**
-- `D` - Destination register is written
-- `D and PC` - Both destination and program counter written (for jumps/calls)
-- `PC` - Only PC written
-- `---` - Nothing written (compare, test instructions)
-- `LUT` - LUT memory written
-- `Hub` - Hub memory written
+
+| Value | Meaning |
+|-------|---------|
+| `D` | Destination register is written |
+| `D and PC` | Both destination and program counter written (for jumps/calls) |
+| `PC` | Only PC written |
+| `---` | Nothing written (compare, test instructions) |
+| `LUT` | LUT memory written |
+| `Hub` | Hub memory written |
 
 **Flag columns:**
-- `---` - Flag is not changed
-- Descriptive text - Describes condition that sets/clears the flag
+
+| Value | Meaning |
+|-------|---------|
+| `---` | Flag is not changed |
+| Descriptive text | Describes condition that sets/clears the flag |
 
 **Clocks column:**
-- `2` - Always 2 clock cycles
-- `2+` - Minimum 2 cycles, may be more
-- `2 or 4` - 2 if condition false/not taken, 4 if true/taken
-- `2 / 8-23` - COG mode cycles / Hub mode cycles
-- `9..35` - Variable range depending on operands
+
+| Value | Meaning |
+|-------|---------|
+| `2` | Always 2 clock cycles |
+| `2+` | Minimum 2 cycles, may be more |
+| `2 or 4` | 2 if condition false/not taken, 4 if true/taken |
+| `2 / 8-23` | COG mode cycles / Hub mode cycles |
+| `9..35` | Variable range depending on operands |
 
 
 ## 2.4 Understanding Multiple Encoding Rows
@@ -380,7 +389,7 @@ Each entry in Part II has a colored bar on the left edge of its header block. Th
 The colors indicate entry type:
 
 | Color | Entry Type | Description |
-|-------|------------|-------------|
+|:----------|:-----------|:--------------------------------------------------------|
 | **Red** | Instruction | PASM2 machine instructions (the majority of entries) |
 | **Amber** | Directive | Assembler directives like ORG, BYTE, LONG |
 | **Violet** | Constant | Pre-defined constants like smart pin mode values |
@@ -589,7 +598,7 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 \item AUGS/AUGD extend immediates to full 32 bits by inserting an extra instruction before the target
 \item Encoding tables show both the bit pattern (left 5 columns) and the effects (right 4 columns)
 \item Multiple table rows indicate instruction families or syntax variants with different encodings
-\item The \_RET\_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item The _RET_ condition (EEEE=0000) transforms any instruction into a subroutine return
 \end{keyconcepts}
 ```
 

@@ -22,7 +22,7 @@ Shift Arithmetic Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -57,7 +57,7 @@ Shift Arithmetic Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -92,7 +92,7 @@ Scale
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Product = 0 | 2 |
 
@@ -128,7 +128,7 @@ Scale Signed
 - WZ is an optional effect to update the Z flag.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Result = 0 | 2 |
 
@@ -160,7 +160,7 @@ Set Byte
 - N is a 2-bit literal (0-3) identifying the byte of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -196,7 +196,7 @@ Set Colorspace Converter Frequency
 - Dest is a register or literal value (0-511) to set as CFRQ parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111011 | --- | --- | --- | 2 |
 
@@ -225,7 +225,7 @@ Set Colorspace Converter CI
 - Dest is a register or literal value (0-511) to set as CI parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111001 | --- | --- | --- | 2 |
 
@@ -254,7 +254,7 @@ Set Colorspace Converter Mode
 - Dest is a register or literal value (0-511) to set as CMOD parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111100 | --- | --- | --- | 2 |
 
@@ -283,7 +283,7 @@ Set Colorspace Converter CQ
 - Dest is a register or literal value (0-511) to set as CQ parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111010 | --- | --- | --- | 2 |
 
@@ -312,7 +312,7 @@ Set Colorspace Converter CY
 - Dest is a register or literal value (0-511) to set as CY parameter.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111000 | --- | --- | --- | 2 |
 
@@ -342,7 +342,7 @@ Set Destination Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -373,7 +373,7 @@ Set DACs
 - Dest is a register or literal value (0-511) containing four 8-bit DAC values.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011100 | --- | --- | --- | 2 |
 
@@ -402,7 +402,7 @@ Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
 - Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100101 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100110 | --- | --- | --- | 2 |
@@ -435,7 +435,7 @@ Set LUT Sharing
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110111 | --- | --- | --- | 2 |
 
@@ -467,7 +467,7 @@ Set Nibble
 - N is a 3-bit literal (0-7) identifying the nibble of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -504,7 +504,7 @@ Set Pin Pattern
 - Src is a register or immediate containing match value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1011111 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
@@ -533,7 +533,7 @@ Set Pixel Blend Factor
 - Dest is a register or literal value (0-511) containing 8-bit blend factor in bits [7:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111101 | --- | --- | --- | 2 |
 
@@ -562,7 +562,7 @@ Set Pixel Mixer Mode
 - Dest is a register or literal value (0-511) containing 6-bit mode in bits [5:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000111110 | --- | --- | --- | 2 |
 
@@ -591,7 +591,7 @@ Set Q Register
 - Dest is a register or literal value (0-511) to load into Q.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101000 | --- | --- | --- | 2 |
 
@@ -625,7 +625,7 @@ Set Q For LUT Transfers
 - Dest is a register or literal value (0-511) to load into Q.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000101001 | --- | --- | --- | 2 |
 
@@ -660,7 +660,7 @@ Set Result Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the Result field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -692,7 +692,7 @@ Set Source Field
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field of Dest.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 
@@ -723,7 +723,7 @@ Set Oscilloscope
 - Dest is a register or literal value (0-511) containing enable bit [6] and pin base [5:2].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 001110000 | --- | --- | --- | 2 |
 
@@ -753,7 +753,7 @@ Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
 - Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100000 | --- | --- | --- | 2 |
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100001 | --- | --- | --- | 2 |
@@ -790,7 +790,7 @@ Set Word
 - N is a 1-bit literal (0-1) identifying the word of Dest to modify.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
 | EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
@@ -826,7 +826,7 @@ Set Streamer Frequency
 - Dest is a register or literal value (0-511) containing frequency value.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000011101 | --- | --- | --- | 2 |
 
@@ -855,7 +855,7 @@ Seuss Forward
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | D | --- | --- | 2 |
 
@@ -884,7 +884,7 @@ Seuss Reverse
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | D | --- | --- | 2 |
 
@@ -915,7 +915,7 @@ Shift Left
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -950,7 +950,7 @@ Shift Right
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
 
@@ -985,7 +985,7 @@ Sign Extend
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
 
@@ -1018,7 +1018,7 @@ Skip Instructions
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110001 | --- | --- | --- | 2 |
 
@@ -1054,7 +1054,7 @@ Skip Instructions Fast
 - Dest is a register or literal value (0-511) containing skip pattern bitmask.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110010 | --- | --- | --- | 2 |
 
@@ -1083,7 +1083,7 @@ Split Bits To Bytes
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
 
@@ -1112,7 +1112,7 @@ Split Bits To Words
 - Dest is a register to transform.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
 
@@ -1139,7 +1139,7 @@ Disallow Interrupts
 **Result:** All future interrupts are disallowed.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 000 | 000100001 | 000100100 | --- | --- | --- | 2 |
 
@@ -1176,7 +1176,7 @@ Subtract
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
 
@@ -1211,7 +1211,7 @@ Subtract Reverse
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2 |
 
@@ -1242,7 +1242,7 @@ Subtract Signed
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2 |
 
@@ -1273,7 +1273,7 @@ Subtract Signed Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2 |
 
@@ -1304,7 +1304,7 @@ Subtract Extended
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2 |
 
@@ -1338,7 +1338,7 @@ Conditional Sum {#sumnc} {#sumz} {#sumnz}
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
 | EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |

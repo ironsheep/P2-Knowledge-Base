@@ -23,7 +23,7 @@ Encode Bit Position
 - WC, WZ, or WCZ are optional effects to update flags.
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | D | S != 0 | Result = 0 | 2 |
 | EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
@@ -67,7 +67,7 @@ Execute with Skip Pattern
 - Dest is a register or 10-bit literal specifying the target address in bits [9:0] and the skip pattern in bits [31:10].
 
 
-| EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 

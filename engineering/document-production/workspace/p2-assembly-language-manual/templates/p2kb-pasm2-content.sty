@@ -657,11 +657,12 @@
 
 % Simple 5-column encoding snippet (just bit fields, no result columns)
 % For showing encoding structure in explanatory sections
+% Uses same color zones as full encoding tables
 \newcommand{\encodingsnippet}[5]{%
   \par\vspace{4pt}%
   \small
   \noindent
-  \begin{tabular}{|c|c|c|c|c|}
+  \begin{tabular}{|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-operand}}c|>{\columncolor{pasm2-enc-operand}}c|}
   \hline
   \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
   \hline
@@ -673,11 +674,12 @@
 
 % Encoding snippet with annotation below S field
 % For Section 2.5.3 style where we want to highlight a fixed S value
+% Uses same color zones as full encoding tables
 \newcommand{\encodingsnippetannotated}[6]{%
   \par\vspace{4pt}%
   \small
   \noindent
-  \begin{tabular}{|c|c|c|c|c|}
+  \begin{tabular}{|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-operand}}c|>{\columncolor{pasm2-enc-operand}}c|}
   \hline
   \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
   \hline

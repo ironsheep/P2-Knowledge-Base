@@ -13,16 +13,16 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 
 | Operation | Instruction | Output |
 |-----------|-------------|--------|
-| Multiply | QMUL | 64-bit product (low 32 bits in X, high 32 bits in Y) |
-| Divide | QDIV | Quotient in X, remainder in Y |
-| Fractional divide | QFRAC | Fractional quotient in X, remainder in Y |
-| Square root | QSQRT | Integer square root in X |
-| Rotate | QROTATE | Rotated X coordinate, rotated Y coordinate |
-| Vector | QVECTOR | Magnitude in X, angle in Y (Cartesian to polar) |
-| Logarithm | QLOG | Natural log approximation in X |
-| Exponential | QEXP | e^x approximation in X |
+| Multiply | [QMUL](#qmul) | 64-bit product (low 32 bits in X, high 32 bits in Y) |
+| Divide | [QDIV](#qdiv) | Quotient in X, remainder in Y |
+| Fractional divide | [QFRAC](#qfrac) | Fractional quotient in X, remainder in Y |
+| Square root | [QSQRT](#qsqrt) | Integer square root in X |
+| Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
+| Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
+| Logarithm | [QLOG](#qlog) | Natural log approximation in X |
+| Exponential | [QEXP](#qexp) | e^x approximation in X |
 
-Each operation produces one or two 32-bit results, retrieved through GETQX and GETQY instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
+Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
 
 ### 5.1.2 CORDIC Operation Flow
 
@@ -143,9 +143,9 @@ This pattern achieves one rotation result every ~20 instructions (the loop body)
 
 ### 5.1.7 CORDIC Instructions Reference
 
-**Queue Operations:** QMUL, QDIV, QFRAC, QSQRT, QROTATE, QVECTOR, QLOG, QEXP
+**Queue Operations:** [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QROTATE](#qrotate), [QVECTOR](#qvector), [QLOG](#qlog), [QEXP](#qexp)
 
-**Result Retrieval:** GETQX, GETQY
+**Result Retrieval:** [GETQX](#getqx), [GETQY](#getqy)
 
 Full instruction details, including operand formats and result interpretations, appear in Part II under each instruction's entry.
 
@@ -347,7 +347,14 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 - **POLLATN** - Poll attention status
 - **POLLPAT** - Poll pattern match status
 
-Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event. The pattern `POLLSE1 WC; IF_C JMP #handler` branches to handler code only when the event occurred.
+Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
+
+```pasm
+                pollse1         wc              ' Test event 1, set C if occurred
+        if_c    jmp     #handler                ' Branch to handler only if event fired
+```
+
+This pattern branches to handler code only when the event occurred.
 
 ### 5.4.5 Interrupt Philosophy
 
@@ -449,7 +456,7 @@ The P2 includes a hardware bytecode execution engine called XBYTE that accelerat
 
 XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
 
-XBYTE is like a phantom instruction that executes on a hardware stack return (RET/\_RET\_) to address $1FF. Such a return does not pop the stack, so each additional RET/\_RET\_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
+XBYTE is like a phantom instruction that executes on a hardware stack return (RET/_RET_) to address $1FF. Such a return does not pop the stack, so each additional RET/_RET_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
 
 The execution cycle proceeds through eight clock phases:
 
@@ -464,7 +471,7 @@ The execution cycle proceeds through eight clock phases:
 | 7 | go | reload pipeline | Pipeline reload |
 | 8 | get | first instruction | First instruction of bytecode routine executes |
 
-When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a \_RET\_ prefix, making the total XBYTE loop take only 8 clocks.
+When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks.
 
 ### 5.6.2 LUT Table Format
 
@@ -513,7 +520,7 @@ This flag option allows bytecode routines to receive up to 4 states encoded in t
 
 ### 5.6.5 Starting XBYTE
 
-XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute \_RET\_ SETQ to configure the mode and trigger XBYTE:
+XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute _RET_ SETQ to configure the mode and trigger XBYTE:
 
 ```pasm
                                         ' Setup before starting XBYTE:
@@ -526,21 +533,21 @@ XBYTE mode begins through a specific instruction sequence. First, push $1FF onto
 _RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
 ```
 
-The \_RET\_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or \_RET\_, returning to $1FF to fetch the next bytecode.
+The _RET_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or _RET_, returning to $1FF to fetch the next bytecode.
 
-To alter the XBYTE mode for all subsequent bytecodes, execute another \_RET\_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use \_RET\_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
+To alter the XBYTE mode for all subsequent bytecodes, execute another _RET_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use _RET_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
 
 ### 5.6.6 Bytecode Routine Requirements
 
 Bytecode routines must follow these constraints:
 
 - **Location**: Must reside in COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
-- **Exit**: Must end with RET or \_RET\_ to return control to XBYTE
+- **Exit**: Must end with RET or _RET_ to return control to XBYTE
 - **Stack**: Hardware stack must not overflow (8 levels maximum)
 
 The PA register ($1F6) contains the current bytecode value, available as an immediate operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode using RFBYTE, RFWORD, or RFLONG.
 
-For maximum performance, use the \_RET\_ prefix on the final instruction:
+For maximum performance, use the _RET_ prefix on the final instruction:
 
 ```pasm
 toggle_pin0
@@ -824,28 +831,47 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 
 ### 5.8.6 Visual Debug Displays
 
-Beyond text output, DEBUG supports graphical display windows that visualize data in real time. These displays open automatically when the corresponding DEBUG statement executes.
+Beyond text output, DEBUG supports graphical display windows that visualize data in real time. Visual displays use a two-phase pattern: one statement **creates** the display window, and subsequent statements **update** it with new data.
+
+**Window Creation vs. Update:**
+
+The first DEBUG statement with a display name creates and configures the window. Inside loops, you update the existing window using the backtick-name syntax:
+
+```pasm
+                debug(`scope MySignal)              ' CREATE window (before loop)
+
+.loop           rdlong  adc_value, adc_ptr
+                debug(`MySignal adc_value)          ' UPDATE window (in loop)
+                waitms  #1
+                jmp     #.loop
+```
+
+The creation statement (with the display type keyword) establishes the window. Update statements (using just the backtick and name) send data points to the existing window. This separation is critical—creating windows inside loops would be extremely slow and waste resources.
 
 **SCOPE — Oscilloscope Display:**
 
 The SCOPE display provides multi-channel waveform visualization, similar to a digital oscilloscope:
 
 ```pasm
+                debug(`scope MySignal)              ' Create scope window
+
 .loop           rdlong  adc_value, adc_ptr
-                debug(`scope MySignal, adc_value)
+                debug(`MySignal adc_value)          ' Send sample to scope
                 waitms  #1
                 jmp     #.loop
 ```
 
-SCOPE supports up to 8 channels, auto-scaling, triggering modes, and time base adjustment. Each DEBUG call adds one sample point; the display scrolls as new data arrives.
+SCOPE supports up to 8 channels, auto-scaling, triggering modes, and time base adjustment. Each update call adds one sample point; the display scrolls as new data arrives.
 
 **PLOT — Data Plotting:**
 
 The PLOT display creates line graphs, scatter plots, and trend charts:
 
 ```pasm
+                debug(`plot Temperature)            ' Create plot window
+
 .loop           call    #read_temperature
-                debug(`plot Temperature, temp_value)
+                debug(`Temperature temp_value)      ' Send data point to plot
                 waitms  #1000
                 jmp     #.loop
 ```
@@ -857,8 +883,9 @@ PLOT provides rolling or accumulating display modes, multiple data series, and s
 The TERM display provides a dedicated text terminal window, separate from the default debug output:
 
 ```pasm
-                debug(`term Status, "System initialized", 13)
-                debug(`term Status, "Temperature: ", sdec_(temp), "°C", 13)
+                debug(`term Status)                           ' Create terminal window
+                debug(`Status "System initialized", 13)       ' Send text to terminal
+                debug(`Status "Temperature: ", sdec_(temp), "°C", 13)
 ```
 
 TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen) and provides a scrolling text buffer.
@@ -868,8 +895,10 @@ TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen
 The LOGIC display shows digital signal timing as a logic analyzer view:
 
 ```pasm
+                debug(`logic PortA)                 ' Create logic analyzer window
+
 .loop           rdbyte  port_state, port_addr
-                debug(`logic PortA, port_state)
+                debug(`PortA port_state)            ' Send sample to analyzer
                 waitx   ##100
                 jmp     #.loop
 ```
@@ -881,7 +910,8 @@ LOGIC displays multiple digital channels with timing relationships, useful for d
 The BITMAP display renders pixel data as an image:
 
 ```pasm
-                debug(`bitmap Display, 320, 240, @framebuffer)
+                debug(`bitmap Display, 320, 240)              ' Create bitmap window
+                debug(`Display @framebuffer)                  ' Send pixel data
 ```
 
 BITMAP creates a window showing raw pixel data, useful for graphics and video debugging.
@@ -929,20 +959,44 @@ BITMAP creates a window showing raw pixel data, useful for graphics and video de
 
 ### 5.8.8 DEBUG Performance Considerations
 
-DEBUG statements execute at runtime, consuming clock cycles for formatting and serial transmission. While typically negligible for occasional debug output, intensive debugging can affect timing-critical code.
+**CRITICAL WARNING:** Never place DEBUG statements inside performance-critical loops. DEBUG is a serial transmission mechanism—each statement can take thousands of clock cycles to format and transmit data. A tight loop with DEBUG inside will run orders of magnitude slower than the same loop without DEBUG. This isn't a subtle performance concern; it will fundamentally change your code's timing behavior.
 
-**Timing Impact:**
+**What DEBUG Actually Costs:**
 
 - Each DEBUG statement requires cycles for formatting and transmission
-- Serial transmission at 2 Mbaud limits throughput
-- Visual displays (SCOPE, PLOT) add host-side processing
+- Serial transmission at 2 Mbaud limits throughput to roughly 200,000 characters per second
+- A single `debug(udec(value))` statement may consume 100+ microseconds
+- Visual display updates (SCOPE, PLOT) add host-side processing overhead
+- In a loop running at 1 MHz, adding DEBUG drops effective frequency to kilohertz range
+
+**Safe DEBUG Patterns:**
+
+```pasm
+                ' WRONG - DEBUG inside tight loop destroys timing
+.bad_loop       rdlong  value, ptr
+                debug(udec_(value))                 ' This kills performance!
+                djnz    count, #.bad_loop
+
+                ' RIGHT - DEBUG outside performant loop
+.fast_loop      rdlong  value, ptr
+                call    #process_value
+                djnz    count, #.fast_loop
+                debug("Final value: ", udec_(value))  ' Debug after loop completes
+
+                ' RIGHT - Conditional debug for occasional sampling
+.sample_loop    rdlong  value, ptr
+                incmod  sample_cnt, #999    wz
+        if_z    debug(udec_(value))                 ' Only every 1000th iteration
+                djnz    count, #.sample_loop
+```
 
 **Mitigation Strategies:**
 
-- Use conditional DEBUG to output only when conditions warrant
-- Remove or disable DEBUG in timing-critical inner loops
+- Debug before or after performance-critical loops, never inside
+- Use conditional DEBUG with counters to sample infrequently
+- Remove DEBUG from timing-critical code paths entirely during development
 - Use the compiler's debug-disable option for production builds
-- Aggregate multiple values into single DEBUG statements
+- For real-time monitoring, use hardware methods (pin toggles, scope probes)
 
 **Production Builds:**
 
@@ -952,12 +1006,23 @@ The compiler provides options to disable DEBUG entirely. When disabled, DEBUG st
 
 When multiple COGs execute DEBUG statements, output interleaves in the debug window. Each COG's output appears as it transmits, which can create confusing mixed output when COGs debug simultaneously.
 
+**Automatic COG Identification:**
+
+For standard DEBUG output (not routed to a visual display window), the debug system automatically prefixes each message with the COG number (Cog0: through Cog7:). You do not need to manually add COG identification—it's built into the debug protocol:
+
+```pasm
+                debug("Starting motor control")     ' Output: Cog2: Starting motor control
+                debug(udec(speed))                  ' Output: Cog2: speed = 1500
+```
+
+This automatic prefixing applies only to text output. Visual displays (SCOPE, PLOT, TERM, etc.) do not receive the COG prefix because they're typically dedicated to specific COGs or purposes.
+
 **Strategies for Multi-COG Debugging:**
 
-- Prefix messages with COG identification: `debug("COG", udec_(cog_id), ": message")`
+- Rely on automatic COG prefixes for text debug output—no manual prefix needed
 - Use separate TERM windows for each COG: `debug(`term COG0, ...)`, `debug(`term COG1, ...)`
-- Add brief delays between DEBUG calls in different COGs
-- Debug one COG at a time during initial development
+- Add brief delays between DEBUG calls in different COGs if message interleaving is problematic
+- Debug one COG at a time during initial development for clearest output
 
 The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access across COGs, ensuring atomic message transmission, but message ordering depends on execution timing.
 

@@ -86,6 +86,7 @@ local ambiguous_words = {
   ["ones"] = true,
   ["skip"] = true,
   ["debug"] = true,
+  ["sets"] = true,  -- "sets direction" vs SETS instruction
 }
 
 -- Check if a word is a mnemonic
@@ -100,20 +101,37 @@ end
 
 -- Grammar patterns that indicate English usage (NOT an instruction)
 -- prev_word is the word before, next_word is the word after
-local function is_english_context(word, prev_word, next_word)
+-- suffix is any trailing characters after the word (like "-level" in "BYTE-level")
+local function is_english_context(word, prev_word, next_word, suffix)
   local w = word:lower()
   local prev = prev_word and prev_word:lower() or ""
   local next = next_word and next_word:lower() or ""
+  local suf = suffix and suffix:lower() or ""
+
+  -- Check for hyphenated compounds - if suffix starts with hyphen, check what follows
+  -- e.g., "BYTE-level" has suffix "-level"
+  if suf:match("^%-") then
+    local hyphen_word = suf:match("^%-(%a+)")
+    if hyphen_word then
+      -- Treat hyphenated compound as English usage
+      -- "BYTE-level", "WORD-aligned", etc.
+      return true
+    end
+  end
 
   -- "and" as conjunction: "X and Y", "and the", "and then", "and also"
   if w == "and" then
     -- If followed by instruction/directive keywords, it's the instruction
-    if next == "instruction" or next == "performs" or next == "operation" then
+    if next == "instruction" or next == "performs" then
       return false
     end
     -- If preceded by instruction-like context, it's the instruction
     if prev == "the" and next == "instruction" then
       return false
+    end
+    -- "configuration AND operation" - AND as conjunction
+    if next == "operation" or next == "operations" then
+      return true
     end
     -- Otherwise, "and" in prose is almost always a conjunction
     -- The instruction AND is typically written as `AND` in code or "the AND instruction"
@@ -173,14 +191,19 @@ local function is_english_context(word, prev_word, next_word)
     return false
   end
 
-  -- "byte" as noun: "the byte", "a byte", "byte value"
+  -- "byte" as noun/adjective: "the byte", "a byte", "byte value", "BYTE-level"
   if w == "byte" then
     if prev == "the" or prev == "a" or prev == "each" or prev == "every" or
        prev == "per" or prev == "one" then
       return true
     end
     if next == "value" or next == "values" or next == "size" or next == "aligned" or
-       next == "boundary" or next == "order" then
+       next == "boundary" or next == "order" or next == "level" then
+      return true
+    end
+    -- Hyphenated compounds: "BYTE-level", "BYTE-sized" etc.
+    -- The next "word" after hyphen stripping might be "level"
+    if next and next:match("^level") then
       return true
     end
     if next == "instruction" or next == "directive" then
@@ -356,6 +379,27 @@ local function is_english_context(word, prev_word, next_word)
       return false
     end
     return false
+  end
+
+  -- "sets" as verb: "sets direction", "sets the", "DIRZ sets"
+  -- The SETS instruction is rare in prose; "sets" is almost always the verb
+  if w == "sets" then
+    -- If followed by instruction keyword, it's the instruction
+    if next == "instruction" or next == "performs" then
+      return false
+    end
+    -- "sets direction", "sets the", "sets a" - all verb usage
+    if next == "direction" or next == "the" or next == "a" or next == "an" or
+       next == "it" or next == "this" or next == "that" then
+      return true
+    end
+    -- Previous word is an instruction (like DIRZ) - this "sets" is the verb
+    -- describing what that instruction does
+    if is_mnemonic(prev) then
+      return true
+    end
+    -- Default for "sets" - treat as English verb (very common)
+    return true
   end
 
   -- Default: not English context (treat as instruction)
@@ -534,7 +578,7 @@ function Para(para)
         -- Check if this is an ambiguous word needing grammar analysis
         local should_bold = true
         if is_ambiguous(core_word) then
-          if is_english_context(core_word, prev_word, next_word) then
+          if is_english_context(core_word, prev_word, next_word, suffix) then
             should_bold = false
           end
         end
@@ -607,7 +651,7 @@ function Plain(plain)
 
         local should_bold = true
         if is_ambiguous(core_word) then
-          if is_english_context(core_word, prev_word, next_word) then
+          if is_english_context(core_word, prev_word, next_word, suffix) then
             should_bold = false
           end
         end

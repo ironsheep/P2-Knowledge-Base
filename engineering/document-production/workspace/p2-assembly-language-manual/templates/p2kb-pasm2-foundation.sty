@@ -101,22 +101,31 @@
 % CRITICAL: The book class has hardcoded vertical space for \part and \chapter.
 % We must use titlesec's complete control to override this.
 
-% PART: Minimal space above, consistent formatting
+% PART: No page break after, keeps first chapter on same page
 % Parts are used for major document divisions (Part I, Part II, Part III)
 \titleformat{\part}[display]
   {\centering\normalfont\huge\bfseries}  % Format: centered, huge, bold
   {\partname\ \thepart}                   % Label: "Part I", "Part II", etc.
   {10pt}                                  % Sep between label and title
   {\Huge}                                 % Before-code: make title Huge
-\titlespacing*{\part}{0pt}{-50pt}{20pt}   % Left, before (negative to pull up), after
+\titlespacing*{\part}{0pt}{40pt}{30pt}    % Left, before, after (no page break)
 
-% CHAPTER: Minimal space above, consistent formatting
+% Prevent page break after part heading - chapter follows immediately
+\makeatletter
+\let\origpart\part
+\renewcommand*{\part}[1]{%
+  \origpart{#1}%
+  \nopagebreak[4]%  % Strongly discourage page break after part
+}
+\makeatother
+
+% CHAPTER: Add one blank line (approx 12pt) below header rule before chapter title
 \titleformat{\chapter}[display]
   {\normalfont\Huge\bfseries}
   {}
   {0pt}
   {}
-\titlespacing*{\chapter}{0pt}{-50pt}{15pt}
+\titlespacing*{\chapter}{0pt}{-38pt}{15pt}  % Adjusted: -38pt gives ~12pt below header rule
 
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}

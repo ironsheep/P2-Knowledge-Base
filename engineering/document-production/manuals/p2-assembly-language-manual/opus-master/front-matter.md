@@ -124,11 +124,11 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
 
-- Chapter 1: P2 Architecture Overview
-- Chapter 2: Instruction Format and Encoding
-- Chapter 3: Addressing Modes and Register Usage
-- Chapter 4: Flags and Conditional Execution
-- Chapter 5: Program Flow and Subroutines
+- Chapter 1: The P2 Execution Model
+- Chapter 2: The Instruction Format
+- Chapter 3: Flags and Conditional Execution
+- Chapter 4: Timing and Determinism
+- Chapter 5: Special Hardware Overview
 
 **Part II: Language Reference** — Complete documentation of all PASM2 elements:
 
@@ -146,8 +146,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 - Appendix E: Smart Pin Mode Constants
 - Appendix F: Streamer Mode Constants
 - Appendix G: Reserved Words Reference
-- Appendix H: Opcode Bit Patterns
-- Appendix I: Glossary of Encoding Terms
+- Appendix H: Glossary of Encoding Terms
 
 ### Quick Navigation Guide
 
@@ -155,15 +154,15 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **"I need to understand the architecture"** → Part I, read Chapters 1-2 sequentially
 
-**"I need encoding details"** → Appendix A (summary tables) or Appendix F (complete opcode map)
+**"I need encoding details"** → Appendix A (encoding summary tables)
 
 **"I need to find instructions by category"** → Appendix B (grouped by function: arithmetic, logic, memory, etc.)
 
 **"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix C (summary table)
 
-**"I need Smart Pin configuration values"** → Appendix D
+**"I need Smart Pin configuration values"** → Appendix E (Smart Pin Mode Constants)
 
-**"I need CORDIC function codes"** → Appendix E
+**"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 
 
 ## Conventions Used in This Manual
@@ -207,23 +206,23 @@ Throughout this manual, special markers highlight important information:
 
 Part II instruction entries include encoding tables with the following columns:
 
-**COND** — Condition code field (4 bits, EEEE). Determines when instruction executes based on flag states.
+**EEEE** — Condition code field (4 bits). Determines when instruction executes based on flag states.
 
-**INSTR** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
+**Opcode** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
 
-**FX** — Flag effects field (3 bits, CZI). Controls which flags are updated and how.
+**CZI** — Flag effects field (3 bits). Controls which flags are updated and how.
 
-**DEST** — Destination register (9 bits). Where the result is written.
+**Dest** — Destination register (9 bits). Where the result is written.
 
-**SRC** — Source register or immediate value (9 bits). Second operand for the instruction.
+**Src** — Source register or immediate value (9 bits). Second operand for the instruction.
 
-**Write** — What value gets written to the destination register.
+**C** — Effect on the Carry flag: set (1), cleared (0), modified based on result, or unchanged (---).
 
-**C Flag** — Effect on the Carry flag: set (1), cleared (0), modified based on result, or unchanged (-).
+**Z** — Effect on the Zero flag: set (1), cleared (0), modified based on result, or unchanged (---).
 
-**Z Flag** — Effect on the Zero flag: set (1), cleared (0), modified based on result, or unchanged (-).
+**Result** — What value gets written to the destination register.
 
-**Clocks** — Execution time in system clock cycles.
+**Clks** — Execution time in system clock cycles.
 
 ### Cross-References
 
