@@ -213,6 +213,13 @@ def process_latex_escaping(input_file, output_file):
                 protected_commands.append(escaped_cmd)
                 line = line.replace(match.group(0), placeholder, 1)
         
+        # Protect trailing backslash (Pandoc hard line break) BEFORE escaping
+        # A single backslash at end of line is Pandoc's hard line break syntax
+        trailing_backslash = False
+        if line.rstrip().endswith('\\') and not line.rstrip().endswith('\\\\'):
+            trailing_backslash = True
+            line = line.rstrip()[:-1]  # Remove trailing backslash temporarily
+
         # Find and protect LaTeX formatting commands (no arguments)
         for pattern in [r'\\par\b', r'\\newline\b', r'\\\\', r'\\noindent\b',
                        r'\\centering\b', r'\\raggedright\b', r'\\raggedleft\b',
@@ -301,8 +308,12 @@ def process_latex_escaping(input_file, output_file):
         for i, code in enumerate(protected_inline_code):
             placeholder = f'XPROTECTINLINECODE{i}X'
             line = line.replace(placeholder, code)
-        
-        output_lines.append(line + '\n')
+
+        # 7. Restore trailing backslash for Pandoc hard line breaks
+        if trailing_backslash:
+            output_lines.append(line + '\\\n')
+        else:
+            output_lines.append(line + '\n')
     
     with open(output_file, 'w') as f:
         f.writelines(output_lines)

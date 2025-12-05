@@ -5,24 +5,30 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-12-05 (v3 - Fenced div protection added)
+- **Last Modified**: 2025-12-05 (v4 - Trailing backslash preservation added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, escapes P2 literals
+- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Pandoc Fenced Divs** (NEW in v3)
+1. **Trailing Backslash Preservation** (NEW in v4)
+   - Trailing `\` at end of line is Pandoc hard line break syntax
+   - Preserved as-is (NOT escaped to `\textbackslash{}`)
+   - Used for multi-line operand lists in instruction documentation
+   - Test Case: `test-cases.md` → "Trailing Backslash Test"
+
+2. **Pandoc Fenced Divs** (v3)
    - `::: pasm2` / `::: spin2` / `::: cordic` / `::: multicog` / `::: antipattern` - Code NOT escaped
    - Content between `:::` and closing `:::` is preserved exactly
    - Text outside fenced divs is still escaped normally
 
-2. **Markdown Image Paths** (v2)
+4. **Markdown Image Paths** (v2)
    - `![alt](path/with_underscores.png)` - NOT escaped
    - `[link](file.ext)` - NOT escaped if contains extension
    - Preserves spaces and underscores in paths
 
-3. **Basic LaTeX Special Characters**
+5. **Basic LaTeX Special Characters**
    - `#` → `\#` (except in markdown headers)
    - `$` → `\$`
    - `%` → `\%`
@@ -32,13 +38,13 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    - `{` → `\{`
    - `}` → `\}`
 
-4. **Protected Contexts**
+6. **Protected Contexts**
    - Code blocks (```pasm2, ```spin2, etc.) - NO escaping
    - Fenced divs (::: pasm2, ::: spin2, etc.) - NO escaping (v3)
    - Standard LaTeX environments (equation, align, etc.) - NO escaping
    - Template environments (sidetrack, interlude, etc.) - content IS escaped
 
-5. **LaTeX Commands Preserved**
+7. **LaTeX Commands Preserved**
    - `\textbf{}`, `\textit{}`, `\emph{}`, etc.
    - `\section{}`, `\subsection{}`, etc. (content inside {} IS escaped)
    - Spacing commands (`\vspace{}`, `\quad`, etc.)
@@ -105,6 +111,13 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-12-05: Version 4 Released
+- **Trailing Backslash Preservation**: Single trailing `\` at end of line preserved for Pandoc hard line breaks
+- **Use Case**: Instruction operand lists with multiple lines (e.g., `**TESTP** *{#}Dest* WC/WZ\`)
+- **Bug Fixed**: Trailing backslash was incorrectly escaped to `\textbackslash{}` breaking multi-line layouts
+- **Impact**: PASM2 manual instruction documentation uses trailing backslashes for operand formatting
+- **Test Added**: "Trailing Backslash Test (Pandoc Hard Line Breaks)" section in test-cases.md
 
 ### 2025-12-05: Version 3 Released
 - **Fenced Div Protection**: Added protection for `::: type` Pandoc fenced divs

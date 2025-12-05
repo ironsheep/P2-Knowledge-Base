@@ -229,3 +229,22 @@ Text between divs should have #special and $chars and _underscores escaped.
 :::
 
 Final regular text with #hash and $dollar and _underscore should be escaped.
+
+## Trailing Backslash Test (Pandoc Hard Line Breaks)
+This tests trailing backslash preservation for Pandoc hard line breaks.
+
+**TESTP**  *{#}Dest*  WC/WZ\
+**TESTPN**  *{#}Dest*  WC/WZ
+
+Multiple consecutive lines with trailing backslash:
+**MOV**  *Dest*, *{#}Src*\
+**ADD**  *Dest*, *{#}Src*\
+**SUB**  *Dest*, *{#}Src*
+
+Mixed content with backslash and special chars:
+Line with #immediate and trailing backslash\
+Line with $hex_value and trailing backslash\
+Line with underscore_pattern and trailing backslash\
+Final line without trailing backslash
+
+Regular text should still have _underscores and #hash escaped even near backslashes.
