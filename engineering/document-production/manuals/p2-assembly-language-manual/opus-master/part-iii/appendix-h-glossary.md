@@ -82,3 +82,4 @@ This glossary defines the terms used throughout the instruction encoding tables,
 - **Appendix A** — Encoding summary tables
 - **Appendix H** — Complete opcode bit patterns for all instructions
 
+

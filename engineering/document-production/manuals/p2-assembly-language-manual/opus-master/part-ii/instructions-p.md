@@ -39,13 +39,13 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 ::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
-Poll Counter Event {#pollct2} {#pollct3}
+Poll Counter Event
 
 [Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
 
-**POLLCT1**  **{WC|WZ|WCZ}**
-**POLLCT2**  **{WC|WZ|WCZ}**
+**POLLCT1**  **{WC|WZ|WCZ}**\
+**POLLCT2**  **{WC|WZ|WCZ}**\
 **POLLCT3**  **{WC|WZ|WCZ}**
 
 ---
@@ -208,14 +208,14 @@ This instruction enables error detection for CORDIC operations.
 
 ::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
-Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
+Poll Selectable Event
 
 [Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
 
-**POLLSE1**  **{WC|WZ|WCZ}**
-**POLLSE2**  **{WC|WZ|WCZ}**
-**POLLSE3**  **{WC|WZ|WCZ}**
+**POLLSE1**  **{WC|WZ|WCZ}**\
+**POLLSE2**  **{WC|WZ|WCZ}**\
+**POLLSE3**  **{WC|WZ|WCZ}**\
 **POLLSE4**  **{WC|WZ|WCZ}**
 
 ---
@@ -579,4 +579,5 @@ PUSHB writes the long value in Dest (or a 9-bit immediate value) to Hub address 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
 
 Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
+
 

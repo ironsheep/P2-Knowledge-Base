@@ -190,14 +190,14 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 ::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
+Float with Output Preset by Flag
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
-**FLTC**  *{#}Dest*  **{WCZ}**
-**FLTNC**  *{#}Dest*  **{WCZ}**
-**FLTZ**  *{#}Dest*  **{WCZ}**
+**FLTC**  *{#}Dest*  **{WCZ}**\
+**FLTNC**  *{#}Dest*  **{WCZ}**\
+**FLTZ**  *{#}Dest*  **{WCZ}**\
 **FLTNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -390,6 +390,7 @@ When Dest is a register, the register's value bits \[10:0\] are used as-is to fo
 The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
 
 
 

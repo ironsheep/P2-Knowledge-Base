@@ -253,10 +253,12 @@ The D field can also specify:
 The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 
 **Register mode (I = 0):**
+
 - S is a COG register address ($000-$1FF)
 - The value in that register is used as the operand
 
 **Immediate mode (I = 1):**
+
 - S is a 9-bit unsigned value (0-511)
 - This value is used directly as the operand
 
@@ -449,6 +451,7 @@ Instructions are grouped by category in Appendix B. When looking for "an instruc
 The PDF version of this manual includes extensive cross-reference links to help you navigate efficiently. Links appear in blue text and are clickable:
 
 **In the entry header block:**
+
 - The **Category name** links to Appendix B's categorical listing
 
 **In the Related line:**
@@ -604,3 +607,4 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 
 
 <!-- End of Chapter 2 -->
+

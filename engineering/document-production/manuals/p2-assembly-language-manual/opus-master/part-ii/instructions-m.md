@@ -481,14 +481,14 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 
 ::: instrheader
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
-Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
+Multiplex Flag To Bits
 
 [Arithmetic Operations](#arithmetic-operations) - Sets selected bits to a flag value based on mask.
 :::
 
-**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
-**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**
-**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**\
+**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**\
+**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
 
 ---
@@ -694,6 +694,7 @@ The Q register mask enables sophisticated bit manipulation:
 MUXQ is particularly valuable for HUB75 RGB panel driving and other applications requiring atomic multi-pin updates. It executes in 2 clock cycles, providing high-performance parallel bit operations essential for real-time graphics and control applications.
 
 Unlike MUXC and MUXZ which replicate a single flag bit to all selected positions, MUXQ copies the actual corresponding bits from the source, enabling true parallel bit transfer operations.
+
 
 
 

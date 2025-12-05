@@ -405,7 +405,7 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 ::: instrheader
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
-Resume From Interrupt {#resi1} {#resi2} {#resi3}
+Resume From Interrupt
 
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
@@ -547,7 +547,7 @@ RETB is paired with CALLB for implementing software stacks in Hub memory, enabli
 
 ::: instrheader
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
-Return From Interrupt {#reti1} {#reti2} {#reti3}
+Return From Interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
@@ -895,7 +895,7 @@ Rotate Byte Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a byte from source into destination register.
 :::
 
-**ROLBYTE**  *Dest, {#}Src, #N*
+**ROLBYTE**  *Dest, {#}Src, #N*\
 **ROLBYTE**  *Dest*
 
 ---
@@ -930,7 +930,7 @@ Rotate Nibble Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a nibble from source into destination register.
 :::
 
-**ROLNIB**  *Dest, {#}Src, #N*
+**ROLNIB**  *Dest, {#}Src, #N*\
 **ROLNIB**  *Dest*
 
 ---
@@ -965,7 +965,7 @@ Rotate Word Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a word from source into destination register.
 :::
 
-**ROLWORD**  *Dest, {#}Src, #N*
+**ROLWORD**  *Dest, {#}Src, #N*\
 **ROLWORD**  *Dest*
 
 ---
@@ -1062,4 +1062,5 @@ RQPIN reads the result value from the specified Smart Pin without acknowledging 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
 This instruction is useful when you need to check a pin's result value without consuming it, such as polling for completion before actually processing the result.
+
 

@@ -561,3 +561,4 @@ Miscellaneous instructions provide utility functions including immediate value e
 | [SETQ](#setq) | Set Q register to D |
 | [SETQ2](#setq2) | Set Q register to D (for LUT transfers) |
 | [WAITX](#waitx) | Wait 2 + D clocks |
+

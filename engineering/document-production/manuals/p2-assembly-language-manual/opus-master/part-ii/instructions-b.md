@@ -6,14 +6,14 @@ This section contains all PASM2 instructions beginning with the letter B.
 
 ::: instrheader
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
-Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
+Set Bit to Flag State
 
 [Arithmetic Operations](#arithmetic-operations) - Sets bits to match flag state.
 :::
 
-**BITC**  *Dest, {#}Src*  **{WCZ}**
-**BITNC**  *Dest, {#}Src*  **{WCZ}**
-**BITZ**  *Dest, {#}Src*  **{WCZ}**
+**BITC**  *Dest, {#}Src*  **{WCZ}**\
+**BITNC**  *Dest, {#}Src*  **{WCZ}**\
+**BITZ**  *Dest, {#}Src*  **{WCZ}**\
 **BITNZ**  *Dest, {#}Src*  **{WCZ}**
 
 ---
@@ -245,7 +245,7 @@ Bit Mask
 [Arithmetic Operations](#arithmetic-operations) - Generates an LSB-justified bit mask.
 :::
 
-**BMASK**  *Dest, {#}Src*
+**BMASK**  *Dest, {#}Src*\
 **BMASK**  *Dest*
 
 ---
@@ -315,5 +315,6 @@ During a Debug ISR, the BRK instruction is used instead to establish the next de
 The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.
 
 BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
+
 
 

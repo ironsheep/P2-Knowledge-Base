@@ -11,7 +11,7 @@ Negate
 [Arithmetic Operations](#arithmetic-operations) - Negates a value, flipping its sign.
 :::
 
-**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -45,21 +45,21 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 ::: instrheader
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
-Conditional Negate {#negnc} {#negz} {#negnz}
+Conditional Negate
 
 [Arithmetic Operations](#arithmetic-operations) - Conditionally negates a value based on flag state.
 :::
 
-**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGNC**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGZ**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -108,7 +108,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 ::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-Cancel Interrupt {#nixint2} {#nixint3}
+Cancel Interrupt
 
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
@@ -175,7 +175,7 @@ Bitwise Not
 [Arithmetic Operations](#arithmetic-operations) - Inverts all bits in a value.
 :::
 
-**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NOT**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -204,5 +204,6 @@ When using syntax 1, NOT inverts the Src operand and stores the result into Dest
 If the WC or WCZ effect is specified, the C flag is set to the inverse of bit 31 of the source operand. For syntax 1, this is the inverse of S[31]; for syntax 2, this is the inverse of D[31].
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
+
 
 

@@ -209,10 +209,16 @@ The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting f
 
 RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 
-| D[31] | Behavior |
-|-------|----------|
-| 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
-| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
++--------+---------------------------------------------------------------------------------+
+| D[31]  | Behavior                                                                        |
++========+=================================================================================+
+| 0      | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST,      |
+|        | also wait until FIFO begins receiving data. Ready to use immediately after      |
+|        | instruction completes.                                                          |
++--------+---------------------------------------------------------------------------------+
+| 1      | No-wait mode—takes only 2 clocks. Code must allow sufficient time before        |
+|        | accessing FIFO data.                                                            |
++--------+---------------------------------------------------------------------------------+
 
 The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
 
@@ -695,3 +701,4 @@ The dramatic timing difference between modes—often 4× or more—makes COG mod
 
 
 <!-- End of Chapter 4 -->
+

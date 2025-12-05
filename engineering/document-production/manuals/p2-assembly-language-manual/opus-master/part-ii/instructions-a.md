@@ -11,7 +11,7 @@ Absolute Value
 [Arithmetic Operations](#arithmetic-operations) - Returns the absolute (non-negative) value of a signed number.
 :::
 
-**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -94,8 +94,8 @@ Add and Set Counter Event Trigger
 [Events and Timing](#events-and-timing) - Sets counter event trigger to Dest + Src for time-based events.
 :::
 
-**ADDCT1**  *Dest, {#}Src*
-**ADDCT2**  *Dest, {#}Src*
+**ADDCT1**  *Dest, {#}Src*\
+**ADDCT2**  *Dest, {#}Src*\
 **ADDCT3**  *Dest, {#}Src*
 
 ---
@@ -343,7 +343,7 @@ Alter Bit
 [Register Indirection](#register-indirection) - Alters next BITxxx instruction's target bit address.
 :::
 
-**ALTB**  *Dest, {#}Src*
+**ALTB**  *Dest, {#}Src*\
 **ALTB**  *Dest*
 
 ---
@@ -391,7 +391,7 @@ Alter Destination
 [Register Indirection](#register-indirection) - Alters next instruction's Dest field.
 :::
 
-**ALTD**  *Dest, {#}Src*
+**ALTD**  *Dest, {#}Src*\
 **ALTD**  *Dest*
 
 ---
@@ -433,7 +433,7 @@ Alter Get Byte
 [Register Indirection](#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
-**ALTGB**  *Dest, {#}Src*
+**ALTGB**  *Dest, {#}Src*\
 **ALTGB**  *Dest*
 
 ---
@@ -479,7 +479,7 @@ Alter Get Nibble
 [Register Indirection](#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
-**ALTGN**  *Dest, {#}Src*
+**ALTGN**  *Dest, {#}Src*\
 **ALTGN**  *Dest*
 
 ---
@@ -525,7 +525,7 @@ Alter Get Word
 [Register Indirection](#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
-**ALTGW**  *Dest, {#}Src*
+**ALTGW**  *Dest, {#}Src*\
 **ALTGW**  *Dest*
 
 ---
@@ -571,7 +571,7 @@ Alter Instruction
 [Register Indirection](#register-indirection) - Alters multiple fields of the next instruction.
 :::
 
-**ALTI**  *Dest, {#}Src*
+**ALTI**  *Dest, {#}Src*\
 **ALTI**  *Dest*
 
 ---
@@ -611,7 +611,7 @@ Alter Result
 [Register Indirection](#register-indirection) - Alters next instruction's result write address.
 :::
 
-**ALTR**  *Dest, {#}Src*
+**ALTR**  *Dest, {#}Src*\
 **ALTR**  *Dest*
 
 ---
@@ -655,7 +655,7 @@ Alter Source
 [Register Indirection](#register-indirection) - Alters next instruction's Src field.
 :::
 
-**ALTS**  *Dest, {#}Src*
+**ALTS**  *Dest, {#}Src*\
 **ALTS**  *Dest*
 
 ---
@@ -697,7 +697,7 @@ Alter Set Byte
 [Register Indirection](#register-indirection) - Alters next SETBYTE instruction's target byte.
 :::
 
-**ALTSB**  *Dest, {#}Src*
+**ALTSB**  *Dest, {#}Src*\
 **ALTSB**  *Dest*
 
 ---
@@ -741,7 +741,7 @@ Alter Set Nibble
 [Register Indirection](#register-indirection) - Alters next SETNIB instruction's target nibble.
 :::
 
-**ALTSN**  *Dest, {#}Src*
+**ALTSN**  *Dest, {#}Src*\
 **ALTSN**  *Dest*
 
 ---
@@ -787,7 +787,7 @@ Alter Set Word
 [Register Indirection](#register-indirection) - Alters next SETWORD instruction's target word.
 :::
 
-**ALTSW**  *Dest, {#}Src*
+**ALTSW**  *Dest, {#}Src*\
 **ALTSW**  *Dest*
 
 ---
@@ -1041,5 +1041,6 @@ When the instruction with the soon-to-be-augmented literal is later executed, th
 All instructions following AUGS are shielded from interrupt until after the instruction with the newly-augmented literal Src value is executed. Src value augmentation occurs in the instruction pipeline only; code is not altered, value does not persist. SETQ/SETQ2 does not affect AUGS; the Q value passes through to the next instruction.
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
+
 
 

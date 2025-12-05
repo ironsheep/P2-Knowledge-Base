@@ -171,14 +171,27 @@ The Smart Pin's autonomous operation is particularly significant. Once configure
 
 Smart Pins support 64 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
-| Category | Example Modes | Typical Applications |
-|----------|---------------|----------------------|
-| Digital I/O | Repository mode, registered input, long pulse accumulator | Debounced buttons, event counting, pulse measurement |
-| Serial | UART transmit/receive, synchronous serial, SPI | Communication with peripherals and other systems |
-| PWM | PWM/duty mode, triangle/sawtooth mode, incremental mode | Motor control, LED dimming, audio generation |
-| Analog | DAC output, ADC sampling, comparator | Sensor interfacing, analog signal generation |
-| Timing | Period measurement, pulse width measurement, timeout | Frequency measurement, event timing, watchdog |
-| Quadrature | Quadrature encoder input | Rotary encoder reading, motor position feedback |
++-------------+-------------------------------------+-----------------------------------+
+| Category    | Example Modes                       | Typical Applications              |
++=============+=====================================+===================================+
+| Digital I/O | Repository mode, registered input,  | Debounced buttons, event          |
+|             | long pulse accumulator              | counting, pulse measurement       |
++-------------+-------------------------------------+-----------------------------------+
+| Serial      | UART transmit/receive, synchronous  | Communication with peripherals    |
+|             | serial, SPI                         | and other systems                 |
++-------------+-------------------------------------+-----------------------------------+
+| PWM         | PWM/duty mode, triangle/sawtooth    | Motor control, LED dimming,       |
+|             | mode, incremental mode              | audio generation                  |
++-------------+-------------------------------------+-----------------------------------+
+| Analog      | DAC output, ADC sampling,           | Sensor interfacing, analog        |
+|             | comparator                          | signal generation                 |
++-------------+-------------------------------------+-----------------------------------+
+| Timing      | Period measurement, pulse width     | Frequency measurement, event      |
+|             | measurement, timeout                | timing, watchdog                  |
++-------------+-------------------------------------+-----------------------------------+
+| Quadrature  | Quadrature encoder input            | Rotary encoder reading, motor     |
+|             |                                     | position feedback                 |
++-------------+-------------------------------------+-----------------------------------+
 
 Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the Smart Pin's operation.
 
@@ -460,16 +473,33 @@ XBYTE is like a phantom instruction that executes on a hardware stack return (RE
 
 The execution cycle proceeds through eight clock phases:
 
-| Clock | Phase | Activity | Description |
-|-------|-------|----------|-------------|
-| 1 | go | RFBYTE bytecode, SKIPF #0 | Fetch bytecode from FIFO, cancel any prior skip pattern |
-| 2 | get | MOV PA,bytecode, RDLUT | Write bytecode to PA ($1F6), start LUT read |
-| 3 | go | RDLUT (data → D) | Complete LUT read, get routine address and skip pattern |
-| 4 | get | EXECF D (begin) | Start EXECF dispatch |
-| 5 | go | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB ($1F7), optionally set C/Z, branch |
-| 6 | get | flush pipeline | Pipeline flush for branch |
-| 7 | go | reload pipeline | Pipeline reload |
-| 8 | get | first instruction | First instruction of bytecode routine executes |
++-------+-------+------------------------------------------+------------------------------+
+| Clock | Phase | Activity                                 | Description                  |
++=======+=======+==========================================+==============================+
+| 1     | go    | RFBYTE bytecode, SKIPF #0                | Fetch bytecode from FIFO,    |
+|       |       |                                          | cancel any prior skip        |
+|       |       |                                          | pattern                      |
++-------+-------+------------------------------------------+------------------------------+
+| 2     | get   | MOV PA,bytecode, RDLUT                   | Write bytecode to PA         |
+|       |       |                                          | ($1F6), start LUT read       |
++-------+-------+------------------------------------------+------------------------------+
+| 3     | go    | RDLUT (data → D)                         | Complete LUT read, get       |
+|       |       |                                          | routine address and skip     |
+|       |       |                                          | pattern                      |
++-------+-------+------------------------------------------+------------------------------+
+| 4     | get   | EXECF D (begin)                          | Start EXECF dispatch         |
++-------+-------+------------------------------------------+------------------------------+
+| 5     | go    | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB     |
+|       |       |                                          | ($1F7), optionally set C/Z,  |
+|       |       |                                          | branch                       |
++-------+-------+------------------------------------------+------------------------------+
+| 6     | get   | flush pipeline                           | Pipeline flush for branch    |
++-------+-------+------------------------------------------+------------------------------+
+| 7     | go    | reload pipeline                          | Pipeline reload              |
++-------+-------+------------------------------------------+------------------------------+
+| 8     | get   | first instruction                        | First instruction of         |
+|       |       |                                          | bytecode routine executes    |
++-------+-------+------------------------------------------+------------------------------+
 
 When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks.
 
@@ -486,17 +516,27 @@ When XBYTE dispatches to a bytecode routine, EXECF simultaneously jumps to the r
 
 XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements. The SETQ/SETQ2 D value controls the mode:
 
-| Bits | SETQ D Pattern | LUT Base | Index Calculation | Bytecodes |
-|------|----------------|----------|-------------------|-----------|
-| 8 | %A0000000F | %A00000000 | I = bytecode[7:0] | 256 |
-| 7 | %AAxx0010F | %AA0000000 | I = bytecode[6:0] | 128 |
-| 7 | %AAxx0011F | %AA0000000 | I = bytecode[7:1] | 128 |
-| 6 | %AAAx1010F | %AAA000000 | I = bytecode[5:0] | 64 |
-| 6 | %AAAx1011F | %AAA000000 | I = bytecode[7:2] | 64 |
-| 5 | %AAAAx100F | %AAAA00000 | I = bytecode[4:0] | 32 |
-| 5 | %AAAAx101F | %AAAA00000 | I = bytecode[7:3] | 32 |
-| 4 | %AAAAA110F | %AAAAA0000 | I = bytecode[3:0] | 16 |
-| 4 | %AAAAA111F | %AAAAA0000 | I = bytecode[7:4] | 16 |
++------+----------------+-------------+-------------------+-----------+
+| Bits | SETQ D Pattern | LUT Base    | Index Calculation | Bytecodes |
++======+================+=============+===================+===========+
+| 8    | %A0000000F     | %A00000000  | I = bytecode[7:0] | 256       |
++------+----------------+-------------+-------------------+-----------+
+| 7    | %AAxx0010F     | %AA0000000  | I = bytecode[6:0] | 128       |
++------+----------------+-------------+-------------------+-----------+
+| 7    | %AAxx0011F     | %AA0000000  | I = bytecode[7:1] | 128       |
++------+----------------+-------------+-------------------+-----------+
+| 6    | %AAAx1010F     | %AAA000000  | I = bytecode[5:0] | 64        |
++------+----------------+-------------+-------------------+-----------+
+| 6    | %AAAx1011F     | %AAA000000  | I = bytecode[7:2] | 64        |
++------+----------------+-------------+-------------------+-----------+
+| 5    | %AAAAx100F     | %AAAA00000  | I = bytecode[4:0] | 32        |
++------+----------------+-------------+-------------------+-----------+
+| 5    | %AAAAx101F     | %AAAA00000  | I = bytecode[7:3] | 32        |
++------+----------------+-------------+-------------------+-----------+
+| 4    | %AAAAA110F     | %AAAAA0000  | I = bytecode[3:0] | 16        |
++------+----------------+-------------+-------------------+-----------+
+| 4    | %AAAAA111F     | %AAAAA0000  | I = bytecode[7:4] | 16        |
++------+----------------+-------------+-------------------+-----------+
 
 The A bits specify the LUT base address where the dispatch table begins. The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code.
 
@@ -1048,3 +1088,7 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 
 
 <!-- End of Chapter 5 -->
+
+
+# Part II: Instruction Set Reference
+

@@ -11,7 +11,7 @@ Increment and Jump If Zero {#ijnz}
 [Branching and Flow Control](#branching-and-flow-control) - Increments and conditionally jumps based on the result.
 :::
 
-**IJZ**  *Dest, {#}Src*
+**IJZ**  *Dest, {#}Src*\
 **IJNZ**  *Dest, {#}Src*
 
 ---
@@ -112,5 +112,6 @@ INCMOD is also ideal for round-robin scheduling across a fixed number of resourc
 
                 ' All ports serviced, continue
 ```
+
 
 

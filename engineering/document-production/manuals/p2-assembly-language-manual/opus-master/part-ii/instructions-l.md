@@ -11,7 +11,7 @@ Load Address
 [Hub Memory Access](#hub-memory-access) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
 :::
 
-**LOC**  *PA/PB/PTRA/PTRB, #A*
+**LOC**  *PA/PB/PTRA/PTRB, #A*\
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
 
 ---
@@ -182,5 +182,6 @@ If the WC effect is specified, the C flag is set (1) if the lock was successfull
 LOCKTRY implements the critical section entry point in the standard lock pattern: try to acquire the lock, and only proceed if successful. The lock must be released with LOCKREL when the critical section completes. This ensures mutual exclusion, preventing multiple COGs from simultaneously accessing shared resources.
 
 The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
+
 
 

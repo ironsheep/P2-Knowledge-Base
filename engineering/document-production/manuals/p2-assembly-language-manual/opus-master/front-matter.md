@@ -239,9 +239,14 @@ This manual uses consistent cross-reference formats:
 
 ## Document Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-11 | Initial release. Complete coverage of PASM2 instruction set, directives, constants, and special registers. Includes architectural foundation chapters and comprehensive appendices. |
++---------+---------+---------------------------------------------------------------+
+| Version | Date    | Changes                                                       |
++=========+=========+===============================================================+
+| 1.0     | 2025-11 | Initial release. Complete coverage of PASM2 instruction set,  |
+|         |         | directives, constants, and special registers. Includes        |
+|         |         | architectural foundation chapters and comprehensive           |
+|         |         | appendices.                                                   |
++---------+---------+---------------------------------------------------------------+
 
 
 ## About This Manual
@@ -262,3 +267,7 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*
+
+
+# Part I: Architectural Foundation
+

@@ -11,7 +11,7 @@ Encode Bit Position
 [Arithmetic Operations](#arithmetic-operations) - Returns the position of the highest set bit.
 :::
 
-**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ENCOD**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -85,5 +85,6 @@ The SKIPF pattern in Dest[31:10] provides a 22-bit pattern that controls which s
 EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from COG/LUT or Hub memory.
+
 
 

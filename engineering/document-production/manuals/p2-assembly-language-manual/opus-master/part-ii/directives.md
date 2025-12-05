@@ -611,3 +611,4 @@ The P2 assembler's 13 directives provide complete control over memory layout and
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
 
 These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.
+

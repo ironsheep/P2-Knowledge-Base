@@ -196,6 +196,7 @@ These are the canonical condition names:
 Convenient aliases for post-comparison conditional execution:
 
 **Unsigned comparison aliases:**
+
 - **IF_A** - Above (same as IF_NC_AND_NZ)
 - **IF_AE** - Above or equal (same as IF_NC)
 - **IF_B** - Below (same as IF_C)
@@ -204,12 +205,14 @@ Convenient aliases for post-comparison conditional execution:
 - **IF_NE** - Not equal (same as IF_NZ)
 
 **Signed comparison aliases:**
+
 - **IF_GE** - Greater or equal (same as IF_NC)
 - **IF_GT** - Greater than (same as IF_NC_AND_NZ)
 - **IF_LE** - Less or equal (same as IF_NC_OR_Z)
 - **IF_LT** - Less than (same as IF_C)
 
 **Other aliases:**
+
 - **IF_DIFF** - Different (same as IF_C_NE_Z)
 - **IF_SAME** - Same (same as IF_C_EQ_Z)
 - **IF_NZ_AND_C** - Not zero and carry (same as IF_C_AND_NZ)
@@ -321,3 +324,4 @@ PASM2 reserves **449 identifiers** across six categories:
 **Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 449-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
 **Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). Since there is a single compiler for both Spin2 and PASM2, all reserved words from both languages always apply regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+

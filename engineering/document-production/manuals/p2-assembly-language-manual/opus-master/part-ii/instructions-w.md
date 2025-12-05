@@ -43,13 +43,13 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
-Wait For Counter Event {#waitct2} {#waitct3}
+Wait For Counter Event
 
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
 
-**WAITCT1**  **{WC|WZ|WCZ}**
-**WAITCT2**  **{WC|WZ|WCZ}**
+**WAITCT1**  **{WC|WZ|WCZ}**\
+**WAITCT2**  **{WC|WZ|WCZ}**\
 **WAITCT3**  **{WC|WZ|WCZ}**
 
 ---
@@ -178,14 +178,14 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 
 ::: instrheader
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
-Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
+Wait For Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
 
-**WAITSE1**  **{WC|WZ|WCZ}**
-**WAITSE2**  **{WC|WZ|WCZ}**
-**WAITSE3**  **{WC|WZ|WCZ}**
+**WAITSE1**  **{WC|WZ|WCZ}**\
+**WAITSE2**  **{WC|WZ|WCZ}**\
+**WAITSE3**  **{WC|WZ|WCZ}**\
 **WAITSE4**  **{WC|WZ|WCZ}**
 
 ---
@@ -538,14 +538,14 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 ::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
-Write Flag To Register {#wrnc} {#wrz} {#wrnz}
+Write Flag To Register
 
 [Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
 
-**WRC**  *Dest*
-**WRNC**  *Dest*
-**WRZ**  *Dest*
+**WRC**  *Dest*\
+**WRNC**  *Dest*\
+**WRZ**  *Dest*\
 **WRNZ**  *Dest*
 
 ---
@@ -849,4 +849,5 @@ Writing the Y register also acknowledges pin completion, clearing any completion
 ::: pasm2
         WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
 :::
+
 

@@ -50,7 +50,7 @@ Decode Bit Position
 [Arithmetic Operations](#arithmetic-operations) - Generates a bitmask with a single bit set at the specified position.
 :::
 
-**DECOD**  *Dest, {#}Src*
+**DECOD**  *Dest, {#}Src*\
 **DECOD**  *Dest*
 
 ---
@@ -91,7 +91,7 @@ Set Pin Direction by C Flag {#dirnc}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
-**DIRC**  *{#}Dest*  **{WCZ}**
+**DIRC**  *{#}Dest*  **{WCZ}**\
 **DIRNC**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -247,7 +247,7 @@ Set Pin Direction by Z Flag {#dirnz}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
-**DIRZ**  *{#}Dest*  **{WCZ}**
+**DIRZ**  *{#}Dest*  **{WCZ}**\
 **DIRNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -401,7 +401,7 @@ Decrement and Jump If Zero {#djnz}
 [Branching and Flow Control](#branching-and-flow-control) - Decrements and conditionally jumps based on zero result.
 :::
 
-**DJZ**  *Dest, {#}Src*
+**DJZ**  *Dest, {#}Src*\
 **DJNZ**  *Dest, {#}Src*
 
 ---
@@ -453,7 +453,7 @@ Drive Pins by C Flag {#drvnc}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
-**DRVC**  *{#}Dest*  **{WCZ}**
+**DRVC**  *{#}Dest*  **{WCZ}**\
 **DRVNC**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -615,7 +615,7 @@ Drive Pins by Z Flag {#drvnz}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
-**DRVZ**  *{#}Dest*  **{WCZ}**
+**DRVZ**  *{#}Dest*  **{WCZ}**\
 **DRVNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -691,5 +691,6 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest, before the random modification occurs.
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
+
 
 

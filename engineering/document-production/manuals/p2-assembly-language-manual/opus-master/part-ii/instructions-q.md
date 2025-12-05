@@ -330,3 +330,4 @@ QVECTOR is the inverse operation of QROTATE.
         GETQY   angle          ' Get polar angle
 :::
 
+

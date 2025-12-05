@@ -215,71 +215,71 @@ Constants are combined using OR operations to build the complete configuration:
 
 ### Mode %00000 - %00011: Repository and DAC Dither Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_NORMAL | %00000 | %0000_0000_000_0000000000000_00_00000_0 | Normal I/O (smart pin disabled) |
-| P_REPOSITORY | %00001 | %0000_0000_000_0000000000000_00_00001_0 | Long repository (non-DAC mode) |
-| P_DAC_NOISE | %00001 | %0000_0000_000_0000000000000_00_00001_0 | DAC noise (DAC mode) |
-| P_DAC_DITHER_RND | %00010 | %0000_0000_000_0000000000000_00_00010_0 | DAC 16-bit random dither |
-| P_DAC_DITHER_PWM | %00011 | %0000_0000_000_0000000000000_00_00011_0 | DAC 16-bit PWM dither |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_NORMAL | %0000_0000_000_0000000000000_00_00000_0 | Normal I/O (smart pin disabled) |
+| P_REPOSITORY | %0000_0000_000_0000000000000_00_00001_0 | Long repository (non-DAC mode) |
+| P_DAC_NOISE | %0000_0000_000_0000000000000_00_00001_0 | DAC noise (DAC mode) |
+| P_DAC_DITHER_RND | %0000_0000_000_0000000000000_00_00010_0 | DAC 16-bit random dither |
+| P_DAC_DITHER_PWM | %0000_0000_000_0000000000000_00_00011_0 | DAC 16-bit PWM dither |
 
 ### Mode %00100 - %00111: Pulse and NCO Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_PULSE | %00100 | %0000_0000_000_0000000000000_00_00100_0 | Pulse/cycle output |
-| P_TRANSITION | %00101 | %0000_0000_000_0000000000000_00_00101_0 | Transition output |
-| P_NCO_FREQ | %00110 | %0000_0000_000_0000000000000_00_00110_0 | NCO frequency output |
-| P_NCO_DUTY | %00111 | %0000_0000_000_0000000000000_00_00111_0 | NCO duty cycle output |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_PULSE | %0000_0000_000_0000000000000_00_00100_0 | Pulse/cycle output |
+| P_TRANSITION | %0000_0000_000_0000000000000_00_00101_0 | Transition output |
+| P_NCO_FREQ | %0000_0000_000_0000000000000_00_00110_0 | NCO frequency output |
+| P_NCO_DUTY | %0000_0000_000_0000000000000_00_00111_0 | NCO duty cycle output |
 
 ### Mode %01000 - %01011: PWM Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_PWM_TRIANGLE | %01000 | %0000_0000_000_0000000000000_00_01000_0 | PWM with triangle carrier |
-| P_PWM_SAWTOOTH | %01001 | %0000_0000_000_0000000000000_00_01001_0 | PWM with sawtooth carrier |
-| P_PWM_SMPS | %01010 | %0000_0000_000_0000000000000_00_01010_0 | PWM for switch-mode power supplies |
-| P_QUADRATURE | %01011 | %0000_0000_000_0000000000000_00_01011_0 | A-B quadrature encoder input |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_PWM_TRIANGLE | %0000_0000_000_0000000000000_00_01000_0 | PWM with triangle carrier |
+| P_PWM_SAWTOOTH | %0000_0000_000_0000000000000_00_01001_0 | PWM with sawtooth carrier |
+| P_PWM_SMPS | %0000_0000_000_0000000000000_00_01010_0 | PWM for switch-mode power supplies |
+| P_QUADRATURE | %0000_0000_000_0000000000000_00_01011_0 | A-B quadrature encoder input |
 
 ### Mode %01100 - %01111: Counter Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_REG_UP | %01100 | %0000_0000_000_0000000000000_00_01100_0 | Inc on A-rise when B-high |
-| P_REG_UP_DOWN | %01101 | %0000_0000_000_0000000000000_00_01101_0 | Inc on A-rise/B-high, dec on A-rise/B-low |
-| P_COUNT_RISES | %01110 | %0000_0000_000_0000000000000_00_01110_0 | Count A-rises, optionally dec on B-rise |
-| P_COUNT_HIGHS | %01111 | %0000_0000_000_0000000000000_00_01111_0 | Count A-highs, optionally dec on B-high |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_REG_UP | %0000_0000_000_0000000000000_00_01100_0 | Inc on A-rise when B-high |
+| P_REG_UP_DOWN | %0000_0000_000_0000000000000_00_01101_0 | Inc on A-rise/B-high, dec on A-rise/B-low |
+| P_COUNT_RISES | %0000_0000_000_0000000000000_00_01110_0 | Count A-rises, optionally dec on B-rise |
+| P_COUNT_HIGHS | %0000_0000_000_0000000000000_00_01111_0 | Count A-highs, optionally dec on B-high |
 
 ### Mode %10000 - %10111: Timing Measurement Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_STATE_TICKS | %10000 | %0000_0000_000_0000000000000_00_10000_0 | For A-low/high states, count ticks |
-| P_HIGH_TICKS | %10001 | %0000_0000_000_0000000000000_00_10001_0 | For A-high states, count ticks |
-| P_EVENTS_TICKS | %10010 | %0000_0000_000_0000000000000_00_10010_0 | For X A-events, count ticks / timeout |
-| P_PERIODS_TICKS | %10011 | %0000_0000_000_0000000000000_00_10011_0 | For X periods of A, count ticks |
-| P_PERIODS_HIGHS | %10100 | %0000_0000_000_0000000000000_00_10100_0 | For X periods of A, count highs |
-| P_COUNTER_TICKS | %10101 | %0000_0000_000_0000000000000_00_10101_0 | For periods in X+ ticks, count ticks |
-| P_COUNTER_HIGHS | %10110 | %0000_0000_000_0000000000000_00_10110_0 | For periods in X+ ticks, count highs |
-| P_COUNTER_PERIODS | %10111 | %0000_0000_000_0000000000000_00_10111_0 | For periods in X+ ticks, count periods |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_STATE_TICKS | %0000_0000_000_0000000000000_00_10000_0 | For A-low/high states, count ticks |
+| P_HIGH_TICKS | %0000_0000_000_0000000000000_00_10001_0 | For A-high states, count ticks |
+| P_EVENTS_TICKS | %0000_0000_000_0000000000000_00_10010_0 | For X A-events, count ticks / timeout |
+| P_PERIODS_TICKS | %0000_0000_000_0000000000000_00_10011_0 | For X periods of A, count ticks |
+| P_PERIODS_HIGHS | %0000_0000_000_0000000000000_00_10100_0 | For X periods of A, count highs |
+| P_COUNTER_TICKS | %0000_0000_000_0000000000000_00_10101_0 | For periods in X+ ticks, count ticks |
+| P_COUNTER_HIGHS | %0000_0000_000_0000000000000_00_10110_0 | For periods in X+ ticks, count highs |
+| P_COUNTER_PERIODS | %0000_0000_000_0000000000000_00_10111_0 | For periods in X+ ticks, count periods |
 
 ### Mode %11000 - %11011: ADC and USB Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_ADC | %11000 | %0000_0000_000_0000000000000_00_11000_0 | ADC sample/filter/capture (internal clock) |
-| P_ADC_EXT | %11001 | %0000_0000_000_0000000000000_00_11001_0 | ADC sample/filter/capture (external clock) |
-| P_ADC_SCOPE | %11010 | %0000_0000_000_0000000000000_00_11010_0 | ADC oscilloscope with trigger |
-| P_USB_PAIR | %11011 | %0000_0000_000_0000000000000_00_11011_0 | USB D+/D- pin pair |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_ADC | %0000_0000_000_0000000000000_00_11000_0 | ADC sample/filter/capture (internal clock) |
+| P_ADC_EXT | %0000_0000_000_0000000000000_00_11001_0 | ADC sample/filter/capture (external clock) |
+| P_ADC_SCOPE | %0000_0000_000_0000000000000_00_11010_0 | ADC oscilloscope with trigger |
+| P_USB_PAIR | %0000_0000_000_0000000000000_00_11011_0 | USB D+/D- pin pair |
 
 ### Mode %11100 - %11111: Serial Communication Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_SYNC_TX | %11100 | %0000_0000_000_0000000000000_00_11100_0 | Synchronous serial transmit |
-| P_SYNC_RX | %11101 | %0000_0000_000_0000000000000_00_11101_0 | Synchronous serial receive |
-| P_ASYNC_TX | %11110 | %0000_0000_000_0000000000000_00_11110_0 | Asynchronous serial transmit |
-| P_ASYNC_RX | %11111 | %0000_0000_000_0000000000000_00_11111_0 | Asynchronous serial receive |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_SYNC_TX | %0000_0000_000_0000000000000_00_11100_0 | Synchronous serial transmit |
+| P_SYNC_RX | %0000_0000_000_0000000000000_00_11101_0 | Synchronous serial receive |
+| P_ASYNC_TX | %0000_0000_000_0000000000000_00_11110_0 | Asynchronous serial transmit |
+| P_ASYNC_RX | %0000_0000_000_0000000000000_00_11111_0 | Asynchronous serial receive |
 
 
 
@@ -344,4 +344,5 @@ SmartPin constants are designed to be combined using OR operations. The bit fiel
 - [RDPIN](#rdpin) — Read SmartPin result and clear flag
 - [RQPIN](#rqpin) — Read SmartPin result without clearing flag
 - [AKPIN](#akpin) — Acknowledge SmartPin (clear flag only)
+
 

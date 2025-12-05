@@ -381,3 +381,4 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 | **Total** | **155** | Core predefined constants |
 
 *Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
+

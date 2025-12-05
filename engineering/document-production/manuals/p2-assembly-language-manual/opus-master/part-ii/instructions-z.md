@@ -49,3 +49,4 @@ The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit p
 
 ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for unsigned values), SIGNX fills upper bits with the value of the designated bit (for signed values). Use ZEROX when working with unsigned data, and SIGNX when working with signed data that needs proper sign extension.
 
+

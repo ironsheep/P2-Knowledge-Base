@@ -11,7 +11,7 @@ Test
 [Arithmetic Operations](#arithmetic-operations) - Tests parity and zero state of a value.
 :::
 
-**TEST**  *Dest*  **{WC|WZ|WCZ}**
+**TEST**  *Dest*  **{WC|WZ|WCZ}**\
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -55,9 +55,9 @@ Test Bit
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
-**TESTB**  *Dest, {#}Src*  **WC/WZ**
-**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
-**TESTB**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTB**  *Dest, {#}Src*  **WC/WZ**\
+**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**\
+**TESTB**  *Dest, {#}Src*  **ORC/ORZ**\
 **TESTB**  *Dest, {#}Src*  **XORC/XORZ**
 
 ---
@@ -102,9 +102,9 @@ Test Bit Negated
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
-**TESTBN**  *Dest, {#}Src*  **WC/WZ**
-**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
-**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTBN**  *Dest, {#}Src*  **WC/WZ**\
+**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**\
+**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**\
 **TESTBN**  *Dest, {#}Src*  **XORC/XORZ**
 
 ---
@@ -181,14 +181,14 @@ Test Pin / Test Pin Negated {#testpn}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
-**TESTP**  *{#}Dest*  **WC/WZ**
-**TESTP**  *{#}Dest*  **ANDC/ANDZ**
-**TESTP**  *{#}Dest*  **ORC/ORZ**
+**TESTP**  *{#}Dest*  **WC/WZ**\
+**TESTP**  *{#}Dest*  **ANDC/ANDZ**\
+**TESTP**  *{#}Dest*  **ORC/ORZ**\
 **TESTP**  *{#}Dest*  **XORC/XORZ**
 
-**TESTPN**  *{#}Dest*  **WC/WZ**
-**TESTPN**  *{#}Dest*  **ANDC/ANDZ**
-**TESTPN**  *{#}Dest*  **ORC/ORZ**
+**TESTPN**  *{#}Dest*  **WC/WZ**\
+**TESTPN**  *{#}Dest*  **ANDC/ANDZ**\
+**TESTPN**  *{#}Dest*  **ORC/ORZ**\
 **TESTPN**  *{#}Dest*  **XORC/XORZ**
 
 ---
@@ -239,7 +239,7 @@ Test And Jump If Full / Not Full {#tjnf}
 [Branching and Flow Control](#branching-and-flow-control) - Tests for all bits set and conditionally jumps.
 :::
 
-**TJF**  *Dest, {#}Src*
+**TJF**  *Dest, {#}Src*\
 **TJNF**  *Dest, {#}Src*
 
 ---
@@ -280,7 +280,7 @@ Test And Jump If Signed / Not Signed {#tjns}
 [Branching and Flow Control](#branching-and-flow-control) - Tests sign bit and conditionally jumps.
 :::
 
-**TJS**  *Dest, {#}Src*
+**TJS**  *Dest, {#}Src*\
 **TJNS**  *Dest, {#}Src*
 
 ---
@@ -321,7 +321,7 @@ Test And Jump If Zero / Not Zero {#tjnz}
 [Branching and Flow Control](#branching-and-flow-control) - Tests for zero and conditionally jumps.
 :::
 
-**TJZ**  *Dest, {#}Src*
+**TJZ**  *Dest, {#}Src*\
 **TJNZ**  *Dest, {#}Src*
 
 ---
@@ -406,7 +406,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 ::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
-Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
+Trigger Interrupt (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
@@ -434,4 +434,5 @@ Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
 TRGINT1, TRGINT2, and TRGINT3 software-trigger their respective interrupt handlers, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
 
 The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions when you need to invoke an interrupt handler programmatically.
+
 

@@ -11,8 +11,8 @@ Call Subroutine
 [Branching and Flow Control](#branching-and-flow-control) - Calls a subroutine and pushes return info to stack.
 :::
 
-**CALL**  *#Addr*
-**CALL**  *#\Addr*
+**CALL**  *#Addr*\
+**CALL**  *#\Addr*\
 **CALL**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -55,8 +55,8 @@ Call Subroutine via PTRA
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine using PTRA as stack pointer.
 :::
 
-**CALLA**  *#Addr*
-**CALLA**  *#\Addr*
+**CALLA**  *#Addr*\
+**CALLA**  *#\Addr*\
 **CALLA**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -99,8 +99,8 @@ Call Subroutine via PTRB
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine using PTRB as stack pointer.
 :::
 
-**CALLB**  *#Addr*
-**CALLB**  *#\Addr*
+**CALLB**  *#Addr*\
+**CALLB**  *#\Addr*\
 **CALLB**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -143,8 +143,8 @@ Call with Destination Register
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine saving return info to a register.
 :::
 
-**CALLD**  *PA|PB|PTRA|PTRB, #Addr*
-**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
+**CALLD**  *PA|PB|PTRA|PTRB, #Addr*\
+**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*\
 **CALLD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -876,5 +876,6 @@ The typical usage pattern is:
 ```
 
 CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providing a 4x speedup for CRC calculations. The automatic Q shift simplifies the loop logic for multi-nibble processing.
+
 
 

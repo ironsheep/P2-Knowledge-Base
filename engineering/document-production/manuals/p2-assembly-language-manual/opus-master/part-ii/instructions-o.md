@@ -11,7 +11,7 @@ Ones
 [Arithmetic Operations](#arithmetic-operations) - Counts the number of high bits (1s) in a value.
 :::
 
-**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -94,14 +94,14 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 
 ::: instrheader
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
-Output By Flag State {#outnc} {#outz} {#outnz}
+Output By Flag State
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
-**OUTC**  *{#}Dest*  **{WCZ}**
-**OUTNC**  *{#}Dest*  **{WCZ}**
-**OUTZ**  *{#}Dest*  **{WCZ}**
+**OUTC**  *{#}Dest*  **{WCZ}**\
+**OUTNC**  *{#}Dest*  **{WCZ}**\
+**OUTZ**  *{#}Dest*  **{WCZ}**\
 **OUTNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -290,6 +290,7 @@ When Dest is a register, the register's bits [10:0] are used directly to form th
 If the WCZ effect is specified, both the C and Z flags are set to the original state of the output level bit for the base pin, before the instruction executes.
 
 OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
+
 
 
 

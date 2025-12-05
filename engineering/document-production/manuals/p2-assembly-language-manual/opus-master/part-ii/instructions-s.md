@@ -148,7 +148,7 @@ Set Byte
 [Arithmetic Operations](#arithmetic-operations) - Writes an 8-bit value to a specific byte position within a register.
 :::
 
-**SETBYTE**  *Dest, {#}Src, #N*
+**SETBYTE**  *Dest, {#}Src, #N*\
 **SETBYTE**  *{#}Src*
 
 ---
@@ -386,13 +386,13 @@ Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 rece
 
 ::: instrheader
 ## SETINT1 / SETINT2 / SETINT3 {#setint1}
-Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
+Set Interrupt Source (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Configures which event triggers the specified interrupt level.
 :::
 
-**SETINT1**  *{#}Dest*
-**SETINT2**  *{#}Dest*
+**SETINT1**  *{#}Dest*\
+**SETINT2**  *{#}Dest*\
 **SETINT3**  *{#}Dest*
 
 ---
@@ -455,7 +455,7 @@ Set Nibble
 [Arithmetic Operations](#arithmetic-operations) - Writes a 4-bit value to a specific nibble position within a register.
 :::
 
-**SETNIB**  *Dest, {#}Src, #N*
+**SETNIB**  *Dest, {#}Src, #N*\
 **SETNIB**  *{#}Src*
 
 ---
@@ -736,14 +736,14 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 
 ::: instrheader
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
-Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
+Set Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
 
-**SETSE1**  *{#}Dest*
-**SETSE2**  *{#}Dest*
-**SETSE3**  *{#}Dest*
+**SETSE1**  *{#}Dest*\
+**SETSE2**  *{#}Dest*\
+**SETSE3**  *{#}Dest*\
 **SETSE4**  *{#}Dest*
 
 ---
@@ -778,7 +778,7 @@ Set Word
 [Arithmetic Operations](#arithmetic-operations) - Writes a 16-bit value to a specific word position within a register.
 :::
 
-**SETWORD**  *Dest, {#}Src, #N*
+**SETWORD**  *Dest, {#}Src, #N*\
 **SETWORD**  *{#}Src*
 
 ---
@@ -1319,14 +1319,14 @@ SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and store
 
 ::: instrheader
 ## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
-Conditional Sum {#sumnc} {#sumz} {#sumnz}
+Conditional Sum
 
 [Arithmetic Operations](#arithmetic-operations) - Conditionally adds or subtracts based on flag state.
 :::
 
-**SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-**SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-**SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
+**SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
+**SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **SUMNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -1360,4 +1360,5 @@ These instructions conditionally add or subtract Src from Dest based on the spec
 The C flag (with WC) is updated to reflect the correct sign of the result.
 
 SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when their flag is clear (0), providing complementary behavior.
+
 

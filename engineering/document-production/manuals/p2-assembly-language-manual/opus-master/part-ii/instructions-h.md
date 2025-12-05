@@ -81,3 +81,4 @@ In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divide
 HUBSET takes 2 clock cycles to execute, but switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
 
 
+

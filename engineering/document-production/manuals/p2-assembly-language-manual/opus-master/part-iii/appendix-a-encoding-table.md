@@ -400,3 +400,4 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 - The `*` symbol indicates hub memory access with variable timing
 - See Part II (Instruction Reference) for complete encoding details and all variants
 - Special instructions (ASMCLK, DEBUG) are compiler directives, not executable instructions
+

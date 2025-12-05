@@ -51,7 +51,7 @@ Get Byte
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified byte from a 32-bit value.
 :::
 
-**GETBYTE**  *Dest, {#}Src, #Num*
+**GETBYTE**  *Dest, {#}Src, #Num*\
 **GETBYTE**  *Dest*
 
 ---
@@ -124,7 +124,7 @@ Get Nibble
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified nibble from a 32-bit value.
 :::
 
-**GETNIB**  *Dest, {#}Src, #Num*
+**GETNIB**  *Dest, {#}Src, #Num*\
 **GETNIB**  *Dest*
 
 ---
@@ -270,7 +270,7 @@ Get Random Value
 [Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
 :::
 
-**GETRND**  *Dest*  **{WC|WZ|WCZ}**
+**GETRND**  *Dest*  **{WC|WZ|WCZ}**\
 **GETRND**  **{WC|WZ|WCZ}**
 
 ---
@@ -347,7 +347,7 @@ Get Word
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified word from a 32-bit value.
 :::
 
-**GETWORD**  *Dest, {#}Src, #Num*
+**GETWORD**  *Dest, {#}Src, #Num*\
 **GETWORD**  *Dest*
 
 ---
@@ -409,5 +409,6 @@ The X accumulator value is written directly to the Dest register. The Y accumula
 This dual-retrieval mechanism allows both accumulator values to be captured in a compact instruction sequence. The following instruction must have an S field that can receive the Y accumulator value. Typically, this is a MOV or similar instruction where the S operand receives the Y accumulator data.
 
 GETXACC is used in conjunction with the streamer's Goertzel mode, configured via XINIT and controlled via XCONT. The retrieved accumulator values represent the correlation between the input signal and the reference frequency configured in the Goertzel algorithm.
+
 
 
