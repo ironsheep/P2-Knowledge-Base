@@ -491,8 +491,8 @@ def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
         result.warn("Could not verify filter pattern match")
 
     # Check same base URL
-    if 'IronSheepProductionsLLC/P2-Knowledge-Base' in bash_content and \
-       'IronSheepProductionsLLC/P2-Knowledge-Base' in ps_content:
+    if 'ironsheep/P2-Knowledge-Base' in bash_content and \
+       'ironsheep/P2-Knowledge-Base' in ps_content:
         result.ok("Base URLs match")
     else:
         result.fail("Base URLs do not match")
