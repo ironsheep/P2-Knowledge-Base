@@ -5,19 +5,24 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-08-27 (v2 - Image path protection added)
+- **Last Modified**: 2025-12-05 (v3 - Fenced div protection added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working correctly - protects image paths, escapes P2 literals
+- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Markdown Image Paths** (NEW in v2)
+1. **Pandoc Fenced Divs** (NEW in v3)
+   - `::: pasm2` / `::: spin2` / `::: cordic` / `::: multicog` / `::: antipattern` - Code NOT escaped
+   - Content between `:::` and closing `:::` is preserved exactly
+   - Text outside fenced divs is still escaped normally
+
+2. **Markdown Image Paths** (v2)
    - `![alt](path/with_underscores.png)` - NOT escaped
    - `[link](file.ext)` - NOT escaped if contains extension
    - Preserves spaces and underscores in paths
 
-2. **Basic LaTeX Special Characters**
+3. **Basic LaTeX Special Characters**
    - `#` → `\#` (except in markdown headers)
    - `$` → `\$`
    - `%` → `\%`
@@ -27,12 +32,13 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    - `{` → `\{`
    - `}` → `\}`
 
-2. **Protected Contexts**
+4. **Protected Contexts**
    - Code blocks (```pasm2, ```spin2, etc.) - NO escaping
+   - Fenced divs (::: pasm2, ::: spin2, etc.) - NO escaping (v3)
    - Standard LaTeX environments (equation, align, etc.) - NO escaping
    - Template environments (sidetrack, interlude, etc.) - content IS escaped
 
-3. **LaTeX Commands Preserved**
+5. **LaTeX Commands Preserved**
    - `\textbf{}`, `\textit{}`, `\emph{}`, etc.
    - `\section{}`, `\subsection{}`, etc. (content inside {} IS escaped)
    - Spacing commands (`\vspace{}`, `\quad`, etc.)
@@ -99,6 +105,12 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-12-05: Version 3 Released
+- **Fenced Div Protection**: Added protection for `::: type` Pandoc fenced divs
+- **Code Types Protected**: pasm2, spin2, cordic, multicog, antipattern, pasm, spin
+- **Bug Fixed**: Issue #324 - underscores/hash/dollar in fenced div code blocks were incorrectly escaped
+- **Impact**: PASM2 manual, DeSilva manual, Smart Pins tutorial all use fenced divs extensively
 
 ### 2025-08-27: Version 2 Released
 - **Image Path Protection**: Added protection for markdown image/link syntax

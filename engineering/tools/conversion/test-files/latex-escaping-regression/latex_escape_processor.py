@@ -12,19 +12,53 @@ def process_latex_escaping(input_file, output_file):
     """Process file and escape LaTeX special characters with proper state tracking."""
     with open(input_file, 'r') as f:
         lines = f.readlines()
-    
+
     output_lines = []
     in_code_block = False
+    in_raw_latex_block = False  # Track ```{=latex} blocks (need partial escaping)
+    in_fenced_div = False  # Track ::: type fenced divs
     in_latex_env = False
-    
+
+    # Code types that should be protected in fenced divs (no escaping inside)
+    code_div_types = ['pasm2', 'spin2', 'cordic', 'multicog', 'antipattern', 'pasm', 'spin']
+
     for line in lines:
         original_line = line
         line = line.rstrip('\n')
-        
-        # Track code blocks (```pasm2, ```markdown, etc.)
+
+        # Track code blocks (```pasm2, ```markdown, etc.) and raw LaTeX blocks
         # Check the stripped line to handle indented code blocks
-        if line.strip().startswith('```'):
-            in_code_block = not in_code_block
+        stripped = line.strip()
+        if stripped.startswith('```'):
+            # Check if this is a raw LaTeX block opening/closing
+            if stripped == '```{=latex}' or stripped.startswith('```{=latex}'):
+                in_raw_latex_block = not in_raw_latex_block
+                output_lines.append(original_line)
+                continue
+            elif stripped == '```' and in_raw_latex_block:
+                # Closing a raw LaTeX block
+                in_raw_latex_block = False
+                output_lines.append(original_line)
+                continue
+            else:
+                # Regular code block
+                in_code_block = not in_code_block
+                output_lines.append(original_line)
+                continue
+
+        # Track fenced divs (::: pasm2, ::: spin2, etc.)
+        # These are Pandoc fenced div syntax for code blocks
+        stripped = line.strip()
+        if stripped.startswith(':::'):
+            # Check if this is a code-type div opening (e.g., "::: pasm2")
+            div_match = re.match(r'^:::\s*(\w+)', stripped)
+            if div_match:
+                div_type = div_match.group(1).lower()
+                if div_type in code_div_types:
+                    in_fenced_div = True
+            # Check if this is a closing ::: (just ":::" with optional whitespace)
+            elif stripped == ':::' or re.match(r'^:::\s*$', stripped):
+                in_fenced_div = False
             output_lines.append(original_line)
             continue
             
@@ -56,16 +90,33 @@ def process_latex_escaping(input_file, output_file):
             continue
             
         # Skip processing if in protected blocks
-        if in_code_block or in_latex_env:
+        if in_code_block or in_latex_env or in_fenced_div:
             output_lines.append(original_line)
+            continue
+
+        # Special handling for raw LaTeX blocks (```{=latex})
+        # Only escape underscores - other chars are valid LaTeX
+        if in_raw_latex_block:
+            # Escape underscores that are NOT already escaped
+            # Use negative lookbehind to avoid double-escaping
+            line = re.sub(r'(?<!\\)_', r'\\_', line)
+            output_lines.append(line + '\n')
             continue
             
         # Handle markdown headers - keep structure but escape content
+        # IMPORTANT: Preserve Pandoc anchor syntax {#anchor-id} at end of headers
         header_match = re.match(r'^(#+\s+)(.*)', line)
         if header_match:
-            header_prefix = header_match.group(1)  # "### " 
-            header_content = header_match.group(2) # "Immediate Values (# characters)"
-            
+            header_prefix = header_match.group(1)  # "### "
+            header_content = header_match.group(2) # "INSTR {#instr}" or "Immediate Values (# characters)"
+
+            # Check for Pandoc anchor at end: {#some-anchor-id}
+            anchor_match = re.search(r'\s*(\{#[a-zA-Z0-9_-]+\})\s*$', header_content)
+            anchor_suffix = ''
+            if anchor_match:
+                anchor_suffix = anchor_match.group(1)  # Preserve the anchor exactly
+                header_content = header_content[:anchor_match.start()]  # Content before anchor
+
             # Escape the content part but keep header structure
             escaped_content = header_content
             escaped_content = escaped_content.replace('\\', '\\textbackslash{}')
@@ -81,8 +132,12 @@ def process_latex_escaping(input_file, output_file):
             escaped_content = escaped_content.replace('_', '\\_')
             # Don't escape tildes - Pandoc handles them fine in markdown
             # escaped_content = escaped_content.replace('~', '\\textasciitilde{}')
-            
-            output_lines.append(header_prefix + escaped_content + '\n')
+
+            # Reassemble: header prefix + escaped content + unescaped anchor
+            if anchor_suffix:
+                output_lines.append(header_prefix + escaped_content + ' ' + anchor_suffix + '\n')
+            else:
+                output_lines.append(header_prefix + escaped_content + '\n')
             continue
             
         # Process normal text lines - escape LaTeX special characters
@@ -111,7 +166,8 @@ def process_latex_escaping(input_file, output_file):
             line = line.replace(match.group(0), placeholder, 1)
         
         # Find and protect other LaTeX commands
-        for pattern in [r'\\textit\{([^}]*)\}', r'\\texttt\{([^}]*)\}', r'\\emph\{([^}]*)\}', r'\\underline\{([^}]*)\}']:
+        for pattern in [r'\\textit\{([^}]*)\}', r'\\texttt\{([^}]*)\}', r'\\emph\{([^}]*)\}', r'\\underline\{([^}]*)\}',
+                        r'\\textsuperscript\{([^}]*)\}', r'\\textsubscript\{([^}]*)\}']:
             while True:
                 match = re.search(pattern, line)
                 if not match:
@@ -206,21 +262,29 @@ def process_latex_escaping(input_file, output_file):
                 protected_commands.append(match.group(0))
                 line = line.replace(match.group(0), placeholder, 1)
         
+        # Protect PASM2 operand syntax {#} meaning "optional immediate"
+        # This appears in instruction syntax like: ADD Dest, {#}Src
+        # Must be protected BEFORE escaping { } and #
+        line = line.replace('{#}', 'XPROTECT_OPTIONAL_IMM_X')
+
         # Now escape special characters in the remaining text
         # 1. Escape backslashes (but not in protected commands)
         line = line.replace('\\', '\\textbackslash{}')
-        
+
         # 2. Escape ^ before { } to create \^{} correctly
         line = line.replace('^', '\\^{}')
-        
+
         # 3. Now protect our \^{} patterns and escape remaining { }
         line = line.replace('\\^{}', 'XPROTECT_CARET_X')
         line = line.replace('{', '\\{')
         line = line.replace('}', '\\}')
         line = line.replace('XPROTECT_CARET_X', '\\^{}')
-        
+
         # 4. Escape other special characters
         line = line.replace('#', '\\#')
+
+        # 5. Restore {#} optional immediate syntax
+        line = line.replace('XPROTECT_OPTIONAL_IMM_X', '{\\#}')
         line = line.replace('$', '\\$') 
         line = line.replace('%', '\\%')
         line = line.replace('&', '\\&')

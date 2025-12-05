@@ -198,3 +198,34 @@ This tests inline code that should NOT be escaped.
 6. Set `mode_value` with `P_PWM_SAWTOOTH`
 
 Regular text outside backticks: P_TRANSITION and $FF_AA should be escaped here.
+
+## Fenced Div Code Blocks Test (Bug Fix - Issue #324)
+This tests ::: fenced divs with code type labels (pasm2, spin2, etc.) that should NOT be escaped.
+
+::: pasm2
+        XINIT   mode, data         ' Start data transfer
+        WYPIN   count, #clk_pin    ' Start clock generation
+        WAITXFI                    ' Wait for completion
+:::
+
+::: spin2
+    ' Spin2 code with underscores and $ values
+    hub_address := $FF_AA_BB
+    wait_time := ##25_000_000
+:::
+
+::: cordic
+    ' CORDIC operations with special chars
+    QROTATE x_val, #angle_deg
+    GETQX   result_x
+:::
+
+Text between divs should have #special and $chars and _underscores escaped.
+
+::: antipattern
+' WRONG: This antipattern code should NOT be escaped
+    mov   x, #bad_value      ' Bad pattern with #immediate
+    wrlong $bad_addr, data   ' Bad hex address
+:::
+
+Final regular text with #hash and $dollar and _underscore should be escaped.

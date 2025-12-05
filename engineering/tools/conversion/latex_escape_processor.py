@@ -12,19 +12,53 @@ def process_latex_escaping(input_file, output_file):
     """Process file and escape LaTeX special characters with proper state tracking."""
     with open(input_file, 'r') as f:
         lines = f.readlines()
-    
+
     output_lines = []
     in_code_block = False
+    in_raw_latex_block = False  # Track ```{=latex} blocks (need partial escaping)
+    in_fenced_div = False  # Track ::: type fenced divs
     in_latex_env = False
-    
+
+    # Code types that should be protected in fenced divs (no escaping inside)
+    code_div_types = ['pasm2', 'spin2', 'cordic', 'multicog', 'antipattern', 'pasm', 'spin']
+
     for line in lines:
         original_line = line
         line = line.rstrip('\n')
-        
-        # Track code blocks (```pasm2, ```markdown, etc.)
+
+        # Track code blocks (```pasm2, ```markdown, etc.) and raw LaTeX blocks
         # Check the stripped line to handle indented code blocks
-        if line.strip().startswith('```'):
-            in_code_block = not in_code_block
+        stripped = line.strip()
+        if stripped.startswith('```'):
+            # Check if this is a raw LaTeX block opening/closing
+            if stripped == '```{=latex}' or stripped.startswith('```{=latex}'):
+                in_raw_latex_block = not in_raw_latex_block
+                output_lines.append(original_line)
+                continue
+            elif stripped == '```' and in_raw_latex_block:
+                # Closing a raw LaTeX block
+                in_raw_latex_block = False
+                output_lines.append(original_line)
+                continue
+            else:
+                # Regular code block
+                in_code_block = not in_code_block
+                output_lines.append(original_line)
+                continue
+
+        # Track fenced divs (::: pasm2, ::: spin2, etc.)
+        # These are Pandoc fenced div syntax for code blocks
+        stripped = line.strip()
+        if stripped.startswith(':::'):
+            # Check if this is a code-type div opening (e.g., "::: pasm2")
+            div_match = re.match(r'^:::\s*(\w+)', stripped)
+            if div_match:
+                div_type = div_match.group(1).lower()
+                if div_type in code_div_types:
+                    in_fenced_div = True
+            # Check if this is a closing ::: (just ":::" with optional whitespace)
+            elif stripped == ':::' or re.match(r'^:::\s*$', stripped):
+                in_fenced_div = False
             output_lines.append(original_line)
             continue
             
@@ -56,8 +90,17 @@ def process_latex_escaping(input_file, output_file):
             continue
             
         # Skip processing if in protected blocks
-        if in_code_block or in_latex_env:
+        if in_code_block or in_latex_env or in_fenced_div:
             output_lines.append(original_line)
+            continue
+
+        # Special handling for raw LaTeX blocks (```{=latex})
+        # Only escape underscores - other chars are valid LaTeX
+        if in_raw_latex_block:
+            # Escape underscores that are NOT already escaped
+            # Use negative lookbehind to avoid double-escaping
+            line = re.sub(r'(?<!\\)_', r'\\_', line)
+            output_lines.append(line + '\n')
             continue
             
         # Handle markdown headers - keep structure but escape content
