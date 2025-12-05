@@ -198,36 +198,11 @@ function Table(el)
     return handle_encoding_table(el)
   end
 
-  -- For other tables: set intelligent widths based on column count
-  -- Give more space to the last column (usually descriptions)
-  local widths = {}
-
-  if num_cols == 2 then
-    -- 2-column: 30% left, 70% right
-    widths = {0.30, 0.70}
-  elseif num_cols == 3 then
-    -- 3-column: 15%, 15%, 70% (e.g., Version/Date/Changes)
-    widths = {0.15, 0.15, 0.70}
-  elseif num_cols == 4 then
-    -- 4-column: 15%, 15%, 20%, 50%
-    widths = {0.15, 0.15, 0.20, 0.50}
-  elseif num_cols == 5 then
-    -- 5-column: equal widths
-    widths = {0.20, 0.20, 0.20, 0.20, 0.20}
-  elseif num_cols == 6 then
-    -- 6-column: Appendix A style (Instruction, Opcode, CZI, Cycles, C Effect, Z Effect)
-    widths = {0.15, 0.12, 0.08, 0.10, 0.25, 0.25}
-  else
-    -- Default: equal widths
-    local col_width = 1.0 / num_cols
-    for i = 1, num_cols do
-      widths[i] = col_width
-    end
-  end
-
+  -- For other tables: don't set explicit widths, let LaTeX auto-size
+  -- Just preserve alignment from markdown, use nil for width (auto)
   for i = 1, num_cols do
     local align = el.colspecs[i] and el.colspecs[i][1] or pandoc.AlignDefault
-    el.colspecs[i] = {align, widths[i]}
+    el.colspecs[i] = {align, nil}
   end
 
   return el
