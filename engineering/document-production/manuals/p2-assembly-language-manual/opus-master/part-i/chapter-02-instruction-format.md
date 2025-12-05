@@ -592,6 +592,154 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 
 
+## 2.10 Labels and Symbol Scoping
+
+PASM2 supports two scoping levels for labels within DAT blocks: global labels and local labels. This scoping mechanism enables reuse of common label names (such as `loop`, `done`, `exit`) without naming collisions across different routines.
+
+### 2.10.1 Global Labels
+
+Global labels are defined by placing an identifier at the start of a line without any prefix character.
+
+**Syntax:**
+```pasm
+labelname       instruction     operands        ' comment
+```
+
+Global labels have these characteristics:
+
+- Visible throughout the entire DAT block
+- Can be referenced from Spin2 code using `@labelname`
+- Defining a new global label resets the local label scope
+- Must begin with a letter (A-Z, a-z) or underscore (_)
+- May contain letters, digits (0-9), and underscores
+- Maximum length: 30 characters
+
+**Example:**
+```pasm
+DAT             org
+
+' Global labels - visible everywhere in DAT block
+init_routine    mov     x, #0                   ' Routine entry point
+                add     x, #1
+                ret
+
+data_table      long    $DEAD_BEEF              ' Data with global label
+                long    $CAFE_BABE
+
+math_helper     abs     x                       ' Another routine
+                ret
+```
+
+### 2.10.2 Local Labels
+
+Local labels are defined by prefixing an identifier with either a dot (`.`) or colon (`:`). Both prefix characters are functionally equivalent.
+
+**Syntax:**
+```pasm
+.labelname      instruction     operands        ' comment
+:labelname      instruction     operands        ' comment
+```
+
+Local labels have these characteristics:
+
+- Visible only within the scope of the preceding global label
+- Scope ends when the next global label is defined
+- The same local name can be reused under different global labels
+- Internally mangled by the compiler (e.g., `loop'0001`) for uniqueness
+- Must begin with a letter or underscore after the prefix
+
+**Example:**
+```pasm
+DAT             org
+
+send_byte       rdbyte  x, ptr                  ' Global: send_byte
+                call    #.wait                  ' Reference local .wait
+.loop           testp   tx_pin          wc      ' Local: .loop (scope: send_byte)
+        if_nc   jmp     #.loop
+                wypin   x, tx_pin
+.wait           testp   tx_pin          wc      ' Local: .wait (scope: send_byte)
+        if_c    jmp     #.wait
+                ret
+
+recv_byte       testp   rx_pin          wc      ' Global: recv_byte (new scope begins)
+        if_nc   jmp     #.wait                  ' This .wait is different from above
+.wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
+        if_nc   jmp     #.wait
+                rdpin   x, rx_pin
+.loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
+                ret
+```
+
+The example demonstrates how `.loop` and `.wait` can be reused in both `send_byte` and `recv_byte` without collision. Each global label creates a new local scope.
+
+### 2.10.3 Label Reference Operators
+
+PASM2 provides several operators for referencing labels in different contexts:
+
+| Operator | Meaning | Context |
+|----------|---------|---------|
+| `#label` | Immediate value (COG address) | PASM instructions |
+| `#.local` | Immediate reference to local label | PASM instructions |
+| `#\label` | Absolute COG-relative address | Forces 9-bit COG address |
+| `@label` | Hub address of label | Spin2 or PASM |
+| `@@label` | Object-relative address | Spin2 or PASM |
+| `$` | Current COG address | PASM (ORG mode) |
+| `$$` | Current Hub address | PASM (ORGH mode) |
+
+**Example:**
+```pasm
+DAT             org
+
+routine         jmp     #.skip                  ' Jump to local label
+                long    0
+.skip           mov     x, #routine             ' Load address of global
+                call    #\.helper               ' Absolute call to local
+                ret
+
+.helper         nop
+                ret
+
+' In ORGH (Hub) mode:
+                orgh
+hub_data        byte    "Hello", 0
+hub_routine     long    @routine                ' Hub address of COG routine
+```
+
+### 2.10.4 Scope Boundary Rules
+
+Three events create scope boundaries:
+
+1. **Global label definition** — Starts a new local scope
+2. **Storage directives** (BYTE, WORD, LONG, RES with a label) — Also start a new local scope
+3. **End of DAT block** — Terminates all label scopes
+
+**Example:**
+```pasm
+DAT             org
+
+func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
+.loop           djnz    x, #.loop               ' Local .loop in scope #1
+
+data_block      long    0, 0, 0, 0              ' Global: data_block, scope #2 begins
+
+func_b          mov     y, #2                   ' Global: func_b, scope #3 begins
+.loop           djnz    y, #.loop               ' Local .loop in scope #3 (different)
+.done           ret                             ' Local .done in scope #3
+```
+
+### 2.10.5 Best Practices
+
+**Use descriptive global names** for routine entry points: `send_packet`, `init_uart`, `calc_crc`
+
+**Use short local names** for flow control: `.loop`, `.done`, `.retry`, `.skip`, `.exit`
+
+**Prefer dot notation** (`.label`) over colon notation (`:label`) for consistency with modern convention
+
+**Keep local labels near their references** to improve readability
+
+**Limit symbol names to 30 characters** for compatibility with the PNut compiler
+
+
 ```{=latex}
 \begin{keyconcepts}
 \item Every instruction is exactly 32 bits: 4-bit condition, 7-bit opcode, 3-bit flags, 9-bit D, 9-bit S
@@ -601,7 +749,8 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 \item AUGS/AUGD extend immediates to full 32 bits by inserting an extra instruction before the target
 \item Encoding tables show both the bit pattern (left 5 columns) and the effects (right 4 columns)
 \item Multiple table rows indicate instruction families or syntax variants with different encodings
-\item The _RET_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item The \_RET\_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item Global labels are visible throughout a DAT block; local labels (.name or :name) are scoped to the preceding global label
 \end{keyconcepts}
 ```
 

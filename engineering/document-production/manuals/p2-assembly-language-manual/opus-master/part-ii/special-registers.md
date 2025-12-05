@@ -312,6 +312,7 @@ Address $1FA. Direction register A for pins 0-31. Controls whether each pin is a
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | DIR | Direction for each pin: 1 = output, 0 = input |
@@ -339,6 +340,7 @@ Address $1FB. Direction register B for pins 32-63. Controls whether each pin is 
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | DIR | Direction for each pin: 1 = output, 0 = input |
@@ -363,6 +365,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
@@ -391,6 +394,7 @@ Address $1FD. Output register B for pins 32-63. Sets the output state for pins c
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
@@ -416,6 +420,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 **Access**: Read-only for pin states (also serves as debug interrupt call address)
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |
@@ -446,6 +451,7 @@ Address $1FF. Input register B for pins 32-63. Reads the current state of pins r
 **Access**: Read-only for pin states (also serves as debug interrupt return address)
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |

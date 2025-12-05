@@ -378,12 +378,15 @@ Repeat Block
 
 **REP**  *{#}Dest, {#}Src*
 
+**REP**  *@.label, {#}Src*
+
 ---
 
 **Result:** The next Dest[8:0] instructions are executed Src times.
 
 - Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
 - Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
+- Alternatively, `@.label` calculates the instruction count automatically from a local label.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -400,6 +403,38 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
 REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+
+**Using Labels Instead of Counts:**
+
+The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
+
+**Example using instruction count:**
+```pasm
+' Hardcoded count - fragile if code changes
+                rep     #4, count               ' Repeat next 4 instructions
+                rdlong  x, ptr
+                add     ptr, #4
+                add     sum, x
+                djnz    n, #$-3                 ' Problem: count must match!
+```
+
+**Example using local label (preferred):**
+```pasm
+' Label-based count - automatically correct
+process_data    rep     @.end, count            ' Repeat until .end label
+                rdlong  x, ptr                  ' Instructions between REP
+                add     ptr, #4                 ' and label are counted
+                add     sum, x                  ' automatically
+.end                                            ' Empty label marks end
+
+' Alternative using the # prefix with local label:
+fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
+                wrbyte  value, ptr
+                add     ptr, #1
+.done
+```
+
+**Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 
 
 

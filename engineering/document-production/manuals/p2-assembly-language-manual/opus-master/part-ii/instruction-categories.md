@@ -8,47 +8,47 @@ This chapter defines the instruction categories used throughout Part II. Each ca
 
 Arithmetic instructions perform mathematical and logical operations on register values. This includes addition, subtraction, multiplication, comparisons, bitwise operations (AND, OR, XOR), bit manipulation, shifts, rotates, and data movement. This is the largest instruction category.
 
-*Data Movement:* [MOV](#mov), [LOC](#loc)
+**Data Movement:** [MOV](#mov), [LOC](#loc)
 
-*Addition/Subtraction:* [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
+**Addition/Subtraction:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
 
-*Negation/Absolute:* [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
+**Negation/Absolute:** [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
 
-*Multiplication:* [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
+**Multiplication:** [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
 
-*Comparisons:* [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [TEST](#test), [TESTN](#testn)
+**Comparisons:** [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [TEST](#test), [TESTN](#testn)
 
-*Min/Max:* [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles)
+**Min/Max:** [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles)
 
-*Modular Arithmetic:* [INCMOD](#incmod), [DECMOD](#decmod)
+**Modular Arithmetic:** [INCMOD](#incmod), [DECMOD](#decmod)
 
-*Bitwise Logic:* [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
+**Bitwise Logic:** [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
 
-*Bit Field Operations:* [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
+**Bit Field Operations:** [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
 
-*Bit Utilities:* [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
+**Bit Utilities:** [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
 
-*Shifts:* [SHL](#shl), [SHR](#shr), [SAL](#sal), [SAR](#sar)
+**Shifts:** [SHL](#shl), [SHR](#shr), [SAL](#sal), [SAR](#sar)
 
-*Rotates:* [ROL](#rol), [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr)
+**Rotates:** [ROL](#rol), [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr)
 
-*Byte/Word/Nibble Access:* [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [SETNIB](#setnib), [SETWORD](#setword), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword)
+**Byte/Word/Nibble Access:** [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [SETNIB](#setnib), [SETWORD](#setword), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword)
 
-*Byte/Word Packing:* [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
+**Byte/Word Packing:** [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
 
-*Mux Operations:* [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Mux Operations:** [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
-*Conditional Sum:* [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
+**Conditional Sum:** [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
 
-*Flag Operations:* [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
+**Flag Operations:** [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
 
-*Instruction Field Modification:* [SETD](#setd), [SETS](#sets), [SETR](#setr)
+**Instruction Field Modification:** [SETD](#setd), [SETS](#sets), [SETR](#setr)
 
-*CRC:* [CRCBIT](#crcbit), [CRCNIB](#crcnib)
+**CRC:** [CRCBIT](#crcbit), [CRCNIB](#crcnib)
 
-*Graphics:* [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz)
+**Graphics:** [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz)
 
-*Shuffling:* [SEUSSF](#seussf), [SEUSSR](#seussr)
+**Shuffling:** [SEUSSF](#seussf), [SEUSSR](#seussr)
 
 ---
 
@@ -80,19 +80,19 @@ Lookup table (LUT) instructions access the 512-long LUT memory private to each c
 
 Pin instructions control the P2's 64 I/O pins. Basic pin operations set direction (input/output) and output level (high/low). Smart pin instructions configure and communicate with the autonomous smart pin state machines that can perform complex I/O functions independent of cog processing.
 
-*Direction Control:* [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
+**Direction Control:** [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
 
-*Output Control:* [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
+**Output Control:** [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
 
-*Drive (Direction + Output):* [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
+**Drive (Direction + Output):** [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
 
-*Float (Input with Preset):* [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
+**Float (Input with Preset):** [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
 
-*Pin Testing:* [TESTP](#testp), [TESTPN](#testpn)
+**Pin Testing:** [TESTP](#testp), [TESTPN](#testpn)
 
-*Smart Pin Control:* [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+**Smart Pin Control:** [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
-*Oscilloscope/DAC:* [GETSCP](#getscp), [SETSCP](#setscp), [SETDACS](#setdacs)
+**Oscilloscope/DAC:** [GETSCP](#getscp), [SETSCP](#setscp), [SETDACS](#setdacs)
 
 ---
 
@@ -100,17 +100,17 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 
 Event instructions monitor and respond to system events including counter/timer triggers, smart pin signals, FIFO status, streamer conditions, and inter-cog attention signals. They provide configuration, polling, waiting, and conditional branching mechanisms for synchronization.
 
-*Configuration:* [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
+**Configuration:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
 
-*Inter-COG:* [COGATN](#cogatn)
+**Inter-COG:** [COGATN](#cogatn)
 
-*Polling:* [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
+**Polling:** [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
 
-*Waiting:* [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
+**Waiting:** [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
 
-*Branch on Event Set:* [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
+**Branch on Event Set:** [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
 
-*Branch on Event Clear:* [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
+**Branch on Event Clear:** [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
 
 ---
 
