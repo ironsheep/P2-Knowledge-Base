@@ -271,6 +271,10 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 # Part I: Architectural Foundation
 
+
+
+# Part I: Architectural Foundation
+
 # Chapter 1: The P2 Execution Model
 
 <!-- Chapter establishing the foundational mental model for the P2 architecture -->
@@ -485,6 +489,7 @@ The hardware automatically handles mode transitions. The programmer simply speci
 
 
 <!-- End of Chapter 1 -->
+
 
 # Chapter 2: The Instruction Format
 
@@ -1096,6 +1101,7 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 
 <!-- End of Chapter 2 -->
 
+
 # Chapter 3: Flags and Conditional Execution
 
 <!-- Chapter covering C and Z flags, WC/WZ/WCZ effects, and IF_x conditions -->
@@ -1705,6 +1711,7 @@ After a multi-long comparison:
 
 
 <!-- End of Chapter 3 -->
+
 
 # Chapter 4: Timing and Determinism
 
@@ -2409,6 +2416,7 @@ The dramatic timing difference between modes—often 4× or more—makes COG mod
 
 
 <!-- End of Chapter 4 -->
+
 
 # Chapter 5: Special Hardware Overview
 
@@ -3504,6 +3512,10 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 
 # Part II: Instruction Set Reference
 
+
+
+# Part II: Instruction Set Reference
+
 # Instruction Categories {#instruction-categories}
 
 This chapter defines the instruction categories used throughout Part II. Each category groups instructions by their primary function. Click any category name in the instruction entries to return here for an overview, or click any instruction mnemonic to jump to its detailed reference.
@@ -3673,6 +3685,7 @@ Instruction modification instructions (also known as register indirection) dynam
 Miscellaneous instructions provide utility functions including immediate value extension (AUGS/AUGD), stack operations, random number generation, system timer access, and delay insertion.
 
 [AUGD](#augd), [AUGS](#augs), [GETCT](#getct), [GETRND](#getrnd), [NOP](#nop), [POP](#pop), [PUSH](#push), [SETQ](#setq), [SETQ2](#setq2), [WAITX](#waitx)
+
 
 # Instructions: A
 
@@ -4720,6 +4733,7 @@ Though AUGS may be manually entered wherever needed, the Parallax P2 compiler su
 
 
 
+
 # Instructions: B
 
 This section contains all PASM2 instructions beginning with the letter B.
@@ -5037,6 +5051,7 @@ During a Debug ISR, the BRK instruction is used instead to establish the next de
 The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.
 
 BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
+
 
 
 
@@ -5921,6 +5936,7 @@ CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providi
 
 
 
+
 # Instructions: D
 
 This section contains all PASM2 instructions beginning with the letter D.
@@ -6617,6 +6633,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 
 
 
+
 # Instructions: E
 
 This section contains all PASM2 instructions beginning with the letter E.
@@ -6704,6 +6721,7 @@ The SKIPF pattern in Dest[31:10] provides a 22-bit pattern that controls which s
 EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from COG/LUT or Hub memory.
+
 
 
 
@@ -7099,6 +7117,7 @@ When Dest is a register, the register's value bits \[10:0\] are used as-is to fo
 The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
 
 
 
@@ -7517,6 +7536,7 @@ GETXACC is used in conjunction with the streamer's Goertzel mode, configured via
 
 
 
+
 # Instructions: H
 
 This section contains all PASM2 instructions beginning with the letter H.
@@ -7598,6 +7618,7 @@ Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
 In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.
 
 HUBSET takes 2 clock cycles to execute, but switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
+
 
 
 
@@ -7715,6 +7736,7 @@ INCMOD is also ideal for round-robin scheduling across a fixed number of resourc
 
                 ' All ports serviced, continue
 ```
+
 
 
 
@@ -8246,6 +8268,7 @@ JXRO is useful for timing-critical streamer applications where code needs to syn
 
 
 
+
 # Instructions: L
 
 This section contains all PASM2 instructions beginning with the letter L.
@@ -8430,6 +8453,7 @@ If the WC effect is specified, the C flag is set (1) if the lock was successfull
 LOCKTRY implements the critical section entry point in the standard lock pattern: try to acquire the lock, and only proceed if successful. The lock must be released with LOCKREL when the critical section completes. This ensures mutual exclusion, preventing multiple COGs from simultaneously accessing shared resources.
 
 The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
+
 
 
 
@@ -9133,6 +9157,7 @@ Unlike MUXC and MUXZ which replicate a single flag bit to all selected positions
 
 
 
+
 # Instructions: N
 
 This section contains all PASM2 instructions beginning with the letter N.
@@ -9339,6 +9364,7 @@ When using syntax 1, NOT inverts the Src operand and stores the result into Dest
 If the WC or WCZ effect is specified, the C flag is set to the inverse of bit 31 of the source operand. For syntax 1, this is the inverse of S[31]; for syntax 2, this is the inverse of D[31].
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
+
 
 
 
@@ -9634,6 +9660,7 @@ When Dest is a register, the register's bits [10:0] are used directly to form th
 If the WCZ effect is specified, both the C and Z flags are set to the original state of the output level bit for the base pin, before the instruction executes.
 
 OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
+
 
 
 
@@ -10221,6 +10248,7 @@ This instruction does not affect any flags. The post-increment model means PTRB 
 Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
+
 # Instructions: Q
 
 This section contains all PASM2 instructions beginning with the letter Q. The Q instructions are part of the CORDIC coprocessor family.
@@ -10552,6 +10580,7 @@ QVECTOR is the inverse operation of QROTATE.
         GETQX   length         ' Get polar length
         GETQY   angle          ' Get polar angle
 :::
+
 
 
 # Instructions: R
@@ -11618,6 +11647,7 @@ RQPIN reads the result value from the specified Smart Pin without acknowledging 
 If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
 This instruction is useful when you need to check a pin's result value without consuming it, such as polling for completion before actually processing the result.
+
 
 
 # Instructions: S
@@ -12984,6 +13014,7 @@ The C flag (with WC) is updated to reflect the correct sign of the result.
 SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when their flag is clear (0), providing complementary behavior.
 
 
+
 # Instructions: T
 
 This section contains all PASM2 instructions beginning with the letter T.
@@ -13420,6 +13451,7 @@ Trigger Interrupt (1, 2, Or 3)
 TRGINT1, TRGINT2, and TRGINT3 software-trigger their respective interrupt handlers, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
 
 The P2 provides three independent interrupt levels, and each TRGINT instruction triggers only its corresponding level. Use these instructions when you need to invoke an interrupt handler programmatically.
+
 
 
 # Instructions: W
@@ -14275,6 +14307,7 @@ Writing the Y register also acknowledges pin completion, clearing any completion
 :::
 
 
+
 # Instructions: X
 
 This section contains all PASM2 instructions beginning with the letter X. The X instructions include the XOR logic operation, the xoroshiro32+ PRNG instruction, and the streamer control family.
@@ -14525,6 +14558,7 @@ This instruction enables chaining multiple streamer operations where each operat
 The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
 
 
+
 # Instructions: Z
 
 This section contains all PASM2 instructions beginning with the letter Z. There is currently one Z instruction: ZEROX for zero extension.
@@ -14575,6 +14609,7 @@ The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit p
 :::
 
 ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for unsigned values), SIGNX fills upper bits with the value of the designated bit (for signed values). Use ZEROX when working with unsigned data, and SIGNX when working with signed data that needs proper sign extension.
+
 
 
 # Assembler Directives
@@ -15190,6 +15225,7 @@ The P2 assembler's 13 directives provide complete control over memory layout and
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
 
 These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.
+
 
 # Special Registers
 
@@ -15915,6 +15951,10 @@ Timeout detection:
 
 # Part III: Reference Tables
 
+
+
+# Part III: Reference Tables
+
 # Appendix A: Instruction Encoding Master Table
 
 This appendix provides the complete encoding reference for all PASM2 instructions in alphabetical order.
@@ -16317,6 +16357,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 - The `*` symbol indicates hub memory access with variable timing
 - See Part II (Instruction Reference) for complete encoding details and all variants
 - Special instructions (ASMCLK, DEBUG) are compiler directives, not executable instructions
+
 
 # Appendix B: Categorical Instruction Index
 
@@ -16882,6 +16923,7 @@ Miscellaneous instructions provide utility functions including immediate value e
 | [SETQ2](#setq2) | Set Q register to D (for LUT transfers) |
 | [WAITX](#waitx) | Wait 2 + D clocks |
 
+
 # Appendix C: Special Registers Quick Reference
 
 ## Register Summary
@@ -16953,6 +16995,7 @@ $1F0 └─────────┘
 ```
 
 *For complete documentation, see Part II: Special Registers.*
+
 
 # Appendix D: Predefined Constants
 
@@ -17338,6 +17381,7 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 
 *Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
 
+
 # Appendix E: Smart Pin Mode Constants
 
 PASM2 provides an extensive set of predefined constants for configuring the P2's 64 Smart Pins. These constants replace complex 32-bit configuration patterns with readable symbolic names, making SmartPin programming practical and maintainable.
@@ -17684,6 +17728,7 @@ SmartPin constants are designed to be combined using OR operations. The bit fiel
 - [RDPIN](#rdpin) — Read SmartPin result and clear flag
 - [RQPIN](#rqpin) — Read SmartPin result without clearing flag
 - [AKPIN](#akpin) — Acknowledge SmartPin (clear flag only)
+
 
 
 # Appendix F: Streamer Mode Constants
@@ -18040,6 +18085,7 @@ The Streamer supports various data packing/unpacking modes:
 - [SETLUTS](#setluts) — Configure LUT for Streamer use
 
 
+
 # Appendix G: Reserved Words Reference
 
 This appendix lists all reserved words in PASM2. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
@@ -18367,6 +18413,7 @@ PASM2 reserves **449 identifiers** across six categories:
 
 **Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). Since there is a single compiler for both Spin2 and PASM2, all reserved words from both languages always apply regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
 
+
 # Appendix H: Glossary of Encoding Terms
 
 This glossary defines the terms used throughout the instruction encoding tables, syntax descriptions, and opcode documentation in this manual.
@@ -18450,5 +18497,6 @@ This glossary defines the terms used throughout the instruction encoding tables,
 - **Chapter 3** — Complete coverage of flag behavior and conditional execution
 - **Appendix A** — Encoding summary tables
 - **Appendix H** — Complete opcode bit patterns for all instructions
+
 
 
