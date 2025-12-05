@@ -5,20 +5,27 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-12-05 (v4 - Trailing backslash preservation added)
+- **Last Modified**: 2025-12-05 (v5 - Grid table protection added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, escapes P2 literals
+- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, grid tables; escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Trailing Backslash Preservation** (NEW in v4)
+1. **Grid Table Protection** (NEW in v5)
+   - Grid tables (using `+---+` borders) are NOT escaped at all
+   - Escaping `%` → `\%` adds a character, breaking column alignment
+   - Broken alignment causes Pandoc to misparse the entire table structure
+   - Pipe tables (using `|---|`) ARE still escaped (no alignment issues)
+   - Test Case: `test-cases.md` → "Grid Table Alignment Test"
+
+2. **Trailing Backslash Preservation** (v4)
    - Trailing `\` at end of line is Pandoc hard line break syntax
    - Preserved as-is (NOT escaped to `\textbackslash{}`)
    - Used for multi-line operand lists in instruction documentation
    - Test Case: `test-cases.md` → "Trailing Backslash Test"
 
-2. **Pandoc Fenced Divs** (v3)
+3. **Pandoc Fenced Divs** (v3)
    - `::: pasm2` / `::: spin2` / `::: cordic` / `::: multicog` / `::: antipattern` - Code NOT escaped
    - Content between `:::` and closing `:::` is preserved exactly
    - Text outside fenced divs is still escaped normally
@@ -41,6 +48,7 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 6. **Protected Contexts**
    - Code blocks (```pasm2, ```spin2, etc.) - NO escaping
    - Fenced divs (::: pasm2, ::: spin2, etc.) - NO escaping (v3)
+   - Grid tables (`+---+` style) - NO escaping (v5)
    - Standard LaTeX environments (equation, align, etc.) - NO escaping
    - Template environments (sidetrack, interlude, etc.) - content IS escaped
 
@@ -111,6 +119,15 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-12-05: Version 5 Released
+- **Grid Table Protection**: Grid tables (using `+---+` border syntax) are completely protected from escaping
+- **Root Cause**: Escaping `%` → `\%` in grid tables adds characters that break column alignment
+- **Impact**: Broken alignment causes Pandoc to fail to recognize the grid table structure, resulting in complete parse failure (PDF errors like "Misplaced \noalign")
+- **Solution**: Detect grid table lines and skip ALL escaping inside grid tables
+- **Pipe Tables**: Still escaped normally (pipe tables are more forgiving of alignment)
+- **Test Added**: "Grid Table Alignment Test (Bug Fix - Grid Tables with %)" section in test-cases.md
+- **Real-World Fix**: PASM2 manual Appendix E instruction encoding tables with binary patterns like `%AAAAA111F`
 
 ### 2025-12-05: Version 4 Released
 - **Trailing Backslash Preservation**: Single trailing `\` at end of line preserved for Pandoc hard line breaks

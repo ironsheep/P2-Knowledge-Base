@@ -18,6 +18,7 @@ def process_latex_escaping(input_file, output_file):
     in_raw_latex_block = False  # Track ```{=latex} blocks (need partial escaping)
     in_fenced_div = False  # Track ::: type fenced divs
     in_latex_env = False
+    in_grid_table = False  # Track grid tables (NO escaping - breaks column alignment)
 
     # Code types that should be protected in fenced divs (no escaping inside)
     code_div_types = ['pasm2', 'spin2', 'cordic', 'multicog', 'antipattern', 'pasm', 'spin']
@@ -45,6 +46,26 @@ def process_latex_escaping(input_file, output_file):
                 in_code_block = not in_code_block
                 output_lines.append(original_line)
                 continue
+
+        # Track grid tables (lines starting with + followed by - or =)
+        # Grid tables MUST NOT be escaped because adding chars breaks column alignment
+        # which causes Pandoc to misparse the table structure entirely
+        if stripped.startswith('+') and (re.match(r'^\+[-=+]+\+$', stripped) or re.match(r'^\+[-=+]+$', stripped)):
+            # This is a grid table border row (e.g., +------+------+ or +======+======+)
+            in_grid_table = True
+            output_lines.append(original_line)
+            continue
+        elif in_grid_table:
+            # Check if we're still in the grid table
+            # Grid table rows start with | (data row) or + (border row)
+            if stripped.startswith('|') or (stripped.startswith('+') and '-' in stripped):
+                # Still in grid table - output unchanged
+                output_lines.append(original_line)
+                continue
+            else:
+                # No longer in grid table
+                in_grid_table = False
+                # Fall through to process this line normally
 
         # Track fenced divs (::: pasm2, ::: spin2, etc.)
         # These are Pandoc fenced div syntax for code blocks
