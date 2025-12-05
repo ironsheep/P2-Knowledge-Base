@@ -26,6 +26,7 @@ declare -a REQUIRED_FILES=(
     "part-i/chapter-03-flags.md"
     "part-i/chapter-04-timing.md"
     "part-i/chapter-05-hardware.md"
+    "part-ii/instruction-categories.md"
     "part-ii/instructions-a.md"
     "part-ii/instructions-b.md"
     "part-ii/instructions-c.md"
@@ -49,14 +50,16 @@ declare -a REQUIRED_FILES=(
     "part-ii/instructions-x.md"
     "part-ii/instructions-z.md"
     "part-ii/directives.md"
-    "part-ii/constants.md"
     "part-ii/special-registers.md"
     "part-iii/appendix-a-encoding-table.md"
     "part-iii/appendix-b-categorical-index.md"
     "part-iii/appendix-c-special-registers.md"
     "part-iii/appendix-d-constants.md"
-    "part-iii/appendix-e-reserved-words.md"
-    "part-iii/appendix-f-opcodes.md"
+    "part-iii/appendix-e-smartpin-constants.md"
+    "part-iii/appendix-f-streamer-constants.md"
+    "part-iii/appendix-g-reserved-words.md"
+    "part-iii/appendix-h-opcodes.md"
+    "part-iii/appendix-i-glossary.md"
 )
 
 # Verify all required files exist
@@ -123,6 +126,9 @@ cat >> "$OUTPUT" << 'EOF'
 
 EOF
 
+# Part II - Instruction Categories (navigation hub)
+assemble_section "part-ii/instruction-categories.md" "Instruction Categories"
+
 # Part II - Instructions (alphabetical)
 assemble_section "part-ii/instructions-a.md" "Instructions: A"
 assemble_section "part-ii/instructions-b.md" "Instructions: B"
@@ -147,9 +153,8 @@ assemble_section "part-ii/instructions-w.md" "Instructions: W"
 assemble_section "part-ii/instructions-x.md" "Instructions: X"
 assemble_section "part-ii/instructions-z.md" "Instructions: Z"
 
-# Part II - Directives, Constants, Special Registers
+# Part II - Directives and Special Registers
 assemble_section "part-ii/directives.md" "Directives"
-assemble_section "part-ii/constants.md" "Constants"
 assemble_section "part-ii/special-registers.md" "Special Registers"
 
 # Part III Marker
@@ -164,9 +169,12 @@ EOF
 assemble_section "part-iii/appendix-a-encoding-table.md" "Appendix A: Encoding Table"
 assemble_section "part-iii/appendix-b-categorical-index.md" "Appendix B: Categorical Index"
 assemble_section "part-iii/appendix-c-special-registers.md" "Appendix C: Special Registers"
-assemble_section "part-iii/appendix-d-constants.md" "Appendix D: Constants"
-assemble_section "part-iii/appendix-e-reserved-words.md" "Appendix E: Reserved Words"
-assemble_section "part-iii/appendix-f-opcodes.md" "Appendix F: Opcodes"
+assemble_section "part-iii/appendix-d-constants.md" "Appendix D: Predefined Constants"
+assemble_section "part-iii/appendix-e-smartpin-constants.md" "Appendix E: Smart Pin Mode Constants"
+assemble_section "part-iii/appendix-f-streamer-constants.md" "Appendix F: Streamer Mode Constants"
+assemble_section "part-iii/appendix-g-reserved-words.md" "Appendix G: Reserved Words"
+assemble_section "part-iii/appendix-h-opcodes.md" "Appendix H: Opcodes"
+assemble_section "part-iii/appendix-i-glossary.md" "Appendix I: Glossary"
 
 echo ""
 echo "========================================"
@@ -187,8 +195,8 @@ echo ""
 echo "Document Structure:"
 echo "  - Front Matter: 1 file"
 echo "  - Part I (Architectural Foundation): 5 chapters"
-echo "  - Part II (Instruction Set Reference): 24 instruction files + 3 reference sections"
-echo "  - Part III (Reference Tables): 6 appendices"
+echo "  - Part II (Instruction Set Reference): 24 instruction files + 2 reference sections"
+echo "  - Part III (Reference Tables): 9 appendices"
 echo ""
 
 # File size

@@ -141,12 +141,13 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 - Appendix A: Instruction Encoding Summary
 - Appendix B: Instructions by Category
-- Appendix C: Flag Effects Reference
-- Appendix D: Smart Pin Modes
-- Appendix E: CORDIC Functions
-- Appendix F: Opcode Map
-- Appendix G: Glossary
-- Appendix H: Index
+- Appendix C: Special Registers Reference
+- Appendix D: Predefined Constants
+- Appendix E: Smart Pin Mode Constants
+- Appendix F: Streamer Mode Constants
+- Appendix G: Reserved Words Reference
+- Appendix H: Opcode Bit Patterns
+- Appendix I: Glossary of Encoding Terms
 
 ### Quick Navigation Guide
 

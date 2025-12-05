@@ -262,7 +262,22 @@ The Streamer supports multiple operating modes, each optimized for specific data
 | RF mode | Radio frequency output generation | RF signal generation, modulation |
 | Goertzel mode | DSP filtering during transfer | Frequency detection, tone decoding |
 
-Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets Hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns. Complete mode documentation, including configuration bit fields and timing parameters, appears in the P2 hardware documentation.
+Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets Hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns.
+
+### 5.3.4 Streamer Configuration
+
+Streamer commands are built by combining mode constants using OR operations. The constants follow a naming convention that encodes the data flow:
+
+- **X_IMM_** - Immediate data modes (data passed directly)
+- **X_RFBYTE/RFWORD/RFLONG_** - Read from FIFO (hub RAM) with specified data width
+- **X_..._WFBYTE/WFWORD/WFLONG** - Write to FIFO (hub RAM) for capture operations
+- **X_DACS_** - DAC channel selection and configuration
+- **X_PINS_ON/OFF** - Enable/disable pin outputs
+- **X_WRITE_ON/OFF** - Enable/disable hub RAM writes
+
+The naming pattern `X_[source][size]_[pins]P_[dacs]DAC[bits]` describes the complete data path. For example, `X_RFBYTE_RGB8` reads bytes from hub RAM and interprets them as RGB 3:3:2 color values.
+
+**Complete X_* constant documentation, including all 78 mode constants with values and descriptions, appears in Appendix F (Streamer Mode Constants).** That appendix provides the detailed reference needed to configure the Streamer for specific applications, including usage examples for video streaming, audio DAC output, and ADC capture.
 
 
 ## 5.4 Events and Interrupts

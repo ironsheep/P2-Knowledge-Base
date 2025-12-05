@@ -97,13 +97,26 @@
 
 % ==================== HEADING SPACING ====================
 % Reference manual uses tighter spacing than tutorials
+%
+% CRITICAL: The book class has hardcoded vertical space for \part and \chapter.
+% We must use titlesec's complete control to override this.
 
-\titleformat{\chapter}[block]
+% PART: Minimal space above, consistent formatting
+% Parts are used for major document divisions (Part I, Part II, Part III)
+\titleformat{\part}[display]
+  {\centering\normalfont\huge\bfseries}  % Format: centered, huge, bold
+  {\partname\ \thepart}                   % Label: "Part I", "Part II", etc.
+  {10pt}                                  % Sep between label and title
+  {\Huge}                                 % Before-code: make title Huge
+\titlespacing*{\part}{0pt}{-50pt}{20pt}   % Left, before (negative to pull up), after
+
+% CHAPTER: Minimal space above, consistent formatting
+\titleformat{\chapter}[display]
   {\normalfont\Huge\bfseries}
   {}
   {0pt}
   {}
-\titlespacing*{\chapter}{0pt}{-30pt}{15pt}
+\titlespacing*{\chapter}{0pt}{-50pt}{15pt}
 
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
@@ -138,12 +151,13 @@
 \makeindex
 
 % ==================== HYPERREF SETUP ====================
+% Links must be visually distinct - use clear blue color
 
 \hypersetup{
   colorlinks=true,
-  linkcolor=blue!70!black,
-  urlcolor=blue!70!black,
-  citecolor=blue!70!black,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
   hidelinks=false
 }
 

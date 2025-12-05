@@ -444,6 +444,152 @@ Flags can encode state transitions in compact state machines. Instead of compari
 This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
 
+## 3.7 Multi-Long Arithmetic Operations
+
+The P2's flag system enables arithmetic operations on values wider than 32 bits. By chaining instructions that propagate carry/borrow through the C flag and accumulate zero-detection through the Z flag, you can perform addition, subtraction, and comparison on 64-bit, 96-bit, 128-bit, or arbitrarily wide values.
+
+### 3.7.1 Instruction Family Overview
+
+The P2 provides four variants each for ADD, SUB, and CMP operations:
+
+**Addition Instructions:**
+
+| Instruction | Operation | C Flag | Z Flag |
+|-------------|-----------|--------|--------|
+| ADD D, S | D = D + S | Carry out | D result == 0 |
+| ADDX D, S | D = D + S + C | Carry out | Z AND (D result == 0) |
+| ADDS D, S | D = D + S | True sign of result | D result == 0 |
+| ADDSX D, S | D = D + S + C | True sign of result | Z AND (D result == 0) |
+
+**Subtraction Instructions:**
+
+| Instruction | Operation | C Flag | Z Flag |
+|-------------|-----------|--------|--------|
+| SUB D, S | D = D - S | Borrow | D result == 0 |
+| SUBX D, S | D = D - S - C | Borrow | Z AND (D result == 0) |
+| SUBS D, S | D = D - S | True sign of result | D result == 0 |
+| SUBSX D, S | D = D - S - C | True sign of result | Z AND (D result == 0) |
+
+**Comparison Instructions:**
+
+| Instruction | Operation | C Flag | Z Flag |
+|-------------|-----------|--------|--------|
+| CMP D, S | X = D - S | Borrow | X == 0 |
+| CMPX D, S | X = D - S - C | Borrow | Z AND (X == 0) |
+| CMPS D, S | X = D - S | True sign of X | X == 0 |
+| CMPSX D, S | X = D - S - C | True sign of X | Z AND (X == 0) |
+
+The key distinctions:
+- **Base instructions** (ADD, SUB, CMP) start a new operation and reset Z
+- **X variants** (ADDX, SUBX, CMPX) propagate carry/borrow and AND the zero result
+- **S variants** (ADDS, SUBS, CMPS) report the true sign instead of carry
+- **SX variants** (ADDSX, SUBSX, CMPSX) combine both: propagate C, AND-accumulate Z, report true sign
+
+### 3.7.2 The Chaining Pattern
+
+Multi-long operations follow a consistent pattern:
+
+1. **First long:** Use base instruction (ADD, SUB, CMP) with WCZ
+2. **Middle longs:** Use X variant (ADDX, SUBX, CMPX) with WCZ
+3. **Final long:** Use X variant for unsigned, SX variant for signed
+
+The X variants are critical because they:
+- Add/subtract the incoming C flag (carry/borrow from previous long)
+- AND the Z result with the previous Z (tracking if all longs are zero)
+- Output carry/borrow for the next long
+
+### 3.7.3 Unsigned Multi-Long Examples
+
+**64-bit unsigned addition** (A = A + B):
+
+```pasm
+        ADD     A0, B0    WCZ     ' Add low longs, C = carry, Z = (A0 == 0)
+        ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry, Z = Z AND (A1 == 0)
+        ' After: C = overflow, Z = (entire 64-bit result == 0)
+```
+
+**128-bit unsigned addition** (A = A + B):
+
+```pasm
+        ADD     A0, B0    WCZ     ' A0 = A0 + B0
+        ADDX    A1, B1    WCZ     ' A1 = A1 + B1 + carry
+        ADDX    A2, B2    WCZ     ' A2 = A2 + B2 + carry
+        ADDX    A3, B3    WCZ     ' A3 = A3 + B3 + carry
+        ' After: C = overflow beyond 128 bits, Z = (entire 128-bit result == 0)
+```
+
+**64-bit unsigned subtraction** (A = A - B):
+
+```pasm
+        SUB     A0, B0    WCZ     ' Subtract low longs, C = borrow
+        SUBX    A1, B1    WCZ     ' Subtract high longs - borrow
+        ' After: C = underflow (B > A), Z = (result == 0)
+```
+
+**64-bit unsigned comparison** (compare A to B):
+
+```pasm
+        CMP     A0, B0    WCZ     ' Compare low longs
+        CMPX    A1, B1    WCZ     ' Compare high longs with borrow
+        ' After: C = (A < B), Z = (A == B)
+        ' Use IF_B (below) or IF_AE (above/equal) for unsigned branches
+```
+
+### 3.7.4 Signed Multi-Long Examples
+
+For signed operations, the final instruction must be an SX variant to correctly report the sign of the overall result.
+
+**64-bit signed addition** (A = A + B):
+
+```pasm
+        ADD     A0, B0    WCZ     ' Add low longs (unsigned, generates carry)
+        ADDSX   A1, B1    WCZ     ' Add high longs + carry, C = true sign
+        ' After: C = true sign of result (1 = negative), Z = (result == 0)
+```
+
+**128-bit signed addition** (A = A + B):
+
+```pasm
+        ADD     A0, B0    WCZ     ' Unsigned add for low long
+        ADDX    A1, B1    WCZ     ' Unsigned add + carry for middle longs
+        ADDX    A2, B2    WCZ     ' Unsigned add + carry
+        ADDSX   A3, B3    WCZ     ' Signed add for high long, C = true sign
+        ' After: C = 1 if result is negative, Z = (result == 0)
+```
+
+**64-bit signed comparison** (compare A to B):
+
+```pasm
+        CMP     A0, B0    WCZ     ' Compare low longs
+        CMPSX   A1, B1    WCZ     ' Compare high longs, C = true sign of difference
+        ' After: C = (A < B) signed, Z = (A == B)
+        ' Use IF_LT (less than) or IF_GE (greater/equal) for signed branches
+```
+
+### 3.7.5 Understanding "True Sign"
+
+The S and SX variants report the "true sign" of the result rather than carry/borrow. This is the conceptual bit above the MSB—the sign the result would have if computed with infinite precision.
+
+For signed operations:
+- If the result is negative (would be negative with more bits), C = 1
+- If the result is non-negative, C = 0
+
+This differs from carry/borrow, which indicates overflow in unsigned arithmetic. For signed comparisons, the true sign tells you the sign of (A - B), directly indicating whether A < B.
+
+### 3.7.6 Practical Pattern Summary
+
+| Operation | First Long | Middle Longs | Final Long (Unsigned) | Final Long (Signed) |
+|-----------|------------|--------------|----------------------|---------------------|
+| Add | ADD WCZ | ADDX WCZ | ADDX WCZ | ADDSX WCZ |
+| Subtract | SUB WCZ | SUBX WCZ | SUBX WCZ | SUBSX WCZ |
+| Compare | CMP WCZ | CMPX WCZ | CMPX WCZ | CMPSX WCZ |
+
+After a multi-long comparison:
+- **Unsigned:** Use IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
+- **Signed:** Use IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
+- **Either:** Use IF_Z (equal), IF_NZ (not equal)
+
+
 ```{=latex}
 \begin{keyconcepts}
 \item The C flag indicates carry, borrow, bit shifted out, or parity depending on instruction category

@@ -161,7 +161,9 @@ Constants are combined using OR operations to build the complete configuration:
 | Constant | Value | Description |
 |----------|-------|-------------|
 | P_TRUE_OUTPUT | %0000_0000_000_0000000000000_00_00000_0 | True output (default) |
+| P_TRUE_OUT | %0000_0000_000_0000000000000_00_00000_0 | Alias for P_TRUE_OUTPUT |
 | P_INVERT_OUTPUT | %0000_0000_000_0000001000000_00_00000_0 | Invert output |
+| P_INVERT_OUT | %0000_0000_000_0000001000000_00_00000_0 | Alias for P_INVERT_OUTPUT |
 
 
 

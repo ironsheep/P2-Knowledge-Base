@@ -59,51 +59,66 @@
 % Each wraps the 3-line identity block: mnemonic, expansion, category line
 
 % Instruction header (Brick Red bar)
+% before upper=\needspace{8\baselineskip} prevents orphaned headers at page bottom
 \newtcolorbox{instrheader}{
   blanker,
   borderline west={4pt}{0pt}{pasm2-instr-bar},
   left=10pt,
   top=2pt,
   bottom=2pt,
-  before skip=6pt,
-  after skip=6pt
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{8\baselineskip}}
 }
 
 % Directive header (Amber bar)
+% before upper=\needspace{8\baselineskip} prevents orphaned headers at page bottom
 \newtcolorbox{dirheader}{
   blanker,
   borderline west={4pt}{0pt}{pasm2-dir-bar},
   left=10pt,
   top=2pt,
   bottom=2pt,
-  before skip=6pt,
-  after skip=6pt
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{8\baselineskip}}
 }
 
 % Constant header (Violet bar)
+% before upper=\needspace{8\baselineskip} prevents orphaned headers at page bottom
 \newtcolorbox{constheader}{
   blanker,
   borderline west={4pt}{0pt}{pasm2-const-bar},
   left=10pt,
   top=2pt,
   bottom=2pt,
-  before skip=6pt,
-  after skip=6pt
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{8\baselineskip}}
 }
 
-% ==================== PART DIVIDER ====================
-% Custom part heading that doesn't force a page break after
-% Used for Part I, Part II, Part III markers between major sections
-% Styled like a chapter but without the automatic post-chapter clearpage
+% ==================== PART HANDLING ====================
+% Custom part command that:
+% 1. Adds entry to TOC at part level
+% 2. Creates visual part page
+% 3. Does NOT force page break after (first chapter stays on same page)
+%
+% We redefine \part to prevent the automatic page break after part title
+% The Lua filter calls \manualpart{title} which uses our custom behavior
 
-\newcommand{\partdivider}[1]{%
+\newcommand{\manualpart}[1]{%
   \clearpage%                           % Start on new page
-  \thispagestyle{plain}%                % Page number only
-  \vspace*{2cm}%                        % Space from top
-  {\Huge\bfseries #1\par}%              % Large bold title
-  \vspace{1cm}%                         % Space after title
+  \thispagestyle{empty}%                % No header/footer on part page
+  \refstepcounter{part}%                % Increment part counter for TOC
+  \addcontentsline{toc}{part}{#1}%      % Add to TOC as part-level entry
+  \vspace*{3cm}%                        % Space from top
+  {\centering\Huge\bfseries #1\par}%    % Large bold centered title
+  \vspace{2cm}%                         % Space after title
   \nobreak%                             % Prevent page break here
 }
+
+% Legacy alias for backward compatibility
+\newcommand{\partdivider}[1]{\manualpart{#1}}
 
 % ==================== AT A GLANCE BOX ====================
 % Summary box at the top of each instruction entry

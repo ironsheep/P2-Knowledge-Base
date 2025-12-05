@@ -94,15 +94,27 @@
 % ==================== HEADING SPACING ====================
 % Use titlesec for ALL heading formatting (work WITH it, not against it)
 % Format: \titlespacing*{command}{left}{before-sep}{after-sep}
+%
+% CRITICAL: The book class has hardcoded vertical space for \part and \chapter.
+% We must use titlesec's complete control to override this.
+
+% PART: Minimal space above, consistent formatting
+% Parts are used for major document divisions (Dedication, Acknowledgments, Part I, etc.)
+\titleformat{\part}[display]
+  {\centering\normalfont\huge\bfseries}  % Format: centered, huge, bold
+  {}                                      % Label (empty - suppress "Part X")
+  {0pt}                                   % Sep between label and title
+  {}                                      % Before-code
+\titlespacing*{\part}{0pt}{-50pt}{20pt}   % Left, before (negative to pull up), after
 
 % CHAPTER: Minimal space above, consistent formatting
 % The key is using \titleformat to completely control chapter appearance
-\titleformat{\chapter}[block]
+\titleformat{\chapter}[display]
   {\normalfont\Huge\bfseries}  % Format
   {}                            % Label (empty - no "Chapter X")
   {0pt}                         % Sep between label and title
   {}                            % Before-code
-\titlespacing*{\chapter}{0pt}{-40pt}{10pt}  % Left, before (more negative!), after
+\titlespacing*{\chapter}{0pt}{-50pt}{12pt}  % Left, before (more negative!), after
 
 \titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{2pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}

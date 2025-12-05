@@ -311,4 +311,13 @@ PASM2 reserves **449 identifiers** across six categories:
 | Effects | 9 | Flag modification suffixes |
 | **Total** | **449** | |
 
-**Cross-Reference:** See Part II for complete documentation of instructions, directives, constants, and special registers. See Chapter 3 (Conditional Execution) for detailed explanation of condition codes and effect modifiers.
+**Cross-References:**
+
+- **Part II** — Complete documentation of instructions, directives, constants, and special registers
+- **Chapter 3** — Detailed explanation of condition codes and effect modifiers
+- **Appendix E** — Smart Pin mode constants (P_* symbols, approximately 116 constants)
+- **Appendix F** — Streamer mode constants (X_* symbols, approximately 78 constants)
+
+**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 449-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+
+**Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). When writing inline PASM2 within Spin2 code, both sets of reserved words apply. Pure PASM2 files need only consider the words listed in this appendix plus the P_* and X_* constants.

@@ -433,19 +433,151 @@ Instructions are grouped by category in Appendix B. When looking for "an instruc
 - **Branch/Jump Instructions:** JMP, CALL, DJNZ, etc.
 - **Hub Memory Instructions:** RDLONG, WRLONG, etc.
 
-### 2.8.5 Using Related Instructions
+**Tip:** In the PDF version, the category name in each entry's header block is a clickable link that jumps directly to that category's listing in Appendix B.
 
-The Related line shows instructions in the same family or with similar purpose:
+### 2.8.5 Navigating with Links
 
+The PDF version of this manual includes extensive cross-reference links to help you navigate efficiently. Links appear in blue text and are clickable:
+
+**In the entry header block:**
+- The **Category name** links to Appendix B's categorical listing
+
+**In the Related line:**
 ```
 **Related:** ADDX, ADDS, ADDSX, SUB
 ```
 
-This tells you:
+Each instruction name in the Related section is a clickable link that jumps directly to that instruction's entry. This makes it easy to explore instruction families:
+
 - ADDX: ADD with carry-in (for multi-precision)
 - ADDS: Signed addition
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
+
+**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or Cmd+[) to return to where you were after following a link.
+
+
+## 2.9 Constant Expressions and Operators
+
+PASM2 allows constant expressions anywhere a numeric value is expected. These expressions are evaluated at assembly time—the resulting value is encoded into the instruction, not computed at runtime. This enables readable, self-documenting code using symbolic calculations.
+
+### 2.9.1 Where Constant Expressions Apply
+
+Constant expressions can appear in:
+
+- **Immediate operands:** `MOV x, #(BUFFER_SIZE - 1)`
+- **EQU definitions:** `MAX_COUNT EQU 1000 * 60`
+- **Data declarations:** `LONG $FF << 24 | $80 << 16`
+- **ORG/ORGH directives:** `ORG $100 + HEADER_SIZE`
+- **Repeat counts:** `REP @loop_end, #(TABLE_SIZE / 4)`
+
+### 2.9.2 Operator Reference
+
+Operators are listed from highest to lowest precedence within each category.
+
+**Unary Operators** (highest precedence)
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `!` | Bitwise NOT (invert all bits) | `!$FF` → `$FFFFFF00` |
+| `+` | Positive (no effect, explicit sign) | `+5` → `5` |
+| `-` | Negate (two's complement) | `-1` → `$FFFFFFFF` |
+
+**Bitwise Operators**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `>>` | Shift right | `$80 >> 4` → `$08` |
+| `<<` | Shift left | `1 << 8` → `$100` |
+| `&` | Bitwise AND | `$FF & $0F` → `$0F` |
+| `\|` | Bitwise OR | `$F0 \| $0F` → `$FF` |
+| `^` | Bitwise XOR | `$FF ^ $0F` → `$F0` |
+
+**Arithmetic Operators**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `+` | Addition | `100 + 50` → `150` |
+| `-` | Subtraction | `100 - 50` → `50` |
+| `*` | Multiplication (lower 32 bits, signed) | `1000 * 1000` → `1000000` |
+| `/` | Division quotient (signed) | `-100 / 3` → `-33` |
+| `+/` | Division quotient (unsigned) | `$FFFFFFFF +/ 2` → `$7FFFFFFF` |
+| `//` | Division remainder/modulo (signed) | `-100 // 3` → `-1` |
+| `+//` | Division remainder (unsigned) | `$FFFFFFFF +// 16` → `15` |
+
+**Limit Operators**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `#>` | Limit minimum (signed) | `x #> 0` — ensures x ≥ 0 |
+| `<#` | Limit maximum (signed) | `x <# 255` — ensures x ≤ 255 |
+
+**Comparison Operators**
+
+Comparison operators return -1 (true, all bits set) or 0 (false).
+
+| Operator | Description | Signed/Unsigned |
+|----------|-------------|-----------------|
+| `<` | Less than | Signed |
+| `+<` | Less than | Unsigned |
+| `>` | Greater than | Signed |
+| `+>` | Greater than | Unsigned |
+| `<=` | Less than or equal | Signed |
+| `+<=` | Less than or equal | Unsigned |
+| `>=` | Greater than or equal | Signed |
+| `+>=` | Greater than or equal | Unsigned |
+| `==` | Equal | (n/a) |
+| `<>` | Not equal | (n/a) |
+
+**Boolean Operators**
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `!!` | Boolean NOT (0→-1, non-zero→0) | `!!5` → `0` |
+| `&&` | Boolean AND | `(a > 0) && (b > 0)` |
+| `\|\|` | Boolean OR | `(a == 0) \|\| (b == 0)` |
+| `^^` | Boolean XOR | `(a > 0) ^^ (b > 0)` |
+| `<=>` | Three-way compare (returns -1, 0, or 1) | `5 <=> 3` → `1` |
+
+**Ternary Operator** (lowest precedence)
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `? :` | Conditional selection | `(x > 0) ? x : -x` — absolute value |
+
+### 2.9.3 Signed vs. Unsigned Comparisons
+
+The `+` prefix on comparison operators indicates unsigned comparison. This matters when comparing values that may have the high bit set:
+
+```pasm
+' Signed comparison: $80000000 is negative (-2147483648)
+        IF  $80000000 < 0       ' True: negative < 0
+
+' Unsigned comparison: $80000000 is positive (2147483648)
+        IF  $80000000 +< 0      ' False: 2147483648 is not < 0
+```
+
+Use signed comparisons (`<`, `>`, etc.) for values representing signed quantities. Use unsigned comparisons (`+<`, `+>`, etc.) for addresses, bit patterns, or values that should never be negative.
+
+### 2.9.4 Practical Examples
+
+**Bit field construction:**
+```pasm
+PIN_MODE    EQU  %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
+MASK_BITS   EQU  (1 << NUM_BITS) - 1              ' Create bit mask
+```
+
+**Buffer calculations:**
+```pasm
+BUFFER_END  EQU  BUFFER_START + BUFFER_SIZE - 1
+WRAP_MASK   EQU  BUFFER_SIZE - 1                  ' For power-of-2 buffers
+```
+
+**Conditional assembly values:**
+```pasm
+DELAY_MS    EQU  (CLKFREQ / 1000) #> 1            ' At least 1 tick
+TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
+```
 
 
 ```{=latex}

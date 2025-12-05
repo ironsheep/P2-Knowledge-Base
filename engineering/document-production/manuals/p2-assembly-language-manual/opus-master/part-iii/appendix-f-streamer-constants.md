@@ -303,6 +303,10 @@ The Streamer supports various data packing/unpacking modes:
 
 
 
+## Related Documentation
+
+**Chapter 5.3 (Streamer)** provides the architectural overview of the Streamer subsystem, including its relationship with the FIFO, capabilities, and programming model. Refer to that section for conceptual understanding before using these mode constants.
+
 ## Related Instructions
 
 - [XINIT](#xinit) — Initialize Streamer with mode and NCO rate
