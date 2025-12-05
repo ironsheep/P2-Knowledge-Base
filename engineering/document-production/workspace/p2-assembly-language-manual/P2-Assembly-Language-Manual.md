@@ -239,9 +239,14 @@ This manual uses consistent cross-reference formats:
 
 ## Document Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-11 | Initial release. Complete coverage of PASM2 instruction set, directives, constants, and special registers. Includes architectural foundation chapters and comprehensive appendices. |
++---------+---------+---------------------------------------------------------------+
+| Version | Date    | Changes                                                       |
++=========+=========+===============================================================+
+| 1.0     | 2025-11 | Initial release. Complete coverage of PASM2 instruction set,  |
+|         |         | directives, constants, and special registers. Includes        |
+|         |         | architectural foundation chapters and comprehensive           |
+|         |         | appendices.                                                   |
++---------+---------+---------------------------------------------------------------+
 
 
 ## About This Manual
@@ -736,10 +741,12 @@ The D field can also specify:
 The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 
 **Register mode (I = 0):**
+
 - S is a COG register address ($000-$1FF)
 - The value in that register is used as the operand
 
 **Immediate mode (I = 1):**
+
 - S is a 9-bit unsigned value (0-511)
 - This value is used directly as the operand
 
@@ -932,6 +939,7 @@ Instructions are grouped by category in Appendix B. When looking for "an instruc
 The PDF version of this manual includes extensive cross-reference links to help you navigate efficiently. Links appear in blue text and are clickable:
 
 **In the entry header block:**
+
 - The **Category name** links to Appendix B's categorical listing
 
 **In the Related line:**
@@ -1909,10 +1917,16 @@ The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting f
 
 RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 
-| D[31] | Behavior |
-|-------|----------|
-| 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
-| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
++--------+---------------------------------------------------------------------------------+
+| D[31]  | Behavior                                                                        |
++========+=================================================================================+
+| 0      | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST,      |
+|        | also wait until FIFO begins receiving data. Ready to use immediately after      |
+|        | instruction completes.                                                          |
++--------+---------------------------------------------------------------------------------+
+| 1      | No-wait mode—takes only 2 clocks. Code must allow sufficient time before        |
+|        | accessing FIFO data.                                                            |
++--------+---------------------------------------------------------------------------------+
 
 The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
 
@@ -2569,14 +2583,27 @@ The Smart Pin's autonomous operation is particularly significant. Once configure
 
 Smart Pins support 64 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
-| Category | Example Modes | Typical Applications |
-|----------|---------------|----------------------|
-| Digital I/O | Repository mode, registered input, long pulse accumulator | Debounced buttons, event counting, pulse measurement |
-| Serial | UART transmit/receive, synchronous serial, SPI | Communication with peripherals and other systems |
-| PWM | PWM/duty mode, triangle/sawtooth mode, incremental mode | Motor control, LED dimming, audio generation |
-| Analog | DAC output, ADC sampling, comparator | Sensor interfacing, analog signal generation |
-| Timing | Period measurement, pulse width measurement, timeout | Frequency measurement, event timing, watchdog |
-| Quadrature | Quadrature encoder input | Rotary encoder reading, motor position feedback |
++-------------+-------------------------------------+-----------------------------------+
+| Category    | Example Modes                       | Typical Applications              |
++=============+=====================================+===================================+
+| Digital I/O | Repository mode, registered input,  | Debounced buttons, event          |
+|             | long pulse accumulator              | counting, pulse measurement       |
++-------------+-------------------------------------+-----------------------------------+
+| Serial      | UART transmit/receive, synchronous  | Communication with peripherals    |
+|             | serial, SPI                         | and other systems                 |
++-------------+-------------------------------------+-----------------------------------+
+| PWM         | PWM/duty mode, triangle/sawtooth    | Motor control, LED dimming,       |
+|             | mode, incremental mode              | audio generation                  |
++-------------+-------------------------------------+-----------------------------------+
+| Analog      | DAC output, ADC sampling,           | Sensor interfacing, analog        |
+|             | comparator                          | signal generation                 |
++-------------+-------------------------------------+-----------------------------------+
+| Timing      | Period measurement, pulse width     | Frequency measurement, event      |
+|             | measurement, timeout                | timing, watchdog                  |
++-------------+-------------------------------------+-----------------------------------+
+| Quadrature  | Quadrature encoder input            | Rotary encoder reading, motor     |
+|             |                                     | position feedback                 |
++-------------+-------------------------------------+-----------------------------------+
 
 Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the Smart Pin's operation.
 
@@ -2858,16 +2885,33 @@ XBYTE is like a phantom instruction that executes on a hardware stack return (RE
 
 The execution cycle proceeds through eight clock phases:
 
-| Clock | Phase | Activity | Description |
-|-------|-------|----------|-------------|
-| 1 | go | RFBYTE bytecode, SKIPF #0 | Fetch bytecode from FIFO, cancel any prior skip pattern |
-| 2 | get | MOV PA,bytecode, RDLUT | Write bytecode to PA ($1F6), start LUT read |
-| 3 | go | RDLUT (data → D) | Complete LUT read, get routine address and skip pattern |
-| 4 | get | EXECF D (begin) | Start EXECF dispatch |
-| 5 | go | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB ($1F7), optionally set C/Z, branch |
-| 6 | get | flush pipeline | Pipeline flush for branch |
-| 7 | go | reload pipeline | Pipeline reload |
-| 8 | get | first instruction | First instruction of bytecode routine executes |
++-------+-------+------------------------------------------+------------------------------+
+| Clock | Phase | Activity                                 | Description                  |
++=======+=======+==========================================+==============================+
+| 1     | go    | RFBYTE bytecode, SKIPF #0                | Fetch bytecode from FIFO,    |
+|       |       |                                          | cancel any prior skip        |
+|       |       |                                          | pattern                      |
++-------+-------+------------------------------------------+------------------------------+
+| 2     | get   | MOV PA,bytecode, RDLUT                   | Write bytecode to PA         |
+|       |       |                                          | ($1F6), start LUT read       |
++-------+-------+------------------------------------------+------------------------------+
+| 3     | go    | RDLUT (data → D)                         | Complete LUT read, get       |
+|       |       |                                          | routine address and skip     |
+|       |       |                                          | pattern                      |
++-------+-------+------------------------------------------+------------------------------+
+| 4     | get   | EXECF D (begin)                          | Start EXECF dispatch         |
++-------+-------+------------------------------------------+------------------------------+
+| 5     | go    | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB     |
+|       |       |                                          | ($1F7), optionally set C/Z,  |
+|       |       |                                          | branch                       |
++-------+-------+------------------------------------------+------------------------------+
+| 6     | get   | flush pipeline                           | Pipeline flush for branch    |
++-------+-------+------------------------------------------+------------------------------+
+| 7     | go    | reload pipeline                          | Pipeline reload              |
++-------+-------+------------------------------------------+------------------------------+
+| 8     | get   | first instruction                        | First instruction of         |
+|       |       |                                          | bytecode routine executes    |
++-------+-------+------------------------------------------+------------------------------+
 
 When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks.
 
@@ -2884,17 +2928,27 @@ When XBYTE dispatches to a bytecode routine, EXECF simultaneously jumps to the r
 
 XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements. The SETQ/SETQ2 D value controls the mode:
 
-| Bits | SETQ D Pattern | LUT Base | Index Calculation | Bytecodes |
-|------|----------------|----------|-------------------|-----------|
-| 8 | %A0000000F | %A00000000 | I = bytecode[7:0] | 256 |
-| 7 | %AAxx0010F | %AA0000000 | I = bytecode[6:0] | 128 |
-| 7 | %AAxx0011F | %AA0000000 | I = bytecode[7:1] | 128 |
-| 6 | %AAAx1010F | %AAA000000 | I = bytecode[5:0] | 64 |
-| 6 | %AAAx1011F | %AAA000000 | I = bytecode[7:2] | 64 |
-| 5 | %AAAAx100F | %AAAA00000 | I = bytecode[4:0] | 32 |
-| 5 | %AAAAx101F | %AAAA00000 | I = bytecode[7:3] | 32 |
-| 4 | %AAAAA110F | %AAAAA0000 | I = bytecode[3:0] | 16 |
-| 4 | %AAAAA111F | %AAAAA0000 | I = bytecode[7:4] | 16 |
++------+----------------+-------------+-------------------+-----------+
+| Bits | SETQ D Pattern | LUT Base    | Index Calculation | Bytecodes |
++======+================+=============+===================+===========+
+| 8    | %A0000000F     | %A00000000  | I = bytecode[7:0] | 256       |
++------+----------------+-------------+-------------------+-----------+
+| 7    | %AAxx0010F     | %AA0000000  | I = bytecode[6:0] | 128       |
++------+----------------+-------------+-------------------+-----------+
+| 7    | %AAxx0011F     | %AA0000000  | I = bytecode[7:1] | 128       |
++------+----------------+-------------+-------------------+-----------+
+| 6    | %AAAx1010F     | %AAA000000  | I = bytecode[5:0] | 64        |
++------+----------------+-------------+-------------------+-----------+
+| 6    | %AAAx1011F     | %AAA000000  | I = bytecode[7:2] | 64        |
++------+----------------+-------------+-------------------+-----------+
+| 5    | %AAAAx100F     | %AAAA00000  | I = bytecode[4:0] | 32        |
++------+----------------+-------------+-------------------+-----------+
+| 5    | %AAAAx101F     | %AAAA00000  | I = bytecode[7:3] | 32        |
++------+----------------+-------------+-------------------+-----------+
+| 4    | %AAAAA110F     | %AAAAA0000  | I = bytecode[3:0] | 16        |
++------+----------------+-------------+-------------------+-----------+
+| 4    | %AAAAA111F     | %AAAAA0000  | I = bytecode[7:4] | 16        |
++------+----------------+-------------+-------------------+-----------+
 
 The A bits specify the LUT base address where the dispatch table begins. The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code.
 
@@ -3633,7 +3687,7 @@ Absolute Value
 [Arithmetic Operations](#arithmetic-operations) - Returns the absolute (non-negative) value of a signed number.
 :::
 
-**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -3716,8 +3770,8 @@ Add and Set Counter Event Trigger
 [Events and Timing](#events-and-timing) - Sets counter event trigger to Dest + Src for time-based events.
 :::
 
-**ADDCT1**  *Dest, {#}Src*
-**ADDCT2**  *Dest, {#}Src*
+**ADDCT1**  *Dest, {#}Src*\
+**ADDCT2**  *Dest, {#}Src*\
 **ADDCT3**  *Dest, {#}Src*
 
 ---
@@ -3965,7 +4019,7 @@ Alter Bit
 [Register Indirection](#register-indirection) - Alters next BITxxx instruction's target bit address.
 :::
 
-**ALTB**  *Dest, {#}Src*
+**ALTB**  *Dest, {#}Src*\
 **ALTB**  *Dest*
 
 ---
@@ -4013,7 +4067,7 @@ Alter Destination
 [Register Indirection](#register-indirection) - Alters next instruction's Dest field.
 :::
 
-**ALTD**  *Dest, {#}Src*
+**ALTD**  *Dest, {#}Src*\
 **ALTD**  *Dest*
 
 ---
@@ -4055,7 +4109,7 @@ Alter Get Byte
 [Register Indirection](#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
-**ALTGB**  *Dest, {#}Src*
+**ALTGB**  *Dest, {#}Src*\
 **ALTGB**  *Dest*
 
 ---
@@ -4101,7 +4155,7 @@ Alter Get Nibble
 [Register Indirection](#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
-**ALTGN**  *Dest, {#}Src*
+**ALTGN**  *Dest, {#}Src*\
 **ALTGN**  *Dest*
 
 ---
@@ -4147,7 +4201,7 @@ Alter Get Word
 [Register Indirection](#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
-**ALTGW**  *Dest, {#}Src*
+**ALTGW**  *Dest, {#}Src*\
 **ALTGW**  *Dest*
 
 ---
@@ -4193,7 +4247,7 @@ Alter Instruction
 [Register Indirection](#register-indirection) - Alters multiple fields of the next instruction.
 :::
 
-**ALTI**  *Dest, {#}Src*
+**ALTI**  *Dest, {#}Src*\
 **ALTI**  *Dest*
 
 ---
@@ -4233,7 +4287,7 @@ Alter Result
 [Register Indirection](#register-indirection) - Alters next instruction's result write address.
 :::
 
-**ALTR**  *Dest, {#}Src*
+**ALTR**  *Dest, {#}Src*\
 **ALTR**  *Dest*
 
 ---
@@ -4277,7 +4331,7 @@ Alter Source
 [Register Indirection](#register-indirection) - Alters next instruction's Src field.
 :::
 
-**ALTS**  *Dest, {#}Src*
+**ALTS**  *Dest, {#}Src*\
 **ALTS**  *Dest*
 
 ---
@@ -4319,7 +4373,7 @@ Alter Set Byte
 [Register Indirection](#register-indirection) - Alters next SETBYTE instruction's target byte.
 :::
 
-**ALTSB**  *Dest, {#}Src*
+**ALTSB**  *Dest, {#}Src*\
 **ALTSB**  *Dest*
 
 ---
@@ -4363,7 +4417,7 @@ Alter Set Nibble
 [Register Indirection](#register-indirection) - Alters next SETNIB instruction's target nibble.
 :::
 
-**ALTSN**  *Dest, {#}Src*
+**ALTSN**  *Dest, {#}Src*\
 **ALTSN**  *Dest*
 
 ---
@@ -4409,7 +4463,7 @@ Alter Set Word
 [Register Indirection](#register-indirection) - Alters next SETWORD instruction's target word.
 :::
 
-**ALTSW**  *Dest, {#}Src*
+**ALTSW**  *Dest, {#}Src*\
 **ALTSW**  *Dest*
 
 ---
@@ -4674,14 +4728,14 @@ This section contains all PASM2 instructions beginning with the letter B.
 
 ::: instrheader
 ## BITC / BITNC / BITZ / BITNZ {#bitc}
-Set Bit to Flag State {#bitnc} {#bitz} {#bitnz}
+Set Bit to Flag State
 
 [Arithmetic Operations](#arithmetic-operations) - Sets bits to match flag state.
 :::
 
-**BITC**  *Dest, {#}Src*  **{WCZ}**
-**BITNC**  *Dest, {#}Src*  **{WCZ}**
-**BITZ**  *Dest, {#}Src*  **{WCZ}**
+**BITC**  *Dest, {#}Src*  **{WCZ}**\
+**BITNC**  *Dest, {#}Src*  **{WCZ}**\
+**BITZ**  *Dest, {#}Src*  **{WCZ}**\
 **BITNZ**  *Dest, {#}Src*  **{WCZ}**
 
 ---
@@ -4913,7 +4967,7 @@ Bit Mask
 [Arithmetic Operations](#arithmetic-operations) - Generates an LSB-justified bit mask.
 :::
 
-**BMASK**  *Dest, {#}Src*
+**BMASK**  *Dest, {#}Src*\
 **BMASK**  *Dest*
 
 ---
@@ -4999,8 +5053,8 @@ Call Subroutine
 [Branching and Flow Control](#branching-and-flow-control) - Calls a subroutine and pushes return info to stack.
 :::
 
-**CALL**  *#Addr*
-**CALL**  *#\Addr*
+**CALL**  *#Addr*\
+**CALL**  *#\Addr*\
 **CALL**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -5043,8 +5097,8 @@ Call Subroutine via PTRA
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine using PTRA as stack pointer.
 :::
 
-**CALLA**  *#Addr*
-**CALLA**  *#\Addr*
+**CALLA**  *#Addr*\
+**CALLA**  *#\Addr*\
 **CALLA**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -5087,8 +5141,8 @@ Call Subroutine via PTRB
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine using PTRB as stack pointer.
 :::
 
-**CALLB**  *#Addr*
-**CALLB**  *#\Addr*
+**CALLB**  *#Addr*\
+**CALLB**  *#\Addr*\
 **CALLB**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -5131,8 +5185,8 @@ Call with Destination Register
 [Branching and Flow Control](#branching-and-flow-control) - Calls subroutine saving return info to a register.
 :::
 
-**CALLD**  *PA|PB|PTRA|PTRB, #Addr*
-**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
+**CALLD**  *PA|PB|PTRA|PTRB, #Addr*\
+**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*\
 **CALLD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -5919,7 +5973,7 @@ Decode Bit Position
 [Arithmetic Operations](#arithmetic-operations) - Generates a bitmask with a single bit set at the specified position.
 :::
 
-**DECOD**  *Dest, {#}Src*
+**DECOD**  *Dest, {#}Src*\
 **DECOD**  *Dest*
 
 ---
@@ -5960,7 +6014,7 @@ Set Pin Direction by C Flag {#dirnc}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
-**DIRC**  *{#}Dest*  **{WCZ}**
+**DIRC**  *{#}Dest*  **{WCZ}**\
 **DIRNC**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -6116,7 +6170,7 @@ Set Pin Direction by Z Flag {#dirnz}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
-**DIRZ**  *{#}Dest*  **{WCZ}**
+**DIRZ**  *{#}Dest*  **{WCZ}**\
 **DIRNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -6270,7 +6324,7 @@ Decrement and Jump If Zero {#djnz}
 [Branching and Flow Control](#branching-and-flow-control) - Decrements and conditionally jumps based on zero result.
 :::
 
-**DJZ**  *Dest, {#}Src*
+**DJZ**  *Dest, {#}Src*\
 **DJNZ**  *Dest, {#}Src*
 
 ---
@@ -6322,7 +6376,7 @@ Drive Pins by C Flag {#drvnc}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
-**DRVC**  *{#}Dest*  **{WCZ}**
+**DRVC**  *{#}Dest*  **{WCZ}**\
 **DRVNC**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -6484,7 +6538,7 @@ Drive Pins by Z Flag {#drvnz}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
-**DRVZ**  *{#}Dest*  **{WCZ}**
+**DRVZ**  *{#}Dest*  **{WCZ}**\
 **DRVNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -6576,7 +6630,7 @@ Encode Bit Position
 [Arithmetic Operations](#arithmetic-operations) - Returns the position of the highest set bit.
 :::
 
-**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ENCOD**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -6845,14 +6899,14 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 
 ::: instrheader
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
-Float with Output Preset by Flag {#fltnc} {#fltz} {#fltnz}
+Float with Output Preset by Flag
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
-**FLTC**  *{#}Dest*  **{WCZ}**
-**FLTNC**  *{#}Dest*  **{WCZ}**
-**FLTZ**  *{#}Dest*  **{WCZ}**
+**FLTC**  *{#}Dest*  **{WCZ}**\
+**FLTNC**  *{#}Dest*  **{WCZ}**\
+**FLTZ**  *{#}Dest*  **{WCZ}**\
 **FLTNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -7102,7 +7156,7 @@ Get Byte
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified byte from a 32-bit value.
 :::
 
-**GETBYTE**  *Dest, {#}Src, #Num*
+**GETBYTE**  *Dest, {#}Src, #Num*\
 **GETBYTE**  *Dest*
 
 ---
@@ -7175,7 +7229,7 @@ Get Nibble
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified nibble from a 32-bit value.
 :::
 
-**GETNIB**  *Dest, {#}Src, #Num*
+**GETNIB**  *Dest, {#}Src, #Num*\
 **GETNIB**  *Dest*
 
 ---
@@ -7321,7 +7375,7 @@ Get Random Value
 [Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the COG's RNG.
 :::
 
-**GETRND**  *Dest*  **{WC|WZ|WCZ}**
+**GETRND**  *Dest*  **{WC|WZ|WCZ}**\
 **GETRND**  **{WC|WZ|WCZ}**
 
 ---
@@ -7398,7 +7452,7 @@ Get Word
 [Arithmetic Operations](#arithmetic-operations) - Extracts a specified word from a 32-bit value.
 :::
 
-**GETWORD**  *Dest, {#}Src, #Num*
+**GETWORD**  *Dest, {#}Src, #Num*\
 **GETWORD**  *Dest*
 
 ---
@@ -7560,7 +7614,7 @@ Increment and Jump If Zero {#ijnz}
 [Branching and Flow Control](#branching-and-flow-control) - Increments and conditionally jumps based on the result.
 :::
 
-**IJZ**  *Dest, {#}Src*
+**IJZ**  *Dest, {#}Src*\
 **IJNZ**  *Dest, {#}Src*
 
 ---
@@ -7671,150 +7725,167 @@ This section contains all PASM2 instructions beginning with the letter J.
 
 
 ::: instrheader
-## JATN {#jatn}
-Jump If Attention Set
+## JATN / JNATN {#jatn}
+Jump If Attention Set / Clear {#jnatn}
 
-[Events and Timing](#events-and-timing) - Jumps if the ATN event flag is set.
+[Events and Timing](#events-and-timing) - Jumps based on ATN event flag state.
 :::
 
-**JATN**  *{#}S*
+**JATN**  *{#}S*\
+**JNATN**  *{#}S*
 
 ---
 
-**Result:** If the ATN event flag is set, PC is set to the address specified by S.
+**Result:** JATN jumps if the ATN event flag is set; JNATN jumps if the ATN event flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+
+PC is written only when the condition is met (flag set for JATN, flag clear for JNATN).
 
 
-**Related:** [JNATN](#jnatn), [COGATN](#cogatn), [POLLATN](#pollatn)
+**Related:** [COGATN](#cogatn), [POLLATN](#pollatn)
 
 **Explanation:**
 
-JATN checks the ATN (attention) event flag and conditionally jumps to the address specified by S if the flag is set. The ATN event flag indicates that one or more other cogs are requesting this cog's attention via the COGATN instruction.
+JATN checks the ATN (attention) event flag and conditionally jumps if the flag is set. JNATN performs the opposite test, jumping if the flag is clear. The ATN event flag indicates that one or more other cogs are requesting this cog's attention via the COGATN instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the ATN event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JATN is useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
+These instructions are useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
 
 
 
 ::: instrheader
-## JCT1 / JCT2 / JCT3 {#jct1}
-Jump If Counter Event Set {#jct2} {#jct3}
+## JCT1 / JCT2 / JCT3 / JNCT1 / JNCT2 / JNCT3 {#jct1}
+Jump If Counter Event Set / Clear {#jnct1}
 
-[Events and Timing](#events-and-timing) - Jumps if the counter event flag is set.
+[Events and Timing](#events-and-timing) - Jumps based on counter event flag state.
 :::
 
-**JCT1**  *{#}S*
-**JCT2**  *{#}S*
+**JCT1**  *{#}S*\
+**JCT2**  *{#}S*\
 **JCT3**  *{#}S*
 
+**JNCT1**  *{#}S*\
+**JNCT2**  *{#}S*\
+**JNCT3**  *{#}S*
+
 ---
 
-**Result:** If the CTn event flag is set, PC is set to the address specified by S.
+**Result:** JCTn jumps if the CTn event flag is set; JNCTn jumps if the CTn event flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
 
-```{=latex}
-\textsuperscript{1} PC is written only when the CTn event flag is set.
-```
+PC is written only when the condition is met (flag set for JCTn, flag clear for JNCTn).
 
 
-**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
+**Related:** [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. Each CTn event flag is automatically set when the system counter reaches the CTn target value that was previously configured using the corresponding ADDCTn instruction.
+JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. JNCT1, JNCT2, and JNCT3 perform the opposite test, jumping if the flag is clear. Each CTn event flag is automatically set when the system counter reaches the CTn target value that was previously configured using the corresponding ADDCTn instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. These instructions are commonly used for timing loops, delays, and periodic task scheduling.
+The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. JCTn instructions are commonly used for timing loops that wait until a counter fires, while JNCTn instructions enable polling loops that continue until a counter event occurs.
 
 
 
 ::: instrheader
-## JFBW {#jfbw}
-Jump If FIFO Block Wrap Set
+## JFBW / JNFBW {#jfbw}
+Jump If FIFO Block Wrap Set / Clear {#jnfbw}
 
-[Events and Timing](#events-and-timing) - Jumps if the FIFO block wrap event flag is set.
+[Events and Timing](#events-and-timing) - Jumps based on FIFO block wrap event flag state.
 :::
 
-**JFBW**  *{#}S*
+**JFBW**  *{#}S*\
+**JNFBW**  *{#}S*
 
 ---
 
-**Result:** If the FIFO interface block wrap event flag is set, PC is set to the address specified by S.
+**Result:** JFBW jumps if the FIFO block wrap event flag is set; JNFBW jumps if the flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+
+PC is written only when the condition is met.
 
 
-**Related:** [JNFBW](#jnfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
+**Related:** [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
 
 **Explanation:**
 
-JFBW checks the FIFO interface block wrap event flag and conditionally jumps to the address specified by S if the flag is set. This event flag is set when a FIFO read or write operation wraps around the configured block boundary.
+JFBW checks the FIFO interface block wrap event flag and jumps if set. JNFBW performs the opposite test, jumping if clear. This event flag is set when a FIFO read or write operation wraps around the configured block boundary.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the FIFO interface block wrap event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JFBW is useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface, allowing code to respond immediately when a block boundary has been crossed.
+These instructions are useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface.
 
 
 
 ::: instrheader
-## JINT {#jint}
-Jump If Interrupt Set
+## JINT / JNINT {#jint}
+Jump If Interrupt Set / Clear {#jnint}
 
-[Events and Timing](#events-and-timing) - Jumps if the INT event flag is set.
+[Events and Timing](#events-and-timing) - Jumps based on INT event flag state.
 :::
 
-**JINT**  *{#}S*
+**JINT**  *{#}S*\
+**JNINT**  *{#}S*
 
 ---
 
-**Result:** If the INT event flag is set, PC is set to the address specified by S.
+**Result:** JINT jumps if the INT event flag is set; JNINT jumps if the flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+
+PC is written only when the condition is met.
 
 
-**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](#setint1)
+**Related:** [POLLINT](#pollint), [SETINT1/2/3](#setint1)
 
 **Explanation:**
 
-JINT checks the INT (interrupt) event flag and conditionally jumps to the address specified by S if the flag is set. The INT event flag indicates that a hardware interrupt condition is pending, as configured by one of the SETINT instructions.
+JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the opposite test, jumping if clear. The INT event flag indicates that a hardware interrupt condition is pending, as configured by one of the SETINT instructions.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the INT event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JINT provides a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow rather than using asynchronous interrupt handling.
+These instructions provide a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow.
 
 
 
@@ -7825,8 +7896,8 @@ Jump
 [Branching and Flow Control](#branching-and-flow-control) - Unconditionally jumps to a new address.
 :::
 
-**JMP**  *D*  **{WC/WZ/WCZ}**
-**JMP**  *#A*
+**JMP**  *D*  **{WC/WZ/WCZ}**\
+**JMP**  *#A*\
 **JMP**  *#\A*
 
 ---
@@ -7897,661 +7968,281 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 
 
 
-::: instrheader
-## JNATN {#jnatn}
-Jump If Attention Clear
-
-[Events and Timing](#events-and-timing) - Jumps if the ATN event flag is clear.
-:::
-
-**JNATN**  *{#}S*
-
----
-
-**Result:** If the ATN event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JATN](#jatn), [COGATN](#cogatn), [POLLATN](#pollatn)
-
-**Explanation:**
-
-JNATN checks the ATN (attention) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JATN, allowing code to jump when no other cog is requesting attention.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the ATN event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNATN is useful for implementing polling loops that wait until the ATN flag is clear before proceeding with other operations.
 
 
 
 ::: instrheader
-## JNCT1 / JNCT2 / JNCT3 {#jnct1}
-Jump If Counter Event Clear {#jnct2} {#jnct3}
+## JSE1 / JSE2 / JSE3 / JSE4 / JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jse1}
+Jump If Selectable Event Set / Clear {#jnse1}
 
-[Events and Timing](#events-and-timing) - Jumps if the counter event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps based on selectable event flag state.
 :::
 
-**JNCT1**  *{#}S*
-**JNCT2**  *{#}S*
-**JNCT3**  *{#}S*
-
----
-
-**Result:** If the CTn event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-```{=latex}
-\textsuperscript{1} PC is written only when the CTn event flag is clear.
-```
-
-
-**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
-
-**Explanation:**
-
-JNCT1, JNCT2, and JNCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JCT1/2/3, allowing code to jump when the corresponding counter event has not yet occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-These instructions are useful for implementing polling loops that continue until a counter event occurs, or for skipping code that should only execute before a specific time. The P2's three independent counter event polling mechanisms enable sophisticated timing control with minimal code overhead.
-
-
-
-::: instrheader
-## JNFBW {#jnfbw}
-Jump If FIFO Block Wrap Clear
-
-[Events and Timing](#events-and-timing) - Jumps if the FIFO block wrap event flag is clear.
-:::
-
-**JNFBW**  *{#}S*
-
----
-
-**Result:** If the FIFO interface block wrap event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JFBW](#jfbw), [RFBYTE](#rfbyte), [WFBYTE](#wfbyte), [SETQ2](#setq2)
-
-**Explanation:**
-
-JNFBW checks the FIFO interface block wrap event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JFBW, allowing code to jump when no block wrap has occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the FIFO interface block wrap event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNFBW is useful for polling loops that wait until a block wrap occurs, or for conditional code that should only execute when within a block boundary.
-
-
-
-::: instrheader
-## JNINT {#jnint}
-Jump If Interrupt Clear
-
-[Events and Timing](#events-and-timing) - Jumps if the INT event flag is clear.
-:::
-
-**JNINT**  *{#}S*
-
----
-
-**Result:** If the INT event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](#setint1)
-
-**Explanation:**
-
-JNINT checks the INT (interrupt) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JINT, allowing code to jump when no interrupt is pending.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the INT event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNINT is useful for polling loops that wait until an interrupt occurs, or for implementing interrupt-safe critical sections that should only execute when interrupts are not pending.
-
-
-
-::: instrheader
-## JNPAT {#jnpat}
-Jump If Pattern Match Event Clear
-
-[Events and Timing](#events-and-timing) - Jumps if the PAT event flag is clear.
-:::
-
-**JNPAT**  *{#}S*
-
----
-
-**Result:** If the PAT event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JPAT](#jpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
-
-**Explanation:**
-
-JNPAT checks the PAT (pattern match) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JPAT, allowing code to jump when no pattern match has occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the PAT event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins, or for conditional logic that should execute only when the pattern has not yet matched.
-
-
-
-::: instrheader
-## JNQMT {#jnqmt}
-Jump If CORDIC Empty Event Clear
-
-[Events and Timing](#events-and-timing) - Jumps if the CORDIC-read-but-empty event flag is clear.
-:::
-
-**JNQMT**  *{#}S*
-
----
-
-**Result:** If the CORDIC-read-but-empty event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JQMT](#jqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
-
-**Explanation:**
-
-JNQMT checks the CORDIC-read-but-empty event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JQMT, allowing code to jump when the CORDIC result is ready or has not been prematurely read.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CORDIC-read-but-empty event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
-
-
-
-::: instrheader
-## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
-Jump If Selectable Event Clear {#jnse2} {#jnse3} {#jnse4}
-
-[Events and Timing](#events-and-timing) - Jumps if the selectable event flag is clear.
-:::
-
-**JNSE1**  *{#}S*
-**JNSE2**  *{#}S*
-**JNSE3**  *{#}S*
+**JSE1**  *{#}S*\
+**JSE2**  *{#}S*\
+**JSE3**  *{#}S*\
+**JSE4**  *{#}S*
+
+**JNSE1**  *{#}S*\
+**JNSE2**  *{#}S*\
+**JNSE3**  *{#}S*\
 **JNSE4**  *{#}S*
 
 ---
 
-**Result:** If the SEn event flag is clear, PC is set to the address specified by S.
+**Result:** JSEn jumps if the SEn event flag is set; JNSEn jumps if the SEn event flag is clear.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
 
-```{=latex}
-\textsuperscript{1} PC is written only when the SEn event flag is clear.
-```
+PC is written only when the condition is met (flag set for JSEn, flag clear for JNSEn).
 
 
-**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
+**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
-JNSE1, JNSE2, JNSE3, and JNSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JSE1/2/3/4, allowing code to jump when the corresponding selectable event has not occurred.
+JSE1, JSE2, JSE3, and JSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is set. JNSE1, JNSE2, JNSE3, and JNSE4 perform the opposite test, jumping if the flag is clear. Each selectable event can be configured to detect various hardware conditions using the corresponding SETSE instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-The P2 provides four selectable event sources, each configurable via SETSE instructions to detect various hardware conditions. These polling mechanisms provide maximum flexibility for event-driven control flows.
+The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
 
 
 
 ::: instrheader
-## JNXFI {#jnxfi}
-Jump If Streamer Finished Event Clear
+## JPAT / JNPAT {#jpat}
+Jump If Pattern Match Event Set / Clear {#jnpat}
 
-[Events and Timing](#events-and-timing) - Jumps if the XFI event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps based on PAT event flag state.
 :::
 
+**JPAT**  *{#}S*\
+**JNPAT**  *{#}S*
+
+---
+
+**Result:** PC is set to the address specified by S if the PAT event flag is set (JPAT) or clear (JNPAT).
+
+- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+
+
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+
+**Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
+
+**Explanation:**
+
+JPAT and JNPAT check the PAT (pattern match) event flag and conditionally jump to the address specified by S. JPAT jumps if the flag is set; JNPAT jumps if it is clear. The PAT event flag is set when the I/O pins match a pattern previously configured with the SETPAT instruction.
+
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
+
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+
+JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns. JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins.
+
+
+
+::: instrheader
+## JQMT / JNQMT {#jqmt}
+Jump If CORDIC Empty Event Set / Clear {#jnqmt}
+
+[Events and Timing](#events-and-timing) - Jumps based on CORDIC-read-but-empty event flag state.
+:::
+
+**JQMT**  *{#}S*\
+**JNQMT**  *{#}S*
+
+---
+
+**Result:** PC is set to the address specified by S if the CORDIC-read-but-empty event flag is set (JQMT) or clear (JNQMT).
+
+- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+
+
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+
+
+**Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
+
+**Explanation:**
+
+JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump to the address specified by S. JQMT jumps if the flag is set; JNQMT jumps if it is clear. This event flag is set when code attempts to read CORDIC results before the calculation has completed, indicating a timing error.
+
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
+
+The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
+
+JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results. JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
+
+
+
+
+::: instrheader
+## JXFI / JNXFI {#jxfi}
+Jump If Streamer Finished Event Set / Clear {#jnxfi}
+
+[Events and Timing](#events-and-timing) - Jumps based on XFI event flag state.
+:::
+
+**JXFI**  *{#}S*\
 **JNXFI**  *{#}S*
 
 ---
 
-**Result:** If the XFI event flag is clear, PC is set to the address specified by S.
+**Result:** PC is set to the address specified by S if the XFI event flag is set (JXFI) or clear (JNXFI).
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXFI](#jxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
 
 **Explanation:**
 
-JNXFI checks the XFI (streamer finished) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JXFI, allowing code to jump when the streamer has not yet finished.
+JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally jump to the address specified by S. JXFI jumps if the flag is set; JNXFI jumps if it is clear. The XFI event flag is set when the streamer completes its current operation.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XFI event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNXFI is useful for polling loops that wait until the streamer completes its operation, synchronizing code execution with streamer activity.
+JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes. JNXFI is useful for polling loops that wait until the streamer completes its operation.
 
 
 
 ::: instrheader
-## JNXMT {#jnxmt}
-Jump If Streamer Empty Event Clear
+## JXMT / JNXMT {#jxmt}
+Jump If Streamer Empty Event Set / Clear {#jnxmt}
 
-[Events and Timing](#events-and-timing) - Jumps if the XMT event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps based on XMT event flag state.
 :::
 
+**JXMT**  *{#}S*\
 **JNXMT**  *{#}S*
 
 ---
 
-**Result:** If the XMT event flag is clear, PC is set to the address specified by S.
+**Result:** PC is set to the address specified by S if the XMT event flag is set (JXMT) or clear (JNXMT).
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXMT](#jxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
 
 **Explanation:**
 
-JNXMT checks the XMT (streamer empty) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JXMT, allowing code to jump when the streamer still has data to transmit.
+JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump to the address specified by S. JXMT jumps if the flag is set; JNXMT jumps if it is clear. The XMT event flag is set when the streamer's internal buffer becomes empty and needs to be refilled.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XMT event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data, avoiding underrun conditions.
+JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties. JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data.
 
 
 
 ::: instrheader
-## JNXRL {#jnxrl}
-Jump If Streamer LUT Rollover Event Clear
+## JXRL / JNXRL {#jxrl}
+Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 
-[Events and Timing](#events-and-timing) - Jumps if the XRL event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps based on XRL event flag state.
 :::
 
+**JXRL**  *{#}S*\
 **JNXRL**  *{#}S*
 
 ---
 
-**Result:** If the XRL event flag is clear, PC is set to the address specified by S.
+**Result:** PC is set to the address specified by S if the XRL event flag is set (JXRL) or clear (JNXRL).
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRL](#jxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
 
 **Explanation:**
 
-JNXRL checks the XRL (streamer LUT RAM rollover) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JXRL, allowing code to jump when the streamer LUT RAM address has not rolled over.
+JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditionally jump to the address specified by S. JXRL jumps if the flag is set; JNXRL jumps if it is clear. The XRL event flag is set when the streamer's LUT RAM address pointer rolls over from the end back to the beginning of the configured range.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XRL event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNXRL is useful for implementing circular buffer management for streamer operations using LUT RAM, allowing code to detect when a buffer boundary has not yet been crossed.
+JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, detecting when a complete cycle through the buffer has occurred. JNXRL is useful for detecting when a buffer boundary has not yet been crossed.
 
 
 
 ::: instrheader
-## JNXRO {#jnxro}
-Jump If Streamer NCO Rollover Event Clear
+## JXRO / JNXRO {#jxro}
+Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 
-[Events and Timing](#events-and-timing) - Jumps if the XRO event flag is clear.
+[Events and Timing](#events-and-timing) - Jumps based on XRO event flag state.
 :::
 
+**JXRO**  *{#}S*\
 **JNXRO**  *{#}S*
 
 ---
 
-**Result:** If the XRO event flag is clear, PC is set to the address specified by S.
+**Result:** PC is set to the address specified by S if the XRO event flag is set (JXRO) or clear (JNXRO).
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
+| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
 
 
-**Related:** [JXRO](#jxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
-
-**Explanation:**
-
-JNXRO checks the XRO (streamer NCO rollover) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JXRO, allowing code to jump when the streamer's NCO (numerically controlled oscillator) has not rolled over.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XRO event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNXRO is useful for timing-sensitive streamer applications where code needs to synchronize with or detect the absence of NCO rollovers in the streaming operation.
-
-
-
-::: instrheader
-## JPAT {#jpat}
-Jump If Pattern Match Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the PAT event flag is set.
-:::
-
-**JPAT**  *{#}S*
-
----
-
-**Result:** If the PAT event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNPAT](#jnpat), [SETPAT](#setpat), [POLLPAT](#pollpat)
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
 
 **Explanation:**
 
-JPAT checks the PAT (pattern match) event flag and conditionally jumps to the address specified by S if the flag is set. The PAT event flag is set when the I/O pins match a pattern previously configured with the SETPAT instruction.
+JXRO and JNXRO check the XRO (streamer NCO rollover) event flag and conditionally jump to the address specified by S. JXRO jumps if the flag is set; JNXRO jumps if it is clear. The XRO event flag is set when the streamer's numerically controlled oscillator (NCO) rolls over, which occurs at regular intervals determined by the NCO frequency setting.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the PAT event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns, enabling efficient event-driven programming without continuous polling.
-
-
-
-::: instrheader
-## JQMT {#jqmt}
-Jump If CORDIC Empty Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the CORDIC-read-but-empty event flag is set.
-:::
-
-**JQMT**  *{#}S*
-
----
-
-**Result:** If the CORDIC-read-but-empty event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNQMT](#jnqmt), [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
-
-**Explanation:**
-
-JQMT checks the CORDIC-read-but-empty event flag and conditionally jumps to the address specified by S if the flag is set. This event flag is set when code attempts to read CORDIC results before the calculation has completed, indicating a timing error.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CORDIC-read-but-empty event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results, which can help debug timing issues in mathematical code.
-
-
-
-::: instrheader
-## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
-Jump If Selectable Event Set {#jse2} {#jse3} {#jse4}
-
-[Events and Timing](#events-and-timing) - Jumps if the selectable event flag is set.
-:::
-
-**JSE1**  *{#}S*
-**JSE2**  *{#}S*
-**JSE3**  *{#}S*
-**JSE4**  *{#}S*
-
----
-
-**Result:** If the SEn event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-```{=latex}
-\textsuperscript{1} PC is written only when the SEn event flag is set.
-```
-
-
-**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
-
-**Explanation:**
-
-JSE1, JSE2, JSE3, and JSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is set. Each selectable event can be configured to detect various hardware conditions using the corresponding SETSE instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications.
-
-
-
-::: instrheader
-## JXFI {#jxfi}
-Jump If Streamer Finished Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the XFI event flag is set.
-:::
-
-**JXFI**  *{#}S*
-
----
-
-**Result:** If the XFI event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNXFI](#jnxfi), [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
-
-**Explanation:**
-
-JXFI checks the XFI (streamer finished) event flag and conditionally jumps to the address specified by S if the flag is set. The XFI event flag is set when the streamer completes its current operation.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XFI event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes, enabling efficient streamer-driven workflows.
-
-
-
-::: instrheader
-## JXMT {#jxmt}
-Jump If Streamer Empty Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the XMT event flag is set.
-:::
-
-**JXMT**  *{#}S*
-
----
-
-**Result:** If the XMT event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNXMT](#jnxmt), [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
-
-**Explanation:**
-
-JXMT checks the XMT (streamer empty) event flag and conditionally jumps to the address specified by S if the flag is set. The XMT event flag is set when the streamer's internal buffer becomes empty and needs to be refilled.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XMT event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties, preventing gaps or underruns in the output stream.
-
-
-
-::: instrheader
-## JXRL {#jxrl}
-Jump If Streamer LUT Rollover Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the XRL event flag is set.
-:::
-
-**JXRL**  *{#}S*
-
----
-
-**Result:** If the XRL event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNXRL](#jnxrl), [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
-
-**Explanation:**
-
-JXRL checks the XRL (streamer LUT RAM rollover) event flag and conditionally jumps to the address specified by S if the flag is set. The XRL event flag is set when the streamer's LUT RAM address pointer rolls over from the end back to the beginning of the configured range.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XRL event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, allowing code to detect when a complete cycle through the buffer has occurred.
-
-
-
-::: instrheader
-## JXRO {#jxro}
-Jump If Streamer NCO Rollover Event Set
-
-[Events and Timing](#events-and-timing) - Jumps if the XRO event flag is set.
-:::
-
-**JXRO**  *{#}S*
-
----
-
-**Result:** If the XRO event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-
-| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-
-
-**Related:** [JNXRO](#jnxro), [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
-
-**Explanation:**
-
-JXRO checks the XRO (streamer NCO rollover) event flag and conditionally jumps to the address specified by S if the flag is set. The XRO event flag is set when the streamer's numerically controlled oscillator (NCO) rolls over, which occurs at regular intervals determined by the NCO frequency setting.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the XRO event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers, such as sample-rate based operations or periodic streamer updates.
+JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers. JNXRO is useful for detecting the absence of NCO rollovers in the streaming operation.
 
 
 
@@ -8568,7 +8259,7 @@ Load Address
 [Hub Memory Access](#hub-memory-access) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
 :::
 
-**LOC**  *PA/PB/PTRA/PTRB, #A*
+**LOC**  *PA/PB/PTRA/PTRB, #A*\
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
 
 ---
@@ -9225,14 +8916,14 @@ For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instructi
 
 ::: instrheader
 ## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
-Multiplex Flag To Bits {#muxnc} {#muxz} {#muxnz}
+Multiplex Flag To Bits
 
 [Arithmetic Operations](#arithmetic-operations) - Sets selected bits to a flag value based on mask.
 :::
 
-**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
-**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**
-**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**\
+**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**\
+**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
 
 ---
@@ -9455,7 +9146,7 @@ Negate
 [Arithmetic Operations](#arithmetic-operations) - Negates a value, flipping its sign.
 :::
 
-**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -9489,21 +9180,21 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 ::: instrheader
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
-Conditional Negate {#negnc} {#negz} {#negnz}
+Conditional Negate
 
 [Arithmetic Operations](#arithmetic-operations) - Conditionally negates a value based on flag state.
 :::
 
-**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGNC**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGZ**  *Dest*  **{WC|WZ|WCZ}**
 
-**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -9552,7 +9243,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 ::: instrheader
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
-Cancel Interrupt {#nixint2} {#nixint3}
+Cancel Interrupt
 
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
@@ -9619,7 +9310,7 @@ Bitwise Not
 [Arithmetic Operations](#arithmetic-operations) - Inverts all bits in a value.
 :::
 
-**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NOT**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -9664,7 +9355,7 @@ Ones
 [Arithmetic Operations](#arithmetic-operations) - Counts the number of high bits (1s) in a value.
 :::
 
-**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
 
 ---
@@ -9747,14 +9438,14 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 
 ::: instrheader
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
-Output By Flag State {#outnc} {#outz} {#outnz}
+Output By Flag State
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
-**OUTC**  *{#}Dest*  **{WCZ}**
-**OUTNC**  *{#}Dest*  **{WCZ}**
-**OUTZ**  *{#}Dest*  **{WCZ}**
+**OUTC**  *{#}Dest*  **{WCZ}**\
+**OUTNC**  *{#}Dest*  **{WCZ}**\
+**OUTZ**  *{#}Dest*  **{WCZ}**\
 **OUTNZ**  *{#}Dest*  **{WCZ}**
 
 ---
@@ -9988,13 +9679,13 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 ::: instrheader
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
-Poll Counter Event {#pollct2} {#pollct3}
+Poll Counter Event
 
 [Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
 
-**POLLCT1**  **{WC|WZ|WCZ}**
-**POLLCT2**  **{WC|WZ|WCZ}**
+**POLLCT1**  **{WC|WZ|WCZ}**\
+**POLLCT2**  **{WC|WZ|WCZ}**\
 **POLLCT3**  **{WC|WZ|WCZ}**
 
 ---
@@ -10157,14 +9848,14 @@ This instruction enables error detection for CORDIC operations.
 
 ::: instrheader
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
-Poll Selectable Event {#pollse2} {#pollse3} {#pollse4}
+Poll Selectable Event
 
 [Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
 
-**POLLSE1**  **{WC|WZ|WCZ}**
-**POLLSE2**  **{WC|WZ|WCZ}**
-**POLLSE3**  **{WC|WZ|WCZ}**
+**POLLSE1**  **{WC|WZ|WCZ}**\
+**POLLSE2**  **{WC|WZ|WCZ}**\
+**POLLSE3**  **{WC|WZ|WCZ}**\
 **POLLSE4**  **{WC|WZ|WCZ}**
 
 ---
@@ -11270,7 +10961,7 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 ::: instrheader
 ## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
-Resume From Interrupt {#resi1} {#resi2} {#resi3}
+Resume From Interrupt
 
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
@@ -11412,7 +11103,7 @@ RETB is paired with CALLB for implementing software stacks in Hub memory, enabli
 
 ::: instrheader
 ## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
-Return From Interrupt {#reti1} {#reti2} {#reti3}
+Return From Interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
@@ -11760,7 +11451,7 @@ Rotate Byte Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a byte from source into destination register.
 :::
 
-**ROLBYTE**  *Dest, {#}Src, #N*
+**ROLBYTE**  *Dest, {#}Src, #N*\
 **ROLBYTE**  *Dest*
 
 ---
@@ -11795,7 +11486,7 @@ Rotate Nibble Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a nibble from source into destination register.
 :::
 
-**ROLNIB**  *Dest, {#}Src, #N*
+**ROLNIB**  *Dest, {#}Src, #N*\
 **ROLNIB**  *Dest*
 
 ---
@@ -11830,7 +11521,7 @@ Rotate Word Left Into Register
 [Arithmetic Operations](#arithmetic-operations) - Rotates a word from source into destination register.
 :::
 
-**ROLWORD**  *Dest, {#}Src, #N*
+**ROLWORD**  *Dest, {#}Src, #N*\
 **ROLWORD**  *Dest*
 
 ---
@@ -12079,7 +11770,7 @@ Set Byte
 [Arithmetic Operations](#arithmetic-operations) - Writes an 8-bit value to a specific byte position within a register.
 :::
 
-**SETBYTE**  *Dest, {#}Src, #N*
+**SETBYTE**  *Dest, {#}Src, #N*\
 **SETBYTE**  *{#}Src*
 
 ---
@@ -12317,13 +12008,13 @@ Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 rece
 
 ::: instrheader
 ## SETINT1 / SETINT2 / SETINT3 {#setint1}
-Set Interrupt Source (1, 2, Or 3) {#setint2} {#setint3}
+Set Interrupt Source (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Configures which event triggers the specified interrupt level.
 :::
 
-**SETINT1**  *{#}Dest*
-**SETINT2**  *{#}Dest*
+**SETINT1**  *{#}Dest*\
+**SETINT2**  *{#}Dest*\
 **SETINT3**  *{#}Dest*
 
 ---
@@ -12386,7 +12077,7 @@ Set Nibble
 [Arithmetic Operations](#arithmetic-operations) - Writes a 4-bit value to a specific nibble position within a register.
 :::
 
-**SETNIB**  *Dest, {#}Src, #N*
+**SETNIB**  *Dest, {#}Src, #N*\
 **SETNIB**  *{#}Src*
 
 ---
@@ -12667,14 +12358,14 @@ Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base
 
 ::: instrheader
 ## SETSE1 / SETSE2 / SETSE3 / SETSE4 {#setse1}
-Set Selectable Event (1, 2, 3, Or 4) {#setse2} {#setse3} {#setse4}
+Set Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
 
-**SETSE1**  *{#}Dest*
-**SETSE2**  *{#}Dest*
-**SETSE3**  *{#}Dest*
+**SETSE1**  *{#}Dest*\
+**SETSE2**  *{#}Dest*\
+**SETSE3**  *{#}Dest*\
 **SETSE4**  *{#}Dest*
 
 ---
@@ -12709,7 +12400,7 @@ Set Word
 [Arithmetic Operations](#arithmetic-operations) - Writes a 16-bit value to a specific word position within a register.
 :::
 
-**SETWORD**  *Dest, {#}Src, #N*
+**SETWORD**  *Dest, {#}Src, #N*\
 **SETWORD**  *{#}Src*
 
 ---
@@ -13250,14 +12941,14 @@ SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and store
 
 ::: instrheader
 ## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
-Conditional Sum {#sumnc} {#sumz} {#sumnz}
+Conditional Sum
 
 [Arithmetic Operations](#arithmetic-operations) - Conditionally adds or subtracts based on flag state.
 :::
 
-**SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-**SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
-**SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
+**SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
+**SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **SUMNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -13306,7 +12997,7 @@ Test
 [Arithmetic Operations](#arithmetic-operations) - Tests parity and zero state of a value.
 :::
 
-**TEST**  *Dest*  **{WC|WZ|WCZ}**
+**TEST**  *Dest*  **{WC|WZ|WCZ}**\
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
 ---
@@ -13350,9 +13041,9 @@ Test Bit
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
-**TESTB**  *Dest, {#}Src*  **WC/WZ**
-**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
-**TESTB**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTB**  *Dest, {#}Src*  **WC/WZ**\
+**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**\
+**TESTB**  *Dest, {#}Src*  **ORC/ORZ**\
 **TESTB**  *Dest, {#}Src*  **XORC/XORZ**
 
 ---
@@ -13397,9 +13088,9 @@ Test Bit Negated
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
-**TESTBN**  *Dest, {#}Src*  **WC/WZ**
-**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
-**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTBN**  *Dest, {#}Src*  **WC/WZ**\
+**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**\
+**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**\
 **TESTBN**  *Dest, {#}Src*  **XORC/XORZ**
 
 ---
@@ -13476,14 +13167,14 @@ Test Pin / Test Pin Negated {#testpn}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
-**TESTP**  *{#}Dest*  **WC/WZ**
-**TESTP**  *{#}Dest*  **ANDC/ANDZ**
-**TESTP**  *{#}Dest*  **ORC/ORZ**
+**TESTP**  *{#}Dest*  **WC/WZ**\
+**TESTP**  *{#}Dest*  **ANDC/ANDZ**\
+**TESTP**  *{#}Dest*  **ORC/ORZ**\
 **TESTP**  *{#}Dest*  **XORC/XORZ**
 
-**TESTPN**  *{#}Dest*  **WC/WZ**
-**TESTPN**  *{#}Dest*  **ANDC/ANDZ**
-**TESTPN**  *{#}Dest*  **ORC/ORZ**
+**TESTPN**  *{#}Dest*  **WC/WZ**\
+**TESTPN**  *{#}Dest*  **ANDC/ANDZ**\
+**TESTPN**  *{#}Dest*  **ORC/ORZ**\
 **TESTPN**  *{#}Dest*  **XORC/XORZ**
 
 ---
@@ -13534,7 +13225,7 @@ Test And Jump If Full / Not Full {#tjnf}
 [Branching and Flow Control](#branching-and-flow-control) - Tests for all bits set and conditionally jumps.
 :::
 
-**TJF**  *Dest, {#}Src*
+**TJF**  *Dest, {#}Src*\
 **TJNF**  *Dest, {#}Src*
 
 ---
@@ -13575,7 +13266,7 @@ Test And Jump If Signed / Not Signed {#tjns}
 [Branching and Flow Control](#branching-and-flow-control) - Tests sign bit and conditionally jumps.
 :::
 
-**TJS**  *Dest, {#}Src*
+**TJS**  *Dest, {#}Src*\
 **TJNS**  *Dest, {#}Src*
 
 ---
@@ -13616,7 +13307,7 @@ Test And Jump If Zero / Not Zero {#tjnz}
 [Branching and Flow Control](#branching-and-flow-control) - Tests for zero and conditionally jumps.
 :::
 
-**TJZ**  *Dest, {#}Src*
+**TJZ**  *Dest, {#}Src*\
 **TJNZ**  *Dest, {#}Src*
 
 ---
@@ -13701,7 +13392,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 ::: instrheader
 ## TRGINT1 / TRGINT2 / TRGINT3 {#trgint1}
-Trigger Interrupt (1, 2, Or 3) {#trgint2} {#trgint3}
+Trigger Interrupt (1, 2, Or 3)
 
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
@@ -13776,13 +13467,13 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ::: instrheader
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
-Wait For Counter Event {#waitct2} {#waitct3}
+Wait For Counter Event
 
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
 
-**WAITCT1**  **{WC|WZ|WCZ}**
-**WAITCT2**  **{WC|WZ|WCZ}**
+**WAITCT1**  **{WC|WZ|WCZ}**\
+**WAITCT2**  **{WC|WZ|WCZ}**\
 **WAITCT3**  **{WC|WZ|WCZ}**
 
 ---
@@ -13911,14 +13602,14 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 
 ::: instrheader
 ## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 {#waitse1}
-Wait For Selectable Event (1, 2, 3, Or 4) {#waitse2} {#waitse3} {#waitse4}
+Wait For Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
 
-**WAITSE1**  **{WC|WZ|WCZ}**
-**WAITSE2**  **{WC|WZ|WCZ}**
-**WAITSE3**  **{WC|WZ|WCZ}**
+**WAITSE1**  **{WC|WZ|WCZ}**\
+**WAITSE2**  **{WC|WZ|WCZ}**\
+**WAITSE3**  **{WC|WZ|WCZ}**\
 **WAITSE4**  **{WC|WZ|WCZ}**
 
 ---
@@ -14271,14 +13962,14 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 ::: instrheader
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
-Write Flag To Register {#wrnc} {#wrz} {#wrnz}
+Write Flag To Register
 
 [Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
 
-**WRC**  *Dest*
-**WRNC**  *Dest*
-**WRZ**  *Dest*
+**WRC**  *Dest*\
+**WRNC**  *Dest*\
+**WRZ**  *Dest*\
 **WRNZ**  *Dest*
 
 ---
@@ -17864,71 +17555,71 @@ Constants are combined using OR operations to build the complete configuration:
 
 ### Mode %00000 - %00011: Repository and DAC Dither Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_NORMAL | %00000 | %0000_0000_000_0000000000000_00_00000_0 | Normal I/O (smart pin disabled) |
-| P_REPOSITORY | %00001 | %0000_0000_000_0000000000000_00_00001_0 | Long repository (non-DAC mode) |
-| P_DAC_NOISE | %00001 | %0000_0000_000_0000000000000_00_00001_0 | DAC noise (DAC mode) |
-| P_DAC_DITHER_RND | %00010 | %0000_0000_000_0000000000000_00_00010_0 | DAC 16-bit random dither |
-| P_DAC_DITHER_PWM | %00011 | %0000_0000_000_0000000000000_00_00011_0 | DAC 16-bit PWM dither |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_NORMAL | %0000_0000_000_0000000000000_00_00000_0 | Normal I/O (smart pin disabled) |
+| P_REPOSITORY | %0000_0000_000_0000000000000_00_00001_0 | Long repository (non-DAC mode) |
+| P_DAC_NOISE | %0000_0000_000_0000000000000_00_00001_0 | DAC noise (DAC mode) |
+| P_DAC_DITHER_RND | %0000_0000_000_0000000000000_00_00010_0 | DAC 16-bit random dither |
+| P_DAC_DITHER_PWM | %0000_0000_000_0000000000000_00_00011_0 | DAC 16-bit PWM dither |
 
 ### Mode %00100 - %00111: Pulse and NCO Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_PULSE | %00100 | %0000_0000_000_0000000000000_00_00100_0 | Pulse/cycle output |
-| P_TRANSITION | %00101 | %0000_0000_000_0000000000000_00_00101_0 | Transition output |
-| P_NCO_FREQ | %00110 | %0000_0000_000_0000000000000_00_00110_0 | NCO frequency output |
-| P_NCO_DUTY | %00111 | %0000_0000_000_0000000000000_00_00111_0 | NCO duty cycle output |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_PULSE | %0000_0000_000_0000000000000_00_00100_0 | Pulse/cycle output |
+| P_TRANSITION | %0000_0000_000_0000000000000_00_00101_0 | Transition output |
+| P_NCO_FREQ | %0000_0000_000_0000000000000_00_00110_0 | NCO frequency output |
+| P_NCO_DUTY | %0000_0000_000_0000000000000_00_00111_0 | NCO duty cycle output |
 
 ### Mode %01000 - %01011: PWM Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_PWM_TRIANGLE | %01000 | %0000_0000_000_0000000000000_00_01000_0 | PWM with triangle carrier |
-| P_PWM_SAWTOOTH | %01001 | %0000_0000_000_0000000000000_00_01001_0 | PWM with sawtooth carrier |
-| P_PWM_SMPS | %01010 | %0000_0000_000_0000000000000_00_01010_0 | PWM for switch-mode power supplies |
-| P_QUADRATURE | %01011 | %0000_0000_000_0000000000000_00_01011_0 | A-B quadrature encoder input |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_PWM_TRIANGLE | %0000_0000_000_0000000000000_00_01000_0 | PWM with triangle carrier |
+| P_PWM_SAWTOOTH | %0000_0000_000_0000000000000_00_01001_0 | PWM with sawtooth carrier |
+| P_PWM_SMPS | %0000_0000_000_0000000000000_00_01010_0 | PWM for switch-mode power supplies |
+| P_QUADRATURE | %0000_0000_000_0000000000000_00_01011_0 | A-B quadrature encoder input |
 
 ### Mode %01100 - %01111: Counter Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_REG_UP | %01100 | %0000_0000_000_0000000000000_00_01100_0 | Inc on A-rise when B-high |
-| P_REG_UP_DOWN | %01101 | %0000_0000_000_0000000000000_00_01101_0 | Inc on A-rise/B-high, dec on A-rise/B-low |
-| P_COUNT_RISES | %01110 | %0000_0000_000_0000000000000_00_01110_0 | Count A-rises, optionally dec on B-rise |
-| P_COUNT_HIGHS | %01111 | %0000_0000_000_0000000000000_00_01111_0 | Count A-highs, optionally dec on B-high |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_REG_UP | %0000_0000_000_0000000000000_00_01100_0 | Inc on A-rise when B-high |
+| P_REG_UP_DOWN | %0000_0000_000_0000000000000_00_01101_0 | Inc on A-rise/B-high, dec on A-rise/B-low |
+| P_COUNT_RISES | %0000_0000_000_0000000000000_00_01110_0 | Count A-rises, optionally dec on B-rise |
+| P_COUNT_HIGHS | %0000_0000_000_0000000000000_00_01111_0 | Count A-highs, optionally dec on B-high |
 
 ### Mode %10000 - %10111: Timing Measurement Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_STATE_TICKS | %10000 | %0000_0000_000_0000000000000_00_10000_0 | For A-low/high states, count ticks |
-| P_HIGH_TICKS | %10001 | %0000_0000_000_0000000000000_00_10001_0 | For A-high states, count ticks |
-| P_EVENTS_TICKS | %10010 | %0000_0000_000_0000000000000_00_10010_0 | For X A-events, count ticks / timeout |
-| P_PERIODS_TICKS | %10011 | %0000_0000_000_0000000000000_00_10011_0 | For X periods of A, count ticks |
-| P_PERIODS_HIGHS | %10100 | %0000_0000_000_0000000000000_00_10100_0 | For X periods of A, count highs |
-| P_COUNTER_TICKS | %10101 | %0000_0000_000_0000000000000_00_10101_0 | For periods in X+ ticks, count ticks |
-| P_COUNTER_HIGHS | %10110 | %0000_0000_000_0000000000000_00_10110_0 | For periods in X+ ticks, count highs |
-| P_COUNTER_PERIODS | %10111 | %0000_0000_000_0000000000000_00_10111_0 | For periods in X+ ticks, count periods |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_STATE_TICKS | %0000_0000_000_0000000000000_00_10000_0 | For A-low/high states, count ticks |
+| P_HIGH_TICKS | %0000_0000_000_0000000000000_00_10001_0 | For A-high states, count ticks |
+| P_EVENTS_TICKS | %0000_0000_000_0000000000000_00_10010_0 | For X A-events, count ticks / timeout |
+| P_PERIODS_TICKS | %0000_0000_000_0000000000000_00_10011_0 | For X periods of A, count ticks |
+| P_PERIODS_HIGHS | %0000_0000_000_0000000000000_00_10100_0 | For X periods of A, count highs |
+| P_COUNTER_TICKS | %0000_0000_000_0000000000000_00_10101_0 | For periods in X+ ticks, count ticks |
+| P_COUNTER_HIGHS | %0000_0000_000_0000000000000_00_10110_0 | For periods in X+ ticks, count highs |
+| P_COUNTER_PERIODS | %0000_0000_000_0000000000000_00_10111_0 | For periods in X+ ticks, count periods |
 
 ### Mode %11000 - %11011: ADC and USB Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_ADC | %11000 | %0000_0000_000_0000000000000_00_11000_0 | ADC sample/filter/capture (internal clock) |
-| P_ADC_EXT | %11001 | %0000_0000_000_0000000000000_00_11001_0 | ADC sample/filter/capture (external clock) |
-| P_ADC_SCOPE | %11010 | %0000_0000_000_0000000000000_00_11010_0 | ADC oscilloscope with trigger |
-| P_USB_PAIR | %11011 | %0000_0000_000_0000000000000_00_11011_0 | USB D+/D- pin pair |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_ADC | %0000_0000_000_0000000000000_00_11000_0 | ADC sample/filter/capture (internal clock) |
+| P_ADC_EXT | %0000_0000_000_0000000000000_00_11001_0 | ADC sample/filter/capture (external clock) |
+| P_ADC_SCOPE | %0000_0000_000_0000000000000_00_11010_0 | ADC oscilloscope with trigger |
+| P_USB_PAIR | %0000_0000_000_0000000000000_00_11011_0 | USB D+/D- pin pair |
 
 ### Mode %11100 - %11111: Serial Communication Modes
 
-| Constant | Mode | Value | Description |
-|----------|------|-------|-------------|
-| P_SYNC_TX | %11100 | %0000_0000_000_0000000000000_00_11100_0 | Synchronous serial transmit |
-| P_SYNC_RX | %11101 | %0000_0000_000_0000000000000_00_11101_0 | Synchronous serial receive |
-| P_ASYNC_TX | %11110 | %0000_0000_000_0000000000000_00_11110_0 | Asynchronous serial transmit |
-| P_ASYNC_RX | %11111 | %0000_0000_000_0000000000000_00_11111_0 | Asynchronous serial receive |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| P_SYNC_TX | %0000_0000_000_0000000000000_00_11100_0 | Synchronous serial transmit |
+| P_SYNC_RX | %0000_0000_000_0000000000000_00_11101_0 | Synchronous serial receive |
+| P_ASYNC_TX | %0000_0000_000_0000000000000_00_11110_0 | Asynchronous serial transmit |
+| P_ASYNC_RX | %0000_0000_000_0000000000000_00_11111_0 | Asynchronous serial receive |
 
 
 
@@ -18140,13 +17831,24 @@ These modes capture data from pins/ADCs and write to hub RAM via WRFAST FIFO.
 
 These modes capture ADC samples and optionally write to hub RAM.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| X_1ADC8_0P_1DAC8_WFBYTE | %1111_0000_0000_0010 << 16 | 1 ADC to 8-bit, 0 pins, 1 DAC, write byte |
-| X_1ADC8_8P_2DAC8_WFWORD | %1111_0000_0000_0011 << 16 | 1 ADC to 8-bit, 8 pins, 2 DACs, write word |
-| X_2ADC8_0P_2DAC8_WFWORD | %1111_0000_0000_0100 << 16 | 2 ADCs to 8-bit, 0 pins, 2 DACs, write word |
-| X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 << 16 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
-| X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 << 16 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
++----------------------------+------------------------------+------------------------------------------+
+| Constant                   | Value                        | Description                              |
++============================+==============================+==========================================+
+| X_1ADC8_0P_1DAC8_WFBYTE    | %1111_0000_0000_0010 << 16   | 1 ADC to 8-bit, 0 pins, 1 DAC,           |
+|                            |                              | write byte                               |
++----------------------------+------------------------------+------------------------------------------+
+| X_1ADC8_8P_2DAC8_WFWORD    | %1111_0000_0000_0011 << 16   | 1 ADC to 8-bit, 8 pins, 2 DACs,          |
+|                            |                              | write word                               |
++----------------------------+------------------------------+------------------------------------------+
+| X_2ADC8_0P_2DAC8_WFWORD    | %1111_0000_0000_0100 << 16   | 2 ADCs to 8-bit, 0 pins, 2 DACs,         |
+|                            |                              | write word                               |
++----------------------------+------------------------------+------------------------------------------+
+| X_2ADC8_16P_4DAC8_WFLONG   | %1111_0000_0000_0101 << 16   | 2 ADCs to 8-bit, 16 pins, 4 DACs,        |
+|                            |                              | write long                               |
++----------------------------+------------------------------+------------------------------------------+
+| X_4ADC8_0P_4DAC8_WFLONG    | %1111_0000_0000_0110 << 16   | 4 ADCs to 8-bit, 0 pins, 4 DACs,         |
+|                            |                              | write long                               |
++----------------------------+------------------------------+------------------------------------------+
 
 
 
@@ -18169,24 +17871,47 @@ These flags modify Streamer behavior and are combined with mode constants using 
 
 The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) are active and how they're configured. The naming convention uses X for disabled channels, 0/1 for channel values, and N suffix for inverted output.
 
-| Constant | Value | Description |
-|----------|-------|-------------|
-| X_DACS_OFF | (default - no bits set) | Disable all DAC outputs |
-| X_DACS_0_0_0_0 | %0000_0000_0000_0000 << 16 | All 4 DAC channels output 0 |
-| X_DACS_X_X_0_0 | %0000_0001_0000_0000 << 16 | DAC channels 3,2 disabled; 1,0 output 0 |
-| X_DACS_0_0_X_X | %0000_0010_0000_0000 << 16 | DAC channels 3,2 output 0; 1,0 disabled |
-| X_DACS_X_X_X_0 | %0000_0011_0000_0000 << 16 | Only DAC channel 0 enabled |
-| X_DACS_X_X_0_X | %0000_0100_0000_0000 << 16 | Only DAC channel 1 enabled |
-| X_DACS_X_0_X_X | %0000_0101_0000_0000 << 16 | Only DAC channel 2 enabled |
-| X_DACS_0_X_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 3 enabled |
-| X_DACS_0N0_0N0 | %0000_0111_0000_0000 << 16 | Channels 3,1 normal; channels 2,0 inverted |
-| X_DACS_X_X_0N0 | %0000_1000_0000_0000 << 16 | Channels 1,0 enabled; channel 0 inverted |
-| X_DACS_0N0_X_X | %0000_1001_0000_0000 << 16 | Channels 3,2 enabled; channel 2 inverted |
-| X_DACS_1_0_1_0 | %0000_1010_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
-| X_DACS_X_X_1_0 | %0000_1011_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
-| X_DACS_1_0_X_X | %0000_1100_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
-| X_DACS_1N1_0N0 | %0000_1101_0000_0000 << 16 | All channels; odd channels inverted |
-| X_DACS_3_2_1_0 | %0000_1110_0000_0000 << 16 | Use all 4 DAC channels (standard) |
++------------------+------------------------------+------------------------------------------+
+| Constant         | Value                        | Description                              |
++==================+==============================+==========================================+
+| X_DACS_OFF       | (default - no bits set)      | Disable all DAC outputs                  |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_0_0_0_0   | %0000_0000_0000_0000 << 16   | All 4 DAC channels output 0              |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_X_0_0   | %0000_0001_0000_0000 << 16   | DAC channels 3,2 disabled;               |
+|                  |                              | 1,0 output 0                             |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_0_0_X_X   | %0000_0010_0000_0000 << 16   | DAC channels 3,2 output 0;               |
+|                  |                              | 1,0 disabled                             |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_X_X_0   | %0000_0011_0000_0000 << 16   | Only DAC channel 0 enabled               |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_X_0_X   | %0000_0100_0000_0000 << 16   | Only DAC channel 1 enabled               |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_0_X_X   | %0000_0101_0000_0000 << 16   | Only DAC channel 2 enabled               |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_0_X_X_X   | %0000_0110_0000_0000 << 16   | Only DAC channel 3 enabled               |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_0N0_0N0   | %0000_0111_0000_0000 << 16   | Channels 3,1 normal;                     |
+|                  |                              | channels 2,0 inverted                    |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_X_0N0   | %0000_1000_0000_0000 << 16   | Channels 1,0 enabled;                    |
+|                  |                              | channel 0 inverted                       |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_0N0_X_X   | %0000_1001_0000_0000 << 16   | Channels 3,2 enabled;                    |
+|                  |                              | channel 2 inverted                       |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_1_0_1_0   | %0000_1010_0000_0000 << 16   | Alternating 1,0 pattern                  |
+|                  |                              | across all channels                      |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_X_X_1_0   | %0000_1011_0000_0000 << 16   | Channels 1,0 with 1,0 pattern            |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_1_0_X_X   | %0000_1100_0000_0000 << 16   | Channels 3,2 with 1,0 pattern            |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_1N1_0N0   | %0000_1101_0000_0000 << 16   | All channels; odd inverted               |
++------------------+------------------------------+------------------------------------------+
+| X_DACS_3_2_1_0   | %0000_1110_0000_0000 << 16   | Use all 4 DAC channels (standard)        |
++------------------+------------------------------+------------------------------------------+
 
 ### Pin Output Control
 
@@ -18513,6 +18238,7 @@ These are the canonical condition names:
 Convenient aliases for post-comparison conditional execution:
 
 **Unsigned comparison aliases:**
+
 - **IF_A** - Above (same as IF_NC_AND_NZ)
 - **IF_AE** - Above or equal (same as IF_NC)
 - **IF_B** - Below (same as IF_C)
@@ -18521,12 +18247,14 @@ Convenient aliases for post-comparison conditional execution:
 - **IF_NE** - Not equal (same as IF_NZ)
 
 **Signed comparison aliases:**
+
 - **IF_GE** - Greater or equal (same as IF_NC)
 - **IF_GT** - Greater than (same as IF_NC_AND_NZ)
 - **IF_LE** - Less or equal (same as IF_NC_OR_Z)
 - **IF_LT** - Less than (same as IF_C)
 
 **Other aliases:**
+
 - **IF_DIFF** - Different (same as IF_C_NE_Z)
 - **IF_SAME** - Same (same as IF_C_EQ_Z)
 - **IF_NZ_AND_C** - Not zero and carry (same as IF_C_AND_NZ)
