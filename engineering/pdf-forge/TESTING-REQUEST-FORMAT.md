@@ -487,57 +487,108 @@ Before submitting testing request:
 
 ## 📊 Expected Output
 
-### Successful Test Result
+Results appear in `interactive-testing/test-runs/{request-id}_{timestamp}/`.
+
+### Directory Structure Per Run
+```
+test-runs/{request-id}_{timestamp}/
+├── request.json     # Copy of original request
+├── summary.json     # Overall run result
+└── {test-name}/     # One folder per test
+    ├── result.json      # Test result with file paths
+    ├── output.pdf       # Generated PDF
+    ├── output.tex       # Generated TeX (for debugging)
+    └── thumbnail.png    # PNG of first page
+```
+
+### Summary File (`summary.json`)
 ```json
 {
-  "request_id": "test-request-name",
+  "request_id": "my-test-001",
+  "run_id": "my-test-001_1699123456",
+  "run_path": "/workspace/shared/test-runs/my-test-001_1699123456",
   "status": "completed",
-  "timestamp": "2025-01-01T12:00:00.000Z",
-  "forge_version": "Enhanced by Claude v1.0",
+  "started_at": "2025-01-15T10:30:00.000Z",
+  "completed_at": "2025-01-15T10:30:15.000Z",
   "template": "p2kb-smart-pins.latex",
-  "test_results": [
-    {
-      "name": "basic-test",
-      "status": "✅ PASS",
-      "duration_ms": 2340,
-      "pdf_path": "output-pdfs/basic-test-1234567890.pdf",
-      "pdf_size_bytes": 45672,
-      "tex_path": "basic-test-1234567890.tex",
-      "tex_available": true
+  "tests": {
+    "basic": {
+      "result": "✅ PASS",
+      "result_file": "basic/result.json",
+      "has_pdf": true,
+      "has_thumbnail": true,
+      "duration_ms": 3500
     }
-  ],
-  "performance": {
-    "total_duration_ms": 2450,
-    "tests_run": 1,
-    "failures": 0
   },
-  "overall_result": "success"
+  "overall_result": "success",
+  "pass_count": 1,
+  "fail_count": 0,
+  "total_duration_ms": 4700
+}
+```
+
+### Per-Test Result File (`{test-name}/result.json`)
+```json
+{
+  "request_id": "my-test-001_1699123456",
+  "test_name": "basic",
+  "status": "completed",
+  "result": "✅ PASS",
+  "started_at": "2025-01-15T10:30:00.000Z",
+  "completed_at": "2025-01-15T10:30:03.500Z",
+  "duration_ms": 3500,
+  "template": "p2kb-smart-pins.latex",
+  "input_file": "test-input.md",
+  "lua_filters": ["p2kb-sp-code-coloring"],
+  "generated_files": {
+    "pdf": {
+      "path": "/workspace/shared/test-runs/my-test-001_1699123456/basic/output.pdf",
+      "relative_path": "basic/output.pdf",
+      "size_bytes": 45231,
+      "exists": true
+    },
+    "tex": {
+      "path": "/workspace/shared/test-runs/my-test-001_1699123456/basic/output.tex",
+      "relative_path": "basic/output.tex",
+      "exists": true
+    },
+    "thumbnail": {
+      "path": "/workspace/shared/test-runs/my-test-001_1699123456/basic/thumbnail.png",
+      "relative_path": "basic/thumbnail.png",
+      "exists": true
+    }
+  },
+  "pdf_info": {
+    "pages": "5",
+    "page_size": "595.276 x 841.89 pts (A4)",
+    "pdf_version": "1.5"
+  },
+  "error": null
 }
 ```
 
 ### Failed Test Result
 ```json
 {
-  "request_id": "test-request-name",
+  "test_name": "advanced",
   "status": "completed",
-  "overall_result": "partial_failure",
-  "test_results": [
-    {
-      "name": "failed-test",
-      "status": "❌ FAIL",
-      "duration_ms": 1200,
-      "error": "LaTeX Error: Missing \\begin{document}",
-      "error_analysis": {
-        "recognized": true,
-        "cause": "Template structure issue",
-        "solution": "Add document environment to template",
-        "confidence": 0.9,
-        "auto_fixable": false
-      },
-      "tex_available": false,
-      "tex_error": "PDF generation failed before .tex could be generated"
-    }
-  ]
+  "result": "❌ FAIL",
+  "generated_files": {
+    "pdf": { "exists": false },
+    "tex": {
+      "path": "/workspace/shared/test-runs/.../advanced/output.tex",
+      "exists": true
+    },
+    "thumbnail": { "exists": false }
+  },
+  "error": "! LaTeX Error: Missing \\begin{document}...",
+  "error_analysis": {
+    "recognized": true,
+    "cause": "Template structure error - document body not started",
+    "solution": "Ensure template has \\begin{document} before $body$",
+    "confidence": 0.95,
+    "auto_fixable": true
+  }
 }
 ```
 
@@ -545,9 +596,9 @@ Before submitting testing request:
 
 ## 🔗 Related Documentation
 
+- **[REMOTE-TESTING-GUIDE.md](REMOTE-TESTING-GUIDE.md)** - Complete testing workflow guide
 - **[AI-FORMAT-DECISION-GUIDE.md](AI-FORMAT-DECISION-GUIDE.md)** - Choose between testing and production formats
 - **[PRODUCTION-REQUEST-FORMAT.md](PRODUCTION-REQUEST-FORMAT.md)** - Production document generation format
-- **PDF Forge System Documentation** - Complete system overview
 
 ---
 

@@ -211,47 +211,49 @@ With `pandoc_args` support enabled:
 
 **CRITICAL**: The PDF Forge has a shared workspace for interactive testing without using the inbox/outbox workflow.
 
+📚 **Complete Guide**: See **[../../REMOTE-TESTING-GUIDE.md](../../REMOTE-TESTING-GUIDE.md)** for full workflow and result formats.
+
 ### Workspace Structure
+
+**Local Path**: `engineering/pdf-forge/interactive-testing/`
+**Maps To**: `/workspace/shared/` on PDF Forge
+
 ```
-pdf-forge-workspace/           # Local directory (bind-mounted to PDF Forge)
+interactive-testing/
 ├── test-requests/            # Place test JSON requests here
 │   └── processed/           # Completed requests get archived here
-├── test-results/            # PDF Forge writes results here
-│   ├── *.json              # Test result JSON files
-│   └── *.tex               # Generated LaTeX for debugging
+├── test-runs/               # Output: one folder per request
+│   └── {request-id}_{timestamp}/
+│       ├── summary.json     # Overall run result
+│       └── {test-name}/     # One folder per test
+│           ├── result.json      # Test result with file paths
+│           ├── output.pdf       # Generated PDF
+│           ├── output.tex       # Generated TeX (for debugging)
+│           └── thumbnail.png    # PNG of first page
 ├── test-documents/          # Markdown test documents
 ├── filters/                 # Lua filters for testing
 ├── templates/               # LaTeX templates
-├── output-pdfs/            # Generated PDFs
 └── status/                 # Status and log files
 ```
 
-### Test Request Format (for workspace testing)
+### Test Request Format
 ```json
 {
-  "request_id": "unique-test-id",
   "template": "template-name.latex",
-  "timestamp": "2025-08-31T06:00:00Z",
   "tests": [
     {
       "name": "test-name",
-      "document": "test-document.md",
-      "lua_filters": [           // CRITICAL: Use lua_filters array, not pandoc_args!
-        "filter-name-without-lua",  // Don't include .lua extension
-        "another-filter"
-      ],
-      "pandoc_args": [           // Optional: Additional pandoc arguments
-        "--listings",
-        "--number-sections"
-      ]
+      "input": "test-document.md",
+      "lua_filters": ["filter-name"]
     }
-  ],
-  "options": {
-    "auto_fix_attempt": false,
-    "cleanup": true
-  }
+  ]
 }
 ```
+
+**Key Points:**
+- Use `lua_filters` array (not `pandoc_args` with `--lua-filter`)
+- Filter names only - no path, no `.lua` extension
+- Use `input` field for markdown file (must exist in `test-documents/`)
 
 ### Key Differences from Inbox Workflow
 
@@ -261,72 +263,14 @@ pdf-forge-workspace/           # Local directory (bind-mounted to PDF Forge)
 | Filter specification | `pandoc_args` with `--lua-filter` | `lua_filters` array |
 | Filter path | Must specify full path | Just filter name (no .lua) |
 | Processing | Manual trigger | Auto-detected by watcher |
-| Results location | `/outbox/` | `test-results/` |
-| Response time | Varies | 2-4 seconds |
+| Results location | `/outbox/` | `test-runs/{id}_{timestamp}/` |
 
-### Testing Workflow
+### Checking Results
 
-1. **Place files in workspace**:
-   ```bash
-   # Copy your Lua filter
-   cp my-filter.lua pdf-forge-workspace/filters/
-   
-   # Copy test document
-   cp test.md pdf-forge-workspace/test-documents/
-   
-   # Create test request
-   cat > pdf-forge-workspace/test-requests/my-test.json
-   ```
-
-2. **PDF Forge automatically processes** (watch-shared-workspace.js is running)
-   - Detects new request in 1-2 seconds
-   - Processes and generates PDF
-   - Writes result to `test-results/`
-
-3. **Check results**:
-   ```bash
-   # Check JSON result
-   cat pdf-forge-workspace/test-results/my-test-result.json
-   
-   # Check generated .tex for debugging
-   cat pdf-forge-workspace/test-results/test-name-*.tex
-   
-   # View PDF
-   open pdf-forge-workspace/output-pdfs/test-name-*.pdf
-   ```
-
-### Common Issues and Solutions
-
-**Issue**: "cannot open filter.lua: No such file or directory"
-- **Cause**: Filter not found in workspace/filters/
-- **Solution**: Copy filter to `pdf-forge-workspace/filters/`
-
-**Issue**: "Missing required field: template"
-- **Cause**: Using wrong request format
-- **Solution**: Use `template` field (not nested in documents)
-
-**Issue**: Filter not running despite being specified
-- **Cause**: Using `pandoc_args` instead of `lua_filters`
-- **Solution**: Use `lua_filters` array with filter names (no .lua extension)
-
-### Debugging Tips
-
-1. **Check daemon log** for processing details:
-   ```bash
-   tail -f pdf-forge-workspace/status/daemon.log
-   ```
-
-2. **Verify filter was copied to working directory**:
-   - PDF Forge creates temp directories like `/tmp/pandoc-work-*`
-   - Filters must be accessible from there
-
-3. **Examine generated .tex file**:
-   - Look for Lua filter comments (e.g., `% LUA FILTER: ...`)
-   - Check if expected LaTeX environments were generated
-
-4. **Review test result JSON**:
-   - Contains error messages and processing details
-   - Shows exact pandoc command attempted
+Results appear in `test-runs/{request-id}_{timestamp}/`:
+- **summary.json** - Overall pass/fail for all tests
+- **{test-name}/result.json** - Per-test details
+- **{test-name}/thumbnail.png** - Visual preview (Claude can read this)
 
 ## 📚 Related Documentation
 

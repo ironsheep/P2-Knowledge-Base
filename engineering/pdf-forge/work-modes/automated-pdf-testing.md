@@ -6,37 +6,42 @@
 - **Rapid iteration testing** for PDF template development and visual refinement
 - **Temporary testing only** - Templates are NOT automatically deployed to production
 
+📚 **COMPREHENSIVE REFERENCE**: See **[../REMOTE-TESTING-GUIDE.md](../REMOTE-TESTING-GUIDE.md)** for complete workflow, result formats, and examples.
+
 ## System Architecture
 
 **CRITICAL CONNECTION:**
-- **My Local Access**: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/pdf-forge/interactive-testing
-- **PDF Forge Shared Workspace**: `/workspace/shared/` (on PDF Forge system)
-- **Connection**: The local `engineering/pdf-forge/interactive-testing/` directory maps directly to `/workspace/shared/` on Forgs
+- **Local Path**: `engineering/pdf-forge/interactive-testing/`
+- **Maps To**: `/workspace/shared/` on PDF Forge
+- **NEVER create a `shared/` subdirectory** inside `interactive-testing/`
 
-**⚠️ CRITICAL MAPPING - AVOID CONFUSION:**
+**Key Features:**
+- **Request Queue**: Requests queued and processed in FIFO order
+- **Hierarchical Output**: Each test run gets its own directory with all artifacts
+- **Per-Test Results**: Individual result files for each test
+- **Visual Verification**: PNG thumbnails of generated PDFs
 
-- ✅ **CORRECT**: engineering/pdf-forge/interactive-testing/` → `/workspace/shared/` on Forge
-- ❌ **WRONG**: `engineering/pdf-forge/interactive-testing/shared/` → `/workspace/shared/shared/` on Forge (nested confusion!)
-- **NEVER create a `shared/` subdirectory inside `engineering/pdf-forge/interactive-testing/`**
-
-**Monitoring Script**: `watch-shared-workspace.js` (Enhanced by Claude v1.0)
-
-- **Auto-detection**: Monitors for new test requests, processes them automatically
-- **Result Format**: JSON files with detailed analysis and error reporting
-- **Temporary testing**: Templates copied to `/tmp/` for testing, NOT installed permanently
-
-## Directory Structure on PDF Forge
+## Directory Structure
 
 ```
-/workspace/shared/
+interactive-testing/  (maps to /workspace/shared/)
 ├── test-requests/          # Drop test requests here
-│   └── processed/          # Completed requests moved here
-├── test-results/           # JSON results appear here
+│   └── processed/          # Completed requests archived here
+├── test-runs/              # Output: one folder per request
+│   └── {request-id}_{timestamp}/
+│       ├── request.json    # Copy of original request
+│       ├── summary.json    # Overall run result
+│       └── {test-name}/    # One folder per test
+│           ├── result.json     # Test result with file paths
+│           ├── output.pdf      # Generated PDF
+│           ├── output.tex      # Generated TeX (for debugging)
+│           └── thumbnail.png   # PNG of first page
 ├── templates/              # All .latex and .sty files
+├── filters/               # Lua filters (.lua files)
 ├── test-documents/         # Test markdown files
 ├── assets/                # Images and other assets (PNG, JPG, etc.)
-├── output-pdfs/           # Generated PDFs
 └── status/                # Activity logs, ready signals
+    ├── queue-status.json  # Current queue state
     ├── activity.log       # Real-time monitoring log
     ├── errors.log         # Error details
     └── forge-ready.txt    # System ready signal
@@ -44,25 +49,16 @@
 
 ## Usage Workflow
 
-### 1. Start PDF Forge Listener
-**You (Stephen) run on PDF Forge system:**
-```bash
-# Start the monitoring daemon
-node /path/to/watch-shared-workspace.js
+### 1. Prepare Files (Claude)
 
-# Verify it's running
-cat /workspace/shared/status/forge-ready.txt
-```
+**File Locations:**
+- **Templates** (.latex, .sty): `interactive-testing/templates/`
+- **Lua Filters** (.lua): `interactive-testing/filters/`
+- **Test Documents** (.md): `interactive-testing/test-documents/`
+- **Assets** (PNG, JPG): `interactive-testing/assets/`
+- **Test Requests** (.json): `interactive-testing/test-requests/`
 
-### 2. Create Test Request (Claude drops files locally)
-**Claude's Workflow:**
-- Drop test markdown files in: `engineering/pdf-forge/interactive-testing/test-documents/`
-- **CRITICAL**: Drop request JSON in: `engineering/pdf-forge/interactive-testing/test-requests/` (NOT in root!)
-- Read results from: `engineering/pdf-forge/interactive-testing/test-results/`
-- Templates (.sty files) go in: `engineering/pdf-forge/interactive-testing/templates/`
-- **ASSETS**: Images (PNG, JPG) go in: `engineering/pdf-forge/interactive-testing/assets/`
-
-**🔴 COMMON MISTAKE**: Creating a `shared/` subdirectory - remember `engineering/pdf-forge/interactive-testing/` itself IS the shared workspace!
+**🔴 COMMON MISTAKE**: Creating a `shared/` subdirectory - remember `interactive-testing/` itself IS the shared workspace!
 
 **Test Request Format** (`test-request-YYYYMMDD-HHMM.json`):
 ```json
@@ -164,38 +160,55 @@ cat /workspace/shared/status/forge-ready.txt
 - Daemon builds path as: `/workspace/shared/filters/[name].lua`
 - Multiple filters supported: `"lua_filters": ["filter1", "filter2"]`
 
-### 3. Deploy Files to Forge
-**Claude prepares, you deploy:**
-- `templates/` - All .latex templates and .sty files
-- `test-documents/` - Markdown test files
-- `test-requests/` - JSON request files
-- `assets/` - Image files referenced in markdown (PNG, JPG, etc.)
+### 2. Check Results (Claude)
 
-### 4. Monitor Results (Claude reads automatically)
-**Result File** (`smart-pins-list-test-001-result.json`):
+Results appear in `interactive-testing/test-runs/{request-id}_{timestamp}/`:
+
+**Summary File** (`summary.json`):
 ```json
 {
-  "request_id": "smart-pins-list-test-001",
+  "request_id": "my-test-001",
+  "run_id": "my-test-001_1699123456",
   "status": "completed",
-  "overall_result": "success|partial_failure|error",
-  "test_results": [
-    {
-      "name": "list-formatting-test",
-      "status": "✅ PASS|❌ FAIL|🔧 FIXED",
-      "pdf_path": "output-pdfs/list-formatting-test-1234567890.pdf",
-      "error": null,
-      "error_analysis": {
-        "recognized": true,
-        "cause": "Missing \\real{} command",
-        "solution": "Add \\newcommand*{\\real}[1]{#1}",
-        "auto_fixable": true
-      }
+  "template": "p2kb-smart-pins.latex",
+  "tests": {
+    "basic": {
+      "result": "✅ PASS",
+      "result_file": "basic/result.json",
+      "has_pdf": true,
+      "has_thumbnail": true
     }
-  ],
-  "performance": {
-    "total_duration_ms": 2500,
-    "tests_run": 1,
-    "failures": 0
+  },
+  "overall_result": "success",
+  "pass_count": 1,
+  "fail_count": 0
+}
+```
+
+**Per-Test Result** (`{test-name}/result.json`):
+```json
+{
+  "test_name": "basic",
+  "result": "✅ PASS",
+  "generated_files": {
+    "pdf": { "relative_path": "basic/output.pdf", "exists": true },
+    "tex": { "relative_path": "basic/output.tex", "exists": true },
+    "thumbnail": { "relative_path": "basic/thumbnail.png", "exists": true }
+  },
+  "pdf_info": { "pages": "5" },
+  "error": null
+}
+```
+
+**On Failure:**
+```json
+{
+  "result": "❌ FAIL",
+  "error": "! LaTeX Error: Missing \\begin{document}...",
+  "error_analysis": {
+    "recognized": true,
+    "cause": "Template structure error",
+    "solution": "Ensure template has \\begin{document} before $body$"
   }
 }
 ```
@@ -406,28 +419,13 @@ The monitoring script (`watch-shared-workspace.js`) now correctly sets the `TEXI
 
 **Concurrent Testing**: Single request processing (queued if multiple)
 
-## Ready Check Commands
+## Status Monitoring
 
-**Verify system status:**
-```bash
-# Check if daemon is running
-cat /workspace/shared/status/forge-ready.txt
-
-# Monitor real-time activity
-tail -f /workspace/shared/status/activity.log
-
-# Check recent errors
-tail -5 /workspace/shared/status/errors.log
-```
-
-**Emergency reset:**
-```bash
-# Clear all pending requests
-rm /workspace/shared/test-requests/*.json
-
-# Clear old results (optional)
-rm /workspace/shared/test-results/*-result.json
-```
+**Check system status by reading these files:**
+- `interactive-testing/status/forge-ready.txt` - Confirms daemon is running
+- `interactive-testing/status/queue-status.json` - Current queue state
+- `interactive-testing/status/activity.log` - Real-time activity
+- `interactive-testing/status/errors.log` - Error details
 
 ## Integration with Smart Pins Visual Work
 
