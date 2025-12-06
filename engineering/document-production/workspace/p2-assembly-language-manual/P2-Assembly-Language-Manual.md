@@ -273,10 +273,6 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 # Part I: Architectural Foundation
 
-
-
-# Part I: Architectural Foundation
-
 # Chapter 1: The P2 Execution Model
 
 <!-- Chapter establishing the foundational mental model for the P2 architecture -->
@@ -3688,10 +3684,6 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 
 # Part II: Instruction Set Reference
 
-
-
-# Part II: Instruction Set Reference
-
 # Instruction Categories {#instruction-categories}
 
 This chapter defines the instruction categories used throughout Part II. Each category groups instructions by their primary function. Click any category name in the instruction entries to return here for an overview, or click any instruction mnemonic to jump to its detailed reference.
@@ -3953,11 +3945,13 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 
 
 ::: instrheader
-## ADDCT1 / ADDCT2 / ADDCT3 {#addct1} {#addct2} {#addct3}
+## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 Add and Set Counter Event Trigger
 
 [Events and Timing](#events-and-timing) - Sets counter event trigger to Dest + Src for time-based events.
 :::
+
+\hypertarget{addct2}{}\hypertarget{addct3}{}
 
 **ADDCT1**  *Dest, {#}Src*\
 **ADDCT2**  *Dest, {#}Src*\
@@ -4289,6 +4283,9 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
+⚠️ **Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+
+⚠️ **Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active. See [Appendix I](#appendix-i) for details.
 
 
 ::: instrheader
@@ -4872,6 +4869,7 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
+⚠️ **Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
 
 
 ::: instrheader
@@ -4907,6 +4905,9 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
+⚠️ **Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate. See [Appendix I](#appendix-i) for details.
+
+⚠️ **Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
 
 
 
@@ -7966,10 +7967,12 @@ These instructions are useful for implementing inter-cog communication mechanism
 
 ::: instrheader
 ## JCT1 / JCT2 / JCT3 / JNCT1 / JNCT2 / JNCT3 {#jct1}
-Jump If Counter Event Set / Clear {#jnct1}
+Jump If Counter Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on counter event flag state.
 :::
+
+\hypertarget{jct2}{}\hypertarget{jct3}{}\hypertarget{jnct1}{}\hypertarget{jnct2}{}\hypertarget{jnct3}{}
 
 **JCT1**  *{#}S*\
 **JCT2**  *{#}S*\
@@ -8174,10 +8177,12 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 
 ::: instrheader
 ## JSE1 / JSE2 / JSE3 / JSE4 / JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jse1}
-Jump If Selectable Event Set / Clear {#jnse1}
+Jump If Selectable Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on selectable event flag state.
 :::
+
+\hypertarget{jse2}{}\hypertarget{jse3}{}\hypertarget{jse4}{}\hypertarget{jnse1}{}\hypertarget{jnse2}{}\hypertarget{jnse3}{}\hypertarget{jnse4}{}
 
 **JSE1**  *{#}S*\
 **JSE2**  *{#}S*\
@@ -9454,6 +9459,8 @@ Cancel Interrupt
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
 
+\hypertarget{nixint2}{}\hypertarget{nixint3}{}
+
 **NIXINT1**
 **NIXINT2**
 **NIXINT3**
@@ -9892,6 +9899,8 @@ Poll Counter Event
 [Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
 
+\hypertarget{pollct2}{}\hypertarget{pollct3}{}
+
 **POLLCT1**  **{WC|WZ|WCZ}**\
 **POLLCT2**  **{WC|WZ|WCZ}**\
 **POLLCT3**  **{WC|WZ|WCZ}**
@@ -10060,6 +10069,8 @@ Poll Selectable Event
 
 [Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
+
+\hypertarget{pollse2}{}\hypertarget{pollse3}{}\hypertarget{pollse4}{}
 
 **POLLSE1**  **{WC|WZ|WCZ}**\
 **POLLSE2**  **{WC|WZ|WCZ}**\
@@ -11211,6 +11222,8 @@ Resume From Interrupt
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
 
+\hypertarget{resi1}{}\hypertarget{resi2}{}\hypertarget{resi3}{}
+
 **RESI0**
 **RESI1**
 **RESI2**
@@ -11352,6 +11365,8 @@ Return From Interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
+
+\hypertarget{reti1}{}\hypertarget{reti2}{}\hypertarget{reti3}{}
 
 **RETI0**
 **RETI1**
@@ -12259,6 +12274,8 @@ Set Interrupt Source (1, 2, Or 3)
 [Interrupts](#interrupts) - Configures which event triggers the specified interrupt level.
 :::
 
+\hypertarget{setint2}{}\hypertarget{setint3}{}
+
 **SETINT1**  *{#}Dest*\
 **SETINT2**  *{#}Dest*\
 **SETINT3**  *{#}Dest*
@@ -12475,6 +12492,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 :::
 
+⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward. See [Appendix I](#appendix-i) for details and workarounds.
 
 
 ::: instrheader
@@ -12509,6 +12527,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 :::
 
+⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. See [Appendix I](#appendix-i) for details and workarounds.
 
 
 ::: instrheader
@@ -12608,6 +12627,8 @@ Set Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
+
+\hypertarget{setse2}{}\hypertarget{setse3}{}\hypertarget{setse4}{}
 
 **SETSE1**  *{#}Dest*\
 **SETSE2**  *{#}Dest*\
@@ -13644,6 +13665,8 @@ Trigger Interrupt (1, 2, Or 3)
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
 
+\hypertarget{trgint2}{}\hypertarget{trgint3}{}
+
 **TRGINT1**
 **TRGINT2**
 **TRGINT3**
@@ -13719,6 +13742,8 @@ Wait For Counter Event
 
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
+
+\hypertarget{waitct2}{}\hypertarget{waitct3}{}
 
 **WAITCT1**  **{WC|WZ|WCZ}**\
 **WAITCT2**  **{WC|WZ|WCZ}**\
@@ -13854,6 +13879,8 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
+
+\hypertarget{waitse2}{}\hypertarget{waitse3}{}\hypertarget{waitse4}{}
 
 **WAITSE1**  **{WC|WZ|WCZ}**\
 **WAITSE2**  **{WC|WZ|WCZ}**\
@@ -16176,10 +16203,6 @@ Timeout detection:
 **PC Wrap Behavior**: The program counter wraps at the 20-bit boundary ($FFFFF → $00000). Code executing near the top of Hub RAM must account for this wrap behavior.
 
 **Per-Cog Independence**: Each cog has its own independent copy of all special registers. Changes in one cog do not affect other cogs' registers, enabling parallel independent operation.
-
-
-# Part III: Reference Tables
-
 
 
 # Part III: Reference Tables
@@ -19047,4 +19070,89 @@ This glossary defines the terms used throughout the instruction encoding tables,
 - **Appendix H** — Complete opcode bit patterns for all instructions
 
 
+
+::: instrheader
+# Appendix I: Known Silicon Bugs {#appendix-i}
+:::
+
+This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P Rev B/C silicon.
+
+## ALTx/AUGx Interference with SETQ Block Transfers {#bug-altx-setq}
+
+**Affected Instructions:** SETQ, SETQ2, RDLONG, WRLONG, WMLONG with PTRx expressions
+
+**Bug Description:**
+
+When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer, intervening ALTx, AUGS, or AUGD instructions cancel the special-case block-size PTRx delta calculation. The expected number of longs transfers correctly, but PTRx is modified according to normal PTRx expression behavior rather than the block-adjusted delta.
+
+**Example of Bug:**
+
+::: pasm2
+        SETQ    #16-1           ' Ready to load 16 longs
+        ALTD    start_reg       ' Alter start register - CANCELS block-size PTRx delta!
+        RDLONG  0, ptra++       ' ptra increments by 4 (1 long), NOT 64 (16 longs)
+:::
+
+**Expected Behavior:** After reading 16 longs with `ptra++`, ptra should advance by 64 bytes (16 × 4).
+
+**Actual Behavior:** ptra advances by only 4 bytes (1 long) because the ALTD instruction between SETQ and RDLONG cancels the block-size adjustment.
+
+**Workaround:**
+
+Manually adjust PTRx after the block transfer, or restructure code to avoid ALTx/AUGx instructions between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG.
+
+::: pasm2
+        ' Workaround: Adjust pointer manually after transfer
+        SETQ    #16-1           ' Ready to load 16 longs
+        ALTD    start_reg       ' Alter start register
+        RDLONG  0, ptra++       ' ptra only advances by 4
+        ADD     ptra, #(16-1)*4 ' Manually add remaining 60 bytes
+:::
+
+---
+
+## AUGS Leakage to Intervening ALTx Instructions {#bug-augs-altx}
+
+**Affected Instructions:** AUGS, ALTD, ALTS, ALTR, and all ALTx variants
+
+**Bug Description:**
+
+When AUGS precedes an instruction with an immediate #S operand (its intended target), intervening ALTx instructions that also have an immediate #S operand will consume the AUGS value without canceling it. Both the intervening ALTx and the intended target instruction receive the augmented value.
+
+**Example of Bug:**
+
+::: pasm2
+        AUGS    #$FFFFF123      ' Intended for ADD instruction
+        ALTD    index, #base    ' WARNING: #base also receives AUGS value!
+        ADD     0-0, #$123      ' #$123 is augmented as expected, cancels AUGS
+:::
+
+**Expected Behavior:** AUGS should only affect the ADD instruction's #$123 operand.
+
+**Actual Behavior:** AUGS affects both `#base` in the ALTD instruction AND `#$123` in the ADD instruction. The `#base` value becomes `#$FFFFF000 + base` (augmented), which is almost certainly not the intended behavior.
+
+**Workaround:**
+
+Use a register instead of an immediate for the ALTx instruction's S operand when an AUGS is active.
+
+::: pasm2
+        ' Workaround: Use register instead of immediate in ALTx
+        MOV     temp, #base     ' Load base into register first
+        AUGS    #$FFFFF123      ' Intended for ADD instruction
+        ALTD    index, temp     ' Register operand - unaffected by AUGS
+        ADD     0-0, #$123      ' Only this instruction receives augmented value
+:::
+
+---
+
+## Summary Table
+
+| Bug | Trigger Condition | Consequence | Workaround |
+|-----|-------------------|-------------|------------|
+| ALTx cancels block PTRx delta | ALTx/AUGx between SETQ and RD/WR/WMLONG | PTRx advances by single-long delta instead of block delta | Manually adjust PTRx after transfer |
+| AUGS leaks to ALTx | ALTx with #S between AUGS and target | ALTx receives unintended augmented value | Use register for ALTx S operand |
+
+---
+
+*These bugs are documented in the official Parallax P2 documentation and affect all P2X8C4M64P Rev B/C silicon.*
 
