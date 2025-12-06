@@ -17,11 +17,11 @@
 
 \begin{center}
 \vspace{0.6cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Assembly Programming\par}
+{\fontsize{36}{42}\selectfont\bfseries Discovering P2 Assembly\par}
 \vspace{0.3cm}
-{\Large\itshape A Human-Centered Approach to Parallel Processing\par}
+{\Large\itshape Build, Experiment, and Master the Propeller 2\par}
 \vspace{0.6cm}
-{\large November 2025\par}
+{\large December 2025\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0 - Technical Review\par}
 

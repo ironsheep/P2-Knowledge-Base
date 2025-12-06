@@ -26,6 +26,9 @@
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 
+% Force Arabic page numbering from the start (no Roman numerals)
+\pagenumbering{arabic}
+
 % Title page setup - no headers/footers on first page only
 % NOTE: The markdown content sets \pagestyle{fancy} after the title page
 \thispagestyle{empty}

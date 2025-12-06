@@ -132,8 +132,12 @@
 \renewcommand{\cftsecfont}{\normalfont}
 \renewcommand{\cftsubsecfont}{\normalfont\small}
 
-% TOC depth: Chapters and Sections (allows sidetracks added via Lua filter)
+% TOC depth: show chapters only (Parts are level 0, Chapters are level 1)
 \setcounter{tocdepth}{1}
+
+% ==================== PAGE NUMBERING ====================
+% Force Arabic numerals throughout (no Roman numerals in frontmatter)
+\AtBeginDocument{\pagenumbering{arabic}}
 % Section numbering: DISABLE auto-numbering (headings already contain numbers)
 \setcounter{secnumdepth}{-1}
 

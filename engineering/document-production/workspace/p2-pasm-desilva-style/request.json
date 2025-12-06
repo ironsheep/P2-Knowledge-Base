@@ -7,7 +7,9 @@
       "template": "p2kb-desilva",
       "pandoc_args": [
         "--top-level-division=chapter",
-        "--pdf-engine=xelatex"
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=1"
       ],
       "lua_filters": [
         "p2kb-desilva-mnemonic-bold",
@@ -16,10 +18,11 @@
         "p2kb-desilva-pagination"
       ],
       "metadata": {
-        "title": "P2 Assembly Programming",
-        "subtitle": "A Human-Centered Approach to Parallel Processing",
+        "title": "Discovering P2 Assembly",
+        "subtitle": "Build, Experiment, and Master the Propeller 2",
+        "author": "Iron Sheep Productions, LLC",
         "version": "Version 1.0 - Technical Review",
-        "date": "November 2025"
+        "date": "December 2025"
       }
     }
   ]
