@@ -198,14 +198,25 @@ Creating a pedagogical PASM2 manual that captures deSilva's teaching philosophy:
 ## Special Requirements
 
 ### Pandoc Arguments (CRITICAL!)
-This document REQUIRES special pandoc arguments:
+This document REQUIRES specific pandoc arguments:
 ```json
 {
-  "required_pandoc_args": ["--top-level-division=part"]
+  "pandoc_args": [
+    "--top-level-division=chapter",
+    "--pdf-engine=xelatex",
+    "--toc",
+    "--toc-depth=1"
+  ]
 }
 ```
 
-**Why:** Document uses Part/Chapter structure. Without this argument, page breaks fail.
+**Why:**
+- `--top-level-division=chapter`: DeSilva uses `# Chapter X` (level 1) and `## Section` (level 2). This makes level 1 = `\chapter{}`, level 2 = `\section{}`.
+- `--toc-depth=1`: Shows only chapters in TOC (not sections).
+- The pagination filter (`p2kb-desilva-pagination.lua`) is designed for this chapter-based structure.
+
+**IMPORTANT:** Do NOT use `--top-level-division=part` - that's for Smart Pins which has `# Part` and `## Chapter`. DeSilva has no Parts.
+
 **Documented In:** `request-requirements.json` in this workspace
 
 ### 5-Color Code Block System
@@ -269,20 +280,33 @@ The `request.json` file configures PDF Forge:
       "output": "P2-PASM-deSilva-Style.pdf",
       "template": "p2kb-desilva",
       "pandoc_args": [
-        "--top-level-division=part",
+        "--top-level-division=chapter",
         "--pdf-engine=xelatex",
         "--toc",
-        "--toc-depth=2"
+        "--toc-depth=1"
+      ],
+      "lua_filters": [
+        "p2kb-desilva-mnemonic-bold",
+        "p2kb-desilva-code-coloring",
+        "p2kb-desilva-semantic",
+        "p2kb-desilva-pagination"
       ],
       "metadata": {
         "title": "Discovering P2 Assembly",
         "subtitle": "Build, Experiment, and Master the Propeller 2",
-        "author": "Iron Sheep Productions, LLC"
+        "author": "Iron Sheep Productions, LLC",
+        "version": "Version 1.0 - Technical Review",
+        "date": "December 2025"
       }
     }
   ]
 }
 ```
+
+**Key configuration notes:**
+- `--top-level-division=chapter`: Matches DeSilva's `# Chapter` / `## Section` structure
+- `--toc-depth=1`: TOC shows chapters only
+- `p2kb-desilva-pagination`: Chapter-based pagination (NOT Part-based like Smart Pins)
 
 Required arguments are documented in `request-requirements.json`.
 
