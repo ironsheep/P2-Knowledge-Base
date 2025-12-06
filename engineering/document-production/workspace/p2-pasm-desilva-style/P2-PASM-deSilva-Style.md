@@ -368,11 +368,11 @@ The blinker works, but it's a bit rigid, isn't it? What if we want to change the
         
         mov     delay, ##50_000_000    ' Set delay to 0.25 seconds (at 200 MHz)
         
-blink   drvh    #56                    ' LED on
+.blink  drvh    #56                    ' LED on
         waitx   delay                  ' Wait
         drvl    #56                    ' LED off
         waitx   delay                  ' Wait
-        jmp     #blink                 ' Repeat forever
+        jmp     #.blink                ' Repeat forever
         
 delay   long    0                      ' Storage for our delay value
 ```
@@ -407,22 +407,22 @@ Make the LED blink in a pattern: short-short-long (like SOS):
         mov     short, ##20_000_000    ' 0.1 second (at 200 MHz)
         mov     long_d, ##60_000_000   ' 0.3 seconds (at 200 MHz)
         
-pattern drvh    #56                    ' Short pulse 1
+.pattern drvh    #56                    ' Short pulse 1
         waitx   short
         drvl    #56
         waitx   short
-        
+
         drvh    #56                    ' Short pulse 2
         waitx   short
         drvl    #56
         waitx   short
-        
+
         drvh    #56                    ' Long pulse
         waitx   long_d
         drvl    #56
         waitx   long_d
-        
-        jmp     #pattern
+
+        jmp     #.pattern
         
 short   long    0
 long_d  long    0
@@ -436,15 +436,15 @@ Blink LEDs on pins 56 and 57 alternately:
 ```
         org     0
         
-loop    drvh    #56                    ' LED 56 on
+.loop   drvh    #56                    ' LED 56 on
         drvl    #57                    ' LED 57 off
         waitx   ##50_000_000           ' 0.25 sec at 200 MHz
 
         drvl    #56                    ' LED 56 off
         drvh    #57                    ' LED 57 on
         waitx   ##50_000_000           ' 0.25 sec at 200 MHz
-        
-        jmp     #loop
+
+        jmp     #.loop
 ```
 :::
 
@@ -459,11 +459,11 @@ This one's a bit tricky - we'll use PWM to fade the LED:
         wxpin   ##$100, #56            ' Set period to 256
         dirh    #56                    ' Enable the pin
         
-fade    wypin   level, #56             ' Set duty cycle
+.fade   wypin   level, #56             ' Set duty cycle
         waitx   ##100_000              ' Small delay
         add     level, #1              ' Increment brightness
         and     level, #$FF            ' Wrap at 256
-        jmp     #fade
+        jmp     #.fade
         
 level   long    0
 ```
@@ -478,9 +478,9 @@ Feeling overwhelmed? Here's the simplified prescription:
 
 ::: pasm2
 ```
-loop    drvnot  #56          ' Toggle pin 56
+.loop   drvnot  #56          ' Toggle pin 56
         waitx   ##50_000_000 ' 0.25s at 200MHz
-        jmp     #loop        ' Repeat
+        jmp     #.loop       ' Repeat
 ```
 :::
 
@@ -632,13 +632,13 @@ DAT
         org     0
 cog_code
         rdlong  pin_num, ptra          ' Get our pin number from hub
-        
-loop    drvnot  pin_num                ' Toggle our LED
+
+.loop   drvnot  pin_num                ' Toggle our LED
         shl     pin_num, #24           ' Pin number to bits 24-31
         or      pin_num, ##10_000_000  ' Combine with delay
         waitx   pin_num                ' Wait (different for each COG!)
         shr     pin_num, #24           ' Restore pin number
-        jmp     #loop
+        jmp     #.loop
 
 pin_num long    0
 ```
@@ -674,17 +674,17 @@ When multiple COGs might write to the same location, we need locks:
 ::: pasm2
 ```
 ' Get a lock
-try_lock
+.try_lock
         locktry lock_id wc     ' Try to get lock
-   if_c jmp     #try_lock      ' Keep trying if failed
-        
+   if_c jmp     #.try_lock     ' Keep trying if failed
+
         ' Critical section - we have the lock!
         rdlong  value, ##shared_addr
         add     value, #1
         wrlong  value, ##shared_addr
-        
+
         lockrel lock_id        ' Release the lock
-        
+
 lock_id long    0              ' Lock 0-15
 ```
 :::
@@ -699,8 +699,8 @@ A mailbox is just a hub location where COGs leave messages:
         wrlong  message, ##mailbox
         
 ' COG B: Check for messages
-check   rdlong  data, ##mailbox wz
-   if_z jmp     #check         ' Keep checking if empty
+.check  rdlong  data, ##mailbox wz
+   if_z jmp     #.check        ' Keep checking if empty
         wrlong  #0, ##mailbox  ' Clear mailbox
         ' Process the message in 'data'
 ```
@@ -719,10 +719,10 @@ Each COG has its own 64-bit timer, always counting system clocks. This is incred
 
 ' Method 2: Periodic events
         getct   time
-loop    addct1  time, ##10_000_000
+.loop   addct1  time, ##10_000_000
         waitct1                ' Wait for next 10M clock interval
         drvnot  #56           ' Toggle LED
-        jmp     #loop         ' Perfectly periodic!
+        jmp     #.loop        ' Perfectly periodic!
 ```
 :::
 
@@ -891,11 +891,11 @@ PUB main() | i
 DAT
         org     0
 counter rdlong  hub_ptr, ptra
-loop    rdlong  value, hub_ptr
+.loop   rdlong  value, hub_ptr
         add     value, #1
         wrlong  value, hub_ptr
         waitx   ##1_000_000
-        jmp     #loop
+        jmp     #.loop
         
 hub_ptr long    0
 value   long    0
@@ -912,14 +912,14 @@ Make 8 LEDs display a moving pattern, with each COG controlling one LED:
         rdlong  pin, ptra
         rdlong  delay, ptrb      ' Different delay per COG
         
-flash   drvh    pin
+.flash  drvh    pin
         waitx   delay
         drvl    pin
         waitx   delay
         shl     delay, #1        ' Double the delay
         cmp     delay, ##100_000_000 wcz
    if_a mov     delay, ##1_000_000  ' Reset if too long
-        jmp     #flash
+        jmp     #.flash
 ```
 :::
 
@@ -1148,6 +1148,124 @@ subroutine
 ```
 :::
 
+## Labels: Naming Your Places
+
+You've been using labels throughout this chapter without us properly introducing them. How rude of me! Let's fix that.
+
+### Global Labels: The Big Signposts
+
+A global label is just a name at the start of a line:
+
+::: pasm2
+```
+DAT             org
+
+send_byte       rdbyte  x, ptr          ' Global label
+                wypin   x, tx_pin
+                ret
+
+receive_byte    testp   rx_pin    wc    ' Another global label
+                rdpin   x, rx_pin
+                ret
+```
+:::
+
+Global labels are visible everywhere in your DAT block. You can jump to them, call them, reference them from Spin2 - they're your main signposts.
+
+### Local Labels: The Little Helpers
+
+But here's a problem. What if every routine needs a loop? You can't have two labels called `loop` - the assembler would be terribly confused.
+
+Enter local labels. Prefix a name with a dot (`.`) and it becomes local:
+
+::: pasm2
+```
+DAT             org
+
+send_byte       rdbyte  x, ptr
+.loop           testp   tx_pin    wc    ' Local: belongs to send_byte
+        if_nc   jmp     #.loop
+                wypin   x, tx_pin
+                ret
+
+receive_byte    testp   rx_pin    wc    ' New scope begins here
+        if_nc   jmp     #.wait
+.wait           testp   rx_pin    wc    ' Local: belongs to receive_byte
+        if_nc   jmp     #.wait
+                rdpin   x, rx_pin
+.loop           shr     x, #24          ' Different .loop - no conflict!
+                ret
+```
+:::
+
+Each global label starts a new "scope". The `.loop` under `send_byte` is completely separate from the `.loop` under `receive_byte`. You can reuse `.loop`, `.done`, `.retry`, `.exit` to your heart's content.
+
+### The Colon Alternative
+
+You might also see local labels with a colon prefix:
+
+::: pasm2
+```
+:loop           djnz    count, #:loop   ' Same as .loop
+```
+:::
+
+Both `:` and `.` work identically. I prefer the dot - it's what modern convention has settled on - but you'll see both in the wild.
+
+### Reference Operators: Finding Your Labels
+
+When you reference a label, you need to tell the assembler what you want:
+
+::: pasm2
+```
+' In COG code (after ORG):
+        jmp     #my_routine     ' # = immediate COG address
+        call    #.helper        ' # works for local labels too
+        mov     x, #data_table  ' Get COG address of data
+
+' For hub addresses (used with Spin2):
+        mov     ptr, @hub_data  ' @ = hub address of label
+```
+:::
+
+The `#` means "immediate value" - use this for jumps and calls within COG code. The `@` means "hub address" - use this when passing addresses to Spin2 or for hub memory operations.
+
+### Scope Boundaries: When Local Labels Reset
+
+Here's the rule: **every global label or data definition starts a new local scope**.
+
+::: pasm2
+```
+func_a          mov     x, #1           ' Scope #1 begins
+.loop           djnz    x, #.loop       ' .loop in scope #1
+
+data_block      long    0, 0, 0, 0      ' Scope #2 begins (data counts!)
+
+func_b          mov     y, #2           ' Scope #3 begins
+.loop           djnz    y, #.loop       ' .loop in scope #3 - different!
+.done           ret
+```
+:::
+
+This is wonderfully useful - your utility routines can all use `.loop` and `.done` without stepping on each other's toes.
+
+### The Medicine: Quick Reference
+
+| What | Syntax | Example |
+|------|--------|---------|
+| Global label | `name` | `my_routine` |
+| Local label | `.name` or `:name` | `.loop`, `:done` |
+| Jump to label | `#label` | `jmp #.loop` |
+| Hub address | `@label` | `mov ptr, @data` |
+
+### Common Gotchas
+
+1. **Forgetting the dot**: `loop` is global, `.loop` is local. If you accidentally create a global `loop`, you'll get conflicts.
+
+2. **Scope surprise**: Data definitions (`LONG`, `WORD`, `BYTE`) also start new scopes. If you put data between two parts of a routine, your local labels won't work!
+
+3. **The 30-character limit**: For compatibility with all tools, keep label names under 30 characters. `this_is_a_really_long_label_name` might cause trouble.
+
 ## The Flags: C and Z (and Q!)
 
 Flags are your friends. They remember things:
@@ -1302,13 +1420,13 @@ Count up if button pressed, down if not:
 ```
         org     0
         
-loop    testp   #BUTTON_PIN wc ' Test button
+.loop   testp   #BUTTON_PIN wc ' Test button
 if_c    add     counter, #1    ' Increment if pressed
 if_nc   sub     counter, #1    ' Decrement if not
-        
+
         wrlong  counter, ##HUB_ADDR ' Display count
         waitx   ##1_000_000
-        jmp     #loop
+        jmp     #.loop
         
 counter long    0
 ```
@@ -1324,18 +1442,18 @@ Find a pattern in data:
         mov     pattern, ##$DEADBEEF
         mov     ptra, ##data_start
         
-search  rdlong  value, ptra++
+.search rdlong  value, ptra++
         cmp     value, pattern wz
-if_z    jmp     #found
+if_z    jmp     #.found
         cmp     ptra, ##data_end wcz
-if_b    jmp     #search
-        jmp     #not_found
-        
-found   ' Pattern found!
+if_b    jmp     #.search
+        jmp     #.not_found
+
+.found  ' Pattern found!
         drvh    #SUCCESS_LED
         jmp     #$
-        
-not_found
+
+.not_found
         drvh    #FAIL_LED
         jmp     #$
 ```
@@ -1463,9 +1581,9 @@ Here's where P2 gets serious about speed:
         rdfast  #0, ##data_start  ' Start fast read
         
 ' Now read at maximum speed
-loop    rflong  value            ' Read from FIFO
+.loop   rflong  value            ' Read from FIFO
         ' Process value
-        djnz    count, #loop     ' Decrement and jump if not zero
+        djnz    count, #.loop    ' Decrement and jump if not zero
         
 ' No hub timing worries - FIFO handles it all!
 ```
@@ -1836,13 +1954,13 @@ Starting code:
         mov     angle, #0
         mov     radius, ##100          ' 100 pixel radius
         
-loop    qrotate angle, radius         ' Your code here
+.loop   qrotate angle, radius         ' Your code here
         ' Add code to:
         ' 1. Get X,Y coordinates
-        ' 2. Add screen center offset  
+        ' 2. Add screen center offset
         ' 3. Draw pixel at that position
         ' 4. Increment angle
-        ' 5. Loop
+        ' 5. Loop back to .loop
 ```
 :::
 
@@ -2103,10 +2221,10 @@ Watch this:
 ::: pasm2
 ```
 ' Complete button-and-LED program
-loop    testp   #BUTTON_PIN wc  ' Read button into C flag
+.loop   testp   #BUTTON_PIN wc  ' Read button into C flag
    if_c drvh    #LED_PIN        ' If pressed, LED on
   if_nc drvl    #LED_PIN        ' If not pressed, LED off
-        jmp     #loop           ' Repeat forever
+        jmp     #.loop          ' Repeat forever
 ```
 :::
 
@@ -2117,9 +2235,9 @@ But wait, let me show you the same thing with even more elegance:
 ::: pasm2
 ```
 ' Even simpler - button controls LED directly
-loop    testp   #BUTTON_PIN wc  ' Read button
+.loop   testp   #BUTTON_PIN wc  ' Read button
         drvc    #LED_PIN        ' Drive LED from C flag!
-        jmp     #loop
+        jmp     #.loop
 ```
 :::
 
@@ -2323,10 +2441,10 @@ Starting code:
         
         mov     pattern, #1     ' Start with one LED
         
-loop    mov     pins, pattern   ' Your code here
+.loop   mov     pins, pattern   ' Your code here
         ' Make pattern rotate through pins 56-63
         ' Add delay between changes
-        ' Wrap around at the end
+        ' Wrap around at the end, then jmp #.loop
 ```
 :::
 
@@ -2390,9 +2508,9 @@ Feeling overwhelmed by all these pin operations? Here's the simplified prescript
 
 ::: pasm2
 ```
-loop    drvnot  #LED
+.loop   drvnot  #LED
         waitx   ##50_000_000
-        jmp     #loop
+        jmp     #.loop
 ```
 :::
 
@@ -2677,9 +2795,9 @@ Feeling overwhelmed by all this streaming? Here's your prescription:
 ::: pasm2
 ```
         rdfast  #0, ##source
-loop    rflong  value
+.loop   rflong  value
         ' Process value
-        djnz    count, #loop
+        djnz    count, #.loop
 ```
 :::
 
@@ -3394,10 +3512,10 @@ monitor
 ```
 ' Perfect timing without interrupts
         getct   next_time
-loop    addct1  next_time, ##PERIOD
+.loop   addct1  next_time, ##PERIOD
         waitct1                ' Exact timing
         call    #periodic_task
-        jmp     #loop
+        jmp     #.loop
 ```
 :::
 
@@ -3563,17 +3681,17 @@ Look at this seemingly innocent code:
 ::: pasm2
 ```
 ' Before optimization: 11 clocks
-loop    rdlong  value, ptra      ' 3-9 clocks (avg 6)
+.loop   rdlong  value, ptra      ' 3-9 clocks (avg 6)
         add     value, #1        ' 2 clocks
         wrlong  value, ptra      ' 3 clocks
         add     ptra, #4         ' 2 clocks
-        djnz    count, #loop     ' 2 clocks
+        djnz    count, #.loop    ' 2 clocks
 
 ' After optimization: 6 clocks!
-loop    rdlong  value, ptra++    ' 3-9 clocks, pointer incremented for free!
-        add     value, #1        ' 2 clocks  
+.loop   rdlong  value, ptra++    ' 3-9 clocks, pointer incremented for free!
+        add     value, #1        ' 2 clocks
         wrlong  value, --ptra++  ' 3 clocks, clever pointer work
-        djnz    count, #loop     ' 2 clocks
+        djnz    count, #.loop    ' 2 clocks
 ```
 :::
 
@@ -3628,9 +3746,9 @@ REP creates hardware-accelerated loops with zero overhead:
 ::: pasm2
 ```
 ' Traditional loop: 4 clocks overhead per iteration
-loop    add     sum, value      ' 2 clocks
+.loop   add     sum, value      ' 2 clocks
         add     ptr, #4         ' 2 clocks
-        djnz    count, #loop    ' 2 clocks = 6 total
+        djnz    count, #.loop   ' 2 clocks = 6 total
 
 ' REP loop: 0 clocks overhead!
         rep     #2, count       ' Repeat next 2 instructions
@@ -3689,15 +3807,15 @@ For ultimate speed, use the FIFO:
 ::: pasm2
 ```
 ' Traditional hub reading: ~6 clocks average per long
-loop    rdlong  value, ptra++
+.loop   rdlong  value, ptra++
         add     sum, value
-        djnz    count, #loop
-        
+        djnz    count, #.loop
+
 ' FIFO reading: 2 clocks per long!
         rdfast  #0, ptra        ' Start FIFO
-loop    rflong  value           ' 2 clocks, always!
+.loop   rflong  value           ' 2 clocks, always!
         add     sum, value      ' 2 clocks
-        djnz    count, #loop    ' 2 clocks
+        djnz    count, #.loop   ' 2 clocks
         ' 3x faster for sequential reads!
 ```
 :::
@@ -3811,11 +3929,11 @@ checksum_slow
         mov     sum, #0
         mov     addr, ##buffer
         mov     count, #256
-        
-loop    rdbyte  temp, addr
+
+.loop   rdbyte  temp, addr
         add     sum, temp
         add     addr, #1
-        djnz    count, #loop
+        djnz    count, #.loop
 ```
 :::
 
