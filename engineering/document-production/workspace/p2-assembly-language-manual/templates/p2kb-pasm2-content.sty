@@ -134,14 +134,17 @@
 \makeatother
 
 % Custom \manualpart command
+% Renders part title on its own page, chapter follows on same page
+% NOTE: The Lua filter replaces the # Part header entirely with \manualpart{},
+% so Pandoc does NOT generate a separate \chapter or \part for it.
 \newcommand{\manualpart}[1]{%
   \clearpage%                           % Start on new page
   \thispagestyle{empty}%                % No header/footer on part page
   \refstepcounter{part}%                % Increment part counter for TOC
   \addcontentsline{toc}{part}{#1}%      % Add to TOC as part-level entry
-  \vspace*{3cm}%                        % Space from top
+  \vspace*{0.25in}%                     % Small space from top (was 3cm)
   {\centering\Huge\bfseries #1\par}%    % Large bold centered title
-  \vspace{2cm}%                         % Space after title
+  \vspace{0.5in}%                       % Modest space after title (was 2cm)
   \nobreak%                             % Prevent page break here
   \global\booltrue{aftermanualpart}%    % Set flag for next \chapter
 }

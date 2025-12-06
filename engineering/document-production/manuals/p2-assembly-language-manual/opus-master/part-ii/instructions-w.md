@@ -48,6 +48,8 @@ Wait For Counter Event
 [Events and Timing](#events-and-timing) - Waits for a counter event flag to be set.
 :::
 
+\hypertarget{waitct2}{}\hypertarget{waitct3}{}
+
 **WAITCT1**  **{WC|WZ|WCZ}**\
 **WAITCT2**  **{WC|WZ|WCZ}**\
 **WAITCT3**  **{WC|WZ|WCZ}**
@@ -182,6 +184,8 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Waits for a selectable event flag to be set.
 :::
+
+\hypertarget{waitse2}{}\hypertarget{waitse3}{}\hypertarget{waitse4}{}
 
 **WAITSE1**  **{WC|WZ|WCZ}**\
 **WAITSE2**  **{WC|WZ|WCZ}**\

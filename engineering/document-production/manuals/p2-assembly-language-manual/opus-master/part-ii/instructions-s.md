@@ -391,6 +391,8 @@ Set Interrupt Source (1, 2, Or 3)
 [Interrupts](#interrupts) - Configures which event triggers the specified interrupt level.
 :::
 
+\hypertarget{setint2}{}\hypertarget{setint3}{}
+
 **SETINT1**  *{#}Dest*\
 **SETINT2**  *{#}Dest*\
 **SETINT3**  *{#}Dest*
@@ -607,6 +609,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 :::
 
+⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward. See [Appendix I](#appendix-i) for details and workarounds.
 
 
 ::: instrheader
@@ -641,6 +644,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 :::
 
+⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. See [Appendix I](#appendix-i) for details and workarounds.
 
 
 ::: instrheader
@@ -740,6 +744,8 @@ Set Selectable Event (1, 2, 3, Or 4)
 
 [Events and Timing](#events-and-timing) - Configures the detection criteria for selectable events.
 :::
+
+\hypertarget{setse2}{}\hypertarget{setse3}{}\hypertarget{setse4}{}
 
 **SETSE1**  *{#}Dest*\
 **SETSE2**  *{#}Dest*\

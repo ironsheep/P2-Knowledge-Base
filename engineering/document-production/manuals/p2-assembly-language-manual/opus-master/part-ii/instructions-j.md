@@ -45,10 +45,12 @@ These instructions are useful for implementing inter-cog communication mechanism
 
 ::: instrheader
 ## JCT1 / JCT2 / JCT3 / JNCT1 / JNCT2 / JNCT3 {#jct1}
-Jump If Counter Event Set / Clear {#jnct1}
+Jump If Counter Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on counter event flag state.
 :::
+
+\hypertarget{jct2}{}\hypertarget{jct3}{}\hypertarget{jnct1}{}\hypertarget{jnct2}{}\hypertarget{jnct3}{}
 
 **JCT1**  *{#}S*\
 **JCT2**  *{#}S*\
@@ -253,10 +255,12 @@ JMPREL is useful for implementing position-independent code, jump tables, and dy
 
 ::: instrheader
 ## JSE1 / JSE2 / JSE3 / JSE4 / JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jse1}
-Jump If Selectable Event Set / Clear {#jnse1}
+Jump If Selectable Event Set / Clear
 
 [Events and Timing](#events-and-timing) - Jumps based on selectable event flag state.
 :::
+
+\hypertarget{jse2}{}\hypertarget{jse3}{}\hypertarget{jse4}{}\hypertarget{jnse1}{}\hypertarget{jnse2}{}\hypertarget{jnse3}{}\hypertarget{jnse4}{}
 
 **JSE1**  *{#}S*\
 **JSE2**  *{#}S*\

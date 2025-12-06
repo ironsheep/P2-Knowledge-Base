@@ -59,6 +59,7 @@ declare -a REQUIRED_FILES=(
     "part-iii/appendix-f-streamer-constants.md"
     "part-iii/appendix-g-reserved-words.md"
     "part-iii/appendix-h-glossary.md"
+    "part-iii/appendix-i-known-bugs.md"
 )
 
 # Verify all required files exist
@@ -173,6 +174,7 @@ assemble_section "part-iii/appendix-e-smartpin-constants.md" "Appendix E: Smart 
 assemble_section "part-iii/appendix-f-streamer-constants.md" "Appendix F: Streamer Mode Constants"
 assemble_section "part-iii/appendix-g-reserved-words.md" "Appendix G: Reserved Words"
 assemble_section "part-iii/appendix-h-glossary.md" "Appendix H: Glossary"
+assemble_section "part-iii/appendix-i-known-bugs.md" "Appendix I: Known Silicon Bugs"
 
 echo ""
 echo "========================================"

@@ -445,6 +445,8 @@ Resume From Interrupt
 [Interrupts](#interrupts) - Resumes execution from an interrupted location.
 :::
 
+\hypertarget{resi1}{}\hypertarget{resi2}{}\hypertarget{resi3}{}
+
 **RESI0**
 **RESI1**
 **RESI2**
@@ -586,6 +588,8 @@ Return From Interrupt
 
 [Interrupts](#interrupts) - Returns from interrupt handler to interrupted location.
 :::
+
+\hypertarget{reti1}{}\hypertarget{reti2}{}\hypertarget{reti3}{}
 
 **RETI0**
 **RETI1**

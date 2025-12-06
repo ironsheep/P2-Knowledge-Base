@@ -44,6 +44,8 @@ Poll Counter Event
 [Events and Timing](#events-and-timing) - Polls and clears the system counter event flag.
 :::
 
+\hypertarget{pollct2}{}\hypertarget{pollct3}{}
+
 **POLLCT1**  **{WC|WZ|WCZ}**\
 **POLLCT2**  **{WC|WZ|WCZ}**\
 **POLLCT3**  **{WC|WZ|WCZ}**
@@ -212,6 +214,8 @@ Poll Selectable Event
 
 [Events and Timing](#events-and-timing) - Polls and clears a configurable selectable event flag.
 :::
+
+\hypertarget{pollse2}{}\hypertarget{pollse3}{}\hypertarget{pollse4}{}
 
 **POLLSE1**  **{WC|WZ|WCZ}**\
 **POLLSE2**  **{WC|WZ|WCZ}**\

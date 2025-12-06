@@ -50,17 +50,19 @@ end
 -- Strategy: Set minimums for C, Z, Clks based on max content; give remainder to Result
 -- Emits raw LaTeX tabularray with colored header zones
 local function handle_encoding_table(el)
-  -- Fixed widths for bit field columns (total: ~0.41)
+  -- Fixed widths for bit field columns (total: ~0.43)
+  -- NOTE: Col 3 (CZI) needs extra width for preto/appto padding (8pt total)
   local fixed_widths = {
-    0.055,  -- Col 1: EEEE (4 chars)
+    0.055,  -- Col 1: EEEE (4 chars + 8pt padding)
     0.100,  -- Col 2: Opcode (7 chars)
-    0.035,  -- Col 3: CZI (3 chars)
+    0.055,  -- Col 3: CZI (3 chars + 8pt padding) - was 0.035, too narrow
     0.110,  -- Col 4: D (9 chars)
     0.110,  -- Col 5: S (9 chars)
   }
 
   -- Total available for columns 6-9 (leave margin for borders/padding)
-  local remaining = 0.54
+  -- Fixed cols total ~0.43, so remaining is ~0.52 for flexible cols + margins
+  local remaining = 0.52
 
   -- Measure content length in columns 6-9
   local content_lens = {}
@@ -69,31 +71,43 @@ local function handle_encoding_table(el)
   end
 
   -- Calculate widths based on content with minimum constraints
-  -- C (col 6): min 0.06, scale up for long content like "correct sign of..."
-  -- Z (col 7): min 0.06, scale up for long content like "Z AND (D == S + C)"
-  -- Clks (col 9): min 0.08, scale up for long content like "2 or WRFAST finish..."
-  -- Result (col 8): gets whatever remains (at least 0.20)
+  -- Strategy: Calculate what each column NEEDS, then distribute remaining space proportionally
+  -- C (col 6): min 0.06, content like "DIRx + OUTx" needs more
+  -- Z (col 7): min 0.06, content like "Z AND (D == S + C)" needs more
+  -- Result (col 8): min 0.15, typically short content like "OUT bit"
+  -- Clks (col 9): min 0.06, typically "2" or similar
 
   local flex_widths = {}
 
-  -- Width per character (approximate) - about 0.007 per char for small font
-  local char_width = 0.007
+  -- Width per character (approximate) - about 0.008 per char for small font
+  local char_width = 0.008
 
-  -- Column 6 (C): minimum 0.06, or content-based
-  local c_content_width = content_lens[6] * char_width
-  flex_widths[6] = math.max(0.06, math.min(c_content_width + 0.02, 0.18))
+  -- Calculate content-based width for each column
+  local c_need = math.max(0.06, content_lens[6] * char_width + 0.02)
+  local z_need = math.max(0.06, content_lens[7] * char_width + 0.02)
+  local result_need = math.max(0.15, content_lens[8] * char_width + 0.02)
+  local clks_need = math.max(0.06, content_lens[9] * char_width + 0.02)
 
-  -- Column 7 (Z): minimum 0.06, or content-based
-  local z_content_width = content_lens[7] * char_width
-  flex_widths[7] = math.max(0.06, math.min(z_content_width + 0.02, 0.14))
+  local total_need = c_need + z_need + result_need + clks_need
 
-  -- Column 9 (Clks): minimum 0.08, or content-based
-  local clks_content_width = content_lens[9] * char_width
-  flex_widths[9] = math.max(0.08, math.min(clks_content_width + 0.02, 0.22))
-
-  -- Column 8 (Result): gets the remainder, minimum 0.20
-  local used = flex_widths[6] + flex_widths[7] + flex_widths[9]
-  flex_widths[8] = math.max(0.20, remaining - used)
+  -- If total need fits in remaining, use proportional distribution
+  -- Otherwise, cap the largest columns and give priority to C and Z (flag columns)
+  if total_need <= remaining then
+    -- Everything fits - distribute extra space proportionally
+    local extra = remaining - total_need
+    local scale = 1 + (extra / total_need)
+    flex_widths[6] = c_need * scale
+    flex_widths[7] = z_need * scale
+    flex_widths[8] = result_need * scale
+    flex_widths[9] = clks_need * scale
+  else
+    -- Need to fit into remaining - prioritize C and Z, cap Result
+    flex_widths[6] = math.min(c_need, 0.14)
+    flex_widths[7] = math.min(z_need, 0.12)
+    flex_widths[9] = math.min(clks_need, 0.10)
+    local used = flex_widths[6] + flex_widths[7] + flex_widths[9]
+    flex_widths[8] = math.max(0.15, remaining - used)
+  end
 
   -- Build tabularray LaTeX with colored headers
   -- Header color zones:

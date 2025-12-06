@@ -411,6 +411,8 @@ Trigger Interrupt (1, 2, Or 3)
 [Interrupts](#interrupts) - Software-triggers an interrupt handler.
 :::
 
+\hypertarget{trgint2}{}\hypertarget{trgint3}{}
+
 **TRGINT1**
 **TRGINT2**
 **TRGINT3**

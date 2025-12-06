@@ -113,6 +113,8 @@ Cancel Interrupt
 [Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
 :::
 
+\hypertarget{nixint2}{}\hypertarget{nixint3}{}
+
 **NIXINT1**
 **NIXINT2**
 **NIXINT3**

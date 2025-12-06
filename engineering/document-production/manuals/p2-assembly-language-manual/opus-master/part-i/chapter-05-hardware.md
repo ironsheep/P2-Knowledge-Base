@@ -1102,7 +1102,3 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 
 
 <!-- End of Chapter 5 -->
-
-
-# Part II: Instruction Set Reference
-
