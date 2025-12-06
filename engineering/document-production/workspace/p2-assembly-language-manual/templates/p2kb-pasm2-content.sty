@@ -68,7 +68,7 @@
   bottom=2pt,
   before skip=24pt,
   after skip=6pt,
-  before upper={\needspace{8\baselineskip}}
+  before upper={\needspace{11\baselineskip}}
 }
 
 % Directive header (Amber bar)
@@ -81,7 +81,7 @@
   bottom=2pt,
   before skip=24pt,
   after skip=6pt,
-  before upper={\needspace{8\baselineskip}}
+  before upper={\needspace{11\baselineskip}}
 }
 
 % Constant header (Violet bar)
@@ -94,7 +94,7 @@
   bottom=2pt,
   before skip=24pt,
   after skip=6pt,
-  before upper={\needspace{8\baselineskip}}
+  before upper={\needspace{11\baselineskip}}
 }
 
 % ==================== PART HANDLING ====================
@@ -103,9 +103,37 @@
 % 2. Creates visual part page
 % 3. Does NOT force page break after (first chapter stays on same page)
 %
-% We redefine \part to prevent the automatic page break after part title
-% The Lua filter calls \manualpart{title} which uses our custom behavior
+% CRITICAL: The \chapter command has \clearpage built into its definition.
+% Even if the Lua filter doesn't add a \clearpage before the chapter header,
+% Pandoc still generates \chapter{...} which internally calls \clearpage.
+%
+% Solution: Use etoolbox to patch \chapter with a conditional clearpage.
+% When \manualpart is called, it sets a flag. The patched \chapter checks
+% this flag and skips its internal clearpage if the flag is set.
 
+% Boolean flag: set by \manualpart, checked by patched \chapter
+\newbool{aftermanualpart}
+\boolfalse{aftermanualpart}
+
+% Conditional clearpage that respects the aftermanualpart flag
+\newcommand{\conditionalclearpage}{%
+  \ifbool{aftermanualpart}{%
+    \global\boolfalse{aftermanualpart}%   % Clear the flag
+    % Skip clearpage - chapter stays on same page as part
+  }{%
+    \clearpage%                           % Normal page break
+  }%
+}
+
+% Patch \chapter to use conditional clearpage instead of unconditional
+% The book class \chapter starts with: \if@openright\cleardoublepage\else\clearpage\fi
+% We patch both possibilities
+\makeatletter
+\patchcmd{\chapter}{\clearpage}{\conditionalclearpage}{}{}
+\patchcmd{\chapter}{\cleardoublepage}{\conditionalclearpage}{}{}
+\makeatother
+
+% Custom \manualpart command
 \newcommand{\manualpart}[1]{%
   \clearpage%                           % Start on new page
   \thispagestyle{empty}%                % No header/footer on part page
@@ -115,6 +143,7 @@
   {\centering\Huge\bfseries #1\par}%    % Large bold centered title
   \vspace{2cm}%                         % Space after title
   \nobreak%                             % Prevent page break here
+  \global\booltrue{aftermanualpart}%    % Set flag for next \chapter
 }
 
 % Legacy alias for backward compatibility
@@ -181,9 +210,9 @@
     rowsep=2pt,
     colsep=4pt,
     row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
-    column{1}={wd=0.055\linewidth, halign=c, font=\ttfamily\small},
-    column{2}={wd=0.100\linewidth, halign=c, font=\ttfamily\small},
-    column{3}={wd=0.035\linewidth, halign=c, font=\ttfamily\small},
+    column{1}={wd=0.065\linewidth, halign=c, font=\ttfamily\small},
+    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily\small},
+    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily\small},
     column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
     column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
     column{6}={halign=c, font=\small},
@@ -210,9 +239,9 @@
     colsep=4pt,
     row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
     row{2}={font=\small},
-    column{1}={wd=0.055\linewidth, halign=c, font=\ttfamily},
-    column{2}={wd=0.100\linewidth, halign=c, font=\ttfamily},
-    column{3}={wd=0.035\linewidth, halign=c, font=\ttfamily},
+    column{1}={wd=0.065\linewidth, halign=c, font=\ttfamily},
+    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily},
+    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily},
     column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily},
     column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily},
     column{6}={halign=c},
