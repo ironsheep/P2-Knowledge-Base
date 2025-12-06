@@ -480,6 +480,7 @@ The P2 provides four variants each for ADD, SUB, and CMP operations:
 | CMPSX D, S | X = D - S - C | True sign of X | Z AND (X == 0) |
 
 The key distinctions:
+
 - **Base instructions** (ADD, SUB, CMP) start a new operation and reset Z
 - **X variants** (ADDX, SUBX, CMPX) propagate carry/borrow and AND the zero result
 - **S variants** (ADDS, SUBS, CMPS) report the true sign instead of carry
@@ -494,6 +495,7 @@ Multi-long operations follow a consistent pattern:
 3. **Final long:** Use X variant for unsigned, SX variant for signed
 
 The X variants are critical because they:
+
 - Add/subtract the incoming C flag (carry/borrow from previous long)
 - AND the Z result with the previous Z (tracking if all longs are zero)
 - Output carry/borrow for the next long
@@ -571,6 +573,7 @@ For signed operations, the final instruction must be an SX variant to correctly 
 The S and SX variants report the "true sign" of the result rather than carry/borrow. This is the conceptual bit above the MSB—the sign the result would have if computed with infinite precision.
 
 For signed operations:
+
 - If the result is negative (would be negative with more bits), C = 1
 - If the result is non-negative, C = 0
 
@@ -585,6 +588,7 @@ This differs from carry/borrow, which indicates overflow in unsigned arithmetic.
 | Compare | CMP WCZ | CMPX WCZ | CMPX WCZ | CMPSX WCZ |
 
 After a multi-long comparison:
+
 - **Unsigned:** Use IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
 - **Signed:** Use IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
 - **Either:** Use IF_Z (equal), IF_NZ (not equal)

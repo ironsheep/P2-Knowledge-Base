@@ -5,6 +5,7 @@ PASM2 provides predefined constants for configuring the P2's Streamer—a powerf
 ## Streamer Overview
 
 The Streamer operates in conjunction with the FIFO and can:
+
 - Transfer data from hub RAM to pins/DACs (playback)
 - Transfer data from pins/ADCs to hub RAM (capture)
 - Perform real-time data transformations (color conversion, bit manipulation)

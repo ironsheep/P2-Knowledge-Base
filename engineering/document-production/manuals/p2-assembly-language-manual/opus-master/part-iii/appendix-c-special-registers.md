@@ -32,40 +32,8 @@
 
 ## Memory Map
 
-```
-$1FF ┌─────────┐
-     │   INB   │ ← Read-only: pins 32-63
-$1FE ├─────────┤
-     │   INA   │ ← Read-only: pins 0-31
-$1FD ├─────────┤
-     │  OUTB   │
-$1FC ├─────────┤  Fixed Special
-     │  OUTA   │  Registers
-$1FB ├─────────┤
-     │  DIRB   │
-$1FA ├─────────┤
-     │  DIRA   │
-$1F9 ├─────────┤
-     │  PTRB   │
-$1F8 ├─────────┤
-     │  PTRA   │
-$1F7 ├─────────┤
-     │   PB    │
-$1F6 ├─────────┤  Dual-Purpose
-     │   PA    │  Registers
-$1F5 ├─────────┤
-     │  IRET1  │
-$1F4 ├─────────┤
-     │  IJMP1  │
-$1F3 ├─────────┤
-     │  IRET2  │
-$1F2 ├─────────┤
-     │  IJMP2  │
-$1F1 ├─────────┤
-     │  IRET3  │
-$1F0 └─────────┘
-     │  IJMP3  │
-     └─────────┘
+```{=latex}
+\SpecialRegistersMapDiagram
 ```
 
 *For complete documentation, see Part II: Special Registers.*

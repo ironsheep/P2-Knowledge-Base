@@ -74,6 +74,7 @@ Decode Bit Position
 DECOD generates a 32-bit value with just one bit high, corresponding to the Src or Dest value (0-31) and stores that result in Dest. In effect, Dest becomes %1 << value via the DECOD instruction, where value is Src[4:0] or Dest[4:0].
 
 Examples of decoded values:
+
 - A value of 0 generates %00000000_00000000_00000000_00000001
 - A value of 5 generates %00000000_00000000_00000000_00100000
 - A value of 15 generates %00000000_00000000_10000000_00000000

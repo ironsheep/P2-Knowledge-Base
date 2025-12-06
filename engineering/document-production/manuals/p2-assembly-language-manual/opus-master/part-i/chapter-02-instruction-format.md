@@ -244,6 +244,7 @@ The 9-bit D field (bits 17-9) addresses a COG register from $000 to $1FF:
 - **Write only:** Some move instructions write D without reading its previous value
 
 The D field can also specify:
+
 - Hub addresses (for ALTD-modified instructions)
 - LUT addresses (for LUT instructions)
 - Pin numbers (for certain I/O instructions)
@@ -291,6 +292,7 @@ The `#` prefix before an operand indicates an immediate value:
 ```
 
 When `#` is used:
+
 - The assembler sets the I bit (bit 18) to 1
 - The S field contains the 9-bit value
 
@@ -360,6 +362,7 @@ If any instruction intervenes (including a conditional NOP), the augmentation is
 ### 2.7.4 When Augmentation is Required
 
 Augmentation is needed when:
+
 - Values exceed 9 bits (> 511 for unsigned)
 - Hub addresses are used (20-bit address space)
 - 32-bit constants are needed
@@ -455,9 +458,8 @@ The PDF version of this manual includes extensive cross-reference links to help 
 - The **Category name** links to Appendix B's categorical listing
 
 **In the Related line:**
-```
-**Related:** ADDX, ADDS, ADDSX, SUB
-```
+
+> **Related:** ADDX, ADDS, ADDSX, SUB
 
 Each instruction name in the Related section is a clickable link that jumps directly to that instruction's entry. This makes it easy to explore instruction families:
 

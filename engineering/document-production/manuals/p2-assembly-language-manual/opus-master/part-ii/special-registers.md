@@ -255,6 +255,7 @@ Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access 
 **Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. The pointer is 20 bits wide, addressing the full Hub RAM space.
 
 **Addressing Modes**:
+
 - `PTRA++` — Post-increment by 4 bytes (one long)
 - `PTRA--` — Post-decrement by 4 bytes
 - `++PTRA` — Pre-increment by 4 bytes
@@ -285,6 +286,7 @@ Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM acces
 **Usage**: PTRB is the secondary pointer for Hub RAM operations, providing the same capabilities as PTRA. Having two independent pointers enables efficient dual-buffer operations and complex memory access patterns. COGINIT writes the code start address to the target cog's PTRB, enabling position-independent code.
 
 **Addressing Modes**:
+
 - `PTRB++` — Post-increment by 4 bytes (one long)
 - `PTRB--` — Post-decrement by 4 bytes
 - `++PTRB` — Pre-increment by 4 bytes
@@ -602,6 +604,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 **Usage**: The C and Z flags enable conditional execution and branching. Most ALU instructions can update these flags based on their results. Conditional prefixes (IF_Z, IF_NZ, IF_C, IF_NC, etc.) determine whether an instruction executes based on flag states.
 
 **Flag Setting**:
+
 - **WZ**: Sets Z flag based on result (Z=1 if result is zero)
 - **WC**: Sets C flag based on operation (carry out, bit shifted out, etc.)
 - **WCZ**: Sets both flags

@@ -67,6 +67,7 @@ Execute Initialize
 XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between the cog and hub memory or I/O pins.
 
 The streamer operates as a hardware DMA engine, transferring data without CPU intervention. The mode word in Dest configures critical parameters:
+
 - Transfer direction (input from pins to hub, output from hub to pins, or cog-only operations)
 - Number of pins involved in the transfer
 - Data formatting (bit order, byte packing, word sizes)
@@ -117,6 +118,7 @@ Exclusive Or
 XOR performs a bitwise exclusive OR operation between Dest and Src, storing the result in Dest. Each bit position in the result is set to 1 if the corresponding bits in Dest and Src differ, or 0 if they match.
 
 The exclusive OR operation has several important properties:
+
 - XORing a value with itself produces zero (useful for clearing registers)
 - XORing a value with all 1s produces the bitwise complement
 - XORing twice with the same value returns the original (useful for simple encryption)
@@ -156,6 +158,7 @@ Xoroshiro 32
 XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-quality pseudo-random number generator. The instruction updates the generator state in Dest and simultaneously makes the generated random value available to the next instruction by injecting it into that instruction's S field.
 
 The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bit generator:
+
 - Long period (2^32 - 1 values before repeating)
 - Good distribution across all output bits
 - Fast execution (2 clocks per random number)
@@ -205,6 +208,7 @@ XSTOP immediately halts any active streamer operation. This provides programmati
 When XSTOP executes, the streamer hardware stops all data movement and pin activity. Any buffered streamer command (from XCONT or XZERO) is also discarded.
 
 XSTOP is useful when:
+
 - Error conditions require aborting a transfer
 - Dynamic control flow needs to terminate streaming based on data content
 - Cleanup is required before reconfiguring the streamer

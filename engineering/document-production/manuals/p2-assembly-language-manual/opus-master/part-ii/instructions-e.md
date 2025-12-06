@@ -40,6 +40,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Src (or original 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if not zero.
 
 For example:
+
 - `%00000000_00000000_00000000_00000001` encodes to 0 (bit position of the only 1)
 - `%00000000_00000000_00000000_00100000` encodes to 5 (bit position 5 is the top-most 1)
 - `%00000000_00000000_10000001_01000000` encodes to 15 (bit position 15 is the top-most 1)

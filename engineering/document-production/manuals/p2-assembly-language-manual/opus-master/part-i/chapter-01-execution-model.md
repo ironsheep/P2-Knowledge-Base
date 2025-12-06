@@ -78,24 +78,24 @@ These registers provide a communication mechanism between Spin2 and PASM2 code r
 
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
-| Address | Register | Purpose |
-|:--------|:---------|:------------------------------------------------|
-| $1F0 | IJMP3 | Interrupt 3 jump address |
-| $1F1 | IRET3 | Interrupt 3 return address |
-| $1F2 | IJMP2 | Interrupt 2 jump address |
-| $1F3 | IRET2 | Interrupt 2 return address |
-| $1F4 | IJMP1 | Interrupt 1 jump address |
-| $1F5 | IRET1 | Interrupt 1 return address |
-| $1F6 | PA | Port A scratch / pointer register |
-| $1F7 | PB | Port B scratch / pointer register |
-| $1F8 | PTRA | Pointer A register |
-| $1F9 | PTRB | Pointer B register |
-| $1FA | DIRA | Direction for pins 31-0 |
-| $1FB | DIRB | Direction for pins 63-32 |
-| $1FC | OUTA | Output for pins 31-0 |
-| $1FD | OUTB | Output for pins 63-32 |
-| $1FE | INA | Input from pins 31-0 (read-only) |
-| $1FF | INB | Input from pins 63-32 (read-only) |
+| Address | Register | Access | Purpose |
+|:--------|:---------|:-------|:------------------------------------------------|
+| $1F0 | IJMP3 | R/W | Interrupt 3 jump address |
+| $1F1 | IRET3 | R/W | Interrupt 3 return address |
+| $1F2 | IJMP2 | R/W | Interrupt 2 jump address |
+| $1F3 | IRET2 | R/W | Interrupt 2 return address |
+| $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
+| $1F5 | IRET1 | R/W | Interrupt 1 return address |
+| $1F6 | PA | R/W | Port A scratch / pointer register |
+| $1F7 | PB | R/W | Port B scratch / pointer register |
+| $1F8 | PTRA | R/W | Pointer A register |
+| $1F9 | PTRB | R/W | Pointer B register |
+| $1FA | DIRA | R/W | Direction for pins 31-0 |
+| $1FB | DIRB | R/W | Direction for pins 63-32 |
+| $1FC | OUTA | R/W | Output for pins 31-0 |
+| $1FD | OUTB | R/W | Output for pins 63-32 |
+| $1FE | INA | R/O | Input from pins 31-0 |
+| $1FF | INB | R/O | Input from pins 63-32 |
 
 Registers $1F0-$1F7 serve dual purposes. When their associated hardware functions (interrupts, parameter passing) are not enabled, these registers function as ordinary general-purpose RAM. Registers $1F8-$1FF are fixed special-purpose registers that always provide their hardware functions when accessed.
 

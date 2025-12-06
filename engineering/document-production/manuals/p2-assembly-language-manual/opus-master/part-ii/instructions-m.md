@@ -317,6 +317,7 @@ For example, to swap the high and low words of D, use S = $4E (binary 01_00_11_1
 MOVBYTS is useful for byte-order conversions (endianness swapping), color channel reordering in pixel data, and general byte permutation operations. It executes in 2 clock cycles, making it an efficient alternative to multiple shift and mask operations.
 
 Common patterns include:
+
 - S = $E4 (binary 11_10_01_00): No change (identity)
 - S = $1B (binary 00_01_10_11): Reverse bytes (big/little endian swap)
 - S = $B1 (binary 10_11_00_01): Swap words
@@ -413,6 +414,7 @@ This instruction is essential for pixel color multiplication operations used in 
 MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
 
 Common uses include:
+
 - Color modulation (tinting): Multiply each color channel by a tint value
 - Brightness adjustment: Multiply RGB by a brightness factor
 - Alpha premultiplication: Multiply RGB by alpha for compositing

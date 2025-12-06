@@ -705,6 +705,7 @@ Cog Initialize
 COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from Hub RAM to be executed within COG/LUT RAM or to be executed right from Hub RAM.
 
 The format of Dest is `%E_N_xVVV` where:
+
 - E controls loading (0=load from Hub, 1=no load/Hub exec)
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
