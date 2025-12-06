@@ -85,7 +85,8 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
 ```pasm
-        pollqmt             wc              ' C=1 if pipeline empty, C=0 if results pending
+        pollqmt             wc              ' C=1 if pipeline empty,
+                                            '  C=0 if results pending
         if_nc getqx result                  ' Only retrieve if results available
 ```
 
@@ -364,7 +365,8 @@ Polling enables responsive event handling within loops. Code can check multiple 
 
 ```pasm
                 pollse1         wc              ' Test event 1, set C if occurred
-        if_c    jmp     #handler                ' Branch to handler only if event fired
+        if_c    jmp     #handler                ' Branch to handler only if
+                                                '  event fired
 ```
 
 This pattern branches to handler code only when the event occurred.
@@ -744,12 +746,18 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
 
 ```pasm
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
-                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal, 15pF caps
-                waitx   ##20_000_000/100                          ' Wait 10ms for crystal
-                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to crystal
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1 = 160MHz
-                waitx   ##20_000_000/10000                        ' Wait 100µs for PLL lock
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL output
+                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal,
+                                                                  '  15pF caps
+                waitx   ##20_000_000/100                          ' Wait 10ms for
+                                                                  '  crystal
+                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to
+                                                                  '  crystal
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1
+                                                                  '  = 160MHz
+                waitx   ##20_000_000/10000                        ' Wait 100µs for
+                                                                  '  PLL lock
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL
+                                                                  '  output
 ```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
@@ -763,7 +771,8 @@ The boot ROM cannot know what clock source your hardware provides. Some boards u
 The HUBSET instruction can trigger a hardware reset, returning the chip to the boot sequence:
 
 ```pasm
-                hubset  ##$1000_0000                ' Generate reset pulse, reboot chip
+                hubset  ##$1000_0000                ' Generate reset pulse,
+                                                    '  reboot chip
 ```
 
 This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
@@ -865,8 +874,10 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 **Conditional Output:**
 
 ```pasm
-                debug(if(error_flag), "Error detected") ' Only outputs if condition true
-                debug(ifnot(ready), "Not ready")        ' Only outputs if condition false
+                debug(if(error_flag), "Error detected") ' Only outputs if
+                                                        '  condition true
+                debug(ifnot(ready), "Not ready")        ' Only outputs if
+                                                        '  condition false
 ```
 
 ### 5.8.6 Visual Debug Displays
@@ -923,8 +934,10 @@ PLOT provides rolling or accumulating display modes, multiple data series, and s
 The TERM display provides a dedicated text terminal window, separate from the default debug output:
 
 ```pasm
-                debug(`term Status)                           ' Create terminal window
-                debug(`Status "System initialized", 13)       ' Send text to terminal
+                debug(`term Status)                           ' Create terminal
+                                                              '  window
+                debug(`Status "System initialized", 13)       ' Send text to
+                                                              '  terminal
                 debug(`Status "Temperature: ", sdec_(temp), "°C", 13)
 ```
 
@@ -1051,7 +1064,8 @@ When multiple COGs execute DEBUG statements, output interleaves in the debug win
 For standard DEBUG output (not routed to a visual display window), the debug system automatically prefixes each message with the COG number (Cog0: through Cog7:). You do not need to manually add COG identification—it's built into the debug protocol:
 
 ```pasm
-                debug("Starting motor control")     ' Output: Cog2: Starting motor control
+                debug("Starting motor control")     ' Output: Cog2: Starting
+                                                    '  motor control
                 debug(udec(speed))                  ' Output: Cog2: speed = 1500
 ```
 

@@ -329,8 +329,9 @@ Constants are combined using OR operations to build the complete configuration:
 SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
 
 ```pasm
-' Complex configuration: Async TX with inverted output
-        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT | P_HIGH_FAST | P_LOW_FAST
+' Complex config: Async TX, inverted, fast drive
+        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
+        or      mode, ##P_HIGH_FAST | P_LOW_FAST
         wrpin   mode, pin
 ```
 

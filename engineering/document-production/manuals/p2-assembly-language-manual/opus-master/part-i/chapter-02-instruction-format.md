@@ -663,7 +663,8 @@ send_byte       rdbyte  x, ptr                  ' Global: send_byte
         if_c    jmp     #.wait
                 ret
 
-recv_byte       testp   rx_pin          wc      ' Global: recv_byte (new scope begins)
+recv_byte       testp   rx_pin          wc      ' Global: recv_byte
+                                                '  (new scope begins)
         if_nc   jmp     #.wait                  ' This .wait is different from above
 .wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
         if_nc   jmp     #.wait
@@ -722,10 +723,13 @@ DAT             org
 func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
 .loop           djnz    x, #.loop               ' Local .loop in scope #1
 
-data_block      long    0, 0, 0, 0              ' Global: data_block, scope #2 begins
+data_block      long    0, 0, 0, 0              ' Global: data_block,
+                                                '  scope #2 begins
 
-func_b          mov     y, #2                   ' Global: func_b, scope #3 begins
-.loop           djnz    y, #.loop               ' Local .loop in scope #3 (different)
+func_b          mov     y, #2                   ' Global: func_b,
+                                                '  scope #3 begins
+.loop           djnz    y, #.loop               ' Local .loop in scope #3
+                                                '  (different)
 .done           ret                             ' Local .done in scope #3
 ```
 

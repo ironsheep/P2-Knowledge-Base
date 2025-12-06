@@ -506,7 +506,8 @@ The X variants are critical because they:
 
 ```pasm
         ADD     A0, B0    WCZ     ' Add low longs, C = carry, Z = (A0 == 0)
-        ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry, Z = Z AND (A1 == 0)
+        ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry,
+                                  '  Z = Z AND (A1 == 0)
         ' After: C = overflow, Z = (entire 64-bit result == 0)
 ```
 

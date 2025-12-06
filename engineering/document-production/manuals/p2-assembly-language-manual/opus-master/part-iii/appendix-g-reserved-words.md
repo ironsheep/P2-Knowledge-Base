@@ -1,15 +1,17 @@
 # Appendix G: Reserved Words Reference
 
-This appendix lists all reserved words in PASM2. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
+This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
-**Total Reserved Words: 449**
+**Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+
+**Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2 + P_*/X_* constants)
 
 ## Categories
 
 Reserved words fall into six main categories:
 
 1. **Instruction Mnemonics** (358 words) - All instruction names
-2. **Assembly Directives** (14 words) - Assembly-time directives
+2. **Assembly Directives** (21 words) - Block identifiers and assembly-time directives
 3. **Predefined Constants** (11 words) - Built-in constant values
 4. **Special Register Names** (16 words) - Special-purpose registers
 5. **Condition Keywords** (41 words) - Conditional execution prefixes
@@ -86,9 +88,23 @@ XORO32      XSTOP       XZERO       ZEROX
 
 
 
-## Assembly Directives (14 words)
+## Assembly Directives (21 words)
 
 Directives control the assembly process and code organization:
+
+### Block/Section Identifiers (7)
+
+These keywords define the major sections of a Spin2/PASM2 source file:
+
+- **CON** - Constants block (define named constants)
+- **DAT** - Data block (contains PASM2 code and data)
+- **FILE** - Include binary file in DAT section
+- **OBJ** - Objects block (instantiate child objects)
+- **PRI** - Private method block
+- **PUB** - Public method block
+- **VAR** - Variables block (instance variables)
+
+### Assembly-Time Directives (14)
 
 - **ALIGNL** - Align to next long boundary (4-byte alignment)
 - **ALIGNW** - Align to next word boundary (2-byte alignment)
@@ -308,17 +324,49 @@ byte_data       long  $0
 
 ## Summary
 
-PASM2 reserves **449 identifiers** across six categories:
+The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
+
+**PASM2-Specific Reserved Words (456):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
 | Instructions | 358 | All instruction mnemonics |
-| Directives | 14 | Assembly-time directives |
+| Directives | 21 | Block identifiers and assembly-time directives |
 | Constants | 11 | Predefined constant values |
 | Special Registers | 16 | Hardware-mapped registers |
 | Conditions | 41 | Conditional execution prefixes |
 | Effects | 9 | Flag modification suffixes |
-| **Total** | **449** | |
+| **PASM2 Subtotal** | **456** | |
+
+**Spin2-Specific Reserved Words (586):**
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Language Keywords | 18 | Core Spin2 constructs |
+| DEBUG Parameters | 114 | Debug output formatting |
+| Graphics/Color | 34 | Color names and display |
+| String/Data Methods | 21 | Memory/string manipulation |
+| Math/Conversion | 12 | Math functions |
+| Event Constants | 16 | Event source identifiers |
+| Pin Methods | 14 | High-level pin control |
+| Condition Shortcuts | 32 | Underscore-prefixed conditions |
+| IF_ Variants | 28 | Extended condition patterns |
+| Shared Registers | 8 | PR0-PR7 communication |
+| System/I/O | 27 | System control methods |
+| Graphics Drawing | 32 | Graphics primitives |
+| Text/Display | 12 | Text rendering |
+| Lookup/Misc | 20 | Table lookup and other |
+| **Spin2 Subtotal** | **586** | |
+
+**Hardware Constants (194+):**
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Smart Pin (P_*) | ~116 | Pin configuration |
+| Streamer (X_*) | ~78 | Streamer modes |
+| **Constants Subtotal** | **~194** | |
+
+**Grand Total: 1,236+ reserved identifiers**
 
 **Cross-References:**
 
@@ -327,7 +375,302 @@ PASM2 reserves **449 identifiers** across six categories:
 - **Appendix E** — Smart Pin mode constants (P_* symbols, approximately 116 constants)
 - **Appendix F** — Streamer mode constants (X_* symbols, approximately 78 constants)
 
-**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 449-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
-**Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). Since there is a single compiler for both Spin2 and PASM2, all reserved words from both languages always apply regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+
+## Spin2 Reserved Words
+
+Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. You cannot use any of these identifiers as labels, symbols, or variable names in your assembly code, even when writing pure PASM2.
+
+**Total Spin2-Only Reserved Words: 586**
+
+The following sections list Spin2 reserved words organized by category.
+
+
+
+### Language Keywords (18 words)
+
+Core Spin2 language constructs (block names CON, DAT, VAR, PUB, PRI, OBJ are listed under PASM2 Assembly Directives):
+
+```
+ABORT       CASE        CASE_FAST   ELSE        ELSEIF      ELSEIFNOT
+END         FROM        IF          IFNOT       NEXT        OTHER
+QUIT        REPEAT      RETURN      TO          UNTIL       WHILE
+```
+
+
+
+### DEBUG Command Parameters (114 words)
+
+Debug output formatting commands and their variants:
+
+```
+DEBUG_BAUD           DEBUG_COGS           DEBUG_DELAY          DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP    DEBUG_HEIGHT         DEBUG_LEFT           DEBUG_LOG_SIZE
+DEBUG_PIN            DEBUG_TIMESTAMP      DEBUG_TOP            DEBUG_WIDTH
+DEBUG_WINDOWS_OFF
+```
+
+**Signed decimal (SDEC) variants:**
+```
+SDEC        SDEC_       SDEC_BYTE        SDEC_BYTE_       SDEC_BYTE_ARRAY
+SDEC_BYTE_ARRAY_      SDEC_LONG        SDEC_LONG_       SDEC_LONG_ARRAY
+SDEC_LONG_ARRAY_      SDEC_REG_ARRAY   SDEC_REG_ARRAY_  SDEC_WORD
+SDEC_WORD_            SDEC_WORD_ARRAY  SDEC_WORD_ARRAY_
+```
+
+**Unsigned decimal (UDEC) variants:**
+```
+UDEC        UDEC_       UDEC_BYTE        UDEC_BYTE_       UDEC_BYTE_ARRAY
+UDEC_BYTE_ARRAY_      UDEC_LONG        UDEC_LONG_       UDEC_LONG_ARRAY
+UDEC_LONG_ARRAY_      UDEC_REG_ARRAY   UDEC_REG_ARRAY_  UDEC_WORD
+UDEC_WORD_            UDEC_WORD_ARRAY  UDEC_WORD_ARRAY_
+```
+
+**Signed hex (SHEX) variants:**
+```
+SHEX        SHEX_       SHEX_BYTE        SHEX_BYTE_       SHEX_BYTE_ARRAY
+SHEX_BYTE_ARRAY_      SHEX_LONG        SHEX_LONG_       SHEX_LONG_ARRAY
+SHEX_LONG_ARRAY_      SHEX_REG_ARRAY   SHEX_REG_ARRAY_  SHEX_WORD
+SHEX_WORD_            SHEX_WORD_ARRAY  SHEX_WORD_ARRAY_
+```
+
+**Unsigned hex (UHEX) variants:**
+```
+UHEX        UHEX_       UHEX_BYTE        UHEX_BYTE_       UHEX_BYTE_ARRAY
+UHEX_BYTE_ARRAY_      UHEX_LONG        UHEX_LONG_       UHEX_LONG_ARRAY
+UHEX_LONG_ARRAY_      UHEX_REG_ARRAY   UHEX_REG_ARRAY_  UHEX_WORD
+UHEX_WORD_            UHEX_WORD_ARRAY  UHEX_WORD_ARRAY_
+```
+
+**Signed binary (SBIN) variants:**
+```
+SBIN        SBIN_       SBIN_BYTE_       SBIN_BYTE_ARRAY  SBIN_BYTE_ARRAY_
+SBIN_LONG   SBIN_LONG_  SBIN_LONG_ARRAY  SBIN_LONG_ARRAY_ SBIN_REG_ARRAY
+SBIN_REG_ARRAY_       SBIN_WORD        SBIN_WORD_       SBIN_WORD_ARRAY
+SBIN_WORD_ARRAY_
+```
+
+**Unsigned binary (UBIN) variants:**
+```
+UBIN        UBIN_       UBIN_BYTE        UBIN_BYTE_       UBIN_BYTE_ARRAY
+UBIN_BYTE_ARRAY_      UBIN_LONG        UBIN_LONG_       UBIN_LONG_ARRAY
+UBIN_LONG_ARRAY_      UBIN_REG_ARRAY   UBIN_REG_ARRAY_  UBIN_WORD
+UBIN_WORD_            UBIN_WORD_ARRAY  UBIN_WORD_ARRAY_
+```
+
+**Floating-point decimal (FDEC) variants:**
+```
+FDEC        FDEC_       FDEC_ARRAY       FDEC_ARRAY_      FDEC_REG_ARRAY
+FDEC_REG_ARRAY_
+```
+
+
+
+### Graphics and Color Constants (34 words)
+
+Color names and graphics-related constants:
+
+```
+BACKCOLOR   BLACK       BLUE        COLOR       CYAN        DEPTH
+GREEN       GREY        MAGENTA     OPACITY     ORANGE      RED
+WHITE       YELLOW
+```
+
+**HSV color conversion:**
+```
+HSV8        HSV8W       HSV8X       HSV16       HSV16W      HSV16X
+```
+
+**RGB color formats:**
+```
+RGB8        RGB16       RGB24       RGBI8       RGBI8W      RGBI8X
+```
+
+**Luminance and LUT:**
+```
+LUMA8       LUMA8W      LUMA8X      LUT1        LUT2        LUT4
+LUT8        LUTCOLORS
+```
+
+
+
+### String and Data Methods (21 words)
+
+Memory and string manipulation:
+
+```
+BYTEFILL    BYTEMOVE    LONGFILL    LONGMOVE    STRCOMP     STRING
+STRSIZE     WORDFILL    WORDMOVE
+```
+
+**Bit-packing constants:**
+```
+BYTES_1BIT  BYTES_2BIT  BYTES_4BIT
+WORDS_1BIT  WORDS_2BIT  WORDS_4BIT  WORDS_8BIT
+LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT  LONGS_16BIT
+```
+
+
+
+### Math and Conversion Methods (12 words)
+
+Mathematical functions available in Spin2:
+
+```
+FABS        FLOAT       FRAC        FSQRT       LOGSCALE    MULDIV64
+NAN         QCOS        QSIN        ROUND       SQRT        TRUNC
+```
+
+
+
+### Event Constants (16 words)
+
+Event source identifiers for WAITSE and POLLSE:
+
+```
+EVENT_ATN   EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT
+EVENT_PAT   EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4
+EVENT_XFI   EVENT_XMT   EVENT_XRL   EVENT_XRO
+```
+
+
+
+### Pin Methods (14 words)
+
+High-level pin manipulation methods:
+
+```
+PINCLEAR    PINF        PINFLOAT    PINH        PINHIGH     PINL
+PINLOW      PINR        PINREAD     PINSTART    PINT        PINTOGGLE
+PINW        PINWRITE
+```
+
+
+
+### Condition Code Shortcuts (32 words)
+
+Spin2 uses underscore-prefixed condition codes as shortcuts:
+
+```
+_C          _CLR        _E          _GE         _GT         _LE
+_LT         _NC         _NE         _NZ         _SET        _Z
+```
+
+**Compound conditions:**
+```
+_C_AND_NZ   _C_AND_Z    _C_EQ_Z     _C_NE_Z     _C_OR_NZ    _C_OR_Z
+_NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z    _NZ_AND_C   _NZ_AND_NC
+_NZ_OR_C    _NZ_OR_NC   _Z_AND_C    _Z_AND_NC   _Z_EQ_C     _Z_NE_C
+_Z_OR_C     _Z_OR_NC
+```
+
+
+
+### Additional IF_ Condition Variants (28 words)
+
+Extended condition code patterns for bit-testing:
+
+```
+IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
+IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
+IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
+IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_NOT_00
+IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_X0       IF_X1       IF_Z_EQ_C
+IF_Z_NE_C   IFNOT
+```
+
+
+
+### Shared Registers (8 words)
+
+PASM2 to Spin2 communication registers:
+
+```
+PR0         PR1         PR2         PR3         PR4         PR5
+PR6         PR7
+```
+
+
+
+### System and I/O Methods (27 words)
+
+System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
+
+```
+CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
+DEV         GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
+NEWCOG      RECV        REG         REGEXEC     REGLOAD     SEND
+SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
+WINDOW
+```
+
+
+
+### Graphics Drawing Methods (32 words)
+
+Graphics primitives and display control:
+
+```
+BITMAP      BOX         CARTESIAN   CIRCLE      CLEAR       DOT
+DOTSIZE     FFT         HIDEXY      HOLDOFF     LINE        LINESIZE
+LOGIC       OBOX        ORIGIN      OVAL        PC_KEY      PC_MOUSE
+PLOT        POLAR       POLLCT      POLXY       POS         RANGE
+ROTXY       SAMPLES     SAVE        SCOPE       SCOPE_XY    SCROLL
+SPECTRO     XYPOL
+```
+
+
+
+### Text and Display (12 words)
+
+Text rendering parameters:
+
+```
+SPACING     SPRITE      SPRITEDEF   TERM        TEXT        TEXTANGLE
+TEXTSIZE    TEXTSTYLE   TITLE       TRACE       TRIGGER     ZSTR
+ZSTR_
+```
+
+
+
+### Lookup and Miscellaneous (20 words)
+
+Table lookup and other Spin2 features:
+
+```
+ADDBITS     ADDPINS     ALT         ARCHIVE     CHANNEL     DLY
+FVAR        FVARS       LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ
+LSTR        LSTR_       MAG         MIDI        PRECISE     PRECOMPILE
+SET         SIGNED      SIZE        SQRT        STEP
+```
+
+
+
+### Smart Pin Constants (P_*)
+
+The complete list of Smart Pin configuration constants (116 constants) is documented in **Appendix E: Smart Pin Constants**. These include:
+
+- Pin mode constants (P_ASYNC_TX, P_ASYNC_RX, P_SYNC_TX, etc.)
+- DAC configuration (P_DAC_*, P_BITDAC)
+- ADC configuration (P_ADC_*)
+- Filter and logic modes (P_FILT*, P_LOGIC_*, P_COMPARE_*)
+- Output drive strength (P_HIGH_*, P_LOW_*)
+- Many more specialized pin configurations
+
+All P_* constants are reserved words and cannot be used as user-defined symbols.
+
+
+
+### Streamer Constants (X_*)
+
+The complete list of Streamer mode constants (78 constants) is documented in **Appendix F: Streamer Constants**. These include:
+
+- Immediate mode constants (X_IMM_*)
+- RF byte/word/long modes (X_RFBYTE_*, X_RFWORD_*, X_RFLONG_*)
+- DAC output configurations (X_*DAC*)
+- Control flags (X_PINS_ON, X_PINS_OFF, X_WRITE_ON, X_WRITE_OFF, etc.)
+
+All X_* constants are reserved words and cannot be used as user-defined symbols.
+
 

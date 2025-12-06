@@ -1,12 +1,15 @@
 -- P2KB PASM2 Table Formatting Filter
--- Auto-sized content tables with no wrapping; fixed-width encoding tables
+-- Conservative fix: constrain tables to page width, last column wraps
 -- Author: Iron Sheep Productions, LLC
--- Version: 4.0 - Auto-sized columns for content tables (no fixed widths)
+-- Version: 5.1 - Conservative fix for table overflow (uses Pandoc widths when available)
 --
 -- Strategy:
--- - 9-column encoding tables: Use fixed widths with colored headers (tabularray)
--- - All other tables: Let LaTeX auto-size columns to fit content (no wrapping)
---   This means NOT setting explicit colspecs widths, allowing natural sizing
+-- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
+-- - 2-8 column tables: Use tabularray with width=\linewidth
+--   * If markdown specifies column widths (via grid table syntax), use those proportions
+--   * If no widths specified, give ~15% each to first N-1 columns, last column flexible (X)
+-- - This preserves existing table appearance while preventing overflow
+-- - Last column uses X type (flexible width with word-wrap) when no width specified
 
 -- Get maximum text length in a column across all rows (used for encoding tables)
 local function get_max_column_length(el, col_index)
@@ -189,6 +192,132 @@ local function handle_encoding_table(el)
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
+-- Handle content tables (2-8 columns) with page-width constraint
+-- CONSERVATIVE: Uses Pandoc's column width hints from markdown, just adds width=\linewidth
+-- If no widths specified in markdown, uses equal distribution with last column flexible
+local function handle_content_table(el)
+  local num_cols = #el.colspecs
+
+  -- Extract column widths from Pandoc's colspecs
+  -- colspecs is a list of {alignment, width} pairs
+  -- width is nil if not specified, or a fraction (0.0-1.0) of line width
+  local widths = {}
+  local has_widths = false
+  local total_specified = 0
+
+  for i = 1, num_cols do
+    local spec = el.colspecs[i]
+    if spec and spec[2] then
+      widths[i] = spec[2]
+      has_widths = true
+      total_specified = total_specified + spec[2]
+    else
+      widths[i] = nil
+    end
+  end
+
+  -- If markdown specified widths, use them (scaled to fit)
+  -- If not, calculate reasonable defaults
+  if has_widths and total_specified > 0 then
+    -- Scale widths to sum to ~0.95 (leave room for padding)
+    local scale = 0.95 / total_specified
+    for i = 1, num_cols do
+      if widths[i] then
+        widths[i] = widths[i] * scale
+      end
+    end
+  else
+    -- No widths specified: give equal space to first N-1 cols, last col gets remainder
+    -- This ensures last column (usually description) can wrap
+    local per_col = 0.15  -- ~15% each for narrow columns
+    local max_for_narrow = 0.60  -- max 60% for narrow columns combined
+
+    if (num_cols - 1) * per_col > max_for_narrow then
+      per_col = max_for_narrow / (num_cols - 1)
+    end
+
+    for i = 1, num_cols - 1 do
+      widths[i] = per_col
+    end
+    -- Last column is flexible (X type in tabularray)
+    widths[num_cols] = nil  -- will use X
+  end
+
+  -- Helper to render cell contents as LaTeX
+  local function cell_to_latex(cell)
+    if not cell or not cell.contents then
+      return ""
+    end
+    if #cell.contents == 0 then
+      return ""
+    end
+    -- Use pandoc.write for proper LaTeX conversion
+    local doc = pandoc.Pandoc({pandoc.Plain(cell.contents)})
+    local latex_str = pandoc.write(doc, "latex")
+    return latex_str:gsub("\n$", "")
+  end
+
+  -- Build tabularray LaTeX
+  local latex = {}
+  table.insert(latex, "\\begin{tblr}{")
+  table.insert(latex, "  width=\\linewidth,")
+  table.insert(latex, "  rowsep=3pt,")
+  table.insert(latex, "  colsep=6pt,")
+
+  -- Column specifications
+  for i = 1, num_cols do
+    if widths[i] then
+      table.insert(latex, string.format("  column{%d}={wd=%.3f\\linewidth, halign=l},", i, widths[i]))
+    else
+      -- Flexible column (X type) - takes remaining space and wraps
+      table.insert(latex, string.format("  column{%d}={X, halign=l},", i))
+    end
+  end
+
+  -- Styling: bold header row, horizontal rules
+  table.insert(latex, "  row{1}={font=\\bfseries},")
+  table.insert(latex, "  hline{1,2}={solid},")
+  table.insert(latex, "  hline{Z}={solid},")
+  table.insert(latex, "}")
+
+  -- Extract and add header row
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells then
+      local headers = {}
+      for i, cell in ipairs(header_row.cells) do
+        if i <= num_cols then
+          table.insert(headers, cell_to_latex(cell))
+        end
+      end
+      if #headers > 0 then
+        table.insert(latex, "  " .. table.concat(headers, " & ") .. " \\\\")
+      end
+    end
+  end
+
+  -- Add data rows
+  for _, body in ipairs(el.bodies) do
+    if body.body then
+      for _, row in ipairs(body.body) do
+        local cells = {}
+        for i, cell in ipairs(row.cells) do
+          if i <= num_cols then
+            table.insert(cells, cell_to_latex(cell))
+          end
+        end
+        if #cells > 0 then
+          table.insert(latex, "  " .. table.concat(cells, " & ") .. " \\\\")
+        end
+      end
+    end
+  end
+
+  table.insert(latex, "\\end{tblr}")
+
+  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
+end
+
 function Table(el)
   -- Get number of columns
   local num_cols = #el.colspecs
@@ -198,12 +327,11 @@ function Table(el)
     return handle_encoding_table(el)
   end
 
-  -- For other tables: don't set explicit widths, let LaTeX auto-size
-  -- Just preserve alignment from markdown, use nil for width (auto)
-  for i = 1, num_cols do
-    local align = el.colspecs[i] and el.colspecs[i][1] or pandoc.AlignDefault
-    el.colspecs[i] = {align, nil}
+  -- Handle 2-8 column content tables with page-width constraint
+  if num_cols >= 2 and num_cols <= 8 then
+    return handle_content_table(el)
   end
 
+  -- For tables outside our handling (1 column or 10+ columns), pass through
   return el
 end

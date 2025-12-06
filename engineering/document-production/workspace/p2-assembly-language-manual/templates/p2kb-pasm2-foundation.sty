@@ -152,6 +152,15 @@
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{6pt}
 
+% Fix for table overflow: constrain longtable to text width
+% This makes longtables respect page margins instead of overflowing
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt plus 1fill}
+
+% Define a paragraph column type for wrapping text in last column
+% Usage in markdown: tables with long text in rightmost column will wrap
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
 % ==================== PAGE SETUP ====================
 
 \pagestyle{fancy}
