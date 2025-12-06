@@ -251,10 +251,22 @@ local function handle_content_table(el)
     if #cell.contents == 0 then
       return ""
     end
-    -- Use pandoc.write for proper LaTeX conversion
-    local doc = pandoc.Pandoc({pandoc.Plain(cell.contents)})
-    local latex_str = pandoc.write(doc, "latex")
-    return latex_str:gsub("\n$", "")
+    -- cell.contents is a list of Blocks, use pandoc.write directly
+    local ok, result = pcall(function()
+      local doc = pandoc.Pandoc(cell.contents)
+      local latex_str = pandoc.write(doc, "latex")
+      if latex_str then
+        return latex_str:gsub("\n$", "")
+      else
+        return pandoc.utils.stringify(cell.contents)
+      end
+    end)
+    if ok then
+      return result or ""
+    else
+      -- Fallback to stringify if pandoc.write fails
+      return pandoc.utils.stringify(cell.contents) or ""
+    end
   end
 
   -- Build tabularray LaTeX
@@ -265,14 +277,18 @@ local function handle_content_table(el)
   table.insert(latex, "  colsep=6pt,")
 
   -- Column specifications
+  -- Build colspec string for tabularray
+  local colspec_parts = {}
   for i = 1, num_cols do
     if widths[i] then
-      table.insert(latex, string.format("  column{%d}={wd=%.3f\\linewidth, halign=l},", i, widths[i]))
+      table.insert(colspec_parts, string.format("Q[wd=%.3f\\linewidth, l]", widths[i]))
     else
       -- Flexible column (X type) - takes remaining space and wraps
-      table.insert(latex, string.format("  column{%d}={X, halign=l},", i))
+      table.insert(colspec_parts, "X[l]")
     end
   end
+  table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
+
 
   -- Styling: bold header row, horizontal rules
   table.insert(latex, "  row{1}={font=\\bfseries},")

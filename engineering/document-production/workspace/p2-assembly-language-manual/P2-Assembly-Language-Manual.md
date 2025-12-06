@@ -81,10 +81,12 @@ Copyright 2025 P2 Knowledge Base Project
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 You are free to:
+
 - **Share** — copy and redistribute the material in any medium or format
 - **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
+
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
 
@@ -355,24 +357,24 @@ These registers provide a communication mechanism between Spin2 and PASM2 code r
 
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
-| Address | Register | Purpose |
-|:--------|:---------|:------------------------------------------------|
-| $1F0 | IJMP3 | Interrupt 3 jump address |
-| $1F1 | IRET3 | Interrupt 3 return address |
-| $1F2 | IJMP2 | Interrupt 2 jump address |
-| $1F3 | IRET2 | Interrupt 2 return address |
-| $1F4 | IJMP1 | Interrupt 1 jump address |
-| $1F5 | IRET1 | Interrupt 1 return address |
-| $1F6 | PA | Port A scratch / pointer register |
-| $1F7 | PB | Port B scratch / pointer register |
-| $1F8 | PTRA | Pointer A register |
-| $1F9 | PTRB | Pointer B register |
-| $1FA | DIRA | Direction for pins 31-0 |
-| $1FB | DIRB | Direction for pins 63-32 |
-| $1FC | OUTA | Output for pins 31-0 |
-| $1FD | OUTB | Output for pins 63-32 |
-| $1FE | INA | Input from pins 31-0 (read-only) |
-| $1FF | INB | Input from pins 63-32 (read-only) |
+| Address | Register | Access | Purpose |
+|:--------|:---------|:-------|:------------------------------------------------|
+| $1F0 | IJMP3 | R/W | Interrupt 3 jump address |
+| $1F1 | IRET3 | R/W | Interrupt 3 return address |
+| $1F2 | IJMP2 | R/W | Interrupt 2 jump address |
+| $1F3 | IRET2 | R/W | Interrupt 2 return address |
+| $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
+| $1F5 | IRET1 | R/W | Interrupt 1 return address |
+| $1F6 | PA | R/W | Port A scratch / pointer register |
+| $1F7 | PB | R/W | Port B scratch / pointer register |
+| $1F8 | PTRA | R/W | Pointer A register |
+| $1F9 | PTRB | R/W | Pointer B register |
+| $1FA | DIRA | R/W | Direction for pins 31-0 |
+| $1FB | DIRB | R/W | Direction for pins 63-32 |
+| $1FC | OUTA | R/W | Output for pins 31-0 |
+| $1FD | OUTB | R/W | Output for pins 63-32 |
+| $1FE | INA | R/O | Input from pins 31-0 |
+| $1FF | INB | R/O | Input from pins 63-32 |
 
 Registers $1F0-$1F7 serve dual purposes. When their associated hardware functions (interrupts, parameter passing) are not enabled, these registers function as ordinary general-purpose RAM. Registers $1F8-$1FF are fixed special-purpose registers that always provide their hardware functions when accessed.
 
@@ -737,6 +739,7 @@ The 9-bit D field (bits 17-9) addresses a COG register from $000 to $1FF:
 - **Write only:** Some move instructions write D without reading its previous value
 
 The D field can also specify:
+
 - Hub addresses (for ALTD-modified instructions)
 - LUT addresses (for LUT instructions)
 - Pin numbers (for certain I/O instructions)
@@ -784,6 +787,7 @@ The `#` prefix before an operand indicates an immediate value:
 ```
 
 When `#` is used:
+
 - The assembler sets the I bit (bit 18) to 1
 - The S field contains the 9-bit value
 
@@ -853,6 +857,7 @@ If any instruction intervenes (including a conditional NOP), the augmentation is
 ### 2.7.4 When Augmentation is Required
 
 Augmentation is needed when:
+
 - Values exceed 9 bits (> 511 for unsigned)
 - Hub addresses are used (20-bit address space)
 - 32-bit constants are needed
@@ -948,9 +953,8 @@ The PDF version of this manual includes extensive cross-reference links to help 
 - The **Category name** links to Appendix B's categorical listing
 
 **In the Related line:**
-```
-**Related:** ADDX, ADDS, ADDSX, SUB
-```
+
+> **Related:** ADDX, ADDS, ADDSX, SUB
 
 Each instruction name in the Related section is a clickable link that jumps directly to that instruction's entry. This makes it easy to explore instruction families:
 
@@ -1085,6 +1089,158 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 
 
+## 2.10 Labels and Symbol Scoping
+
+PASM2 supports two scoping levels for labels within DAT blocks: global labels and local labels. This scoping mechanism enables reuse of common label names (such as `loop`, `done`, `exit`) without naming collisions across different routines.
+
+### 2.10.1 Global Labels
+
+Global labels are defined by placing an identifier at the start of a line without any prefix character.
+
+**Syntax:**
+```pasm
+labelname       instruction     operands        ' comment
+```
+
+Global labels have these characteristics:
+
+- Visible throughout the entire DAT block
+- Can be referenced from Spin2 code using `@labelname`
+- Defining a new global label resets the local label scope
+- Must begin with a letter (A-Z, a-z) or underscore (_)
+- May contain letters, digits (0-9), and underscores
+- Maximum length: 30 characters
+
+**Example:**
+```pasm
+DAT             org
+
+' Global labels - visible everywhere in DAT block
+init_routine    mov     x, #0                   ' Routine entry point
+                add     x, #1
+                ret
+
+data_table      long    $DEAD_BEEF              ' Data with global label
+                long    $CAFE_BABE
+
+math_helper     abs     x                       ' Another routine
+                ret
+```
+
+### 2.10.2 Local Labels
+
+Local labels are defined by prefixing an identifier with either a dot (`.`) or colon (`:`). Both prefix characters are functionally equivalent.
+
+**Syntax:**
+```pasm
+.labelname      instruction     operands        ' comment
+:labelname      instruction     operands        ' comment
+```
+
+Local labels have these characteristics:
+
+- Visible only within the scope of the preceding global label
+- Scope ends when the next global label is defined
+- The same local name can be reused under different global labels
+- Internally mangled by the compiler (e.g., `loop'0001`) for uniqueness
+- Must begin with a letter or underscore after the prefix
+
+**Example:**
+```pasm
+DAT             org
+
+send_byte       rdbyte  x, ptr                  ' Global: send_byte
+                call    #.wait                  ' Reference local .wait
+.loop           testp   tx_pin          wc      ' Local: .loop (scope: send_byte)
+        if_nc   jmp     #.loop
+                wypin   x, tx_pin
+.wait           testp   tx_pin          wc      ' Local: .wait (scope: send_byte)
+        if_c    jmp     #.wait
+                ret
+
+recv_byte       testp   rx_pin          wc      ' Global: recv_byte
+                                                '  (new scope begins)
+        if_nc   jmp     #.wait                  ' This .wait is different from above
+.wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
+        if_nc   jmp     #.wait
+                rdpin   x, rx_pin
+.loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
+                ret
+```
+
+The example demonstrates how `.loop` and `.wait` can be reused in both `send_byte` and `recv_byte` without collision. Each global label creates a new local scope.
+
+### 2.10.3 Label Reference Operators
+
+PASM2 provides several operators for referencing labels in different contexts:
+
+| Operator | Meaning | Context |
+|----------|---------|---------|
+| `#label` | Immediate value (COG address) | PASM instructions |
+| `#.local` | Immediate reference to local label | PASM instructions |
+| `#\label` | Absolute COG-relative address | Forces 9-bit COG address |
+| `@label` | Hub address of label | Spin2 or PASM |
+| `@@label` | Object-relative address | Spin2 or PASM |
+| `$` | Current COG address | PASM (ORG mode) |
+| `$$` | Current Hub address | PASM (ORGH mode) |
+
+**Example:**
+```pasm
+DAT             org
+
+routine         jmp     #.skip                  ' Jump to local label
+                long    0
+.skip           mov     x, #routine             ' Load address of global
+                call    #\.helper               ' Absolute call to local
+                ret
+
+.helper         nop
+                ret
+
+' In ORGH (Hub) mode:
+                orgh
+hub_data        byte    "Hello", 0
+hub_routine     long    @routine                ' Hub address of COG routine
+```
+
+### 2.10.4 Scope Boundary Rules
+
+Three events create scope boundaries:
+
+1. **Global label definition** — Starts a new local scope
+2. **Storage directives** (BYTE, WORD, LONG, RES with a label) — Also start a new local scope
+3. **End of DAT block** — Terminates all label scopes
+
+**Example:**
+```pasm
+DAT             org
+
+func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
+.loop           djnz    x, #.loop               ' Local .loop in scope #1
+
+data_block      long    0, 0, 0, 0              ' Global: data_block,
+                                                '  scope #2 begins
+
+func_b          mov     y, #2                   ' Global: func_b,
+                                                '  scope #3 begins
+.loop           djnz    y, #.loop               ' Local .loop in scope #3
+                                                '  (different)
+.done           ret                             ' Local .done in scope #3
+```
+
+### 2.10.5 Best Practices
+
+**Use descriptive global names** for routine entry points: `send_packet`, `init_uart`, `calc_crc`
+
+**Use short local names** for flow control: `.loop`, `.done`, `.retry`, `.skip`, `.exit`
+
+**Prefer dot notation** (`.label`) over colon notation (`:label`) for consistency with modern convention
+
+**Keep local labels near their references** to improve readability
+
+**Limit symbol names to 30 characters** for compatibility with the PNut compiler
+
+
 ```{=latex}
 \begin{keyconcepts}
 \item Every instruction is exactly 32 bits: 4-bit condition, 7-bit opcode, 3-bit flags, 9-bit D, 9-bit S
@@ -1094,7 +1250,8 @@ TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 \item AUGS/AUGD extend immediates to full 32 bits by inserting an extra instruction before the target
 \item Encoding tables show both the bit pattern (left 5 columns) and the effects (right 4 columns)
 \item Multiple table rows indicate instruction families or syntax variants with different encodings
-\item The _RET_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item The \_RET\_ condition (EEEE=0000) transforms any instruction into a subroutine return
+\item Global labels are visible throughout a DAT block; local labels (.name or :name) are scoped to the preceding global label
 \end{keyconcepts}
 ```
 
@@ -1584,6 +1741,7 @@ The P2 provides four variants each for ADD, SUB, and CMP operations:
 | CMPSX D, S | X = D - S - C | True sign of X | Z AND (X == 0) |
 
 The key distinctions:
+
 - **Base instructions** (ADD, SUB, CMP) start a new operation and reset Z
 - **X variants** (ADDX, SUBX, CMPX) propagate carry/borrow and AND the zero result
 - **S variants** (ADDS, SUBS, CMPS) report the true sign instead of carry
@@ -1598,6 +1756,7 @@ Multi-long operations follow a consistent pattern:
 3. **Final long:** Use X variant for unsigned, SX variant for signed
 
 The X variants are critical because they:
+
 - Add/subtract the incoming C flag (carry/borrow from previous long)
 - AND the Z result with the previous Z (tracking if all longs are zero)
 - Output carry/borrow for the next long
@@ -1608,7 +1767,8 @@ The X variants are critical because they:
 
 ```pasm
         ADD     A0, B0    WCZ     ' Add low longs, C = carry, Z = (A0 == 0)
-        ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry, Z = Z AND (A1 == 0)
+        ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry,
+                                  '  Z = Z AND (A1 == 0)
         ' After: C = overflow, Z = (entire 64-bit result == 0)
 ```
 
@@ -1675,6 +1835,7 @@ For signed operations, the final instruction must be an SX variant to correctly 
 The S and SX variants report the "true sign" of the result rather than carry/borrow. This is the conceptual bit above the MSB—the sign the result would have if computed with infinite precision.
 
 For signed operations:
+
 - If the result is negative (would be negative with more bits), C = 1
 - If the result is non-negative, C = 0
 
@@ -1689,6 +1850,7 @@ This differs from carry/borrow, which indicates overflow in unsigned arithmetic.
 | Compare | CMP WCZ | CMPX WCZ | CMPX WCZ | CMPSX WCZ |
 
 After a multi-long comparison:
+
 - **Unsigned:** Use IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
 - **Signed:** Use IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
 - **Either:** Use IF_Z (equal), IF_NZ (not equal)
@@ -2505,7 +2667,8 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
 ```pasm
-        pollqmt             wc              ' C=1 if pipeline empty, C=0 if results pending
+        pollqmt             wc              ' C=1 if pipeline empty,
+                                            '  C=0 if results pending
         if_nc getqx result                  ' Only retrieve if results available
 ```
 
@@ -2784,7 +2947,8 @@ Polling enables responsive event handling within loops. Code can check multiple 
 
 ```pasm
                 pollse1         wc              ' Test event 1, set C if occurred
-        if_c    jmp     #handler                ' Branch to handler only if event fired
+        if_c    jmp     #handler                ' Branch to handler only if
+                                                '  event fired
 ```
 
 This pattern branches to handler code only when the event occurred.
@@ -3164,12 +3328,18 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
 
 ```pasm
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
-                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal, 15pF caps
-                waitx   ##20_000_000/100                          ' Wait 10ms for crystal
-                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to crystal
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1 = 160MHz
-                waitx   ##20_000_000/10000                        ' Wait 100µs for PLL lock
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL output
+                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal,
+                                                                  '  15pF caps
+                waitx   ##20_000_000/100                          ' Wait 10ms for
+                                                                  '  crystal
+                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to
+                                                                  '  crystal
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1
+                                                                  '  = 160MHz
+                waitx   ##20_000_000/10000                        ' Wait 100µs for
+                                                                  '  PLL lock
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL
+                                                                  '  output
 ```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
@@ -3183,7 +3353,8 @@ The boot ROM cannot know what clock source your hardware provides. Some boards u
 The HUBSET instruction can trigger a hardware reset, returning the chip to the boot sequence:
 
 ```pasm
-                hubset  ##$1000_0000                ' Generate reset pulse, reboot chip
+                hubset  ##$1000_0000                ' Generate reset pulse,
+                                                    '  reboot chip
 ```
 
 This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
@@ -3285,8 +3456,10 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 **Conditional Output:**
 
 ```pasm
-                debug(if(error_flag), "Error detected") ' Only outputs if condition true
-                debug(ifnot(ready), "Not ready")        ' Only outputs if condition false
+                debug(if(error_flag), "Error detected") ' Only outputs if
+                                                        '  condition true
+                debug(ifnot(ready), "Not ready")        ' Only outputs if
+                                                        '  condition false
 ```
 
 ### 5.8.6 Visual Debug Displays
@@ -3343,8 +3516,10 @@ PLOT provides rolling or accumulating display modes, multiple data series, and s
 The TERM display provides a dedicated text terminal window, separate from the default debug output:
 
 ```pasm
-                debug(`term Status)                           ' Create terminal window
-                debug(`Status "System initialized", 13)       ' Send text to terminal
+                debug(`term Status)                           ' Create terminal
+                                                              '  window
+                debug(`Status "System initialized", 13)       ' Send text to
+                                                              '  terminal
                 debug(`Status "Temperature: ", sdec_(temp), "°C", 13)
 ```
 
@@ -3471,7 +3646,8 @@ When multiple COGs execute DEBUG statements, output interleaves in the debug win
 For standard DEBUG output (not routed to a visual display window), the debug system automatically prefixes each message with the COG number (Cog0: through Cog7:). You do not need to manually add COG identification—it's built into the debug protocol:
 
 ```pasm
-                debug("Starting motor control")     ' Output: Cog2: Starting motor control
+                debug("Starting motor control")     ' Output: Cog2: Starting
+                                                    '  motor control
                 debug(udec(speed))                  ' Output: Cog2: speed = 1500
 ```
 
@@ -3526,47 +3702,47 @@ This chapter defines the instruction categories used throughout Part II. Each ca
 
 Arithmetic instructions perform mathematical and logical operations on register values. This includes addition, subtraction, multiplication, comparisons, bitwise operations (AND, OR, XOR), bit manipulation, shifts, rotates, and data movement. This is the largest instruction category.
 
-*Data Movement:* [MOV](#mov), [LOC](#loc)
+**Data Movement:** [MOV](#mov), [LOC](#loc)
 
-*Addition/Subtraction:* [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
+**Addition/Subtraction:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
 
-*Negation/Absolute:* [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
+**Negation/Absolute:** [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
 
-*Multiplication:* [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
+**Multiplication:** [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
 
-*Comparisons:* [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [TEST](#test), [TESTN](#testn)
+**Comparisons:** [CMP](#cmp), [CMPM](#cmpm), [CMPR](#cmpr), [CMPS](#cmps), [CMPSUB](#cmpsub), [CMPSX](#cmpsx), [CMPX](#cmpx), [TEST](#test), [TESTN](#testn)
 
-*Min/Max:* [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles)
+**Min/Max:** [FGE](#fge), [FGES](#fges), [FLE](#fle), [FLES](#fles)
 
-*Modular Arithmetic:* [INCMOD](#incmod), [DECMOD](#decmod)
+**Modular Arithmetic:** [INCMOD](#incmod), [DECMOD](#decmod)
 
-*Bitwise Logic:* [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
+**Bitwise Logic:** [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
 
-*Bit Field Operations:* [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
+**Bit Field Operations:** [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
 
-*Bit Utilities:* [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
+**Bit Utilities:** [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
 
-*Shifts:* [SHL](#shl), [SHR](#shr), [SAL](#sal), [SAR](#sar)
+**Shifts:** [SHL](#shl), [SHR](#shr), [SAL](#sal), [SAR](#sar)
 
-*Rotates:* [ROL](#rol), [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr)
+**Rotates:** [ROL](#rol), [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [RCZL](#rczl), [RCZR](#rczr)
 
-*Byte/Word/Nibble Access:* [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [SETNIB](#setnib), [SETWORD](#setword), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword)
+**Byte/Word/Nibble Access:** [GETBYTE](#getbyte), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [SETNIB](#setnib), [SETWORD](#setword), [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [ROLWORD](#rolword)
 
-*Byte/Word Packing:* [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
+**Byte/Word Packing:** [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
 
-*Mux Operations:* [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Mux Operations:** [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
-*Conditional Sum:* [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
+**Conditional Sum:** [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
 
-*Flag Operations:* [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
+**Flag Operations:** [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
 
-*Instruction Field Modification:* [SETD](#setd), [SETS](#sets), [SETR](#setr)
+**Instruction Field Modification:** [SETD](#setd), [SETS](#sets), [SETR](#setr)
 
-*CRC:* [CRCBIT](#crcbit), [CRCNIB](#crcnib)
+**CRC:** [CRCBIT](#crcbit), [CRCNIB](#crcnib)
 
-*Graphics:* [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz)
+**Graphics:** [RGBEXP](#rgbexp), [RGBSQZ](#rgbsqz)
 
-*Shuffling:* [SEUSSF](#seussf), [SEUSSR](#seussr)
+**Shuffling:** [SEUSSF](#seussf), [SEUSSR](#seussr)
 
 ---
 
@@ -3598,19 +3774,19 @@ Lookup table (LUT) instructions access the 512-long LUT memory private to each c
 
 Pin instructions control the P2's 64 I/O pins. Basic pin operations set direction (input/output) and output level (high/low). Smart pin instructions configure and communicate with the autonomous smart pin state machines that can perform complex I/O functions independent of cog processing.
 
-*Direction Control:* [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
+**Direction Control:** [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
 
-*Output Control:* [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
+**Output Control:** [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
 
-*Drive (Direction + Output):* [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
+**Drive (Direction + Output):** [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
 
-*Float (Input with Preset):* [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
+**Float (Input with Preset):** [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
 
-*Pin Testing:* [TESTP](#testp), [TESTPN](#testpn)
+**Pin Testing:** [TESTP](#testp), [TESTPN](#testpn)
 
-*Smart Pin Control:* [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
+**Smart Pin Control:** [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
-*Oscilloscope/DAC:* [GETSCP](#getscp), [SETSCP](#setscp), [SETDACS](#setdacs)
+**Oscilloscope/DAC:** [GETSCP](#getscp), [SETSCP](#setscp), [SETDACS](#setdacs)
 
 ---
 
@@ -3618,17 +3794,17 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 
 Event instructions monitor and respond to system events including counter/timer triggers, smart pin signals, FIFO status, streamer conditions, and inter-cog attention signals. They provide configuration, polling, waiting, and conditional branching mechanisms for synchronization.
 
-*Configuration:* [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
+**Configuration:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
 
-*Inter-COG:* [COGATN](#cogatn)
+**Inter-COG:** [COGATN](#cogatn)
 
-*Polling:* [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
+**Polling:** [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
 
-*Waiting:* [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
+**Waiting:** [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
 
-*Branch on Event Set:* [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
+**Branch on Event Set:** [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
 
-*Branch on Event Clear:* [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
+**Branch on Event Clear:** [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
 
 ---
 
@@ -5762,6 +5938,7 @@ Cog Initialize
 COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from Hub RAM to be executed within COG/LUT RAM or to be executed right from Hub RAM.
 
 The format of Dest is `%E_N_xVVV` where:
+
 - E controls loading (0=load from Hub, 1=no load/Hub exec)
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
@@ -6013,6 +6190,7 @@ Decode Bit Position
 DECOD generates a 32-bit value with just one bit high, corresponding to the Src or Dest value (0-31) and stores that result in Dest. In effect, Dest becomes %1 << value via the DECOD instruction, where value is Src[4:0] or Dest[4:0].
 
 Examples of decoded values:
+
 - A value of 0 generates %00000000_00000000_00000000_00000001
 - A value of 5 generates %00000000_00000000_00000000_00100000
 - A value of 15 generates %00000000_00000000_10000000_00000000
@@ -6676,6 +6854,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Src (or original 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if not zero.
 
 For example:
+
 - `%00000000_00000000_00000000_00000001` encodes to 0 (bit position of the only 1)
 - `%00000000_00000000_00000000_00100000` encodes to 5 (bit position 5 is the top-most 1)
 - `%00000000_00000000_10000001_01000000` encodes to 15 (bit position 15 is the top-most 1)
@@ -8776,6 +8955,7 @@ For example, to swap the high and low words of D, use S = $4E (binary 01_00_11_1
 MOVBYTS is useful for byte-order conversions (endianness swapping), color channel reordering in pixel data, and general byte permutation operations. It executes in 2 clock cycles, making it an efficient alternative to multiple shift and mask operations.
 
 Common patterns include:
+
 - S = $E4 (binary 11_10_01_00): No change (identity)
 - S = $1B (binary 00_01_10_11): Reverse bytes (big/little endian swap)
 - S = $B1 (binary 10_11_00_01): Swap words
@@ -8872,6 +9052,7 @@ This instruction is essential for pixel color multiplication operations used in 
 MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
 
 Common uses include:
+
 - Color modulation (tinting): Multiply each color channel by a tint value
 - Brightness adjustment: Multiply RGB by a brightness factor
 - Alpha premultiplication: Multiply RGB by alpha for compositing
@@ -10963,12 +11144,15 @@ Repeat Block
 
 **REP**  *{#}Dest, {#}Src*
 
+**REP**  *@.label, {#}Src*
+
 ---
 
 **Result:** The next Dest[8:0] instructions are executed Src times.
 
 - Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
 - Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
+- Alternatively, `@.label` calculates the instruction count automatically from a local label.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -10985,6 +11169,38 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
 REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+
+**Using Labels Instead of Counts:**
+
+The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
+
+**Example using instruction count:**
+```pasm
+' Hardcoded count - fragile if code changes
+                rep     #4, count               ' Repeat next 4 instructions
+                rdlong  x, ptr
+                add     ptr, #4
+                add     sum, x
+                djnz    n, #$-3                 ' Problem: count must match!
+```
+
+**Example using local label (preferred):**
+```pasm
+' Label-based count - automatically correct
+process_data    rep     @.end, count            ' Repeat until .end label
+                rdlong  x, ptr                  ' Instructions between REP
+                add     ptr, #4                 ' and label are counted
+                add     sum, x                  ' automatically
+.end                                            ' Empty label marks end
+
+' Alternative using the # prefix with local label:
+fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
+                wrbyte  value, ptr
+                add     ptr, #1
+.done
+```
+
+**Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 
 
 
@@ -14377,6 +14593,7 @@ Execute Initialize
 XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between the cog and hub memory or I/O pins.
 
 The streamer operates as a hardware DMA engine, transferring data without CPU intervention. The mode word in Dest configures critical parameters:
+
 - Transfer direction (input from pins to hub, output from hub to pins, or cog-only operations)
 - Number of pins involved in the transfer
 - Data formatting (bit order, byte packing, word sizes)
@@ -14427,6 +14644,7 @@ Exclusive Or
 XOR performs a bitwise exclusive OR operation between Dest and Src, storing the result in Dest. Each bit position in the result is set to 1 if the corresponding bits in Dest and Src differ, or 0 if they match.
 
 The exclusive OR operation has several important properties:
+
 - XORing a value with itself produces zero (useful for clearing registers)
 - XORing a value with all 1s produces the bitwise complement
 - XORing twice with the same value returns the original (useful for simple encryption)
@@ -14466,6 +14684,7 @@ Xoroshiro 32
 XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-quality pseudo-random number generator. The instruction updates the generator state in Dest and simultaneously makes the generated random value available to the next instruction by injecting it into that instruction's S field.
 
 The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bit generator:
+
 - Long period (2^32 - 1 values before repeating)
 - Good distribution across all output bits
 - Fast execution (2 clocks per random number)
@@ -14515,6 +14734,7 @@ XSTOP immediately halts any active streamer operation. This provides programmati
 When XSTOP executes, the streamer hardware stops all data movement and pin activity. Any buffered streamer command (from XCONT or XZERO) is also discarded.
 
 XSTOP is useful when:
+
 - Error conditions require aborting a transfer
 - Dynamic control flow needs to terminate streaming based on data content
 - Cleanup is required before reconfiguring the streamer
@@ -15484,6 +15704,7 @@ Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access 
 **Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. The pointer is 20 bits wide, addressing the full Hub RAM space.
 
 **Addressing Modes**:
+
 - `PTRA++` — Post-increment by 4 bytes (one long)
 - `PTRA--` — Post-decrement by 4 bytes
 - `++PTRA` — Pre-increment by 4 bytes
@@ -15514,6 +15735,7 @@ Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM acces
 **Usage**: PTRB is the secondary pointer for Hub RAM operations, providing the same capabilities as PTRA. Having two independent pointers enables efficient dual-buffer operations and complex memory access patterns. COGINIT writes the code start address to the target cog's PTRB, enabling position-independent code.
 
 **Addressing Modes**:
+
 - `PTRB++` — Post-increment by 4 bytes (one long)
 - `PTRB--` — Post-decrement by 4 bytes
 - `++PTRB` — Pre-increment by 4 bytes
@@ -15541,6 +15763,7 @@ Address $1FA. Direction register A for pins 0-31. Controls whether each pin is a
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | DIR | Direction for each pin: 1 = output, 0 = input |
@@ -15568,6 +15791,7 @@ Address $1FB. Direction register B for pins 32-63. Controls whether each pin is 
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | DIR | Direction for each pin: 1 = output, 0 = input |
@@ -15592,6 +15816,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
@@ -15620,6 +15845,7 @@ Address $1FD. Output register B for pins 32-63. Sets the output state for pins c
 **Access**: Read/Write
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
@@ -15645,6 +15871,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 **Access**: Read-only for pin states (also serves as debug interrupt call address)
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |
@@ -15675,6 +15902,7 @@ Address $1FF. Input register B for pins 32-63. Reads the current state of pins r
 **Access**: Read-only for pin states (also serves as debug interrupt return address)
 
 **Bit Field**:
+
 | Bits | Name | Description |
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |
@@ -15825,6 +16053,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 **Usage**: The C and Z flags enable conditional execution and branching. Most ALU instructions can update these flags based on their results. Conditional prefixes (IF_Z, IF_NZ, IF_C, IF_NC, etc.) determine whether an instruction executes based on flag states.
 
 **Flag Setting**:
+
 - **WZ**: Sets Z flag based on result (Z=1 if result is zero)
 - **WC**: Sets C flag based on operation (carry out, bit shifted out, etc.)
 - **WCZ**: Sets both flags
@@ -16958,40 +17187,8 @@ Miscellaneous instructions provide utility functions including immediate value e
 
 ## Memory Map
 
-```
-$1FF ┌─────────┐
-     │   INB   │ ← Read-only: pins 32-63
-$1FE ├─────────┤
-     │   INA   │ ← Read-only: pins 0-31
-$1FD ├─────────┤
-     │  OUTB   │
-$1FC ├─────────┤  Fixed Special
-     │  OUTA   │  Registers
-$1FB ├─────────┤
-     │  DIRB   │
-$1FA ├─────────┤
-     │  DIRA   │
-$1F9 ├─────────┤
-     │  PTRB   │
-$1F8 ├─────────┤
-     │  PTRA   │
-$1F7 ├─────────┤
-     │   PB    │
-$1F6 ├─────────┤  Dual-Purpose
-     │   PA    │  Registers
-$1F5 ├─────────┤
-     │  IRET1  │
-$1F4 ├─────────┤
-     │  IJMP1  │
-$1F3 ├─────────┤
-     │  IRET2  │
-$1F2 ├─────────┤
-     │  IJMP2  │
-$1F1 ├─────────┤
-     │  IRET3  │
-$1F0 └─────────┘
-     │  IJMP3  │
-     └─────────┘
+```{=latex}
+\SpecialRegistersMapDiagram
 ```
 
 *For complete documentation, see Part II: Special Registers.*
@@ -17713,8 +17910,9 @@ Constants are combined using OR operations to build the complete configuration:
 SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
 
 ```pasm
-' Complex configuration: Async TX with inverted output
-        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT | P_HIGH_FAST | P_LOW_FAST
+' Complex config: Async TX, inverted, fast drive
+        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
+        or      mode, ##P_HIGH_FAST | P_LOW_FAST
         wrpin   mode, pin
 ```
 
@@ -17738,6 +17936,7 @@ PASM2 provides predefined constants for configuring the P2's Streamer—a powerf
 ## Streamer Overview
 
 The Streamer operates in conjunction with the FIFO and can:
+
 - Transfer data from hub RAM to pins/DACs (playback)
 - Transfer data from pins/ADCs to hub RAM (capture)
 - Perform real-time data transformations (color conversion, bit manipulation)
@@ -18088,16 +18287,18 @@ The Streamer supports various data packing/unpacking modes:
 
 # Appendix G: Reserved Words Reference
 
-This appendix lists all reserved words in PASM2. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
+This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
-**Total Reserved Words: 449**
+**Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+
+**Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2 + P_*/X_* constants)
 
 ## Categories
 
 Reserved words fall into six main categories:
 
 1. **Instruction Mnemonics** (358 words) - All instruction names
-2. **Assembly Directives** (14 words) - Assembly-time directives
+2. **Assembly Directives** (21 words) - Block identifiers and assembly-time directives
 3. **Predefined Constants** (11 words) - Built-in constant values
 4. **Special Register Names** (16 words) - Special-purpose registers
 5. **Condition Keywords** (41 words) - Conditional execution prefixes
@@ -18174,9 +18375,23 @@ XORO32      XSTOP       XZERO       ZEROX
 
 
 
-## Assembly Directives (14 words)
+## Assembly Directives (21 words)
 
 Directives control the assembly process and code organization:
+
+### Block/Section Identifiers (7)
+
+These keywords define the major sections of a Spin2/PASM2 source file:
+
+- **CON** - Constants block (define named constants)
+- **DAT** - Data block (contains PASM2 code and data)
+- **FILE** - Include binary file in DAT section
+- **OBJ** - Objects block (instantiate child objects)
+- **PRI** - Private method block
+- **PUB** - Public method block
+- **VAR** - Variables block (instance variables)
+
+### Assembly-Time Directives (14)
 
 - **ALIGNL** - Align to next long boundary (4-byte alignment)
 - **ALIGNW** - Align to next word boundary (2-byte alignment)
@@ -18374,33 +18589,71 @@ When naming labels, variables, and symbols in your PASM2 code:
 
 ### Example Conflicts to Avoid
 
+::: antipattern
+
 ```pasm
 ' WRONG - uses reserved words as labels
-add:    mov   x, #1      ' Error: 'add' is instruction
-or:     jmp   #loop      ' Error: 'or' is instruction
-byte:   long  $0         ' Error: 'byte' is directive
+add         mov   x, #1      ' Error: 'add' is instruction
+or          jmp   #loop      ' Error: 'or' is instruction
+byte        long  $0         ' Error: 'byte' is directive
+```
 
+:::
+
+```pasm
 ' CORRECT - uses valid label names
-add_routine:  mov   x, #1
-choice_or:    jmp   #loop
-byte_data:    long  $0
+add_routine     mov   x, #1
+choice_or       jmp   #loop
+byte_data       long  $0
 ```
 
 
 
 ## Summary
 
-PASM2 reserves **449 identifiers** across six categories:
+The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
+
+**PASM2-Specific Reserved Words (456):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
 | Instructions | 358 | All instruction mnemonics |
-| Directives | 14 | Assembly-time directives |
+| Directives | 21 | Block identifiers and assembly-time directives |
 | Constants | 11 | Predefined constant values |
 | Special Registers | 16 | Hardware-mapped registers |
 | Conditions | 41 | Conditional execution prefixes |
 | Effects | 9 | Flag modification suffixes |
-| **Total** | **449** | |
+| **PASM2 Subtotal** | **456** | |
+
+**Spin2-Specific Reserved Words (586):**
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Language Keywords | 18 | Core Spin2 constructs |
+| DEBUG Parameters | 114 | Debug output formatting |
+| Graphics/Color | 34 | Color names and display |
+| String/Data Methods | 21 | Memory/string manipulation |
+| Math/Conversion | 12 | Math functions |
+| Event Constants | 16 | Event source identifiers |
+| Pin Methods | 14 | High-level pin control |
+| Condition Shortcuts | 32 | Underscore-prefixed conditions |
+| IF_ Variants | 28 | Extended condition patterns |
+| Shared Registers | 8 | PR0-PR7 communication |
+| System/I/O | 27 | System control methods |
+| Graphics Drawing | 32 | Graphics primitives |
+| Text/Display | 12 | Text rendering |
+| Lookup/Misc | 20 | Table lookup and other |
+| **Spin2 Subtotal** | **586** | |
+
+**Hardware Constants (194+):**
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Smart Pin (P_*) | ~116 | Pin configuration |
+| Streamer (X_*) | ~78 | Streamer modes |
+| **Constants Subtotal** | **~194** | |
+
+**Grand Total: 1,236+ reserved identifiers**
 
 **Cross-References:**
 
@@ -18409,9 +18662,304 @@ PASM2 reserves **449 identifiers** across six categories:
 - **Appendix E** — Smart Pin mode constants (P_* symbols, approximately 116 constants)
 - **Appendix F** — Streamer mode constants (X_* symbols, approximately 78 constants)
 
-**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 449-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+**Note on P_* and X_* Constants:** The Smart Pin configuration constants (P_*) and Streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's Smart Pins and Streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
 
-**Note on Spin2 Reserved Words:** This appendix covers PASM2-specific reserved words. The Spin2 language includes additional reserved words for its high-level constructs (CASE, CON, DAT, IF, PUB, VAR, etc.), DEBUG command parameters (UBIN, UDEC, UHEX variants), and graphics constants (BLACK, WHITE, YELLOW, etc.). Since there is a single compiler for both Spin2 and PASM2, all reserved words from both languages always apply regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
+
+## Spin2 Reserved Words
+
+Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. You cannot use any of these identifiers as labels, symbols, or variable names in your assembly code, even when writing pure PASM2.
+
+**Total Spin2-Only Reserved Words: 586**
+
+The following sections list Spin2 reserved words organized by category.
+
+
+
+### Language Keywords (18 words)
+
+Core Spin2 language constructs (block names CON, DAT, VAR, PUB, PRI, OBJ are listed under PASM2 Assembly Directives):
+
+```
+ABORT       CASE        CASE_FAST   ELSE        ELSEIF      ELSEIFNOT
+END         FROM        IF          IFNOT       NEXT        OTHER
+QUIT        REPEAT      RETURN      TO          UNTIL       WHILE
+```
+
+
+
+### DEBUG Command Parameters (114 words)
+
+Debug output formatting commands and their variants:
+
+```
+DEBUG_BAUD           DEBUG_COGS           DEBUG_DELAY          DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP    DEBUG_HEIGHT         DEBUG_LEFT           DEBUG_LOG_SIZE
+DEBUG_PIN            DEBUG_TIMESTAMP      DEBUG_TOP            DEBUG_WIDTH
+DEBUG_WINDOWS_OFF
+```
+
+**Signed decimal (SDEC) variants:**
+```
+SDEC        SDEC_       SDEC_BYTE        SDEC_BYTE_       SDEC_BYTE_ARRAY
+SDEC_BYTE_ARRAY_      SDEC_LONG        SDEC_LONG_       SDEC_LONG_ARRAY
+SDEC_LONG_ARRAY_      SDEC_REG_ARRAY   SDEC_REG_ARRAY_  SDEC_WORD
+SDEC_WORD_            SDEC_WORD_ARRAY  SDEC_WORD_ARRAY_
+```
+
+**Unsigned decimal (UDEC) variants:**
+```
+UDEC        UDEC_       UDEC_BYTE        UDEC_BYTE_       UDEC_BYTE_ARRAY
+UDEC_BYTE_ARRAY_      UDEC_LONG        UDEC_LONG_       UDEC_LONG_ARRAY
+UDEC_LONG_ARRAY_      UDEC_REG_ARRAY   UDEC_REG_ARRAY_  UDEC_WORD
+UDEC_WORD_            UDEC_WORD_ARRAY  UDEC_WORD_ARRAY_
+```
+
+**Signed hex (SHEX) variants:**
+```
+SHEX        SHEX_       SHEX_BYTE        SHEX_BYTE_       SHEX_BYTE_ARRAY
+SHEX_BYTE_ARRAY_      SHEX_LONG        SHEX_LONG_       SHEX_LONG_ARRAY
+SHEX_LONG_ARRAY_      SHEX_REG_ARRAY   SHEX_REG_ARRAY_  SHEX_WORD
+SHEX_WORD_            SHEX_WORD_ARRAY  SHEX_WORD_ARRAY_
+```
+
+**Unsigned hex (UHEX) variants:**
+```
+UHEX        UHEX_       UHEX_BYTE        UHEX_BYTE_       UHEX_BYTE_ARRAY
+UHEX_BYTE_ARRAY_      UHEX_LONG        UHEX_LONG_       UHEX_LONG_ARRAY
+UHEX_LONG_ARRAY_      UHEX_REG_ARRAY   UHEX_REG_ARRAY_  UHEX_WORD
+UHEX_WORD_            UHEX_WORD_ARRAY  UHEX_WORD_ARRAY_
+```
+
+**Signed binary (SBIN) variants:**
+```
+SBIN        SBIN_       SBIN_BYTE_       SBIN_BYTE_ARRAY  SBIN_BYTE_ARRAY_
+SBIN_LONG   SBIN_LONG_  SBIN_LONG_ARRAY  SBIN_LONG_ARRAY_ SBIN_REG_ARRAY
+SBIN_REG_ARRAY_       SBIN_WORD        SBIN_WORD_       SBIN_WORD_ARRAY
+SBIN_WORD_ARRAY_
+```
+
+**Unsigned binary (UBIN) variants:**
+```
+UBIN        UBIN_       UBIN_BYTE        UBIN_BYTE_       UBIN_BYTE_ARRAY
+UBIN_BYTE_ARRAY_      UBIN_LONG        UBIN_LONG_       UBIN_LONG_ARRAY
+UBIN_LONG_ARRAY_      UBIN_REG_ARRAY   UBIN_REG_ARRAY_  UBIN_WORD
+UBIN_WORD_            UBIN_WORD_ARRAY  UBIN_WORD_ARRAY_
+```
+
+**Floating-point decimal (FDEC) variants:**
+```
+FDEC        FDEC_       FDEC_ARRAY       FDEC_ARRAY_      FDEC_REG_ARRAY
+FDEC_REG_ARRAY_
+```
+
+
+
+### Graphics and Color Constants (34 words)
+
+Color names and graphics-related constants:
+
+```
+BACKCOLOR   BLACK       BLUE        COLOR       CYAN        DEPTH
+GREEN       GREY        MAGENTA     OPACITY     ORANGE      RED
+WHITE       YELLOW
+```
+
+**HSV color conversion:**
+```
+HSV8        HSV8W       HSV8X       HSV16       HSV16W      HSV16X
+```
+
+**RGB color formats:**
+```
+RGB8        RGB16       RGB24       RGBI8       RGBI8W      RGBI8X
+```
+
+**Luminance and LUT:**
+```
+LUMA8       LUMA8W      LUMA8X      LUT1        LUT2        LUT4
+LUT8        LUTCOLORS
+```
+
+
+
+### String and Data Methods (21 words)
+
+Memory and string manipulation:
+
+```
+BYTEFILL    BYTEMOVE    LONGFILL    LONGMOVE    STRCOMP     STRING
+STRSIZE     WORDFILL    WORDMOVE
+```
+
+**Bit-packing constants:**
+```
+BYTES_1BIT  BYTES_2BIT  BYTES_4BIT
+WORDS_1BIT  WORDS_2BIT  WORDS_4BIT  WORDS_8BIT
+LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT  LONGS_16BIT
+```
+
+
+
+### Math and Conversion Methods (12 words)
+
+Mathematical functions available in Spin2:
+
+```
+FABS        FLOAT       FRAC        FSQRT       LOGSCALE    MULDIV64
+NAN         QCOS        QSIN        ROUND       SQRT        TRUNC
+```
+
+
+
+### Event Constants (16 words)
+
+Event source identifiers for WAITSE and POLLSE:
+
+```
+EVENT_ATN   EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT
+EVENT_PAT   EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4
+EVENT_XFI   EVENT_XMT   EVENT_XRL   EVENT_XRO
+```
+
+
+
+### Pin Methods (14 words)
+
+High-level pin manipulation methods:
+
+```
+PINCLEAR    PINF        PINFLOAT    PINH        PINHIGH     PINL
+PINLOW      PINR        PINREAD     PINSTART    PINT        PINTOGGLE
+PINW        PINWRITE
+```
+
+
+
+### Condition Code Shortcuts (32 words)
+
+Spin2 uses underscore-prefixed condition codes as shortcuts:
+
+```
+_C          _CLR        _E          _GE         _GT         _LE
+_LT         _NC         _NE         _NZ         _SET        _Z
+```
+
+**Compound conditions:**
+```
+_C_AND_NZ   _C_AND_Z    _C_EQ_Z     _C_NE_Z     _C_OR_NZ    _C_OR_Z
+_NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z    _NZ_AND_C   _NZ_AND_NC
+_NZ_OR_C    _NZ_OR_NC   _Z_AND_C    _Z_AND_NC   _Z_EQ_C     _Z_NE_C
+_Z_OR_C     _Z_OR_NC
+```
+
+
+
+### Additional IF_ Condition Variants (28 words)
+
+Extended condition code patterns for bit-testing:
+
+```
+IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
+IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
+IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
+IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_NOT_00
+IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_X0       IF_X1       IF_Z_EQ_C
+IF_Z_NE_C   IFNOT
+```
+
+
+
+### Shared Registers (8 words)
+
+PASM2 to Spin2 communication registers:
+
+```
+PR0         PR1         PR2         PR3         PR4         PR5
+PR6         PR7
+```
+
+
+
+### System and I/O Methods (27 words)
+
+System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
+
+```
+CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
+DEV         GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
+NEWCOG      RECV        REG         REGEXEC     REGLOAD     SEND
+SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
+WINDOW
+```
+
+
+
+### Graphics Drawing Methods (32 words)
+
+Graphics primitives and display control:
+
+```
+BITMAP      BOX         CARTESIAN   CIRCLE      CLEAR       DOT
+DOTSIZE     FFT         HIDEXY      HOLDOFF     LINE        LINESIZE
+LOGIC       OBOX        ORIGIN      OVAL        PC_KEY      PC_MOUSE
+PLOT        POLAR       POLLCT      POLXY       POS         RANGE
+ROTXY       SAMPLES     SAVE        SCOPE       SCOPE_XY    SCROLL
+SPECTRO     XYPOL
+```
+
+
+
+### Text and Display (12 words)
+
+Text rendering parameters:
+
+```
+SPACING     SPRITE      SPRITEDEF   TERM        TEXT        TEXTANGLE
+TEXTSIZE    TEXTSTYLE   TITLE       TRACE       TRIGGER     ZSTR
+ZSTR_
+```
+
+
+
+### Lookup and Miscellaneous (20 words)
+
+Table lookup and other Spin2 features:
+
+```
+ADDBITS     ADDPINS     ALT         ARCHIVE     CHANNEL     DLY
+FVAR        FVARS       LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ
+LSTR        LSTR_       MAG         MIDI        PRECISE     PRECOMPILE
+SET         SIGNED      SIZE        SQRT        STEP
+```
+
+
+
+### Smart Pin Constants (P_*)
+
+The complete list of Smart Pin configuration constants (116 constants) is documented in **Appendix E: Smart Pin Constants**. These include:
+
+- Pin mode constants (P_ASYNC_TX, P_ASYNC_RX, P_SYNC_TX, etc.)
+- DAC configuration (P_DAC_*, P_BITDAC)
+- ADC configuration (P_ADC_*)
+- Filter and logic modes (P_FILT*, P_LOGIC_*, P_COMPARE_*)
+- Output drive strength (P_HIGH_*, P_LOW_*)
+- Many more specialized pin configurations
+
+All P_* constants are reserved words and cannot be used as user-defined symbols.
+
+
+
+### Streamer Constants (X_*)
+
+The complete list of Streamer mode constants (78 constants) is documented in **Appendix F: Streamer Constants**. These include:
+
+- Immediate mode constants (X_IMM_*)
+- RF byte/word/long modes (X_RFBYTE_*, X_RFWORD_*, X_RFLONG_*)
+- DAC output configurations (X_*DAC*)
+- Control flags (X_PINS_ON, X_PINS_OFF, X_WRITE_ON, X_WRITE_OFF, etc.)
+
+All X_* constants are reserved words and cannot be used as user-defined symbols.
+
 
 
 # Appendix H: Glossary of Encoding Terms
