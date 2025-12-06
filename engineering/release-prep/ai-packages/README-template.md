@@ -46,9 +46,9 @@ This package provides structured knowledge for:
 
 ## Repository
 
-Source: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
-Issues: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/issues
-Documentation: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/wiki
+Source: https://github.com/ironsheep/P2-Knowledge-Base
+Issues: https://github.com/ironsheep/P2-Knowledge-Base/issues
+Documentation: https://github.com/ironsheep/P2-Knowledge-Base/wiki
 
 ---
 *Generated from YAML sources - do not edit package contents directly*

@@ -373,4 +373,4 @@ TRACK THESE METRICS:
 
 *AI Privacy Guide v1.0 - Responsible AI usage for P2 development*  
 *© 2025 IronSheep Productions LLC - Licensed under MIT License*  
-*For updates and community discussion: [GitHub Repository](https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base)*
+*For updates and community discussion: [GitHub Repository](https://github.com/ironsheep/P2-Knowledge-Base)*

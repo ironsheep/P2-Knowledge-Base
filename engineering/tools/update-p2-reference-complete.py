@@ -93,11 +93,15 @@ class P2CompleteReferenceUpdater:
             categories[category]["instructions"][name] = {
                 "mnemonic": name,
                 "syntax": inst.get("syntax", ""),
+                "brief_description": inst.get("brief_description", ""),
+                "oneliner": inst.get("oneliner", ""),
                 "encoding": inst.get("encoding", ""),
                 "description": inst.get("description", ""),
+                "result": inst.get("result", ""),
                 "timing": inst.get("timing", {}),
                 "flags_affected": inst.get("flags_affected", {}),
                 "parameters": inst.get("parameters", []),
+                "syntax_variants": inst.get("syntax_variants", []),
                 "related": inst.get("related", []),
                 "compiler_info": {
                     "syntax": inst.get("compiler_syntax", ""),

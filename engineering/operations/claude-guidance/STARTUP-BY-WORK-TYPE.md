@@ -1,156 +1,172 @@
 # Smart Startup System - Work Type Detection & Document Guidance
 
-**Purpose**: Automatically detect current work focus and provide targeted reading lists with explicit paths
-**Created**: 2025-08-25
-**Status**: ACTIVE - Integrated with session start protocol
+**Purpose**: Authoritative session start guide - detect work focus and route to correct guidance documents.
+**Last Updated**: 2025-12-06
+**Status**: ACTIVE - Primary session start reference
 
-## 🎯 How It Works
+## How It Works
 
-During session startup, check context keys to determine current work focus, then read the appropriate document set for maximum efficiency.
-
-## 🔍 Work Type Detection Patterns
-
-### PDF Generation & Template Development
-**Context Key Patterns**: `*pdf*`, `*template*`, `*layered*`, `*smart_pins_step*`, `*desilva_manual*`
-
-**READ LIST**:
-- `/documentation/pipelines/pdf-generation-format-guide.md` - Universal patterns
-- `/documentation/pdf-forge-system/layered-template-architecture.md` - Current architecture
-- Document-specific creation guide (auto-detect from context)
-
-### Document Review & Iteration Cycles  
-**Context Key Patterns**: `*review*`, `*feedback*`, `*iteration*`, `*validation*`, `*step*_complete`
-
-**READ LIST**:
-- `/documentation/pipelines/pdf-generation-format-guide.md` - Deployment standards
-- `/documentation/pdf-forge-system/layered-template-architecture.md` - Template system
-- Document-specific creation guide (for quality gates)
-- `/pipelines/human-ai-collaboration-process.md` - Feedback interpretation
-- `/TECHNICAL-CLIMBING-METHODOLOGY.md` - Iteration principles
-
-### Content Ingestion & Source Studies
-**Context Key Patterns**: `*extraction*`, `*ingestion*`, `*source*`, `*edge*`, `*silicon*`
-
-**READ LIST**:
-- `/pipelines/enhanced-source-code-ingestion-methodology.md` - Process methodology
-- `/sources/INGESTED-SOURCES-CATALOG.md` - What we have
-- `/pipelines/source-code-extraction-methodology.md` - Code extraction
-- `/documentation/project-process/task-generation-process.md` - Task workflow
-
-### Template/Style Sheet Development
-**Context Key Patterns**: `*sty*`, `*latex*`, `*template*`, `*foundation*`, `*content*`, `*presentation*`
-
-**READ LIST**:
-- `/documentation/pdf-forge-system/layered-template-architecture.md` - Architecture principles
-- `/documentation/pipelines/pdf-generation-format-guide.md` - Format standards
-- `/pipelines/formatting-reference/` - Visual design guides
-- Document-specific creation guide (target requirements)
-
-### System Maintenance & Process Improvement
-**Context Key Patterns**: `*process*`, `*methodology*`, `*workflow*`, `*documentation*`
-
-**READ LIST**:
-- `/TECHNICAL-CLIMBING-METHODOLOGY.md` - Core principles
-- `/engineering/operations/README.md` - Current goals (was PROJECT-MASTER.md)
-- `/pipelines/task-generation-process.md` - Process framework
-- Active sprint documentation
-
-## 🎯 Document-Specific Context Detection
-
-### Smart Pins Reference Work
-**Context Patterns**: `smart_pins*`, `*pins*`, `*reference*`
-**Additional Reading**:
-- `/documentation/manuals/smart-pins-reference/creation-guide.md` - Specific requirements
-- `/sources/extractions/smart-pins-complete-extraction-audit/` - Source material
-
-### PASM2 deSilva Manual Work  
-**Context Patterns**: `desilva*`, `*pasm*`, `*tutorial*`
-**Additional Reading**:
-- `/documentation/manuals/p2-pasm-desilva-style/creation-guide.md` - Tutorial requirements
-- `/sources/extractions/desilva-p1-tutorial/` - Reference material
-
-## 📋 Session Startup Integration
-
-### Enhanced Session Start Protocol:
-
-```bash
-# 1. Standard context resume
-mcp__todo-mcp__context_resume
-
-# 2. Smart work type detection
-# Check recent context keys for patterns → determine work type
-
-# 3. Auto-suggest reading list
-# "Context shows Smart Pins review work → Recommend reading:"
-# → List specific documents with full paths
-
-# 4. Optional: Auto-read critical documents
-# For highly focused work, automatically read 1-2 key documents
-```
-
-### Implementation in CLAUDE.md:
-```markdown
-### 3. 🔴 MANDATORY: Smart Document Reading
-# Context analysis determines work type:
-# - PDF_GENERATION_SMART_PINS → Read pdf-generation + smart-pins creation guide  
-# - REVIEW_ITERATION_CYCLE → Read pdf-generation + collaboration-process + creation guide
-# - CONTENT_INGESTION → Read extraction methodologies + source catalog
-# - TEMPLATE_DEVELOPMENT → Read layered-architecture + format-guide
-# - SYSTEM_MAINTENANCE → Read technical-climbing + project-master
-```
-
-## 🏆 Success Metrics
-
-**Before Smart Startup**: 
-- 10+ minutes orienting to work context
-- Reading 3-5 long documents to find relevant sections
-- Mistakes from incomplete context understanding
-
-**After Smart Startup**:
-- 2-3 minutes with targeted document list
-- Reading 2-3 specific documents with full context
-- Faster, more confident work execution
-
-## 🔄 Continuous Improvement
-
-### Feedback Loop:
-1. **Track context patterns** that don't match current detection rules
-2. **Add new work types** as project evolves  
-3. **Refine reading lists** based on what's actually helpful
-4. **Update paths** when documentation moves
-
-### Pattern Evolution:
-- New document types → New context patterns + reading lists
-- New methodologies → Update relevant reading lists
-- Process improvements → Reflect in startup guidance
-
-## 📚 Master Document Path Reference
-
-### Core Operational Guides:
-- `/CLAUDE.md` - AI operational guide
-- `/TECHNICAL-CLIMBING-METHODOLOGY.md` - Project principles  
-- `/engineering/operations/README.md` - Goals and current state
-
-### PDF Generation & Templates:
-- `/documentation/pipelines/pdf-generation-format-guide.md` - Universal patterns
-- `/documentation/pdf-forge-system/layered-template-architecture.md` - Template system
-- `/documentation/pdf-templates-master/` - Master template files
-
-### Content Creation & Ingestion:
-- `/pipelines/enhanced-source-code-ingestion-methodology.md` - Ingestion process
-- `/sources/INGESTED-SOURCES-CATALOG.md` - Available sources
-- `/pipelines/source-code-extraction-methodology.md` - Code extraction
-
-### Process & Methodology:
-- `/pipelines/human-ai-collaboration-process.md` - Feedback cycles
-- `/documentation/project-process/task-generation-process.md` - Task workflow
-- `/pipelines/task-generation-process.md` - Process framework
-
-### Document-Specific Guides:
-- `/documentation/manuals/smart-pins-reference/creation-guide.md` - Smart Pins requirements
-- `/documentation/manuals/p2-pasm-desilva-style/creation-guide.md` - deSilva tutorial requirements
+1. Run `mcp__todo-mcp__context_resume` to see current state
+2. Match context patterns below to determine work type
+3. Read the listed Quick Guide to get into frame of mind
+4. Use filter tag with Todo MCP for focused task list
 
 ---
 
-**Integration Status**: Ready for CLAUDE.md session protocol integration
-**Next Steps**: Test with actual context key patterns, refine detection rules
+## Work Type Detection & Routing
+
+### 1. Document Ingestion
+**Context Patterns**: `*extraction*`, `*ingestion*`, `*source*`, `*edge*`, `*silicon*`
+
+**Quick Guide**: `/engineering/ingestion/work-modes/document-ingestion-focused.md`
+**Filter Tag**: `document_ingestion`
+
+**Additional Resources**:
+- `/engineering/ingestion/work-modes/image-extraction-focused.md` - Image extraction sub-process
+- `/engineering/ingestion/methodology/enhanced-source-code-ingestion-methodology.md` - Full methodology
+
+---
+
+### 2. YAML Knowledge Base
+**Context Patterns**: `*yaml*`, `*crossref*`, `*index*`, `*dod*`, `*validation*`
+
+**Quick Guide**: `/engineering/procedures/yaml-workflow-quick-guide.md`
+**Filter Tag**: `yaml_knowledge_base`
+
+**Additional Resources**:
+- CLAUDE.md → DOD v3.0 Procedure section - Complete workflow
+- `/engineering/tools/validate-crossref-keys.py` - Cross-reference validation
+- `/engineering/tools/generate-p2kb-index.py` - Index regeneration
+
+---
+
+### 3. PDF Document Production
+**Context Patterns**: `*pdf*`, `*template*`, `*desilva*`, `*smart_pins*`, `*manual*`
+
+**READ FIRST**: `/engineering/document-production/PDF-PRODUCTION-ARCHITECTURE.md`
+- Three-folder rule (manuals → workspace → outbound)
+- Where edits happen (content in manuals/, templates in workspace/)
+- Two operational modes (interactive testing vs production)
+
+**Then read document-specific Quick Guide**:
+- DeSilva Manual: `/engineering/document-production/work-modes/desilva-visual-refinement.md`
+- Smart Pins: `/engineering/document-production/work-modes/smart-pins-visual-refinement.md`
+- PASM2 Manual: `/engineering/document-production/work-modes/desilva-visual-refinement.md`
+- General PDF: `/engineering/pdf-forge/work-modes/production-pdf-generation.md`
+- Interactive Testing: `/engineering/pdf-forge/work-modes/automated-pdf-testing.md`
+
+**Filter Tags**: `desilva_visual`, `smart_pins_visual`, `pdf_production`, `pasm2_manual`
+
+**Rules & References**:
+- `/engineering/pdf-forge/PDF-CLAUDE-RULES.md` - Critical rules (edit locations, file naming)
+- `/workspace/[doc]/README.md` - Document-specific workspace instructions
+
+---
+
+### 4. Engineering Tooling
+**Context Patterns**: `*tool*`, `*script*`, `*compiler*`, `*pnut*`
+
+**Quick Guide**: Standard development practices (no specific guide needed)
+**Filter Tag**: `engineering_tooling`
+
+**Additional Resources**:
+- `/engineering/tools/compiler/pnut_ts-usage-guide.md` - P2 compiler usage
+- `/engineering/tools/compiler/claude-p2-development-environment.md` - Development environment
+
+---
+
+### 5. Operational Infrastructure
+**Context Patterns**: `*sprint*`, `*process*`, `*methodology*`, `*workflow*`, `*documentation*`
+
+**Quick Guide**: `/engineering/operations/project-guidance/work-mode-lifecycle.md`
+**Filter Tag**: `operational`
+
+**Additional Resources**:
+- `/engineering/operations/project-guidance/sprint-lifecycle-methodology.md` - Complete sprint process
+- `/engineering/operations/project-guidance/human-ai-collaboration-process.md` - Feedback cycles
+- `/engineering/operations/PROCESS-GUIDANCE-ARCHITECTURE.md` - Map of all guidance docs
+
+---
+
+## Document-Specific Context Detection
+
+### PASM2 Assembly Manual Work
+**Context Patterns**: `*pasm2*`, `*assembly*`, `*instruction*`
+**Quick Guide**: `/engineering/document-production/work-modes/desilva-visual-refinement.md`
+**Creation Guide**: `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md`
+
+### Smart Pins Reference Work
+**Context Patterns**: `smart_pins*`, `*pins*`, `*reference*`
+**Quick Guide**: `/engineering/document-production/work-modes/smart-pins-visual-refinement.md`
+
+---
+
+## Session Startup Protocol
+
+```bash
+# 1. ALWAYS FIRST - Restore context
+mcp__todo-mcp__context_resume
+
+# 2. Analyze context patterns → Determine work type (use sections above)
+
+# 3. Read Quick Guide for identified work type
+# Example: Read(engineering/document-production/work-modes/desilva-visual-refinement.md)
+
+# 4. Use filter tag for focused task list
+mcp__todo-mcp__todo_next tags:["desilva_visual"]
+
+# 5. Begin work with proper context loaded
+```
+
+---
+
+## Success Metrics
+
+**Before Smart Startup**:
+- 10+ minutes orienting to work context
+- Reading multiple long documents to find relevant sections
+- Mistakes from incomplete context understanding
+
+**After Smart Startup**:
+- 2-3 minutes with targeted document routing
+- Read only the Quick Guide for current work type
+- Faster, more confident work execution
+
+---
+
+## Master Document Path Reference
+
+### Core Operational:
+- `/CLAUDE.md` - AI operational guide (quality rules, sacred rules)
+- `/engineering/operations/PROCESS-GUIDANCE-ARCHITECTURE.md` - Map of all guidance docs
+- `/engineering/operations/README.md` - Operational dashboard
+
+### PDF Generation:
+- `/engineering/pdf-forge/PDF-CLAUDE-RULES.md` - Claude-specific rules
+- `/engineering/document-production/methodology/pdf-generation-format-guide.md` - Format standards
+- `/engineering/pdf-forge/guides/pdf-forge-system/layered-template-architecture.md` - Template system
+- `/engineering/document-production/shared-assets/templates/pdf-templates-master/` - Master templates
+
+### Content Ingestion:
+- `/engineering/ingestion/methodology/enhanced-source-code-ingestion-methodology.md` - Ingestion process
+- `/engineering/ingestion/methodology/source-code-extraction-methodology.md` - Code extraction
+
+### Process & Methodology:
+- `/engineering/operations/project-guidance/human-ai-collaboration-process.md` - Feedback cycles
+- `/engineering/operations/project-guidance/task-generation-process.md` - Task workflow
+- `/engineering/operations/project-guidance/methodology/TECHNICAL-CLIMBING-METHODOLOGY.md` - Project principles
+
+### Lessons Learned:
+- `/engineering/operations/lessons-learned/INDEX.md` - Rule → incident mapping
+
+---
+
+## Relationship to Other Documents
+
+- **CLAUDE.md**: Contains core quality rules that apply to ALL work types. This document routes to work-type-specific guidance.
+- **PROCESS-GUIDANCE-ARCHITECTURE.md**: Comprehensive map of all guidance documents. This document provides quick routing.
+- **Quick Guides**: Entry points for each work type. This document tells you which one to read.
+
+---
+
+*This is the authoritative session start reference. Run context_resume, match patterns, read the right Quick Guide.*

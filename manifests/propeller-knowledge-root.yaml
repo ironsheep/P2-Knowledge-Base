@@ -1,5 +1,5 @@
 # Propeller Knowledge Base - Root Manifest v3.2
-# Repository: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
+# Repository: https://github.com/ironsheep/P2-Knowledge-Base
 # This is the entry point - fetch this first
 
 version: "3.2"
@@ -24,7 +24,7 @@ migration:
     **Unix/macOS/Linux:**
     ```bash
     # Download and run refresh script (handles migration automatically)
-    curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
+    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
     chmod +x ~/.p2kb-cache/refresh-kb.sh
     ~/.p2kb-cache/refresh-kb.sh
     ```
@@ -32,7 +32,7 @@ migration:
     **Windows PowerShell:**
     ```powershell
     # Download and run refresh script (handles migration automatically)
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
     & "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
     ```
 
@@ -94,7 +94,7 @@ storage:
 quickstart: |
   # 1. Download fetch script
   mkdir -p ~/.p2kb-cache
-  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
   chmod +x ~/.p2kb-cache/fetch-kb-file.sh
 
   # 2. See available commands
@@ -123,5 +123,5 @@ knowledge_bases:
 
 # Metadata
 metadata:
-  repository: "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base"
-  raw_base_url: "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/"
+  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"

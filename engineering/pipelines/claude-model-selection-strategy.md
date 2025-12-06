@@ -7,9 +7,9 @@
 **Strengths**: Complex reasoning, strategy, nuance, creativity
 **Speed**: Slower but deeper
 
-### Sonnet 3.5
+### Sonnet 4
 **Cost**: Medium (~1/3 of Opus)
-**Strengths**: Execution, structured tasks, speed
+**Strengths**: Execution, structured tasks, speed, document analysis
 **Speed**: Very fast
 
 ### Haiku 3.5

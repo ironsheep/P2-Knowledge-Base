@@ -37,7 +37,7 @@ git checkout v2.0.0  # Access specific release
 ## Release Packages
 
 Official release packages are available on GitHub:
-https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/releases
+https://github.com/ironsheep/P2-Knowledge-Base/releases
 
 ## Source
 

@@ -47,19 +47,19 @@ urls:
 ## 🔴 CRITICAL GAPS IDENTIFIED
 
 1. **Missing GitHub Base URL** in unified index
-2. **Organization name confusion** (IronSheepProductionsLLC vs ironsheep)
+2. **Organization name confusion** (IronSheepProductionsLLC vs ironsheep) - **FIXED: Use ironsheep**
 3. **No explicit URL construction instructions** in the index
 
 ## Proposed Fix: Add URL Construction to Index
 
 ```yaml
 index_metadata:
-  github_base: 'https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main'
+  github_base: 'https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main'
   content_base: '/engineering/knowledge-base/P2/community/obex'
   
   url_construction:
     object_yaml: '{github_base}{content_base}/{content_path}'
-    example: 'https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/knowledge-base/P2/community/obex/objects/2817.yaml'
+    example: 'https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/community/obex/objects/2817.yaml'
 ```
 
 ## Alternative Fix: Full URLs in Index
@@ -68,7 +68,7 @@ Instead of `content_path: objects/2817.yaml`, provide:
 ```yaml
 objects:
   '2817':
-    content_url: 'https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/knowledge-base/P2/community/obex/objects/2817.yaml'
+    content_url: 'https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/community/obex/objects/2817.yaml'
 ```
 
 ## Current State Assessment

@@ -285,4 +285,4 @@ P2-Knowledge-Base/
 | 1.0.x   | ✅ Active | Full support | TBD |
 | 0.1.x   | ⚠️ Legacy | Security only | 2025-12-31 |
 
-For more information, see [Releases](https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/releases) and [Contributing Guidelines](./CONTRIBUTING.md).
+For more information, see [Releases](https://github.com/ironsheep/P2-Knowledge-Base/releases) and [Contributing Guidelines](./CONTRIBUTING.md).

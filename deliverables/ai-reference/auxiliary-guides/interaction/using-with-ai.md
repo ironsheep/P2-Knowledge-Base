@@ -1,7 +1,7 @@
 # AI Integration Guide for P2 Knowledge Base v3.0
 *Key-based access - simple and reliable*
 
-**Repository**: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
+**Repository**: https://github.com/ironsheep/P2-Knowledge-Base
 
 > **Version 3.0**: Key-based access system replaces manifest navigation. No more path construction - just use keys like `p2kbPasm2Mov`.
 
@@ -26,14 +26,14 @@ mkdir -p ~/.p2kb-cache
 
 **Unix/macOS/Linux:**
 ```bash
-curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
 chmod +x ~/.p2kb-cache/fetch-kb-file.sh
 ```
 
 **Windows PowerShell:**
 ```powershell
 mkdir "$env:USERPROFILE\.p2kb-cache" -Force
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
 ```
 
 ### Step 3: Verify
