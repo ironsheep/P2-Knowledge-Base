@@ -614,60 +614,109 @@
 % ============================================================================
 % PAGE 16: Mode %00101 NCO Frequency - Transition Counting Diagram
 % ============================================================================
+% Pulse train with 6 pulses (12 transitions), X[15:0] = pulse width, Y[31:0] = transition count
+% X and Y register labels in BLUE, no footnote needed
 
 \newcommand{\NCOFrequencyDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.8cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Signal levels
-\node[sp-annotation, anchor=east] at (0.0, 2.5) {1};
-\node[sp-annotation, anchor=east] at (0.0, 1.5) {0};
+% Key positions
+\def\startx{1.5}           % First rising edge
+\def\pulsewidth{0.8}       % Width of HIGH and LOW portions (50/50 duty)
+\def\yhi{2.5}
+\def\ylo{1.5}
 
-% Pulses Start annotation
-\draw[sp-arrow] (0.8, 3.2) -- (0.8, 2.7);
-\node[sp-annotation, anchor=south east] at (1.0, 3.2) {Pulses Start};
+% Calculate positions for 6 pulses (12 transitions)
+% Each pulse = rise + HIGH + fall + LOW
+\pgfmathsetmacro{\pulsepitch}{\pulsewidth * 2}  % Full cycle width
+\pgfmathsetmacro{\lastfall}{\startx + 6 * \pulsepitch - \pulsewidth}  % 12th transition (last falling edge)
 
-% Initial low
-\draw[dashed, thin] (-0.3, 1.5) -- (0.5, 1.5);
+% Signal level labels (1 and 0)
+\node[font=\small, anchor=east] at (\startx - 0.5, \yhi) {1};
+\node[font=\small, anchor=east] at (\startx - 0.5, \ylo) {0};
 
-% Draw 12 transitions (6 complete pulses)
-\draw[sp-signal] (0.5, 1.5) -- (0.8, 1.5) -- (0.8, 2.5);
-% Cycle numbers above pulses
-\node[sp-annotation] at (1.0, 2.8) {1};
-\draw[sp-signal] (0.8, 2.5) -- (1.2, 2.5) -- (1.2, 1.5);
-\node[sp-annotation] at (1.4, 2.8) {2};
-\draw[sp-signal] (1.2, 1.5) -- (1.6, 1.5) -- (1.6, 2.5);
-\node[sp-annotation] at (1.8, 2.8) {3};
-\draw[sp-signal] (1.6, 2.5) -- (2.0, 2.5) -- (2.0, 1.5);
-\draw[sp-signal] (2.0, 1.5) -- (2.4, 1.5) -- (2.4, 2.5);
-\draw[sp-signal] (2.4, 2.5) -- (2.8, 2.5) -- (2.8, 1.5);
-\draw[sp-signal] (2.8, 1.5) -- (3.2, 1.5) -- (3.2, 2.5);
-\draw[sp-signal] (3.2, 2.5) -- (3.6, 2.5) -- (3.6, 1.5);
-\draw[sp-signal] (3.6, 1.5) -- (4.0, 1.5) -- (4.0, 2.5);
-\draw[sp-signal] (4.0, 2.5) -- (4.4, 2.5) -- (4.4, 1.5);
-\draw[sp-signal] (4.4, 1.5) -- (4.8, 1.5) -- (4.8, 2.5);
-\node[sp-annotation] at (5.0, 2.8) {11};
-\draw[sp-signal] (4.8, 2.5) -- (5.2, 2.5) -- (5.2, 1.5);
-\node[sp-annotation] at (5.4, 2.8) {12};
-\draw[sp-signal] (5.2, 1.5) -- (5.6, 1.5);
-\draw[dashed, thin] (5.6, 1.5) -- (6.0, 1.5);
+% Pulses Start annotation - label toward center, arrow points outward to first rising edge
+\node[font=\small, anchor=south west] at (\startx + 0.5, 3.0) {Pulses Start};
+\draw[->] (\startx + 0.4, 3.0) -- (\startx + 0.05, \yhi + 0.15);
 
-% Y[31:0] annotation
-\node[sp-annotation] at (3.2, 2.0) {Y[31:0] = 12 transitions};
+% Dashed lead-in at LOW
+\draw[dashed, thin] (\startx - 0.6, \ylo) -- (\startx, \ylo);
 
-% X[15:0] dimension
-\draw[sp-dim] (0.8, 0.8) -- (1.2, 0.8);
-\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
-\draw[thin] (1.2, 0.6) -- (1.2, 1.0);
-\node[sp-annotation] at (1.0, 0.4) {X[15:0]*};
+% Draw 6 pulses with transition numbers
+% Numbers centered vertically in waveform, just inside/right of each edge
+% Single-digit labels use smaller offset, double-digit use larger
+\pgfmathsetmacro{\ymid}{(\yhi + \ylo) / 2}  % Vertical center of waveform
+\def\labeloffsetsingle{0.18}  % Offset for single-digit labels (1, 2, 3)
+\def\labeloffsetdouble{0.28}  % Offset for double-digit labels (11, 12)
 
-% IN Flag
-\node[sp-annotation, anchor=west] at (4.5, 0.0) {IN Flag};
-\draw[dashed, thin] (5.2, -0.3) -- (5.2, 0.3);
-\draw[sp-signal] (5.2, -0.3) -- (5.2, 0.3);
+% Pulse 1: transitions 1, 2
+\draw[sp-signal] (\startx, \ylo) -- (\startx, \yhi);  % Rise (1)
+\node[font=\small, anchor=west] at ({\startx + 0.04}, \ymid) {1};
+\draw[sp-signal] (\startx, \yhi) -- ({\startx + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + \pulsewidth}, \yhi) -- ({\startx + \pulsewidth}, \ylo);  % Fall (2)
+\node[font=\small, anchor=west] at ({\startx + \pulsewidth + 0.04}, \ymid) {2};
+\draw[sp-signal] ({\startx + \pulsewidth}, \ylo) -- ({\startx + \pulsepitch}, \ylo);
 
-% Footnote
-\node[sp-annotation] at (3.0, -0.8) {* Number of system-clock periods};
+% Pulse 2: transitions 3, 4
+\draw[sp-signal] ({\startx + \pulsepitch}, \ylo) -- ({\startx + \pulsepitch}, \yhi);  % Rise (3)
+\node[font=\small, anchor=west] at ({\startx + \pulsepitch + 0.04}, \ymid) {3};
+\draw[sp-signal] ({\startx + \pulsepitch}, \yhi) -- ({\startx + \pulsepitch + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + \pulsepitch + \pulsewidth}, \yhi) -- ({\startx + \pulsepitch + \pulsewidth}, \ylo);  % Fall (4)
+\draw[sp-signal] ({\startx + \pulsepitch + \pulsewidth}, \ylo) -- ({\startx + 2*\pulsepitch}, \ylo);
+
+% Pulses 3-5 (transitions 5-10) - no labels, just waveform
+\draw[sp-signal] ({\startx + 2*\pulsepitch}, \ylo) -- ({\startx + 2*\pulsepitch}, \yhi);
+\draw[sp-signal] ({\startx + 2*\pulsepitch}, \yhi) -- ({\startx + 2*\pulsepitch + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + 2*\pulsepitch + \pulsewidth}, \yhi) -- ({\startx + 2*\pulsepitch + \pulsewidth}, \ylo);
+\draw[sp-signal] ({\startx + 2*\pulsepitch + \pulsewidth}, \ylo) -- ({\startx + 3*\pulsepitch}, \ylo);
+
+\draw[sp-signal] ({\startx + 3*\pulsepitch}, \ylo) -- ({\startx + 3*\pulsepitch}, \yhi);
+\draw[sp-signal] ({\startx + 3*\pulsepitch}, \yhi) -- ({\startx + 3*\pulsepitch + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + 3*\pulsepitch + \pulsewidth}, \yhi) -- ({\startx + 3*\pulsepitch + \pulsewidth}, \ylo);
+\draw[sp-signal] ({\startx + 3*\pulsepitch + \pulsewidth}, \ylo) -- ({\startx + 4*\pulsepitch}, \ylo);
+
+\draw[sp-signal] ({\startx + 4*\pulsepitch}, \ylo) -- ({\startx + 4*\pulsepitch}, \yhi);
+\draw[sp-signal] ({\startx + 4*\pulsepitch}, \yhi) -- ({\startx + 4*\pulsepitch + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + 4*\pulsepitch + \pulsewidth}, \yhi) -- ({\startx + 4*\pulsepitch + \pulsewidth}, \ylo);
+\draw[sp-signal] ({\startx + 4*\pulsepitch + \pulsewidth}, \ylo) -- ({\startx + 5*\pulsepitch}, \ylo);
+
+% Pulse 6: transitions 11, 12 (double-digit, need more space)
+\draw[sp-signal] ({\startx + 5*\pulsepitch}, \ylo) -- ({\startx + 5*\pulsepitch}, \yhi);  % Rise (11)
+\node[font=\small, anchor=west] at ({\startx + 5*\pulsepitch + 0.04}, \ymid) {11};
+\draw[sp-signal] ({\startx + 5*\pulsepitch}, \yhi) -- ({\startx + 5*\pulsepitch + \pulsewidth}, \yhi);
+\draw[sp-signal] ({\startx + 5*\pulsepitch + \pulsewidth}, \yhi) -- ({\startx + 5*\pulsepitch + \pulsewidth}, \ylo);  % Fall (12)
+\node[font=\small, anchor=west] at ({\startx + 5*\pulsepitch + \pulsewidth + 0.04}, \ymid) {12};
+
+% End with solid LOW then dashed
+\draw[sp-signal] ({\startx + 5*\pulsepitch + \pulsewidth}, \ylo) -- ({\startx + 6*\pulsepitch}, \ylo);
+\draw[dashed, thin] ({\startx + 6*\pulsepitch}, \ylo) -- ({\startx + 6*\pulsepitch + 0.5}, \ylo);
+
+% X[15:0] dimension - HIGH portion width of first pulse - BLUE
+\def\xdimylevel{0.8}
+\draw[<->, color=sp-annotation] (\startx, \xdimylevel) -- ({\startx + \pulsewidth}, \xdimylevel);
+\draw[thin, color=sp-annotation] (\startx, \xdimylevel - 0.15) -- (\startx, \xdimylevel + 0.15);
+\draw[thin, color=sp-annotation] ({\startx + \pulsewidth}, \xdimylevel - 0.15) -- ({\startx + \pulsewidth}, \xdimylevel + 0.15);
+\node[font=\small, color=sp-annotation, fill=white, inner sep=1pt] at ({\startx + \pulsewidth/2}, \xdimylevel - 0.4) {X[15:0]*};
+
+% Y[31:0] = 12 transitions annotation - BLUE, positioned below waveform in middle
+\node[font=\small, color=sp-annotation] at ({\startx + 2.5*\pulsepitch}, \ylo - 0.35) {Y[31:0] = 12 transitions};
+
+% IN Flag row - rises at 12th transition (last falling edge)
+% Vertical dashed line connects 12th transition to IN Flag rising edge
+\pgfmathsetmacro{\inflagx}{\startx + 5*\pulsepitch + \pulsewidth}  % Position of 12th transition
+\def\inflaglo{-1.0}
+\def\inflaghi{0.0}
+\pgfmathsetmacro{\inflagmid}{(\inflaglo + \inflaghi) / 2}
+
+% Vertical dashed line from transition 12 down to IN Flag
+\draw[dashed, thin] (\inflagx, \ylo) -- (\inflagx, \inflaghi);
+
+% IN Flag signal
+\node[font=\small, anchor=east] at (\inflagx - 0.15, \inflagmid) {IN Flag};
+\draw[dashed, thin] ({\inflagx - 1.5}, \inflaglo) -- (\inflagx, \inflaglo);
+\draw[sp-signal] (\inflagx, \inflaglo) -- (\inflagx, \inflaghi);
+\draw[sp-signal] (\inflagx, \inflaghi) -- ({\inflagx + 0.8}, \inflaghi);
 
 \end{tikzpicture}
 \par}
