@@ -459,48 +459,72 @@
 % ============================================================================
 % PAGE 13: DAC/PWM Period Timing Diagram
 % ============================================================================
+% Shows pulse width measurement: HIGH->LOW(20)->HIGH(236)->LOW = 256 total
+% PWM Period = falling edge to falling edge
 
 \newcommand{\DACPWMPeriodDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% DAC Input label
-\node[sp-label] at (-0.5, 1.5) {DAC Input};
+% Key positions
+\def\lowwidth{1.0}      % Width of LOW portion (20 clocks)
+\def\highwidth{11.8}    % Width of HIGH portion (236 clocks)
+\def\dashstart{1.0}     % Where dashed lead-in starts
+\def\startx{1.8}        % Start of first falling edge (end of dashed line)
+\pgfmathsetmacro{\riseedge}{\startx + \lowwidth}       % Rising edge (end of LOW)
+\pgfmathsetmacro{\falledge}{\riseedge + \highwidth}    % Second falling edge (end of HIGH)
+
+% DAC Input label (far left, centered between 240 and 239)
+\node[font=\small, anchor=east] at (\dashstart - 0.2, 2.0) {DAC Input};
 
 % Signal levels
-\node[sp-annotation, anchor=east] at (0.3, 2.0) {240};
-\node[sp-annotation, anchor=east] at (0.3, 1.5) {239};
+% 240 level with short dashed line extending to falling edge
+\node[font=\small, anchor=east] at (\dashstart + 0.5, 2.5) {240};
+\draw[dashed, thin] (\dashstart + 0.55, 2.5) -- (\startx, 2.5);
+% 239 level
+\node[font=\small, anchor=east] at (\dashstart + 0.5, 1.5) {239};
 
-% Dashed line at 240
-\draw[dashed, thin] (0.4, 2.0) -- (0.8, 2.0);
+% PWM waveform: HIGH(240) -> fall -> LOW(239) for 20 -> rise -> HIGH(240) for 236 -> fall -> LOW(239)
+% Dashed lead-in at HIGH level (240) - this is part of the 240 label line above
+% First falling edge (PWM Period Starts here)
+\draw[sp-signal] (\startx, 2.5) -- (\startx, 1.5);
+% LOW portion (20 clocks)
+\draw[sp-signal] (\startx, 1.5) -- (\riseedge, 1.5);
+% Rising edge
+\draw[sp-signal] (\riseedge, 1.5) -- (\riseedge, 2.5);
+% HIGH portion (236 clocks)
+\draw[sp-signal] (\riseedge, 2.5) -- (\falledge, 2.5);
+% Second falling edge (PWM Period Ends here)
+\draw[sp-signal] (\falledge, 2.5) -- (\falledge, 1.5);
+% Dashed lead-out at LOW level
+\draw[dashed, thin] (\falledge, 1.5) -- (\falledge + 0.5, 1.5);
 
-% PWM waveform - low then high then continues
-\draw[sp-signal] (0.8, 1.5) -- (0.8, 2.0) -- (6.5, 2.0);
-\draw[sp-signal] (6.5, 2.0) -- (6.5, 1.5);
-\draw[dashed, thin] (6.5, 1.5) -- (7.0, 1.5);
+% PWM Period Starts annotation (angled arrow pointing to FIRST falling edge)
+\draw[->] (\startx + 0.8, 3.1) -- (\startx + 0.1, 2.65);
+\node[font=\small, anchor=south west] at (\startx + 0.3, 3.1) {PWM Period Starts};
 
-% PWM Period annotations
-\draw[sp-arrow] (0.8, 2.5) -- (0.8, 2.2);
-\node[sp-annotation, anchor=south] at (1.5, 2.5) {PWM Period Starts};
+% PWM Period Ends annotation (angled arrow pointing to SECOND falling edge)
+\draw[->] (\falledge - 0.8, 3.1) -- (\falledge - 0.1, 2.65);
+\node[font=\small, anchor=south east] at (\falledge - 0.3, 3.1) {PWM Period Ends};
 
-\draw[sp-arrow] (6.5, 2.5) -- (6.5, 2.2);
-\node[sp-annotation, anchor=south] at (5.8, 2.5) {PWM Period Ends};
+% Dimension lines below the waveform
 
-% Dimension lines below
-% 20 clocks
-\draw[sp-dim] (0.8, 0.8) -- (1.3, 0.8);
-\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
-\draw[thin] (1.3, 0.6) -- (1.3, 1.0);
-\node[sp-annotation] at (1.05, 0.5) {20};
+% 20 clocks - LOW portion (double-headed arrow with vertical bars)
+\draw[<->] (\startx, 0.8) -- (\riseedge, 0.8);
+\draw[thin] (\startx, 0.6) -- (\startx, 1.0);
+\draw[thin] (\riseedge, 0.6) -- (\riseedge, 1.0);
+\node[font=\small] at ({(\startx + \riseedge)/2}, 0.5) {20};
 
-% 236 clocks
-\node[sp-annotation] at (3.9, 0.8) {236};
+% 236 clocks - HIGH portion (double-headed arrow with vertical bars)
+\draw[<->] (\riseedge, 0.8) -- (\falledge, 0.8);
+\draw[thin] (\falledge, 0.6) -- (\falledge, 1.0);
+\node[font=\small] at ({(\riseedge + \falledge)/2}, 0.5) {236};
 
-% 256 total dimension
-\draw[sp-dim] (0.8, 0.0) -- (6.5, 0.0);
-\draw[thin] (0.8, -0.2) -- (0.8, 0.2);
-\draw[thin] (6.5, -0.2) -- (6.5, 0.2);
-\node[sp-annotation] at (3.65, -0.4) {256 System-clock periods};
+% 256 System-clock periods - total dimension (double-headed arrow)
+\draw[<->] (\startx, 0.0) -- (\falledge, 0.0);
+\draw[thin] (\startx, -0.2) -- (\startx, 0.2);
+\draw[thin] (\falledge, -0.2) -- (\falledge, 0.2);
+\node[font=\small] at ({(\startx + \falledge)/2}, -0.4) {256 System-clock periods};
 
 \end{tikzpicture}
 \par}
