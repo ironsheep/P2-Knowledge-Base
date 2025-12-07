@@ -863,61 +863,112 @@
 
 % ============================================================================
 % PAGE 17 IMAGE 02: Mode %00110 NCO Duty - Block Diagram
+% Reference: P2 SmartPins-220809_mode00101_page17_img02.png
+% THREE ROWS:
+%   Row 1 (top): Optional Offset X[31:16] - above Z
+%   Row 2 (middle): X[15:0], Y[31:0], Z[31:0] - register blocks
+%   Row 3 (bottom): System Clock, Div by 2, Adder - all same level
 % ============================================================================
 
 \newcommand{\NCODutyBlockDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% System Clock input
-\node[sp-block, minimum width=2cm] (sysclk) at (0, 0) {System Clock\\100 MHz};
+% Row positions
+\def\offsetrow{3.5}     % Row 1: Optional Offset (above Z)
+\def\regrow{2.0}        % Row 2: X, Y, Z register blocks
+\def\annotrow{2.7}      % Annotations above register row (X=, Y=)
+\def\mainrow{0}         % Row 3: System Clock, Div by 2, Adder (all same level)
+\def\overflowrow{-1.2}  % Below main row for Overflow label
+
+% Column positions
+\def\sysclkcol{0}       % System Clock
+\def\divcol{3.5}        % Div by 2 (and X[15:0] above it)
+\def\yregcol{6.5}       % Y[31:0]
+\def\addercol{9.0}      % Adder (same row as Div by 2)
+\def\zregcol{11.5}      % Z[31:0]
+
+% === ROW 3 (bottom): System Clock, Div by 2, Adder ===
+
+% System Clock
+\node[sp-block, minimum width=2.2cm, minimum height=0.8cm] (sysclk) at (\sysclkcol, \mainrow) {System Clock};
+\node[font=\small] at (\sysclkcol, \mainrow - 0.7) {100 MHz};
+
+% Arrow: System Clock -> Div by 2
+\draw[sp-arrow] (sysclk.east) -- (\divcol - 0.9, \mainrow);
 
 % Div by 2
-\node[sp-block, minimum width=1.5cm] (div) at (2.5, 0) {Div by 2};
-\draw[sp-arrow] (sysclk) -- (div);
+\node[sp-block, minimum width=1.6cm, minimum height=0.8cm] (div) at (\divcol, \mainrow) {Div by 2};
 
-% X[15:0] register
-\node[sp-block, minimum width=1.5cm] (xreg) at (2.5, 1.5) {X[15:0]};
-\node[sp-annotation, anchor=south] at (2.5, 2.0) {X = \$2};
-\draw[sp-arrow] (xreg) -- (div);
+% Arrow: Div by 2 -> Adder (with "50 MHz Base Period" label below)
+\draw[sp-arrow] (div.east) -- (\addercol - 0.9, \mainrow);
+\node[font=\small, align=center] at (6.2, \mainrow - 0.7) {50 MHz\\Base Period};
 
-% Base Period annotation
-\node[sp-annotation] at (4.0, -0.5) {50 MHz\\Base Period};
+% Adder (same row as Div by 2)
+\node[sp-block, minimum width=1.6cm, minimum height=0.8cm] (adder) at (\addercol, \mainrow) {Adder};
 
-% Y[31:0] register
-\node[sp-block, minimum width=1.5cm] (yreg) at (5.5, 1.5) {Y[31:0]};
-\node[sp-annotation, anchor=south] at (5.5, 2.0) {Y = \$5010};
+% === ROW 2 (middle): X[15:0], Y[31:0], Z[31:0] ===
 
-% Adder
-\node[sp-block, minimum width=1.5cm] (adder) at (5.5, 0) {Adder};
-\draw[sp-arrow] (div) -- (adder);
-\draw[sp-arrow] (yreg) -- (adder);
+% X[15:0] above Div by 2
+\node[sp-block, minimum width=1.6cm, minimum height=0.7cm] (xreg) at (\divcol, \regrow) {\textcolor{blue}{X[15:0]}};
+\node[font=\small] at (\divcol, \annotrow) {X = \$2};
 
-% Z[31:0] register
-\node[sp-block, minimum width=1.5cm] (zreg) at (8.0, 1.5) {Z[31:0]};
+% Arrow: X[15:0] -> straight down to Div by 2
+\draw[sp-arrow] (xreg.south) -- (div.north);
 
-% MSB arrow from Z to output
-\draw[sp-arrow] (zreg.north) -- (8.0, 2.5) -- (6.5, 2.5);
-\node[sp-annotation, anchor=south] at (7.25, 2.5) {MSB};
-\node[sp-annotation, anchor=east] at (6.5, 2.5) {To Pin};
-\draw[sp-arrow] (6.5, 2.5) -- (6.0, 2.5);
+% Y[31:0]
+\node[sp-block, minimum width=1.6cm, minimum height=0.7cm] (yreg) at (\yregcol, \regrow) {\textcolor{blue}{Y[31:0]}};
+\node[font=\small] at (\yregcol, \annotrow) {Y = \$5010};
 
-% Sum output from adder
-\draw[sp-arrow] (adder) -- (8.0, 0) -- (8.0, 1.0);
-\node[sp-annotation, anchor=west] at (8.1, 0.5) {Sum};
+% Z[31:0]
+\node[sp-block, minimum width=1.6cm, minimum height=0.7cm] (zreg) at (\zregcol, \regrow) {\textcolor{blue}{Z[31:0]}};
 
-% Overflow output
-\draw[sp-arrow] (8.0, -0.3) -- (8.0, -0.8);
-\node[sp-annotation, anchor=north] at (8.0, -0.9) {Overflow};
+% === CONNECTIONS: Y and Z feed into Adder top ===
 
-% Optional Offset (dashed box)
-\draw[dashed] (9.0, 2.8) rectangle (10.5, 1.8);
-\node[sp-annotation] at (9.75, 2.3) {X[31:16]};
-\node[sp-annotation, anchor=south] at (9.75, 2.8) {Optional Offset};
-\draw[sp-arrow, dashed] (9.75, 1.8) -- (9.75, 1.5) -- (8.5, 1.5);
+% Y -> down, right, down into Adder top (left of center)
+\draw[sp-signal] (yreg.south) -- (\yregcol, \regrow - 0.5);
+\draw[sp-signal] (\yregcol, \regrow - 0.5) -- (\addercol - 0.25, \regrow - 0.5);
+\draw[sp-arrow] (\addercol - 0.25, \regrow - 0.5) -- (\addercol - 0.25, \mainrow + 0.4);
 
-% Feedback loop from Z to adder (implied by position)
-\draw[sp-arrow] (zreg.south) -- (8.0, 0.8) -- (6.5, 0.8) -- (6.5, 0) -- (adder.east);
+% Z -> down, left, down into Adder top (right of center)
+\draw[sp-signal] (zreg.south) -- (\zregcol, \regrow - 0.5);
+\draw[sp-signal] (\zregcol, \regrow - 0.5) -- (\addercol + 0.25, \regrow - 0.5);
+\draw[sp-arrow] (\addercol + 0.25, \regrow - 0.5) -- (\addercol + 0.25, \mainrow + 0.4);
+
+% === Adder outputs ===
+
+% Adder -> Overflow (down from bottom)
+\draw[sp-arrow] (adder.south) -- (\addercol, \overflowrow);
+\node[font=\small, anchor=north] at (\addercol, \overflowrow - 0.1) {Overflow};
+
+% Adder Sum -> right of center bottom, down, right, up, left, then DOWN into Z top
+% Start from right side of adder bottom area
+\draw[sp-signal] (\addercol + 0.5, \mainrow - 0.4) -- (\addercol + 0.5, \overflowrow + 0.3);
+\draw[sp-signal] (\addercol + 0.5, \overflowrow + 0.3) -- (\zregcol + 1.0, \overflowrow + 0.3);
+\draw[sp-signal] (\zregcol + 1.0, \overflowrow + 0.3) -- (\zregcol + 1.0, \regrow + 0.8);
+\draw[sp-signal] (\zregcol + 1.0, \regrow + 0.8) -- (\zregcol + 0.25, \regrow + 0.8);
+\draw[sp-signal] (\zregcol + 0.25, \regrow + 0.8) -- (\zregcol + 0.25, \regrow + 0.55);
+\draw[sp-arrow] (\zregcol + 0.25, \regrow + 0.55) -- (\zregcol + 0.25, \regrow + 0.35);
+% Sum label inside the loop, centered between Adder right edge and vertical line
+\node[font=\small] at (\addercol + 1.5, \overflowrow + 0.55) {Sum};
+
+% === ROW 1 (top): Optional Offset and MSB output ===
+
+% Optional Offset (dashed box) - directly above Z
+\draw[dashed, thick] (\zregcol - 0.9, \offsetrow + 0.4) rectangle (\zregcol + 0.9, \offsetrow - 0.3);
+\node[font=\small, text=blue] at (\zregcol, \offsetrow) {X[31:16]};
+\node[font=\small, anchor=south] at (\zregcol, \offsetrow + 0.4) {Optional Offset};
+
+% Optional Offset -> straight down into Z top (left of center)
+\draw[sp-arrow, dashed] (\zregcol - 0.25, \offsetrow - 0.3) -- (\zregcol - 0.25, \regrow + 0.5);
+
+% MSB output: Z left edge -> up, left to "To Pin"
+\draw[sp-signal] (zreg.west) -- (\zregcol - 1.2, \regrow);
+\draw[sp-signal] (\zregcol - 1.2, \regrow) -- (\zregcol - 1.2, \offsetrow);
+\draw[sp-arrow] (\zregcol - 1.2, \offsetrow) -- (\yregcol - 0.5, \offsetrow);
+\node[font=\small, anchor=south] at (\zregcol - 2.0, \offsetrow) {MSB};
+% "To Pin" label sits to the left of the incoming arrow (no arrow over text)
+\node[font=\small, anchor=east] at (\yregcol - 0.6, \offsetrow) {To Pin};
 
 \end{tikzpicture}
 \par}
