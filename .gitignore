@@ -139,6 +139,9 @@ archive-old/
 /exports/pdf-generation/outbound
 /engineering/pdf-forge/interactive-testing
 
+# Workspace test documents (not versioned)
+/engineering/document-production/workspace/*/test-documents/
+
 # Todo MCP working directory
 tasks/
 
