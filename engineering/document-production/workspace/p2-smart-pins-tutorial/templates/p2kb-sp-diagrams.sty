@@ -119,71 +119,147 @@
 
 \newcommand{\DRVHTimingDiagram}{%
 {\centering
+% Clock cycle width = 1.4cm (sized for labels: DIRA/OUTA ~0.7cm, P0 DRIV ~1.0cm)
 \begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers (positioned above clock waveform)
+% Define clock parameters
+% DIRA=12mm needs room + arrow, so cycle should be ~20mm = 2.0cm
+\def\clkw{2.0}        % Clock cycle width
+\def\clkh{1.0}        % Clock high width (half cycle)
+\def\clkstart{1.5}    % X position of clock 0 rising edge (moved right for label space)
+
+% Clock cycle numbers (positioned above clock waveform, centered over each cycle)
 \foreach \i in {0,...,5} {
-    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.8) {\i};
+    \pgfmathsetmacro{\xpos}{\clkstart + \i*\clkw + \clkw/2}
+    \node[font=\normalsize] at (\xpos, 4.8) {\i};
 }
 
 % System Clock label and waveform
-\node[sp-label] at (-0.5, 4.2) {System Clock};
-% Lead-in: DASHED line before clock 0
-\draw[dashed, sp-signal] (-0.2, 3.9) -- (0.5, 3.9);
-\draw[sp-signal] (0.5, 3.9) -- (1.0, 3.9);
-% Main clock cycles 0-5
+% Label right-aligned with whitespace gap before clock waveform
+\node[font=\small, anchor=east] at (\clkstart - 0.5, 4.2) {System Clock};
+% Lead-in: DASHED line before clock 0 rising edge
+\draw[dashed, sp-signal] (0.8, 3.9) -- (1.2, 3.9);
+\draw[sp-signal] (1.2, 3.9) -- (\clkstart, 3.9);
+% Main clock cycles 0-5 (each cycle: rising edge, high, falling edge, low)
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
-    \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\x+0.5, 4.4) -- (\x+0.5, 3.9) -- (\x+1.0, 3.9);
+    \pgfmathsetmacro{\x}{\clkstart + \i*\clkw}
+    \pgfmathsetmacro{\xhigh}{\x + \clkh}
+    \pgfmathsetmacro{\xend}{\x + \clkw}
+    \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\xhigh, 4.4) -- (\xhigh, 3.9) -- (\xend, 3.9);
 }
-% Lead-out: DASHED line after clock 5
-\draw[dashed, sp-signal] (7.0, 3.9) -- (7.5, 3.9);
+% Cycle 6: rising edge only, then dashed lead-out
+\pgfmathsetmacro{\clk}{6}
+\pgfmathsetmacro{\xsix}{\clkstart + \clk*\clkw}
+\draw[sp-signal] (\xsix, 3.9) -- (\xsix, 4.4) -- (\xsix+0.4, 4.4);
+\draw[dashed, sp-signal] (\xsix+0.4, 4.4) -- (\xsix+0.8, 4.4);
 
-% DIRA row
-\node[sp-label] at (-0.5, 3.0) {DIRA:};
-\draw[sp-signal] (1.0, 2.85) -- (1.0, 3.15);  % Initial tick
-\node[font=\small, anchor=west] at (1.1, 3.0) {DIRA};
-\draw[sp-signal, ->] (1.7, 3.0) -- (1.95, 3.0);
-\draw[sp-signal] (2.0, 2.85) -- (2.0, 3.15);
-\draw[sp-signal, ->] (2.05, 3.0) -- (2.95, 3.0);
-\draw[sp-signal] (3.0, 2.85) -- (3.0, 3.15);
-\draw[sp-signal, ->] (3.05, 3.0) -- (3.95, 3.0);
-\draw[sp-signal] (4.0, 2.85) -- (4.0, 3.15);
-\draw[sp-signal, ->] (4.05, 3.0) -- (4.95, 3.0);
-\draw[sp-signal] (5.0, 2.85) -- (5.0, 3.15);
-\draw[sp-signal, ->] (5.05, 3.0) -- (5.95, 3.0);
-\draw[sp-signal] (6.0, 2.85) -- (6.0, 3.15);
-\draw[sp-signal, ->] (6.05, 3.0) -- (6.95, 3.0);
-\draw[sp-signal] (7.0, 2.85) -- (7.0, 3.15);
-\node[font=\small, anchor=west] at (7.1, 3.0) {P0 DRIVEN};
+% Rising edge X positions: clk0=1.0, clk1=2.4, clk2=3.8, clk3=5.2, clk4=6.6, clk5=8.0, clk6=9.4
+\def\clkzero{\clkstart}
+\pgfmathsetmacro{\clkone}{\clkstart + 1*\clkw}
+\pgfmathsetmacro{\clktwo}{\clkstart + 2*\clkw}
+\pgfmathsetmacro{\clkthree}{\clkstart + 3*\clkw}
+\pgfmathsetmacro{\clkfour}{\clkstart + 4*\clkw}
+\pgfmathsetmacro{\clkfive}{\clkstart + 5*\clkw}
+\pgfmathsetmacro{\clksix}{\clkstart + 6*\clkw}
 
-% OUTA row
-\node[sp-label] at (-0.5, 2.2) {OUTA:};
-\draw[sp-signal] (1.0, 2.05) -- (1.0, 2.35);  % Initial tick
-\node[font=\small, anchor=west] at (1.1, 2.2) {OUTA};
-\draw[sp-signal, ->] (1.7, 2.2) -- (1.95, 2.2);
-\draw[sp-signal] (2.0, 2.05) -- (2.0, 2.35);
-\draw[sp-signal, ->] (2.05, 2.2) -- (2.95, 2.2);
-\draw[sp-signal] (3.0, 2.05) -- (3.0, 2.35);
-\draw[sp-signal, ->] (3.05, 2.2) -- (3.95, 2.2);
-\draw[sp-signal] (4.0, 2.05) -- (4.0, 2.35);
-\draw[sp-signal, ->] (4.05, 2.2) -- (4.95, 2.2);
-\draw[sp-signal] (5.0, 2.05) -- (5.0, 2.35);
-\draw[sp-signal, ->] (5.05, 2.2) -- (5.95, 2.2);
-\draw[sp-signal] (6.0, 2.05) -- (6.0, 2.35);
-\draw[sp-signal, ->] (6.05, 2.2) -- (6.95, 2.2);
-\draw[sp-signal] (7.0, 2.05) -- (7.0, 2.35);
-\node[font=\small, anchor=west] at (7.1, 2.2) {P0 HIGH};
+% Vertical alignment bar at clock 0 rising edge (spans DIRA and OUTA rows)
+\draw[sp-signal] (\clkzero, 2.0) -- (\clkzero, 3.2);
 
-% Register transfer annotations in BLUE (between DIRA and OUTA rows)
-\node[font=\small, color=sp-annotation] at (2.5, 2.6) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.5, 2.6) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.5, 2.6) {Reg*};
+% DIRA row - vertical bars at rising edges of clocks 1,2,3,4,5,6
+% Row label ends under rising edge of clock 0
+\node[sp-label] at (\clkstart - 0.1, 3.0) {DIRA:};
+\draw[sp-signal] (\clkone, 2.85) -- (\clkone, 3.15);    % Bar at clock 1
+\node[font=\small, anchor=west] at (\clkone+0.08, 3.0) {DIRA};
+% Arrow starts after DIRA text (12mm) + more whitespace (1.6 gives ~4mm gap)
+\draw[sp-signal, ->] (\clkone+1.6, 3.0) -- (\clktwo, 3.0);
+\draw[sp-signal] (\clktwo, 2.85) -- (\clktwo, 3.15);    % Bar at clock 2
+\draw[sp-signal, ->] (\clktwo+0.05, 3.0) -- (\clkthree, 3.0);
+\draw[sp-signal] (\clkthree, 2.85) -- (\clkthree, 3.15);  % Bar at clock 3
+\draw[sp-signal, ->] (\clkthree+0.05, 3.0) -- (\clkfour, 3.0);
+\draw[sp-signal] (\clkfour, 2.85) -- (\clkfour, 3.15);  % Bar at clock 4
+\draw[sp-signal, ->] (\clkfour+0.05, 3.0) -- (\clkfive, 3.0);
+\draw[sp-signal] (\clkfive, 2.85) -- (\clkfive, 3.15);  % Bar at clock 5
+% P0 DRIV label under clock 5, no arrow after it, just vertical bar at clock 6
+\node[font=\small, anchor=west] at (\clkfive+0.08, 3.0) {P0 DRIV};
+\draw[sp-signal] (\clksix, 2.85) -- (\clksix, 3.15);    % Bar at clock 6 (final)
 
-% Instruction row
-\node[sp-label] at (-0.5, 1.4) {Instruction:};
-\draw[sp-signal] (1.0, 1.25) -- (1.0, 1.55);  % Initial tick
-\node[font=\small, anchor=west] at (1.1, 1.4) {DRVH \#0};
+% OUTA row - vertical bars at rising edges of clocks 1,2,3,4,5,6
+% Row label ends under rising edge of clock 0
+\node[sp-label] at (\clkstart - 0.1, 2.2) {OUTA:};
+\draw[sp-signal] (\clkone, 2.05) -- (\clkone, 2.35);    % Bar at clock 1
+\node[font=\small, anchor=west] at (\clkone+0.08, 2.2) {OUTA};
+% Arrow starts after OUTA text (12mm) + more whitespace (1.6 gives ~4mm gap)
+\draw[sp-signal, ->] (\clkone+1.6, 2.2) -- (\clktwo, 2.2);
+\draw[sp-signal] (\clktwo, 2.05) -- (\clktwo, 2.35);    % Bar at clock 2
+\draw[sp-signal, ->] (\clktwo+0.05, 2.2) -- (\clkthree, 2.2);
+\draw[sp-signal] (\clkthree, 2.05) -- (\clkthree, 2.35);  % Bar at clock 3
+\draw[sp-signal, ->] (\clkthree+0.05, 2.2) -- (\clkfour, 2.2);
+\draw[sp-signal] (\clkfour, 2.05) -- (\clkfour, 2.35);  % Bar at clock 4
+\draw[sp-signal, ->] (\clkfour+0.05, 2.2) -- (\clkfive, 2.2);
+\draw[sp-signal] (\clkfive, 2.05) -- (\clkfive, 2.35);  % Bar at clock 5
+% P0 HIGH label under clock 5, no arrow after it, just vertical bar at clock 6
+\node[font=\small, anchor=west] at (\clkfive+0.08, 2.2) {P0 HIGH};
+\draw[sp-signal] (\clksix, 2.05) -- (\clksix, 2.35);    % Bar at clock 6 (final)
+
+% Register transfer annotations in BLUE (below OUTA row, centered in cycles 2, 3, 4)
+\pgfmathsetmacro{\regtwox}{(\clktwo + \clkthree)/2}
+\pgfmathsetmacro{\regthreex}{(\clkthree + \clkfour)/2}
+\pgfmathsetmacro{\regfourx}{(\clkfour + \clkfive)/2}
+\node[font=\small, color=sp-annotation] at (\regtwox, 1.7) {Reg*};
+\node[font=\small, color=sp-annotation] at (\regthreex, 1.7) {Reg*};
+\node[font=\small, color=sp-annotation] at (\regfourx, 1.7) {Reg*};
+
+% Instruction row - spans from clock 0 rising edge to clock 2 rising edge
+% Row label ends under rising edge of clock 0
+\node[sp-label] at (\clkstart - 0.1, 1.2) {Instruction:};
+\draw[sp-signal] (\clkzero, 1.05) -- (\clkzero, 1.35);  % Bar at clock 0
+\draw[sp-signal] (\clkzero+0.05, 1.2) -- (\clkzero+0.3, 1.2);  % Line before text
+\pgfmathsetmacro{\instcenter}{(\clkzero + \clktwo)/2}
+\node[font=\small] at (\instcenter, 1.2) {DRVH \#0};
+\draw[sp-signal, ->] (\clktwo-0.5, 1.2) -- (\clktwo, 1.2);  % Arrow to clock 2
+\draw[sp-signal] (\clktwo, 1.05) -- (\clktwo, 1.35);    % Bar at clock 2
+
+% ============================================================================
+% MEASUREMENT REFERENCE - for calibrating label sizes vs clock width
+% ============================================================================
+% Ruler with 0.1cm tick marks (aligned with diagram)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.2) {Ruler (0.1cm ticks):};
+\draw[thin] (\clkstart, -0.2) -- (\clkstart + 12, -0.2);  % Baseline
+\foreach \i in {0,1,...,120} {
+    \pgfmathsetmacro{\x}{\clkstart + \i * 0.1}
+    \pgfmathparse{mod(\i, 10) == 0 ? 1 : 0}
+    \ifnum\pgfmathresult=1
+        \draw[thin] (\x, -0.35) -- (\x, -0.05);  % Major tick every 1cm
+        \pgfmathsetmacro{\label}{\i / 10}
+        \node[font=\tiny, anchor=north] at (\x, -0.35) {\pgfmathprintnumber[fixed, precision=0]{\label}};
+    \else
+        \pgfmathparse{mod(\i, 5) == 0 ? 1 : 0}
+        \ifnum\pgfmathresult=1
+            \draw[thin] (\x, -0.3) -- (\x, -0.1);  % Medium tick every 0.5cm
+        \else
+            \draw[thin] (\x, -0.25) -- (\x, -0.15);  % Minor tick every 0.1cm
+        \fi
+    \fi
+}
+
+% Sample labels for measurement (aligned with ruler starting at clkstart)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.8) {Sample labels:};
+\node[font=\small, anchor=west] at (\clkstart, -0.8) {DIRA};
+\draw[thin] (\clkstart, -0.95) -- (\clkstart, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 2, -0.8) {OUTA};
+\draw[thin] (\clkstart + 2, -0.95) -- (\clkstart + 2, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 4, -0.8) {P0 DRIV};
+\draw[thin] (\clkstart + 4, -0.95) -- (\clkstart + 4, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 6.5, -0.8) {P0 HIGH};
+\draw[thin] (\clkstart + 6.5, -0.95) -- (\clkstart + 6.5, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 9, -0.8) {DRVH \#0};
+\draw[thin] (\clkstart + 9, -0.95) -- (\clkstart + 9, -0.65);  % Start marker
+
+% Current clock width reference (aligned with clkstart)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -1.4) {Clock width (\clkw cm):};
+\draw[thick] (\clkstart, -1.4) -- (\clkstart + \clkw, -1.4);
+\draw[thick] (\clkstart, -1.55) -- (\clkstart, -1.25);  % Start bar
+\draw[thick] (\clkstart + \clkw, -1.55) -- (\clkstart + \clkw, -1.25);  % End bar
 
 \end{tikzpicture}
 \par}
@@ -192,58 +268,98 @@
 % ============================================================================
 % PAGE 04 IMAGE 01: TESTB INA Timing Diagram
 % ============================================================================
+% Uses same clock geometry as DRVH diagram: clkw=2.0cm, clkh=1.0cm, clkstart=1.5cm
 
 \newcommand{\TESTBINATimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers (positioned above clock waveform)
+% Define clock parameters (same as DRVH)
+\def\clkw{2.0}        % Clock cycle width
+\def\clkh{1.0}        % Clock high width (half cycle)
+\def\clkstart{1.5}    % X position of clock 0 rising edge
+
+% Calculate clock positions
+\pgfmathsetmacro{\clkzero}{\clkstart}
+\pgfmathsetmacro{\clkone}{\clkstart + 1*\clkw}
+\pgfmathsetmacro{\clktwo}{\clkstart + 2*\clkw}
+\pgfmathsetmacro{\clkthree}{\clkstart + 3*\clkw}
+\pgfmathsetmacro{\clkfour}{\clkstart + 4*\clkw}
+\pgfmathsetmacro{\clkfive}{\clkstart + 5*\clkw}
+\pgfmathsetmacro{\clksix}{\clkstart + 6*\clkw}
+
+% Clock cycle numbers (centered over each cycle)
 \foreach \i in {0,...,5} {
-    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.3) {\i};
+    \pgfmathsetmacro{\xpos}{\clkstart + \i*\clkw + \clkw/2}
+    \node[font=\normalsize] at (\xpos, 4.8) {\i};
 }
 
-% Clock label and waveform
-\node[sp-label] at (-0.5, 3.7) {Clock:};
-% Lead-in: DASHED line before clock 0
-\draw[dashed, sp-signal] (-0.2, 3.4) -- (0.5, 3.4);
-\draw[sp-signal] (0.5, 3.4) -- (1.0, 3.4);
-% Main clock cycles 0-5
+% System Clock label and waveform (label positioned with whitespace gap)
+\node[font=\small, anchor=east] at (\clkstart - 0.5, 4.2) {System Clock};
+% Lead-in: DASHED line before clock 0 rising edge
+\draw[dashed, sp-signal] (0.8, 3.9) -- (1.2, 3.9);
+\draw[sp-signal] (1.2, 3.9) -- (\clkstart, 3.9);
+% Main clock cycles 0-5 (each cycle: rising edge, high, falling edge, low)
 \foreach \i in {0,...,5} {
-    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
-    \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
+    \pgfmathsetmacro{\x}{\clkstart + \i*\clkw}
+    \pgfmathsetmacro{\xhigh}{\x + \clkh}
+    \pgfmathsetmacro{\xend}{\x + \clkw}
+    \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\xhigh, 4.4) -- (\xhigh, 3.9) -- (\xend, 3.9);
 }
-% Lead-out: DASHED line after clock 5
-\draw[dashed, sp-signal] (7.0, 3.4) -- (7.5, 3.4);
+% Cycle 6: rising edge only, then dashed lead-out
+\draw[sp-signal] (\clksix, 3.9) -- (\clksix, 4.4) -- (\clksix+0.4, 4.4);
+\draw[dashed, sp-signal] (\clksix+0.4, 4.4) -- (\clksix+0.8, 4.4);
 
-% INA row
-\node[sp-label] at (-0.5, 2.5) {INA:};
-\draw[sp-signal] (1.0, 2.35) -- (1.0, 2.65);  % Initial tick
-\node[font=\small, anchor=west] at (1.1, 2.5) {P0 IN};
-\draw[sp-signal, ->] (1.75, 2.5) -- (1.95, 2.5);
-\draw[sp-signal] (2.0, 2.35) -- (2.0, 2.65);
-\draw[sp-signal, ->] (2.05, 2.5) -- (2.95, 2.5);
-\draw[sp-signal] (3.0, 2.35) -- (3.0, 2.65);
-\draw[sp-signal, ->] (3.05, 2.5) -- (3.95, 2.5);
-\draw[sp-signal] (4.0, 2.35) -- (4.0, 2.65);
-\draw[sp-signal, ->] (4.05, 2.5) -- (4.95, 2.5);
-\draw[sp-signal] (5.0, 2.35) -- (5.0, 2.65);
-\node[font=\small, anchor=west] at (5.1, 2.5) {ALU};
-\draw[sp-signal] (5.6, 2.35) -- (5.6, 2.65);
-\node[font=\small, anchor=west] at (5.7, 2.5) {C/Z};
-\draw[sp-signal, ->] (6.15, 2.5) -- (7.5, 2.5);
+% INA row - row label positioned to end before clock start
+% NO horizontal line before clock 0 - starts directly at vertical bar
+\node[sp-label] at (\clkstart - 0.5, 3.0) {INA:};
+% Vertical bar at clock 0
+\draw[sp-signal] (\clkzero, 2.85) -- (\clkzero, 3.15);
+% Short horizontal line, then P0 IN label, then arrow
+\draw[sp-signal] (\clkzero, 3.0) -- (\clkzero+0.3, 3.0);
+\node[font=\small, anchor=west] at (\clkzero+0.35, 3.0) {P0 IN};
+% Arrow to clock 1 (start after P0 IN text + gap)
+\draw[sp-signal, ->] (\clkzero+1.6, 3.0) -- (\clkone, 3.0);
+% Vertical bars and arrows at clocks 1,2,3,4
+\draw[sp-signal] (\clkone, 2.85) -- (\clkone, 3.15);
+\draw[sp-signal, ->] (\clkone+0.05, 3.0) -- (\clktwo, 3.0);
+\draw[sp-signal] (\clktwo, 2.85) -- (\clktwo, 3.15);
+\draw[sp-signal, ->] (\clktwo+0.05, 3.0) -- (\clkthree, 3.0);
+\draw[sp-signal] (\clkthree, 2.85) -- (\clkthree, 3.15);
+\draw[sp-signal, ->] (\clkthree+0.05, 3.0) -- (\clkfour, 3.0);
+\draw[sp-signal] (\clkfour, 2.85) -- (\clkfour, 3.15);
+% Short horizontal line, then ALU label, then arrow to clock 5
+\draw[sp-signal] (\clkfour, 3.0) -- (\clkfour+0.3, 3.0);
+\node[font=\small, anchor=west] at (\clkfour+0.35, 3.0) {ALU};
+% Arrow to clock 5 (start after ALU text + gap)
+\draw[sp-signal, ->] (\clkfour+1.2, 3.0) -- (\clkfive, 3.0);
+\draw[sp-signal] (\clkfive, 2.85) -- (\clkfive, 3.15);
+% Short horizontal line, then C/Z label, then arrow to clock 6
+\draw[sp-signal] (\clkfive, 3.0) -- (\clkfive+0.3, 3.0);
+\node[font=\small, anchor=west] at (\clkfive+0.35, 3.0) {C/Z};
+% Arrow ending at clock 6 vertical bar
+\draw[sp-signal, ->] (\clkfive+1.1, 3.0) -- (\clksix, 3.0);
+% Vertical bar at clock 6 (end of INA row)
+\draw[sp-signal] (\clksix, 2.85) -- (\clksix, 3.15);
 
-% Register transfer annotations in BLUE (below INA line)
-\node[font=\small, color=sp-annotation] at (2.5, 1.95) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.5, 1.95) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.5, 1.95) {Reg*};
+% Register transfer annotations (below INA line, between clocks 1-2, 2-3, 3-4)
+% Reg* labels shifted slightly left to center with asterisk
+\node[font=\small, color=sp-annotation] at (\clkone + \clkw/2 - 0.1, 2.4) {Reg*};
+\node[font=\small, color=sp-annotation] at (\clktwo + \clkw/2 - 0.1, 2.4) {Reg*};
+\node[font=\small, color=sp-annotation] at (\clkthree + \clkw/2 - 0.1, 2.4) {Reg*};
 
-% Instruction row
-\node[sp-label] at (-0.5, 1.2) {Instruction:};
-% Horizontal line leading up to instruction
-\draw[sp-signal] (1.0, 1.2) -- (4.95, 1.2);
-\draw[sp-signal] (5.0, 1.05) -- (5.0, 1.35);  % Tick mark
-\node[font=\small, anchor=west] at (5.1, 1.2) {TESTB INA, \#0};
-\draw[sp-signal, ->] (7.0, 1.2) -- (7.5, 1.2);
+% Instruction row - moved up to reduce whitespace (was 1.2, now 1.8)
+% NO horizontal line before clock 4 - instruction starts at clock 4
+\node[sp-label] at (\clkstart - 0.5, 1.8) {Instruction:};
+% Vertical bar at clock 4 (instruction start)
+\draw[sp-signal] (\clkfour, 1.65) -- (\clkfour, 1.95);
+% Short horizontal line, then TESTB INA, #0 label, then arrow
+\draw[sp-signal] (\clkfour, 1.8) -- (\clkfour+0.3, 1.8);
+\node[font=\small, anchor=west] at (\clkfour+0.35, 1.8) {TESTB INA, \#0};
+% Arrow ending at clock 6 vertical bar (start after label + gap)
+\draw[sp-signal, ->] (\clkfour+3.4, 1.8) -- (\clksix, 1.8);
+% Vertical bar at clock 6 (end of Instruction row)
+\draw[sp-signal] (\clksix, 1.65) -- (\clksix, 1.95);
 
 \end{tikzpicture}
 \par}
@@ -252,56 +368,89 @@
 % ============================================================================
 % PAGE 04 IMAGE 02: TESTP Timing Diagram
 % ============================================================================
+% Uses same clock geometry as DRVH/TESTB INA: clkw=2.0cm, clkh=1.0cm, clkstart=1.5cm
 
 \newcommand{\TESTPTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.0cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Clock cycle numbers (positioned above clock waveform)
+% Define clock parameters (same as DRVH/TESTB INA)
+\def\clkw{2.0}        % Clock cycle width
+\def\clkh{1.0}        % Clock high width (half cycle)
+\def\clkstart{1.5}    % X position of clock 0 rising edge
+
+% Calculate clock positions
+\pgfmathsetmacro{\clkzero}{\clkstart}
+\pgfmathsetmacro{\clkone}{\clkstart + 1*\clkw}
+\pgfmathsetmacro{\clktwo}{\clkstart + 2*\clkw}
+\pgfmathsetmacro{\clkthree}{\clkstart + 3*\clkw}
+\pgfmathsetmacro{\clkfour}{\clkstart + 4*\clkw}
+\pgfmathsetmacro{\clkfive}{\clkstart + 5*\clkw}
+
+% Clock cycle numbers (centered over each cycle) - 0 to 4
 \foreach \i in {0,...,4} {
-    \node[font=\normalsize] at (\i*1.0 + 1.5, 4.3) {\i};
+    \pgfmathsetmacro{\xpos}{\clkstart + \i*\clkw + \clkw/2}
+    \node[font=\normalsize] at (\xpos, 4.8) {\i};
 }
 
-% Clock label and waveform
-\node[sp-label] at (-0.5, 3.7) {Clock:};
-% Lead-in: DASHED line before clock 0
-\draw[dashed, sp-signal] (-0.2, 3.4) -- (0.5, 3.4);
-\draw[sp-signal] (0.5, 3.4) -- (1.0, 3.4);
-% Main clock cycles 0-4
+% System Clock label and waveform (label positioned with whitespace gap)
+\node[font=\small, anchor=east] at (\clkstart - 0.5, 4.2) {System Clock};
+% Lead-in: DASHED line before clock 0 rising edge
+\draw[dashed, sp-signal] (0.8, 3.9) -- (1.2, 3.9);
+\draw[sp-signal] (1.2, 3.9) -- (\clkstart, 3.9);
+% Main clock cycles 0-4 (each cycle: rising edge, high, falling edge, low)
 \foreach \i in {0,...,4} {
-    \pgfmathsetmacro{\x}{1.0 + \i*1.0}
-    \draw[sp-signal] (\x, 3.4) -- (\x, 3.9) -- (\x+0.5, 3.9) -- (\x+0.5, 3.4) -- (\x+1.0, 3.4);
+    \pgfmathsetmacro{\x}{\clkstart + \i*\clkw}
+    \pgfmathsetmacro{\xhigh}{\x + \clkh}
+    \pgfmathsetmacro{\xend}{\x + \clkw}
+    \draw[sp-signal] (\x, 3.9) -- (\x, 4.4) -- (\xhigh, 4.4) -- (\xhigh, 3.9) -- (\xend, 3.9);
 }
-% Lead-out: DASHED line after clock 4
-\draw[dashed, sp-signal] (6.0, 3.4) -- (6.5, 3.4);
+% Cycle 5: rising edge only, then dashed lead-out
+\draw[sp-signal] (\clkfive, 3.9) -- (\clkfive, 4.4) -- (\clkfive+0.4, 4.4);
+\draw[dashed, sp-signal] (\clkfive+0.4, 4.4) -- (\clkfive+0.8, 4.4);
 
-% INA row
-\node[sp-label] at (-0.5, 2.5) {INA:};
-\draw[sp-signal] (1.0, 2.35) -- (1.0, 2.65);  % Initial tick
-\node[font=\small, anchor=west] at (1.1, 2.5) {P0 IN};
-\draw[sp-signal, ->] (1.75, 2.5) -- (1.95, 2.5);
-\draw[sp-signal] (2.0, 2.35) -- (2.0, 2.65);
-\draw[sp-signal, ->] (2.05, 2.5) -- (2.95, 2.5);
-\draw[sp-signal] (3.0, 2.35) -- (3.0, 2.65);
-\draw[sp-signal, ->] (3.05, 2.5) -- (3.95, 2.5);
-\draw[sp-signal] (4.0, 2.35) -- (4.0, 2.65);
-\draw[sp-signal, ->] (4.05, 2.5) -- (4.95, 2.5);
-\draw[sp-signal] (5.0, 2.35) -- (5.0, 2.65);
-\node[font=\small, anchor=west] at (5.1, 2.5) {C/Z};
-\draw[sp-signal, ->] (5.6, 2.5) -- (6.5, 2.5);
+% INA row - NO horizontal line before clock 0
+\node[sp-label] at (\clkstart - 0.5, 3.0) {INA:};
+% Vertical bar at clock 0
+\draw[sp-signal] (\clkzero, 2.85) -- (\clkzero, 3.15);
+% Short horizontal line, then P0 IN label, then arrow
+\draw[sp-signal] (\clkzero, 3.0) -- (\clkzero+0.3, 3.0);
+\node[font=\small, anchor=west] at (\clkzero+0.35, 3.0) {P0 IN};
+% Arrow to clock 1 (start after P0 IN text + gap)
+\draw[sp-signal, ->] (\clkzero+1.6, 3.0) -- (\clkone, 3.0);
+% Vertical bars and arrows at clocks 1,2,3,4
+\draw[sp-signal] (\clkone, 2.85) -- (\clkone, 3.15);
+\draw[sp-signal, ->] (\clkone+0.05, 3.0) -- (\clktwo, 3.0);
+\draw[sp-signal] (\clktwo, 2.85) -- (\clktwo, 3.15);
+\draw[sp-signal, ->] (\clktwo+0.05, 3.0) -- (\clkthree, 3.0);
+\draw[sp-signal] (\clkthree, 2.85) -- (\clkthree, 3.15);
+\draw[sp-signal, ->] (\clkthree+0.05, 3.0) -- (\clkfour, 3.0);
+\draw[sp-signal] (\clkfour, 2.85) -- (\clkfour, 3.15);
+% Short horizontal line, then C/Z label, then arrow to clock 5
+\draw[sp-signal] (\clkfour, 3.0) -- (\clkfour+0.3, 3.0);
+\node[font=\small, anchor=west] at (\clkfour+0.35, 3.0) {C/Z};
+% Arrow ending at clock 5 vertical bar
+\draw[sp-signal, ->] (\clkfour+1.1, 3.0) -- (\clkfive, 3.0);
+% Vertical bar at clock 5 (end of INA row)
+\draw[sp-signal] (\clkfive, 2.85) -- (\clkfive, 3.15);
 
-% Register transfer annotations in BLUE (below INA line)
-\node[font=\small, color=sp-annotation] at (2.5, 1.95) {Reg*};
-\node[font=\small, color=sp-annotation] at (3.5, 1.95) {Reg*};
-\node[font=\small, color=sp-annotation] at (4.5, 1.95) {Reg*};
+% Register transfer annotations (below INA line, between clocks 1-2, 2-3, 3-4)
+% Reg* labels shifted slightly left to center with asterisk
+\node[font=\small, color=sp-annotation] at (\clkone + \clkw/2 - 0.1, 2.4) {Reg*};
+\node[font=\small, color=sp-annotation] at (\clktwo + \clkw/2 - 0.1, 2.4) {Reg*};
+\node[font=\small, color=sp-annotation] at (\clkthree + \clkw/2 - 0.1, 2.4) {Reg*};
 
-% Instruction row
-\node[sp-label] at (-0.5, 1.2) {Instruction:};
-% Horizontal line leading up to instruction
-\draw[sp-signal] (1.0, 1.2) -- (3.95, 1.2);
-\draw[sp-signal] (4.0, 1.05) -- (4.0, 1.35);  % Tick mark
-\node[font=\small, anchor=west] at (4.1, 1.2) {TESTP \#0};
-\draw[sp-signal, ->] (5.4, 1.2) -- (6.5, 1.2);
+% Instruction row - NO horizontal line before clock 3
+\node[sp-label] at (\clkstart - 0.5, 1.8) {Instruction:};
+% Vertical bar at clock 3 (instruction start)
+\draw[sp-signal] (\clkthree, 1.65) -- (\clkthree, 1.95);
+% Short horizontal line, then TESTP #0 label, then arrow
+\draw[sp-signal] (\clkthree, 1.8) -- (\clkthree+0.3, 1.8);
+\node[font=\small, anchor=west] at (\clkthree+0.35, 1.8) {TESTP \#0};
+% Arrow ending at clock 5 vertical bar (start after label + gap)
+\draw[sp-signal, ->] (\clkthree+2.2, 1.8) -- (\clkfive, 1.8);
+% Vertical bar at clock 5 (end of Instruction row)
+\draw[sp-signal] (\clkfive, 1.65) -- (\clkfive, 1.95);
 
 \end{tikzpicture}
 \par}
