@@ -728,57 +728,133 @@
 
 \newcommand{\NCODutyTimingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.55cm, y=1cm]
+\begin{tikzpicture}[x=0.75cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% IN Flag
-\node[sp-label] at (-1.0, 4.0) {IN Flag};
-\node[sp-annotation, anchor=east] at (0.0, 4.3) {1};
-\node[sp-annotation, anchor=east] at (0.0, 3.7) {0};
-\draw[sp-signal] (0.2, 3.7) -- (12.0, 3.7) -- (12.0, 4.3) -- (13.0, 4.3);
-\draw[sp-arrow] (12.5, 4.5) -- (12.0, 4.5);
-\node[sp-annotation, anchor=west] at (12.6, 4.5) {Z Overflow};
+% Layout parameters
+\def\labelx{-1.6}          % X position for row labels (right-aligned)
+\def\levelx{-0.9}          % X position for 1/0 level indicators (tighter spacing)
+\def\wavestart{-0.55}      % X position where waveforms begin (closer to 1/0)
+\def\waveend{14.0}         % X position where waveforms end
+\def\signalheight{0.5}     % Height of signals (0 to 1 level)
 
-% Output
-\node[sp-label] at (-1.0, 2.8) {Output};
-\node[sp-annotation, anchor=east] at (0.0, 3.1) {1};
-\node[sp-annotation, anchor=east] at (0.0, 2.5) {0};
-\draw[sp-signal] (0.2, 2.5) -- (2.5, 2.5) -- (2.5, 3.1) -- (5.0, 3.1) -- (5.0, 2.5) -- (13.0, 2.5);
+% Base Period timing parameters (defined early so Output can reference them)
+\def\basepulsewidth{1.0}
+\def\basepulsepitch{2.0}
+\def\basepulsestart{0.3}   % Offset from wavestart to first rising edge
 
-% Base Period
-\node[sp-label] at (-1.0, 1.5) {Base Period};
-\node[sp-annotation, anchor=east] at (0.0, 1.8) {1};
-\node[sp-annotation, anchor=east] at (0.0, 1.2) {0};
+% Row Y positions (from top to bottom)
+\def\inflagy{5.5}
+\def\outputy{4.0}
+\def\baseperioby{2.5}
+\def\zvaluesy{1.2}
+\def\sysclocky{-0.3}
+
+% =========== IN Flag Row ===========
+\node[font=\small, anchor=east] at (\labelx, \inflagy) {IN Flag};
+\node[font=\small, anchor=east] at (\levelx, \inflagy + 0.25) {1};
+\node[font=\small, anchor=east] at (\levelx, \inflagy - 0.25) {0};
+% Signal: LOW for most, then rises at Z Overflow (aligned with $4040 = index 4)
+% IN Flag rising edge aligns with Output falling edge (middle of diagram)
+\pgfmathsetmacro{\inflagrise}{\wavestart + \basepulsestart + 4*\basepulsepitch}  % index 4 = $4040
+\draw[sp-signal] (\wavestart, \inflagy - 0.25) -- (\inflagrise, \inflagy - 0.25) -- (\inflagrise, \inflagy + 0.25) -- (\waveend, \inflagy + 0.25);
+% Z Overflow annotation - arrow pointing LEFT to rising edge, label in BLUE
+% Centered vertically within the IN Flag waveform (at \inflagy, not above it)
+\pgfmathsetmacro{\inflagarrowstart}{\inflagrise + 1.0}
+\pgfmathsetmacro{\inflagarrowend}{\inflagrise + 0.1}
+\draw[->] (\inflagarrowstart, \inflagy) -- (\inflagarrowend, \inflagy);
+\node[font=\small, color=sp-annotation, anchor=west] at ({\inflagarrowstart + 0.1}, \inflagy) {Z Overflow};
+
+% =========== Output Row ===========
+\node[font=\small, anchor=east] at (\labelx, \outputy) {Output};
+\node[font=\small, anchor=east] at (\levelx, \outputy + 0.25) {1};
+\node[font=\small, anchor=east] at (\levelx, \outputy - 0.25) {0};
+% Output transitions align with Base Period rising edges
+% Output is f/4 (Base Period is f/2, System Clock is f) - INVERTED
+% 50% duty cycle: LOW for 2 BP cycles, HIGH for 2 BP cycles
+% Edges at indices 0, 2, 4, 6 (same positions, inverted polarity)
+\pgfmathsetmacro{\outputedgeA}{\wavestart + \basepulsestart + 0*\basepulsepitch}  % index 0: fall
+\pgfmathsetmacro{\outputedgeB}{\wavestart + \basepulsestart + 2*\basepulsepitch}  % index 2: rise
+\pgfmathsetmacro{\outputedgeC}{\wavestart + \basepulsestart + 4*\basepulsepitch}  % index 4: fall
+\pgfmathsetmacro{\outputedgeD}{\wavestart + \basepulsestart + 6*\basepulsepitch}  % index 6: rise
+% Draw Output INVERTED: HIGH -> fall -> LOW -> rise -> HIGH -> fall -> LOW -> rise -> HIGH
+\draw[sp-signal] (\wavestart, \outputy + 0.25) -- (\outputedgeA, \outputy + 0.25) -- (\outputedgeA, \outputy - 0.25) -- (\outputedgeB, \outputy - 0.25) -- (\outputedgeB, \outputy + 0.25) -- (\outputedgeC, \outputy + 0.25) -- (\outputedgeC, \outputy - 0.25) -- (\outputedgeD, \outputy - 0.25) -- (\outputedgeD, \outputy + 0.25) -- (\waveend, \outputy + 0.25);
+
+% =========== Base Period Row ===========
+\node[font=\small, anchor=east] at (\labelx, \baseperioby) {Base Period};
+\node[font=\small, anchor=east] at (\levelx, \baseperioby + 0.25) {1};
+\node[font=\small, anchor=east] at (\levelx, \baseperioby - 0.25) {0};
+% Signal: 7 pulses aligned with Z register values
+% Pulse pitch must be wide enough to fit 5-digit hex labels ($xxxx) centered under each rising edge
+% Each label is ~5 chars wide, at x=0.75cm scale, need ~1.5cm per label plus spacing
+% (basepulsewidth and basepulsepitch already defined at top of macro)
+% Initial LOW segment
+\draw[sp-signal] (\wavestart, \baseperioby - 0.25) -- ({\wavestart + \basepulsestart}, \baseperioby - 0.25);
+% Draw 7 pulses manually for proper alignment with Z values
 \foreach \i in {0,...,6} {
-    \pgfmathsetmacro{\x}{0.2 + \i*2.0}
-    \draw[sp-signal] (\x, 1.2) -- (\x, 1.8) -- (\x+1.0, 1.8) -- (\x+1.0, 1.2) -- (\x+2.0, 1.2);
+    \pgfmathsetmacro{\risingx}{\wavestart + \basepulsestart + \i*\basepulsepitch}
+    \pgfmathsetmacro{\fallingx}{\risingx + \basepulsewidth}
+    \draw[sp-signal] (\risingx, \baseperioby - 0.25) -- (\risingx, \baseperioby + 0.25);
+    \draw[sp-signal] (\risingx, \baseperioby + 0.25) -- (\fallingx, \baseperioby + 0.25);
+    \draw[sp-signal] (\fallingx, \baseperioby + 0.25) -- (\fallingx, \baseperioby - 0.25);
+    \ifnum\i<6
+        \pgfmathsetmacro{\nextrise}{\wavestart + \basepulsestart + (\i+1)*\basepulsepitch}
+        \draw[sp-signal] (\fallingx, \baseperioby - 0.25) -- (\nextrise, \baseperioby - 0.25);
+    \else
+        \draw[sp-signal] (\fallingx, \baseperioby - 0.25) -- (\waveend, \baseperioby - 0.25);
+    \fi
 }
 
-% Z[31:16] values with arrows
-\draw[sp-arrow] (1.2, 0.8) -- (1.2, 1.1);
-\node[sp-annotation] at (1.2, 0.5) {\$0000};
-\draw[sp-arrow] (3.2, 0.8) -- (3.2, 1.1);
-\node[sp-annotation] at (3.2, 0.5) {\$5010};
-\draw[sp-arrow] (5.2, 0.8) -- (5.2, 1.1);
-\node[sp-annotation] at (5.2, 0.5) {\$A020};
-\draw[sp-arrow] (7.2, 0.8) -- (7.2, 1.1);
-\node[sp-annotation] at (7.2, 0.5) {\$F030};
-\draw[sp-arrow] (9.2, 0.8) -- (9.2, 1.1);
-\node[sp-annotation] at (9.2, 0.5) {\$4040};
-\draw[sp-arrow] (11.2, 0.8) -- (11.2, 1.1);
-\node[sp-annotation] at (11.2, 0.5) {\$9050};
-\draw[sp-arrow] (13.2, 0.8) -- (13.2, 1.1);
-\node[sp-annotation] at (13.2, 0.5) {\$E060};
+% =========== Z[31:16] Values Row ===========
+% Label in BLUE
+\node[font=\small, color=sp-annotation, anchor=east] at (\labelx, \zvaluesy) {Z[31:16]};
+% Hex values with arrows pointing UP to Base Period rising edges
+% Positions aligned with Base Period rising edges
+\pgfmathsetmacro{\zxA}{\wavestart + \basepulsestart + 0*\basepulsepitch}
+\pgfmathsetmacro{\zxB}{\wavestart + \basepulsestart + 1*\basepulsepitch}
+\pgfmathsetmacro{\zxC}{\wavestart + \basepulsestart + 2*\basepulsepitch}
+\pgfmathsetmacro{\zxD}{\wavestart + \basepulsestart + 3*\basepulsepitch}
+\pgfmathsetmacro{\zxE}{\wavestart + \basepulsestart + 4*\basepulsepitch}
+\pgfmathsetmacro{\zxF}{\wavestart + \basepulsestart + 5*\basepulsepitch}
+\pgfmathsetmacro{\zxG}{\wavestart + \basepulsestart + 6*\basepulsepitch}
 
-% Z[31:16] label
-\node[sp-annotation, anchor=east] at (-0.3, 0.5) {Z[31:16]};
+% Arrow pointing UP from value to rising edge
+\draw[->] (\zxA, \zvaluesy + 0.4) -- (\zxA, \baseperioby - 0.35);
+\node[font=\small] at (\zxA, \zvaluesy) {\$0000};
 
-% System Clock
-\node[sp-label] at (-1.0, -0.5) {System Clock};
-\node[sp-annotation, anchor=east] at (0.0, -0.2) {1};
-\node[sp-annotation, anchor=east] at (0.0, -0.8) {0};
-\foreach \i in {0,...,25} {
-    \pgfmathsetmacro{\x}{0.2 + \i*0.5}
-    \draw[sp-signal] (\x, -0.8) -- (\x, -0.2) -- (\x+0.25, -0.2) -- (\x+0.25, -0.8) -- (\x+0.5, -0.8);
+\draw[->] (\zxB, \zvaluesy + 0.4) -- (\zxB, \baseperioby - 0.35);
+\node[font=\small] at (\zxB, \zvaluesy) {\$5010};
+
+\draw[->] (\zxC, \zvaluesy + 0.4) -- (\zxC, \baseperioby - 0.35);
+\node[font=\small] at (\zxC, \zvaluesy) {\$A020};
+
+\draw[->] (\zxD, \zvaluesy + 0.4) -- (\zxD, \baseperioby - 0.35);
+\node[font=\small] at (\zxD, \zvaluesy) {\$F030};
+
+\draw[->] (\zxE, \zvaluesy + 0.4) -- (\zxE, \baseperioby - 0.35);
+\node[font=\small] at (\zxE, \zvaluesy) {\$4040};
+
+\draw[->] (\zxF, \zvaluesy + 0.4) -- (\zxF, \baseperioby - 0.35);
+\node[font=\small] at (\zxF, \zvaluesy) {\$9050};
+
+\draw[->] (\zxG, \zvaluesy + 0.4) -- (\zxG, \baseperioby - 0.35);
+\node[font=\small] at (\zxG, \zvaluesy) {\$E060};
+
+% =========== System Clock Row ===========
+\node[font=\small, anchor=east] at (\labelx, \sysclocky) {System Clock};
+\node[font=\small, anchor=east] at (\levelx, \sysclocky + 0.25) {1};
+\node[font=\small, anchor=east] at (\levelx, \sysclocky - 0.25) {0};
+% System clock rising edges align with Base Period edges (both rising and falling)
+% Base Period pulse width = basepulsewidth, so system clock period = basepulsewidth
+% This means Base Period rising edge and falling edge each align with a System Clock rising edge
+\pgfmathsetmacro{\clockwidth}{\basepulsewidth}
+% Start system clock aligned with basepulsestart (where base period starts)
+\pgfmathsetmacro{\clockstart}{\wavestart + \basepulsestart}
+\foreach \i in {0,...,50} {
+    \pgfmathsetmacro{\x}{\clockstart + \i*\clockwidth}
+    \pgfmathparse{\x + \clockwidth < \waveend ? 1 : 0}
+    \ifnum\pgfmathresult>0
+        \draw[sp-signal] (\x, \sysclocky - 0.25) -- (\x, \sysclocky + 0.25) -- ({\x + \clockwidth/2}, \sysclocky + 0.25) -- ({\x + \clockwidth/2}, \sysclocky - 0.25) -- ({\x + \clockwidth}, \sysclocky - 0.25);
+    \fi
 }
 
 \end{tikzpicture}
