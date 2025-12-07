@@ -533,45 +533,79 @@
 % ============================================================================
 % PAGE 15: Pulse Width Measurement Diagram
 % ============================================================================
+% Waveform: LOW -> rise (Pulse Start) -> HIGH -> fall -> LOW -> rise (Pulse End) -> HIGH
+% X[15:0]* = full pulse width (rising edge to rising edge)
+% X[31:16]* = LOW portion width (about 4/7 of LOW section)
 
 \newcommand{\PulseWidthMeasurementDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, >={Latex[length=2mm, width=1.5mm]}]
 
-% Signal levels
-\node[sp-annotation, anchor=east] at (0.0, 2.5) {1};
-\node[sp-annotation, anchor=east] at (0.0, 1.5) {0};
+% Key positions - waveform goes: dashed LOW -> rise -> LONG HIGH -> fall -> SHORT LOW -> rise -> dashed HIGH
+\def\startx{1.5}        % First rising edge (Pulse Start)
+\def\highwidth{7.0}     % Width of HIGH portion (long)
+\def\lowwidth{2.5}      % Width of LOW portion (shorter)
+\pgfmathsetmacro{\falledge}{\startx + \highwidth}
+\pgfmathsetmacro{\endx}{\falledge + \lowwidth}  % Second rising edge (Pulse End)
 
-% Pulse Start annotation
-\draw[sp-arrow] (0.4, 3.0) -- (0.4, 2.6);
-\node[sp-annotation, anchor=south east] at (0.6, 3.0) {Pulse Start};
+% Y coordinates for signal levels
+\def\yhi{2.5}
+\def\ylo{1.5}
 
-% Pulse End annotation
-\draw[sp-arrow] (6.0, 3.0) -- (6.0, 2.6);
-\node[sp-annotation, anchor=south west] at (5.8, 3.0) {Pulse End};
+% Signal level labels (1 and 0) positioned to left
+\node[font=\small, anchor=east] at (\startx - 0.5, \yhi) {1};
+\node[font=\small, anchor=east] at (\startx - 0.5, \ylo) {0};
 
-% Main pulse waveform
-\draw[dashed, thin] (-0.3, 1.5) -- (0.2, 1.5);
-\draw[sp-signal] (0.2, 1.5) -- (0.4, 1.5) -- (0.4, 2.5) -- (6.0, 2.5) -- (6.0, 1.5);
-\draw[dashed, thin] (6.0, 1.5) -- (6.5, 1.5);
+% Pulse Start annotation - label toward center, arrow points LEFT-DOWN (outward) to rising edge
+\node[font=\small, anchor=south west] at (\startx + 0.5, 3.0) {Pulse Start};
+\draw[->] (\startx + 0.4, 3.0) -- (\startx + 0.05, \yhi + 0.15);
 
-% X[15:0] dimension (full pulse width)
-\draw[sp-dim] (0.4, 0.8) -- (6.0, 0.8);
-\draw[thin] (0.4, 0.6) -- (0.4, 1.0);
-\draw[thin] (6.0, 0.6) -- (6.0, 1.0);
-\node[sp-annotation] at (3.2, 0.5) {X[15:0]*};
+% Pulse End annotation - label toward center, arrow points RIGHT-DOWN (outward) to rising edge
+\node[font=\small, anchor=south east] at (\endx - 0.5, 3.0) {Pulse End};
+\draw[->] (\endx - 0.4, 3.0) -- (\endx - 0.05, \yhi + 0.15);
 
-% X[31:16] dimension (high portion)
-\draw[sp-dim] (4.5, 1.8) -- (6.0, 1.8);
-\node[sp-annotation] at (5.25, 2.1) {X[31:16]*};
+% Main pulse waveform: dashed LOW -> rise -> HIGH -> fall -> LOW -> rise -> dashed HIGH
+% Dashed lead-in at LOW level
+\draw[dashed, thin] (\startx - 0.8, \ylo) -- (\startx, \ylo);
+% First rising edge (Pulse Start)
+\draw[sp-signal] (\startx, \ylo) -- (\startx, \yhi);
+% HIGH portion (long)
+\draw[sp-signal] (\startx, \yhi) -- (\falledge, \yhi);
+% Falling edge
+\draw[sp-signal] (\falledge, \yhi) -- (\falledge, \ylo);
+% LOW portion (shorter)
+\draw[sp-signal] (\falledge, \ylo) -- (\endx, \ylo);
+% Second rising edge (Pulse End)
+\draw[sp-signal] (\endx, \ylo) -- (\endx, \yhi);
+% Dashed lead-out at HIGH level
+\draw[dashed, thin] (\endx, \yhi) -- (\endx + 0.8, \yhi);
 
-% IN Flag
-\node[sp-annotation, anchor=west] at (5.0, 0.0) {IN Flag};
-\draw[sp-signal] (6.0, -0.5) -- (6.0, 0.0) -- (6.5, 0.0);
-\draw[dashed, thin] (5.0, -0.5) -- (6.0, -0.5);
+% X[31:16]* dimension - spans LOW portion (falling edge to second rising edge) - BLUE
+% Positioned BELOW the 0 level
+\def\xdimyupper{1.1}
+\draw[<->, color=sp-annotation] (\falledge, \xdimyupper) -- (\endx, \xdimyupper);
+\draw[thin, color=sp-annotation] (\falledge, \xdimyupper - 0.15) -- (\falledge, \xdimyupper + 0.15);
+\draw[thin, color=sp-annotation] (\endx, \xdimyupper - 0.15) -- (\endx, \xdimyupper + 0.15);
+\node[font=\small, color=sp-annotation, anchor=west] at (\endx + 0.15, \xdimyupper) {X[31:16]*};
 
-% Footnote
-\node[sp-annotation] at (3.2, -1.0) {* Number of system-clock periods};
+% X[15:0]* dimension - full pulse width (first rising edge to second rising edge) - BLUE
+% Positioned below X[31:16]*, label centered ON the line (like reference)
+\def\xdimylower{0.4}
+\draw[<->, color=sp-annotation] (\startx, \xdimylower) -- (\endx, \xdimylower);
+\draw[thin, color=sp-annotation] (\startx, \xdimylower - 0.15) -- (\startx, \xdimylower + 0.15);
+\draw[thin, color=sp-annotation] (\endx, \xdimylower - 0.15) -- (\endx, \xdimylower + 0.15);
+\node[font=\small, color=sp-annotation, fill=white, inner sep=1pt] at ({(\startx + \endx)/2}, \xdimylower) {X[15:0]*};
+
+% IN Flag row - label vertically centered within waveform, dropped down for visual separation from X[15:0]*
+% Signal height matches main pulse (1.0 unit from LOW to HIGH)
+\def\inflaglo{-1.0}           % LOW level of IN Flag waveform (dropped down more for separation)
+\def\inflaghi{0.0}            % HIGH level (1.0 unit above LOW, same height as main pulse)
+\pgfmathsetmacro{\inflagmid}{(\inflaglo + \inflaghi) / 2}  % Vertical center for label
+\pgfmathsetmacro{\inflagstart}{\falledge - 0.5}  % Start dashed line before falling edge for longer lead-in
+\node[font=\small, anchor=east] at (\endx - 0.15, \inflagmid) {IN Flag};
+\draw[dashed, thin] (\inflagstart, \inflaglo) -- (\endx, \inflaglo);
+\draw[sp-signal] (\endx, \inflaglo) -- (\endx, \inflaghi);
+\draw[sp-signal] (\endx, \inflaghi) -- (\endx + 0.8, \inflaghi);
 
 \end{tikzpicture}
 \par}
