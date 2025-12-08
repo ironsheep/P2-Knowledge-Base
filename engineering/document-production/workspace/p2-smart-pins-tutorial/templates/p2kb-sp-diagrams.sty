@@ -219,48 +219,6 @@
 \draw[sp-signal, ->] (\clktwo-0.5, 1.2) -- (\clktwo, 1.2);  % Arrow to clock 2
 \draw[sp-signal] (\clktwo, 1.05) -- (\clktwo, 1.35);    % Bar at clock 2
 
-% ============================================================================
-% MEASUREMENT REFERENCE - for calibrating label sizes vs clock width
-% ============================================================================
-% Ruler with 0.1cm tick marks (aligned with diagram)
-\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.2) {Ruler (0.1cm ticks):};
-\draw[thin] (\clkstart, -0.2) -- (\clkstart + 12, -0.2);  % Baseline
-\foreach \i in {0,1,...,120} {
-    \pgfmathsetmacro{\x}{\clkstart + \i * 0.1}
-    \pgfmathparse{mod(\i, 10) == 0 ? 1 : 0}
-    \ifnum\pgfmathresult=1
-        \draw[thin] (\x, -0.35) -- (\x, -0.05);  % Major tick every 1cm
-        \pgfmathsetmacro{\label}{\i / 10}
-        \node[font=\tiny, anchor=north] at (\x, -0.35) {\pgfmathprintnumber[fixed, precision=0]{\label}};
-    \else
-        \pgfmathparse{mod(\i, 5) == 0 ? 1 : 0}
-        \ifnum\pgfmathresult=1
-            \draw[thin] (\x, -0.3) -- (\x, -0.1);  % Medium tick every 0.5cm
-        \else
-            \draw[thin] (\x, -0.25) -- (\x, -0.15);  % Minor tick every 0.1cm
-        \fi
-    \fi
-}
-
-% Sample labels for measurement (aligned with ruler starting at clkstart)
-\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.8) {Sample labels:};
-\node[font=\small, anchor=west] at (\clkstart, -0.8) {DIRA};
-\draw[thin] (\clkstart, -0.95) -- (\clkstart, -0.65);  % Start marker
-\node[font=\small, anchor=west] at (\clkstart + 2, -0.8) {OUTA};
-\draw[thin] (\clkstart + 2, -0.95) -- (\clkstart + 2, -0.65);  % Start marker
-\node[font=\small, anchor=west] at (\clkstart + 4, -0.8) {P0 DRIV};
-\draw[thin] (\clkstart + 4, -0.95) -- (\clkstart + 4, -0.65);  % Start marker
-\node[font=\small, anchor=west] at (\clkstart + 6.5, -0.8) {P0 HIGH};
-\draw[thin] (\clkstart + 6.5, -0.95) -- (\clkstart + 6.5, -0.65);  % Start marker
-\node[font=\small, anchor=west] at (\clkstart + 9, -0.8) {DRVH \#0};
-\draw[thin] (\clkstart + 9, -0.95) -- (\clkstart + 9, -0.65);  % Start marker
-
-% Current clock width reference (aligned with clkstart)
-\node[font=\small, anchor=east] at (\clkstart - 0.2, -1.4) {Clock width (\clkw cm):};
-\draw[thick] (\clkstart, -1.4) -- (\clkstart + \clkw, -1.4);
-\draw[thick] (\clkstart, -1.55) -- (\clkstart, -1.25);  % Start bar
-\draw[thick] (\clkstart + \clkw, -1.55) -- (\clkstart + \clkw, -1.25);  % End bar
-
 \end{tikzpicture}
 \par}
 }
@@ -1158,65 +1116,110 @@
 }
 
 % ============================================================================
-% PAGE 21: Simplified Sawtooth PWM Diagram
+% PAGE 21: Sawtooth PWM Diagram (rising sawtooth with stepped counter visualization)
+% Reference: P2 SmartPins-220809_mode01001_page21_img01.png
+% - 2 complete rising sawtooth edges + partial 3rd (NO vertical drop lines)
+% - 2 P20 output pulses
+% - 1 IN pulse (rises near end)
+% - Blue labels for X[31:16] and Y[15:0]
+% - No footer text
 % ============================================================================
 
 \newcommand{\SawtoothPWMDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+\begin{tikzpicture}[x=1.0cm, y=0.9cm]
 
-% IN signal
-\node[sp-annotation, anchor=east] at (-0.5, 4.5) {IN};
-\node[sp-annotation, anchor=east] at (0.0, 4.8) {1};
-\node[sp-annotation, anchor=east] at (0.0, 4.2) {0};
-\draw[sp-signal] (0.2, 4.2) -- (4.5, 4.2) -- (4.5, 4.8) -- (5.5, 4.8);
-\draw[dashed, thin] (5.5, 4.8) -- (6.0, 4.8);
+% Key X positions for sawtooth bases (where each rising edge starts)
+\def\basezero{1.2}
+\def\baseone{3.0}
+\def\basetwo{4.8}
 
-% P20 Output
-\node[sp-annotation, anchor=east] at (-0.5, 3.0) {P20 Output};
-\node[sp-annotation, anchor=east] at (0.0, 3.4) {1};
-\node[sp-annotation, anchor=east] at (0.0, 2.6) {0};
+% Y positions for sawtooth
+\def\sawpeak{1.8}       % Peak height of sawtooth (top)
+\def\sawvalley{0.6}     % Base height of sawtooth (bottom)
+\def\ythreshold{1.0}    % Y threshold line position
 
-% PWM pulses
-\draw[sp-signal] (0.2, 3.4) -- (0.8, 3.4) -- (0.8, 2.6);
-\draw[sp-signal] (0.8, 2.6) -- (1.8, 2.6) -- (1.8, 3.4) -- (2.4, 3.4) -- (2.4, 2.6);
-\draw[sp-signal] (2.4, 2.6) -- (3.4, 2.6) -- (3.4, 3.4) -- (4.0, 3.4) -- (4.0, 2.6);
-\draw[sp-signal] (4.0, 2.6) -- (5.0, 2.6) -- (5.0, 3.4);
-\draw[dashed, thin] (5.0, 3.4) -- (5.5, 3.4);
+% === IN signal (top) - LOW then rises HIGH near end ===
+\node[font=\small, anchor=east] at (0.7, 4.5) {IN};
+\node[font=\scriptsize, anchor=east] at (1.1, 4.8) {1};
+\node[font=\scriptsize, anchor=east] at (1.1, 4.2) {0};
+\draw[sp-signal] (\basezero, 4.2) -- (4.2, 4.2) -- (4.2, 4.8) -- (5.5, 4.8);
+\draw[dashed, thin] (5.5, 4.8) -- (5.9, 4.8);
 
-% Timing annotations
-\draw[sp-dim] (0.8, 3.6) -- (1.3, 3.6);
-\node[sp-annotation, anchor=west] at (1.4, 3.6) {5.1 usec};
+% === P20 Output - starts LOW, 2 HIGH pulses with narrow LOW dips ===
+\node[font=\small, anchor=east] at (0.7, 3.3) {P20 Output};
+\node[font=\scriptsize, anchor=east] at (1.1, 3.6) {1};
+\node[font=\scriptsize, anchor=east] at (1.1, 3.0) {0};
 
-% X[31:16] annotation
-\draw[sp-arrow] (3.0, 3.8) -- (2.4, 3.5);
-\node[sp-annotation, anchor=west] at (3.1, 3.8) {X[31:16] = \$200};
+% P20: starts LOW at 0, rises to HIGH, dips LOW briefly, rises HIGH, dips LOW, rises HIGH, dashed
+% Looking at reference: starts at 0, rises HIGH at start, falls LOW briefly, rises HIGH, falls LOW briefly, HIGH continues
+\draw[sp-signal] (\basezero, 3.0) -- (\basezero, 3.6);  % Initial rise
+\draw[sp-signal] (\basezero, 3.6) -- (1.8, 3.6) -- (1.8, 3.0);  % HIGH then fall
+\draw[sp-signal] (1.8, 3.0) -- (2.2, 3.0) -- (2.2, 3.6);  % LOW dip 1
+\draw[sp-signal] (2.2, 3.6) -- (3.6, 3.6) -- (3.6, 3.0);  % HIGH then fall
+\draw[sp-signal] (3.6, 3.0) -- (4.0, 3.0) -- (4.0, 3.6);  % LOW dip 2
+\draw[sp-signal] (4.0, 3.6) -- (5.3, 3.6);  % HIGH continues
+\draw[dashed, thin] (5.3, 3.6) -- (5.7, 3.6);
 
-% Y[15:0] dashed line
-\node[sp-annotation, anchor=east] at (-0.5, 1.8) {Y[15:0] = \$0080};
-\draw[sp-arrow, dashed] (-0.3, 1.8) -- (0.8, 1.8);
+% 5.1 usec annotation - arrows pointing inward to first LOW dip edges
+\draw[sp-dim, ->] (1.55, 2.85) -- (1.8, 2.85);
+\draw[sp-dim, <-] (2.2, 2.85) -- (2.45, 2.85);
+\node[font=\scriptsize, anchor=west] at (2.5, 2.85) {5.1 usec};
 
-% Sawtooth wave
-\draw[sp-signal, dashed] (0.8, 1.8) -- (1.8, 2.8) -- (1.8, 1.8) -- (2.8, 2.8) -- (2.8, 1.8) -- (3.8, 2.8) -- (3.8, 1.8);
-\draw[dashed, thin] (3.8, 1.8) -- (4.8, 2.8);
+% Dotted vertical lines from P20 edges down toward sawtooth
+\draw[dotted] (1.8, 3.0) -- (1.8, \ythreshold + 0.05);
+\draw[dotted] (2.2, 3.0) -- (2.2, \ythreshold + 0.05);
 
-% 1 annotation
-\node[sp-annotation] at (1.3, 1.5) {1};
-\draw[sp-arrow] (1.1, 1.3) -- (1.1, 1.8);
+% X[31:16] = $200 annotation (blue register label) with arrow pointing left
+\node[font=\small, anchor=west] at (3.8, 2.5) {\textcolor{blue}{X[31:16]} = \$200};
+\draw[sp-dim, <-] (3.75, 2.5) -- (3.2, 2.3);
 
-% Frame Period dimension
-\draw[sp-dim] (0.8, 0.8) -- (1.8, 0.8);
-\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
-\draw[thin] (1.8, 0.6) -- (1.8, 1.0);
-\node[sp-annotation] at (1.3, 0.4) {Frame Period\\20.5 usec};
+% === Y[15:0] annotation (blue register label) with arrow line to sawtooth ===
+\node[font=\small, anchor=east] at (0.7, \ythreshold) {\textcolor{blue}{Y[15:0]} = \$0080};
+\draw[sp-dim, ->] (0.8, \ythreshold) -- (1.55, \ythreshold);
 
-% Time axis
-\draw[sp-arrow] (0, 0.0) -- (5.5, 0.0);
-\node[sp-annotation] at (2.75, -0.3) {Time};
+% === Sawtooth waveform (rising only, stepped, NO vertical drop lines) ===
 
-% Footer
-\node[sp-annotation, text width=8cm] at (2.75, -0.9) {Base period = 40 nsec (25 MHz system clock) X[15:0] = 1};
-\node[sp-annotation, text width=8cm] at (2.75, -1.4) {\$200 Base periods = 20.5 usec Frame Period};
+% Sawtooth 1: from basezero to baseone (complete rising edge)
+\foreach \i in {0,1,...,35} {
+    \pgfmathsetmacro{\xstart}{\basezero + \i * (\baseone - \basezero) / 36}
+    \pgfmathsetmacro{\xend}{\basezero + (\i + 1) * (\baseone - \basezero) / 36}
+    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+
+% Sawtooth 2: from baseone to basetwo (complete rising edge)
+\foreach \i in {0,1,...,35} {
+    \pgfmathsetmacro{\xstart}{\baseone + \i * (\basetwo - \baseone) / 36}
+    \pgfmathsetmacro{\xend}{\baseone + (\i + 1) * (\basetwo - \baseone) / 36}
+    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+
+% Sawtooth 3: partial rising edge continuing right (about 60% complete)
+\foreach \i in {0,1,...,21} {
+    \pgfmathsetmacro{\xstart}{\basetwo + \i * (\baseone - \basezero) / 36}
+    \pgfmathsetmacro{\xend}{\basetwo + (\i + 1) * (\baseone - \basezero) / 36}
+    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+
+% "1" label with horizontal arrow pointing right to first base
+\node[font=\scriptsize, anchor=east] at (1.0, 0.35) {1};
+\draw[sp-dim, ->] (1.05, 0.35) -- (\basezero - 0.05, 0.35);
+
+% === Frame Period dimension line (base to base) ===
+\draw[thin] (\basezero, 0.5) -- (\basezero, 0.1);
+\draw[thin] (\baseone, 0.5) -- (\baseone, 0.1);
+\draw[sp-dim] (\basezero, 0.3) -- (\baseone, 0.3);
+% Dotted trail to right
+\draw[dotted, thin] (\baseone, 0.3) -- (5.7, 0.3);
+% Frame Period label - positioned below the line, not overlapping
+\node[font=\scriptsize, align=center] at (2.1, -0.1) {Frame Period\\20.5 usec};
+
+% === Time axis ===
+\draw[sp-arrow] (\basezero, -0.5) -- (5.5, -0.5);
+\node[font=\small] at (3.3, -0.75) {Time};
 
 \end{tikzpicture}
 \par}

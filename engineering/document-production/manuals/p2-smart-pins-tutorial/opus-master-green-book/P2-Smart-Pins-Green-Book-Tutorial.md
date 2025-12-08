@@ -1,31 +1,85 @@
-# P2 Smart Pins & I/O Complete Tutorial
+```{=latex}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
 
-## Master Every Aspect of P2 Input/Output Through Progressive Learning
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Smart Pins \& I/O\par}
+\vspace{0.3cm}
+{\Large\itshape Master Every Aspect of P2 Input/Output Through Progressive Learning\par}
+\vspace{0.6cm}
+{\large December 2025\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0 - Technical Review\par}
 
-### Green Book Edition - P2 Smart Pins Tutorial
-### Updated: 2025-01-10 | Prepared for technical review
+\vfill
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Tutorial Guide},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{Learn by doing with color-coded examples!}
 
----
+\vspace{0.3cm}
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Code Block Colors:}
+\begin{itemize}
+\item \textcolor{green!50!black}{\textbf{Green}} -- Spin2 examples
+\item \textcolor{orange!70!black}{\textbf{Yellow}} -- PASM2 assembly
+\item \textcolor{red!60!black}{\textbf{Red}} -- Antipatterns (avoid!)
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.50\textwidth}
+\textbf{Special Sections:}
+\begin{itemize}
+\item \textcolor{blue!60!black}{\textbf{Tips}} -- helpful hints
+\item \textcolor{gray!70!black}{\textbf{Diagrams}} -- timing \& signal flow
+\end{itemize}
+\end{minipage}
+\end{tcolorbox}
+\vspace{1cm}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+
+\clearpage
+```
 
 ## Copyright and License
 
-Copyright © 2025 Parallax Inc.
+Copyright 2025 Parallax Inc. and Iron Sheep Productions LLC.
 All rights reserved.
 
 This tutorial incorporates knowledge and teaching approaches inspired by:
+
 - **Jon Titus** - Original Smart Pins documentation and tutorial approach
-- **Iron Sheep Productions LLC** - Technical expertise and P2 community contributions
+- **Evan Hillis** (evanh) - Original ASCII art Smart Pin block diagram
+- **Raymond Allen** (Rayman) - Color Smart Pin block diagram based on Evan's work
 - **The Propeller Community** - Years of collective wisdom
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-
----
-
-## Version History
-
-**Initial Release (2025-01-10)**: Prepared for technical review
-
----
 
 ## Preface: Your Complete Journey into P2 I/O
 
@@ -1067,6 +1121,7 @@ Let's start with the simplest modes and build our understanding progressively. T
 This is where every Smart Pin begins - turned off, acting like a normal I/O pin.
 
 **When to Use:**
+
 - Normal GPIO operations
 - Resetting a misconfigured Smart Pin
 - Power-sensitive applications where Smart Pins aren't needed
@@ -1106,6 +1161,7 @@ WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0],
 Now for our first real Smart Pin mode - Repository. Think of it as a mailbox where any COG can leave a 32-bit value and any COG can read it.
 
 **When to Use:**
+
 - Inter-COG communication without hub RAM
 - Storing configuration values
 - Creating flags or semaphores
@@ -1174,6 +1230,14 @@ read_value
 
 The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capabilities with optional dithering for enhanced resolution.
 
+**When to Use:**
+
+- Generating analog voltages
+- Audio output (use PRNG dithering)
+- Video generation (75Ω mode with PWM dithering)
+- Control voltages for external circuits
+- Sensor simulation
+
 ```{=latex}
 \DACPWMPeriodDiagram
 ```
@@ -1201,13 +1265,6 @@ DAC configuration involves TWO separate aspects:
 | P_DAC_600R_2V | 600Ω | 2.0V | Moderate drive |
 | P_DAC_124R_3V | 124Ω | 3.3V | Higher current, fast response |
 | P_DAC_75R_2V | 75Ω | 2.0V | Video output (75Ω termination) |
-
-**When to Use:**
-- Generating analog voltages
-- Audio output (use PRNG dithering)
-- Video generation (75Ω mode with PWM dithering)
-- Control voltages for external circuits
-- Sensor simulation
 
 **Configuration Example:**
 
@@ -1274,16 +1331,17 @@ The dithering modes provide effective 16-bit resolution from the 8-bit DAC hardw
 
 This mode generates precise pulses or continuous cycles with programmable high and low times.
 
-```{=latex}
-\PulseWidthMeasurementDiagram
-```
-
 **When to Use:**
+
 - Servo control pulses
 - Stepper motor control
 - Custom protocol generation
 - Precise timing sequences
 - One-shot or continuous pulses
+
+```{=latex}
+\PulseWidthMeasurementDiagram
+```
 
 **How It Works:**
 X[31:16] = High time in clocks
@@ -1352,6 +1410,7 @@ pulse_gen
 Transition output mode generates edges at programmable intervals - perfect for clocks and timing references.
 
 **When to Use:**
+
 - Clock generation
 - Baud rate generation
 - Timing references
@@ -1399,16 +1458,17 @@ trans_out
 
 NCO (Numerically Controlled Oscillator) mode generates precise frequencies using phase accumulation.
 
-```{=latex}
-\NCOFrequencyDiagram
-```
-
 **When to Use:**
+
 - Clock generation
 - Frequency synthesis
 - Audio tone generation
 - Carrier wave generation
 - Precision frequency references
+
+```{=latex}
+\NCOFrequencyDiagram
+```
 
 **How It Works:**
 The NCO adds X to a 32-bit phase accumulator on each clock. When bit 31 changes, the output toggles.
@@ -1483,6 +1543,13 @@ nco_freq
 
 NCO Duty mode generates PWM with precise duty cycle control at a specific frequency.
 
+**When to Use:**
+
+- PWM with specific frequency AND duty
+- LED brightness control at fixed frequency
+- Motor control with precise timing
+- Power supply control
+
 ```{=latex}
 \NCODutyTimingDiagram
 ```
@@ -1492,12 +1559,6 @@ The internal architecture shows how the Z accumulator controls duty cycle:
 ```{=latex}
 \NCODutyBlockDiagram
 ```
-
-**When to Use:**
-- PWM with specific frequency AND duty
-- LED brightness control at fixed frequency
-- Motor control with precise timing
-- Power supply control
 
 **How It Works:**
 X = NCO increment (sets frequency)
@@ -1549,15 +1610,16 @@ nco_duty
 
 PWM Triangle mode provides phase-correct PWM using a symmetric triangle wave comparison.
 
-```{=latex}
-\TrianglePWMDiagram
-```
-
 **When to Use:**
+
 - Phase-correct PWM needed
 - Audio applications
 - Symmetric PWM requirements
 - Reduced harmonics applications
+
+```{=latex}
+\TrianglePWMDiagram
+```
 
 **How It Works:**
 Counter counts up to X, then down to 0
@@ -1606,15 +1668,16 @@ pwm_tri
 
 PWM Sawtooth mode provides high-resolution PWM using a sawtooth (ramp-reset) comparison.
 
-```{=latex}
-\SawtoothPWMDiagram
-```
-
 **When to Use:**
+
 - Motor speed control
 - LED dimming
 - Power control
 - Analog voltage generation (with filtering)
+
+```{=latex}
+\SawtoothPWMDiagram
+```
 
 **How It Works:**
 X = PWM period (frame)
@@ -1679,6 +1742,7 @@ update_duty
 This specialized mode is designed for switch-mode power supply control with current feedback.
 
 **When to Use:**
+
 - DC-DC converters
 - Buck/Boost regulators
 - LED drivers with current control
@@ -1912,15 +1976,16 @@ Now let's explore modes that measure external signals - these are your oscillosc
 
 This mode decodes quadrature encoder signals for position and rotation sensing.
 
-```{=latex}
-\QuadEncoderDiagram
-```
-
 **When to Use:**
+
 - Rotary encoder reading
 - Linear encoder tracking
 - Motor position feedback
 - User interface knobs
+
+```{=latex}
+\QuadEncoderDiagram
+```
 
 **How It Works:**
 Monitors A and B inputs, counts transitions based on quadrature state changes.
@@ -1992,15 +2057,16 @@ read_encoder
 
 Count rising edges on the input - your basic pulse counter.
 
-```{=latex}
-\PeriodMeasurementDiagram
-```
-
 **When to Use:**
+
 - Event counting
 - Frequency measurement (with time base)
 - RPM measurement
 - Flow meter reading
+
+```{=latex}
+\PeriodMeasurementDiagram
+```
 
 **How It Works:**
 Counts rising edges on input
@@ -2058,6 +2124,7 @@ PUB gated_counter(pin, gate_ms) | period
 Counts transitions on A input, with B input controlling direction.
 
 **When to Use:**
+
 - Step/direction motor feedback
 - Up/down counters
 - Manual pulse generators
@@ -2098,6 +2165,7 @@ Incremental encoder timing showing single-phase counting
 Single-phase encoder counting with optional direction control.
 
 **When to Use:**
+
 - Simple encoders
 - Tachometers
 - Single-phase position sensing
@@ -2124,17 +2192,18 @@ PUB incremental_encoder() | count
 
 ### Mode %01111 - Local/Global Comparator
 
-```{=latex}
-\ComparatorDiagram
-```
-
 Compares input against threshold with optional hysteresis.
 
 **When to Use:**
+
 - Level detection
 - Zero-crossing detection
 - Threshold monitoring
 - Window comparators
+
+```{=latex}
+\ComparatorDiagram
+```
 
 ::: spin2
 ```
@@ -5397,28 +5466,6 @@ Happy coding, and welcome to the Smart Pin revolution!
 
 ---
 
-## About This Tutorial
-
-**Version:** 3.0 - Green Book Edition with Enhanced Visual Coverage
-**Created:** 2025-08-30 | Enhanced: 2025-08-31
-**Pages:** ~140 (estimated for PDF)
-**Examples:** 150+
-**Diagrams:** 19+ (enhanced from 11)
-**Visual Coverage:** 73% (enhanced from 42%)
-
-**Version 3.0 Enhancements:**
-- Added 8 authoritative technical diagrams from Titus SmartPins documentation
-- Enhanced visual coverage from 42% to 73% using official P2 sources
-- Maintained complete v2.0 content with visual improvements
-- Preserved all semantic environments and tutorial structure
-
-This tutorial represents the collective knowledge of the Propeller 2 community, with special thanks to Jon Titus for the original Smart Pins documentation and all the contributors who have shared their expertise.
-
----
-
-*End of P2 Smart Pins Complete Tutorial - Green Book Edition with Enhanced Visual Coverage*
----
-
 ## INDEX
 
 ### A
@@ -5580,15 +5627,3 @@ This tutorial represents the collective knowledge of the Propeller 2 community, 
 ### Z
 - Z register: Ch 1, all mode chapters
 - Zero flag operations: Ch 0.4, p. 6
-
----
-
-## About This Tutorial
-
-This tutorial represents the collective knowledge of the Propeller 2 community, with special thanks to Jon Titus for the original Smart Pins documentation and all the contributors who have shared their expertise.
-
----
-
-# Index
-
-*[Index content would be generated here by LaTeX]*

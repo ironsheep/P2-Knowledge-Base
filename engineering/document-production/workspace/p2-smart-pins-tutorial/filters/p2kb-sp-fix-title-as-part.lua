@@ -17,9 +17,9 @@ function Header(header)
     -- Don't treat Part headers as document title - let them be real \part{}
     if title:match("^Part ") then
       -- This is a Part header, not a title - pass through unchanged
-      -- Don't set is_first_h1 = false, in case there's a title later (unlikely)
-      -- Actually, if Part is first, there's no separate title, so set flag
+      -- Part-structured documents don't have title/subtitle, so disable both
       is_first_h1 = false
+      is_first_h2 = false  -- Prevent next H2 from being treated as subtitle
       return header
     end
 
