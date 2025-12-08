@@ -474,7 +474,8 @@
 \node[membox, fill=mem-special, minimum height=0.6cm] (ijmp1) at (0, 0) {IJMP1, IRET1};
 \node[addr] at (-3.5, 0) {\$1F4};
 
-\node[membox, fill=mem-special, minimum height=0.6cm] (papb) at (0, -0.7) {PA, PB};
+% PA, PB uses diagram-highlight (green) to match SpecialRegistersMapDiagram
+\node[membox, fill=diagram-highlight, minimum height=0.6cm] (papb) at (0, -0.7) {PA, PB};
 \node[addr] at (-3.5, -0.7) {\$1F6};
 
 \node[membox, fill=orange!20, minimum height=0.6cm] (ptrs) at (0, -1.4) {PTRA, PTRB};
@@ -489,15 +490,20 @@
 \node[membox, fill=orange!20, minimum height=0.6cm] (ina) at (0, -3.5) {INA, INB};
 \node[addr] at (-3.5, -3.5) {\$1FE};
 
-% Bracket for special registers
-\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}]
-    (3.3, 1.7) -- (3.3, -3.8) node[midway, right=6pt, font=\scriptsize, text width=2cm, align=left] {Special\\Registers\\(\$1F0--\$1FF)};
-
-% Annotations
+% Annotations on right side - positioned to avoid overlap
+% General purpose area annotation
 \node[annotation] at (3.5, 3.5) {Read/Write};
-\node[annotation] at (3.5, 0.3) {Interrupt vectors};
-\node[annotation] at (3.5, -1.4) {Hub pointers};
-\node[annotation] at (3.5, -2.5) {I/O control};
+
+% Interrupt vectors bracket (IJMP3 to IJMP1: y=1.4 to y=0)
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}]
+    (3.3, 1.7) -- (3.3, -0.3) node[midway, right=6pt, font=\scriptsize] {Interrupt vectors};
+
+% Special registers label for PA/PB only (different color group)
+\node[annotation] at (3.5, -0.7) {Special};
+
+% I/O registers bracket (PTRA to INA: y=-1.4 to y=-3.5)
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}]
+    (3.3, -1.1) -- (3.3, -3.8) node[midway, right=6pt, font=\scriptsize] {I/O control};
 
 \end{tikzpicture}
 \end{center}

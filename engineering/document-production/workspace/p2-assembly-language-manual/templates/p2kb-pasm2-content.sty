@@ -205,6 +205,7 @@
 
 % Environment for encoding tables - simple wrapper around tblr
 % The content must be written directly, not captured and re-expanded
+% Note: columns 1-3 use auto-width to prevent header text wrapping
 \newenvironment{encodingtable}{%
   \par\vspace{6pt}%
   \noindent
@@ -213,9 +214,9 @@
     rowsep=2pt,
     colsep=4pt,
     row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
-    column{1}={wd=0.065\linewidth, halign=c, font=\ttfamily\small},
-    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily\small},
-    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily\small},
+    column{1}={halign=c, font=\ttfamily\small},
+    column{2}={halign=c, font=\ttfamily\small},
+    column{3}={halign=c, font=\ttfamily\small},
     column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
     column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
     column{6}={halign=c, font=\small},
@@ -233,6 +234,7 @@
 
 % Simple encoding - standalone single-row encoding table
 % Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
+% Note: columns 1-3 use auto-width to prevent header text wrapping
 \newcommand{\simpleencoding}[9]{%
   \par\vspace{6pt}%
   \noindent
@@ -242,9 +244,9 @@
     colsep=4pt,
     row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
     row{2}={font=\small},
-    column{1}={wd=0.065\linewidth, halign=c, font=\ttfamily},
-    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily},
-    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily},
+    column{1}={halign=c, font=\ttfamily},
+    column{2}={halign=c, font=\ttfamily},
+    column{3}={halign=c, font=\ttfamily},
     column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily},
     column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily},
     column{6}={halign=c},
@@ -711,9 +713,9 @@
   \par\vspace{4pt}%
   \small
   \noindent
-  \begin{tabular}{|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-operand}}c|>{\columncolor{pasm2-enc-operand}}c|}
+  \begin{tabular}{|c|c|c|c|c|}
   \hline
-  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
+  \cellcolor{pasm2-enc-instruction}\textbf{EEEE} & \cellcolor{pasm2-enc-instruction}\textbf{Opcode} & \cellcolor{pasm2-enc-instruction}\textbf{CZI} & \cellcolor{pasm2-enc-operand}\textbf{D} & \cellcolor{pasm2-enc-operand}\textbf{S} \\
   \hline
   \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} \\
   \hline
