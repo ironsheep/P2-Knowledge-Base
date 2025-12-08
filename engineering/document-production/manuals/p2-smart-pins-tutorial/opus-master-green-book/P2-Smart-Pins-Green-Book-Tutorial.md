@@ -116,8 +116,6 @@ You'll make mistakes. Your first pin might not toggle. Your first Smart Pin migh
 
 Ready? Let's start with the basics and build up to the amazing!
 
----
-
 # Part I: Understanding P2 I/O - From Basic to Smart
 
 ## Chapter 0: P2 I/O Fundamentals - Before Smart Pins
@@ -430,8 +428,6 @@ For your convenience, here's the complete basic I/O instruction set in both lang
 
 > 💡 **Tip**: This table covers 90% of your basic I/O needs. The other variants (C, NC, Z, NZ, RND) are in Appendix F for when you need them.
 
----
-
 ## Chapter 1: The Smart Pin Revolution
 
 ### What Problem Do Smart Pins Solve?
@@ -619,8 +615,6 @@ Before we move on, let's cement the key concepts:
 5. **Any Pin Can Do Anything**: No dedicated pins for specific functions
 
 Ready to explore all 32 modes? Let's go!
-
----
 
 ## Chapter 2: The Smart Pin Configuration Protocol
 
@@ -1107,8 +1101,6 @@ Before we dive into specific modes, remember these golden rules:
 5. **Document Intent**: Comment what the configuration achieves
 
 Ready to explore all 32 modes? Let's start with the digital I/O modes!
-
----
 
 # Part II: Progressive Mode Tutorials
 
@@ -1791,8 +1783,6 @@ smps_setup
 ```
 :::
 
----
-
 ### Choosing the Right Output Generation Mode
 
 With seven different output generation modes available, how do you pick the right one? This section provides a comprehensive comparison to guide your decision.
@@ -1965,8 +1955,6 @@ PUB compare_modes()
 - **PWM_TRIANGLE**: Best for symmetric/phase-correct applications
 - **PULSE**: Most flexible timing control
 - **SMPS**: Only mode with feedback control
-
----
 
 ## Chapter 4: Measurement Modes - Precision Timing
 
@@ -2682,8 +2670,6 @@ receive_byte
         rdpin   char, #RX_PIN   ' Read received character
 ```
 :::
-
----
 
 ## Chapter 5: Advanced Techniques
 
@@ -4172,8 +4158,6 @@ repeat
 | Check if data ready | TESTP / pinread() | Doesn't affect IN flag |
 | Peek at data, decide later | RQPIN + AKPIN | Two-step consume |
 
----
-
 ## Chapter 6: Multi-Pin Coordination
 
 The true power of Smart Pins emerges when you coordinate multiple pins to create complex systems.
@@ -4445,8 +4429,6 @@ PUB synchronized_sampling() | trigger_time
 ```
 :::
 
----
-
 ## Chapter 7: Troubleshooting and Optimization
 
 Even experts encounter issues with Smart Pins. Here's how to diagnose and fix common problems.
@@ -4662,8 +4644,6 @@ PUB triggered_adc()
   pinclear(ADC_PIN)             ' Disable until next reading
 ```
 :::
-
----
 
 ## Chapter 8: Real-World Applications
 
@@ -4918,8 +4898,6 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 ```
 :::
 
----
-
 # Part III: System Integration
 
 ## Chapter 9: Building Complex Systems
@@ -5070,8 +5048,6 @@ PRI measure_response_latency() | start, latency
   debug("Latency: ", udec(latency * 1_000_000 / clkfreq), " ns")
 ```
 :::
-
----
 
 # Part IV: Reference
 
@@ -5430,8 +5406,6 @@ For the most comprehensive examples, see:
 4. **Use Debug Output**
 5. **Scope the Signals**
 
----
-
 ## Conclusion: Your Smart Pin Journey
 
 ### What You've Learned
@@ -5463,8 +5437,6 @@ Smart Pins represent a paradigm shift in microcontroller I/O. By offloading repe
 Remember: Smart Pins are tools. Like any tool, they become more powerful as you gain experience. Don't be afraid to experiment, make mistakes, and push the boundaries of what's possible.
 
 Happy coding, and welcome to the Smart Pin revolution!
-
----
 
 ## INDEX
 

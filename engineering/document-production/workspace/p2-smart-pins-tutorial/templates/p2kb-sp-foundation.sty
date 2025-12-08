@@ -233,27 +233,31 @@
 % CRITICAL: \raggedright prevents justified (spread-out) text in long titles
 % This fixes the "Chapter 0: P2 I/O Fundamentals" justified title bug
 
-% PART: Starts new page, minimal vertical space
-% Format: [block] allows inline title without label line
+% PART: Starts new page, but first chapter stays on same page
+% CRITICAL: Default \part in book class uses "page" titleclass which isolates part on its own page
+% We use "straight" to remove that isolation, then handle clearpage in \pretocmd
+\titleclass{\part}{straight}
 \titleformat{\part}[block]
-  {\clearpage\thispagestyle{empty}\normalfont\Huge\bfseries\raggedright}% format includes page break
+  {\normalfont\Huge\bfseries\raggedright}% format - NO clearpage here (handled in pretocmd)
   {}% label (empty - headings already have numbers)
   {0pt}% sep between label and title
   {}% before-code
 \titlespacing*{\part}
   {0pt}% left margin
-  {0pt}% vertical space before (minimal after page break)
+  {0pt}% vertical space before
   {18pt}% vertical space after
 
-% CHAPTER: [block] format, controlled page breaks via hook
+% CHAPTER: Remove automatic page break, control manually via hook
+% \titleclass{straight} makes chapter behave like section (no auto \clearpage)
+\titleclass{\chapter}{straight}
 \titleformat{\chapter}[block]
-  {\normalfont\Huge\bfseries\raggedright}% format - raggedright prevents justified titles
+  {\normalfont\huge\bfseries\raggedright}% format - \huge (one step below Part's \Huge)
   {}% label (empty)
   {0pt}% sep
   {}% before-code
 \titlespacing*{\chapter}
   {0pt}% left margin
-  {0pt}% space before (minimal)
+  {12pt}% space before (small gap after part title)
   {12pt}% space after
 
 % SECTION: Normal flow within chapters
@@ -304,8 +308,10 @@
 \RequirePackage{etoolbox}
 
 \makeatletter
-% Track when we enter a new part
+% Track when we enter a new part - also handle page break here
 \pretocmd{\part}{%
+  \clearpage%  % Start part on new page
+  \thispagestyle{empty}%  % No header/footer on part page
   \stepcounter{currentpart}%
   \global\firstchapterinparttrue%
   \global\firstsectioninchapterfalse%
