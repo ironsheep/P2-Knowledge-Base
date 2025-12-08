@@ -976,74 +976,182 @@
 
 % ============================================================================
 % PAGE 20: Triangle/Sawtooth PWM Diagram (Complex)
+% Reference: P2 SmartPins-220809_mode01000_page20_img01.png
+% Sawtooth starts at PEAK, valleys at 2.5 and 6.5, peaks at 0.5, 4.5
+% P20 POSITIVE pulse centered around valleys, IN rises at peak
+% Sawtooth made of tiny horizontal steps (counter increments)
 % ============================================================================
 
 \newcommand{\TrianglePWMDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+\begin{tikzpicture}[x=1.0cm, y=0.9cm]
 
-% IN signal (top)
-\node[sp-annotation, anchor=east] at (-0.5, 5.5) {IN};
-\node[sp-annotation, anchor=east] at (0.0, 5.8) {1};
-\node[sp-annotation, anchor=east] at (0.0, 5.2) {0};
-\draw[sp-signal] (0.2, 5.2) -- (5.5, 5.2) -- (5.5, 5.8) -- (7.0, 5.8);
-\draw[dashed, thin] (7.0, 5.8) -- (7.5, 5.8);
+% Key X positions: peak0=0.5, valley1=2.5, peak2=4.5, valley2=6.5
+\def\peakzero{0.5}
+\def\valleyone{2.5}
+\def\peaktwo{4.5}
+\def\valleytwo{6.5}
+\def\wavestart{0.5}    % Left edge of waveforms
 
-% P20 Output
-\node[sp-annotation, anchor=east] at (-0.5, 3.8) {P20 Output};
-\node[sp-annotation, anchor=east] at (0.0, 4.2) {1};
-\node[sp-annotation, anchor=east] at (0.0, 3.4) {0};
+% Y positions for sawtooth
+\def\sawpeak{2.8}      % Peak height of sawtooth
+\def\sawvalley{1.0}    % Valley height of sawtooth
+\def\ythreshold{1.6}   % Y threshold line (where dotted lines stop)
 
-% PWM pulses
-\draw[sp-signal] (0.2, 4.2) -- (1.0, 4.2) -- (1.0, 3.4);
-\draw[sp-signal] (1.0, 3.4) -- (2.5, 3.4) -- (2.5, 4.2) -- (3.2, 4.2) -- (3.2, 3.4);
-\draw[sp-signal] (3.2, 3.4) -- (4.7, 3.4) -- (4.7, 4.2) -- (5.4, 4.2) -- (5.4, 3.4);
-\draw[sp-signal] (5.4, 3.4) -- (6.9, 3.4) -- (6.9, 4.2);
-\draw[dashed, thin] (6.9, 4.2) -- (7.5, 4.2);
+% === Vertical reference line at left edge (from P20 down, extends past timeline) ===
+\draw[thin] (\wavestart, 4.0) -- (\wavestart, -1.85);
 
-% X[31:16] and timing annotations
-\node[sp-annotation, anchor=east] at (-0.5, 3.0) {X[31:16] = \$200};
-\draw[sp-arrow] (-0.3, 3.0) -- (0.5, 3.0);
+% === IN signal (top) - rises at peak2 ===
+\node[font=\small, anchor=east] at (-0.5, 5.5) {IN};
+\node[font=\scriptsize, anchor=east] at (0.3, 5.8) {1};
+\node[font=\scriptsize, anchor=east] at (0.3, 5.2) {0};
+\draw[sp-signal] (\wavestart, 5.2) -- (\peaktwo, 5.2) -- (\peaktwo, 5.8) -- (7.2, 5.8);
+\draw[dashed, thin] (7.2, 5.8) -- (7.6, 5.8);
 
-% Counter Steps circle/zoom
-\draw (0.3, 2.2) circle (0.3);
-\node[sp-annotation] at (0.3, 2.2) {\tiny --};
-\node[sp-annotation, anchor=east] at (-0.3, 2.2) {Counter\\Steps};
+% === P20 Output - POSITIVE pulse centered around valleys ===
+\node[font=\small, anchor=east] at (-0.5, 4.0) {P20 Output};
+\node[font=\scriptsize, anchor=east] at (0.3, 4.4) {1};
+\node[font=\scriptsize, anchor=east] at (0.3, 3.6) {0};
 
-% Y[15:0] annotation
-\node[sp-annotation, anchor=east] at (-0.5, 1.5) {Y[15:0] = \$0080};
-\draw[sp-arrow, dashed] (-0.3, 1.5) -- (1.0, 1.5);
+% P20: starts LOW, rises before valley1, falls after valley1 (positive pulse)
+% Pulse 1 centered on valley1 (2.5): rise at ~2.0, fall at ~3.0
+% Pulse 2 starts near valley2 (6.5): rise at ~6.0
+\draw[sp-signal] (\wavestart, 3.6) -- (2.0, 3.6) -- (2.0, 4.4);
+\draw[sp-signal] (2.0, 4.4) -- (3.0, 4.4) -- (3.0, 3.6);
+\draw[sp-signal] (3.0, 3.6) -- (6.0, 3.6) -- (6.0, 4.4);
+\draw[sp-signal] (6.0, 4.4) -- (7.0, 4.4) -- (7.0, 3.6);
+\draw[dashed, thin] (7.0, 3.6) -- (7.6, 3.6);
 
-% Triangle wave (counter value)
-\draw[sp-signal, dashed] (1.0, 1.5) -- (2.5, 3.0) -- (4.0, 1.5) -- (5.5, 3.0) -- (7.0, 1.5);
-\draw[dashed, thin] (7.0, 1.5) -- (7.5, 1.5);
+% Dotted lines from P20 edges down - extend to Y threshold line (no gap)
+\draw[dotted] (2.0, 3.6) -- (2.0, 1.45);   % First rising edge
+\draw[dotted] (3.0, 3.6) -- (3.0, 1.45);   % First falling edge
+\draw[dotted] (6.0, 3.6) -- (6.0, 1.45);   % Second rising edge
+\draw[dotted] (7.0, 3.6) -- (7.0, 1.45);   % Second falling edge
 
-% Baseline
-\node[sp-annotation] at (1.5, 1.2) {1};
-\draw[sp-arrow] (1.3, 1.0) -- (1.3, 1.5);
+% === X[31:16] annotation (blue register, black value) - at sawtooth peak height ===
+\node[font=\small, anchor=east] at (-1.8, \sawpeak) {\textcolor{blue}{X[31:16]} = \$200};
+% Solid line stops with whitespace before vertical diagram edge (thin arrow)
+\draw[sp-dim, ->] (-1.6, \sawpeak) -- (0.3, \sawpeak);
 
-% 10.2 usec annotation
-\draw[sp-dim] (2.5, 4.5) -- (3.2, 4.5);
-\node[sp-annotation, anchor=west] at (2.6, 4.7) {10.2 usec};
+% 10.2 usec annotation - below the first pulse, label to the right (thin arrows)
+% Dropped down for more whitespace from signal line
+\draw[sp-dim] (2.0, 3.38) -- (3.0, 3.38);
+\node[font=\scriptsize, anchor=west] at (3.1, 3.38) {10.2 usec};
 
-% Frame Period
-\draw[sp-dim] (1.0, 0.3) -- (2.5, 0.3);
-\draw[thin] (1.0, 0.1) -- (1.0, 0.5);
-\draw[thin] (2.5, 0.1) -- (2.5, 0.5);
-\node[sp-annotation] at (1.75, -0.1) {Frame Period\\20.5 usec};
+% === Sawtooth waveform (many tiny horizontal steps) ===
+% Peak at 0.5, valley at 2.5, peak at 4.5, valley at 6.5
 
-% PWM Period
-\draw[sp-dim] (2.5, 0.3) -- (5.5, 0.3);
-\draw[thin] (5.5, 0.1) -- (5.5, 0.5);
-\node[sp-annotation] at (4.0, -0.1) {PWM Period\\41.0 usec};
+% Draw stepped sawtooth using many small segments
+% Descending from peak0 to valley1 (about 40 steps)
+\foreach \i in {0,1,...,39} {
+    \pgfmathsetmacro{\xstart}{\peakzero + \i * (\valleyone - \peakzero) / 40}
+    \pgfmathsetmacro{\xend}{\peakzero + (\i + 1) * (\valleyone - \peakzero) / 40}
+    \pgfmathsetmacro{\yval}{\sawpeak - \i * (\sawpeak - \sawvalley) / 40}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+% Ascending from valley1 to peak2
+\foreach \i in {0,1,...,39} {
+    \pgfmathsetmacro{\xstart}{\valleyone + \i * (\peaktwo - \valleyone) / 40}
+    \pgfmathsetmacro{\xend}{\valleyone + (\i + 1) * (\peaktwo - \valleyone) / 40}
+    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 40}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+% Descending from peak2 to valley2
+\foreach \i in {0,1,...,39} {
+    \pgfmathsetmacro{\xstart}{\peaktwo + \i * (\valleytwo - \peaktwo) / 40}
+    \pgfmathsetmacro{\xend}{\peaktwo + (\i + 1) * (\valleytwo - \peaktwo) / 40}
+    \pgfmathsetmacro{\yval}{\sawpeak - \i * (\sawpeak - \sawvalley) / 40}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
+% Continue ascending past valley2 - same angle as descent (40 steps over 2.0 units)
+% Descent uses 40 steps for (peaktwo - valleytwo) = 2.0 units, so ascent should match
+\foreach \i in {0,1,...,19} {
+    \pgfmathsetmacro{\xstart}{\valleytwo + \i * (\peaktwo - \valleyone) / 40}
+    \pgfmathsetmacro{\xend}{\valleytwo + (\i + 1) * (\peaktwo - \valleyone) / 40}
+    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 40}
+    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
+}
 
-% Time axis
-\draw[sp-arrow] (0, -0.8) -- (7.5, -0.8);
-\node[sp-annotation] at (3.75, -1.1) {Time};
+% === Magnifier showing counter steps ===
+% Horizontal layout: Counter Steps label -> big circle -> small circle on triangle
+% Vertically centered between X (y=sawpeak=2.8) and Y (y=ythreshold=1.6) => y=2.2
 
-% Footer notes
-\node[sp-annotation, text width=8cm] at (3.5, -1.8) {Base period = 40 nsec (25 MHz system clock) X[15:0] = 1};
-\node[sp-annotation, text width=8cm] at (3.5, -2.3) {\$200 Base periods = 20.5 usec Frame Period};
+\def\magcentery{2.2}  % Vertically centered between X and Y labels
+
+% Counter Steps label - small font, two words close together vertically
+% Centered so "Counter" aligns under "31" of X[31:16]
+\node[font=\scriptsize, anchor=east, align=right, inner sep=0pt, inner ysep=0pt] at (-1.3, \magcentery) {Counter\\[-2pt]Steps};
+
+% Large circle - just after label, with step content
+\def\maglargex{-0.9}
+\draw[thin] (\maglargex, \magcentery) circle (0.35);
+
+% Draw 5 step segments inside the large circle (descending pattern)
+\draw[thick] (\maglargex - 0.18, \magcentery + 0.14) -- (\maglargex - 0.06, \magcentery + 0.14);
+\draw[thick] (\maglargex - 0.12, \magcentery + 0.07) -- (\maglargex, \magcentery + 0.07);
+\draw[thick] (\maglargex - 0.06, \magcentery) -- (\maglargex + 0.06, \magcentery);
+\draw[thick] (\maglargex, \magcentery - 0.07) -- (\maglargex + 0.12, \magcentery - 0.07);
+\draw[thick] (\maglargex + 0.06, \magcentery - 0.14) -- (\maglargex + 0.18, \magcentery - 0.14);
+
+% Small circle - on the triangle waveform where it crosses y=2.2 (magcentery)
+% Sawtooth descends from peak (0.5, 2.8) to valley (2.5, 1.0)
+% At y=2.2: x = 0.5 + (2.8-2.2)/(2.8-1.0) * (2.5-0.5) = 0.5 + 0.6/1.8 * 2 = 0.5 + 0.67 = 1.17
+\def\magsmallx{1.17}
+\draw[thin] (\magsmallx, \magcentery) circle (0.12);
+
+% Magnifier lines - only 2 lines: top-to-top and bottom-to-bottom (horizontal orientation)
+\draw[thin] (\maglargex + 0.35, \magcentery + 0.2) -- (\magsmallx - 0.12, \magcentery + 0.08);
+\draw[thin] (\maglargex + 0.35, \magcentery - 0.2) -- (\magsmallx - 0.12, \magcentery - 0.08);
+
+% === Y[15:0] annotation (blue register, black value) - at sawtooth intersection ===
+% Y line at 1.45 intersects sawtooth at pulse edges (x=2.0, x=3.0, etc.)
+\def\ythresholdlower{1.45}
+\node[font=\small, anchor=east] at (-1.8, \ythresholdlower) {\textcolor{blue}{Y[15:0]} = \$0080};
+% Solid line crosses vertical diagram edge, goes to sawtooth with whitespace before it
+% At y=1.45, sawtooth is at x~2.0, so stop at x=1.9
+\draw[sp-dim, ->] (-1.5, \ythresholdlower) -- (1.9, \ythresholdlower);
+% Dashed segments ONLY under the pulses (valley regions), not under peaks
+% Pulse 1 region: x=2.0 to x=3.0 (centered on valley1=2.5)
+\draw[dashed, thin] (2.0, \ythresholdlower) -- (3.0, \ythresholdlower);
+% Pulse 2 region: x=6.0 to x=7.0 (centered on valley2=6.5)
+\draw[dashed, thin] (6.0, \ythresholdlower) -- (7.0, \ythresholdlower);
+
+% === Line 1: Baseline with tick marks at peaks/valleys ===
+\draw[thin] (\wavestart, 0.6) -- (7.2, 0.6);
+% Dotted trail to right edge
+\draw[dotted, thin] (7.2, 0.6) -- (7.6, 0.6);
+\draw[thin] (\peakzero, 0.4) -- (\peakzero, 0.8);   % tick at peak0
+\draw[thin] (\valleyone, 0.4) -- (\valleyone, 0.8); % tick at valley1
+\draw[thin] (\peaktwo, 0.4) -- (\peaktwo, 0.8);     % tick at peak2
+\draw[thin] (\valleytwo, 0.4) -- (\valleytwo, 0.8); % tick at valley2
+
+% "1" label - smaller font, moved left, horizontal arrow to valley bottom (no vertical arrow)
+\node[font=\scriptsize, anchor=east] at (2.0, 0.9) {1};
+\draw[sp-dim, ->] (2.05, 0.9) -- (\valleyone - 0.05, 0.9);
+
+% === Line 2: PWM Period - peak to peak with thin arrows ===
+% Vertical lines extend down from peaks to this line
+\draw[thin] (\peakzero, 0.4) -- (\peakzero, 0.0);   % extend peak0 down
+\draw[thin] (\peaktwo, 0.4) -- (\peaktwo, 0.0);     % extend peak2 down
+% Double-ended arrow from peak0 to peak2 using thin arrow style
+\draw[sp-dim] (\peakzero, 0.0) -- (\peaktwo, 0.0);
+% Single left-arrow from right edge toward peak2
+\draw[sp-dim, <-] (7.0, 0.0) -- (\peaktwo, 0.0);
+% Dotted trail to right edge
+\draw[dotted, thin] (7.0, 0.0) -- (7.6, 0.0);
+% PWM Period label centered between valley1 and peak2, with whitespace below line
+\node[font=\scriptsize, align=center] at (3.5, -0.42) {PWM Period\\41.0 usec};
+
+% === Line 3: Frame Period (peak to valley) with thin arrows ===
+\draw[thin] (\peakzero, -0.3) -- (\peakzero, -0.9);   % extend peak0 down
+\draw[thin] (\valleyone, -0.3) -- (\valleyone, -0.9); % extend valley1 down
+\draw[sp-dim] (\peakzero, -0.7) -- (\valleyone, -0.7);
+% Frame Period label
+\node[font=\scriptsize, align=center] at (1.5, -1.17) {Frame Period\\20.5 usec};
+
+% === Time axis - starts from vertical line ===
+\draw[sp-arrow] (\wavestart, -1.7) -- (\peaktwo + 0.5, -1.7);
+\node[font=\small] at (2.75, -1.95) {Time};
 
 \end{tikzpicture}
 \par}
