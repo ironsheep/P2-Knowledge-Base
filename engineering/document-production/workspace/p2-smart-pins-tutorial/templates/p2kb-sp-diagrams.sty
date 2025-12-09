@@ -219,6 +219,48 @@
 \draw[sp-signal, ->] (\clktwo-0.5, 1.2) -- (\clktwo, 1.2);  % Arrow to clock 2
 \draw[sp-signal] (\clktwo, 1.05) -- (\clktwo, 1.35);    % Bar at clock 2
 
+% ============================================================================
+% MEASUREMENT REFERENCE - for calibrating label sizes vs clock width
+% ============================================================================
+% Ruler with 0.1cm tick marks (aligned with diagram)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.2) {Ruler (0.1cm ticks):};
+\draw[thin] (\clkstart, -0.2) -- (\clkstart + 12, -0.2);  % Baseline
+\foreach \i in {0,1,...,120} {
+    \pgfmathsetmacro{\x}{\clkstart + \i * 0.1}
+    \pgfmathparse{mod(\i, 10) == 0 ? 1 : 0}
+    \ifnum\pgfmathresult=1
+        \draw[thin] (\x, -0.35) -- (\x, -0.05);  % Major tick every 1cm
+        \pgfmathsetmacro{\label}{\i / 10}
+        \node[font=\tiny, anchor=north] at (\x, -0.35) {\pgfmathprintnumber[fixed, precision=0]{\label}};
+    \else
+        \pgfmathparse{mod(\i, 5) == 0 ? 1 : 0}
+        \ifnum\pgfmathresult=1
+            \draw[thin] (\x, -0.3) -- (\x, -0.1);  % Medium tick every 0.5cm
+        \else
+            \draw[thin] (\x, -0.25) -- (\x, -0.15);  % Minor tick every 0.1cm
+        \fi
+    \fi
+}
+
+% Sample labels for measurement (aligned with ruler starting at clkstart)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -0.8) {Sample labels:};
+\node[font=\small, anchor=west] at (\clkstart, -0.8) {DIRA};
+\draw[thin] (\clkstart, -0.95) -- (\clkstart, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 2, -0.8) {OUTA};
+\draw[thin] (\clkstart + 2, -0.95) -- (\clkstart + 2, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 4, -0.8) {P0 DRIV};
+\draw[thin] (\clkstart + 4, -0.95) -- (\clkstart + 4, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 6.5, -0.8) {P0 HIGH};
+\draw[thin] (\clkstart + 6.5, -0.95) -- (\clkstart + 6.5, -0.65);  % Start marker
+\node[font=\small, anchor=west] at (\clkstart + 9, -0.8) {DRVH \#0};
+\draw[thin] (\clkstart + 9, -0.95) -- (\clkstart + 9, -0.65);  % Start marker
+
+% Current clock width reference (aligned with clkstart)
+\node[font=\small, anchor=east] at (\clkstart - 0.2, -1.4) {Clock width (\clkw cm):};
+\draw[thick] (\clkstart, -1.4) -- (\clkstart + \clkw, -1.4);
+\draw[thick] (\clkstart, -1.55) -- (\clkstart, -1.25);  % Start bar
+\draw[thick] (\clkstart + \clkw, -1.55) -- (\clkstart + \clkw, -1.25);  % End bar
+
 \end{tikzpicture}
 \par}
 }
@@ -1127,99 +1169,151 @@
 
 \newcommand{\SawtoothPWMDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1.0cm, y=0.9cm]
+\begin{tikzpicture}[x=1.0cm, y=1.0cm, >=Stealth]
 
-% Key X positions for sawtooth bases (where each rising edge starts)
-\def\basezero{1.2}
-\def\baseone{3.0}
-\def\basetwo{4.8}
+% =============================================================================
+% COORDINATE SYSTEM - Revised 2025-12-09 v6
+% =============================================================================
+% Key X positions (phase-aligned):
+\def\leftedge{1.8}
+\def\pulseArise{2.4}      % First pulse rising = sawtooth valley
+\def\pulseAfall{3.1}      % First pulse falling = threshold
+\def\pulseBrise{4.5}      % Second pulse rising = sawtooth peak = IN rising
+\def\pulseBfall{5.2}      % Second pulse falling = threshold
+\def\rightedge{7.0}
+\def\waveend{6.6}         % Where solid waveforms end, dashed begins
 
-% Y positions for sawtooth
-\def\sawpeak{1.8}       % Peak height of sawtooth (top)
-\def\sawvalley{0.6}     % Base height of sawtooth (bottom)
-\def\ythreshold{1.0}    % Y threshold line position
+% Y positions - compressed IN/P20 spacing, steeper sawtooth
+\def\inHigh{5.0}
+\def\inLow{4.6}
+\def\outHigh{3.9}
+\def\outLow{3.5}
+\def\sawpeak{2.8}         % Steeper sawtooth - higher peak
+\def\sawvalley{0.9}
+\def\ythreshold{1.6}      % Adjusted for steeper sawtooth
+\def\sawbaseline{0.6}     % Horizontal baseline below sawtooth
+\def\framearrow{0.35}     % Frame period arrow line
+\def\timeline{-0.4}       % Time axis - moved down for whitespace
 
-% === IN signal (top) - LOW then rises HIGH near end ===
-\node[font=\small, anchor=east] at (0.7, 4.5) {IN};
-\node[font=\scriptsize, anchor=east] at (1.1, 4.8) {1};
-\node[font=\scriptsize, anchor=east] at (1.1, 4.2) {0};
-\draw[sp-signal] (\basezero, 4.2) -- (4.2, 4.2) -- (4.2, 4.8) -- (5.5, 4.8);
-\draw[dashed, thin] (5.5, 4.8) -- (5.9, 4.8);
+% Label X positions
+\def\labelright{0.9}      % Signal names
+\def\levelright{1.6}      % Level indicators (0, 1)
 
-% === P20 Output - starts LOW, 2 HIGH pulses with narrow LOW dips ===
-\node[font=\small, anchor=east] at (0.7, 3.3) {P20 Output};
-\node[font=\scriptsize, anchor=east] at (1.1, 3.6) {1};
-\node[font=\scriptsize, anchor=east] at (1.1, 3.0) {0};
+% =============================================================================
+% LEFT VERTICAL REFERENCE LINE
+% Starts at mid-height of P20, drops past timeline
+% =============================================================================
+\draw[thin] (\leftedge, 3.7) -- (\leftedge, \timeline - 0.1);
 
-% P20: starts LOW at 0, rises to HIGH, dips LOW briefly, rises HIGH, dips LOW, rises HIGH, dashed
-% Looking at reference: starts at 0, rises HIGH at start, falls LOW briefly, rises HIGH, falls LOW briefly, HIGH continues
-\draw[sp-signal] (\basezero, 3.0) -- (\basezero, 3.6);  % Initial rise
-\draw[sp-signal] (\basezero, 3.6) -- (1.8, 3.6) -- (1.8, 3.0);  % HIGH then fall
-\draw[sp-signal] (1.8, 3.0) -- (2.2, 3.0) -- (2.2, 3.6);  % LOW dip 1
-\draw[sp-signal] (2.2, 3.6) -- (3.6, 3.6) -- (3.6, 3.0);  % HIGH then fall
-\draw[sp-signal] (3.6, 3.0) -- (4.0, 3.0) -- (4.0, 3.6);  % LOW dip 2
-\draw[sp-signal] (4.0, 3.6) -- (5.3, 3.6);  % HIGH continues
-\draw[dashed, thin] (5.3, 3.6) -- (5.7, 3.6);
+% =============================================================================
+% IN SIGNAL (top) - starts LOW, single rising edge coincident with pulseBrise
+% =============================================================================
+\node[font=\small, anchor=east] at (\labelright, 4.8) {IN};
+\node[font=\scriptsize, anchor=east] at (\levelright, \inHigh) {1};
+\node[font=\scriptsize, anchor=east] at (\levelright, \inLow) {0};
 
-% 5.1 usec annotation - arrows pointing inward to first LOW dip edges
-\draw[sp-dim, ->] (1.55, 2.85) -- (1.8, 2.85);
-\draw[sp-dim, <-] (2.2, 2.85) -- (2.45, 2.85);
-\node[font=\scriptsize, anchor=west] at (2.5, 2.85) {5.1 usec};
+% IN: LOW from start, rises at pulseBrise, continues HIGH
+\draw[thick] (\leftedge, \inLow) -- (\pulseBrise, \inLow) -- (\pulseBrise, \inHigh) -- (\waveend, \inHigh);
+\draw[dashed, thin] (\waveend, \inHigh) -- (\rightedge, \inHigh);
 
-% Dotted vertical lines from P20 edges down toward sawtooth
-\draw[dotted] (1.8, 3.0) -- (1.8, \ythreshold + 0.05);
-\draw[dotted] (2.2, 3.0) -- (2.2, \ythreshold + 0.05);
+% =============================================================================
+% P20 OUTPUT - starts LOW, two HIGH pulses, ends LOW
+% =============================================================================
+\node[font=\small, anchor=east] at (\labelright, 3.7) {P20 Output};
+\node[font=\scriptsize, anchor=east] at (\levelright, \outHigh) {1};
+\node[font=\scriptsize, anchor=east] at (\levelright, \outLow) {0};
 
-% X[31:16] = $200 annotation (blue register label) with arrow pointing left
-\node[font=\small, anchor=west] at (3.8, 2.5) {\textcolor{blue}{X[31:16]} = \$200};
-\draw[sp-dim, <-] (3.75, 2.5) -- (3.2, 2.3);
+% P20: LOW baseline with two HIGH pulses
+\draw[thick] (\leftedge, \outLow) -- (\pulseArise, \outLow);
+\draw[thick] (\pulseArise, \outLow) -- (\pulseArise, \outHigh);
+\draw[thick] (\pulseArise, \outHigh) -- (\pulseAfall, \outHigh);
+\draw[thick] (\pulseAfall, \outHigh) -- (\pulseAfall, \outLow);
+\draw[thick] (\pulseAfall, \outLow) -- (\pulseBrise, \outLow);
+\draw[thick] (\pulseBrise, \outLow) -- (\pulseBrise, \outHigh);
+\draw[thick] (\pulseBrise, \outHigh) -- (\pulseBfall, \outHigh);
+\draw[thick] (\pulseBfall, \outHigh) -- (\pulseBfall, \outLow);
+\draw[thick] (\pulseBfall, \outLow) -- (\waveend, \outLow);
+\draw[dashed, thin] (\waveend, \outLow) -- (\rightedge, \outLow);
 
-% === Y[15:0] annotation (blue register label) with arrow line to sawtooth ===
-\node[font=\small, anchor=east] at (0.7, \ythreshold) {\textcolor{blue}{Y[15:0]} = \$0080};
-\draw[sp-dim, ->] (0.8, \ythreshold) -- (1.55, \ythreshold);
+% =============================================================================
+% 5.1 usec ANNOTATION - width of first HIGH pulse
+% Inward arrows, label to the right outside arrows
+% =============================================================================
+\draw[thin, ->] (\pulseArise + 0.2, 3.2) -- (\pulseArise + 0.02, 3.2);
+\draw[thin, <-] (\pulseAfall - 0.02, 3.2) -- (\pulseAfall - 0.2, 3.2);
+\node[font=\scriptsize, anchor=west] at (\pulseAfall + 0.15, 3.2) {5.1 usec};
 
-% === Sawtooth waveform (rising only, stepped, NO vertical drop lines) ===
+% =============================================================================
+% DOTTED VERTICAL REFERENCE LINES - connect P20 pulse 1 edges down to valley
+% First one extends to just above sawtooth valley
+% =============================================================================
+\draw[dotted] (\pulseArise, \outLow) -- (\pulseArise, \sawvalley + 0.08);
+\draw[dotted] (\pulseAfall, \outLow) -- (\pulseAfall, \ythreshold);
 
-% Sawtooth 1: from basezero to baseone (complete rising edge)
+% =============================================================================
+% X[31:16] = $200 ANNOTATION - HORIZONTAL arrow pointing FROM label TO peak
+% =============================================================================
+\node[font=\small, anchor=west] at (\pulseBrise + 0.5, \sawpeak) {\textcolor{blue}{X[31:16]} = \$200};
+\draw[thin, ->] (\pulseBrise + 0.4, \sawpeak) -- (\pulseBrise + 0.1, \sawpeak);
+
+% =============================================================================
+% Y[15:0] = $0080 ANNOTATION - threshold level
+% Arrow extends nearly to first pulse falling edge (no separate dashed line)
+% =============================================================================
+\node[font=\small, anchor=east] at (\labelright, \ythreshold) {\textcolor{blue}{Y[15:0]} = \$0080};
+\draw[thin, ->] (\labelright + 0.1, \ythreshold) -- (\pulseAfall - 0.1, \ythreshold);
+
+% =============================================================================
+% SAWTOOTH WAVEFORM - stepped/dashed style, NO vertical drops, steeper
+% =============================================================================
+
+% Frame 1: complete sawtooth from valley to peak
+\pgfmathsetmacro{\sawwidth}{\pulseBrise - \pulseArise}
 \foreach \i in {0,1,...,35} {
-    \pgfmathsetmacro{\xstart}{\basezero + \i * (\baseone - \basezero) / 36}
-    \pgfmathsetmacro{\xend}{\basezero + (\i + 1) * (\baseone - \basezero) / 36}
+    \pgfmathsetmacro{\xstart}{\pulseArise + \i * \sawwidth / 36}
+    \pgfmathsetmacro{\xend}{\pulseArise + (\i + 1) * \sawwidth / 36}
     \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
     \draw[thin] (\xstart, \yval) -- (\xend, \yval);
 }
 
-% Sawtooth 2: from baseone to basetwo (complete rising edge)
-\foreach \i in {0,1,...,35} {
-    \pgfmathsetmacro{\xstart}{\baseone + \i * (\basetwo - \baseone) / 36}
-    \pgfmathsetmacro{\xend}{\baseone + (\i + 1) * (\basetwo - \baseone) / 36}
+% Frame 2: partial sawtooth (~75% = 27 steps)
+\foreach \i in {0,1,...,26} {
+    \pgfmathsetmacro{\xstart}{\pulseBrise + \i * \sawwidth / 36}
+    \pgfmathsetmacro{\xend}{\pulseBrise + (\i + 1) * \sawwidth / 36}
     \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
     \draw[thin] (\xstart, \yval) -- (\xend, \yval);
 }
 
-% Sawtooth 3: partial rising edge continuing right (about 60% complete)
-\foreach \i in {0,1,...,21} {
-    \pgfmathsetmacro{\xstart}{\basetwo + \i * (\baseone - \basezero) / 36}
-    \pgfmathsetmacro{\xend}{\basetwo + (\i + 1) * (\baseone - \basezero) / 36}
-    \pgfmathsetmacro{\yval}{\sawvalley + \i * (\sawpeak - \sawvalley) / 36}
-    \draw[thin] (\xstart, \yval) -- (\xend, \yval);
-}
+% =============================================================================
+% SAWTOOTH BASELINE - starts at left edge, ends with dotted like waveforms
+% =============================================================================
+\draw[thin] (\leftedge, \sawbaseline) -- (\waveend, \sawbaseline);
+\draw[dotted, thin] (\waveend, \sawbaseline) -- (\rightedge, \sawbaseline);
 
-% "1" label with horizontal arrow pointing right to first base
-\node[font=\scriptsize, anchor=east] at (1.0, 0.35) {1};
-\draw[sp-dim, ->] (1.05, 0.35) -- (\basezero - 0.05, 0.35);
+% =============================================================================
+% "1" ANNOTATION - HORIZONTAL arrow pointing to first valley
+% =============================================================================
+\node[font=\scriptsize, anchor=east] at (\leftedge - 0.3, \sawvalley) {1};
+\draw[thin, ->] (\leftedge - 0.2, \sawvalley) -- (\pulseArise - 0.1, \sawvalley);
 
-% === Frame Period dimension line (base to base) ===
-\draw[thin] (\basezero, 0.5) -- (\basezero, 0.1);
-\draw[thin] (\baseone, 0.5) -- (\baseone, 0.1);
-\draw[sp-dim] (\basezero, 0.3) -- (\baseone, 0.3);
-% Dotted trail to right
-\draw[dotted, thin] (\baseone, 0.3) -- (5.7, 0.3);
-% Frame Period label - positioned below the line, not overlapping
-\node[font=\scriptsize, align=center] at (2.1, -0.1) {Frame Period\\20.5 usec};
+% =============================================================================
+% FRAME PERIOD DIMENSION - tick marks cross baseline, arrow above
+% =============================================================================
+% Vertical tick marks at valleys - cross the baseline
+\draw[thin] (\pulseArise, \sawbaseline + 0.1) -- (\pulseArise, \framearrow - 0.08);
+\draw[thin] (\pulseBrise, \sawbaseline + 0.1) -- (\pulseBrise, \framearrow - 0.08);
+% Double-ended arrow between ticks
+\draw[thin, <->] (\pulseArise, \framearrow) -- (\pulseBrise, \framearrow);
+% Dotted continuation to right - same endpoint as waveforms
+\draw[dotted, thin] (\pulseBrise, \framearrow) -- (\waveend, \framearrow);
+% Frame Period label - smaller font, tighter line spacing, moved down
+\node[font=\tiny, align=center, inner sep=1pt] at ({(\pulseArise + \pulseBrise) / 2}, \framearrow - 0.35) {Frame Period\\20.5 usec};
 
-% === Time axis ===
-\draw[sp-arrow] (\basezero, -0.5) -- (5.5, -0.5);
-\node[font=\small] at (3.3, -0.75) {Time};
+% =============================================================================
+% TIME AXIS - label above arrow, in last third
+% =============================================================================
+\draw[thin, ->] (\leftedge, \timeline) -- (\rightedge - 0.3, \timeline);
+\node[font=\tiny, anchor=south] at ({\rightedge - 1.0}, \timeline + 0.02) {Time};
 
 \end{tikzpicture}
 \par}
@@ -1231,85 +1325,232 @@
 
 \newcommand{\QuadEncoderDiagram}{%
 {\centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, >=Stealth]
 
-% === LEFT SIDE: Circuit schematic ===
+% =============================================================================
+% LAYOUT: ~30% schematic (left), ~70% waveforms (right)
+% Increased horizontal spacing for clarity
+% =============================================================================
 
-% +3.3V and resistor
-\draw (1.0, 4.0) -- (1.0, 3.5);
-\node[sp-annotation] at (1.0, 4.2) {+3.3V};
-% Resistor symbol
-\draw (1.0, 3.5) -- (0.85, 3.3) -- (1.15, 3.1) -- (0.85, 2.9) -- (1.15, 2.7) -- (1.0, 2.5);
-\node[sp-annotation, anchor=west] at (1.2, 3.0) {1000};
+% =============================================================================
+% LEFT SIDE: Circuit Schematic
+% =============================================================================
 
-% Junction to P32
-\draw[fill] (1.0, 2.5) circle (0.05);
-\draw (1.0, 2.5) -- (2.0, 2.5);
-\node[sp-block, minimum width=0.8cm, minimum height=0.5cm] (p32) at (2.4, 2.5) {P32};
+% --- Quad Encoder Device ---
+% "Quad Encoder" label ABOVE the box
+\node[font=\small, anchor=south, align=center] at (-0.5, 3.2) {Quad\\Encoder};
 
-% Quad Encoder box
-\node[sp-block, minimum width=1.2cm, minimum height=1.5cm] (enc) at (-0.5, 1.5) {};
-\node[sp-annotation] at (-0.5, 1.5) {Quad\\Encoder};
-% Encoder symbol (circle with marks)
-\draw (-0.5, 1.5) circle (0.4);
+% Outer rectangle
+\draw[thick] (-1.2, 1.0) rectangle (0.2, 3.0);
 
-% Encoder outputs
-\draw (0.1, 2.0) -- (1.0, 2.0) -- (1.0, 2.5);
-\draw (0.1, 1.0) -- (1.0, 1.0);
+% Inner circle (encoder wheel)
+\draw[thick] (-0.5, 2.0) circle (0.5);
+% Half-moon inside circle (D-shaft)
+\draw[thick] (-0.5, 2.35) arc (90:270:0.35);
+\draw[thick] (-0.5, 1.65) -- (-0.5, 2.35);
 
-% Second resistor and P33
-\draw (1.0, 1.0) -- (1.0, 0.5);
-\draw[fill] (1.0, 1.0) circle (0.05);
-\draw (1.0, 1.0) -- (2.0, 1.0);
-\node[sp-block, minimum width=0.8cm, minimum height=0.5cm] (p33) at (2.4, 1.0) {P33};
+% THREE output pins on right side of encoder (top, middle, bottom)
+\draw[thick] (0.2, 2.6) rectangle (0.4, 2.8);   % top pin (to P32)
+\draw[thick] (0.2, 1.9) rectangle (0.4, 2.1);   % middle pin (to ground)
+\draw[thick] (0.2, 1.2) rectangle (0.4, 1.4);   % bottom pin (to P33)
 
-% Resistor to ground
-\draw (1.0, 0.5) -- (0.85, 0.3) -- (1.15, 0.1) -- (0.85, -0.1) -- (1.15, -0.3) -- (1.0, -0.5);
-\node[sp-annotation, anchor=west] at (1.2, 0.0) {1000};
-\node[sp-annotation] at (1.0, -0.7) {+3.3V};
-
+% --- Ground connection from MIDDLE pin ---
+\draw[thick] (0.4, 2.0) -- (0.7, 2.0);
+\draw[thick] (0.7, 2.0) -- (0.7, 0.3);
 % Ground symbol
-\draw (-0.5, 0.5) -- (-0.5, 0.0);
-\draw (-0.7, 0.0) -- (-0.3, 0.0);
-\draw (-0.6, -0.1) -- (-0.4, -0.1);
-\draw (-0.55, -0.2) -- (-0.45, -0.2);
+\draw[thick] (0.5, 0.3) -- (0.9, 0.3);
+\draw[thick] (0.55, 0.2) -- (0.85, 0.2);
+\draw[thick] (0.6, 0.1) -- (0.8, 0.1);
 
-% === RIGHT SIDE: Timing waveforms ===
+% --- Upper signal path (to P32) ---
+% From encoder top pin
+\draw[thick] (0.4, 2.7) -- (1.4, 2.7);
+% Junction dot
+\draw[fill] (1.4, 2.7) circle (0.06);
+% Vertical UP to resistor
+\draw[thick] (1.4, 2.7) -- (1.4, 3.4);
+% Resistor zigzag (upward to +3.3V)
+\draw[thick] (1.4, 3.4) -- (1.25, 3.55) -- (1.55, 3.7) -- (1.25, 3.85) -- (1.55, 4.0) -- (1.4, 4.15);
+\draw[thick] (1.4, 4.15) -- (1.4, 4.4);
+% +3.3V label
+\node[font=\small] at (1.4, 4.6) {+3.3V};
+% Resistor value
+\node[font=\small, anchor=west] at (1.65, 3.75) {1000};
 
-% CW (Clockwise) section
-% P32 waveform
-\node[sp-annotation] at (4.5, 4.0) {P32};
-\draw[sp-signal] (5.0, 3.5) -- (5.0, 4.0) -- (5.8, 4.0) -- (5.8, 3.5) -- (6.6, 3.5) -- (6.6, 4.0) -- (7.4, 4.0) -- (7.4, 3.5) -- (8.0, 3.5);
+% Arrow to P32 (signal flows FROM encoder TO P32)
+\draw[thick, ->] (1.4, 2.7) -- (2.5, 2.7);
+% P32 box
+\draw[thick] (2.5, 2.45) rectangle (3.2, 2.95);
+\node[font=\small] at (2.85, 2.7) {P32};
 
-% P33 waveform (phase shifted)
-\node[sp-annotation] at (4.5, 3.0) {P33};
-\draw[sp-signal] (5.0, 2.5) -- (5.4, 2.5) -- (5.4, 3.0) -- (6.2, 3.0) -- (6.2, 2.5) -- (7.0, 2.5) -- (7.0, 3.0) -- (7.8, 3.0) -- (7.8, 2.5) -- (8.0, 2.5);
+% --- Lower signal path (to P33) ---
+% From encoder bottom pin
+\draw[thick] (0.4, 1.3) -- (1.4, 1.3);
+% Junction dot
+\draw[fill] (1.4, 1.3) circle (0.06);
+% Vertical DOWN to resistor
+\draw[thick] (1.4, 1.3) -- (1.4, 0.6);
+% Resistor zigzag (downward to +3.3V)
+\draw[thick] (1.4, 0.6) -- (1.25, 0.45) -- (1.55, 0.3) -- (1.25, 0.15) -- (1.55, 0.0) -- (1.4, -0.15);
+\draw[thick] (1.4, -0.15) -- (1.4, -0.4);
+% +3.3V label
+\node[font=\small] at (1.4, -0.6) {+3.3V};
+% Resistor value
+\node[font=\small, anchor=west] at (1.65, 0.3) {1000};
 
-% CW direction arrow
-\draw[sp-arrow, thick] (8.2, 3.5) arc (90:-90:0.3);
-\node[sp-annotation] at (8.8, 3.2) {CW};
+% Arrow to P33 (signal flows FROM encoder TO P33)
+\draw[thick, ->] (1.4, 1.3) -- (2.5, 1.3);
+% P33 box
+\draw[thick] (2.5, 1.05) rectangle (3.2, 1.55);
+\node[font=\small] at (2.85, 1.3) {P33};
 
-% 4 edges annotation
-\draw[sp-arrow] (7.4, 3.2) -- (7.4, 2.8);
-\draw[sp-arrow] (7.8, 3.2) -- (7.8, 2.8);
-\node[sp-annotation, anchor=west] at (8.0, 2.8) {4 edges};
-\node[sp-annotation] at (7.0, 2.2) {4 counts};
+% =============================================================================
+% RIGHT SIDE: Timing Waveforms
+% Signals: LOW baseline, HIGH pulses
+% Pattern: 2 pulses close together, gap, 1 pulse
+% Labels at mid-height, LOW level below labels
+% =============================================================================
 
-% Dividing line
-\draw[thin] (4.3, 2.0) -- (8.5, 2.0);
+% X offset for waveform section (increased for more horizontal spacing)
+\def\wavestart{5.0}
+\def\wavelabelx{4.5}   % Labels shifted further left to clear rising edges
+\def\leadinW{0.5}      % Extra LOW lead-in width for label placement
 
-% CCW (Counter-clockwise) section
-% P32 waveform
-\node[sp-annotation] at (4.5, 1.5) {P32};
-\draw[sp-signal] (5.0, 1.0) -- (5.4, 1.0) -- (5.4, 1.5) -- (6.2, 1.5) -- (6.2, 1.0) -- (7.0, 1.0) -- (7.0, 1.5) -- (7.8, 1.5) -- (7.8, 1.0) -- (8.0, 1.0);
+% Waveform dimensions
+\def\highY{0.5}      % height of HIGH above baseline
+\def\pulseW{0.5}     % width of each pulse
+\def\gapW{0.35}      % gap between pulse 1 and 2
+\def\bigGapW{0.9}    % larger gap before pulse 3
+\def\tailW{0.6}      % exit tail length
 
-% P33 waveform
-\node[sp-annotation] at (4.5, 0.5) {P33};
-\draw[sp-signal] (5.0, 0.0) -- (5.0, 0.5) -- (5.8, 0.5) -- (5.8, 0.0) -- (6.6, 0.0) -- (6.6, 0.5) -- (7.4, 0.5) -- (7.4, 0.0) -- (8.0, 0.0);
+% --- CW (Clockwise) Section - TOP ---
+% Y positions for CW section
+\def\cwPthrtytwoBase{4.0}
+\def\cwPthrtythreeBase{3.0}
 
-% CCW direction arrow
-\draw[sp-arrow, thick] (8.2, 0.5) arc (-90:90:0.3);
-\node[sp-annotation] at (8.8, 0.8) {CCW};
+% P32 CW waveform - LOW baseline, HIGH pulses
+% Label centered over the lead-in foot (smaller font)
+\node[font=\scriptsize] at (\wavelabelx, \cwPthrtytwoBase + 0.25) {P32};
+% Pattern: extended lead-in LOW (foot), pulse1, gap, pulse2, bigger gap, pulse3, lead-out LOW
+% Extended lead-in LOW (foot for label)
+\draw[thick] (\wavestart, \cwPthrtytwoBase) -- (\wavestart + \leadinW, \cwPthrtytwoBase);
+% Pulse 1
+\draw[thick] (\wavestart + \leadinW, \cwPthrtytwoBase) -- (\wavestart + \leadinW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + \pulseW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \pulseW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + \pulseW, \cwPthrtytwoBase);
+% Gap between pulses 1 and 2
+\draw[thick] (\wavestart + \leadinW + \pulseW, \cwPthrtytwoBase) -- (\wavestart + \leadinW + \pulseW + \gapW, \cwPthrtytwoBase);
+% Pulse 2
+\draw[thick] (\wavestart + \leadinW + \pulseW + \gapW, \cwPthrtytwoBase) -- (\wavestart + \leadinW + \pulseW + \gapW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \pulseW + \gapW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 2*\pulseW + \gapW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 2*\pulseW + \gapW, \cwPthrtytwoBase);
+% Bigger gap before pulse 3
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW, \cwPthrtytwoBase) -- (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase);
+% Pulse 3
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase) -- (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase);
+% Lead-out LOW
+\draw[thick] (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \cwPthrtytwoBase) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW + \tailW, \cwPthrtytwoBase);
+
+% P33 CW waveform - same pattern but shifted RIGHT (lagging ~50%)
+\node[font=\scriptsize] at (\wavelabelx, \cwPthrtythreeBase + 0.25) {P33};
+% Phase shift amount (P33 lags P32)
+\def\cwShift{0.25}
+% Lead-in LOW (longer due to lag)
+\draw[thick] (\wavestart, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift, \cwPthrtythreeBase);
+% Pulse 1
+\draw[thick] (\wavestart + \leadinW + \cwShift, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + \pulseW, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift + \pulseW, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + \pulseW, \cwPthrtythreeBase);
+% Gap
+\draw[thick] (\wavestart + \leadinW + \cwShift + \pulseW, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift + \pulseW + \gapW, \cwPthrtythreeBase);
+% Pulse 2
+\draw[thick] (\wavestart + \leadinW + \cwShift + \pulseW + \gapW, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift + \pulseW + \gapW, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift + \pulseW + \gapW, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW, \cwPthrtythreeBase);
+% Bigger gap
+\draw[thick] (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase);
+% Pulse 3
+\draw[thick] (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase) -- (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift + 2*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + 3*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \cwShift + 3*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase + \highY) -- (\wavestart + \leadinW + \cwShift + 3*\pulseW + \gapW + \bigGapW, \cwPthrtythreeBase);
+% Lead-out LOW (exit tail)
+\def\cwPthrtythreeEnd{\wavestart + \leadinW + \cwShift + 3*\pulseW + \gapW + \bigGapW}
+\draw[thick] (\cwPthrtythreeEnd, \cwPthrtythreeBase) -- (\cwPthrtythreeEnd + \tailW - \cwShift, \cwPthrtythreeBase);
+
+% CW curved arrow and label - arc center on P32 baseline
+\def\cwArcX{\wavestart + 4.3}
+\def\cwArcY{\cwPthrtytwoBase}  % Arc center on P32 baseline
+\draw[thick, ->] (\cwArcX, \cwArcY + 0.3) arc (90:-180:0.3);
+\node[font=\scriptsize, anchor=west] at (\cwArcX + 0.35, \cwArcY) {CW};
+
+% "4 edges" ABOVE and "4 counts" BELOW the P33 exit tail
+\def\annotX{\cwPthrtythreeEnd + 0.15}
+\node[font=\scriptsize, anchor=west] at (\annotX, \cwPthrtythreeBase + 0.25) {4 edges};
+\node[font=\scriptsize, anchor=west] at (\annotX, \cwPthrtythreeBase - 0.25) {4 counts};
+
+% --- Dividing Line ---
+\draw[thin] (\wavestart - 0.3, 2.5) -- (\wavestart + 4.8, 2.5);
+
+% --- CCW (Counter-Clockwise) Section - BOTTOM ---
+% Y positions for CCW section
+\def\ccwPthrtytwoBase{1.8}
+\def\ccwPthrtythreeBase{0.8}
+
+% P32 CCW waveform - same pattern as CW P32
+\node[font=\scriptsize] at (\wavelabelx, \ccwPthrtytwoBase + 0.25) {P32};
+% Extended lead-in LOW (foot for label)
+\draw[thick] (\wavestart, \ccwPthrtytwoBase) -- (\wavestart + \leadinW, \ccwPthrtytwoBase);
+% Pulse 1
+\draw[thick] (\wavestart + \leadinW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + \pulseW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \pulseW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + \pulseW, \ccwPthrtytwoBase);
+% Gap
+\draw[thick] (\wavestart + \leadinW + \pulseW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW + \pulseW + \gapW, \ccwPthrtytwoBase);
+% Pulse 2
+\draw[thick] (\wavestart + \leadinW + \pulseW + \gapW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW + \pulseW + \gapW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + \pulseW + \gapW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 2*\pulseW + \gapW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 2*\pulseW + \gapW, \ccwPthrtytwoBase);
+% Bigger gap
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase);
+% Pulse 3
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase + \highY);
+\draw[thick] (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase + \highY) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase);
+% Lead-out LOW
+\draw[thick] (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtytwoBase) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW + \tailW, \ccwPthrtytwoBase);
+
+% P33 CCW waveform - same pattern but shifted LEFT (leading ~50%)
+\node[font=\scriptsize] at (\wavelabelx, \ccwPthrtythreeBase + 0.25) {P33};
+% Phase shift - P33 leads P32 (starts earlier)
+\def\ccwShift{0.25}
+% Lead-in LOW (shorter due to lead)
+\draw[thick] (\wavestart, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift, \ccwPthrtythreeBase);
+% Pulse 1 (starts earlier)
+\draw[thick] (\wavestart + \leadinW - \ccwShift, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + \pulseW, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift + \pulseW, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + \pulseW, \ccwPthrtythreeBase);
+% Gap
+\draw[thick] (\wavestart + \leadinW - \ccwShift + \pulseW, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift + \pulseW + \gapW, \ccwPthrtythreeBase);
+% Pulse 2
+\draw[thick] (\wavestart + \leadinW - \ccwShift + \pulseW + \gapW, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift + \pulseW + \gapW, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift + \pulseW + \gapW, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW, \ccwPthrtythreeBase);
+% Bigger gap
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase);
+% Pulse 3
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase) -- (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 2*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase + \highY);
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase + \highY) -- (\wavestart + \leadinW - \ccwShift + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase);
+% Lead-out LOW (longer due to lead)
+\draw[thick] (\wavestart + \leadinW - \ccwShift + 3*\pulseW + \gapW + \bigGapW, \ccwPthrtythreeBase) -- (\wavestart + \leadinW + 3*\pulseW + \gapW + \bigGapW + \tailW, \ccwPthrtythreeBase);
+
+% CCW curved arrow and label - arc center on P32 baseline, arrow goes opposite direction
+\def\ccwArcX{\wavestart + 4.3}
+\def\ccwArcY{\ccwPthrtytwoBase}  % Arc center on P32 baseline
+\draw[thick, ->] (\ccwArcX, \ccwArcY - 0.3) arc (-90:180:0.3);
+\node[font=\scriptsize, anchor=west] at (\ccwArcX + 0.35, \ccwArcY) {CCW};
 
 \end{tikzpicture}
 \par}
