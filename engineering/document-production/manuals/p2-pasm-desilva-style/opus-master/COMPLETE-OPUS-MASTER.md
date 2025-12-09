@@ -1,6 +1,78 @@
+```{=latex}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
+
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Assembly Programming\par}
+\vspace{0.3cm}
+{\Large\itshape A Human-Centered Approach to Parallel Processing\par}
+\vspace{0.6cm}
+{\large December 2025\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0 - Technical Review\par}
+
+\vfill
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Tutorial Philosophy},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{Learn by doing, celebrate progress, have fun!}
+
+\vspace{0.3cm}
+\begin{minipage}[t]{0.38\textwidth}
+\textbf{Code Block Colors:}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item \textcolor{green!50!black}{\textbf{Green}} -- Spin2
+\item \textcolor{orange!70!black}{\textbf{Yellow}} -- PASM2
+\item \textcolor{purple!60!black}{\textbf{Purple}} -- CORDIC
+\item \textcolor{blue!60!black}{\textbf{Blue}} -- Multi-COG
+\item \textcolor{red!60!black}{\textbf{Red}} -- Antipattern
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.58\textwidth}
+\textbf{Teaching Elements:}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item \textcolor{purple!60!black}{\textbf{Sidetracks}} -- deeper dives
+\item \textcolor{teal!70!black}{\textbf{Medicine Cabinet}} -- simpler alternatives
+\item \textcolor{green!50!black}{\textbf{Your Turn}} -- hands-on exercises
+\item \textcolor{orange!70!black}{\textbf{Interludes}} -- stories \& context
+\end{itemize}
+\end{minipage}
+\end{tcolorbox}
+\vspace{1cm}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+```
+
 # Copyright and License
 
-Copyright © 2025 Parallax Inc.  
+Copyright © 2025 Parallax Inc.
 All rights reserved.
 
 This manual incorporates knowledge and teaching approaches inspired by:
