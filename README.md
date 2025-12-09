@@ -16,8 +16,12 @@
 
 ## 🎯 Find What You Need
 
+### PDF Manuals (Community Review)
+**[→ Generated Documents](deliverables/documents/)**
+P2 Assembly Language Reference Manual and P2 Assembly Programming tutorial available for community technical review.
+
 ### For AI Systems & Code Generation
-**→ AI Reference Documentation**  
+**→ AI Reference Documentation**
 (Work in progress) Complete P2 instruction set, architecture details, and code patterns optimized for LLM consumption. Structured for accurate code generation with comprehensive examples and constraints.
 
 ## The following sections are planned for future updates, but currently contain NO content!
