@@ -1143,6 +1143,169 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 
 3. **The 30-character limit**: For compatibility with all tools, keep label names under 30 characters. `this_is_a_really_long_label_name` might cause trouble.
 
+## Data in DAT Blocks: Your Program's Pantry
+
+Speaking of data definitions starting new scopes... we should probably talk about how to actually declare data! You've seen snippets like `counter long 0` scattered through our examples, but there's a whole world of data declaration waiting for you.
+
+### The Three Sizes
+
+Just like Goldilocks, you have three choices:
+
+```pasm2
+DAT
+my_byte         byte    $FF             ' 1 byte (8 bits)
+my_word         word    $1234           ' 2 bytes (16 bits)
+my_long         long    $DEADBEEF       ' 4 bytes (32 bits)
+```
+
+When do you use each? Well:
+- **BYTE** for characters, small counters, flags, or when every byte of memory counts
+- **WORD** for medium values, 16-bit peripherals, or when BYTE is too small but LONG is wasteful
+- **LONG** for everything else - addresses, large numbers, and "I don't want to think about it"
+
+If you're unsure, use LONG. Memory is cheap, debugging overflow errors is not.
+
+### Multiple Values on One Line
+
+Here's a convenience - you can list multiple values after a single type:
+
+```pasm2
+DAT
+primes          long    2, 3, 5, 7, 11, 13, 17, 19
+gpio_pins       byte    16, 17, 18, 19, 20, 21
+message         byte    "Hello, P2!", 0     ' String with null terminator
+```
+
+The assembler just lays them out consecutively in memory. That string? It's just bytes - each character followed by a zero at the end.
+
+### Arrays: The Repetition Trick
+
+Need 100 bytes of zeros? Don't type them all out:
+
+```pasm2
+DAT
+buffer          byte    0[100]          ' 100 zero bytes
+lookup_table    word    $FFFF[64]       ' 64 words, all $FFFF
+scratch_pad     long    0[32]           ' 32 longs of zeros
+```
+
+The `[count]` syntax repeats the value. This is your friend for buffers, tables, and anywhere you need initialized storage.
+
+You can even combine values and repetition:
+
+```pasm2
+DAT
+mixed_init      byte    $AA, $BB, 0[10], $CC, $DD
+                '       ^    ^   ^^^^^   ^    ^
+                '       Two values, then 10 zeros, then two more values
+```
+
+### BYTEFIT and WORDFIT: The Safety Net
+
+Here's a subtle trap. What if you accidentally write:
+
+```pasm2
+DAT
+oops            byte    1000            ' Uh oh - 1000 doesn't fit in a byte!
+```
+
+The assembler will silently truncate 1000 to 232 (the low 8 bits). Your program will run, but with wrong values. Debugging that is no fun at all.
+
+Enter the safety net:
+
+```pasm2
+DAT
+safe_byte       bytefit 100, 200, 255   ' OK - all fit in a byte
+danger_byte     bytefit 100, 200, 300   ' ERROR! 300 > 255, assembler complains
+
+safe_word       wordfit 1000, 50000     ' OK - all fit in a word
+danger_word     wordfit 1000, 70000     ' ERROR! 70000 > 65535
+```
+
+Use `BYTEFIT` and `WORDFIT` when you want the assembler to check that your constants actually fit. It's like having a compiler catch your mistakes before they become 3 AM debugging sessions.
+
+### Alignment: Keeping Things Tidy
+
+The P2 is quite forgiving about alignment - it can read a LONG from any address. But aligned access is faster and cleaner. Sometimes you need to force alignment:
+
+```pasm2
+DAT
+some_bytes      byte    1, 2, 3         ' 3 bytes
+                alignw                   ' Align to word boundary
+next_word       word    $1234           ' Now properly aligned
+
+more_bytes      byte    "ABC"           ' 3 bytes
+                alignl                   ' Align to long boundary
+next_long       long    $DEADBEEF       ' Now on a 4-byte boundary
+```
+
+When does alignment matter? Mostly when you're:
+- Mixing data sizes in the same DAT block
+- Creating structures that Spin2 code will access
+- Optimizing for maximum hub access speed
+
+If you're just starting out, don't worry about it. Add alignment when you hit problems.
+
+### A Complete Example
+
+Let's put it all together:
+
+```pasm2
+DAT             org
+
+' Your code goes here
+entry           mov     ptra, ##buffer_addr
+                mov     count, #BUFFER_SIZE
+.fill           wrbyte  fill_value, ptra++
+                djnz    count, #.fill
+                jmp     #$
+
+' Constants (read-only, effectively)
+fill_value      byte    $55
+BUFFER_SIZE     long    256
+
+' Lookup tables
+                alignl
+sin_table       word    0, 1608, 3212, 4808, 6393   ' Partial sine table
+                word    7962, 9512, 11039, 12540    ' ... continues
+
+' Working storage
+                alignl
+buffer_addr     long    0               ' Filled by Spin2 at startup
+temp            long    0
+result          long    0
+
+' Reserve uninitialized space
+                alignl
+scratch         res     16              ' Reserve 16 longs (not initialized)
+```
+
+Notice the pattern: code first, then constants, then working storage, then reserved space. This keeps things organized and makes your DAT block readable.
+
+### The Medicine: Quick Reference
+
+| Declaration | Meaning | Example |
+|-------------|---------|---------|
+| `byte val` | 8-bit value | `byte $FF` |
+| `word val` | 16-bit value | `word $1234` |
+| `long val` | 32-bit value | `long $DEADBEEF` |
+| `val[n]` | Repeat n times | `byte 0[100]` |
+| `bytefit` | Byte with range check | `bytefit 100, 200` |
+| `wordfit` | Word with range check | `wordfit 1000, 50000` |
+| `alignw` | Align to word | (no value) |
+| `alignl` | Align to long | (no value) |
+| `res n` | Reserve n longs | `res 16` |
+
+### Common Gotchas
+
+1. **Forgetting the label**: Every piece of data needs a label if you want to reference it. Anonymous data just wastes space.
+
+2. **String termination**: `byte "Hello"` doesn't include a null terminator. Add `, 0` if you need one!
+
+3. **RES is in longs**: `res 10` reserves 10 *longs* (40 bytes), not 10 bytes. This trips up everyone at least once.
+
+4. **Alignment after RES**: `res` doesn't affect alignment. If you need alignment after reserved space, add an explicit `alignl` or `alignw`.
+
 ## The Flags: C and Z (and Q!)
 
 Flags are your friends. They remember things:
@@ -1365,6 +1528,8 @@ This isn't accident - it's philosophy. The P2 was designed to make assembly prog
 - ✅ Basic data movement and math
 - ✅ Hardware multiply and divide (!)
 - ✅ Conditional execution on any instruction
+- ✅ Labels (global and local) and scoping rules
+- ✅ DAT block data declarations (BYTE, WORD, LONG)
 - ✅ Special instructions (SKIP, REP, ALT*)
 - ✅ Flag operations and testing
 - ✅ Why PASM2 is human-friendly
