@@ -10,14 +10,14 @@
 
 The following documents are available for community technical review. We welcome feedback on accuracy, completeness, and clarity.
 
-### [P2 Assembly Language Reference Manual](P2-Assembly-Language-Manual.pdf)
+### [P2 Assembly Language Reference Manual](DOCs/P2-Assembly-Language-Manual.pdf)
 **Complete PASM2 Instruction Set Documentation**
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 
 *December 2025 - First Community Review Edition*
 
-### [P2 Assembly Programming](P2-PASM-deSilva-Style.pdf)
+### [P2 Assembly Programming](DOCs/P2-PASM-deSilva-Style.pdf)
 **A Human-Centered Approach to Parallel Processing**
 
 This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
