@@ -1564,50 +1564,95 @@
 {\centering
 \begin{tikzpicture}[x=0.5cm, y=1cm]
 
-% System Clock (dense)
-\node[sp-label] at (-1.5, 3.5) {System\\Clock};
-\node[sp-annotation, anchor=east] at (0.0, 3.8) {1};
-\node[sp-annotation, anchor=east] at (0.0, 3.2) {0};
-% Draw many clock cycles
-\foreach \i in {0,...,40} {
-    \pgfmathsetmacro{\x}{0.2 + \i*0.3}
-    \draw[sp-signal, thin] (\x, 3.2) -- (\x, 3.8) -- (\x+0.15, 3.8) -- (\x+0.15, 3.2);
+% Layout parameters
+\def\leadinW{0.5}           % Width of dashed lead-in/lead-out
+\def\solidleadW{1.0}        % Width of solid LOW before/after clock pulses
+\def\wavestart{0.2}         % Where solid waveform starts (after dashed)
+\def\Qend{2.0}              % End of Q region (first rising edge)
+\def\Rwidth{6.7}            % R region width (was 5.0, now ~1/3 wider)
+\def\Swidth{6.7}            % S region width (was 5.0, now ~1/3 wider)
+\pgfmathsetmacro{\Rend}{\Qend + \Rwidth}        % End of R = 8.7
+\pgfmathsetmacro{\Send}{\Rend + \Swidth}        % End of S = 15.4
+\pgfmathsetmacro{\waveend}{\Send + 1.0}         % End of HIGH after S
+\pgfmathsetmacro{\totalend}{\waveend + \leadinW} % End including dashed
+
+% Y levels
+\def\clkHi{3.8}
+\def\clkLo{3.2}
+\def\clkMid{3.5}
+\def\sigHi{2.2}
+\def\sigLo{1.4}
+\def\sigMid{1.8}
+
+% System Clock labels (keep position)
+\node[sp-label] at (-1.5, \clkMid) {System\\Clock};
+% Level indicators moved left by ~1 digit width
+\node[sp-annotation, anchor=east] at (-0.5, \clkHi) {1};
+\node[sp-annotation, anchor=east] at (-0.5, \clkLo) {0};
+
+% System Clock waveform with proper baseline
+% Lead-in: dashed LOW
+\draw[dashed, thin] (-\leadinW, \clkLo) -- (0, \clkLo);
+% Solid LOW lead before clock pulses
+\draw[sp-signal] (0, \clkLo) -- (\solidleadW, \clkLo);
+% Clock pulses (dense) - proper square wave with gaps at HIGH
+\pgfmathsetmacro{\clkstart}{\solidleadW}
+\pgfmathsetmacro{\clkend}{\Send + 2.0}  % Continue past S rising edge
+% Each pulse: rise, HIGH, fall, then LOW segment to next rise
+% Pattern: | |__| |__| |__ (gaps at top, connected at bottom between pulses)
+\foreach \i in {0,...,50} {
+    \pgfmathsetmacro{\x}{\clkstart + \i*0.3}
+    \ifdim \x pt < \clkend pt
+        % Rising edge, HIGH, falling edge
+        \draw[sp-signal, thin] (\x, \clkLo) -- (\x, \clkHi) -- (\x+0.15, \clkHi) -- (\x+0.15, \clkLo);
+        % LOW segment connecting to next pulse (if not last)
+        \pgfmathsetmacro{\nextx}{\x + 0.3}
+        \ifdim \nextx pt < \clkend pt
+            \draw[sp-signal, thin] (\x+0.15, \clkLo) -- (\nextx, \clkLo);
+        \fi
+    \fi
 }
+% Solid LOW from end of last pulse to waveend, then dashed lead-out
+\draw[sp-signal] (\clkend, \clkLo) -- (\waveend, \clkLo);
+\draw[dashed, thin] (\waveend, \clkLo) -- (\totalend, \clkLo);
 
-% A Input
-\node[sp-label] at (-1.5, 1.8) {A Input};
-\node[sp-annotation, anchor=east] at (0.0, 2.2) {1};
-\node[sp-annotation, anchor=east] at (0.0, 1.4) {0};
+% A Input labels (keep position)
+\node[sp-label] at (-1.5, \sigMid) {A Input};
+% Level indicators moved left by ~1 digit width
+\node[sp-annotation, anchor=east] at (-0.5, \sigHi) {1};
+\node[sp-annotation, anchor=east] at (-0.5, \sigLo) {0};
 
-% Signal with regions Q, R, S
-\draw[dashed, thin] (-0.3, 1.4) -- (0.2, 1.4);
-\draw[sp-signal] (0.2, 1.4) -- (2.0, 1.4) -- (2.0, 2.2);
-% Q region (low)
-\node[sp-annotation] at (1.1, 1.8) {Q};
+% A Input waveform
+% Lead-in: dashed LOW
+\draw[dashed, thin] (-\leadinW, \sigLo) -- (\wavestart, \sigLo);
+% Q region (LOW)
+\draw[sp-signal] (\wavestart, \sigLo) -- (\Qend, \sigLo) -- (\Qend, \sigHi);
+\node[sp-annotation] at ({(\wavestart + \Qend)/2}, \sigMid) {Q};
 
-% R region (high)
-\draw[sp-signal] (2.0, 2.2) -- (7.0, 2.2) -- (7.0, 1.4);
-\node[sp-annotation] at (4.5, 1.8) {R};
+% R region (HIGH) - wider
+\draw[sp-signal] (\Qend, \sigHi) -- (\Rend, \sigHi) -- (\Rend, \sigLo);
+\node[sp-annotation] at ({(\Qend + \Rend)/2}, \sigMid) {R};
 
-% S region (low)
-\draw[sp-signal] (7.0, 1.4) -- (12.0, 1.4) -- (12.0, 2.2);
-\node[sp-annotation] at (9.5, 1.8) {S};
+% S region (LOW) - wider
+\draw[sp-signal] (\Rend, \sigLo) -- (\Send, \sigLo) -- (\Send, \sigHi);
+\node[sp-annotation] at ({(\Rend + \Send)/2}, \sigMid) {S};
 
-\draw[sp-signal] (12.0, 2.2) -- (13.0, 2.2);
-\draw[dashed, thin] (13.0, 2.2) -- (13.5, 2.2);
+% Final HIGH and lead-out
+\draw[sp-signal] (\Send, \sigHi) -- (\waveend, \sigHi);
+\draw[dashed, thin] (\waveend, \sigHi) -- (\totalend, \sigHi);
 
 % Annotations at transitions
-\draw[sp-arrow] (2.0, 1.0) -- (2.0, 1.3);
-\node[sp-annotation] at (2.0, 0.6) {C = 0};
-\node[sp-annotation, color=sp-annotation] at (2.0, 0.2) {Z = Q Counts};
+\draw[sp-arrow] (\Qend, 1.0) -- (\Qend, 1.3);
+\node[sp-annotation] at (\Qend, 0.6) {C = 0};
+\node[sp-annotation, color=sp-annotation] at (\Qend, 0.2) {Z = Q Counts};
 
-\draw[sp-arrow] (7.0, 1.0) -- (7.0, 1.3);
-\node[sp-annotation] at (7.0, 0.6) {C= 1};
-\node[sp-annotation] at (7.0, 0.2) {Z = R Counts};
+\draw[sp-arrow] (\Rend, 1.0) -- (\Rend, 1.3);
+\node[sp-annotation] at (\Rend, 0.6) {C= 1};
+\node[sp-annotation] at (\Rend, 0.2) {Z = R Counts};
 
-\draw[sp-arrow] (12.0, 1.0) -- (12.0, 1.3);
-\node[sp-annotation] at (12.0, 0.6) {C= 0};
-\node[sp-annotation] at (12.0, 0.2) {Z = S Counts};
+\draw[sp-arrow] (\Send, 1.0) -- (\Send, 1.3);
+\node[sp-annotation] at (\Send, 0.6) {C= 0};
+\node[sp-annotation] at (\Send, 0.2) {Z = S Counts};
 
 \end{tikzpicture}
 \par}
