@@ -64,6 +64,9 @@ sources/originals/*.pdf
 sources/originals/*.csv
 *.pdf
 
+# Exception: Allow PDFs in deliverables (final documents for community)
+!deliverables/documents/*.pdf
+
 # Archived V1 extractions (superseded by V2)
 sources/extractions-v1-archived/
 

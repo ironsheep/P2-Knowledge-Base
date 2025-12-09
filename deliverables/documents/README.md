@@ -6,16 +6,23 @@
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
 
-## Available Documents
+## Documents in Community Review
 
-*Documents will be listed here as they are generated.*
+The following documents are available for community technical review. We welcome feedback on accuracy, completeness, and clarity.
 
-Coming soon:
+### [P2 Assembly Programming](P2-PASM-deSilva-Style.pdf)
+**A Human-Centered Approach to Parallel Processing**
+
+This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
+
+*December 2025 - First Community Review Edition*
+
+
+## Coming Soon
 
 - Propeller 2 Manual
-- Propeller 2 Assembly Language (PASM2) Manual 
+- Propeller 2 Assembly Language (PASM2) Reference Manual
 - Propeller 2 Smart Pins & I/O - Master Every Aspect of P2 Input/Output Through Progressive Learning
-- Propeller 2 Assembly Lanuguage Programming - A Human-Centered Approach to Parallel Processing
 - Learning to use Debug Windows
 - Single-step Debugger Reference Guide
 
