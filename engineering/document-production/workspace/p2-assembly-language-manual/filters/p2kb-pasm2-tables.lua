@@ -134,7 +134,7 @@ local function handle_encoding_table(el)
   table.insert(latex, string.format("  column{9}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[9]))
   -- Header row styling with color zones and inner padding
   -- Add padding to narrow columns (EEEE, CZI) so text doesn't butt against borders
-  table.insert(latex, "  row{1}={font=\\bfseries\\small},")
+  table.insert(latex, "  row{1}={font=\\bfseries\\footnotesize},")
   table.insert(latex, "  cell{1}{1}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")
   table.insert(latex, "  cell{1}{2}={bg=pasm2-enc-instruction},")
   table.insert(latex, "  cell{1}{3}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")

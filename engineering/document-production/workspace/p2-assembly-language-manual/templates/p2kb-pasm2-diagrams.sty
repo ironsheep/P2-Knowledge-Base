@@ -1504,15 +1504,19 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (packed: $11, $22, $22, $33, $33, $33, $33, --, --, --, --, --)
+% Data cells (without ALIGNL - word and long still auto-align)
+% B0: byte $11
+% B1: $00 (word auto-aligns to word boundary at B2)
+% B2-B3: word $BBAA in little-endian: $AA, $BB
+% B4-B7: long $44332211 in little-endian: $11, $22, $33, $44
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
-\node[cell, fill=align-data] at (1*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (3*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$AA};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$BB};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
 \node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-empty] at (7*\cw, 0) {--};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$44};
 \node[cell, fill=align-empty] at (8*\cw, 0) {--};
 \node[cell, fill=align-empty] at (9*\cw, 0) {--};
 \node[cell, fill=align-empty] at (10*\cw, 0) {--};
@@ -1576,19 +1580,24 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (aligned: $11, $00, $00, $00, $22, $22, $33, $33, $33, $33, --, --)
+% Data cells with ALIGNL applied
+% B0: byte $11
+% B1-B3: ALIGNL padding (3 bytes to reach L1)
+% B4-B5: word $BBAA in little-endian: $AA, $BB
+% B6-B7: long auto-alignment padding (2 bytes to reach L2)
+% B8-B11: long $44332211 in little-endian: $11, $22, $33, $44
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
 \node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
 \node[cell, fill=align-pad] at (2*\cw, 0) {\$00};
 \node[cell, fill=align-pad] at (3*\cw, 0) {\$00};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (7*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (8*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (9*\cw, 0) {\$33};
-\node[cell, fill=align-empty] at (10*\cw, 0) {--};
-\node[cell, fill=align-empty] at (11*\cw, 0) {--};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$AA};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$BB};
+\node[cell, fill=align-pad] at (6*\cw, 0) {\$00};
+\node[cell, fill=align-pad] at (7*\cw, 0) {\$00};
+\node[cell, fill=align-data] at (8*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (9*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (10*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (11*\cw, 0) {\$44};
 
 \end{tikzpicture}
 \end{center}
@@ -1647,15 +1656,19 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (packed: $11, $22, $22, $33, $33, $33, $33, --, --, --, --, --)
+% Data cells (without ALIGNW - bytes pack tightly, long auto-aligns)
+% B0: byte $11 (T1)
+% B1-B2: bytes $AA, $BB (T2 - no alignment, packed after T1)
+% B3: $00 (long auto-aligns to long boundary at B4)
+% B4-B7: long $44332211 in little-endian: $11, $22, $33, $44
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
-\node[cell, fill=align-data] at (1*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (3*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (1*\cw, 0) {\$AA};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$BB};
+\node[cell, fill=align-pad] at (3*\cw, 0) {\$00};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
 \node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-empty] at (7*\cw, 0) {--};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$44};
 \node[cell, fill=align-empty] at (8*\cw, 0) {--};
 \node[cell, fill=align-empty] at (9*\cw, 0) {--};
 \node[cell, fill=align-empty] at (10*\cw, 0) {--};
@@ -1719,15 +1732,19 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (word-aligned: $11, $00, $22, $22, $33, $33, $33, $33, --, --, --, --)
+% Data cells (with ALIGNW - T2 bytes start on word boundary)
+% B0: byte $11 (T1)
+% B1: $00 (ALIGNW padding to reach word boundary at B2)
+% B2-B3: bytes $AA, $BB (T2 - now word-aligned)
+% B4-B7: long $44332211 in little-endian: $11, $22, $33, $44
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
 \node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
-\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (3*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$AA};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$BB};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
 \node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (7*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$44};
 \node[cell, fill=align-empty] at (8*\cw, 0) {--};
 \node[cell, fill=align-empty] at (9*\cw, 0) {--};
 \node[cell, fill=align-empty] at (10*\cw, 0) {--};
