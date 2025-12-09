@@ -76,9 +76,9 @@
 
 # Copyright and License
 
-Copyright 2025 P2 Knowledge Base Project
+Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
 You are free to:
 
@@ -88,9 +88,13 @@ You are free to:
 Under the following terms:
 
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
-- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
 
-Propeller 2, P2, and Parallax are trademarks of Parallax Inc. This manual is an independent community resource and is not officially endorsed by Parallax Inc.
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+
+### Trademarks
+
+Propeller 2, P2, and Parallax are trademarks of Parallax Inc.
 
 
 ## Acknowledgments
