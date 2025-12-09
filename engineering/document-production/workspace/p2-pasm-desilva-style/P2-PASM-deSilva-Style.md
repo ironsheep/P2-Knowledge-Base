@@ -72,18 +72,9 @@
 
 # Copyright and License
 
-Copyright © 2025 Parallax Inc.  
-All rights reserved.
+Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
 
-This manual incorporates knowledge and teaching approaches inspired by:
-- **deSilva's P1 Assembly Tutorial** - The foundational pedagogical approach
-- **Iron Sheep Productions LLC** - Technical expertise and P2 community contributions
-- **The Propeller Community** - Years of collective wisdom
-
-
-### License
-
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
 You are free to:
 
@@ -95,11 +86,18 @@ Under the following terms:
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
 
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+
+### Acknowledgments
+
+This manual incorporates knowledge and teaching approaches inspired by:
+
+- **deSilva's P1 Assembly Tutorial** — The foundational pedagogical approach
+- **The Propeller Community** — Years of collective wisdom
 
 ### Trademarks
 
 Propeller, Propeller 2, P2, Spin, and the Parallax logo are trademarks of Parallax Inc.
-
 
 ### Disclaimer
 
