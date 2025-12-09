@@ -51,11 +51,12 @@ end
 -- Emits raw LaTeX tabularray with colored header zones
 local function handle_encoding_table(el)
   -- Fixed widths for bit field columns (total: ~0.43)
-  -- NOTE: Col 3 (CZI) needs extra width for preto/appto padding (8pt total)
+  -- NOTE: Cols 1 & 3 have preto/appto padding (8pt total each)
+  -- Redistributed: took 0.010 from Opcode, 0.005 from CZI, gave to EEEE
   local fixed_widths = {
-    0.055,  -- Col 1: EEEE (4 chars + 8pt padding)
-    0.100,  -- Col 2: Opcode (7 chars)
-    0.055,  -- Col 3: CZI (3 chars + 8pt padding) - was 0.035, too narrow
+    0.070,  -- Col 1: EEEE (4 chars + 8pt padding) - was 0.055, increased to prevent line-wrap
+    0.090,  -- Col 2: Opcode (7 chars) - was 0.100, reduced slightly
+    0.050,  -- Col 3: CZI (3 chars + 8pt padding) - was 0.055, reduced to balance whitespace
     0.110,  -- Col 4: D (9 chars)
     0.110,  -- Col 5: S (9 chars)
   }
@@ -206,11 +207,70 @@ local function handle_encoding_table(el)
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
+-- Detect if this is a "Constant | Value | Description" table (Appendix E, F patterns)
+-- These tables have long binary/hex values in column 2 that need special handling
+local function is_constant_value_description_table(el)
+  if #el.colspecs ~= 3 then
+    return false
+  end
+
+  -- Check header row for "Constant", "Value", "Description" pattern
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 3 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
+      local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+      local h3 = pandoc.utils.stringify(header_row.cells[3].contents):lower()
+
+      -- Match "Constant | Value | Description" or similar patterns
+      if (h1:match("constant") or h1:match("name") or h1:match("symbol")) and
+         (h2:match("value") or h2:match("hex") or h2:match("binary")) and
+         (h3:match("description") or h3:match("meaning") or h3:match("purpose")) then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
+-- Detect if this is an "Instruction | Description" table (Appendix B pattern)
+-- These 2-column tables should have consistent widths: ~20% instruction, ~80% description
+local function is_instruction_description_table(el)
+  if #el.colspecs ~= 2 then
+    return false
+  end
+
+  -- Check header row for "Instruction", "Description" pattern
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 2 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
+      local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+
+      -- Match "Instruction | Description" pattern
+      if h1:match("instruction") and h2:match("description") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
 -- Handle content tables (2-8 columns) with page-width constraint
 -- CONSERVATIVE: Uses Pandoc's column width hints from markdown, just adds width=\linewidth
 -- If no widths specified in markdown, uses equal distribution with last column flexible
 local function handle_content_table(el)
   local num_cols = #el.colspecs
+
+  -- Special handling for "Constant | Value | Description" tables (Appendix E, F)
+  -- These need specific widths because Value column has long binary patterns
+  local is_const_val_desc = is_constant_value_description_table(el)
+
+  -- Special handling for "Instruction | Description" tables (Appendix B)
+  -- These need consistent widths to avoid 50/50 split on shorter tables
+  local is_instr_desc = is_instruction_description_table(el)
 
   -- Extract column widths from Pandoc's colspecs
   -- colspecs is a list of {alignment, width} pairs
@@ -230,9 +290,41 @@ local function handle_content_table(el)
     end
   end
 
-  -- If markdown specified widths, use them (scaled to fit)
-  -- If not, calculate reasonable defaults
-  if has_widths and total_specified > 0 then
+  -- Special case: Constant | Value | Description tables
+  -- Override Pandoc's widths with optimized values for binary/hex content
+  -- Appendix E has very long values: %0000_0000_000_0000000000000_00_00000_0 (36 chars)
+  -- Appendix F has shorter values: %0000_0000_0000_0000 << 16 (26 chars)
+  -- Measure actual content to determine which width profile to use
+  if is_const_val_desc then
+    -- Measure max length in column 2 (Value column)
+    local max_value_len = get_max_column_length(el, 2)
+
+    if max_value_len >= 32 then
+      -- Appendix E style: long 36-char binary values
+      -- Column 1 (Constant): 17% - max 16 chars like P_DAC_DITHER_RND
+      -- Column 2 (Value): 43% - 36-char binary patterns
+      -- Column 3 (Description): 35% - more room for descriptions
+      widths[1] = 0.17
+      widths[2] = 0.43
+      widths[3] = 0.35
+    else
+      -- Appendix F style: shorter 26-char shifted values
+      -- Column 1 (Constant): 22% - max 24 chars like X_2ADC8_16P_4DAC8_WFLONG
+      -- Column 2 (Value): 32% - 26-char shifted patterns
+      -- Column 3 (Description): 41% - much more room for descriptions
+      widths[1] = 0.22
+      widths[2] = 0.32
+      widths[3] = 0.41
+    end
+    has_widths = true
+  elseif is_instr_desc then
+    -- Instruction | Description tables (Appendix B)
+    -- Force consistent widths: 18% instruction name, 77% description
+    -- This prevents Pandoc from inferring 50/50 on shorter tables
+    widths[1] = 0.18
+    widths[2] = 0.77
+    has_widths = true
+  elseif has_widths and total_specified > 0 then
     -- Scale widths to sum to ~0.95 (leave room for padding)
     local scale = 0.95 / total_specified
     for i = 1, num_cols do
@@ -287,8 +379,15 @@ local function handle_content_table(el)
   local latex = {}
   table.insert(latex, "\\begin{tblr}{")
   table.insert(latex, "  width=\\linewidth,")
-  table.insert(latex, "  rowsep=3pt,")
-  table.insert(latex, "  colsep=6pt,")
+
+  -- Use tighter spacing for Constant|Value|Description tables
+  if is_const_val_desc then
+    table.insert(latex, "  rowsep=2pt,")
+    table.insert(latex, "  colsep=4pt,")
+  else
+    table.insert(latex, "  rowsep=3pt,")
+    table.insert(latex, "  colsep=6pt,")
+  end
 
   -- Column specifications
   -- Build colspec string for tabularray
@@ -303,9 +402,15 @@ local function handle_content_table(el)
   end
   table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
 
+  -- Styling for Constant|Value|Description tables: smaller monospace font
+  if is_const_val_desc then
+    table.insert(latex, "  row{1}={font=\\bfseries\\footnotesize},")
+    table.insert(latex, "  row{2-Z}={font=\\ttfamily\\footnotesize},")
+  else
+    -- Styling: bold header row
+    table.insert(latex, "  row{1}={font=\\bfseries},")
+  end
 
-  -- Styling: bold header row, horizontal rules
-  table.insert(latex, "  row{1}={font=\\bfseries},")
   table.insert(latex, "  hline{1,2}={solid},")
   table.insert(latex, "  hline{Z}={solid},")
   table.insert(latex, "}")

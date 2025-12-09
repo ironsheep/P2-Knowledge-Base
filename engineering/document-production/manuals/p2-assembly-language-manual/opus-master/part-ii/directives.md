@@ -395,17 +395,58 @@ Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align
 
 #### Syntax
 ```pasm
-        ALIGNL
+DAT
+  code_and_data_statements
+  ALIGNL
+  data_statements
 ```
 
-#### Usage
-Use ALIGNL before data declarations or code sections that require long alignment for efficient access or hardware requirements. The P2 requires long alignment for certain operations and achieves optimal performance when accessing long-aligned data in hub RAM.
+**Result:** The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.
+
+- *code_and_data_statements* are leading program code and/or data.
+- *data_statements* begin long-aligned in Hub RAM.
+
+#### Explanation
+
+ALIGNL aligns the next data element to the beginning of the next long of Hub RAM. ALIGNL is important to use when code requires certain data to begin on a long boundary (for access convenience and speed).
+
+ALIGNL is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
+
+The following creates a data table of a byte ($11), a word ($2222), and a long ($33333333) meant for access from Hub RAM.
+
 ```pasm
-        ALIGNL                  ' Align to next long boundary
-mydata  long    0               ' This starts on a long-aligned address
+DAT
+    T1      byte    $11
+    T2      word    $2222
+            long    $33333333
 ```
+
+This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries.
+
+::: {.diagram}
+\AlignLBeforeDiagram
+:::
+
+Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenience or speed), the ALIGNL directive achieves this, as follows.
+
+```pasm
+DAT
+    T1      byte    $11
+
+            ALIGNL
+    T2      word    $2222
+            long    $33333333
+```
+
+In comparison, this data will be emitted as follows:
+
+::: {.diagram}
+\AlignLAfterDiagram
+:::
+
+In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of L1. Note that the second element (a long) of Table T2 is still packed right after the first element (a word) which may require further attention depending on the needs of the code accessing it.
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
@@ -431,17 +472,58 @@ Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align
 
 #### Syntax
 ```pasm
-        ALIGNW
+DAT
+  code_and_data_statements
+  ALIGNW
+  data_statements
 ```
 
-#### Usage
-Use ALIGNW before data declarations that require word alignment for efficient 16-bit access. Proper word alignment improves performance when accessing word-sized data in hub RAM.
+**Result:** The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.
+
+- *code_and_data_statements* are leading program code and/or data.
+- *data_statements* begin word-aligned in Hub RAM.
+
+#### Explanation
+
+ALIGNW aligns the next data element to the beginning of the next word of Hub RAM. ALIGNW is important to use when code requires certain data to begin on a word boundary (for access convenience and speed).
+
+ALIGNW is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
+
+The following creates a data table of a byte ($11), a word ($2222), and a long ($33333333) meant for access from Hub RAM.
+
 ```pasm
-        ALIGNW                  ' Align to next word boundary
-myword  word    0               ' This starts on a word-aligned address
+DAT
+    T1      byte    $11
+    T2      word    $2222
+            long    $33333333
 ```
+
+This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries.
+
+::: {.diagram}
+\AlignWBeforeDiagram
+:::
+
+Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenience or speed), the ALIGNW directive achieves this, as follows.
+
+```pasm
+DAT
+    T1      byte    $11
+
+            ALIGNW
+    T2      word    $2222
+            long    $33333333
+```
+
+In comparison, this data will be emitted as follows:
+
+::: {.diagram}
+\AlignWAfterDiagram
+:::
+
+In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of W1.
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary

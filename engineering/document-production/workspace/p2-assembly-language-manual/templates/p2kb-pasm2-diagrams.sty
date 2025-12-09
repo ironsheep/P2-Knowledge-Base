@@ -1440,94 +1440,307 @@ Each level has its own IJMP/IRET register pair.
 \end{center}
 }
 
-% ==================== ALIGNW DIAGRAM ====================
-% Shows ALIGNW word alignment effect
-\newcommand{\AlignWDiagram}{%
+% ==================== MEMORY ALIGNMENT DIAGRAMS ====================
+% Parallax-style three-tier memory layout diagrams for ALIGNL/ALIGNW
+% Shows Long boundaries (L#), Word boundaries (W#), Byte boundaries (B#)
+% with actual hex data values
+
+% Color for alignment diagram data cells (yellow like Parallax reference)
+\definecolor{align-data}{HTML}{FFFFCC}      % Light yellow for data
+\definecolor{align-pad}{HTML}{CCFFCC}       % Light green for padding bytes
+\definecolor{align-empty}{HTML}{E0E0E0}     % Gray for empty/unused
+
+% ==================== ALIGNL BEFORE DIAGRAM ====================
+% Shows data layout BEFORE ALIGNL is applied
+% Data: T1=BYTE $11, T2=WORD $2222, LONG $33333333 (packed)
+\newcommand{\AlignLBeforeDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
     cell/.style={
         rectangle,
         draw=diagram-border,
-        minimum width=0.8cm,
-        minimum height=0.6cm,
+        minimum width=0.85cm,
+        minimum height=0.55cm,
         align=center,
         font=\scriptsize\ttfamily
     },
-    annotation/.style={
+    header/.style={
         font=\scriptsize,
         text=diagram-text
+    },
+    boundary/.style={
+        font=\tiny,
+        text=gray
     }
 ]
 
-% Title
-\node[font=\bfseries] at (0, 2) {ALIGNW: Word Alignment};
+% Cell width for positioning
+\def\cw{0.85}
 
-% Before
-\node[annotation, anchor=east] at (-4, 1) {Before:};
-\node[cell, fill=diagram-highlight] at (-2.5, 1) {B0};
-\node[cell, fill=diagram-box] at (-1.7, 1) {?};
-\node[cell, fill=diagram-box] at (-0.9, 1) {?};
-\node[annotation] at (-3.3, 1) {\$001};
+% Long boundary labels (top row)
+\node[header] at (1.5*\cw, 1.4) {L0};
+\node[header] at (5.5*\cw, 1.4) {L1};
+\node[header] at (9.5*\cw, 1.4) {L2};
 
-% After
-\node[annotation, anchor=east] at (-4, 0) {After:};
-\node[cell, fill=diagram-highlight] at (-2.5, 0) {B0};
-\node[cell, fill=timing-wait] at (-1.7, 0) {pad};
-\node[cell, fill=diagram-box] at (-0.9, 0) {next};
-\node[annotation] at (-3.3, 0) {\$001};
-\node[annotation] at (-0.9, -0.5) {\$002 (word aligned)};
+% Word boundary labels (middle row)
+\node[boundary] at (0.5*\cw, 1.0) {W0};
+\node[boundary] at (2.5*\cw, 1.0) {W1};
+\node[boundary] at (4.5*\cw, 1.0) {W2};
+\node[boundary] at (6.5*\cw, 1.0) {W3};
+\node[boundary] at (8.5*\cw, 1.0) {W4};
+\node[boundary] at (10.5*\cw, 1.0) {W5};
 
-\node[annotation, text width=6cm, align=center] at (0, -1.2) {Pads to next word boundary (even address)};
+% Byte boundary labels (bottom row above data)
+\node[boundary] at (0*\cw, 0.6) {B0};
+\node[boundary] at (1*\cw, 0.6) {B1};
+\node[boundary] at (2*\cw, 0.6) {B2};
+\node[boundary] at (3*\cw, 0.6) {B3};
+\node[boundary] at (4*\cw, 0.6) {B4};
+\node[boundary] at (5*\cw, 0.6) {B5};
+\node[boundary] at (6*\cw, 0.6) {B6};
+\node[boundary] at (7*\cw, 0.6) {B7};
+\node[boundary] at (8*\cw, 0.6) {B8};
+\node[boundary] at (9*\cw, 0.6) {B9};
+\node[boundary] at (10*\cw, 0.6) {B10};
+\node[boundary] at (11*\cw, 0.6) {B11};
+
+% Data cells (packed: $11, $22, $22, $33, $33, $33, $33, --, --, --, --, --)
+\node[cell, fill=align-data] at (0*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (1*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
+\node[cell, fill=align-empty] at (7*\cw, 0) {--};
+\node[cell, fill=align-empty] at (8*\cw, 0) {--};
+\node[cell, fill=align-empty] at (9*\cw, 0) {--};
+\node[cell, fill=align-empty] at (10*\cw, 0) {--};
+\node[cell, fill=align-empty] at (11*\cw, 0) {--};
 
 \end{tikzpicture}
 \end{center}
 }
 
-% ==================== ALIGNL DIAGRAM ====================
-% Shows ALIGNL long alignment effect
-\newcommand{\AlignLDiagram}{%
+% ==================== ALIGNL AFTER DIAGRAM ====================
+% Shows data layout AFTER ALIGNL is applied
+% Data: T1=BYTE $11, [ALIGNL pads $00,$00,$00], T2=WORD $2222, LONG $33333333
+\newcommand{\AlignLAfterDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
     cell/.style={
         rectangle,
         draw=diagram-border,
-        minimum width=0.8cm,
-        minimum height=0.6cm,
+        minimum width=0.85cm,
+        minimum height=0.55cm,
         align=center,
         font=\scriptsize\ttfamily
     },
-    annotation/.style={
+    header/.style={
         font=\scriptsize,
         text=diagram-text
+    },
+    boundary/.style={
+        font=\tiny,
+        text=gray
     }
 ]
 
-% Title
-\node[font=\bfseries] at (0, 2) {ALIGNL: Long Alignment};
+% Cell width for positioning
+\def\cw{0.85}
 
-% Before
-\node[annotation, anchor=east] at (-4, 1) {Before:};
-\node[cell, fill=diagram-highlight] at (-2.5, 1) {B0};
-\node[cell, fill=diagram-box] at (-1.7, 1) {?};
-\node[cell, fill=diagram-box] at (-0.9, 1) {?};
-\node[cell, fill=diagram-box] at (-0.1, 1) {?};
-\node[annotation] at (-3.3, 1) {\$001};
+% Long boundary labels (top row)
+\node[header] at (1.5*\cw, 1.4) {L0};
+\node[header] at (5.5*\cw, 1.4) {L1};
+\node[header] at (9.5*\cw, 1.4) {L2};
 
-% After
-\node[annotation, anchor=east] at (-4, 0) {After:};
-\node[cell, fill=diagram-highlight] at (-2.5, 0) {B0};
-\node[cell, fill=timing-wait] at (-1.7, 0) {pad};
-\node[cell, fill=timing-wait] at (-0.9, 0) {pad};
-\node[cell, fill=timing-wait] at (-0.1, 0) {pad};
-\node[cell, fill=diagram-box] at (0.7, 0) {next};
-\node[annotation] at (-3.3, 0) {\$001};
-\node[annotation] at (0.7, -0.5) {\$004 (long aligned)};
+% Word boundary labels (middle row)
+\node[boundary] at (0.5*\cw, 1.0) {W0};
+\node[boundary] at (2.5*\cw, 1.0) {W1};
+\node[boundary] at (4.5*\cw, 1.0) {W2};
+\node[boundary] at (6.5*\cw, 1.0) {W3};
+\node[boundary] at (8.5*\cw, 1.0) {W4};
+\node[boundary] at (10.5*\cw, 1.0) {W5};
 
-\node[annotation, text width=6cm, align=center] at (0, -1.2) {Pads to next long boundary (multiple of 4)};
+% Byte boundary labels (bottom row above data)
+\node[boundary] at (0*\cw, 0.6) {B0};
+\node[boundary] at (1*\cw, 0.6) {B1};
+\node[boundary] at (2*\cw, 0.6) {B2};
+\node[boundary] at (3*\cw, 0.6) {B3};
+\node[boundary] at (4*\cw, 0.6) {B4};
+\node[boundary] at (5*\cw, 0.6) {B5};
+\node[boundary] at (6*\cw, 0.6) {B6};
+\node[boundary] at (7*\cw, 0.6) {B7};
+\node[boundary] at (8*\cw, 0.6) {B8};
+\node[boundary] at (9*\cw, 0.6) {B9};
+\node[boundary] at (10*\cw, 0.6) {B10};
+\node[boundary] at (11*\cw, 0.6) {B11};
+
+% Data cells (aligned: $11, $00, $00, $00, $22, $22, $33, $33, $33, $33, --, --)
+\node[cell, fill=align-data] at (0*\cw, 0) {\$11};
+\node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
+\node[cell, fill=align-pad] at (2*\cw, 0) {\$00};
+\node[cell, fill=align-pad] at (3*\cw, 0) {\$00};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (8*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (9*\cw, 0) {\$33};
+\node[cell, fill=align-empty] at (10*\cw, 0) {--};
+\node[cell, fill=align-empty] at (11*\cw, 0) {--};
 
 \end{tikzpicture}
 \end{center}
 }
+
+% ==================== ALIGNW BEFORE DIAGRAM ====================
+% Shows data layout BEFORE ALIGNW is applied (same as ALIGNL before)
+\newcommand{\AlignWBeforeDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cell/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.85cm,
+        minimum height=0.55cm,
+        align=center,
+        font=\scriptsize\ttfamily
+    },
+    header/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    boundary/.style={
+        font=\tiny,
+        text=gray
+    }
+]
+
+% Cell width for positioning
+\def\cw{0.85}
+
+% Long boundary labels (top row)
+\node[header] at (1.5*\cw, 1.4) {L0};
+\node[header] at (5.5*\cw, 1.4) {L1};
+\node[header] at (9.5*\cw, 1.4) {L2};
+
+% Word boundary labels (middle row)
+\node[boundary] at (0.5*\cw, 1.0) {W0};
+\node[boundary] at (2.5*\cw, 1.0) {W1};
+\node[boundary] at (4.5*\cw, 1.0) {W2};
+\node[boundary] at (6.5*\cw, 1.0) {W3};
+\node[boundary] at (8.5*\cw, 1.0) {W4};
+\node[boundary] at (10.5*\cw, 1.0) {W5};
+
+% Byte boundary labels (bottom row above data)
+\node[boundary] at (0*\cw, 0.6) {B0};
+\node[boundary] at (1*\cw, 0.6) {B1};
+\node[boundary] at (2*\cw, 0.6) {B2};
+\node[boundary] at (3*\cw, 0.6) {B3};
+\node[boundary] at (4*\cw, 0.6) {B4};
+\node[boundary] at (5*\cw, 0.6) {B5};
+\node[boundary] at (6*\cw, 0.6) {B6};
+\node[boundary] at (7*\cw, 0.6) {B7};
+\node[boundary] at (8*\cw, 0.6) {B8};
+\node[boundary] at (9*\cw, 0.6) {B9};
+\node[boundary] at (10*\cw, 0.6) {B10};
+\node[boundary] at (11*\cw, 0.6) {B11};
+
+% Data cells (packed: $11, $22, $22, $33, $33, $33, $33, --, --, --, --, --)
+\node[cell, fill=align-data] at (0*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (1*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
+\node[cell, fill=align-empty] at (7*\cw, 0) {--};
+\node[cell, fill=align-empty] at (8*\cw, 0) {--};
+\node[cell, fill=align-empty] at (9*\cw, 0) {--};
+\node[cell, fill=align-empty] at (10*\cw, 0) {--};
+\node[cell, fill=align-empty] at (11*\cw, 0) {--};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== ALIGNW AFTER DIAGRAM ====================
+% Shows data layout AFTER ALIGNW is applied
+% Data: T1=BYTE $11, [ALIGNW pads $00], T2=WORD $2222, LONG $33333333
+\newcommand{\AlignWAfterDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cell/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.85cm,
+        minimum height=0.55cm,
+        align=center,
+        font=\scriptsize\ttfamily
+    },
+    header/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    boundary/.style={
+        font=\tiny,
+        text=gray
+    }
+]
+
+% Cell width for positioning
+\def\cw{0.85}
+
+% Long boundary labels (top row)
+\node[header] at (1.5*\cw, 1.4) {L0};
+\node[header] at (5.5*\cw, 1.4) {L1};
+\node[header] at (9.5*\cw, 1.4) {L2};
+
+% Word boundary labels (middle row)
+\node[boundary] at (0.5*\cw, 1.0) {W0};
+\node[boundary] at (2.5*\cw, 1.0) {W1};
+\node[boundary] at (4.5*\cw, 1.0) {W2};
+\node[boundary] at (6.5*\cw, 1.0) {W3};
+\node[boundary] at (8.5*\cw, 1.0) {W4};
+\node[boundary] at (10.5*\cw, 1.0) {W5};
+
+% Byte boundary labels (bottom row above data)
+\node[boundary] at (0*\cw, 0.6) {B0};
+\node[boundary] at (1*\cw, 0.6) {B1};
+\node[boundary] at (2*\cw, 0.6) {B2};
+\node[boundary] at (3*\cw, 0.6) {B3};
+\node[boundary] at (4*\cw, 0.6) {B4};
+\node[boundary] at (5*\cw, 0.6) {B5};
+\node[boundary] at (6*\cw, 0.6) {B6};
+\node[boundary] at (7*\cw, 0.6) {B7};
+\node[boundary] at (8*\cw, 0.6) {B8};
+\node[boundary] at (9*\cw, 0.6) {B9};
+\node[boundary] at (10*\cw, 0.6) {B10};
+\node[boundary] at (11*\cw, 0.6) {B11};
+
+% Data cells (word-aligned: $11, $00, $22, $22, $33, $33, $33, $33, --, --, --, --)
+\node[cell, fill=align-data] at (0*\cw, 0) {\$11};
+\node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$33};
+\node[cell, fill=align-empty] at (8*\cw, 0) {--};
+\node[cell, fill=align-empty] at (9*\cw, 0) {--};
+\node[cell, fill=align-empty] at (10*\cw, 0) {--};
+\node[cell, fill=align-empty] at (11*\cw, 0) {--};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== LEGACY WRAPPER MACROS ====================
+% For backward compatibility - these call the "before" diagrams
+\newcommand{\AlignWDiagram}{\AlignWBeforeDiagram}
+\newcommand{\AlignLDiagram}{\AlignLBeforeDiagram}
 
 % ============================================================================
 % PART II: REGISTER BIT FIELD DIAGRAMS

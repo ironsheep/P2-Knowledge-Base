@@ -6,6 +6,262 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 **Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2 + P_*/X_* constants)
 
+## Quick Reference Index
+
+Use this alphabetical index to quickly check if a name is reserved. For detailed descriptions and usage context, see the categorized sections that follow.
+
+**Note:** P_* constants (Smart Pin, ~116 words) are listed in Appendix E. X_* constants (Streamer, ~78 words) are listed in Appendix F. Both prefixes are reserved.
+
+### A
+```
+ABS         ABORT       ADDBITS     ADD         ADDCT1      ADDCT2
+ADDCT3      ADDPIX      ADDPINS     ADDS        ADDSX       ADDX
+AKPIN       ALIGNL      ALIGNW      ALLOWI      ALT         ALTB
+ALTD        ALTGB       ALTGN       ALTGW       ALTI        ALTR
+ALTS        ALTSB       ALTSN       ALTSW       AND         ANDC
+ANDN        ANDZ        ARCHIVE     ASMCLK      AUGD        AUGS
+```
+
+### B
+```
+BACKCOLOR   BITMAP      BITC        BITH        BITL        BITNC
+BITNOT      BITNZ       BITRND      BITZ        BLACK       BLNPIX
+BLUE        BMASK       BOX         BRK         BYTE        BYTEFILL
+BYTEFIT     BYTEMOVE    BYTES_1BIT  BYTES_2BIT  BYTES_4BIT
+```
+
+### C
+```
+CALL        CALLA       CALLB       CALLD       CALLPA      CALLPB
+CARTESIAN   CASE        CASE_FAST   CHANNEL     CIRCLE      CLEAR
+CLKFREQ     CLKMODE     CLKSET      CLOSE       CMP         CMPM
+CMPR        CMPS        CMPSUB      CMPSX       CMPX        COGBRK
+COGCHK      COGEXEC     COGEXEC_NEW COGEXEC_NEW_PAIR        COGATN
+COGID       COGINIT     COGSPIN     COGSTOP     COLOR       CON
+CRCBIT      CRCNIB      CYAN
+```
+
+### D
+```
+DAT         DEBUG       DEBUG_BAUD  DEBUG_COGS  DEBUG_DELAY DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP       DEBUG_HEIGHT            DEBUG_LEFT  DEBUG_LOG_SIZE
+DEBUG_PIN   DEBUG_TIMESTAMP         DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
+DECMOD      DECOD       DEPTH       DEV         DIRA        DIRB
+DIRC        DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
+DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
+DJZ         DLY         DOT         DOTSIZE     DRVC        DRVH
+DRVL        DRVNC       DRVNOT      DRVNZ       DRVRND      DRVZ
+```
+
+### E
+```
+ELSE        ELSEIF      ELSEIFNOT   ENCOD       END         EVENT_ATN
+EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT   EVENT_PAT
+EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4   EVENT_XFI
+EVENT_XMT   EVENT_XRL   EVENT_XRO   EXECF
+```
+
+### F
+```
+FABS        FALSE       FBLOCK      FDEC        FDEC_       FDEC_ARRAY
+FDEC_ARRAY_ FDEC_REG_ARRAY          FDEC_REG_ARRAY_         FFT
+FGE         FGES        FILE        FIT         FLE         FLES
+FLOAT       FLTC        FLTH        FLTL        FLTNC       FLTNOT
+FLTNZ       FLTRND      FLTZ        FRAC        FROM        FSQRT
+FVAR        FVARS
+```
+
+### G
+```
+GETBRK      GETBYTE     GETCT       GETMS       GETNIB      GETPTR
+GETQX       GETQY       GETREGS     GETRND      GETSCP      GETSEC
+GETWORD     GETXACC     GREEN       GREY
+```
+
+### H
+```
+HIDEXY      HOLDOFF     HSV8        HSV8W       HSV8X       HSV16
+HSV16W      HSV16X      HUBEXEC     HUBEXEC_NEW HUBEXEC_NEW_PAIR
+HUBSET
+```
+
+### I
+```
+IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
+IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
+IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
+IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_A
+IF_AE       IF_ALWAYS   IF_B        IF_BE       IF_C        IF_C_AND_NZ
+IF_C_AND_Z  IF_C_EQ_Z   IF_C_NE_Z   IF_C_OR_NZ  IF_C_OR_Z   IF_DIFF
+IF_E        IF_GE       IF_GT       IF_LE       IF_LT       IF_NC
+IF_NC_AND_NZ            IF_NC_AND_Z IF_NC_OR_NZ IF_NC_OR_Z  IF_NE
+IF_NEVER    IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
+IF_NZ_AND_C IF_NZ_AND_NC            IF_NZ_OR_C  IF_NZ_OR_NC IF_SAME
+IF_X0       IF_X1       IF_Z        IF_Z_AND_C  IF_Z_AND_NC IF_Z_EQ_C
+IF_Z_NE_C   IF_Z_OR_C   IF_Z_OR_NC  IFNOT       IJMP1       IJMP2
+IJMP3       IJNZ        IJZ         INA         INB         INCMOD
+INT_OFF     IRET1       IRET2       IRET3
+```
+
+### J
+```
+JATN        JCT1        JCT2        JCT3        JFBW        JINT
+JMP         JMPREL      JNATN       JNCT1       JNCT2       JNCT3
+JNFBW       JNINT       JNPAT       JNQMT       JNSE1       JNSE2
+JNSE3       JNSE4       JNXFI       JNXMT       JNXRL       JNXRO
+JPAT        JQMT        JSE1        JSE2        JSE3        JSE4
+JXFI        JXMT        JXRL        JXRO
+```
+
+### L
+```
+LINE        LINESIZE    LOC         LOCKCHK     LOCKNEW     LOCKREL
+LOCKRET     LOCKTRY     LOGIC       LOGSCALE    LONG        LONGFILL
+LONGMOVE    LONGS_16BIT LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT
+LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ     LSTR        LSTR_
+LUMA8       LUMA8W      LUMA8X      LUT1        LUT2        LUT4
+LUT8        LUTCOLORS
+```
+
+### M
+```
+MAG         MAGENTA     MERGEB      MERGEW      MIDI        MIXPIX
+MODC        MODCZ       MODZ        MOV         MOVBYTS     MUL
+MULDIV64    MULPIX      MULS        MUXC        MUXNC       MUXNIBS
+MUXNITS     MUXNZ       MUXQ        MUXZ
+```
+
+### N
+```
+NAN         NEG         NEGC        NEGNC       NEGNZ       NEGX
+NEGZ        NEWCOG      NEXT        NIXINT1     NIXINT2     NIXINT3
+NOP         NOT
+```
+
+### O
+```
+OBJ         OBOX        ONES        OPACITY     OR          ORANGE
+ORC         ORG         ORGF        ORGH        ORIGIN      ORZ
+OTHER       OUTA        OUTB        OUTC        OUTH        OUTL
+OUTNC       OUTNOT      OUTNZ       OUTRND      OUTZ        OVAL
+```
+
+### P
+```
+PA          PB          PC_KEY      PC_MOUSE    PI          PINCLEAR
+PINF        PINFLOAT    PINH        PINHIGH     PINL        PINLOW
+PINR        PINREAD     PINSTART    PINT        PINTOGGLE   PINW
+PINWRITE    PLOT        POLAR       POLLATN     POLLCT      POLLCT1
+POLLCT2     POLLCT3     POLLFBW     POLLINT     POLLPAT     POLLQMT
+POLLSE1     POLLSE2     POLLSE3     POLLSE4     POLLXFI     POLLXMT
+POLLXRL     POLLXRO     POLXY       POP         POPA        POPB
+POS         POSX        PR0         PR1         PR2         PR3
+PR4         PR5         PR6         PR7         PRECISE     PRECOMPILE
+PRI         PTRA        PTRB        PUB         PUSH        PUSHA
+PUSHB
+```
+
+### Q
+```
+QCOS        QDIV        QEXP        QFRAC       QLOG        QMUL
+QROTATE     QSIN        QSQRT       QUIT        QVECTOR
+```
+
+### R
+```
+RANGE       RCL         RCR         RCZL        RCZR        RDBYTE
+RDFAST      RDLONG      RDLUT       RDPIN       RDWORD      RECV
+RED         REG         REGEXEC     REGLOAD     REP         REPEAT
+RES         RESI0       RESI1       RESI2       RESI3       RET
+RETA        RETB        RETI0       RETI1       RETI2       RETI3
+RETURN      REV         RFBYTE      RFLONG      RFVAR       RFVARS
+RFWORD      RGB8        RGB16       RGB24       RGBEXP      RGBI8
+RGBI8W      RGBI8X      RGBSQZ      ROL         ROLBYTE     ROLNIB
+ROLWORD     ROR         ROTXY       ROUND       RQPIN
+```
+
+### S
+```
+SAL         SAMPLES     SAR         SAVE        SCA         SCAS
+SCOPE       SCOPE_XY    SCROLL      SDEC        SDEC_       SDEC_BYTE
+SDEC_BYTE_  SDEC_BYTE_ARRAY         SDEC_BYTE_ARRAY_        SDEC_LONG
+SDEC_LONG_  SDEC_LONG_ARRAY         SDEC_LONG_ARRAY_        SDEC_REG_ARRAY
+SDEC_REG_ARRAY_         SDEC_WORD   SDEC_WORD_  SDEC_WORD_ARRAY
+SDEC_WORD_ARRAY_        SEND        SET         SETBYTE     SETCFRQ
+SETCI       SETCMOD     SETCQ       SETCY       SETD        SETDACS
+SETINT1     SETINT2     SETINT3     SETLUTS     SETNIB      SETPAT
+SETPIV      SETPIX      SETQ        SETQ2       SETR        SETREGS
+SETS        SETSCP      SETSE1      SETSE2      SETSE3      SETSE4
+SETWORD     SETXFRQ     SEUSSF      SEUSSR      SHEX        SHEX_
+SHEX_BYTE   SHEX_BYTE_  SHEX_BYTE_ARRAY         SHEX_BYTE_ARRAY_
+SHEX_LONG   SHEX_LONG_  SHEX_LONG_ARRAY         SHEX_LONG_ARRAY_
+SHEX_REG_ARRAY          SHEX_REG_ARRAY_         SHEX_WORD   SHEX_WORD_
+SHEX_WORD_ARRAY         SHEX_WORD_ARRAY_        SHL         SHR
+SIGNED      SIGNX       SIZE        SKIP        SKIPF       SPACING
+SPECTRO     SPLITB      SPLITW      SPRITE      SPRITEDEF   SQRT
+STALLI      STEP        STRCOMP     STRING      STRSIZE     SUB
+SUBR        SUBS        SUBSX       SUBX        SUMC        SUMNC
+SUMNZ       SUMZ
+```
+
+### T
+```
+TERM        TEST        TESTB       TESTBN      TESTN       TESTP
+TESTPN      TEXT        TEXTANGLE   TEXTSIZE    TEXTSTYLE   TITLE
+TJF         TJNF        TJNS        TJNZ        TJS         TJV
+TJZ         TO          TRACE       TRGINT1     TRGINT2     TRGINT3
+TRIGGER     TRUE        TRUNC
+```
+
+### U
+```
+UBIN        UBIN_       UBIN_BYTE   UBIN_BYTE_  UBIN_BYTE_ARRAY
+UBIN_BYTE_ARRAY_        UBIN_LONG   UBIN_LONG_  UBIN_LONG_ARRAY
+UBIN_LONG_ARRAY_        UBIN_REG_ARRAY          UBIN_REG_ARRAY_
+UBIN_WORD   UBIN_WORD_  UBIN_WORD_ARRAY         UBIN_WORD_ARRAY_
+UDEC        UDEC_       UDEC_BYTE   UDEC_BYTE_  UDEC_BYTE_ARRAY
+UDEC_BYTE_ARRAY_        UDEC_LONG   UDEC_LONG_  UDEC_LONG_ARRAY
+UDEC_LONG_ARRAY_        UDEC_REG_ARRAY          UDEC_REG_ARRAY_
+UDEC_WORD   UDEC_WORD_  UDEC_WORD_ARRAY         UDEC_WORD_ARRAY_
+UHEX        UHEX_       UHEX_BYTE   UHEX_BYTE_  UHEX_BYTE_ARRAY
+UHEX_BYTE_ARRAY_        UHEX_LONG   UHEX_LONG_  UHEX_LONG_ARRAY
+UHEX_LONG_ARRAY_        UHEX_REG_ARRAY          UHEX_REG_ARRAY_
+UHEX_WORD   UHEX_WORD_  UHEX_WORD_ARRAY         UHEX_WORD_ARRAY_
+UNTIL       UPDATE
+```
+
+### V-W
+```
+VAR         VARBASE     WAITATN     WAITCT      WAITCT1     WAITCT2
+WAITCT3     WAITFBW     WAITINT     WAITMS      WAITPAT     WAITSE1
+WAITSE2     WAITSE3     WAITSE4     WAITUS      WAITX       WAITXFI
+WAITXMT     WAITXRL     WAITXRO     WC          WCZ         WFBYTE
+WFLONG      WFWORD      WHITE       WHILE       WINDOW      WMLONG
+WORD        WORDFILL    WORDFIT     WORDMOVE    WORDS_1BIT  WORDS_2BIT
+WORDS_4BIT  WORDS_8BIT  WRBYTE      WRC         WRFAST      WRLONG
+WRLUT       WRNC        WRNZ        WRPIN       WRWORD      WRZ
+WXPIN       WYPIN       WZ
+```
+
+### X-Z
+```
+XCONT       XINIT       XOR         XORC        XORO32      XORZ
+XSTOP       XYPOL       XZERO       YELLOW      ZEROX       ZSTR
+ZSTR_
+```
+
+### Underscore-Prefixed Conditions
+```
+_C          _CLR        _C_AND_NZ   _C_AND_Z    _C_EQ_Z     _C_NE_Z
+_C_OR_NZ    _C_OR_Z     _E          _GE         _GT         _LE
+_LT         _NC         _NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z
+_NE         _NZ         _NZ_AND_C   _NZ_AND_NC  _NZ_OR_C    _NZ_OR_NC
+_RET_       _SET        _Z          _Z_AND_C    _Z_AND_NC   _Z_EQ_C
+_Z_NE_C     _Z_OR_C     _Z_OR_NC
+```
+
+---
+
 ## Categories
 
 Reserved words fall into six main categories:

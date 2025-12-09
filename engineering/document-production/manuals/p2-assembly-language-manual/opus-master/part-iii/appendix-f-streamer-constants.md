@@ -298,16 +298,25 @@ Streamer constant names follow a consistent pattern:
 X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 ```
 
-| Component | Meaning |
-|-----------|---------|
-| X_ | Streamer constant prefix |
-| RF | Read from FIFO (hub RAM) |
-| WF | Write to FIFO (hub RAM) |
-| IMM | Immediate data |
-| BYTE/WORD/LONG | Data unit size |
-| _nP | Number of pins used |
-| _nDACn | Number of DAC channels, bits per channel |
-| LUT | Data passes through LUT |
++------------------+----------------------------------------------+
+| Component        | Meaning                                      |
++==================+==============================================+
+| X_               | Streamer constant prefix                     |
++------------------+----------------------------------------------+
+| RF               | Read from FIFO (hub RAM)                     |
++------------------+----------------------------------------------+
+| WF               | Write to FIFO (hub RAM)                      |
++------------------+----------------------------------------------+
+| IMM              | Immediate data                               |
++------------------+----------------------------------------------+
+| BYTE/WORD/LONG   | Data unit size                               |
++------------------+----------------------------------------------+
+| _nP              | Number of pins used                          |
++------------------+----------------------------------------------+
+| _nDACn           | Number of DAC channels, bits per channel     |
++------------------+----------------------------------------------+
+| LUT              | Data passes through LUT                      |
++------------------+----------------------------------------------+
 
 
 
