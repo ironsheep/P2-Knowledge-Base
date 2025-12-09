@@ -1,0 +1,145 @@
+name: AI Content Defect
+description: Report errors in YAML/JSON knowledge base files used for AI code generation
+title: "[AI CONTENT] "
+labels: ["bug", "ai-content", "knowledge-base", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the P2 Knowledge Base for AI systems!
+
+        **Use this template when:** You found an error in YAML or JSON files in the knowledge base
+        **Use AI Defect Report instead if:** An AI model generated incorrect code (the issue is AI behavior, not source content)
+        **Use Document Defect instead if:** The error is in a PDF manual
+
+  - type: dropdown
+    id: content-type
+    attributes:
+      label: Content Type
+      description: What type of knowledge base content has the error?
+      options:
+        - Instruction YAML (PASM2 instructions)
+        - Directive YAML (assembler directives)
+        - Smart Pin YAML (pin modes/configuration)
+        - Register YAML/JSON (special registers)
+        - Constant YAML (predefined constants)
+        - Architecture YAML (COG, Hub, etc.)
+        - Other YAML/JSON content
+    validations:
+      required: true
+
+  - type: input
+    id: file-path
+    attributes:
+      label: File Path
+      description: Path to the file containing the error
+      placeholder: "engineering/knowledge-base/P2/instructions/pasm2/MOV.yaml"
+    validations:
+      required: true
+
+  - type: input
+    id: field-key
+    attributes:
+      label: Field/Key Affected
+      description: Which YAML field or JSON key contains the error?
+      placeholder: "encoding.opcode or syntax.operands[1]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-value
+    attributes:
+      label: Current Value
+      description: What is the current (incorrect) value?
+      placeholder: |
+        ```yaml
+        opcode: "0110010"
+        ```
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct-value
+    attributes:
+      label: Correct Value
+      description: What should the value be?
+      placeholder: |
+        ```yaml
+        opcode: "0110011"
+        ```
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: source-reference
+    attributes:
+      label: Source Reference
+      description: What official documentation or testing confirms the correct value?
+      placeholder: |
+        According to the Propeller 2 Rev B Silicon Documentation, page X...
+        Verified by assembling with PNut and checking binary output...
+        The P2 Instruction Document spreadsheet shows...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this error for AI code generation?
+      options:
+        - Critical - AI will generate non-functional or dangerous code
+        - High - AI will generate code with significant bugs
+        - Medium - AI may generate suboptimal or confusing code
+        - Low - Minor issue unlikely to affect code generation
+    validations:
+      required: true
+
+  - type: textarea
+    id: ai-impact
+    attributes:
+      label: Impact on AI Code Generation
+      description: How might this error affect AI-generated code?
+      placeholder: |
+        This could cause AI to generate code that...
+        When asked to use this instruction, AI might...
+    validations:
+      required: false
+
+  - type: textarea
+    id: related-files
+    attributes:
+      label: Related Files
+      description: Are there other files that might have the same error or need updating?
+      placeholder: |
+        This same pattern appears in:
+        - engineering/knowledge-base/P2/instructions/pasm2/MOVS.yaml
+        - The encoding table CSV may also need updating
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: How have you verified this error?
+      options:
+        - label: Checked against official Parallax P2 documentation
+        - label: Verified with PNut or other P2 assembler
+        - label: Tested on actual P2 hardware
+        - label: Cross-referenced with P2 instruction spreadsheet
+        - label: Confirmed AI generates incorrect code due to this
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information about this error
+    validations:
+      required: false

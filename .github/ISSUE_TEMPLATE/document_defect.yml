@@ -1,0 +1,149 @@
+name: Document Defect
+description: Report errors in PDF manuals where you know the correct information
+title: "[DOC DEFECT] "
+labels: ["bug", "documentation", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our PDF manuals!
+
+        **Use this template when:** You found an error and know (or can reference) the correct information
+        **Use Document Feedback instead if:** You're unsure of the fix, have suggestions, or find something confusing
+
+  - type: dropdown
+    id: document
+    attributes:
+      label: Document
+      description: Which PDF manual contains the error?
+      options:
+        - P2 Assembly Language Reference Manual
+        - P2 Assembly Programming (De Silva Style)
+    validations:
+      required: true
+
+  - type: input
+    id: page-number
+    attributes:
+      label: Page Number
+      description: Page number where the error occurs
+      placeholder: "Page 42"
+    validations:
+      required: true
+
+  - type: input
+    id: nearest-heading
+    attributes:
+      label: Nearest Section/Heading
+      description: The chapter, section, or heading title nearest to the error
+      placeholder: "Chapter 3: Flags / ALIGNL directive"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: defect-type
+    attributes:
+      label: Defect Type
+      description: What type of error is this?
+      options:
+        - Incorrect technical information
+        - Typo or grammar error
+        - Code example error (won't compile or wrong behavior)
+        - Incorrect encoding/opcode
+        - Formatting or layout issue
+        - Inconsistency (conflicts with another section)
+        - Broken cross-reference
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content
+      description: Quote or describe the incorrect content
+      placeholder: |
+        The manual currently states:
+        "The ALIGNL directive inserts up to 7 bytes..."
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct-content
+    attributes:
+      label: Correct Content
+      description: What should the documentation say instead?
+      placeholder: |
+        It should say:
+        "The ALIGNL directive inserts up to 3 bytes..."
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: source-reference
+    attributes:
+      label: Source Reference
+      description: What official P2 documentation or testing supports this correction?
+      placeholder: |
+        According to the Propeller 2 Rev B Silicon Documentation...
+        Verified by testing on P2 hardware...
+        The Parallax Forums post at [link] confirms...
+    validations:
+      required: false
+
+  - type: input
+    id: second-location
+    attributes:
+      label: Second Location (for inconsistencies)
+      description: If this conflicts with another section, where is the other occurrence?
+      placeholder: "Page 85, Section 4.2"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this error?
+      options:
+        - Critical - Could cause hardware damage or completely wrong understanding
+        - High - Significantly misleading information
+        - Medium - Incorrect but may be obvious from context
+        - Low - Minor typo or formatting issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag and drop a screenshot showing the error (optional but helpful)
+      placeholder: |
+        Drag and drop image here, or paste from clipboard
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: How have you verified this is an error?
+      options:
+        - label: Checked against official Parallax P2 documentation
+        - label: Tested on actual P2 hardware
+        - label: Confirmed with P2 community/forums
+        - label: Cross-referenced with other sections of this manual
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information about this error
+    validations:
+      required: false

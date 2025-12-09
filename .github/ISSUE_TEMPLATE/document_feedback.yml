@@ -1,0 +1,119 @@
+name: Document Feedback
+description: Suggest improvements, report confusing content, or provide general feedback on PDF manuals
+title: "[DOC FEEDBACK] "
+labels: ["enhancement", "documentation", "feedback"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our PDF manuals!
+
+        **Use this template when:** Content is confusing, you have suggestions, or something seems wrong but you're not sure of the fix
+        **Use Document Defect instead if:** You found a clear error and know the correct information
+
+  - type: dropdown
+    id: document
+    attributes:
+      label: Document
+      description: Which PDF manual is this feedback about?
+      options:
+        - P2 Assembly Language Reference Manual
+        - P2 Assembly Programming (De Silva Style)
+        - General (applies to multiple documents)
+    validations:
+      required: true
+
+  - type: input
+    id: page-number
+    attributes:
+      label: Page Number
+      description: Page number (if applicable)
+      placeholder: "Page 42"
+    validations:
+      required: false
+
+  - type: input
+    id: nearest-heading
+    attributes:
+      label: Nearest Section/Heading
+      description: The chapter, section, or heading title (if applicable)
+      placeholder: "Chapter 3: Flags / ALIGNL directive"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: feedback-type
+    attributes:
+      label: Feedback Type
+      description: What kind of feedback is this?
+      options:
+        - Unclear or confusing explanation
+        - Missing information or content gap
+        - Suggestion for improvement
+        - Better example needed
+        - Organization or structure suggestion
+        - Something seems wrong (but I'm not sure)
+        - General feedback or praise
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the issue, suggestion, or feedback
+      placeholder: |
+        The explanation of X is confusing because...
+        It would help to add...
+        I expected to find information about...
+        This section seems unclear when it says...
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-improvement
+    attributes:
+      label: Proposed Improvement (Optional)
+      description: If you have ideas for how to improve this, share them here. It's okay if you don't know the solution!
+      placeholder: |
+        It might be clearer if...
+        Consider adding an example that shows...
+        A diagram would help explain...
+      render: markdown
+    validations:
+      required: false
+
+  - type: dropdown
+    id: user-experience
+    attributes:
+      label: Your Experience Level
+      description: This helps us understand who might be affected
+      options:
+        - New to P2 (learning)
+        - Experienced with P1, new to P2
+        - Experienced P2 developer
+        - Prefer not to say
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag and drop a screenshot if it helps illustrate the issue
+      placeholder: |
+        Drag and drop image here, or paste from clipboard
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information that might help
+    validations:
+      required: false
