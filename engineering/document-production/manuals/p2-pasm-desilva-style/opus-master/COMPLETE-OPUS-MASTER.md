@@ -318,7 +318,7 @@ CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 
 PUB main()
-    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in a new COG
+    coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in new COG
     repeat  ' Keep the main COG alive
 
 DAT
@@ -361,7 +361,8 @@ The blinker works, but it's a bit rigid, isn't it? What if we want to change the
 ```
         org     0
         
-        mov     delay, ##50_000_000    ' Set delay to 0.25 seconds (at 200 MHz)
+        mov     delay, ##50_000_000    ' Set delay to 0.25 sec
+                                       '  (at 200 MHz)
         
 .blink  drvh    #56                    ' LED on
         waitx   delay                  ' Wait
@@ -369,7 +370,7 @@ The blinker works, but it's a bit rigid, isn't it? What if we want to change the
         waitx   delay                  ' Wait
         jmp     #.blink                ' Repeat forever
         
-delay   long    0                      ' Storage for our delay value
+delay   long    0                      ' Storage for delay value
 ```
 :::
 
@@ -626,12 +627,12 @@ PUB main() | i
 DAT
         org     0
 cog_code
-        rdlong  pin_num, ptra          ' Get our pin number from hub
+        rdlong  pin_num, ptra          ' Get pin number from hub
 
 .loop   drvnot  pin_num                ' Toggle our LED
         shl     pin_num, #24           ' Pin number to bits 24-31
         or      pin_num, ##10_000_000  ' Combine with delay
-        waitx   pin_num                ' Wait (different for each COG!)
+        waitx   pin_num                ' Wait (varies per COG!)
         shr     pin_num, #24           ' Restore pin number
         jmp     #.loop
 
@@ -991,8 +992,8 @@ The MOV family - your bread and butter:
         neg     dest, source    ' dest = -source
 
 ' And the mind-blowing ones
-        altd    dest, source    ' Modify NEXT instruction's dest field!
-        alts    dest, source    ' Modify NEXT instruction's source field!
+        altd    dest, source    ' Modify NEXT inst's dest field!
+        alts    dest, source    ' Modify NEXT inst's source field!
 ```
 :::
 
@@ -1046,7 +1047,7 @@ Your Boolean friends:
         and     x, mask        ' x = x AND mask
         or      x, bits        ' x = x OR bits  
         xor     x, toggle      ' x = x XOR toggle
-        not     x              ' x = NOT x (same as XOR with $FFFFFFFF)
+        not     x              ' x = NOT x (XOR with $FFFFFFFF)
         
 ' Bit manipulation
         bitl    x, #5          ' Clear bit 5 of x
@@ -1064,7 +1065,7 @@ Moving bits around:
 ```
         shl     x, #3          ' Shift left 3 bits
         shr     x, #3          ' Shift right 3 bits
-        sar     x, #3          ' Arithmetic shift right (sign-extend)
+        sar     x, #3          ' Arithmetic shift right (signed)
         rol     x, #3          ' Rotate left 3 bits
         ror     x, #3          ' Rotate right 3 bits
         
@@ -1178,17 +1179,17 @@ Enter local labels. Prefix a name with a dot (`.`) and it becomes local:
 DAT             org
 
 send_byte       rdbyte  x, ptr
-.loop           testp   tx_pin    wc    ' Local: belongs to send_byte
+.loop           testp   tx_pin    wc    ' Local to send_byte
         if_nc   jmp     #.loop
                 wypin   x, tx_pin
                 ret
 
 receive_byte    testp   rx_pin    wc    ' New scope begins here
         if_nc   jmp     #.wait
-.wait           testp   rx_pin    wc    ' Local: belongs to receive_byte
+.wait           testp   rx_pin    wc    ' Local to receive_byte
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin
-.loop           shr     x, #24          ' Different .loop - no conflict!
+.loop           shr     x, #24          ' Different .loop, OK!
                 ret
 ```
 :::
@@ -1234,10 +1235,10 @@ Here's the rule: **every global label or data definition starts a new local scop
 func_a          mov     x, #1           ' Scope #1 begins
 .loop           djnz    x, #.loop       ' .loop in scope #1
 
-data_block      long    0, 0, 0, 0      ' Scope #2 begins (data counts!)
+data_block      long    0, 0, 0, 0      ' Scope #2 begins (data!)
 
 func_b          mov     y, #2           ' Scope #3 begins
-.loop           djnz    y, #.loop       ' .loop in scope #3 - different!
+.loop           djnz    y, #.loop       ' .loop in scope #3, OK!
 .done           ret
 ```
 :::
@@ -1291,7 +1292,7 @@ Here's a convenience - you can list multiple values after a single type:
 DAT
 primes          long    2, 3, 5, 7, 11, 13, 17, 19
 gpio_pins       byte    16, 17, 18, 19, 20, 21
-message         byte    "Hello, P2!", 0     ' String with null terminator
+message         byte    "Hello, P2!", 0     ' String with null term
 ```
 
 The assembler just lays them out consecutively in memory. That string? It's just bytes - each character followed by a zero at the end.
@@ -1315,7 +1316,7 @@ You can even combine values and repetition:
 DAT
 mixed_init      byte    $AA, $BB, 0[10], $CC, $DD
                 '       ^    ^   ^^^^^   ^    ^
-                '       Two values, then 10 zeros, then two more values
+                '       Two vals, then 10 zeros, then two more
 ```
 
 ### BYTEFIT and WORDFIT: The Safety Net
@@ -1324,7 +1325,7 @@ Here's a subtle trap. What if you accidentally write:
 
 ```pasm2
 DAT
-oops            byte    1000            ' Uh oh - 1000 doesn't fit in a byte!
+oops            byte    1000            ' 1000 won't fit in a byte!
 ```
 
 The assembler will silently truncate 1000 to 232 (the low 8 bits). Your program will run, but with wrong values. Debugging that is no fun at all.
@@ -1334,7 +1335,7 @@ Enter the safety net:
 ```pasm2
 DAT
 safe_byte       bytefit 100, 200, 255   ' OK - all fit in a byte
-danger_byte     bytefit 100, 200, 300   ' ERROR! 300 > 255, assembler complains
+danger_byte     bytefit 100, 200, 300   ' ERROR! 300 > 255, error!
 
 safe_word       wordfit 1000, 50000     ' OK - all fit in a word
 danger_word     wordfit 1000, 70000     ' ERROR! 70000 > 65535
@@ -1384,18 +1385,18 @@ BUFFER_SIZE     long    256
 
 ' Lookup tables
                 alignl
-sin_table       word    0, 1608, 3212, 4808, 6393   ' Partial sine table
+sin_table       word    0, 1608, 3212, 4808, 6393   ' Sine table
                 word    7962, 9512, 11039, 12540    ' ... continues
 
 ' Working storage
                 alignl
-buffer_addr     long    0               ' Filled by Spin2 at startup
+buffer_addr     long    0               ' Set by Spin2 at startup
 temp            long    0
 result          long    0
 
 ' Reserve uninitialized space
                 alignl
-scratch         res     16              ' Reserve 16 longs (not initialized)
+scratch         res     16              ' Reserve 16 longs
 ```
 
 Notice the pattern: code first, then constants, then working storage, then reserved space. This keeps things organized and makes your DAT block readable.
@@ -1759,9 +1760,9 @@ clear_screen
         mov     chunks, ##640*480/512   ' Number of 512-long chunks
         mov     color, ##$00_00_00_00   ' Black
 
-.loop   setq    #512-1                  ' Transfer 512 longs (max block size)
+.loop   setq    #512-1                  ' Transfer 512 longs (max)
         wrlong  color, hub_ptr          ' Fill this chunk
-        add     hub_ptr, ##512*4        ' Advance by 512 longs (2KB)
+        add     hub_ptr, ##512*4        ' Advance 512 longs (2KB)
         djnz    chunks, #.loop
         ' Full screen cleared with minimal loop overhead!
 ```
@@ -1810,7 +1811,7 @@ Remember doing this with shifts and adds? Those days are over!
         muls    result, value     ' Signed version
         
 ' Scale and multiply
-        scl     result, ##$8000   ' Scale by 0.5 (32.32 fixed point)
+        scl     result, ##$8000   ' Scale by 0.5 (32.32 fixed pt)
 ```
 :::
 
@@ -1955,8 +1956,8 @@ Let me show you something even more impressive:
 ```
 ' Calculate sine and cosine simultaneously
         qrotate angle, ##$7FFF_FFFF  ' Max radius for unit circle
-        getqx   cosine              ' cos(angle) in 2.30 fixed point
-        getqy   sine                ' sin(angle) in 2.30 fixed point
+        getqx   cosine              ' cos(angle) in 2.30 fixed pt
+        getqy   sine                ' sin(angle) in 2.30 fixed pt
         ' Both trig functions in 55 clocks total!
 ```
 :::
@@ -1987,7 +1988,7 @@ Here's the beautiful part: CORDIC operations are pipelined. While one calculatio
         
 generate
         qrotate angle, ##$7FFF_FFFF  ' Start calculation
-        add     angle, ##$0100_0000   ' Increment angle (don't wait!)
+        add     angle, ##$0100_0000   ' Increment angle (no wait!)
         
         ' Do other work while CORDIC calculates
         add     sample_ptr, #4
@@ -2443,7 +2444,7 @@ And the really clever one:
 
 ::: pasm2
 ```
-        drvnot  #56 wcz        ' Toggle pin AND read old state into C
+        drvnot  #56 wcz        ' Toggle pin AND read old state to C
         ' C now contains what the pin WAS before toggling
 ```
 :::
@@ -2452,7 +2453,7 @@ And the really clever one:
 
 ::: pasm2
 ```
-        drvrnot #56            ' Randomly toggle pin (hardware random!)
+        drvrnot #56            ' Randomly toggle (hardware random!)
         outl    #56            ' Drive low (alternate form)
         outh    #56            ' Drive high (alternate form)
 ```
@@ -2475,7 +2476,7 @@ Or read into Z flag for zero/non-zero testing:
 ::: pasm2
 ```
         testp   #SENSOR_PIN wz ' Read pin into Z flag  
-   if_z jmp     #sensor_low    ' Jump if pin is low (Z=1 when pin=0)
+   if_z jmp     #sensor_low    ' Jump if pin low (Z=1 when pin=0)
   if_nz jmp     #sensor_high   ' Jump if pin is high
 ```
 :::
@@ -2683,7 +2684,7 @@ You can control multiple pins at once:
 
 ::: pasm2
 ```
-        drvh    #LED_BASE addpins 3  ' Drive 4 pins high (base + 3 more)
+        drvh    #LED_BASE addpins 3  ' Drive 4 pins high (base+3)
         drvl    #LED_BASE addpins 7  ' Drive 8 pins low
 ```
 :::
@@ -2695,7 +2696,7 @@ For when you need absolute control:
 ::: pasm2
 ```
         mov     outa, pattern    ' Set output register directly
-        mov     dira, ##$FF      ' Set direction register (rare in P2!)
+        mov     dira, ##$FF      ' Set direction reg (rare in P2!)
 ```
 :::
 
@@ -3846,7 +3847,7 @@ Look at this seemingly innocent code:
         djnz    count, #.loop    ' 2 clocks
 
 ' After optimization: 6 clocks!
-.loop   rdlong  value, ptra++    ' 3-9 clocks, pointer incremented for free!
+.loop   rdlong  value, ptra++    ' 3-9 clks, ptr inc'd for free!
         add     value, #1        ' 2 clocks
         wrlong  value, --ptra++  ' 3 clocks, clever pointer work
         djnz    count, #.loop    ' 2 clocks
@@ -3865,7 +3866,7 @@ This means while one instruction executes, the next is already being fetched:
 
 ::: pasm2
 ```
-        add     x, y      ' Executing while next instruction fetches
+        add     x, y      ' Executing while next inst fetches
         sub     a, b      ' Fetching while previous executes
         ' Perfect overlap = maximum throughput
 ```
@@ -4280,7 +4281,7 @@ For loading entire tables, **SETQ2** + **RDLONG** can transfer hub data directly
 ::: pasm2
 ```
         setq2   #256-1              ' 256 longs
-        rdlong  $200, hub_table_ptr ' Load into LUT starting at $200
+        rdlong  $200, hub_table_ptr ' Load into LUT from $200
 ```
 :::
 
@@ -4509,10 +4510,10 @@ Remember that tedious bit-bang serial from Chapter 8? Watch this:
 ::: pasm2
 ```
 ' Configure pin as UART transmitter - done!
-        dirl    #TX_PIN                 ' CRITICAL: Reset pin first!
+        dirl    #TX_PIN                 ' Reset pin first!
         wrpin   ##P_ASYNC_TX, #TX_PIN   ' Configure as async TX
         wxpin   ##BAUD_115200, #TX_PIN  ' Set baud rate
-        dirh    #TX_PIN                 ' Enable - pin now runs autonomously
+        dirh    #TX_PIN                 ' Enable - runs on its own
 ```
 :::
 
@@ -5730,8 +5731,8 @@ main() { while(1) { sensor_loop(); } }  ' Hope we get time
 ' Each task owns its own processor
 COG0: coginit(1, @motor_control)   ' Coordinator launches workers
 COG1: motor_control()              ' Dedicated - always on time
-COG2: serial_handler()             ' Dedicated - never misses a byte
-COG3: sensor_loop()                ' Dedicated - consistent sampling
+COG2: serial_handler()             ' Dedicated - never misses byte
+COG3: sensor_loop()                ' Dedicated - consistent sample
 COG4-7: ready for more
 ```
 :::
