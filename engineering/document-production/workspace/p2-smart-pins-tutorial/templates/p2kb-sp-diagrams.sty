@@ -1664,39 +1664,124 @@
 
 \newcommand{\PeriodMeasurementDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.7cm, y=1cm]
+\begin{tikzpicture}[x=0.5cm, y=1cm]
+
+% Pulse widths - asymmetrical pattern
+\def\wideHi{1.2}      % Wide HIGH pulse
+\def\narrowHi{0.6}    % Narrow HIGH pulse
+\def\wideGap{0.8}     % Wide LOW gap
+\def\narrowGap{0.4}   % Narrow LOW gap
+
+% Y levels
+\def\yHi{2.4}
+\def\yLo{1.6}
+\def\yMid{2.0}
 
 % A Input label
-\node[sp-label] at (-1.0, 2.0) {A Input};
-\node[sp-annotation, anchor=east] at (0.0, 2.4) {1};
-\node[sp-annotation, anchor=east] at (0.0, 1.6) {0};
+\node[sp-label] at (-1.5, \yMid) {A Input};
+\node[sp-annotation, anchor=east] at (-0.3, \yHi) {1};
+\node[sp-annotation, anchor=east] at (-0.3, \yLo) {0};
 
-% Cycle numbers
-\foreach \i in {1,...,9} {
-    \pgfmathsetmacro{\x}{0.5 + \i*1.0}
-    \node[sp-annotation] at (\x, 2.8) {\i};
-}
+% Build pulse train manually with correct widths
+% Pulse widths: 0=N, 1=W, 2=W, 3=N, 4=W, 5=W, 6=N, 7=W, 8=W, 9=N(partial)
+% Gap widths:   0-1=S, 1-2=W, 2-3=S, 3-4=S, 4-5=W, 5-6=S, 6-7=S, 7-8=W, 8-9=S
 
-% Waveform - 9 complete cycles
-\draw[dashed, thin] (-0.3, 1.6) -- (0.5, 1.6);
-\draw[sp-signal] (0.5, 1.6) -- (0.5, 2.4);
-\foreach \i in {1,...,9} {
-    \pgfmathsetmacro{\x}{0.5 + (\i-1)*1.0}
-    \draw[sp-signal] (\x, 2.4) -- (\x+0.5, 2.4) -- (\x+0.5, 1.6) -- (\x+1.0, 1.6) -- (\x+1.0, 2.4);
-}
-\draw[dashed, thin] (9.5, 2.4) -- (10.0, 2.4);
+\def\startx{0.5}
+\pgfmathsetmacro{\pA}{\startx}                                          % Pulse 0 rise (narrow)
+\pgfmathsetmacro{\pAend}{\pA + \narrowHi}                               % Pulse 0 fall
+\pgfmathsetmacro{\pB}{\pAend + \narrowGap}                              % Pulse 1 rise (wide) - gap 0-1 short
+\pgfmathsetmacro{\pBend}{\pB + \wideHi}                                 % Pulse 1 fall
+\pgfmathsetmacro{\pC}{\pBend + \wideGap}                                % Pulse 2 rise (wide) - gap 1-2 wide
+\pgfmathsetmacro{\pCend}{\pC + \wideHi}                                 % Pulse 2 fall
+\pgfmathsetmacro{\pD}{\pCend + \narrowGap}                              % Pulse 3 rise (narrow) - gap 2-3 short
+\pgfmathsetmacro{\pDend}{\pD + \narrowHi}                               % Pulse 3 fall
+\pgfmathsetmacro{\pE}{\pDend + \narrowGap}                              % Pulse 4 rise (wide) - gap 3-4 short
+\pgfmathsetmacro{\pEend}{\pE + \wideHi}                                 % Pulse 4 fall
+\pgfmathsetmacro{\pF}{\pEend + \wideGap}                                % Pulse 5 rise (wide) - gap 4-5 wide
+\pgfmathsetmacro{\pFend}{\pF + \wideHi}                                 % Pulse 5 fall
+\pgfmathsetmacro{\pG}{\pFend + \narrowGap}                              % Pulse 6 rise (narrow) - gap 5-6 short
+\pgfmathsetmacro{\pGend}{\pG + \narrowHi}                               % Pulse 6 fall
+\pgfmathsetmacro{\pH}{\pGend + \narrowGap}                              % Pulse 7 rise (wide) - gap 6-7 short
+\pgfmathsetmacro{\pHend}{\pH + \wideHi}                                 % Pulse 7 fall
+\pgfmathsetmacro{\pI}{\pHend + \wideGap}                                % Pulse 8 rise (wide) - gap 7-8 wide
+\pgfmathsetmacro{\pIend}{\pI + \wideHi}                                 % Pulse 8 fall
+\pgfmathsetmacro{\pJ}{\pIend + \narrowGap}                              % Pulse 9 rise (narrow) - gap 8-9 short
+\pgfmathsetmacro{\pJend}{\pJ + \narrowHi}                               % Pulse 9 fall
+\pgfmathsetmacro{\pK}{\pJend + \narrowGap}                              % Pulse 10 rise (partial) - gap 9-10 short
+\pgfmathsetmacro{\pKpartial}{\pK + 0.6}                                 % Pulse 10 partial HIGH
 
-% Measured Period dimension
-\draw[sp-dim] (0.5, 0.8) -- (9.5, 0.8);
-\draw[thin] (0.5, 0.6) -- (0.5, 1.0);
-\draw[thin] (9.5, 0.6) -- (9.5, 1.0);
-\node[sp-annotation] at (5.0, 0.4) {Measured Period};
-\node[sp-annotation] at (5.0, 0.0) {(in System-Clock Counts)};
+% Lead-in dashed
+\draw[dashed, thin] (-0.3, \yLo) -- (\startx, \yLo);
 
-% C/Z annotation
-\draw[sp-arrow] (9.5, 1.2) -- (9.5, 1.5);
-\node[sp-annotation, anchor=west] at (9.7, 1.4) {C= 1};
-\node[sp-annotation, anchor=west] at (9.7, 1.0) {Z = Counts};
+% Draw the pulse train
+% Pulse 0 (unnumbered, narrow)
+\draw[sp-signal] (\pA, \yLo) -- (\pA, \yHi) -- (\pAend, \yHi) -- (\pAend, \yLo);
+% Gap 0-1 (short)
+\draw[sp-signal] (\pAend, \yLo) -- (\pB, \yLo);
+% Pulse 1 (wide)
+\draw[sp-signal] (\pB, \yLo) -- (\pB, \yHi) -- (\pBend, \yHi) -- (\pBend, \yLo);
+% Gap 1-2 (wide)
+\draw[sp-signal] (\pBend, \yLo) -- (\pC, \yLo);
+% Pulse 2 (wide)
+\draw[sp-signal] (\pC, \yLo) -- (\pC, \yHi) -- (\pCend, \yHi) -- (\pCend, \yLo);
+% Gap 2-3 (short)
+\draw[sp-signal] (\pCend, \yLo) -- (\pD, \yLo);
+% Pulse 3 (narrow)
+\draw[sp-signal] (\pD, \yLo) -- (\pD, \yHi) -- (\pDend, \yHi) -- (\pDend, \yLo);
+% Gap 3-4 (short)
+\draw[sp-signal] (\pDend, \yLo) -- (\pE, \yLo);
+% Pulse 4 (wide)
+\draw[sp-signal] (\pE, \yLo) -- (\pE, \yHi) -- (\pEend, \yHi) -- (\pEend, \yLo);
+% Gap 4-5 (wide)
+\draw[sp-signal] (\pEend, \yLo) -- (\pF, \yLo);
+% Pulse 5 (wide)
+\draw[sp-signal] (\pF, \yLo) -- (\pF, \yHi) -- (\pFend, \yHi) -- (\pFend, \yLo);
+% Gap 5-6 (short)
+\draw[sp-signal] (\pFend, \yLo) -- (\pG, \yLo);
+% Pulse 6 (narrow)
+\draw[sp-signal] (\pG, \yLo) -- (\pG, \yHi) -- (\pGend, \yHi) -- (\pGend, \yLo);
+% Gap 6-7 (short)
+\draw[sp-signal] (\pGend, \yLo) -- (\pH, \yLo);
+% Pulse 7 (wide)
+\draw[sp-signal] (\pH, \yLo) -- (\pH, \yHi) -- (\pHend, \yHi) -- (\pHend, \yLo);
+% Gap 7-8 (wide)
+\draw[sp-signal] (\pHend, \yLo) -- (\pI, \yLo);
+% Pulse 8 (wide)
+\draw[sp-signal] (\pI, \yLo) -- (\pI, \yHi) -- (\pIend, \yHi) -- (\pIend, \yLo);
+% Gap 8-9 (short)
+\draw[sp-signal] (\pIend, \yLo) -- (\pJ, \yLo);
+% Pulse 9 (narrow, complete)
+\draw[sp-signal] (\pJ, \yLo) -- (\pJ, \yHi) -- (\pJend, \yHi) -- (\pJend, \yLo);
+% Gap 9-10 (short)
+\draw[sp-signal] (\pJend, \yLo) -- (\pK, \yLo);
+% Pulse 10 (partial - just rise and partial HIGH)
+\draw[sp-signal] (\pK, \yLo) -- (\pK, \yHi) -- (\pKpartial, \yHi);
+% Lead-out dashed
+\draw[dashed, thin] (\pKpartial, \yHi) -- (\pKpartial + 0.4, \yHi);
+
+% Cycle numbers (1-9 above pulses 2-10)
+% Position each number above center of its pulse
+\node[sp-annotation] at ({(\pB + \pBend)/2}, 2.8) {1};
+\node[sp-annotation] at ({(\pC + \pCend)/2}, 2.8) {2};
+\node[sp-annotation] at ({(\pD + \pDend)/2}, 2.8) {3};
+\node[sp-annotation] at ({(\pE + \pEend)/2}, 2.8) {4};
+\node[sp-annotation] at ({(\pF + \pFend)/2}, 2.8) {5};
+\node[sp-annotation] at ({(\pG + \pGend)/2}, 2.8) {6};
+\node[sp-annotation] at ({(\pH + \pHend)/2}, 2.8) {7};
+\node[sp-annotation] at ({(\pI + \pIend)/2}, 2.8) {8};
+\node[sp-annotation] at ({(\pJ + \pJend)/2}, 2.8) {9};
+
+% Measured Period dimension - from pulse "1" rising edge to pulse 10 rising edge
+\draw[sp-dim] (\pB, 0.8) -- (\pK, 0.8);
+\draw[thin] (\pB, 0.6) -- (\pB, 1.0);
+\draw[thin] (\pK, 0.6) -- (\pK, 1.0);
+\node[sp-annotation] at ({(\pB + \pK)/2}, 0.4) {Measured Period};
+\node[sp-annotation] at ({(\pB + \pK)/2}, 0.0) {(in System-Clock Counts)};
+
+% C/Z annotation - at pulse 10 rising edge
+\draw[sp-arrow] (\pK, 1.2) -- (\pK, 1.5);
+\node[sp-annotation, anchor=west] at (\pK + 0.2, 1.4) {C= 1};
+\node[sp-annotation, anchor=west] at (\pK + 0.2, 1.0) {Z = Counts};
 
 \end{tikzpicture}
 \par}
