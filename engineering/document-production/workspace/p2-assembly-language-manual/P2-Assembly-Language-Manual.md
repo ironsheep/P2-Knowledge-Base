@@ -15029,21 +15029,27 @@ Declare byte data in memory. Stores 8-bit values at the current address.
 #### Syntax
 ```pasm
 [label] BYTE    value[, value...]
+[label] BYTE    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 8-bit value or string literal |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use BYTE to define individual bytes, byte arrays, or strings. Each value occupies exactly 1 byte. Strings are stored as individual bytes in sequence. BYTE provides no automatic alignment—data appears at the current address.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing buffers or padding.
 
 #### Example
 ```pasm
 text    byte    "Hello P2", 0   ' String with null terminator
 data    byte    $FF, $00, $55   ' Hex values
 nums    byte    1, 2, 3, 4, 5   ' Decimal values
+zeros   byte    0[256]          ' 256 zero bytes (buffer initialization)
+pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
 ```
 
 #### Notes
@@ -15051,6 +15057,7 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 - Strings are stored as individual bytes without alignment
 - No automatic alignment—use ALIGNW or ALIGNL if needed
 - Values outside 0-255 range will be truncated to 8 bits
+- The `[count]` syntax repeats the preceding value, useful for buffer initialization
 
 #### Related Directives
 - [WORD](#word) — Declare 16-bit word data
@@ -15072,21 +15079,27 @@ Declare long data in memory. Stores 32-bit values at the current address.
 #### Syntax
 ```pasm
 [label] LONG    value[, value...]
+[label] LONG    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 32-bit value, expression, or address reference |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. In hub RAM, LONG data is automatically long-aligned for optimal access efficiency.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
 #### Example
 ```pasm
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
 ptrs    long    @start, @end    ' Address pointers
+buffer  long    0[32]           ' 32 zero longs (128 bytes)
+clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
 ```
 
 #### Notes
@@ -15094,6 +15107,7 @@ ptrs    long    @start, @end    ' Address pointers
 - Automatically long-aligned in hub RAM
 - Supports full 32-bit range (0 to $FFFFFFFF)
 - Standard size for P2 registers and instructions
+- The `[count]` syntax repeats the preceding value
 
 #### Related Directives
 - [BYTE](#byte) — Declare 8-bit byte data
@@ -15115,20 +15129,26 @@ Declare word data in memory. Stores 16-bit values at the current address.
 #### Syntax
 ```pasm
 [label] WORD    value[, value...]
+[label] WORD    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 16-bit value or expression |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. In hub RAM, WORD data is automatically word-aligned for efficient 16-bit access.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
 #### Example
 ```pasm
 counts  word    1000, 2000, 3000    ' Decimal values
 addr    word    @buffer             ' Address reference (lower 16 bits)
+zeros   word    0[64]               ' 64 zero words (128 bytes)
+sine    word    $8000[256]          ' Initialize sine table with midpoint values
 ```
 
 #### Notes
@@ -15136,12 +15156,49 @@ addr    word    @buffer             ' Address reference (lower 16 bits)
 - Automatically word-aligned in hub RAM
 - Range: 0 to 65535 (unsigned)
 - Values outside this range will be truncated to 16 bits
+- The `[count]` syntax repeats the preceding value
 
 #### Related Directives
 - [BYTE](#byte) — Declare 8-bit byte data
 - [LONG](#long) — Declare 32-bit long data
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
+
+
+
+### Inline Type Mixing {#inline-type-mixing}
+
+BYTE, WORD, and LONG declarations can be mixed within a single data block to create packed data structures. Each type specifier affects only the values that follow it until the next type specifier or end of line.
+
+#### Example: Protocol Packet Header
+```pasm
+DAT
+' Packet header: 1-byte type, 2-byte length, 4-byte timestamp
+packet_hdr
+        byte    $01             ' Packet type (1 byte)
+        word    $0100           ' Length field (2 bytes)
+        long    0               ' Timestamp placeholder (4 bytes)
+```
+
+#### Example: Mixed Data Block
+```pasm
+DAT
+' Sensor configuration block with mixed sizes
+sensor_cfg
+        byte    $42             ' Sensor ID
+        byte    $03             ' Channel count
+        word    1000            ' Sample rate (Hz)
+        long    @callback       ' Callback address
+        byte    "SENS", 0       ' Name string with terminator
+```
+
+#### Notes
+- Data elements pack contiguously regardless of size
+- No automatic padding is inserted between different-sized elements
+- Use ALIGNW or ALIGNL when subsequent access requires alignment
+- This technique is useful for protocol buffers, hardware register layouts, and memory-mapped structures
+
+For Spin2-declared structures (STRUCT) accessed from PASM2, refer to the Spin2 Reference Manual for structure memory layout and the SIZEOF() operator.
 
 
 
@@ -15256,17 +15313,58 @@ Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align
 
 #### Syntax
 ```pasm
-        ALIGNL
+DAT
+  code_and_data_statements
+  ALIGNL
+  data_statements
 ```
 
-#### Usage
-Use ALIGNL before data declarations or code sections that require long alignment for efficient access or hardware requirements. The P2 requires long alignment for certain operations and achieves optimal performance when accessing long-aligned data in hub RAM.
+**Result:** The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.
+
+- *code_and_data_statements* are leading program code and/or data.
+- *data_statements* begin long-aligned in Hub RAM.
+
+#### Explanation
+
+ALIGNL aligns the next data element to the beginning of the next long of Hub RAM. ALIGNL is important to use when code requires certain data to begin on a long boundary (for access convenience and speed).
+
+ALIGNL is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
+
+The following creates a data table of a byte ($11), a word ($2222), and a long ($33333333) meant for access from Hub RAM.
+
 ```pasm
-        ALIGNL                  ' Align to next long boundary
-mydata  long    0               ' This starts on a long-aligned address
+DAT
+    T1      byte    $11
+    T2      word    $2222
+            long    $33333333
 ```
+
+This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries.
+
+::: {.diagram}
+\AlignLBeforeDiagram
+:::
+
+Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenience or speed), the ALIGNL directive achieves this, as follows.
+
+```pasm
+DAT
+    T1      byte    $11
+
+            ALIGNL
+    T2      word    $2222
+            long    $33333333
+```
+
+In comparison, this data will be emitted as follows:
+
+::: {.diagram}
+\AlignLAfterDiagram
+:::
+
+In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of L1. Note that the second element (a long) of Table T2 is still packed right after the first element (a word) which may require further attention depending on the needs of the code accessing it.
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
@@ -15292,17 +15390,58 @@ Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align
 
 #### Syntax
 ```pasm
-        ALIGNW
+DAT
+  code_and_data_statements
+  ALIGNW
+  data_statements
 ```
 
-#### Usage
-Use ALIGNW before data declarations that require word alignment for efficient 16-bit access. Proper word alignment improves performance when accessing word-sized data in hub RAM.
+**Result:** The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.
+
+- *code_and_data_statements* are leading program code and/or data.
+- *data_statements* begin word-aligned in Hub RAM.
+
+#### Explanation
+
+ALIGNW aligns the next data element to the beginning of the next word of Hub RAM. ALIGNW is important to use when code requires certain data to begin on a word boundary (for access convenience and speed).
+
+ALIGNW is only allowed in DAT blocks, not in in-line PASM.
 
 #### Example
+
+The following creates a data table of a byte ($11), a word ($2222), and a long ($33333333) meant for access from Hub RAM.
+
 ```pasm
-        ALIGNW                  ' Align to next word boundary
-myword  word    0               ' This starts on a word-aligned address
+DAT
+    T1      byte    $11
+    T2      word    $2222
+            long    $33333333
 ```
+
+This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries.
+
+::: {.diagram}
+\AlignWBeforeDiagram
+:::
+
+Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenience or speed), the ALIGNW directive achieves this, as follows.
+
+```pasm
+DAT
+    T1      byte    $11
+
+            ALIGNW
+    T2      word    $2222
+            long    $33333333
+```
+
+In comparison, this data will be emitted as follows:
+
+::: {.diagram}
+\AlignWAfterDiagram
+:::
+
+In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of W1.
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
@@ -15447,12 +15586,24 @@ buffer  res     16              ' Reserve 16 longs
 temp    res     1               ' Reserve 1 long for temporary storage
 ```
 
+#### Working with Spin2 Structures
+
+When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
+
+```pasm
+' Reserve space for a Spin2 structure (structure defined in CON block)
+mystruct        res     SIZEOF(point) / 4       ' Reserve longs for point structure
+```
+
+The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
+
 #### Notes
 - RES only reserves space in cog RAM (not hub RAM)
 - No hub memory is allocated or affected
 - Useful for variables and buffers that will be initialized at runtime
 - Advances address counter by count longs without generating binary data
 - Use LONG to reserve initialized space in hub RAM
+- SIZEOF() enables correct sizing when working with Spin2 structures
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data
@@ -18252,16 +18403,25 @@ Streamer constant names follow a consistent pattern:
 X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 ```
 
-| Component | Meaning |
-|-----------|---------|
-| X_ | Streamer constant prefix |
-| RF | Read from FIFO (hub RAM) |
-| WF | Write to FIFO (hub RAM) |
-| IMM | Immediate data |
-| BYTE/WORD/LONG | Data unit size |
-| _nP | Number of pins used |
-| _nDACn | Number of DAC channels, bits per channel |
-| LUT | Data passes through LUT |
++------------------+----------------------------------------------+
+| Component        | Meaning                                      |
++==================+==============================================+
+| X_               | Streamer constant prefix                     |
++------------------+----------------------------------------------+
+| RF               | Read from FIFO (hub RAM)                     |
++------------------+----------------------------------------------+
+| WF               | Write to FIFO (hub RAM)                      |
++------------------+----------------------------------------------+
+| IMM              | Immediate data                               |
++------------------+----------------------------------------------+
+| BYTE/WORD/LONG   | Data unit size                               |
++------------------+----------------------------------------------+
+| _nP              | Number of pins used                          |
++------------------+----------------------------------------------+
+| _nDACn           | Number of DAC channels, bits per channel     |
++------------------+----------------------------------------------+
+| LUT              | Data passes through LUT                      |
++------------------+----------------------------------------------+
 
 
 
@@ -18315,6 +18475,262 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
 
 **Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2 + P_*/X_* constants)
+
+## Quick Reference Index
+
+Use this alphabetical index to quickly check if a name is reserved. For detailed descriptions and usage context, see the categorized sections that follow.
+
+**Note:** P_* constants (Smart Pin, ~116 words) are listed in Appendix E. X_* constants (Streamer, ~78 words) are listed in Appendix F. Both prefixes are reserved.
+
+### A
+```
+ABS         ABORT       ADDBITS     ADD         ADDCT1      ADDCT2
+ADDCT3      ADDPIX      ADDPINS     ADDS        ADDSX       ADDX
+AKPIN       ALIGNL      ALIGNW      ALLOWI      ALT         ALTB
+ALTD        ALTGB       ALTGN       ALTGW       ALTI        ALTR
+ALTS        ALTSB       ALTSN       ALTSW       AND         ANDC
+ANDN        ANDZ        ARCHIVE     ASMCLK      AUGD        AUGS
+```
+
+### B
+```
+BACKCOLOR   BITMAP      BITC        BITH        BITL        BITNC
+BITNOT      BITNZ       BITRND      BITZ        BLACK       BLNPIX
+BLUE        BMASK       BOX         BRK         BYTE        BYTEFILL
+BYTEFIT     BYTEMOVE    BYTES_1BIT  BYTES_2BIT  BYTES_4BIT
+```
+
+### C
+```
+CALL        CALLA       CALLB       CALLD       CALLPA      CALLPB
+CARTESIAN   CASE        CASE_FAST   CHANNEL     CIRCLE      CLEAR
+CLKFREQ     CLKMODE     CLKSET      CLOSE       CMP         CMPM
+CMPR        CMPS        CMPSUB      CMPSX       CMPX        COGBRK
+COGCHK      COGEXEC     COGEXEC_NEW COGEXEC_NEW_PAIR        COGATN
+COGID       COGINIT     COGSPIN     COGSTOP     COLOR       CON
+CRCBIT      CRCNIB      CYAN
+```
+
+### D
+```
+DAT         DEBUG       DEBUG_BAUD  DEBUG_COGS  DEBUG_DELAY DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP       DEBUG_HEIGHT            DEBUG_LEFT  DEBUG_LOG_SIZE
+DEBUG_PIN   DEBUG_TIMESTAMP         DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
+DECMOD      DECOD       DEPTH       DEV         DIRA        DIRB
+DIRC        DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
+DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
+DJZ         DLY         DOT         DOTSIZE     DRVC        DRVH
+DRVL        DRVNC       DRVNOT      DRVNZ       DRVRND      DRVZ
+```
+
+### E
+```
+ELSE        ELSEIF      ELSEIFNOT   ENCOD       END         EVENT_ATN
+EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT   EVENT_PAT
+EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4   EVENT_XFI
+EVENT_XMT   EVENT_XRL   EVENT_XRO   EXECF
+```
+
+### F
+```
+FABS        FALSE       FBLOCK      FDEC        FDEC_       FDEC_ARRAY
+FDEC_ARRAY_ FDEC_REG_ARRAY          FDEC_REG_ARRAY_         FFT
+FGE         FGES        FILE        FIT         FLE         FLES
+FLOAT       FLTC        FLTH        FLTL        FLTNC       FLTNOT
+FLTNZ       FLTRND      FLTZ        FRAC        FROM        FSQRT
+FVAR        FVARS
+```
+
+### G
+```
+GETBRK      GETBYTE     GETCT       GETMS       GETNIB      GETPTR
+GETQX       GETQY       GETREGS     GETRND      GETSCP      GETSEC
+GETWORD     GETXACC     GREEN       GREY
+```
+
+### H
+```
+HIDEXY      HOLDOFF     HSV8        HSV8W       HSV8X       HSV16
+HSV16W      HSV16X      HUBEXEC     HUBEXEC_NEW HUBEXEC_NEW_PAIR
+HUBSET
+```
+
+### I
+```
+IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
+IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
+IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
+IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_A
+IF_AE       IF_ALWAYS   IF_B        IF_BE       IF_C        IF_C_AND_NZ
+IF_C_AND_Z  IF_C_EQ_Z   IF_C_NE_Z   IF_C_OR_NZ  IF_C_OR_Z   IF_DIFF
+IF_E        IF_GE       IF_GT       IF_LE       IF_LT       IF_NC
+IF_NC_AND_NZ            IF_NC_AND_Z IF_NC_OR_NZ IF_NC_OR_Z  IF_NE
+IF_NEVER    IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
+IF_NZ_AND_C IF_NZ_AND_NC            IF_NZ_OR_C  IF_NZ_OR_NC IF_SAME
+IF_X0       IF_X1       IF_Z        IF_Z_AND_C  IF_Z_AND_NC IF_Z_EQ_C
+IF_Z_NE_C   IF_Z_OR_C   IF_Z_OR_NC  IFNOT       IJMP1       IJMP2
+IJMP3       IJNZ        IJZ         INA         INB         INCMOD
+INT_OFF     IRET1       IRET2       IRET3
+```
+
+### J
+```
+JATN        JCT1        JCT2        JCT3        JFBW        JINT
+JMP         JMPREL      JNATN       JNCT1       JNCT2       JNCT3
+JNFBW       JNINT       JNPAT       JNQMT       JNSE1       JNSE2
+JNSE3       JNSE4       JNXFI       JNXMT       JNXRL       JNXRO
+JPAT        JQMT        JSE1        JSE2        JSE3        JSE4
+JXFI        JXMT        JXRL        JXRO
+```
+
+### L
+```
+LINE        LINESIZE    LOC         LOCKCHK     LOCKNEW     LOCKREL
+LOCKRET     LOCKTRY     LOGIC       LOGSCALE    LONG        LONGFILL
+LONGMOVE    LONGS_16BIT LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT
+LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ     LSTR        LSTR_
+LUMA8       LUMA8W      LUMA8X      LUT1        LUT2        LUT4
+LUT8        LUTCOLORS
+```
+
+### M
+```
+MAG         MAGENTA     MERGEB      MERGEW      MIDI        MIXPIX
+MODC        MODCZ       MODZ        MOV         MOVBYTS     MUL
+MULDIV64    MULPIX      MULS        MUXC        MUXNC       MUXNIBS
+MUXNITS     MUXNZ       MUXQ        MUXZ
+```
+
+### N
+```
+NAN         NEG         NEGC        NEGNC       NEGNZ       NEGX
+NEGZ        NEWCOG      NEXT        NIXINT1     NIXINT2     NIXINT3
+NOP         NOT
+```
+
+### O
+```
+OBJ         OBOX        ONES        OPACITY     OR          ORANGE
+ORC         ORG         ORGF        ORGH        ORIGIN      ORZ
+OTHER       OUTA        OUTB        OUTC        OUTH        OUTL
+OUTNC       OUTNOT      OUTNZ       OUTRND      OUTZ        OVAL
+```
+
+### P
+```
+PA          PB          PC_KEY      PC_MOUSE    PI          PINCLEAR
+PINF        PINFLOAT    PINH        PINHIGH     PINL        PINLOW
+PINR        PINREAD     PINSTART    PINT        PINTOGGLE   PINW
+PINWRITE    PLOT        POLAR       POLLATN     POLLCT      POLLCT1
+POLLCT2     POLLCT3     POLLFBW     POLLINT     POLLPAT     POLLQMT
+POLLSE1     POLLSE2     POLLSE3     POLLSE4     POLLXFI     POLLXMT
+POLLXRL     POLLXRO     POLXY       POP         POPA        POPB
+POS         POSX        PR0         PR1         PR2         PR3
+PR4         PR5         PR6         PR7         PRECISE     PRECOMPILE
+PRI         PTRA        PTRB        PUB         PUSH        PUSHA
+PUSHB
+```
+
+### Q
+```
+QCOS        QDIV        QEXP        QFRAC       QLOG        QMUL
+QROTATE     QSIN        QSQRT       QUIT        QVECTOR
+```
+
+### R
+```
+RANGE       RCL         RCR         RCZL        RCZR        RDBYTE
+RDFAST      RDLONG      RDLUT       RDPIN       RDWORD      RECV
+RED         REG         REGEXEC     REGLOAD     REP         REPEAT
+RES         RESI0       RESI1       RESI2       RESI3       RET
+RETA        RETB        RETI0       RETI1       RETI2       RETI3
+RETURN      REV         RFBYTE      RFLONG      RFVAR       RFVARS
+RFWORD      RGB8        RGB16       RGB24       RGBEXP      RGBI8
+RGBI8W      RGBI8X      RGBSQZ      ROL         ROLBYTE     ROLNIB
+ROLWORD     ROR         ROTXY       ROUND       RQPIN
+```
+
+### S
+```
+SAL         SAMPLES     SAR         SAVE        SCA         SCAS
+SCOPE       SCOPE_XY    SCROLL      SDEC        SDEC_       SDEC_BYTE
+SDEC_BYTE_  SDEC_BYTE_ARRAY         SDEC_BYTE_ARRAY_        SDEC_LONG
+SDEC_LONG_  SDEC_LONG_ARRAY         SDEC_LONG_ARRAY_        SDEC_REG_ARRAY
+SDEC_REG_ARRAY_         SDEC_WORD   SDEC_WORD_  SDEC_WORD_ARRAY
+SDEC_WORD_ARRAY_        SEND        SET         SETBYTE     SETCFRQ
+SETCI       SETCMOD     SETCQ       SETCY       SETD        SETDACS
+SETINT1     SETINT2     SETINT3     SETLUTS     SETNIB      SETPAT
+SETPIV      SETPIX      SETQ        SETQ2       SETR        SETREGS
+SETS        SETSCP      SETSE1      SETSE2      SETSE3      SETSE4
+SETWORD     SETXFRQ     SEUSSF      SEUSSR      SHEX        SHEX_
+SHEX_BYTE   SHEX_BYTE_  SHEX_BYTE_ARRAY         SHEX_BYTE_ARRAY_
+SHEX_LONG   SHEX_LONG_  SHEX_LONG_ARRAY         SHEX_LONG_ARRAY_
+SHEX_REG_ARRAY          SHEX_REG_ARRAY_         SHEX_WORD   SHEX_WORD_
+SHEX_WORD_ARRAY         SHEX_WORD_ARRAY_        SHL         SHR
+SIGNED      SIGNX       SIZE        SKIP        SKIPF       SPACING
+SPECTRO     SPLITB      SPLITW      SPRITE      SPRITEDEF   SQRT
+STALLI      STEP        STRCOMP     STRING      STRSIZE     SUB
+SUBR        SUBS        SUBSX       SUBX        SUMC        SUMNC
+SUMNZ       SUMZ
+```
+
+### T
+```
+TERM        TEST        TESTB       TESTBN      TESTN       TESTP
+TESTPN      TEXT        TEXTANGLE   TEXTSIZE    TEXTSTYLE   TITLE
+TJF         TJNF        TJNS        TJNZ        TJS         TJV
+TJZ         TO          TRACE       TRGINT1     TRGINT2     TRGINT3
+TRIGGER     TRUE        TRUNC
+```
+
+### U
+```
+UBIN        UBIN_       UBIN_BYTE   UBIN_BYTE_  UBIN_BYTE_ARRAY
+UBIN_BYTE_ARRAY_        UBIN_LONG   UBIN_LONG_  UBIN_LONG_ARRAY
+UBIN_LONG_ARRAY_        UBIN_REG_ARRAY          UBIN_REG_ARRAY_
+UBIN_WORD   UBIN_WORD_  UBIN_WORD_ARRAY         UBIN_WORD_ARRAY_
+UDEC        UDEC_       UDEC_BYTE   UDEC_BYTE_  UDEC_BYTE_ARRAY
+UDEC_BYTE_ARRAY_        UDEC_LONG   UDEC_LONG_  UDEC_LONG_ARRAY
+UDEC_LONG_ARRAY_        UDEC_REG_ARRAY          UDEC_REG_ARRAY_
+UDEC_WORD   UDEC_WORD_  UDEC_WORD_ARRAY         UDEC_WORD_ARRAY_
+UHEX        UHEX_       UHEX_BYTE   UHEX_BYTE_  UHEX_BYTE_ARRAY
+UHEX_BYTE_ARRAY_        UHEX_LONG   UHEX_LONG_  UHEX_LONG_ARRAY
+UHEX_LONG_ARRAY_        UHEX_REG_ARRAY          UHEX_REG_ARRAY_
+UHEX_WORD   UHEX_WORD_  UHEX_WORD_ARRAY         UHEX_WORD_ARRAY_
+UNTIL       UPDATE
+```
+
+### V-W
+```
+VAR         VARBASE     WAITATN     WAITCT      WAITCT1     WAITCT2
+WAITCT3     WAITFBW     WAITINT     WAITMS      WAITPAT     WAITSE1
+WAITSE2     WAITSE3     WAITSE4     WAITUS      WAITX       WAITXFI
+WAITXMT     WAITXRL     WAITXRO     WC          WCZ         WFBYTE
+WFLONG      WFWORD      WHITE       WHILE       WINDOW      WMLONG
+WORD        WORDFILL    WORDFIT     WORDMOVE    WORDS_1BIT  WORDS_2BIT
+WORDS_4BIT  WORDS_8BIT  WRBYTE      WRC         WRFAST      WRLONG
+WRLUT       WRNC        WRNZ        WRPIN       WRWORD      WRZ
+WXPIN       WYPIN       WZ
+```
+
+### X-Z
+```
+XCONT       XINIT       XOR         XORC        XORO32      XORZ
+XSTOP       XYPOL       XZERO       YELLOW      ZEROX       ZSTR
+ZSTR_
+```
+
+### Underscore-Prefixed Conditions
+```
+_C          _CLR        _C_AND_NZ   _C_AND_Z    _C_EQ_Z     _C_NE_Z
+_C_OR_NZ    _C_OR_Z     _E          _GE         _GT         _LE
+_LT         _NC         _NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z
+_NE         _NZ         _NZ_AND_C   _NZ_AND_NC  _NZ_OR_C    _NZ_OR_NC
+_RET_       _SET        _Z          _Z_AND_C    _Z_AND_NC   _Z_EQ_C
+_Z_NE_C     _Z_OR_C     _Z_OR_NC
+```
+
+---
 
 ## Categories
 
@@ -19147,10 +19563,15 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
 
 ## Summary Table
 
-| Bug | Trigger Condition | Consequence | Workaround |
-|-----|-------------------|-------------|------------|
-| ALTx cancels block PTRx delta | ALTx/AUGx between SETQ and RD/WR/WMLONG | PTRx advances by single-long delta instead of block delta | Manually adjust PTRx after transfer |
-| AUGS leaks to ALTx | ALTx with #S between AUGS and target | ALTx receives unintended augmented value | Use register for ALTx S operand |
++----------------------------+--------------------------------+----------------------------------+-------------------------------+
+| Bug                        | Trigger Condition              | Consequence                      | Workaround                    |
++============================+================================+==================================+===============================+
+| ALTx cancels block         | ALTx/AUGx between SETQ         | PTRx advances by single-long     | Manually adjust PTRx          |
+| PTRx delta                 | and RD/WR/WMLONG               | delta instead of block delta     | after transfer                |
++----------------------------+--------------------------------+----------------------------------+-------------------------------+
+| AUGS leaks to ALTx         | ALTx with #S between           | ALTx receives unintended         | Use register for ALTx         |
+|                            | AUGS and target                | augmented value                  | S operand                     |
++----------------------------+--------------------------------+----------------------------------+-------------------------------+
 
 ---
 

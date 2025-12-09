@@ -168,21 +168,27 @@ Declare byte data in memory. Stores 8-bit values at the current address.
 #### Syntax
 ```pasm
 [label] BYTE    value[, value...]
+[label] BYTE    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 8-bit value or string literal |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use BYTE to define individual bytes, byte arrays, or strings. Each value occupies exactly 1 byte. Strings are stored as individual bytes in sequence. BYTE provides no automatic alignment—data appears at the current address.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing buffers or padding.
 
 #### Example
 ```pasm
 text    byte    "Hello P2", 0   ' String with null terminator
 data    byte    $FF, $00, $55   ' Hex values
 nums    byte    1, 2, 3, 4, 5   ' Decimal values
+zeros   byte    0[256]          ' 256 zero bytes (buffer initialization)
+pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
 ```
 
 #### Notes
@@ -190,6 +196,7 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 - Strings are stored as individual bytes without alignment
 - No automatic alignment—use ALIGNW or ALIGNL if needed
 - Values outside 0-255 range will be truncated to 8 bits
+- The `[count]` syntax repeats the preceding value, useful for buffer initialization
 
 #### Related Directives
 - [WORD](#word) — Declare 16-bit word data
@@ -211,21 +218,27 @@ Declare long data in memory. Stores 32-bit values at the current address.
 #### Syntax
 ```pasm
 [label] LONG    value[, value...]
+[label] LONG    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 32-bit value, expression, or address reference |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. In hub RAM, LONG data is automatically long-aligned for optimal access efficiency.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
 #### Example
 ```pasm
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
 ptrs    long    @start, @end    ' Address pointers
+buffer  long    0[32]           ' 32 zero longs (128 bytes)
+clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
 ```
 
 #### Notes
@@ -233,6 +246,7 @@ ptrs    long    @start, @end    ' Address pointers
 - Automatically long-aligned in hub RAM
 - Supports full 32-bit range (0 to $FFFFFFFF)
 - Standard size for P2 registers and instructions
+- The `[count]` syntax repeats the preceding value
 
 #### Related Directives
 - [BYTE](#byte) — Declare 8-bit byte data
@@ -254,20 +268,26 @@ Declare word data in memory. Stores 16-bit values at the current address.
 #### Syntax
 ```pasm
 [label] WORD    value[, value...]
+[label] WORD    value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
 | value | 16-bit value or expression |
+| count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
 Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. In hub RAM, WORD data is automatically word-aligned for efficient 16-bit access.
+
+The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
 #### Example
 ```pasm
 counts  word    1000, 2000, 3000    ' Decimal values
 addr    word    @buffer             ' Address reference (lower 16 bits)
+zeros   word    0[64]               ' 64 zero words (128 bytes)
+sine    word    $8000[256]          ' Initialize sine table with midpoint values
 ```
 
 #### Notes
@@ -275,12 +295,49 @@ addr    word    @buffer             ' Address reference (lower 16 bits)
 - Automatically word-aligned in hub RAM
 - Range: 0 to 65535 (unsigned)
 - Values outside this range will be truncated to 16 bits
+- The `[count]` syntax repeats the preceding value
 
 #### Related Directives
 - [BYTE](#byte) — Declare 8-bit byte data
 - [LONG](#long) — Declare 32-bit long data
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
+
+
+
+### Inline Type Mixing {#inline-type-mixing}
+
+BYTE, WORD, and LONG declarations can be mixed within a single data block to create packed data structures. Each type specifier affects only the values that follow it until the next type specifier or end of line.
+
+#### Example: Protocol Packet Header
+```pasm
+DAT
+' Packet header: 1-byte type, 2-byte length, 4-byte timestamp
+packet_hdr
+        byte    $01             ' Packet type (1 byte)
+        word    $0100           ' Length field (2 bytes)
+        long    0               ' Timestamp placeholder (4 bytes)
+```
+
+#### Example: Mixed Data Block
+```pasm
+DAT
+' Sensor configuration block with mixed sizes
+sensor_cfg
+        byte    $42             ' Sensor ID
+        byte    $03             ' Channel count
+        word    1000            ' Sample rate (Hz)
+        long    @callback       ' Callback address
+        byte    "SENS", 0       ' Name string with terminator
+```
+
+#### Notes
+- Data elements pack contiguously regardless of size
+- No automatic padding is inserted between different-sized elements
+- Use ALIGNW or ALIGNL when subsequent access requires alignment
+- This technique is useful for protocol buffers, hardware register layouts, and memory-mapped structures
+
+For Spin2-declared structures (STRUCT) accessed from PASM2, refer to the Spin2 Reference Manual for structure memory layout and the SIZEOF() operator.
 
 
 
@@ -668,12 +725,24 @@ buffer  res     16              ' Reserve 16 longs
 temp    res     1               ' Reserve 1 long for temporary storage
 ```
 
+#### Working with Spin2 Structures
+
+When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
+
+```pasm
+' Reserve space for a Spin2 structure (structure defined in CON block)
+mystruct        res     SIZEOF(point) / 4       ' Reserve longs for point structure
+```
+
+The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
+
 #### Notes
 - RES only reserves space in cog RAM (not hub RAM)
 - No hub memory is allocated or affected
 - Useful for variables and buffers that will be initialized at runtime
 - Advances address counter by count longs without generating binary data
 - Use LONG to reserve initialized space in hub RAM
+- SIZEOF() enables correct sizing when working with Spin2 structures
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data

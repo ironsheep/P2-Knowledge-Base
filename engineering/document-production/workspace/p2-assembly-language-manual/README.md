@@ -165,46 +165,71 @@ This intermediate LaTeX file is useful for:
 
 ## Content Assembly
 
-### Assembly Strategy (Phased Approach)
+### CRITICAL: Always Use the Assembly Script
 
-The complete manual is expected to be 400-600 pages. To ensure quality and efficient debugging, we use a phased assembly approach:
+**NEVER use raw `cat` commands to assemble the manual.**
 
-#### Phase A: Generate Part I Alone (~50-80 pages)
+**ALWAYS use the assembly script:**
+
 ```bash
-# Assemble Part I only
-cat front-matter.md \
-    part-i/chapter-01-execution-model.md \
-    part-i/chapter-02-instruction-format.md \
-    part-i/chapter-03-flags.md \
-    part-i/chapter-04-timing.md \
-    part-i/chapter-05-hardware.md \
-    > P2-Assembly-Language-Manual.md
-```
-**Validate:** Chapter formatting, Key Concepts boxes, code examples, any TikZ diagrams. Fix template issues while the document is small—this catches 80% of rendering problems.
+# From the workspace folder:
+cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-assembly-language-manual
 
-#### Phase B: Add Part II Incrementally
-Add instruction groups progressively, validating after each addition.
-
-#### Phase C: Complete Manual
-```bash
-# Full assembly - all parts
-cat front-matter.md \
-    part-i/chapter-*.md \
-    part-ii/instructions-*.md \
-    part-ii/directives.md \
-    part-ii/constants.md \
-    part-ii/smartpin-constants.md \
-    part-ii/streamer-constants.md \
-    part-ii/special-registers.md \
-    part-iii/appendix-*.md \
-    > P2-Assembly-Language-Manual.md
+# Run the assembly script
+./assemble-manual.sh
 ```
 
-#### Why This Approach?
-- A rendering bug in a 600-page PDF is painful to diagnose
-- The same bug in a 50-page Part I is manageable
-- Can release Part I while Part II is finalized (if needed)
-- Faster iteration on template fixes
+**Why?** The assembly script does much more than concatenate files:
+- Verifies ALL required source files exist before starting
+- Adds proper Part I/II/III section markers with correct pagination control
+- Ensures proper spacing between assembled sections
+- Provides detailed logging of what's being assembled
+- Reports statistics (line counts, file counts) for verification
+
+**What the script produces that `cat` doesn't:**
+- Part I marker: `# Part I: Architectural Foundation`
+- Part II marker: `# Part II: Instruction Set Reference`
+- Part III marker: `# Part III: Reference Tables`
+- Proper blank lines between sections for clean LaTeX output
+
+### Assembly Output
+
+After running the script, you'll see:
+```
+========================================
+PASM2 Manual Assembly Script
+========================================
+
+Verifying source files...
+  All source files verified!
+
+Assembling manual...
+  Adding: Front Matter
+  Adding: Part I marker
+  Adding: Chapter 1: Execution Model
+  ...
+  Adding: Part III marker
+  Adding: Appendix A: Encoding Table
+  ...
+
+========================================
+Assembly Complete!
+========================================
+
+Output file: P2-Assembly-Language-Manual.md
+Total lines: ~19,500
+Source files included: 38
+```
+
+### Historical Note
+
+Early development used raw `cat` commands, but this approach:
+- Missed Part markers (breaking TOC navigation)
+- Didn't verify source files existed
+- Provided no feedback during assembly
+- Made it easy to accidentally skip files
+
+The assembly script was created to prevent these issues.
 
 ---
 

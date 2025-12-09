@@ -258,6 +258,164 @@ local function is_instruction_description_table(el)
   return false
 end
 
+-- Detect if this is an "Operator | Description | Example" table (Chapter 2 pattern)
+-- These 3-column tables need consistent widths to prevent column 1 cramping column 2
+local function is_operator_description_example_table(el)
+  if #el.colspecs ~= 3 then
+    return false
+  end
+
+  -- Check header row for "Operator", "Description", "Example" pattern
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 3 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
+      local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+      local h3 = pandoc.utils.stringify(header_row.cells[3].contents):lower()
+
+      -- Match "Operator | Description | Example" pattern
+      if h1:match("operator") and h2:match("description") and h3:match("example") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
+-- Detect tables that should auto-shrink to content width (no forced full-width)
+-- These are compact reference tables where content is short and wrapping looks bad
+local function should_auto_shrink(el)
+  if not el.head or not el.head.rows or #el.head.rows == 0 then
+    return false
+  end
+
+  local header_row = el.head.rows[1]
+  if not header_row.cells then
+    return false
+  end
+
+  local num_cols = #el.colspecs
+
+  -- Get header texts
+  local headers = {}
+  for i, cell in ipairs(header_row.cells) do
+    headers[i] = pandoc.utils.stringify(cell.contents):lower()
+  end
+
+  -- 2-column patterns (Chapter 4.2.2, 4.2.3)
+  if num_cols == 2 then
+    -- "Instruction Type | Typical Cycles"
+    if headers[1] and headers[2] and
+       headers[1]:match("instruction") and headers[2]:match("cycle") then
+      return true
+    end
+    -- "Notation | Meaning"
+    if headers[1] and headers[2] and
+       headers[1]:match("notation") and headers[2]:match("meaning") then
+      return true
+    end
+  end
+
+  -- 4-column pattern (Chapter 3.7.1)
+  -- "Instruction | Operation | C Flag | Z Flag"
+  if num_cols == 4 then
+    if headers[1] and headers[2] and headers[3] and headers[4] and
+       headers[1]:match("instruction") and headers[2]:match("operation") and
+       headers[3]:match("c flag") and headers[4]:match("z flag") then
+      return true
+    end
+  end
+
+  return false
+end
+
+-- Handle auto-shrink tables: no width constraint, columns size to content
+local function handle_auto_shrink_table(el)
+  local num_cols = #el.colspecs
+
+  -- Helper to render cell contents as LaTeX
+  local function cell_to_latex(cell)
+    if not cell or not cell.contents then
+      return ""
+    end
+    if #cell.contents == 0 then
+      return ""
+    end
+    local ok, result = pcall(function()
+      local doc = pandoc.Pandoc(cell.contents)
+      local latex_str = pandoc.write(doc, "latex")
+      if latex_str then
+        return latex_str:gsub("\n$", "")
+      else
+        return pandoc.utils.stringify(cell.contents)
+      end
+    end)
+    if ok then
+      return result or ""
+    else
+      return pandoc.utils.stringify(cell.contents) or ""
+    end
+  end
+
+  -- Build tabularray LaTeX WITHOUT width=\linewidth (auto-shrink)
+  local latex = {}
+  table.insert(latex, "\\begin{tblr}{")
+  -- No width specification - table shrinks to content
+  table.insert(latex, "  rowsep=3pt,")
+  table.insert(latex, "  colsep=6pt,")
+
+  -- All columns use auto-width left-aligned
+  local colspec_parts = {}
+  for i = 1, num_cols do
+    table.insert(colspec_parts, "l")
+  end
+  table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
+
+  -- Styling: bold header row
+  table.insert(latex, "  row{1}={font=\\bfseries},")
+  table.insert(latex, "  hline{1,2}={solid},")
+  table.insert(latex, "  hline{Z}={solid},")
+  table.insert(latex, "}")
+
+  -- Extract and add header row
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells then
+      local headers = {}
+      for i, cell in ipairs(header_row.cells) do
+        if i <= num_cols then
+          table.insert(headers, cell_to_latex(cell))
+        end
+      end
+      if #headers > 0 then
+        table.insert(latex, "  " .. table.concat(headers, " & ") .. " \\\\")
+      end
+    end
+  end
+
+  -- Add data rows
+  for _, body in ipairs(el.bodies) do
+    if body.body then
+      for _, row in ipairs(body.body) do
+        local cells = {}
+        for i, cell in ipairs(row.cells) do
+          if i <= num_cols then
+            table.insert(cells, cell_to_latex(cell))
+          end
+        end
+        if #cells > 0 then
+          table.insert(latex, "  " .. table.concat(cells, " & ") .. " \\\\")
+        end
+      end
+    end
+  end
+
+  table.insert(latex, "\\end{tblr}")
+
+  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
+end
+
 -- Handle content tables (2-8 columns) with page-width constraint
 -- CONSERVATIVE: Uses Pandoc's column width hints from markdown, just adds width=\linewidth
 -- If no widths specified in markdown, uses equal distribution with last column flexible
@@ -271,6 +429,10 @@ local function handle_content_table(el)
   -- Special handling for "Instruction | Description" tables (Appendix B)
   -- These need consistent widths to avoid 50/50 split on shorter tables
   local is_instr_desc = is_instruction_description_table(el)
+
+  -- Special handling for "Operator | Description | Example" tables (Chapter 2)
+  -- These need consistent widths to prevent Operator column cramping Description
+  local is_op_desc_ex = is_operator_description_example_table(el)
 
   -- Extract column widths from Pandoc's colspecs
   -- colspecs is a list of {alignment, width} pairs
@@ -323,6 +485,15 @@ local function handle_content_table(el)
     -- This prevents Pandoc from inferring 50/50 on shorter tables
     widths[1] = 0.18
     widths[2] = 0.77
+    has_widths = true
+  elseif is_op_desc_ex then
+    -- Operator | Description | Example tables (Chapter 2)
+    -- Column 1 (Operator): 12% - short symbols like `+`, `>>`, `#>`
+    -- Column 2 (Description): 43% - medium text like "Bitwise NOT (invert all bits)"
+    -- Column 3 (Example): 40% - code examples like `$80 >> 4` → `$08`
+    widths[1] = 0.12
+    widths[2] = 0.43
+    widths[3] = 0.40
     has_widths = true
   elseif has_widths and total_specified > 0 then
     -- Scale widths to sum to ~0.95 (leave room for padding)
@@ -460,6 +631,12 @@ function Table(el)
   -- Handle 9-column encoding tables specially (fixed widths with colored headers)
   if num_cols == 9 then
     return handle_encoding_table(el)
+  end
+
+  -- Handle auto-shrink tables (specific patterns that should size to content)
+  -- Check this BEFORE general content table handling
+  if should_auto_shrink(el) then
+    return handle_auto_shrink_table(el)
   end
 
   -- Handle 2-8 column content tables with page-width constraint
