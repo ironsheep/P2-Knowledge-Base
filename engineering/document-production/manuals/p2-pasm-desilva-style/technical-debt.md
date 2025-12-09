@@ -11,6 +11,7 @@ Track improvement opportunities identified during MVP development that we're int
 - [2025-08-23] Consider how error messages could teach rather than just report
 - [2025-08-23] What if each chapter had a "confidence check" before proceeding?
 - [2025-08-23] Pattern noticed: Learners need "permission" to experiment
+- [2025-12-09] Consider reducing base font size from 12pt to 11pt to match P2 Assembly Language Manual - current 12pt appears larger than intended
 - [Add new observations here with date]
 
 ## MVP Definition (What We're Shipping First)
