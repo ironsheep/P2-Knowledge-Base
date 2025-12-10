@@ -3600,6 +3600,33 @@ Method 2 (with fraction): `((clocks_per_bit * $10000) & $FFFFFC00) | (bits - 1)`
 
 The hardware does not generate parity bits. To add parity, calculate it in software and insert at MSB+1 position. Include the parity bit in the bit count.
 
+**PASM2 UART Transmit:**
+
+::: pasm2
+```
+' Asynchronous serial transmit
+' 200 MHz system clock, 115200 baud, 8N1
+                org     0
+                dirl    #56                     ' Reset TX pin
+                wrpin   async_tx_mode, #56      ' Configure async TX mode
+                wxpin   baud_tx, #56            ' Set baud and bit count
+                dirh    #56                     ' Enable TX
+
+.loop           wypin   #$55, #56               ' Transmit $55 (alternating bits)
+.wait           testp   #56 wc                  ' Check IN flag (buffer empty)
+        if_nc   jmp     #.wait                  ' Wait for completion
+                waitx   ##10_000_000            ' Delay between transmissions
+                jmp     #.loop
+
+' Async TX mode: %0000_0000_000_00000_00000000_01_11110_0
+'   TT=%01 (P_OE), Mode=%11110
+async_tx_mode   long    P_ASYNC_TX | P_OE
+' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
+' X = (1736 << 16) | 7 = $06C8_0007
+baud_tx         long    $06C8_0007
+```
+:::
+
 ### Mode %11111 - Asynchronous Serial Receive
 
 Receive 1 to 32 data bits at a preset baud rate matching the transmitter. The Smart Pin automatically detects the start bit and samples data at the bit centers.
@@ -3647,33 +3674,6 @@ PUB uart_rx_check(pin) : char, valid
   valid := (pinr(pin) & $8000_0000) <> 0
   if valid
     char := rdpin(pin) & $FF
-```
-:::
-
-**PASM2 UART Transmit:**
-
-::: pasm2
-```
-' Asynchronous serial transmit
-' 200 MHz system clock, 115200 baud, 8N1
-                org     0
-                dirl    #56                     ' Reset TX pin
-                wrpin   async_tx_mode, #56      ' Configure async TX mode
-                wxpin   baud_tx, #56            ' Set baud and bit count
-                dirh    #56                     ' Enable TX
-
-.loop           wypin   #$55, #56               ' Transmit $55 (alternating bits)
-.wait           testp   #56 wc                  ' Check IN flag (buffer empty)
-        if_nc   jmp     #.wait                  ' Wait for completion
-                waitx   ##10_000_000            ' Delay between transmissions
-                jmp     #.loop
-
-' Async TX mode: %0000_0000_000_00000_00000000_01_11110_0
-'   TT=%01 (P_OE), Mode=%11110
-async_tx_mode   long    P_ASYNC_TX | P_OE
-' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
-' X = (1736 << 16) | 7 = $06C8_0007
-baud_tx         long    $06C8_0007
 ```
 :::
 
