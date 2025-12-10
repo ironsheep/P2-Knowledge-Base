@@ -2237,42 +2237,94 @@
 
 \newcommand{\SyncSerialRisingDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.7cm, y=1cm]
+\begin{tikzpicture}[x=0.9cm, y=1cm]
 
-% Clock waveform with sampling arrows (rising edge)
-\draw[dashed, thin] (-0.3, 2.5) -- (0.0, 2.5);
+% Parameters
+\def\clockHi{3.5}
+\def\clockLo{2.8}
+\def\dataHi{1.6}
+\def\dataLo{0.9}
+\def\bitWidth{1.0}
+
+% Clock waveform - 50% duty, starts LOW, 8 HIGH pulses, ends LOW
+% Dashed lead-in at LOW
+\draw[dashed, thin] (-0.4, \clockLo) -- (0, \clockLo);
+% 8 clock cycles: LOW-HIGH-LOW for each bit
 \foreach \i in {0,...,7} {
-    \pgfmathsetmacro{\x}{0.0 + \i*1.2}
-    \draw[sp-signal] (\x, 2.5) -- (\x, 3.0) -- (\x+0.6, 3.0) -- (\x+0.6, 2.5) -- (\x+1.2, 2.5);
-    % Sampling arrow at rising edge
-    \draw[sp-arrow] (\x, 3.1) -- (\x, 2.0);
+    \pgfmathsetmacro{\x}{\i * \bitWidth}
+    % Rise to HIGH
+    \draw[sp-signal] (\x, \clockLo) -- (\x, \clockHi);
+    % HIGH period (half cycle)
+    \draw[sp-signal] (\x, \clockHi) -- (\x + 0.5, \clockHi);
+    % Fall to LOW
+    \draw[sp-signal] (\x + 0.5, \clockHi) -- (\x + 0.5, \clockLo);
+    % LOW period (half cycle)
+    \draw[sp-signal] (\x + 0.5, \clockLo) -- (\x + \bitWidth, \clockLo);
 }
-\draw[dashed, thin] (9.6, 2.5) -- (10.0, 2.5);
+% Dashed trail at LOW
+\draw[dashed, thin] (8.0, \clockLo) -- (8.4, \clockLo);
 
-% Data waveform with bit values
-\draw[dashed, thin] (-0.3, 1.0) -- (0.3, 1.0);
-\draw[sp-signal] (0.3, 1.0) -- (0.3, 1.5);
-% Bit cells with values
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (0.9, 1.25) {1};
-\draw[sp-signal] (1.4, 1.5) -- (1.4, 1.0);
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (2.1, 1.25) {0};
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (3.3, 1.25) {0};
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (4.5, 1.25) {0};
-\draw[sp-signal] (5.0, 1.0) -- (5.0, 1.5);
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (5.7, 1.25) {1};
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (6.9, 1.25) {1};
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (8.1, 1.25) {1};
-\draw[sp-signal] (8.6, 1.5) -- (8.6, 1.0);
-\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (9.3, 1.25) {0};
-\draw[dashed, thin] (9.8, 1.0) -- (10.0, 1.0);
+% Sampling arrows only on first two and last two rising edges (Y-shape pointing UP, inside waveform)
+\foreach \i in {0,1,6,7} {
+    \pgfmathsetmacro{\x}{\i * \bitWidth}
+    \draw[thin] (\x, \clockHi - 0.15) -- (\x - 0.08, \clockHi - 0.35);
+    \draw[thin] (\x, \clockHi - 0.15) -- (\x + 0.08, \clockHi - 0.35);
+    \draw[thin] (\x, \clockHi - 0.15) -- (\x, \clockHi);
+}
 
-% LSB/MSB labels
-\node[sp-annotation] at (0.9, 0.3) {LSB};
-\node[sp-annotation] at (9.3, 0.3) {MSB};
+% Dashed lines from first two rising edges down to data level
+\draw[dashed, thin] (0, \clockLo) -- (0, \dataHi);
+\draw[dashed, thin] (1.0, \clockLo) -- (1.0, \dataHi);
+
+% Data waveform - transitions ONLY on clock falling edges (at x + 0.5)
+% Bit values: 1, 0, 0, 0, 1, 1, 1, 0 (sampled at rising edges)
+% Digits centered on rising edges (at x = 0, 1, 2, 3, 4, 5, 6, 7)
+
+% Dashed lead-in at HIGH
+\draw[dashed, thin] (-0.4, \dataHi) -- (0, \dataHi);
+
+% Bit 0 = 1: Data HIGH, sampled at rise 0 (x=0)
+% Data HIGH from start to falling edge 0 (x=0.5)
+\draw[sp-signal] (0, \dataHi) -- (0.5, \dataHi);
+% Transition LOW on falling edge 0 (x=0.5)
+\draw[sp-signal] (0.5, \dataHi) -- (0.5, \dataLo);
+
+% Bits 1,2,3 = 0,0,0: Data LOW from fall 0 to fall 3
+\draw[sp-signal] (0.5, \dataLo) -- (3.5, \dataLo);
+% Transition HIGH on falling edge 3 (x=3.5)
+\draw[sp-signal] (3.5, \dataLo) -- (3.5, \dataHi);
+
+% Bits 4,5,6 = 1,1,1: Data HIGH from fall 3 to fall 6
+\draw[sp-signal] (3.5, \dataHi) -- (6.5, \dataHi);
+% Transition LOW on falling edge 6 (x=6.5)
+\draw[sp-signal] (6.5, \dataHi) -- (6.5, \dataLo);
+
+% Bit 7 = 0: Data LOW from fall 6 to fall 7
+\draw[sp-signal] (6.5, \dataLo) -- (7.5, \dataLo);
+% Transition HIGH on falling edge 7 (x=7.5) - return to idle
+\draw[sp-signal] (7.5, \dataLo) -- (7.5, \dataHi);
+\draw[sp-signal] (7.5, \dataHi) -- (8.0, \dataHi);
+
+% Dashed trail at HIGH
+\draw[dashed, thin] (8.0, \dataHi) -- (8.4, \dataHi);
+
+% Digit labels centered on rising edges (x = 0, 1, 2, 3, 4, 5, 6, 7)
+\node[sp-annotation] at (0, {(\dataHi + \dataLo)/2}) {1};
+\node[sp-annotation] at (1, {(\dataHi + \dataLo)/2}) {0};
+\node[sp-annotation] at (2, {(\dataHi + \dataLo)/2}) {0};
+\node[sp-annotation] at (3, {(\dataHi + \dataLo)/2}) {0};
+\node[sp-annotation] at (4, {(\dataHi + \dataLo)/2}) {1};
+\node[sp-annotation] at (5, {(\dataHi + \dataLo)/2}) {1};
+\node[sp-annotation] at (6, {(\dataHi + \dataLo)/2}) {1};
+\node[sp-annotation] at (7, {(\dataHi + \dataLo)/2}) {0};
+
+% LSB/MSB labels - centered under first and last digits
+\node[sp-annotation] at (0, \dataLo - 0.4) {LSB};
+\node[sp-annotation] at (7, \dataLo - 0.4) {MSB};
 
 % Time arrow
-\draw[sp-arrow] (0, -0.2) -- (10.0, -0.2);
-\node[sp-annotation] at (5.0, -0.5) {Time};
+\draw[sp-arrow] (0, -0.1) -- (8.2, -0.1);
+\node[sp-annotation] at (4.0, -0.45) {Time};
 
 \end{tikzpicture}
 \par}
