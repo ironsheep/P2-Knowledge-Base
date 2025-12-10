@@ -71,6 +71,7 @@ workspace/p2-smart-pins-tutorial/     <- YOU ARE HERE (production prep)
 |   |-- p2kb-sp-structure.lua         # Document structure
 |   |-- p2kb-sp-index-toc.lua         # Index and TOC
 |   |-- p2kb-sp-code-coloring.lua     # Code block coloring
+|   |-- p2kb-sp-mnemonic-bold.lua     # PASM2 mnemonic uppercasing
 |   +-- p2kb-sp-semantic.lua          # Semantic marker conversion
 |-- assets/
 |   +-- (PNG images for diagrams)
@@ -92,6 +93,7 @@ outbound/p2-smart-pins-tutorial/      <- FLAT structure for PDF Forge
 |-- p2kb-sp-structure.lua
 |-- p2kb-sp-index-toc.lua
 |-- p2kb-sp-code-coloring.lua
+|-- p2kb-sp-mnemonic-bold.lua
 |-- p2kb-sp-semantic.lua
 |-- request.json                      # Config (FLAT - root level)
 +-- assets/                           # ALL images go here (only subfolder!)
@@ -313,7 +315,8 @@ Filters must be applied in this exact order:
 4. `p2kb-sp-structure.lua` - Document structure
 5. `p2kb-sp-index-toc.lua` - Index and TOC
 6. `p2kb-sp-code-coloring.lua` - Code block coloring
-7. `p2kb-sp-semantic.lua` - Semantic marker conversion
+7. `p2kb-sp-mnemonic-bold.lua` - PASM2 mnemonic uppercasing (grammar-aware)
+8. `p2kb-sp-semantic.lua` - Semantic marker conversion
 
 **Order Critical:** Each filter depends on previous filter's output
 
@@ -398,6 +401,7 @@ The `request.json` file configures PDF Forge:
         "p2kb-sp-structure",
         "p2kb-sp-index-toc",
         "p2kb-sp-code-coloring",
+        "p2kb-sp-mnemonic-bold",
         "p2kb-sp-semantic"
       ]
     }
