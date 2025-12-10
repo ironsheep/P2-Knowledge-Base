@@ -1232,7 +1232,7 @@ read_value
 
 test_data       long    $1500_0000              ' Test data to store
 result          long    0                       ' Retrieved value stored here
-repo_mode       long    %0000_0000_000_0000000000000_00_00001_0
+repo_mode       long    P_REPOSITORY    ' %0000_0000_000_0000000000000_00_00001_0
 ```
 :::
 
@@ -1263,10 +1263,9 @@ X[15:0] sets an optional sample period in clock cycles. The IN flag rises at eac
 .loop           nop                             ' Output runs continuously
                 jmp     #.loop
 
-dac_noise_cfg   long    %0000_0000_000_10100_00000000_01_00001_0
-                '                     ^^^^^               ^^^^^
-                '                     DAC mode            Mode %00001
-                '                     M[12:10]=%101
+' P_DAC_NOISE with DAC mode enabled: %0000_0000_000_10100_00000000_01_00001_0
+'   DAC mode M[12:10]=%101 (P_DAC_990R_3V), TT=%01 (P_OE), Mode=%00001
+dac_noise_cfg   long    P_DAC_NOISE | P_DAC_990R_3V | P_OE
 ```
 :::
 
@@ -1407,9 +1406,9 @@ output_voltage
                 add     dac_volt, #$100         ' Increment voltage by 256
                 jmp     #.loop                  ' Repeat forever
 
-dac_config      long    %0000_0000_000_10100_00000000_01_00010_0
-                '                     ^^^^^               ^^^^^
-                '                     DAC mode            Mode %00010 (PRNG)
+' DAC dither with PRNG: %0000_0000_000_10100_00000000_01_00010_0
+'   DAC mode M[12:10]=%101 (P_DAC_990R_3V), TT=%01 (P_OE), Mode=%00010
+dac_config      long    P_DAC_DITHER_RND | P_DAC_990R_3V | P_OE
 dac_period      long    $100                    ' 256 clock sample period
 dac_volt        long    0                       ' Y[15:0] voltage value
 ```
@@ -1500,7 +1499,9 @@ This example generates 16 logic-1 pulses at 25 MHz system clock (60µs pulse, 20
 .wait           testp   #20 wc                  ' Check IN flag
         if_nc   jmp     #.wait                  ' Wait for pulses to complete
 
-pulse_config    long    %0000_0000_000_00000_00000000_11_00100_0
+' Pulse mode: %0000_0000_000_00000_00000000_11_00100_0
+'   TT=%11 (output override active), Mode=%00100
+pulse_config    long    P_PULSE | P_OE | P_TT_10
 cycles          long    $0010                   ' 16 pulses
 pulse_timing    long    $01F4_05DC              ' X[31:16]=$01F4 (500), X[15:0]=$05DC (1500)
                                                 ' At 25MHz: 60µs high, 20µs low per cycle
@@ -1590,7 +1591,9 @@ This example generates 16 transitions (8 complete cycles) with 1500 system clock
                 testp   #20 wc                  ' Check IN flag
         if_nc   jmp     #.wait                  ' Wait for transitions to complete
 
-trans_config    long    %0000_0000_000_0000_000000000_11_00101_0
+' Transition mode: %0000_0000_000_0000_000000000_11_00101_0
+'   TT=%11 (output override active), Mode=%00101
+trans_config    long    P_TRANSITION | P_OE | P_TT_10
 cycles          long    $0010                   ' 16 transitions (8 complete cycles)
 trans_timing    long    $0000_05DC              ' 1500 clocks between transitions
 ```
@@ -1699,7 +1702,7 @@ _clk_freq       =       25_000_000
 .loop           nop
                 jmp     #.loop                  ' Run forever
 
-nco_config      long    %0000_0000_000_0000_000000000_01_00110_0
+nco_config      long    P_NCO_FREQ | P_OE   ' %0000_0000_000_0000_000000000_01_00110_0
 ```
 :::
 
@@ -1824,7 +1827,7 @@ This example generates 1µs pulses every 18µs at 25 MHz:
 .loop           nop
                 jmp     #.loop                  ' Run forever
 
-nco_duty_cfg    long    %0000_0000_000_0000_000000000_01_00111_0
+nco_duty_cfg    long    P_NCO_DUTY | P_OE   ' %0000_0000_000_0000_000000000_01_00111_0
 y_period        long    $0E38_E38E              ' 2^32 / 18 = 18µs period
 ```
 :::
@@ -1922,7 +1925,7 @@ PUB phase_correct_pwm()
 .loop           nop
                 jmp     #.loop                  ' Run forever
 
-pwm_tri_cfg     long    %0000_0000_000_00000_00000000_01_01000_0
+pwm_tri_cfg     long    P_PWM_TRIANGLE | P_OE  ' %0000_0000_000_00000_00000000_01_01000_0
 y_regdata       long    $0000_0080              ' Y[15:0] = 128 (duty threshold)
 x_regdata       long    $0200_0001              ' X[31:16]=$200 (frame=512), X[15:0]=1 (no division)
 ```
@@ -2023,7 +2026,7 @@ PUB dynamic_pwm() | duty
 .loop           nop
                 jmp     #.loop                  ' Run forever
 
-pwm_saw_cfg     long    %0000_0000_000_00000_00000000_01_01001_0
+pwm_saw_cfg     long    P_PWM_SAWTOOTH | P_OE  ' %0000_0000_000_00000_00000000_01_01001_0
 y_regdata       long    $0000_0080              ' Y[15:0] = 128 (duty threshold)
 x_regdata       long    $0200_0001              ' X[31:16]=$200 (frame=512), X[15:0]=1 (no division)
 ```
@@ -2120,8 +2123,9 @@ Due to the nature of switch-mode power supplies, set Y[15:0] once and let it rep
 .loop           nop
                 jmp     #.loop                  ' Run - feedback controls operation
 
-' SMPS mode: %01010, TT=01 (output enabled)
-smps_cfg        long    %0000_0001_000_00000_00000000_01_01010_0
+' SMPS mode with B-input from P21: %0000_0001_000_00000_00000000_01_01010_0
+'   BBBB=%0001 (P_PLUS1_B), TT=%01 (P_OE), Mode=%01010
+smps_cfg        long    P_PWM_SMPS | P_OE | P_PLUS1_B
 ' X[15:0]=200 (1µs base @ 200MHz), X[31:16]=100 (100 base periods = 100µs frame = 10kHz)
 x_regdata       long    $0064_00C8
 ' Y[15:0]=50 (50% initial duty)
@@ -2411,8 +2415,9 @@ PUB quadrature_demo() | position, last_pos
                 mov     outa, quad_data         ' Display on LEDs
                 jmp     #.myloop                ' Repeat forever
 
-' Quadrature mode, BBBB=%0001 selects P33 as B input
-quad_cfg        long    %0000_0001_000_00000_00000000_00_01011_0
+' Quadrature mode: %0000_0001_000_00000_00000000_00_01011_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01011
+quad_cfg        long    P_QUADRATURE | P_PLUS1_B
 ' 2-second period at 25 MHz = 50,000,000 clocks
 x_period        long    $02FA_F080
 quad_data       long    0
@@ -2439,8 +2444,9 @@ quad_data       long    0
                 mov     outa, quad_data         ' Display on LEDs
                 jmp     #.myloop                ' Repeat forever
 
-' Quadrature mode, BBBB=%0001 selects P33 as B input
-quad_cfg        long    %0000_0001_000_00000_00000000_00_01011_0
+' Quadrature mode: %0000_0001_000_00000_00000000_00_01011_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01011
+quad_cfg        long    P_QUADRATURE | P_PLUS1_B
 quad_data       long    0
 ```
 :::
@@ -2533,8 +2539,9 @@ PUB gated_counter() | count
                 mov     outa, count_data        ' Display on LEDs
                 jmp     #.loop                  ' Repeat
 
-' Gated counter mode, BBBB=%0001 selects P33 as B (gate) input
-gated_cfg       long    %0000_0001_000_00000_00000000_00_01100_0
+' Gated counter mode: %0000_0001_000_00000_00000000_00_01100_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as gate), Mode=%01100
+gated_cfg       long    P_REG_UP | P_PLUS1_B
 ' 1-second period at 25 MHz = 25,000,000 clocks
 x_period        long    $017D_7840
 count_data      long    0
@@ -2626,8 +2633,9 @@ PUB step_dir_counter() | count
                 mov     outa, count_data        ' Display on LEDs
                 jmp     #.loop                  ' Repeat
 
-' Up/down mode, BBBB=%0001 selects P33 as B (direction) input
-updown_cfg      long    %0000_0001_000_00000_00000000_00_01101_0
+' Up/down mode: %0000_0001_000_00000_00000000_00_01101_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as direction), Mode=%01101
+updown_cfg      long    P_REG_UP_DOWN | P_PLUS1_B
 count_data      long    0
 ```
 :::
@@ -2721,8 +2729,9 @@ PUB dual_edge_counter() | count
                 mov     outa, count_data        ' Display on LEDs
                 jmp     #.loop                  ' Repeat
 
-' Edge counter mode, BBBB=%0001 selects P33 as B input
-edge_cfg        long    %0000_0001_000_00000_00000000_00_01110_0
+' Edge counter mode: %0000_0001_000_00000_00000000_00_01110_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01110
+edge_cfg        long    P_COUNT_RISES | P_PLUS1_B
 count_data      long    0
 ```
 :::
@@ -2831,10 +2840,14 @@ PUB duty_cycle_measure() | high_time, period_clks
                 wypin   #64, #40                ' Start SPI clock
                 jmp     #.loop                  ' Repeat
 
-a_in_mode       long    %0000_0001_000_00000_00000000_00_01111_0
+' Level counter: %0000_0001_000_00000_00000000_00_01111_0
+'   BBBB=%0001 (P_PLUS1_B), Mode=%01111
+a_in_mode       long    P_COUNT_HIGHS | P_PLUS1_B
 count_data      long    0
-sync_tx_mode    long    %0000_1111_000_00000_00000000_01_11100_0
-clock_mode      long    %0000_0000_000_00000_00000000_01_00101_0
+' Sync TX with inverted B from pin-1: %0000_1111_000_00000_00000000_01_11100_0
+'   BBBB=%1111 (P_INVERT_B | P_MINUS1_B), TT=%01 (P_OE), Mode=%11100
+sync_tx_mode    long    P_SYNC_TX | P_OE | P_INVERT_B | P_MINUS1_B
+clock_mode      long    P_TRANSITION | P_OE  ' %0000_0000_000_00000_00000000_01_00101_0
 ```
 :::
 
@@ -2912,7 +2925,9 @@ PUB state_timing() | duration, was_high
                 mov     low_count, pin_data     ' Save LOW duration
                 jmp     #.wait_high             ' Continue measuring
 
-state_mode      long    %0000_0000_000_00010_00000000_00_10000_0
+' State timing: %0000_0000_000_00010_00000000_00_10000_0
+'   P[10]=%1 (Schmitt trigger A), Mode=%10000
+state_mode      long    P_STATE_TICKS | P_SCHMITT_A
 pin_data        long    0
 high_count      long    0
 low_count       long    0
@@ -2974,7 +2989,7 @@ PUB high_pulse_timing() | high_duration
                 ' Process high_time...
                 jmp     #.loop
 
-high_mode       long    %0000_0000_000_00000_00000000_00_10001_0
+high_mode       long    P_HIGH_TICKS    ' %0000_0000_000_00000_00000000_00_10001_0
 high_time       long    0
 ```
 :::
@@ -3456,9 +3471,10 @@ PUB sync_tx_8bit(data)
                 wypin   #16, #20                ' Start 16 clock edges (8 bits × 2)
                 jmp     #.loop
 
-' Positive-edge: FFF bits set for data transition on falling edge
-sync_tx_mode    long    %0000_1111_000_00000_00000000_01_11100_0
-clock_mode      long    %0000_0000_000_00000_00000000_01_00101_0
+' Positive-edge clocking: %0000_1111_000_00000_00000000_01_11100_0
+'   BBBB=%1111 (P_INVERT_B | P_MINUS1_B), TT=%01 (P_OE), Mode=%11100
+sync_tx_mode    long    P_SYNC_TX | P_OE | P_INVERT_B | P_MINUS1_B
+clock_mode      long    P_TRANSITION | P_OE  ' %0000_0000_000_00000_00000000_01_00101_0
 ```
 :::
 
@@ -3537,8 +3553,9 @@ PUB sync_rx_8bit() : data
                 mov     outa, rcvd_data         ' Display on LEDs
                 jmp     #.loop
 
-' Sync RX mode, BBBB=%0001 selects P31 as clock input
-sync_rx_mode    long    %0000_0001_000_00000_00000000_01_11101_0
+' Sync RX mode: %0000_0001_000_00000_00000000_01_11101_0
+'   BBBB=%0001 (P_PLUS1_B selects P31 as clock), TT=%01 (P_OE), Mode=%11101
+sync_rx_mode    long    P_SYNC_RX | P_OE | P_PLUS1_B
 rcvd_data       long    0
 ```
 :::
@@ -3651,8 +3668,9 @@ PUB uart_rx_check(pin) : char, valid
                 waitx   ##10_000_000            ' Delay between transmissions
                 jmp     #.loop
 
-' Async TX mode with output enable (TT=01)
-async_tx_mode   long    %0000_0000_000_00000_00000000_01_11110_0
+' Async TX mode: %0000_0000_000_00000_00000000_01_11110_0
+'   TT=%01 (P_OE), Mode=%11110
+async_tx_mode   long    P_ASYNC_TX | P_OE
 ' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
 ' X = (1736 << 16) | 7 = $06C8_0007
 baud_tx         long    $06C8_0007
@@ -3680,8 +3698,9 @@ baud_tx         long    $06C8_0007
                 mov     outa, rx_data           ' Display on LEDs
                 jmp     #.loop
 
-' Async RX mode (TT=00, no output)
-async_rx_mode   long    %0000_0000_000_00000_00000000_00_11111_0
+' Async RX mode: %0000_0000_000_00000_00000000_00_11111_0
+'   TT=%00 (no output), Mode=%11111
+async_rx_mode   long    P_ASYNC_RX
 ' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
 baud_rx         long    $06C8_0007
 rx_data         long    0
