@@ -67,19 +67,41 @@
 \clearpage
 ```
 
-## Copyright and License
+# Copyright and License
 
-Copyright 2025 Parallax Inc. and Iron Sheep Productions LLC.
-All rights reserved.
+Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
 
-This tutorial incorporates knowledge and teaching approaches inspired by:
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
-- **Jon Titus** - Original Smart Pins documentation and tutorial approach
-- **Evan Hillis** (evanh) - Original ASCII art Smart Pin block diagram
-- **Raymond Allen** (Rayman) - Color Smart Pin block diagram based on Evan's work
-- **The Propeller Community** - Years of collective wisdom
+You are free to:
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
+
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+
+### Trademarks
+
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+
+
+## Acknowledgments
+
+This tutorial would not exist without the contributions of many individuals:
+
+**Jon Titus** for the original Smart Pins documentation and tutorial approach that forms the pedagogical foundation of this work.
+
+**Evan Hillis** (evanh) for the original ASCII art Smart Pin block diagram that helped the community understand Smart Pin architecture.
+
+**Raymond Allen** (Rayman) for the color Smart Pin block diagram based on Evan's work.
+
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of Smart Pins.
+
 
 ## Preface: Your Complete Journey into P2 I/O
 
@@ -660,6 +682,10 @@ configure_smart_pin
 
 The mode register (written with WRPIN) is 32 bits of configuration magic. The register layout controls both the Smart Pin mode and the pin's electrical characteristics.
 
+```{=latex}
+\WRPINFormatDiagram
+```
+
 ```
 Bits 31..14: Pin configuration (input, output, drive strength)
 Bits 13..8:  Digital filtering
@@ -784,6 +810,10 @@ if rqpin(serial_pin) & $100    ' Check if byte available
 Here's where Smart Pins get really powerful - each Smart Pin has TWO independent input selectors (A and B) that can monitor any nearby pin!
 
 **Understanding the WRPIN D Parameter Format**
+
+```{=latex}
+\WRPINFormatDiagram
+```
 
 ```
 %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
@@ -1123,15 +1153,19 @@ In this mode, the Smart Pin hardware is completely disabled. The pin behaves exa
 
 ::: spin2
 ```
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56                  ' LED on P2 Eval board
+
 PUB demonstrate_normal_io()
   ' Make sure Smart Pin is OFF
-  pinclear(56)                  ' LED on P2 Eval board
+  pinclear(LED_PIN)
 
   ' Now use as normal I/O
   repeat 10
-    pinh(56)                    ' LED on
+    pinh(LED_PIN)               ' LED on
     waitms(500)
-    pinl(56)                    ' LED off
+    pinl(LED_PIN)               ' LED off
     waitms(500)
 
   ' This uses processor time for timing!
@@ -1141,12 +1175,23 @@ PUB demonstrate_normal_io()
 
 ::: pasm2
 ```
-WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0],
-                                    acknowledge Smart Pin.
+' Normal I/O without Smart Pin - LED blink example
+                org
+                dirl    #LED_PIN                ' Ensure Smart Pin is off
+                wrpin   #0, #LED_PIN            ' Clear any mode configuration
+
+.loop           outh    #LED_PIN                ' LED on
+                waitx   delay                   ' Wait (uses COG time)
+                outl    #LED_PIN                ' LED off
+                waitx   delay                   ' Wait (uses COG time)
+                jmp     #.loop
+
+delay           long    100_000_000             ' 500ms at 200MHz
+LED_PIN         =       56
 ```
 :::
 
-**Key Point:** Notice how we need `waitms()` for timing? That's processor time being consumed. Every other mode we'll learn eliminates this waste.
+**Key Point:** Notice how we need `waitms()` / `waitx` for timing? That's processor time being consumed. Every other mode we'll learn eliminates this waste.
 
 ### Mode %00001 - Repository Mode (Shared Storage)
 
@@ -1252,20 +1297,37 @@ The pin's 8-bit DAC receives a unique pseudo-random value on every system clock 
 
 X[15:0] sets an optional sample period in clock cycles. The IN flag rises at each period completion, useful for timing synchronization. Set X[15:0] to zero for maximum period (65,536 clocks) to minimize switching power when timing is not needed.
 
-**PASM2 DAC Noise Example:**
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  NOISE_PIN = 20
+
+PUB dac_noise_demo()
+  ' Configure DAC noise mode with 990Ω/3.3V output
+  pinstart(NOISE_PIN, P_DAC_NOISE | P_DAC_990R_3V | P_OE, 0, 0)
+
+  ' Output runs continuously - nothing more to do
+  repeat
+    waitms(1000)
+    debug("DAC noise running on pin ", udec(NOISE_PIN))
+```
+:::
 
 ::: pasm2
 ```
-                dirl    #20                     ' Reset pin P20
-                wrpin   dac_noise_cfg, #20      ' Configure DAC noise mode
-                dirh    #20                     ' Start DAC noise output
+' DAC Noise output - generates pseudo-random analog noise
+                org
+                dirl    #NOISE_PIN              ' Reset pin
+                wrpin   dac_noise_cfg, #NOISE_PIN ' Configure DAC noise mode
+                dirh    #NOISE_PIN              ' Start DAC noise output
 
 .loop           nop                             ' Output runs continuously
                 jmp     #.loop
 
-' P_DAC_NOISE with DAC mode enabled: %0000_0000_000_10100_00000000_01_00001_0
-'   DAC mode M[12:10]=%101 (P_DAC_990R_3V), TT=%01 (P_OE), Mode=%00001
+' P_DAC_NOISE with DAC mode: M[12:10]=%101, TT=%01, Mode=%00001
 dac_noise_cfg   long    P_DAC_NOISE | P_DAC_990R_3V | P_OE
+NOISE_PIN       =       20
 ```
 :::
 
@@ -1288,6 +1350,10 @@ The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capa
 - Video generation (75Ω mode with PWM dithering)
 - Control voltages for external circuits
 - Sensor simulation
+
+**How It Works:**
+
+The DAC converts a digital value to an analog voltage, with optional dithering to improve effective resolution beyond the native 8-bit range.
 
 ```{=latex}
 \DACPWMPeriodDiagram
@@ -1430,13 +1496,15 @@ This mode generates precise pulses or continuous cycles with programmable high a
 - Precise timing sequences
 - One-shot or continuous pulses
 
+**How It Works:**
+
+The mode uses a countdown counter and comparison value to generate pulses with programmable high and low times.
+
 ```{=latex}
 \PulseWidthMeasurementDiagram
 ```
 
-**How It Works:**
-
-The mode uses a countdown counter and comparison value:
+The counter counts down from the base period, comparing against a threshold to determine output state:
 
 | Register | Function |
 |----------|----------|
@@ -1628,13 +1696,15 @@ NCO (Numerically Controlled Oscillator) mode generates precise frequencies using
 - Carrier wave generation
 - Precision frequency references
 
+**How It Works:**
+
+The NCO uses a phase accumulator that adds a fixed increment each clock cycle; the MSB of the accumulator drives the output pin.
+
 ```{=latex}
 \NCOFrequencyDiagram
 ```
 
-**How It Works:**
-
-The NCO uses a divide-by-n counter to create a base frequency, then accumulates phase in a 32-bit Z register.
+The phase accumulator overflows at a rate determined by the increment value, producing precise output frequencies:
 
 | Register | Function |
 |----------|----------|
@@ -1750,6 +1820,10 @@ NCO Duty mode generates PWM with precise duty cycle control at a specific freque
 - Motor control with precise timing
 - Power supply control
 
+**How It Works:**
+
+This mode creates logic-1 pulses of fixed duration with programmable spacing, using a phase accumulator to control both frequency and duty cycle independently.
+
 ```{=latex}
 \NCODutyTimingDiagram
 ```
@@ -1760,9 +1834,7 @@ The internal architecture shows how the Z accumulator controls duty cycle:
 \NCODutyBlockDiagram
 ```
 
-**How It Works:**
-
-This mode creates logic-1 pulses of fixed duration with programmable spacing. Unlike NCO Frequency mode which generates 50% duty, NCO Duty controls both pulse width and period independently.
+Unlike NCO Frequency mode which generates 50% duty, NCO Duty allows independent control of pulse width and period:
 
 | Register | Function |
 |----------|----------|
@@ -1856,13 +1928,15 @@ PWM Triangle mode provides phase-correct PWM using a symmetric triangle wave com
 - Symmetric PWM requirements
 - Reduced harmonics applications
 
+**How It Works:**
+
+This mode uses an up-down counter to create phase-correct PWM; the output changes state when the counter crosses the threshold value.
+
 ```{=latex}
 \TrianglePWMDiagram
 ```
 
-**How It Works:**
-
-This mode uses an up-down counter to create phase-correct PWM with symmetric pulse placement.
+The symmetric counting produces centered pulses with reduced harmonic content:
 
 | Register | Function |
 |----------|----------|
@@ -1955,13 +2029,15 @@ PWM Sawtooth mode provides high-resolution PWM using a sawtooth (ramp-reset) com
 - Power control
 - Analog voltage generation (with filtering)
 
+**How It Works:**
+
+This mode uses an up counter that resets when reaching the frame period; output is high while counter is below the threshold.
+
 ```{=latex}
 \SawtoothPWMDiagram
 ```
 
-**How It Works:**
-
-This mode uses an up counter (1 to frame period) for standard edge-aligned PWM. Unlike Triangle mode, the PWM period equals the frame period (not 2×).
+Unlike Triangle mode, the PWM period equals the frame period (not 2×), providing edge-aligned PWM:
 
 | Register | Function |
 |----------|----------|
@@ -2105,31 +2181,54 @@ During reset (DIR=0):
 
 Due to the nature of switch-mode power supplies, set Y[15:0] once and let it repeat indefinitely. The feedback inputs handle regulation automatically.
 
-**PASM2 SMPS Example:**
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  SMPS_PIN = 20                 ' PWM output to FET gate
+  ' A input (P21) = voltage feedback from DAC comparator
+  ' B input (P22) = current feedback from DAC comparator
+
+PUB smps_controller() | duty
+  ' Configure SMPS mode
+  ' P_PLUS1_B selects P21 for B-input (current sense)
+  ' A-input is same pin by default (voltage sense)
+  duty := 50                    ' 50% initial duty cycle
+
+  ' X[15:0]=200 (1µs base @ 200MHz)
+  ' X[31:16]=100 (100 base periods = 100µs frame = 10kHz PWM)
+  pinstart(SMPS_PIN, P_PWM_SMPS | P_OE | P_PLUS1_B, $0064_00C8, duty)
+
+  ' SMPS runs autonomously - feedback inputs control regulation
+  repeat
+    waitms(1000)
+    debug("SMPS running, duty = ", udec(duty))
+```
+:::
 
 ::: pasm2
 ```
 ' Switch-mode power supply controller
 ' A input (P21) = voltage feedback from DAC comparator
 ' B input (P22) = current feedback from DAC comparator
-' 200 MHz system clock, 100 kHz PWM frequency
-                org     0
-                dirl    #20                     ' Reset Smart Pin at P20
-                wrpin   smps_cfg, #20           ' Configure SMPS mode
-                wxpin   x_regdata, #20          ' Set base period and frame count
-                dirh    #20                     ' Enable Smart Pin
-                wypin   y_regdata, #20          ' Set initial duty cycle
+' 200 MHz system clock, 10 kHz PWM frequency
+                org
+                dirl    #SMPS_PIN               ' Reset Smart Pin
+                wrpin   smps_cfg, #SMPS_PIN     ' Configure SMPS mode
+                wxpin   x_regdata, #SMPS_PIN    ' Set base period and frame count
+                dirh    #SMPS_PIN               ' Enable Smart Pin
+                wypin   y_regdata, #SMPS_PIN    ' Set initial duty cycle
 
 .loop           nop
                 jmp     #.loop                  ' Run - feedback controls operation
 
-' SMPS mode with B-input from P21: %0000_0001_000_00000_00000000_01_01010_0
-'   BBBB=%0001 (P_PLUS1_B), TT=%01 (P_OE), Mode=%01010
+' SMPS mode with B-input from P21: BBBB=%0001 (P_PLUS1_B), TT=%01 (P_OE)
 smps_cfg        long    P_PWM_SMPS | P_OE | P_PLUS1_B
-' X[15:0]=200 (1µs base @ 200MHz), X[31:16]=100 (100 base periods = 100µs frame = 10kHz)
+' X[15:0]=200 (1µs base @ 200MHz), X[31:16]=100 (100 base periods = 10kHz)
 x_regdata       long    $0064_00C8
 ' Y[15:0]=50 (50% initial duty)
 y_regdata       long    $0000_0032
+SMPS_PIN        =       20
 ```
 :::
 
@@ -2321,9 +2420,15 @@ This mode decodes quadrature encoder signals for position and rotation sensing. 
 - Motor position feedback (servo systems)
 - Velocity measurement (periodic mode)
 
+**How It Works:**
+
+The Smart Pin monitors two input signals (A and B) that are 90° out of phase, counting transitions to track position and direction.
+
 ```{=latex}
 \QuadEncoderDiagram
 ```
+
+The decoder watches both edges of both signals, providing 4× resolution compared to single-edge counting:
 
 **Register Configuration:**
 
@@ -2461,10 +2566,6 @@ Count rising edges on the A input, but only while the B input is HIGH. This mode
 - Frequency measurement with external gate
 - RPM measurement with gate control
 - Flow meter reading with validity signal
-
-```{=latex}
-\PeriodMeasurementDiagram
-```
 
 **Register Configuration:**
 
@@ -2653,6 +2754,16 @@ This mode has two behaviors controlled by Y[0]:
 - Separate increment/decrement inputs
 - Bidirectional event counting
 
+**How It Works:**
+
+The Smart Pin counts rising edges on one or two inputs, incrementing or decrementing a counter based on which input triggers.
+
+```{=latex}
+\SinglePhaseEncoderDiagram
+```
+
+The counter accumulates edge events, with optional bidirectional counting when using two inputs:
+
 **Register Configuration:**
 
 | Register | Function |
@@ -2750,6 +2861,16 @@ This mode counts based on input **levels** (HIGH state duration) rather than edg
 - High-time accumulation
 - Bidirectional level-based counting (Y[0]=1)
 - PWM input analysis
+
+**How It Works:**
+
+The Smart Pin counts clock cycles while an input is high, accumulating time rather than events.
+
+```{=latex}
+\ComparatorDiagram
+```
+
+The counter increments each clock cycle that the input remains high, providing precise duty cycle measurement:
 
 **Register Configuration:**
 
@@ -2998,9 +3119,19 @@ high_time       long    0
 
 Mode %10010 (P_EVENTS_TICKS) provides dual functionality: timing a specified number of events, or detecting when events stop occurring (timeout/watchdog).
 
+**How It Works:**
+
+The Smart Pin counts clock cycles between events (for timing) or monitors for activity gaps (for timeout detection).
+
+```{=latex}
+\PeriodMeasurementDiagram
+```
+
 ```{=latex}
 \ContinuousPeriodDiagram
 ```
+
+The mode can measure precise event timing or trigger an alert when expected events stop occurring:
 
 **Two Operating Modes (controlled by Y[2]):**
 
@@ -3070,11 +3201,15 @@ handle_timeout
 
 Mode %10011 (P_PERIODS_TICKS) measures total time over X complete periods, enabling precise average period/frequency measurement.
 
+**How It Works:**
+
+The Smart Pin accumulates clock cycles from one event type to another over multiple periods, providing averaged measurements that reduce noise.
+
 ```{=latex}
 \TimeoutWatchdogDiagram
 ```
 
-Each period is defined by events on A-input and B-input. The mode accumulates clock cycles from A-event to B-event over X repetitions.
+Each period is defined by events on A-input and B-input. The mode accumulates clock cycles from A-event to B-event over X repetitions:
 
 ```{=latex}
 \DualInputTimeDiagram
@@ -3225,6 +3360,16 @@ PUB precision_frequency() | total_time, period_count, frequency
 
 The P2's Smart Pins include sophisticated ADC capabilities for analog measurements using delta-sigma conversion.
 
+**How It Works:**
+
+The ADC uses delta-sigma modulation with digital filtering to convert analog voltages to digital values with configurable resolution and sample rate.
+
+```{=latex}
+\ADCSampleHoldDiagram
+```
+
+Three ADC modes provide different clocking and triggering options:
+
 **Mode %11000**: ADC Sample/Filter with Internal Clock
 **Mode %11001**: ADC Sample/Filter with External Clock
 **Mode %11010**: ADC Scope with Trigger
@@ -3344,6 +3489,16 @@ PUB continuous_adc() | voltage
 
 USB host/device mode provides low-level USB 1.1 physical layer support. This mode overrides OUT to control the pin output states. Full USB protocol implementation requires an additional software stack.
 
+**How It Works:**
+
+Two adjacent pins work together to handle the differential D+ and D- signals of the USB physical layer.
+
+```{=latex}
+\USBDifferentialDiagram
+```
+
+The Smart Pin handles USB signaling states (J, K, SE0, SE1) on the pin pair:
+
 **Pin Pair Requirement:**
 
 USB mode requires two adjacent pins configured together as an even/odd pair. Only the LSB of their pin numbers differs:
@@ -3361,8 +3516,9 @@ Configure both pins with `%0_11011_0` to disable output drive, creating a USB bu
 ::: spin2
 ```
 CON
-  USB_DM = 0      ' D- on even pin
-  USB_DP = 1      ' D+ on odd pin
+  _clkfreq = 200_000_000
+  USB_DM = 0                    ' D- on even pin
+  USB_DP = 1                    ' D+ on odd pin
 
 PUB usb_basic_setup()
   ' Configure USB pair with output enabled
@@ -3375,17 +3531,47 @@ PUB usb_basic_setup()
 
 PUB usb_sniffer_setup()
   ' Configure as USB sniffer (no output drive)
-  ' Use %0_11011_0 instead of %1_11011_0
-  wrpin(USB_DM, %0_11011_0)
-  wrpin(USB_DP, %0_11011_0)
-  dirh(USB_DM)
-  dirh(USB_DP)
+  ' Use mode without P_OE for receive-only operation
+  pinfloat(USB_DM)
+  pinfloat(USB_DP)
+  wrpin(USB_DM, P_USB_PAIR)     ' Mode without output enable
+  wrpin(USB_DP, P_USB_PAIR)
+  pinh(USB_DM)                  ' Enable Smart Pin
+  pinh(USB_DP)
+```
+:::
+
+::: pasm2
+```
+' USB Host/Device mode - basic setup
+' Requires even/odd pin pair (USB_DM=even, USB_DP=odd)
+                org
+                ' Configure USB pair with output enabled
+                dirl    #USB_DM
+                dirl    #USB_DP
+                wrpin   usb_cfg, #USB_DM        ' D- configuration
+                wrpin   usb_cfg, #USB_DP        ' D+ configuration (identical)
+                dirh    #USB_DM
+                dirh    #USB_DP
+
+                ' USB operation requires additional software stack
+.loop           nop
+                jmp     #.loop
+
+' USB mode with output: TT=%01 (P_OE), Mode=%11011
+usb_cfg         long    P_USB_PAIR
+USB_DM          =       0                       ' D- on even pin
+USB_DP          =       1                       ' D+ on odd pin
 ```
 :::
 
 ### Mode %11100 - Synchronous Serial Transmit
 
 Data from 1 to 32 bits shifts out synchronized with an external clock signal. This mode overrides OUT to control the pin output state. Bits shift out LSB first.
+
+**How It Works:**
+
+The Smart Pin shifts data out one bit per clock edge, synchronized to an external clock signal from the A-input.
 
 **Falling Edge Clocking (data changes on rising, sampled on falling):**
 
@@ -3398,6 +3584,8 @@ Data from 1 to 32 bits shifts out synchronized with an external clock signal. Th
 ```{=latex}
 \SyncSerialRisingDiagram
 ```
+
+The clock polarity determines when data transitions and when the receiver samples:
 
 **X Register Configuration:**
 
@@ -3600,30 +3788,49 @@ Method 2 (with fraction): `((clocks_per_bit * $10000) & $FFFFFC00) | (bits - 1)`
 
 The hardware does not generate parity bits. To add parity, calculate it in software and insert at MSB+1 position. Include the parity bit in the bit count.
 
-**PASM2 UART Transmit:**
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  TX_PIN = 56
+  BAUD = 115_200
+
+PUB async_tx_demo() | baud_val, i
+  ' Calculate baud: (clocks_per_bit << 16) | (bits - 1)
+  baud_val := (_clkfreq / BAUD) << 16 | 7     ' 8 data bits
+
+  ' Configure async transmit with output enable
+  pinstart(TX_PIN, P_ASYNC_TX | P_OE, baud_val, 0)
+
+  ' Transmit test pattern
+  repeat i from 0 to 255
+    wypin(TX_PIN, i)                           ' Send byte
+    repeat until pinr(TX_PIN)                  ' Wait for buffer empty
+    waitms(10)                                 ' Delay between bytes
+```
+:::
 
 ::: pasm2
 ```
 ' Asynchronous serial transmit
 ' 200 MHz system clock, 115200 baud, 8N1
-                org     0
-                dirl    #56                     ' Reset TX pin
-                wrpin   async_tx_mode, #56      ' Configure async TX mode
-                wxpin   baud_tx, #56            ' Set baud and bit count
-                dirh    #56                     ' Enable TX
+                org
+                dirl    #TX_PIN                 ' Reset TX pin
+                wrpin   async_tx_mode, #TX_PIN  ' Configure async TX mode
+                wxpin   baud_val, #TX_PIN       ' Set baud and bit count
+                dirh    #TX_PIN                 ' Enable TX
 
-.loop           wypin   #$55, #56               ' Transmit $55 (alternating bits)
-.wait           testp   #56 wc                  ' Check IN flag (buffer empty)
+.loop           wypin   #$55, #TX_PIN           ' Transmit $55 (alternating bits)
+.wait           testp   #TX_PIN wc              ' Check IN flag (buffer empty)
         if_nc   jmp     #.wait                  ' Wait for completion
                 waitx   ##10_000_000            ' Delay between transmissions
                 jmp     #.loop
 
-' Async TX mode: %0000_0000_000_00000_00000000_01_11110_0
-'   TT=%01 (P_OE), Mode=%11110
+' Async TX mode: TT=%01 (P_OE), Mode=%11110
 async_tx_mode   long    P_ASYNC_TX | P_OE
 ' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
-' X = (1736 << 16) | 7 = $06C8_0007
-baud_tx         long    $06C8_0007
+baud_val        long    $06C8_0007
+TX_PIN          =       56
 ```
 :::
 
@@ -3809,34 +4016,11 @@ rx_data         long    0
 - **Complexity**: Simple, easy to understand and debug
 - **Best For**: Time-critical applications where immediate response is essential
 
-#### The Event-Driven Approach
+#### The Event-Driven Approach (PASM2 Only)
 
-Event-driven waiting uses the P2's hardware event system. The COG configures an event to trigger when the Smart Pin's IN flag rises, then sleeps until the event occurs:
+Event-driven waiting uses the P2's hardware event system. The COG configures an event to trigger when the Smart Pin's IN flag rises, then sleeps until the event occurs.
 
-::: spin2
-```
-CON
-  _clkfreq = 200_000_000
-  UART_RX = 21
-  BAUD = 115_200
-
-PUB event_receive() | byte_received
-  ' Configure UART receive
-  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / BAUD) << 16 | 8, 0)
-
-  ' Event-driven approach - sleep until data arrives
-  repeat
-    ' Configure event: trigger on Smart Pin IN flag rise
-    ' Format: %MMM_PPPPPP where MMM=%001 for IN-rise, PPPPPP=pin number
-    setse1(%001 << 6 + UART_RX)
-    waitse1()                         ' Sleep until event
-    byte_received := rdpin(UART_RX)   ' Read data
-    process_byte(byte_received)
-
-PRI process_byte(b)
-  debug("Received: ", uhex_byte(b))
-```
-:::
+**Important:** The event system instructions (`SETSE1..4`, `WAITSE1..4`, `POLLSE1..4`) are PASM2 instructions only. Spin2 does not provide built-in methods for these. To use event-driven waiting in a Spin2 program, you must use inline PASM2.
 
 In PASM2:
 
@@ -3869,7 +4053,7 @@ rx_data         long    0
 - **Complexity**: Slightly more complex - requires event system knowledge
 - **Best For**: Low-power applications, longer wait periods, concurrent operations
 
-#### Event Source Configuration
+#### Event Source Configuration (PASM2)
 
 The `SETSE1/2/3/4` instructions configure what triggers each of the four selectable events. For Smart Pin waiting, the most useful event source is the IN flag:
 
@@ -3881,12 +4065,12 @@ The `SETSE1/2/3/4` instructions configure what triggers each of the four selecta
 
 The event configuration format is: `#%MMM << 6 + pin_number`
 
-::: spin2
+::: pasm2
 ```
 ' Examples of event configuration
-setse1(%001 << 6 + 10)    ' Event 1: Pin 10 IN rises (data ready)
-setse2(%010 << 6 + 15)    ' Event 2: Pin 15 IN falls
-setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
+                setse1  #%001 << 6 + 10   ' Event 1: Pin 10 IN rises (data ready)
+                setse2  #%010 << 6 + 15   ' Event 2: Pin 15 IN falls
+                setse3  #%011 << 6 + 20   ' Event 3: Pin 20 IN changes
 ```
 :::
 
@@ -3914,9 +4098,9 @@ setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
 - Wait times are very short and COG has nothing else to do anyway
 - Simplicity is more important than efficiency
 
-#### Hybrid Approach: Multi-Event Monitoring
+#### Multi-Source Monitoring in Spin2
 
-The P2 provides four selectable events (SE1-SE4), allowing sophisticated multi-source monitoring:
+Spin2 programs can monitor multiple Smart Pins by polling each one in a loop:
 
 ::: spin2
 ```
@@ -3933,31 +4117,26 @@ PUB multi_source_monitor() | uart_data, adc_value, encoder_count
   pinstart(ENCODER_PIN, P_QUADRATURE, 0, 0)
 
   repeat
-    ' Configure events for each source
-    setse1(%001 << 6 + UART_RX)       ' UART data ready
-    setse2(%001 << 6 + ADC_PIN)       ' ADC sample ready
-    setse3(%001 << 6 + ENCODER_PIN)   ' Encoder count updated
-
-    ' Poll all events efficiently
-    if pollse1()
+    ' Poll each Smart Pin for data ready (IN flag high)
+    if pinr(UART_RX)
       uart_data := rdpin(UART_RX)
       handle_uart(uart_data)
 
-    if pollse2()
+    if pinr(ADC_PIN)
       adc_value := rdpin(ADC_PIN)
       handle_adc(adc_value)
 
-    if pollse3()
+    if pinr(ENCODER_PIN)
       encoder_count := rdpin(ENCODER_PIN)
       handle_encoder(encoder_count)
 ```
 :::
 
-This hybrid approach uses events for detection but polling (via POLLSE) for checking, combining the benefits of both approaches.
+This polling approach checks each Smart Pin's IN flag in sequence. For lower-latency multi-source monitoring, use PASM2 with the event system (`SETSE1..4`, `POLLSE1..4`).
 
-#### ADC Sampling: A Practical Comparison
+#### ADC Sampling in Spin2
 
-Consider continuous ADC sampling - a common task where the choice matters significantly:
+Continuous ADC sampling in Spin2 uses polling to wait for each sample:
 
 ::: spin2
 ```
@@ -3966,46 +4145,35 @@ CON
   ADC_PIN = 25
   SAMPLE_COUNT = 1000
 
-PUB compare_adc_methods() | samples[SAMPLE_COUNT], i, start_time, poll_time, event_time
+PUB adc_sampling() | samples[SAMPLE_COUNT], i, start_time, elapsed
 
   ' Configure ADC
   pinstart(ADC_PIN, P_ADC | P_ADC_1X, 0, 0)
 
-  ' Method 1: Polling
+  ' Polling approach - the only option in pure Spin2
   start_time := getct()
   repeat i from 0 to SAMPLE_COUNT - 1
-    repeat until pinread(ADC_PIN)     ' Busy wait
+    repeat until pinr(ADC_PIN)        ' Wait for sample ready
     samples[i] := rdpin(ADC_PIN)
-  poll_time := getct() - start_time
+  elapsed := getct() - start_time
 
-  ' Method 2: Event-driven
-  start_time := getct()
-  repeat i from 0 to SAMPLE_COUNT - 1
-    setse1(%001 << 6 + ADC_PIN)
-    waitse1()                          ' Sleep until ready
-    samples[i] := rdpin(ADC_PIN)
-  event_time := getct() - start_time
-
-  debug("Polling: ", udec(poll_time), " clocks")
-  debug("Events:  ", udec(event_time), " clocks")
-  ' Both complete in similar time, but event-driven
-  ' allows other COGs to use system resources during waits
+  debug("Collected ", udec(SAMPLE_COUNT), " samples in ", udec(elapsed), " clocks")
 ```
 :::
 
-Both methods complete sampling in similar overall time, but event-driven waiting frees the COG to potentially do other work during each wait period, and reduces power consumption.
+For lower power consumption during waits, use PASM2 with the event system. The `WAITSE1` instruction suspends the COG until the Smart Pin's IN flag rises, reducing power draw compared to active polling.
 
 #### Best Practices for Waiting
 
-1. **Clear Before Configure**: The event flag may be set from a previous occurrence. POLLSE clears the flag when checking, or use WAITSE which auto-clears.
+1. **Use RQPIN for Shared Access**: When multiple COGs monitor the same Smart Pin, use `rqpin()` (reads without clearing IN) so all COGs can see the data. Use `rdpin()` only when you're the sole consumer.
 
-2. **Match Method to Wait Duration**: For waits under ~100 clocks, polling overhead is minimal. For longer waits, event-driven is more efficient.
+2. **Match Method to Wait Duration**: For Spin2, polling is the only option. For PASM2, use events (`WAITSE`) for waits longer than ~100 clocks to reduce power consumption.
 
-3. **Consider Multi-COG Impact**: Polling ties up a COG completely. In multi-COG systems, event-driven waiting makes better use of system resources.
+3. **Consider Multi-COG Impact**: Polling ties up a COG completely. In multi-COG systems, dedicated PASM2 COGs using event-driven waiting make better use of system resources.
 
-4. **Use RQPIN for Shared Access**: When multiple COGs monitor the same Smart Pin, use RQPIN (reads without clearing IN) so all COGs can see the data.
+4. **In PASM2, Clear Before Configure**: The event flag may be set from a previous occurrence. `POLLSE` clears the flag when checking, or use `WAITSE` which auto-clears.
 
-5. **Document Your Choice**: Comment why you chose polling vs events - future maintainers will thank you.
+5. **Document Your Choice**: Comment why you chose polling vs events (PASM2) - future maintainers will thank you.
 
 ### Multi-Pin Synchronization
 
@@ -4082,12 +4250,9 @@ PUB signal_distribution()
 
 Create closed-loop control systems using Smart Pins.
 
-::: needs-diagram
-Feedback loop showing:
-- Output generation
-- Measurement
-- Adjustment cycle
-:::
+```{=latex}
+\FeedbackLoopDiagram
+```
 
 ::: spin2
 ```
@@ -4120,12 +4285,9 @@ PUB pwm_with_current_feedback() | current, duty
 
 Build complex timing relationships using multiple Smart Pins.
 
-::: needs-diagram
-Timing network showing:
-- Master clock
-- Divided clocks
-- Phase relationships
-:::
+```{=latex}
+\ClockDistributionDiagram
+```
 
 ::: spin2
 ```
@@ -4151,12 +4313,9 @@ PUB timing_network()
 
 Use Smart Pins to translate between different protocols.
 
-::: needs-diagram
-Protocol bridge showing:
-- Input protocol
-- Translation logic
-- Output protocol
-:::
+```{=latex}
+\ProtocolBridgeDiagram
+```
 
 ::: spin2
 ```
@@ -4183,12 +4342,9 @@ PUB uart_to_spi_bridge() | data
 
 Build complex state machines using Smart Pin feedback.
 
-::: needs-diagram
-State machine showing:
-- States
-- Transitions
-- Smart Pin interactions
-:::
+```{=latex}
+\StateMachineDiagram
+```
 
 ::: spin2
 ```
@@ -4477,29 +4633,25 @@ When jitter must be minimized, use these techniques:
 ```
 CON
   _clkfreq = 200_000_000
-  TRIGGER_PIN = 20
   SAMPLE_PIN = 21
 
-PUB low_jitter_sampling() | trigger_time, sample
-  ' Configure trigger detection
-  pinstart(TRIGGER_PIN, P_COUNT_RISES, 0, 0)
-
+PUB low_jitter_sampling() | next_time, sample
   ' Configure ADC
   pinstart(SAMPLE_PIN, P_ADC | P_ADC_1X, 0, 0)
 
+  ' Spin2 method: Synchronized to system counter
+  ' This provides precise, predictable timing
+  next_time := getct()
   repeat
-    ' Method 1: Event-driven (lowest jitter)
-    setse1(%001 << 6 + TRIGGER_PIN)   ' Event on trigger
-    waitse1()                          ' Zero-latency wake
-    sample := rdpin(SAMPLE_PIN)        ' Immediate read
-
-    ' Method 2: Synchronized to system counter
-    trigger_time := getct()
-    addct1(trigger_time, _clkfreq / 1000)  ' 1ms intervals
-    waitct1()                               ' Precise timing
-    sample := rdpin(SAMPLE_PIN)
+    next_time += _clkfreq / 1000          ' 1ms intervals
+    waitct(next_time)                      ' Precise timing
+    repeat until pinr(SAMPLE_PIN)          ' Ensure sample ready
+    sample := rdpin(SAMPLE_PIN)            ' Read sample
+    process_sample(sample)
 ```
 :::
+
+For absolute minimum jitter, use PASM2 with the event system. The `WAITSE` instruction provides zero-latency wake from sleep:
 
 ::: pasm2
 ```
@@ -5239,13 +5391,9 @@ The true power of Smart Pins emerges when you coordinate multiple pins to create
 
 Let's combine multiple Smart Pin modes to create a sophisticated motor controller.
 
-::: needs-diagram
-Motor controller showing:
-- PWM outputs
-- Encoder inputs
-- Current sensing
-- Control loop
-:::
+```{=latex}
+\MotorControllerDiagram
+```
 
 ::: spin2
 ```
@@ -5328,12 +5476,9 @@ PUB position_control(target_pos) | current_pos, error, output
 
 Combine multiple ADC channels with timing and storage.
 
-::: needs-diagram
-Data acquisition showing:
-- Multiple ADC channels
-- Sample timing
-- Buffer management
-:::
+```{=latex}
+\DataAcquisitionDiagram
+```
 
 ::: spin2
 ```
@@ -5393,13 +5538,9 @@ PUB process_data() | chan, sample, min, max, avg
 
 Create a multi-protocol communication system.
 
-::: needs-diagram
-Communication hub showing:
-- Multiple UART channels
-- SPI interface
-- I2C interface
-- Protocol routing
-:::
+```{=latex}
+\CommunicationHubDiagram
+```
 
 ::: spin2
 ```
@@ -5472,12 +5613,9 @@ PRI process_spi_message(data)
 
 Create a system where multiple inputs are sampled simultaneously.
 
-::: needs-diagram
-Synchronized sampling showing:
-- Sample trigger
-- Simultaneous capture
-- Data alignment
-:::
+```{=latex}
+\SynchronizedSamplingDiagram
+```
 
 ::: spin2
 ```
@@ -5607,22 +5745,32 @@ PUB precise_timing() | start_time
 
 ::: spin2
 ```
-' High latency - polling approach
-PUB high_latency()
+' Standard Spin2 approach - polling
+PUB standard_receive() | data
   repeat
-    if pinr(pin) & $80000000
+    if pinr(pin)                  ' Check IN flag
       data := rdpin(pin)
       process(data)
 
-' Low latency - interrupt approach
-PUB low_latency()
-  ' Configure interrupt on Smart Pin
-  setse1(##%01 << 6 | pin)     ' Event on pin IN rising
-
+' Tighter polling loop for lower latency
+PUB tight_polling() | data
   repeat
-    waitse1()                   ' Wait for Smart Pin event
+    repeat until pinr(pin)        ' Dedicated wait
     data := rdpin(pin)
     process(data)
+```
+:::
+
+For absolute minimum latency, use PASM2 with the event system:
+
+::: pasm2
+```
+                ' Zero-latency wake using events
+                setse1  #%001 << 6 + pin      ' Event on IN rising
+.loop           waitse1                        ' Sleep until event
+                rdpin   data, #pin
+                call    #process
+                jmp     #.loop
 ```
 :::
 
@@ -5724,13 +5872,9 @@ Let's build complete, practical applications using Smart Pins.
 
 ### Digital Oscilloscope
 
-::: needs-diagram
-Oscilloscope architecture showing:
-- Input conditioning
-- ADC sampling
-- Trigger detection
-- Display output
-:::
+```{=latex}
+\OscilloscopeArchDiagram
+```
 
 ::: spin2
 ```
@@ -5849,13 +5993,9 @@ PRI lookup(delta) : multiplier
 
 ### Complete Robot Controller
 
-::: needs-diagram
-Robot system architecture showing:
-- Motor control
-- Sensor inputs
-- Communication
-- Navigation logic
-:::
+```{=latex}
+\RobotSystemDiagram
+```
 
 ::: spin2
 ```
@@ -5979,9 +6119,9 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 
 Now let's create a complete data acquisition and control system that showcases the full power of Smart Pins working together.
 
-::: needs-diagram
-Complete system architecture showing all subsystems and interconnections
-:::
+```{=latex}
+\CompleteSystemDiagram
+```
 
 ::: spin2
 ```

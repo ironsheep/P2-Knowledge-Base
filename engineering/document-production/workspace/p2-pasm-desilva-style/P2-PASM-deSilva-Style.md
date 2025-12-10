@@ -88,20 +88,18 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
 
-### Acknowledgments
-
-This manual incorporates knowledge and teaching approaches inspired by:
-
-- **deSilva's P1 Assembly Tutorial** — The foundational pedagogical approach
-- **The Propeller Community** — Years of collective wisdom
-
 ### Trademarks
 
-Propeller, Propeller 2, P2, Spin, and the Parallax logo are trademarks of Parallax Inc.
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
-### Disclaimer
 
-The information in this manual is subject to change without notice. While every effort has been made to ensure accuracy, the authors and publishers assume no responsibility for errors or omissions, or for damages resulting from the use of the information contained herein.
+## Acknowledgments
+
+This manual would not exist without the contributions of many individuals:
+
+**deSilva's P1 Assembly Tutorial** for the foundational pedagogical approach that inspired the teaching style used throughout this work.
+
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of PASM2 programming.
 
 
 # Dedication

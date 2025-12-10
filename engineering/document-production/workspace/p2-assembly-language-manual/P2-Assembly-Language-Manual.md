@@ -94,7 +94,7 @@ To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
 
 ### Trademarks
 
-Propeller 2, P2, and Parallax are trademarks of Parallax Inc.
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 
 ## Acknowledgments

@@ -67,19 +67,41 @@
 \clearpage
 ```
 
-## Copyright and License
+# Copyright and License
 
-Copyright 2025 Parallax Inc. and Iron Sheep Productions LLC.
-All rights reserved.
+Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
 
-This tutorial incorporates knowledge and teaching approaches inspired by:
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
-- **Jon Titus** - Original Smart Pins documentation and tutorial approach
-- **Evan Hillis** (evanh) - Original ASCII art Smart Pin block diagram
-- **Raymond Allen** (Rayman) - Color Smart Pin block diagram based on Evan's work
-- **The Propeller Community** - Years of collective wisdom
+You are free to:
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
+
+To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+
+### Trademarks
+
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+
+
+## Acknowledgments
+
+This tutorial would not exist without the contributions of many individuals:
+
+**Jon Titus** for the original Smart Pins documentation and tutorial approach that forms the pedagogical foundation of this work.
+
+**Evan Hillis** (evanh) for the original ASCII art Smart Pin block diagram that helped the community understand Smart Pin architecture.
+
+**Raymond Allen** (Rayman) for the color Smart Pin block diagram based on Evan's work.
+
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of Smart Pins.
+
 
 ## Preface: Your Complete Journey into P2 I/O
 
@@ -660,6 +682,10 @@ configure_smart_pin
 
 The mode register (written with WRPIN) is 32 bits of configuration magic. The register layout controls both the Smart Pin mode and the pin's electrical characteristics.
 
+```{=latex}
+\WRPINFormatDiagram
+```
+
 ```
 Bits 31..14: Pin configuration (input, output, drive strength)
 Bits 13..8:  Digital filtering
@@ -784,6 +810,10 @@ if rqpin(serial_pin) & $100    ' Check if byte available
 Here's where Smart Pins get really powerful - each Smart Pin has TWO independent input selectors (A and B) that can monitor any nearby pin!
 
 **Understanding the WRPIN D Parameter Format**
+
+```{=latex}
+\WRPINFormatDiagram
+```
 
 ```
 %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
@@ -1123,15 +1153,19 @@ In this mode, the Smart Pin hardware is completely disabled. The pin behaves exa
 
 ::: spin2
 ```
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56                  ' LED on P2 Eval board
+
 PUB demonstrate_normal_io()
   ' Make sure Smart Pin is OFF
-  pinclear(56)                  ' LED on P2 Eval board
+  pinclear(LED_PIN)
 
   ' Now use as normal I/O
   repeat 10
-    pinh(56)                    ' LED on
+    pinh(LED_PIN)               ' LED on
     waitms(500)
-    pinl(56)                    ' LED off
+    pinl(LED_PIN)               ' LED off
     waitms(500)
 
   ' This uses processor time for timing!
@@ -1141,12 +1175,23 @@ PUB demonstrate_normal_io()
 
 ::: pasm2
 ```
-WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0],
-                                    acknowledge Smart Pin.
+' Normal I/O without Smart Pin - LED blink example
+                org
+                dirl    #LED_PIN                ' Ensure Smart Pin is off
+                wrpin   #0, #LED_PIN            ' Clear any mode configuration
+
+.loop           outh    #LED_PIN                ' LED on
+                waitx   delay                   ' Wait (uses COG time)
+                outl    #LED_PIN                ' LED off
+                waitx   delay                   ' Wait (uses COG time)
+                jmp     #.loop
+
+delay           long    100_000_000             ' 500ms at 200MHz
+LED_PIN         =       56
 ```
 :::
 
-**Key Point:** Notice how we need `waitms()` for timing? That's processor time being consumed. Every other mode we'll learn eliminates this waste.
+**Key Point:** Notice how we need `waitms()` / `waitx` for timing? That's processor time being consumed. Every other mode we'll learn eliminates this waste.
 
 ### Mode %00001 - Repository Mode (Shared Storage)
 
@@ -1213,10 +1258,86 @@ read_value
 :::
 
 **Important Notes:**
-- No IN flag is raised when value changes
-- Reading doesn't clear the value
+- WXPIN updates the stored value and raises the IN flag
+- Reading with RDPIN clears the IN flag; RQPIN does not
 - Writing overwrites immediately
-- Perfect for configuration constants
+- During reset (DIR=0), WXPIN instructions are ignored and IN remains low
+- Perfect for configuration constants and inter-COG communication
+
+**Complete PASM2 Example:**
+
+::: pasm2
+```
+                org     0
+                dirh    #12                     ' Set P12 as output
+                wrpin   repo_mode, #12          ' Configure repository mode
+                wxpin   test_data, #12          ' Store value in repository
+                nop                             ' Delay for register clocking
+                rqpin   result, #12             ' Read value (IN flag unchanged)
+
+test_data       long    $1500_0000              ' Test data to store
+result          long    0                       ' Retrieved value stored here
+repo_mode       long    P_REPOSITORY    ' %0000_0000_000_0000000000000_00_00001_0
+```
+:::
+
+### Mode %00001 with DAC_MODE - DAC Noise Output
+
+When mode %00001 is combined with DAC_MODE (M[12:10] = %101), the Smart Pin generates pseudo-random noise on its DAC output instead of functioning as a repository.
+
+**When to Use:**
+
+- White noise generation for audio
+- Dithering source for external circuits
+- Test signal generation
+- Randomized analog output
+
+**How It Works:**
+The pin's 8-bit DAC receives a unique pseudo-random value on every system clock cycle. Each pin configured in this mode produces a different noise pattern.
+
+X[15:0] sets an optional sample period in clock cycles. The IN flag rises at each period completion, useful for timing synchronization. Set X[15:0] to zero for maximum period (65,536 clocks) to minimize switching power when timing is not needed.
+
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  NOISE_PIN = 20
+
+PUB dac_noise_demo()
+  ' Configure DAC noise mode with 990Ω/3.3V output
+  pinstart(NOISE_PIN, P_DAC_NOISE | P_DAC_990R_3V | P_OE, 0, 0)
+
+  ' Output runs continuously - nothing more to do
+  repeat
+    waitms(1000)
+    debug("DAC noise running on pin ", udec(NOISE_PIN))
+```
+:::
+
+::: pasm2
+```
+' DAC Noise output - generates pseudo-random analog noise
+                org
+                dirl    #NOISE_PIN              ' Reset pin
+                wrpin   dac_noise_cfg, #NOISE_PIN ' Configure DAC noise mode
+                dirh    #NOISE_PIN              ' Start DAC noise output
+
+.loop           nop                             ' Output runs continuously
+                jmp     #.loop
+
+' P_DAC_NOISE with DAC mode: M[12:10]=%101, TT=%01, Mode=%00001
+dac_noise_cfg   long    P_DAC_NOISE | P_DAC_990R_3V | P_OE
+NOISE_PIN       =       20
+```
+:::
+
+**Important Notes:**
+- This mode overrides M[7:0] to feed the DAC
+- M[12:10] must be %101 to enable DAC output
+- RDPIN/RQPIN retrieves the 16-bit ADC accumulation from the last sample period
+- During reset (DIR=0), IN is low
+
+---
 
 ### Mode %00010 & %00011 - DAC Dithering Modes
 
@@ -1229,6 +1350,10 @@ The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capa
 - Video generation (75Ω mode with PWM dithering)
 - Control voltages for external circuits
 - Sensor simulation
+
+**How It Works:**
+
+The DAC converts a digital value to an analog voltage, with optional dithering to improve effective resolution beyond the native 8-bit range.
 
 ```{=latex}
 \DACPWMPeriodDiagram
@@ -1244,11 +1369,26 @@ DAC configuration involves TWO separate aspects:
 - Uses pseudo-random noise dithering
 - Better for audio applications
 - Spreads quantization noise across frequency spectrum
+- No fixed period required - can update output value at any time
 
 **Mode %00011 (P_DAC_DITHER_PWM): DAC with PWM Dithering**
 - Uses PWM-based dithering
-- More predictable noise characteristics
-- Better for control applications
+- Better dynamic range than PRNG (maximum two transitions per 256 clocks)
+- Produces a predictable tone at Fclock/256 at -48dB
+- Sample period must be a multiple of 256 clocks (X[7:0]=0) for proper operation
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Sample period in clock cycles. Set to 1 for immediate updates (IN stays high). For PWM mode, must be multiple of 256. |
+| Y[15:0] | DAC output value (0-65535). Captured at each sample period completion. |
+
+**Timing Coordination:**
+On completion of each sample period, Y[15:0] is captured for the next output value and the IN flag rises. Coordinate Y register updates with IN going high for glitch-free output.
+
+**ADC Feedback:**
+When OUT is high, the internal ADC is enabled. Use RDPIN/RQPIN to retrieve the 16-bit ADC accumulation from the previous sample period. This measures actual loading on the DAC pin - useful for current sensing or calibration.
 
 **Drive Strength/Voltage Configuration Constants (set via M bits):**
 | Constant | Impedance | Voltage | Use Case |
@@ -1315,6 +1455,31 @@ output_voltage
 ```
 :::
 
+**Complete PASM2 Sawtooth Generator:**
+
+::: pasm2
+```
+                org     0
+                dirl    #20                     ' Reset DAC at pin P20
+                wrpin   dac_config, #20         ' Configure DAC mode
+                wxpin   dac_period, #20         ' Set sample period
+                dirh    #20                     ' Enable DAC
+
+.loop           wypin   dac_volt, #20           ' Output voltage value
+.wait_period    nop
+                testp   #20 wc                  ' Test IN flag
+        if_nc   jmp     #.wait_period           ' Wait for sample period complete
+                add     dac_volt, #$100         ' Increment voltage by 256
+                jmp     #.loop                  ' Repeat forever
+
+' DAC dither with PRNG: %0000_0000_000_10100_00000000_01_00010_0
+'   DAC mode M[12:10]=%101 (P_DAC_990R_3V), TT=%01 (P_OE), Mode=%00010
+dac_config      long    P_DAC_DITHER_RND | P_DAC_990R_3V | P_OE
+dac_period      long    $100                    ' 256 clock sample period
+dac_volt        long    0                       ' Y[15:0] voltage value
+```
+:::
+
 ::: tip
 The dithering modes provide effective 16-bit resolution from the 8-bit DAC hardware by rapidly alternating between adjacent levels. PRNG dithering uses pseudo-random patterns that spread noise across frequencies (better for audio), while PWM dithering uses deterministic patterns (better for control signals).
 :::
@@ -1331,14 +1496,31 @@ This mode generates precise pulses or continuous cycles with programmable high a
 - Precise timing sequences
 - One-shot or continuous pulses
 
+**How It Works:**
+
+The mode uses a countdown counter and comparison value to generate pulses with programmable high and low times.
+
 ```{=latex}
 \PulseWidthMeasurementDiagram
 ```
 
-**How It Works:**
-X[31:16] = High time in clocks
-X[15:0] = Low time in clocks
-Y[31:0] = Number of pulses (0 = continuous)
+The counter counts down from the base period, comparing against a threshold to determine output state:
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period in clock cycles. Counter counts down from this value to 1, then restarts if Y > 0. |
+| X[31:16] | Comparison threshold. Output is HIGH when counter > X[31:16] and Y > 0, else LOW. |
+| Y[31:0] | Pulse count. Decrements after each complete cycle. IN rises when Y reaches zero. |
+
+**Timing Examples:**
+- X[31:16]=0: Output stays HIGH for entire duration while Y > 0
+- X[15:0]=3, X[31:16]=2: Output pattern is 0-0-1 (repeat) - one clock HIGH, two clocks LOW per cycle
+
+**Logic Inversion:**
+For logic-0 pulses (inverted), set the P5 bit in the mode configuration:
+`%0000_0000_000_00000_00_1_00000_11_00100_0` (note P5=1)
+
+This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Y is cleared to zero.
 
 ::: spin2
 ```
@@ -1367,16 +1549,34 @@ PUB single_pulse(width_us)
 ```
 :::
 
+**Complete PASM2 Pulse Example:**
+
+This example generates 16 logic-1 pulses at 25 MHz system clock (60µs pulse, 20µs low):
+
 ::: pasm2
 ```
-        wrpin    PulseConfig,  #20   'Set config for pulse/cycle
-        wxpin    PulseTiming,  #20   'Set cycle time and logic-0
-                                     '  period
-        dirh     #20                 'Finished setup
+' 25-MHz system clock frequency
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   pulse_config, #20       ' Set pulse/cycle mode
+                wxpin   pulse_timing, #20       ' Set timing parameters
+                dirh    #20                     ' Enable Smart Pin
+                wypin   cycles, #20             ' Load pulse count into Y
+                nop                             ' Delay for IN to clear
+
+.wait           testp   #20 wc                  ' Check IN flag
+        if_nc   jmp     #.wait                  ' Wait for pulses to complete
+
+' Pulse mode: %0000_0000_000_00000_00000000_11_00100_0
+'   TT=%11 (output override active), Mode=%00100
+pulse_config    long    P_PULSE | P_OE | P_TT_10
+cycles          long    $0010                   ' 16 pulses
+pulse_timing    long    $01F4_05DC              ' X[31:16]=$01F4 (500), X[15:0]=$05DC (1500)
+                                                ' At 25MHz: 60µs high, 20µs low per cycle
 ```
 :::
 
-**PASM2 Pulse Generation:**
+**PASM2 Pulse Generation (Generic):**
 
 ::: pasm2
 ```
@@ -1384,16 +1584,16 @@ pulse_gen
         dirl    #PULSE_PIN
         wrpin   ##P_PULSE | P_OE, #PULSE_PIN
 
-        ' Set pulse timing
-        mov     x, high_time
+        ' Set pulse timing: X[31:16]=comparison, X[15:0]=base period
+        mov     x, compare_val
         shl     x, #16
-        or      x, low_time
+        or      x, base_period
         wxpin   x, #PULSE_PIN
 
-        ' Set pulse count (0 = infinite)
+        ' Set pulse count (0 = continuous)
         wypin   pulse_count, #PULSE_PIN
 
-        dirh    #PULSE_PIN      ' Start pulsing
+        dirh    #PULSE_PIN              ' Start pulsing
 ```
 :::
 
@@ -1409,9 +1609,21 @@ Transition output mode generates edges at programmable intervals - perfect for c
 - Square wave output
 
 **How It Works:**
-X = Period between transitions
-Y = (not used)
-Output toggles every X clocks
+
+This mode produces a series of pulses with equal logic-0 and logic-1 periods.
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period in clock cycles between transitions |
+| Y[31:0] | Number of transitions (edges) to generate. Decrements after each toggle. |
+
+The pin starts at logic-0 and toggles at each base period while Y > 0. The IN flag rises when Y reaches zero, with the pin remaining in its final state.
+
+**Odd vs Even Transition Counts:**
+- Even count (e.g., 8): Output returns to logic-0 when complete
+- Odd count (e.g., 7): Output remains logic-1 when complete
+
+This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Y is cleared to zero.
 
 ::: spin2
 ```
@@ -1430,7 +1642,32 @@ PUB multiple_clocks()
 ```
 :::
 
-**PASM2 Transition Generation:**
+**Complete PASM2 Transition Example:**
+
+This example generates 16 transitions (8 complete cycles) with 1500 system clocks between each edge:
+
+::: pasm2
+```
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   trans_config, #20       ' Configure transition mode
+                wxpin   trans_timing, #20       ' Set period between transitions
+                dirh    #20                     ' Enable Smart Pin
+                wypin   cycles, #20             ' Load transition count into Y
+
+.wait           nop                             ' Delay for IN to clear
+                testp   #20 wc                  ' Check IN flag
+        if_nc   jmp     #.wait                  ' Wait for transitions to complete
+
+' Transition mode: %0000_0000_000_0000_000000000_11_00101_0
+'   TT=%11 (output override active), Mode=%00101
+trans_config    long    P_TRANSITION | P_OE | P_TT_10
+cycles          long    $0010                   ' 16 transitions (8 complete cycles)
+trans_timing    long    $0000_05DC              ' 1500 clocks between transitions
+```
+:::
+
+**PASM2 Continuous Clock Generation:**
 
 ::: pasm2
 ```
@@ -1439,10 +1676,11 @@ trans_out
         wrpin   ##P_TRANSITION | P_OE, #TRANS_PIN
 
         ' Set transition period
-        mov     period, ##100_000  ' Transition every 100k clocks
+        mov     period, ##100_000           ' Transition every 100k clocks
         wxpin   period, #TRANS_PIN
 
-        dirh    #TRANS_PIN         ' Start toggling
+        wypin   ##0, #TRANS_PIN             ' Y=0 for continuous output
+        dirh    #TRANS_PIN                  ' Start toggling
 ```
 :::
 
@@ -1458,14 +1696,41 @@ NCO (Numerically Controlled Oscillator) mode generates precise frequencies using
 - Carrier wave generation
 - Precision frequency references
 
+**How It Works:**
+
+The NCO uses a phase accumulator that adds a fixed increment each clock cycle; the MSB of the accumulator drives the output pin.
+
 ```{=latex}
 \NCOFrequencyDiagram
 ```
 
-**How It Works:**
-The NCO adds X to a 32-bit phase accumulator on each clock. When bit 31 changes, the output toggles.
+The phase accumulator overflows at a rate determined by the increment value, producing precise output frequencies:
 
-Frequency = (X * ClockFreq) / 2^32
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period divider. Divides system clock to create base frequency. X=1 means no division. |
+| X[31:16] | Phase preload. Written to Z[31:16] on WXPIN for initial phase offset. |
+| Y[31:0] | Phase increment. Added to Z[31:0] at each base period. |
+| Z[31:0] | Phase accumulator (internal). Z[31] drives pin output. |
+
+**Output Behavior:**
+- Pin output reflects Z[31] bit state
+- IN flag rises whenever Z overflows (Z > 2³²)
+- Higher Y values = higher output frequency
+
+**Frequency Calculation:**
+```
+Base Frequency = System Clock / X[15:0]
+Output Frequency = (Y × Base Frequency) / 2³²
+```
+
+For direct system clock operation (X=1):
+```
+Output Frequency = (Y × System Clock) / 2³²
+Y = (Desired Frequency × 2³²) / System Clock
+```
+
+This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Z is cleared to zero.
 
 ::: spin2
 ```
@@ -1484,17 +1749,30 @@ PUB audio_tones()
 ```
 :::
 
+**Complete PASM2 NCO Example:**
+
+This example configures an NCO at 25 MHz system clock with frequency calculation:
+
 ::: pasm2
 ```
-      wrpin   NCO_Config, #20
-'Set configuration for NCO mode
-      wxpin   #1, #20
-'Set divide-by-n to 1, 25-MHz;
-'  one system-clock period
-      dirh    #20
-'Finished setup
-      qfrac     ##123, ##_clkfreq   'Calc #of 25-MHz cycles for
-                                    '  8 msec period
+' 25-MHz system clock frequency
+_clk_freq       =       25_000_000
+
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   nco_config, #20         ' Configure NCO frequency mode
+                wxpin   #1, #20                 ' X[15:0]=1: no division (25 MHz base)
+                dirh    #20                     ' Enable Smart Pin
+
+                ' Calculate Y for desired frequency using CORDIC
+                qfrac   ##123, ##_clk_freq      ' Calculate cycles for 123 Hz
+                getqx   pa                      ' Get result in PA register
+                wypin   pa, #20                 ' Load Y register with phase increment
+
+.loop           nop
+                jmp     #.loop                  ' Run forever
+
+nco_config      long    P_NCO_FREQ | P_OE   ' %0000_0000_000_0000_000000000_01_00110_0
 ```
 :::
 
@@ -1542,6 +1820,10 @@ NCO Duty mode generates PWM with precise duty cycle control at a specific freque
 - Motor control with precise timing
 - Power supply control
 
+**How It Works:**
+
+This mode creates logic-1 pulses of fixed duration with programmable spacing, using a phase accumulator to control both frequency and duty cycle independently.
+
 ```{=latex}
 \NCODutyTimingDiagram
 ```
@@ -1552,11 +1834,24 @@ The internal architecture shows how the Z accumulator controls duty cycle:
 \NCODutyBlockDiagram
 ```
 
-**How It Works:**
-X = NCO increment (sets frequency)
-Y = Duty threshold (sets duty cycle)
+Unlike NCO Frequency mode which generates 50% duty, NCO Duty allows independent control of pulse width and period:
 
-Output is high when phase accumulator > Y
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period divider. Determines the logic-1 pulse duration. |
+| X[31:16] | Phase preload. Written to Z[31:16] on WXPIN for initial phase. |
+| Y[31:0] | Period control. Added to Z[31:0] at each base period. Controls time between pulse starts. |
+| Z[31:0] | Phase accumulator (internal). Output goes HIGH on Z overflow. |
+
+**Timing Control:**
+- Pulse width = System Clock Period × X[15:0]
+- Pulse period = 2³² / Y (in base period units)
+
+**Worked Example: 1µs pulse every 18µs at 25 MHz:**
+1. For 1µs pulse width: X[15:0] = 25 (25 MHz ÷ 25 = 1µs base period)
+2. For 18µs period: Y = 2³² ÷ 18 = 238,609,294 = $0E38_E38E
+
+The IN flag rises whenever Z overflows. This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Z is cleared to zero.
 
 ::: spin2
 ```
@@ -1587,13 +1882,37 @@ PUB breathing_led() | brightness
 ```
 :::
 
+**Complete PASM2 NCO Duty Example:**
+
+This example generates 1µs pulses every 18µs at 25 MHz:
+
+::: pasm2
+```
+' 25-MHz system clock frequency
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   nco_duty_cfg, #20       ' Configure NCO duty mode
+                wxpin   #25, #20                ' X[15:0]=25: 1µs base period (25 MHz/25)
+                dirh    #20                     ' Enable Smart Pin
+                wypin   y_period, #20           ' Load period value
+
+.loop           nop
+                jmp     #.loop                  ' Run forever
+
+nco_duty_cfg    long    P_NCO_DUTY | P_OE   ' %0000_0000_000_0000_000000000_01_00111_0
+y_period        long    $0E38_E38E              ' 2^32 / 18 = 18µs period
+```
+:::
+
+**PASM2 Generic NCO Duty Setup:**
+
 ::: pasm2
 ```
 nco_duty
         dirl    #DUTY_PIN
         wrpin   ##P_NCO_DUTY | P_OE, #DUTY_PIN
-        wxpin   freq_x, #DUTY_PIN    ' Set frequency via X
-        wypin   duty_y, #DUTY_PIN    ' Set duty via Y
+        wxpin   freq_x, #DUTY_PIN    ' Set pulse width via X[15:0]
+        wypin   duty_y, #DUTY_PIN    ' Set period via Y
         dirh    #DUTY_PIN            ' Enable
 ```
 :::
@@ -1609,14 +1928,41 @@ PWM Triangle mode provides phase-correct PWM using a symmetric triangle wave com
 - Symmetric PWM requirements
 - Reduced harmonics applications
 
+**How It Works:**
+
+This mode uses an up-down counter to create phase-correct PWM; the output changes state when the counter crosses the threshold value.
+
 ```{=latex}
 \TrianglePWMDiagram
 ```
 
-**How It Works:**
-Counter counts up to X, then down to 0
-Output is high when counter < Y (both up and down)
-Period = 2 * X clocks
+The symmetric counting produces centered pulses with reduced harmonic content:
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period divider. Divides system clock to create base period units. |
+| X[31:16] | Frame period in base period units. Counter counts down from this value to 1, then up to frame period. |
+| Y[15:0] | PWM threshold (0 to frame period). Captured at each frame start. |
+
+**Counter Operation:**
+The counter counts from frame period down to 1, then from 1 back up to frame period. When counter ≤ Y, output is HIGH; when counter > Y, output is LOW.
+
+**Timing:**
+- Base period = System Clock Period × X[15:0]
+- Frame period = Base period × X[31:16]
+- **PWM period = 2 × Frame period** (due to up-down counting)
+
+**Worked Example at 25 MHz:**
+- X[15:0] = 1 (no division, 40ns base period)
+- X[31:16] = $200 (512)
+- Frame period = 40ns × 512 = 20.48µs
+- PWM period = 2 × 20.48µs = 40.96µs (~24.4 kHz)
+
+**Duty Limits:**
+- Y = 0: Constant LOW output
+- Y = frame period: Constant HIGH output
+
+This mode overrides OUT. During reset (DIR=0), IN is low, output is low, and Y[15:0] is captured.
 
 ::: spin2
 ```
@@ -1638,20 +1984,36 @@ PUB phase_correct_pwm()
 ```
 :::
 
-**PASM2 Triangle PWM:**
+**Complete PASM2 Triangle PWM Example:**
+
+::: pasm2
+```
+' 25 MHz system-clock frequency
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   pwm_tri_cfg, #20        ' Configure PWM triangle mode
+                wxpin   x_regdata, #20          ' Set base period and frame period
+                dirh    #20                     ' Enable Smart Pin
+                wypin   y_regdata, #20          ' Set PWM threshold
+
+.loop           nop
+                jmp     #.loop                  ' Run forever
+
+pwm_tri_cfg     long    P_PWM_TRIANGLE | P_OE  ' %0000_0000_000_00000_00000000_01_01000_0
+y_regdata       long    $0000_0080              ' Y[15:0] = 128 (duty threshold)
+x_regdata       long    $0200_0001              ' X[31:16]=$200 (frame=512), X[15:0]=1 (no division)
+```
+:::
+
+**PASM2 Triangle PWM (Generic):**
 
 ::: pasm2
 ```
 pwm_tri
         dirl    #PWM_PIN
         wrpin   ##P_PWM_TRIANGLE | P_OE, #PWM_PIN
-
-        ' Set period (half of full cycle)
-        wxpin   period_half, #PWM_PIN
-
-        ' Set duty
-        wypin   duty_value, #PWM_PIN
-
+        wxpin   x_config, #PWM_PIN      ' X[31:16]=frame, X[15:0]=divider
+        wypin   duty_value, #PWM_PIN    ' Set duty threshold
         dirh    #PWM_PIN
 ```
 :::
@@ -1667,14 +2029,34 @@ PWM Sawtooth mode provides high-resolution PWM using a sawtooth (ramp-reset) com
 - Power control
 - Analog voltage generation (with filtering)
 
+**How It Works:**
+
+This mode uses an up counter that resets when reaching the frame period; output is high while counter is below the threshold.
+
 ```{=latex}
 \SawtoothPWMDiagram
 ```
 
-**How It Works:**
-X = PWM period (frame)
-Y = ON time within frame
-Output is high for Y clocks out of every X clocks
+Unlike Triangle mode, the PWM period equals the frame period (not 2×), providing edge-aligned PWM:
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period divider. Divides system clock to create base period units. |
+| X[31:16] | Frame period in base period units. Counter counts from 1 up to this value. |
+| Y[15:0] | PWM threshold (0 to frame period). Captured at each frame start. |
+
+**Counter Operation:**
+Counter counts from 1 up to frame period, then resets to 1. When counter ≤ Y, output is HIGH; when counter > Y, output is LOW. The IN flag rises at each frame reset.
+
+**Key Difference from Triangle:**
+- **Sawtooth:** PWM period = Frame period (up count only)
+- **Triangle:** PWM period = 2 × Frame period (up-down count)
+
+**Duty Limits:**
+- Y = 0: Constant LOW output
+- Y = frame period: Constant HIGH output
+
+This mode overrides OUT. During reset (DIR=0), IN is low, output is low, and Y[15:0] is captured.
 
 ::: spin2
 ```
@@ -1705,81 +2087,148 @@ PUB dynamic_pwm() | duty
 ```
 :::
 
-**PASM2 Sawtooth PWM:**
+**Complete PASM2 Sawtooth PWM Example:**
+
+::: pasm2
+```
+' 25 MHz system-clock frequency
+                org     0
+                dirl    #20                     ' Reset Smart Pin at P20
+                wrpin   pwm_saw_cfg, #20        ' Configure PWM sawtooth mode
+                wxpin   x_regdata, #20          ' Set base period and frame period
+                dirh    #20                     ' Enable Smart Pin
+                wypin   y_regdata, #20          ' Set PWM threshold
+
+.loop           nop
+                jmp     #.loop                  ' Run forever
+
+pwm_saw_cfg     long    P_PWM_SAWTOOTH | P_OE  ' %0000_0000_000_00000_00000000_01_01001_0
+y_regdata       long    $0000_0080              ' Y[15:0] = 128 (duty threshold)
+x_regdata       long    $0200_0001              ' X[31:16]=$200 (frame=512), X[15:0]=1 (no division)
+```
+:::
+
+**PASM2 Sawtooth PWM (Generic):**
 
 ::: pasm2
 ```
 pwm_saw
         dirl    #PWM_PIN
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
-
-        ' Set period
-        mov     period, ##10_000
-        wxpin   period, #PWM_PIN
-
-        ' Set initial duty
-        mov     duty, ##5_000    ' 50%
-        wypin   duty, #PWM_PIN
-
-        dirh    #PWM_PIN         ' Start PWM
+        wxpin   x_config, #PWM_PIN      ' X[31:16]=frame, X[15:0]=divider
+        wypin   duty_value, #PWM_PIN    ' Set duty threshold
+        dirh    #PWM_PIN                ' Start PWM
 
 update_duty
-        ' Change duty cycle on the fly
-        wypin   new_duty, #PWM_PIN
+        wypin   new_duty, #PWM_PIN      ' Change duty on the fly
 ```
 :::
 
 ### Mode %01010 - Switch-Mode Power Supply
 
-This specialized mode is designed for switch-mode power supply control with current feedback.
+This specialized mode provides PWM control for switch-mode power supplies with integrated voltage and current feedback. This mode overrides OUT to control the pin output state.
 
 **When to Use:**
 
-- DC-DC converters
-- Buck/Boost regulators
-- LED drivers with current control
-- Motor drivers with current limiting
+- DC-DC converters (buck, boost, buck-boost)
+- LED drivers with current limiting
+- Motor drivers with current protection
+- Any application requiring closed-loop power control
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[15:0] | Base period in system clock cycles |
+| X[31:16] | PWM frame period in base periods |
+| Y[15:0] | PWM output value (duty threshold, 0 to frame period) |
 
 **How It Works:**
-Monitors current feedback and adjusts switching to maintain target current.
-X[31:16] = ON time limit
-X[15:0] = OFF time limit
-Y = Target ADC reading
+
+A counter updates at each base period, counting from one up to the frame period. At each base period:
+
+1. The captured output value (Y[15:0]) is compared to the counter
+2. If output value ≥ counter, output is HIGH
+3. If output value < counter, output is LOW
+
+After the counter reaches the frame period, the 'A' input is sampled at each base period until it reads LOW. When 'A' reads LOW:
+- Y[15:0] is captured for the next frame
+- IN is raised
+- The cycle repeats
+
+**The A and B Feedback Inputs:**
+
+The 'A' input serves as the voltage detector for the SMPS output. Configure an adjacent pin in DAC comparison mode to observe a voltage divider on the final SMPS output. When 'A' is LOW, the output voltage has sagged below the setpoint and a new PWM cycle begins.
+
+The 'B' input serves as the over-current detector. If 'B' ever goes HIGH during a PWM cycle, the output is immediately forced LOW for the rest of that cycle. Configure an adjacent pin in DAC comparison mode to monitor a shunt resistor between ground and the FET source. When the shunt voltage exceeds the threshold, the FET turns off to limit current.
+
+**Typical SMPS Operation:**
+
+1. PWM output drives FET gate HIGH
+2. Current flows through inductor, building magnetic field
+3. When 'B' (current sense) goes HIGH, or duty cycle expires, FET turns off
+4. Inductor energy transfers through diode to output capacitor
+5. When 'A' (voltage sense) goes LOW, next cycle begins
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Output is LOW
+- Y[15:0] is captured
+
+**Application Note:**
+
+Due to the nature of switch-mode power supplies, set Y[15:0] once and let it repeat indefinitely. The feedback inputs handle regulation automatically.
 
 ::: spin2
 ```
-PUB smps_controller() | config
-  ' Configure for SMPS operation
-  config := P_SMPS_INDUCTOR | P_OE
+CON
+  _clkfreq = 200_000_000
+  SMPS_PIN = 20                 ' PWM output to FET gate
+  ' A input (P21) = voltage feedback from DAC comparator
+  ' B input (P22) = current feedback from DAC comparator
 
-  ' Set switching times (in clocks)
-  x_val := (MAX_ON_TIME << 16) | MIN_OFF_TIME
+PUB smps_controller() | duty
+  ' Configure SMPS mode
+  ' P_PLUS1_B selects P21 for B-input (current sense)
+  ' A-input is same pin by default (voltage sense)
+  duty := 50                    ' 50% initial duty cycle
 
-  ' Set target current (ADC reading)
-  y_val := TARGET_CURRENT_ADC
+  ' X[15:0]=200 (1µs base @ 200MHz)
+  ' X[31:16]=100 (100 base periods = 100µs frame = 10kHz PWM)
+  pinstart(SMPS_PIN, P_PWM_SMPS | P_OE | P_PLUS1_B, $0064_00C8, duty)
 
-  pinstart(SMPS_PIN, config, x_val, y_val)
+  ' SMPS runs autonomously - feedback inputs control regulation
+  repeat
+    waitms(1000)
+    debug("SMPS running, duty = ", udec(duty))
 ```
 :::
 
-**PASM2 SMPS Control:**
-
 ::: pasm2
 ```
-smps_setup
-        dirl    #SMPS_PIN
-        wrpin   ##P_SMPS_INDUCTOR | P_OE, #SMPS_PIN
+' Switch-mode power supply controller
+' A input (P21) = voltage feedback from DAC comparator
+' B input (P22) = current feedback from DAC comparator
+' 200 MHz system clock, 10 kHz PWM frequency
+                org
+                dirl    #SMPS_PIN               ' Reset Smart Pin
+                wrpin   smps_cfg, #SMPS_PIN     ' Configure SMPS mode
+                wxpin   x_regdata, #SMPS_PIN    ' Set base period and frame count
+                dirh    #SMPS_PIN               ' Enable Smart Pin
+                wypin   y_regdata, #SMPS_PIN    ' Set initial duty cycle
 
-        ' Configure timing limits
-        mov     x, max_on
-        shl     x, #16
-        or      x, min_off
-        wxpin   x, #SMPS_PIN
+.loop           nop
+                jmp     #.loop                  ' Run - feedback controls operation
 
-        ' Set target current
-        wypin   target_adc, #SMPS_PIN
-
-        dirh    #SMPS_PIN
+' SMPS mode with B-input from P21: BBBB=%0001 (P_PLUS1_B), TT=%01 (P_OE)
+smps_cfg        long    P_PWM_SMPS | P_OE | P_PLUS1_B
+' X[15:0]=200 (1µs base @ 200MHz), X[31:16]=100 (100 base periods = 10kHz)
+x_regdata       long    $0064_00C8
+' Y[15:0]=50 (50% initial duty)
+y_regdata       long    $0000_0032
+SMPS_PIN        =       20
 ```
 :::
 
@@ -1797,7 +2246,7 @@ With seven different output generation modes available, how do you pick the righ
 | %00111 | P_NCO_DUTY | Frequency word | Duty threshold | Frequency + duty control |
 | %01000 | P_PWM_TRIANGLE | Period/2 | Duty value | Symmetric PWM (phase-correct) |
 | %01001 | P_PWM_SAWTOOTH | Period | Duty value | Standard PWM (fast) |
-| %01010 | P_PWM_SMPS | Period | Current target | SMPS with feedback |
+| %01010 | P_PWM_SMPS | Base/Frame period | Duty threshold | SMPS with V/I feedback |
 
 **P_PULSE vs P_TRANSITION: When to Use Each**
 
@@ -1962,24 +2411,71 @@ Now let's explore modes that measure external signals - these are your oscillosc
 
 ### Mode %01011 - Quadrature Encoder
 
-This mode decodes quadrature encoder signals for position and rotation sensing.
+This mode decodes quadrature encoder signals for position and rotation sensing. The Z register holds a 2's complement value representing the net total encoder counts in one direction minus counts in the opposite direction.
 
 **When to Use:**
 
-- Rotary encoder reading
-- Linear encoder tracking
-- Motor position feedback
-- User interface knobs
+- Rotary encoder reading (motor feedback, user knobs)
+- Linear encoder tracking (CNC machines, 3D printers)
+- Motor position feedback (servo systems)
+- Velocity measurement (periodic mode)
+
+**How It Works:**
+
+The Smart Pin monitors two input signals (A and B) that are 90° out of phase, counting transitions to track position and direction.
 
 ```{=latex}
 \QuadEncoderDiagram
 ```
 
-**How It Works:**
-Monitors A and B inputs, counts transitions based on quadrature state changes.
-X = (not used)
-Y = (not used)
-Z accumulates position count
+The decoder watches both edges of both signals, providing 4× resolution compared to single-edge counting:
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[31:0] | Measurement period in clock cycles (0 = continuous mode) |
+| Y | (not used) |
+| Z[31:0] | Accumulated quadrature count (32-bit signed) |
+
+**B Input Selection:**
+
+The BBBB field in the mode control word selects the pin for the B signal. For example, to use P32 (A) and P33 (B), set BBBB = %0001, which selects P32+1 = P33.
+
+**Two Operational Modes:**
+
+**Continuous Mode (X = 0):**
+The Z register continuously tracks the net quadrature count. Read the current position at any time with RDPIN or RQPIN. This mode works like a totalizer with no period boundaries.
+
+**Periodic Mode (X ≠ 0):**
+Quadrature steps are counted for X clock cycles. At the end of each period:
+- The result is placed in Z
+- IN is raised
+- The accumulator is set to the 0/1/-1 value that would have been added
+
+This design ensures no counts are lost across measurement boundaries. If a transition occurs exactly at the period boundary, it is added to the next period's count.
+
+**4× Counting:**
+
+A quadrature encoder produces four logic transitions per mechanical "click" of the shaft—two on the A input and two on the B input. The Smart Pin counts all four transitions. To obtain counts per click, use an arithmetic shift right by 2 bits:
+
+```
+sar count, #2   ' Divide by 4, preserve sign
+```
+
+**Position + Velocity Configuration:**
+
+Configure both A and B pins to quadrature mode: one continuous (X=0) for absolute position tracking, the other periodic (X≠0) for velocity measurement. Both pins track the same encoder but report different information.
+
+**Zeroing the Count:**
+
+Pulse DIR low at any time to reset the quadrature count to zero. No WXPIN is required—the Smart Pin reinitializes automatically.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to the adder value (0/1/-1)
 
 ::: spin2
 ```
@@ -1989,144 +2485,228 @@ CON
 
 PUB quadrature_demo() | position, last_pos
   ' Configure quadrature decoder
-  pinstart(ENCODER_A, P_QUADRATURE | ENCODER_B << 8, 0, 0)
+  ' BBBB field selects B pin offset from A pin
+  pinstart(ENCODER_A, P_QUADRATURE | (ENCODER_B - ENCODER_A) << 24, 0, 0)
 
   last_pos := 0
   repeat
-    position := rdpin(ENCODER_A)
+    position := rdpin(ENCODER_A) sar 2   ' Divide by 4 for clicks
     if position <> last_pos
       debug("Position: ", sdec(position))
       last_pos := position
 ```
 :::
 
-::: pasm2
-```
-        mov    outa, QuadEnc_data
- 'send to LEDs
-```
-:::
-
-**Advanced Quadrature with Velocity:**
-
-::: spin2
-```
-PUB encoder_with_velocity() | pos, last_pos, velocity
-  pinstart(ENCODER_A, P_QUADRATURE | ENCODER_B << 8, 0, 0)
-
-  last_pos := 0
-  repeat
-    pos := rdpin(ENCODER_A)
-    velocity := pos - last_pos  ' Changes per loop
-
-    debug("Pos: ", sdec(pos), " Vel: ", sdec(velocity))
-    last_pos := pos
-    waitms(100)
-```
-:::
-
-**PASM2 Quadrature Reading:**
+**PASM2 Quadrature - Periodic Mode:**
 
 ::: pasm2
 ```
-quad_setup
-        dirl    #ENCODER_A
-        mov     config, ##P_QUADRATURE
-        or      config, #ENCODER_B << 8
-        wrpin   config, #ENCODER_A
-        dirh    #ENCODER_A
+' Quadrature encoder with periodic measurement
+' Displays count on LEDs at P7:P0
+' 25 MHz system clock, 2-second sample period
+                org     0
+                mov     dira, ##$FF             ' Set P7:P0 as LED outputs
+                dirl    #32                     ' Reset Smart Pin at P32
+                wrpin   quad_cfg, #32           ' Configure quadrature mode
+                wxpin   x_period, #32           ' Set 2-second sample period
+                dirh    #32                     ' Enable Smart Pin
 
-read_encoder
-        rdpin   position, #ENCODER_A   ' Read accumulated count
+.myloop         nop
+.wait_here      testp   #32 wc                  ' Test IN flag at P32
+                nop
+        if_nc   jmp     #.wait_here             ' No flag? Keep waiting
+                rqpin   quad_data, #32          ' Get accumulated count
+                sar     quad_data, #2           ' Divide by 4 for clicks
+                mov     outa, quad_data         ' Display on LEDs
+                jmp     #.myloop                ' Repeat forever
+
+' Quadrature mode: %0000_0001_000_00000_00000000_00_01011_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01011
+quad_cfg        long    P_QUADRATURE | P_PLUS1_B
+' 2-second period at 25 MHz = 50,000,000 clocks
+x_period        long    $02FA_F080
+quad_data       long    0
 ```
 :::
 
-### Mode %01100 - Count Rises
+**PASM2 Quadrature - Continuous Mode:**
 
-Count rising edges on the input - your basic pulse counter.
+::: pasm2
+```
+' Quadrature encoder with continuous (free-run) measurement
+' Displays count on LEDs at P7:P0
+                org     0
+                mov     dira, ##$FF             ' Set P7:P0 as LED outputs
+                dirl    #32                     ' Reset Smart Pin at P32
+                wrpin   quad_cfg, #32           ' Configure quadrature mode
+                wxpin   #0, #32                 ' X=0 for continuous mode
+                dirh    #32                     ' Enable Smart Pin
+                nop                             ' Brief settling delay
+
+.myloop         nop
+                rqpin   quad_data, #32          ' Get current count
+                sar     quad_data, #2           ' Divide by 4 for clicks
+                mov     outa, quad_data         ' Display on LEDs
+                jmp     #.myloop                ' Repeat forever
+
+' Quadrature mode: %0000_0001_000_00000_00000000_00_01011_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01011
+quad_cfg        long    P_QUADRATURE | P_PLUS1_B
+quad_data       long    0
+```
+:::
+
+### Mode %01100 - Gated Positive-Edge Counter
+
+Count rising edges on the A input, but only while the B input is HIGH. This mode provides hardware-gated counting without software intervention.
 
 **When to Use:**
 
-- Event counting
-- Frequency measurement (with time base)
-- RPM measurement
-- Flow meter reading
+- Event counting with enable signal
+- Frequency measurement with external gate
+- RPM measurement with gate control
+- Flow meter reading with validity signal
 
-```{=latex}
-\PeriodMeasurementDiagram
-```
+**Register Configuration:**
 
-**How It Works:**
-Counts rising edges on input
-X = (optional) count period for gated counting
-Y = (not used)
-Z accumulates count
+| Register | Function |
+|----------|----------|
+| X[31:0] | Measurement period in clock cycles (0 = continuous mode) |
+| Y | (not used) |
+| Z[31:0] | Accumulated count of A-rises while B is HIGH |
+
+**B Input Gating:**
+
+The count increments only on A-input positive edges that occur while the B input is at logic-1. When B is LOW, A-input edges are ignored. This provides hardware-level gating without software overhead.
+
+**Two Operational Modes:**
+
+**Continuous Mode (X = 0):**
+The Z register continuously accumulates gated edge counts. Read the current count at any time with RDPIN or RQPIN.
+
+**Periodic Mode (X ≠ 0):**
+Gated edges are counted for X clock cycles. At the end of each period:
+- The result is placed in Z
+- IN is raised
+- The accumulator preserves any edge that occurred at the boundary
+
+No counts are lost across measurement boundaries.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to the adder value (0/1)
+
+**Note:** This mode does not debounce mechanical switch signals. For switches, add external RC filtering or use software debouncing.
 
 ::: spin2
 ```
-PUB count_pulses(pin) | count
-  ' Simple pulse counter
-  pinstart(pin, P_COUNT_RISES, 0, 0)
+CON
+  COUNT_PIN = 32    ' A input - signal to count
+  GATE_PIN = 33     ' B input - gate signal
+
+PUB gated_counter() | count
+  ' Configure gated edge counter
+  ' BBBB field selects gate pin offset
+  pinstart(COUNT_PIN, P_REG_UP | (GATE_PIN - COUNT_PIN) << 24, 0, 0)
 
   repeat
-    waitms(1000)               ' Count for 1 second
-    count := rdpin(pin)        ' Read and reset count
-    debug("Pulses/sec: ", udec(count))
+    waitms(1000)
+    count := rdpin(COUNT_PIN)
+    debug("Gated pulses/sec: ", udec(count))
 ```
 :::
+
+**PASM2 Gated Counter - Periodic Mode:**
 
 ::: pasm2
 ```
-        wrpin   A_in_mode,     #A_in   'Set up mode for pin P53
-        wxpin   ##$17D_7840,   #A_in   'Set continuous count 1-sec,
+' Gated positive-edge counter
+' Counts A-rises only when B is HIGH
+' 25 MHz system clock, 1-second measurement period
+                org     0
+                mov     dira, ##$FF             ' Set P7:P0 as LED outputs
+                dirl    #32                     ' Reset Smart Pin at P32
+                wrpin   gated_cfg, #32          ' Configure gated counter mode
+                wxpin   x_period, #32           ' Set 1-second period
+                dirh    #32                     ' Enable Smart Pin
+
+.loop           nop
+.wait           testp   #32 wc                  ' Test IN flag
+                nop
+        if_nc   jmp     #.wait                  ' Wait for period end
+                rdpin   count_data, #32         ' Get gated count
+                mov     outa, count_data        ' Display on LEDs
+                jmp     #.loop                  ' Repeat
+
+' Gated counter mode: %0000_0001_000_00000_00000000_00_01100_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as gate), Mode=%01100
+gated_cfg       long    P_REG_UP | P_PLUS1_B
+' 1-second period at 25 MHz = 25,000,000 clocks
+x_period        long    $017D_7840
+count_data      long    0
 ```
 :::
 
-**Gated Counting:**
+### Mode %01101 - Positive-Edge Up/Down Counter
 
-::: spin2
-```
-PUB gated_counter(pin, gate_ms) | period
-  ' Count for specific period
-  period := clkfreq / 1000 * gate_ms
-
-  pinstart(pin, P_COUNT_RISES | P_GATED, period, 0)
-
-  ' Wait for gate period to complete
-  repeat until pinr(pin) & $80000000
-
-  count := rdpin(pin)
-  debug("Count in ", udec(gate_ms), "ms: ", udec(count))
-```
-:::
-
-::: pasm2
-```
-        wypin   #0,            #A_in   'Count only A-input highs
-        dirh    #A_in                  'Enable Smart Pin
-```
-:::
-
-### Mode %01101 - A-B Encoder (Inc/Dec)
-
-Counts transitions on A input, with B input controlling direction.
+Count A-input positive edges with the B input controlling increment or decrement direction. This mode provides step/direction counting commonly used with stepper motor drivers.
 
 **When to Use:**
 
 - Step/direction motor feedback
-- Up/down counters
-- Manual pulse generators
+- Up/down counters with edge triggering
+- Manual pulse generators (MPG)
 - Incremental position sensing
 
-**How It Works:**
-A input provides pulses
-B input sets direction (high = up, low = down)
-Z accumulates signed count
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[31:0] | Measurement period in clock cycles (0 = continuous mode) |
+| Y | (not used) |
+| Z[31:0] | Net count (32-bit signed) |
+
+**Direction Control:**
+
+On each A-input positive edge:
+- If B = HIGH (1): increment count
+- If B = LOW (0): decrement count
+
+The B input state may change at any time. The direction is sampled at each A-input edge.
+
+**Two Operational Modes:**
+
+**Continuous Mode (X = 0):**
+The Z register continuously tracks the net count (increments minus decrements). Read the current value at any time with RDPIN or RQPIN.
+
+**Periodic Mode (X ≠ 0):**
+Edges are counted for X clock cycles. At the end of each period:
+- The net result is placed in Z
+- IN is raised
+- The accumulator is set to +1/0/-1 for any edge at the boundary
+
+No counts are lost across measurement boundaries.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to the adder value (+1/0/-1)
+
+**Note:** This mode does not debounce mechanical switch signals.
 
 ::: spin2
 ```
+CON
+  STEP_PIN = 32     ' A input - step pulses
+  DIR_PIN = 33      ' B input - direction control
+
 PUB step_dir_counter() | count
-  pinstart(STEP_PIN, P_INCREMENT | DIR_PIN << 8, 0, 0)
+  ' Configure step/direction counter
+  ' BBBB field selects direction pin offset
+  pinstart(STEP_PIN, P_REG_UP_DOWN | (DIR_PIN - STEP_PIN) << 24, 0, 0)
 
   repeat
     count := rdpin(STEP_PIN)
@@ -2135,106 +2715,423 @@ PUB step_dir_counter() | count
 ```
 :::
 
+**PASM2 Step/Direction Counter:**
+
 ::: pasm2
 ```
-      wrpin   QuadEnc_Config,  #32 'Set for Quad-Encoder mode
-      wxpin   X_RegData,       #32 'Set sample period in system-clock
-                                   '   periods
-      dirh       #32               'Finished setup
+' Step/direction counter
+' A-rises increment when B=1, decrement when B=0
+' Continuous mode (X=0)
+                org     0
+                mov     dira, ##$FF             ' Set P7:P0 as LED outputs
+                dirl    #32                     ' Reset Smart Pin at P32
+                wrpin   updown_cfg, #32         ' Configure up/down mode
+                wxpin   #0, #32                 ' X=0 for continuous mode
+                dirh    #32                     ' Enable Smart Pin
+
+.loop           nop
+                rqpin   count_data, #32         ' Get current net count
+                mov     outa, count_data        ' Display on LEDs
+                jmp     #.loop                  ' Repeat
+
+' Up/down mode: %0000_0001_000_00000_00000000_00_01101_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as direction), Mode=%01101
+updown_cfg      long    P_REG_UP_DOWN | P_PLUS1_B
+count_data      long    0
 ```
 :::
 
-### Mode %01110 - Incremental Encoder
+### Mode %01110 - Edge Counter / Dual-Edge Up/Down
 
-::: needs-diagram
-Incremental encoder timing showing single-phase counting
-:::
-
-Single-phase encoder counting with optional direction control.
+This mode has two behaviors controlled by Y[0]:
+- **Y[0] = 0**: Count A-input positive edges only
+- **Y[0] = 1**: Increment on A-input positive edge, decrement on B-input positive edge
 
 **When to Use:**
 
-- Simple encoders
-- Tachometers
-- Single-phase position sensing
+- Simple edge counting (Y[0]=0)
+- Two-signal up/down counting (Y[0]=1)
+- Separate increment/decrement inputs
+- Bidirectional event counting
+
+**How It Works:**
+
+The Smart Pin counts rising edges on one or two inputs, incrementing or decrementing a counter based on which input triggers.
+
+```{=latex}
+\SinglePhaseEncoderDiagram
+```
+
+The counter accumulates edge events, with optional bidirectional counting when using two inputs:
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[31:0] | Measurement period in clock cycles (0 = continuous mode) |
+| Y[0] | Mode select: 0=count A-rises only, 1=A-rise increments/B-rise decrements |
+| Z[31:0] | Accumulated count (32-bit signed when Y[0]=1) |
+
+**Mode Y[0] = 0: Simple Edge Counter**
+
+Counts positive edges on the A input only. The B input is ignored. This provides a basic pulse counter without gating.
+
+**Mode Y[0] = 1: Dual-Edge Up/Down Counter**
+
+- A-input positive edge: increment count
+- B-input positive edge: decrement count
+
+Both inputs operate independently—an A-rise and B-rise can occur in any order.
+
+**Two Operational Modes:**
+
+**Continuous Mode (X = 0):**
+The Z register continuously tracks the count. Read the current value at any time with RDPIN or RQPIN.
+
+**Periodic Mode (X ≠ 0):**
+Events are counted for X clock cycles. At the end of each period:
+- The result is placed in Z
+- IN is raised
+- The accumulator is set to 0/1/-1 for any edge at the boundary
+
+No counts are lost across measurement boundaries.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to the adder value (0/1/-1)
 
 ::: spin2
 ```
-PUB incremental_encoder() | count
-  pinstart(ENCODER_PIN, P_INCREMENTAL, 0, 0)
+CON
+  UP_PIN = 32       ' A input - increment signal
+  DOWN_PIN = 33     ' B input - decrement signal
+
+PUB dual_edge_counter() | count
+  ' Configure dual-edge up/down counter
+  ' Y[0]=1 enables increment/decrement mode
+  pinstart(UP_PIN, P_COUNT_RISES | (DOWN_PIN - UP_PIN) << 24, 0, 1)
 
   repeat
-    count := rdpin(ENCODER_PIN)
-    debug("Count: ", sdec(count))
+    count := rdpin(UP_PIN)
+    debug("Net count: ", sdec(count))
     waitms(100)
 ```
 :::
 
+**PASM2 Dual-Edge Counter:**
+
 ::: pasm2
 ```
-        sar    QuadEnc_data, #2        'Arithmetic shift right 2
-                                       ' (divide by 4)
-        nop
+' Dual-edge up/down counter
+' A-rises increment, B-rises decrement
+' Continuous mode (X=0)
+                org     0
+                mov     dira, ##$FF             ' Set P7:P0 as LED outputs
+                dirl    #32                     ' Reset Smart Pin at P32
+                wrpin   edge_cfg, #32           ' Configure edge counter mode
+                wxpin   #0, #32                 ' X=0 for continuous mode
+                wypin   #1, #32                 ' Y[0]=1 for up/down mode
+                dirh    #32                     ' Enable Smart Pin
+
+.loop           nop
+                rqpin   count_data, #32         ' Get current net count
+                mov     outa, count_data        ' Display on LEDs
+                jmp     #.loop                  ' Repeat
+
+' Edge counter mode: %0000_0001_000_00000_00000000_00_01110_0
+'   BBBB=%0001 (P_PLUS1_B selects P33 as B input), Mode=%01110
+edge_cfg        long    P_COUNT_RISES | P_PLUS1_B
+count_data      long    0
 ```
 :::
 
-### Mode %01111 - Local/Global Comparator
+### Mode %01111 - Level Counter / Dual-Level Up/Down
 
-Compares input against threshold with optional hysteresis.
+This mode has two behaviors controlled by Y[0]:
+- **Y[0] = 0**: Count clock cycles while A-input is HIGH
+- **Y[0] = 1**: Increment while A-input is HIGH, decrement while B-input is HIGH
+
+This mode counts based on input **levels** (HIGH state duration) rather than edges.
 
 **When to Use:**
 
-- Level detection
-- Zero-crossing detection
-- Threshold monitoring
-- Window comparators
+- Duty cycle measurement (Y[0]=0)
+- High-time accumulation
+- Bidirectional level-based counting (Y[0]=1)
+- PWM input analysis
+
+**How It Works:**
+
+The Smart Pin counts clock cycles while an input is high, accumulating time rather than events.
 
 ```{=latex}
 \ComparatorDiagram
 ```
 
+The counter increments each clock cycle that the input remains high, providing precise duty cycle measurement:
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X[31:0] | Measurement period in clock cycles (0 = continuous mode) |
+| Y[0] | Mode select: 0=count A-highs only, 1=A-high increments/B-high decrements |
+| Z[31:0] | Accumulated count in clock cycles |
+
+**Mode Y[0] = 0: Count A-Input Highs**
+
+Counts system clock cycles while the A input is at logic-1. When A is LOW, the count stops but is not reset. This effectively measures the cumulative HIGH time of the input signal.
+
+**Mode Y[0] = 1: Dual-Level Up/Down Counter**
+
+- While A is HIGH: increment count each clock cycle
+- While B is HIGH: decrement count each clock cycle
+
+If both A and B are HIGH simultaneously, the increments and decrements cancel out (net zero change).
+
+**Two Operational Modes:**
+
+**Continuous Mode (X = 0):**
+The Z register continuously tracks the accumulated high time. Read the current value at any time with RDPIN or RQPIN.
+
+**Periodic Mode (X ≠ 0):**
+High time is accumulated for X clock cycles. At the end of each period:
+- The result is placed in Z
+- IN is raised
+- The accumulator is set to 0/1/-1 for counts at the boundary
+
+No counts are lost across measurement boundaries.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to the adder value (0/1/-1)
+
 ::: spin2
 ```
-PUB comparator_demo() | threshold
-  threshold := $8000            ' Mid-scale threshold
+CON
+  INPUT_PIN = 32
 
-  pinstart(COMP_PIN, P_COMPARATOR | P_LOCAL, 0, threshold)
+PUB duty_cycle_measure() | high_time, period_clks
+  ' Measure duty cycle over 1 second
+  period_clks := clkfreq          ' 1 second in clock cycles
+
+  ' Y[0]=0 to count A-input high time only
+  pinstart(INPUT_PIN, P_HIGH_TICKS, period_clks, 0)
 
   repeat
-    if pinr(COMP_PIN) & 1
-      debug("Above threshold")
+    repeat until pinr(INPUT_PIN) & $8000_0000   ' Wait for IN flag
+    high_time := rdpin(INPUT_PIN)
+    debug("High time: ", udec(high_time), " clocks")
+    debug("Duty cycle: ", udec(high_time * 100 / period_clks), "%")
+```
+:::
+
+**PASM2 Level Counter with SPI Output:**
+
+::: pasm2
+```
+' Count A-input high time and transmit via SPI
+' 25 MHz system clock, 1-second measurement period
+                org     0
+                dirl    #41                     ' Transmitter setup
+                wrpin   sync_tx_mode, #41       ' Set sync TX mode for P41
+                wxpin   #%1_11111, #41          ' Stop/start mode, 32 bits
+                dirh    #41                     ' Enable transmitter
+                dirl    #40                     ' Clock output setup
+                wrpin   clock_mode, #40         ' Set P40 as transition mode
+                wxpin   ##$1000, #40            ' Set base period
+                dirh    #40                     ' Enable clock output
+
+                dirl    #53                     ' Count A-input highs
+                wrpin   a_in_mode, #53          ' Configure level counter mode
+                wxpin   ##$17D_7840, #53        ' 1-second period (25 MHz)
+                wypin   #0, #53                 ' Y[0]=0: count A-highs only
+                dirh    #53                     ' Enable Smart Pin
+
+.loop           nop
+.wait           testp   #53 wc                  ' Get IN flag state
+                nop
+        if_nc   jmp     #.wait                  ' Wait for period end
+                rdpin   count_data, #53         ' Get high-time count
+                wypin   count_data, #41         ' Send via SPI
+                wypin   #64, #40                ' Start SPI clock
+                jmp     #.loop                  ' Repeat
+
+' Level counter: %0000_0001_000_00000_00000000_00_01111_0
+'   BBBB=%0001 (P_PLUS1_B), Mode=%01111
+a_in_mode       long    P_COUNT_HIGHS | P_PLUS1_B
+count_data      long    0
+' Sync TX with inverted B from pin-1: %0000_1111_000_00000_00000000_01_11100_0
+'   BBBB=%1111 (P_INVERT_B | P_MINUS1_B), TT=%01 (P_OE), Mode=%11100
+sync_tx_mode    long    P_SYNC_TX | P_OE | P_INVERT_B | P_MINUS1_B
+clock_mode      long    P_TRANSITION | P_OE  ' %0000_0000_000_00000_00000000_01_00101_0
+```
+:::
+
+### Mode %10000 - Time A-Input States
+
+This mode continuously measures the duration of both HIGH and LOW states on the A input. Each state change triggers a measurement.
+
+**How It Works:**
+
+When the A-input changes state, the Smart Pin:
+1. Places the prior state (0 or 1) in the C-flag buffer
+2. Places the prior state's duration count in Z
+3. Raises IN
+
+Use RQPIN to read both the duration and the C-flag without clearing IN. The C-flag indicates which state was measured (C=1 for HIGH period, C=0 for LOW period).
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X | (not used) |
+| Y | (not used) |
+| Z[31:0] | Duration of previous state in clock cycles (max $80000000) |
+
+**Important Considerations:**
+
+If states change faster than the cog can retrieve measurements, data will be lost as new measurements overwrite old ones. A workaround: use two Smart Pins to measure the same signal—one with inverted input. This allows capturing both states as long as the combined state durations allow time for retrieval.
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to $00000001
+
+::: spin2
+```
+CON
+  INPUT_PIN = 53
+
+PUB state_timing() | duration, was_high
+  pinstart(INPUT_PIN, P_TIME_STATES, 0, 0)
+
+  repeat
+    repeat until pinr(INPUT_PIN)    ' Wait for state change
+    duration := rdpin(INPUT_PIN) wc ' Get duration, C=prior state
+    was_high := C
+    if was_high
+      debug("HIGH duration: ", udec(duration), " clocks")
     else
-      debug("Below threshold")
-    waitms(100)
+      debug("LOW duration: ", udec(duration), " clocks")
+```
+:::
+
+**PASM2 State Timing:**
+
+::: pasm2
+```
+' Time both HIGH and LOW states
+' Saves measurements to separate variables
+                org     0
+                dirl    #53                     ' Reset Smart Pin
+                wrpin   state_mode, #53         ' Configure state timing mode
+                dirh    #53                     ' Enable Smart Pin
+
+.wait_high      nop
+                rqpin   pin_data, #53 wc        ' Get C-flag (prior state)
+        if_nc   waitx   #200                    ' Short delay if C=0
+        if_nc   jmp     #.wait_high             ' Wait for HIGH measurement
+                mov     high_count, pin_data    ' Save HIGH duration
+
+.wait_low       nop
+                rqpin   pin_data, #53 wc        ' Get C-flag
+        if_c    waitx   #200                    ' Short delay if C=1
+        if_c    jmp     #.wait_low              ' Wait for LOW measurement
+                mov     low_count, pin_data     ' Save LOW duration
+                jmp     #.wait_high             ' Continue measuring
+
+' State timing: %0000_0000_000_00010_00000000_00_10000_0
+'   P[10]=%1 (Schmitt trigger A), Mode=%10000
+state_mode      long    P_STATE_TICKS | P_SCHMITT_A
+pin_data        long    0
+high_count      long    0
+low_count       long    0
+```
+:::
+
+### Mode %10001 - Time A-Input Highs
+
+This mode measures the duration of each HIGH state on the A input. When the input transitions from HIGH to LOW, the measurement is captured.
+
+**How It Works:**
+
+Clock cycles are counted while A-input is HIGH. Upon each HIGH-to-LOW transition:
+1. The HIGH duration count is placed in Z
+2. IN is raised
+
+**Register Configuration:**
+
+| Register | Function |
+|----------|----------|
+| X | (not used) |
+| Y | (not used) |
+| Z[31:0] | Duration of previous HIGH state in clock cycles (max $80000000) |
+
+**Reset Behavior:**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to $00000001
+
+::: spin2
+```
+CON
+  INPUT_PIN = 53
+
+PUB high_pulse_timing() | high_duration
+  pinstart(INPUT_PIN, P_TIME_HIGHS, 0, 0)
+
+  repeat
+    repeat until pinr(INPUT_PIN)      ' Wait for falling edge
+    high_duration := rdpin(INPUT_PIN)
+    debug("HIGH pulse: ", udec(high_duration), " clocks")
+    debug("Duration: ", udec(high_duration * 1_000_000 / clkfreq), " us")
 ```
 :::
 
 ::: pasm2
 ```
-        wrpin  A_in_mode, #A_in        'Set up mode for pin P53
-        dirh   #A_in                   'Enable Smart Pin
+' Time HIGH pulses
+                org     0
+                dirl    #53                     ' Reset Smart Pin
+                wrpin   high_mode, #53          ' Configure HIGH timing mode
+                dirh    #53                     ' Enable Smart Pin
+
+.loop           nop
+.wait           testp   #53 wc                  ' Check IN flag
+        if_nc   jmp     #.wait                  ' Wait for measurement
+                rdpin   high_time, #53          ' Get HIGH duration
+                ' Process high_time...
+                jmp     #.loop
+
+high_mode       long    P_HIGH_TICKS    ' %0000_0000_000_00000_00000000_00_10001_0
+high_time       long    0
 ```
 :::
-
-### Modes %10000-%10011 - Time and Event Measurement
-
-These modes measure time durations and event counts with high precision.
-
-**Mode %10000 (P_TIME_STATES): Time A-states**
-
-Measures cumulative time that A-input is in a specified state.
-
-**Mode %10001 (P_TIME_HIGHS): Time A-high states**
-
-Measures total time that A-input is high.
 
 ### Mode %10010 - Event Timing and Timeout Detection
 
 Mode %10010 (P_EVENTS_TICKS) provides dual functionality: timing a specified number of events, or detecting when events stop occurring (timeout/watchdog).
 
+**How It Works:**
+
+The Smart Pin counts clock cycles between events (for timing) or monitors for activity gaps (for timeout detection).
+
+```{=latex}
+\PeriodMeasurementDiagram
+```
+
 ```{=latex}
 \ContinuousPeriodDiagram
 ```
+
+The mode can measure precise event timing or trigger an alert when expected events stop occurring:
 
 **Two Operating Modes (controlled by Y[2]):**
 
@@ -2304,11 +3201,15 @@ handle_timeout
 
 Mode %10011 (P_PERIODS_TICKS) measures total time over X complete periods, enabling precise average period/frequency measurement.
 
+**How It Works:**
+
+The Smart Pin accumulates clock cycles from one event type to another over multiple periods, providing averaged measurements that reduce noise.
+
 ```{=latex}
 \TimeoutWatchdogDiagram
 ```
 
-Each period is defined by events on A-input and B-input. The mode accumulates clock cycles from A-event to B-event over X repetitions.
+Each period is defined by events on A-input and B-input. The mode accumulates clock cycles from A-event to B-event over X repetitions:
 
 ```{=latex}
 \DualInputTimeDiagram
@@ -2377,297 +3278,676 @@ PUB phase_delay_measurement(pin_a, pin_b) | phase_clocks, phase_degrees
 ```
 :::
 
-### Modes %10100-%10111 - Extended Time Measurement
+### Modes %10011-%10111 - Period-Based Measurement
 
-These modes provide additional time measurement capabilities with different counting and gating options.
+These modes measure periods defined by A-input and B-input events. They provide oversampled measurements for precise frequency and duty cycle determination.
 
-**Mode %10100 (P_PERIODS_STATES): For X periods, count states**
+**Period Definition (Y[1:0] for all modes):**
 
-Counts A-input states over X complete B-input periods.
+| Y[1:0] | Period Start | Period End |
+|--------|--------------|------------|
+| %00 | A-input rise | B-input rise |
+| %01 | A-input rise | B-input edge |
+| %10 | A-input edge | B-input rise |
+| %11 | A-input edge | B-input edge |
 
-**Mode %10101 (P_COUNTER_TICKS): For X clocks, count periods**
+**Note:** The B-input can be set to the same pin as the A-input for single-pin cycle measurement.
 
-Counts complete periods within a fixed time window.
+**Mode %10011: For X periods, count time**
 
-**Mode %10110 (P_COUNTER_STATES): For X clocks, count states**
+Accumulates clock cycles from A-event to B-event over X periods. Result is total time for X complete periods.
 
-Counts A-input states within a fixed clock window.
+**Mode %10100: For X periods, count states**
 
-**Mode %10111 (P_TIME_COUNT): For X clocks, count time**
+Counts A-input trigger states (high time) within each A-to-B period over X periods. Result is cumulative duty measurement.
 
-Continuous timing with periodic snapshots.
+**Mode %10101: For periods in X+ clocks, count time**
+
+Measures time until X clock cycles elapse, then completes any period in progress. Result is total time for however many complete periods fit within X+ clocks.
+
+**Mode %10110: For periods in X+ clocks, count states**
+
+Counts A-input states until X clock cycles elapse, then completes any period in progress. Result is cumulative duty for periods within X+ clocks.
+
+**Mode %10111: For periods in X+ clocks, count periods**
+
+Counts complete periods until X clock cycles elapse. Result is the number of complete periods.
+
+**Reset Behavior (all modes):**
+
+During reset (DIR=0):
+- IN is LOW
+- Z is set to $00000000
+
+**Precision Frequency/Duty Measurement:**
+
+Combining multiple measurements provides very precise frequency and duty cycle calculations. For example:
+- Use %10101 to get total time for N periods
+- Use %10110 to get total high-time for N periods
+- Use %10111 to get exact period count
+
+Then: `frequency = period_count * clkfreq / total_time` and `duty = (high_time * 100) / total_time`
 
 ::: spin2
 ```
-PUB measure_pulse_width() | width
-  pinstart(MEASURE_PIN, P_TIME_HIGHS, 0, 0)
+CON
+  SIGNAL_PIN = 53
 
-  ' Wait for measurement
-  repeat until pinr(MEASURE_PIN) & $80000000
+PUB precision_frequency() | total_time, period_count, frequency
+  ' Run two measurements concurrently for precise frequency
 
-  width := rdpin(MEASURE_PIN)
-  debug("Pulse width: ", udec(width), " clocks")
-  debug("Time: ", udec(width / (clkfreq / 1_000_000)), " us")
+  ' Mode %10101: measure time for periods in 100ms+ window
+  pinstart(SIGNAL_PIN, P_PERIODS_TIME | P_LOCAL_B, clkfreq/10, %00)
+
+  repeat until pinr(SIGNAL_PIN)
+  total_time := rdpin(SIGNAL_PIN)
+
+  ' Mode %10111: count periods in 100ms+ window
+  pinstart(SIGNAL_PIN, P_PERIODS_COUNT | P_LOCAL_B, clkfreq/10, %00)
+
+  repeat until pinr(SIGNAL_PIN)
+  period_count := rdpin(SIGNAL_PIN)
+
+  ' Calculate precise frequency
+  frequency := (period_count * clkfreq) / total_time
+  debug("Periods: ", udec(period_count))
+  debug("Total time: ", udec(total_time), " clocks")
+  debug("Frequency: ", udec(frequency), " Hz")
 ```
 :::
 
 ### Modes %11000-%11010 - ADC Modes
 
-The P2's Smart Pins include sophisticated ADC capabilities for analog measurements.
+The P2's Smart Pins include sophisticated ADC capabilities for analog measurements using delta-sigma conversion.
 
-**Mode %11000 (P_ADC): ADC Sample/Filter with Internal Clock**
-**Mode %11001 (P_ADC_EXT): ADC Sample/Filter with External Clock**
-**Mode %11010 (P_ADC_SCOPE): ADC Scope with Trigger**
+**How It Works:**
 
-::: needs-diagram
-ADC modes showing:
-- Sample/hold timing
-- Filter configurations (SINC1/2/3)
-- Scope trigger conditions
-:::
+The ADC uses delta-sigma modulation with digital filtering to convert analog voltages to digital values with configurable resolution and sample rate.
 
-**ADC Sub-modes (via X register configuration):**
-- SINC1 filtering (fastest, least noise reduction)
-- SINC2 filtering (balanced speed and filtering)
-- SINC3 filtering (smoothest, best noise reduction)
+```{=latex}
+\ADCSampleHoldDiagram
+```
+
+Three ADC modes provide different clocking and triggering options:
+
+**Mode %11000**: ADC Sample/Filter with Internal Clock
+**Mode %11001**: ADC Sample/Filter with External Clock
+**Mode %11010**: ADC Scope with Trigger
+
+**X Register Configuration:**
+
+WXPIN sets the mode (X[5:4]) and sample period (X[3:0]):
+
+| X[5:4] | Mode | Description |
+|--------|------|-------------|
+| %00 | SINC2 Sampling | Complete conversion, power-of-2 periods only |
+| %01 | SINC2 Filtering | Requires software differencing |
+| %10 | SINC3 Filtering | Better dynamic response |
+| %11 | Bitstream Capture | Raw ADC bits (LSB = oldest) |
+
+**Sample Period and Resolution:**
+
+| X[3:0] | Period | SINC2 Sample | SINC2 Filter | SINC3 Filter |
+|--------|--------|--------------|--------------|--------------|
+| %0000 | 1 clk | impractical | impractical | impractical |
+| %0011 | 8 clks | 4 bits | 4 ENOB | impractical |
+| %0100 | 16 clks | 5 bits | 5 ENOB | 8 ENOB |
+| %0101 | 32 clks | 6 bits | 6 ENOB | 10 ENOB |
+| %0110 | 64 clks | 7 bits | 7 ENOB | 12 ENOB |
+| %0111 | 128 clks | 8 bits | 8 ENOB | 14 ENOB |
+| %1000 | 256 clks | 9 bits | 9 ENOB | 16 ENOB |
+| %1001 | 512 clks | 10 bits | 10 ENOB | 18 ENOB |
+| %1011 | 2048 clks | 12 bits | 12 ENOB | overflow |
+| %1101 | 8192 clks | 14 bits | 14 ENOB | overflow |
+
+*ENOB = Effective Number of Bits*
+
+**SINC2 vs SINC3 Filtering:**
+
+**SINC2 Filtering:** Uses double integration—sums input bits into an accumulator which feeds a second accumulator. Provides an extra bit of resolution over simple bit-summing and filters rectangular-sampling-window effects. Best for DC measurements where precision matters. Practical 14-bit resolution at 8192 clock periods. Filter becomes accurate on the second sample period.
+
+**SINC3 Filtering:** Adds a third level of accumulation for better dynamic response. Doubles the ENOB for fast-changing signals but only slightly better than SINC2 for DC. Limited to 512 samples/period due to 27-bit accumulator constraints. Filter becomes accurate on the third sample period.
+
+**Custom Sample Periods:**
+
+For modes other than SINC2 Sampling (X[5:4] > %00), use WYPIN to set an arbitrary period in Y[13:0]. Maximum periods: SINC3 = 512 clocks, SINC2 = 11,585 clocks.
+
+**27-bit Accumulator Handling (PASM2):**
+
+The accumulators are 27 bits wide. For correct 32-bit math, either prescale or post-trim:
+
+```
+' Prescale method:
+RDPIN   x, #adcpin        ' Get SINC2 accumulator
+SHL     x, #5             ' Prescale 27-bit to 32-bit
+SUB     x, diff           ' Compute sample
+ADD     diff, x           ' Update diff value
+
+' Post-trim method:
+RDPIN   x, #adcpin        ' Get SINC2 accumulator
+SUB     x, diff           ' Compute sample
+ADD     diff, x           ' Update diff value
+ZEROX   x, #26            ' Trim to 27-bit
+```
 
 ::: spin2
 ```
 PUB adc_reading(pin) : value
-  ' Configure for ADC input with internal clock, 1x gain, GND reference
+  ' Configure for ADC input with internal clock
+  ' P[12:10] = %100 enables ADC mode
   pinstart(pin, P_ADC | P_ADC_1X | P_ADC_GND, 0, 0)
 
-  waitms(1)                    ' Let it settle
+  waitms(1)                    ' Let SINC filter settle
   value := rdpin(pin)          ' Read ADC value
 
-PUB adc_scope_capture(pin, trigger_level)
-  ' Configure ADC scope mode with trigger
-  pinstart(pin, P_ADC_SCOPE | P_ADC_1X, trigger_level, 0)
+PUB adc_8bit_fast(pin) : value
+  ' Fast 8-bit ADC using SINC2 sampling at 128 clocks
+  pinstart(pin, P_ADC | P_ADC_1X, %00_0111, 0)
 
-  ' Wait for trigger condition
-  repeat until pinr(pin) & $80000000
+  repeat until pinr(pin)       ' Wait for sample
   value := rdpin(pin)
 
-PUB differential_adc(pos_pin, neg_pin) : diff
-  ' Configure for differential measurement between two pins
-  pinstart(pos_pin, P_ADC | P_ADC_1X | neg_pin << 8, 0, 0)
+PUB adc_14bit_precision(pin) : value
+  ' High precision 14-bit ADC using SINC2 at 8192 clocks
+  pinstart(pin, P_ADC | P_ADC_1X, %00_1101, 0)
 
-  waitms(1)
-  diff := rdpin(pos_pin)
-
-  ' Result is signed
-  debug("Differential: ", sdec(diff))
+  repeat until pinr(pin)       ' Wait for sample (~41µs at 200MHz)
+  value := rdpin(pin)
 
 PUB continuous_adc() | voltage
   ' Continuous ADC with SINC2 filtering
-  pinstart(ADC_PIN, P_ADC | P_ADC_1X | P_ADC_GND | P_ADC_SINC2, 0, 0)
+  pinstart(ADC_PIN, P_ADC | P_ADC_1X | P_ADC_GND, %00_0111, 0)
 
   repeat
+    repeat until pinr(ADC_PIN)
     voltage := rdpin(ADC_PIN)
-    ' Convert to millivolts (assuming 3.3V reference)
-    voltage := voltage * 3300 / $FFFF
+    ' Convert to millivolts (assuming 3.3V reference, 8-bit)
+    voltage := voltage * 3300 / 255
     debug("Voltage: ", udec(voltage), " mV")
-    waitms(100)
 ```
 :::
 
+**PASM2 ADC Setup:**
+
 ::: pasm2
 ```
-      wrpin     ##P_ADC | P_ADC_1X, #A_ADC   'Set up mode for ADC
-      wxpin     #%00_0111, #A_ADC            '8-bit resolution
-      dirh      #A_ADC                        'Enable Smart Pin
-      setse1    #%001<<6 + A_ADC             'Event on IN flag rise
+' Configure ADC with SINC2 sampling, 8-bit resolution
+                wrpin   ##%100011_0000000_00_11000_0, #adcpin  ' ADC mode
+                wxpin   #%00_0111, #adcpin                     ' SINC2, 128 clocks
+                dirh    #adcpin                                ' Enable
+
+' Read samples continuously
+.loop           testp   #adcpin wc              ' Check IN flag
+        if_nc   jmp     #.loop                  ' Wait for sample
+                rdpin   sample, #adcpin         ' Get ADC value
+                ' Process sample...
+                jmp     #.loop
 ```
 :::
 
 ### Mode %11011 - USB Host/Device Mode
 
-USB host/device mode provides low-level USB 1.1 physical layer support. Full USB protocol implementation requires additional software stack (not covered in this tutorial).
+USB host/device mode provides low-level USB 1.1 physical layer support. This mode overrides OUT to control the pin output states. Full USB protocol implementation requires an additional software stack.
 
-::: needs-diagram
-USB communication showing:
-- D+ and D- differential signaling
-- Packet structure
-- Host/device negotiation
-:::
+**How It Works:**
 
-**Mode %11011 (P_USB_PAIR): USB Host/Device (pair mode)**
+Two adjacent pins work together to handle the differential D+ and D- signals of the USB physical layer.
 
-USB mode requires two adjacent pins (even/odd pair) for D- and D+ differential signaling.
+```{=latex}
+\USBDifferentialDiagram
+```
+
+The Smart Pin handles USB signaling states (J, K, SE0, SE1) on the pin pair:
+
+**Pin Pair Requirement:**
+
+USB mode requires two adjacent pins configured together as an even/odd pair. Only the LSB of their pin numbers differs:
+- Pins 0 and 1
+- Pins 2 and 3
+- Pins 4 and 5
+- etc.
+
+Both pins must be configured with identical WRPIN data of `%1_11011_0` (output enabled) or `%0_11011_0` (output disabled for "sniffer" mode).
+
+**Sniffer Mode:**
+
+Configure both pins with `%0_11011_0` to disable output drive, creating a USB bus observer that can monitor traffic without participating.
 
 ::: spin2
 ```
+CON
+  _clkfreq = 200_000_000
+  USB_DM = 0                    ' D- on even pin
+  USB_DP = 1                    ' D+ on odd pin
+
 PUB usb_basic_setup()
-  ' Basic USB configuration using pin pair
-  ' Full implementation requires protocol stack
-  pinstart(USB_DM, P_USB_PAIR | P_MINUS1_B, 0, 0)
-  pinstart(USB_DP, P_USB_PAIR | P_PLUS1_B, 0, 0)
+  ' Configure USB pair with output enabled
+  ' Both pins get identical configuration
+  pinstart(USB_DM, P_USB_PAIR, 0, 0)
+  pinstart(USB_DP, P_USB_PAIR, 0, 0)
 
   ' USB operation requires additional software stack
-```
-:::
+  ' See Parallax USB libraries for full implementation
 
-### Modes %11100-%11101 - Synchronous Serial (SPI)
-
-Synchronous serial modes provide clocked data transmission and reception, commonly used for SPI communication.
-
-**Mode %11100 (P_SYNC_TX): Synchronous Serial Transmit**
-**Mode %11101 (P_SYNC_RX): Synchronous Serial Receive**
-
-Data can be sampled on either the falling or rising edge of the clock, depending on the SPI mode required:
-
-**Falling Edge Sampling (SPI Mode 0/2):**
-
-```{=latex}
-\SyncSerialFallingDiagram
-```
-
-**Rising Edge Sampling (SPI Mode 1/3):**
-
-```{=latex}
-\SyncSerialRisingDiagram
-```
-
-::: spin2
-```
-PUB sync_serial_tx(pin, data, bits) | config
-  ' Configure sync serial transmit
-  config := P_SYNC_TX | P_OE
-
-  ' X[31:16] = clock divider
-  ' X[4:0] = bits to transmit
-  x_val := (CLOCK_DIV << 16) | bits
-
-  pinstart(pin, config, x_val, data)
-
-PUB sync_serial_rx(data_pin, clock_pin, bits) | config
-  ' Configure sync serial receive with clock from adjacent pin
-  config := P_SYNC_RX | P_PLUS1_B   ' Clock on pin+1
-
-  x_val := bits                      ' Number of bits to receive
-
-  pinstart(data_pin, config, x_val, 0)
+PUB usb_sniffer_setup()
+  ' Configure as USB sniffer (no output drive)
+  ' Use mode without P_OE for receive-only operation
+  pinfloat(USB_DM)
+  pinfloat(USB_DP)
+  wrpin(USB_DM, P_USB_PAIR)     ' Mode without output enable
+  wrpin(USB_DP, P_USB_PAIR)
+  pinh(USB_DM)                  ' Enable Smart Pin
+  pinh(USB_DP)
 ```
 :::
 
 ::: pasm2
 ```
-        wrpin   ##P_SYNC_TX | P_OE, #txout   'Set sync tx mode
-        wxpin   #%1_00111,    #txout         'Set 8 bits (7 + 1)
-        dirh    #txout                        'Enable smart pin
+' USB Host/Device mode - basic setup
+' Requires even/odd pin pair (USB_DM=even, USB_DP=odd)
+                org
+                ' Configure USB pair with output enabled
+                dirl    #USB_DM
+                dirl    #USB_DP
+                wrpin   usb_cfg, #USB_DM        ' D- configuration
+                wrpin   usb_cfg, #USB_DP        ' D+ configuration (identical)
+                dirh    #USB_DM
+                dirh    #USB_DP
 
-        wrpin   ##P_SYNC_RX | P_PLUS1_B, #rxin  'Set sync rx, clock from pin+1
-        wxpin   #8, #rxin                        'Set 8 bits
-        dirh    #rxin                            'Enable smart pin
+                ' USB operation requires additional software stack
+.loop           nop
+                jmp     #.loop
+
+' USB mode with output: TT=%01 (P_OE), Mode=%11011
+usb_cfg         long    P_USB_PAIR
+USB_DM          =       0                       ' D- on even pin
+USB_DP          =       1                       ' D+ on odd pin
 ```
 :::
 
-### Modes %11110-%11111 - Asynchronous Serial (UART)
+### Mode %11100 - Synchronous Serial Transmit
 
-The P2's Smart Pins excel at UART communication, handling all timing and framing in hardware.
+Data from 1 to 32 bits shifts out synchronized with an external clock signal. This mode overrides OUT to control the pin output state. Bits shift out LSB first.
 
-**Mode %11110 (P_ASYNC_TX): Asynchronous Serial Transmit**
-**Mode %11111 (P_ASYNC_RX): Asynchronous Serial Receive**
+**How It Works:**
+
+The Smart Pin shifts data out one bit per clock edge, synchronized to an external clock signal from the A-input.
+
+**Falling Edge Clocking (data changes on rising, sampled on falling):**
+
+```{=latex}
+\SyncSerialFallingDiagram
+```
+
+**Rising Edge Clocking (data changes on falling, sampled on rising):**
+
+```{=latex}
+\SyncSerialRisingDiagram
+```
+
+The clock polarity determines when data transitions and when the receiver samples:
+
+**X Register Configuration:**
+
+| Field | Function |
+|-------|----------|
+| X[4:0] | Number of bits minus 1 (e.g., 7 for 8 bits) |
+| X[5] | Mode: 0=continuous, 1=start-stop |
+
+**Two Transmission Modes:**
+
+**Continuous Mode (X[5]=0):**
+During reset (DIR=0), WYPIN primes the shift register with the first data. After enabling (DIR=1), another WYPIN loads the buffer. When transmission completes, buffered data moves to the shifter automatically. The IN flag indicates buffer empty—load new data immediately to maintain continuous transmission.
+
+**Start-Stop Mode (X[5]=1):**
+Transmit data on demand. WYPIN can modify data before the first clock arrives. After transmission starts, WYPIN data is buffered for the next transmission.
+
+**Double Buffering:**
+
+WYPIN data always goes to the buffer first. During reset, data flows immediately through to the shifter. After transmission starts, buffer contents load into the shifter when the current transmission ends. IN flag signals buffer empty.
+
+**MSB-First Transmission:**
+
+Data shifts out LSB first by default. For MSB-first:
+```
+SHL   data, #32-8    ' Shift 8-bit value into D[31:24]
+REV   data           ' Reverse all bits
+' Now LSB-first transmission sends MSB-first
+```
+
+**Reset Behavior:**
+
+During reset (DIR=0), output is held LOW. After enabling, output equals the LSB of the data written during reset.
+
+::: spin2
+```
+CON
+  CLK_PIN = 20
+  TX_PIN = 21
+
+PUB sync_tx_8bit(data)
+  ' Transmit 8 bits, start-stop mode
+  pinstart(TX_PIN, P_SYNC_TX | P_OE, %1_00111, data)
+
+  ' Use separate transition mode pin for clock
+  pinstart(CLK_PIN, P_TRANSITION | P_OE, $1000, 0)
+
+  ' Trigger 16 clock edges (8 data bits × 2)
+  wypin(CLK_PIN, 16)
+```
+:::
+
+**PASM2 Sync TX - Positive Edge Clock:**
+
+::: pasm2
+```
+' Synchronous serial transmit with external clock
+' Positive-edge clocking (data sampled on rising edge)
+                org     0
+                dirl    #21                     ' Reset TX pin
+                wrpin   sync_tx_mode, #21       ' Configure sync TX mode
+                wxpin   #%1_00111, #21          ' Start-stop mode, 8 bits
+                dirh    #21                     ' Enable TX
+
+                dirl    #20                     ' Reset clock pin
+                wrpin   clock_mode, #20         ' Configure as transition output
+                wxpin   ##$1000, #20            ' Set clock base period
+                dirh    #20                     ' Enable clock
+
+.loop           waitx   ##10_000_000            ' Delay between transmissions
+                wypin   #$85, #21               ' Load 8-bit data ($85 = %10000101)
+                wypin   #16, #20                ' Start 16 clock edges (8 bits × 2)
+                jmp     #.loop
+
+' Positive-edge clocking: %0000_1111_000_00000_00000000_01_11100_0
+'   BBBB=%1111 (P_INVERT_B | P_MINUS1_B), TT=%01 (P_OE), Mode=%11100
+sync_tx_mode    long    P_SYNC_TX | P_OE | P_INVERT_B | P_MINUS1_B
+clock_mode      long    P_TRANSITION | P_OE  ' %0000_0000_000_00000_00000000_01_00101_0
+```
+:::
+
+### Mode %11101 - Synchronous Serial Receive
+
+Receives 1 to 32 bits synchronized with an external clock. Data shifts in LSB first. Requires configuring both A (data) and B (clock) inputs.
+
+**X Register Configuration:**
+
+| Field | Function |
+|-------|----------|
+| X[4:0] | Number of bits minus 1 (e.g., 7 for 8 bits) |
+| X[5] | Sample timing: 0=before B-edge, 1=coincident with B-edge |
+
+**Sample Timing (X[5]):**
+
+**X[5]=0 (Before B-edge):** Samples A input just before registering the B-input edge. Requires no hold time from sender. Use for most applications.
+
+**X[5]=1 (Coincident):** Samples coincident with B-edge registration. Useful when transmitted data remains steady briefly after the clock edge. When receiving from another P2 Smart Pin in sync TX mode (which holds data for 2 clocks after B-edge), this enables fastest data transmission.
+
+**Left-Justified Data:**
+
+Received data is left-justified with MSB in bit 31. For 8-bit data, right-shift by 24:
+```
+SHR   data, #24    ' Move 8-bit LSB to D[7:0]
+```
+
+**MSB-First Reception:**
+
+If sender transmits MSB-first, reverse and trim after receiving:
+```
+REV    data          ' Reverse all 32 bits
+TRIML  data, #8      ' Keep only low 8 bits
+```
+
+**IN Flag Behavior:**
+
+When all required bits are received, IN is raised. Use RDPIN or RQPIN to retrieve the 32-bit left-justified data.
+
+::: spin2
+```
+CON
+  RX_PIN = 30
+  CLK_PIN = 31
+
+PUB sync_rx_8bit() : data
+  ' Configure sync receive, clock from pin+1
+  pinstart(RX_PIN, P_SYNC_RX | 1 << 24, %0_00111, 0)  ' BBBB=1 for CLK_PIN
+
+  repeat until pinr(RX_PIN)       ' Wait for reception complete
+  data := rdpin(RX_PIN)
+  data >>= 24                     ' Right-justify 8-bit value
+```
+:::
+
+**PASM2 Sync RX - Complete Example:**
+
+::: pasm2
+```
+' Synchronous serial receive
+' Receives 8 bits, displays on LEDs at P7:P0
+                org     0
+                mov     dira, ##$00FF           ' P7:P0 as LED outputs
+
+                dirl    #30                     ' Reset receiver
+                wrpin   sync_rx_mode, #30       ' Configure sync RX mode
+                wxpin   #%0_00111, #30          ' Before-edge sample, 8 bits
+                dirh    #30                     ' Enable receiver
+
+.loop           testp   #30 wc                  ' Check IN flag
+                nop
+        if_nc   jmp     #.loop                  ' Wait for data
+
+                rqpin   rcvd_data, #30          ' Get received data
+                shr     rcvd_data, #24          ' Right-justify (32-8=24)
+                mov     outa, rcvd_data         ' Display on LEDs
+                jmp     #.loop
+
+' Sync RX mode: %0000_0001_000_00000_00000000_01_11101_0
+'   BBBB=%0001 (P_PLUS1_B selects P31 as clock), TT=%01 (P_OE), Mode=%11101
+sync_rx_mode    long    P_SYNC_RX | P_OE | P_PLUS1_B
+rcvd_data       long    0
+```
+:::
+
+### Mode %11110 - Asynchronous Serial Transmit
+
+Transmit 1 to 32 data bits at a programmable baud rate. Each transmission automatically includes a start bit (LOW) and stop bit (HIGH). This mode overrides OUT to control the pin output state.
+
+**Frame Format:**
+
+```
+IDLE  START  D0  D1  D2  D3  D4  D5  D6  D7  STOP  IDLE
+ 1     0     ←───── 8 data bits LSB first ─────→   1     1
+```
+
+**X Register Configuration:**
+
+| Field | Function |
+|-------|----------|
+| X[4:0] | Number of data bits minus 1 (e.g., 7 for 8 bits) |
+| X[15:10] | Fractional bit period (when X[31:26] = 0) |
+| X[31:16] | Integer bit period in system clocks |
+
+**Baud Rate Calculation:**
+
+```
+clocks_per_bit = system_clock_frequency / baud_rate
+```
+
+For 200 MHz system clock at 115,200 baud:
+```
+200,000,000 / 115,200 = 1736.1 clocks/bit
+```
+
+**X Register Value:**
+
+Method 1 (integer only): `(clocks_per_bit << 16) | (bits - 1)`
+
+Method 2 (with fraction): `((clocks_per_bit * $10000) & $FFFFFC00) | (bits - 1)`
+
+**Optional Parity:**
+
+The hardware does not generate parity bits. To add parity, calculate it in software and insert at MSB+1 position. Include the parity bit in the bit count.
+
+::: spin2
+```
+CON
+  _clkfreq = 200_000_000
+  TX_PIN = 56
+  BAUD = 115_200
+
+PUB async_tx_demo() | baud_val, i
+  ' Calculate baud: (clocks_per_bit << 16) | (bits - 1)
+  baud_val := (_clkfreq / BAUD) << 16 | 7     ' 8 data bits
+
+  ' Configure async transmit with output enable
+  pinstart(TX_PIN, P_ASYNC_TX | P_OE, baud_val, 0)
+
+  ' Transmit test pattern
+  repeat i from 0 to 255
+    wypin(TX_PIN, i)                           ' Send byte
+    repeat until pinr(TX_PIN)                  ' Wait for buffer empty
+    waitms(10)                                 ' Delay between bytes
+```
+:::
+
+::: pasm2
+```
+' Asynchronous serial transmit
+' 200 MHz system clock, 115200 baud, 8N1
+                org
+                dirl    #TX_PIN                 ' Reset TX pin
+                wrpin   async_tx_mode, #TX_PIN  ' Configure async TX mode
+                wxpin   baud_val, #TX_PIN       ' Set baud and bit count
+                dirh    #TX_PIN                 ' Enable TX
+
+.loop           wypin   #$55, #TX_PIN           ' Transmit $55 (alternating bits)
+.wait           testp   #TX_PIN wc              ' Check IN flag (buffer empty)
+        if_nc   jmp     #.wait                  ' Wait for completion
+                waitx   ##10_000_000            ' Delay between transmissions
+                jmp     #.loop
+
+' Async TX mode: TT=%01 (P_OE), Mode=%11110
+async_tx_mode   long    P_ASYNC_TX | P_OE
+' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
+baud_val        long    $06C8_0007
+TX_PIN          =       56
+```
+:::
+
+### Mode %11111 - Asynchronous Serial Receive
+
+Receive 1 to 32 data bits at a preset baud rate matching the transmitter. The Smart Pin automatically detects the start bit and samples data at the bit centers.
+
+**X Register Configuration:**
+
+| Field | Function |
+|-------|----------|
+| X[4:0] | Number of data bits minus 1 (e.g., 7 for 8 bits) |
+| X[15:10] | Fractional bit period (when X[31:26] = 0) |
+| X[31:16] | Integer bit period in system clocks |
+
+**Reception Process:**
+
+1. Smart Pin waits for start bit (HIGH-to-LOW transition)
+2. Samples data bits at calculated bit centers
+3. Raises IN flag when all bits received
+4. RDPIN/RQPIN retrieves data (right-justified)
 
 ::: spin2
 ```
 CON
   BAUD = 115_200
 
-PUB uart_setup(tx_pin, rx_pin)
-  ' Configure TX
-  pinstart(tx_pin, P_ASYNC_TX | P_OE, (clkfreq / BAUD) << 16 | 7, 0)
+PUB uart_setup(tx_pin, rx_pin) | baud_val
+  ' Calculate baud rate value
+  baud_val := (clkfreq / BAUD) << 16 | 7    ' 8 bits (7+1)
+
+  ' Configure TX with output enable
+  pinstart(tx_pin, P_ASYNC_TX | P_OE, baud_val, 0)
 
   ' Configure RX
-  pinstart(rx_pin, P_ASYNC_RX, (clkfreq / BAUD) << 16 | 7, 0)
+  pinstart(rx_pin, P_ASYNC_RX, baud_val, 0)
 
-PUB uart_send(pin, char)
+PUB uart_tx(pin, char)
   wypin(pin, char)
-  repeat until pinr(pin) & $80000000  ' Wait for completion
+  repeat until pinr(pin) & $8000_0000   ' Wait for buffer empty
 
-PUB uart_receive(pin) : char | ready
-  repeat
-    ready := pinr(pin)
-    if ready & $80000000              ' Check if byte received
-      char := rdpin(pin) & $FF        ' Get byte
-      quit
+PUB uart_rx(pin) : char
+  repeat until pinr(pin) & $8000_0000   ' Wait for byte received
+  char := rdpin(pin) & $FF              ' Get byte, clear IN
+
+PUB uart_rx_check(pin) : char, valid
+  ' Non-blocking receive
+  valid := (pinr(pin) & $8000_0000) <> 0
+  if valid
+    char := rdpin(pin) & $FF
 ```
 :::
+
+**PASM2 UART Receive:**
 
 ::: pasm2
 ```
-        wrpin sync_rx_mode, #rxin
-'Set sync receiver mode
-        wxpin #%1_00111, #rxin
-'Set receiver to sample on B-
-                                      ' input edge
-        dirh #rxin
-      'Enable Smart-Pin sync receiver
+' Asynchronous serial receive
+' 200 MHz system clock, 115200 baud, 8N1
+' Displays received byte on LEDs at P7:P0
+                org     0
+                mov     dira, ##$FF             ' P7:P0 as LED outputs
+
+                dirl    #57                     ' Reset RX pin
+                wrpin   async_rx_mode, #57      ' Configure async RX mode
+                wxpin   baud_rx, #57            ' Set baud and bit count
+                dirh    #57                     ' Enable RX
+
+.loop           testp   #57 wc                  ' Check IN flag
+        if_nc   jmp     #.loop                  ' Wait for byte
+                rdpin   rx_data, #57            ' Get received byte
+                mov     outa, rx_data           ' Display on LEDs
+                jmp     #.loop
+
+' Async RX mode: %0000_0000_000_00000_00000000_00_11111_0
+'   TT=%00 (no output), Mode=%11111
+async_rx_mode   long    P_ASYNC_RX
+' Baud: 200MHz/115200 = 1736 clocks, bits = 7 (8-1)
+baud_rx         long    $06C8_0007
+rx_data         long    0
 ```
 :::
 
-**Full UART Driver:**
+**Full Duplex UART Example:**
 
 ::: spin2
 ```
-OBJ
-  uart : "uart_driver"
+CON
+  TX_PIN = 56
+  RX_PIN = 57
+  BAUD = 115_200
 
-PUB full_uart_example()
-  uart.start(TX_PIN, RX_PIN, BAUD)
+VAR
+  byte rx_buffer[64]
+  byte rx_head, rx_tail
 
-  uart.str(string("Hello, World!", 13, 10))
+PUB start()
+  ' Initialize UART
+  pinstart(TX_PIN, P_ASYNC_TX | P_OE, (clkfreq / BAUD) << 16 | 7, 0)
+  pinstart(RX_PIN, P_ASYNC_RX, (clkfreq / BAUD) << 16 | 7, 0)
 
-  repeat
-    if uart.available()
-      char := uart.rx()
-      uart.tx(char)        ' Echo back
-```
-:::
+PUB tx(char)
+  wypin(TX_PIN, char)
+  repeat until pinr(TX_PIN) & $8000_0000
 
-**PASM2 UART Implementation:**
+PUB tx_str(str)
+  repeat while byte[str]
+    tx(byte[str++])
 
-::: pasm2
-```
-uart_tx_setup
-        dirl    #TX_PIN
-        wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN
+PUB rx() : char
+  repeat until pinr(RX_PIN) & $8000_0000
+  char := rdpin(RX_PIN) & $FF
 
-        ' Calculate baud
-        mov     x, ##clkfreq / BAUD
-        shl     x, #16
-        or      x, #7           ' 8 bits
-        wxpin   x, #TX_PIN
-
-        dirh    #TX_PIN
-
-send_byte
-        wypin   char, #TX_PIN   ' Send character
-.wait   testp   #TX_PIN wc      ' Wait for completion
-  if_nc jmp     #.wait
-```
-:::
-
-**PASM2 UART Receive Implementation:**
-
-::: pasm2
-```
-uart_rx_setup
-        dirl    #RX_PIN
-        wrpin   ##P_ASYNC_RX, #RX_PIN
-
-        ' Calculate baud
-        mov     x, ##clkfreq / BAUD
-        shl     x, #16
-        or      x, #7           ' 8 bits
-        wxpin   x, #RX_PIN
-
-        dirh    #RX_PIN
-
-receive_byte
-.wait   testp   #RX_PIN wc      ' Wait for byte received
-  if_nc jmp     #.wait
-        rdpin   char, #RX_PIN   ' Read received character
+PUB rx_check() : char, available
+  available := (pinr(RX_PIN) & $8000_0000) <> 0
+  if available
+    char := rdpin(RX_PIN) & $FF
 ```
 :::
 
@@ -2736,34 +4016,11 @@ rx_data         long    0
 - **Complexity**: Simple, easy to understand and debug
 - **Best For**: Time-critical applications where immediate response is essential
 
-#### The Event-Driven Approach
+#### The Event-Driven Approach (PASM2 Only)
 
-Event-driven waiting uses the P2's hardware event system. The COG configures an event to trigger when the Smart Pin's IN flag rises, then sleeps until the event occurs:
+Event-driven waiting uses the P2's hardware event system. The COG configures an event to trigger when the Smart Pin's IN flag rises, then sleeps until the event occurs.
 
-::: spin2
-```
-CON
-  _clkfreq = 200_000_000
-  UART_RX = 21
-  BAUD = 115_200
-
-PUB event_receive() | byte_received
-  ' Configure UART receive
-  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / BAUD) << 16 | 8, 0)
-
-  ' Event-driven approach - sleep until data arrives
-  repeat
-    ' Configure event: trigger on Smart Pin IN flag rise
-    ' Format: %MMM_PPPPPP where MMM=%001 for IN-rise, PPPPPP=pin number
-    setse1(%001 << 6 + UART_RX)
-    waitse1()                         ' Sleep until event
-    byte_received := rdpin(UART_RX)   ' Read data
-    process_byte(byte_received)
-
-PRI process_byte(b)
-  debug("Received: ", uhex_byte(b))
-```
-:::
+**Important:** The event system instructions (`SETSE1..4`, `WAITSE1..4`, `POLLSE1..4`) are PASM2 instructions only. Spin2 does not provide built-in methods for these. To use event-driven waiting in a Spin2 program, you must use inline PASM2.
 
 In PASM2:
 
@@ -2796,7 +4053,7 @@ rx_data         long    0
 - **Complexity**: Slightly more complex - requires event system knowledge
 - **Best For**: Low-power applications, longer wait periods, concurrent operations
 
-#### Event Source Configuration
+#### Event Source Configuration (PASM2)
 
 The `SETSE1/2/3/4` instructions configure what triggers each of the four selectable events. For Smart Pin waiting, the most useful event source is the IN flag:
 
@@ -2808,12 +4065,12 @@ The `SETSE1/2/3/4` instructions configure what triggers each of the four selecta
 
 The event configuration format is: `#%MMM << 6 + pin_number`
 
-::: spin2
+::: pasm2
 ```
 ' Examples of event configuration
-setse1(%001 << 6 + 10)    ' Event 1: Pin 10 IN rises (data ready)
-setse2(%010 << 6 + 15)    ' Event 2: Pin 15 IN falls
-setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
+                setse1  #%001 << 6 + 10   ' Event 1: Pin 10 IN rises (data ready)
+                setse2  #%010 << 6 + 15   ' Event 2: Pin 15 IN falls
+                setse3  #%011 << 6 + 20   ' Event 3: Pin 20 IN changes
 ```
 :::
 
@@ -2841,9 +4098,9 @@ setse3(%011 << 6 + 20)    ' Event 3: Pin 20 IN changes
 - Wait times are very short and COG has nothing else to do anyway
 - Simplicity is more important than efficiency
 
-#### Hybrid Approach: Multi-Event Monitoring
+#### Multi-Source Monitoring in Spin2
 
-The P2 provides four selectable events (SE1-SE4), allowing sophisticated multi-source monitoring:
+Spin2 programs can monitor multiple Smart Pins by polling each one in a loop:
 
 ::: spin2
 ```
@@ -2860,31 +4117,26 @@ PUB multi_source_monitor() | uart_data, adc_value, encoder_count
   pinstart(ENCODER_PIN, P_QUADRATURE, 0, 0)
 
   repeat
-    ' Configure events for each source
-    setse1(%001 << 6 + UART_RX)       ' UART data ready
-    setse2(%001 << 6 + ADC_PIN)       ' ADC sample ready
-    setse3(%001 << 6 + ENCODER_PIN)   ' Encoder count updated
-
-    ' Poll all events efficiently
-    if pollse1()
+    ' Poll each Smart Pin for data ready (IN flag high)
+    if pinr(UART_RX)
       uart_data := rdpin(UART_RX)
       handle_uart(uart_data)
 
-    if pollse2()
+    if pinr(ADC_PIN)
       adc_value := rdpin(ADC_PIN)
       handle_adc(adc_value)
 
-    if pollse3()
+    if pinr(ENCODER_PIN)
       encoder_count := rdpin(ENCODER_PIN)
       handle_encoder(encoder_count)
 ```
 :::
 
-This hybrid approach uses events for detection but polling (via POLLSE) for checking, combining the benefits of both approaches.
+This polling approach checks each Smart Pin's IN flag in sequence. For lower-latency multi-source monitoring, use PASM2 with the event system (`SETSE1..4`, `POLLSE1..4`).
 
-#### ADC Sampling: A Practical Comparison
+#### ADC Sampling in Spin2
 
-Consider continuous ADC sampling - a common task where the choice matters significantly:
+Continuous ADC sampling in Spin2 uses polling to wait for each sample:
 
 ::: spin2
 ```
@@ -2893,46 +4145,35 @@ CON
   ADC_PIN = 25
   SAMPLE_COUNT = 1000
 
-PUB compare_adc_methods() | samples[SAMPLE_COUNT], i, start_time, poll_time, event_time
+PUB adc_sampling() | samples[SAMPLE_COUNT], i, start_time, elapsed
 
   ' Configure ADC
   pinstart(ADC_PIN, P_ADC | P_ADC_1X, 0, 0)
 
-  ' Method 1: Polling
+  ' Polling approach - the only option in pure Spin2
   start_time := getct()
   repeat i from 0 to SAMPLE_COUNT - 1
-    repeat until pinread(ADC_PIN)     ' Busy wait
+    repeat until pinr(ADC_PIN)        ' Wait for sample ready
     samples[i] := rdpin(ADC_PIN)
-  poll_time := getct() - start_time
+  elapsed := getct() - start_time
 
-  ' Method 2: Event-driven
-  start_time := getct()
-  repeat i from 0 to SAMPLE_COUNT - 1
-    setse1(%001 << 6 + ADC_PIN)
-    waitse1()                          ' Sleep until ready
-    samples[i] := rdpin(ADC_PIN)
-  event_time := getct() - start_time
-
-  debug("Polling: ", udec(poll_time), " clocks")
-  debug("Events:  ", udec(event_time), " clocks")
-  ' Both complete in similar time, but event-driven
-  ' allows other COGs to use system resources during waits
+  debug("Collected ", udec(SAMPLE_COUNT), " samples in ", udec(elapsed), " clocks")
 ```
 :::
 
-Both methods complete sampling in similar overall time, but event-driven waiting frees the COG to potentially do other work during each wait period, and reduces power consumption.
+For lower power consumption during waits, use PASM2 with the event system. The `WAITSE1` instruction suspends the COG until the Smart Pin's IN flag rises, reducing power draw compared to active polling.
 
 #### Best Practices for Waiting
 
-1. **Clear Before Configure**: The event flag may be set from a previous occurrence. POLLSE clears the flag when checking, or use WAITSE which auto-clears.
+1. **Use RQPIN for Shared Access**: When multiple COGs monitor the same Smart Pin, use `rqpin()` (reads without clearing IN) so all COGs can see the data. Use `rdpin()` only when you're the sole consumer.
 
-2. **Match Method to Wait Duration**: For waits under ~100 clocks, polling overhead is minimal. For longer waits, event-driven is more efficient.
+2. **Match Method to Wait Duration**: For Spin2, polling is the only option. For PASM2, use events (`WAITSE`) for waits longer than ~100 clocks to reduce power consumption.
 
-3. **Consider Multi-COG Impact**: Polling ties up a COG completely. In multi-COG systems, event-driven waiting makes better use of system resources.
+3. **Consider Multi-COG Impact**: Polling ties up a COG completely. In multi-COG systems, dedicated PASM2 COGs using event-driven waiting make better use of system resources.
 
-4. **Use RQPIN for Shared Access**: When multiple COGs monitor the same Smart Pin, use RQPIN (reads without clearing IN) so all COGs can see the data.
+4. **In PASM2, Clear Before Configure**: The event flag may be set from a previous occurrence. `POLLSE` clears the flag when checking, or use `WAITSE` which auto-clears.
 
-5. **Document Your Choice**: Comment why you chose polling vs events - future maintainers will thank you.
+5. **Document Your Choice**: Comment why you chose polling vs events (PASM2) - future maintainers will thank you.
 
 ### Multi-Pin Synchronization
 
@@ -3009,12 +4250,9 @@ PUB signal_distribution()
 
 Create closed-loop control systems using Smart Pins.
 
-::: needs-diagram
-Feedback loop showing:
-- Output generation
-- Measurement
-- Adjustment cycle
-:::
+```{=latex}
+\FeedbackLoopDiagram
+```
 
 ::: spin2
 ```
@@ -3047,12 +4285,9 @@ PUB pwm_with_current_feedback() | current, duty
 
 Build complex timing relationships using multiple Smart Pins.
 
-::: needs-diagram
-Timing network showing:
-- Master clock
-- Divided clocks
-- Phase relationships
-:::
+```{=latex}
+\ClockDistributionDiagram
+```
 
 ::: spin2
 ```
@@ -3078,12 +4313,9 @@ PUB timing_network()
 
 Use Smart Pins to translate between different protocols.
 
-::: needs-diagram
-Protocol bridge showing:
-- Input protocol
-- Translation logic
-- Output protocol
-:::
+```{=latex}
+\ProtocolBridgeDiagram
+```
 
 ::: spin2
 ```
@@ -3110,12 +4342,9 @@ PUB uart_to_spi_bridge() | data
 
 Build complex state machines using Smart Pin feedback.
 
-::: needs-diagram
-State machine showing:
-- States
-- Transitions
-- Smart Pin interactions
-:::
+```{=latex}
+\StateMachineDiagram
+```
 
 ::: spin2
 ```
@@ -3404,29 +4633,25 @@ When jitter must be minimized, use these techniques:
 ```
 CON
   _clkfreq = 200_000_000
-  TRIGGER_PIN = 20
   SAMPLE_PIN = 21
 
-PUB low_jitter_sampling() | trigger_time, sample
-  ' Configure trigger detection
-  pinstart(TRIGGER_PIN, P_COUNT_RISES, 0, 0)
-
+PUB low_jitter_sampling() | next_time, sample
   ' Configure ADC
   pinstart(SAMPLE_PIN, P_ADC | P_ADC_1X, 0, 0)
 
+  ' Spin2 method: Synchronized to system counter
+  ' This provides precise, predictable timing
+  next_time := getct()
   repeat
-    ' Method 1: Event-driven (lowest jitter)
-    setse1(%001 << 6 + TRIGGER_PIN)   ' Event on trigger
-    waitse1()                          ' Zero-latency wake
-    sample := rdpin(SAMPLE_PIN)        ' Immediate read
-
-    ' Method 2: Synchronized to system counter
-    trigger_time := getct()
-    addct1(trigger_time, _clkfreq / 1000)  ' 1ms intervals
-    waitct1()                               ' Precise timing
-    sample := rdpin(SAMPLE_PIN)
+    next_time += _clkfreq / 1000          ' 1ms intervals
+    waitct(next_time)                      ' Precise timing
+    repeat until pinr(SAMPLE_PIN)          ' Ensure sample ready
+    sample := rdpin(SAMPLE_PIN)            ' Read sample
+    process_sample(sample)
 ```
 :::
+
+For absolute minimum jitter, use PASM2 with the event system. The `WAITSE` instruction provides zero-latency wake from sleep:
 
 ::: pasm2
 ```
@@ -4166,13 +5391,9 @@ The true power of Smart Pins emerges when you coordinate multiple pins to create
 
 Let's combine multiple Smart Pin modes to create a sophisticated motor controller.
 
-::: needs-diagram
-Motor controller showing:
-- PWM outputs
-- Encoder inputs
-- Current sensing
-- Control loop
-:::
+```{=latex}
+\MotorControllerDiagram
+```
 
 ::: spin2
 ```
@@ -4255,12 +5476,9 @@ PUB position_control(target_pos) | current_pos, error, output
 
 Combine multiple ADC channels with timing and storage.
 
-::: needs-diagram
-Data acquisition showing:
-- Multiple ADC channels
-- Sample timing
-- Buffer management
-:::
+```{=latex}
+\DataAcquisitionDiagram
+```
 
 ::: spin2
 ```
@@ -4320,13 +5538,9 @@ PUB process_data() | chan, sample, min, max, avg
 
 Create a multi-protocol communication system.
 
-::: needs-diagram
-Communication hub showing:
-- Multiple UART channels
-- SPI interface
-- I2C interface
-- Protocol routing
-:::
+```{=latex}
+\CommunicationHubDiagram
+```
 
 ::: spin2
 ```
@@ -4399,12 +5613,9 @@ PRI process_spi_message(data)
 
 Create a system where multiple inputs are sampled simultaneously.
 
-::: needs-diagram
-Synchronized sampling showing:
-- Sample trigger
-- Simultaneous capture
-- Data alignment
-:::
+```{=latex}
+\SynchronizedSamplingDiagram
+```
 
 ::: spin2
 ```
@@ -4534,22 +5745,32 @@ PUB precise_timing() | start_time
 
 ::: spin2
 ```
-' High latency - polling approach
-PUB high_latency()
+' Standard Spin2 approach - polling
+PUB standard_receive() | data
   repeat
-    if pinr(pin) & $80000000
+    if pinr(pin)                  ' Check IN flag
       data := rdpin(pin)
       process(data)
 
-' Low latency - interrupt approach
-PUB low_latency()
-  ' Configure interrupt on Smart Pin
-  setse1(##%01 << 6 | pin)     ' Event on pin IN rising
-
+' Tighter polling loop for lower latency
+PUB tight_polling() | data
   repeat
-    waitse1()                   ' Wait for Smart Pin event
+    repeat until pinr(pin)        ' Dedicated wait
     data := rdpin(pin)
     process(data)
+```
+:::
+
+For absolute minimum latency, use PASM2 with the event system:
+
+::: pasm2
+```
+                ' Zero-latency wake using events
+                setse1  #%001 << 6 + pin      ' Event on IN rising
+.loop           waitse1                        ' Sleep until event
+                rdpin   data, #pin
+                call    #process
+                jmp     #.loop
 ```
 :::
 
@@ -4651,13 +5872,9 @@ Let's build complete, practical applications using Smart Pins.
 
 ### Digital Oscilloscope
 
-::: needs-diagram
-Oscilloscope architecture showing:
-- Input conditioning
-- ADC sampling
-- Trigger detection
-- Display output
-:::
+```{=latex}
+\OscilloscopeArchDiagram
+```
 
 ::: spin2
 ```
@@ -4776,13 +5993,9 @@ PRI lookup(delta) : multiplier
 
 ### Complete Robot Controller
 
-::: needs-diagram
-Robot system architecture showing:
-- Motor control
-- Sensor inputs
-- Communication
-- Navigation logic
-:::
+```{=latex}
+\RobotSystemDiagram
+```
 
 ::: spin2
 ```
@@ -4906,9 +6119,9 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 
 Now let's create a complete data acquisition and control system that showcases the full power of Smart Pins working together.
 
-::: needs-diagram
-Complete system architecture showing all subsystems and interconnections
-:::
+```{=latex}
+\CompleteSystemDiagram
+```
 
 ::: spin2
 ```
