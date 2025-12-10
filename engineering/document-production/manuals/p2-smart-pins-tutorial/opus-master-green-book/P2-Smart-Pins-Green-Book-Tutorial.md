@@ -269,7 +269,7 @@ And for quick pin testing (TESTP instruction):
 - Synchronizing with external hardware
 - Creating precise timing patterns
 
-> 📘 **Need exact timing?** See Appendix A's "Pin Timing Specifications" for clock-by-clock details essential for high-speed protocols.
+> **Note:** Need exact timing? See Appendix A's "Pin Timing Specifications" for clock-by-clock details essential for high-speed protocols.
 
 ### 0.4 The Pattern Behind Pin Instructions
 
@@ -293,7 +293,7 @@ Now that you've mastered the essential four, let's understand the full pattern. 
 - **RND** - Random value (useful for testing)
 - **NOT** - Invert current state - *Occasionally useful*
 
-This gives us 4 × 8 = 32 instructions, but remember: **You'll use the L and H variants 95% of the time!**
+This gives us $4 \times 8 = 32$ instructions, but remember: **You'll use the L and H variants 95% of the time!**
 
 Here's a practical example using the NOT variant:
 
@@ -457,7 +457,7 @@ For your convenience, here's the complete basic I/O instruction set in both lang
 - **Spin2**: Use loops with pin methods, or direct register access `OUTA := value`
 - **PASM2**: Use `ADDPINS n` suffix to control consecutive pins
 
-> 💡 **Tip**: This table covers 90% of your basic I/O needs. The other variants (C, NC, Z, NZ, RND) are in Appendix F for when you need them.
+> **Tip:** This table covers 90% of your basic I/O needs. The other variants (C, NC, Z, NZ, RND) are in Appendix F for when you need them.
 
 ## Chapter 1: The Smart Pin Revolution
 
@@ -691,19 +691,12 @@ configure_smart_pin
 ```
 :::
 
-### Understanding the Mode Register
+### Understanding the Mode Register (WRPIN D Parameter)
 
 The mode register (written with WRPIN) is 32 bits of configuration magic. The register layout controls both the Smart Pin mode and the pin's electrical characteristics.
 
 ```{=latex}
 \WRPINFormatDiagram
-```
-
-```
-Bits 31..14: Pin configuration (input, output, drive strength)
-Bits 13..8:  Digital filtering
-Bits 7..6:   Output control
-Bits 5..0:   Smart Pin mode (%MMMMMM)
 ```
 
 But here's the beautiful part - Spin2 provides constants for everything:
@@ -829,20 +822,10 @@ if rqpin(serial_pin) & $100    ' Check if byte available
 
 Here's where Smart Pins get really powerful - each Smart Pin has TWO independent input selectors (A and B) that can monitor any nearby pin!
 
-**Understanding the WRPIN D Parameter Format**
+**The D Parameter Bit Fields**
 
 ```{=latex}
 \WRPINFormatDiagram
-```
-
-```
-%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
- │    │    │   │              │  └── Mode (5 bits)
- │    │    │   │              └── DIR/OUT control (2 bits)
- │    │    │   └── Low-level control M bits (13 bits)
- │    │    └── Filter selection (3 bits)
- │    └── B-input selector (4 bits)
- └── A-input selector (4 bits)
 ```
 
 **Why A/B Routing Matters**
@@ -1334,7 +1317,7 @@ CON
   NOISE_PIN = 20
 
 PUB dac_noise_demo()
-  ' Configure DAC noise mode with 990Ω/3.3V output
+  ' Configure DAC noise mode with 990$\Omega$/3.3V output
   pinstart(NOISE_PIN, P_DAC_NOISE | P_DAC_990R_3V | P_OE, 0, 0)
 
   ' Output runs continuously - nothing more to do
@@ -1378,7 +1361,7 @@ The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capa
 
 - Generating analog voltages
 - Audio output (use PRNG dithering)
-- Video generation (75Ω mode with PWM dithering)
+- Video generation (75$\Omega$ mode with PWM dithering)
 - Control voltages for external circuits
 - Sensor simulation
 
@@ -1427,10 +1410,10 @@ When OUT is high, the internal ADC is enabled. Use RDPIN/RQPIN to retrieve the 1
 **Drive Strength/Voltage Configuration Constants (set via M bits):**
 | Constant | Impedance | Voltage | Use Case |
 |----------|-----------|---------|----------|
-| P_DAC_990R_3V | 990Ω | 3.3V | General purpose, low current |
-| P_DAC_600R_2V | 600Ω | 2.0V | Moderate drive |
-| P_DAC_124R_3V | 124Ω | 3.3V | Higher current, fast response |
-| P_DAC_75R_2V | 75Ω | 2.0V | Video output (75Ω termination) |
+| P_DAC_990R_3V | 990$\Omega$ | 3.3V | General purpose, low current |
+| P_DAC_600R_2V | 600$\Omega$ | 2.0V | Moderate drive |
+| P_DAC_124R_3V | 124$\Omega$ | 3.3V | Higher current, fast response |
+| P_DAC_75R_2V | 75$\Omega$ | 2.0V | Video output (75$\Omega$ termination) |
 
 **Configuration Example:**
 
@@ -1440,7 +1423,7 @@ CON
   DAC_PIN = 16
 
 PUB dac_demo() | level
-  ' Configure DAC with PRNG dithering and 3.3V/124Ω output
+  ' Configure DAC with PRNG dithering and 3.3V/124$\Omega$ output
   ' Mode = P_DAC_DITHER_RND, Drive = P_DAC_124R_3V
   pinstart(DAC_PIN, P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE, 0, 0)
 
@@ -1454,7 +1437,7 @@ PUB dac_demo() | level
       waitus(100)
 
 PUB video_dac_setup()
-  ' Configure DAC for video output (75Ω, 2.0V, PWM dithering)
+  ' Configure DAC for video output (75$\Omega$, 2.0V, PWM dithering)
   pinstart(VIDEO_PIN, P_DAC_DITHER_PWM | P_DAC_75R_2V | P_OE, 0, 0)
 ```
 :::
@@ -1480,7 +1463,7 @@ PUB sine_wave_output() | angle
 ```
 dac_setup
         dirl    #DAC_PIN
-        ' PRNG dithering + 124Ω/3.3V drive + output enable
+        ' PRNG dithering + 124$\Omega$/3.3V drive + output enable
         wrpin   ##P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE, #DAC_PIN
         dirh    #DAC_PIN
 
@@ -1586,7 +1569,7 @@ PUB single_pulse(width_us)
 
 **Complete PASM2 Pulse Example:**
 
-This example generates 16 logic-1 pulses at 25 MHz system clock (60µs pulse, 20µs low):
+This example generates 16 logic-1 pulses at 25 MHz system clock (60$\mu$s pulse, 20$\mu$s low):
 
 ::: pasm2
 ```
@@ -1607,7 +1590,7 @@ This example generates 16 logic-1 pulses at 25 MHz system clock (60µs pulse, 20
 pulse_config    long    P_PULSE | P_OE | P_TT_10
 cycles          long    $0010                   ' 16 pulses
 ' X[31:16]=$01F4 (500 clks), X[15:0]=$05DC (1500 clks)
-' At 25MHz: 60µs high, 20µs low per cycle
+' At 25MHz: 60$\mu$s high, 20$\mu$s low per cycle
 pulse_timing    long    $01F4_05DC
 ```
 :::
@@ -1753,20 +1736,19 @@ The phase accumulator overflows at a rate determined by the increment value, pro
 **Output Behavior:**
 
 - Pin output reflects Z[31] bit state
-- IN flag rises whenever Z overflows (Z > 2³²)
+- IN flag rises whenever Z overflows ($Z > 2^{32}$)
 - Higher Y values = higher output frequency
 
 **Frequency Calculation:**
-```
-Base Frequency = System Clock / X[15:0]
-Output Frequency = (Y × Base Frequency) / 2³²
-```
+$$\text{Base Frequency} = \frac{\text{System Clock}}{X[15:0]}$$
+
+$$\text{Output Frequency} = \frac{Y \times \text{Base Frequency}}{2^{32}}$$
 
 For direct system clock operation (X=1):
-```
-Output Frequency = (Y × System Clock) / 2³²
-Y = (Desired Frequency × 2³²) / System Clock
-```
+
+$$\text{Output Frequency} = \frac{Y \times \text{System Clock}}{2^{32}}$$
+
+$$Y = \frac{\text{Desired Frequency} \times 2^{32}}{\text{System Clock}}$$
 
 This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Z is cleared to zero.
 
@@ -1885,13 +1867,13 @@ Unlike NCO Frequency mode which generates 50% duty, NCO Duty allows independent 
 
 **Timing Control:**
 
-- Pulse width = System Clock Period × X[15:0]
-- Pulse period = 2³² / Y (in base period units)
+- Pulse width = System Clock Period $\times$ X[15:0]
+- Pulse period = $2^{32} / Y$ (in base period units)
 
-**Worked Example: 1µs pulse every 18µs at 25 MHz:**
+**Worked Example: 1$\mu$s pulse every 18$\mu$s at 25 MHz:**
 
-1. For 1µs pulse width: X[15:0] = 25 (25 MHz ÷ 25 = 1µs base period)
-2. For 18µs period: Y = 2³² ÷ 18 = 238,609,294 = $0E38_E38E
+1. For 1$\mu$s pulse width: X[15:0] = 25 (25 MHz $\div$ 25 = 1$\mu$s base period)
+2. For 18$\mu$s period: $Y = 2^{32} \div 18 = 238,609,294$ = \$0E38\_E38E
 
 The IN flag rises whenever Z overflows. This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Z is cleared to zero.
 
@@ -1926,7 +1908,7 @@ PUB breathing_led() | brightness
 
 **Complete PASM2 NCO Duty Example:**
 
-This example generates 1µs pulses every 18µs at 25 MHz:
+This example generates 1$\mu$s pulses every 18$\mu$s at 25 MHz:
 
 ::: pasm2
 ```
@@ -1934,7 +1916,7 @@ This example generates 1µs pulses every 18µs at 25 MHz:
                 org     0
                 dirl    #20                     ' Reset Smart Pin at P20
                 wrpin   nco_duty_cfg, #20       ' NCO duty mode
-                wxpin   #25, #20                ' X=25: 1µs (25MHz/25)
+                wxpin   #25, #20                ' X=25: 1$\mu$s (25MHz/25)
                 dirh    #20                     ' Enable Smart Pin
                 wypin   y_period, #20           ' Load period value
 
@@ -1943,7 +1925,7 @@ This example generates 1µs pulses every 18µs at 25 MHz:
 
 ' P_NCO_DUTY | P_OE = %0000_0000_000_0000_000000000_01_00111_0
 nco_duty_cfg    long    P_NCO_DUTY | P_OE
-y_period        long    $0E38_E38E              ' 2^32/18 = 18µs period
+y_period        long    $0E38_E38E              ' 2^32/18 = 18$\mu$s period
 ```
 :::
 
@@ -1988,20 +1970,20 @@ The symmetric counting produces centered pulses with reduced harmonic content:
 | Y[15:0] | PWM threshold (0 to frame period). Captured at each frame start. |
 
 **Counter Operation:**
-The counter counts from frame period down to 1, then from 1 back up to frame period. When counter ≤ Y, output is HIGH; when counter > Y, output is LOW.
+The counter counts from frame period down to 1, then from 1 back up to frame period. When counter $\leq$ Y, output is HIGH; when counter $>$ Y, output is LOW.
 
 **Timing:**
 
-- Base period = System Clock Period × X[15:0]
-- Frame period = Base period × X[31:16]
-- **PWM period = 2 × Frame period** (due to up-down counting)
+- Base period = System Clock Period $\times$ X[15:0]
+- Frame period = Base period $\times$ X[31:16]
+- **PWM period = $2 \times$ Frame period** (due to up-down counting)
 
 **Worked Example at 25 MHz:**
 
 - X[15:0] = 1 (no division, 40ns base period)
-- X[31:16] = $200 (512)
-- Frame period = 40ns × 512 = 20.48µs
-- PWM period = 2 × 20.48µs = 40.96µs (~24.4 kHz)
+- X[31:16] = \$200 (512)
+- Frame period = 40ns $\times$ 512 = 20.48$\mu$s
+- PWM period = $2 \times 20.48$$\mu$s = 40.96$\mu$s (~24.4 kHz)
 
 **Duty Limits:**
 
@@ -2085,7 +2067,7 @@ This mode uses an up counter that resets when reaching the frame period; output 
 \SawtoothPWMDiagram
 ```
 
-Unlike Triangle mode, the PWM period equals the frame period (not 2×), providing edge-aligned PWM:
+Unlike Triangle mode, the PWM period equals the frame period (not $2\times$), providing edge-aligned PWM:
 
 | Register | Function |
 |----------|----------|
@@ -2094,12 +2076,12 @@ Unlike Triangle mode, the PWM period equals the frame period (not 2×), providin
 | Y[15:0] | PWM threshold (0 to frame period). Captured at each frame start. |
 
 **Counter Operation:**
-Counter counts from 1 up to frame period, then resets to 1. When counter ≤ Y, output is HIGH; when counter > Y, output is LOW. The IN flag rises at each frame reset.
+Counter counts from 1 up to frame period, then resets to 1. When counter $\leq$ Y, output is HIGH; when counter $>$ Y, output is LOW. The IN flag rises at each frame reset.
 
 **Key Difference from Triangle:**
 
 - **Sawtooth:** PWM period = Frame period (up count only)
-- **Triangle:** PWM period = 2 × Frame period (up-down count)
+- **Triangle:** PWM period = $2 \times$ Frame period (up-down count)
 
 **Duty Limits:**
 
@@ -2200,8 +2182,8 @@ This specialized mode provides PWM control for switch-mode power supplies with i
 A counter updates at each base period, counting from one up to the frame period. At each base period:
 
 1. The captured output value (Y[15:0]) is compared to the counter
-2. If output value ≥ counter, output is HIGH
-3. If output value < counter, output is LOW
+2. If output value $\geq$ counter, output is HIGH
+3. If output value $<$ counter, output is LOW
 
 After the counter reaches the frame period, the 'A' input is sampled at each base period until it reads LOW. When 'A' reads LOW:
 
@@ -2249,8 +2231,8 @@ PUB smps_controller() | duty
   ' A-input is same pin by default (voltage sense)
   duty := 50                    ' 50% initial duty cycle
 
-  ' X[15:0]=200 (1µs base @ 200MHz)
-  ' X[31:16]=100 (100 base periods = 100µs frame = 10kHz PWM)
+  ' X[15:0]=200 (1$\mu$s base @ 200MHz)
+  ' X[31:16]=100 (100 base periods = 100$\mu$s frame = 10kHz PWM)
   pinstart(SMPS_PIN, P_PWM_SMPS | P_OE | P_PLUS1_B, $0064_00C8, duty)
 
   ' SMPS runs autonomously - feedback inputs control regulation
@@ -2278,7 +2260,7 @@ PUB smps_controller() | duty
 
 ' SMPS mode with B-input from P21: BBBB=%0001 (P_PLUS1_B), TT=%01 (P_OE)
 smps_cfg        long    P_PWM_SMPS | P_OE | P_PLUS1_B
-' X[15:0]=200 (1µs base @200MHz), X[31:16]=100 (100 periods=10kHz)
+' X[15:0]=200 (1$\mu$s base @200MHz), X[31:16]=100 (100 periods=10kHz)
 x_regdata       long    $0064_00C8
 ' Y[15:0]=50 (50% initial duty)
 y_regdata       long    $0000_0032
@@ -2292,15 +2274,15 @@ With seven different output generation modes available, how do you pick the righ
 
 **Output Generation Modes Overview**
 
-| Mode | Constant | X Register | Y Register | Output Behavior |
-|------|----------|------------|------------|-----------------|
-| %00100 | P_PULSE | Base period | High/low times | Single or continuous pulses |
-| %00101 | P_TRANSITION | Toggle period | (unused) | State change at intervals |
-| %00110 | P_NCO_FREQ | Frequency word | (unused) | Precise frequency synthesis |
-| %00111 | P_NCO_DUTY | Frequency word | Duty threshold | Frequency + duty control |
-| %01000 | P_PWM_TRIANGLE | Period/2 | Duty value | Symmetric PWM (phase-correct) |
-| %01001 | P_PWM_SAWTOOTH | Period | Duty value | Standard PWM (fast) |
-| %01010 | P_PWM_SMPS | Base/Frame period | Duty threshold | SMPS with V/I feedback |
+| Constant | X Register | Y Register | Output Behavior |
+|----------|------------|------------|-----------------|
+| P_PULSE | Base period | High/low times | Single or continuous pulses |
+| P_TRANSITION | Toggle period | (unused) | State change at intervals |
+| P_NCO_FREQ | Frequency word | (unused) | Precise frequency synthesis |
+| P_NCO_DUTY | Frequency word | Duty threshold | Frequency + duty control |
+| P_PWM_TRIANGLE | Period/2 | Duty value | Symmetric PWM (phase-correct) |
+| P_PWM_SAWTOOTH | Period | Duty value | Standard PWM (fast) |
+| P_PWM_SMPS | Base/Frame period | Duty threshold | SMPS with V/I feedback |
 
 **P_PULSE vs P_TRANSITION: When to Use Each**
 
@@ -2340,7 +2322,7 @@ Both use Numerically Controlled Oscillator (NCO) for precise frequency generatio
 
 **P_NCO_FREQ (%00110):**
 
-- Output frequency = (X × ClockFreq) / 2^32
+- Output frequency = $(X \times \text{ClockFreq}) / 2^{32}$
 - 50% duty cycle always
 - Resolution: Sub-Hz precision at any frequency
 - Best for: Clocks, carriers, audio tones, DDS applications
@@ -2372,7 +2354,7 @@ Both generate PWM, but with different counter behavior:
 
 - Counter counts UP to X, then DOWN to 0
 - Output changes state when counter crosses Y
-- Period = 2 × X clocks
+- Period = $2 \times X$ clocks
 - Symmetric switching (phase-correct)
 - Best for: Audio DAC, motor H-bridges, reduced EMI
 
@@ -2392,7 +2374,7 @@ Both generate PWM, but with different counter behavior:
 ' SAWTOOTH: Period = X = 10,000 clocks
 pinstart(pin, P_PWM_SAWTOOTH | P_OE, 10_000, 5_000)
 
-' TRIANGLE: Period = 2×X, so X = 5,000 clocks
+' TRIANGLE: Period = 2*X, so X = 5,000 clocks
 pinstart(pin, P_PWM_TRIANGLE | P_OE, 5_000, 2_500)
 ```
 :::
@@ -2408,24 +2390,8 @@ pinstart(pin, P_PWM_TRIANGLE | P_OE, 5_000, 2_500)
 
 **Decision Flowchart: Selecting an Output Mode**
 
-```
-Need to generate an output signal?
-│
-├─► Need precise frequency (sub-Hz resolution)?
-│   └─► P_NCO_FREQ (50% duty) or P_NCO_DUTY (variable duty)
-│
-├─► Need asymmetric pulse widths (different high/low times)?
-│   └─► P_PULSE
-│
-├─► Need simple clock/square wave generation?
-│   └─► P_TRANSITION
-│
-├─► Need PWM for motor/LED control?
-│   ├─► Phase-correct (audio, H-bridge)? → P_PWM_TRIANGLE
-│   └─► Standard PWM (fast response)? → P_PWM_SAWTOOTH
-│
-└─► Need power supply control with current feedback?
-    └─► P_PWM_SMPS
+```{=latex}
+\OutputModeFlowchart
 ```
 
 **Same Frequency, Different Modes: A Practical Example**
@@ -2453,7 +2419,7 @@ PUB compare_modes()
     _clkfreq / TARGET_FREQ, _clkfreq / TARGET_FREQ / 2)
 
   ' Method 4: PWM_TRIANGLE - Phase-correct PWM
-  ' Period = 2 × 10,000 = 20,000 clocks
+  ' Period = 2 * 10,000 = 20,000 clocks
   pinstart(23, P_PWM_TRIANGLE | P_OE, ...
     _clkfreq / TARGET_FREQ / 2, _clkfreq / TARGET_FREQ / 4)
 ```
@@ -2486,13 +2452,13 @@ This mode decodes quadrature encoder signals for position and rotation sensing. 
 
 **How It Works:**
 
-The Smart Pin monitors two input signals (A and B) that are 90° out of phase, counting transitions to track position and direction.
+The Smart Pin monitors two input signals (A and B) that are $90^\circ$ out of phase, counting transitions to track position and direction.
 
 ```{=latex}
 \QuadEncoderDiagram
 ```
 
-The decoder watches both edges of both signals, providing 4× resolution compared to single-edge counting:
+The decoder watches both edges of both signals, providing $4\times$ resolution compared to single-edge counting:
 
 **Register Configuration:**
 
@@ -2511,7 +2477,7 @@ The BBBB field in the mode control word selects the pin for the B signal. For ex
 **Continuous Mode (X = 0):**
 The Z register continuously tracks the net quadrature count. Read the current position at any time with RDPIN or RQPIN. This mode works like a totalizer with no period boundaries.
 
-**Periodic Mode (X ≠ 0):**
+**Periodic Mode (X $\neq$ 0):**
 Quadrature steps are counted for X clock cycles. At the end of each period:
 
 - The result is placed in Z
@@ -2520,17 +2486,20 @@ Quadrature steps are counted for X clock cycles. At the end of each period:
 
 This design ensures no counts are lost across measurement boundaries. If a transition occurs exactly at the period boundary, it is added to the next period's count.
 
-**4× Counting:**
+**$4\times$ Counting:**
 
 A quadrature encoder produces four logic transitions per mechanical "click" of the shaft—two on the A input and two on the B input. The Smart Pin counts all four transitions. To obtain counts per click, use an arithmetic shift right by 2 bits:
 
+::: pasm2
 ```
-sar count, #2   ' Divide by 4, preserve sign
+' Fragment - not standalone code
+                sar       count, #2             ' Divide by 4, preserve sign
 ```
+:::
 
 **Position + Velocity Configuration:**
 
-Configure both A and B pins to quadrature mode: one continuous (X=0) for absolute position tracking, the other periodic (X≠0) for velocity measurement. Both pins track the same encoder but report different information.
+Configure both A and B pins to quadrature mode: one continuous (X=0) for absolute position tracking, the other periodic (X$\neq$0) for velocity measurement. Both pins track the same encoder but report different information.
 
 **Zeroing the Count:**
 
@@ -2651,7 +2620,7 @@ The count increments only on A-input positive edges that occur while the B input
 **Continuous Mode (X = 0):**
 The Z register continuously accumulates gated edge counts. Read the current count at any time with RDPIN or RQPIN.
 
-**Periodic Mode (X ≠ 0):**
+**Periodic Mode (X $\neq$ 0):**
 Gated edges are counted for X clock cycles. At the end of each period:
 
 - The result is placed in Z
@@ -2751,7 +2720,7 @@ The B input state may change at any time. The direction is sampled at each A-inp
 **Continuous Mode (X = 0):**
 The Z register continuously tracks the net count (increments minus decrements). Read the current value at any time with RDPIN or RQPIN.
 
-**Periodic Mode (X ≠ 0):**
+**Periodic Mode (X $\neq$ 0):**
 Edges are counted for X clock cycles. At the end of each period:
 
 - The net result is placed in Z
@@ -2861,7 +2830,7 @@ Both inputs operate independently—an A-rise and B-rise can occur in any order.
 **Continuous Mode (X = 0):**
 The Z register continuously tracks the count. Read the current value at any time with RDPIN or RQPIN.
 
-**Periodic Mode (X ≠ 0):**
+**Periodic Mode (X $\neq$ 0):**
 Events are counted for X clock cycles. At the end of each period:
 
 - The result is placed in Z
@@ -2972,7 +2941,7 @@ If both A and B are HIGH simultaneously, the increments and decrements cancel ou
 **Continuous Mode (X = 0):**
 The Z register continuously tracks the accumulated high time. Read the current value at any time with RDPIN or RQPIN.
 
-**Periodic Mode (X ≠ 0):**
+**Periodic Mode (X $\neq$ 0):**
 High time is accumulated for X clock cycles. At the end of each period:
 
 - The result is placed in Z
@@ -3504,19 +3473,22 @@ For modes other than SINC2 Sampling (X[5:4] > %00), use WYPIN to set an arbitrar
 
 The accumulators are 27 bits wide. For correct 32-bit math, either prescale or post-trim:
 
+::: pasm2
 ```
+' Fragment - not standalone code
 ' Prescale method:
-RDPIN   x, #adcpin        ' Get SINC2 accumulator
-SHL     x, #5             ' Prescale 27-bit to 32-bit
-SUB     x, diff           ' Compute sample
-ADD     diff, x           ' Update diff value
+                rdpin     x, #adcpin            ' Get SINC2 accumulator
+                shl       x, #5                 ' Prescale 27-bit to 32-bit
+                sub       x, diff               ' Compute sample
+                add       diff, x               ' Update diff value
 
 ' Post-trim method:
-RDPIN   x, #adcpin        ' Get SINC2 accumulator
-SUB     x, diff           ' Compute sample
-ADD     diff, x           ' Update diff value
-ZEROX   x, #26            ' Trim to 27-bit
+                rdpin     x, #adcpin            ' Get SINC2 accumulator
+                sub       x, diff               ' Compute sample
+                add       diff, x               ' Update diff value
+                zerox     x, #26                ' Trim to 27-bit
 ```
+:::
 
 ::: spin2
 ```
@@ -3539,7 +3511,7 @@ PUB adc_14bit_precision(pin) : value
   ' High precision 14-bit ADC using SINC2 at 8192 clocks
   pinstart(pin, P_ADC | P_ADC_1X, %00_1101, 0)
 
-  repeat until pinr(pin)       ' Wait for sample (~41µs at 200MHz)
+  repeat until pinr(pin)       ' Wait for sample (~41$\mu$s at 200MHz)
   value := rdpin(pin)
 
 PUB continuous_adc() | voltage
@@ -3698,11 +3670,15 @@ WYPIN data always goes to the buffer first. During reset, data flows immediately
 **MSB-First Transmission:**
 
 Data shifts out LSB first by default. For MSB-first:
+
+::: pasm2
 ```
-SHL   data, #32-8    ' Shift 8-bit value into D[31:24]
-REV   data           ' Reverse all bits
-' Now LSB-first transmission sends MSB-first
+' Fragment - not standalone code
+                shl       data, #32-8           ' Shift 8-bit value into D[31:24]
+                rev       data                  ' Reverse all bits
+                ' Now LSB-first transmission sends MSB-first
 ```
+:::
 
 **Reset Behavior:**
 
@@ -3721,7 +3697,7 @@ PUB sync_tx_8bit(data)
   ' Use separate transition mode pin for clock
   pinstart(CLK_PIN, P_TRANSITION | P_OE, $1000, 0)
 
-  ' Trigger 16 clock edges (8 data bits × 2)
+  ' Trigger 16 clock edges (8 data bits * 2)
   wypin(CLK_PIN, 16)
 ```
 :::
@@ -3776,17 +3752,25 @@ Receives 1 to 32 bits synchronized with an external clock. Data shifts in LSB fi
 **Left-Justified Data:**
 
 Received data is left-justified with MSB in bit 31. For 8-bit data, right-shift by 24:
+
+::: pasm2
 ```
-SHR   data, #24    ' Move 8-bit LSB to D[7:0]
+' Fragment - not standalone code
+                shr       data, #24             ' Move 8-bit LSB to D[7:0]
 ```
+:::
 
 **MSB-First Reception:**
 
 If sender transmits MSB-first, reverse and trim after receiving:
+
+::: pasm2
 ```
-REV    data          ' Reverse all 32 bits
-TRIML  data, #8      ' Keep only low 8 bits
+' Fragment - not standalone code
+                rev       data                  ' Reverse all 32 bits
+                triml     data, #8              ' Keep only low 8 bits
 ```
+:::
 
 **IN Flag Behavior:**
 
@@ -3844,9 +3828,8 @@ Transmit 1 to 32 data bits at a programmable baud rate. Each transmission automa
 
 **Frame Format:**
 
-```
-IDLE  START  D0  D1  D2  D3  D4  D5  D6  D7  STOP  IDLE
- 1     0     ←───── 8 data bits LSB first ─────→   1     1
+```{=latex}
+\UARTFrameDiagram
 ```
 
 **X Register Configuration:**
@@ -3859,14 +3842,11 @@ IDLE  START  D0  D1  D2  D3  D4  D5  D6  D7  STOP  IDLE
 
 **Baud Rate Calculation:**
 
-```
-clocks_per_bit = system_clock_frequency / baud_rate
-```
+$$\text{clocks\_per\_bit} = \frac{\text{system\_clock\_frequency}}{\text{baud\_rate}}$$
 
 For 200 MHz system clock at 115,200 baud:
-```
-200,000,000 / 115,200 = 1736.1 clocks/bit
-```
+
+$$\frac{200{,}000{,}000}{115{,}200} = 1736.1 \text{ clocks/bit}$$
 
 **X Register Value:**
 
@@ -5556,7 +5536,7 @@ PUB position_control(target_pos) | current_pos, error, output
 
     ' Simple proportional control
     output := error * KP / 100
-    output := output #> -100 <# 100  ' Limit to ±100%
+    output := output #> -100 <# 100  ' Limit to +/-100%
 
     ' Set direction and speed
     if output < 0
@@ -6371,40 +6351,40 @@ PRI measure_response_latency() | start, latency
 
 ### Quick Reference Table
 
-| Mode | Binary | Constant | Name | Primary Use |
-|------|--------|----------|------|-------------|
-| %00000 | 00000 | P_NORMAL | Normal (Pass-through) | Disable Smart Pin mode |
-| %00001 | 00001 | P_REPOSITORY | Repository/DAC Noise | Shared storage or DAC noise |
-| %00010 | 00010 | P_DAC_DITHER_RND | DAC 16-bit PRNG Dither | Analog output with random dither |
-| %00011 | 00011 | P_DAC_DITHER_PWM | DAC 16-bit PWM Dither | Analog output with PWM dither |
-| %00100 | 00100 | P_PULSE | Pulse/Cycle Output | Pulse generation |
-| %00101 | 00101 | P_TRANSITION | Transition Output | State transitions at intervals |
-| %00110 | 00110 | P_NCO_FREQ | NCO Frequency | Frequency synthesis |
-| %00111 | 00111 | P_NCO_DUTY | NCO Duty | Frequency with duty control |
-| %01000 | 01000 | P_PWM_TRIANGLE | PWM Triangle | Phase-correct PWM (symmetric) |
-| %01001 | 01001 | P_PWM_SAWTOOTH | PWM Sawtooth | Standard PWM (ramp-reset) |
-| %01010 | 01010 | P_PWM_SMPS | PWM SMPS | Switch-mode power supply |
-| %01011 | 01011 | P_QUADRATURE | Quadrature Encoder | A/B encoder input |
-| %01100 | 01100 | P_REG_UP | Count A-rises (B-high) | Conditional pulse counting |
-| %01101 | 01101 | P_REG_UP_DOWN | Count A-rise, inc/dec B | Step/direction counting |
-| %01110 | 01110 | P_COUNT_RISES | Count A-edges | Edge counting with B-dec option |
-| %01111 | 01111 | P_COUNT_HIGHS | Count A-high or A&B-high | State counting/comparison |
-| %10000 | 10000 | P_STATE_TICKS | Time A-states | State duration measurement |
-| %10001 | 10001 | P_HIGH_TICKS | Time A-high states | High-state duration |
-| %10010 | 10010 | P_EVENTS_TICKS | Time X A-highs/rises/edges | Event timing |
-| %10011 | 10011 | P_PERIODS_TICKS | For X periods, count time | Period measurement |
-| %10100 | 10100 | P_PERIODS_HIGHS | For X periods, count states | Period state counting |
-| %10101 | 10101 | P_COUNTER_TICKS | For X clocks, count periods | Frequency counting |
-| %10110 | 10110 | P_COUNTER_HIGHS | For X clocks, count states | State frequency |
-| %10111 | 10111 | P_COUNTER_PERIODS | For X clocks, count time | Continuous timing |
-| %11000 | 11000 | P_ADC | ADC Sample/Filter (int clk) | Analog input, internal clock |
-| %11001 | 11001 | P_ADC_EXT | ADC Sample/Filter (ext clk) | Analog input, external clock |
-| %11010 | 11010 | P_ADC_SCOPE | ADC Scope with Trigger | Triggered analog capture |
-| %11011 | 11011 | P_USB_PAIR | USB Host/Device (pair) | USB communication |
-| %11100 | 11100 | P_SYNC_TX | Synchronous Serial TX | SPI/synchronous transmit |
-| %11101 | 11101 | P_SYNC_RX | Synchronous Serial RX | SPI/synchronous receive |
-| %11110 | 11110 | P_ASYNC_TX | Asynchronous Serial TX | UART transmit |
-| %11111 | 11111 | P_ASYNC_RX | Asynchronous Serial RX | UART receive |
+| Mode | Constant | Name | Primary Use |
+|------|----------|------|-------------|
+| %00000 | P_NORMAL | Normal (Pass-through) | Disable Smart Pin mode |
+| %00001 | P_REPOSITORY | Repository/DAC Noise | Shared storage or DAC noise |
+| %00010 | P_DAC_DITHER_RND | DAC 16-bit PRNG Dither | Analog output with random dither |
+| %00011 | P_DAC_DITHER_PWM | DAC 16-bit PWM Dither | Analog output with PWM dither |
+| %00100 | P_PULSE | Pulse/Cycle Output | Pulse generation |
+| %00101 | P_TRANSITION | Transition Output | State transitions at intervals |
+| %00110 | P_NCO_FREQ | NCO Frequency | Frequency synthesis |
+| %00111 | P_NCO_DUTY | NCO Duty | Frequency with duty control |
+| %01000 | P_PWM_TRIANGLE | PWM Triangle | Phase-correct PWM (symmetric) |
+| %01001 | P_PWM_SAWTOOTH | PWM Sawtooth | Standard PWM (ramp-reset) |
+| %01010 | P_PWM_SMPS | PWM SMPS | Switch-mode power supply |
+| %01011 | P_QUADRATURE | Quadrature Encoder | A/B encoder input |
+| %01100 | P_REG_UP | Count A-rises (B-high) | Conditional pulse counting |
+| %01101 | P_REG_UP_DOWN | Count A-rise, inc/dec B | Step/direction counting |
+| %01110 | P_COUNT_RISES | Count A-edges | Edge counting with B-dec option |
+| %01111 | P_COUNT_HIGHS | Count A-high or A&B-high | State counting/comparison |
+| %10000 | P_STATE_TICKS | Time A-states | State duration measurement |
+| %10001 | P_HIGH_TICKS | Time A-high states | High-state duration |
+| %10010 | P_EVENTS_TICKS | Time X A-highs/rises/edges | Event timing |
+| %10011 | P_PERIODS_TICKS | For X periods, count time | Period measurement |
+| %10100 | P_PERIODS_HIGHS | For X periods, count states | Period state counting |
+| %10101 | P_COUNTER_TICKS | For X clocks, count periods | Frequency counting |
+| %10110 | P_COUNTER_HIGHS | For X clocks, count states | State frequency |
+| %10111 | P_COUNTER_PERIODS | For X clocks, count time | Continuous timing |
+| %11000 | P_ADC | ADC Sample/Filter (int clk) | Analog input, internal clock |
+| %11001 | P_ADC_EXT | ADC Sample/Filter (ext clk) | Analog input, external clock |
+| %11010 | P_ADC_SCOPE | ADC Scope with Trigger | Triggered analog capture |
+| %11011 | P_USB_PAIR | USB Host/Device (pair) | USB communication |
+| %11100 | P_SYNC_TX | Synchronous Serial TX | SPI/synchronous transmit |
+| %11101 | P_SYNC_RX | Synchronous Serial RX | SPI/synchronous receive |
+| %11110 | P_ASYNC_TX | Asynchronous Serial TX | UART transmit |
+| %11111 | P_ASYNC_RX | Asynchronous Serial RX | UART receive |
 
 ## Appendix B: Complete Smart Pin Constants Reference
 
@@ -6414,22 +6394,9 @@ This appendix provides all Smart Pin-relevant P_ constants with their hex values
 
 The WRPIN D parameter (and PINSTART mode parameter) follows this 32-bit format:
 
+```{=latex}
+\WRPINFormatDiagram
 ```
-Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
-      AAAA   BBBB   FFF    MMMMMMMMMMMMM     TT     SSSSS  0
-      A-in   B-in   Filt   Low-Level         Dir/   Mode   (reserved)
-      route  route        Pin Control        Out
-```
-
-| Field | Bits | Purpose |
-|-------|------|---------|
-| AAAA | 31:28 | A-input source selection |
-| BBBB | 27:24 | B-input source selection |
-| FFF | 23:21 | Input filtering/logic |
-| M | 20:8 | Low-level pin control (13 bits) |
-| TT | 7:6 | DIR/OUT control |
-| SSSSS | 5:1 | Smart Pin mode (32 modes) |
-| bit 0 | 0 | Reserved (always 0) |
 
 ### Smart Pin Mode Constants (SSSSS Field)
 
@@ -6537,10 +6504,10 @@ Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
 
 | Constant | Hex | Impedance | Voltage | Use Case |
 |----------|-----|-----------|---------|----------|
-| P_DAC_990R_3V | $00000000 | 990Ω | 3.3V | General purpose |
-| P_DAC_600R_2V | $00010000 | 600Ω | 2.0V | Low voltage |
-| P_DAC_124R_3V | $00020000 | 124Ω | 3.3V | High current |
-| P_DAC_75R_2V | $00030000 | 75Ω | 2.0V | Video output (75Ω term) |
+| P_DAC_990R_3V | $00000000 | 990$\Omega$ | 3.3V | General purpose |
+| P_DAC_600R_2V | $00010000 | 600$\Omega$ | 2.0V | Low voltage |
+| P_DAC_124R_3V | $00020000 | 124$\Omega$ | 3.3V | High current |
+| P_DAC_75R_2V | $00030000 | 75$\Omega$ | 2.0V | Video output (75$\Omega$ term) |
 
 ### ADC Configuration Constants (M bits)
 
@@ -6569,8 +6536,8 @@ Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
 | P_HIGH_15K | $00000200 | 15K high drive |
 | P_HIGH_150K | $00000300 | 150K high drive |
 | P_HIGH_1MA | $00000400 | 1mA high drive |
-| P_HIGH_100UA | $00000500 | 100µA high drive |
-| P_HIGH_10UA | $00000600 | 10µA high drive |
+| P_HIGH_100UA | $00000500 | 100$\mu$A high drive |
+| P_HIGH_10UA | $00000600 | 10$\mu$A high drive |
 | P_HIGH_FLOAT | $00000700 | Float high |
 
 **Low-Side Drive:**
@@ -6582,8 +6549,8 @@ Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
 | P_LOW_15K | $00001000 | 15K low drive |
 | P_LOW_150K | $00001800 | 150K low drive |
 | P_LOW_1MA | $00002000 | 1mA low drive |
-| P_LOW_100UA | $00002800 | 100µA low drive |
-| P_LOW_10UA | $00003000 | 10µA low drive |
+| P_LOW_100UA | $00002800 | 100$\mu$A low drive |
+| P_LOW_10UA | $00003000 | 10$\mu$A low drive |
 | P_LOW_FLOAT | $00003800 | Float low |
 
 ### Combining Constants
@@ -6656,35 +6623,34 @@ pinstart(ADC_PIN, mode, 0, 0)
 ### Frequency Calculations
 
 **NCO Frequency:**
-```
-Frequency = (X * ClockFreq) / 2^32
-X = (Frequency * 2^32) / ClockFreq
-```
+
+$$\text{Frequency} = \frac{X \times \text{ClockFreq}}{2^{32}}$$
+
+$$X = \frac{\text{Frequency} \times 2^{32}}{\text{ClockFreq}}$$
 
 **PWM Frequency:**
-```
-PWM_Freq = ClockFreq / Period
-Period = ClockFreq / PWM_Freq
-```
+
+$$\text{PWM\_Freq} = \frac{\text{ClockFreq}}{\text{Period}}$$
+
+$$\text{Period} = \frac{\text{ClockFreq}}{\text{PWM\_Freq}}$$
 
 **Transition Rate:**
-```
-Toggle_Rate = ClockFreq / (2 * X)
-X = ClockFreq / (2 * Toggle_Rate)
-```
+
+$$\text{Toggle\_Rate} = \frac{\text{ClockFreq}}{2 \times X}$$
+
+$$X = \frac{\text{ClockFreq}}{2 \times \text{Toggle\_Rate}}$$
 
 ### Time Measurements
 
 **Pulse Width:**
-```
-Width_Seconds = Count / ClockFreq
-Width_Microseconds = Count / (ClockFreq / 1_000_000)
-```
+
+$$\text{Width\_Seconds} = \frac{\text{Count}}{\text{ClockFreq}}$$
+
+$$\text{Width\_Microseconds} = \frac{\text{Count}}{\text{ClockFreq} / 1{,}000{,}000}$$
 
 **Frequency from Count:**
-```
-Frequency = Count / Measurement_Time
-```
+
+$$\text{Frequency} = \frac{\text{Count}}{\text{Measurement\_Time}}$$
 
 ## Appendix D: Code Examples Summary
 
