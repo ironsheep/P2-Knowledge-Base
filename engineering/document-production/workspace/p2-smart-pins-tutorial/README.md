@@ -40,9 +40,10 @@ This changelog documents critical issues discovered during document production (
 
 **Rules:**
 - Always use the exact document name - no suffixes like `-escaped`, `-v2`, `-final`
-- The workspace copy is unescaped (source of truth)
+- The manuals copy is the canonical source (edit here)
+- The workspace copy is unescaped (production prep, copied from manuals)
 - The outbound copy is escaped (ready for Forge)
-- Both use the identical filename: `P2-Smart-Pins-Green-Book-Tutorial.md`
+- All three use the identical filename: `P2-Smart-Pins-Green-Book-Tutorial.md`
 - Never rename files - always replace in place
 
 ---
@@ -50,9 +51,12 @@ This changelog documents critical issues discovered during document production (
 ## Directory Structure
 
 ```
-workspace/p2-smart-pins-tutorial/     <- YOU ARE HERE (unescaped source)
+manuals/p2-smart-pins-tutorial/opus-master-green-book/  <- CANONICAL SOURCE (edit here)
+|-- P2-Smart-Pins-Green-Book-Tutorial.md  # Master document - all edits here
+
+workspace/p2-smart-pins-tutorial/     <- YOU ARE HERE (production prep)
 |-- README.md                         # This file
-|-- P2-Smart-Pins-Green-Book-Tutorial.md  # Master document (UNESCAPED)
+|-- P2-Smart-Pins-Green-Book-Tutorial.md  # Working copy (UNESCAPED, copied from manuals)
 |-- templates/
 |   |-- README.md                     # Template documentation
 |   |-- p2kb-sp-template.latex        # Main LaTeX template
@@ -99,7 +103,32 @@ outbound/p2-smart-pins-tutorial/      <- FLAT structure for PDF Forge
 
 ## PDF Forge Workflow
 
-### CRITICAL UNDERSTANDING: PDF Forge Persistence
+### CRITICAL: Three-Stage Document Pipeline
+
+```
+MANUALS (canonical source)     WORKSPACE (production prep)     OUTBOUND (staging)          PDF FORGE
+        |                              |                              |                          |
+   Edit content here           Copy/assemble here              Escaped files here        Persistent storage
+        |                              |                              |                          |
+        +---- copy or assemble ------->|                              |                          |
+                                       +---- latex-escape-all.sh ---->|                          |
+                                       + copy CHANGED templates/filters                          |
+                                                                      +---- User MOVES files --->|
+                                                                                                 |
+        <--------------------------------- User provides feedback -------------------------------+
+        |
+   Fix in manuals, repeat cycle
+```
+
+**Why three stages?**
+
+1. **manuals/opus-master-green-book/** - The canonical source. All content edits happen here. For complex documents, this may contain multiple .md files (chapters/parts) that need assembly.
+
+2. **workspace/** - Production preparation. The assembled, unescaped document ready for final prep. Some documents need filtering/transformation here (e.g., converting syntax). For this document, no filtering is needed—it's a straight copy.
+
+3. **outbound/** - Staging for PDF Forge. Contains escaped markdown and any changed templates/filters. User moves files from here to Forge.
+
+### PDF Forge Persistence
 
 **PDF Forge is a PERSISTENT system.** It retains ALL files from the last deployment indefinitely. This has major implications:
 
@@ -110,30 +139,23 @@ outbound/p2-smart-pins-tutorial/      <- FLAT structure for PDF Forge
 
 **Why outbound is often empty:** After user deploys to Forge, ALL files are moved out. This is NORMAL. It does NOT mean the Forge lost them - the Forge is persistent. An empty outbound just means nothing new needs to be sent.
 
-### Overview
-
-```
-WORKSPACE (unescaped)          OUTBOUND (staging)              PDF FORGE (persistent)
-        |                              |                               |
-   Edit files here            Stage ONLY changes here         Retains ALL files
-        |                              |                               |
-        +---- latex-escape-all.sh ---->|                               |
-              + copy CHANGED files     |                               |
-                                       +---- User MOVES files -------->|
-                                             (files DISAPPEAR          |
-                                              from outbound)           |
-                                                                       |
-        <------------------- User provides feedback -------------------+
-        |
-   Fix issues, repeat (only send what changed)
-```
-
 ### Step-by-Step Process
 
-#### 1. Edit in Workspace
-All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
+#### 1. Edit in Manuals (Canonical Source)
+All content edits happen in `manuals/p2-smart-pins-tutorial/opus-master-green-book/`. This is the canonical source of truth for the document content.
 
-#### 2. Stage ONLY Changed Files to Outbound
+#### 2. Copy to Workspace
+
+Copy the edited master from manuals to workspace:
+
+```bash
+cp ../../manuals/p2-smart-pins-tutorial/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial.md \
+   P2-Smart-Pins-Green-Book-Tutorial.md
+```
+
+**Note:** For this document, no additional filtering/transformation is needed—it's production-ready. Other documents may require syntax conversion or assembly of multiple files at this stage.
+
+#### 3. Escape to Outbound and Stage Changed Files
 
 **CRITICAL: Only stage files that CHANGED!**
 
@@ -146,8 +168,8 @@ PDF Forge already has every file from the last deployment. Ask yourself:
 # From the workspace folder:
 cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-smart-pins-tutorial
 
-# Run escape script for markdown (content usually changes each iteration)
-../../../tools/latex-escape-all.sh \
+# Escape markdown from workspace to outbound (content usually changes each iteration)
+/workspaces/P2-Knowledge-Base/engineering/tools/conversion/latex-escape-all.sh \
     P2-Smart-Pins-Green-Book-Tutorial.md \
     ../../outbound/p2-smart-pins-tutorial/P2-Smart-Pins-Green-Book-Tutorial.md
 
@@ -174,7 +196,7 @@ cp request.json ../../outbound/p2-smart-pins-tutorial/
 | `request.json` | Only if pandoc args or metadata changed |
 | `.png` (assets) | Only if new images added or images replaced |
 
-#### 3. User Deploys to PDF Forge
+#### 4. User Deploys to PDF Forge
 
 The user **MOVES** (not copies) files from `outbound/p2-smart-pins-tutorial/` to PDF Forge.
 
@@ -184,15 +206,17 @@ The user **MOVES** (not copies) files from `outbound/p2-smart-pins-tutorial/` to
 - Empty outbound = nothing new to send
 - DO NOT panic and re-copy everything
 
-#### 4. Feedback Loop
+#### 5. Feedback Loop
 
-- If PDF Forge reports errors -> User relays error messages -> Fix in workspace -> Stage ONLY the fixed files -> Repeat
-- If PDF generates successfully -> User provides visual feedback -> Fix in workspace -> Stage ONLY the fixed files -> Repeat
+- If PDF Forge reports errors -> User relays error messages -> Fix in manuals -> Copy to workspace -> Escape to outbound -> Repeat
+- If PDF generates successfully -> User provides visual feedback -> Fix in manuals -> Copy to workspace -> Escape to outbound -> Repeat
 - Continue until PDF is correct
 
 **Each iteration, only stage files you actually modified.** The Forge already has everything else.
 
-#### 5. Debugging with Generated .tex File
+**Note:** Template/filter fixes happen directly in workspace (they don't live in manuals). Only content fixes go through the full manuals→workspace→outbound pipeline.
+
+#### 6. Debugging with Generated .tex File
 
 After each PDF Forge run, the user will drop the generated `.tex` file into the outbound directory:
 ```
@@ -204,7 +228,7 @@ This intermediate LaTeX file is useful for:
 - Debugging rendering issues when user provides visual feedback
 - Finding the exact LaTeX that produced problematic output
 
-#### 6. Interactive Testing for Component Isolation
+#### 7. Interactive Testing for Component Isolation
 
 For debugging specific components (like individual TikZ diagrams), use PDF Forge's interactive testing system:
 
@@ -398,5 +422,5 @@ Required arguments are documented in `request-requirements.json`.
 ---
 
 *Created: 2025-09-10*
-*Updated: 2025-12-03 - Added interactive testing section for component isolation debugging*
+*Updated: 2025-12-10 - Clarified three-stage pipeline (manuals→workspace→outbound)*
 *Sprint: Smart Pins Tutorial Audit*
