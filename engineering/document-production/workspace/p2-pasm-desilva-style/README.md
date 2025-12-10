@@ -3,7 +3,7 @@
 **Purpose:** PDF production workspace for "Discovering P2 Assembly" - a pedagogical PASM2 tutorial.
 
 **Status:** Active - Content Development Phase
-**Content Source:** `../../manuals/p2-pasm-desilva-style/opus-master/`
+**Content Source:** `../../manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md`
 
 ---
 
@@ -11,11 +11,49 @@
 
 | Resource | Location |
 |----------|----------|
-| **Content (Opus Master)** | `../../manuals/p2-pasm-desilva-style/opus-master/` |
+| **Opus Master (edit here)** | `../../manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` |
 | **Creation Guide** | `../../manuals/p2-pasm-desilva-style/creation-guide.md` |
 | **Style Guide** | `../../manuals/p2-pasm-desilva-style/desilva-style-guide.md` |
 | **Escape Script** | `../../../tools/conversion/latex-escape-all.sh` |
 | **Outbound Folder** | `../../outbound/p2-pasm-desilva-style/` |
+
+---
+
+## Content Flow: Opus Master → Workspace → Outbound
+
+This manual uses a simplified 3-step workflow:
+
+```
+OPUS MASTER                    WORKSPACE                      OUTBOUND
+(source of truth)              (working copy)                 (PDF Forge ready)
+      │                              │                              │
+      │   1. Copy master             │                              │
+      └─────────────────────────────►│                              │
+                                     │   2. Escape for LaTeX        │
+                                     └─────────────────────────────►│
+                                                                    │
+                                                           3. User deploys
+                                                              to PDF Forge
+```
+
+**Step 1: Copy Master to Workspace**
+```bash
+cp ../../manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md \
+   P2-PASM-deSilva-Style.md
+```
+
+**Step 2: Escape and Stage to Outbound**
+```bash
+../../../tools/conversion/latex-escape-all.sh \
+    P2-PASM-deSilva-Style.md \
+    ../../outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
+```
+
+**Step 3: User deploys to PDF Forge** (manual step by user)
+
+### Historical Note
+
+Earlier manuals required additional transformations (division fixes, markdown cleanup) between the Opus Master and workspace. This manual's Opus Master is now PDF-ready, so only the copy and escape steps are needed.
 
 ---
 

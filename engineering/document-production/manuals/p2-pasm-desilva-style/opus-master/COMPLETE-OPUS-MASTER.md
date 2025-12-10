@@ -88,13 +88,6 @@ Under the following terms:
 
 To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
 
-### Acknowledgments
-
-This manual incorporates knowledge and teaching approaches inspired by:
-
-- **deSilva's P1 Assembly Tutorial** — The foundational pedagogical approach
-- **The Propeller Community** — Years of collective wisdom
-
 ### Trademarks
 
 Propeller, Propeller 2, P2, Spin, and the Parallax logo are trademarks of Parallax Inc.

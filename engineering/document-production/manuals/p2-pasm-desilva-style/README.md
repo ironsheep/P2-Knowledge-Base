@@ -43,24 +43,21 @@ This directory contains the complete specification for the De Silva PASM2 Manual
 - Recommendations for enhancement
 
 ### opus-master/
-- Chapters 1-6: Strong foundation to preserve
-- Original De Silva voice examples
-- Chapter flow and structure
-- Reference for regeneration
+- `COMPLETE-OPUS-MASTER.md` - The authoritative source of truth
+- Full 16 chapters with De Silva voice
+- Git-protected (version history provides safety)
 
 ## Workflow
 
-1. **Planning**: Review creation-guide.md for approach
-2. **Reference**: Check opus-master for foundation
-3. **Writing**: Follow creation-guide.md templates
-4. **Formatting**: Apply desilva-style-guide.md rules
-5. **Production**: Use workspace for active files
-6. **Deployment**: Stage in outbound directory
+1. **Edit**: Make changes in `opus-master/COMPLETE-OPUS-MASTER.md` (source of truth)
+2. **Copy**: Bring master to workspace as `P2-PASM-deSilva-Style.md`
+3. **Escape**: Run escape script, output to outbound
+4. **Deploy**: User moves outbound files to PDF Forge
 
 ## Important Notes
 
-- **DO NOT EDIT** opus-master files - they are reference only
-- **Workspace** is for active editing of manual parts
+- **Opus Master is the source of truth** - Edit here carefully, git provides version safety
+- **Workspace copy** is derived from the master (copy, don't edit independently)
 - **These specs** define the manual but aren't part of it
 - **Version together** - creation and style guides evolve as a pair
 
