@@ -2037,48 +2037,96 @@
 {\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
-% IN Flag
-\node[sp-label] at (-1.0, 4.0) {IN Flag};
-\draw[dashed, thin] (-0.3, 3.8) -- (6.5, 3.8);
-\draw[sp-signal] (6.5, 3.8) -- (6.5, 4.2) -- (7.0, 4.2);
+% Shared parameters
+\def\pulseHeight{0.6}        % Same height for all pulses
+\def\pulseWidth{1.2}         % Standard pulse width
+\def\oneShotWidth{0.18}      % IN Flag one-shot pulse (~1/6 of pulseWidth)
+\def\lineEnd{9.0}            % Right edge of diagram
 
-% Data annotation
-\node[sp-annotation, anchor=south] at (5.5, 4.2) {Data = Q + R};
-\draw[sp-arrow] (6.2, 4.3) -- (6.5, 4.0);
+% Y positions
+\def\inflagLo{4.0}
+\pgfmathsetmacro{\inflagHi}{\inflagLo + \pulseHeight}
+\def\ainputLo{2.5}
+\pgfmathsetmacro{\ainputHi}{\ainputLo + \pulseHeight}
+\def\binputLo{1.0}
+\pgfmathsetmacro{\binputHi}{\binputLo + \pulseHeight}
+
+% Pulse positions - B pulses are ~2 pulse widths RIGHT of A pulses
+% A pulse 1 rises, then Q distance later B pulse 1 rises
+% A pulse 2 rises, then R distance later B pulse 2 rises (triggers IN Flag)
+\def\aRiseOne{1.0}           % A pulse 1 rising edge
+\pgfmathsetmacro{\aFallOne}{\aRiseOne + \pulseWidth}
+\def\aRiseTwo{5.0}           % A pulse 2 rising edge
+\pgfmathsetmacro{\aFallTwo}{\aRiseTwo + \pulseWidth}
+
+% B pulses are offset to the right by Q/R distance (~2 pulse widths)
+\def\qDistance{2.0}          % Q = rising A1 to rising B1
+\def\rDistance{2.0}          % R = rising A2 to rising B2 (same as Q per reference)
+\pgfmathsetmacro{\bRiseOne}{\aRiseOne + \qDistance}
+\pgfmathsetmacro{\bFallOne}{\bRiseOne + \pulseWidth}
+\pgfmathsetmacro{\bRiseTwo}{\aRiseTwo + \rDistance}
+\pgfmathsetmacro{\bFallTwo}{\bRiseTwo + \pulseWidth}
+
+% IN Flag one-shot triggers at B pulse 2 rising edge
+\pgfmathsetmacro{\inflagRise}{\bRiseTwo}
+\pgfmathsetmacro{\inflagFall}{\inflagRise + \oneShotWidth}
+
+% IN Flag - dashed lead-in, solid baseline, one-shot pulse, dashed trail
+\node[sp-label] at (-1.0, \inflagLo) {IN Flag};
+\draw[dashed, thin] (-0.3, \inflagLo) -- (0, \inflagLo);
+\draw[sp-signal] (0, \inflagLo) -- (\inflagRise, \inflagLo);
+\draw[sp-signal] (\inflagRise, \inflagLo) -- (\inflagRise, \inflagHi) -- (\inflagFall, \inflagHi) -- (\inflagFall, \inflagLo);
+\draw[sp-signal] (\inflagFall, \inflagLo) -- (\lineEnd, \inflagLo);
+\draw[dashed, thin] (\lineEnd, \inflagLo) -- (\lineEnd + 0.5, \inflagLo);
+
+% Data annotation - left of pulse, arrow extends right to upper third of pulse
+\node[sp-annotation, anchor=east] at (\inflagRise - 0.3, \inflagHi + 0.3) {Data = Q + R};
+\draw[sp-arrow] (\inflagRise - 0.2, \inflagHi + 0.2) -- (\inflagRise + \oneShotWidth/2, \inflagHi);
+
+% Dotted line showing relationship: IN Flag rising edge to B Input pulse 2 rising edge
+\draw[dashed, thin] (\inflagRise, \inflagLo) -- (\bRiseTwo, \binputHi);
 
 % A Input
-\node[sp-label] at (-1.0, 2.8) {A Input};
-\node[sp-annotation, anchor=east] at (-0.3, 3.1) {1};
-\node[sp-annotation, anchor=east] at (-0.3, 2.5) {0};
+\node[sp-label] at (-1.0, {(\ainputHi + \ainputLo)/2}) {A Input};
+\node[sp-annotation, anchor=east] at (-0.3, \ainputHi) {1};
+\node[sp-annotation, anchor=east] at (-0.3, \ainputLo) {0};
 
-\draw[sp-signal] (-0.2, 2.5) -- (1.0, 2.5) -- (1.0, 3.1) -- (2.5, 3.1) -- (2.5, 2.5);
-\draw[sp-signal] (2.5, 2.5) -- (4.5, 2.5) -- (4.5, 3.1) -- (6.0, 3.1) -- (6.0, 2.5);
-\draw[sp-signal] (6.0, 2.5) -- (7.0, 2.5);
+\draw[dashed, thin] (-0.3, \ainputLo) -- (0, \ainputLo);
+\draw[sp-signal] (0, \ainputLo) -- (\aRiseOne, \ainputLo);
+\draw[sp-signal] (\aRiseOne, \ainputLo) -- (\aRiseOne, \ainputHi) -- (\aFallOne, \ainputHi) -- (\aFallOne, \ainputLo);
+\draw[sp-signal] (\aFallOne, \ainputLo) -- (\aRiseTwo, \ainputLo);
+\draw[sp-signal] (\aRiseTwo, \ainputLo) -- (\aRiseTwo, \ainputHi) -- (\aFallTwo, \ainputHi) -- (\aFallTwo, \ainputLo);
+\draw[sp-signal] (\aFallTwo, \ainputLo) -- (\lineEnd, \ainputLo);
+\draw[dashed, thin] (\lineEnd, \ainputLo) -- (\lineEnd + 0.5, \ainputLo);
 
 % B Input
-\node[sp-label] at (-1.0, 1.3) {B Input};
-\node[sp-annotation, anchor=east] at (-0.3, 1.6) {1};
-\node[sp-annotation, anchor=east] at (-0.3, 1.0) {0};
+\node[sp-label] at (-1.0, {(\binputHi + \binputLo)/2}) {B Input};
+\node[sp-annotation, anchor=east] at (-0.3, \binputHi) {1};
+\node[sp-annotation, anchor=east] at (-0.3, \binputLo) {0};
 
-\draw[sp-signal] (-0.2, 1.0) -- (1.5, 1.0) -- (1.5, 1.6) -- (2.0, 1.6) -- (2.0, 1.0);
-\draw[sp-signal] (2.0, 1.0) -- (5.0, 1.0) -- (5.0, 1.6) -- (5.5, 1.6) -- (5.5, 1.0);
-\draw[sp-signal] (5.5, 1.0) -- (7.0, 1.0);
+\draw[dashed, thin] (-0.3, \binputLo) -- (0, \binputLo);
+\draw[sp-signal] (0, \binputLo) -- (\bRiseOne, \binputLo);
+\draw[sp-signal] (\bRiseOne, \binputLo) -- (\bRiseOne, \binputHi) -- (\bFallOne, \binputHi) -- (\bFallOne, \binputLo);
+\draw[sp-signal] (\bFallOne, \binputLo) -- (\bRiseTwo, \binputLo);
+\draw[sp-signal] (\bRiseTwo, \binputLo) -- (\bRiseTwo, \binputHi) -- (\bFallTwo, \binputHi) -- (\bFallTwo, \binputLo);
+\draw[sp-signal] (\bFallTwo, \binputLo) -- (\lineEnd, \binputLo);
+\draw[dashed, thin] (\lineEnd, \binputLo) -- (\lineEnd + 0.5, \binputLo);
 
-% Q dimension
-\draw[sp-dim] (1.5, 0.4) -- (2.0, 0.4);
-\draw[dashed, thin] (1.5, 0.6) -- (1.5, 1.0);
-\draw[dashed, thin] (2.0, 0.6) -- (2.0, 1.0);
-\node[sp-annotation] at (1.75, 0.0) {Q};
+% Q dimension - from A pulse 1 rising to B pulse 1 rising
+\draw[sp-dim] (\aRiseOne, 0.3) -- (\bRiseOne, 0.3);
+\draw[dashed, thin] (\aRiseOne, 0.5) -- (\aRiseOne, \ainputLo);
+\draw[dashed, thin] (\bRiseOne, 0.5) -- (\bRiseOne, \binputLo);
+\node[sp-annotation] at ({(\aRiseOne + \bRiseOne)/2}, -0.1) {Q};
 
-% R dimension
-\draw[sp-dim] (5.0, 0.4) -- (5.5, 0.4);
-\draw[dashed, thin] (5.0, 0.6) -- (5.0, 1.0);
-\draw[dashed, thin] (5.5, 0.6) -- (5.5, 1.0);
-\node[sp-annotation] at (5.25, 0.0) {R};
+% R dimension - from A pulse 2 rising to B pulse 2 rising
+\draw[sp-dim] (\aRiseTwo, 0.3) -- (\bRiseTwo, 0.3);
+\draw[dashed, thin] (\aRiseTwo, 0.5) -- (\aRiseTwo, \ainputLo);
+\draw[dashed, thin] (\bRiseTwo, 0.5) -- (\bRiseTwo, \binputLo);
+\node[sp-annotation] at ({(\aRiseTwo + \bRiseTwo)/2}, -0.1) {R};
 
 % Time axis
-\draw[sp-arrow] (0, -0.5) -- (7.0, -0.5);
-\node[sp-annotation] at (3.5, -0.8) {Time};
+\draw[sp-arrow] (0, -0.6) -- (\lineEnd, -0.6);
+\node[sp-annotation] at ({\lineEnd/2}, -0.95) {Time};
 
 \end{tikzpicture}
 \par}
