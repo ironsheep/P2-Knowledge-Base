@@ -3231,13 +3231,22 @@
 \let\NCOPWMBlockDiagram\NCODutyBlockDiagram            % page17_img02 -> Mode %00110
 \let\HighLowCountingDiagram\ComparatorDiagram          % page29 -> Mode %01111
 
-% ============================================================================
-% OUTPUT MODE SELECTION FLOWCHART
-% ============================================================================
-% Decision flowchart for selecting the appropriate output generation mode
+% NOTE: OutputModeFlowchart is defined earlier in this file (around line 2439)
+% Duplicate definition removed to prevent LaTeX "already defined" error
 
-\newcommand{\OutputModeFlowchart}{%
-{\centering
+% ============================================================================
+% UART FRAME FORMAT DIAGRAM (was after duplicate OutputModeFlowchart)
+% ============================================================================
+% Placeholder comment - actual UARTFrameDiagram follows below
+
+\begin{comment}
+REMOVED DUPLICATE: OutputModeFlowchart was defined twice.
+Keeping the first definition at line 2439.
+\end{comment}
+
+% Continue with remaining diagrams...
+% The following tikzpicture block was the duplicate - now removed:
+\iffalse
 \begin{tikzpicture}[
     >={Stealth[length=2mm]},
     node distance=0.4cm and 0.8cm,
@@ -3338,6 +3347,8 @@
 \end{tikzpicture}
 \par}
 }
+\fi
+% END of removed duplicate OutputModeFlowchart
 
 % ============================================================================
 % UART FRAME FORMAT DIAGRAM

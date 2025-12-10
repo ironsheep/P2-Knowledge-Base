@@ -323,7 +323,9 @@
 }{}{}
 
 % Define partmark similar to chaptermark - sets leftmark to part title
-\newcommand{\partmark}[1]{\markboth{#1}{}}
+% Use providecommand to avoid conflict if already defined by a package
+\providecommand{\partmark}[1]{}
+\renewcommand{\partmark}[1]{\markboth{#1}{}}
 
 % Hook into part to set the mark after it runs
 \let\oldpart\part

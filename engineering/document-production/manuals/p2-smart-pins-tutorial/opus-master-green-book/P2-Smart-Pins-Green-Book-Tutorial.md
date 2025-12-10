@@ -479,7 +479,7 @@ Enter Smart Pins.
 
 Imagine if each I/O pin had its own tiny processor - not a full CPU, but dedicated hardware that could handle one specific task perfectly. That's exactly what Smart Pins are. Each of the P2's 64 I/O pins has a Smart Pin unit that can be configured to perform one of 32 different functions, from simple digital I/O to complex protocols.
 
-![Smart Pin Block Diagram](v6-assets/smart-pins-master-trimmed.png)
+![Smart Pin Block Diagram](assets/smart-pins-master-trimmed.png)
 
 Once configured, a Smart Pin runs completely independently. Set up a PWM? It generates perfect pulses forever. Configure a UART? It transmits and receives without bothering your code. Need to count encoder pulses? The Smart Pin counts them in hardware while your code does other things.
 
