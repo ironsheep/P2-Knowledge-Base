@@ -1899,71 +1899,131 @@
 
 \newcommand{\TimeoutWatchdogDiagram}{%
 {\centering
-\begin{tikzpicture}[x=0.8cm, y=1cm]
+\begin{tikzpicture}[x=0.65cm, y=1cm]
 
-% Top signal (output pulses)
-\draw[dashed, thin] (-0.3, 4.0) -- (0.0, 4.0);
-\draw[sp-signal] (0.0, 4.0) -- (2.0, 4.0);
-\draw[thin] (2.0, 3.8) -- (2.0, 4.2);
-\draw[sp-signal] (2.0, 4.0) -- (5.0, 4.0);
-\draw[thin] (5.0, 3.8) -- (5.0, 4.2);
-\draw[sp-signal] (5.0, 4.0) -- (9.0, 4.0);
-\draw[thin] (9.0, 3.8) -- (9.0, 4.2);
-\draw[sp-signal] (9.0, 4.0) -- (11.0, 4.0);
+% 8 clock ticks at fixed frequency, tick 9 is forecast position for top signal
+% Clock ticks are 25% wider than before (1.5 * 1.25 = 1.875 -> round to 1.5)
+% Gap after pulse 4 is ~2.125 clock cycles
+% Wide pulse sits over two clock ticks, solid line spans full tick-to-tick distance
 
-% C/Z annotation
-\draw[sp-arrow] (2.0, 4.4) -- (2.0, 4.1);
-\node[sp-annotation, anchor=south] at (2.0, 4.5) {C = 1};
-\node[sp-annotation, anchor=south] at (2.0, 5.0) {Z = Counts};
+\def\dashstart{-0.5}    % Dashed lead-in
+\def\startx{0.0}        % Solid signal start
+% baselineEnd calculated after clkNine to extend past last top tick
+\def\clockEnd{14.5}     % Clock reset ends earlier
 
-% A Input
-\node[sp-label] at (-1.5, 2.5) {A Input};
-\node[sp-annotation, anchor=east] at (0.0, 2.9) {1};
-\node[sp-annotation, anchor=east] at (0.0, 2.1) {0};
+% Y positions - reduced gaps (2/3 of previous)
+\def\topY{3.8}          % Top signal (Z counts) - isolated
+\def\ainputHi{2.4}      % A Input HIGH
+\def\ainputLo{1.7}      % A Input LOW
+\def\clockresetY{1.0}   % Clock reset - grouped with A Input
+\def\legendOneY{-0.2}   % Legend line 1 (closer)
+\def\legendTwoY{-0.6}   % Legend line 2
 
-% Input pulses
-\draw[dashed, thin] (-0.3, 2.1) -- (0.0, 2.1);
-\draw[sp-signal] (0.0, 2.1) -- (0.0, 2.9) -- (0.5, 2.9) -- (0.5, 2.1);
-\draw[sp-signal] (0.5, 2.1) -- (1.0, 2.1) -- (1.0, 2.9) -- (1.5, 2.9) -- (1.5, 2.1);
-\draw[sp-signal] (1.5, 2.1) -- (2.0, 2.1) -- (2.0, 2.9) -- (2.5, 2.9) -- (2.5, 2.1);
-\draw[sp-signal] (2.5, 2.1) -- (3.0, 2.1) -- (3.0, 2.9) -- (3.5, 2.9) -- (3.5, 2.1);
-% Gap (no pulses)
-\draw[sp-signal] (3.5, 2.1) -- (7.0, 2.1);
-% More pulses
-\draw[sp-signal] (7.0, 2.1) -- (7.0, 2.9) -- (7.5, 2.9) -- (7.5, 2.1);
-\draw[sp-signal] (7.5, 2.1) -- (8.5, 2.1) -- (8.5, 2.9) -- (9.0, 2.9) -- (9.0, 2.1);
-\draw[sp-signal] (9.0, 2.1) -- (10.0, 2.1) -- (10.0, 2.9) -- (10.5, 2.9) -- (10.5, 2.1);
-\draw[dashed, thin] (10.5, 2.1) -- (11.0, 2.1);
+% Clock tick frequency - another 25% wider interval, 50% duty cycle
+\def\clockInterval{1.875}         % Wider clock interval (was 1.5, now 1.875 = 25% wider)
+\pgfmathsetmacro{\pulseWidth}{\clockInterval / 2}  % 50% duty cycle
 
-% Clock reset
-\node[sp-label] at (-1.5, 1.0) {Clock reset};
-\draw[dashed, thin] (-0.3, 1.0) -- (0.0, 1.0);
-% Reset ticks at each input pulse
-\draw[thin] (0.0, 0.8) -- (0.0, 1.2);
-\draw[thin] (0.5, 0.8) -- (0.5, 1.2);
-\draw[thin] (1.0, 0.8) -- (1.0, 1.2);
-\draw[thin] (1.5, 0.8) -- (1.5, 1.2);
-\draw[thin] (2.0, 0.8) -- (2.0, 1.2);
-\draw[thin] (2.5, 0.8) -- (2.5, 1.2);
-\draw[thin] (3.0, 0.8) -- (3.0, 1.2);
-\draw[thin] (3.5, 0.8) -- (3.5, 1.2);
-% Gap in reset ticks
-\draw[dashed, thin] (3.5, 1.0) -- (7.0, 1.0);
-\draw[thin] (7.0, 0.8) -- (7.0, 1.2);
-\draw[thin] (7.5, 0.8) -- (7.5, 1.2);
-\draw[thin] (8.5, 0.8) -- (8.5, 1.2);
-\draw[thin] (9.0, 0.8) -- (9.0, 1.2);
-\draw[thin] (10.0, 0.8) -- (10.0, 1.2);
-\draw[thin] (10.5, 0.8) -- (10.5, 1.2);
+% Clock tick positions (fixed frequency) - 8 ticks plus tick 9 forecast
+\pgfmathsetmacro{\clkOne}{0.75}                       % Tick 1
+\pgfmathsetmacro{\clkTwo}{\clkOne + \clockInterval}   % Tick 2
+\pgfmathsetmacro{\clkThree}{\clkTwo + \clockInterval} % Tick 3
+\pgfmathsetmacro{\clkFour}{\clkThree + \clockInterval} % Tick 4
+\pgfmathsetmacro{\clkFive}{\clkFour + \clockInterval}  % Tick 5 (in gap)
+\pgfmathsetmacro{\clkSix}{\clkFive + \clockInterval}   % Tick 6 (in gap, wide pulse starts after)
+\pgfmathsetmacro{\clkSeven}{\clkSix + \clockInterval}  % Tick 7 (wide pulse HIGH - no top tick)
+\pgfmathsetmacro{\clkEight}{\clkSeven + \clockInterval} % Tick 8 (after wide pulse)
+\pgfmathsetmacro{\clkNine}{\clkEight + \clockInterval}  % Tick 9 (forecast for top signal)
 
-% Legend
-\draw[sp-dim, dashed] (-1.0, -0.3) -- (0.0, -0.3);
-\node[sp-annotation, anchor=west] at (0.2, -0.3) {= Time period set via X register (210 msec.)};
+% Baseline end - extend past last top tick (clkNine) with some margin
+\pgfmathsetmacro{\baselineEnd}{\clkNine + 0.75}
 
-\draw[sp-dim] (-1.0, -0.8) -- (0.0, -0.8);
-\draw[thin] (-1.0, -1.0) -- (-1.0, -0.6);
-\draw[thin] (0.0, -1.0) -- (0.0, -0.6);
-\node[sp-annotation, anchor=west] at (0.2, -0.8) {= Actual time};
+% A Input: First 4 pulses at 50% duty, falling edges at clock ticks
+\def\pulseFallOne{\clkOne}
+\pgfmathsetmacro{\pulseRiseTwo}{\clkOne + \pulseWidth}
+\def\pulseFallTwo{\clkTwo}
+\pgfmathsetmacro{\pulseRiseThree}{\clkTwo + \pulseWidth}
+\def\pulseFallThree{\clkThree}
+\pgfmathsetmacro{\pulseRiseFour}{\clkThree + \pulseWidth}
+\def\pulseFallFour{\clkFour}
+
+% Wide pulse: rises ~1/8 after tick 6, falls AT tick 7
+% Gap from pulse 4 to wide pulse is ~2.125 clock cycles
+\pgfmathsetmacro{\widePulseRise}{\clkSix + (\clockInterval / 8)}  % ~1/8 after tick 6
+\def\widePulseFall{\clkSeven}                                      % Falls AT tick 7
+
+% Top signal ticks - at clk 5, 6, 8, 9 (NOT 7 because wide pulse is HIGH)
+% Tick 9 is forecast position
+
+% Top signal baseline with tall upward ticks
+\draw[dashed, thin] (\dashstart, \topY) -- (\startx, \topY);
+\draw[sp-signal] (\startx, \topY) -- (\baselineEnd, \topY);
+\draw[dashed, thin] (\baselineEnd, \topY) -- (\baselineEnd + 0.5, \topY);
+% Tall ticks at 5, 6, 8, 9
+\draw[thin] (\clkFive, \topY) -- (\clkFive, \topY + 0.6);
+\draw[thin] (\clkSix, \topY) -- (\clkSix, \topY + 0.6);
+\draw[thin] (\clkEight, \topY) -- (\clkEight, \topY + 0.6);
+\draw[thin] (\clkNine, \topY) -- (\clkNine, \topY + 0.6);
+
+% C/Z annotation - right-aligned labels, arrow to first tick (tick 5)
+% Labels shifted left by ~1.5 characters to not overlap arrow
+\node[sp-annotation, anchor=east] at (\clkFive - 0.6, \topY + 1.1) {C = 1};
+\node[sp-annotation, anchor=east] at (\clkFive - 0.6, \topY + 0.75) {Z = Counts};
+\draw[sp-arrow] (\clkFive - 0.5, \topY + 0.85) -- (\clkFive, \topY + 0.65);
+
+% A Input label and level indicators
+\node[sp-label] at (-1.8, {(\ainputHi + \ainputLo)/2}) {A Input};
+\node[sp-annotation, anchor=east] at (-0.6, \ainputHi) {1};
+\node[sp-annotation, anchor=east] at (-0.6, \ainputLo) {0};
+
+% A Input waveform - 50% duty cycle for first 4 pulses
+\draw[dashed, thin] (\dashstart, \ainputHi) -- (\startx, \ainputHi);
+% First partial pulse (starts HIGH, falls at tick 1)
+\draw[sp-signal] (\startx, \ainputHi) -- (\pulseFallOne, \ainputHi) -- (\pulseFallOne, \ainputLo);
+% Pulse 2 (50% duty)
+\draw[sp-signal] (\pulseFallOne, \ainputLo) -- (\pulseRiseTwo, \ainputLo) -- (\pulseRiseTwo, \ainputHi) -- (\pulseFallTwo, \ainputHi) -- (\pulseFallTwo, \ainputLo);
+% Pulse 3 (50% duty)
+\draw[sp-signal] (\pulseFallTwo, \ainputLo) -- (\pulseRiseThree, \ainputLo) -- (\pulseRiseThree, \ainputHi) -- (\pulseFallThree, \ainputHi) -- (\pulseFallThree, \ainputLo);
+% Pulse 4 (50% duty)
+\draw[sp-signal] (\pulseFallThree, \ainputLo) -- (\pulseRiseFour, \ainputLo) -- (\pulseRiseFour, \ainputHi) -- (\pulseFallFour, \ainputHi) -- (\pulseFallFour, \ainputLo);
+% Long LOW gap (timeout period) - ~2.125 clock cycles
+\draw[sp-signal] (\pulseFallFour, \ainputLo) -- (\widePulseRise, \ainputLo);
+% Wide pulse - rises ~1/8 after tick 6, falls AT tick 7
+\draw[sp-signal] (\widePulseRise, \ainputLo) -- (\widePulseRise, \ainputHi) -- (\widePulseFall, \ainputHi) -- (\widePulseFall, \ainputLo);
+% Lead-out LOW then dashed
+\draw[sp-signal] (\widePulseFall, \ainputLo) -- (\baselineEnd, \ainputLo);
+\draw[dashed, thin] (\baselineEnd, \ainputLo) -- (\baselineEnd + 0.5, \ainputLo);
+
+% Clock reset line - 8 ticks at fixed frequency
+\node[sp-label] at (-1.8, \clockresetY) {Clock reset};
+\draw[dashed, thin] (\dashstart, \clockresetY) -- (\startx, \clockresetY);
+% Solid line under first 4 pulses (ticks 1-4)
+\draw[sp-signal] (\startx, \clockresetY) -- (\pulseFallFour, \clockresetY);
+% Ticks 1-4 under first 4 pulses
+\draw[thin] (\clkOne, \clockresetY) -- (\clkOne, \clockresetY + 0.3);
+\draw[thin] (\clkTwo, \clockresetY) -- (\clkTwo, \clockresetY + 0.3);
+\draw[thin] (\clkThree, \clockresetY) -- (\clkThree, \clockresetY + 0.3);
+\draw[thin] (\clkFour, \clockresetY) -- (\clkFour, \clockresetY + 0.3);
+% Dashed during gap (timeout period) - ticks 5-6
+\draw[dashed, thin] (\pulseFallFour, \clockresetY) -- (\clkSix, \clockresetY);
+\draw[thin] (\clkFive, \clockresetY) -- (\clkFive, \clockresetY + 0.3);
+\draw[thin] (\clkSix, \clockresetY) -- (\clkSix, \clockresetY + 0.3);
+% SOLID from tick 6 to tick 7 (full tick-to-tick span under wide pulse)
+\draw[sp-signal] (\clkSix, \clockresetY) -- (\clkSeven, \clockresetY);
+\draw[thin] (\clkSeven, \clockresetY) -- (\clkSeven, \clockresetY + 0.3);
+% Dashed after tick 7 - tick 8 (no tick 9 on clock reset, only forecast for top)
+\draw[dashed, thin] (\clkSeven, \clockresetY) -- (\clockEnd, \clockresetY);
+\draw[thin] (\clkEight, \clockresetY) -- (\clkEight, \clockresetY + 0.3);
+
+% Legend - aligned with dashed lead-in
+\draw[thin] (\dashstart, \legendOneY - 0.15) -- (\dashstart, \legendOneY + 0.15);
+\draw[dashed, thin] (\dashstart, \legendOneY) -- (\dashstart + 1.5, \legendOneY);
+\draw[thin] (\dashstart + 1.5, \legendOneY - 0.15) -- (\dashstart + 1.5, \legendOneY + 0.15);
+\node[sp-annotation, anchor=west] at (\dashstart + 1.7, \legendOneY) {= Time period set via X register (210 msec.)};
+
+\draw[thin] (\dashstart, \legendTwoY - 0.15) -- (\dashstart, \legendTwoY + 0.15);
+\draw[sp-signal] (\dashstart, \legendTwoY) -- (\dashstart + 1.0, \legendTwoY);
+\draw[thin] (\dashstart + 1.0, \legendTwoY - 0.15) -- (\dashstart + 1.0, \legendTwoY + 0.15);
+\node[sp-annotation, anchor=west] at (\dashstart + 1.7, \legendTwoY) {= Actual time};
 
 \end{tikzpicture}
 \par}
