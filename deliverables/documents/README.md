@@ -5,6 +5,26 @@
 
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
+## About These Documents
+
+This documentation is produced differently than traditional technical manuals. These are **AI-generated drafts, guided by human expertise** — a collaborative approach where AI assists in structuring and writing while humans provide direction, source material curation, and review.
+
+**Our process emphasizes source fidelity:**
+- Source material is rigorously gathered from official Parallax documentation, datasheets, and authoritative community references
+- Code examples are compiled and validated using `pnut_ts` wherever possible
+- Content is cross-referenced against the project's structured YAML knowledge base
+
+**What this means for community review:**
+
+Because these documents are AI-assisted, the issues you may encounter differ from traditionally authored manuals. Watch for:
+
+- **Plausible but incorrect details** — Specifications that sound right but aren't (wrong clock cycles, flag behaviors, register addresses)
+- **Overgeneralization** — Statements presented as universal that have exceptions or edge cases
+- **Missing practitioner context** — Technically accurate but lacking the practical insight experienced users know
+- **Logic errors in examples** — Code that compiles but doesn't behave as described
+- **Terminology drift** — Nearly-correct terms that could mislead
+
+**Your expertise is essential.** This review process depends on practitioners who know the Propeller 2 to catch what automated validation cannot. If something looks wrong, seems incomplete, or contradicts your experience — **[report it via the Issues page](https://github.com/ironsheep/P2-Knowledge-Base/issues)**.
 
 ## Documents in Community Review
 
