@@ -426,9 +426,9 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
-⚠️ **Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
-⚠️ **Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active.
 
 
 ::: instrheader
@@ -1012,7 +1012,7 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-⚠️ **Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
 
 ::: instrheader
@@ -1048,8 +1048,8 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
 
-⚠️ **Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
 

@@ -151,12 +151,12 @@ For real-time code, deterministic timing often matters more than average speed.
 
 ### 3.3.3 Complete Condition Table
 
-The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus two special cases (always and never). Many conditions have multiple names—aliases that make code more readable in different contexts:
+The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus the special `_RET_` prefix (EEEE=0000) which executes the instruction and then returns. Many conditions have multiple names—aliases that make code more readable in different contexts:
 
 | Condition | Aliases | C | Z | True When |
 |-----------|---------|---|---|-----------|
-| IF_ALWAYS | (none) | * | * | Always executes (unconditional) |
-| IF_NEVER | (none) | - | - | Never executes (acts as NOP) |
+| IF_ALWAYS | (none) | * | * | Always executes (unconditional, EEEE=1111) |
+| _RET_ | (none) | * | * | Always executes, then returns if no branch (EEEE=0000) |
 | IF_C | IF_B | 1 | * | C = 1 (carry set, below) |
 | IF_NC | IF_AE, IF_NB | 0 | * | C = 0 (no carry, above or equal) |
 | IF_Z | IF_E | * | 1 | Z = 1 (zero, equal) |

@@ -170,7 +170,7 @@ Read Byte From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 |
 
 
 **Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
@@ -243,7 +243,7 @@ Read Long From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
@@ -256,7 +256,11 @@ If preceded by a SETQ instruction, burst reads of multiple longs can be performe
 
 If the WC or WCZ effect is specified, C is set to the MSB of the long.
 
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
+
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
+
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations if you expect PTRx to point past the block.
 
 
 
@@ -352,7 +356,7 @@ Read Word From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
@@ -403,6 +407,17 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
 REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+
+**Critical Restrictions:**
+
+- **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
+
+- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
+
+**Forbidden instructions in REP blocks:**
+- Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
+- Conditional branches: DJNZ, DJZ, TJZ, TJNZ, IJZ, IJNZ
+- Any instruction that modifies PC
 
 **Using Labels Instead of Counts:**
 

@@ -95,7 +95,7 @@ IF_AE       IF_ALWAYS   IF_B        IF_BE       IF_C        IF_C_AND_NZ
 IF_C_AND_Z  IF_C_EQ_Z   IF_C_NE_Z   IF_C_OR_NZ  IF_C_OR_Z   IF_DIFF
 IF_E        IF_GE       IF_GT       IF_LE       IF_LT       IF_NC
 IF_NC_AND_NZ            IF_NC_AND_Z IF_NC_OR_NZ IF_NC_OR_Z  IF_NE
-IF_NEVER    IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
+IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
 IF_NZ_AND_C IF_NZ_AND_NC            IF_NZ_OR_C  IF_NZ_OR_NC IF_SAME
 IF_X0       IF_X1       IF_Z        IF_Z_AND_C  IF_Z_AND_NC IF_Z_EQ_C
 IF_Z_NE_C   IF_Z_OR_C   IF_Z_OR_NC  IFNOT       IJMP1       IJMP2
@@ -446,8 +446,8 @@ Conditional execution prefixes (IF_xxx) that can be applied to any instruction. 
 
 These are the canonical condition names:
 
-- **IF_ALWAYS** - Always execute (default, can be omitted)
-- **IF_NEVER** - Never execute (effectively a NOP)
+- **IF_ALWAYS** - Always execute (default, can be omitted; EEEE=1111)
+- **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
 - **IF_C** - Execute if C=1
 - **IF_NC** - Execute if C=0
 - **IF_Z** - Execute if Z=1
@@ -493,7 +493,7 @@ Convenient aliases for post-comparison conditional execution:
 
 ### Special Return Condition (1)
 
-- **_RET_** - Always execute AND return (combines execution with return)
+- **_RET_** - Always execute instruction, then return if no branch (no flag restore)
 
 ### Symmetric Alternatives (9)
 
@@ -820,6 +820,40 @@ _NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z    _NZ_AND_C   _NZ_AND_NC
 _NZ_OR_C    _NZ_OR_NC   _Z_AND_C    _Z_AND_NC   _Z_EQ_C     _Z_NE_C
 _Z_OR_C     _Z_OR_NC
 ```
+
+**MODCZ Operand Values:**
+
+These mnemonics are used with the MODCZ instruction to modify C and Z flags. Each mnemonic represents a 4-bit value that selects the flag modification logic:
+
+| Value | Binary | Mnemonic | Description |
+|-------|--------|----------|-------------|
+| 0 | 0000 | _CLR | Always clear (result = 0) |
+| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
+| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 3 | 0011 | _NC | Copy inverse of C (not C) |
+| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
+| 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
+| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
+| 10 | 1010 | _Z | Copy Z |
+| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 12 | 1100 | _C | Copy C |
+| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
+| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 15 | 1111 | _SET | Always set (result = 1) |
+
+**Common MODCZ Usage:**
+```pasm
+        MODCZ   _CLR, _SET      ' Clear C, set Z
+        MODCZ   _SET, _CLR      ' Set C, clear Z
+        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C          ' Swap C and Z values
+        MODCZ   _NC, _NZ        ' Invert both flags
+```
+
+**Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
 
 
 

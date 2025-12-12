@@ -256,17 +256,30 @@ Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access 
 
 **Addressing Modes**:
 
-- `PTRA++` — Post-increment by 4 bytes (one long)
-- `PTRA--` — Post-decrement by 4 bytes
-- `++PTRA` — Pre-increment by 4 bytes
-- `--PTRA` — Pre-decrement by 4 bytes
-- `PTRA[offset]` — Indexed access (offset in longs)
+The increment/decrement amount (SCALE) depends on the instruction:
+
+| Instruction | SCALE | Increment/Decrement |
+|-------------|-------|---------------------|
+| RDBYTE, WRBYTE | 1 | 1 byte |
+| RDWORD, WRWORD | 2 | 2 bytes |
+| RDLONG, WRLONG, WMLONG | 4 | 4 bytes |
+
+- `PTRA++` — Post-increment by SCALE bytes
+- `PTRA--` — Post-decrement by SCALE bytes
+- `++PTRA` — Pre-increment by SCALE bytes
+- `--PTRA` — Pre-decrement by SCALE bytes
+- `PTRA[index]` — Indexed access: address = PTRA + (index × SCALE)
+- `PTRA++[index]` — Post-update indexed: use PTRA, then PTRA += index × SCALE
+- `++PTRA[index]` — Pre-update indexed: PTRA += index × SCALE, then use PTRA
+
+Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long, post-increment
-        wrlong  data, ptra[4]           ' Write long to Hub at PTRA+16 bytes
+        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
+        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
+        wrlong  data, ptra[4]           ' Write long to Hub at PTRA + 4×4 = PTRA+16 bytes
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
@@ -287,17 +300,22 @@ Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM acces
 
 **Addressing Modes**:
 
-- `PTRB++` — Post-increment by 4 bytes (one long)
-- `PTRB--` — Post-decrement by 4 bytes
-- `++PTRB` — Pre-increment by 4 bytes
-- `--PTRB` — Pre-decrement by 4 bytes
-- `PTRB[offset]` — Indexed access (offset in longs)
+PTRB supports the same addressing modes as PTRA, with SCALE determined by instruction type (see PTRA for details):
+
+- `PTRB++` — Post-increment by SCALE bytes
+- `PTRB--` — Post-decrement by SCALE bytes
+- `++PTRB` — Pre-increment by SCALE bytes
+- `--PTRB` — Pre-decrement by SCALE bytes
+- `PTRB[index]` — Indexed access: address = PTRB + (index × SCALE)
+- `PTRB++[index]` — Post-update indexed: use PTRB, then PTRB += index × SCALE
+- `++PTRB[index]` — Pre-update indexed: PTRB += index × SCALE, then use PTRB
 
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long, post-increment
-        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB+32 bytes
+        rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
+        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
+        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB + 8×4 = PTRB+32 bytes
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr

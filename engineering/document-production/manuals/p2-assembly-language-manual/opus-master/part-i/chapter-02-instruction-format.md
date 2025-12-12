@@ -42,10 +42,10 @@ The condition field enables conditional execution of any instruction. The instru
 
 | EEEE | Mnemonic | Condition | Description |
 |:-----|:-------------|:-------------|:------------------------------------------|
-| 0000 | _RET_ | (special) | Return from subroutine |
+| 0000 | _RET_ | Always | Execute instruction, then return if no branch |
 | 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Neither carry nor zero |
 | 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | C=0 | No carry (unsigned less than) |
+| 0011 | IF_NC | C=0 | No carry (unsigned ≥, signed ≥) |
 | 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
 | 0101 | IF_NZ | Z=0 | Not zero |
 | 0110 | IF_C_NE_Z | C≠Z | Carry not equal to zero |
@@ -54,25 +54,89 @@ The condition field enables conditional execution of any instruction. The instru
 | 1001 | IF_C_EQ_Z | C=Z | Carry equals zero |
 | 1010 | IF_Z | Z=1 | Zero |
 | 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | C=1 | Carry (unsigned greater than or equal) |
+| 1100 | IF_C | C=1 | Carry (unsigned <, signed <) |
 | 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
 | 1110 | IF_C_OR_Z | C=1 OR Z=1 | Carry or zero |
 | 1111 | (always) | Always | Unconditional execution |
 
 ### 2.2.2 The _RET_ Condition
 
-The condition code 0000 (_RET_) has special behavior. When an instruction has EEEE=0000, it functions as a return from subroutine:
+The condition code 0000 (`_RET_`) has special behavior that differs from all other conditions. Unlike other condition codes which control whether the instruction executes, `_RET_` means: **"Always execute the instruction, then return if the instruction did not branch."**
 
-- The instruction field is ignored
-- PC is loaded from the return address stored in PA (for CALL) or from the stack
+When an instruction has EEEE=0000:
 
-This encoding allows any instruction mnemonic to become a conditional return when prefixed with _RET_:
+1. **The instruction always executes** (condition 0000 means "always" for `_RET_`)
+2. **If the instruction does not branch**: Return by popping stack[19:0] into PC
+3. **If the instruction branches** (JMP, CALL, etc.): No return occurs—the branch takes precedence
+4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags from the stack
+
+This is fundamentally different from the RET instruction, which optionally restores C and Z flags when WC/WZ/WCZ effects are specified.
+
+**Basic Usage:**
 
 ```pasm
-_ret_   add     x, y                    ' Return, ADD is not executed
+_ret_   add     x, y                    ' ADD executes, then return (flags unchanged)
+_ret_   drvnot  #0                      ' Toggle pin 0, then return
+_ret_   mov     result, temp            ' Copy temp to result, then return
 ```
 
-The _RET_ prefix is primarily used with CALLA, CALLB, and related call instructions that use the condition field for return control.
+**Branch Behavior—No Return When Instruction Branches:**
+
+When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
+
+```pasm
+_ret_   jmp     #somewhere              ' JMP executes, NO return (branch took effect)
+_ret_   call    #subroutine             ' CALL executes, NO return (call pushed new return)
+_ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if counter=0: return
+```
+
+**SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
+
+The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
+
+```pasm
+' Start XBYTE: SETQ executes to configure mode, then returns to $1FF
+        push    #$1FF                   ' Push $1FF for XBYTE returns
+_ret_   setq    #$100                   ' Configure XBYTE with LUT base $100, then return
+
+' Change XBYTE mode permanently for subsequent bytecodes
+_ret_   setq    #$200                   ' New LUT base $200 for all future bytecodes
+
+' Change XBYTE mode for next bytecode only (auto-restores afterward)
+_ret_   setq2   #$300                   ' Temporary LUT base $300 for one bytecode
+```
+
+**SKIP/SKIPF with _RET_—Branch Before Skipping:**
+
+Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
+
+```pasm
+        push    #routine                ' Push target address
+_ret_   skipf   pattern                 ' SKIPF executes, then branch to routine with skip active
+```
+
+**Timing:**
+
+The `_RET_` prefix adds overhead to the base instruction timing:
+
+| Execution Mode | Additional Cycles |
+|----------------|-------------------|
+| COG/LUT        | +2 cycles         |
+| Hub            | +11 to +18 cycles |
+
+**Single-Instruction Subroutines:**
+
+The `_RET_` prefix enables efficient single-instruction subroutines:
+
+```pasm
+toggle_pin0                             ' Subroutine: toggle pin 0
+_ret_   drvnot  #0                      ' 2 cycles + 2 return = 4 total cycles
+
+read_input                              ' Subroutine: read input to result
+_ret_   mov     result, ina             ' Execute MOV, then return
+```
+
+This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
 
 ### 2.2.3 Conditional Execution Patterns
 

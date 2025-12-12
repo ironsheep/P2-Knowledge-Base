@@ -658,6 +658,8 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
         WRLONG  buffer, ptra   ' Write 16 longs to hub
 :::
 
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
+
 
 
 ::: instrheader

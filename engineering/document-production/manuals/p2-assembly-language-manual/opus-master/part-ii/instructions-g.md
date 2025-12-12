@@ -95,23 +95,28 @@ Get System Counter
 **Result:** The current value of the system counter CT is written to Dest.
 
 - Dest is a register where the system counter value is written.
-- WC is an optional effect that preserves the current C flag state.
+- WC is an optional effect to retrieve the upper 32 bits of the 64-bit counter (Rev B/C silicon).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | CT[63:32] if WC | --- | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-GETCT retrieves the current value of the system counter CT into the Dest register. The system counter is a 32-bit counter that is reset to zero on system reset and increments by one on every clock cycle.
+GETCT retrieves the current value of the system counter CT into the Dest register. On Rev B/C silicon, the system counter is a 64-bit counter that is reset to zero on system reset and increments by one on every clock cycle. The lower 32 bits (CT[31:0]) are always returned in Dest.
 
-The CT counter provides a continuous, monotonic time reference that wraps around from $FFFF_FFFF to $0000_0000. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
+The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
 
-If the WC effect is specified, the C flag is preserved and remains unchanged by this instruction. This allows GETCT to be used in sequences where the C flag state must be maintained across operations.
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to the C flag's associated result location. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+
+```pasm
+        getct   low_word wc     ' Get lower 32 bits, upper 32 to result
+        getct   high_word       ' Get upper 32 bits (if needed for verification)
+```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 

@@ -609,7 +609,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 :::
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward. See [Appendix I](#appendix-i) for details and workarounds.
+**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
 
 
 ::: instrheader
@@ -644,7 +644,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 :::
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. See [Appendix I](#appendix-i) for details and workarounds.
+**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
 
 ::: instrheader
@@ -1070,6 +1070,17 @@ Skip Instructions Fast
 **Explanation:**
 
 Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
+
+**CRITICAL: COG/LUT Memory Only**
+
+SKIPF can ONLY leap over instructions when executing from **COG or LUT memory**. When SKIPF is executed from Hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the Hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of COG/LUT memory.
+
+**Best Practice:** Use SKIP for code in Hub memory (ORGH sections), SKIPF for code in COG/LUT memory (ORG sections).
+
+**REP Compatibility:**
+- SKIP is fully compatible with REP—cancellation maintains instruction counts
+- SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
+- Recommendation: Use SKIP within REP blocks for predictable behavior
 
 
 

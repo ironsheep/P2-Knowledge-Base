@@ -2,7 +2,7 @@
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 13 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
+The P2 assembler provides 14 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
 
 
 
@@ -302,6 +302,76 @@ sine    word    $8000[256]          ' Initialize sine table with midpoint values
 - [LONG](#long) — Declare 32-bit long data
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
+
+
+
+::: dirheader
+### FILE {#file}
+Include Binary File
+
+Includes raw binary file data at the current address.
+:::
+
+Include the contents of a binary file at the current assembly address. The raw bytes from the specified file are inserted directly into the assembled output.
+
+#### Syntax
+```pasm
+[label] FILE    "filename"
+```
+
+#### Parameters
+| Parameter | Description |
+|-----------|-------------|
+| filename | String literal specifying the file path to include |
+
+#### Usage
+Use FILE to embed binary resources directly into your program—font data, lookup tables, images, audio samples, or any pre-computed binary content. The file is read at assembly time and its raw bytes are inserted at the current address. A label preceding FILE becomes a byte pointer to the start of the included data.
+
+FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI methods.
+
+#### Example
+```pasm
+DAT
+' Include a font file for VGA text display
+font_data   file    "8x8_font.bin"      ' 2KB font bitmap
+font_end                                 ' Label marks end for size calculation
+
+' Include pre-computed sine table
+sine_table  file    "sine_256.dat"      ' 256-entry sine lookup
+
+' Include raw image data
+splash      file    "logo.raw"          ' Splash screen bitmap
+
+' Calculate included file size at assembly time
+            long    @font_end - @font_data  ' Store font size in bytes
+```
+
+#### Example: Text File Inclusion
+```pasm
+DAT
+' Include text file for display
+text_data   file    "message.txt"
+text_end
+
+PUB ShowText() | ptr, len
+    ptr := @text_data
+    len := @text_end - @text_data
+    ' Process text bytes...
+```
+
+#### Notes
+- FILE reads the file at assembly time—the file must exist during compilation
+- File contents are included as raw bytes without modification
+- A label before FILE provides a byte-addressable pointer to the data
+- Place a label after the FILE directive to calculate the included file's size
+- FILE is not allowed within inline PASM code (only in DAT blocks)
+- File paths are relative to the source file's directory
+- Common uses: fonts, lookup tables, images, audio samples, pre-computed data
+
+#### Related Directives
+- [BYTE](#byte) — Declare individual byte data
+- [LONG](#long) — Declare long data
+- [ORGH](#orgh) — Set hub origin (FILE data typically resides in hub RAM)
 
 
 
@@ -753,10 +823,10 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 
 ## Summary
 
-The P2 assembler's 13 directives provide complete control over memory layout and assembly constraints:
+The P2 assembler's 14 directives provide complete control over memory layout and assembly constraints:
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
-**Memory Definition**: BYTE, WORD, LONG allocate and initialize data
+**Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT catch overflow at compile time
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
