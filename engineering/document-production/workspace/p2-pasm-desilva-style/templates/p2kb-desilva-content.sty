@@ -29,25 +29,28 @@
 
 % ==================== DESILVA 5-COLOR CODE BLOCK SYSTEM ====================
 % Based on deSilva pedagogical approach with 5 distinct code block types:
-% 1. Spin2 (green) - High-level language examples
-% 2. PASM2 (yellow/cream) - Assembly language (most common)
+% 1. PASM2 (green) - Assembly language (most common) - IDE-aligned
+% 2. Spin2 (blue) - High-level language examples - IDE-aligned
 % 3. CORDIC (purple) - Mathematical operations and trigonometry
-% 4. Multi-COG (blue) - Parallel processing examples
+% 4. Multi-COG (teal) - Parallel processing examples
 % 5. Antipattern (red) - What NOT to do
+%
+% v1.1.0: Colors aligned with Propeller Tool/Spin Tools IDE conventions
+%         PASM = green, Spin2 = blue (same as P2 Assembly Language Manual)
 
-% Define DeSilva color palette (muted pastels for accessibility)
-\definecolor{desilva-spin2-bg}{HTML}{F8FCF8}         % Very soft green-gray
-\definecolor{desilva-spin2-border}{HTML}{85B985}     % Muted green border
-\definecolor{desilva-pasm2-bg}{HTML}{FFFEF5}         % Very soft cream (deSilva yellow)
-\definecolor{desilva-pasm2-border}{HTML}{D4B896}     % Muted tan border
+% Define DeSilva color palette (IDE-aligned for PASM2/Spin2)
+\definecolor{desilva-pasm2-bg}{HTML}{EBFCEB}         % Light green HSB(120,7,99) - IDE-aligned
+\definecolor{desilva-pasm2-border}{HTML}{4CB04C}     % Green border HSB(120,57,69) - IDE-aligned
+\definecolor{desilva-spin2-bg}{HTML}{E3F2FD}         % Light blue - IDE-aligned
+\definecolor{desilva-spin2-border}{HTML}{1976D2}     % Blue border - IDE-aligned
 \definecolor{desilva-cordic-bg}{HTML}{F8F5FF}        % Very soft purple
 \definecolor{desilva-cordic-border}{HTML}{A785C2}    % Muted purple border
-\definecolor{desilva-multicog-bg}{HTML}{F5F9FC}      % Very soft blue-gray
-\definecolor{desilva-multicog-border}{HTML}{7FA8C9}  % Muted blue border
+\definecolor{desilva-multicog-bg}{HTML}{E0F2F1}      % Teal 50 - distinct from Spin2 blue
+\definecolor{desilva-multicog-border}{HTML}{00897B}  % Teal 600 - distinct from Spin2 blue
 \definecolor{desilva-antipattern-bg}{HTML}{FFF5F5}   % Very soft pink
 \definecolor{desilva-antipattern-border}{HTML}{C08080} % Muted rose border
 
-% Spin2 Block Environment (green theme)
+% Spin2 Block Environment (blue theme - IDE-aligned)
 \newtcolorbox{DeSilvaSpin2Block}{%
   boxrule=2pt,
   colback=desilva-spin2-bg,
@@ -66,7 +69,7 @@
   breakable
 }
 
-% PASM2 Block Environment (deSilva yellow/cream theme) - Most common
+% PASM2 Block Environment (green theme - IDE-aligned) - Most common
 \newtcolorbox{DeSilvaPASM2Block}{%
   boxrule=2pt,
   colback=desilva-pasm2-bg,

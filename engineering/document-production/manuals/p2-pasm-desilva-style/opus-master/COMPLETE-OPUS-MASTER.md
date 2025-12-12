@@ -275,7 +275,7 @@ DAT
         waitx   ##50_000_000    ' Wait 0.25 seconds at 200MHz
         drvl    #56             ' Drive pin 56 low (LED off)
         waitx   ##50_000_000    ' Wait 0.25 seconds
-        jmp     #$-4            ' Jump back 4 instructions
+        jmp     #$-4            ' Jump back 4 longs (addresses)
 ```
 :::
 
@@ -295,7 +295,7 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 **`drvl #56`** - Drive low. LED off. You get the pattern.
 
-**`jmp #$-4`** - Jump back 4 instructions. The '$' means "current address", so '$-4' means "4 instructions back from here". Infinite loop achieved!
+**`jmp #$-4`** - Jump back 4 longs. The '$' means "current address", so '$-4' means "4 addresses back from here" (each instruction is one long). Infinite loop achieved!
 
 ### But Wait, There's More!
 
@@ -367,7 +367,7 @@ delay   long    0                      ' Storage for delay value
 
 Uff! Look at that - we're using a register now! The `mov` instruction copies our delay value into a register (which we cleverly named 'delay'). Now we can change the blink rate by modifying just one value.
 
-*A note on terminology: P2 documentation often uses "register" to refer to any long in COG RAM. Unlike ARM or x86 where registers are a small, special set (R0-R15, EAX, etc.), every COG RAM location can be used as a general-purpose register. However, the last 16 locations (addresses 496-511) are reserved for special-purpose registers, so avoid those for your variables. When you see "register" in P2 context, think "COG RAM location."*
+*A note on terminology: P2 documentation often uses "register" to refer to any long in COG RAM. Unlike ARM or x86 where registers are a small, special set (R0-R15, EAX, etc.), every COG RAM location can be used as a general-purpose register. However, the last 16 locations (496-511) have special functions: addresses 496-503 are dual-purpose (usable as RAM if interrupts aren't used), and 504-511 are special-purpose registers (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB). When you see "register" in P2 context, think "COG RAM location."*
 
 ## Understanding COGs
 
@@ -487,7 +487,7 @@ When a COG is started with `coginit`, the hardware:
 
 This means every COG program starts fresh, with a clean slate. No residual state, no confusion. It's like each COG gets a fresh brain transplant every time it starts!
 
-The last 16 longs (addresses 496-511) are special purpose registers (DIRA, OUTA, etc. in P1 terms, though P2 handles these differently). We'll explore these later.
+The last 16 longs (addresses 496-511) have special functions: 496-503 are dual-purpose (usable as RAM if interrupts not used), and 504-511 are special-purpose registers (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB). We'll explore these later.
 :::
 
 ## Common Gotchas
@@ -498,7 +498,7 @@ Before we move on, let me save you some debugging time:
 
 2. **Wrong pin number** - The P2 Eval board's LEDs are on pins 56-63. The P2 Edge module might have different assignments.
 
-3. **No clock setup** - We're assuming the default 100MHz clock. If someone's changed it, your timing will be off.
+3. **Clock setup required** - P2 boots at ~20MHz (internal RC oscillator). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust WAITX values if your clock differs.
 
 4. **COG already running** - If you `coginit` to a specific COG that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free COG.
 
@@ -844,7 +844,8 @@ Save yourself some debugging time:
 ::: pasm2
 ```
    rdlong  value, ##$1000  ' Reads from hub byte address $1000
-   mov     value, $1000    ' Moves from COG long address $1000 
+   mov     value, $100     ' Moves from COG long address $100 (256)
+   ' Note: COG RAM is only 512 longs ($000-$1FF)!
 ```
 :::
 
@@ -865,7 +866,7 @@ Look at what you now understand:
 ## Your Turn: Experiments
 
 ### Experiment 1: COG Counter
-Start 8 COGs, each incrementing a different hub location. Watch them count in parallel:
+Start COGs to increment different hub locations. With COGEXEC_NEW, the loop will start up to 7 new COGs (since COG 0 runs Spin2):
 
 ::: spin2
 ```
@@ -1017,17 +1018,21 @@ Here's a complete multiply example:
 
 ::: pasm2
 ```
-' Multiply two numbers and get 64-bit result
+' Simple 16x16->32 multiply (2 clocks)
         mov     x, #123
         mov     y, #456
-        mul     x, y           ' Low 32 bits in x
-        getmulh high           ' High 32 bits in high
-        ' Result: 123 * 456 = 56088
-        ' (all in 2 clock cycles!)
+        mul     x, y           ' Result: 123 * 456 = 56088 in x
+        ' Uses lower 16 bits of each operand!
+
+' For full 32x32->64 multiply, use CORDIC:
+        qmul    x, y           ' Start multiply (uses full 32 bits)
+        ' ... 54 clocks of other work ...
+        getqx   low            ' Lower 32 bits of result
+        getqy   high           ' Upper 32 bits of result
 ```
 :::
 
-Uff! In the old days, we'd write loops for this. Now it's instant.
+Uff! In the old days, we'd write loops for this. Now hardware does it!
 
 ### Logic Operations
 
@@ -1079,7 +1084,7 @@ Moving bits around:
         jmp     target         ' Jump to address in target register
         
 ' Relative jumps
-        jmp     #$-4          ' Jump back 4 instructions
+        jmp     #$-4          ' Jump back 4 longs (addresses)
         jmp     #$+8          ' Jump forward 8 instructions
 ```
 :::
@@ -1134,6 +1139,71 @@ subroutine
 ' You get 8 levels of hardware stack!
 ```
 :::
+
+### The _RET_ Prefix: Return With Benefits
+
+Here's a clever trick the P2 offers. What if you could execute an instruction *and* return from a subroutine in one go? That's exactly what the `_RET_` prefix does.
+
+::: pasm2
+```
+' Normal way: Two instructions
+add_and_return
+        add     x, y            ' Do the add
+        ret                     ' Then return (4+ cycles total)
+
+' _RET_ way: One instruction!
+add_and_return
+        _ret_   add     x, y    ' Add AND return (saves 2 cycles)
+```
+:::
+
+The `_RET_` prefix says: "Execute this instruction, then return." It's like getting a free return ticket with your instruction. The add happens, flags get set normally, and then—pop!—you're back at the caller.
+
+**When does _RET_ NOT return?**
+
+Here's the catch: if the instruction itself branches, no return happens. The branch wins:
+
+::: pasm2
+```
+        _ret_   jmp     #somewhere      ' JMP wins - no return
+        _ret_   call    #helper         ' CALL wins - no return
+        _ret_   djnz    count, #loop    ' Branch? No return. Zero? Return!
+```
+:::
+
+That last one is interesting! If `count` isn't zero, DJNZ branches and no return. But when `count` hits zero, no branch occurs, so you get your return. Clever, right?
+
+**One-Instruction Subroutines**
+
+This is where `_RET_` really shines:
+
+::: pasm2
+```
+' Toggle pin 0 - entire subroutine is ONE instruction!
+toggle_led
+        _ret_   drvnot  #0              ' Toggle and return
+
+' Read all inputs - also just one instruction
+read_inputs
+        _ret_   mov     result, ina     ' Copy INA and return
+
+' Usage:
+        call    #toggle_led             ' Blink!
+        call    #read_inputs            ' result now has INA
+```
+:::
+
+A normal subroutine needs at least two instructions (the work + RET). With `_RET_`, you can have genuinely single-instruction subroutines. Your code gets smaller and faster.
+
+**The Medicine: _RET_ Quick Reference**
+
+| Pattern | What Happens |
+|---------|--------------|
+| `_ret_ add x, y` | ADD executes, then return |
+| `_ret_ jmp #label` | JMP executes, NO return (branch wins) |
+| `_ret_ djnz n, #loop` | If n>0: branch, no return. If n=0: no branch, return |
+
+**Important**: Unlike `ret wcz`, the `_RET_` prefix does NOT restore C and Z flags from the stack. If you need flag restoration, use the regular `ret wcz` instruction.
 
 ## Labels: Naming Your Places
 
@@ -1416,6 +1486,88 @@ Notice the pattern: code first, then constants, then working storage, then reser
 
 4. **Alignment after RES**: `res` doesn't affect alignment. If you need alignment after reserved space, add an explicit `alignl` or `alignw`.
 
+### Including External Files: FILE
+
+Sometimes you have binary data sitting in a file - a font bitmap, a sound sample, a pre-computed lookup table. Rather than manually converting it to hex values (ugh!), you can pull it straight in:
+
+```pasm2
+DAT
+font_data       file    "myfont.bin"        ' Import entire file
+sound_sample    file    "beep.raw"          ' Raw audio data
+lut_table       file    "precalc.dat"       ' Pre-computed values
+```
+
+The assembler reads the file at compile time and drops its raw bytes right into your DAT block. The label gives you a way to reference where the data starts.
+
+**Where does it search?**
+
+1. Same folder as your source file
+2. Library paths (if configured)
+
+**Practical example - embedded bitmap:**
+
+```pasm2
+DAT             org
+entry           mov     ptr, ##@splash_screen
+                ' ... display routine using ptr
+
+' The image data lives right here in your code
+splash_screen   file    "logo_128x64.bin"   ' 1024 bytes of pixel data
+```
+
+No conversion scripts, no copy-paste errors. Just reference the file and it's part of your program. The icing on the cake? If you update the file, recompile, and your program has the new data.
+
+### String and Data Generation Methods
+
+Beyond manually typing values, you have some helpers for creating data:
+
+**@"text" - Inline String Address**
+
+Need a string address without declaring a separate label?
+
+```pasm2
+        mov     ptra, @"Hello!"     ' ptra points to "Hello!" in hub
+        call    #print_string
+
+        mov     ptra, @"Error: "    ' Another string, inline
+        call    #print_string
+```
+
+The `@"text"` syntax creates the string in hub memory and gives you its address. It's like an anonymous label for a string constant. Each unique string gets stored once, even if you reference it multiple times.
+
+**STRING("text") and LSTRING("text")**
+
+These work similarly but in different contexts:
+
+```spin2
+' In Spin2 code (not PASM):
+debug(STRING("Temperature: "))    ' Zero-terminated string address
+debug(LSTRING("Status"))          ' Length-prefixed string (length byte first)
+```
+
+`STRING()` returns the hub address of a zero-terminated string - same as what C programmers expect. `LSTRING()` puts a length byte at the front, which is handy when you need to know the string length without scanning for null.
+
+**BYTE[], WORD[], LONG[] - Data Arrays**
+
+In Spin2, you can create inline data arrays:
+
+```spin2
+' Spin2 examples:
+lookup := BYTE[10, 20, 30, 40, 50]    ' Returns address of byte array
+config := LONG[$DEAD_BEEF, $CAFE_BABE]
+```
+
+These are primarily Spin2 features, but they generate hub data that your PASM code can access if you know the addresses.
+
+**The Pattern:**
+
+| Method | Result | Use Case |
+|--------|--------|----------|
+| `file "name"` | Raw binary data | Images, audio, lookup tables |
+| `@"text"` | String address | Quick inline strings in PASM |
+| `STRING("text")` | Zero-terminated string address | Spin2 string constants |
+| `LSTRING("text")` | Length-prefixed string | When you need length upfront |
+
 ## The Flags: C and Z (and Q!)
 
 Flags are your friends. They remember things:
@@ -1497,7 +1649,7 @@ fast_copy
         rep     #2, ##256              ' Repeat 256 times
         rdlong  temp, ptra++           ' Read and increment
         wrlong  temp, ptrb++           ' Write and increment
-        ' 512 bytes copied with no loop overhead!
+        ' 1024 bytes (256 longs) copied with no loop overhead!
         
 temp    long    0
 ```
@@ -1779,13 +1931,18 @@ clear_screen
 
 *Hardware multiply and divide - finally!*
 
-## The Hook: 64-Bit Multiply in 2 Clocks
+## The Hook: Hardware Multiply
 
 ::: pasm2
 ```
-        mul     x, y              ' 32x32->64 bit multiply
-        getmulh high              ' Get high 32 bits
-        ' Done! 64-bit result in 2 instructions!
+        mul     x, y              ' 16x16->32 bit unsigned multiply
+        ' Result in x (lower 16 bits of each operand used)
+
+        ' For full 32x32->64 bit multiply, use CORDIC:
+        qmul    x, y              ' Start 32x32->64 multiply
+        ' ... other work (54 clocks) ...
+        getqx   low               ' Get lower 32 bits
+        getqy   high              ' Get upper 32 bits
 ```
 :::
 
@@ -1830,11 +1987,12 @@ Remember doing this with shifts and adds? Those days are over!
 ' 64-bit add
         add     low1, low2 wc
         addx    high1, high2
-        
-' 64-bit multiply  
-        mul     x, y
-        getmulh high
-        ' Result in high:x
+
+' 64-bit multiply (uses CORDIC)
+        qmul    x, y           ' Start 32x32->64 multiply
+        ' ... 54 clocks ...
+        getqx   low            ' Lower 32 bits
+        getqy   high           ' Upper 32 bits
 ```
 :::
 
@@ -1842,14 +2000,16 @@ Remember doing this with shifts and adds? Those days are over!
 
 ::: pasm2
 ```
-' 16.16 fixed point multiply
+' 16.16 fixed point multiply (uses CORDIC for full precision)
 fixed_mul
-        muls    a, b             ' Multiply
-        getmulh high            ' Get high part
-        shl     a, #16          ' Shift low part
-        shr     high, #16       ' Shift high part
-        or      a, high         ' Combine
-        ' Result in 16.16 format!
+        qmul    a, b             ' Start 32x32->64 signed multiply
+        ' ... 54 clocks (do other work) ...
+        getqx   low              ' Lower 32 bits
+        getqy   high             ' Upper 32 bits
+        ' Extract middle 32 bits for 16.16 result:
+        shl     high, #16        ' Upper 16 bits of result
+        shr     low, #16         ' Lower 16 bits of result
+        or      a, low, high     ' Combine for 16.16 format
 ```
 :::
 
@@ -1946,9 +2106,9 @@ Let me show you something even more impressive:
 ::: pasm2
 ```
 ' Calculate sine and cosine simultaneously
-        qrotate angle, ##$7FFF_FFFF  ' Max radius for unit circle
-        getqx   cosine              ' cos(angle) in 2.30 fixed pt
-        getqy   sine                ' sin(angle) in 2.30 fixed pt
+        qrotate ##$7FFF_FFFF, angle  ' D=radius (max), S=angle
+        getqx   cosine               ' cos(angle) in 2.30 fixed pt
+        getqy   sine                 ' sin(angle) in 2.30 fixed pt
         ' Both trig functions in 55 clocks total!
 ```
 :::
@@ -1976,9 +2136,9 @@ Here's the beautiful part: CORDIC operations are pipelined. While one calculatio
 ' Generate sine wave samples rapid-fire
         mov     angle, #0
         mov     count, #256
-        
+
 generate
-        qrotate angle, ##$7FFF_FFFF  ' Start calculation
+        qrotate ##$7FFF_FFFF, angle   ' D=radius, S=angle
         add     angle, ##$0100_0000   ' Increment angle (no wait!)
         
         ' Do other work while CORDIC calculates
@@ -2086,7 +2246,7 @@ next_vertex
         djnz    vertex_count, #next_vertex
         
         ' Increment rotation for animation
-        add     rotation_angle, ##$0100_0000  ' ~5.6 degrees
+        add     rotation_angle, ##$0100_0000  ' ~1.4 degrees (1/256 rotation)
 ```
 :::
 
@@ -2103,8 +2263,8 @@ Starting code:
         
         mov     angle, #0
         mov     radius, ##100          ' 100 pixel radius
-        
-.loop   qrotate angle, radius         ' Your code here
+
+.loop   qrotate radius, angle         ' D=X (radius), S=angle
         ' Add code to:
         ' 1. Get X,Y coordinates
         ' 2. Add screen center offset
@@ -2154,7 +2314,7 @@ Feeling overwhelmed by all this trigonometry? Here's your simplified prescriptio
 
 ::: pasm2
 ```
-        qrotate angle, ##$7FFF_FFFF
+        qrotate ##$7FFF_FFFF, angle    ' D=radius, S=angle
         getqx   cos_value
         getqy   sin_value
 ```
@@ -2238,9 +2398,9 @@ Want to draw a spiral? CORDIC makes it trivial:
 spiral
         mov     angle, #0
         mov     radius, #1
-        
+
 draw_spiral
-        qrotate angle, radius
+        qrotate radius, angle         ' D=X (radius), S=angle
         getqx   x
         getqy   y
         
@@ -2271,10 +2431,10 @@ Generate perfect sine waves for audio:
 ' Audio tone generator using CORDIC
 tone_generator
         mov     phase, #0
-        mov     frequency, ##$0100_0000  ' ~5.6 degrees per sample
+        mov     frequency, ##$0100_0000  ' ~1.4 degrees per sample (1/256 rotation)
         
 sample_loop
-        qrotate phase, ##$7FFF_FFFF     ' Unit circle
+        qrotate ##$7FFF_FFFF, phase     ' D=radius, S=angle
         add     phase, frequency        ' Increment phase
         
         ' Do other audio processing while waiting
@@ -2504,16 +2664,8 @@ wait_low
 ```
 :::
 
-But there's a better way - hardware-assisted waiting:
+But there's a better way - hardware-assisted waiting with Smart Events:
 
-::: pasm2
-```
-        waitpeq mask, pins     ' Wait for pins to equal pattern
-        waitpne mask, pins     ' Wait for pins to NOT equal pattern
-```
-:::
-
-Or the even better P2 way:
 
 ::: pasm2
 ```
@@ -2862,22 +3014,23 @@ write_loop
 
 ## Real-World Example: Screen Buffer Clear
 
-Let's clear a 640x480x4 byte screen buffer (1.2MB!):
+Let's clear a 320x240x4 byte screen buffer (~307KB - fits in hub!):
 
 ::: pasm2
 ```
 ' Ultra-fast screen clear
 clear_screen
-        mov     color, ##$00_00_00_00    ' Black (4 bytes)
-        mov     pixels, ##640*480        ' Total pixels
-        
+        mov     color, ##$00_00_00_00    ' Black (4 bytes per pixel)
+        mov     pixels, ##320*240        ' 76,800 pixels
+
         wrfast  #0, ##screen_buffer      ' Start FIFO write
-        
+
 clear_loop
         wflong  color                    ' Write 4-byte pixel
         djnz    pixels, #clear_loop
-        
-        ' 1.2MB cleared at maximum hub speed!
+
+        ' 307KB cleared at maximum hub speed!
+        ' Note: Hub RAM is 512KB - plan buffer sizes accordingly
 ```
 :::
 
@@ -2971,29 +3124,27 @@ circular_loop
 ```
 :::
 
-### Parallel Processing Pipeline
+### Processing Pipeline with FIFO
 
 ::: pasm2
 ```
-' Process data while streaming
-        rdfast  #0, ##source
-        wrfast  #0, ##dest
-        
+' Read data with FIFO, process, write via PTRA
+        rdfast  #0, ##source    ' Set up FIFO for reading
+        mov     dest_ptr, ##dest
+
 pipeline
-        rflong  input           ' Get next input
-        
-        ' Process while FIFO works
-        mul     input, ##SCALE_FACTOR
-        getmulh temp
-        shr     input, #16
-        or      input, temp
-        
-        wflong  input           ' Write result
+        rflong  input           ' Get next input from FIFO
+
+        ' Scale using 16x16 multiply (result in input)
+        mul     input, #SCALE_FACTOR
+
+        wrlong  input, dest_ptr ' Write result via PTRA
+        add     dest_ptr, #4
         djnz    count, #pipeline
-        
-' Input and output stream simultaneously!
 ```
 :::
+
+Note: FIFO can only read OR write at a time, not both. Use PTRA/PTRB for the other direction.
 
 ## Your Turn: Streaming Experiments
 
@@ -3065,7 +3216,7 @@ Watch out for these:
 
 Let's talk speed:
 - **Block transfer**: Up to 1 long per clock (at 200MHz = 800MB/s!)
-- **FIFO streaming**: Sustained 1 long per 8 clocks
+- **FIFO streaming**: Up to 1 long per clock sustained
 - **Random hub access**: 2-9 clocks per access
 - **Streamer to pins**: Up to sysclock/1 rate
 
@@ -3262,8 +3413,9 @@ Here's the real power - combining both modes:
         
 ' Critical timing code in COG
 critical_loop
-        waitpeq pattern, mask  ' Wait for trigger
-        drvh    #CRITICAL_PIN  ' Immediate response!
+        testp   #TRIGGER_PIN wz       ' Test trigger pin
+  if_nz jmp     #critical_loop        ' Loop until triggered
+        drvh    #CRITICAL_PIN         ' Immediate response!
         call    #hub_process   ' Do complex processing
         jmp     #critical_loop
         
@@ -3611,10 +3763,11 @@ Well, let me be more nuanced. P2 has interrupts for those rare cases where you a
 ::: pasm2
 ```
 ' Setting up an interrupt (not recommended!)
-        setint1 #INT_PINRISE, #PANIC_BUTTON
-        
+        setse1  #%001<<6 + PANIC_BUTTON   ' SE1 triggers when pin goes high
+        setint1 #EVENT_SE1                ' Enable INT1 on SE1 event
+
 int1_handler
-        ' Interrupt code
+        ' Interrupt code here
         reti1
 ```
 :::
@@ -3635,10 +3788,11 @@ Still thinking you need interrupts? Here's your medicine:
 
 ::: pasm2
 ```
-' Dedicated COG responds in 2 clocks
+' Dedicated COG responds in ~4 clocks
 watcher
-        waitpeq pattern, mask  ' Hardware wait
-        drvh    #RESPONSE_PIN  ' Instant response!
+        testp   #INPUT_PIN wz         ' Test pin state
+  if_nz jmp     #watcher              ' Loop until pin high
+        drvh    #RESPONSE_PIN         ' Instant response!
 ```
 :::
 
@@ -3800,7 +3954,7 @@ A: Dedicate a COG to critical events. It will respond faster than any interrupt.
 A: You have eight! And a focused COG is simpler than interrupt-riddled code.
 
 **Q: "What about power consumption?"**
-A: Use WAITPEQ/WAITCT for low-power waiting. COG sleeps until event.
+A: Use WAITSE/WAITCT for low-power waiting. COG sleeps until event.
 
 ## What We've Learned
 
@@ -3830,18 +3984,18 @@ Look at this seemingly innocent code:
 
 ::: pasm2
 ```
-' Before optimization: 11 clocks
-.loop   rdlong  value, ptra      ' 3-9 clocks (avg 6)
+' Before optimization: 13 clocks
+.loop   rdlong  value, ptra      ' 9-16 clocks hub access
         add     value, #1        ' 2 clocks
-        wrlong  value, ptra      ' 3 clocks
+        wrlong  value, ptra      ' 3-10 clocks
         add     ptra, #4         ' 2 clocks
-        djnz    count, #.loop    ' 2 clocks
+        djnz    count, #.loop    ' 2/4 clocks
 
-' After optimization: 6 clocks!
-.loop   rdlong  value, ptra++    ' 3-9 clks, ptr inc'd for free!
-        add     value, #1        ' 2 clocks
-        wrlong  value, --ptra++  ' 3 clocks, clever pointer work
-        djnz    count, #.loop    ' 2 clocks
+' After optimization using PTR expressions:
+.loop   rdlong  value, ptra      ' Read from current address
+        add     value, #1        ' Process
+        wrlong  value, ptra++    ' Write and increment in one!
+        djnz    count, #.loop    ' Saved the ADD instruction
 ```
 :::
 
@@ -3875,8 +4029,8 @@ Not all instructions are created equal:
         and     c, d            ' 2 clocks
 
 ' Variable timing (hub access)
-        rdlong  value, hubaddr  ' 3-9 clocks
-        wrlong  value, hubaddr  ' 3 clocks
+        rdlong  value, hubaddr  ' 9-16 clocks (hub slot wait)
+        wrlong  value, hubaddr  ' 3-10 clocks (variable)
         
 ' Long operations (CORDIC)
         qrotate x, angle        ' 2 clocks to start
@@ -3895,10 +4049,10 @@ REP creates hardware-accelerated loops with zero overhead:
 
 ::: pasm2
 ```
-' Traditional loop: 4 clocks overhead per iteration
+' Traditional loop: overhead per iteration
 .loop   add     sum, value      ' 2 clocks
         add     ptr, #4         ' 2 clocks
-        djnz    count, #.loop   ' 2 clocks = 6 total
+        djnz    count, #.loop   ' 2 or 4 clocks (4 if branch taken)
 
 ' REP loop: 0 clocks overhead!
         rep     #2, count       ' Repeat next 2 instructions
@@ -3972,26 +4126,30 @@ For ultimate speed, use the FIFO:
 
 ## Parallel Operations
 
-Some operations can overlap:
+CORDIC operations can overlap with other work:
 
 ::: pasm2
 ```
-' Multiply while doing other work
-        mul     x, y            ' Start multiply
-        add     a, b            ' This executes during multiply
-        sub     c, d            ' So does this
-        getmulh result          ' Now get multiply result
-        
-' CORDIC overlap
-        qrotate angle, radius   ' Start CORDIC
-        ' 55 clocks to do other work!
+' CORDIC overlaps with other instructions
+        qmul    x, y            ' Start 32x32->64 multiply (CORDIC)
+        ' 54 clocks to do other work!
+        add     a, b            ' These execute during CORDIC
+        sub     c, d
         mov     index, #0
         rdlong  data, ptra++
-        process data
         ' ... more work
-        getqx   x_result        ' Get CORDIC result
+        getqx   low_result      ' Get CORDIC result (lower 32 bits)
+        getqy   high_result     ' Get CORDIC result (upper 32 bits)
+
+' QROTATE overlap
+        qrotate x_coord, angle  ' Start rotation (D=X, S=angle)
+        ' 54 clocks of other work!
+        getqx   new_x           ' Get rotated X
+        getqy   new_y           ' Get rotated Y
 ```
 :::
+
+Note: MUL/MULS are 2-clock ALU instructions that complete immediately (16x16->32). Use QMUL for 32x32->64 with CORDIC overlap.
 
 ## Real-World Example: Fast Memory Copy
 
@@ -4100,9 +4258,9 @@ Some instruction pairs execute specially:
 
 ::: pasm2
 ```
-' AUGS + instruction = extended immediate
-        augs    #$12345000
-        mov     x, #$678        ' x = $12345678
+' ## syntax handles AUGS automatically
+        mov     x, ##$12345678  ' Assembler generates AUGS + MOV
+        ' Same result, cleaner code!
         
 ' ALTD + instruction = indirect addressing
         altd    index, #array
@@ -4215,8 +4373,8 @@ You might be thinking, "Wait, I already have COG RAM and Hub RAM - why do I need
 
 | Memory | Size per COG | Access Time | Special Features |
 |--------|--------------|-------------|------------------|
-| COG RAM | 512 longs | 2 clocks (write), 0 (read) | Instructions live here |
-| Hub RAM | 512 KB shared | 9-16 clocks (depends on slot) | Shared by all COGs |
+| COG RAM | 512 longs | 2 clocks | Instructions live here |
+| Hub RAM | 512 KB shared | 2-9 clocks (hub slot wait) | Shared by all COGs |
 | **LUT RAM** | 512 longs | **3 clocks** | **Private, deterministic, shareable with neighbor** |
 
 The LUT fills a sweet spot: faster than hub memory, doesn't compete with your instruction space, and has a trick up its sleeve - neighboring COGs can share LUTs!
@@ -4281,28 +4439,33 @@ This works because the assembler maps LUT addresses $200-$3FF. Just remember the
 
 ## LUT Sharing Between COGs
 
-Here's something clever: adjacent COG pairs can share LUT access! COG 0 can read COG 1's LUT, COG 2 can read COG 3's, and so on.
+Here's something clever: adjacent COG pairs can share LUT data! When you enable LUT sharing with SETLUTS, writes your neighbor makes to their LUT are automatically *copied* to your LUT too.
 
 ::: pasm2
 ```
-' --- COG 0 (producer) ---
-        wrlut   message, #10    ' Write to my LUT[10]
-        wrlut   #1, #0          ' Set "ready" flag at LUT[0]
+' --- COG 1 (consumer) - MUST enable sharing FIRST ---
+        setluts #1              ' Enable LUT write copying FROM COG 0
+        ' Now when COG 0 writes to its LUT, data is COPIED to our LUT
 
-' --- COG 1 (consumer) ---
-        setluts #1              ' Enable LUT sharing
-.wait   rdluts  flag, #0        ' Read COG 0's LUT[0]
+' --- COG 0 (producer) - writes AFTER consumer enables sharing ---
+        wrlut   message, #10    ' Write to MY LUT[10] (copied to COG 1's LUT[10])
+        wrlut   #1, #0          ' Set "ready" flag (copied to COG 1's LUT[0])
+
+' --- COG 1 (consumer) - reads its OWN LUT (which contains copies) ---
+.wait   rdlut   flag, #0        ' Read MY LUT[0] (contains copy from COG 0)
         cmp     flag, #1 wz
   if_nz jmp     #.wait
-        rdluts  message, #10    ' Read COG 0's LUT[10]
+        rdlut   message, #10    ' Read MY LUT[10] (contains copy from COG 0)
 ```
 :::
 
-The instructions are:
-- **SETLUTS**: Enable shared LUT reading
-- **RDLUTS**: Read from neighbor COG's LUT
+The key instruction is:
+- **SETLUTS**: Enable write copying - when neighbor writes with WRLUT, data is copied to YOUR LUT
+- **RDLUT**: Read your own LUT (which now contains copied data)
 
-This gives you a 512-long shared buffer between COG pairs without touching hub memory at all. Perfect for high-bandwidth data passing!
+Important: The consumer COG must enable SETLUTS *before* the producer writes, otherwise the writes won't be copied!
+
+This gives you a 512-long shared buffer between COG pairs without touching hub memory. Perfect for high-bandwidth data passing!
 
 ::: sidetrack
 **Which COGs Are Neighbors?**
@@ -4422,17 +4585,20 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 :::
 
 ::: antipattern
-**❌ WRONG: Forgetting SETLUTS for sharing**
+**❌ WRONG: Reading LUT before neighbor writes**
 ```pasm2
-' WRONG - RDLUTS fails without SETLUTS
-        rdluts  data, #10       ' Won't work!
+' WRONG - No data to read yet!
+        setluts #1              ' Enable sharing
+        rdlut   data, #10       ' Empty - neighbor hasn't written!
 ```
 
-**✓ RIGHT: Enable sharing first**
+**✓ RIGHT: Wait for neighbor's write signal**
 ```pasm2
-' RIGHT - Enable LUT sharing first
-        setluts #1              ' Enable sharing
-        rdluts  data, #10       ' Now it works
+' RIGHT - Wait for data to be copied
+        setluts #1              ' Enable sharing BEFORE neighbor writes
+.wait   rdlut   ready, #0       ' Check flag in MY LUT
+        tjz     ready, #.wait   ' Wait until neighbor writes
+        rdlut   data, #10       ' Now MY LUT has copied data
 ```
 :::
 
@@ -4445,8 +4611,7 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 |-------------|-----------|--------|
 | **RDLUT** D, S | Read LUT[S] into D | 3 |
 | **WRLUT** D, S | Write D to LUT[S] | 2 |
-| **RDLUTS** D, S | Read neighbor's LUT[S] | 3 |
-| **SETLUTS** | Enable LUT sharing | 2 |
+| **SETLUTS** D | Enable LUT write copying (D[0]=1) | 2 |
 
 **Memory Map:**
 - LUT addresses: 0-511 (512 longs = 2KB)
@@ -4891,6 +5056,48 @@ The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 | %110 | Pin rises |
 | %111 | Pin falls |
 
+### EVENT_* Constants: When You Need Interrupts
+
+While dedicated COGs are usually better than interrupts (see Chapter 11), sometimes you need them. The **SETINT1/2/3** instructions select which event triggers an interrupt using these constants:
+
+| Constant | Value | Description | When It Fires |
+|----------|-------|-------------|---------------|
+| `EVENT_INT` | %0000 | Edge/level on interrupt pin | Pin matches configuration |
+| `EVENT_CT1` | %0001 | CT equals CT1 | Timer 1 reaches target |
+| `EVENT_CT2` | %0010 | CT equals CT2 | Timer 2 reaches target |
+| `EVENT_CT3` | %0011 | CT equals CT3 | Timer 3 reaches target |
+| `EVENT_SE1` | %0100 | SE1 event occurred | Selectable event 1 triggers |
+| `EVENT_SE2` | %0101 | SE2 event occurred | Selectable event 2 triggers |
+| `EVENT_SE3` | %0110 | SE3 event occurred | Selectable event 3 triggers |
+| `EVENT_SE4` | %0111 | SE4 event occurred | Selectable event 4 triggers |
+| `EVENT_PAT` | %1000 | Pin pattern match | SETPAT pattern detected |
+| `EVENT_FBW` | %1001 | FIFO block wrap | Hub FIFO wrapped around |
+| `EVENT_XMT` | %1010 | Streamer empty | Streamer needs data |
+| `EVENT_XFI` | %1011 | Streamer finished | Streamer operation complete |
+| `EVENT_XRO` | %1100 | Streamer NCO rollover | NCO frequency counter rolled |
+| `EVENT_XRL` | %1101 | Streamer pattern match | Streamer matched pattern |
+| `EVENT_ATN` | %1110 | Attention from COG | Another COG signaled |
+| `EVENT_QMT` | %1111 | CORDIC/PIX done | Math operation complete |
+
+**Using EVENT_* with SETINT:**
+
+::: pasm2
+```
+' Enable INT1 when SE1 event occurs
+        setse1  #%001<<6 + RX_PIN       ' SE1 = IN rise on RX_PIN
+        setint1 #EVENT_SE1              ' INT1 fires when SE1 triggers
+
+' Enable INT2 on timer match
+        addct2  target, ##200_000       ' Set timer 2 target
+        setint2 #EVENT_CT2              ' INT2 fires when CT = CT2
+
+' Enable INT3 when another COG signals
+        setint3 #EVENT_ATN              ' INT3 fires on COGATN
+```
+:::
+
+**Pro tip**: You can also use these constants with WAITSE/POLLSE by first triggering them with the appropriate hardware condition, then waiting. But for most purposes, the SETSE mode bits (the table above this one) are what you'll configure directly.
+
 ### Smart Pin Events
 
 The most common use is waiting for a Smart Pin to have data:
@@ -5237,14 +5444,21 @@ Watch this system architecture come alive:
 ```
 ' Main orchestrator (COG 0)
 main_orchestrator
-        ' Launch the orchestra
-        coginit #1, @sensor_cog, @sensor_params
-        coginit #2, @motor_cog, @motor_params
-        coginit #3, @comms_cog, @comms_params
-        coginit #4, @display_cog, @display_params
-        coginit #5, @safety_cog, @safety_params
-        coginit #6, @logger_cog, @logger_params
-        coginit #7, @debug_cog, @debug_params
+        ' Launch the orchestra (SETQ sets PTRA for new COG)
+        setq    @sensor_params
+        coginit #1, @sensor_cog
+        setq    @motor_params
+        coginit #2, @motor_cog
+        setq    @comms_params
+        coginit #3, @comms_cog
+        setq    @display_params
+        coginit #4, @display_cog
+        setq    @safety_params
+        coginit #5, @safety_cog
+        setq    @logger_params
+        coginit #6, @logger_cog
+        setq    @debug_params
+        coginit #7, @debug_cog
         
         ' Now coordinate them all
 orchestrate
@@ -5424,10 +5638,14 @@ sensor_cog
         waitx   ##1000
         drvl    #TRIGGER_PIN
         
-        ' Measure echo time
-        waitpeq #ECHO_PIN, #ECHO_PIN
+        ' Measure echo time - wait for rising edge
+.wait_hi
+        testp   #ECHO_PIN wz
+  if_nz jmp     #.wait_hi
         getct   start_time
-        waitpne #ECHO_PIN, #ECHO_PIN
+.wait_lo                              ' Wait for falling edge
+        testp   #ECHO_PIN wz
+  if_z  jmp     #.wait_lo
         getct   end_time
         
         ' Calculate distance
@@ -5901,8 +6119,7 @@ Engineers who've fought interrupt priority inversions, missed timing deadlines, 
 - Flow control: Ch3
 
 ### G
-- GETMULH: Ch5
-- GETQX/GETQY: Ch7
+- GETQX/GETQY: Ch5, Ch7
 
 ### H
 - Hardware multiply: Ch5
