@@ -62,6 +62,7 @@
 \RequirePackage[table]{xcolor}
 \RequirePackage{tabularray}  % Modern table package - replaces tabularx for encoding tables
 \UseTblrLibrary{booktabs}    % Enable booktabs-style rules in tabularray
+\UseTblrLibrary{longtables}  % Enable longtblr for multi-page tables (30+ rows)
 \RequirePackage{environ}     % For capturing environment body
 \RequirePackage{fancyhdr}
 \RequirePackage{titlesec}
@@ -172,6 +173,7 @@
 
 % ==================== HYPERREF SETUP ====================
 % Links must be visually distinct - use clear blue color
+% Note: Pandoc may inject its own hypersetup, so we force ours with \AtBeginDocument
 
 \hypersetup{
   colorlinks=true,
@@ -179,12 +181,18 @@
   urlcolor=blue,
   citecolor=blue,
   hidelinks=false,
+  linktoc=all,                    % Make BOTH title AND page number clickable in TOC
   % PDF Navigation Pane (sidebar TOC)
   bookmarks=true,
   bookmarksnumbered=true,
   bookmarksopen=true,
   bookmarksopenlevel=2,
   pdfpagemode=UseOutlines
+}
+
+% Force link colors AFTER all packages load (overrides any Pandoc injection)
+\AtBeginDocument{%
+  \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hidelinks=false}%
 }
 
 % ==================== CODE ENVIRONMENTS ====================

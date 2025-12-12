@@ -1,7 +1,7 @@
 -- P2KB PASM2 Table Formatting Filter
 -- Conservative fix: constrain tables to page width, last column wraps
 -- Author: Iron Sheep Productions, LLC
--- Version: 5.2 - Added longtblr for large tables (30+ rows) to allow page breaks
+-- Version: 5.4 - Fixed Condition Code Table column widths (overlapping columns)
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -294,6 +294,32 @@ local function is_operator_description_example_table(el)
   return false
 end
 
+-- Detect if this is a Condition Code Table (Chapter 2.2.1 pattern)
+-- 5 columns: EEEE | Primary Mnemonic | Aliases | Condition | Description
+-- Needs specific widths because Aliases column has long comma-separated lists
+local function is_condition_code_table(el)
+  if #el.colspecs ~= 5 then
+    return false
+  end
+
+  -- Check header row for "EEEE" in first column (unique identifier)
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 5 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):upper()
+      local h3 = pandoc.utils.stringify(header_row.cells[3].contents):lower()
+      local h4 = pandoc.utils.stringify(header_row.cells[4].contents):lower()
+
+      -- Match "EEEE | ... | Aliases | Condition | ..." pattern
+      if h1 == "EEEE" and h3:match("alias") and h4:match("condition") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
 -- Detect tables that should auto-shrink to content width (no forced full-width)
 -- These are compact reference tables where content is short and wrapping looks bad
 local function should_auto_shrink(el)
@@ -445,6 +471,10 @@ local function handle_content_table(el)
   -- These need consistent widths to prevent Operator column cramping Description
   local is_op_desc_ex = is_operator_description_example_table(el)
 
+  -- Special handling for Condition Code Table (Chapter 2.2.1)
+  -- Needs optimized widths: EEEE is narrow, Aliases needs room for comma-separated lists
+  local is_cond_code = is_condition_code_table(el)
+
   -- Extract column widths from Pandoc's colspecs
   -- colspecs is a list of {alignment, width} pairs
   -- width is nil if not specified, or a fraction (0.0-1.0) of line width
@@ -506,6 +536,19 @@ local function handle_content_table(el)
     widths[2] = 0.43
     widths[3] = 0.40
     has_widths = true
+  elseif is_cond_code then
+    -- Condition Code Table (Chapter 2.2.1)
+    -- Column 1 (EEEE): 6% - just 4 chars like "0000"
+    -- Column 2 (Primary Mnemonic): 16% - like "IF_NC_AND_NZ"
+    -- Column 3 (Aliases): 30% - comma-separated lists like "IF_NZ_AND_NC, IF_GT, IF_A, IF_00"
+    -- Column 4 (Condition): 13% - like "C=0 AND Z=0"
+    -- Column 5 (Description): 30% - explanatory text
+    widths[1] = 0.06
+    widths[2] = 0.16
+    widths[3] = 0.30
+    widths[4] = 0.13
+    widths[5] = 0.30
+    has_widths = true
   elseif has_widths and total_specified > 0 then
     -- Scale widths to sum to ~0.95 (leave room for padding)
     local scale = 0.95 / total_specified
@@ -558,8 +601,10 @@ local function handle_content_table(el)
   end
 
   -- Count rows to decide between tblr and longtblr
+  -- Threshold lowered to 12 because tables with wrapped content (like Condition Code Table
+  -- with 16 rows) can exceed one page height even with fewer rows
   local row_count = count_data_rows(el)
-  local use_longtblr = row_count > 30  -- Use longtblr for tables with 30+ rows
+  local use_longtblr = row_count > 12  -- Use longtblr for tables with 12+ rows
 
   -- Build tabularray LaTeX
   local latex = {}

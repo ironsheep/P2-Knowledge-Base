@@ -14,7 +14,18 @@ Track improvement opportunities identified during development that we're intenti
 
 ## Deferred Improvements
 
-- [Add deferred work items here]
+- [2025-12-12] **Internal links not visually distinct in PDF**
+  - Problem: Hyperlinks within the document (instruction cross-references, TOC entries) work correctly but have no visual indicator (no blue color, no underline)
+  - Cursor changes to hand pointer on hover, but there's no static visual cue
+  - Attempted fixes that didn't work:
+    - `colorlinks=true, linkcolor=blue` in hypersetup
+    - `hidelinks=false` explicitly set
+    - `\AtBeginDocument{\hypersetup{...}}` to force settings after Pandoc
+  - Possible future approaches:
+    - Use `pdfborderstyle={/S/U/W 0.5}` for underlined links
+    - Define explicit RGB color instead of named `blue`
+    - Investigate if Pandoc's PDF engine is overriding hyperref settings
+    - Check PDF Forge's Pandoc configuration for conflicting options
 
 ---
 

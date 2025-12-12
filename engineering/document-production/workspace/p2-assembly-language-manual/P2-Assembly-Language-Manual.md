@@ -4510,7 +4510,7 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 **Addition/Subtraction:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
 
-**Negation/Absolute:** [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negnc), [NEGNZ](#negnz), [NEGZ](#negz)
+**Negation/Absolute:** [ABS](#abs), [NEG](#neg), [NEGC](#negc), [NEGNC](#negc), [NEGNZ](#negc), [NEGZ](#negc)
 
 **Multiplication:** [MUL](#mul), [MULS](#muls), [SCA](#sca), [SCAS](#scas)
 
@@ -4522,7 +4522,7 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 **Bitwise Logic:** [AND](#and), [ANDN](#andn), [OR](#or), [XOR](#xor), [NOT](#not), [XORO32](#xoro32)
 
-**Bit Field Operations:** [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitnc), [BITNOT](#bitnot), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITZ](#bitz), [TESTB](#testb), [TESTBN](#testbn)
+**Bit Field Operations:** [BITC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNC](#bitc), [BITNOT](#bitnot), [BITNZ](#bitc), [BITRND](#bitrnd), [BITZ](#bitc), [TESTB](#testb), [TESTBN](#testbn)
 
 **Bit Utilities:** [BMASK](#bmask), [DECOD](#decod), [ENCOD](#encod), [ONES](#ones), [REV](#rev), [SIGNX](#signx), [ZEROX](#zerox)
 
@@ -4534,11 +4534,11 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 **Byte/Word Packing:** [MOVBYTS](#movbyts), [SPLITB](#splitb), [SPLITW](#splitw), [MERGEB](#mergeb), [MERGEW](#mergew)
 
-**Mux Operations:** [MUXC](#muxc), [MUXNC](#muxnc), [MUXNZ](#muxnz), [MUXZ](#muxz), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Mux Operations:** [MUXC](#muxc), [MUXNC](#muxc), [MUXNZ](#muxc), [MUXZ](#muxc), [MUXQ](#muxq), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
-**Conditional Sum:** [SUMC](#sumc), [SUMNC](#sumnc), [SUMNZ](#sumnz), [SUMZ](#sumz)
+**Conditional Sum:** [SUMC](#sumc), [SUMNC](#sumc), [SUMNZ](#sumc), [SUMZ](#sumc)
 
-**Flag Operations:** [WRC](#wrc), [WRNC](#wrnc), [WRNZ](#wrnz), [WRZ](#wrz), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
+**Flag Operations:** [WRC](#wrc), [WRNC](#wrc), [WRNZ](#wrc), [WRZ](#wrc), [MODC](#modc), [MODZ](#modz), [MODCZ](#modcz)
 
 **Instruction Field Modification:** [SETD](#setd), [SETS](#sets), [SETR](#setr)
 
@@ -4554,7 +4554,7 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 Branch instructions control program flow by modifying the program counter. This category includes conditional and unconditional jumps, subroutine calls using stack or pointer registers, returns from subroutines and interrupts, and instruction skipping/repeating mechanisms.
 
-[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djnz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijnz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi1), [RESI2](#resi2), [RESI3](#resi3), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti1), [RETI2](#reti2), [RETI3](#reti3), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjnf), [TJNS](#tjns), [TJNZ](#tjnz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
+[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi0), [RESI2](#resi0), [RESI3](#resi0), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti0), [RETI2](#reti0), [RETI3](#reti0), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjf), [TJNS](#tjs), [TJNZ](#tjz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
 
 ---
 
@@ -4578,15 +4578,15 @@ Lookup table (LUT) instructions access the 512-long LUT memory private to each c
 
 Pin instructions control the P2's 64 I/O pins. Basic pin operations set direction (input/output) and output level (high/low). Smart pin instructions configure and communicate with the autonomous smart pin state machines that can perform complex I/O functions independent of cog processing.
 
-**Direction Control:** [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRNZ](#dirnz), [DIRRND](#dirrnd), [DIRZ](#dirz)
+**Direction Control:** [DIRC](#dirc), [DIRH](#dirh), [DIRL](#dirl), [DIRNC](#dirc), [DIRNOT](#dirnot), [DIRNZ](#dirz), [DIRRND](#dirrnd), [DIRZ](#dirz)
 
-**Output Control:** [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outnc), [OUTNOT](#outnot), [OUTNZ](#outnz), [OUTRND](#outrnd), [OUTZ](#outz)
+**Output Control:** [OUTC](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNC](#outc), [OUTNOT](#outnot), [OUTNZ](#outc), [OUTRND](#outrnd), [OUTZ](#outc)
 
-**Drive (Direction + Output):** [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvnc), [DRVNOT](#drvnot), [DRVNZ](#drvnz), [DRVRND](#drvrnd), [DRVZ](#drvz)
+**Drive (Direction + Output):** [DRVC](#drvc), [DRVH](#drvh), [DRVL](#drvl), [DRVNC](#drvc), [DRVNOT](#drvnot), [DRVNZ](#drvz), [DRVRND](#drvrnd), [DRVZ](#drvz)
 
-**Float (Input with Preset):** [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltnc), [FLTNOT](#fltnot), [FLTNZ](#fltnz), [FLTRND](#fltrnd), [FLTZ](#fltz)
+**Float (Input with Preset):** [FLTC](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNC](#fltc), [FLTNOT](#fltnot), [FLTNZ](#fltc), [FLTRND](#fltrnd), [FLTZ](#fltc)
 
-**Pin Testing:** [TESTP](#testp), [TESTPN](#testpn)
+**Pin Testing:** [TESTP](#testp), [TESTPN](#testp)
 
 **Smart Pin Control:** [AKPIN](#akpin), [RDPIN](#rdpin), [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
@@ -4598,17 +4598,17 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 
 Event instructions monitor and respond to system events including counter/timer triggers, smart pin signals, FIFO status, streamer conditions, and inter-cog attention signals. They provide configuration, polling, waiting, and conditional branching mechanisms for synchronization.
 
-**Configuration:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4)
+**Configuration:** [ADDCT1](#addct1), [ADDCT2](#addct1), [ADDCT3](#addct1), [SETPAT](#setpat), [SETSE1](#setse1), [SETSE2](#setse1), [SETSE3](#setse1), [SETSE4](#setse1)
 
 **Inter-COG:** [COGATN](#cogatn)
 
-**Polling:** [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse2), [POLLSE3](#pollse3), [POLLSE4](#pollse4), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
+**Polling:** [POLLATN](#pollatn), [POLLCT1](#pollct1), [POLLCT2](#pollct1), [POLLCT3](#pollct1), [POLLFBW](#pollfbw), [POLLINT](#pollint), [POLLPAT](#pollpat), [POLLQMT](#pollqmt), [POLLSE1](#pollse1), [POLLSE2](#pollse1), [POLLSE3](#pollse1), [POLLSE4](#pollse1), [POLLXFI](#pollxfi), [POLLXMT](#pollxmt), [POLLXRL](#pollxrl), [POLLXRO](#pollxro)
 
-**Waiting:** [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
+**Waiting:** [WAITATN](#waitatn), [WAITCT1](#waitct1), [WAITCT2](#waitct1), [WAITCT3](#waitct1), [WAITFBW](#waitfbw), [WAITINT](#waitint), [WAITPAT](#waitpat), [WAITSE1](#waitse1), [WAITSE2](#waitse1), [WAITSE3](#waitse1), [WAITSE4](#waitse1), [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro)
 
-**Branch on Event Set:** [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
+**Branch on Event Set:** [JATN](#jatn), [JCT1](#jct1), [JCT2](#jct1), [JCT3](#jct1), [JFBW](#jfbw), [JINT](#jint), [JPAT](#jpat), [JQMT](#jqmt), [JSE1](#jse1), [JSE2](#jse1), [JSE3](#jse1), [JSE4](#jse1), [JXFI](#jxfi), [JXMT](#jxmt), [JXRL](#jxrl), [JXRO](#jxro)
 
-**Branch on Event Clear:** [JNATN](#jnatn), [JNCT1](#jnct1), [JNCT2](#jnct2), [JNCT3](#jnct3), [JNFBW](#jnfbw), [JNINT](#jnint), [JNPAT](#jnpat), [JNQMT](#jnqmt), [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JNXFI](#jnxfi), [JNXMT](#jnxmt), [JNXRL](#jnxrl), [JNXRO](#jnxro)
+**Branch on Event Clear:** [JNATN](#jatn), [JNCT1](#jct1), [JNCT2](#jct1), [JNCT3](#jct1), [JNFBW](#jfbw), [JNINT](#jint), [JNPAT](#jpat), [JNQMT](#jqmt), [JNSE1](#jse1), [JNSE2](#jse1), [JNSE3](#jse1), [JNSE4](#jse1), [JNXFI](#jxfi), [JNXMT](#jxmt), [JNXRL](#jxrl), [JNXRO](#jxro)
 
 ---
 
@@ -4616,7 +4616,7 @@ Event instructions monitor and respond to system events including counter/timer 
 
 Interrupt instructions control the cog's three-level interrupt system (INT1, INT2, INT3) plus the debug interrupt (INT0). This includes enabling/disabling interrupts, configuring interrupt sources, triggering software interrupts, and managing breakpoints for debugging.
 
-[ALLOWI](#allowi), [BRK](#brk), [COGBRK](#cogbrk), [GETBRK](#getbrk), [NIXINT1](#nixint1), [NIXINT2](#nixint2), [NIXINT3](#nixint3), [SETINT1](#setint1), [SETINT2](#setint2), [SETINT3](#setint3), [STALLI](#stalli), [TRGINT1](#trgint1), [TRGINT2](#trgint2), [TRGINT3](#trgint3)
+[ALLOWI](#allowi), [BRK](#brk), [COGBRK](#cogbrk), [GETBRK](#getbrk), [NIXINT1](#nixint1), [NIXINT2](#nixint1), [NIXINT3](#nixint1), [SETINT1](#setint1), [SETINT2](#setint1), [SETINT3](#setint1), [STALLI](#stalli), [TRGINT1](#trgint1), [TRGINT2](#trgint1), [TRGINT3](#trgint1)
 
 ---
 
