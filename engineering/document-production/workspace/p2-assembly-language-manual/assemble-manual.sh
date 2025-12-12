@@ -26,6 +26,7 @@ declare -a REQUIRED_FILES=(
     "part-i/chapter-03-flags.md"
     "part-i/chapter-04-timing.md"
     "part-i/chapter-05-hardware.md"
+    "part-i/chapter-06-address-modes.md"
     "part-ii/instruction-categories.md"
     "part-ii/instructions-a.md"
     "part-ii/instructions-b.md"
@@ -117,6 +118,7 @@ assemble_section "part-i/chapter-02-instruction-format.md" "Chapter 2: Instructi
 assemble_section "part-i/chapter-03-flags.md" "Chapter 3: Flags"
 assemble_section "part-i/chapter-04-timing.md" "Chapter 4: Timing"
 assemble_section "part-i/chapter-05-hardware.md" "Chapter 5: Hardware"
+assemble_section "part-i/chapter-06-address-modes.md" "Chapter 6: Address Modes"
 
 # Part II Marker
 echo "  Adding: Part II marker"
@@ -194,9 +196,9 @@ echo ""
 # Structure summary
 echo "Document Structure:"
 echo "  - Front Matter: 1 file"
-echo "  - Part I (Architectural Foundation): 5 chapters"
+echo "  - Part I (Architectural Foundation): 6 chapters"
 echo "  - Part II (Instruction Set Reference): 24 instruction files + 2 reference sections"
-echo "  - Part III (Reference Tables): 8 appendices"
+echo "  - Part III (Reference Tables): 9 appendices"
 echo ""
 
 # File size

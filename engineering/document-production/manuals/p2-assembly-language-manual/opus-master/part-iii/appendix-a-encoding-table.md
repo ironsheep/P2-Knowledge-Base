@@ -66,7 +66,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
 | CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
 | CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLD | `---` | — | 4 / 13-20 | — | — |
+| CALLD | `1011001` | CZI | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
 | CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D=S |
@@ -183,9 +183,9 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | MODZ | `1101011` | — | 2 | — | zzzz[{C,Z}] |
 | MOV | `0110000` | CZI | 2 | S[31] | Result = 0 |
 | MOVBYTS | `1001111` | — | 2 | — | — |
-| MUL | `1010000` | I | 2 | — | (D = 0) | (S = 0) |
+| MUL | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
 | MULPIX | `1010010` | — | 7 | — | — |
-| MULS | `1010000` | I | 2 | — | (D = 0) | (S = 0) |
+| MULS | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
 | MUXC | `0101100` | CZI | 2 | parity of result | Result = 0 |
 | MUXNC | `0101101` | CZI | 2 | parity of result | Result = 0 |
 | MUXNIBS | `1001111` | — | 2 | — | — |
@@ -329,7 +329,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S) | Result = 0 |
 | SUMNZ | `0011111` | CZI | 2 | correct sign of (D +/- S) | 0 then D = D - S, else D = D + S |
 | SUMZ | `0011110` | CZI | 2 | correct sign of (D +/- S) | 1 then D = D - S, else D = D + S |
-| TEST | `0111110` | CZ | 2 | Parity of D | D = 0 |
+| TEST | `0111110` | CZ | 2 | Parity of (D & S) | (D & S) = 0 |
 | TESTB | `0100000` | CZI | 2 | D[S[4:0]] | D[S[4:0]] |
 | TESTBN | `0100001` | CZI | 2 | !D[S[4:0]] | !D[S[4:0]] |
 | TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) = 0 |
@@ -385,7 +385,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | XZERO | `1100101` | — | 2+ | — | — |
 | ZEROX | `0111010` | CZI | 2 | MSB of result | Result = 0 |
 
-**Total Instructions:** 359
+**Total Instructions:** 359 (357 executable + 2 compiler directives)
 
 
 

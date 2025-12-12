@@ -280,6 +280,63 @@ Required arguments are documented in `request-requirements.json`.
 
 ---
 
+## Release Process
+
+When a PDF is ready for distribution:
+
+### 1. Update Version in Source Files
+
+**Changelog** (in opus-master):
+```
+../../manuals/p2-assembly-language-manual/opus-master/CHANGELOG.md
+```
+- Add new version section at top (e.g., `## v1.1.0 (2025-12-12)`)
+- Document all changes since last release
+
+**request.json** (in workspace):
+- Update `metadata.version` field to match (e.g., `"Version 1.1.0"`)
+
+### 2. Promote to Deliverables
+
+After PDF Forge generates the final PDF:
+
+```bash
+# Deliverables folder (at repository root)
+DOCS="/workspaces/P2-Knowledge-Base/deliverables/documents/DOCs"
+
+# Copy PDF (user provides from PDF Forge output)
+cp <path-to-generated-pdf> "$DOCS/P2-Assembly-Language-Manual.pdf"
+
+# Copy changelog
+cp ../../manuals/p2-assembly-language-manual/opus-master/CHANGELOG.md \
+   "$DOCS/p2-assembly-language-manual-changelog.md"
+```
+
+### 3. Deliverables Structure
+
+```
+deliverables/documents/DOCs/
+├── P2-Assembly-Language-Manual.pdf           # Latest PDF
+└── p2-assembly-language-manual-changelog.md  # Cumulative changelog
+```
+
+**Naming Convention:**
+- Filenames are **versionless** - always the same name
+- Version numbers live **inside** the documents (PDF title page, changelog headers)
+- Git provides version history - checkout any tag to get that release
+- Changelog is cumulative - newest version at top
+
+### 4. Tag the Release
+
+```bash
+git add .
+git commit -m "Release p2-assembly-language-manual v1.1.0"
+git tag -a p2-assembly-language-manual-v1.1.0 -m "P2 Assembly Language Manual v1.1.0"
+```
+
+---
+
 *Created: 2025-11-28*
 *Updated: 2025-12-01 - Added PDF Forge workflow, file naming conventions*
+*Updated: 2025-12-12 - Added Release Process section*
 *Sprint: PASM2 Manual Generation*

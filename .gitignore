@@ -145,6 +145,9 @@ archive-old/
 # Workspace test documents (not versioned)
 /engineering/document-production/workspace/*/test-documents/
 
+# Audit working files (internal QA, not versioned - changelog captures results)
+engineering/document-production/manuals/*/audit/
+
 # Todo MCP working directory
 tasks/
 

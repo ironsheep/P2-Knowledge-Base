@@ -40,24 +40,32 @@ The condition field enables conditional execution of any instruction. The instru
 
 ### 2.2.1 Condition Code Table
 
-| EEEE | Mnemonic | Condition | Description |
-|:-----|:-------------|:-------------|:------------------------------------------|
-| 0000 | _RET_ | Always | Execute instruction, then return if no branch |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Neither carry nor zero |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | C=0 | No carry (unsigned ≥, signed ≥) |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | Z=0 | Not zero |
-| 0110 | IF_C_NE_Z | C≠Z | Carry not equal to zero |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | No carry or not zero |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Carry and zero |
-| 1001 | IF_C_EQ_Z | C=Z | Carry equals zero |
-| 1010 | IF_Z | Z=1 | Zero |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | C=1 | Carry (unsigned <, signed <) |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Carry or zero |
-| 1111 | (always) | Always | Unconditional execution |
+| EEEE | Primary Mnemonic | Aliases | Condition | Description |
+|:-----|:-----------------|:--------|:----------|:------------|
+| 0000 | _RET_ | | Always | Execute, then return if no branch |
+| 0001 | IF_NC_AND_NZ | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 | C=0 AND Z=0 | After CMP: greater than (signed) / above (unsigned) |
+| 0010 | IF_NC_AND_Z | IF_Z_AND_NC, IF_01 | C=0 AND Z=1 | No carry and zero |
+| 0011 | IF_NC | IF_GE, IF_AE, IF_0X | C=0 | After CMP: greater or equal (signed) / above or equal (unsigned) |
+| 0100 | IF_C_AND_NZ | IF_NZ_AND_C, IF_10 | C=1 AND Z=0 | Carry and not zero |
+| 0101 | IF_NZ | IF_NE, IF_X0 | Z=0 | Not zero; after CMP: not equal |
+| 0110 | IF_C_NE_Z | IF_Z_NE_C, IF_DIFF | C≠Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | IF_NZ_OR_NC, IF_NOT_11 | C=0 OR Z=0 | Not both flags set |
+| 1000 | IF_C_AND_Z | IF_Z_AND_C, IF_11 | C=1 AND Z=1 | Both flags set |
+| 1001 | IF_C_EQ_Z | IF_Z_EQ_C, IF_SAME | C=Z | C and Z flags same |
+| 1010 | IF_Z | IF_E, IF_X1 | Z=1 | Zero; after CMP: equal |
+| 1011 | IF_NC_OR_Z | IF_Z_OR_NC, IF_NOT_10 | C=0 OR Z=1 | No carry or zero |
+| 1100 | IF_C | IF_LT, IF_B, IF_1X | C=1 | After CMP: less than (signed) / below (unsigned) |
+| 1101 | IF_C_OR_NZ | IF_NZ_OR_C, IF_NOT_01 | C=1 OR Z=0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 | C=1 OR Z=1 | After CMP: less or equal (signed) / below or equal (unsigned) |
+| 1111 | IF_ALWAYS | | Always | Unconditional (default when no prefix) |
+
+**Alias Categories:**
+
+- **Commutative forms:** IF_NZ_AND_NC = IF_NC_AND_NZ (same condition, alternate word order)
+- **Comparison aliases:** IF_GT, IF_GE, IF_LT, IF_LE (signed); IF_A, IF_AE, IF_B, IF_BE (unsigned)
+- **Equality aliases:** IF_E (equal), IF_NE (not equal)
+- **Flag pattern aliases:** IF_SAME (C=Z), IF_DIFF (C≠Z)
+- **Bit pattern aliases:** IF_00, IF_01, IF_10, IF_11 (exact CZ pattern); IF_0X, IF_1X, IF_X0, IF_X1 (partial match); IF_NOT_xx (inverted)
 
 ### 2.2.2 The _RET_ Condition
 
@@ -138,7 +146,73 @@ _ret_   mov     result, ina             ' Execute MOV, then return
 
 This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
 
-### 2.2.3 Conditional Execution Patterns
+### 2.2.3 Signed vs. Unsigned Comparison Condition Codes
+
+When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two parallel sets of comparison aliases: **signed** (using two's complement interpretation) and **unsigned** (treating values as positive magnitudes).
+
+**Why Two Sets?**
+
+The same flag state has different meanings depending on whether values are signed or unsigned:
+
+| Comparison Result | Flag State | Unsigned Alias | Signed Alias |
+|:------------------|:-----------|:---------------|:-------------|
+| Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
+| Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
+| Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
+| Less or equal | C=1 OR Z=1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
+| Equal | Z=1 | IF_E | IF_E |
+| Not equal | Z=0 | IF_NE | IF_NE |
+
+**Signed Comparisons (IF_LT, IF_GT, IF_LE, IF_GE):**
+
+Use these when operands represent signed quantities (two's complement). The comparison correctly handles negative numbers:
+
+```pasm
+        mov     x, ##-100               ' x = -100 (signed)
+        mov     y, #50                  ' y = 50
+        cmps    x, y            wc wz   ' Signed compare: -100 vs 50
+if_lt   jmp     #x_is_smaller           ' True: -100 < 50 (signed)
+```
+
+**Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
+
+Use these when operands represent unsigned quantities (addresses, bit patterns, counters):
+
+```pasm
+        mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
+        cmp     addr, #0        wc wz   ' Unsigned compare
+if_a    jmp     #addr_is_larger         ' True: 2,147,483,648 > 0 (unsigned)
+                                        ' Note: IF_GT would be false (signed: negative)
+```
+
+**Choosing the Right Comparison:**
+
+| Data Type | Use | Example |
+|:----------|:----|:--------|
+| Memory addresses | Unsigned (IF_A, IF_B, etc.) | `cmp ptr, limit wc` then `if_ae` |
+| Loop counters (0 to N) | Unsigned | `cmp count, #MAX wc` then `if_b` |
+| Signed integers | Signed (IF_GT, IF_LT, etc.) | `cmps temp, #0 wc` then `if_lt` |
+| Temperature, position, velocity | Signed | `cmps delta, #0 wc wz` then `if_ge` |
+| Bit patterns, masks | Unsigned | `cmp flags, mask wc wz` |
+
+**CMP vs. CMPS:**
+
+- **CMP** performs unsigned subtraction (for setting flags)
+- **CMPS** performs signed subtraction (for setting flags)
+
+Match your compare instruction to your condition alias for correct results:
+
+```pasm
+' Unsigned comparison
+        cmp     a, b            wc wz
+if_ae   mov     result, #1              ' Unsigned: a >= b
+
+' Signed comparison
+        cmps    a, b            wc wz
+if_ge   mov     result, #1              ' Signed: a >= b
+```
+
+### 2.2.4 Conditional Execution Patterns
 
 Conditional execution eliminates branches, providing deterministic timing:
 
@@ -422,6 +496,24 @@ The AUG instruction must immediately precede the instruction it augments:
 4. The augmentation is consumed (one-shot)
 
 If any instruction intervenes (including a conditional NOP), the augmentation is lost.
+
+**Timing Overhead:**
+
+Each AUG instruction adds **+2 clock cycles** to the total execution time. When using `##` notation:
+
+| Operands | AUG Instructions | Additional Cycles |
+|:---------|:-----------------|:------------------|
+| `##Src` only | 1 (AUGS) | +2 cycles |
+| `##Dest` only | 1 (AUGD) | +2 cycles |
+| `##Dest, ##Src` | 2 (AUGD + AUGS) | +4 cycles |
+
+```pasm
+        mov     x, #100                 ' 2 cycles (no augmentation)
+        mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
+        wrlong  ##dest, ##addr          ' 6 cycles minimum (2 + 2 + 2 for AUGD + AUGS)
+```
+
+**Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
 
 ### 2.7.4 When Augmentation is Required
 

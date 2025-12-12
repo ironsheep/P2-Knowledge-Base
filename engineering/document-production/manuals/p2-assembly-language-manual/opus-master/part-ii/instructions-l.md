@@ -61,7 +61,7 @@ Allocate New Lock
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | D | 1 if no LOCK available | --- | 4...11 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | No LOCK available | --- | D | 4...11 |
 
 
 **Related:** [LOCKTRY](#locktry), [LOCKREL](#lockrel), [LOCKRET](#lockret)

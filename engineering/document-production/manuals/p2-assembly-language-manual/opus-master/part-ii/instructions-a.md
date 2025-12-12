@@ -25,8 +25,8 @@ Absolute Value
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
-| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
+| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
+| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D[31] | Result = 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -110,9 +110,9 @@ Add and Set Counter Event Trigger
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
@@ -290,7 +290,7 @@ Acknowledge Smart Pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
+| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | --- | 2 |
 
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)

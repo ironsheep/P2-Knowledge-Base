@@ -170,14 +170,22 @@ Read Byte From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 |
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
 **Explanation:**
 
-RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
 
@@ -208,14 +216,24 @@ Read Fast Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
+| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 2 or WRFAST finish + 10...17 |
+| Hub execution | *Not available—FIFO in use* |
+| COG with interrupts | 2 or WRFAST finish + 10...25 |
+| Hub with interrupts | *Not available—FIFO in use* |
+
+**Note:** FIFO operations require COG execution mode. When code runs from Hub memory, the FIFO is used for instruction fetch and cannot be redirected for data streaming.
 
 
 **Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
 **Explanation:**
 
-RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing.
+RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from COG/LUT memory, not Hub memory.
 
 Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting Hub address. The FIFO automatically wraps at the block boundary.
 
@@ -243,14 +261,22 @@ Read Long From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 |
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
 **Explanation:**
 
-RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple longs can be performed.
 
@@ -356,14 +382,22 @@ Read Word From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 |
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
 **Explanation:**
 
-RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple words can be performed.
 
@@ -545,8 +579,16 @@ Return Via PTRA Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 † |
 
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 11...18 |
+| Hub execution | 20...40 |
+| COG with interrupts | 11...26 |
+| Hub with interrupts | 20...70 |
 
 **Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
@@ -580,8 +622,16 @@ Return Via PTRB Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 † |
 
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 11...18 |
+| Hub execution | 20...40 |
+| COG with interrupts | 11...26 |
+| Hub with interrupts | 20...70 |
 
 **Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 

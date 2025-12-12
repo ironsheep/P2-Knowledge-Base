@@ -26,7 +26,7 @@ Decrement Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
+| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | Result = 0 | D | 2 |
 
 
 **Related:** [INCMOD](#incmod)

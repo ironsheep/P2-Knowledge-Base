@@ -75,6 +75,27 @@ When WZ (Write Z) is specified, the instruction updates the Z flag based on whet
 
 This consistency makes WZ predictable. After any arithmetic, logical, or shift operation with WZ, checking IF_Z tests whether the result was zero. After a comparison with WZ, checking IF_Z tests whether the operands were equal.
 
+**Exception: Extended Instructions (Z AND behavior)**
+
+The extended arithmetic instructions—ADDX, SUBX, ADDSX, SUBSX, CMPX, CMPSX—use a modified Z flag update rule:
+
+```
+Z = Z AND (result == 0)
+```
+
+Instead of simply replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
+
+```pasm
+' 64-bit addition: [hi:lo] += [bhi:blo]
+        add     lo, blo         wc wz   ' Add low 32 bits, Z = (lo_result == 0)
+        addx    hi, bhi         wc wz   ' Add high + carry, Z = Z AND (hi_result == 0)
+        ' Z is now 1 only if BOTH lo and hi results were zero (entire 64-bit result is zero)
+```
+
+Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
+
+**Source Verification:** CSV v35 documents this as "Z = Z AND (Result = 0)" for all extended instructions.
+
 ### 3.2.3 The WCZ Effect
 
 ```pasm
@@ -85,7 +106,48 @@ When WCZ (Write C and Z) is specified, both flags are updated according to their
 
 WCZ is common after comparisons where both the ordering (C) and equality (Z) matter, or after arithmetic operations where both carry detection and zero detection are needed.
 
-### 3.2.4 No Effect (Default)
+### 3.2.4 Special Flag Effects (ANDC/ANDZ/ORC/ORZ/XORC/XORZ)
+
+The TESTB, TESTBN, TESTP, and TESTPN instructions support additional flag effects that perform bitwise operations on the existing flag value rather than replacing it. These enable testing multiple bits and accumulating the results into a single flag.
+
+| Effect | Operation | Description |
+|:-------|:----------|:------------|
+| ANDC | C = C AND bit | AND tested bit into C |
+| ANDZ | Z = Z AND bit | AND tested bit into Z |
+| ORC | C = C OR bit | OR tested bit into C |
+| ORZ | Z = Z OR bit | OR tested bit into Z |
+| XORC | C = C XOR bit | XOR tested bit into C |
+| XORZ | Z = Z XOR bit | XOR tested bit into Z |
+
+Unlike WC and WZ which replace the flag value, these effects combine the tested bit with the existing flag value using the specified boolean operation.
+
+**Use Case: Testing Multiple Bits**
+
+The most common use is testing whether ALL bits in a set are high (AND), or whether ANY bit in a set is high (OR):
+
+```pasm
+' Test if ALL of pins 0, 4, and 7 are high (AND pattern)
+        testp   #0              wc      ' C = pin 0 state
+        testp   #4              andc    ' C = C AND pin 4 state
+        testp   #7              andc    ' C = C AND pin 7 state
+        ' C = 1 only if ALL three pins are high
+
+' Test if ANY of pins 0, 4, or 7 is high (OR pattern)
+        testpn  #0              wc      ' C = NOT pin 0 (so C=0 if pin high)
+        testpn  #4              andc    ' C = C AND NOT pin 4
+        testpn  #7              andc    ' C = C AND NOT pin 7
+        ' C = 0 if ANY pin is high, C = 1 if ALL pins are low
+```
+
+**TESTB vs TESTP:**
+
+- TESTB tests a bit within a register: `TESTB reg, #bit_number`
+- TESTP tests a pin's input state: `TESTP #pin_number`
+- TESTBN and TESTPN test the inverted bit or pin state
+
+**Source Verification:** CSV v35 documents these as `C/Z = C/Z AND/OR/XOR D[S[4:0]]` for TESTB variants and `C/Z = C/Z AND/OR/XOR IN[D[5:0]]` for TESTP variants.
+
+### 3.2.5 No Effect (Default)
 
 ```pasm
         add     result, value           ' Execute operation, preserve flags
@@ -601,6 +663,7 @@ After a multi-long comparison:
 \item The Z flag indicates a zero result or equality across nearly all instructions
 \item Flags persist until explicitly modified—instructions without WC/WZ/WCZ preserve flag values
 \item WC, WZ, and WCZ effects control which flags are updated; the operation always executes
+\item Special effects ANDC/ANDZ/ORC/ORZ/XORC/XORZ combine tested bits with existing flags (TESTx instructions only)
 \item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
 \item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing

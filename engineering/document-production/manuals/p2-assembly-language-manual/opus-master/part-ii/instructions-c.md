@@ -321,7 +321,7 @@ Compare Most Significant Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Result[31] | D=S | 2 |
+| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | D = S | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps)
@@ -438,10 +438,9 @@ Compare and Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | Unsigned(D >= S) | Result = 0 | 2 |
+| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | Result = 0 | D † | 2 |
 
-
-\textsuperscript{1} Dest is only written if Dest >= Src (subtraction was performed).
+† Dest is only written if D >= S (subtraction was performed).
 
 **Related:** [CMP](#cmp), [SUB](#sub)
 
@@ -648,8 +647,9 @@ Cog Identification
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | D if reg and !WC | Cog Running | --- | 2-9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D[3:0] running | --- | D † | 2...9, +2 if result |
 
+† Result written only if D is register and WC not specified.
 
 **Related:** [COGINIT](#coginit), [COGSTOP](#cogstop)
 
@@ -695,8 +695,9 @@ Cog Initialize
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | D if reg and WC | No cog available | --- | 2-9, +2 if result |
+| EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | No cog available | --- | D † | 2...9, +2 if result |
 
+† Result written only if D is register and WC specified; contains launched cog ID.
 
 **Related:** [COGID](#cogid), [COGSTOP](#cogstop)
 

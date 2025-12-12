@@ -18,19 +18,19 @@ Set Bit to Flag State
 
 ---
 
-**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates Z to the original bit state.
+**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates C and Z to the original bit state.
 
 - Dest is a register whose value will have bit(s) set to the flag state.
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
-- WCZ is an optional effect to update the Z flag to the original bit state.
+- WCZ is an optional effect to update C and Z flags to the original bit state.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
@@ -50,7 +50,7 @@ BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag
 
 Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
-If WCZ is specified, the Z flag is set (1) if the original base bit was set, or cleared (0) if it was clear.
+If WCZ is specified, both C and Z flags are set to the original base bit value—set (1) if the original base bit was set, or cleared (0) if it was clear.
 
 
 
@@ -74,7 +74,7 @@ Bit High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
@@ -111,7 +111,7 @@ Bit Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
@@ -148,7 +148,7 @@ Bit Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
@@ -185,7 +185,7 @@ Bit Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)

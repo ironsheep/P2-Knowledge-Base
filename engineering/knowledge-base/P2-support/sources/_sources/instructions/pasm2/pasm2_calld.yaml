@@ -32,7 +32,11 @@ layer2_datasheet:
   extraction_date: 2025-09-06T14:35:25.615406
   source: P2 Datasheet v35
   timing:
-    raw: 4 / 4
+    raw: 4 / 13-20
+    base_cycles_cog: 4
+    base_cycles_hub: 13-20
+    type: variable
+    correction_note: "Fixed 2025-12-12: Was incorrectly 4/4. Silicon doc confirms 4 cycles for COG/LUT, 13-20 cycles for Hub execution."
 layer3_silicon_doc:
   extraction_date: 2025-09-06T14:38:48.033586
   narratives:

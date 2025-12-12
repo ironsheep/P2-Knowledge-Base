@@ -28,9 +28,10 @@ layer2_datasheet:
   extraction_date: 2025-09-06T21:15:50.307091
   source: P2 Datasheet v35
   timing:
-    raw: 2
-    base_cycles: 2
+    raw: 7
+    base_cycles: 7
     type: fixed
+    correction_note: "Fixed 2025-12-12: Was incorrectly 2 cycles. Silicon doc confirms 7 cycles for pixel operations."
 layer3_narrative:
   source: P2 Instructions CSV v35
   description: "Alpha-blend bytes of S into bytes of D, using SETPIV value."

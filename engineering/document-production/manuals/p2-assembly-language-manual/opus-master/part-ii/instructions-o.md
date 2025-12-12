@@ -272,7 +272,7 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
