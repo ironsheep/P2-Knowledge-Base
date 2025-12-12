@@ -87,7 +87,7 @@ For non-blocking result checking, use POLLQMT to test whether the CORDIC pipelin
 ```pasm
         pollqmt             wc              ' C=1 if pipeline empty,
                                             '  C=0 if results pending
-        if_nc getqx result                  ' Only retrieve if results available
+        if_nc   getqx   result              ' Retrieve if available
 ```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
@@ -364,7 +364,7 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
 
 ```pasm
-                pollse1         wc              ' Test event 1, set C if occurred
+                pollse1         wc          ' Test event 1, C if occurred
         if_c    jmp     #handler                ' Branch to handler only if
                                                 '  event fired
 ```
@@ -746,18 +746,18 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
 
 ```pasm
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
-                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal,
-                                                                  '  15pF caps
-                waitx   ##20_000_000/100                          ' Wait 10ms for
-                                                                  '  crystal
-                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to
-                                                                  '  crystal
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1
-                                                                  '  = 160MHz
-                waitx   ##20_000_000/10000                        ' Wait 100µs for
-                                                                  '  PLL lock
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL
-                                                                  '  output
+                ' Enable crystal oscillator with 15pF caps
+                hubset  ##%0000_0001_0000_0000_0000_0000_00_10
+                ' Wait 10ms for crystal stabilization
+                waitx   ##20_000_000/100
+                ' Switch to crystal clock source
+                hubset  ##%0000_0001_0000_0000_0000_0000_10_10
+                ' Configure PLL: /1 * 8 / 1 = 160MHz
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_10
+                ' Wait 100µs for PLL lock
+                waitx   ##20_000_000/10000
+                ' Switch to PLL output
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_11
 ```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
@@ -790,7 +790,7 @@ The basic DEBUG syntax accepts text strings and formatted values:
 
 ```pasm
                 debug("Hello from P2")                  ' Simple text message
-                debug("Count: ", udec(counter))         ' Text with decimal value
+                debug("Count: ", udec(counter))     ' Text with decimal
                 debug("Address: ", uhex(ptr))           ' Hexadecimal display
                 debug("Flags: ", ubin(status))          ' Binary display
 ```
@@ -836,7 +836,7 @@ Sized formatters ensure consistent output width and proper sign extension:
 ```pasm
                 debug(uhex_byte(value))                 ' 2 hex digits: $xx
                 debug(uhex_word(value))                 ' 4 hex digits: $xxxx
-                debug(uhex_long(value))                 ' 8 hex digits: $xxxxxxxx
+                debug(uhex_long(value))             ' 8 hex digits: $xxxxxxxx
                 debug(ubin_byte(flags))                 ' 8 binary digits
 ```
 
@@ -860,15 +860,15 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 **String Display:**
 
 ```pasm
-                debug(zstr(@message))                   ' Zero-terminated string
-                debug(lstr(@text, length))              ' Length-specified string
+                debug(zstr(@message))               ' Zero-terminated string
+                debug(lstr(@text, length))          ' Length-specified string
 ```
 
 **Boolean and Flag Display:**
 
 ```pasm
-                debug(bool(enabled))                    ' Displays TRUE or FALSE
-                debug(c_z)                              ' Shows C and Z flag values
+                debug(bool(enabled))                ' Displays TRUE or FALSE
+                debug(c_z)                          ' Shows C and Z flag values
 ```
 
 **Conditional Output:**
@@ -889,7 +889,7 @@ Beyond text output, DEBUG supports graphical display windows that visualize data
 The first DEBUG statement with a display name creates and configures the window. Inside loops, you update the existing window using the backtick-name syntax:
 
 ```pasm
-                debug(`scope MySignal)              ' CREATE window (before loop)
+                debug(`scope MySignal)          ' CREATE window (before loop)
 
 .loop           rdlong  adc_value, adc_ptr
                 debug(`MySignal adc_value)          ' UPDATE window (in loop)
@@ -948,7 +948,7 @@ TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen
 The LOGIC display shows digital signal timing as a logic analyzer view:
 
 ```pasm
-                debug(`logic PortA)                 ' Create logic analyzer window
+                debug(`logic PortA)             ' Create logic analyzer
 
 .loop           rdbyte  port_state, port_addr
                 debug(`PortA port_state)            ' Send sample to analyzer
@@ -963,7 +963,7 @@ LOGIC displays multiple digital channels with timing relationships, useful for d
 The BITMAP display renders pixel data as an image:
 
 ```pasm
-                debug(`bitmap Display, 320, 240)              ' Create bitmap window
+                debug(`bitmap Display, 320, 240)  ' Create bitmap
                 debug(`Display @framebuffer)                  ' Send pixel data
 ```
 
@@ -1034,12 +1034,12 @@ BITMAP creates a window showing raw pixel data, useful for graphics and video de
 .fast_loop      rdlong  value, ptr
                 call    #process_value
                 djnz    count, #.fast_loop
-                debug("Final value: ", udec_(value))  ' Debug after loop completes
+                debug("Final: ", udec_(value))   ' Debug after loop
 
                 ' RIGHT - Conditional debug for occasional sampling
 .sample_loop    rdlong  value, ptr
                 incmod  sample_cnt, #999    wz
-        if_z    debug(udec_(value))                 ' Only every 1000th iteration
+        if_z    debug(udec_(value))             ' Every 1000th iteration
                 djnz    count, #.sample_loop
 ```
 
@@ -1066,7 +1066,7 @@ For standard DEBUG output (not routed to a visual display window), the debug sys
 ```pasm
                 debug("Starting motor control")     ' Output: Cog2: Starting
                                                     '  motor control
-                debug(udec(speed))                  ' Output: Cog2: speed = 1500
+                debug(udec(speed))              ' Output: Cog2: speed = 1500
 ```
 
 This automatic prefixing applies only to text output. Visual displays (SCOPE, PLOT, TERM, etc.) do not receive the COG prefix because they're typically dedicated to specific COGs or purposes.

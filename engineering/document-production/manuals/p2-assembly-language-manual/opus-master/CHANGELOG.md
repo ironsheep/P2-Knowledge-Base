@@ -39,7 +39,12 @@
 ### Part III: Appendices
 
 #### Appendix A - Encoding Master Table
+- **Instruction Encodings table**: Fixed multi-page rendering (was truncated to first page only). Table now spans all pages with repeating headers.
 - CALLD: Opcode added (`1011001` with CZI effects) - was marked as `---`
+
+#### Appendix B - Categorical Index
+- **Arithmetic Operations table** (112 rows): Fixed multi-page rendering
+- **Events and Timing table** (34 rows): Fixed multi-page rendering
 - MUL: Z flag fixed (markdown table parsing issue with `|` character)
 - MULS: Z flag fixed (same issue)
 - TEST: C and Z flag effects corrected
@@ -74,6 +79,8 @@
 - Code block colors aligned with IDE conventions (Propeller Tool, Spin Tools IDE):
   - PASM2 blocks: Green color family
   - Spin2 blocks: Blue color family
+- Key Concepts boxes: Changed from blue to deep purple to distinguish from Spin2 code blocks
+- Large tables (30+ rows): Now span multiple pages with repeating headers
 - PDF navigation pane enabled (bookmarks sidebar opens automatically)
 
 ---

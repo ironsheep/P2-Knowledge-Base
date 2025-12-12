@@ -82,7 +82,7 @@ When `#` is used:
 The 9-bit immediate field is always treated as unsigned (0-511). For instructions that interpret operands as signed values, the 9-bit value is sign-extended:
 
 ```pasm
-        mov     x, #$1FF                ' x = 511 (unsigned) or -1 (if sign-extended)
+        mov     x, #$1FF                ' x = 511 or -1 (sign-extended)
         add     x, #1                   ' Add 1
         sub     x, #10                  ' Subtract 10
 ```
@@ -164,7 +164,7 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 ```pasm
         mov     x, #100                 ' 2 cycles
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##data, ##addr          ' 6+ cycles (2 + 2 + 2 for AUGD + AUGS + instruction)
+        wrlong  ##data, ##addr          ' 6+ cycles (2+2+2: AUGD+AUGS+instr)
 ```
 
 **Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.
@@ -259,7 +259,7 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
         rdbyte  x, ++ptra               ' PTRA += 1, then read byte at new PTRA
         rdword  y, ++ptrb               ' PTRB += 2, then read word at new PTRB
         rdlong  z, --ptra               ' PTRA -= 4, then read long at new PTRA
-        wrbyte  x, --ptrb               ' PTRB -= 1, then write byte at new PTRB
+        wrbyte  x, --ptrb               ' PTRB -= 1, then write byte
 ```
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
@@ -288,8 +288,8 @@ Indexed mode accesses memory at an offset from the pointer without modifying the
 ```pasm
         rdlong  x, ptra[0]              ' Read at PTRA + 0*4 = PTRA
         rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = PTRA + 20 bytes
-        rdbyte  z, ptrb[-3]             ' Read at PTRB + (-3)*1 = PTRB - 3 bytes
-        wrword  w, ptra[10]             ' Write at PTRA + 10*2 = PTRA + 20 bytes
+        rdbyte  z, ptrb[-3]             ' Read at PTRB - 3 bytes
+        wrword  w, ptra[10]             ' Write at PTRA + 20 bytes
 ```
 
 The index is multiplied by SCALE:
@@ -313,7 +313,7 @@ Indexed mode is ideal for accessing structure fields or array elements:
 
 ' Access array element
         mov     ptra, ##long_array
-        rdlong  x, ptra[index]          ' Read array[index] (if index in register)
+        rdlong  x, ptra[index]          ' Read array[index]
 ```
 
 ### 6.4.6 Indexed Pointer with Update (Compound Forms)
@@ -321,8 +321,8 @@ Indexed mode is ideal for accessing structure fields or array elements:
 Compound forms combine indexing with pointer update:
 
 ```pasm
-        rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 5*4 (20 bytes)
-        rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 3*4 (12 bytes)
+        rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 20
+        rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 12
         rdlong  z, ++ptra[5]            ' PTRA += 5*4, then read at new PTRA
         rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
 ```
@@ -367,7 +367,7 @@ All expressions work identically with PTRB.
 For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
 
 ```pasm
-        rdlong  x, ptra[##1000]         ' Index of 1000 (offset 4000 bytes for long)
+        rdlong  x, ptra[##1000]         ' Index 1000 (4000 byte offset)
         rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
 ```
 
@@ -402,7 +402,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ```pasm
 ' Post-increment: read from current PTRA, then advance by total transfer size
         setq    #15                     ' 16 longs
-        rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 16*4 = 64 bytes
+        rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 64
 
 ' Post-decrement: read from current PTRA, then move back
         setq    #15
@@ -410,11 +410,11 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 
 ' Pre-increment: advance first, then read
         setq    #15
-        rdlong  buffer, ++ptra          ' PTRA += 64, read 16 longs from new PTRA
+        rdlong  buffer, ++ptra          ' PTRA += 64, then read 16 longs
 
 ' Pre-decrement: move back first, then read
         setq    #15
-        rdlong  buffer, --ptra          ' PTRA -= 64, read 16 longs from new PTRA
+        rdlong  buffer, --ptra          ' PTRA -= 64, then read 16 longs
 ```
 
 **Critical:** With SETQ block transfers, the index field is **overridden** by the block count. An arbitrary index cannot be specified:
@@ -422,7 +422,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ```pasm
 ' This does NOT work as expected:
         setq    #15
-        rdlong  buffer, ptra++[5]       ' Index [5] is IGNORED! Uses block count instead
+        rdlong  buffer, ptra++[5]       ' Index [5] IGNORED! Uses block count
 ```
 
 ### 6.5.3 SETQ2 for LUT Transfers
@@ -444,7 +444,7 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
         altd    dest_reg                ' ALTD cancels block-size PTRx delta!
-        rdlong  0, ptra++               ' PTRA increments by 4 (1 long), NOT 64!
+        rdlong  0, ptra++               ' PTRA += 4 (1 long), NOT 64!
 
 ' CORRECT CODE - No intervening instruction
         setq    #15
@@ -485,7 +485,7 @@ ALTS modifies the source field of the next instruction:
 ALTI can modify both destination and source fields, plus the instruction opcode:
 
 ```pasm
-        alti    index, #template        ' Modify D, S, and optionally instruction
+        alti    index, #template        ' Modify D, S, and opcode
         add     0-0, 0-0                ' Both operands modified
 ```
 

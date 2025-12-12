@@ -16,8 +16,8 @@ When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer
 
 ::: pasm2
         SETQ    #16-1           ' Ready to load 16 longs
-        ALTD    start_reg       ' Alter start register - CANCELS block-size PTRx delta!
-        RDLONG  0, ptra++       ' ptra increments by 4 (1 long), NOT 64 (16 longs)
+        ALTD    start_reg       ' BUG: Cancels block-size PTRx delta!
+        RDLONG  0, ptra++       ' ptra += 4 (not 64!)
 :::
 
 **Expected Behavior:** After reading 16 longs with `ptra++`, ptra should advance by 64 bytes (16 × 4).
@@ -67,7 +67,7 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
         MOV     temp, #base     ' Load base into register first
         AUGS    #$FFFFF123      ' Intended for ADD instruction
         ALTD    index, temp     ' Register operand - unaffected by AUGS
-        ADD     0-0, #$123      ' Only this instruction receives augmented value
+        ADD     0-0, #$123      ' Only ADD gets the augmented value
 :::
 
 ---

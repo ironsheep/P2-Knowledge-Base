@@ -1,7 +1,7 @@
 -- P2KB PASM2 Table Formatting Filter
 -- Conservative fix: constrain tables to page width, last column wraps
 -- Author: Iron Sheep Productions, LLC
--- Version: 5.1 - Conservative fix for table overflow (uses Pandoc widths when available)
+-- Version: 5.2 - Added longtblr for large tables (30+ rows) to allow page breaks
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -10,6 +10,17 @@
 --   * If no widths specified, give ~15% each to first N-1 columns, last column flexible (X)
 -- - This preserves existing table appearance while preventing overflow
 -- - Last column uses X type (flexible width with word-wrap) when no width specified
+
+-- Count total data rows in a table (excluding header)
+local function count_data_rows(el)
+  local count = 0
+  for _, body in ipairs(el.bodies) do
+    if body.body then
+      count = count + #body.body
+    end
+  end
+  return count
+end
 
 -- Get maximum text length in a column across all rows (used for encoding tables)
 local function get_max_column_length(el, col_index)
@@ -546,9 +557,18 @@ local function handle_content_table(el)
     end
   end
 
+  -- Count rows to decide between tblr and longtblr
+  local row_count = count_data_rows(el)
+  local use_longtblr = row_count > 30  -- Use longtblr for tables with 30+ rows
+
   -- Build tabularray LaTeX
   local latex = {}
-  table.insert(latex, "\\begin{tblr}{")
+  if use_longtblr then
+    -- longtblr allows page breaks within table; no caption/label needed
+    table.insert(latex, "\\begin{longtblr}{")
+  else
+    table.insert(latex, "\\begin{tblr}{")
+  end
   table.insert(latex, "  width=\\linewidth,")
 
   -- Use tighter spacing for Constant|Value|Description tables
@@ -580,6 +600,11 @@ local function handle_content_table(el)
   else
     -- Styling: bold header row
     table.insert(latex, "  row{1}={font=\\bfseries},")
+  end
+
+  -- For longtblr, specify header row to repeat on each page
+  if use_longtblr then
+    table.insert(latex, "  rowhead=1,")
   end
 
   table.insert(latex, "  hline{1,2}={solid},")
@@ -619,7 +644,11 @@ local function handle_content_table(el)
     end
   end
 
-  table.insert(latex, "\\end{tblr}")
+  if use_longtblr then
+    table.insert(latex, "\\end{longtblr}")
+  else
+    table.insert(latex, "\\end{tblr}")
+  end
 
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end

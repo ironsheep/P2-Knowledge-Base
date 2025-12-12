@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0 - Technical Review\par}
+{\large\color{blue}Version 1.1 - Technical Review\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -241,18 +241,6 @@ This manual uses consistent cross-reference formats:
 **"See Appendix X"** — Reference to Part III appendices for quick reference tables
 
 **"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
-
-
-## Document Version History
-
-+---------+---------+---------------------------------------------------------------+
-| Version | Date    | Changes                                                       |
-+=========+=========+===============================================================+
-| 1.0     | 2025-11 | Initial release. Complete coverage of PASM2 instruction set,  |
-|         |         | directives, constants, and special registers. Includes        |
-|         |         | architectural foundation chapters and comprehensive           |
-|         |         | appendices.                                                   |
-+---------+---------+---------------------------------------------------------------+
 
 
 ## About This Manual
@@ -578,9 +566,9 @@ This is fundamentally different from the RET instruction, which optionally resto
 **Basic Usage:**
 
 ```pasm
-_ret_   add     x, y                    ' ADD executes, then return (flags unchanged)
-_ret_   drvnot  #0                      ' Toggle pin 0, then return
-_ret_   mov     result, temp            ' Copy temp to result, then return
+        _ret_   add     x, y            ' ADD then return (flags same)
+        _ret_   drvnot  #0              ' Toggle pin 0, then return
+        _ret_   mov     result, temp    ' Copy to result, then return
 ```
 
 **Branch Behavior—No Return When Instruction Branches:**
@@ -588,9 +576,9 @@ _ret_   mov     result, temp            ' Copy temp to result, then return
 When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
 
 ```pasm
-_ret_   jmp     #somewhere              ' JMP executes, NO return (branch took effect)
-_ret_   call    #subroutine             ' CALL executes, NO return (call pushed new return)
-_ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if counter=0: return
+        _ret_   jmp     #somewhere      ' JMP executes, NO return
+        _ret_   call    #subroutine     ' CALL executes, NO return
+        _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
 ```
 
 **SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
@@ -598,15 +586,15 @@ _ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if 
 The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
 
 ```pasm
-' Start XBYTE: SETQ executes to configure mode, then returns to $1FF
+' Start XBYTE: SETQ configures mode, returns to $1FF
         push    #$1FF                   ' Push $1FF for XBYTE returns
-_ret_   setq    #$100                   ' Configure XBYTE with LUT base $100, then return
+        _ret_   setq    #$100           ' LUT base $100, then return
 
-' Change XBYTE mode permanently for subsequent bytecodes
-_ret_   setq    #$200                   ' New LUT base $200 for all future bytecodes
+' Change XBYTE mode permanently
+        _ret_   setq    #$200           ' New LUT base for all bytecodes
 
-' Change XBYTE mode for next bytecode only (auto-restores afterward)
-_ret_   setq2   #$300                   ' Temporary LUT base $300 for one bytecode
+' Change XBYTE mode for next bytecode only
+        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
 ```
 
 **SKIP/SKIPF with _RET_—Branch Before Skipping:**
@@ -615,7 +603,7 @@ Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern
 
 ```pasm
         push    #routine                ' Push target address
-_ret_   skipf   pattern                 ' SKIPF executes, then branch to routine with skip active
+        _ret_   skipf   pattern         ' SKIPF then branch with skip active
 ```
 
 **Timing:**
@@ -633,10 +621,10 @@ The `_RET_` prefix enables efficient single-instruction subroutines:
 
 ```pasm
 toggle_pin0                             ' Subroutine: toggle pin 0
-_ret_   drvnot  #0                      ' 2 cycles + 2 return = 4 total cycles
+        _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
 
-read_input                              ' Subroutine: read input to result
-_ret_   mov     result, ina             ' Execute MOV, then return
+read_input                              ' Subroutine: read input
+        _ret_   mov     result, ina     ' MOV, then return
 ```
 
 This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
@@ -666,7 +654,7 @@ Use these when operands represent signed quantities (two's complement). The comp
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
         cmps    x, y            wc wz   ' Signed compare: -100 vs 50
-if_lt   jmp     #x_is_smaller           ' True: -100 < 50 (signed)
+        if_lt   jmp     #x_is_smaller   ' True: -100 < 50 (signed)
 ```
 
 **Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
@@ -676,8 +664,8 @@ Use these when operands represent unsigned quantities (addresses, bit patterns, 
 ```pasm
         mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
         cmp     addr, #0        wc wz   ' Unsigned compare
-if_a    jmp     #addr_is_larger         ' True: 2,147,483,648 > 0 (unsigned)
-                                        ' Note: IF_GT would be false (signed: negative)
+        if_a    jmp     #addr_is_larger ' True: 2B > 0 (unsigned)
+                                        ' Note: IF_GT false (signed neg)
 ```
 
 **Choosing the Right Comparison:**
@@ -700,11 +688,11 @@ Match your compare instruction to your condition alias for correct results:
 ```pasm
 ' Unsigned comparison
         cmp     a, b            wc wz
-if_ae   mov     result, #1              ' Unsigned: a >= b
+        if_ae   mov     result, #1      ' Unsigned: a >= b
 
 ' Signed comparison
         cmps    a, b            wc wz
-if_ge   mov     result, #1              ' Signed: a >= b
+        if_ge   mov     result, #1      ' Signed: a >= b
 ```
 
 ### 2.2.4 Conditional Execution Patterns
@@ -1005,7 +993,7 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 ```pasm
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##dest, ##addr          ' 6 cycles minimum (2 + 2 + 2 for AUGD + AUGS)
+        wrlong  ##dest, ##addr          ' 6 cycles (AUGD+AUGS+instr)
 ```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
@@ -1316,7 +1304,7 @@ send_byte       rdbyte  x, ptr                  ' Global: send_byte
 
 recv_byte       testp   rx_pin          wc      ' Global: recv_byte
                                                 '  (new scope begins)
-        if_nc   jmp     #.wait                  ' This .wait is different from above
+        if_nc   jmp     #.wait                  ' Different .wait (new scope)
 .wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin
@@ -1505,8 +1493,9 @@ Instead of simply replacing Z with the zero test, these instructions AND the new
 ```pasm
 ' 64-bit addition: [hi:lo] += [bhi:blo]
         add     lo, blo         wc wz   ' Add low 32 bits, Z = (lo_result == 0)
-        addx    hi, bhi         wc wz   ' Add high + carry, Z = Z AND (hi_result == 0)
-        ' Z is now 1 only if BOTH lo and hi results were zero (entire 64-bit result is zero)
+        addx    hi, bhi         wc wz   ' High + carry, Z = Z AND (hi==0)
+        ' Z is now 1 only if BOTH lo and hi were zero
+        '  (entire 64-bit result is zero)
 ```
 
 Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
@@ -2043,7 +2032,7 @@ For signed operations, the final instruction must be an SX variant to correctly 
 
 ```pasm
         CMP     A0, B0    WCZ     ' Compare low longs
-        CMPSX   A1, B1    WCZ     ' Compare high longs, C = true sign of difference
+        CMPSX   A1, B1    WCZ     ' Compare high, C = sign of difference
         ' After: C = (A < B) signed, Z = (A == B)
         ' Use IF_LT (less than) or IF_GE (greater/equal) for signed branches
 ```
@@ -2888,7 +2877,7 @@ For non-blocking result checking, use POLLQMT to test whether the CORDIC pipelin
 ```pasm
         pollqmt             wc              ' C=1 if pipeline empty,
                                             '  C=0 if results pending
-        if_nc getqx result                  ' Only retrieve if results available
+        if_nc   getqx   result              ' Retrieve if available
 ```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
@@ -3165,7 +3154,7 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
 
 ```pasm
-                pollse1         wc              ' Test event 1, set C if occurred
+                pollse1         wc          ' Test event 1, C if occurred
         if_c    jmp     #handler                ' Branch to handler only if
                                                 '  event fired
 ```
@@ -3373,7 +3362,7 @@ XBYTE mode begins through a specific instruction sequence. First, push $1FF onto
         rdfast  #0, #bytecodes          ' Init FIFO at bytecode stream
 
         push    #$1FF                   ' Push $1FF for XBYTE returns
-_RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
+        _ret_   setq    #$100           ' Start XBYTE: LUT base=$100
 ```
 
 The _RET_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or _RET_, returning to $1FF to fetch the next bytecode.
@@ -3394,7 +3383,7 @@ For maximum performance, use the _RET_ prefix on the final instruction:
 
 ```pasm
 toggle_pin0
-_RET_   drvnot  #0                      ' Toggle pin 0, return to XBYTE (2 clocks)
+        _ret_   drvnot  #0              ' Toggle pin 0, return (2 clocks)
 ```
 
 This executes in just 2 clocks, making the complete XBYTE cycle only 8 clocks total.
@@ -3547,18 +3536,18 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
 
 ```pasm
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
-                hubset  ##%0000_0001_0000_0000_0000_0000_00_10    ' Enable crystal,
-                                                                  '  15pF caps
-                waitx   ##20_000_000/100                          ' Wait 10ms for
-                                                                  '  crystal
-                hubset  ##%0000_0001_0000_0000_0000_0000_10_10    ' Switch to
-                                                                  '  crystal
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_10    ' PLL: /1 * 8 / 1
-                                                                  '  = 160MHz
-                waitx   ##20_000_000/10000                        ' Wait 100µs for
-                                                                  '  PLL lock
-                hubset  ##%0000_0001_0000_1000_0000_0010_00_11    ' Switch to PLL
-                                                                  '  output
+                ' Enable crystal oscillator with 15pF caps
+                hubset  ##%0000_0001_0000_0000_0000_0000_00_10
+                ' Wait 10ms for crystal stabilization
+                waitx   ##20_000_000/100
+                ' Switch to crystal clock source
+                hubset  ##%0000_0001_0000_0000_0000_0000_10_10
+                ' Configure PLL: /1 * 8 / 1 = 160MHz
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_10
+                ' Wait 100µs for PLL lock
+                waitx   ##20_000_000/10000
+                ' Switch to PLL output
+                hubset  ##%0000_0001_0000_1000_0000_0010_00_11
 ```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
@@ -3591,7 +3580,7 @@ The basic DEBUG syntax accepts text strings and formatted values:
 
 ```pasm
                 debug("Hello from P2")                  ' Simple text message
-                debug("Count: ", udec(counter))         ' Text with decimal value
+                debug("Count: ", udec(counter))     ' Text with decimal
                 debug("Address: ", uhex(ptr))           ' Hexadecimal display
                 debug("Flags: ", ubin(status))          ' Binary display
 ```
@@ -3637,7 +3626,7 @@ Sized formatters ensure consistent output width and proper sign extension:
 ```pasm
                 debug(uhex_byte(value))                 ' 2 hex digits: $xx
                 debug(uhex_word(value))                 ' 4 hex digits: $xxxx
-                debug(uhex_long(value))                 ' 8 hex digits: $xxxxxxxx
+                debug(uhex_long(value))             ' 8 hex digits: $xxxxxxxx
                 debug(ubin_byte(flags))                 ' 8 binary digits
 ```
 
@@ -3661,15 +3650,15 @@ Beyond numeric values, DEBUG supports several special-purpose formatters:
 **String Display:**
 
 ```pasm
-                debug(zstr(@message))                   ' Zero-terminated string
-                debug(lstr(@text, length))              ' Length-specified string
+                debug(zstr(@message))               ' Zero-terminated string
+                debug(lstr(@text, length))          ' Length-specified string
 ```
 
 **Boolean and Flag Display:**
 
 ```pasm
-                debug(bool(enabled))                    ' Displays TRUE or FALSE
-                debug(c_z)                              ' Shows C and Z flag values
+                debug(bool(enabled))                ' Displays TRUE or FALSE
+                debug(c_z)                          ' Shows C and Z flag values
 ```
 
 **Conditional Output:**
@@ -3690,7 +3679,7 @@ Beyond text output, DEBUG supports graphical display windows that visualize data
 The first DEBUG statement with a display name creates and configures the window. Inside loops, you update the existing window using the backtick-name syntax:
 
 ```pasm
-                debug(`scope MySignal)              ' CREATE window (before loop)
+                debug(`scope MySignal)          ' CREATE window (before loop)
 
 .loop           rdlong  adc_value, adc_ptr
                 debug(`MySignal adc_value)          ' UPDATE window (in loop)
@@ -3749,7 +3738,7 @@ TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen
 The LOGIC display shows digital signal timing as a logic analyzer view:
 
 ```pasm
-                debug(`logic PortA)                 ' Create logic analyzer window
+                debug(`logic PortA)             ' Create logic analyzer
 
 .loop           rdbyte  port_state, port_addr
                 debug(`PortA port_state)            ' Send sample to analyzer
@@ -3764,7 +3753,7 @@ LOGIC displays multiple digital channels with timing relationships, useful for d
 The BITMAP display renders pixel data as an image:
 
 ```pasm
-                debug(`bitmap Display, 320, 240)              ' Create bitmap window
+                debug(`bitmap Display, 320, 240)  ' Create bitmap
                 debug(`Display @framebuffer)                  ' Send pixel data
 ```
 
@@ -3835,12 +3824,12 @@ BITMAP creates a window showing raw pixel data, useful for graphics and video de
 .fast_loop      rdlong  value, ptr
                 call    #process_value
                 djnz    count, #.fast_loop
-                debug("Final value: ", udec_(value))  ' Debug after loop completes
+                debug("Final: ", udec_(value))   ' Debug after loop
 
                 ' RIGHT - Conditional debug for occasional sampling
 .sample_loop    rdlong  value, ptr
                 incmod  sample_cnt, #999    wz
-        if_z    debug(udec_(value))                 ' Only every 1000th iteration
+        if_z    debug(udec_(value))             ' Every 1000th iteration
                 djnz    count, #.sample_loop
 ```
 
@@ -3867,7 +3856,7 @@ For standard DEBUG output (not routed to a visual display window), the debug sys
 ```pasm
                 debug("Starting motor control")     ' Output: Cog2: Starting
                                                     '  motor control
-                debug(udec(speed))                  ' Output: Cog2: speed = 1500
+                debug(udec(speed))              ' Output: Cog2: speed = 1500
 ```
 
 This automatic prefixing applies only to text output. Visual displays (SCOPE, PLOT, TERM, etc.) do not receive the COG prefix because they're typically dedicated to specific COGs or purposes.
@@ -3988,7 +3977,7 @@ When `#` is used:
 The 9-bit immediate field is always treated as unsigned (0-511). For instructions that interpret operands as signed values, the 9-bit value is sign-extended:
 
 ```pasm
-        mov     x, #$1FF                ' x = 511 (unsigned) or -1 (if sign-extended)
+        mov     x, #$1FF                ' x = 511 or -1 (sign-extended)
         add     x, #1                   ' Add 1
         sub     x, #10                  ' Subtract 10
 ```
@@ -4070,7 +4059,7 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 ```pasm
         mov     x, #100                 ' 2 cycles
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##data, ##addr          ' 6+ cycles (2 + 2 + 2 for AUGD + AUGS + instruction)
+        wrlong  ##data, ##addr          ' 6+ cycles (2+2+2: AUGD+AUGS+instr)
 ```
 
 **Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.
@@ -4085,8 +4074,8 @@ The augmented value applies only to the immediately following instruction. If an
         mov     x, #$678                ' Gets $678, NOT $12345678
 
         augs    #$12345
-if_z    mov     x, #$678                ' Even if Z=0 and MOV doesn't execute,
-                                        ' AUGS is still consumed
+        if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
+                                        '  AUGS is still consumed
 ```
 
 The assembler handles this automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to instruction sequencing.
@@ -4165,7 +4154,7 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
         rdbyte  x, ++ptra               ' PTRA += 1, then read byte at new PTRA
         rdword  y, ++ptrb               ' PTRB += 2, then read word at new PTRB
         rdlong  z, --ptra               ' PTRA -= 4, then read long at new PTRA
-        wrbyte  x, --ptrb               ' PTRB -= 1, then write byte at new PTRB
+        wrbyte  x, --ptrb               ' PTRB -= 1, then write byte
 ```
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
@@ -4194,8 +4183,8 @@ Indexed mode accesses memory at an offset from the pointer without modifying the
 ```pasm
         rdlong  x, ptra[0]              ' Read at PTRA + 0*4 = PTRA
         rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = PTRA + 20 bytes
-        rdbyte  z, ptrb[-3]             ' Read at PTRB + (-3)*1 = PTRB - 3 bytes
-        wrword  w, ptra[10]             ' Write at PTRA + 10*2 = PTRA + 20 bytes
+        rdbyte  z, ptrb[-3]             ' Read at PTRB - 3 bytes
+        wrword  w, ptra[10]             ' Write at PTRA + 20 bytes
 ```
 
 The index is multiplied by SCALE:
@@ -4219,7 +4208,7 @@ Indexed mode is ideal for accessing structure fields or array elements:
 
 ' Access array element
         mov     ptra, ##long_array
-        rdlong  x, ptra[index]          ' Read array[index] (if index in register)
+        rdlong  x, ptra[index]          ' Read array[index]
 ```
 
 ### 6.4.6 Indexed Pointer with Update (Compound Forms)
@@ -4227,8 +4216,8 @@ Indexed mode is ideal for accessing structure fields or array elements:
 Compound forms combine indexing with pointer update:
 
 ```pasm
-        rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 5*4 (20 bytes)
-        rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 3*4 (12 bytes)
+        rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 20
+        rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 12
         rdlong  z, ++ptra[5]            ' PTRA += 5*4, then read at new PTRA
         rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
 ```
@@ -4273,7 +4262,7 @@ All expressions work identically with PTRB.
 For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
 
 ```pasm
-        rdlong  x, ptra[##1000]         ' Index of 1000 (offset 4000 bytes for long)
+        rdlong  x, ptra[##1000]         ' Index 1000 (4000 byte offset)
         rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
 ```
 
@@ -4308,7 +4297,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ```pasm
 ' Post-increment: read from current PTRA, then advance by total transfer size
         setq    #15                     ' 16 longs
-        rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 16*4 = 64 bytes
+        rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 64
 
 ' Post-decrement: read from current PTRA, then move back
         setq    #15
@@ -4316,11 +4305,11 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 
 ' Pre-increment: advance first, then read
         setq    #15
-        rdlong  buffer, ++ptra          ' PTRA += 64, read 16 longs from new PTRA
+        rdlong  buffer, ++ptra          ' PTRA += 64, then read 16 longs
 
 ' Pre-decrement: move back first, then read
         setq    #15
-        rdlong  buffer, --ptra          ' PTRA -= 64, read 16 longs from new PTRA
+        rdlong  buffer, --ptra          ' PTRA -= 64, then read 16 longs
 ```
 
 **Critical:** With SETQ block transfers, the index field is **overridden** by the block count. An arbitrary index cannot be specified:
@@ -4328,7 +4317,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ```pasm
 ' This does NOT work as expected:
         setq    #15
-        rdlong  buffer, ptra++[5]       ' Index [5] is IGNORED! Uses block count instead
+        rdlong  buffer, ptra++[5]       ' Index [5] IGNORED! Uses block count
 ```
 
 ### 6.5.3 SETQ2 for LUT Transfers
@@ -4350,7 +4339,7 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
         altd    dest_reg                ' ALTD cancels block-size PTRx delta!
-        rdlong  0, ptra++               ' PTRA increments by 4 (1 long), NOT 64!
+        rdlong  0, ptra++               ' PTRA += 4 (1 long), NOT 64!
 
 ' CORRECT CODE - No intervening instruction
         setq    #15
@@ -4391,7 +4380,7 @@ ALTS modifies the source field of the next instruction:
 ALTI can modify both destination and source fields, plus the instruction opcode:
 
 ```pasm
-        alti    index, #template        ' Modify D, S, and optionally instruction
+        alti    index, #template        ' Modify D, S, and opcode
         add     0-0, 0-0                ' Both operands modified
 ```
 
@@ -5613,10 +5602,10 @@ Set Clock Mode
 
 For external clock modes, the expansion sequence is:
 
-```pasm2
-HUBSET  ##clkmode_ & !%11    ' Start external clock, stay in RCFAST
-WAITX   ##20_000_000/100     ' Wait ~10ms for clock stabilization
-HUBSET  ##clkmode_           ' Switch to target clock mode
+```pasm
+                hubset  ##clkmode_ & !%11       ' Start ext clock, RCFAST
+                waitx   ##20_000_000/100        ' Wait ~10ms for stability
+                hubset  ##clkmode_              ' Switch to target mode
 ```
 
 **Related:** [HUBSET](#hubset), [WAITX](#waitx)
@@ -5639,22 +5628,22 @@ As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. T
 
 To disable the automatic clock-setter and use ASMCLK manually, define:
 
-```spin2
+```pasm
 CON
-  _AUTOCLK = 0    ' Disable automatic clock-setter
+  _AUTOCLK = 0                  ' Disable automatic clock-setter
 ```
 
 **Example:**
 
-```spin2
+```pasm
 CON
-  _clkfreq = 200_000_000    ' 200 MHz target
-  _xtlfreq = 20_000_000     ' 20 MHz crystal
+  _clkfreq = 200_000_000            ' 200 MHz target
+  _xtlfreq = 20_000_000             ' 20 MHz crystal
 
 DAT
-        ORG 0
-        ASMCLK              ' Set clock to 200 MHz
-        ' ... program continues
+                org     0
+                asmclk              ' Set clock to 200 MHz
+                ' ... program continues
 ```
 
 
@@ -20536,8 +20525,8 @@ When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer
 
 ::: pasm2
         SETQ    #16-1           ' Ready to load 16 longs
-        ALTD    start_reg       ' Alter start register - CANCELS block-size PTRx delta!
-        RDLONG  0, ptra++       ' ptra increments by 4 (1 long), NOT 64 (16 longs)
+        ALTD    start_reg       ' BUG: Cancels block-size PTRx delta!
+        RDLONG  0, ptra++       ' ptra += 4 (not 64!)
 :::
 
 **Expected Behavior:** After reading 16 longs with `ptra++`, ptra should advance by 64 bytes (16 × 4).
@@ -20587,7 +20576,7 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
         MOV     temp, #base     ' Load base into register first
         AUGS    #$FFFFF123      ' Intended for ADD instruction
         ALTD    index, temp     ' Register operand - unaffected by AUGS
-        ADD     0-0, #$123      ' Only this instruction receives augmented value
+        ADD     0-0, #$123      ' Only ADD gets the augmented value
 :::
 
 ---

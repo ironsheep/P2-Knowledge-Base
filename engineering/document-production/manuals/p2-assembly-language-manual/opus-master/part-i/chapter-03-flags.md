@@ -88,8 +88,9 @@ Instead of simply replacing Z with the zero test, these instructions AND the new
 ```pasm
 ' 64-bit addition: [hi:lo] += [bhi:blo]
         add     lo, blo         wc wz   ' Add low 32 bits, Z = (lo_result == 0)
-        addx    hi, bhi         wc wz   ' Add high + carry, Z = Z AND (hi_result == 0)
-        ' Z is now 1 only if BOTH lo and hi results were zero (entire 64-bit result is zero)
+        addx    hi, bhi         wc wz   ' High + carry, Z = Z AND (hi==0)
+        ' Z is now 1 only if BOTH lo and hi were zero
+        '  (entire 64-bit result is zero)
 ```
 
 Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
@@ -626,7 +627,7 @@ For signed operations, the final instruction must be an SX variant to correctly 
 
 ```pasm
         CMP     A0, B0    WCZ     ' Compare low longs
-        CMPSX   A1, B1    WCZ     ' Compare high longs, C = true sign of difference
+        CMPSX   A1, B1    WCZ     ' Compare high, C = sign of difference
         ' After: C = (A < B) signed, Z = (A == B)
         ' Use IF_LT (less than) or IF_GE (greater/equal) for signed branches
 ```

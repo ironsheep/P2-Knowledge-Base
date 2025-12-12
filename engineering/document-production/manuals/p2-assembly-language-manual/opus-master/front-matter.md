@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0 - Technical Review\par}
+{\large\color{blue}Version 1.1 - Technical Review\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -241,18 +241,6 @@ This manual uses consistent cross-reference formats:
 **"See Appendix X"** — Reference to Part III appendices for quick reference tables
 
 **"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
-
-
-## Document Version History
-
-+---------+---------+---------------------------------------------------------------+
-| Version | Date    | Changes                                                       |
-+=========+=========+===============================================================+
-| 1.0     | 2025-11 | Initial release. Complete coverage of PASM2 instruction set,  |
-|         |         | directives, constants, and special registers. Includes        |
-|         |         | architectural foundation chapters and comprehensive           |
-|         |         | appendices.                                                   |
-+---------+---------+---------------------------------------------------------------+
 
 
 ## About This Manual

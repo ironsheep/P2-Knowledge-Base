@@ -510,7 +510,7 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 ```pasm
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
-        wrlong  ##dest, ##addr          ' 6 cycles minimum (2 + 2 + 2 for AUGD + AUGS)
+        wrlong  ##dest, ##addr          ' 6 cycles (AUGD+AUGS+instr)
 ```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
@@ -821,7 +821,7 @@ send_byte       rdbyte  x, ptr                  ' Global: send_byte
 
 recv_byte       testp   rx_pin          wc      ' Global: recv_byte
                                                 '  (new scope begins)
-        if_nc   jmp     #.wait                  ' This .wait is different from above
+        if_nc   jmp     #.wait                  ' Different .wait (new scope)
 .wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin

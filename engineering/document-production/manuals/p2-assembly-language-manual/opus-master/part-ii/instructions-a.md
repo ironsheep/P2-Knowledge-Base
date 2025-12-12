@@ -934,9 +934,9 @@ Set Clock Mode
 For external clock modes, the expansion sequence is:
 
 ```pasm
-        hubset  ##clkmode_ & !%11   ' Start external clock, RCFAST
-        waitx   ##20_000_000/100    ' Wait ~10ms for stabilization
-        hubset  ##clkmode_          ' Switch to target clock mode
+                hubset  ##clkmode_ & !%11       ' Start ext clock, RCFAST
+                waitx   ##20_000_000/100        ' Wait ~10ms for stability
+                hubset  ##clkmode_              ' Switch to target mode
 ```
 
 **Related:** [HUBSET](#hubset), [WAITX](#waitx)
@@ -959,22 +959,22 @@ As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. T
 
 To disable the automatic clock-setter and use ASMCLK manually, define:
 
-```spin2
+```pasm
 CON
-  _AUTOCLK = 0    ' Disable automatic clock-setter
+  _AUTOCLK = 0                  ' Disable automatic clock-setter
 ```
 
 **Example:**
 
-```spin2
+```pasm
 CON
-  _clkfreq = 200_000_000    ' 200 MHz target
-  _xtlfreq = 20_000_000     ' 20 MHz crystal
+  _clkfreq = 200_000_000            ' 200 MHz target
+  _xtlfreq = 20_000_000             ' 20 MHz crystal
 
 DAT
-        ORG 0
-        ASMCLK              ' Set clock to 200 MHz
-        ' ... program continues
+                org     0
+                asmclk              ' Set clock to 200 MHz
+                ' ... program continues
 ```
 
 
