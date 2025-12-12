@@ -63,6 +63,13 @@
 - Spin2 Language Manual v51a
 - P2-Knowledge-Base YAML instruction definitions
 
+### Presentation
+
+- Code block colors aligned with IDE conventions (Propeller Tool, Spin Tools IDE):
+  - PASM2 blocks: Green color family
+  - Spin2 blocks: Blue color family
+- PDF navigation pane enabled (bookmarks sidebar opens automatically)
+
 ---
 
 ## v1.0.0 (2025-12-11)
