@@ -572,7 +572,7 @@ XBYTE mode begins through a specific instruction sequence. First, push $1FF onto
         rdfast  #0, #bytecodes          ' Init FIFO at bytecode stream
 
         push    #$1FF                   ' Push $1FF for XBYTE returns
-_RET_   setq    #$100                   ' Start XBYTE: LUT base=$100, 256 bytecodes
+        _ret_   setq    #$100           ' Start XBYTE: LUT base=$100
 ```
 
 The _RET_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or _RET_, returning to $1FF to fetch the next bytecode.
@@ -593,7 +593,7 @@ For maximum performance, use the _RET_ prefix on the final instruction:
 
 ```pasm
 toggle_pin0
-_RET_   drvnot  #0                      ' Toggle pin 0, return to XBYTE (2 clocks)
+        _ret_   drvnot  #0              ' Toggle pin 0, return (2 clocks)
 ```
 
 This executes in just 2 clocks, making the complete XBYTE cycle only 8 clocks total.

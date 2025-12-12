@@ -83,9 +83,9 @@ This is fundamentally different from the RET instruction, which optionally resto
 **Basic Usage:**
 
 ```pasm
-_ret_   add     x, y                    ' ADD executes, then return (flags unchanged)
-_ret_   drvnot  #0                      ' Toggle pin 0, then return
-_ret_   mov     result, temp            ' Copy temp to result, then return
+        _ret_   add     x, y            ' ADD then return (flags same)
+        _ret_   drvnot  #0              ' Toggle pin 0, then return
+        _ret_   mov     result, temp    ' Copy to result, then return
 ```
 
 **Branch Behavior—No Return When Instruction Branches:**
@@ -93,9 +93,9 @@ _ret_   mov     result, temp            ' Copy temp to result, then return
 When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
 
 ```pasm
-_ret_   jmp     #somewhere              ' JMP executes, NO return (branch took effect)
-_ret_   call    #subroutine             ' CALL executes, NO return (call pushed new return)
-_ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if counter=0: return
+        _ret_   jmp     #somewhere      ' JMP executes, NO return
+        _ret_   call    #subroutine     ' CALL executes, NO return
+        _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
 ```
 
 **SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
@@ -103,15 +103,15 @@ _ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if 
 The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
 
 ```pasm
-' Start XBYTE: SETQ executes to configure mode, then returns to $1FF
+' Start XBYTE: SETQ configures mode, returns to $1FF
         push    #$1FF                   ' Push $1FF for XBYTE returns
-_ret_   setq    #$100                   ' Configure XBYTE with LUT base $100, then return
+        _ret_   setq    #$100           ' LUT base $100, then return
 
-' Change XBYTE mode permanently for subsequent bytecodes
-_ret_   setq    #$200                   ' New LUT base $200 for all future bytecodes
+' Change XBYTE mode permanently
+        _ret_   setq    #$200           ' New LUT base for all bytecodes
 
-' Change XBYTE mode for next bytecode only (auto-restores afterward)
-_ret_   setq2   #$300                   ' Temporary LUT base $300 for one bytecode
+' Change XBYTE mode for next bytecode only
+        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
 ```
 
 **SKIP/SKIPF with _RET_—Branch Before Skipping:**
@@ -120,7 +120,7 @@ Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern
 
 ```pasm
         push    #routine                ' Push target address
-_ret_   skipf   pattern                 ' SKIPF executes, then branch to routine with skip active
+        _ret_   skipf   pattern         ' SKIPF then branch with skip active
 ```
 
 **Timing:**
@@ -138,10 +138,10 @@ The `_RET_` prefix enables efficient single-instruction subroutines:
 
 ```pasm
 toggle_pin0                             ' Subroutine: toggle pin 0
-_ret_   drvnot  #0                      ' 2 cycles + 2 return = 4 total cycles
+        _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
 
-read_input                              ' Subroutine: read input to result
-_ret_   mov     result, ina             ' Execute MOV, then return
+read_input                              ' Subroutine: read input
+        _ret_   mov     result, ina     ' MOV, then return
 ```
 
 This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
@@ -171,7 +171,7 @@ Use these when operands represent signed quantities (two's complement). The comp
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
         cmps    x, y            wc wz   ' Signed compare: -100 vs 50
-if_lt   jmp     #x_is_smaller           ' True: -100 < 50 (signed)
+        if_lt   jmp     #x_is_smaller   ' True: -100 < 50 (signed)
 ```
 
 **Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
@@ -181,8 +181,8 @@ Use these when operands represent unsigned quantities (addresses, bit patterns, 
 ```pasm
         mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
         cmp     addr, #0        wc wz   ' Unsigned compare
-if_a    jmp     #addr_is_larger         ' True: 2,147,483,648 > 0 (unsigned)
-                                        ' Note: IF_GT would be false (signed: negative)
+        if_a    jmp     #addr_is_larger ' True: 2B > 0 (unsigned)
+                                        ' Note: IF_GT false (signed neg)
 ```
 
 **Choosing the Right Comparison:**
@@ -205,11 +205,11 @@ Match your compare instruction to your condition alias for correct results:
 ```pasm
 ' Unsigned comparison
         cmp     a, b            wc wz
-if_ae   mov     result, #1              ' Unsigned: a >= b
+        if_ae   mov     result, #1      ' Unsigned: a >= b
 
 ' Signed comparison
         cmps    a, b            wc wz
-if_ge   mov     result, #1              ' Signed: a >= b
+        if_ge   mov     result, #1      ' Signed: a >= b
 ```
 
 ### 2.2.4 Conditional Execution Patterns

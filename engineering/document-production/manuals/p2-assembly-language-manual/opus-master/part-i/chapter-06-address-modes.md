@@ -179,8 +179,8 @@ The augmented value applies only to the immediately following instruction. If an
         mov     x, #$678                ' Gets $678, NOT $12345678
 
         augs    #$12345
-if_z    mov     x, #$678                ' Even if Z=0 and MOV doesn't execute,
-                                        ' AUGS is still consumed
+        if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
+                                        '  AUGS is still consumed
 ```
 
 The assembler handles this automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to instruction sequencing.

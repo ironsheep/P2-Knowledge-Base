@@ -933,10 +933,10 @@ Set Clock Mode
 
 For external clock modes, the expansion sequence is:
 
-```pasm2
-HUBSET  ##clkmode_ & !%11    ' Start external clock, stay in RCFAST
-WAITX   ##20_000_000/100     ' Wait ~10ms for clock stabilization
-HUBSET  ##clkmode_           ' Switch to target clock mode
+```pasm
+        hubset  ##clkmode_ & !%11   ' Start external clock, RCFAST
+        waitx   ##20_000_000/100    ' Wait ~10ms for stabilization
+        hubset  ##clkmode_          ' Switch to target clock mode
 ```
 
 **Related:** [HUBSET](#hubset), [WAITX](#waitx)
