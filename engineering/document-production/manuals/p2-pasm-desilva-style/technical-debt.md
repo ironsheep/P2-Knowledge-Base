@@ -12,6 +12,7 @@ Track improvement opportunities identified during MVP development that we're int
 - [2025-08-23] What if each chapter had a "confidence check" before proceeding?
 - [2025-08-23] Pattern noticed: Learners need "permission" to experiment
 - [2025-12-09] Consider reducing base font size from 12pt to 11pt to match P2 Assembly Language Manual - current 12pt appears larger than intended
+- [2025-12-12] **USER REQUEST**: Copy button for code blocks - users report difficulty copying code from PDFs
 - [Add new observations here with date]
 
 ## MVP Definition (What We're Shipping First)
@@ -91,6 +92,54 @@ Track improvement opportunities identified during MVP development that we're int
 **Effort**: Very High
 **Priority**: P3
 
+### 11. Code Block Copy Functionality (USER REQUEST)
+**User Feedback**: Users report difficulty copying code from the PDF. They want a "copy button" on code blocks.
+
+**The Challenge**: PDFs are static documents - they don't support JavaScript interactivity like web pages. A copy button requires JavaScript to capture clicks and write to clipboard.
+
+**Potential Options**:
+
+1. **Improve PDF text selection** (Low effort)
+   - Verify code blocks render as selectable text (not images)
+   - Test across PDF readers (Adobe, Preview, browser-based)
+   - Document best practices for users ("select all text in block, Cmd+C")
+
+2. **Companion HTML version** (Medium effort)
+   - Generate HTML alongside PDF using Pandoc
+   - Add JavaScript copy buttons (highlight.js, Prism, or custom)
+   - Host on GitHub Pages or similar
+   - Users choose PDF for reading, HTML for copying
+
+3. **Companion code repository** (Medium effort)
+   - Create GitHub repo with all code examples as downloadable files
+   - Organize by chapter/section
+   - Link from PDF (static URLs) or README
+
+4. **QR codes linking to web-hosted code** (High effort)
+   - Generate QR code for each significant code block
+   - QR links to web page with copyable version
+   - Complex to implement and maintain
+
+5. **PDF JavaScript via insDLJS/AcroTeX** (Medium-High effort)
+   - LaTeX package `insDLJS` (part of AcroTeX bundle) CAN embed JavaScript in PDFs
+   - See: [JavaScript in PDF using LaTeX](https://gehrcke.de/2010/11/javascript-in-pdf-using-latex/)
+   - See: [Techniques of Introducing Document-level JavaScript](https://tug.org/TUGboat/tb22-3/tb72story.pdf)
+   - **MAJOR CAVEAT**: Only works in Adobe Acrobat/Reader
+   - Preview (Mac), browser viewers, Foxit, etc. do NOT support PDF JavaScript
+   - Security settings often block functionality
+   - Would require users to use Adobe Reader specifically
+   - **Worth investigating** but may not be practical for broad audience
+
+**Recommended Investigation Path**:
+1. First verify current PDF text selection works well
+2. If selection is problematic, investigate HTML companion
+3. Consider companion repo for complete examples
+
+**Value**: Significantly improved user experience for code reuse
+**Effort**: Varies by approach (Low to High)
+**Priority**: P1 - Direct user feedback
+**Status**: Needs investigation
+
 ### 9. Community Feedback Integration
 **Opportunity**: Process for incorporating user feedback
 - Common stumbling blocks
@@ -152,5 +201,5 @@ Track improvement opportunities identified during MVP development that we're int
 
 ---
 
-*Last Updated: 2025-08-23*
+*Last Updated: 2025-12-12*
 *Status: Actively collecting debt during MVP development*
