@@ -30,6 +30,12 @@
 - AKPIN: Encoding corrected
 - COGATN: Timing cycles added
 
+### Part I: Architectural Foundation
+
+- `_RET_` prefix: Clarified behavior and interaction with conditional execution
+- Flag aliases: Documented C/NC, Z/NZ flag test aliases
+- Conditional aliases: Complete IF_x condition code reference verified
+
 ### Part III: Appendices
 
 #### Appendix A - Encoding Master Table
