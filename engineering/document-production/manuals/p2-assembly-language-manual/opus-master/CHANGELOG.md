@@ -59,7 +59,9 @@
 **Sources Used for Verification:**
 - P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv
 - Silicon Documentation v35 (p2-documentation.txt)
-- PASM2 Manual (Spin2/PASM2 documentation)
+- Parallax PASM2 Manual Draft (2022-11-01)
+- Spin2 Language Manual v51a
+- P2-Knowledge-Base YAML instruction definitions
 
 ---
 
