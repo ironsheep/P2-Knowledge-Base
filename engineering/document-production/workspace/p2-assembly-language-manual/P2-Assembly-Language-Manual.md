@@ -535,41 +535,179 @@ The condition field enables conditional execution of any instruction. The instru
 
 ### 2.2.1 Condition Code Table
 
-| EEEE | Mnemonic | Condition | Description |
-|:-----|:-------------|:-------------|:------------------------------------------|
-| 0000 | _RET_ | (special) | Return from subroutine |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | Neither carry nor zero |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | C=0 | No carry (unsigned less than) |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | Z=0 | Not zero |
-| 0110 | IF_C_NE_Z | C≠Z | Carry not equal to zero |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | No carry or not zero |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Carry and zero |
-| 1001 | IF_C_EQ_Z | C=Z | Carry equals zero |
-| 1010 | IF_Z | Z=1 | Zero |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | C=1 | Carry (unsigned greater than or equal) |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Carry or zero |
-| 1111 | (always) | Always | Unconditional execution |
+| EEEE | Primary Mnemonic | Aliases | Condition | Description |
+|:-----|:-----------------|:--------|:----------|:------------|
+| 0000 | _RET_ | | Always | Execute, then return if no branch |
+| 0001 | IF_NC_AND_NZ | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 | C=0 AND Z=0 | After CMP: greater than (signed) / above (unsigned) |
+| 0010 | IF_NC_AND_Z | IF_Z_AND_NC, IF_01 | C=0 AND Z=1 | No carry and zero |
+| 0011 | IF_NC | IF_GE, IF_AE, IF_0X | C=0 | After CMP: greater or equal (signed) / above or equal (unsigned) |
+| 0100 | IF_C_AND_NZ | IF_NZ_AND_C, IF_10 | C=1 AND Z=0 | Carry and not zero |
+| 0101 | IF_NZ | IF_NE, IF_X0 | Z=0 | Not zero; after CMP: not equal |
+| 0110 | IF_C_NE_Z | IF_Z_NE_C, IF_DIFF | C≠Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | IF_NZ_OR_NC, IF_NOT_11 | C=0 OR Z=0 | Not both flags set |
+| 1000 | IF_C_AND_Z | IF_Z_AND_C, IF_11 | C=1 AND Z=1 | Both flags set |
+| 1001 | IF_C_EQ_Z | IF_Z_EQ_C, IF_SAME | C=Z | C and Z flags same |
+| 1010 | IF_Z | IF_E, IF_X1 | Z=1 | Zero; after CMP: equal |
+| 1011 | IF_NC_OR_Z | IF_Z_OR_NC, IF_NOT_10 | C=0 OR Z=1 | No carry or zero |
+| 1100 | IF_C | IF_LT, IF_B, IF_1X | C=1 | After CMP: less than (signed) / below (unsigned) |
+| 1101 | IF_C_OR_NZ | IF_NZ_OR_C, IF_NOT_01 | C=1 OR Z=0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 | C=1 OR Z=1 | After CMP: less or equal (signed) / below or equal (unsigned) |
+| 1111 | IF_ALWAYS | | Always | Unconditional (default when no prefix) |
+
+**Alias Categories:**
+
+- **Commutative forms:** IF_NZ_AND_NC = IF_NC_AND_NZ (same condition, alternate word order)
+- **Comparison aliases:** IF_GT, IF_GE, IF_LT, IF_LE (signed); IF_A, IF_AE, IF_B, IF_BE (unsigned)
+- **Equality aliases:** IF_E (equal), IF_NE (not equal)
+- **Flag pattern aliases:** IF_SAME (C=Z), IF_DIFF (C≠Z)
+- **Bit pattern aliases:** IF_00, IF_01, IF_10, IF_11 (exact CZ pattern); IF_0X, IF_1X, IF_X0, IF_X1 (partial match); IF_NOT_xx (inverted)
 
 ### 2.2.2 The _RET_ Condition
 
-The condition code 0000 (_RET_) has special behavior. When an instruction has EEEE=0000, it functions as a return from subroutine:
+The condition code 0000 (`_RET_`) has special behavior that differs from all other conditions. Unlike other condition codes which control whether the instruction executes, `_RET_` means: **"Always execute the instruction, then return if the instruction did not branch."**
 
-- The instruction field is ignored
-- PC is loaded from the return address stored in PA (for CALL) or from the stack
+When an instruction has EEEE=0000:
 
-This encoding allows any instruction mnemonic to become a conditional return when prefixed with _RET_:
+1. **The instruction always executes** (condition 0000 means "always" for `_RET_`)
+2. **If the instruction does not branch**: Return by popping stack[19:0] into PC
+3. **If the instruction branches** (JMP, CALL, etc.): No return occurs—the branch takes precedence
+4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags from the stack
+
+This is fundamentally different from the RET instruction, which optionally restores C and Z flags when WC/WZ/WCZ effects are specified.
+
+**Basic Usage:**
 
 ```pasm
-_ret_   add     x, y                    ' Return, ADD is not executed
+_ret_   add     x, y                    ' ADD executes, then return (flags unchanged)
+_ret_   drvnot  #0                      ' Toggle pin 0, then return
+_ret_   mov     result, temp            ' Copy temp to result, then return
 ```
 
-The _RET_ prefix is primarily used with CALLA, CALLB, and related call instructions that use the condition field for return control.
+**Branch Behavior—No Return When Instruction Branches:**
 
-### 2.2.3 Conditional Execution Patterns
+When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
+
+```pasm
+_ret_   jmp     #somewhere              ' JMP executes, NO return (branch took effect)
+_ret_   call    #subroutine             ' CALL executes, NO return (call pushed new return)
+_ret_   djnz    counter, #loop          ' If counter≠0: branch, no return; if counter=0: return
+```
+
+**SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
+
+The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
+
+```pasm
+' Start XBYTE: SETQ executes to configure mode, then returns to $1FF
+        push    #$1FF                   ' Push $1FF for XBYTE returns
+_ret_   setq    #$100                   ' Configure XBYTE with LUT base $100, then return
+
+' Change XBYTE mode permanently for subsequent bytecodes
+_ret_   setq    #$200                   ' New LUT base $200 for all future bytecodes
+
+' Change XBYTE mode for next bytecode only (auto-restores afterward)
+_ret_   setq2   #$300                   ' Temporary LUT base $300 for one bytecode
+```
+
+**SKIP/SKIPF with _RET_—Branch Before Skipping:**
+
+Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
+
+```pasm
+        push    #routine                ' Push target address
+_ret_   skipf   pattern                 ' SKIPF executes, then branch to routine with skip active
+```
+
+**Timing:**
+
+The `_RET_` prefix adds overhead to the base instruction timing:
+
+| Execution Mode | Additional Cycles |
+|----------------|-------------------|
+| COG/LUT        | +2 cycles         |
+| Hub            | +11 to +18 cycles |
+
+**Single-Instruction Subroutines:**
+
+The `_RET_` prefix enables efficient single-instruction subroutines:
+
+```pasm
+toggle_pin0                             ' Subroutine: toggle pin 0
+_ret_   drvnot  #0                      ' 2 cycles + 2 return = 4 total cycles
+
+read_input                              ' Subroutine: read input to result
+_ret_   mov     result, ina             ' Execute MOV, then return
+```
+
+This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
+
+### 2.2.3 Signed vs. Unsigned Comparison Condition Codes
+
+When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two parallel sets of comparison aliases: **signed** (using two's complement interpretation) and **unsigned** (treating values as positive magnitudes).
+
+**Why Two Sets?**
+
+The same flag state has different meanings depending on whether values are signed or unsigned:
+
+| Comparison Result | Flag State | Unsigned Alias | Signed Alias |
+|:------------------|:-----------|:---------------|:-------------|
+| Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
+| Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
+| Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
+| Less or equal | C=1 OR Z=1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
+| Equal | Z=1 | IF_E | IF_E |
+| Not equal | Z=0 | IF_NE | IF_NE |
+
+**Signed Comparisons (IF_LT, IF_GT, IF_LE, IF_GE):**
+
+Use these when operands represent signed quantities (two's complement). The comparison correctly handles negative numbers:
+
+```pasm
+        mov     x, ##-100               ' x = -100 (signed)
+        mov     y, #50                  ' y = 50
+        cmps    x, y            wc wz   ' Signed compare: -100 vs 50
+if_lt   jmp     #x_is_smaller           ' True: -100 < 50 (signed)
+```
+
+**Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
+
+Use these when operands represent unsigned quantities (addresses, bit patterns, counters):
+
+```pasm
+        mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
+        cmp     addr, #0        wc wz   ' Unsigned compare
+if_a    jmp     #addr_is_larger         ' True: 2,147,483,648 > 0 (unsigned)
+                                        ' Note: IF_GT would be false (signed: negative)
+```
+
+**Choosing the Right Comparison:**
+
+| Data Type | Use | Example |
+|:----------|:----|:--------|
+| Memory addresses | Unsigned (IF_A, IF_B, etc.) | `cmp ptr, limit wc` then `if_ae` |
+| Loop counters (0 to N) | Unsigned | `cmp count, #MAX wc` then `if_b` |
+| Signed integers | Signed (IF_GT, IF_LT, etc.) | `cmps temp, #0 wc` then `if_lt` |
+| Temperature, position, velocity | Signed | `cmps delta, #0 wc wz` then `if_ge` |
+| Bit patterns, masks | Unsigned | `cmp flags, mask wc wz` |
+
+**CMP vs. CMPS:**
+
+- **CMP** performs unsigned subtraction (for setting flags)
+- **CMPS** performs signed subtraction (for setting flags)
+
+Match your compare instruction to your condition alias for correct results:
+
+```pasm
+' Unsigned comparison
+        cmp     a, b            wc wz
+if_ae   mov     result, #1              ' Unsigned: a >= b
+
+' Signed comparison
+        cmps    a, b            wc wz
+if_ge   mov     result, #1              ' Signed: a >= b
+```
+
+### 2.2.4 Conditional Execution Patterns
 
 Conditional execution eliminates branches, providing deterministic timing:
 
@@ -853,6 +991,24 @@ The AUG instruction must immediately precede the instruction it augments:
 4. The augmentation is consumed (one-shot)
 
 If any instruction intervenes (including a conditional NOP), the augmentation is lost.
+
+**Timing Overhead:**
+
+Each AUG instruction adds **+2 clock cycles** to the total execution time. When using `##` notation:
+
+| Operands | AUG Instructions | Additional Cycles |
+|:---------|:-----------------|:------------------|
+| `##Src` only | 1 (AUGS) | +2 cycles |
+| `##Dest` only | 1 (AUGD) | +2 cycles |
+| `##Dest, ##Src` | 2 (AUGD + AUGS) | +4 cycles |
+
+```pasm
+        mov     x, #100                 ' 2 cycles (no augmentation)
+        mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
+        wrlong  ##dest, ##addr          ' 6 cycles minimum (2 + 2 + 2 for AUGD + AUGS)
+```
+
+**Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
 
 ### 2.7.4 When Augmentation is Required
 
@@ -1336,6 +1492,27 @@ When WZ (Write Z) is specified, the instruction updates the Z flag based on whet
 
 This consistency makes WZ predictable. After any arithmetic, logical, or shift operation with WZ, checking IF_Z tests whether the result was zero. After a comparison with WZ, checking IF_Z tests whether the operands were equal.
 
+**Exception: Extended Instructions (Z AND behavior)**
+
+The extended arithmetic instructions—ADDX, SUBX, ADDSX, SUBSX, CMPX, CMPSX—use a modified Z flag update rule:
+
+```
+Z = Z AND (result == 0)
+```
+
+Instead of simply replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
+
+```pasm
+' 64-bit addition: [hi:lo] += [bhi:blo]
+        add     lo, blo         wc wz   ' Add low 32 bits, Z = (lo_result == 0)
+        addx    hi, bhi         wc wz   ' Add high + carry, Z = Z AND (hi_result == 0)
+        ' Z is now 1 only if BOTH lo and hi results were zero (entire 64-bit result is zero)
+```
+
+Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
+
+**Source Verification:** CSV v35 documents this as "Z = Z AND (Result = 0)" for all extended instructions.
+
 ### 3.2.3 The WCZ Effect
 
 ```pasm
@@ -1346,7 +1523,48 @@ When WCZ (Write C and Z) is specified, both flags are updated according to their
 
 WCZ is common after comparisons where both the ordering (C) and equality (Z) matter, or after arithmetic operations where both carry detection and zero detection are needed.
 
-### 3.2.4 No Effect (Default)
+### 3.2.4 Special Flag Effects (ANDC/ANDZ/ORC/ORZ/XORC/XORZ)
+
+The TESTB, TESTBN, TESTP, and TESTPN instructions support additional flag effects that perform bitwise operations on the existing flag value rather than replacing it. These enable testing multiple bits and accumulating the results into a single flag.
+
+| Effect | Operation | Description |
+|:-------|:----------|:------------|
+| ANDC | C = C AND bit | AND tested bit into C |
+| ANDZ | Z = Z AND bit | AND tested bit into Z |
+| ORC | C = C OR bit | OR tested bit into C |
+| ORZ | Z = Z OR bit | OR tested bit into Z |
+| XORC | C = C XOR bit | XOR tested bit into C |
+| XORZ | Z = Z XOR bit | XOR tested bit into Z |
+
+Unlike WC and WZ which replace the flag value, these effects combine the tested bit with the existing flag value using the specified boolean operation.
+
+**Use Case: Testing Multiple Bits**
+
+The most common use is testing whether ALL bits in a set are high (AND), or whether ANY bit in a set is high (OR):
+
+```pasm
+' Test if ALL of pins 0, 4, and 7 are high (AND pattern)
+        testp   #0              wc      ' C = pin 0 state
+        testp   #4              andc    ' C = C AND pin 4 state
+        testp   #7              andc    ' C = C AND pin 7 state
+        ' C = 1 only if ALL three pins are high
+
+' Test if ANY of pins 0, 4, or 7 is high (OR pattern)
+        testpn  #0              wc      ' C = NOT pin 0 (so C=0 if pin high)
+        testpn  #4              andc    ' C = C AND NOT pin 4
+        testpn  #7              andc    ' C = C AND NOT pin 7
+        ' C = 0 if ANY pin is high, C = 1 if ALL pins are low
+```
+
+**TESTB vs TESTP:**
+
+- TESTB tests a bit within a register: `TESTB reg, #bit_number`
+- TESTP tests a pin's input state: `TESTP #pin_number`
+- TESTBN and TESTPN test the inverted bit or pin state
+
+**Source Verification:** CSV v35 documents these as `C/Z = C/Z AND/OR/XOR D[S[4:0]]` for TESTB variants and `C/Z = C/Z AND/OR/XOR IN[D[5:0]]` for TESTP variants.
+
+### 3.2.5 No Effect (Default)
 
 ```pasm
         add     result, value           ' Execute operation, preserve flags
@@ -1412,12 +1630,12 @@ For real-time code, deterministic timing often matters more than average speed.
 
 ### 3.3.3 Complete Condition Table
 
-The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus two special cases (always and never). Many conditions have multiple names—aliases that make code more readable in different contexts:
+The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus the special `_RET_` prefix (EEEE=0000) which executes the instruction and then returns. Many conditions have multiple names—aliases that make code more readable in different contexts:
 
 | Condition | Aliases | C | Z | True When |
 |-----------|---------|---|---|-----------|
-| IF_ALWAYS | (none) | * | * | Always executes (unconditional) |
-| IF_NEVER | (none) | - | - | Never executes (acts as NOP) |
+| IF_ALWAYS | (none) | * | * | Always executes (unconditional, EEEE=1111) |
+| _RET_ | (none) | * | * | Always executes, then returns if no branch (EEEE=0000) |
 | IF_C | IF_B | 1 | * | C = 1 (carry set, below) |
 | IF_NC | IF_AE, IF_NB | 0 | * | C = 0 (no carry, above or equal) |
 | IF_Z | IF_E | * | 1 | Z = 1 (zero, equal) |
@@ -1862,6 +2080,7 @@ After a multi-long comparison:
 \item The Z flag indicates a zero result or equality across nearly all instructions
 \item Flags persist until explicitly modified—instructions without WC/WZ/WCZ preserve flag values
 \item WC, WZ, and WCZ effects control which flags are updated; the operation always executes
+\item Special effects ANDC/ANDZ/ORC/ORZ/XORC/XORZ combine tested bits with existing flags (TESTx instructions only)
 \item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
 \item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing
@@ -3685,6 +3904,606 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 
 <!-- End of Chapter 5 -->
 
+# Chapter 6: Address Modes
+
+<!-- Chapter covering all operand addressing modes in PASM2 -->
+
+PASM2 provides several addressing modes that determine how instruction operands are specified and how memory is accessed. Understanding these modes is essential for writing efficient code that accesses registers, immediate values, and Hub memory correctly.
+
+This chapter covers all addressing modes from simple register access through the sophisticated pointer expressions used for Hub memory operations. Each mode has specific use cases, encoding requirements, and performance characteristics.
+
+
+## 6.1 Direct Register Addressing
+
+The most basic addressing mode specifies COG registers directly by address. Both source and destination operands can use direct register addressing.
+
+### 6.1.1 Register as Destination
+
+The destination field (D) in every instruction specifies a 9-bit COG register address ($000-$1FF). The instruction reads from and/or writes to this register:
+
+```pasm
+        add     result, value           ' result is destination register
+        mov     counter, #0             ' counter is destination register
+        test    flags, #MASK    wz      ' flags is destination (read-only here)
+```
+
+The assembler translates symbolic register names to their addresses. Programmers define registers using labels or the RES directive:
+
+```pasm
+result          res     1               ' Reserve one long at current address
+counter         res     1
+flags           res     1
+```
+
+### 6.1.2 Register as Source
+
+When the I bit (bit 18) is clear, the source field (S) specifies a register address. The instruction reads the value from that register:
+
+```pasm
+        add     x, y                    ' y is source register (I=0)
+        mov     dest, source            ' source is register (I=0)
+        cmp     a, b            wc      ' b is source register (I=0)
+```
+
+Direct register addressing provides single-cycle access to COG RAM. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
+
+### 6.1.3 Special Register Addresses
+
+Addresses $1F0-$1FF access special-purpose registers with hardware functions:
+
+| Address | Register | Purpose |
+|:--------|:---------|:--------|
+| $1F0-$1F7 | IJMP3/IRET3 through PA/PB | Interrupt and scratch registers |
+| $1F8 | PTRA | Pointer A for Hub addressing |
+| $1F9 | PTRB | Pointer B for Hub addressing |
+| $1FA-$1FB | DIRA/DIRB | Pin direction control |
+| $1FC-$1FD | OUTA/OUTB | Pin output control |
+| $1FE-$1FF | INA/INB | Pin input (read-only) |
+
+These registers function like ordinary registers for most purposes but have additional hardware significance.
+
+
+## 6.2 Immediate Addressing
+
+Immediate addressing embeds a constant value directly in the instruction rather than reading from a register.
+
+### 6.2.1 The # Prefix (9-bit Immediate)
+
+The `#` prefix before an operand indicates an immediate value:
+
+```pasm
+        add     x, #100                 ' Add immediate value 100
+        mov     counter, #0             ' Load zero
+        cmp     value, #255     wc      ' Compare against 255
+```
+
+When `#` is used:
+
+- The assembler sets the I bit (bit 18) to 1
+- The 9-bit S field contains the immediate value
+- Valid range: 0 to 511 ($000 to $1FF)
+
+### 6.2.2 Immediate Range and Signedness
+
+The 9-bit immediate field is always treated as unsigned (0-511). For instructions that interpret operands as signed values, the 9-bit value is sign-extended:
+
+```pasm
+        mov     x, #$1FF                ' x = 511 (unsigned) or -1 (if sign-extended)
+        add     x, #1                   ' Add 1
+        sub     x, #10                  ' Subtract 10
+```
+
+Values outside the 0-511 range require augmentation (see Section 6.3).
+
+### 6.2.3 Current Address ($)
+
+The `$` symbol represents the current assembly address:
+
+```pasm
+loop    add     counter, #1
+        djnz    count, #$-1             ' Jump back one instruction (to ADD)
+        jmp     #$                      ' Infinite loop (jump to self)
+```
+
+When used with `#`, it becomes an immediate value representing the address. This is useful for relative branches and self-referencing code.
+
+
+## 6.3 Augmented Immediate Addressing
+
+When values exceed 9 bits, PASM2 uses augmentation to provide full 32-bit immediates.
+
+### 6.3.1 The ## Prefix (32-bit Immediate)
+
+The `##` prefix indicates a full 32-bit immediate value:
+
+```pasm
+        mov     dest, ##$12345678       ' Load full 32-bit value
+        add     counter, ##1000000      ' Add one million
+        mov     ptr, ##hub_buffer       ' Load 20-bit Hub address
+```
+
+### 6.3.2 How Augmentation Works
+
+The assembler implements `##` by inserting an AUGS or AUGD instruction before the target instruction:
+
+```pasm
+' What the programmer writes:
+        mov     dest, ##$12345678
+
+' What the assembler generates:
+        augs    #$12345                 ' Upper 23 bits
+        mov     dest, #$678             ' Lower 9 bits
+                                        ' Combined: $12345678
+```
+
+The AUG instruction provides bits 31-9, which combine with the 9-bit field from the next instruction to form the complete 32-bit value.
+
+### 6.3.3 AUGS vs. AUGD
+
+Two augmentation instructions exist:
+
+- **AUGS** augments the Source field of the following instruction
+- **AUGD** augments the Destination field of the following instruction
+
+Both operands can be augmented simultaneously:
+
+```pasm
+' What the programmer writes:
+        wrlong  ##value, ##address      ' Both operands augmented
+
+' What the assembler generates:
+        augd    #value_upper            ' Augment D field
+        augs    #address_upper          ' Augment S field
+        wrlong  #value_lower, #address_lower
+```
+
+### 6.3.4 Augmentation Timing
+
+Each AUG instruction adds **+2 clock cycles** to execution:
+
+| Augmentation | Additional Cycles |
+|:-------------|:------------------|
+| `##Src` only | +2 cycles (AUGS) |
+| `##Dest` only | +2 cycles (AUGD) |
+| `##Dest, ##Src` | +4 cycles (AUGD + AUGS) |
+
+```pasm
+        mov     x, #100                 ' 2 cycles
+        mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
+        wrlong  ##data, ##addr          ' 6+ cycles (2 + 2 + 2 for AUGD + AUGS + instruction)
+```
+
+**Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.
+
+### 6.3.5 Augmentation is One-Shot
+
+The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
+
+```pasm
+        augs    #$12345
+        nop                             ' This consumes the AUGS!
+        mov     x, #$678                ' Gets $678, NOT $12345678
+
+        augs    #$12345
+if_z    mov     x, #$678                ' Even if Z=0 and MOV doesn't execute,
+                                        ' AUGS is still consumed
+```
+
+The assembler handles this automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to instruction sequencing.
+
+
+## 6.4 Pointer Register Addressing (PTRA/PTRB)
+
+The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—that enable sophisticated Hub memory addressing with automatic increment, decrement, and indexing.
+
+### 6.4.1 Basic Pointer Access
+
+The simplest pointer usage reads or writes Hub memory at the address in PTRA or PTRB:
+
+```pasm
+        mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
+        rdbyte  x, ptra                 ' Read byte from Hub at PTRA
+        wrlong  y, ptrb                 ' Write long to Hub at PTRB
+```
+
+### 6.4.2 The SCALE Factor
+
+**Critical Concept:** Pointer operations are scaled by the instruction's data size:
+
+| Instruction | SCALE | Description |
+|:------------|:------|:------------|
+| RDBYTE, WRBYTE | 1 | Byte operations |
+| RDWORD, WRWORD | 2 | Word (16-bit) operations |
+| RDLONG, WRLONG, WMLONG | 4 | Long (32-bit) operations |
+
+All pointer increments, decrements, and index offsets are multiplied by SCALE. This means:
+
+- `RDBYTE x, PTRA++` increments PTRA by **1 byte**
+- `RDWORD x, PTRA++` increments PTRA by **2 bytes**
+- `RDLONG x, PTRA++` increments PTRA by **4 bytes**
+
+This automatic scaling makes sequential memory access natural—each operation advances to the next element regardless of element size.
+
+### 6.4.3 Post-Increment and Post-Decrement
+
+Post-modify modes use the current pointer value for the memory access, then update the pointer afterward:
+
+```pasm
+        rdbyte  x, ptra++               ' Read byte at PTRA, then PTRA += 1
+        rdword  y, ptrb++               ' Read word at PTRB, then PTRB += 2
+        rdlong  z, ptra--               ' Read long at PTRA, then PTRA -= 4
+        wrbyte  x, ptrb--               ' Write byte at PTRB, then PTRB -= 1
+```
+
+**Execution sequence for `RDLONG x, PTRA++`:**
+1. Read long from Hub address in PTRA
+2. Store value in register x
+3. Add 4 (SCALE for long) to PTRA
+
+Post-modify is ideal for sequential forward or backward traversal:
+
+```pasm
+' Read 10 bytes sequentially
+        mov     ptra, ##source
+        rep     @.end, #10
+        rdbyte  x, ptra++               ' Read byte, advance pointer
+        ' ... process x ...
+.end
+
+' Write longs in reverse order
+        mov     ptrb, ##buffer_end
+        rep     @.done, #count
+        wrlong  value, ptrb--           ' Write long, move backward
+.done
+```
+
+### 6.4.4 Pre-Increment and Pre-Decrement
+
+Pre-modify modes update the pointer first, then use the new value for memory access:
+
+```pasm
+        rdbyte  x, ++ptra               ' PTRA += 1, then read byte at new PTRA
+        rdword  y, ++ptrb               ' PTRB += 2, then read word at new PTRB
+        rdlong  z, --ptra               ' PTRA -= 4, then read long at new PTRA
+        wrbyte  x, --ptrb               ' PTRB -= 1, then write byte at new PTRB
+```
+
+**Execution sequence for `RDLONG x, ++PTRA`:**
+1. Add 4 (SCALE for long) to PTRA
+2. Read long from Hub address in updated PTRA
+3. Store value in register x
+
+Pre-modify is useful for stack operations and accessing elements relative to a base:
+
+```pasm
+' Push onto stack (stack grows upward)
+        wrlong  value, ptra++           ' Post: write at current, then advance
+
+' Pop from stack
+        rdlong  value, --ptra           ' Pre: back up first, then read
+
+' Skip first element, read second
+        mov     ptra, ##array
+        rdlong  x, ++ptra               ' Skip element 0, read element 1
+```
+
+### 6.4.5 Indexed Pointer Access (Non-Updating)
+
+Indexed mode accesses memory at an offset from the pointer without modifying the pointer:
+
+```pasm
+        rdlong  x, ptra[0]              ' Read at PTRA + 0*4 = PTRA
+        rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = PTRA + 20 bytes
+        rdbyte  z, ptrb[-3]             ' Read at PTRB + (-3)*1 = PTRB - 3 bytes
+        wrword  w, ptra[10]             ' Write at PTRA + 10*2 = PTRA + 20 bytes
+```
+
+The index is multiplied by SCALE:
+
+| Expression | Instruction | Effective Address |
+|:-----------|:------------|:------------------|
+| `PTRA[5]` | RDBYTE | PTRA + 5 bytes |
+| `PTRA[5]` | RDWORD | PTRA + 10 bytes |
+| `PTRA[5]` | RDLONG | PTRA + 20 bytes |
+
+**Index Range (non-updating):** -32 to +31 (6-bit signed)
+
+Indexed mode is ideal for accessing structure fields or array elements:
+
+```pasm
+' Access structure fields
+        mov     ptra, ##my_struct
+        rdlong  id, ptra[0]             ' First field (offset 0)
+        rdlong  flags, ptra[1]          ' Second field (offset 4)
+        rdlong  data, ptra[2]           ' Third field (offset 8)
+
+' Access array element
+        mov     ptra, ##long_array
+        rdlong  x, ptra[index]          ' Read array[index] (if index in register)
+```
+
+### 6.4.6 Indexed Pointer with Update (Compound Forms)
+
+Compound forms combine indexing with pointer update:
+
+```pasm
+        rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 5*4 (20 bytes)
+        rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 3*4 (12 bytes)
+        rdlong  z, ++ptra[5]            ' PTRA += 5*4, then read at new PTRA
+        rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
+```
+
+**Index Range (updating):** 1 to 16 (special encoding: 1-15 normal, 16 encoded as 0)
+
+These forms enable strided access patterns:
+
+```pasm
+' Read every 4th long (stride of 16 bytes)
+        mov     ptra, ##data
+        rep     @.end, #count
+        rdlong  x, ptra++[4]            ' Read, advance by 4 longs
+        ' ... process x ...
+.end
+
+' Read structure array (12-byte structures as 3 longs)
+        mov     ptra, ##struct_array
+.loop   rdlong  field1, ptra++[3]       ' Read field1, skip to next struct
+        ' ... (to read all fields, use indexed without update for field2, field3)
+```
+
+### 6.4.7 Complete PTRx Expression Summary
+
+| Expression | Memory Address | Pointer Update |
+|:-----------|:---------------|:---------------|
+| `PTRA` | PTRA | None |
+| `PTRA[index]` | PTRA + index*SCALE | None |
+| `PTRA++` | PTRA | PTRA += 1*SCALE |
+| `PTRA--` | PTRA | PTRA -= 1*SCALE |
+| `++PTRA` | PTRA + 1*SCALE | PTRA += 1*SCALE |
+| `--PTRA` | PTRA - 1*SCALE | PTRA -= 1*SCALE |
+| `PTRA++[index]` | PTRA | PTRA += index*SCALE |
+| `PTRA--[index]` | PTRA | PTRA -= index*SCALE |
+| `++PTRA[index]` | PTRA + index*SCALE | PTRA += index*SCALE |
+| `--PTRA[index]` | PTRA - index*SCALE | PTRA -= index*SCALE |
+
+All expressions work identically with PTRB.
+
+### 6.4.8 Extended Index with AUGS
+
+For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
+
+```pasm
+        rdlong  x, ptra[##1000]         ' Index of 1000 (offset 4000 bytes for long)
+        rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
+```
+
+With AUGS, the index becomes a 20-bit value, and the index is **not scaled**—it represents the actual byte offset:
+
+```pasm
+' Without AUGS: index is scaled
+        rdlong  x, ptra[10]             ' Offset = 10 * 4 = 40 bytes
+
+' With AUGS: index is NOT scaled (direct byte offset)
+        rdlong  x, ptra[##40]           ' Offset = 40 bytes (same result)
+```
+
+
+## 6.5 Block Transfers with SETQ and Pointers
+
+The SETQ instruction enables efficient multi-long transfers between Hub memory and COG/LUT RAM.
+
+### 6.5.1 Basic Block Transfer
+
+```pasm
+        setq    #15                     ' Transfer 16 longs (count - 1)
+        rdlong  first_reg, ptra         ' Read 16 consecutive longs
+```
+
+SETQ specifies the count minus one. The transfer moves `count+1` longs at one long per clock cycle.
+
+### 6.5.2 Block Transfer with Pointer Update
+
+When using PTRx with SETQ block transfers, the pointer updates by the **total transfer size**:
+
+```pasm
+' Post-increment: read from current PTRA, then advance by total transfer size
+        setq    #15                     ' 16 longs
+        rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 16*4 = 64 bytes
+
+' Post-decrement: read from current PTRA, then move back
+        setq    #15
+        rdlong  buffer, ptra--          ' Read 16 longs, PTRA -= 64 bytes
+
+' Pre-increment: advance first, then read
+        setq    #15
+        rdlong  buffer, ++ptra          ' PTRA += 64, read 16 longs from new PTRA
+
+' Pre-decrement: move back first, then read
+        setq    #15
+        rdlong  buffer, --ptra          ' PTRA -= 64, read 16 longs from new PTRA
+```
+
+**Critical:** With SETQ block transfers, the index field is **overridden** by the block count. An arbitrary index cannot be specified:
+
+```pasm
+' This does NOT work as expected:
+        setq    #15
+        rdlong  buffer, ptra++[5]       ' Index [5] is IGNORED! Uses block count instead
+```
+
+### 6.5.3 SETQ2 for LUT Transfers
+
+SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
+
+```pasm
+        setq2   #31                     ' Transfer 32 longs
+        rdlong  lut_addr, ptra++        ' Read 32 longs into LUT
+```
+
+### 6.5.4 Hardware Bug: ALTx/AUGS Between SETQ and Transfer
+
+::: {.warningbox}
+**SILICON BUG:** Do not place ALTx, AUGS, or AUGD instructions between SETQ/SETQ2 and the block transfer instruction when using PTRx expressions.
+:::
+
+```pasm
+' BUGGY CODE - PTRx update is wrong!
+        setq    #15                     ' Ready to transfer 16 longs
+        altd    dest_reg                ' ALTD cancels block-size PTRx delta!
+        rdlong  0, ptra++               ' PTRA increments by 4 (1 long), NOT 64!
+
+' CORRECT CODE - No intervening instruction
+        setq    #15
+        rdlong  dest_reg, ptra++        ' PTRA correctly increments by 64
+```
+
+**Impact:** The data transfer completes correctly (16 longs are read), but PTRA only increments by the normal single-operation amount (4 bytes) instead of the block amount (64 bytes).
+
+**Workaround:** Never place ALTx, AUGS, or AUGD between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG when using PTRx expressions.
+
+
+## 6.6 ALTx Modified Addressing
+
+The ALT instructions modify how the following instruction interprets its operands, enabling computed addresses and self-modifying code patterns.
+
+### 6.6.1 ALTD (Alter Destination)
+
+ALTD modifies the destination field of the next instruction:
+
+```pasm
+        altd    index, #base            ' Next D = base + index
+        mov     0-0, value              ' Actually writes to base[index]
+```
+
+The assembler uses `0-0` as a placeholder for the modified destination.
+
+### 6.6.2 ALTS (Alter Source)
+
+ALTS modifies the source field of the next instruction:
+
+```pasm
+        alts    index, #table           ' Next S = table + index
+        mov     result, 0-0             ' Actually reads from table[index]
+```
+
+### 6.6.3 ALTI (Alter Both)
+
+ALTI can modify both destination and source fields, plus the instruction opcode:
+
+```pasm
+        alti    index, #template        ' Modify D, S, and optionally instruction
+        add     0-0, 0-0                ' Both operands modified
+```
+
+### 6.6.4 ALTx with AUGS Interaction
+
+::: {.warningbox}
+**SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the AUGS value affects both the ALTx and its intended target.
+:::
+
+```pasm
+' BUGGY CODE - AUGS affects both instructions
+        augs    #$12340000
+        altd    index, #$100            ' #$100 becomes #$12340100! (bug)
+        mov     0-0, #$5678             ' #$5678 becomes #$12345678
+
+' CORRECT CODE - Use register for ALTx operand
+        mov     base, #$100             ' Put base in register
+        augs    #$12340000
+        altd    index, base             ' Register not affected by AUGS
+        mov     0-0, #$5678             ' Only this gets augmented
+```
+
+**Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
+
+
+## 6.7 Hub Address Expressions
+
+Hub memory instructions accept several address expression forms:
+
+### 6.7.1 Register Address
+
+A register containing a Hub address:
+
+```pasm
+        mov     addr, ##$1000
+        rdlong  x, addr                 ' Read from Hub address in register
+```
+
+### 6.7.2 Immediate Address
+
+An 8-bit immediate Hub address (limited range):
+
+```pasm
+        rdlong  x, #$80                 ' Read from Hub address $80
+```
+
+### 6.7.3 Augmented Immediate Address
+
+A 20-bit Hub address using AUGS:
+
+```pasm
+        rdlong  x, ##$12345             ' Read from Hub address $12345
+```
+
+### 6.7.4 Pointer Expressions
+
+Any of the PTRx forms described in Section 6.4:
+
+```pasm
+        rdlong  x, ptra                 ' Basic pointer
+        rdlong  x, ptra++               ' With update
+        rdlong  x, ptra[5]              ' With index
+```
+
+
+## 6.8 Address Mode Selection Guide
+
+| Need | Recommended Mode |
+|:-----|:-----------------|
+| Local variable access | Direct register |
+| Small constants (0-511) | 9-bit immediate (#) |
+| Large constants, Hub addresses | Augmented immediate (##) |
+| Sequential Hub access | PTRx with ++/-- |
+| Random Hub access | PTRx with index |
+| Structure field access | PTRx with fixed index |
+| Block transfers | SETQ + PTRx |
+| Computed register access | ALTx instructions |
+
+### 6.8.1 Performance Considerations
+
+**Fastest:** Direct register addressing (2 cycles)
+
+**Fast:** 9-bit immediate (2 cycles)
+
+**Moderate:** Augmented immediate (+2 cycles per AUG instruction)
+
+**Variable:** Hub operations (2-9 cycles depending on Hub slot)
+
+For time-critical inner loops:
+- Frequently-used values should reside in COG registers
+- Large constants should be pre-loaded before entering the loop
+- Sequential Hub access benefits from PTRx with ++/--
+- Bulk data movement is most efficient with block transfers (SETQ)
+
+
+```{=latex}
+\begin{keyconcepts}
+\item Direct register addressing uses 9-bit fields to access COG RAM at addresses \$000-\$1FF
+\item The \# prefix creates 9-bit immediates (0-511); \#\# creates 32-bit immediates via AUGS/AUGD
+\item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
+\item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms
+\item The SCALE factor (1/2/4) depends on instruction: byte=1, word=2, long=4
+\item Non-updating index range: -32 to +31; updating index range: 1 to 16
+\item SETQ block transfers override the index field; pointer updates by total transfer size
+\item SILICON BUG: ALTx/AUGS between SETQ and PTRx transfer breaks pointer update
+\item SILICON BUG: AUGS affects immediate operands in intervening ALTx instructions
+\end{keyconcepts}
+```
+
+
+<!-- End of Chapter 6 -->
+
 
 # Part II: Instruction Set Reference
 
@@ -3886,8 +4705,8 @@ Absolute Value
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
-| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | D[31] | Result = 0 | 2 |
+| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
+| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D[31] | Result = 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -3971,9 +4790,9 @@ Add and Set Counter Event Trigger
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1010011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1010011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
@@ -4151,7 +4970,7 @@ Acknowledge Smart Pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | Ack Bus | --- | --- | 2 |
+| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | --- | 2 |
 
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
@@ -4287,9 +5106,9 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
-⚠️ **Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
-⚠️ **Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active.
 
 
 ::: instrheader
@@ -4873,7 +5692,7 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-⚠️ **Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
 
 ::: instrheader
@@ -4909,9 +5728,9 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
 
-⚠️ **Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta. See [Appendix I](#appendix-i) for details.
+**Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
 
 
 
@@ -4935,19 +5754,19 @@ Set Bit to Flag State
 
 ---
 
-**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates Z to the original bit state.
+**Result:** Dest bit(s) designated by Src are set to the corresponding flag state. Optionally updates C and Z to the original bit state.
 
 - Dest is a register whose value will have bit(s) set to the flag state.
 - Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
-- WCZ is an optional effect to update the Z flag to the original bit state.
+- WCZ is an optional effect to update C and Z flags to the original bit state.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | orig bit | 2 |
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
@@ -4967,7 +5786,7 @@ BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag
 
 Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
-If WCZ is specified, the Z flag is set (1) if the original base bit was set, or cleared (0) if it was clear.
+If WCZ is specified, both C and Z flags are set to the original base bit value—set (1) if the original base bit was set, or cleared (0) if it was clear.
 
 
 
@@ -4991,7 +5810,7 @@ Bit High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
@@ -5028,7 +5847,7 @@ Bit Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
@@ -5065,7 +5884,7 @@ Bit Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | D | --- | original D[S[4:0]] | 2 |
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
@@ -5102,7 +5921,7 @@ Bit Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | D | original D[S[4:0]] | original D[S[4:0]] | 2 |
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
 **Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
@@ -5308,8 +6127,8 @@ Call Subroutine via PTRA
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5...12 |
+| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
@@ -5326,7 +6145,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
+CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
 
 
 
@@ -5352,8 +6171,8 @@ Call Subroutine via PTRB
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5...12 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5...12 |
+| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
@@ -5370,7 +6189,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
 
 
 
@@ -5559,7 +6378,7 @@ Compare Most Significant Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Result[31] | D=S | 2 |
+| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | D = S | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps)
@@ -5676,10 +6495,9 @@ Compare and Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | Unsigned(D >= S) | Result = 0 | 2 |
+| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | Result = 0 | D † | 2 |
 
-
-\textsuperscript{1} Dest is only written if Dest >= Src (subtraction was performed).
+† Dest is only written if D >= S (subtraction was performed).
 
 **Related:** [CMP](#cmp), [SUB](#sub)
 
@@ -5886,8 +6704,9 @@ Cog Identification
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | D if reg and !WC | Cog Running | --- | 2-9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D[3:0] running | --- | D † | 2...9, +2 if result |
 
+† Result written only if D is register and WC not specified.
 
 **Related:** [COGINIT](#coginit), [COGSTOP](#cogstop)
 
@@ -5933,8 +6752,9 @@ Cog Initialize
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | D if reg and WC | No cog available | --- | 2-9, +2 if result |
+| EEEE | 1100111 | CLI | DDDDDDDDD | SSSSSSSSS | No cog available | --- | D † | 2...9, +2 if result |
 
+† Result written only if D is register and WC specified; contains launched cog ID.
 
 **Related:** [COGID](#cogid), [COGSTOP](#cogstop)
 
@@ -6147,7 +6967,7 @@ Decrement Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Modulus triggered | Result = 0 | 2 |
+| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | Result = 0 | D | 2 |
 
 
 **Related:** [INCMOD](#incmod)
@@ -7403,23 +8223,28 @@ Get System Counter
 **Result:** The current value of the system counter CT is written to Dest.
 
 - Dest is a register where the system counter value is written.
-- WC is an optional effect that preserves the current C flag state.
+- WC is an optional effect to retrieve the upper 32 bits of the 64-bit counter (Rev B/C silicon).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | same | --- | 2 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | CT[63:32] if WC | --- | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-GETCT retrieves the current value of the system counter CT into the Dest register. The system counter is a 32-bit counter that is reset to zero on system reset and increments by one on every clock cycle.
+GETCT retrieves the current value of the system counter CT into the Dest register. On Rev B/C silicon, the system counter is a 64-bit counter that is reset to zero on system reset and increments by one on every clock cycle. The lower 32 bits (CT[31:0]) are always returned in Dest.
 
-The CT counter provides a continuous, monotonic time reference that wraps around from $FFFF_FFFF to $0000_0000. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
+The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
 
-If the WC effect is specified, the C flag is preserved and remains unchanged by this instruction. This allows GETCT to be used in sequences where the C flag state must be maintained across operations.
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to the C flag's associated result location. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+
+```pasm
+        getct   low_word wc     ' Get lower 32 bits, upper 32 to result
+        getct   high_word       ' Get upper 32 bits (if needed for verification)
+```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
@@ -7745,7 +8570,7 @@ Set Hub Configuration
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2 |
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000000000 | --- | --- | --- | 2...9 |
 
 
 **Related:** [COGINIT](#coginit), [COGID](#cogid)
@@ -7801,7 +8626,7 @@ Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
 
 In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.
 
-HUBSET takes 2 clock cycles to execute, but switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
+HUBSET takes 2-9 clock cycles to execute depending on Hub window alignment. Switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
 
 
 
@@ -8484,7 +9309,7 @@ Load Address
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | Per W | --- | --- | 2 |
+| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 2 |
 
 
 **Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -8520,7 +9345,7 @@ Allocate New Lock
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | D | 1 if no LOCK available | --- | 4...11 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000000100 | No LOCK available | --- | D | 4...11 |
 
 
 **Related:** [LOCKTRY](#locktry), [LOCKREL](#lockrel), [LOCKRET](#lockret)
@@ -8627,7 +9452,7 @@ Try To Acquire Lock
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | --- | 1 if got LOCK | --- | 2...9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000110 | 1 if got LOCK | --- | --- | 2...9, +2 if result |
 
 
 **Related:** [LOCKREL](#lockrel), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
@@ -9834,7 +10659,7 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
@@ -10951,14 +11776,22 @@ Read Byte From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16 |
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
 **Explanation:**
 
-RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
 
@@ -10989,14 +11822,24 @@ Read Fast Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 |
+| EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 2 or WRFAST finish + 10...17 |
+| Hub execution | *Not available—FIFO in use* |
+| COG with interrupts | 2 or WRFAST finish + 10...25 |
+| Hub with interrupts | *Not available—FIFO in use* |
+
+**Note:** FIFO operations require COG execution mode. When code runs from Hub memory, the FIFO is used for instruction fetch and cannot be redirected for data streaming.
 
 
 **Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
 **Explanation:**
 
-RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing.
+RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from COG/LUT memory, not Hub memory.
 
 Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting Hub address. The FIFO automatically wraps at the block boundary.
 
@@ -11024,20 +11867,32 @@ Read Long From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of long | --- | 9...16 |
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
 **Explanation:**
 
-RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple longs can be performed.
 
 If the WC or WCZ effect is specified, C is set to the MSB of the long.
 
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
+
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
+
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations if you expect PTRx to point past the block.
 
 
 
@@ -11133,14 +11988,22 @@ Read Word From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of word | Result = 0 | 9...16 |
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
+
+† **Timing varies by execution context:**
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 9...16 |
+| Hub execution | 9...26 |
+| COG with interrupts | 9...24 |
+| Hub with interrupts | 9...44 |
 
 
 **Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
 **Explanation:**
 
-RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
+RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for COG execution, 9-26 for Hub execution, with additional latency when interrupts are enabled (9-24 for COG, 9-44 for Hub). The cog must wait for its Hub access window.
 
 If preceded by a SETQ instruction, burst reads of multiple words can be performed.
 
@@ -11184,6 +12047,17 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
 REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+
+**Critical Restrictions:**
+
+- **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
+
+- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
+
+**Forbidden instructions in REP blocks:**
+- Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
+- Conditional branches: DJNZ, DJZ, TJZ, TJNZ, IJZ, IJNZ
+- Any instruction that modifies PC
 
 **Using Labels Instead of Counts:**
 
@@ -11311,8 +12185,16 @@ Return Via PTRA Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 † |
 
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 11...18 |
+| Hub execution | 20...40 |
+| COG with interrupts | 11...26 |
+| Hub with interrupts | 20...70 |
 
 **Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
@@ -11346,8 +12228,16 @@ Return Via PTRB Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 † |
 
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG execution | 11...18 |
+| Hub execution | 20...40 |
+| COG with interrupts | 11...26 |
+| Hub with interrupts | 20...70 |
 
 **Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
@@ -12496,7 +13386,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 :::
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward. See [Appendix I](#appendix-i) for details and workarounds.
+**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
 
 
 ::: instrheader
@@ -12531,7 +13421,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 :::
 
-⚠️ **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. See [Appendix I](#appendix-i) for details and workarounds.
+**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
 
 ::: instrheader
@@ -12957,6 +13847,17 @@ Skip Instructions Fast
 **Explanation:**
 
 Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
+
+**CRITICAL: COG/LUT Memory Only**
+
+SKIPF can ONLY leap over instructions when executing from **COG or LUT memory**. When SKIPF is executed from Hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the Hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of COG/LUT memory.
+
+**Best Practice:** Use SKIP for code in Hub memory (ORGH sections), SKIPF for code in COG/LUT memory (ORG sections).
+
+**REP Compatibility:**
+- SKIP is fully compatible with REP—cancellation maintains instruction counts
+- SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
+- Recommendation: Use SKIP within REP blocks for predictable behavior
 
 
 
@@ -14357,6 +15258,8 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
         WRLONG  buffer, ptra   ' Write 16 longs to hub
 :::
 
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
+
 
 
 ::: instrheader
@@ -14867,7 +15770,7 @@ ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for u
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 13 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
+The P2 assembler provides 14 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
 
 
 
@@ -15167,6 +16070,76 @@ sine    word    $8000[256]          ' Initialize sine table with midpoint values
 - [LONG](#long) — Declare 32-bit long data
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
+
+
+
+::: dirheader
+### FILE {#file}
+Include Binary File
+
+Includes raw binary file data at the current address.
+:::
+
+Include the contents of a binary file at the current assembly address. The raw bytes from the specified file are inserted directly into the assembled output.
+
+#### Syntax
+```pasm
+[label] FILE    "filename"
+```
+
+#### Parameters
+| Parameter | Description |
+|-----------|-------------|
+| filename | String literal specifying the file path to include |
+
+#### Usage
+Use FILE to embed binary resources directly into your program—font data, lookup tables, images, audio samples, or any pre-computed binary content. The file is read at assembly time and its raw bytes are inserted at the current address. A label preceding FILE becomes a byte pointer to the start of the included data.
+
+FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI methods.
+
+#### Example
+```pasm
+DAT
+' Include a font file for VGA text display
+font_data   file    "8x8_font.bin"      ' 2KB font bitmap
+font_end                                 ' Label marks end for size calculation
+
+' Include pre-computed sine table
+sine_table  file    "sine_256.dat"      ' 256-entry sine lookup
+
+' Include raw image data
+splash      file    "logo.raw"          ' Splash screen bitmap
+
+' Calculate included file size at assembly time
+            long    @font_end - @font_data  ' Store font size in bytes
+```
+
+#### Example: Text File Inclusion
+```pasm
+DAT
+' Include text file for display
+text_data   file    "message.txt"
+text_end
+
+PUB ShowText() | ptr, len
+    ptr := @text_data
+    len := @text_end - @text_data
+    ' Process text bytes...
+```
+
+#### Notes
+- FILE reads the file at assembly time—the file must exist during compilation
+- File contents are included as raw bytes without modification
+- A label before FILE provides a byte-addressable pointer to the data
+- Place a label after the FILE directive to calculate the included file's size
+- FILE is not allowed within inline PASM code (only in DAT blocks)
+- File paths are relative to the source file's directory
+- Common uses: fonts, lookup tables, images, audio samples, pre-computed data
+
+#### Related Directives
+- [BYTE](#byte) — Declare individual byte data
+- [LONG](#long) — Declare long data
+- [ORGH](#orgh) — Set hub origin (FILE data typically resides in hub RAM)
 
 
 
@@ -15618,10 +16591,10 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 
 ## Summary
 
-The P2 assembler's 13 directives provide complete control over memory layout and assembly constraints:
+The P2 assembler's 14 directives provide complete control over memory layout and assembly constraints:
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
-**Memory Definition**: BYTE, WORD, LONG allocate and initialize data
+**Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT catch overflow at compile time
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
@@ -15887,17 +16860,30 @@ Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access 
 
 **Addressing Modes**:
 
-- `PTRA++` — Post-increment by 4 bytes (one long)
-- `PTRA--` — Post-decrement by 4 bytes
-- `++PTRA` — Pre-increment by 4 bytes
-- `--PTRA` — Pre-decrement by 4 bytes
-- `PTRA[offset]` — Indexed access (offset in longs)
+The increment/decrement amount (SCALE) depends on the instruction:
+
+| Instruction | SCALE | Increment/Decrement |
+|-------------|-------|---------------------|
+| RDBYTE, WRBYTE | 1 | 1 byte |
+| RDWORD, WRWORD | 2 | 2 bytes |
+| RDLONG, WRLONG, WMLONG | 4 | 4 bytes |
+
+- `PTRA++` — Post-increment by SCALE bytes
+- `PTRA--` — Post-decrement by SCALE bytes
+- `++PTRA` — Pre-increment by SCALE bytes
+- `--PTRA` — Pre-decrement by SCALE bytes
+- `PTRA[index]` — Indexed access: address = PTRA + (index × SCALE)
+- `PTRA++[index]` — Post-update indexed: use PTRA, then PTRA += index × SCALE
+- `++PTRA[index]` — Pre-update indexed: PTRA += index × SCALE, then use PTRA
+
+Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long, post-increment
-        wrlong  data, ptra[4]           ' Write long to Hub at PTRA+16 bytes
+        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
+        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
+        wrlong  data, ptra[4]           ' Write long to Hub at PTRA + 4×4 = PTRA+16 bytes
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
@@ -15918,17 +16904,22 @@ Address $1F9. Pointer B to Hub RAM. Secondary pointer register for Hub RAM acces
 
 **Addressing Modes**:
 
-- `PTRB++` — Post-increment by 4 bytes (one long)
-- `PTRB--` — Post-decrement by 4 bytes
-- `++PTRB` — Pre-increment by 4 bytes
-- `--PTRB` — Pre-decrement by 4 bytes
-- `PTRB[offset]` — Indexed access (offset in longs)
+PTRB supports the same addressing modes as PTRA, with SCALE determined by instruction type (see PTRA for details):
+
+- `PTRB++` — Post-increment by SCALE bytes
+- `PTRB--` — Post-decrement by SCALE bytes
+- `++PTRB` — Pre-increment by SCALE bytes
+- `--PTRB` — Pre-decrement by SCALE bytes
+- `PTRB[index]` — Indexed access: address = PTRB + (index × SCALE)
+- `PTRB++[index]` — Post-update indexed: use PTRB, then PTRB += index × SCALE
+- `++PTRB[index]` — Pre-update indexed: PTRB += index × SCALE, then use PTRB
 
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long, post-increment
-        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB+32 bytes
+        rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
+        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
+        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB + 8×4 = PTRB+32 bytes
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
@@ -16430,7 +17421,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
 | CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
 | CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLD | `---` | — | 4 / 13-20 | — | — |
+| CALLD | `1011001` | CZI | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
 | CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D=S |
@@ -16547,9 +17538,9 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | MODZ | `1101011` | — | 2 | — | zzzz[{C,Z}] |
 | MOV | `0110000` | CZI | 2 | S[31] | Result = 0 |
 | MOVBYTS | `1001111` | — | 2 | — | — |
-| MUL | `1010000` | I | 2 | — | (D = 0) | (S = 0) |
+| MUL | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
 | MULPIX | `1010010` | — | 7 | — | — |
-| MULS | `1010000` | I | 2 | — | (D = 0) | (S = 0) |
+| MULS | `1010000` | I | 2 | — | (D = 0) OR (S = 0) |
 | MUXC | `0101100` | CZI | 2 | parity of result | Result = 0 |
 | MUXNC | `0101101` | CZI | 2 | parity of result | Result = 0 |
 | MUXNIBS | `1001111` | — | 2 | — | — |
@@ -16693,7 +17684,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | SUMNC | `0011101` | CZI | 2 | 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S) | Result = 0 |
 | SUMNZ | `0011111` | CZI | 2 | correct sign of (D +/- S) | 0 then D = D - S, else D = D + S |
 | SUMZ | `0011110` | CZI | 2 | correct sign of (D +/- S) | 1 then D = D - S, else D = D + S |
-| TEST | `0111110` | CZ | 2 | Parity of D | D = 0 |
+| TEST | `0111110` | CZ | 2 | Parity of (D & S) | (D & S) = 0 |
 | TESTB | `0100000` | CZI | 2 | D[S[4:0]] | D[S[4:0]] |
 | TESTBN | `0100001` | CZI | 2 | !D[S[4:0]] | !D[S[4:0]] |
 | TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) = 0 |
@@ -16749,7 +17740,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | XZERO | `1100101` | — | 2+ | — | — |
 | ZEROX | `0111010` | CZI | 2 | MSB of result | Result = 0 |
 
-**Total Instructions:** 359
+**Total Instructions:** 359 (357 executable + 2 compiler directives)
 
 
 
@@ -18517,9 +19508,10 @@ CRCBIT      CRCNIB      CYAN
 
 ### D
 ```
-DAT         DEBUG       DEBUG_BAUD  DEBUG_COGS  DEBUG_DELAY DEBUG_DISPLAY_LEFT
-DEBUG_DISPLAY_TOP       DEBUG_HEIGHT            DEBUG_LEFT  DEBUG_LOG_SIZE
-DEBUG_PIN   DEBUG_TIMESTAMP         DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
+DAT         DEBUG       DEBUG_BAUD  DEBUG_COGS  DEBUG_COGINIT           DEBUG_DELAY
+DEBUG_DISABLE           DEBUG_DISPLAY_LEFT      DEBUG_DISPLAY_TOP       DEBUG_HEIGHT
+DEBUG_LEFT  DEBUG_LOG_SIZE          DEBUG_MAIN  DEBUG_MASK  DEBUG_PIN   DEBUG_PIN_RX
+DEBUG_PIN_TX            DEBUG_TIMESTAMP         DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
 DECMOD      DECOD       DEPTH       DEV         DIRA        DIRB
 DIRC        DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
 DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
@@ -18569,7 +19561,7 @@ IF_AE       IF_ALWAYS   IF_B        IF_BE       IF_C        IF_C_AND_NZ
 IF_C_AND_Z  IF_C_EQ_Z   IF_C_NE_Z   IF_C_OR_NZ  IF_C_OR_Z   IF_DIFF
 IF_E        IF_GE       IF_GT       IF_LE       IF_LT       IF_NC
 IF_NC_AND_NZ            IF_NC_AND_Z IF_NC_OR_NZ IF_NC_OR_Z  IF_NE
-IF_NEVER    IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
+IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_NZ
 IF_NZ_AND_C IF_NZ_AND_NC            IF_NZ_OR_C  IF_NZ_OR_NC IF_SAME
 IF_X0       IF_X1       IF_Z        IF_Z_AND_C  IF_Z_AND_NC IF_Z_EQ_C
 IF_Z_NE_C   IF_Z_OR_C   IF_Z_OR_NC  IFNOT       IJMP1       IJMP2
@@ -18920,8 +19912,8 @@ Conditional execution prefixes (IF_xxx) that can be applied to any instruction. 
 
 These are the canonical condition names:
 
-- **IF_ALWAYS** - Always execute (default, can be omitted)
-- **IF_NEVER** - Never execute (effectively a NOP)
+- **IF_ALWAYS** - Always execute (default, can be omitted; EEEE=1111)
+- **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
 - **IF_C** - Execute if C=1
 - **IF_NC** - Execute if C=0
 - **IF_Z** - Execute if Z=1
@@ -18967,7 +19959,7 @@ Convenient aliases for post-comparison conditional execution:
 
 ### Special Return Condition (1)
 
-- **_RET_** - Always execute AND return (combines execution with return)
+- **_RET_** - Always execute instruction, then return if no branch (no flag restore)
 
 ### Symmetric Alternatives (9)
 
@@ -19130,15 +20122,17 @@ QUIT        REPEAT      RETURN      TO          UNTIL       WHILE
 
 
 
-### DEBUG Command Parameters (114 words)
+### DEBUG Command Parameters (120 words)
 
 Debug output formatting commands and their variants:
 
+**Configuration Symbols:**
 ```
-DEBUG_BAUD           DEBUG_COGS           DEBUG_DELAY          DEBUG_DISPLAY_LEFT
-DEBUG_DISPLAY_TOP    DEBUG_HEIGHT         DEBUG_LEFT           DEBUG_LOG_SIZE
-DEBUG_PIN            DEBUG_TIMESTAMP      DEBUG_TOP            DEBUG_WIDTH
-DEBUG_WINDOWS_OFF
+DEBUG_BAUD           DEBUG_COGS           DEBUG_COGINIT        DEBUG_DELAY
+DEBUG_DISABLE        DEBUG_DISPLAY_LEFT   DEBUG_DISPLAY_TOP    DEBUG_HEIGHT
+DEBUG_LEFT           DEBUG_LOG_SIZE       DEBUG_MAIN           DEBUG_MASK
+DEBUG_PIN            DEBUG_PIN_RX         DEBUG_PIN_TX         DEBUG_TIMESTAMP
+DEBUG_TOP            DEBUG_WIDTH          DEBUG_WINDOWS_OFF
 ```
 
 **Signed decimal (SDEC) variants:**
@@ -19294,6 +20288,40 @@ _NC_AND_NZ  _NC_AND_Z   _NC_OR_NZ   _NC_OR_Z    _NZ_AND_C   _NZ_AND_NC
 _NZ_OR_C    _NZ_OR_NC   _Z_AND_C    _Z_AND_NC   _Z_EQ_C     _Z_NE_C
 _Z_OR_C     _Z_OR_NC
 ```
+
+**MODCZ Operand Values:**
+
+These mnemonics are used with the MODCZ instruction to modify C and Z flags. Each mnemonic represents a 4-bit value that selects the flag modification logic:
+
+| Value | Binary | Mnemonic | Description |
+|-------|--------|----------|-------------|
+| 0 | 0000 | _CLR | Always clear (result = 0) |
+| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
+| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 3 | 0011 | _NC | Copy inverse of C (not C) |
+| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
+| 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
+| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
+| 10 | 1010 | _Z | Copy Z |
+| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 12 | 1100 | _C | Copy C |
+| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
+| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 15 | 1111 | _SET | Always set (result = 1) |
+
+**Common MODCZ Usage:**
+```pasm
+        MODCZ   _CLR, _SET      ' Clear C, set Z
+        MODCZ   _SET, _CLR      ' Set C, clear Z
+        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C          ' Swap C and Z values
+        MODCZ   _NC, _NZ        ' Invert both flags
+```
+
+**Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
 
 
 
@@ -19486,8 +20514,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 
 - **Chapter 2** — Detailed explanation of instruction encoding format
 - **Chapter 3** — Complete coverage of flag behavior and conditional execution
-- **Appendix A** — Encoding summary tables
-- **Appendix H** — Complete opcode bit patterns for all instructions
+- **Appendix A** — Encoding summary tables with complete opcode bit patterns
 
 
 

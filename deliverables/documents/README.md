@@ -35,7 +35,7 @@ The following documents are available for community technical review. We welcome
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 
-*December 2025 - First Community Review Edition*
+*December 2025 - First Community Review Edition* | [Changelog](DOCs/p2-assembly-language-manual-changelog.md)
 
 ### [P2 Assembly Programming](DOCs/P2-PASM-deSilva-Style.pdf)
 **A Human-Centered Approach to Parallel Processing**
