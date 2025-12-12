@@ -9,7 +9,7 @@
 % For physical print with binding, change to: twoside,openany
 % This will require margin adjustments for inner/outer binding margins.
 
-\documentclass[12pt,letterpaper,oneside]{book}
+\documentclass[11pt,letterpaper,oneside]{book}
 
 % ==================== LOAD FOUNDATION LAYER ====================
 % DeSilva-specific foundation: pandoc compatibility, basic setup, pagination logic

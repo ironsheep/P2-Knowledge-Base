@@ -47,8 +47,8 @@
 \definecolor{desilva-cordic-border}{HTML}{A785C2}    % Muted purple border
 \definecolor{desilva-multicog-bg}{HTML}{E0F2F1}      % Teal 50 - distinct from Spin2 blue
 \definecolor{desilva-multicog-border}{HTML}{00897B}  % Teal 600 - distinct from Spin2 blue
-\definecolor{desilva-antipattern-bg}{HTML}{FFF5F5}   % Very soft pink
-\definecolor{desilva-antipattern-border}{HTML}{C08080} % Muted rose border
+\definecolor{desilva-antipattern-bg}{HTML}{FFEBEE}   % Material Red 50 - clear pink
+\definecolor{desilva-antipattern-border}{HTML}{E53935} % Material Red 600 - unmistakably red
 
 % Spin2 Block Environment (blue theme - IDE-aligned)
 \newtcolorbox{DeSilvaSpin2Block}{%
@@ -159,12 +159,17 @@
 % Teaching elements that capture deSilva's encouraging and human approach
 
 % Medicine Cabinet - Simpler alternatives when overwhelmed
+% v1.2.6: Tan/beige theme - band-aid association, medical feel
+% Uses needspace to request ~40% page height; if not available, pushes to next page
+% If content exceeds that, it can still break across pages
+\definecolor{desilva-medicine-bg}{HTML}{FFF8F0}        % Warm cream - band-aid light
+\definecolor{desilva-medicine-border}{HTML}{D2A679}    % Band-aid tan
 \newtcolorbox{DeSilvaMedicineCabinet}{
   title=The Medicine Cabinet,
   fonttitle=\bfseries\color{white},
-  colbacktitle=teal!70!black,
-  colback=teal!5,
-  colframe=teal!70!black,
+  colbacktitle=desilva-medicine-border,
+  colback=desilva-medicine-bg,
+  colframe=desilva-medicine-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -173,17 +178,21 @@
   bottom=10pt,
   before skip=20pt,
   after skip=20pt,
+  before upper={\needspace{0.4\textheight}},
   breakable,
   enhanced
 }
 
 % Your Turn - Hands-on exercises
+% v1.2.2: Ultra-light amber (almost white, code blocks breathe)
+\definecolor{desilva-yourturn-bg}{HTML}{FFFDF8}        % Ultra-light warm - almost white
+\definecolor{desilva-yourturn-border}{HTML}{F9A825}    % Golden amber - "action time!"
 \newtcolorbox{DeSilvaYourTurn}{
   title=Your Turn,
   fonttitle=\bfseries\color{white},
-  colbacktitle=green!60!black,
-  colback=green!5,
-  colframe=green!60!black,
+  colbacktitle=desilva-yourturn-border,
+  colback=desilva-yourturn-bg,
+  colframe=desilva-yourturn-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -197,12 +206,15 @@
 }
 
 % Sidetrack - Interesting diversions and deeper explanations
+% v1.2.3: Light rose/red (more red than brown)
+\definecolor{desilva-sidetrack-bg}{HTML}{FDF5F5}       % Light rose - visible red tint
+\definecolor{desilva-sidetrack-border}{HTML}{B05050}   % Rose-red (more red, less brown)
 \newtcolorbox{DeSilvaSidetrack}{
   title=Sidetrack,
   fonttitle=\bfseries\color{white},
-  colbacktitle=purple!60!black,
-  colback=purple!5,
-  colframe=purple!60!black,
+  colbacktitle=desilva-sidetrack-border,
+  colback=desilva-sidetrack-bg,
+  colframe=desilva-sidetrack-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -216,12 +228,15 @@
 }
 
 % Interlude - Stories and historical context
+% v1.2.3: Ultra-light orange with conditional page break
+\definecolor{desilva-interlude-bg}{HTML}{FFFDFB}       % Ultra-light orange - almost white
+\definecolor{desilva-interlude-border}{HTML}{CC7A00}   % Soft orange
 \newtcolorbox{DeSilvaInterlude}{
   title=Interlude,
   fonttitle=\bfseries\color{white},
-  colbacktitle=orange!70!black,
-  colback=orange!5,
-  colframe=orange!70!black,
+  colbacktitle=desilva-interlude-border,
+  colback=desilva-interlude-bg,
+  colframe=desilva-interlude-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -229,6 +244,7 @@
   top=10pt,
   bottom=10pt,
   before skip=20pt,
+  before upper={\needspace{0.4\textheight}},
   after skip=20pt,
   breakable,
   enhanced
@@ -299,12 +315,13 @@
 % These match the semantic filter's ds* naming convention
 
 % Medicine Cabinet (ds prefix)
+% v1.2.3: Cyan pastel with conditional page break
 \newtcolorbox{dsmedicinecabinet}{
   title=The Medicine Cabinet,
   fonttitle=\bfseries\color{white},
-  colbacktitle=teal!70!black,
-  colback=teal!5,
-  colframe=teal!70!black,
+  colbacktitle=desilva-medicine-border,
+  colback=desilva-medicine-bg,
+  colframe=desilva-medicine-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -313,17 +330,19 @@
   bottom=10pt,
   before skip=20pt,
   after skip=20pt,
+  before upper={\needspace{0.4\textheight}},
   breakable,
   enhanced
 }
 
 % Your Turn (ds prefix)
+% v1.2.0: Amber/gold pastel palette
 \newtcolorbox{dsyourturn}{
   title=Your Turn,
   fonttitle=\bfseries\color{white},
-  colbacktitle=green!60!black,
-  colback=green!5,
-  colframe=green!60!black,
+  colbacktitle=desilva-yourturn-border,
+  colback=desilva-yourturn-bg,
+  colframe=desilva-yourturn-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,
@@ -337,12 +356,13 @@
 }
 
 % Sidetrack (ds prefix)
+% v1.2.0: Lavender pastel palette
 \newtcolorbox{dssidetrack}{
   title=Sidetrack,
   fonttitle=\bfseries\color{white},
-  colbacktitle=purple!60!black,
-  colback=purple!5,
-  colframe=purple!60!black,
+  colbacktitle=desilva-sidetrack-border,
+  colback=desilva-sidetrack-bg,
+  colframe=desilva-sidetrack-border,
   boxrule=2pt,
   rounded corners,
   left=15pt,

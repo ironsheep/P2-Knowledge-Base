@@ -371,16 +371,16 @@
 \node[fieldlabel] at (-1.4, -0.7) {Event Mode\\(3 bits)};
 \node[fieldlabel] at (1.4, -0.7) {Pin Number\\(6 bits: 0--63)};
 
-% Mode values reference (compact)
-\node[font=\scriptsize, align=left, anchor=north west] at (-3.5, -1.5) {%
+% Mode values reference (compact) - two columns with adequate spacing
+\node[font=\scriptsize, align=left, anchor=north west] at (-4.2, -1.5) {%
 \begin{tabular}{ll}
 \texttt{\%000} & Disabled \\
-\texttt{\%001} & IN rises (Smart Pin ready) \\
+\texttt{\%001} & IN rises \\
 \texttt{\%010} & IN falls \\
 \texttt{\%011} & IN changes \\
 \end{tabular}};
 
-\node[font=\scriptsize, align=left, anchor=north west] at (0.5, -1.5) {%
+\node[font=\scriptsize, align=left, anchor=north west] at (0.8, -1.5) {%
 \begin{tabular}{ll}
 \texttt{\%100} & Pin high \\
 \texttt{\%101} & Pin low \\

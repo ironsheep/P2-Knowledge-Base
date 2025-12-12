@@ -74,6 +74,29 @@
   - Spin2 blocks: Blue color family
   - Multi-COG blocks: Teal color family (distinct from Spin2)
 
+- Pedagogical environment colors with semantic associations:
+  - Medicine Cabinet: Tan/beige theme (band-aid association for "remedy/help")
+  - Your Turn: Amber theme (attention, action)
+  - Sidetrack: Rose-red theme (distinct warm color)
+  - Interlude: Orange theme (warmth, storytelling)
+
+- Antipattern code blocks: Clear red theme (`#FFEBEE` / `#E53935`) for unmistakable "warning/wrong" semantic
+
+- Antipattern div structure fixed (Chapters 13, 15): WRONG code renders in red, RIGHT code renders in green PASM2 blocks
+
+- Base font size changed from 12pt to 11pt (matches P2 Assembly Language Manual)
+
+- PDF navigation: Table of Contents entries fully clickable (both title and page number navigate to chapter)
+
+- Page break improvements:
+  - Medicine Cabinet and Interlude boxes request 40% page height before starting
+  - Section/subsection headings stay with following content (no orphaned headings)
+
+- Markdown formatting fixes:
+  - 52 lists now have required blank line after lead-in text
+  - 2 LaTeX diagram commands (WRPIN, SETSE bit fields) properly wrapped for Pandoc
+  - Code block line length standardized to 75 characters max
+
 ### Verification Notes
 
 **Sections Verified Correct:**

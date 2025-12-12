@@ -149,6 +149,16 @@ All edits happen in the workspace folder. Files here are **unescaped** - this is
 
 #### 2. Stage ONLY Changed Files to Outbound
 
+> **⚠️ SACRED RULE - VIOLATION CAUSES REAL PROBLEMS**
+>
+> **ONLY put files in outbound that you CHANGED IN THIS SESSION.**
+>
+> PDF Forge is **PERSISTENT** - it keeps all files from previous deployments.
+> Sending unchanged files wastes user time and creates confusion.
+>
+> **Before copying ANY file to outbound, ask:** "Did I edit this file TODAY?"
+> If the answer is NO, do NOT copy it.
+
 **CRITICAL: Only stage files that CHANGED!**
 
 ```bash

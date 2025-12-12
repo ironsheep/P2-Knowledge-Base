@@ -587,25 +587,36 @@ REGENERATION:
 
 ## 🎨 Visual Style Rules (AUTOMATIC)
 
-### Color Scheme
-- **Yellow**: Code blocks (listings)
-- **Gray**: Sidetracks and interludes
+### Color Scheme (v1.2.0 Harmonized Pastel Palette)
+
+**5-Color Code Block System (IDE-aligned):**
+- **Green** (`#EBFCEB`/`#4CB04C`): PASM2 code - most common
+- **Blue** (`#E3F2FD`/`#1976D2`): Spin2 code - IDE-aligned
+- **Purple** (`#F8F5FF`/`#A785C2`): CORDIC math operations
+- **Teal** (`#E0F2F1`/`#00897B`): Multi-COG parallel examples
+- **Red** (`#FFF5F5`/`#C08080`): Antipatterns - what NOT to do
+
+**Pedagogical Environment Pastels:**
+- **Cyan** (`#E0F7FA`/`#00ACC1`): Medicine Cabinet - distinct from PASM green
+- **Amber** (`#FFF8E1`/`#F9A825`): Your Turn - warm contrast to green code
+- **Lavender** (`#F3E5F5`/`#9575CD`): Sidetrack - complements PASM green
+- **Orange**: Interlude, Uff! environments
+- **Blue**: Chapter Summary, Well... environments
+
+**Other Colors:**
 - **Violet**: Missing content warnings
 - **Orange**: Technical review needs
-- **Blue**: Diagram placeholders
-- **Green**: Chapter endings
 - **Bold only**: Inline code (no background)
 
 ### Box Styles (AUTOMATIC)
 | Box Type | Background | Border | Title |
 |----------|------------|--------|-------|
-| `:::sidetrack` | Light gray | Dotted | "Sidetrack [Letter]:" prefix |
-| `:::interlude` | Gray | None | "Interlude [Number]:" prefix |
+| `:::medicine-cabinet` | Cyan pastel | Cyan | "The Medicine Cabinet" |
+| `:::your-turn` | Amber pastel | Golden | "Your Turn" |
+| `:::sidetrack` | Lavender pastel | Purple | "Sidetrack" |
+| `:::interlude` | Orange tint | Orange | "Interlude" |
 | `:::missing` | Violet | Thick | Auto-generated |
 | `:::review` | Orange | Thick | Auto-generated |
-| `:::diagram` | Blue | Normal | Auto-generated |
-| `:::yourturn` | Yellow tint | Normal | No prefix |
-| `:::chapterend` | Green | Normal | With separator |
 
 ### Typography (AUTOMATIC)
 - Chapter numbers: Large, bold

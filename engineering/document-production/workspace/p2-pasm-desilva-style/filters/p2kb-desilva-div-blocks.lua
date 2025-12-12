@@ -6,7 +6,7 @@
 -- Convert div blocks to appropriate LaTeX environments
 function Div(elem)
     local class = elem.classes[1]
-    
+
     if class == "spin2" then
         -- Spin2 high-level language (green)
         return {
@@ -43,7 +43,7 @@ function Div(elem)
             pandoc.RawBlock("latex", "\\end{DeSilvaAntipatternBlock}")
         }
     end
-    
+
     -- Return unchanged if not a recognized code block type
     return elem
 end

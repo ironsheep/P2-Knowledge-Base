@@ -116,8 +116,20 @@
   {}                            % Before-code
 \titlespacing*{\chapter}{0pt}{-50pt}{12pt}  % Left, before (more negative!), after
 
+% Section headings request minimum space to stay with following content
+\titleformat{\section}
+  {\needspace{6\baselineskip}\normalfont\Large\bfseries}
+  {\thesection}{1em}{}
 \titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{2pt plus 1pt minus 1pt}
+
+\titleformat{\subsection}
+  {\needspace{4\baselineskip}\normalfont\large\bfseries}
+  {\thesubsection}{1em}{}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
+
+\titleformat{\subsubsection}
+  {\needspace{3\baselineskip}\normalfont\normalsize\bfseries}
+  {\thesubsubsection}{1em}{}
 \titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}
 
 % ==================== LIST SPACING ====================
@@ -166,7 +178,8 @@
   linkcolor=blue,
   urlcolor=blue,
   citecolor=blue,
-  hidelinks=false
+  hidelinks=false,
+  linktoc=all           % Both title and page number are clickable in TOC
 }
 
 % ==================== CODE ENVIRONMENTS ====================

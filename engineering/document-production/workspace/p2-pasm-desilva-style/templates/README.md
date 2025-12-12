@@ -13,7 +13,7 @@ This document uses a **2-layer template stack** optimized for pedagogical conten
 **Purpose:** Pandoc compatibility, basic document setup, deSilva-specific infrastructure
 **Provides:**
 - Pandoc integration packages
-- 12pt font on letter paper (tutorial-friendly)
+- 11pt font on letter paper (matches P2 Assembly Language Manual)
 - Two-sided layout for printed manuals
 - Basic pagination and structure
 - deSilva color palette definitions

@@ -34,15 +34,22 @@ This guide captures all pedagogical and formatting decisions for the P2 PASM man
 
 ## Box Types and Their Purposes
 
-### Sidetrack (Gray with Dashed Border)
+### Sidetrack (Lavender Pastel)
 **Purpose:** Technical specifications, architecture details, implementation notes
-**Visual:** Gray background (`F5F5F5`) with dashed border
+**Visual:** Lavender background (`#F3E5F5`) with soft purple border (`#9575CD`)
 **Title:** Always has bold title describing the sidetrack topic
+**Color rationale:** Purple complements PASM green (opposite on color wheel)
 
 Examples:
 - "Why Pin 16?" - explaining safe pin choices
 - "Cog Resources at a Glance" - specifications
 - "Why 512 Longs?" - architecture decisions
+
+### Medicine Cabinet (Tan/Beige)
+**Purpose:** Simpler alternatives when learner feels overwhelmed
+**Visual:** Warm cream background (`#FFF8F0`) with tan border (`#D2A679`)
+**Title:** "The Medicine Cabinet"
+**Color rationale:** Band-aid association for "remedy/help" semantic; distinct from all code block colors
 
 ### Interlude (Gray, No Border)
 **Purpose:** Conceptual bridges, philosophical insights, "aha moments"
@@ -54,12 +61,12 @@ Examples:
 - "Parallel Thinking" - philosophy behind the architecture
 - Bridging paragraphs between major concepts
 
-### Your Turn (Light Blue)
+### Your Turn (Amber/Gold Pastel)
 **Purpose:** Exercises, challenges, experimentation prompts
-**Visual:** Light blue background (`E6F3FF`)
+**Visual:** Cream background (`#FFF8E1`) with golden amber border (`#F9A825`)
 **Title:** "Your Turn" followed by challenge descriptions
 
-The blue color is intentionally distinct from yellow code blocks to signal "shift from reading to doing."
+The warm amber color contrasts with cool green PASM code blocks, signaling "shift from reading to doing." Previously green, changed to avoid green-on-green conflict when containing PASM code.
 
 ### Missing Content (Lavender)
 **Purpose:** Placeholder for content to be added
@@ -87,21 +94,34 @@ The blue color is intentionally distinct from yellow code blocks to signal "shif
 
 ## Color Psychology and Visual Hierarchy
 
-### Color Assignments
-- **Yellow (`FFFACD`)**: Active code, immediate attention
-- **Blue (`E6F3FF`)**: Your turn to practice, exploration
-- **Gray (`F5F5F5`)**: Supplemental information, asides
-- **Green (`F0FFF0`)**: Success, completion, moving forward
+### Color Assignments (v1.2.0 Harmonized Pastel Palette)
+
+**Code Blocks (IDE-aligned, brighter accents):**
+- **Green** (`#EBFCEB`/`#4CB04C`): PASM2 code - most common
+- **Blue** (`#E3F2FD`/`#1976D2`): Spin2 code - IDE-aligned
+- **Purple** (`#F8F5FF`/`#A785C2`): CORDIC math operations
+- **Teal** (`#E0F2F1`/`#00897B`): Multi-COG parallel examples
+- **Red** (`#FFEBEE`/`#E53935`): Antipatterns - what NOT to do (unmistakable warning)
+
+**Pedagogical Containers (softer pastels, don't compete with code):**
+- **Tan/Beige** (`#FFF8F0`/`#D2A679`): Medicine Cabinet - band-aid association for "remedy"
+- **Amber** (`#FFF8E1`/`#F9A825`): Your Turn - warm contrast to green code
+- **Lavender** (`#F3E5F5`/`#9575CD`): Sidetrack - complements PASM green
+- **Orange**: Interlude, Uff! environments
+- **Green** (`F0FFF0`): Chapter End - success, completion
+
+**Status/Placeholder Colors:**
 - **Orange (`FFE4B5`)**: Attention needed, review required
 - **Violet (`E6E6FA`)**: Missing, incomplete
 - **Sky Blue (`E0F2FF`)**: Visual/diagram placeholder
 
 ### Visual Flow
 1. **Main text** (white) → primary learning path
-2. **Code blocks** (yellow) → examples to study
-3. **Sidetracks** (gray/dashed) → optional deep dives
-4. **Your Turn** (blue) → active practice
-5. **Chapter End** (green) → celebration and transition
+2. **Code blocks** (green/blue/purple) → examples to study (brighter accents)
+3. **Sidetracks** (lavender) → optional deep dives (soft container)
+4. **Your Turn** (amber) → active practice (warm call to action)
+5. **Medicine Cabinet** (tan) → simpler alternatives (remedy/help)
+6. **Chapter End** (green) → celebration and transition
 
 ## Code Block Formatting
 
@@ -206,6 +226,11 @@ The LaTeX escaping script must:
 - 2025-08-21: Established UPPERCASE + BOLD rule for all mnemonics
 - 2025-08-21: Changed Your Turn color from FFF8DC to E6F3FF
 - 2025-08-21: Defined interlude vs sidetrack distinction
+- 2025-12-12: v1.2.0 Harmonized Pastel Palette
+  - Your Turn: Changed from blue to amber/gold (#FFF8E1/#F9A825) - eliminates green-on-green
+  - Medicine Cabinet: Changed from teal to cyan (#E0F7FA/#00ACC1) - distinct from PASM green
+  - Sidetrack: Softened to lavender (#F3E5F5/#9575CD) - complements PASM green
+  - Added 5-color code block system documentation (IDE-aligned)
 
 ## Quick Reference Checklist
 

@@ -374,6 +374,7 @@ Uff! Look at that - we're using a register now! The `mov` instruction copies our
 Here's something important: each COG is a complete processor with its own memory. When we loaded our blink program, it was copied from hub memory into COG memory. The COG then executes it independently, without any further connection to hub memory (unless we explicitly read or write to it).
 
 Think of it like this:
+
 - **Hub memory** is the meeting place (512KB shared by all)
 - **COG memory** is private workspace (2KB per COG)
 - Loading a COG is like making a photocopy - the COG gets its own copy to run
@@ -505,6 +506,7 @@ Before we move on, let me save you some debugging time:
 ## What We've Learned
 
 Let's celebrate what you've accomplished:
+
 - ✅ Written your first PASM2 program
 - ✅ Controlled hardware (LED) directly
 - ✅ Used immediate values (# and ##)
@@ -517,6 +519,7 @@ That's quite a lot for Chapter 1!
 ## Coming Up Next
 
 In Chapter 2, we'll take our "Architecture Safari" and explore:
+
 - How 8 COGs really work together
 - The hub memory system and the "egg beater"
 - Why the P2 doesn't need interrupts
@@ -544,6 +547,7 @@ The answer is beautifully simple: to avoid complexity.
 "Wait," you might say, "eight processors sounds MORE complex, not less!"
 
 Well, consider the traditional approach:
+
 - One processor trying to do everything
 - Interrupts constantly breaking your flow
 - Priority levels to juggle
@@ -551,6 +555,7 @@ Well, consider the traditional approach:
 - Race conditions and timing nightmares
 
 Now consider the Propeller way:
+
 - Eight processors, each doing one thing well
 - No interrupts needed (why interrupt when you have a dedicated processor?)
 - No priorities (all COGs are equal)
@@ -576,6 +581,7 @@ Each COG has exactly 512 longs (2048 bytes) of memory. The first 496 longs are y
 "Only 496 instructions?" you might cry. "That's tiny!"
 
 Well, yes and no. Remember:
+
 1. PASM2 instructions are powerful - one instruction often does what takes several in other processors
 2. You have EIGHT of these COGs
 3. There's hub execution mode for larger programs (Chapter 10)
@@ -632,6 +638,7 @@ pin_num long    0
 :::
 
 What's happening here:
+
 1. The main Spin2 code starts 4 COGs
 2. Each COG gets a different pin number (56, 57, 58, 59)
 3. Each COG blinks its LED at a slightly different rate
@@ -856,6 +863,7 @@ Save yourself some debugging time:
 ## What We've Learned
 
 Look at what you now understand:
+
 - ✅ Why eight processors is simpler than one with interrupts
 - ✅ How COGs are structured and limited
 - ✅ The hub memory system and egg beater access
@@ -914,6 +922,7 @@ Make 8 LEDs display a moving pattern, with each COG controlling one LED:
 ## Coming Up Next
 
 In Chapter 3, "Speaking PASM2", we'll dive deep into the instruction set:
+
 - The anatomy of an instruction
 - Conditional execution that will blow your mind
 - Math operations that actually make sense
@@ -943,6 +952,7 @@ Look at this single PASM2 instruction:
 :::
 
 This one line:
+
 - Adds 1 to 'value'
 - Optionally sets the carry flag
 - Executes in exactly 2 clock cycles
@@ -1339,6 +1349,7 @@ my_long         long    $DEADBEEF       ' 4 bytes (32 bits)
 ```
 
 When do you use each? Well:
+
 - **BYTE** for characters, small counters, flags, or when every byte of memory counts
 - **WORD** for medium values, 16-bit peripherals, or when BYTE is too small but LONG is wasteful
 - **LONG** for everything else - addresses, large numbers, and "I don't want to think about it"
@@ -1420,6 +1431,7 @@ next_long       long    $DEADBEEF       ' Now on a 4-byte boundary
 ```
 
 When does alignment matter? Mostly when you're:
+
 - Mixing data sizes in the same DAT block
 - Creating structures that Spin2 code will access
 - Optimizing for maximum hub access speed
@@ -1542,7 +1554,7 @@ These work similarly but in different contexts:
 ```spin2
 ' In Spin2 code (not PASM):
 debug(STRING("Temperature: "))    ' Zero-terminated string address
-debug(LSTRING("Status"))          ' Length-prefixed string (length byte first)
+debug(LSTRING("Status"))          ' Length byte first, then string
 ```
 
 `STRING()` returns the hub address of a zero-terminated string - same as what C programmers expect. `LSTRING()` puts a length byte at the front, which is handy when you need to know the string length without scanning for null.
@@ -1680,7 +1692,7 @@ Feeling overwhelmed? Here's your simplified prescription:
 
 ' Flags
         cmp     x, y wcz       ' Compare and set flags
-        if_z    jmp #label     ' Conditional jump
+  if_z  jmp     #label         ' Conditional jump
 ```
 :::
 
@@ -1807,6 +1819,7 @@ This isn't accident - it's philosophy. The P2 was designed to make assembly prog
 ## Coming Up Next
 
 Chapter 4, "The Hub Connection", explores:
+
 - Reading and writing hub memory
 - The FIFO and fast block transfers
 - Hub execution mode
@@ -2118,6 +2131,7 @@ Let me show you something even more impressive:
 CORDIC stands for COordinate Rotation DIgital Computer. It's a method invented in 1959 for calculating trigonometric functions using only shifts and adds - no multiplies needed! Each P2 COG has its own dedicated CORDIC unit built into the hardware.
 
 Think of CORDIC as your mathematical co-processor that can:
+
 - Rotate points around the origin
 - Convert between rectangular and polar coordinates  
 - Calculate sine, cosine, tangent
@@ -2172,6 +2186,7 @@ Here's a subtle detail: CORDIC operations work on 2D coordinates (X, Y), but the
 :::
 
 The angle format is special: it's a 32-bit unsigned value where:
+
 - $0000_0000 = 0 degrees
 - $4000_0000 = 90 degrees  
 - $8000_0000 = 180 degrees
@@ -2193,6 +2208,7 @@ This makes angle math incredibly easy - just use regular addition and subtractio
 :::
 
 Perfect for:
+
 - Finding distances between points
 - Converting joystick input to angle/magnitude
 - Radar and sonar applications
@@ -2200,6 +2216,7 @@ Perfect for:
 ### The Power of 32-Bit Precision
 
 CORDIC uses 32-bit precision throughout:
+
 - Angles: 32 bits (0.0000084 degree resolution!)
 - Coordinates: 32 bits signed
 - Results: Full 32-bit or 64-bit when needed
@@ -2246,7 +2263,7 @@ next_vertex
         djnz    vertex_count, #next_vertex
         
         ' Increment rotation for animation
-        add     rotation_angle, ##$0100_0000  ' ~1.4 degrees (1/256 rotation)
+        add     rotation_angle, ##$0100_0000  ' ~1.4 deg (1/256 rotation)
 ```
 :::
 
@@ -2431,7 +2448,7 @@ Generate perfect sine waves for audio:
 ' Audio tone generator using CORDIC
 tone_generator
         mov     phase, #0
-        mov     frequency, ##$0100_0000  ' ~1.4 degrees per sample (1/256 rotation)
+        mov     frequency, ##$0100_0000  ' ~1.4 deg/sample (1/256 rot)
         
 sample_loop
         qrotate ##$7FFF_FFFF, phase     ' D=radius, S=angle
@@ -2501,6 +2518,7 @@ From military navigation to your LED projects - quite a journey for an algorithm
 ## What We've Learned
 
 Let's celebrate your new CORDIC powers:
+
 - ✅ Understood CORDIC's rotate and vector operations
 - ✅ Generated sine and cosine values
 - ✅ Calculated distances and angles
@@ -2558,6 +2576,7 @@ Three lines! The `drvc` instruction drives the pin to match the C flag. Input be
 Every P2 pin is bidirectional and incredibly capable. Unlike older microcontrollers where you set data direction registers, P2 pins change direction on the fly based on the instruction you use.
 
 Here's the mental model:
+
 - **Output instructions** automatically make the pin an output
 - **Input instructions** automatically make the pin an input  
 - **Float instructions** make the pin high-impedance
@@ -2910,6 +2929,7 @@ No setup, no configuration, no confusion.
 ## What We've Learned
 
 Look at your new I/O skills:
+
 - ✅ Understood P2's automatic pin direction
 - ✅ Mastered the four fundamental output instructions
 - ✅ Learned pin reading and conditional testing
@@ -3215,6 +3235,7 @@ Watch out for these:
 ## Performance Numbers
 
 Let's talk speed:
+
 - **Block transfer**: Up to 1 long per clock (at 200MHz = 800MB/s!)
 - **FIFO streaming**: Up to 1 long per clock sustained
 - **Random hub access**: 2-9 clocks per access
@@ -3260,6 +3281,7 @@ process_loop
 ## What We've Learned
 
 Your streaming skills now include:
+
 - ✅ Block transfers with SETQ
 - ✅ FIFO reading and writing
 - ✅ Streaming pipeline concepts
@@ -3309,12 +3331,14 @@ Your code now lives in hub memory's 512KB instead of COG memory's 2KB. That's 25
 Let's be honest about the differences:
 
 **COG Execution** (traditional):
+
 - ✅ Fast: exactly 2 clocks per instruction
 - ✅ Deterministic: perfect for real-time
 - ❌ Limited: only 496 instructions
 - ✅ Self-contained: runs independently
 
 **Hub Execution** (the new way):
+
 - ❌ Slower: 2-9 clocks per instruction (typically 3-4)
 - ❌ Variable timing: depends on hub alignment
 - ✅ Unlimited: 512KB of code space!
@@ -3596,6 +3620,7 @@ string_compare
 ## When to Use Hub Execution
 
 **Perfect for:**
+
 - User interfaces and menus
 - Command processors
 - Complex algorithms
@@ -3604,6 +3629,7 @@ string_compare
 - Error handling and recovery
 
 **Avoid for:**
+
 - Interrupt handlers (if you use them)
 - Precise timing loops
 - Bit-banged protocols
@@ -3612,6 +3638,7 @@ string_compare
 ## What We've Learned
 
 You've mastered hub execution:
+
 - ✅ Understanding COG vs hub trade-offs
 - ✅ Automatic mode switching
 - ✅ Mixing COG and hub code
@@ -3773,6 +3800,7 @@ int1_handler
 :::
 
 When might you use them?
+
 - Porting legacy code that requires interrupts
 - Ultra-low-power designs where COGs must sleep
 - Theoretical minimum latency response (but dedicated COG is usually faster!)
@@ -3921,11 +3949,13 @@ Success Check: Perfect timing without interrupts
 The Propeller philosophy is about **determinism over responsiveness**.
 
 Traditional processors optimize for average-case performance:
+
 - Interrupts handle rare events
 - Most code runs uninterrupted
 - When events happen, everything stops
 
 Propeller optimizes for worst-case determinism:
+
 - Every COG runs predictably
 - No surprises, ever
 - Timing is guaranteed
@@ -3959,6 +3989,7 @@ A: Use WAITSE/WAITCT for low-power waiting. COG sleeps until event.
 ## What We've Learned
 
 You now understand the Propeller way:
+
 - ✅ Why interrupts cause problems
 - ✅ How COGs eliminate interrupt need
 - ✅ Event system as polite alternative
@@ -4004,6 +4035,7 @@ Almost twice as fast! The secret? Understanding how P2 really works.
 ## Understanding the Pipeline
 
 P2 has a 2-stage pipeline:
+
 1. **Fetch** - Get next instruction
 2. **Execute** - Do the work
 
@@ -4332,6 +4364,7 @@ Always measure your optimizations:
 ## What We've Learned
 
 You're now an optimization expert:
+
 - ✅ Understanding the P2 pipeline
 - ✅ Instruction timing knowledge
 - ✅ REP and SKIP for zero-overhead loops
@@ -4448,18 +4481,19 @@ Here's something clever: adjacent COG pairs can share LUT data! When you enable 
         ' Now when COG 0 writes to its LUT, data is COPIED to our LUT
 
 ' --- COG 0 (producer) - writes AFTER consumer enables sharing ---
-        wrlut   message, #10    ' Write to MY LUT[10] (copied to COG 1's LUT[10])
-        wrlut   #1, #0          ' Set "ready" flag (copied to COG 1's LUT[0])
+        wrlut   message, #10    ' Write MY LUT[10] (copies to COG 1)
+        wrlut   #1, #0          ' Set ready flag (copies to COG 1)
 
 ' --- COG 1 (consumer) - reads its OWN LUT (which contains copies) ---
 .wait   rdlut   flag, #0        ' Read MY LUT[0] (contains copy from COG 0)
         cmp     flag, #1 wz
   if_nz jmp     #.wait
-        rdlut   message, #10    ' Read MY LUT[10] (contains copy from COG 0)
+        rdlut   message, #10    ' Read MY LUT[10] (copied from COG 0)
 ```
 :::
 
 The key instruction is:
+
 - **SETLUTS**: Enable write copying - when neighbor writes with WRLUT, data is copied to YOUR LUT
 - **RDLUT**: Read your own LUT (which now contains copied data)
 
@@ -4471,6 +4505,7 @@ This gives you a 512-long shared buffer between COG pairs without touching hub m
 **Which COGs Are Neighbors?**
 
 The LUT sharing pairs are fixed:
+
 - COG 0 ↔ COG 1
 - COG 2 ↔ COG 3
 - COG 4 ↔ COG 5
@@ -4572,13 +4607,17 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 
 ::: antipattern
 **❌ WRONG: Confusing LUT addresses**
-```pasm2
+
+```
 ' WRONG - This reads COG RAM, not LUT!
         mov     value, $200     ' $200 is COG RAM address
 ```
+:::
 
 **✓ RIGHT: Use RDLUT for LUT access**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - RDLUT addresses the LUT space
         rdlut   value, #0       ' LUT address 0
 ```
@@ -4586,14 +4625,18 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 
 ::: antipattern
 **❌ WRONG: Reading LUT before neighbor writes**
-```pasm2
+
+```
 ' WRONG - No data to read yet!
         setluts #1              ' Enable sharing
         rdlut   data, #10       ' Empty - neighbor hasn't written!
 ```
+:::
 
 **✓ RIGHT: Wait for neighbor's write signal**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - Wait for data to be copied
         setluts #1              ' Enable sharing BEFORE neighbor writes
 .wait   rdlut   ready, #0       ' Check flag in MY LUT
@@ -4614,10 +4657,12 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 | **SETLUTS** D | Enable LUT write copying (D[0]=1) | 2 |
 
 **Memory Map:**
+
 - LUT addresses: 0-511 (512 longs = 2KB)
 - Neighbor pairs: 0↔1, 2↔3, 4↔5, 6↔7
 
 **Best Uses:**
+
 - Lookup tables (sine, gamma, encoding)
 - Fast circular buffers
 - COG-pair data sharing
@@ -4643,6 +4688,7 @@ Create a LUT-based ASCII to 7-segment display encoder. Load a 128-entry table wh
 **Exercise 2: High-Speed COG Communication**
 
 Use LUT sharing to create a message passing system between COG 2 and COG 3:
+
 - COG 2 writes 8-long messages
 - COG 3 reads them without hub access
 - Use a simple ready/ack protocol
@@ -4873,23 +4919,29 @@ The mode values like `P_ASYNC_TX` are constants defined by the assembler. Here's
 
 The **WRPIN** D value is a 32-bit configuration:
 
+```{=latex}
 \WRPINBitFieldDiagram
+```
 
 For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM_SAWTOOTH`, `P_ADC`. The P2 assembler knows all of them.
 
 ## Common Gotchas
 
-::: antipattern
 **❌ WRONG: Forgetting to reset before configure**
-```pasm2
+
+::: antipattern
+```
 ' WRONG - Pin may be in unknown state!
         wrpin   ##P_PWM_SAWTOOTH, #PIN
         wxpin   ##1000, #PIN
         dirh    #PIN
 ```
+:::
 
 **✓ RIGHT: Always DIRL first**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - Start clean
         dirl    #PIN                    ' Reset first!
         wrpin   ##P_PWM_SAWTOOTH, #PIN
@@ -4898,17 +4950,21 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 ```
 :::
 
-::: antipattern
 **❌ WRONG: Enabling before configuring**
-```pasm2
+
+::: antipattern
+```
 ' WRONG - Pin enabled with partial config!
         dirl    #PIN
         dirh    #PIN                    ' Enabled too early!
         wrpin   ##P_ASYNC_TX, #PIN
 ```
+:::
 
 **✓ RIGHT: DIRH comes last**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - Configure completely, then enable
         dirl    #PIN
         wrpin   ##P_ASYNC_TX, #PIN
@@ -4923,26 +4979,25 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 **Smart Pin Quick Reference**
 
 **The Recipe:**
-```pasm2
-DIRL pin          ' 1. Reset
-WRPIN mode, pin   ' 2. Mode
-WXPIN x, pin      ' 3. X parameter
-WYPIN y, pin      ' 4. Y parameter
-DIRH pin          ' 5. Enable
-```
+
+1. **DIRL** pin — Reset the pin first
+2. **WRPIN** mode, pin — Set the operating mode
+3. **WXPIN** x, pin — Set X parameter
+4. **WYPIN** y, pin — Set Y parameter
+5. **DIRH** pin — Enable the Smart Pin
 
 **Common Modes:**
-| Mode | Constant | Use |
-|------|----------|-----|
-| UART TX | P_ASYNC_TX | Serial transmit |
-| UART RX | P_ASYNC_RX | Serial receive |
-| PWM Saw | P_PWM_SAWTOOTH | PWM output |
-| PWM Tri | P_PWM_TRIANGLE | PWM output |
-| ADC | P_ADC | Analog input |
-| Quadrature | P_QUADRATURE | Encoder |
-| NCO | P_NCO_FREQ | Frequency output |
+
+- **UART TX**: `P_ASYNC_TX` — Serial transmit
+- **UART RX**: `P_ASYNC_RX` — Serial receive
+- **PWM**: `P_PWM_SAWTOOTH` — Sawtooth wave output
+- **PWM**: `P_PWM_TRIANGLE` — Triangle wave output
+- **ADC**: `P_ADC` — Analog input
+- **Quadrature**: `P_QUADRATURE` — Encoder
+- **NCO**: `P_NCO_FREQ` — Frequency output
 
 **Data Flow:**
+
 - **WYPIN** = Write data TO Smart Pin
 - **RDPIN** = Read data FROM Smart Pin (clears IN)
 - **TESTP** = Check if IN flag set
@@ -4956,6 +5011,7 @@ DIRH pin          ' 5. Enable
 **Exercise 1: PWM LED Dimmer**
 
 Create a PWM output that dims an LED:
+
 1. Configure a pin for PWM sawtooth mode
 2. Set a 1 kHz period (at 160 MHz: period = 160,000)
 3. Vary duty cycle from 0% to 100%
@@ -4970,6 +5026,7 @@ Create a PWM output that dims an LED:
 **Exercise 2: Simple Serial Echo**
 
 Set up UART at 115200 baud:
+
 1. Configure RX on pin 63
 2. Configure TX on pin 62
 3. Echo every received byte back
@@ -5013,6 +5070,7 @@ The event system lets your COG sleep while waiting. When the event happens, it w
 ## Why Events Matter
 
 Polling loops have two problems:
+
 1. **They waste cycles** - The COG spins doing nothing useful
 2. **They add latency** - You check periodically, so there's delay between "thing happened" and "you noticed"
 
@@ -5041,7 +5099,9 @@ Plus there are built-in timer events:
 
 The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 
+```{=latex}
 \SETSEBitFieldDiagram
+```
 
 ### Event Modes
 
@@ -5060,24 +5120,24 @@ The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 
 While dedicated COGs are usually better than interrupts (see Chapter 11), sometimes you need them. The **SETINT1/2/3** instructions select which event triggers an interrupt using these constants:
 
-| Constant | Value | Description | When It Fires |
-|----------|-------|-------------|---------------|
-| `EVENT_INT` | %0000 | Edge/level on interrupt pin | Pin matches configuration |
-| `EVENT_CT1` | %0001 | CT equals CT1 | Timer 1 reaches target |
-| `EVENT_CT2` | %0010 | CT equals CT2 | Timer 2 reaches target |
-| `EVENT_CT3` | %0011 | CT equals CT3 | Timer 3 reaches target |
-| `EVENT_SE1` | %0100 | SE1 event occurred | Selectable event 1 triggers |
-| `EVENT_SE2` | %0101 | SE2 event occurred | Selectable event 2 triggers |
-| `EVENT_SE3` | %0110 | SE3 event occurred | Selectable event 3 triggers |
-| `EVENT_SE4` | %0111 | SE4 event occurred | Selectable event 4 triggers |
-| `EVENT_PAT` | %1000 | Pin pattern match | SETPAT pattern detected |
-| `EVENT_FBW` | %1001 | FIFO block wrap | Hub FIFO wrapped around |
-| `EVENT_XMT` | %1010 | Streamer empty | Streamer needs data |
-| `EVENT_XFI` | %1011 | Streamer finished | Streamer operation complete |
-| `EVENT_XRO` | %1100 | Streamer NCO rollover | NCO frequency counter rolled |
-| `EVENT_XRL` | %1101 | Streamer pattern match | Streamer matched pattern |
-| `EVENT_ATN` | %1110 | Attention from COG | Another COG signaled |
-| `EVENT_QMT` | %1111 | CORDIC/PIX done | Math operation complete |
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `EVENT_INT` | %0000 | Pin matches interrupt configuration |
+| `EVENT_CT1` | %0001 | CT equals CT1 (timer 1 target) |
+| `EVENT_CT2` | %0010 | CT equals CT2 (timer 2 target) |
+| `EVENT_CT3` | %0011 | CT equals CT3 (timer 3 target) |
+| `EVENT_SE1` | %0100 | Selectable event 1 triggered |
+| `EVENT_SE2` | %0101 | Selectable event 2 triggered |
+| `EVENT_SE3` | %0110 | Selectable event 3 triggered |
+| `EVENT_SE4` | %0111 | Selectable event 4 triggered |
+| `EVENT_PAT` | %1000 | SETPAT pattern detected |
+| `EVENT_FBW` | %1001 | Hub FIFO wrapped around |
+| `EVENT_XMT` | %1010 | Streamer needs data |
+| `EVENT_XFI` | %1011 | Streamer operation complete |
+| `EVENT_XRO` | %1100 | NCO frequency counter rolled |
+| `EVENT_XRL` | %1101 | Streamer matched pattern |
+| `EVENT_ATN` | %1110 | Another COG signaled attention |
+| `EVENT_QMT` | %1111 | CORDIC/PIX math complete |
 
 **Using EVENT_* with SETINT:**
 
@@ -5147,6 +5207,7 @@ For precise timing, use the counter comparison events:
 :::
 
 The timer events are:
+
 - **ADDCT1/ADDCT2/ADDCT3**: Set the comparison target
 - **WAITCT1/WAITCT2/WAITCT3**: Wait until CT reaches target
 - **POLLCT1/POLLCT2/POLLCT3**: Check (non-blocking) if target reached
@@ -5295,15 +5356,19 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a C
 
 ::: antipattern
 **❌ WRONG: Forgetting to clear event flag**
-```pasm2
+
+```
 ' WRONG - Event may fire before you're ready
         setse1  #%001<<6 + PIN
         ' ... do other stuff ...
         waitse1                 ' May return immediately!
 ```
+:::
 
 **✓ RIGHT: Poll first to clear any pending event**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - Clear any stale event
         setse1  #%001<<6 + PIN
         pollse1                 ' Clear if already set
@@ -5314,14 +5379,18 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a C
 
 ::: antipattern
 **❌ WRONG: Using WAIT when you need to handle multiple sources**
-```pasm2
+
+```
 ' WRONG - Can only wait for one event at a time
         waitse1                 ' Stuck here until SE1
         ' SE2 might fire and be missed!
 ```
+:::
 
 **✓ RIGHT: Use POLL loop for multiple events**
-```pasm2
+
+::: pasm2
+```
 ' RIGHT - Check all sources
 .loop   pollse1 wc
   if_c  call    #handle_se1
@@ -5724,6 +5793,7 @@ Eight COGs, each doing one job perfectly, creating a responsive, reliable robot!
 **Exercise: Traffic Light Controller**
 
 Requirements:
+
 - COG 0: Main sequencer
 - COG 1: North-South lights
 - COG 2: East-West lights  
@@ -5797,6 +5867,7 @@ Test each COG in isolation before combining!
 ## What We've Learned
 
 You've mastered multi-COG orchestration:
+
 - ✅ Communication patterns (mailbox, ring buffer, queue)
 - ✅ Synchronization techniques
 - ✅ Real-world system architecture
@@ -5820,6 +5891,7 @@ You've completed this manual, but your P2 journey has just begun:
 **Congratulations!** You've mastered multi-COG orchestration!
 
 You now understand:
+
 - How to coordinate 8 parallel processors
 - Communication patterns between COGs
 - Synchronization techniques
@@ -5832,6 +5904,7 @@ You now understand:
 **Have Fun!** 
 
 Remember what you've learned:
+
 - Eight COGs working together are more powerful than any interrupt-driven system
 - Parallel processing isn't harder, it's different
 - The P2 way is about determinism and elegance
@@ -6045,17 +6118,20 @@ Coming from Arduino's library-for-everything culture, you'll write more code you
 P2 isn't just a chip - it's a platform with expansion options:
 
 **Video & Audio:**
+
 - A/V Breakout Board: VGA, RCA, 80mW stereo, microphone input
 - Digital Video Out: HDMI-type with differential signaling
 - Built-in 8-bit DAC per pin (16-bit with dithering)
 
 **Connectivity:**
+
 - USB Host Board: Two USB-A ports
 - USB Device Board: HID or CDC modes
 - Serial Host/Device: RS-232 interfaces
 - WizNet/ESP modules: Ethernet or WiFi
 
 **Development:**
+
 - P2 Eval Board: Complete development environment
 - Edge Modules: 4MB or 32MB flash for embedding
 - Breakout Boards: All 64 pins accessible
