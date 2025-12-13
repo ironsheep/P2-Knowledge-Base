@@ -44,6 +44,23 @@
 
 ### Directive Documentation Corrections (directives.md)
 
+**Data Packing and Alignment** (based on PNut_ts compiler analysis):
+- Corrected all incorrect "auto-alignment" statements throughout directives section
+- BYTE, WORD, LONG: Changed "automatically aligned" to "packs sequentially; use ALIGNW/ALIGNL if needed"
+- ALIGNL, ALIGNW: Fixed explanatory text that incorrectly implied automatic alignment of subsequent data
+- Related Directives sections: Removed "(auto-aligned in hub)" annotations
+- Added clarifying note to ALIGNW example: subsequent data packing is coincidental, not automatic
+- Key finding: Spin2/PASM2 has NO automatic alignment—data packs sequentially without gaps
+
+**DITTO Directive** (complete rewrite—previous documentation was entirely wrong):
+- Old (incorrect): Described as "Repeat Previous Instruction" with no parameters
+- New (correct): Block-based code/data replication: `DITTO count` ... `DITTO END`
+- Documented `$$` symbol for iteration index (0 to count-1)
+- Added zero count behavior (block skipped entirely)
+- Added restriction table: ORG/ORGH not allowed inside, `$$` only valid inside block
+- Added multi-instruction block examples
+- Introduced in PNut version 50
+
 **FILE Directive**:
 - Added filename requirements section documenting invalid characters (`/`, `:`, `*`, `?`, `"`, `<`, `>`, `|`)
 - Documented file search order (current dir → library dir → include dirs)
@@ -74,6 +91,15 @@
 - Affected instructions: RESI0-3, RETI0-3, SETINT1-3, NIXINT1-3, ADDCT1-3, POLLCT1-3, WAITCT1-3, WAITSE1-4, SETSE1-4, TRGINT1-3, JCT1-3, JSE1-4, and their negated variants
 - Root cause: LaTeX escape processor was escaping `\hypertarget` commands
 - Solution: Added hypertarget pattern to protected LaTeX commands (escape processor v6)
+
+### Voice and Style Consistency (directives.md)
+
+**Voice Guide Audit**:
+- Removed minimizing language ("simply") from ORG, ORGF descriptions
+- Removed second-person constructions ("when you need") from ORGF, BYTEFIT, WORDFIT
+- Removed hedging language ("might change", "typically") from BYTEFIT, WORDFIT, FILE
+- Changed "may be emitted" to definitive statements in ALIGNL, ALIGNW examples
+- All Usage sections now use third-person reference voice per voice-guide.md
 
 ---
 
