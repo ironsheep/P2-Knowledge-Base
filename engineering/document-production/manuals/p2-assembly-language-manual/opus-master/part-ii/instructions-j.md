@@ -324,10 +324,10 @@ Jump If Pattern Match Event Set / Clear {#jnpat}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
@@ -361,10 +361,10 @@ Jump If CORDIC Empty Event Set / Clear {#jnqmt}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
@@ -399,10 +399,10 @@ Jump If Streamer Finished Event Set / Clear {#jnxfi}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
@@ -436,10 +436,10 @@ Jump If Streamer Empty Event Set / Clear {#jnxmt}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
@@ -473,10 +473,10 @@ Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
@@ -510,10 +510,10 @@ Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 
-| Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
-|:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
