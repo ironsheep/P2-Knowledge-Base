@@ -26,6 +26,18 @@
 - Updated encoding table column values
 - Enhanced explanation of flag modification behavior
 
+#### Deep Audit Corrections (instructions-f.md, instructions-w.md)
+
+**FLT* Instructions** (FLTC, FLTNC, FLTZ, FLTNZ, FLTH, FLTL, FLTNOT, FLTRND):
+- Corrected C and Z flag columns from "DIRx + OUTx" to "Original OUTx base bit" per Silicon CSV ("C,Z = OUT bit")
+- Corrected Result column from "OUT bit" to "OUTx"
+- Updated explanation text: "Z flag" → "C and Z flags" for WCZ effect
+
+**WAITX Instruction**:
+- Corrected timing formula from "Dest+1" to "2 + Dest" per Silicon CSV
+- Added randomized delay behavior documentation (when WC/WZ/WCZ specified)
+- Fixed code example comment: "Wait 100" → "Wait 101 clock cycles (2 + 99)"
+
 ---
 
 ## v1.1.0 (2025-12-12)

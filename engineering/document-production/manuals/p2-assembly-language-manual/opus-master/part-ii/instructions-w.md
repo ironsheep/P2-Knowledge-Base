@@ -228,10 +228,10 @@ Wait Cycles
 
 ---
 
-**Result:** Stalls the cog for Dest+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay. Sets C and Z to 0 after completion.
 
-- Dest is the number of cycles minus 1 to wait (0-511 for immediate).
-- WC, WZ, or WCZ are optional; always set to 0 after completion.
+- Dest is the delay value; total wait is 2 + Dest cycles (0-511 for immediate).
+- WC, WZ, or WCZ enable randomized delay mode; C and Z are set to 0 after completion.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -243,12 +243,12 @@ Wait Cycles
 
 **Explanation:**
 
-WAITX stalls the cog for precise timing delays. The actual wait time is Dest+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
+WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. This randomized mode is useful for avoiding timing-based interference between cogs. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
 ::: pasm2
-        WAITX   #99            ' Wait 100 clock cycles
+        WAITX   #99            ' Wait 101 clock cycles (2 + 99)
 :::
 
 
