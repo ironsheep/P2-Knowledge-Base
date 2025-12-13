@@ -42,6 +42,19 @@
 - Added randomized delay behavior documentation (when WC/WZ/WCZ specified)
 - Fixed code example comment: "Wait 100" → "Wait 101 clock cycles (2 + 99)"
 
+### PDF Rendering Fixes
+
+**Timing Table Rendering (instructions-r.md)**:
+- Fixed RDBYTE, RDFAST, RDLONG, RDWORD timing tables not rendering as tables
+- Root cause: Missing blank line between footnote text and table header
+- Tables now render with proper headers instead of inline text
+
+**Cross-Reference Anchor Rendering**:
+- Fixed hypertarget commands appearing literally in PDF (e.g., `\{}hypertarget{resi1}{}`)
+- Affected instructions: RESI0-3, RETI0-3, SETINT1-3, NIXINT1-3, ADDCT1-3, POLLCT1-3, WAITCT1-3, WAITSE1-4, SETSE1-4, TRGINT1-3, JCT1-3, JSE1-4, and their negated variants
+- Root cause: LaTeX escape processor was escaping `\hypertarget` commands
+- Solution: Added hypertarget pattern to protected LaTeX commands (escape processor v6)
+
 ---
 
 ## v1.1.0 (2025-12-12)

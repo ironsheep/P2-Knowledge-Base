@@ -286,3 +286,26 @@ Pipe table with % (should still be escaped since pipe tables don't have alignmen
 |------|-------|-------------|
 | Binary | %1010 | Binary pattern |
 | Hex | $FF | Hex value |
+
+## Hypertarget Anchor Commands Test (Bug Fix - Cross-reference anchors)
+This tests \hypertarget commands used for Pandoc cross-references. These LaTeX
+commands must NOT be escaped - they create anchor points for internal links.
+
+Single hypertarget:
+\hypertarget{resi0}{}
+
+Multiple hypertargets on one line (common for combined instruction groups):
+\hypertarget{resi1}{}\hypertarget{resi2}{}\hypertarget{resi3}{}
+
+Hypertargets for interrupt instructions:
+\hypertarget{setint2}{}\hypertarget{setint3}{}
+
+Hypertargets for counter instructions:
+\hypertarget{addct2}{}\hypertarget{addct3}{}
+\hypertarget{pollct2}{}\hypertarget{pollct3}{}
+\hypertarget{waitct2}{}\hypertarget{waitct3}{}
+
+Hypertargets for event instructions:
+\hypertarget{jse2}{}\hypertarget{jse3}{}\hypertarget{jse4}{}\hypertarget{jnse1}{}\hypertarget{jnse2}{}\hypertarget{jnse3}{}\hypertarget{jnse4}{}
+
+Text after hypertargets should have #hash and $dollar and _underscore escaped normally.

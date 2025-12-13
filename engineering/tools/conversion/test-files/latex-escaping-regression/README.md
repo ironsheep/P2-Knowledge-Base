@@ -5,14 +5,25 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-12-05 (v5 - Grid table protection added)
+- **Last Modified**: 2025-12-13 (v6 - Hypertarget protection and PASM2 absolute address protection added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, grid tables; escapes P2 literals
+- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, grid tables, hypertarget commands, PASM2 absolute address syntax; escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Grid Table Protection** (NEW in v5)
+1. **Hypertarget Command Protection** (NEW in v6)
+   - `\hypertarget{anchor}{}` commands are NOT escaped
+   - Used for Pandoc cross-reference anchors in combined instruction groups
+   - Test Case: `test-cases.md` → "Hypertarget Anchor Commands Test"
+
+2. **PASM2 Absolute Address Protection** (NEW in v6)
+   - `#\Label` and `\Label` syntax for absolute addresses NOT escaped
+   - P2 uses backslash prefix for absolute vs relative addressing
+   - Produces proper `\#\\Label` output for LaTeX
+   - Test Case: Added to production but deferred test case
+
+3. **Grid Table Protection** (v5)
    - Grid tables (using `+---+` borders) are NOT escaped at all
    - Escaping `%` → `\%` adds a character, breaking column alignment
    - Broken alignment causes Pandoc to misparse the entire table structure
@@ -119,6 +130,17 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-12-13: Version 6 Released
+- **Hypertarget Command Protection**: `\hypertarget{anchor}{}` commands are preserved
+- **Root Cause**: Combined instruction groups (RESI0/1/2/3, SETINT1/2/3, etc.) use hypertargets for cross-reference anchors
+- **Impact**: Without protection, `\hypertarget{resi1}{}` becomes `\textbackslash\{\}hypertarget\{resi1\}\{\}` appearing literally in PDF
+- **Solution**: Added regex pattern to protected LaTeX command list: `r'\\hypertarget\{([^}]*)\}\{([^}]*)\}'`
+- **PASM2 Absolute Address Protection**: `#\Label` and `\Label` syntax preserved
+- **Root Cause**: P2 assembly uses backslash prefix for absolute addressing vs relative
+- **Impact**: `CALLB #\Addr` was rendering as `CALLB \#\{\}Addr` in PDF
+- **Solution**: Pre-protect patterns before escaping, restore with proper double-backslash for LaTeX
+- **Test Added**: "Hypertarget Anchor Commands Test" section in test-cases.md
 
 ### 2025-12-05: Version 5 Released
 - **Grid Table Protection**: Grid tables (using `+---+` border syntax) are completely protected from escaping

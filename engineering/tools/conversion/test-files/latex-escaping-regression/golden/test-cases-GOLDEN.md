@@ -248,3 +248,64 @@ Line with underscore\_pattern and trailing backslash\
 Final line without trailing backslash
 
 Regular text should still have \_underscores and \#hash escaped even near backslashes.
+
+## Grid Table Alignment Test (Bug Fix - Grid Tables with \%)
+This tests grid tables containing \% characters. The escape processor must NOT escape
+\% inside grid tables because adding the backslash breaks column alignment and causes
+Pandoc to misparse the table structure.
+
+Grid table with \% in data cells:
+
++------+----------------+-------------+-------------------+-----------+
+| Bits | SETQ D Pattern | LUT Base    | Index Calculation | Bytecodes |
++======+================+=============+===================+===========+
+| 8    | %A0000000F     | %A00000000  | I = bytecode[7:0] | 256       |
++------+----------------+-------------+-------------------+-----------+
+| 7    | %AAxx0010F     | %AA0000000  | I = bytecode[6:0] | 128       |
++------+----------------+-------------+-------------------+-----------+
+| 4    | %AAAAA111F     | %AAAAA0000  | I = bytecode[7:4] | 16        |
++------+----------------+-------------+-------------------+-----------+
+
+Grid table with multi-line cells and \%:
+
++----------------------------+------------------------------+------------------------------------------+
+| Constant                   | Value                        | Description                              |
++============================+==============================+==========================================+
+| X_1ADC8_0P_1DAC8_WFBYTE    | %1111_0000_0000_0010 << 16   | 1 ADC to 8-bit, 0 pins, 1 DAC,           |
+|                            |                              | write byte                               |
++----------------------------+------------------------------+------------------------------------------+
+| X_2ADC8_0P_2DAC8_WFWORD    | %1111_0000_0000_0100 << 16   | 2 ADCs to 8-bit, 0 pins, 2 DACs,         |
+|                            |                              | write word                               |
++----------------------------+------------------------------+------------------------------------------+
+
+Text after grid table should have \%percent escaped normally.
+
+Pipe table with \% (should still be escaped since pipe tables don't have alignment issues):
+
+| Mode | Value | Description |
+|------|-------|-------------|
+| Binary | \%1010 | Binary pattern |
+| Hex | \$FF | Hex value |
+
+## Hypertarget Anchor Commands Test (Bug Fix - Cross-reference anchors)
+This tests \\hypertarget commands used for Pandoc cross-references. These LaTeX
+commands must NOT be escaped - they create anchor points for internal links.
+
+Single hypertarget:
+\hypertarget{resi0}{}
+
+Multiple hypertargets on one line (common for combined instruction groups):
+\hypertarget{resi1}{}\hypertarget{resi2}{}\hypertarget{resi3}{}
+
+Hypertargets for interrupt instructions:
+\hypertarget{setint2}{}\hypertarget{setint3}{}
+
+Hypertargets for counter instructions:
+\hypertarget{addct2}{}\hypertarget{addct3}{}
+\hypertarget{pollct2}{}\hypertarget{pollct3}{}
+\hypertarget{waitct2}{}\hypertarget{waitct3}{}
+
+Hypertargets for event instructions:
+\hypertarget{jse2}{}\hypertarget{jse3}{}\hypertarget{jse4}{}\hypertarget{jnse1}{}\hypertarget{jnse2}{}\hypertarget{jnse3}{}\hypertarget{jnse4}{}
+
+Text after hypertargets should have \#hash and \$dollar and \_underscore escaped normally.

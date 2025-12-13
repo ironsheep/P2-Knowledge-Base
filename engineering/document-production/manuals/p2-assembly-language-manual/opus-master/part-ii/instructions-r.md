@@ -173,6 +173,7 @@ Read Byte From Hub
 | EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |
@@ -219,6 +220,7 @@ Read Fast Via FIFO
 | EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 2 or WRFAST finish + 10...17 |
@@ -264,6 +266,7 @@ Read Long From Hub
 | EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |
@@ -385,6 +388,7 @@ Read Word From Hub
 | EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |

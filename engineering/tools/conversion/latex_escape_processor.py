@@ -269,7 +269,8 @@ def process_latex_escaping(input_file, output_file):
         
         # Find and protect LaTeX reference commands
         for pattern in [r'\\ref\{([^}]*)\}', r'\\label\{([^}]*)\}', r'\\cite\{([^}]*)\}',
-                       r'\\pageref\{([^}]*)\}', r'\\eqref\{([^}]*)\}']:
+                       r'\\pageref\{([^}]*)\}', r'\\eqref\{([^}]*)\}',
+                       r'\\hypertarget\{([^}]*)\}\{([^}]*)\}']:  # Pandoc anchor targets
             while True:
                 match = re.search(pattern, line)
                 if not match:
