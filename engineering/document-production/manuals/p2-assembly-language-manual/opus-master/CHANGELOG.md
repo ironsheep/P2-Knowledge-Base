@@ -1,5 +1,27 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v1.3.0 (2025-12-13)
+
+**Directives Enhancement Release** - Expanded directive documentation with inline assembly support and comprehensive usage guidance.
+
+### Part II: Directives
+
+**New Documentation:**
+- END: Added inline assembly termination directive (syntax, examples, restrictions)
+
+**Enhanced Documentation:**
+- ORG: Added `$` symbol explanation, COG/LUT memory regions table, auto-limit behavior, restrictions table
+- ORGH: Added behavior by context, address constraints (Spin2 vs PASM-only), mode switching example, restrictions table
+- ORGF: Added COG-mode-only restriction, restrictions table
+- RES: Added RES 0 alias technique, key characteristics, RES vs LONG comparison table, restrictions table
+- FIT: Added behavior by mode (COG vs Hub), common limit values table, additional examples
+
+**Structural:**
+- Directive count updated from 14 to 15
+- Added "Inline Assembly Directives" category
+
+---
+
 ## v1.2.0 (2025-12-13)
 
 **Community Feedback Release** - Additional corrections from user review of v1.0.0.
