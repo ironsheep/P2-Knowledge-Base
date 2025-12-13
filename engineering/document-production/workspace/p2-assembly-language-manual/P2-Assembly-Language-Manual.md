@@ -16506,54 +16506,93 @@ Space management directives control memory allocation and verify size constraint
 
 ::: dirheader
 ### DITTO {#ditto}
-Repeat Previous Instruction
+Replicate Code/Data Block
 
-Inserts a copy of the preceding instruction.
+Repeats a block of code or data with iteration index access.
 :::
 
-Repeat the previous instruction. Inserts a copy of the immediately preceding instruction at the current location.
+Replicate a block of instructions or data a specified number of times at compile time. The special `$$` symbol provides access to the current iteration index within the block.
 
 #### Syntax
 ```pasm
-        DITTO
+DAT
+        DITTO   count           ' Start block, repeat count times
+        ' ... code or data ...
+        DITTO   END             ' End block
 ```
 
+#### Parameters
+| Parameter | Description |
+|-----------|-------------|
+| count | Number of iterations (0 or more); zero skips the block entirely |
+| `$$` | Special symbol evaluating to current iteration index (0 to count-1) |
+
 #### Usage
-Use DITTO to create repeated instruction sequences without copy-paste. Useful for loop unrolling, repeated initialization sequences, and creating multiple instances of the same operation. DITTO was introduced in Spin2/PASM2 version 50 and later.
+Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO was introduced in PNut version 50.
 
 #### Example
 ```pasm
-        nop                     ' First NOP
-        ditto                   ' Second NOP (repeat of previous)
-        ditto                   ' Third NOP (repeat of previous)
+CON
+  NumChannels = 8
+  BasePin = 16
 
-        wrlong  data, ptra++    ' Write and increment pointer
-        ditto                   ' Repeat the wrlong with ptra++
-        ditto                   ' And again
-        ditto                   ' Four total writes
+DAT
+        ORG     0
 
-' Initialize 8 consecutive registers to zero
-        mov     reg+0, #0
-        ditto                   ' reg+1
-        ditto                   ' reg+2
-        ditto                   ' reg+3
-        ditto                   ' reg+4
-        ditto                   ' reg+5
-        ditto                   ' reg+6
-        ditto                   ' reg+7
+' Initialize 8 consecutive pins using DITTO
+        DITTO   NumChannels
+        DRVH    #BasePin + $$   ' Drive pins 16, 17, 18, ... 23 high
+        DITTO   END
+
+' Generate indexed data table
+        DITTO   4
+        LONG    $$ * 100        ' Produces: 0, 100, 200, 300
+        DITTO   END
+
+' Multi-instruction block per iteration
+        DITTO   NumChannels
+        WRPIN   ##PinMode, #BasePin + $$
+        WXPIN   ##PinX, #BasePin + $$
+        DRVL    #BasePin + $$
+        DITTO   END
 ```
 
+#### Zero Count Behavior
+
+When count is 0, the entire block is skipped with no output generated:
+
+```pasm
+CON
+  MotorCount = 0                ' No motors in this build
+
+DAT
+        DITTO   MotorCount      ' Block skipped entirely
+        ' ... motor init code ...
+        DITTO   END
+```
+
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| ORG inside DITTO | `ORG not allowed within a DITTO block` |
+| ORGH inside DITTO | `ORGH not allowed within a DITTO block` |
+| `$$` outside DITTO | `"$$" (DITTO index) is only allowed within a DITTO block` |
+| Negative count | `DITTO count must be a positive integer or zero` |
+| Missing END | `Expected DITTO END` |
+
 #### Notes
-- Introduced in Spin2/PASM2 version 50 and later
-- DITTO copies the exact previous instruction including all operands and effects
-- Useful for loop unrolling and repeated initialization sequences
-- Must follow a valid instruction—cannot be first in a DAT block
-- The repeated instruction appears in listing output for clarity
-- Each DITTO generates a full instruction word (same size as original)
+- Introduced in PNut version 50
+- Works in COG, LUT, and ORGH (hub) modes
+- `$$` can be used in any expression: `$$ * 2`, `1 << $$`, `BasePin + $$`
+- Replication occurs at compile time—no runtime overhead
+- Use constants for count to enable configuration: `DITTO NumChannels`
+- Each iteration generates its own instructions/data with `$$` evaluated fresh
 
 #### Related Directives
-- REP instruction — Hardware-assisted instruction repeat
-- [ORG](#org) — Set origin address
+- REP instruction — Hardware-assisted runtime instruction repeat
+- [ORG](#org) — Set origin address (not allowed inside DITTO)
+- [ORGH](#orgh) — Set hub origin (not allowed inside DITTO)
 
 
 
