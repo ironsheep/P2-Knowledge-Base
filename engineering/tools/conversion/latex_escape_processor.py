@@ -295,18 +295,40 @@ def process_latex_escaping(input_file, output_file):
         # Must be protected BEFORE escaping { } and #
         line = line.replace('{#}', 'XPROTECT_OPTIONAL_IMM_X')
 
+        # Protect PASM2 absolute address syntax #\Label and \Label
+        # In PASM2, backslash prefix means absolute address (vs relative)
+        # Pattern: #\ followed by identifier OR just \ followed by identifier at word boundary
+        # Examples: #\Addr, #\DebugStatus, \helper
+        # Store protected patterns to restore later
+        # NOTE: Placeholder uses no underscores to avoid underscore escaping issues
+        protected_pasm2_addr = []
+        # Match #\identifier patterns (absolute immediate address)
+        for match in re.finditer(r'#\\([A-Za-z_][A-Za-z0-9_]*)', line):
+            placeholder = f'XPROTECTPASMABSADDR{len(protected_pasm2_addr)}X'
+            protected_pasm2_addr.append(('\\#\\\\' + match.group(1), match.group(0)))
+            line = line.replace(match.group(0), placeholder, 1)
+        # Match standalone \identifier patterns (absolute address in jumps)
+        for match in re.finditer(r'(?<![#A-Za-z0-9_])\\([A-Za-z_][A-Za-z0-9_]*)', line):
+            placeholder = f'XPROTECTPASMABSADDR{len(protected_pasm2_addr)}X'
+            protected_pasm2_addr.append(('\\\\' + match.group(1), match.group(0)))
+            line = line.replace(match.group(0), placeholder, 1)
+
         # Now escape special characters in the remaining text
         # 1. Escape backslashes (but not in protected commands)
-        line = line.replace('\\', '\\textbackslash{}')
+        # Use a placeholder that won't have its braces escaped
+        line = line.replace('\\', 'XTEXTBACKSLASHX')
 
         # 2. Escape ^ before { } to create \^{} correctly
-        line = line.replace('^', '\\^{}')
+        line = line.replace('^', 'XCARETX')
 
-        # 3. Now protect our \^{} patterns and escape remaining { }
-        line = line.replace('\\^{}', 'XPROTECT_CARET_X')
+        # 3. Escape braces
         line = line.replace('{', '\\{')
         line = line.replace('}', '\\}')
-        line = line.replace('XPROTECT_CARET_X', '\\^{}')
+
+        # 4. Restore backslash and caret with proper LaTeX escapes
+        # \textbackslash{} needs {} for proper spacing in LaTeX
+        line = line.replace('XTEXTBACKSLASHX', '\\textbackslash{}')
+        line = line.replace('XCARETX', '\\^{}')
 
         # 4. Escape other special characters
         line = line.replace('#', '\\#')
@@ -330,7 +352,13 @@ def process_latex_escaping(input_file, output_file):
             placeholder = f'XPROTECTINLINECODE{i}X'
             line = line.replace(placeholder, code)
 
-        # 7. Restore trailing backslash for Pandoc hard line breaks
+        # 7. Restore protected PASM2 absolute address syntax
+        # These use double backslash in output for LaTeX to render single backslash
+        for i, (replacement, original) in enumerate(protected_pasm2_addr):
+            placeholder = f'XPROTECTPASMABSADDR{i}X'
+            line = line.replace(placeholder, replacement)
+
+        # 8. Restore trailing backslash for Pandoc hard line breaks
         if trailing_backslash:
             output_lines.append(line + '\\\n')
         else:

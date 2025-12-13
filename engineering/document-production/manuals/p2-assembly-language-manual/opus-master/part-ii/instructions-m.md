@@ -125,7 +125,7 @@ Modify C Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | cccc[\{C,Z\}] | --- | --- | 2 |
+| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | cccc[{C,Z}] | --- | --- | 2 |
 
 
 **Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -164,7 +164,7 @@ Modify C And Z Flags
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | --- | 2 |
+| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | cccc[{C,Z}] | zzzz[{C,Z}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
@@ -204,7 +204,7 @@ Modify Z Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | zzzz[\{C,Z\}] | --- | 2 |
+| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | zzzz[{C,Z}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -345,7 +345,7 @@ Multiply
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
 
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -444,7 +444,7 @@ Multiply Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
 
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)

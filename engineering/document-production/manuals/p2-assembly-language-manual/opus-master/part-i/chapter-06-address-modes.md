@@ -584,7 +584,7 @@ For time-critical inner loops:
 ```{=latex}
 \begin{keyconcepts}
 \item Direct register addressing uses 9-bit fields to access COG RAM at addresses \$000-\$1FF
-\item The \# prefix creates 9-bit immediates (0-511); \#\# creates 32-bit immediates via AUGS/AUGD
+\item The \# prefix creates 9-bit immediates (0-511); ## creates 32-bit immediates via AUGS/AUGD
 \item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
 \item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms
 \item The SCALE factor (1/2/4) depends on instruction: byte=1, word=2, long=4

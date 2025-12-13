@@ -32,9 +32,9 @@ Set Next FIFO Block
 
 FBLOCK configures the parameters for the next Hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in Hub memory for streaming read and write operations.
 
-Dest\[13:0\] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
+Dest[13:0] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
 
-Src\[19:0\] specifies the starting address of the block in Hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
+Src[19:0] specifies the starting address of the block in Hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
 
 FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between Hub memory and COG/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
 
@@ -263,11 +263,11 @@ Float High
 
 FLTH sets the I/O pin(s) designated by Dest to the input direction (floating) and to a high output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be high.
 
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
 
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
@@ -301,11 +301,11 @@ Float Low
 
 FLTL sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be low.
 
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
 
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
@@ -339,13 +339,13 @@ Float Not
 
 FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions: DIRL followed by OUTNOT.
 
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
 
-When Dest is a register, the register's value bits \[10:0\] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction, in which case SETQ's Dest\[4:0\] substitutes in place of value bits\[10:6\] for FLTNOT's use.
+When Dest is a register, the register's value bits \[10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction, in which case SETQ's Dest[4:0] substitutes in place of value bits\[10:6] for FLTNOT's use.
 
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
@@ -377,17 +377,17 @@ Float Random
 
 **Explanation:**
 
-FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128\*\* PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.
+FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.
 
 FLTRND achieves the same effect as two instructions: DIRL followed by OUTRND.
 
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
 
-When Dest is a register, the register's value bits \[10:0\] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction, in which case SETQ's Dest\[4:0\] substitutes in place of value bits\[10:6\] for FLTRND's use.
+When Dest is a register, the register's value bits \[10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction, in which case SETQ's Dest[4:0] substitutes in place of value bits\[10:6] for FLTRND's use.
 
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
