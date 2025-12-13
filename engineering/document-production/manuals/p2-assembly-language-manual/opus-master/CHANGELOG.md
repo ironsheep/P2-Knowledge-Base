@@ -42,6 +42,26 @@
 - Added randomized delay behavior documentation (when WC/WZ/WCZ specified)
 - Fixed code example comment: "Wait 100" → "Wait 101 clock cycles (2 + 99)"
 
+### Directive Documentation Corrections (directives.md)
+
+**FILE Directive**:
+- Added filename requirements section documenting invalid characters (`/`, `:`, `*`, `?`, `"`, `<`, `>`, `|`)
+- Documented file search order (current dir → library dir → include dirs)
+- Added compiler-specific footnote about include directory support
+- Added maximum filename length (253 characters) and case-insensitivity notes
+
+**BYTEFIT Directive** (complete rewrite):
+- Corrected syntax: `BYTEFIT value` (no parentheses) — it's a data directive like BYTE
+- Fixed valid range: -$80 to $FF (was incorrectly documented as 0-255 only)
+- Added proper examples without parentheses
+- Added actual error message: `BYTEFIT values must range from -$80 to $FF`
+
+**WORDFIT Directive** (complete rewrite):
+- Corrected syntax: `WORDFIT value` (no parentheses) — it's a data directive like WORD
+- Fixed valid range: -$8000 to $FFFF (was incorrectly documented as 0-65535 only)
+- Added proper examples without parentheses
+- Added actual error message: `WORDFIT values must range from -$8000 to $FFFF`
+
 ### PDF Rendering Fixes
 
 **Timing Table Rendering (instructions-r.md)**:
