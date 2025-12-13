@@ -341,7 +341,7 @@
         rectangle,
         draw=diagram-border,
         fill=mem-cog,
-        minimum width=1.6cm,
+        minimum width=2.0cm,
         minimum height=1.1cm,
         align=center,
         font=\small\bfseries
@@ -367,6 +367,7 @@
     lutwrite/.style={
         thick,
         diagram-accent,
+        dotted,
         ->
     },
     lutlabel/.style={
@@ -379,29 +380,30 @@
 \node[hubbox] (hub) at (0, 0) {HUB\\512KB\\Shared RAM};
 
 % 8 COGs arranged in a ring around hub
-% Each COG now shows both RAM and LUT as internal
-\node[cogbox] (cog0) at (-3.2, 1.3) {COG 0\\2KB+LUT};
-\node[cogbox] (cog1) at (-1.3, 3.2) {COG 1\\2KB+LUT};
-\node[cogbox] (cog2) at (1.3, 3.2) {COG 2\\2KB+LUT};
-\node[cogbox] (cog3) at (3.2, 1.3) {COG 3\\2KB+LUT};
-\node[cogbox] (cog4) at (3.2, -1.3) {COG 4\\2KB+LUT};
-\node[cogbox] (cog5) at (1.3, -3.2) {COG 5\\2KB+LUT};
-\node[cogbox] (cog6) at (-1.3, -3.2) {COG 6\\2KB+LUT};
-\node[cogbox] (cog7) at (-3.2, -1.3) {COG 7\\2KB+LUT};
+% Each COG now shows both RAM (2KB) and LUT (2KB) as internal
+\node[cogbox] (cog0) at (-3.2, 1.3) {COG 0\\2KB+LUT 2KB};
+\node[cogbox] (cog1) at (-1.3, 3.2) {COG 1\\2KB+LUT 2KB};
+\node[cogbox] (cog2) at (1.3, 3.2) {COG 2\\2KB+LUT 2KB};
+\node[cogbox] (cog3) at (3.2, 1.3) {COG 3\\2KB+LUT 2KB};
+\node[cogbox] (cog4) at (3.2, -1.3) {COG 4\\2KB+LUT 2KB};
+\node[cogbox] (cog5) at (1.3, -3.2) {COG 5\\2KB+LUT 2KB};
+\node[cogbox] (cog6) at (-1.3, -3.2) {COG 6\\2KB+LUT 2KB};
+\node[cogbox] (cog7) at (-3.2, -1.3) {COG 7\\2KB+LUT 2KB};
 
 % LUT write mirroring arrows between adjacent cog pairs
-% COG 0 <-> COG 1 (upper-left pair)
-\draw[lutwrite] (cog0.north) to[bend left=25] node[lutlabel, above, sloped] {LUT writes} (cog1.west);
-\draw[lutwrite] (cog1.west) to[bend left=25] (cog0.north);
-% COG 2 <-> COG 3 (upper-right pair)
-\draw[lutwrite] (cog2.east) to[bend left=25] node[lutlabel, above, sloped] {LUT writes} (cog3.north);
-\draw[lutwrite] (cog3.north) to[bend left=25] (cog2.east);
-% COG 4 <-> COG 5 (lower-right pair)
-\draw[lutwrite] (cog4.south) to[bend left=25] node[lutlabel, below, sloped] {LUT writes} (cog5.east);
-\draw[lutwrite] (cog5.east) to[bend left=25] (cog4.south);
-% COG 6 <-> COG 7 (lower-left pair)
-\draw[lutwrite] (cog6.west) to[bend left=25] node[lutlabel, below, sloped] {LUT writes} (cog7.south);
-\draw[lutwrite] (cog7.south) to[bend left=25] (cog6.west);
+% Two separate unidirectional arrows, evenly spaced on box edges
+% COG 0 -> COG 1 and COG 1 -> COG 0 (upper-left pair)
+\draw[lutwrite] ([xshift=3pt]cog0.north east) to[bend left=20] node[lutlabel, above, sloped] {LUT writes} ([yshift=-3pt]cog1.south west);
+\draw[lutwrite] ([yshift=3pt]cog1.south west) to[bend left=20] ([xshift=-3pt]cog0.north east);
+% COG 2 -> COG 3 and COG 3 -> COG 2 (upper-right pair)
+\draw[lutwrite] ([yshift=-3pt]cog2.north east) to[bend left=20] node[lutlabel, above, sloped] {LUT writes} ([xshift=-3pt]cog3.north west);
+\draw[lutwrite] ([xshift=3pt]cog3.north west) to[bend left=20] ([yshift=3pt]cog2.north east);
+% COG 4 -> COG 5 and COG 5 -> COG 4 (lower-right pair)
+\draw[lutwrite] ([xshift=-3pt]cog4.south east) to[bend left=20] node[lutlabel, below, sloped] {LUT writes} ([yshift=3pt]cog5.north east);
+\draw[lutwrite] ([yshift=-3pt]cog5.north east) to[bend left=20] ([xshift=3pt]cog4.south east);
+% COG 6 -> COG 7 and COG 7 -> COG 6 (lower-left pair)
+\draw[lutwrite] ([yshift=3pt]cog6.south west) to[bend left=20] node[lutlabel, below, sloped] {LUT writes} ([xshift=3pt]cog7.south east);
+\draw[lutwrite] ([xshift=-3pt]cog7.south east) to[bend left=20] ([yshift=-3pt]cog6.south west);
 
 % Hub connection lines (bidirectional arrows)
 \draw[linestyle] (cog0) -- (hub);
