@@ -223,7 +223,7 @@ Blend Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [ADDPIX](#addpix), [MULPIX](#mulpix), [MIXPIX](#mixpix), [SETPIV](#setpiv)
@@ -258,8 +258,8 @@ Bit Mask
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | --- | --- | D | 2 |
 
 
 **Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)

@@ -63,8 +63,8 @@ Decode Bit Position
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | --- | --- | D | 2 |
 
 
 **Related:** [ENCOD](#encod), [BMASK](#bmask)
@@ -344,7 +344,7 @@ Decrement and Jump If Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
 
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
@@ -378,7 +378,7 @@ Decrement and Jump If Not Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
 
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
@@ -415,8 +415,8 @@ Decrement and Jump If Zero {#djnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.

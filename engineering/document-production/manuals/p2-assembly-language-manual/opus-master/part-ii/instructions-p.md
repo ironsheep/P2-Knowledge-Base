@@ -22,7 +22,7 @@ Poll Attention Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | ATN Event | ATN Event | --- | 2 |
 
 
 **Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
@@ -59,9 +59,9 @@ Poll Counter Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | --- | CT1 Event | CT1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | --- | CT2 Event | CT2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | CT1 Event | CT1 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | CT2 Event | CT2 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | CT3 Event | CT3 Event | --- | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
@@ -94,7 +94,7 @@ Poll FIFO Block Wrap Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | FBW Event | FBW Event | --- | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
@@ -127,7 +127,7 @@ Poll Interrupt Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | INT Event | INT Event | --- | 2 |
 
 
 **Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
@@ -160,7 +160,7 @@ Poll Pin Pattern Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | PAT Event | PAT Event | --- | 2 |
 
 
 **Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
@@ -193,7 +193,7 @@ Poll CORDIC Empty Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | QMT Event | QMT Event | --- | 2 |
 
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
@@ -231,10 +231,10 @@ Poll Selectable Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | --- | SE1 Event | SE1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | --- | SE2 Event | SE2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | --- | SE3 Event | SE3 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | SE1 Event | SE1 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | SE2 Event | SE2 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | SE3 Event | SE3 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | SE4 Event | SE4 Event | --- | 2 |
 
 
 **Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
@@ -267,7 +267,7 @@ Poll Streamer Finished Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | XFI Event | XFI Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
@@ -300,7 +300,7 @@ Poll Streamer Empty Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | XMT Event | XMT Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
@@ -333,7 +333,7 @@ Poll Streamer LUT Rollover Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | XRL Event | XRL Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
@@ -366,7 +366,7 @@ Poll Streamer NCO Rollover Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | XRO Event | XRO Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
@@ -400,7 +400,7 @@ Pop From Internal Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | Result = 0 | D | 2 |
 
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
@@ -436,7 +436,7 @@ Pop From Hub Stack A
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | Result = 0 | D | 9...16 |
 
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
@@ -472,7 +472,7 @@ Pop From Hub Stack B
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | Result = 0 | D | 9...16 |
 
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)

@@ -25,8 +25,8 @@ Ones
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Result is odd | Result = 0 | 2 |
-| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
+| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | Result = 0 | D | 2 |
+| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | Result = 0 | D | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
@@ -65,7 +65,7 @@ Bitwise Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
+| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | Result = 0 | D | 2 |
 
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
@@ -114,10 +114,10 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | OUTx | --- | orig out | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | orig out | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
@@ -158,7 +158,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
@@ -196,7 +196,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
@@ -234,7 +234,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)

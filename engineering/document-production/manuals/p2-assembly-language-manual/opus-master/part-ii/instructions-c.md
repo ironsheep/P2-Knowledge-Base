@@ -71,7 +71,7 @@ Call Subroutine via PTRA
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
@@ -115,7 +115,7 @@ Call Subroutine via PTRB
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
@@ -276,7 +276,7 @@ Compare Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Unsigned (D < S) | D=S | 2 |
+| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | D = S | --- | 2 |
 
 
 **Related:** [CMPR](#cmpr), [CMPX](#cmpx), [CMPS](#cmps), [CMPSX](#cmpsx), [CMPM](#cmpm)
@@ -358,7 +358,7 @@ Compare Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (S - D) | D == S | 2 |
+| EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | borrow of (S - D) | D == S | --- | 2 |
 
 
 **Related:** [CMP](#cmp)
@@ -395,7 +395,7 @@ Compare Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Signed (D < S) | D=S | 2 |
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | Signed (D < S) | D = S | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
@@ -478,7 +478,7 @@ Compare Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | correct sign of (D - (S + C)) | Z AND (D == S + C) | 2 |
+| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPS](#cmps)
@@ -521,7 +521,7 @@ Compare Unsigned Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (D - (S + C)) | Z AND (D == S + C) | 2 |
+| EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | borrow of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps), [CMPSX](#cmpsx)
@@ -809,7 +809,7 @@ CRC Iterate Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [CRCNIB](#crcnib), [REV](#rev)
@@ -856,7 +856,7 @@ CRC Iterate Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [CRCBIT](#crcbit), [REV](#rev)

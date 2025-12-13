@@ -108,7 +108,7 @@ Exclusive Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
+| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Zero | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
@@ -148,7 +148,7 @@ Xoroshiro 32
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | --- | --- | D | 2 |
 
 
 **Related:** [GETRND](#getrnd), [SETQ](#setq)

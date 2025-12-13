@@ -22,7 +22,7 @@ Wait For Attention
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011110 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
@@ -63,9 +63,9 @@ Wait For Counter Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010001 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010010 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010011 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010001 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010010 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
@@ -98,7 +98,7 @@ Wait For FIFO Block Wrap
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011001 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
@@ -129,7 +129,7 @@ Wait For Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010000 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
@@ -160,7 +160,7 @@ Wait For Pattern
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011000 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
@@ -201,10 +201,10 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010100 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010101 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010110 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010111 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010100 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010101 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010110 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010111 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
@@ -236,7 +236,7 @@ Wait Cycles
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | --- | 0 | 0 | 2 + D |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | 0 | 0 | --- | 2 + D |
 
 
 **Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
@@ -271,7 +271,7 @@ Wait For Streamer Finished
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
@@ -302,7 +302,7 @@ Wait For Streamer Empty
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011010 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
@@ -333,7 +333,7 @@ Wait For Streamer LUT Rollover
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011101 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
@@ -364,7 +364,7 @@ Wait For Streamer NCO Rollover
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011100 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
@@ -568,10 +568,10 @@ Write Flag To Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101110 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101111 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101110 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101111 | --- | --- | D | 2 |
 
 
 **Explanation:**

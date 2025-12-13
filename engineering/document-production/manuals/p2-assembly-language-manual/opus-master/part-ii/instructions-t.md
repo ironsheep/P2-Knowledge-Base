@@ -25,8 +25,8 @@ Test
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
-| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
+| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | D = 0 | --- | 2 |
+| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D \& S) | (D \& S) = 0 | --- | 2 |
 
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -74,10 +74,10 @@ Test Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | 2 |
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | 2 |
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D[S[4:0]] | D[S[4:0]] | --- | 2 |
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | --- | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | --- | 2 |
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | --- | 2 |
 
 
 **Related:** [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -121,10 +121,10 @@ Test Bit Negated
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | 2 |
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | 2 |
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | !D[S[4:0]] | !D[S[4:0]] | --- | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | --- | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | --- | 2 |
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | --- | 2 |
 
 
 **Related:** [TESTB](#testb), [TESTP](#testp), [TESTPN](#testpn)
@@ -157,7 +157,7 @@ Test Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
+| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D \& !S) | (D \& !S) = 0 | --- | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
@@ -204,14 +204,14 @@ Test Pin / Test Pin Negated {#testpn}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | --- | C/Z AND IN | C/Z AND IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | --- | C/Z AND !IN | C/Z AND !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | --- | C/Z OR IN | C/Z OR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | --- | C/Z OR !IN | C/Z OR !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | --- | C/Z XOR IN | C/Z XOR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | --- | C/Z XOR !IN | C/Z XOR !IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | IN | IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | !IN | !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | C/Z AND IN | C/Z AND IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | C/Z AND !IN | C/Z AND !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | C/Z OR IN | C/Z OR IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | C/Z OR !IN | C/Z OR !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | C/Z XOR IN | C/Z XOR IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | C/Z XOR !IN | C/Z XOR !IN | --- | 2 |
 
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
@@ -252,8 +252,8 @@ Test And Jump If Full / Not Full {#tjnf}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv)
@@ -293,8 +293,8 @@ Test And Jump If Signed / Not Signed {#tjns}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJF](#tjf), [TJNF](#tjnf), [TJV](#tjv)
@@ -334,8 +334,8 @@ Test And Jump If Zero / Not Zero {#tjnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -383,7 +383,7 @@ Test And Jump If Overflow
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)

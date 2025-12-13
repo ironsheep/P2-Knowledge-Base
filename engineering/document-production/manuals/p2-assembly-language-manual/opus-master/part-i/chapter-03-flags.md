@@ -174,7 +174,7 @@ The P2 allows any instruction to execute conditionally based on the current flag
 
 ### 3.3.1 The IF_x Prefix
 
-Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (typically one clock cycle). When the condition is true, the instruction executes normally:
+Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (2 clock cycles). When the condition is true, the instruction executes normally:
 
 ```pasm
                 cmp     a, b            wc wz   ' Compare, set flags
@@ -188,7 +188,7 @@ The timing predictability is crucial. Traditional branch-based code has variable
 
 ### 3.3.2 Conditional Execution Timing
 
-When a conditional instruction's condition is false, the instruction does not execute but still consumes one clock cycle. This behavior might seem wasteful, but it provides deterministic timing—critical for real-time operations, protocol timing, and cycle-accurate code.
+When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This behavior might seem wasteful, but it provides deterministic timing—critical for real-time operations, protocol timing, and cycle-accurate code.
 
 Consider this example:
 
@@ -433,20 +433,20 @@ Beyond basic conditional execution, the P2 provides specialized instructions for
 The MODC and MODZ instructions modify flags directly without performing computations:
 
 ```pasm
-        modc    #1              ' Set C flag to 1
-        modz    #0              ' Clear Z flag to 0
+        modc    _set    wc      ' Set C flag to 1
+        modz    _clr    wz      ' Clear Z flag to 0
 ```
 
-MODC sets C to the specified bit value (0 or 1), and MODZ sets Z to the specified bit value. These instructions are useful when you need to establish specific flag states for subsequent conditional operations, or when implementing custom flag-based protocols.
+MODC sets C according to a 4-bit modifier constant, and MODZ sets Z similarly. The WC and WZ effects are required for the modification to take effect; without them, the result is computed but discarded. Common modifier constants include `_set` (always 1), `_clr` (always 0), `_c` (current C), and `_z` (current Z).
 
-The MODCZ instruction can modify both flags simultaneously with more complex rules:
+The MODCZ instruction can modify both flags simultaneously:
 
 ```pasm
-        modcz   _clr, _set      ' Clear C, set Z
-        modcz   _set, _set      ' Set both flags
+        modcz   _clr, _set  wcz ' Clear C, set Z
+        modcz   _set, _set  wcz ' Set both flags
 ```
 
-MODCZ accepts operands that specify operations: `_clr` (clear to 0), `_set` (set to 1), `_nc` (copy from C inverted), `_nz` (copy from Z inverted), and others. This enables complex flag manipulation in a single instruction.
+MODCZ accepts two operands specifying operations for C and Z respectively. The WC, WZ, or WCZ effect must be specified for the flags to be modified. Modifier constants include `_clr` (clear to 0), `_set` (set to 1), `_nc` (inverted C), `_nz` (inverted Z), and others that enable complex flag manipulation in a single instruction.
 
 ### 3.6.2 Flag-Based Bit Manipulation
 
@@ -667,7 +667,7 @@ After a multi-long comparison:
 \item Special effects ANDC/ANDZ/ORC/ORZ/XORC/XORZ combine tested bits with existing flags (TESTx instructions only)
 \item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
-\item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing
+\item Conditional instructions consume 2 clock cycles whether they execute or not, maintaining deterministic timing
 \item Multi-precision arithmetic chains flag results between instructions using ADDX and SUBX
 \item Flag-based bit manipulation (MUXC, MUXZ) enables building bit patterns from sequential flag tests
 \item Each COG maintains independent C and Z flags with no cross-COG interaction

@@ -60,7 +60,7 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
@@ -97,7 +97,7 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
@@ -134,7 +134,7 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
@@ -171,7 +171,7 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)

@@ -23,8 +23,8 @@ Jump If Attention Set / Clear {#jnatn}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JATN, flag clear for JNATN).
 
@@ -69,12 +69,12 @@ Jump If Counter Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JCTn, flag clear for JNCTn).
 
@@ -112,8 +112,8 @@ Jump If FIFO Block Wrap Set / Clear {#jnfbw}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met.
 
@@ -151,8 +151,8 @@ Jump If Interrupt Set / Clear {#jnint}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met.
 
@@ -193,8 +193,8 @@ Jump
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | PC | D[31] | D[30] | 4 |
-| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | D[31] | D[30] | PC | 4 |
+| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PC | 4 |
 
 
 **Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
@@ -231,7 +231,7 @@ Jump Relative
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | --- | --- | PC | 4 |
 
 
 **Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP1/2/3](#ijmp1)
@@ -281,14 +281,14 @@ Jump If Selectable Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JSEn, flag clear for JNSEn).
 
@@ -326,8 +326,8 @@ Jump If Pattern Match Event Set / Clear {#jnpat}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
@@ -363,8 +363,8 @@ Jump If CORDIC Empty Event Set / Clear {#jnqmt}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
@@ -401,8 +401,8 @@ Jump If Streamer Finished Event Set / Clear {#jnxfi}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
@@ -438,8 +438,8 @@ Jump If Streamer Empty Event Set / Clear {#jnxmt}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
@@ -475,8 +475,8 @@ Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
@@ -512,8 +512,8 @@ Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)

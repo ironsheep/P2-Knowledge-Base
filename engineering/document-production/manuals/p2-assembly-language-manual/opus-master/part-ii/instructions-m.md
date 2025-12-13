@@ -22,7 +22,7 @@ Merge Bits Of Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | --- | --- | D | 2 |
 
 
 **Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
@@ -55,7 +55,7 @@ Merge Bits Of Words
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | --- | --- | D | 2 |
 
 
 **Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
@@ -89,7 +89,7 @@ Mix Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
@@ -119,13 +119,13 @@ Modify C Flag
 
 **Result:** The C flag is set or cleared according to the modifier and current C and Z flag states.
 
-- c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
-- WC is an optional effect to make the modification visible to subsequent flag reads.
+- c is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the C flag.
+- WC must be specified for the C flag modification to take effect; without it, the result is computed but not written to the flag.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
+| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | cccc[\{C,Z\}] | --- | --- | 2 |
 
 
 **Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -140,7 +140,7 @@ Common modifier values enable useful operations: $F (binary 1111) always sets C 
 
 MODC is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
 
-If the WC effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
+The WC effect must be specified for the modification to take effect. Without WC, the instruction computes the result but does not write it to the C flag, rendering the instruction ineffective for most purposes.
 
 
 
@@ -157,14 +157,14 @@ Modify C And Z Flags
 
 **Result:** Both C and Z flags are set or cleared according to their modifiers and the current C and Z flag states.
 
-- c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
-- z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
-- WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
+- c is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the C flag.
+- z is a 4-bit modifier constant that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
+- WC, WZ, or WCZ must be specified for the flag modifications to take effect; without them, results are computed but not written.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
+| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
@@ -179,7 +179,7 @@ This instruction enables sophisticated conditional logic operations without bran
 
 Common uses include implementing state machines where both flags represent state bits, performing multi-condition tests after comparison operations, and creating compact conditional code sequences that would otherwise require multiple instructions or branches.
 
-If the WC, WZ, or WCZ effects are specified, the flag modifications become visible to subsequent instructions. Without these effects, the modifications may be used internally without affecting the architectural flag state visible to later code.
+The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
 
@@ -198,13 +198,13 @@ Modify Z Flag
 
 **Result:** The Z flag is set or cleared according to the modifier and current C and Z flag states.
 
-- z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
-- WZ is an optional effect to make the modification visible to subsequent flag reads.
+- z is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
+- WZ must be specified for the Z flag modification to take effect; without it, the result is computed but not written to the flag.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
+| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | zzzz[\{C,Z\}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -219,7 +219,7 @@ Common modifier values enable useful operations: $F (binary 1111) always sets Z 
 
 MODZ is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
 
-If the WZ effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
+The WZ effect must be specified for the modification to take effect. Without WZ, the instruction computes the result but does not write it to the Z flag, rendering the instruction ineffective for most purposes.
 
 
 
@@ -243,7 +243,7 @@ Move
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
+| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
@@ -301,7 +301,7 @@ Move Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
@@ -345,7 +345,7 @@ Multiply
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
 
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -398,7 +398,7 @@ Multiply Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
@@ -444,7 +444,7 @@ Multiply Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
 
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -504,10 +504,10 @@ Multiplex Flag To Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
 
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
@@ -560,7 +560,7 @@ Multiplex Nibbles
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
@@ -604,7 +604,7 @@ Multiplex Nits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
@@ -648,7 +648,7 @@ Multiplex Q
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)

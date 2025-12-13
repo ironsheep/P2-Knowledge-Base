@@ -24,7 +24,7 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
@@ -61,7 +61,7 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
@@ -97,7 +97,7 @@ Rotate Carry And Zero Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D | D[31] | D[30] | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D[31] | D[30] | D | 2 |
 
 
 **Related:** [RCZR](#rczr), [RCL](#rcl), [RCR](#rcr)
@@ -133,7 +133,7 @@ Rotate Carry And Zero Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D | D[1] | D[0] | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D[1] | D[0] | D | 2 |
 
 
 **Related:** [RCZL](#rczl), [RCL](#rcl), [RCR](#rcr)
@@ -310,7 +310,7 @@ Read From LUT
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
+| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | Result = 0 | D | 3 |
 
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
@@ -347,7 +347,7 @@ Read Smart Pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | Modal result | --- | D | 2 |
 
 
 **Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
@@ -542,7 +542,7 @@ Return From Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
@@ -579,7 +579,7 @@ Return Via PTRA Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 † |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | L[31] | L[30] | --- | 11...18 † |
 
 † **Timing varies by execution context:**
 
@@ -622,7 +622,7 @@ Return Via PTRB Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 † |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | L[31] | L[30] | --- | 11...18 † |
 
 † **Timing varies by execution context:**
 
@@ -702,7 +702,7 @@ Reverse Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | --- | --- | D | 2 |
 
 
 **Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
@@ -734,7 +734,7 @@ Read Byte Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | D | MSB of byte | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -770,7 +770,7 @@ Read Long Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | D | MSB of long | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
@@ -806,7 +806,7 @@ Read Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | D | 0 | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
@@ -842,7 +842,7 @@ Read Signed Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | D | MSB of value | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
@@ -876,7 +876,7 @@ Read Word Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | D | MSB of word | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -911,7 +911,7 @@ Expand RGB Color
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | --- | --- | D | 2 |
 
 
 **Related:** [RGBSQZ](#rgbsqz)
@@ -942,7 +942,7 @@ Squeeze RGB Color
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | --- | --- | D | 2 |
 
 
 **Related:** [RGBEXP](#rgbexp)
@@ -975,7 +975,7 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
@@ -1013,8 +1013,8 @@ Rotate Byte Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
@@ -1048,8 +1048,8 @@ Rotate Nibble Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
@@ -1083,8 +1083,8 @@ Rotate Word Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
@@ -1117,7 +1117,7 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
@@ -1154,7 +1154,7 @@ Read Smart Pin Without Acknowledge
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | Modal result | --- | D | 2 |
 
 
 **Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)

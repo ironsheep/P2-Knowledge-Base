@@ -23,7 +23,7 @@ Get Breakpoint Status
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | --- | --- | D | 2 |
 
 
 **Related:** [BRK](#brk), [COGBRK](#cogbrk)
@@ -65,8 +65,8 @@ Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
@@ -143,8 +143,8 @@ Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
@@ -177,7 +177,7 @@ Get FIFO Hub Pointer
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | --- | --- | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
@@ -211,7 +211,7 @@ Get CORDIC X Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | Result = 0 | D | 2...58 |
 
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -249,7 +249,7 @@ Get CORDIC Y Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | Result = 0 | D | 2...58 |
 
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -288,8 +288,8 @@ Get Random Value
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
-| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | RND[31] | RND[30], unique per cog | D | 2 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | RND[31] | RND[30], unique per cog | --- | 2 |
 
 
 **Related:** [SETQ](#setq), [SETQ2](#setq2)
@@ -328,7 +328,7 @@ Get Oscilloscope Samples
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | --- | --- | D | 2 |
 
 
 **Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
@@ -366,8 +366,8 @@ Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
@@ -400,7 +400,7 @@ Get Goertzel Accumulators
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | --- | --- | D | 2 |
 
 
 **Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)

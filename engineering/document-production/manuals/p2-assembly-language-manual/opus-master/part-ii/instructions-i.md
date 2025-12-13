@@ -24,8 +24,8 @@ Increment and Jump If Zero {#ijnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -69,7 +69,7 @@ Increment Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
+| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D was S (wrapped) | Result = 0 | D | 2 |
 
 
 **Related:** [DECMOD](#decmod), [ADDCT1/2/3](#addct1)

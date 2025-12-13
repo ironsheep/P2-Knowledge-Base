@@ -155,7 +155,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 
 ### 1.4.3 LUT Sharing Between COGs
 
-The `SETLUTS` instruction enables LUT sharing between COG pairs. Adjacent COGs (0-1, 2-3, 4-5, 6-7) can share their LUT memory, effectively giving one COG 1024 longs of LUT space while the paired COG uses the shared space as well. This feature supports applications where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.5 The Execution Pipeline

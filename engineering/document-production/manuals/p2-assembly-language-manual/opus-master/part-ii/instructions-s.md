@@ -24,7 +24,7 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
@@ -59,7 +59,7 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
@@ -94,7 +94,7 @@ Scale
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Product = 0 | 2 |
+| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | Product = 0 | --- | 2 |
 
 
 **Related:** [SCAS](#scas)
@@ -130,7 +130,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Result = 0 | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Result = 0 | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -162,8 +162,8 @@ Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and byte ID specified by prior ALTSB instruction.
@@ -344,7 +344,7 @@ Set Destination Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
@@ -471,8 +471,8 @@ Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and nibble ID specified by prior ALTSN instruction.
@@ -666,7 +666,7 @@ Set Result Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
@@ -698,7 +698,7 @@ Set Source Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
@@ -798,8 +798,8 @@ Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and word ID specified by prior ALTSW instruction.
@@ -863,7 +863,7 @@ Seuss Forward
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | --- | --- | D | 2 |
 
 
 **Related:** [SEUSSR](#seussr)
@@ -892,7 +892,7 @@ Seuss Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | --- | --- | D | 2 |
 
 
 **Related:** [SEUSSF](#seussf)
@@ -923,7 +923,7 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
@@ -958,7 +958,7 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
@@ -993,7 +993,7 @@ Sign Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
+| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | Result = 0 | D | 2 |
 
 
 **Related:** [ZEROX](#zerox)
@@ -1102,7 +1102,7 @@ Split Bits To Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | --- | --- | D | 2 |
 
 
 **Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
@@ -1131,7 +1131,7 @@ Split Bits To Words
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | --- | --- | D | 2 |
 
 
 **Related:** [SPLITB](#splitb), [MERGEW](#mergew)
@@ -1195,7 +1195,7 @@ Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
+| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | Result = 0 | D | 2 |
 
 
 **Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
@@ -1230,7 +1230,7 @@ Subtract Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2 |
+| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | Result = 0 | D | 2 |
 
 
 **Related:** [SUB](#sub)
@@ -1261,7 +1261,7 @@ Subtract Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2 |
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of (D - S) | Result = 0 | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
@@ -1292,7 +1292,7 @@ Subtract Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of D-(S+C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
@@ -1323,7 +1323,7 @@ Subtract Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2 |
+| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result = 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBSX](#subsx)
@@ -1357,10 +1357,10 @@ Conditional Sum
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
 
 
 **Explanation:**

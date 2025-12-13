@@ -63,7 +63,7 @@ Add Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
 
 
 **Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
@@ -144,7 +144,7 @@ Add Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [MULPIX](#mulpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
@@ -179,7 +179,7 @@ Add Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
+| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D + S) | Result = 0 | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
@@ -218,7 +218,7 @@ Add Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D+S+C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
@@ -255,7 +255,7 @@ Add Unsigned Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S + C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
@@ -851,7 +851,7 @@ Bitwise And
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
 
 
 **Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
@@ -886,7 +886,7 @@ And Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)

@@ -1,5 +1,33 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v1.2.0 (2025-12-13)
+
+**Community Feedback Release** - Additional corrections from user review of v1.0.0, addressing issues not caught in the v1.1.0 audit pass.
+
+### Part I: Architectural Foundation
+
+#### Chapter 1 - Execution Model
+- **LUT Sharing**: Corrected shared LUT capacity from 1024 longs to 512 longs (each cog contributes its 512-long LUT for a combined 1024-long shared space, but each cog can only access 512 longs at a time)
+
+#### Chapter 3 - Flags
+- **Conditional Execution Timing**: Corrected IF_ prefix timing from 1 cycle to 2 cycles when WC/WZ/WCZ effects are not used
+- **MODC/MODZ/MODCZ**: Added requirement that WC, WZ, or WCZ effect must be specified; clarified register-only D operand (no immediates); corrected syntax examples
+
+### Part II: Instruction Reference
+
+#### Encoding Table Column Corrections
+- **Systematic fix across 26 files (~380 table rows)**: C, Z, and Result columns were shifted left by one position throughout. All instruction encoding tables now correctly show:
+  - C column: Flag effect (e.g., "carry of (D + S)", "S[31]", "Parity")
+  - Z column: Flag effect (e.g., "Result = 0", "Zero")
+  - Result column: Destination register (e.g., "D", "PC", "---")
+
+#### MODC/MODZ/MODCZ (instructions-m.md)
+- Corrected syntax to show WC/WZ/WCZ as required, not optional
+- Updated encoding table column values
+- Enhanced explanation of flag modification behavior
+
+---
+
 ## v1.1.0 (2025-12-12)
 
 **Audit-Verified Release** - Comprehensive audit by Claude Opus 4.5 with 8 parallel agents verified ~19,600 lines across 41 files against authoritative sources (P2 Instructions v35 CSV, Silicon Documentation v35).
