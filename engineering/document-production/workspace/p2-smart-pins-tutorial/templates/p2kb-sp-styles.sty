@@ -78,18 +78,19 @@
 
 % ==================== SMART PINS 3-BLOCK COLOR SYSTEM ====================
 % Replace foundation's generic Shaded environment with 3 specialized block types
-% Configuration (blue), Spin2 (green), PASM2 (De Silva yellow)
+% Configuration (blue-gray), Spin2 (blue), PASM2 (green)
+% v1.3: IDE-aligned colors matching Propeller Tool/Spin Tools conventions
 % Includes accessibility features: distinct borders and backgrounds
 
-% Define Smart Pins color palette (muted pastels for less dominance)
-\definecolor{smartpins-config-bg}{HTML}{F5F9FC}      % Very soft blue-gray (was E6F3FF)
-\definecolor{smartpins-config-border}{HTML}{7FA8C9}   % Muted blue border (was 4A90E2)
-\definecolor{smartpins-spin2-bg}{HTML}{F8FCF8}       % Very soft green-gray (was F0FFF0)  
-\definecolor{smartpins-spin2-border}{HTML}{85B985}    % Muted green border (was 5CB85C)
-\definecolor{smartpins-pasm2-bg}{HTML}{FFFEF5}       % Very soft cream (was FFFACD)
-\definecolor{smartpins-pasm2-border}{HTML}{D4B896}    % Muted tan border (was F0AD4E)
-\definecolor{smartpins-antipattern-bg}{HTML}{FFF5F5}  % Very soft pink (was FFE6E6)
-\definecolor{smartpins-antipattern-border}{HTML}{C08080} % Muted rose border (was D9534F)
+% Define Smart Pins color palette (IDE-aligned for Spin2/PASM2)
+\definecolor{smartpins-config-bg}{HTML}{F5F9FC}      % Very soft blue-gray
+\definecolor{smartpins-config-border}{HTML}{7FA8C9}   % Muted blue border
+\definecolor{smartpins-spin2-bg}{HTML}{E3F2FD}       % Light blue - IDE-aligned
+\definecolor{smartpins-spin2-border}{HTML}{1976D2}    % Blue border - IDE-aligned
+\definecolor{smartpins-pasm2-bg}{HTML}{EBFCEB}       % Light green HSB(120,7,99) - IDE-aligned
+\definecolor{smartpins-pasm2-border}{HTML}{4CB04C}    % Green border HSB(120,57,69) - IDE-aligned
+\definecolor{smartpins-antipattern-bg}{HTML}{FFF5F5}  % Very soft pink
+\definecolor{smartpins-antipattern-border}{HTML}{C08080} % Muted rose border
 
 % Configuration Block Environment (blue theme)
 \newtcolorbox{ConfigBlock}{%
@@ -110,7 +111,7 @@
   breakable
 }
 
-% Spin2 Block Environment (green theme)
+% Spin2 Block Environment (blue theme - IDE-aligned)
 \newtcolorbox{Spin2Block}{%
   boxrule=2pt,
   colback=smartpins-spin2-bg,
@@ -129,7 +130,7 @@
   breakable
 }
 
-% PASM2 Block Environment (De Silva yellow theme)
+% PASM2 Block Environment (green theme - IDE-aligned)
 \newtcolorbox{PASM2Block}{%
   boxrule=2pt,
   colback=smartpins-pasm2-bg,
