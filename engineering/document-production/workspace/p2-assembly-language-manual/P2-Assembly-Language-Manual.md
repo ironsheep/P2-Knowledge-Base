@@ -15806,7 +15806,7 @@ table   long    1, 2, 3         ' Data table at specific address
 - ORG affects cog RAM addresses only (range 0-$1FF)
 - For hub RAM addresses, use ORGH
 - To fill gaps between addresses with zeros, use ORGF
-- ORG simply sets the address counter without generating any bytes
+- ORG sets the address counter without generating any bytes
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -15822,7 +15822,7 @@ Set Origin With Fill
 Advances to specified address, filling with zeros.
 :::
 
-Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which simply sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
+Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which only sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
 
 #### Syntax
 ```pasm
@@ -15835,7 +15835,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 | address | Target address to advance to (cog 0-$1FF or hub address) |
 
 #### Usage
-Use ORGF when you need contiguous binary output with guaranteed zero-filled gaps. This ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
+Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
 
 #### Example
 ```pasm
@@ -16155,7 +16155,7 @@ PUB ShowText() | ptr, len
 #### Related Directives
 - [BYTE](#byte) — Declare individual byte data
 - [LONG](#long) — Declare long data
-- [ORGH](#orgh) — Set hub origin (FILE data typically resides in hub RAM)
+- [ORGH](#orgh) — Set hub origin (FILE data resides in hub RAM)
 
 
 
@@ -16231,7 +16231,7 @@ Declare byte data with compile-time range validation. Works identically to BYTE 
 The combined range allows both signed (-128 to +127) and unsigned (0 to 255) byte values.
 
 #### Usage
-Use BYTEFIT instead of BYTE when you need compile-time verification that values fit in 8 bits. This catches overflow errors during assembly rather than silently truncating values. BYTEFIT is particularly useful when values come from calculations or constants that might change.
+Use BYTEFIT instead of BYTE for compile-time verification that values fit in 8 bits. BYTEFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
 ```pasm
@@ -16303,7 +16303,7 @@ Declare word data with compile-time range validation. Works identically to WORD 
 The combined range allows both signed (-32768 to +32767) and unsigned (0 to 65535) word values.
 
 #### Usage
-Use WORDFIT instead of WORD when you need compile-time verification that values fit in 16 bits. This catches overflow errors during assembly rather than silently truncating values. WORDFIT is particularly useful when values come from calculations or constants that might change.
+Use WORDFIT instead of WORD for compile-time verification that values fit in 16 bits. WORDFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
 ```pasm
@@ -16386,7 +16386,7 @@ DAT
             long    $44332211
 ```
 
-This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
+This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
 ```{=latex}
 \AlignLBeforeDiagram
@@ -16463,7 +16463,7 @@ DAT
             long    $44332211
 ```
 
-This data may be emitted into the Hub memory image like below; the actual data start and alignment will vary depending on the code and data that precede it. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
+This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
 ```{=latex}
 \AlignWBeforeDiagram
