@@ -9,6 +9,10 @@
 #### Chapter 1 - Execution Model
 - **LUT Sharing**: Corrected shared LUT capacity from 1024 longs to 512 longs (each cog contributes its 512-long LUT for a combined 1024-long shared space, but each cog can only access 512 longs at a time)
 
+#### Chapter 2 - Instruction Format
+- **Section 2.4.1 DIRZ/DIRNZ example table**: Fixed C column (`D` → `DIRx`), Result column (`Orig bit` → `DIR bit`), CZI column (`CZ0` → `CZL`)
+- **Section 2.8.3 ADD example table**: Fixed column shift - C column (`D` → `carry of (D + S)`), Z column (`carry of (D + S)` → `Result = 0`), Result column (`Result = 0` → `D`)
+
 #### Chapter 3 - Flags
 - **Conditional Execution Timing**: Corrected IF_ prefix timing from 1 cycle to 2 cycles when WC/WZ/WCZ effects are not used
 - **MODC/MODZ/MODCZ**: Added requirement that WC, WZ, or WCZ effect must be specified; clarified register-only D operand (no immediates); corrected syntax examples

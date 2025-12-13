@@ -340,9 +340,9 @@ When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction ge
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001000100 | D | --- | Orig bit | 2 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001000101 | D | --- | Orig bit | 2 |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
 
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
@@ -581,8 +581,8 @@ Consider the ADD instruction entry:
 
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
-|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
+|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
 
 
 From this entry:
