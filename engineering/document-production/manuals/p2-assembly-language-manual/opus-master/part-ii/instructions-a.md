@@ -358,8 +358,8 @@ Alter Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -406,8 +406,8 @@ Alter Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -451,8 +451,8 @@ Alter Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -497,8 +497,8 @@ Alter Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -543,8 +543,8 @@ Alter Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -589,8 +589,8 @@ Alter Instruction
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
+| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
@@ -629,8 +629,8 @@ Alter Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -673,8 +673,8 @@ Alter Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -715,8 +715,8 @@ Alter Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -759,8 +759,8 @@ Alter Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -805,8 +805,8 @@ Alter Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -997,7 +997,7 @@ Augment Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
+| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | --- | 2 |
 
 
 **Related:** [AUGS](#augs)
@@ -1033,7 +1033,7 @@ Augment Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
+| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | --- | 2 |
 
 
 **Related:** [AUGD](#augd)

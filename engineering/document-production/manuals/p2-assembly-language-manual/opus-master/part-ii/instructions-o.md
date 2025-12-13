@@ -158,7 +158,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
@@ -196,7 +196,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
@@ -234,7 +234,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)

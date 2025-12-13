@@ -148,7 +148,7 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -184,7 +184,7 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -220,7 +220,7 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -508,7 +508,7 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
@@ -546,7 +546,7 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
@@ -586,7 +586,7 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)

@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.1 - Technical Review\par}
+{\large\color{blue}Version 1.2\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -5027,8 +5027,8 @@ Alter Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5075,8 +5075,8 @@ Alter Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5120,8 +5120,8 @@ Alter Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5166,8 +5166,8 @@ Alter Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5212,8 +5212,8 @@ Alter Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5258,8 +5258,8 @@ Alter Instruction
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
+| EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
@@ -5298,8 +5298,8 @@ Alter Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5342,8 +5342,8 @@ Alter Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5384,8 +5384,8 @@ Alter Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5428,8 +5428,8 @@ Alter Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5474,8 +5474,8 @@ Alter Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | D\textsuperscript{1} | --- | --- | 2 |
-| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | D\textsuperscript{1} | --- | --- | 2 |
+| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5666,7 +5666,7 @@ Augment Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | Hidden D Queue | --- | --- | 2 |
+| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | --- | 2 |
 
 
 **Related:** [AUGS](#augs)
@@ -5702,7 +5702,7 @@ Augment Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | Hidden S Queue | --- | --- | 2 |
+| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | --- | 2 |
 
 
 **Related:** [AUGD](#augd)
@@ -7078,7 +7078,7 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -7114,7 +7114,7 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -7150,7 +7150,7 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | DIRx | DIR bit | 2 |
 
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
@@ -7438,7 +7438,7 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
@@ -7476,7 +7476,7 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
@@ -7516,7 +7516,7 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
 
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
@@ -9370,7 +9370,7 @@ Release Lock
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | LOCK status | --- | --- | 2...9, +2 if result |
 
 
 **Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)
@@ -10534,7 +10534,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
@@ -10572,7 +10572,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
@@ -10610,7 +10610,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | --- | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)

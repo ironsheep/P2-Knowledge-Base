@@ -16,10 +16,17 @@
 
 **Encoding Table Corrections:**
 - Systematic fix across 26 files (~380 rows): C, Z, Result columns realigned
+- ALT instructions (11 total): C/Z/Result columns corrected; CZI bits are sub-opcode selectors, not flag controls
+- ALTI syntax 2: Result column corrected (D, not ---)
+- AUGD/AUGS: C column cleared (no flag effects)
 - MODC/MODZ/MODCZ: Syntax corrected to show WC/WZ/WCZ as required
 
 **Flag Effect Fixes:**
 - FLT* instructions: C/Z flags corrected to "Original OUTx base bit"
+- DIR* instructions (DIRH, DIRL, DIRNOT): Z flag added (C,Z = DIRx)
+- DRV* instructions (DRVH, DRVL, DRVNOT): Z flag added (C,Z = DIRx* + OUTx)
+- OUT* instructions (OUTH, OUTL, OUTNOT): C flag added (C,Z = Original OUTx base bit)
+- LOCKREL: C flag added (LOCK status)
 - WAITX: Timing corrected to 2 + Dest; added randomized delay documentation
 
 ### Directives

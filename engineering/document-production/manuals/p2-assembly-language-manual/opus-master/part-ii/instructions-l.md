@@ -97,7 +97,7 @@ Release Lock
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | --- | --- | --- | 2...9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000111 | LOCK status | --- | --- | 2...9, +2 if result |
 
 
 **Related:** [LOCKTRY](#locktry), [LOCKNEW](#locknew), [LOCKRET](#lockret), [COGID](#cogid)

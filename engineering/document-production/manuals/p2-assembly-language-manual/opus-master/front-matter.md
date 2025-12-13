@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.1 - Technical Review\par}
+{\large\color{blue}Version 1.2\par}
 
 \vfill
 \begin{tcolorbox}[

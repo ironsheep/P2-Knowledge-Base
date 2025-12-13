@@ -1,13 +1,18 @@
 % P2KB PASM2 Reference Manual Diagrams Package
 % TikZ diagrams for P2 Assembly Language Reference Manual
 % Author: Iron Sheep Productions, LLC
-% Version: 1.0
+% Version: 1.1
 %
 % Based on p2kb-desilva-diagrams.sty with additions for PASM2 manual
 % Provides all diagrams from DIAGRAM-INVENTORY.md
+%
+% v1.1 (2025-12-13): Replaced EggBeaterDiagram and EightCogOverviewDiagram
+%   with new unified Eggbeater diagrams showing circular COG layout:
+%   - EightCogEggbeaterDiagram: Full diagram with LUT sharing arcs
+%   - EggbeaterHubTimingDiagram: Simplified for Hub timing section
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{p2kb-pasm2-diagrams}[2025/12/01 P2KB PASM2 Diagrams v1.0]
+\ProvidesPackage{p2kb-pasm2-diagrams}[2025/12/13 P2KB PASM2 Diagrams v1.1]
 
 \RequirePackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit}
@@ -174,69 +179,50 @@
 \end{center}
 }
 
-% ==================== EGG BEATER DIAGRAM (from DeSilva) ====================
-% Compares P1 sequential hub access vs P2 egg beater simultaneous access
-\newcommand{\EggBeaterDiagram}{%
+% ==================== EGGBEATER HUB TIMING DIAGRAM ====================
+% Simplified eggbeater diagram for Hub timing section (4.3.1)
+% Shows 8 COGs around central Hub without LUT sharing details
+% Same visual style as EightCogEggbeaterDiagram for consistency
+\newcommand{\EggbeaterHubTimingDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
-    cogbox/.style={
-        rectangle,
+    cogcircle/.style={
+        circle,
         draw=diagram-border,
-        fill=diagram-highlight,
-        minimum width=0.7cm,
-        minimum height=0.5cm,
+        fill=mem-cog,
+        minimum size=1.3cm,
         align=center,
-        font=\footnotesize\bfseries
+        font=\scriptsize\bfseries
     },
     annotation/.style={
-        font=\small\itshape,
+        font=\scriptsize,
         text=diagram-text
     },
-    linestyle/.style={
+    spokestyle/.style={
         thick,
-        draw=diagram-border
+        diagram-border
     }
 ]
 
-% === P1 Traditional (Left side) ===
-\node[font=\bfseries] at (-4, 5) {P1 Traditional:};
+% Central Hub as a circle
+\draw[diagram-border, thick, fill=mem-hub] (0, 0) circle (1.0cm);
+\node[font=\footnotesize\bfseries] at (0, 0) {HUB};
 
-% COGs in a circle for P1
-\foreach \i in {0,...,7} {
-    \pgfmathsetmacro{\angle}{90 - \i * 45}
-    \node[cogbox] (p1cog\i) at ({-4 + 2.0*cos(\angle)}, {2.0 + 2.0*sin(\angle)}) {\i};
-}
-
-% Lines connecting COGs in ring
-\foreach \i in {0,...,6} {
-    \pgfmathtruncatemacro{\next}{\i + 1}
-    \draw[linestyle, gray] (p1cog\i) -- (p1cog\next);
-}
-\draw[linestyle, gray] (p1cog7) -- (p1cog0);
-
-% P1 annotation
-\node[annotation, text width=3cm, align=center] at (-4, -1.5) {COGs take turns\\Each waits up to\\16 clocks};
-
-% === P2 Egg Beater (Right side) ===
-\node[font=\bfseries] at (4, 5) {P2 Egg Beater:};
-
-% Central hub as a CIRCLE
-\draw[diagram-border, thick, fill=white] (4, 2.0) circle (0.9cm);
-\node[font=\footnotesize\bfseries] at (4, 2.0) {HUB};
-
-% Rotating arrow inside hub
+% Clockwise rotating arrow inside hub to show rotation
 \draw[thick, green!50!black, ->]
-    ([shift={(45:0.5cm)}]4,2.0) arc (45:-270:0.5cm);
+    ([shift={(60:0.6cm)}]0,0) arc (60:-240:0.6cm);
 
-% COGs around the hub
+% 8 COGs arranged in a ring - COG 0 at top, clockwise
 \foreach \i in {0,...,7} {
     \pgfmathsetmacro{\angle}{90 - \i * 45}
-    \node[cogbox] (p2cog\i) at ({4 + 2.2*cos(\angle)}, {2.0 + 2.2*sin(\angle)}) {\i};
-    \draw[linestyle, green!50!black] (p2cog\i) -- ({4 + 0.95*cos(\angle)}, {2.0 + 0.95*sin(\angle)});
+    \node[cogcircle] (cog\i) at ({\angle}:2.7cm) {COG \i};
+    % Spoke lines from COGs to hub edge (no arrows)
+    \draw[spokestyle] (cog\i) -- ({\angle}:1.05cm);
 }
 
-% P2 annotation
-\node[annotation, text width=3cm, align=center] at (4, -1.5) {All COGs access\\simultaneously!\\Max 8 clocks wait};
+% Single annotation - Hub access timing
+\node[annotation, text width=10cm, align=center] at (0, -4.3)
+    {All COGs access the 512KB Hub memory simultaneously --- max 8 clocks wait};
 
 \end{tikzpicture}
 \end{center}
@@ -331,95 +317,97 @@
 \end{center}
 }
 
-% ==================== EIGHT-COG OVERVIEW DIAGRAM (NEW) ====================
-% D1.1: 8 COGs connected to shared Hub (high-level architecture)
-% Each COG has its own 2KB RAM + 2KB LUT (internal)
-% Adjacent cog pairs can mirror LUT writes via SETLUTS instruction
-\newcommand{\EightCogOverviewDiagram}{%
+% ==================== EIGHT-COG EGGBEATER DIAGRAM ====================
+% Full architecture diagram with LUT sharing visualization
+% Shows 8 COGs around central Hub with bidirectional LUT write arcs
+% Used in Part I for architecture overview
+\newcommand{\EightCogEggbeaterDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
-    cogbox/.style={
-        rectangle,
+    cogcircle/.style={
+        circle,
         draw=diagram-border,
         fill=mem-cog,
-        minimum width=2.0cm,
-        minimum height=1.1cm,
+        minimum size=1.3cm,
         align=center,
-        font=\small\bfseries
-    },
-    hubbox/.style={
-        rectangle,
-        draw=diagram-border,
-        fill=mem-hub,
-        minimum width=3.0cm,
-        minimum height=2.0cm,
-        align=center,
-        font=\bfseries
+        font=\scriptsize\bfseries
     },
     annotation/.style={
         font=\scriptsize,
         text=diagram-text
     },
-    linestyle/.style={
+    spokestyle/.style={
         thick,
-        draw=diagram-border,
-        <->
+        diagram-border
     },
-    lutwrite/.style={
+    lutarc/.style={
         thick,
-        draw=diagram-accent,
         dotted,
-        ->
-    },
-    lutlabel/.style={
-        font=\tiny,
-        text=diagram-accent
+        diagram-accent,
+        ->,
+        >=Stealth
     }
 ]
 
-% Central Hub
-\node[hubbox] (hub) at (0, 0) {HUB\\512KB\\Shared RAM};
+% Central Hub as a circle
+\draw[diagram-border, thick, fill=mem-hub] (0, 0) circle (1.0cm);
+\node[font=\footnotesize\bfseries] at (0, 0) {HUB};
 
-% 8 COGs arranged in a ring around hub
-% Each COG now shows both RAM (2KB) and LUT (2KB) as internal
-\node[cogbox] (cog0) at (-3.2, 1.3) {COG 0\\2KB+LUT 2KB};
-\node[cogbox] (cog1) at (-1.3, 3.2) {COG 1\\2KB+LUT 2KB};
-\node[cogbox] (cog2) at (1.3, 3.2) {COG 2\\2KB+LUT 2KB};
-\node[cogbox] (cog3) at (3.2, 1.3) {COG 3\\2KB+LUT 2KB};
-\node[cogbox] (cog4) at (3.2, -1.3) {COG 4\\2KB+LUT 2KB};
-\node[cogbox] (cog5) at (1.3, -3.2) {COG 5\\2KB+LUT 2KB};
-\node[cogbox] (cog6) at (-1.3, -3.2) {COG 6\\2KB+LUT 2KB};
-\node[cogbox] (cog7) at (-3.2, -1.3) {COG 7\\2KB+LUT 2KB};
+% Clockwise rotating arrow inside hub to show rotation
+\draw[thick, green!50!black, ->]
+    ([shift={(60:0.6cm)}]0,0) arc (60:-240:0.6cm);
 
-% LUT write mirroring arrows between adjacent cog pairs
-% Two separate unidirectional arrows, evenly spaced on box edges
-% COG 0 -> COG 1 and COG 1 -> COG 0 (upper-left pair)
-\draw[lutwrite] ([xshift=3pt]cog0.north east) to[bend left=20] node[lutlabel, above, sloped] {LUT writes} ([yshift=-3pt]cog1.south west);
-\draw[lutwrite] ([yshift=3pt]cog1.south west) to[bend left=20] ([xshift=-3pt]cog0.north east);
-% COG 2 -> COG 3 and COG 3 -> COG 2 (upper-right pair)
-\draw[lutwrite] ([yshift=-3pt]cog2.north east) to[bend left=20] node[lutlabel, above, sloped] {LUT writes} ([xshift=-3pt]cog3.north west);
-\draw[lutwrite] ([xshift=3pt]cog3.north west) to[bend left=20] ([yshift=3pt]cog2.north east);
-% COG 4 -> COG 5 and COG 5 -> COG 4 (lower-right pair)
-\draw[lutwrite] ([xshift=-3pt]cog4.south east) to[bend left=20] node[lutlabel, below, sloped] {LUT writes} ([yshift=3pt]cog5.north east);
-\draw[lutwrite] ([yshift=-3pt]cog5.north east) to[bend left=20] ([xshift=3pt]cog4.south east);
-% COG 6 -> COG 7 and COG 7 -> COG 6 (lower-left pair)
-\draw[lutwrite] ([yshift=3pt]cog6.south west) to[bend left=20] node[lutlabel, below, sloped] {LUT writes} ([xshift=3pt]cog7.south east);
-\draw[lutwrite] ([xshift=-3pt]cog7.south east) to[bend left=20] ([yshift=-3pt]cog6.south west);
+% 8 COGs arranged in a ring - COG 0 at top, clockwise
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogcircle] (cog\i) at ({\angle}:2.7cm) {COG \i};
+    % Spoke lines from COGs to hub edge (no arrows)
+    \draw[spokestyle] (cog\i) -- ({\angle}:1.05cm);
+}
 
-% Hub connection lines (bidirectional arrows)
-\draw[linestyle] (cog0) -- (hub);
-\draw[linestyle] (cog1) -- (hub);
-\draw[linestyle] (cog2) -- (hub);
-\draw[linestyle] (cog3) -- (hub);
-\draw[linestyle] (cog4) -- (hub);
-\draw[linestyle] (cog5) -- (hub);
-\draw[linestyle] (cog6) -- (hub);
-\draw[linestyle] (cog7) -- (hub);
+% LUT sharing arrows - concentric arcs between adjacent pairs
+% Both arcs centered at Hub (0,0) with different radii
+% COG ring radius: 2.7cm, COG circle radius: 0.65cm
+% Arc radii moved closer: outer=2.82cm, inner=2.58cm (1/3 closer each)
+% Angular offset: arctan(0.65/2.7) ≈ 14° trimmed from each endpoint
+% Outer arc: lower→higher COG (clockwise)
+% Inner arc: higher→lower COG (counter-clockwise)
 
-% Annotations
-\node[annotation] at (0, -5.0) {Each COG: Independent processor with 2KB RAM + 2KB LUT (internal)};
-\node[annotation] at (0, -5.5) {LUT writes: SETLUTS enables write mirroring between adjacent cog pairs};
-\node[annotation] at (0, -6.0) {Hub: 512KB shared memory accessible by all COGs};
+% COG 0 (90°) ↔ COG 1 (45°) - trim 14° from each end
+\draw[lutarc] (76:2.82) arc (76:59:2.82);    % Outer: 0→1
+\draw[lutarc] (59:2.58) arc (59:76:2.58);    % Inner: 1→0
+
+% COG 2 (0°) ↔ COG 3 (-45°) - trim 14° from each end
+\draw[lutarc] (-14:2.82) arc (-14:-31:2.82);     % Outer: 2→3
+\draw[lutarc] (-31:2.58) arc (-31:-14:2.58);     % Inner: 3→2
+
+% COG 4 (-90°) ↔ COG 5 (-135°) - trim 14° from each end
+\draw[lutarc] (-104:2.82) arc (-104:-121:2.82);   % Outer: 4→5
+\draw[lutarc] (-121:2.58) arc (-121:-104:2.58);   % Inner: 5→4
+
+% COG 6 (180°) ↔ COG 7 (135°) - trim 14° from each end
+\draw[lutarc] (166:2.82) arc (166:149:2.82);    % Outer: 6→7
+\draw[lutarc] (149:2.58) arc (149:166:2.58);    % Inner: 7→6
+
+% Callout arrow pointing to COG 6↔7 arc pair (left side, prominent)
+% Black arrow pointing down-right to outside of arc pair
+% Text block: two lines, centered, orange to match arcs
+% Position: top of text at COG 7 centerline (y ≈ 1.9cm)
+\node[font=\scriptsize\bfseries, text=diagram-accent, anchor=south east, align=center] at (-4.0, 1.9)
+    {LUT write\\sharing};
+\draw[thick, black, ->] (-4.0, 1.7) -- (157.5:3.1);
+
+% Annotations below diagram - scriptsize font, 10cm wide, 0.45cm spacing
+\node[annotation, text width=10cm, align=center] at (0, -4.3)
+    {All COGs access Hub simultaneously --- Max 8 clocks wait};
+\node[annotation, text width=10cm, align=center] at (0, -4.75)
+    {Each COG: Independent processor with 2KB RAM + 2KB LUT};
+\node[annotation, text width=10cm, align=center] at (0, -5.2)
+    {\textcolor{diagram-accent}{\textbf{LUT sharing}}: SETLUTS enables receiving partner's writes};
+\node[annotation, text width=10cm, align=center] at (0, -5.65)
+    {Both directions = 2KB shared memory between COG pair};
+\node[annotation, text width=10cm, align=center] at (0, -6.1)
+    {Hub: 512KB shared memory accessible by all COGs};
 
 \end{tikzpicture}
 \end{center}
@@ -1496,19 +1484,18 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (without ALIGNL - word and long still auto-align)
+% Data cells (without ALIGNL - everything packs tightly, NO auto-alignment)
 % B0: byte $11
-% B1: $00 (word auto-aligns to word boundary at B2)
-% B2-B3: word $BBAA in little-endian: $AA, $BB
-% B4-B7: long $44332211 in little-endian: $11, $22, $33, $44
+% B1-B2: word $BBAA in little-endian: $AA, $BB (misaligned at B1)
+% B3-B6: long $44332211 in little-endian: $11, $22, $33, $44 (misaligned at B3)
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
-\node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
-\node[cell, fill=align-data] at (2*\cw, 0) {\$AA};
-\node[cell, fill=align-data] at (3*\cw, 0) {\$BB};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$11};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (7*\cw, 0) {\$44};
+\node[cell, fill=align-data] at (1*\cw, 0) {\$AA};
+\node[cell, fill=align-data] at (2*\cw, 0) {\$BB};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$44};
+\node[cell, fill=align-empty] at (7*\cw, 0) {--};
 \node[cell, fill=align-empty] at (8*\cw, 0) {--};
 \node[cell, fill=align-empty] at (9*\cw, 0) {--};
 \node[cell, fill=align-empty] at (10*\cw, 0) {--};
@@ -1572,24 +1559,23 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells with ALIGNL applied
+% Data cells with ALIGNL applied (only ALIGNL adds padding, no auto-alignment)
 % B0: byte $11
 % B1-B3: ALIGNL padding (3 bytes to reach L1)
-% B4-B5: word $BBAA in little-endian: $AA, $BB
-% B6-B7: long auto-alignment padding (2 bytes to reach L2)
-% B8-B11: long $44332211 in little-endian: $11, $22, $33, $44
+% B4-B5: word $BBAA in little-endian: $AA, $BB (T2 now at L1 boundary)
+% B6-B9: long $44332211 in little-endian: $11, $22, $33, $44 (packs after word, misaligned at B6)
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
 \node[cell, fill=align-pad] at (1*\cw, 0) {\$00};
 \node[cell, fill=align-pad] at (2*\cw, 0) {\$00};
 \node[cell, fill=align-pad] at (3*\cw, 0) {\$00};
 \node[cell, fill=align-data] at (4*\cw, 0) {\$AA};
 \node[cell, fill=align-data] at (5*\cw, 0) {\$BB};
-\node[cell, fill=align-pad] at (6*\cw, 0) {\$00};
-\node[cell, fill=align-pad] at (7*\cw, 0) {\$00};
-\node[cell, fill=align-data] at (8*\cw, 0) {\$11};
-\node[cell, fill=align-data] at (9*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (10*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (11*\cw, 0) {\$44};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (7*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (8*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (9*\cw, 0) {\$44};
+\node[cell, fill=align-empty] at (10*\cw, 0) {--};
+\node[cell, fill=align-empty] at (11*\cw, 0) {--};
 
 \end{tikzpicture}
 \end{center}
@@ -1648,19 +1634,18 @@ Each level has its own IJMP/IRET register pair.
 \node[boundary] at (10*\cw, 0.6) {B10};
 \node[boundary] at (11*\cw, 0.6) {B11};
 
-% Data cells (without ALIGNW - bytes pack tightly, long auto-aligns)
+% Data cells (without ALIGNW - everything packs tightly, NO auto-alignment)
 % B0: byte $11 (T1)
-% B1-B2: bytes $AA, $BB (T2 - no alignment, packed after T1)
-% B3: $00 (long auto-aligns to long boundary at B4)
-% B4-B7: long $44332211 in little-endian: $11, $22, $33, $44
+% B1-B2: bytes $AA, $BB (T2 - packed after T1)
+% B3-B6: long $44332211 in little-endian: $11, $22, $33, $44 (misaligned at B3)
 \node[cell, fill=align-data] at (0*\cw, 0) {\$11};
 \node[cell, fill=align-data] at (1*\cw, 0) {\$AA};
 \node[cell, fill=align-data] at (2*\cw, 0) {\$BB};
-\node[cell, fill=align-pad] at (3*\cw, 0) {\$00};
-\node[cell, fill=align-data] at (4*\cw, 0) {\$11};
-\node[cell, fill=align-data] at (5*\cw, 0) {\$22};
-\node[cell, fill=align-data] at (6*\cw, 0) {\$33};
-\node[cell, fill=align-data] at (7*\cw, 0) {\$44};
+\node[cell, fill=align-data] at (3*\cw, 0) {\$11};
+\node[cell, fill=align-data] at (4*\cw, 0) {\$22};
+\node[cell, fill=align-data] at (5*\cw, 0) {\$33};
+\node[cell, fill=align-data] at (6*\cw, 0) {\$44};
+\node[cell, fill=align-empty] at (7*\cw, 0) {--};
 \node[cell, fill=align-empty] at (8*\cw, 0) {--};
 \node[cell, fill=align-empty] at (9*\cw, 0) {--};
 \node[cell, fill=align-empty] at (10*\cw, 0) {--};
@@ -1672,7 +1657,7 @@ Each level has its own IJMP/IRET register pair.
 
 % ==================== ALIGNW AFTER DIAGRAM ====================
 % Shows data layout AFTER ALIGNW is applied
-% Data: T1=BYTE $11, [ALIGNW pads $00], T2=WORD $2222, LONG $33333333
+% Data: T1=BYTE $11, [ALIGNW pads $00], T2=BYTE $AA,$BB, LONG $44332211
 \newcommand{\AlignWAfterDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
@@ -1747,9 +1732,11 @@ Each level has its own IJMP/IRET register pair.
 }
 
 % ==================== LEGACY WRAPPER MACROS ====================
-% For backward compatibility - these call the "before" diagrams
+% For backward compatibility - these call the renamed/updated diagrams
 \newcommand{\AlignWDiagram}{\AlignWBeforeDiagram}
 \newcommand{\AlignLDiagram}{\AlignLBeforeDiagram}
+\newcommand{\EightCogOverviewDiagram}{\EightCogEggbeaterDiagram}
+\newcommand{\EggBeaterDiagram}{\EggbeaterHubTimingDiagram}
 
 % ============================================================================
 % PART II: REGISTER BIT FIELD DIAGRAMS

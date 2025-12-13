@@ -1,7 +1,7 @@
 -- P2KB PASM2 Table Formatting Filter
 -- Conservative fix: constrain tables to page width, last column wraps
 -- Author: Iron Sheep Productions, LLC
--- Version: 5.4 - Fixed Condition Code Table column widths (overlapping columns)
+-- Version: 5.5 - Added auto-shrink for Comparison Condition Alias tables (3.3.4)
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -360,6 +360,22 @@ local function should_auto_shrink(el)
     if headers[1] and headers[2] and headers[3] and headers[4] and
        headers[1]:match("instruction") and headers[2]:match("operation") and
        headers[3]:match("c flag") and headers[4]:match("z flag") then
+      return true
+    end
+    -- "Condition | Alias | Relational Operator | Meaning" (Section 3.3.4)
+    if headers[1] and headers[2] and headers[3] and headers[4] and
+       headers[1]:match("condition") and headers[2]:match("alias") and
+       headers[3]:match("relational") then
+      return true
+    end
+  end
+
+  -- 3-column pattern (Section 3.3.4)
+  -- "Condition | Relational Operator | Meaning"
+  if num_cols == 3 then
+    if headers[1] and headers[2] and headers[3] and
+       headers[1]:match("condition") and headers[2]:match("relational") and
+       headers[3]:match("meaning") then
       return true
     end
   end
