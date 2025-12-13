@@ -1881,14 +1881,26 @@ Unlike NCO Frequency mode which generates 50% duty, NCO Duty allows independent 
 
 The IN flag rises whenever Z overflows. This mode overrides OUT to control the pin output state. During reset (DIR=0), IN is low, output is low, and Z is cleared to zero.
 
+**Duty Cycle Calculation:** To convert a percentage (0-100) to the 32-bit Y threshold, we need to map the percentage to the range 0-$FFFFFFFF. There are two approaches:
+
+1. **Runtime calculation:** `duty_percent * $FFFFFFFF / 100` - intuitive but involves division
+2. **Precalculated constant:** Multiply by "one percent of full scale" ($FFFFFFFF / 100 = $028F5C28)
+
+The second approach is cleaner: define a constant representing 1% and multiply. This avoids runtime division and makes the intent clear.
+
 ::: spin2
 ```
+CON
+  ' Duty cycle scaling: $FFFFFFFF / 100 = value of 1% in 32-bit range
+  ' Using this constant avoids runtime division and potential overflow
+  DUTY_ONE_PERCENT = $028F5C28
+
 PUB nco_duty_demo(pin, freq_hz, duty_percent) | x, y
-  ' Calculate frequency
+  ' Calculate frequency using FRAC operator
   x := freq_hz frac clkfreq
 
-  ' Calculate duty threshold
-  y := duty_percent * $FFFFFFFF / 100
+  ' Calculate duty threshold: multiply percentage by "one percent" value
+  y := duty_percent * DUTY_ONE_PERCENT
 
   pinstart(pin, P_NCO_DUTY | P_OE, x, y)
 
@@ -1899,13 +1911,13 @@ PUB breathing_led() | brightness
   wxpin(LED_PIN, x)
   dirh(LED_PIN)
 
-  ' Smoothly vary brightness
+  ' Smoothly vary brightness (0-100% mapped to 0-$FFFFFFFF)
   repeat
     repeat brightness from 0 to 100
-      wypin(LED_PIN, brightness * $FFFFFFFF / 100)
+      wypin(LED_PIN, brightness * DUTY_ONE_PERCENT)
       waitms(10)
     repeat brightness from 100 to 0
-      wypin(LED_PIN, brightness * $FFFFFFFF / 100)
+      wypin(LED_PIN, brightness * DUTY_ONE_PERCENT)
       waitms(10)
 ```
 :::
