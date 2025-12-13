@@ -1390,7 +1390,7 @@ func_b          mov     y, #2                   ' Global: func_b,
 \item Every instruction is exactly 32 bits: 4-bit condition, 7-bit opcode, 3-bit flags, 9-bit D, 9-bit S
 \item The EEEE condition field enables conditional execution based on C and Z flags
 \item The I bit (position 18) determines whether S is a register address (0) or immediate value (1)
-\item 9-bit immediates range 0-511; larger values require ## augmentation
+\item 9-bit immediates range 0-511; larger values require \#\# augmentation
 \item AUGS/AUGD extend immediates to full 32 bits by inserting an extra instruction before the target
 \item Encoding tables show both the bit pattern (left 5 columns) and the effects (right 4 columns)
 \item Multiple table rows indicate instruction families or syntax variants with different encodings
@@ -4479,7 +4479,7 @@ For time-critical inner loops:
 ```{=latex}
 \begin{keyconcepts}
 \item Direct register addressing uses 9-bit fields to access COG RAM at addresses \$000-\$1FF
-\item The \# prefix creates 9-bit immediates (0-511); ## creates 32-bit immediates via AUGS/AUGD
+\item The \# prefix creates 9-bit immediates (0-511); \#\# creates 32-bit immediates via AUGS/AUGD
 \item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
 \item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms
 \item The SCALE factor (1/2/4) depends on instruction: byte=1, word=2, long=4
