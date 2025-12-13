@@ -11768,6 +11768,7 @@ Read Byte From Hub
 | EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |
@@ -11814,6 +11815,7 @@ Read Fast Via FIFO
 | EEEE | 1100011 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 or WRFAST finish + 10...17 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 2 or WRFAST finish + 10...17 |
@@ -11859,6 +11861,7 @@ Read Long From Hub
 | EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |
@@ -11980,6 +11983,7 @@ Read Word From Hub
 | EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
+
 | Context | Clocks |
 |:--------|:------:|
 | COG execution | 9...16 |
@@ -15958,7 +15962,7 @@ pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
 #### Related Directives
 - [WORD](#word) — Declare 16-bit word data
 - [LONG](#long) — Declare 32-bit long data
-- [BYTEFIT](#bytefit) — Verify value fits in byte range
+- [BYTEFIT](#bytefit) — Declare byte data with range validation
 - [RES](#res) — Reserve uninitialized space
 
 
@@ -15985,7 +15989,7 @@ Declare long data in memory. Stores 32-bit values at the current address.
 | count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
-Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. In hub RAM, LONG data is automatically long-aligned for optimal access efficiency.
+Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. No automatic alignment—data packs sequentially; use ALIGNL before LONG if alignment is needed for optimal access efficiency.
 
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
@@ -16000,7 +16004,7 @@ clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
 
 #### Notes
 - Each value occupies 4 bytes
-- Automatically long-aligned in hub RAM
+- No automatic alignment—data packs sequentially; use ALIGNL if alignment needed
 - Supports full 32-bit range (0 to $FFFFFFFF)
 - Standard size for P2 registers and instructions
 - The `[count]` syntax repeats the preceding value
@@ -16035,7 +16039,7 @@ Declare word data in memory. Stores 16-bit values at the current address.
 | count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
-Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. In hub RAM, WORD data is automatically word-aligned for efficient 16-bit access.
+Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. Data packs sequentially without automatic alignment—use ALIGNW if word alignment is needed for efficient access.
 
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
@@ -16049,7 +16053,7 @@ sine    word    $8000[256]          ' Initialize sine table with midpoint values
 
 #### Notes
 - Each value occupies 2 bytes
-- Automatically word-aligned in hub RAM
+- No automatic alignment—data packs sequentially; use ALIGNW if alignment needed
 - Range: 0 to 65535 (unsigned)
 - Values outside this range will be truncated to 16 bits
 - The `[count]` syntax repeats the preceding value
@@ -16057,7 +16061,7 @@ sine    word    $8000[256]          ' Initialize sine table with midpoint values
 #### Related Directives
 - [BYTE](#byte) — Declare 8-bit byte data
 - [LONG](#long) — Declare 32-bit long data
-- [WORDFIT](#wordfit) — Verify value fits in word range
+- [WORDFIT](#wordfit) — Declare word data with range validation
 - [ALIGNW](#alignw) — Force word alignment
 
 
@@ -16079,7 +16083,29 @@ Include the contents of a binary file at the current assembly address. The raw b
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| filename | String literal specifying the file path to include |
+| filename | Filename enclosed in double quotes (no path separators allowed) |
+
+#### Filename Requirements
+
+The filename must not contain path separator characters. The following characters are invalid in filenames:
+
+| Character | Description |
+|-----------|-------------|
+| `/` | Forward slash |
+| `:` | Colon |
+| `*` | Asterisk |
+| `?` | Question mark |
+| `"` | Double quote |
+| `<` | Less than |
+| `>` | Greater than |
+| `\|` | Pipe |
+
+The compiler searches for the file in the following order:
+1. **Current directory** — The directory containing the source file
+2. **Library directory** — The compiler's built-in library location
+3. **Include directories** — Directories specified via compiler options†
+
+† *Include directory support varies by compiler. PNut_ts supports `-I` options; other P2 compilers may have different or no include directory mechanisms.*
 
 #### Usage
 Use FILE to embed binary resources directly into your program—font data, lookup tables, images, audio samples, or any pre-computed binary content. The file is read at assembly time and its raw bytes are inserted at the current address. A label preceding FILE becomes a byte pointer to the start of the included data.
@@ -16121,8 +16147,9 @@ PUB ShowText() | ptr, len
 - File contents are included as raw bytes without modification
 - A label before FILE provides a byte-addressable pointer to the data
 - Place a label after the FILE directive to calculate the included file's size
-- FILE is not allowed within inline PASM code (only in DAT blocks)
-- File paths are relative to the source file's directory
+- FILE is only allowed in DAT blocks (not in inline PASM code)
+- Maximum filename length: 253 characters
+- Filename matching is case-insensitive
 - Common uses: fonts, lookup tables, images, audio samples, pre-computed data
 
 #### Related Directives
@@ -16174,93 +16201,145 @@ Size verification directives provide compile-time checking that values fit withi
 
 ::: dirheader
 ### BYTEFIT {#bytefit}
-Constrain To Byte Range
+Declare Byte Data With Range Validation
 
-Generates error if expression exceeds byte range.
+Stores byte values with compile-time range checking.
 :::
 
-Constrain expression to fit within byte range (0-255). Generates assembly error if expression value exceeds byte range.
+Declare byte data with compile-time range validation. Works identically to BYTE for storage, but generates an assembly error if any value exceeds the valid byte range. This catches potential truncation errors during compilation.
 
 #### Syntax
 ```pasm
-        BYTEFIT(expression)
+[label] BYTEFIT  value [, value...]
+[label] BYTEFIT  value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| expression | Constant expression that must evaluate to 0-255 |
+| value | Constant value or expression that must fit in byte range |
+| count | Repetition count (creates *count* copies of *value*) |
+
+#### Valid Range
+
+| Representation | Minimum | Maximum |
+|----------------|---------|---------|
+| Hexadecimal | -$80 | $FF |
+| Decimal (signed) | -128 | 127 |
+| Decimal (unsigned) | 0 | 255 |
+
+The combined range allows both signed (-128 to +127) and unsigned (0 to 255) byte values.
 
 #### Usage
-Use BYTEFIT to ensure compile-time verification that values fit in 8 bits. This catches overflow errors during assembly, preventing runtime data corruption. The expression must be resolvable at compile time.
+Use BYTEFIT instead of BYTE when you need compile-time verification that values fit in 8 bits. This catches overflow errors during assembly rather than silently truncating values. BYTEFIT is particularly useful when values come from calculations or constants that might change.
 
 #### Example
 ```pasm
-        byte    BYTEFIT(100)        ' OK: 100 fits in a byte
-
-CON
-    SMALL_VAL = BYTEFIT(200)        ' OK: 200 fits in byte range
-
 DAT
-        byte    BYTEFIT(256)        ' ERROR: 256 exceeds byte range
+' Valid BYTEFIT values
+byteData    BYTEFIT   -$80              ' Minimum signed value: -128
+            BYTEFIT   $FF               ' Maximum unsigned value: 255
+            BYTEFIT   0, 100, 200, 255  ' Multiple values
+            BYTEFIT   -128, -1, 0, 127  ' Signed values
+            BYTEFIT   0[100]            ' 100 bytes of value 0
+
+' Lookup table with validation
+gammaTable  BYTEFIT   0, 1, 2, 3, 4, 5, 7, 9, 12, 15
+            BYTEFIT   18, 22, 27, 32, 38, 44, 51, 58
+
+' The following would cause compile errors:
+'           BYTEFIT   256               ' ERROR: 256 > 255
+'           BYTEFIT   -129              ' ERROR: -129 < -128
+```
+
+#### Error Message
+When values exceed the valid range, the compiler produces:
+```
+BYTEFIT values must range from -$80 to $FF
 ```
 
 #### Notes
-- Compile-time constraint only—no runtime overhead
-- Useful for catching overflow errors during assembly
-- Expression must be resolvable at compile time (no runtime values)
-- Generates error if value is negative or exceeds 255
-- Returns the expression value if constraint is satisfied
+- Compile-time validation only—no runtime overhead
+- Storage is identical to BYTE (8 bits per value)
+- Unlike BYTE, does not silently truncate out-of-range values
+- Useful for lookup tables, configuration data, and calculated offsets
+- Can only be used in DAT blocks
 
 #### Related Directives
-- [WORDFIT](#wordfit) — Constrain to word range (0-65535)
-- [BYTE](#byte) — Declare byte data
+- [WORDFIT](#wordfit) — Declare word data with range validation
+- [BYTE](#byte) — Declare byte data (no range checking)
 
 
 
 ::: dirheader
 ### WORDFIT {#wordfit}
-Constrain To Word Range
+Declare Word Data With Range Validation
 
-Generates error if expression exceeds word range.
+Stores word values with compile-time range checking.
 :::
 
-Constrain expression to fit within word range (0-65535). Generates assembly error if expression value exceeds word range.
+Declare word data with compile-time range validation. Works identically to WORD for storage, but generates an assembly error if any value exceeds the valid word range. This catches potential truncation errors during compilation.
 
 #### Syntax
 ```pasm
-        WORDFIT(expression)
+[label] WORDFIT  value [, value...]
+[label] WORDFIT  value[count]
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| expression | Constant expression that must evaluate to 0-65535 |
+| value | Constant value or expression that must fit in word range |
+| count | Repetition count (creates *count* copies of *value*) |
+
+#### Valid Range
+
+| Representation | Minimum | Maximum |
+|----------------|---------|---------|
+| Hexadecimal | -$8000 | $FFFF |
+| Decimal (signed) | -32768 | 32767 |
+| Decimal (unsigned) | 0 | 65535 |
+
+The combined range allows both signed (-32768 to +32767) and unsigned (0 to 65535) word values.
 
 #### Usage
-Use WORDFIT to ensure compile-time verification that values fit in 16 bits. This catches overflow errors during assembly before they cause runtime problems. The expression must be resolvable at compile time.
+Use WORDFIT instead of WORD when you need compile-time verification that values fit in 16 bits. This catches overflow errors during assembly rather than silently truncating values. WORDFIT is particularly useful when values come from calculations or constants that might change.
 
 #### Example
 ```pasm
-        word    WORDFIT(1000)       ' OK: 1000 fits in a word
-
-CON
-    MED_VAL = WORDFIT(50000)        ' OK: 50000 fits in word range
-
 DAT
-        word    WORDFIT(70000)      ' ERROR: 70000 exceeds word range
+' Valid WORDFIT values
+wordData    WORDFIT   -$8000            ' Minimum signed value: -32768
+            WORDFIT   $FFFF             ' Maximum unsigned value: 65535
+            WORDFIT   1000, 30000       ' Multiple values
+            WORDFIT   -32768, 0, 32767  ' Signed values
+            WORDFIT   $ABCD[50]         ' 50 words of value $ABCD
+
+' ADC calibration values
+adcOffsets  WORDFIT   -1024, -512, 0, 512, 1024
+adcGains    WORDFIT   32768, 33000, 32500, 32768
+
+' The following would cause compile errors:
+'           WORDFIT   65536             ' ERROR: 65536 > 65535
+'           WORDFIT   -32769            ' ERROR: -32769 < -32768
+```
+
+#### Error Message
+When values exceed the valid range, the compiler produces:
+```
+WORDFIT values must range from -$8000 to $FFFF
 ```
 
 #### Notes
-- Compile-time constraint only—no runtime overhead
-- Useful for catching overflow errors during assembly
-- Expression must be resolvable at compile time (no runtime values)
-- Generates error if value is negative or exceeds 65535
-- Returns the expression value if constraint is satisfied
+- Compile-time validation only—no runtime overhead
+- Storage is identical to WORD (16 bits per value)
+- Unlike WORD, does not silently truncate out-of-range values
+- Useful for lookup tables, calibration data, and calculated offsets
+- Can only be used in DAT blocks
 
 #### Related Directives
-- [BYTEFIT](#bytefit) — Constrain to byte range (0-255)
-- [WORD](#word) — Declare word data
+- [BYTEFIT](#bytefit) — Declare byte data with range validation
+- [WORD](#word) — Declare word data (no range checking)
 
 
 
@@ -16313,7 +16392,7 @@ This data may be emitted into the Hub memory image like below; the actual data s
 \AlignLBeforeDiagram
 ```
 
-Notice how each data element aligns to its natural boundary: the word auto-aligns to a word boundary, and the long auto-aligns to a long boundary. If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
+Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
 ```pasm
 DAT
@@ -16330,7 +16409,7 @@ In comparison, this data will be emitted as follows:
 \AlignLAfterDiagram
 ```
 
-In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of L1. The long then auto-aligns to the next long boundary (L2), adding two more padding bytes after the word.
+In this case, the ALIGNL directive causes three zero ($00) bytes to emit after Table T1 to pad and align the start of Table T2 to the boundary of L1. After T2, the word and long pack sequentially—the long at offset 6 is still misaligned. To long-align the long as well, another ALIGNL would be needed before it.
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
@@ -16340,7 +16419,7 @@ In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after
 
 #### Related Directives
 - [ALIGNW](#alignw) — Align to word boundary
-- [LONG](#long) — Declare long data (auto-aligned in hub)
+- [LONG](#long) — Declare long data
 - [ORG](#org) — Set origin address
 
 
@@ -16407,7 +16486,7 @@ In comparison, this data will be emitted as follows:
 \AlignWAfterDiagram
 ```
 
-In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address.
+In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address.
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
@@ -16416,7 +16495,7 @@ In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Ta
 
 #### Related Directives
 - [ALIGNL](#alignl) — Align to long boundary
-- [WORD](#word) — Declare word data (auto-aligned in hub)
+- [WORD](#word) — Declare word data
 - [ORG](#org) — Set origin address
 
 
@@ -16584,7 +16663,7 @@ The P2 assembler's 14 directives provide complete control over memory layout and
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
-**Size Verification**: BYTEFIT, WORDFIT catch overflow at compile time
+**Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
 

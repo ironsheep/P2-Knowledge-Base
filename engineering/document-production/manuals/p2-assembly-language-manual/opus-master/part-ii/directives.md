@@ -228,7 +228,7 @@ Declare long data in memory. Stores 32-bit values at the current address.
 | count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
-Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. In hub RAM, LONG data is automatically long-aligned for optimal access efficiency.
+Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit precision. Each value occupies 4 bytes. No automatic alignment—data packs sequentially; use ALIGNL before LONG if alignment is needed for optimal access efficiency.
 
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
@@ -243,7 +243,7 @@ clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
 
 #### Notes
 - Each value occupies 4 bytes
-- Automatically long-aligned in hub RAM
+- No automatic alignment—data packs sequentially; use ALIGNL if alignment needed
 - Supports full 32-bit range (0 to $FFFFFFFF)
 - Standard size for P2 registers and instructions
 - The `[count]` syntax repeats the preceding value
@@ -278,7 +278,7 @@ Declare word data in memory. Stores 16-bit values at the current address.
 | count | Repetition count (creates *count* copies of *value*) |
 
 #### Usage
-Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. In hub RAM, WORD data is automatically word-aligned for efficient 16-bit access.
+Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes. Data packs sequentially without automatic alignment—use ALIGNW if word alignment is needed for efficient access.
 
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
@@ -292,7 +292,7 @@ sine    word    $8000[256]          ' Initialize sine table with midpoint values
 
 #### Notes
 - Each value occupies 2 bytes
-- Automatically word-aligned in hub RAM
+- No automatic alignment—data packs sequentially; use ALIGNW if alignment needed
 - Range: 0 to 65535 (unsigned)
 - Values outside this range will be truncated to 16 bits
 - The `[count]` syntax repeats the preceding value
@@ -631,7 +631,7 @@ This data may be emitted into the Hub memory image like below; the actual data s
 \AlignLBeforeDiagram
 ```
 
-Notice how each data element aligns to its natural boundary: the word auto-aligns to a word boundary, and the long auto-aligns to a long boundary. If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
+Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
 ```pasm
 DAT
@@ -648,7 +648,7 @@ In comparison, this data will be emitted as follows:
 \AlignLAfterDiagram
 ```
 
-In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of L1. The long then auto-aligns to the next long boundary (L2), adding two more padding bytes after the word.
+In this case, the ALIGNL directive causes three zero ($00) bytes to emit after Table T1 to pad and align the start of Table T2 to the boundary of L1. After T2, the word and long pack sequentially—the long at offset 6 is still misaligned. To long-align the long as well, another ALIGNL would be needed before it.
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
@@ -658,7 +658,7 @@ In this case, the ALIGNL instruction causes three zero ($00) bytes to emit after
 
 #### Related Directives
 - [ALIGNW](#alignw) — Align to word boundary
-- [LONG](#long) — Declare long data (auto-aligned in hub)
+- [LONG](#long) — Declare long data
 - [ORG](#org) — Set origin address
 
 
@@ -725,7 +725,7 @@ In comparison, this data will be emitted as follows:
 \AlignWAfterDiagram
 ```
 
-In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Table T1 to automatically pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address.
+In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address.
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
@@ -734,7 +734,7 @@ In this case, the ALIGNW instruction causes one zero ($00) byte to emit after Ta
 
 #### Related Directives
 - [ALIGNL](#alignl) — Align to long boundary
-- [WORD](#word) — Declare word data (auto-aligned in hub)
+- [WORD](#word) — Declare word data
 - [ORG](#org) — Set origin address
 
 
