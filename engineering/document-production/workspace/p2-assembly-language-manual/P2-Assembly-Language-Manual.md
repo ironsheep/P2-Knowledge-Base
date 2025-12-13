@@ -422,7 +422,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 
 ### 1.4.3 LUT Sharing Between COGs
 
-The `SETLUTS` instruction enables LUT sharing between COG pairs. Adjacent COGs (0-1, 2-3, 4-5, 6-7) can share their LUT memory, effectively giving one COG 1024 longs of LUT space while the paired COG uses the shared space as well. This feature supports applications where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.5 The Execution Pipeline
@@ -1579,7 +1579,7 @@ The P2 allows any instruction to execute conditionally based on the current flag
 
 ### 3.3.1 The IF_x Prefix
 
-Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (typically one clock cycle). When the condition is true, the instruction executes normally:
+Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (2 clock cycles). When the condition is true, the instruction executes normally:
 
 ```pasm
                 cmp     a, b            wc wz   ' Compare, set flags
@@ -1593,7 +1593,7 @@ The timing predictability is crucial. Traditional branch-based code has variable
 
 ### 3.3.2 Conditional Execution Timing
 
-When a conditional instruction's condition is false, the instruction does not execute but still consumes one clock cycle. This behavior might seem wasteful, but it provides deterministic timing—critical for real-time operations, protocol timing, and cycle-accurate code.
+When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This behavior might seem wasteful, but it provides deterministic timing—critical for real-time operations, protocol timing, and cycle-accurate code.
 
 Consider this example:
 
@@ -1838,20 +1838,20 @@ Beyond basic conditional execution, the P2 provides specialized instructions for
 The MODC and MODZ instructions modify flags directly without performing computations:
 
 ```pasm
-        modc    #1              ' Set C flag to 1
-        modz    #0              ' Clear Z flag to 0
+        modc    _set    wc      ' Set C flag to 1
+        modz    _clr    wz      ' Clear Z flag to 0
 ```
 
-MODC sets C to the specified bit value (0 or 1), and MODZ sets Z to the specified bit value. These instructions are useful when you need to establish specific flag states for subsequent conditional operations, or when implementing custom flag-based protocols.
+MODC sets C according to a 4-bit modifier constant, and MODZ sets Z similarly. The WC and WZ effects are required for the modification to take effect; without them, the result is computed but discarded. Common modifier constants include `_set` (always 1), `_clr` (always 0), `_c` (current C), and `_z` (current Z).
 
-The MODCZ instruction can modify both flags simultaneously with more complex rules:
+The MODCZ instruction can modify both flags simultaneously:
 
 ```pasm
-        modcz   _clr, _set      ' Clear C, set Z
-        modcz   _set, _set      ' Set both flags
+        modcz   _clr, _set  wcz ' Clear C, set Z
+        modcz   _set, _set  wcz ' Set both flags
 ```
 
-MODCZ accepts operands that specify operations: `_clr` (clear to 0), `_set` (set to 1), `_nc` (copy from C inverted), `_nz` (copy from Z inverted), and others. This enables complex flag manipulation in a single instruction.
+MODCZ accepts two operands specifying operations for C and Z respectively. The WC, WZ, or WCZ effect must be specified for the flags to be modified. Modifier constants include `_clr` (clear to 0), `_set` (set to 1), `_nc` (inverted C), `_nz` (inverted Z), and others that enable complex flag manipulation in a single instruction.
 
 ### 3.6.2 Flag-Based Bit Manipulation
 
@@ -2072,7 +2072,7 @@ After a multi-long comparison:
 \item Special effects ANDC/ANDZ/ORC/ORZ/XORC/XORZ combine tested bits with existing flags (TESTx instructions only)
 \item Any instruction can be conditional using IF_x prefixes for deterministic branchless programming
 \item 16 conditions cover all combinations of C and Z states, with comparison-friendly aliases
-\item Conditional instructions consume one clock cycle whether they execute or not, maintaining deterministic timing
+\item Conditional instructions consume 2 clock cycles whether they execute or not, maintaining deterministic timing
 \item Multi-precision arithmetic chains flag results between instructions using ADDX and SUBX
 \item Flag-based bit manipulation (MUXC, MUXZ) enables building bit patterns from sequential flag tests
 \item Each COG maintains independent C and Z flags with no cross-COG interaction
@@ -4732,7 +4732,7 @@ Add Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S) | Result = 0 | 2 |
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
 
 
 **Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
@@ -4813,7 +4813,7 @@ Add Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [MULPIX](#mulpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
@@ -4848,7 +4848,7 @@ Add Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D + S) | Result = 0 | 2 |
+| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D + S) | Result = 0 | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
@@ -4887,7 +4887,7 @@ Add Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | D | sign of (D+S+C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D+S+C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
@@ -4924,7 +4924,7 @@ Add Unsigned Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | D | carry of (D + S + C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S + C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
@@ -5520,7 +5520,7 @@ Bitwise And
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
 
 
 **Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
@@ -5555,7 +5555,7 @@ And Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | D | parity of result | Result = 0 | 2 |
+| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)
@@ -5948,7 +5948,7 @@ Blend Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [ADDPIX](#addpix), [MULPIX](#mulpix), [MIXPIX](#mixpix), [SETPIV](#setpiv)
@@ -5983,8 +5983,8 @@ Bit Mask
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+| EEEE | 1001110 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001110 | 010 | DDDDDDDDD | DDDDDDDDD | --- | --- | D | 2 |
 
 
 **Related:** [ENCOD](#encod), [DECOD](#decod), [ONES](#ones), [ZEROX](#zerox)
@@ -6117,7 +6117,7 @@ Call Subroutine via PTRA
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | --- | D[31] | D[30] | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
@@ -6161,7 +6161,7 @@ Call Subroutine via PTRB
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | --- | D[31] | D[30] | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
@@ -6322,7 +6322,7 @@ Compare Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Unsigned (D < S) | D=S | 2 |
+| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | D = S | --- | 2 |
 
 
 **Related:** [CMPR](#cmpr), [CMPX](#cmpx), [CMPS](#cmps), [CMPSX](#cmpsx), [CMPM](#cmpm)
@@ -6404,7 +6404,7 @@ Compare Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (S - D) | D == S | 2 |
+| EEEE | 0010100 | CZI | DDDDDDDDD | SSSSSSSSS | borrow of (S - D) | D == S | --- | 2 |
 
 
 **Related:** [CMP](#cmp)
@@ -6441,7 +6441,7 @@ Compare Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Signed (D < S) | D=S | 2 |
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | Signed (D < S) | D = S | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
@@ -6524,7 +6524,7 @@ Compare Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | correct sign of (D - (S + C)) | Z AND (D == S + C) | 2 |
+| EEEE | 0010011 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPS](#cmps)
@@ -6567,7 +6567,7 @@ Compare Unsigned Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | borrow of (D - (S + C)) | Z AND (D == S + C) | 2 |
+| EEEE | 0010001 | CZI | DDDDDDDDD | SSSSSSSSS | borrow of (D - (S + C)) | Z AND (D == S + C) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps), [CMPSX](#cmpsx)
@@ -6855,7 +6855,7 @@ CRC Iterate Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [CRCNIB](#crcnib), [REV](#rev)
@@ -6902,7 +6902,7 @@ CRC Iterate Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001110 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [CRCBIT](#crcbit), [REV](#rev)
@@ -6993,8 +6993,8 @@ Decode Bit Position
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | D | --- | --- | 2 |
+| EEEE | 1001110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001110 | 000 | DDDDDDDDD | DDDDDDDDD | --- | --- | D | 2 |
 
 
 **Related:** [ENCOD](#encod), [BMASK](#bmask)
@@ -7274,7 +7274,7 @@ Decrement and Jump If Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
 
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
@@ -7308,7 +7308,7 @@ Decrement and Jump If Not Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
 
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
@@ -7345,8 +7345,8 @@ Decrement and Jump If Zero {#djnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -7653,8 +7653,8 @@ Encode Bit Position
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | D | S != 0 | Result = 0 | 2 |
-| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Original D != 0 | Result = 0 | 2 |
+| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | S != 0 | Result = 0 | D | 2 |
+| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Original D != 0 | Result = 0 | D | 2 |
 
 
 **Related:** [DECOD](#decod)
@@ -7780,7 +7780,7 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
@@ -7817,7 +7817,7 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
@@ -7854,7 +7854,7 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
@@ -7891,7 +7891,7 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | D | limit enforced | Result = 0 | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
 
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
@@ -7930,10 +7930,10 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | DIRx + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
@@ -7951,7 +7951,7 @@ These instructions set pin(s) to input direction (floating) while pre-setting th
 
 When the pin is later driven as output, it will immediately be at the desired level. FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
 
-If WCZ is specified, the Z flag is set to the original output state of the base pin.
+If WCZ is specified, the C and Z flags are set to the original output state of the base pin.
 
 
 
@@ -7974,7 +7974,7 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
@@ -7989,7 +7989,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range
 
 The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
 
@@ -8012,7 +8012,7 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
@@ -8027,7 +8027,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range
 
 The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
 
@@ -8050,7 +8050,7 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | DIRx + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
@@ -8090,7 +8090,7 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
@@ -8140,7 +8140,7 @@ Get Breakpoint Status
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | D | --- | --- | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000110101 | --- | --- | D | 2 |
 
 
 **Related:** [BRK](#brk), [COGBRK](#cogbrk)
@@ -8182,8 +8182,8 @@ Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1000111 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGB](#altgb), [GETNIB](#getnib), [GETWORD](#getword), [SETBYTE](#setbyte), [ROLBYTE](#rolbyte)
@@ -8260,8 +8260,8 @@ Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 100001N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000010 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGN](#altgn), [GETBYTE](#getbyte), [GETWORD](#getword), [SETNIB](#setnib), [ROLNIB](#rolnib)
@@ -8294,7 +8294,7 @@ Get FIFO Hub Pointer
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000110100 | --- | --- | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong)
@@ -8328,7 +8328,7 @@ Get CORDIC X Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | D | X[31] | Result = 0 | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | Result = 0 | D | 2...58 |
 
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -8366,7 +8366,7 @@ Get CORDIC Y Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | D | Y[31] | Result = 0 | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | Result = 0 | D | 2...58 |
 
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -8405,8 +8405,8 @@ Get Random Value
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | D | RND[31] | RND[30], unique per cog | 2 |
-| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | --- | RND[31] | RND[30], unique per cog | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011011 | RND[31] | RND[30], unique per cog | D | 2 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000011011 | RND[31] | RND[30], unique per cog | --- | 2 |
 
 
 **Related:** [SETQ](#setq), [SETQ2](#setq2)
@@ -8445,7 +8445,7 @@ Get Oscilloscope Samples
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001110001 | --- | --- | D | 2 |
 
 
 **Related:** [SETSCP](#setscp), [RDPIN](#rdpin), [WXPIN](#wxpin)
@@ -8483,8 +8483,8 @@ Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001001 | 1NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001001 | 100 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ALTGW](#altgw), [GETNIB](#getnib), [GETBYTE](#getbyte), [SETWORD](#setword), [ROLWORD](#rolword)
@@ -8517,7 +8517,7 @@ Get Goertzel Accumulators
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 000011110 | --- | --- | D | 2 |
 
 
 **Related:** [XCONT](#xcont), [XINIT](#xinit), [XZERO](#xzero)
@@ -8646,8 +8646,8 @@ Increment and Jump If Zero {#ijnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | D + PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -8691,7 +8691,7 @@ Increment Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D | D = S, set D = 0 and C = 1, else D = D + 1 and C = 0 | Result = 0 | 2 |
+| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D was S (wrapped) | Result = 0 | D | 2 |
 
 
 **Related:** [DECMOD](#decmod), [ADDCT1/2/3](#addct1)
@@ -8763,8 +8763,8 @@ Jump If Attention Set / Clear {#jnatn}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JATN, flag clear for JNATN).
 
@@ -8809,12 +8809,12 @@ Jump If Counter Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JCTn, flag clear for JNCTn).
 
@@ -8852,8 +8852,8 @@ Jump If FIFO Block Wrap Set / Clear {#jnfbw}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met.
 
@@ -8891,8 +8891,8 @@ Jump If Interrupt Set / Clear {#jnint}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met.
 
@@ -8933,8 +8933,8 @@ Jump
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | PC | D[31] | D[30] | 4 |
-| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | PC | --- | --- | 4 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | D[31] | D[30] | PC | 4 |
+| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PC | 4 |
 
 
 **Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
@@ -8971,7 +8971,7 @@ Jump Relative
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | PC | --- | --- | 4 |
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | --- | --- | PC | 4 |
 
 
 **Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP1/2/3](#ijmp1)
@@ -9021,14 +9021,14 @@ Jump If Selectable Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | PC | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 PC is written only when the condition is met (flag set for JSEn, flag clear for JNSEn).
 
@@ -9066,8 +9066,8 @@ Jump If Pattern Match Event Set / Clear {#jnpat}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JPAT | EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNPAT | EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
@@ -9103,8 +9103,8 @@ Jump If CORDIC Empty Event Set / Clear {#jnqmt}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JQMT | EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNQMT | EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
@@ -9141,8 +9141,8 @@ Jump If Streamer Finished Event Set / Clear {#jnxfi}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXFI | EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXFI | EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
@@ -9178,8 +9178,8 @@ Jump If Streamer Empty Event Set / Clear {#jnxmt}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXMT | EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXMT | EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
@@ -9215,8 +9215,8 @@ Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXRL | EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXRL | EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
@@ -9252,8 +9252,8 @@ Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 
 | Instruction | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:-----------:|:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
-| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | PC\textsuperscript{1} | --- | --- | 2 or 4 |
+| JXRO | EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| JNXRO | EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
@@ -9483,7 +9483,7 @@ Merge Bits Of Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100001 | --- | --- | D | 2 |
 
 
 **Related:** [MERGEW](#mergew), [SPLITB](#splitb), [SPLITW](#splitw)
@@ -9516,7 +9516,7 @@ Merge Bits Of Words
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100011 | --- | --- | D | 2 |
 
 
 **Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [SPLITW](#splitw)
@@ -9550,7 +9550,7 @@ Mix Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [SETPIX](#setpix), [SETPIV](#setpiv), [ADDPIX](#addpix), [MULPIX](#mulpix), [BLNPIX](#blnpix)
@@ -9580,13 +9580,13 @@ Modify C Flag
 
 **Result:** The C flag is set or cleared according to the modifier and current C and Z flag states.
 
-- c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
-- WC is an optional effect to make the modification visible to subsequent flag reads.
+- c is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the C flag.
+- WC must be specified for the C flag modification to take effect; without it, the result is computed but not written to the flag.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | --- | cccc[\{C,Z\}] | --- | 2 |
+| EEEE | 1101011 | C01 | 0cccc0000 | 001101111 | cccc[\{C,Z\}] | --- | --- | 2 |
 
 
 **Related:** [MODZ](#modz), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -9601,7 +9601,7 @@ Common modifier values enable useful operations: $F (binary 1111) always sets C 
 
 MODC is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
 
-If the WC effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
+The WC effect must be specified for the modification to take effect. Without WC, the instruction computes the result but does not write it to the C flag, rendering the instruction ineffective for most purposes.
 
 
 
@@ -9618,14 +9618,14 @@ Modify C And Z Flags
 
 **Result:** Both C and Z flags are set or cleared according to their modifiers and the current C and Z flag states.
 
-- c is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the C flag.
-- z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
-- WC, WZ, or WCZ are optional effects to make the modifications visible to subsequent flag reads.
+- c is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the C flag.
+- z is a 4-bit modifier constant that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
+- WC, WZ, or WCZ must be specified for the flag modifications to take effect; without them, results are computed but not written.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | --- | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | 2 |
+| EEEE | 1101011 | CZ1 | 0cccczzzz | 001101111 | cccc[\{C,Z\}] | zzzz[\{C,Z\}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODZ](#modz), [TESTB](#testb), [TESTBN](#testbn)
@@ -9640,7 +9640,7 @@ This instruction enables sophisticated conditional logic operations without bran
 
 Common uses include implementing state machines where both flags represent state bits, performing multi-condition tests after comparison operations, and creating compact conditional code sequences that would otherwise require multiple instructions or branches.
 
-If the WC, WZ, or WCZ effects are specified, the flag modifications become visible to subsequent instructions. Without these effects, the modifications may be used internally without affecting the architectural flag state visible to later code.
+The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
 
@@ -9659,13 +9659,13 @@ Modify Z Flag
 
 **Result:** The Z flag is set or cleared according to the modifier and current C and Z flag states.
 
-- z is a 4-bit modifier value that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
-- WZ is an optional effect to make the modification visible to subsequent flag reads.
+- z is a 4-bit modifier constant (such as `_set`, `_clr`, `_c`, `_z`) that selects which combination of current C and Z flag states produces a 1 result for the Z flag.
+- WZ must be specified for the Z flag modification to take effect; without it, the result is computed but not written to the flag.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | --- | zzzz[\{C,Z\}] | 2 |
+| EEEE | 1101011 | 0Z1 | 00000zzzz | 001101111 | --- | zzzz[\{C,Z\}] | --- | 2 |
 
 
 **Related:** [MODC](#modc), [MODCZ](#modcz), [TESTB](#testb), [TESTBN](#testbn)
@@ -9680,7 +9680,7 @@ Common modifier values enable useful operations: $F (binary 1111) always sets Z 
 
 MODZ is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
 
-If the WZ effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
+The WZ effect must be specified for the modification to take effect. Without WZ, the instruction computes the result but does not write it to the Z flag, rendering the instruction ineffective for most purposes.
 
 
 
@@ -9704,7 +9704,7 @@ Move
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | D | S[31] | Result = 0 | 2 |
+| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
@@ -9762,7 +9762,7 @@ Move Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
@@ -9806,7 +9806,7 @@ Multiply
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
 
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -9859,7 +9859,7 @@ Multiply Pixels
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 7 |
+| EEEE | 1010010 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 7 |
 
 
 **Related:** [ADDPIX](#addpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix), [SETPIX](#setpix)
@@ -9905,7 +9905,7 @@ Multiply Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | D | --- | (D = 0) \| (S = 0) | 2 |
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) \| (S = 0) | D | 2 |
 
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -9965,10 +9965,10 @@ Multiplex Flag To Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
-| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Result = 0 | 2 |
+| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
 
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
@@ -10021,7 +10021,7 @@ Multiplex Nibbles
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MUXNITS](#muxnits), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
@@ -10065,7 +10065,7 @@ Multiplex Nits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [MUXNIBS](#muxnibs), [MUXQ](#muxq), [MOVBYTS](#movbyts), [SPLITB](#splitb)
@@ -10109,7 +10109,7 @@ Multiplex Q
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
@@ -10189,8 +10189,8 @@ Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of result | Result = 0 | 2 |
-| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign of result | Result = 0 | 2 |
+| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of result | Result = 0 | D | 2 |
+| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign of result | Result = 0 | D | 2 |
 
 
 **Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
@@ -10237,14 +10237,14 @@ Conditional Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
-| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Sign | Result = 0 | 2 |
+| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
+| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
+| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
+| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -10355,8 +10355,8 @@ Bitwise Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | D | !S[31] | Result = 0 | 2 |
-| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | !D[31] | Result = 0 | 2 |
+| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | !S[31] | Result = 0 | D | 2 |
+| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | !D[31] | Result = 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
@@ -10401,8 +10401,8 @@ Ones
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Result is odd | Result = 0 | 2 |
-| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | D | Result is odd | Result = 0 | 2 |
+| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | Result = 0 | D | 2 |
+| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | Result = 0 | D | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
@@ -10441,7 +10441,7 @@ Bitwise Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity of Result | Result = 0 | 2 |
+| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | Result = 0 | D | 2 |
 
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
@@ -10490,10 +10490,10 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | OUTx | --- | orig out | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | OUTx | --- | orig out | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | orig out | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
@@ -10534,7 +10534,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
@@ -10572,7 +10572,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
@@ -10610,7 +10610,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUTx | --- | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | --- | Original OUTx base bit | OUTx | 2 |
 
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
@@ -10695,7 +10695,7 @@ Poll Attention Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | --- | ATN Event | ATN Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001110 | 000100100 | ATN Event | ATN Event | --- | 2 |
 
 
 **Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
@@ -10732,9 +10732,9 @@ Poll Counter Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | --- | CT1 Event | CT1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | --- | CT2 Event | CT2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | --- | CT3 Event | CT3 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000001 | 000100100 | CT1 Event | CT1 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000010 | 000100100 | CT2 Event | CT2 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000011 | 000100100 | CT3 Event | CT3 Event | --- | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
@@ -10767,7 +10767,7 @@ Poll FIFO Block Wrap Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | --- | FBW Event | FBW Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001001 | 000100100 | FBW Event | FBW Event | --- | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
@@ -10800,7 +10800,7 @@ Poll Interrupt Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | --- | INT Event | INT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000000 | 000100100 | INT Event | INT Event | --- | 2 |
 
 
 **Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
@@ -10833,7 +10833,7 @@ Poll Pin Pattern Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | --- | PAT Event | PAT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001000 | 000100100 | PAT Event | PAT Event | --- | 2 |
 
 
 **Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
@@ -10866,7 +10866,7 @@ Poll CORDIC Empty Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | --- | QMT Event | QMT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001111 | 000100100 | QMT Event | QMT Event | --- | 2 |
 
 
 **Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
@@ -10904,10 +10904,10 @@ Poll Selectable Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | --- | SE1 Event | SE1 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | --- | SE2 Event | SE2 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | --- | SE3 Event | SE3 Event | 2 |
-| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | --- | SE4 Event | SE4 Event | 2 |
+| EEEE | 1101011 | CZ0 | 000000100 | 000100100 | SE1 Event | SE1 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000101 | 000100100 | SE2 Event | SE2 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000110 | 000100100 | SE3 Event | SE3 Event | --- | 2 |
+| EEEE | 1101011 | CZ0 | 000000111 | 000100100 | SE4 Event | SE4 Event | --- | 2 |
 
 
 **Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
@@ -10940,7 +10940,7 @@ Poll Streamer Finished Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | --- | XFI Event | XFI Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001011 | 000100100 | XFI Event | XFI Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
@@ -10973,7 +10973,7 @@ Poll Streamer Empty Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | --- | XMT Event | XMT Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001010 | 000100100 | XMT Event | XMT Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
@@ -11006,7 +11006,7 @@ Poll Streamer LUT Rollover Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | --- | XRL Event | XRL Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001101 | 000100100 | XRL Event | XRL Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
@@ -11039,7 +11039,7 @@ Poll Streamer NCO Rollover Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | --- | XRO Event | XRO Event | 2 |
+| EEEE | 1101011 | CZ0 | 000001100 | 000100100 | XRO Event | XRO Event | --- | 2 |
 
 
 **Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
@@ -11073,7 +11073,7 @@ Pop From Internal Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | Result = 0 | D | 2 |
 
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
@@ -11109,7 +11109,7 @@ Pop From Hub Stack A
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | Result = 0 | D | 9...16 |
 
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
@@ -11145,7 +11145,7 @@ Pop From Hub Stack B
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | Result = 0 | D | 9...16 |
 
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)
@@ -11619,7 +11619,7 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
@@ -11656,7 +11656,7 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
@@ -11692,7 +11692,7 @@ Rotate Carry And Zero Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D | D[31] | D[30] | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101011 | D[31] | D[30] | D | 2 |
 
 
 **Related:** [RCZR](#rczr), [RCL](#rcl), [RCR](#rcr)
@@ -11728,7 +11728,7 @@ Rotate Carry And Zero Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D | D[1] | D[0] | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 001101010 | D[1] | D[0] | D | 2 |
 
 
 **Related:** [RCZL](#rczl), [RCL](#rcl), [RCR](#rcr)
@@ -11905,7 +11905,7 @@ Read From LUT
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of data | Result = 0 | 3 |
+| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | Result = 0 | D | 3 |
 
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
@@ -11942,7 +11942,7 @@ Read Smart Pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+| EEEE | 1010100 | C1I | DDDDDDDDD | SSSSSSSSS | Modal result | --- | D | 2 |
 
 
 **Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
@@ -12137,7 +12137,7 @@ Return From Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | --- | K[31] | K[30] | 4 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
@@ -12174,7 +12174,7 @@ Return Via PTRA Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | --- | L[31] | L[30] | 11...18 † |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101110 | L[31] | L[30] | --- | 11...18 † |
 
 † **Timing varies by execution context:**
 
@@ -12217,7 +12217,7 @@ Return Via PTRB Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | --- | L[31] | L[30] | 11...18 † |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101111 | L[31] | L[30] | --- | 11...18 † |
 
 † **Timing varies by execution context:**
 
@@ -12297,7 +12297,7 @@ Reverse Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101001 | --- | --- | D | 2 |
 
 
 **Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
@@ -12329,7 +12329,7 @@ Read Byte Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | D | MSB of byte | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -12365,7 +12365,7 @@ Read Long Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | D | MSB of long | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
@@ -12401,7 +12401,7 @@ Read Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | D | 0 | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
@@ -12437,7 +12437,7 @@ Read Signed Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | D | MSB of value | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
@@ -12471,7 +12471,7 @@ Read Word Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | D | MSB of word | Result = 0 | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | Result = 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -12506,7 +12506,7 @@ Expand RGB Color
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100111 | --- | --- | D | 2 |
 
 
 **Related:** [RGBSQZ](#rgbsqz)
@@ -12537,7 +12537,7 @@ Squeeze RGB Color
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100110 | --- | --- | D | 2 |
 
 
 **Related:** [RGBEXP](#rgbexp)
@@ -12570,7 +12570,7 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
@@ -12608,8 +12608,8 @@ Rotate Byte Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001000 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001000 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
@@ -12643,8 +12643,8 @@ Rotate Nibble Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 100010N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000100 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
@@ -12678,8 +12678,8 @@ Rotate Word Left Into Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | D | --- | --- | 2 |
+| EEEE | 1001010 | 0NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001010 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
 **Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
@@ -12712,7 +12712,7 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
@@ -12749,7 +12749,7 @@ Read Smart Pin Without Acknowledge
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | D | Modal result | --- | 2 |
+| EEEE | 1010100 | C0I | DDDDDDDDD | SSSSSSSSS | Modal result | --- | D | 2 |
 
 
 **Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
@@ -12790,7 +12790,7 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
@@ -12825,7 +12825,7 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
@@ -12860,7 +12860,7 @@ Scale
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Product = 0 | 2 |
+| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | Product = 0 | --- | 2 |
 
 
 **Related:** [SCAS](#scas)
@@ -12896,7 +12896,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | --- | Result = 0 | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Result = 0 | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -12928,8 +12928,8 @@ Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 1000110 | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000110 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and byte ID specified by prior ALTSB instruction.
@@ -13110,7 +13110,7 @@ Set Destination Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
@@ -13237,8 +13237,8 @@ Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 100000N | NNI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1000000 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and nibble ID specified by prior ALTSN instruction.
@@ -13432,7 +13432,7 @@ Set Result Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
@@ -13464,7 +13464,7 @@ Set Source Field
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
+| EEEE | 1001101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
 **Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
@@ -13564,8 +13564,8 @@ Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | D | --- | --- | 2 |
-| EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | D* | --- | --- | 2 |
+| EEEE | 1001001 | 0NI | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
+| EEEE | 1001001 | 00I | 000000000 | SSSSSSSSS | --- | --- | D* | 2 |
 
 
 *Dest and word ID specified by prior ALTSW instruction.
@@ -13629,7 +13629,7 @@ Seuss Forward
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100100 | --- | --- | D | 2 |
 
 
 **Related:** [SEUSSR](#seussr)
@@ -13658,7 +13658,7 @@ Seuss Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100101 | --- | --- | D | 2 |
 
 
 **Related:** [SEUSSF](#seussf)
@@ -13689,7 +13689,7 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
@@ -13724,7 +13724,7 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | D | Last bit out\textsuperscript{1} | Result = 0 | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
 
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
@@ -13759,7 +13759,7 @@ Sign Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB of result | Result = 0 | 2 |
+| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | Result = 0 | D | 2 |
 
 
 **Related:** [ZEROX](#zerox)
@@ -13868,7 +13868,7 @@ Split Bits To Bytes
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100000 | --- | --- | D | 2 |
 
 
 **Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
@@ -13897,7 +13897,7 @@ Split Bits To Words
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001100010 | --- | --- | D | 2 |
 
 
 **Related:** [SPLITB](#splitb), [MERGEW](#mergew)
@@ -13961,7 +13961,7 @@ Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2 |
+| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | Result = 0 | D | 2 |
 
 
 **Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
@@ -13996,7 +13996,7 @@ Subtract Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2 |
+| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | Result = 0 | D | 2 |
 
 
 **Related:** [SUB](#sub)
@@ -14027,7 +14027,7 @@ Subtract Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2 |
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of (D - S) | Result = 0 | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
@@ -14058,7 +14058,7 @@ Subtract Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2 |
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of D-(S+C) | Z AND (Result = 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
@@ -14089,7 +14089,7 @@ Subtract Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2 |
+| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result = 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBSX](#subsx)
@@ -14123,10 +14123,10 @@ Conditional Sum
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
-| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | D | Sign | Result = 0 | 2 |
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
 
 
 **Explanation:**
@@ -14173,8 +14173,8 @@ Test
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | --- | Parity of D | D = 0 | 2 |
-| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& S) | (D \& S) = 0 | 2 |
+| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | D = 0 | --- | 2 |
+| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D \& S) | (D \& S) = 0 | --- | 2 |
 
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -14222,10 +14222,10 @@ Test Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | --- | D[S[4:0]] | D[S[4:0]] | 2 |
-| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2 |
-| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | 2 |
-| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | 2 |
+| EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | D[S[4:0]] | D[S[4:0]] | --- | 2 |
+| EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | --- | 2 |
+| EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | --- | 2 |
+| EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | --- | 2 |
 
 
 **Related:** [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -14269,10 +14269,10 @@ Test Bit Negated
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | --- | !D[S[4:0]] | !D[S[4:0]] | 2 |
-| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2 |
-| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | 2 |
-| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | 2 |
+| EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | !D[S[4:0]] | !D[S[4:0]] | --- | 2 |
+| EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | --- | 2 |
+| EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | --- | 2 |
+| EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | --- | 2 |
 
 
 **Related:** [TESTB](#testb), [TESTP](#testp), [TESTPN](#testpn)
@@ -14305,7 +14305,7 @@ Test Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | --- | Parity of (D \& !S) | (D \& !S) = 0 | 2 |
+| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D \& !S) | (D \& !S) = 0 | --- | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
@@ -14352,14 +14352,14 @@ Test Pin / Test Pin Negated {#testpn}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | --- | IN | IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | --- | !IN | !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | --- | C/Z AND IN | C/Z AND IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | --- | C/Z AND !IN | C/Z AND !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | --- | C/Z OR IN | C/Z OR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | --- | C/Z OR !IN | C/Z OR !IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | --- | C/Z XOR IN | C/Z XOR IN | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | --- | C/Z XOR !IN | C/Z XOR !IN | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | IN | IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | !IN | !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | C/Z AND IN | C/Z AND IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | C/Z AND !IN | C/Z AND !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | C/Z OR IN | C/Z OR IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | C/Z OR !IN | C/Z OR !IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | C/Z XOR IN | C/Z XOR IN | --- | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | C/Z XOR !IN | C/Z XOR !IN | --- | 2 |
 
 
 IN = pin state at Dest[5:0]; !IN = inverted pin state.
@@ -14400,8 +14400,8 @@ Test And Jump If Full / Not Full {#tjnf}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv)
@@ -14441,8 +14441,8 @@ Test And Jump If Signed / Not Signed {#tjns}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
-| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJF](#tjf), [TJNF](#tjnf), [TJV](#tjv)
@@ -14482,8 +14482,8 @@ Test And Jump If Zero / Not Zero {#tjnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
-| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC* | --- | --- | 2 or 4 |
+| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -14531,7 +14531,7 @@ Test And Jump If Overflow
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | --- | --- | 2 or 4 |
+| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
 
 
 **Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
@@ -14611,7 +14611,7 @@ Wait For Attention
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011110 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011110 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
@@ -14652,9 +14652,9 @@ Wait For Counter Event
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010001 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010010 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010011 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010001 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010010 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
@@ -14687,7 +14687,7 @@ Wait For FIFO Block Wrap
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011001 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011001 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
@@ -14718,7 +14718,7 @@ Wait For Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010000 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010000 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
@@ -14749,7 +14749,7 @@ Wait For Pattern
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011000 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011000 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
@@ -14790,10 +14790,10 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000010100 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010101 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010110 | 000100100 | --- | Timeout | Timeout | 2+ |
-| EEEE | 1101011 | CZ0 | 000010111 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000010100 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010101 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010110 | 000100100 | Timeout | Timeout | --- | 2+ |
+| EEEE | 1101011 | CZ0 | 000010111 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
@@ -14817,27 +14817,27 @@ Wait Cycles
 
 ---
 
-**Result:** Stalls the cog for Dest+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay. Sets C and Z to 0 after completion.
 
-- Dest is the number of cycles minus 1 to wait (0-511 for immediate).
-- WC, WZ, or WCZ are optional; always set to 0 after completion.
+- Dest is the delay value; total wait is 2 + Dest cycles (0-511 for immediate).
+- WC, WZ, or WCZ enable randomized delay mode; C and Z are set to 0 after completion.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | --- | 0 | 0 | 2 + D |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | 0 | 0 | --- | 2 + D |
 
 
 **Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
 
 **Explanation:**
 
-WAITX stalls the cog for precise timing delays. The actual wait time is Dest+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
+WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. This randomized mode is useful for avoiding timing-based interference between cogs. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
 ::: pasm2
-        WAITX   #99            ' Wait 100 clock cycles
+        WAITX   #99            ' Wait 101 clock cycles (2 + 99)
 :::
 
 
@@ -14860,7 +14860,7 @@ Wait For Streamer Finished
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011011 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
@@ -14891,7 +14891,7 @@ Wait For Streamer Empty
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011010 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011010 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
@@ -14922,7 +14922,7 @@ Wait For Streamer LUT Rollover
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011101 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011101 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
@@ -14953,7 +14953,7 @@ Wait For Streamer NCO Rollover
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | 000011100 | 000100100 | --- | Timeout | Timeout | 2+ |
+| EEEE | 1101011 | CZ0 | 000011100 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
 **Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
@@ -15157,10 +15157,10 @@ Write Flag To Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101110 | D | --- | --- | 2 |
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101111 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101100 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101101 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101110 | --- | --- | D | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101111 | --- | --- | D | 2 |
 
 
 **Explanation:**
@@ -15557,7 +15557,7 @@ Exclusive Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2 |
+| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Zero | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
@@ -15597,7 +15597,7 @@ Xoroshiro 32
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | --- | --- | 2 |
+| EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | --- | --- | D | 2 |
 
 
 **Related:** [GETRND](#getrnd), [SETQ](#setq)
@@ -15730,7 +15730,7 @@ Zero Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | D | MSB | Zero | 2 |
+| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | MSB | Zero | D | 2 |
 
 
 **Related:** [SIGNX](#signx)
