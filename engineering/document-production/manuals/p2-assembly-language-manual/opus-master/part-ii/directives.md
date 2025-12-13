@@ -725,7 +725,7 @@ In comparison, this data will be emitted as follows:
 \AlignWAfterDiagram
 ```
 
-In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address.
+In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address. Note that the long after T2 packs sequentially at offset 4—it happens to be long-aligned here only because T2 is exactly 2 bytes; this is coincidental, not automatic.
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
