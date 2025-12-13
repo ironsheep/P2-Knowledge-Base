@@ -1,6 +1,0 @@
-name: "\\"
-type: operator
-priority: 15
-category: "Bitwise"
-description: "Bitwise operators: OR, XOR, NOT"
-source: Spin2 Documentation v51

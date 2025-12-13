@@ -1,6 +1,0 @@
-name: WAITMS
-type: method
-category: Delays
-signature: "WAITMS(Milliseconds)"
-description: "Delay for milliseconds"
-source: Spin2 Documentation v51

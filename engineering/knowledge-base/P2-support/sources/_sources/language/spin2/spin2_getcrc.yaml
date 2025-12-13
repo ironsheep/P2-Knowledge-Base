@@ -1,6 +1,0 @@
-name: GETCRC
-type: method
-category: String Creation
-signature: "GETCRC(BytePtr, Poly, Count) : CRC"
-description: "Calculate CRC with specified polynomial"
-source: Spin2 Documentation v51

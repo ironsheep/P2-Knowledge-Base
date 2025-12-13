@@ -1,6 +1,0 @@
-name: GETMS
-type: method
-category: Time Measurement
-signature: "GETMS() : Milliseconds"
-description: "Get milliseconds since boot"
-source: Spin2 Documentation v51

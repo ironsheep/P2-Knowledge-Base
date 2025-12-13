@@ -1,6 +1,0 @@
-name: WAITATN
-type: method
-category: Attention Signaling
-signature: "WAITATN()"
-description: "Wait for ATN strobe"
-source: Spin2 Documentation v51

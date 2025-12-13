@@ -1,7 +1,0 @@
-name: HUB75 Adapter
-part_number: 64032
-category: addon
-description: "RGB LED matrix adapter"
-pins_used: 14
-interface: Dual 8-pin headers
-source: P2 Documentation Collection

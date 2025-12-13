@@ -1,6 +1,0 @@
-name: RDPIN
-type: method
-category: SmartPin Operations
-signature: "RDPIN(Pin) : Zval"
-description: "Read and acknowledge smart pin, bit 31 = C flag"
-source: Spin2 Documentation v51

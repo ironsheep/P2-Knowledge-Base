@@ -1,6 +1,0 @@
-name: "ABS"
-type: operator
-priority: 2
-category: \
-description: "` `^^` `ENCOD` `DECOD` `ONES` `SQRT` `QLOG` `QEXP`"
-source: Spin2 Documentation v51
