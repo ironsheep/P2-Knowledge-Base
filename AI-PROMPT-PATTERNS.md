@@ -103,22 +103,22 @@ Fetch: p2kbArchLocks
 ### Search by Prefix
 ```bash
 # All PASM2 instructions
-jq '.files | keys[] | select(startswith("p2kbPasm2"))' ~/.p2kb-cache/p2kb-index.json
+jq '.files | keys[] | select(startswith("p2kbPasm2"))' .p2kb-cache/p2kb-index.json
 
 # All Spin2 methods
-jq '.files | keys[] | select(startswith("p2kbSpin2"))' ~/.p2kb-cache/p2kb-index.json
+jq '.files | keys[] | select(startswith("p2kbSpin2"))' .p2kb-cache/p2kb-index.json
 
 # All Smart Pin modes
-jq '.files | keys[] | select(contains("SmartPin"))' ~/.p2kb-cache/p2kb-index.json
+jq '.files | keys[] | select(contains("SmartPin"))' .p2kb-cache/p2kb-index.json
 ```
 
 ### Search by Keyword
 ```bash
 # Find UART-related content
-grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+grep -o '"p2kb[^"]*"' .p2kb-cache/p2kb-index.json | grep -i uart
 
 # Find timer-related content
-grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i wait
+grep -o '"p2kb[^"]*"' .p2kb-cache/p2kb-index.json | grep -i wait
 ```
 
 ---
@@ -173,7 +173,7 @@ Fetch p2kbPasm2Waitx for assembly delays.
 
 ### Key Not Found
 ```
-Verify key exists: grep "keyname" ~/.p2kb-cache/p2kb-index.json
+Verify key exists: grep "keyname" .p2kb-cache/p2kb-index.json
 Keys are case-sensitive and always start with "p2kb"
 ```
 

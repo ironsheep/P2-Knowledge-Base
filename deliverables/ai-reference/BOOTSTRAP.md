@@ -18,10 +18,10 @@
 ## Bash Setup (Linux / macOS / WSL / Git Bash)
 
 ```bash
-mkdir -p ~/.p2kb-cache && \
-curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh && \
-chmod +x ~/.p2kb-cache/refresh-kb.sh && \
-~/.p2kb-cache/refresh-kb.sh
+mkdir -p .p2kb-cache && \
+curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > .p2kb-cache/refresh-kb.sh && \
+chmod +x .p2kb-cache/refresh-kb.sh && \
+.p2kb-cache/refresh-kb.sh
 ```
 
 ---
@@ -31,10 +31,9 @@ chmod +x ~/.p2kb-cache/refresh-kb.sh && \
 Only use this if running in native Windows PowerShell, not through Bash:
 
 ```powershell
-$d = "$env:USERPROFILE\.p2kb-cache"
-New-Item -ItemType Directory -Force -Path $d | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$d\refresh-kb.ps1"
-& "$d\refresh-kb.ps1"
+New-Item -ItemType Directory -Force -Path .p2kb-cache | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile ".p2kb-cache\refresh-kb.ps1"
+& ".p2kb-cache\refresh-kb.ps1"
 ```
 
 ---
@@ -42,7 +41,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge
 ## Verify Setup
 
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh --help
+.p2kb-cache/fetch-kb-file.sh --help
 ```
 
 You should see available commands including `--search`, `--browse`, and `--categories`.
@@ -55,24 +54,24 @@ You should see available commands including `--search`, `--browse`, and `--categ
 
 ```bash
 # Search for keys by keyword
-~/.p2kb-cache/fetch-kb-file.sh --search uart
-~/.p2kb-cache/fetch-kb-file.sh --search cordic
+.p2kb-cache/fetch-kb-file.sh --search uart
+.p2kb-cache/fetch-kb-file.sh --search cordic
 
 # Browse by category
-~/.p2kb-cache/fetch-kb-file.sh --categories
-~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+.p2kb-cache/fetch-kb-file.sh --categories
+.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
 
 # See what's cached locally
-~/.p2kb-cache/fetch-kb-file.sh --cached
+.p2kb-cache/fetch-kb-file.sh --cached
 ```
 
 ### Fetch Content
 
 ```bash
 # Fetch by key
-~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
-~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
+.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 ```
 
 ---
@@ -93,7 +92,7 @@ You should see available commands including `--search`, `--browse`, and `--categ
 ## Update Everything
 
 ```bash
-~/.p2kb-cache/refresh-kb.sh
+.p2kb-cache/refresh-kb.sh
 ```
 
 ---

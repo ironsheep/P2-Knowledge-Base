@@ -15,7 +15,7 @@ upgrade_instructions: |
 
   1. Run the refresh script to update all components:
      ```bash
-     ~/.p2kb-cache/refresh-kb.sh
+     .p2kb-cache/refresh-kb.sh
      ```
      This handles migration from v3.1 structure automatically.
 
@@ -27,14 +27,14 @@ upgrade_instructions: |
 
   5. Test the new system:
      ```bash
-     ~/.p2kb-cache/fetch-kb-file.sh --help
+     .p2kb-cache/fetch-kb-file.sh --help
      ```
 
   ## What's New in v3.2
   - Navigation commands: --browse, --search, --cached, --categories
   - Better error messages with similar key suggestions
   - Category-based browsing (45 categories)
-  - Index and cache moved to hidden location (~/.p2kb/ on Unix)
+  - Index and cache moved to hidden location (.p2kb/ on Unix)
 
 # ============================================================================
 # CLAUDE.MD CONTENT - Append this to your CLAUDE.md file
@@ -51,49 +51,49 @@ claude_md_content: |
   **ALWAYS use the fetch script for ALL P2KB operations.**
   **NEVER access the index or cache files directly.**
 
-  - ❌ DON'T: `jq ... ~/.p2kb/p2kb-index.json`
-  - ❌ DON'T: `cat ~/.p2kb/cache/...`
+  - ❌ DON'T: `jq ... .p2kb/p2kb-index.json`
+  - ❌ DON'T: `cat .p2kb/cache/...`
   - ❌ DON'T: Guess at key names
-  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh --search <term>`
-  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh --browse <category>`
-  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh <key>`
+  - ✅ DO: `.p2kb-cache/fetch-kb-file.sh --search <term>`
+  - ✅ DO: `.p2kb-cache/fetch-kb-file.sh --browse <category>`
+  - ✅ DO: `.p2kb-cache/fetch-kb-file.sh <key>`
 
   ## 🔒 P2KB Locations (v3.2)
-  - **Scripts (user-visible):** `~/.p2kb-cache/` (Unix) or `$env:USERPROFILE\.p2kb-cache\` (Windows)
-  - **Index/Cache (hidden):** `~/.p2kb/` (Unix) or `$env:LOCALAPPDATA\p2kb` (Windows)
+  - **Scripts (user-visible):** `.p2kb-cache/` (project directory)
+  - **Index/Cache (hidden):** `.p2kb/` (project directory)
 
   ## Quick Reference - Interface Commands
 
   ### Get Help
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh --help
+  .p2kb-cache/fetch-kb-file.sh --help
   ```
 
   ### Find Keys
   ```bash
   # Search for keys containing a term (case-insensitive)
-  ~/.p2kb-cache/fetch-kb-file.sh --search uart
-  ~/.p2kb-cache/fetch-kb-file.sh --search cordic
+  .p2kb-cache/fetch-kb-file.sh --search uart
+  .p2kb-cache/fetch-kb-file.sh --search cordic
 
   # Browse keys by category
-  ~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
-  ~/.p2kb-cache/fetch-kb-file.sh --browse architecture_core
-  ~/.p2kb-cache/fetch-kb-file.sh --browse smart_pins_serial
+  .p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+  .p2kb-cache/fetch-kb-file.sh --browse architecture_core
+  .p2kb-cache/fetch-kb-file.sh --browse smart_pins_serial
 
   # List all categories
-  ~/.p2kb-cache/fetch-kb-file.sh --categories
+  .p2kb-cache/fetch-kb-file.sh --categories
   ```
 
   ### Fetch Content
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Get MOV instruction
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog       # Get COG architecture
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries  # Starting point
+  .p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Get MOV instruction
+  .p2kb-cache/fetch-kb-file.sh p2kbArchCog       # Get COG architecture
+  .p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries  # Starting point
   ```
 
   ### Check Downloaded Files
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh --cached
+  .p2kb-cache/fetch-kb-file.sh --cached
   ```
 
   ### Key Prefixes
@@ -112,14 +112,14 @@ claude_md_content: |
 
   ### Update Check Protocol
   1. Fetch root manifest:
-     `~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml`
+     `.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml`
   2. Compare `ai_instructions.content_hash` with your stored hash
-  3. If different → run `~/.p2kb-cache/refresh-kb.sh` then update CLAUDE.md
+  3. If different → run `.p2kb-cache/refresh-kb.sh` then update CLAUDE.md
   4. If same → cache is current, proceed normally
 
   ### Quick Refresh
   ```bash
-  ~/.p2kb-cache/refresh-kb.sh
+  .p2kb-cache/refresh-kb.sh
   ```
 
   ## Starting Point
@@ -133,34 +133,34 @@ setup_instructions: |
 
   ### Step 1: Create Script Directory
   ```bash
-  mkdir -p ~/.p2kb-cache
+  mkdir -p .p2kb-cache
   ```
 
   ### Step 2: Download Fetch Script
 
   **Unix/macOS/Linux:**
   ```bash
-  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
-  chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > .p2kb-cache/fetch-kb-file.sh
+  chmod +x .p2kb-cache/fetch-kb-file.sh
   ```
 
   **Windows PowerShell:**
   ```powershell
-  New-Item -ItemType Directory -Path "$env:USERPROFILE\.p2kb-cache" -Force
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+  New-Item -ItemType Directory -Path ".p2kb-cache" -Force
+  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile ".p2kb-cache\fetch-kb-file.ps1"
   ```
 
   ### Step 3: Verify Setup
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh --help
+  .p2kb-cache/fetch-kb-file.sh --help
   ```
 
   ✅ Setup complete when you see the help message with available commands.
 
   ### Optional: Download Refresh Script
   ```bash
-  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
-  chmod +x ~/.p2kb-cache/refresh-kb.sh
+  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > .p2kb-cache/refresh-kb.sh
+  chmod +x .p2kb-cache/refresh-kb.sh
   ```
 
 usage:
@@ -178,21 +178,21 @@ usage:
 
   examples:
     find_keys:
-      - "~/.p2kb-cache/fetch-kb-file.sh --search mov"
-      - "~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_math"
-      - "~/.p2kb-cache/fetch-kb-file.sh --categories"
+      - ".p2kb-cache/fetch-kb-file.sh --search mov"
+      - ".p2kb-cache/fetch-kb-file.sh --browse pasm2_math"
+      - ".p2kb-cache/fetch-kb-file.sh --categories"
     fetch_content:
-      - "~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov"
-      - "~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog"
-      - "~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries"
+      - ".p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov"
+      - ".p2kb-cache/fetch-kb-file.sh p2kbArchCog"
+      - ".p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries"
     check_cache:
-      - "~/.p2kb-cache/fetch-kb-file.sh --cached"
+      - ".p2kb-cache/fetch-kb-file.sh --cached"
 
   forbidden_patterns:
     description: "NEVER do these - always use the script interface"
     examples:
-      - "jq ... ~/.p2kb/p2kb-index.json  # DON'T access index directly"
-      - "cat ~/.p2kb/cache/...  # DON'T read cache files directly"
+      - "jq ... .p2kb/p2kb-index.json  # DON'T access index directly"
+      - "cat .p2kb/cache/...  # DON'T read cache files directly"
       - "grep ... p2kb-index.json  # DON'T search index directly"
       - "Guessing key names  # DON'T guess - use --search or --browse"
 

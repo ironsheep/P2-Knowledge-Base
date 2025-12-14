@@ -19,26 +19,26 @@
 
 ### Step 1: Create Cache Directory
 ```bash
-mkdir -p ~/.p2kb-cache
+mkdir -p .p2kb-cache
 ```
 
 ### Step 2: Download Fetch Script
 
 **Unix/macOS/Linux:**
 ```bash
-curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
-chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > .p2kb-cache/fetch-kb-file.sh
+chmod +x .p2kb-cache/fetch-kb-file.sh
 ```
 
 **Windows PowerShell:**
 ```powershell
-mkdir "$env:USERPROFILE\.p2kb-cache" -Force
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+mkdir ".p2kb-cache" -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile ".p2kb-cache\fetch-kb-file.ps1"
 ```
 
 ### Step 3: Verify
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
 ```
 
 ---
@@ -59,17 +59,17 @@ Every piece of content has a unique key:
 ### Fetch Content
 
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh <key>
+.p2kb-cache/fetch-kb-file.sh <key>
 ```
 
 ### Find Keys
 
 ```bash
 # Search index for keys
-jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
+jq '.files | keys[] | select(contains("Pasm2"))' .p2kb-cache/p2kb-index.json
 
 # Grep-based search
-grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+grep -o '"p2kb[^"]*"' .p2kb-cache/p2kb-index.json | grep -i uart
 ```
 
 ---
@@ -96,7 +96,7 @@ Keys follow the pattern: `p2kb` + Category + Name
 ### Start Here: Quick Queries
 ```bash
 # Get the quick reference guide first
-~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
+.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 ```
 
 This guide maps common questions to relevant keys.
@@ -104,23 +104,23 @@ This guide maps common questions to relevant keys.
 ### PASM2 Instructions
 ```bash
 # Get specific instruction
-~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
-~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Add
+.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+.p2kb-cache/fetch-kb-file.sh p2kbPasm2Add
 ```
 
 ### Spin2 Methods
 ```bash
 # Get specific method
-~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Pinwrite
-~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Waitms
+.p2kb-cache/fetch-kb-file.sh p2kbSpin2Pinwrite
+.p2kb-cache/fetch-kb-file.sh p2kbSpin2Waitms
 ```
 
 ### Architecture
 ```bash
 # Core architecture docs
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchHub
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchCordic
+.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+.p2kb-cache/fetch-kb-file.sh p2kbArchHub
+.p2kb-cache/fetch-kb-file.sh p2kbArchCordic
 ```
 
 ---
@@ -169,7 +169,7 @@ The index (`p2kb-index.json`) contains:
 ### Caching
 - Files cached locally after first download
 - Index auto-refreshes every 24 hours
-- Delete `~/.p2kb-cache/content/` to force refresh
+- Delete `.p2kb-cache/content/` to force refresh
 
 ### Metadata Filtering
 - Editorial metadata stripped on download
@@ -183,16 +183,16 @@ The index (`p2kb-index.json`) contains:
 ### Key Not Found
 ```bash
 # Verify key exists
-grep "p2kbPasm2Mov" ~/.p2kb-cache/p2kb-index.json
+grep "p2kbPasm2Mov" .p2kb-cache/p2kb-index.json
 ```
 
 ### Stale Content
 ```bash
 # Clear content cache
-rm -rf ~/.p2kb-cache/content/
+rm -rf .p2kb-cache/content/
 
 # Clear entire cache (forces fresh download)
-rm -rf ~/.p2kb-cache
+rm -rf .p2kb-cache
 ```
 
 ### Network Issues

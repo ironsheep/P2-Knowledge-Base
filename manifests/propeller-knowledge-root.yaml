@@ -14,7 +14,7 @@ migration:
   to_version: "3.2"
   reason: |
     v3.2 adds navigation commands (--browse, --search, --cached, --categories)
-    and moves index/cache to hidden location. Scripts remain in ~/.p2kb-cache/.
+    and moves index/cache to hidden location. Scripts remain in .p2kb-cache/.
 
   ai_action_required: |
     ⚠️ HASH MISMATCH - YOUR CACHE IS OUTDATED
@@ -24,21 +24,21 @@ migration:
     **Unix/macOS/Linux:**
     ```bash
     # Download and run refresh script (handles migration automatically)
-    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
-    chmod +x ~/.p2kb-cache/refresh-kb.sh
-    ~/.p2kb-cache/refresh-kb.sh
+    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > .p2kb-cache/refresh-kb.sh
+    chmod +x .p2kb-cache/refresh-kb.sh
+    .p2kb-cache/refresh-kb.sh
     ```
 
     **Windows PowerShell:**
     ```powershell
     # Download and run refresh script (handles migration automatically)
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
-    & "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile ".p2kb-cache\refresh-kb.ps1"
+    & ".p2kb-cache\refresh-kb.ps1"
     ```
 
     **Verify upgrade:**
     ```bash
-    ~/.p2kb-cache/fetch-kb-file.sh --help
+    .p2kb-cache/fetch-kb-file.sh --help
     ```
 
     Then fetch ai-instructions.yaml and follow upgrade_instructions to update CLAUDE.md.
@@ -82,31 +82,31 @@ obex_scripts:
 # Storage Locations (v3.2)
 storage:
   scripts:
-    unix: "~/.p2kb-cache/"
-    windows: "$env:USERPROFILE\\.p2kb-cache\\"
+    unix: ".p2kb-cache/"
+    windows: ".p2kb-cache\\"
     description: "User-visible script location"
   index_cache:
-    unix: "~/.p2kb/"
-    windows: "$env:LOCALAPPDATA\\p2kb\\"
+    unix: ".p2kb/"
+    windows: ".p2kb\\"
     description: "Hidden index and cache location"
 
 # Quick Start for v3.2
 quickstart: |
   # 1. Download fetch script
-  mkdir -p ~/.p2kb-cache
-  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
-  chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+  mkdir -p .p2kb-cache
+  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > .p2kb-cache/fetch-kb-file.sh
+  chmod +x .p2kb-cache/fetch-kb-file.sh
 
   # 2. See available commands
-  ~/.p2kb-cache/fetch-kb-file.sh --help
+  .p2kb-cache/fetch-kb-file.sh --help
 
   # 3. Find keys
-  ~/.p2kb-cache/fetch-kb-file.sh --search mov
-  ~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+  .p2kb-cache/fetch-kb-file.sh --search mov
+  .p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
 
   # 4. Fetch content by key
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+  .p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+  .p2kb-cache/fetch-kb-file.sh p2kbArchCog
 
 # Knowledge Base Status
 knowledge_bases:

@@ -33,9 +33,9 @@ This downloads the key-based access system with:
 ### Usage
 
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh --search mov      # Find keys
-~/.p2kb-cache/fetch-kb-file.sh --browse pasm2    # Browse category
-~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Fetch content
+.p2kb-cache/fetch-kb-file.sh --search mov      # Find keys
+.p2kb-cache/fetch-kb-file.sh --browse pasm2    # Browse category
+.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Fetch content
 ```
 
 ## For Programmatic Access

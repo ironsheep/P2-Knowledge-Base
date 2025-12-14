@@ -23,9 +23,9 @@ This provides one-command setup for both Unix/macOS and Windows, plus usage inst
 ## Quick Reference (After Setup)
 
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh --search uart     # Find keys
-~/.p2kb-cache/fetch-kb-file.sh --categories      # Browse categories
-~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Fetch content
+.p2kb-cache/fetch-kb-file.sh --search uart     # Find keys
+.p2kb-cache/fetch-kb-file.sh --categories      # Browse categories
+.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Fetch content
 ```
 
 ---
