@@ -143,22 +143,23 @@ Invoke-Migration
 Write-Host ""
 Write-Host "Updating scripts..."
 
-# Cache-control header to bypass GitHub CDN cache
-$NoCacheHeaders = @{"Cache-Control"="no-cache"}
+# Use GitHub API for PS1 files (raw CDN caches too aggressively)
+$ApiBase = "https://api.github.com/repos/ironsheep/P2-Knowledge-Base/contents"
+$ApiHeaders = @{Accept="application/vnd.github.raw"}
 
 # Fetch script
 Write-Log "Downloading fetch-kb-file.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/fetch-kb-file.ps1" -Headers $NoCacheHeaders -OutFile "$ScriptDir\fetch-kb-file.ps1"
+Invoke-WebRequest -Uri "$ApiBase/engineering/tools/p2kb/fetch-kb-file.ps1" -Headers $ApiHeaders -OutFile "$ScriptDir\fetch-kb-file.ps1"
 Write-Status "fetch-kb-file.ps1"
 
 # Refresh script (self-update)
 Write-Log "Downloading refresh-kb.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/refresh-kb.ps1" -Headers $NoCacheHeaders -OutFile "$ScriptDir\refresh-kb.ps1"
+Invoke-WebRequest -Uri "$ApiBase/engineering/tools/p2kb/refresh-kb.ps1" -Headers $ApiHeaders -OutFile "$ScriptDir\refresh-kb.ps1"
 Write-Status "refresh-kb.ps1"
 
 # OBEX helper
 Write-Log "Downloading obex\download-helper.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/obex/download-helper.ps1" -Headers $NoCacheHeaders -OutFile "$ScriptDir\obex\download-helper.ps1"
+Invoke-WebRequest -Uri "$ApiBase/engineering/tools/p2kb/obex/download-helper.ps1" -Headers $ApiHeaders -OutFile "$ScriptDir\obex\download-helper.ps1"
 Write-Status "obex\download-helper.ps1"
 
 # =============================================================================
