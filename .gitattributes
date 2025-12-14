@@ -1,5 +1,5 @@
 # Enforce LF line endings for shell scripts
 *.sh text eol=lf
 
-# PowerShell can handle either, but keep consistent
-*.ps1 text eol=crlf
+# PowerShell requires CRLF - store as-is (no normalization) for raw downloads
+*.ps1 -text
