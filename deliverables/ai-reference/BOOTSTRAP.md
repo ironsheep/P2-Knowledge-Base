@@ -5,9 +5,17 @@
 
 ---
 
-## Unix / Linux / macOS
+## Which Commands to Use
 
-Run this single command to set up everything:
+**Choose based on your SHELL, not the user's OS:**
+- If you can run `bash` and `curl` → Use **Bash commands** (even on Windows with WSL/Git Bash)
+- If you're in native PowerShell on Windows → Use **PowerShell commands**
+
+**Most AI environments use Bash** - when in doubt, try Bash first.
+
+---
+
+## Bash Setup (Linux / macOS / WSL / Git Bash)
 
 ```bash
 mkdir -p ~/.p2kb-cache && \
@@ -18,9 +26,9 @@ chmod +x ~/.p2kb-cache/refresh-kb.sh && \
 
 ---
 
-## Windows PowerShell
+## PowerShell Setup (Native Windows Only)
 
-Run these commands:
+Only use this if running in native Windows PowerShell, not through Bash:
 
 ```powershell
 $d = "$env:USERPROFILE\.p2kb-cache"
