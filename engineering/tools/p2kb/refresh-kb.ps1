@@ -1,9 +1,9 @@
 # P2 Knowledge Base Refresh Script v3.2
 # Updates scripts, index, and common files with migration from v3.1 structure
-# Usage: .\refresh-kb.ps1 [-Verbose] [-Force]
+# Usage: .\refresh-kb.ps1 [-ShowDetails] [-Force]
 
 param(
-    [switch]$Verbose,
+    [switch]$ShowDetails,
     [switch]$Force
 )
 
@@ -21,7 +21,7 @@ $CacheDir = "$IndexDir\cache"
 
 function Write-Log {
     param([string]$Message)
-    if ($Verbose) { Write-Host "[INFO] $Message" -ForegroundColor Cyan }
+    if ($ShowDetails) { Write-Host "[INFO] $Message" -ForegroundColor Cyan }
 }
 
 function Write-Status {

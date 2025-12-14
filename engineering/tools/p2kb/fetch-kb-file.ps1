@@ -11,7 +11,7 @@ param(
     [string]$Browse,
     [string]$Search,
     [switch]$Categories,
-    [switch]$Verbose
+    [switch]$ShowDetails
 )
 
 $ErrorActionPreference = "Stop"
@@ -90,7 +90,7 @@ IMPORTANT:
 
 function Write-Log {
     param([string]$Message)
-    if ($Verbose) {
+    if ($ShowDetails) {
         Write-Host "[INFO] $Message" -ForegroundColor Gray
     }
 }
