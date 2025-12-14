@@ -64,16 +64,33 @@ The download helper operates from the project root and:
 - **Object ID**: A numeric string (e.g., `"2811"`, `"4047"`)
 - NOT prefixed with "OB" - that prefix is only used in download URLs
 
+## Important: OBEX Not in P2KB Index
+
+**OBEX objects are NOT included in the main p2kb-index.json**. This means:
+- You cannot use `p2kb_get` or key-based lookup for OBEX
+- OBEX YAML files must be fetched directly via HTTP
+- The MCP needs separate OBEX-specific tools
+
+This is by design - OBEX is a separate subsystem with its own metadata structure.
+
 ## Operational Flow
 
 ### Step 1: Fetch Object Metadata
 
-**Goal**: Retrieve the YAML metadata for the object from the P2 Knowledge Base.
+**Goal**: Retrieve the YAML metadata for the object directly from GitHub.
+
+**Important**: Must fetch via HTTP, not through p2kb key lookup.
 
 **Path Construction**:
 ```
 deliverables/ai/P2/community/obex/objects/{object_id}.yaml
 ```
+
+**Full URL (GitHub API)**:
+```
+https://api.github.com/repos/ironsheep/P2-Knowledge-Base/contents/deliverables/ai/P2/community/obex/objects/{object_id}.yaml
+```
+With header: `Accept: application/vnd.github.raw`
 
 **Example**:
 ```
@@ -356,6 +373,45 @@ interface ObexDownloadResult {
 | 6 | Empty file | "Download returned empty file - OBEX may be unavailable." |
 | 7 | Extract fails | "ZIP extraction failed - file may be corrupted." |
 
+## Additional Output Behaviors
+
+### File Listing
+
+After extraction, the helper lists all extracted files recursively. This helps users see what they got:
+```
+[INFO] Extracted contents:
+Mode         LastWriteTime     Length Name
+----         -------------     ------ ----
+-a----       5/9/2020 12:00     1234  park_transform.spin2
+-a----       5/9/2020 12:00      567  README.txt
+```
+
+### Programmatic Output
+
+The final line of stdout contains ONLY the path to the extracted files:
+```
+C:\Users\...\OBEX\park-transformation
+```
+
+This allows calling scripts/tools to capture the path for further processing:
+```powershell
+$extractPath = & ".p2kb-cache\obex\download-helper.ps1" -ObjectId 2811 | Select-Object -Last 1
+```
+
+### User Inspection Pause
+
+The helper ends with `[STOP] Ready for user inspection` to indicate:
+1. Download and extraction completed successfully
+2. User should review the files before proceeding
+3. No further automatic actions will be taken
+
+### Preserved Original ZIP
+
+The original `OB{id}.zip` file is kept in the directory for:
+- Re-extraction if needed
+- Verification of original contents
+- Sharing with others
+
 ## Testing Checklist
 
 - [ ] Valid object ID returns correct metadata
@@ -365,3 +421,5 @@ interface ObexDownloadResult {
 - [ ] Nested ZIPs are detected and extracted
 - [ ] Empty downloads are rejected
 - [ ] Directory already exists - handled gracefully
+- [ ] Stdout last line contains only the path
+- [ ] Original ZIP is preserved after extraction

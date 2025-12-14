@@ -6,6 +6,8 @@ This document provides implementation details for adding OBEX (Parallax Object E
 
 OBEX is Parallax's community repository of P2 code objects. The P2 Knowledge Base contains metadata for ~113 OBEX objects, stored as individual YAML files.
 
+**Important**: OBEX objects are NOT in the main `p2kb-index.json`. They require separate tools and direct HTTP fetching. The MCP must implement OBEX-specific tools (`p2kb_obex_*`) that fetch YAML directly from GitHub, not through the key-based lookup system.
+
 ## Data Location
 
 ```
