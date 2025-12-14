@@ -2,6 +2,11 @@
 
 Human-readable reference materials for Propeller 2 development.
 
+
+#  NOTE: (placeholder) for possible future content!
+
+ - this is not live data, just a tiny prototype showing possible shape with hints.
+
 ## Structure
 
 - `P2/architecture/` - Processor architecture documentation
