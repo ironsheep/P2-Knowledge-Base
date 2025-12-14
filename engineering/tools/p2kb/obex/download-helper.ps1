@@ -118,4 +118,4 @@ Write-Host ""
 Write-Host "🛑 STOPPING HERE - Ready for user inspection" -ForegroundColor Yellow
 
 # Output the final path to stdout for Claude to capture
-Write-Output "$(Get-Location)"
+Write-Output "$(Get-Location)"
