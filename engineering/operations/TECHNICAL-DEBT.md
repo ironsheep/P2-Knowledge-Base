@@ -121,6 +121,44 @@ Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2
 
 ---
 
+### 7. DOD v3.2 Bootstrap System - Legacy Cleanup
+
+**Status**: Open
+**Priority**: Low
+**Discovered**: 2025-12-14
+
+**Problem**: After implementing the v3.2 single-bounce bootstrap system (`deliverables/ai-reference/BOOTSTRAP.md`), several legacy files and references remain from the old v2.x two-stage bootstrap approach.
+
+**Legacy Files to Remove**:
+```
+manifests/
+├── ai-bootstrap-unix.yaml       # OLD - replaced by BOOTSTRAP.md
+├── ai-bootstrap-windows.yaml    # OLD - replaced by BOOTSTRAP.md
+├── ai-bootstrap-ultra-minimal.yaml  # OLD - no longer needed
+└── ai-instructions.yaml         # Review - refresh-kb.sh may still reference
+```
+
+**Files with Outdated References**:
+- `engineering/ai-integration/README.md` - References old `manifests/ai-instructions.yaml` system
+- `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` - References ai-instructions.yaml
+- `manifests/propeller-knowledge-root.yaml` - May need update or removal
+
+**What Changed**:
+- v3.2 uses single `BOOTSTRAP.md` file (markdown, not YAML) for both platforms
+- WebFetch returns markdown verbatim (unlike YAML which gets summarized)
+- `refresh-kb.sh` handles all downloads (scripts, index, common files)
+- No more two-stage bootstrap or heredoc script creation
+
+**Fix Approach**:
+- Remove old bootstrap YAML files from manifests/
+- Update `engineering/ai-integration/README.md` to document v3.2 system
+- Verify `refresh-kb.sh` doesn't depend on removed files
+- Keep `engineering/operations/sprints/dod-v3-sprint-plan.md` as historical reference
+
+**Impact**: Low - old files don't break anything, just clutter
+
+---
+
 ## Resolved Debt Items
 
 ### GitHub URL Organization Name (FIXED 2025-12-06)
