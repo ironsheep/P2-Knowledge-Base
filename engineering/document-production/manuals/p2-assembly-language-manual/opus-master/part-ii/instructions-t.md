@@ -25,8 +25,8 @@ Test
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | D = 0 | --- | 2 |
-| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & S) | (D & S) = 0 | --- | 2 |
+| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | (D == 0) | --- | 2 |
+| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & S) | ((D & S) == 0) | --- | 2 |
 
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -157,7 +157,7 @@ Test Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & !S) | (D & !S) = 0 | --- | 2 |
+| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & !S) | ((D & !S) == 0) | --- | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)

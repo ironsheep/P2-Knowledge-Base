@@ -25,8 +25,8 @@ Ones
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | Result = 0 | D | 2 |
-| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | Result = 0 | D | 2 |
+| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | result == 0 | D | 2 |
+| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | result == 0 | D | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
@@ -65,7 +65,7 @@ Bitwise Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | Result = 0 | D | 2 |
+| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
@@ -114,11 +114,12 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
@@ -158,8 +159,9 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
@@ -171,7 +173,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTH is commonly used to turn on LEDs, assert control signals, or drive pins high for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
@@ -196,8 +198,9 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
@@ -209,7 +212,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
@@ -234,8 +237,9 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
@@ -247,7 +251,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
 
@@ -272,8 +276,9 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 

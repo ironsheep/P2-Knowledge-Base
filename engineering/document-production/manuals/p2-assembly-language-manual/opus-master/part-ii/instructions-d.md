@@ -26,7 +26,7 @@ Decrement Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | Result = 0 | D | 2 |
+| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | result == 0 | D | 2 |
 
 
 **Related:** [INCMOD](#incmod)
@@ -105,9 +105,10 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRL](#dirl), [DIRH](#dirh), [DIRNOT](#dirnot), [DIRRND](#dirrnd)
 
@@ -148,8 +149,9 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -161,7 +163,7 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
-If the WCZ effect is specified, the Z flag is set to the state of the direction bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
 
@@ -184,8 +186,9 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -197,7 +200,7 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
-If the WCZ effect is specified, the Z flag is updated to the original state of the target direction bit.
+If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
 
@@ -220,8 +223,9 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -261,9 +265,10 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -304,8 +309,9 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIRx | Original DIRx base bit | Original DIRx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRNOT](#dirnot), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -431,7 +437,7 @@ DJZ and DJNZ decrement Dest and conditionally jump based on whether the result i
 
 | Instruction | Jumps when |
 |-------------|------------|
-| DJZ | Result = 0 |
+| DJZ | result == 0 |
 | DJNZ | Result ≠ 0 |
 
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
@@ -467,9 +473,10 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -485,7 +492,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
 
 
 
@@ -508,8 +515,9 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -523,7 +531,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
 
 
@@ -546,8 +554,9 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -561,7 +570,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
@@ -586,8 +595,9 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -629,9 +639,10 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVC](#drvc), [DRVNC](#drvnc), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -647,7 +658,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
 
 
 
@@ -670,8 +681,9 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit\textsuperscript{1} | DIRx, OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVNOT](#drvnot)
 

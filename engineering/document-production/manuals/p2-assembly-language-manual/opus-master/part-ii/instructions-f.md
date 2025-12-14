@@ -60,8 +60,9 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
 
@@ -97,8 +98,9 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
 
@@ -134,8 +136,9 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
 
@@ -171,8 +174,9 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
 
@@ -210,11 +214,12 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
@@ -254,8 +259,9 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -292,8 +298,9 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -330,8 +337,9 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
 
@@ -370,8 +378,9 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 

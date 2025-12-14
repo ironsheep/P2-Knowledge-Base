@@ -25,8 +25,8 @@ Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of result | Result = 0 | D | 2 |
-| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign of result | Result = 0 | D | 2 |
+| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
@@ -73,14 +73,14 @@ Conditional Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
+| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -191,8 +191,8 @@ Bitwise Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | !S[31] | Result = 0 | D | 2 |
-| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | !D[31] | Result = 0 | D | 2 |
+| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | !S[31] | result == 0 | D | 2 |
+| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | !D[31] | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)

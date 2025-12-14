@@ -108,7 +108,7 @@ Exclusive Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Zero | D | 2 |
+| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)

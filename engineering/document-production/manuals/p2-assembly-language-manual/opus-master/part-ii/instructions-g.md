@@ -211,7 +211,7 @@ Get CORDIC X Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | Result = 0 | D | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | result == 0 | D | 2...58 |
 
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -249,7 +249,7 @@ Get CORDIC Y Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | Result = 0 | D | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | result == 0 | D | 2...58 |
 
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)

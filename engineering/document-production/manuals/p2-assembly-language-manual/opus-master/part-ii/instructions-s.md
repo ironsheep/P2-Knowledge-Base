@@ -24,8 +24,9 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -59,8 +60,9 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
@@ -130,7 +132,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Result = 0 | --- | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | result == 0 | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -923,8 +925,9 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -958,8 +961,9 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -993,7 +997,7 @@ Sign Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | Result = 0 | D | 2 |
+| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [ZEROX](#zerox)
@@ -1195,7 +1199,7 @@ Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | Result = 0 | D | 2 |
+| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | result == 0 | D | 2 |
 
 
 **Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
@@ -1230,7 +1234,7 @@ Subtract Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | Result = 0 | D | 2 |
+| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | result == 0 | D | 2 |
 
 
 **Related:** [SUB](#sub)
@@ -1261,7 +1265,7 @@ Subtract Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of (D - S) | Result = 0 | D | 2 |
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | result == 0 | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
@@ -1292,7 +1296,7 @@ Subtract Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of D-(S+C) | Z AND (Result = 0) | D | 2 |
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
@@ -1323,7 +1327,7 @@ Subtract Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result = 0) | D | 2 |
+| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBSX](#subsx)
@@ -1357,10 +1361,10 @@ Conditional Sum
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
 
 
 **Explanation:**

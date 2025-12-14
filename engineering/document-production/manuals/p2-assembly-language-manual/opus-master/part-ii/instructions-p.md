@@ -400,7 +400,7 @@ Pop From Internal Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | result == 0 | D | 2 |
 
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
@@ -436,7 +436,7 @@ Pop From Hub Stack A
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | Result = 0 | D | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | result == 0 | D | 9...16 |
 
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
@@ -472,7 +472,7 @@ Pop From Hub Stack B
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | Result = 0 | D | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | result == 0 | D | 9...16 |
 
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)

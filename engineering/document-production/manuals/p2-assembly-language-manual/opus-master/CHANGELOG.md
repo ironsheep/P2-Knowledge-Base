@@ -2,7 +2,7 @@
 
 ## v1.3.0 (2025-12-13)
 
-**Directives Enhancement Release** - Expanded directive documentation with inline assembly support and comprehensive usage guidance.
+**Directives & Internal Consistency Release** - Expanded directive documentation and systematic corrections from internal consistency audit.
 
 ### Part II: Directives
 
@@ -19,6 +19,61 @@
 **Structural:**
 - Directive count updated from 14 to 15
 - Added "Inline Assembly Directives" category
+
+### Part II: Instruction Reference
+
+#### Encoding Table Corrections
+
+**Signed Arithmetic C Flag (5 instructions):**
+- ADDS, ADDSX, SUBS, SUBSX, CMPS: C flag description now uses "correct sign of" wording to clarify borrow/carry behavior for signed operations
+
+**Z Flag Notation Standardization (71 occurrences):**
+- Standardized comparison operators across all encoding tables: `Result = 0` → `result == 0`
+- CMP family: `D = S` → `(D == S)` for clarity
+- Extended results: `Z AND (Result = 0)` → `Z AND (result == 0)`
+
+**Column Alignment Fixes:**
+- CALL: Removed erroneous "K and PC" from C column; corrected table structure
+- CALLD: Removed erroneous "Pxxx and PC" and "D and PC"; C flag corrected to `S[31]`
+
+**Z Flag Structure Fixes:**
+- MUL, MULS: Fixed table corruption from pipe character; now `(S == 0) OR (D == 0)`
+- TEST, TESTN: Z flag standardized to `(D == 0)`, `((D & S) == 0)`, `((D & !S) == 0)`
+
+#### Narrative Documentation Corrections
+
+**C Flag WCZ Effect Documentation (12 instructions):**
+
+DIR family:
+- DIRH, DIRL: Added missing C flag behavior to WCZ explanation
+
+DRV family:
+- DRVC/DRVNC, DRVH, DRVL, DRVZ/DRVNZ: Added missing C flag behavior to WCZ explanation
+
+OUT family:
+- OUTH, OUTL, OUTNOT: Corrected WCZ explanation (removed incorrect "C flag is not affected"); now documents C and Z both set to original output state
+
+#### Terminology Standardization
+
+**C Flag Terminology (10 instructions):**
+- NEG, NEGC, NEGNC, NEGZ, NEGNZ: Changed "Sign of result" / "Sign" to "MSB of result"
+- MUXC, MUXNC, MUXNZ, MUXZ, XOR: Changed "Parity" to "parity of result"
+
+**Shift/Rotate Instructions (8 instructions):**
+- RCL, RCR, ROL, ROR, SAL, SAR, SHL, SHR: Added footnote clarifying edge case when S[4:0] = 0
+
+**Limit Instructions (4 instructions):**
+- FGE, FGES, FLE, FLES: Added footnote explaining "limit enforced" means C = 1 if D changed, else C = 0
+
+**Pin I/O Flag Descriptions (standardized with footnotes):**
+- OUT family (8 instructions): Changed verbose "Original OUTx base bit" / "orig out" to "OUT bit" with footnote
+- FLT family (8 instructions): Changed "Original OUTx base bit" to "OUT bit" with footnote
+- DIR family (8 instructions): Changed "DIRx" / "Original DIRx base bit" to "DIR bit" with footnote
+- DRV family (8 instructions): Changed "DIRx* + OUTx" to "OUT bit" with footnote
+
+**Miscellaneous:**
+- XOR: Z flag changed from "Zero" to "result == 0"
+- ZEROX: C flag changed from "MSB" to "MSB of result"; Z flag changed from "Zero" to "result == 0"
 
 ---
 

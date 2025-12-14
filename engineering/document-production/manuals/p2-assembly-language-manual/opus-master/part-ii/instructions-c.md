@@ -26,8 +26,8 @@ Call Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | K and PC | --- | --- | 4 / 13-20 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
+| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | --- | 4 / 13-20 |
 
 
 **Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -160,8 +160,8 @@ Call with Destination Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | Pxxx and PC | --- | --- | 4 / 13-20 |
-| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
+| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
+| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | --- | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
@@ -276,7 +276,7 @@ Compare Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | D = S | --- | 2 |
+| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMPR](#cmpr), [CMPX](#cmpx), [CMPS](#cmps), [CMPSX](#cmpsx), [CMPM](#cmpm)
@@ -321,7 +321,7 @@ Compare Most Significant Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | D = S | --- | 2 |
+| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps)
@@ -395,7 +395,7 @@ Compare Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | Signed (D < S) | D = S | --- | 2 |
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
@@ -438,7 +438,7 @@ Compare and Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | Result = 0 | D † | 2 |
+| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | result == 0 | D † | 2 |
 
 † Dest is only written if D >= S (subtraction was performed).
 

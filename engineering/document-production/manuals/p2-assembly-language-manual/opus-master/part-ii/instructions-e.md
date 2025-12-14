@@ -25,8 +25,8 @@ Encode Bit Position
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | S != 0 | Result = 0 | D | 2 |
-| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Original D != 0 | Result = 0 | D | 2 |
+| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | S != 0 | result == 0 | D | 2 |
+| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Original D != 0 | result == 0 | D | 2 |
 
 
 **Related:** [DECOD](#decod)

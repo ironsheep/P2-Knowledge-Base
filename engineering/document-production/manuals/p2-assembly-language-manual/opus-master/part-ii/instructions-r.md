@@ -24,8 +24,9 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
@@ -61,8 +62,9 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
@@ -170,7 +172,7 @@ Read Byte From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -263,7 +265,7 @@ Read Long From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -313,7 +315,7 @@ Read From LUT
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | Result = 0 | D | 3 |
+| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | result == 0 | D | 3 |
 
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
@@ -385,7 +387,7 @@ Read Word From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -738,7 +740,7 @@ Read Byte Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -774,7 +776,7 @@ Read Long Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
@@ -810,7 +812,7 @@ Read Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
@@ -846,7 +848,7 @@ Read Signed Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
@@ -880,7 +882,7 @@ Read Word Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -979,8 +981,9 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -1121,8 +1124,9 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 

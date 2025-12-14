@@ -26,7 +26,7 @@ Zero Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | MSB | Zero | D | 2 |
+| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [SIGNX](#signx)

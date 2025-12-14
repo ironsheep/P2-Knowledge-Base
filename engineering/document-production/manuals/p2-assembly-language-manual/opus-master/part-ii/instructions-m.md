@@ -243,7 +243,7 @@ Move
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
+| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | result == 0 | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
@@ -345,7 +345,7 @@ Multiply
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (S == 0) OR (D == 0) | D | 2 |
 
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -444,7 +444,7 @@ Multiply Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (S == 0) OR (D == 0) | D | 2 |
 
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -504,10 +504,10 @@ Multiplex Flag To Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
