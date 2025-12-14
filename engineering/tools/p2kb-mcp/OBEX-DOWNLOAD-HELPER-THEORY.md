@@ -10,6 +10,55 @@ The download helper automates the process of:
 3. Extracting the contents (including nested ZIPs)
 4. Organizing files in a named directory
 
+## Project Directory Structure
+
+OBEX objects are downloaded into an `OBEX/` folder at the root of the user's project. Each object gets its own subdirectory named by a slug derived from the object's title.
+
+### Location
+
+```
+{project_root}/
+├── OBEX/                           # Container for all OBEX downloads
+│   ├── park-transformation/        # Object 2811
+│   │   ├── OB2811.zip             # Original download (kept for reference)
+│   │   ├── park_transform.spin2   # Extracted files
+│   │   └── ...
+│   ├── ws2812b-led-driver/         # Object 4047
+│   │   ├── OB4047.zip
+│   │   ├── ws2812b.spin2
+│   │   └── ...
+│   └── i2c-oled-display/           # Object 2853
+│       ├── OB2853.zip
+│       └── ...
+├── src/                            # User's project source
+└── ...
+```
+
+### Why This Structure Works
+
+1. **Isolation**: Each OBEX object lives in its own directory - no file conflicts
+2. **Identification**: Directory names are human-readable (slug from title)
+3. **Traceability**: Original ZIP files are preserved with object ID
+4. **Coexistence**: Multiple objects can be downloaded without collision
+5. **Portability**: The entire `OBEX/` folder can be moved or shared
+
+### Slug-Based Naming
+
+The slug ensures:
+- **No collisions**: Different objects get different directory names
+- **Filesystem safety**: Only alphanumeric characters and hyphens
+- **Readability**: Users can identify objects by directory name
+
+**Same-title handling**: If two objects had identical titles (rare), they would get the same slug. The second download would overwrite the first. In practice, OBEX titles are unique.
+
+### Working Directory
+
+The download helper operates from the project root and:
+1. Creates `OBEX/` if it doesn't exist
+2. Creates `OBEX/{slug}/` for the specific object
+3. Changes into that directory for download/extraction
+4. Returns to project root when complete
+
 ## Input
 
 - **Object ID**: A numeric string (e.g., `"2811"`, `"4047"`)
