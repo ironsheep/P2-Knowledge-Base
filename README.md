@@ -8,11 +8,14 @@
 
 ## 🤖 Using with AI Assistants (Claude, GPT, etc.)
 
-**[→ USING WITH AI GUIDE](deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md)**  
-**Start here if you're using Claude Code, GitHub Copilot, or other AI assistants!** Complete guide on how to set up and use this knowledge base with AI systems, including example prompts and usage patterns.
+**[→ BOOTSTRAP (Quick Setup)](deliverables/ai-reference/BOOTSTRAP.md)**
+**One-command setup for AI assistants.** Single entry point for both Unix/macOS and Windows. Downloads everything automatically.
 
-**[→ PRIVACY GUIDE FOR DEVELOPERS](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** 📔  
-**Essential reading before using AI tools!** Learn how to protect your intellectual property, understand data handling policies, and follow best practices for AI-assisted P2 development.
+**[→ COMPLETE GUIDE](deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md)**
+Comprehensive guide on using this knowledge base with AI systems, including example prompts and usage patterns.
+
+**[→ PRIVACY GUIDE FOR DEVELOPERS](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** 📔
+**Essential reading before using AI tools!** Learn how to protect your intellectual property and follow best practices for AI-assisted P2 development.
 
 ## 🎯 Find What You Need
 
