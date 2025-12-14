@@ -190,9 +190,9 @@ $idx = Get-Content $IndexFile -Raw | ConvertFrom-Json
 $entries = $idx.system.total_entries
 $categories = $idx.system.total_categories
 if ($categories -and $categories -gt 0) {
-    Write-Status "p2kb-index.json ($entries entries, $categories categories)"
+    Write-Status "p2kb-index.json - $entries entries, $categories categories"
 } else {
-    Write-Status "p2kb-index.json ($entries entries)"
+    Write-Status "p2kb-index.json - $entries entries"
 }
 
 # =============================================================================
@@ -235,7 +235,7 @@ foreach ($key in $CommonKeys) {
         $filtered | Out-File -FilePath $cacheFile -Encoding UTF8 -NoNewline
         Write-Status $key
     } else {
-        Write-Err "$key (not found in index)"
+        Write-Err "$key - not found in index"
     }
 }
 
