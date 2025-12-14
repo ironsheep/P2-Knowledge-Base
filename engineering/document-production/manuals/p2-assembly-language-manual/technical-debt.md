@@ -14,6 +14,13 @@ Track improvement opportunities identified during development that we're intenti
 
 ## Deferred Improvements
 
+- [2025-12-13] **Remove legacy diagram aliases in p2kb-pasm2-diagrams.sty**
+  - Problem: Markdown uses old alias names that were preserved for backward compatibility
+  - Current aliases: `EightCogOverviewDiagram`, `EggBeaterDiagram`
+  - Should use canonical names: `EightCogEggbeaterDiagram`, `EggbeaterHubTimingDiagram`
+  - Action: Search/replace in markdown, then remove aliases from .sty file
+  - Estimated effort: 30 minutes
+
 - [2025-12-12] **Internal links not visually distinct in PDF**
   - Problem: Hyperlinks within the document (instruction cross-references, TOC entries) work correctly but have no visual indicator (no blue color, no underline)
   - Cursor changes to hand pointer on hover, but there's no static visual cue
