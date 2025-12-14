@@ -218,7 +218,7 @@ function Invoke-Browse {
     param([string]$Category)
 
     if ([string]::IsNullOrEmpty($Category)) {
-        Write-Error-Message "Usage: fetch-kb-file.ps1 -Browse `<category`>"
+        Write-Error-Message "Usage: fetch-kb-file.ps1 -Browse [category]"
         Write-Host "Use -Categories to see available categories" -ForegroundColor Yellow
         exit 1
     }
@@ -266,7 +266,7 @@ function Invoke-Search {
     param([string]$Term)
 
     if ([string]::IsNullOrEmpty($Term)) {
-        Write-Error-Message "Usage: fetch-kb-file.ps1 -Search `<term`>"
+        Write-Error-Message "Usage: fetch-kb-file.ps1 -Search [term]"
         exit 1
     }
 
