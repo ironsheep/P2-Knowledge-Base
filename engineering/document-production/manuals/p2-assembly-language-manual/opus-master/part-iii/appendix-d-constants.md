@@ -308,45 +308,140 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 ## Execution Mode Variants
 
-The execution mode constants include additional variants for automatic cog selection:
+The execution mode constants include additional variants for automatic cog selection. These variants combine the base execution mode (COGEXEC or HUBEXEC) with automatic resource selection flags, eliminating the need to manually specify cog IDs.
 
 ::: constheader
 ### COGEXEC_NEW {#cogexec_new}
 Auto-Select Cog For Cog Execution
 
-Auto-selects available cog for COGEXEC.
+Auto-selects available cog for COGEXEC mode.
 :::
 
-Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+Execution mode constant for automatically selecting an available cog with COG RAM execution.
+
+#### Encoding
+Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves this to the appropriate bit pattern for COGINIT's Dest operand.
+
+#### Description
+COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 496 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
+
+#### Usage
+```pasm
+' Start any available cog with code load
+                coginit #COGEXEC_NEW, ##@cog_code  wc
+        if_c    jmp     #no_cog_available
+```
+
+#### Notes
+- Use WC to detect if no cog was available (C=1 on failure)
+- With WC and register Dest, the launched cog's ID is returned
+- Equivalent to COGEXEC with N=1 in the %E_N_xVVV encoding
+
+#### Related Constants
+- [COGEXEC](#cogexec) — Base cog execution mode (specific cog)
+- [COGEXEC_NEW_PAIR](#cogexec_new_pair) — Auto-select adjacent cog pair variant
+
 
 ::: constheader
 ### COGEXEC_NEW_PAIR {#cogexec_new_pair}
 Auto-Select Cog Pair For Cog Execution
 
-Auto-selects adjacent cog pair for COGEXEC.
+Auto-selects adjacent cog pair for COGEXEC mode.
 :::
 
-Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with COG RAM execution.
+
+#### Encoding
+Combines COGEXEC base mode with both the N (new cog) and pair selection flags set.
+
+#### Description
+COGEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs (0-1, 2-3, 4-5, or 6-7), load code into the first cog, and start execution. Adjacent cog pairs can share their LUT memory via SETLUTS, enabling efficient inter-cog communication and data sharing.
+
+#### Usage
+```pasm
+' Start a cog pair for LUT sharing
+                coginit #COGEXEC_NEW_PAIR, ##@pair_code  wc
+        if_c    jmp     #no_pair_available
+```
+
+#### Notes
+- Requires two adjacent, stopped cogs to succeed
+- The returned cog ID is the lower of the pair (0, 2, 4, or 6)
+- Adjacent pairs can share LUT memory for fast inter-cog communication
+- Use SETLUTS to configure LUT sharing after both cogs are running
+
+#### Related Constants
+- [COGEXEC](#cogexec) — Base cog execution mode
+- [COGEXEC_NEW](#cogexec_new) — Single cog auto-select variant
+
 
 ::: constheader
 ### HUBEXEC_NEW {#hubexec_new}
 Auto-Select Cog For Hub Execution
 
-Auto-selects available cog for HUBEXEC.
+Auto-selects available cog for HUBEXEC mode.
 :::
 
-Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+Execution mode constant for automatically selecting an available cog with Hub RAM execution.
+
+#### Encoding
+Combines HUBEXEC base mode with the N (new cog) flag set.
+
+#### Description
+HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 496-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
+
+#### Usage
+```pasm
+' Start any available cog in hub execution mode
+                coginit #HUBEXEC_NEW, ##@hub_code  wc
+        if_c    jmp     #no_cog_available
+```
+
+#### Notes
+- Hub execution allows unlimited code size
+- Instruction fetching uses the FIFO/streamer mechanism
+- Slower than cog execution due to Hub RAM access timing
+- Use WC to detect failure and retrieve the launched cog's ID
+
+#### Related Constants
+- [HUBEXEC](#hubexec) — Base hub execution mode (specific cog)
+- [HUBEXEC_NEW_PAIR](#hubexec_new_pair) — Auto-select adjacent cog pair variant
+
 
 ::: constheader
 ### HUBEXEC_NEW_PAIR {#hubexec_new_pair}
 Auto-Select Cog Pair For Hub Execution
 
-Auto-selects adjacent cog pair for HUBEXEC.
+Auto-selects adjacent cog pair for HUBEXEC mode.
 :::
 
-Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with Hub RAM execution.
 
-These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
+#### Encoding
+Combines HUBEXEC base mode with both the N (new cog) and pair selection flags set.
+
+#### Description
+HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from Hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
+
+#### Usage
+```pasm
+' Start a cog pair for hub execution with LUT sharing
+                coginit #HUBEXEC_NEW_PAIR, ##@hub_pair_code  wc
+        if_c    jmp     #no_pair_available
+```
+
+#### Notes
+- Combines unlimited hub code size with LUT sharing capability
+- Requires two adjacent, stopped cogs to succeed
+- The returned cog ID is the lower of the pair
+- Use SETLUTS to configure LUT sharing after both cogs are running
+
+#### Related Constants
+- [HUBEXEC](#hubexec) — Base hub execution mode
+- [HUBEXEC_NEW](#hubexec_new) — Single cog auto-select variant
+
+
+These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification. Always use WC with COGINIT when using these variants to detect allocation failures.
 
 
 

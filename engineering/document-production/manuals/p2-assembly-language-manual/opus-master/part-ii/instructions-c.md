@@ -711,6 +711,19 @@ The format of Dest is `%E_N_xVVV` where:
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
 
+The following predefined constants encode these bit patterns:
+
+| Constant | Target | Execution | Description |
+|----------|--------|-----------|-------------|
+| COGEXEC + id | Specific COG | COG RAM | Load 496 longs from Hub to COG RAM, execute from COG |
+| HUBEXEC + id | Specific COG | Hub RAM | Execute directly from Hub RAM (no load) |
+| COGEXEC_NEW | Any free COG | COG RAM | Auto-select available COG, load and execute |
+| HUBEXEC_NEW | Any free COG | Hub RAM | Auto-select available COG, execute from Hub |
+| COGEXEC_NEW_PAIR | Adjacent pair | COG RAM | Auto-select adjacent COG pair for LUT sharing |
+| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent COG pair, Hub execution |
+
+For specific COG targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
+
 The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA.
 
 If the WC effect is specified, C is set (1) on failure or cleared (0) on success. When WC is given and Dest is a register, Dest receives the launched cog's ID (or $F on failure).

@@ -167,6 +167,39 @@ This behavior enables using flag values across multiple instructions without int
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
 
+### 3.2.6 Effect Availability
+
+Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations.
+
+**Effect Permission Categories:**
+
+| Permission | Allowed Effects | Reason |
+|------------|-----------------|--------|
+| None | (no effects) | Instruction produces no meaningful flag result |
+| WC only | WC | Only the C flag has a defined meaning |
+| WZ only | WZ | Only the Z flag has a defined meaning |
+| Full | WC, WZ, WCZ | Both flags have defined meanings |
+
+**Why WCZ Requires Both Flags:**
+
+Although WCZ encodes as the combination of WC and WZ bits, the assembler validates that both individual effects are meaningful before allowing WCZ. Using WCZ on an instruction that only supports WC would set Z to an undefined value—the assembler prevents this by requiring full effect support for WCZ.
+
+```pasm
+' Example: LOCKTRY only produces meaningful C (lock acquired)
+        locktry #0              wc      ' Valid: C = lock acquired
+        locktry #0              wz      ' ERROR: Z has no meaning
+        locktry #0              wcz     ' ERROR: WCZ requires both to be valid
+```
+
+**Common Restrictions:**
+
+- **NOP**: No effects allowed (and no condition prefix)
+- **LOCKTRY/LOCKREL**: WC only (C indicates lock status)
+- **TESTP/TESTPN/TESTB/TESTBN**: Support both basic effects (WC, WZ) and extended effects (ANDC, ORC, etc.) as documented in Section 3.2.4
+- **Some Hub memory operations**: May have restricted effect support
+
+The Part II instruction reference documents the allowed effects for each instruction in its encoding table. When an invalid effect is specified, the assembler produces the error: "This effect is not allowed for this instruction."
+
 
 ## 3.3 Conditional Execution
 
@@ -322,6 +355,30 @@ Shift and rotate instructions capture the bit shifted or rotated out in the C fl
 For left operations (SHL, ROL), the most significant bit (bit 31) moves into C. For right operations (SHR, ROR), the least significant bit (bit 0) moves into C. This enables multi-precision shifts where the bit shifted out of one word becomes the bit shifted into the next word.
 
 The difference between shift and rotate: shifts fill the vacated bit position with 0, while rotates fill it with the bit shifted out (creating a circular rotation). Both capture the bit that exits the register in C.
+
+### 3.4.4 Move and Data Instructions
+
+Move and data manipulation instructions set flags based on the source or result characteristics:
+
+| Instruction | C Flag (with WC) | Z Flag (with WZ) |
+|-------------|------------------|------------------|
+| MOV | MSB of source (S[31]) | Source = 0 |
+| NEG | Source was non-zero | Result = 0 |
+| ABS | Source was negative | Result = 0 |
+| NOT | Parity of result | Result = 0 |
+| ENCOD | MSB of result | Result = 0 |
+| DECOD | 0 (always cleared) | Result = 0 |
+
+MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
+
+```pasm
+        mov     temp, value     wc      ' Copy value, C = sign bit
+        if_c    jmp     #negative       ' Branch if negative
+```
+
+NEG sets C=1 if the source was non-zero, which indicates that negation actually changed the value. When the source is zero, negation produces zero and C=0.
+
+ABS sets C=1 if the source was negative, indicating that the absolute value operation inverted the sign. This flag persists even for the special case of NEGX ($80000000), whose absolute value cannot be represented in 32 bits.
 
 
 ## 3.5 Common Flag Patterns

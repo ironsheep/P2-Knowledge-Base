@@ -1,8 +1,14 @@
 # P2 Assembly Language Reference Manual - Changelog
 
-## v1.3.0 (2025-12-13)
+## v1.3.0 (2025-12-15)
 
-**Directives & Internal Consistency Release** - Expanded directive documentation and systematic corrections from internal consistency audit.
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, and enhanced flag documentation from PNut-TS compiler analysis.
+
+### Part I: Architectural Foundation
+
+**Chapter 3 - Flags and Conditional Execution:**
+- Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
+- Added Section 3.4.4 "Move and Data Instructions" with flag behavior table for MOV, NEG, ABS, NOT, ENCOD, DECOD
 
 ### Part II: Directives
 
@@ -74,6 +80,22 @@ OUT family:
 **Miscellaneous:**
 - XOR: Z flag changed from "Zero" to "result == 0"
 - ZEROX: C flag changed from "MSB" to "MSB of result"; Z flag changed from "Zero" to "result == 0"
+
+#### Documentation Additions
+
+- COGINIT: Added execution mode constants reference table (COGEXEC, HUBEXEC, and _NEW variants)
+
+### Part III: Appendices
+
+**Appendix D - Predefined Constants:**
+- COGEXEC_NEW: Expanded with encoding note, description, usage example, and related constants
+- COGEXEC_NEW_PAIR: Expanded with LUT sharing documentation and usage example
+- HUBEXEC_NEW: Expanded with hub execution details and usage example
+- HUBEXEC_NEW_PAIR: Expanded with combined benefits documentation and usage example
+
+**Source Material:**
+- WC-WZ-WCZ-Effects-Guide.md (PNut-TS compiler documentation)
+- PASM2-Authoring-Guide.md (PNut-TS compiler documentation)
 
 ---
 
