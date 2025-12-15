@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.2\par}
+{\large\color{blue}Version 1.3\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -1572,6 +1572,39 @@ This behavior enables using flag values across multiple instructions without int
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
 
+### 3.2.6 Effect Availability
+
+Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations.
+
+**Effect Permission Categories:**
+
+| Permission | Allowed Effects | Reason |
+|------------|-----------------|--------|
+| None | (no effects) | Instruction produces no meaningful flag result |
+| WC only | WC | Only the C flag has a defined meaning |
+| WZ only | WZ | Only the Z flag has a defined meaning |
+| Full | WC, WZ, WCZ | Both flags have defined meanings |
+
+**Why WCZ Requires Both Flags:**
+
+Although WCZ encodes as the combination of WC and WZ bits, the assembler validates that both individual effects are meaningful before allowing WCZ. Using WCZ on an instruction that only supports WC would set Z to an undefined value—the assembler prevents this by requiring full effect support for WCZ.
+
+```pasm
+' Example: LOCKTRY only produces meaningful C (lock acquired)
+        locktry #0              wc      ' Valid: C = lock acquired
+        locktry #0              wz      ' ERROR: Z has no meaning
+        locktry #0              wcz     ' ERROR: WCZ requires both to be valid
+```
+
+**Common Restrictions:**
+
+- **NOP**: No effects allowed (and no condition prefix)
+- **LOCKTRY/LOCKREL**: WC only (C indicates lock status)
+- **TESTP/TESTPN/TESTB/TESTBN**: Support both basic effects (WC, WZ) and extended effects (ANDC, ORC, etc.) as documented in Section 3.2.4
+- **Some Hub memory operations**: May have restricted effect support
+
+The Part II instruction reference documents the allowed effects for each instruction in its encoding table. When an invalid effect is specified, the assembler produces the error: "This effect is not allowed for this instruction."
+
 
 ## 3.3 Conditional Execution
 
@@ -1727,6 +1760,30 @@ Shift and rotate instructions capture the bit shifted or rotated out in the C fl
 For left operations (SHL, ROL), the most significant bit (bit 31) moves into C. For right operations (SHR, ROR), the least significant bit (bit 0) moves into C. This enables multi-precision shifts where the bit shifted out of one word becomes the bit shifted into the next word.
 
 The difference between shift and rotate: shifts fill the vacated bit position with 0, while rotates fill it with the bit shifted out (creating a circular rotation). Both capture the bit that exits the register in C.
+
+### 3.4.4 Move and Data Instructions
+
+Move and data manipulation instructions set flags based on the source or result characteristics:
+
+| Instruction | C Flag (with WC) | Z Flag (with WZ) |
+|-------------|------------------|------------------|
+| MOV | MSB of source (S[31]) | Source = 0 |
+| NEG | Source was non-zero | Result = 0 |
+| ABS | Source was negative | Result = 0 |
+| NOT | Parity of result | Result = 0 |
+| ENCOD | MSB of result | Result = 0 |
+| DECOD | 0 (always cleared) | Result = 0 |
+
+MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
+
+```pasm
+        mov     temp, value     wc      ' Copy value, C = sign bit
+        if_c    jmp     #negative       ' Branch if negative
+```
+
+NEG sets C=1 if the source was non-zero, which indicates that negation actually changed the value. When the source is zero, negation produces zero and C=0.
+
+ABS sets C=1 if the source was negative, indicating that the absolute value operation inverted the sign. This flag persists even for the special case of NEGX ($80000000), whose absolute value cannot be represented in 32 bits.
 
 
 ## 3.5 Common Flag Patterns
@@ -4694,8 +4751,8 @@ Absolute Value
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
-| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D[31] | Result = 0 | D | 2 |
+| EEEE | 0110010 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | result == 0 | D | 2 |
+| EEEE | 0110010 | CZ0 | DDDDDDDDD | DDDDDDDDD | D[31] | result == 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -4732,7 +4789,7 @@ Add Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | result == 0 | D | 2 |
 
 
 **Related:** [ADDX](#addx), [ADDS](#adds), [ADDSX](#addsx), [SUB](#sub)
@@ -4848,7 +4905,7 @@ Add Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D + S) | Result = 0 | D | 2 |
+| EEEE | 0001010 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D + S) | result == 0 | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDSX](#addsx), [SUBS](#subs)
@@ -4887,7 +4944,7 @@ Add Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | sign of (D+S+C) | Z AND (Result = 0) | D | 2 |
+| EEEE | 0001011 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D + S + C) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDX](#addx), [ADDS](#adds), [SUBSX](#subsx)
@@ -4924,7 +4981,7 @@ Add Unsigned Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S + C) | Z AND (Result = 0) | D | 2 |
+| EEEE | 0001001 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S + C) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [SUBX](#subx)
@@ -5520,7 +5577,7 @@ Bitwise And
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
+| EEEE | 0101000 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [ANDN](#andn), [OR](#or), [XOR](#xor), [TEST](#test)
@@ -5555,7 +5612,7 @@ And Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | Result = 0 | D | 2 |
+| EEEE | 0101001 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [TEST](#test)
@@ -6072,8 +6129,8 @@ Call Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | K and PC | --- | --- | 4 / 13-20 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | K and PC | D[31] | D[30] | 4 / 13-20 |
+| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | --- | 4 / 13-20 |
 
 
 **Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -6206,8 +6263,8 @@ Call with Destination Register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | Pxxx and PC | --- | --- | 4 / 13-20 |
-| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | D and PC | S[31] | S[30] | 4 / 13-20 |
+| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
+| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | --- | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
@@ -6322,7 +6379,7 @@ Compare Unsigned
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | D = S | --- | 2 |
+| EEEE | 0010000 | CZI | DDDDDDDDD | SSSSSSSSS | Unsigned (D < S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMPR](#cmpr), [CMPX](#cmpx), [CMPS](#cmps), [CMPSX](#cmpsx), [CMPM](#cmpm)
@@ -6367,7 +6424,7 @@ Compare Most Significant Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | D = S | --- | 2 |
+| EEEE | 0010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of (D-S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPS](#cmps)
@@ -6441,7 +6498,7 @@ Compare Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | Signed (D < S) | D = S | --- | 2 |
+| EEEE | 0010010 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | (D == S) | --- | 2 |
 
 
 **Related:** [CMP](#cmp), [CMPX](#cmpx), [CMPSX](#cmpsx)
@@ -6484,7 +6541,7 @@ Compare and Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | Result = 0 | D † | 2 |
+| EEEE | 0010111 | CZI | DDDDDDDDD | SSSSSSSSS | D >= S | result == 0 | D † | 2 |
 
 † Dest is only written if D >= S (subtraction was performed).
 
@@ -6757,6 +6814,19 @@ The format of Dest is `%E_N_xVVV` where:
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
 
+The following predefined constants encode these bit patterns:
+
+| Constant | Target | Execution | Description |
+|----------|--------|-----------|-------------|
+| COGEXEC + id | Specific COG | COG RAM | Load 496 longs from Hub to COG RAM, execute from COG |
+| HUBEXEC + id | Specific COG | Hub RAM | Execute directly from Hub RAM (no load) |
+| COGEXEC_NEW | Any free COG | COG RAM | Auto-select available COG, load and execute |
+| HUBEXEC_NEW | Any free COG | Hub RAM | Auto-select available COG, execute from Hub |
+| COGEXEC_NEW_PAIR | Adjacent pair | COG RAM | Auto-select adjacent COG pair for LUT sharing |
+| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent COG pair, Hub execution |
+
+For specific COG targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
+
 The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA.
 
 If the WC effect is specified, C is set (1) on failure or cleared (0) on success. When WC is given and Dest is a register, Dest receives the launched cog's ID (or $F on failure).
@@ -6956,7 +7026,7 @@ Decrement Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | Result = 0 | D | 2 |
+| EEEE | 0111001 | CZI | DDDDDDDDD | SSSSSSSSS | D was 0 | result == 0 | D | 2 |
 
 
 **Related:** [INCMOD](#incmod)
@@ -7035,9 +7105,10 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRL](#dirl), [DIRH](#dirh), [DIRNOT](#dirnot), [DIRRND](#dirrnd)
 
@@ -7078,8 +7149,9 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -7091,7 +7163,7 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
-If the WCZ effect is specified, the Z flag is set to the state of the direction bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
 
@@ -7114,8 +7186,9 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -7127,7 +7200,7 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
-If the WCZ effect is specified, the Z flag is updated to the original state of the target direction bit.
+If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
 
@@ -7150,8 +7223,9 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIRx | DIRx | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -7191,9 +7265,10 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIRx | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIRx | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -7234,8 +7309,9 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIRx | Original DIRx base bit | Original DIRx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
 
+\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRNOT](#dirnot), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -7361,7 +7437,7 @@ DJZ and DJNZ decrement Dest and conditionally jump based on whether the result i
 
 | Instruction | Jumps when |
 |-------------|------------|
-| DJZ | Result = 0 |
+| DJZ | result == 0 |
 | DJNZ | Result ≠ 0 |
 
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
@@ -7397,9 +7473,10 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -7415,7 +7492,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
 
 
 
@@ -7438,8 +7515,9 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7453,7 +7531,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
 
 
@@ -7476,8 +7554,9 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7491,7 +7570,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
@@ -7516,8 +7595,9 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | DIRx* + OUTx | DIRx* + OUTx | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7559,9 +7639,10 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | DIRx* + OUTx | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | DIRx* + OUTx | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVC](#drvc), [DRVNC](#drvnc), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -7577,7 +7658,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
 
 
 
@@ -7600,8 +7681,9 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | Original OUTx base bit | Original OUTx base bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit\textsuperscript{1} | DIRx, OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVNOT](#drvnot)
 
@@ -7653,8 +7735,8 @@ Encode Bit Position
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | S != 0 | Result = 0 | D | 2 |
-| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Original D != 0 | Result = 0 | D | 2 |
+| EEEE | 0111100 | CZI | DDDDDDDDD | SSSSSSSSS | S != 0 | result == 0 | D | 2 |
+| EEEE | 0111100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Original D != 0 | result == 0 | D | 2 |
 
 
 **Related:** [DECOD](#decod)
@@ -7780,8 +7862,9 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
 
@@ -7817,8 +7900,9 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
 
@@ -7854,8 +7938,9 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
 
@@ -7891,8 +7976,9 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced | Result = 0 | D | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
 
@@ -7930,11 +8016,12 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
@@ -7974,8 +8061,9 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -8012,8 +8100,9 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
@@ -8050,8 +8139,9 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
 
@@ -8090,8 +8180,9 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 
@@ -8328,7 +8419,7 @@ Get CORDIC X Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | Result = 0 | D | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011000 | X[31] | result == 0 | D | 2...58 |
 
 
 **Related:** [GETQY](#getqy), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -8366,7 +8457,7 @@ Get CORDIC Y Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | Result = 0 | D | 2...58 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000011001 | Y[31] | result == 0 | D | 2...58 |
 
 
 **Related:** [GETQX](#getqx), [QROTATE](#qrotate), [QVECTOR](#qvector), [QMUL](#qmul), [QDIV](#qdiv), [QFRAC](#qfrac), [QSQRT](#qsqrt), [QLOG](#qlog), [QEXP](#qexp)
@@ -8662,7 +8753,7 @@ IJZ and IJNZ increment Dest and conditionally jump based on whether the result i
 
 | Instruction | Jumps when |
 |-------------|------------|
-| IJZ | Result = 0 |
+| IJZ | result == 0 |
 | IJNZ | Result ≠ 0 |
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
@@ -8691,7 +8782,7 @@ Increment Modulus
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D was S (wrapped) | Result = 0 | D | 2 |
+| EEEE | 0111000 | CZI | DDDDDDDDD | SSSSSSSSS | D was S (wrapped) | result == 0 | D | 2 |
 
 
 **Related:** [DECMOD](#decmod), [ADDCT1/2/3](#addct1)
@@ -9704,7 +9795,7 @@ Move
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | Result = 0 | D | 2 |
+| EEEE | 0110000 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | result == 0 | D | 2 |
 
 
 **Related:** [MOVBYTS](#movbyts), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits), [SETQ](#setq)
@@ -9806,7 +9897,7 @@ Multiply
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
+| EEEE | 1010000 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | (S == 0) OR (D == 0) | D | 2 |
 
 
 **Related:** [MULS](#muls), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -9905,7 +9996,7 @@ Multiply Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (D = 0) | (S = 0) | D | 2 |
+| EEEE | 1010000 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | (S == 0) OR (D == 0) | D | 2 |
 
 
 **Related:** [MUL](#mul), [QMUL](#qmul), [SCA](#sca), [SCAS](#scas)
@@ -9965,10 +10056,10 @@ Multiplex Flag To Bits
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
-| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Result = 0 | D | 2 |
+| EEEE | 0101100 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101101 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101110 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
+| EEEE | 0101111 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
@@ -10189,8 +10280,8 @@ Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of result | Result = 0 | D | 2 |
-| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign of result | Result = 0 | D | 2 |
+| EEEE | 0110011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
@@ -10237,14 +10328,14 @@ Conditional Negate
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
-| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | Sign | Result = 0 | D | 2 |
+| EEEE | 0110100 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110100 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110101 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110110 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
+| EEEE | 0110111 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [NEG](#neg)
@@ -10355,8 +10446,8 @@ Bitwise Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | !S[31] | Result = 0 | D | 2 |
-| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | !D[31] | Result = 0 | D | 2 |
+| EEEE | 0110001 | CZI | DDDDDDDDD | SSSSSSSSS | !S[31] | result == 0 | D | 2 |
+| EEEE | 0110001 | CZ0 | DDDDDDDDD | DDDDDDDDD | !D[31] | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [XOR](#xor), [ANDN](#andn)
@@ -10401,8 +10492,8 @@ Ones
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | Result = 0 | D | 2 |
-| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | Result = 0 | D | 2 |
+| EEEE | 0111101 | CZI | DDDDDDDDD | SSSSSSSSS | Result is odd | result == 0 | D | 2 |
+| EEEE | 0111101 | CZ0 | DDDDDDDDD | DDDDDDDDD | Result is odd | result == 0 | D | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn), [BITNOT](#bitnot)
@@ -10441,7 +10532,7 @@ Bitwise Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | Result = 0 | D | 2 |
+| EEEE | 0101010 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of Result | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [XOR](#xor), [ANDN](#andn), [NOT](#not)
@@ -10490,11 +10581,12 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | orig out | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | orig out | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
@@ -10534,8 +10626,9 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
@@ -10547,7 +10640,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTH is commonly used to turn on LEDs, assert control signals, or drive pins high for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
@@ -10572,8 +10665,9 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
@@ -10585,7 +10679,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
@@ -10610,8 +10704,9 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
@@ -10623,7 +10718,7 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
+If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
 
@@ -10648,8 +10743,9 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | Original OUTx base bit | Original OUTx base bit | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
 
+\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 
@@ -11073,7 +11169,7 @@ Pop From Internal Stack
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | K[31] | result == 0 | D | 2 |
 
 
 **Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
@@ -11109,7 +11205,7 @@ Pop From Hub Stack A
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | Result = 0 | D | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | MSB of long | result == 0 | D | 9...16 |
 
 
 **Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
@@ -11145,7 +11241,7 @@ Pop From Hub Stack B
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | Result = 0 | D | 9...16 |
+| EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | MSB of long | result == 0 | D | 9...16 |
 
 
 **Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)
@@ -11619,8 +11715,9 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
@@ -11656,8 +11753,9 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
@@ -11765,7 +11863,7 @@ Read Byte From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | Result = 0 | D | 9...16 † |
+| EEEE | 1010110 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of byte | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -11858,7 +11956,7 @@ Read Long From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | Result = 0 | D | 9...16 † |
+| EEEE | 1011000 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of long | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -11908,7 +12006,7 @@ Read From LUT
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | Result = 0 | D | 3 |
+| EEEE | 1010101 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of data | result == 0 | D | 3 |
 
 
 **Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
@@ -11980,7 +12078,7 @@ Read Word From Hub
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | Result = 0 | D | 9...16 † |
+| EEEE | 1010111 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of word | result == 0 | D | 9...16 † |
 
 † **Timing varies by execution context:**
 
@@ -12333,7 +12431,7 @@ Read Byte Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010000 | MSB of byte | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -12369,7 +12467,7 @@ Read Long Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010010 | MSB of long | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
@@ -12405,7 +12503,7 @@ Read Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
@@ -12441,7 +12539,7 @@ Read Signed Variable Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
@@ -12475,7 +12573,7 @@ Read Word Via FIFO
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | Result = 0 | D | 2 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010001 | MSB of word | result == 0 | D | 2 |
 
 
 **Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
@@ -12574,8 +12672,9 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -12716,8 +12815,9 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
@@ -12794,8 +12894,9 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -12829,8 +12930,9 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
@@ -12900,7 +13002,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Result = 0 | --- | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | result == 0 | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -13693,8 +13795,9 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -13728,8 +13831,9 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | Result = 0 | D | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
 
+\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -13763,7 +13867,7 @@ Sign Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | Result = 0 | D | 2 |
+| EEEE | 0111011 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [ZEROX](#zerox)
@@ -13965,7 +14069,7 @@ Subtract
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | Result = 0 | D | 2 |
+| EEEE | 0001100 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - S) | result == 0 | D | 2 |
 
 
 **Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
@@ -14000,7 +14104,7 @@ Subtract Reverse
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | Result = 0 | D | 2 |
+| EEEE | 0010110 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (S - D) | result == 0 | D | 2 |
 
 
 **Related:** [SUB](#sub)
@@ -14031,7 +14135,7 @@ Subtract Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of (D - S) | Result = 0 | D | 2 |
+| EEEE | 0001110 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - S) | result == 0 | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
@@ -14062,7 +14166,7 @@ Subtract Signed Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign of D-(S+C) | Z AND (Result = 0) | D | 2 |
+| EEEE | 0001111 | CZI | DDDDDDDDD | SSSSSSSSS | correct sign of (D - (S + C)) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
@@ -14093,7 +14197,7 @@ Subtract Extended
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result = 0) | D | 2 |
+| EEEE | 0001101 | CZI | DDDDDDDDD | SSSSSSSSS | Borrow of (D - (S + C)) | Z AND (result == 0) | D | 2 |
 
 
 **Related:** [SUB](#sub), [SUBSX](#subsx)
@@ -14127,10 +14231,10 @@ Conditional Sum
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
-| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | Result = 0 | D | 2 |
+| EEEE | 0011100 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011101 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011110 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
+| EEEE | 0011111 | CZI | DDDDDDDDD | SSSSSSSSS | Sign | result == 0 | D | 2 |
 
 
 **Explanation:**
@@ -14177,8 +14281,8 @@ Test
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | D = 0 | --- | 2 |
-| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & S) | (D & S) = 0 | --- | 2 |
+| EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | Parity of D | (D == 0) | --- | 2 |
+| EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & S) | ((D & S) == 0) | --- | 2 |
 
 
 **Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
@@ -14309,7 +14413,7 @@ Test Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & !S) | (D & !S) = 0 | --- | 2 |
+| EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | Parity of (D & !S) | ((D & !S) == 0) | --- | 2 |
 
 
 **Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
@@ -15561,7 +15665,7 @@ Exclusive Or
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | Parity | Zero | D | 2 |
+| EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | parity of result | result == 0 | D | 2 |
 
 
 **Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
@@ -15734,7 +15838,7 @@ Zero Extend
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | MSB | Zero | D | 2 |
+| EEEE | 0111010 | CZI | DDDDDDDDD | SSSSSSSSS | MSB of result | result == 0 | D | 2 |
 
 
 **Related:** [SIGNX](#signx)
@@ -15763,50 +15867,114 @@ ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for u
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 14 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
+The P2 assembler provides 15 directives organized into six functional categories: origin control, memory definition, size verification, alignment, space management, and inline assembly control.
 
 
 
 ## Origin Control Directives
 
-Origin directives set the memory address where subsequent code or data will be assembled. The P2 distinguishes between cog RAM (0-$1FF) and hub RAM addresses.
+Origin directives set the memory address where subsequent code or data will be assembled. The P2 distinguishes between COG RAM (0-$1FF), LUT RAM ($200-$3FF), and Hub RAM addresses.
+
+### The $ Symbol (Current Origin)
+
+Within DAT blocks, the `$` symbol represents the current origin address:
+
+- **In COG mode** (after ORG): `$` returns the current COG address in longs (0-$3FF)
+- **In Hub mode** (after ORGH): `$` returns the current Hub address in bytes
+
+```pasm
+DAT
+        ORG     0
+        ' $ = 0 (COG address 0)
+        NOP
+        ' $ = 1 (COG address 1)
+
+        ORGH    $400
+        ' $ = $400 (Hub address $400)
+        BYTE    0
+        ' $ = $401 (Hub address $401)
+```
+
+### COG/LUT Memory Regions
+
+| Address Range | Memory | Notes |
+|---------------|--------|-------|
+| $000 - $1EF | COG RAM | General purpose registers |
+| $1F0 - $1FF | COG RAM | Special purpose registers (PR0-PR7, etc.) |
+| $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
 ### ORG {#org}
 Set Origin
 
-Sets assembly origin to a specific cog RAM address.
+Sets assembly origin to a specific COG/LUT RAM address.
 :::
 
-Set the assembly origin to a specific cog RAM address. All subsequent instructions assemble starting from this address.
+Set the assembly origin to a specific COG or LUT RAM address. All subsequent instructions assemble starting from this address.
 
 #### Syntax
 ```pasm
-        ORG     address
+        ORG                     ' Reset to COG address 0, limit $1F8
+        ORG     address         ' Set COG address, auto-calculate limit
+        ORG     address, limit  ' Set COG address and limit
 ```
 
 #### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| address | Cog RAM address (0-$1FF, range 0-511 decimal) |
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| address | 0 to $400 | Starting COG/LUT address (in longs) |
+| limit | 0 to $400 | Maximum address for FIT checking (optional) |
+
+#### Auto-Limit Behavior
+
+1. **Without parameters** (`ORG`):
+   - Sets COG address to 0
+   - Sets limit to $1F8 (standard COG RAM limit, before special registers)
+
+2. **With address only** (`ORG address`):
+   - Sets COG address to specified value
+   - Auto-calculates limit:
+     - If address < $200: limit = $200 (COG RAM boundary)
+     - If address >= $200: limit = $400 (LUT RAM boundary)
+
+3. **With address and limit** (`ORG address, limit`):
+   - Sets COG address and limit to specified values
 
 #### Usage
-Use ORG to position code or data at specific cog RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, or organizing cog memory layout.
+Use ORG to position code or data at specific COG/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
 
 #### Example
 ```pasm
-        ORG     0               ' Start at cog RAM address 0
+        ORG     0               ' Start at COG address 0
 entry   jmp     #main           ' First instruction at address 0
 
-        ORG     $100            ' Start at cog address $100
+        ORG     $100            ' Start at COG address $100
 table   long    1, 2, 3         ' Data table at specific address
+
+        ORG     $200            ' Start in LUT RAM
+lut_code
+        MOV     PA, #0          ' LUT address $200
+        RET                     ' LUT address $201
+        FIT     $400            ' Verify fits in LUT
 ```
 
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| Inside inline assembly | `ORG not allowed within inline assembly code` |
+| Inside DITTO block | `ORG not allowed within a DITTO block` |
+| Address > $400 | `Cog address exceeds $400 limit` |
+| Cannot precede with symbol | `This directive cannot be preceded by a symbol` |
+
 #### Notes
-- ORG affects cog RAM addresses only (range 0-$1FF)
-- For hub RAM addresses, use ORGH
+- ORG affects COG/LUT RAM addresses (range 0-$3FF)
+- For Hub RAM addresses, use ORGH
 - To fill gaps between addresses with zeros, use ORGF
 - ORG sets the address counter without generating any bytes
+- DAT blocks start in Hub mode by default; use ORG to switch to COG mode
+
+⚠️ **Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -15855,16 +16023,28 @@ block_start
 block_end
 ```
 
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| In ORGH mode | `ORGF is not allowed in ORGH mode` |
+| Target < current | `Origin already exceeds target` |
+| Target > limit | `Cog address exceeds limit` |
+| Cannot precede with symbol | `This directive cannot be preceded by a symbol` |
+
 #### Notes
 - ORGF fills the gap with zero bytes/longs to reach the target address
+- ORGF is only valid in COG mode (after ORG), not in Hub mode
 - Generates assembly error if target address is less than current address
 - ORG only changes the address counter without filling
 - Useful for creating fixed-layout binary structures
 - Essential for interrupt vector tables and memory-mapped structures
 
+⚠️ **Pitfall:** ORGF only works in COG mode. Attempting to use ORGF after ORGH produces an error. For hub address gaps, use explicit BYTE or LONG declarations with zero values.
+
 #### Related Directives
 - [ORG](#org) — Set origin without fill
-- [ORGH](#orgh) — Set hub RAM origin
+- [ORGH](#orgh) — Set Hub RAM origin
 - [FIT](#fit) — Verify code fits
 - [RES](#res) — Reserve space without initialization
 
@@ -15874,23 +16054,50 @@ block_end
 ### ORGH {#orgh}
 Set Hub Origin
 
-Sets assembly origin to a hub RAM address.
+Sets assembly origin to a Hub RAM address.
 :::
 
-Set the assembly origin to a hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
+Set the assembly origin to a Hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
 
 #### Syntax
 ```pasm
-        ORGH    [address]
+        ORGH                    ' Reset to current hub position (or $400)
+        ORGH    address         ' Set hub address
+        ORGH    address, limit  ' Set hub address and limit
 ```
 
 #### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| address | Hub RAM address (optional, defaults to $400) |
+| Parameter | Range | Description |
+|-----------|-------|-------------|
+| address | $400 to $100000 | Starting hub address (in bytes) |
+| limit | address to $100000 | Maximum address for FIT checking (optional) |
+
+#### Behavior by Context
+
+1. **Without parameters** (`ORGH`):
+   - In Spin2 objects: Sets hub address to $400 (after interpreter)
+   - In PASM-only objects: Sets hub address to current object position
+   - Sets limit to $100000 (1MB)
+
+2. **With address only** (`ORGH address`):
+   - Sets hub address to specified value
+   - In PASM-only mode: Pads with zeros to reach the address
+   - Sets limit to $100000
+
+3. **With address and limit** (`ORGH address, limit`):
+   - Sets hub address and limit to specified values
+
+#### Address Constraints
+
+| Context | Minimum | Maximum |
+|---------|---------|---------|
+| Spin2 objects | $400 | $100000 |
+| PASM-only objects | 0 | $100000 |
+
+The $400 minimum for Spin2 objects reserves space for the Spin2 interpreter.
 
 #### Usage
-Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in hub RAM. If no address is specified, ORGH defaults to $400, the standard starting location for hub-exec code.
+Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in Hub RAM. DAT blocks start in Hub mode by default. Use ORGH to explicitly set hub addresses or to switch back to Hub mode after using ORG.
 
 #### Example
 ```pasm
@@ -15898,18 +16105,63 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
         ' Hub-exec code here
 
         ORGH                    ' Default: start at hub $400
+
+        ORGH    $1000           ' Start at hub address $1000
+hubData LONG    $DEADBEEF       ' Hub address $1000
+        LONG    $CAFEBABE       ' Hub address $1004
+
+        ORGH    $400, $800      ' Hub from $400 to $800 limit
+        BYTE    0[1024]         ' 1KB of data
+        FIT     $800            ' Verify fits within limit
 ```
 
+#### Mode Switching
+
+A DAT block can switch between COG and Hub modes multiple times:
+
+```pasm
+DAT
+        ORGH                    ' Hub mode: bytecode tables
+bc_vectors
+        WORD    @routine1
+        WORD    @routine2
+        ALIGNL
+
+        ORG     $100            ' COG mode: register code
+routine1
+        MOV     PA, #1
+        RET
+
+        ORGH                    ' Back to hub mode
+hub_data
+        LONG    $12345678
+```
+
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| Inside inline assembly | `ORGH not allowed within inline assembly code` |
+| Inside DITTO block | `ORGH not allowed within a DITTO block` |
+| Address < $400 (Spin2) | `Hub address below $400 limit` |
+| Address > $100000 | `Hub address exceeds $100000 ceiling` |
+| Address decrease (PASM) | `Hub address cannot decrease` |
+| Limit < address | `Hub address exceeds limit` |
+| Cannot precede with symbol | `This directive cannot be preceded by a symbol` |
+
 #### Notes
-- ORGH sets hub RAM addresses for hub-exec code and hub data
-- Default address is $400 if not specified
-- Hub-exec code executes directly from hub RAM without loading into cog
-- After ORGH, use ORG to switch back to cog RAM addresses
+- ORGH sets Hub RAM addresses for hub-exec code and hub data
+- Default address is $400 if not specified (in Spin2 objects)
+- Hub-exec code executes directly from Hub RAM without loading into COG
+- After ORGH, use ORG to switch to COG RAM addresses
+- DAT blocks start in Hub mode by default
+
+💡 **Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in COG or Hub mode.
 
 #### Related Directives
-- [ORG](#org) — Set cog RAM origin
+- [ORG](#org) — Set COG RAM origin
 - [ORGF](#orgf) — Set origin with fill
-- HUBEXEC constant — Hub execution mode flag
+- [FIT](#fit) — Verify code fits within limit
 
 
 
@@ -16603,37 +16855,116 @@ Verify Code Fits
 Generates error if current address exceeds limit.
 :::
 
-Verify that code fits within specified address limit. Generates assembly error if current address exceeds specified limit.
+Verify at compile time that the current address has not exceeded a specified limit. FIT is a safety check that produces an error if code or data is too large.
 
 #### Syntax
 ```pasm
-        FIT     [address]
+        FIT     limit           ' Verify current address <= limit
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| address | Maximum allowed address (optional, defaults to $200 for cog RAM limit) |
+| limit | Maximum address (in longs for COG mode, bytes for Hub mode) |
+
+#### Behavior by Mode
+
+**In COG Mode (after ORG):**
+- `limit` is a long address (0 to $400)
+- Error: `Cog address exceeds FIT limit`
+
+**In Hub Mode (after ORGH):**
+- `limit` is a byte address
+- Error: `Hub address exceeds FIT limit`
+
+#### Common Limit Values
+
+| Limit | Meaning |
+|-------|---------|
+| `$1F0` | User COG RAM (before special registers) |
+| `$1F8` | COG RAM (with some special registers) |
+| `$200` | Full COG RAM |
+| `$400` | COG + LUT RAM |
+| `496` | Decimal equivalent of $1F0 |
 
 #### Usage
-Use FIT to verify that code doesn't exceed available space. This is essential for cog code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
+Use FIT to verify that code does not exceed available space. This is essential for COG code, which must fit within 512 longs (addresses 0-$1FF). FIT generates an assembly error if the current address exceeds the specified limit, catching size overflow during assembly rather than at runtime.
 
-#### Example
+FIT does nothing if the limit is not exceeded—it is purely a compile-time check.
+
+#### Example: Standard COG Program
 ```pasm
-' Cog code
+DAT
         ORG     0
-        ' ... code ...
-        FIT     $1F0            ' Ensure fits before special regs
 
-        FIT                     ' Default: ensure fits in cog RAM (< $200)
+entry   ASMCLK                  ' Set clock
+        ' ... main code ...
+        JMP     #entry
+
+vars    RES     10
+
+        FIT     $1F0            ' Ensure user area only
 ```
 
+#### Example: Split COG/LUT Program
+```pasm
+DAT
+        ORG     0
+
+        ' COG code
+        MOV     PA, #1
+        CALL    #lut_routine
+        JMP     #$
+
+        FIT     $200            ' Must fit in COG before LUT
+
+        ORG     $200            ' LUT code
+
+lut_routine
+        MOV     PB, #2
+        RET
+
+        FIT     $400            ' Must fit in LUT
+```
+
+#### Example: Hub Data Table
+```pasm
+DAT
+        ORGH    $400
+
+sinTable
+        LONG    0[256]          ' Sine lookup table
+
+        FIT     $800            ' Table must not exceed $800
+```
+
+#### Example: Calculated Limits
+```pasm
+CON
+  OVERLAY_END = $300
+
+DAT
+        ORG     0
+        ' ... overlay code ...
+        FIT     OVERLAY_END     ' Must fit before overlay area
+```
+
+#### Restrictions
+
+| Restriction | Error |
+|-------------|-------|
+| Cannot have a preceding label | `This directive cannot be preceded by a symbol` |
+| Address exceeds COG limit | `Cog address exceeds FIT limit` |
+| Address exceeds Hub limit | `Hub address exceeds FIT limit` |
+
 #### Notes
-- FIT without parameter checks for cog RAM limit ($200 / 512 longs)
-- Generates assembly error if limit exceeded
-- Essential for cog code size verification
-- Special registers occupy cog addresses $1F0-$1FF
-- Use FIT $1F0 to ensure code doesn't overwrite special registers
+- FIT generates an assembly error if the limit is exceeded
+- Essential for COG code size verification
+- Special registers occupy COG addresses $1F0-$1FF
+- Use FIT $1F0 to ensure code does not overwrite special registers
+- FIT works in both COG mode and Hub mode
+
+💡 **Tip:** Always add FIT after COG code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
 
 #### Related Directives
 - [ORG](#org) — Set origin address
@@ -16646,29 +16977,72 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 ### RES {#res}
 Reserve Space
 
-Allocates cog RAM without initialization.
+Allocates COG/LUT RAM without initialization.
 :::
 
-Reserve space in cog RAM without initializing. Allocates memory space but doesn't generate any data.
+Reserve space in COG or LUT RAM without initializing. Allocates memory space but generates no object code.
 
 #### Syntax
 ```pasm
-[label] RES     count
+[label] RES     count           ' Reserve 'count' longs
+[label] RES     0               ' Create label at current address without reserving space
 ```
 
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| count | Number of longs to reserve |
+| label | Symbol name for the reserved space (optional but typical) |
+| count | Number of longs to reserve (can be 0) |
+
+#### Key Characteristics
+
+1. **COG Mode Only** - RES only works after ORG, not in ORGH mode
+2. **No Object Code** - RES advances the COG address counter but produces no bytes in the object file
+3. **Uninitialized** - Reserved space contains whatever was previously in COG RAM
+4. **Long-Aligned** - RES advances to the next long boundary before reserving
 
 #### Usage
-Use RES to allocate variables and buffers in cog RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in cog RAM—hub RAM variables must use LONG with initial values or be allocated at runtime.
+Use RES to allocate variables and buffers in COG RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in COG/LUT RAM—Hub RAM variables must use LONG with initial values or be allocated at runtime.
 
 #### Example
 ```pasm
-buffer  res     16              ' Reserve 16 longs
-temp    res     1               ' Reserve 1 long for temporary storage
+DAT
+        ORG     0
+
+entry   MOV     temp, #100
+        ADD     temp, value
+        RET
+
+temp    RES     1               ' Reserve 1 long for temporary variable
+value   RES     1               ' Reserve 1 long for value storage
+buffer  RES     16              ' Reserve 16 longs for buffer
 ```
+
+#### Zero-Count Label (Alias Technique)
+
+RES with a count of 0 creates a label at the current address without reserving any space. This technique creates aliases—multiple names for the same register:
+
+```pasm
+DAT
+        ORG     0
+
+' Create aliases - both point to same register
+ma      RES     0               ' ma is alias for x (RES 0 = no space)
+x       RES     1               ' x occupies 1 long
+
+' Both ma and x refer to the same COG address
+```
+
+💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
+
+#### RES vs LONG for Data
+
+| Aspect | `RES count` | `LONG 0[count]` |
+|--------|-------------|-----------------|
+| Initializes memory | No | Yes (to 0) |
+| Generates object code | No | Yes |
+| Valid in ORGH mode | No | Yes |
+| Use case | COG working registers | Initialized data |
 
 #### Working with Spin2 Structures
 
@@ -16676,18 +17050,27 @@ When reserving space for Spin2-declared structures, use the SIZEOF() operator to
 
 ```pasm
 ' Reserve space for a Spin2 structure (structure defined in CON block)
-mystruct        res     SIZEOF(point) / 4       ' Reserve longs for point structure
+mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
 ```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
 
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| Used in ORGH mode | `RES is not allowed in ORGH mode` |
+| Exceeds limit | `Cog address exceeds limit` |
+
 #### Notes
-- RES only reserves space in cog RAM (not hub RAM)
-- No hub memory is allocated or affected
+- RES only reserves space in COG/LUT RAM (not Hub RAM)
+- No Hub memory is allocated or affected
 - Useful for variables and buffers that will be initialized at runtime
 - Advances address counter by count longs without generating binary data
-- Use LONG to reserve initialized space in hub RAM
+- Use LONG to declare initialized data in Hub RAM
 - SIZEOF() enables correct sizing when working with Spin2 structures
+
+⚠️ **Pitfall:** RES cannot be used in Hub mode (after ORGH). For hub-resident uninitialized buffers, use `LONG 0[count]` which does generate object code.
 
 #### Related Directives
 - [LONG](#long) — Declare initialized long data
@@ -16696,15 +17079,139 @@ The SIZEOF() operator returns the structure size in bytes, so divide by 4 to con
 
 
 
+## Inline Assembly Directives
+
+Inline assembly allows PASM2 code to be embedded directly within Spin2 PUB and PRI methods. The END directive marks the boundary where inline assembly ends and Spin2 code resumes.
+
+::: dirheader
+### END {#end}
+End Inline Assembly
+
+Terminates an inline assembly block within a Spin2 method.
+:::
+
+Terminate an inline assembly block and return to Spin2 execution. The compiler automatically inserts a RET instruction at the END location.
+
+#### Syntax
+```pasm
+PUB/PRI MethodName() | locals
+  ' Spin2 code
+
+  ORG                           ' Begin inline PASM (COG execution)
+  ' ... PASM instructions ...
+  END                           ' End inline PASM, implicit RET
+
+  ' Spin2 code continues
+```
+
+#### Parameters
+
+END takes no parameters. It must appear alone on its line.
+
+#### Usage
+
+Use END to mark the conclusion of an inline assembly block that began with ORG or ORGH within a PUB or PRI method. Inline assembly enables time-critical operations to execute at full PASM speed within Spin2 methods.
+
+**ORG vs ORGH for Inline Assembly:**
+
+| Directive | Execution Location | Speed | Address Space |
+|-----------|-------------------|-------|---------------|
+| ORG | COG RAM | Fastest | $000-$11F (limited) |
+| ORGH | Hub RAM | Fast | Larger |
+
+#### Example: Pin Toggle
+
+```pasm
+PUB FastToggle(pin) | mask
+
+  mask := 1 << pin              ' Spin2 code
+
+  ORG                           ' Begin inline PASM (COG execution)
+                DRVNOT  mask    ' Toggle the pin
+  END                           ' End inline PASM, implicit RET
+
+  ' Execution returns here
+```
+
+#### Example: I2C Start Sequence
+
+```pasm
+PUB start() | scl, sda, tix
+
+  longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
+
+  ORG
+                DRVH    sda     ' SDA high
+                DRVH    scl     ' SCL high
+                WAITX   tix     ' Delay
+
+                DRVL    sda     ' SDA low (start condition)
+                WAITX   tix     ' Delay
+                DRVL    scl     ' SCL low
+                WAITX   tix     ' Delay
+  END
+```
+
+#### Example: Local Variable Access
+
+Inline PASM accesses local variables by name:
+
+```pasm
+PUB Example() | value, result
+
+  value := 100
+
+  ORG
+                MOV     result, value    ' Read local variable
+                ADD     result, #50      ' Modify
+  END
+
+  ' result now contains 150
+```
+
+#### Restrictions
+
+| Restriction | Error Message |
+|-------------|--------------|
+| Missing END after ORG/ORGH in method | `Expected END` |
+| ORG inside inline (nested) | `ORG not allowed within inline assembly code` |
+| ORGH inside inline (nested) | `ORGH not allowed within inline assembly code` |
+| ALIGNW/ALIGNL inside inline | `ALIGNW/ALIGNL not allowed within inline assembly code` |
+
+#### END vs RET
+
+| Aspect | END | RET instruction |
+|--------|-----|-----------------|
+| Purpose | End inline block | Return from PASM subroutine |
+| Automatic RET | Compiler adds RET | Manual |
+| Returns to | Spin2 code | PASM caller |
+| Context | Inline assembly only | Any PASM code |
+
+#### Notes
+- END is only valid within inline assembly blocks (after ORG or ORGH in PUB/PRI methods)
+- The compiler automatically inserts a RET instruction at the END location
+- Inline assembly is limited in scope—complex PASM routines belong in DAT blocks
+- Local variables declared in the method are accessible by name within inline PASM
+- END does not apply to DAT blocks—DAT assembly has no explicit terminator
+
+💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
+
+#### Related Directives
+- [ORG](#org) — Set COG/LUT origin (begins inline block in methods)
+- [ORGH](#orgh) — Set hub origin (begins hub-exec inline block)
+
+
+
 ## Summary
 
-The P2 assembler's 14 directives provide complete control over memory layout and assembly constraints:
+The P2 assembler's 15 directives provide complete control over memory layout and assembly constraints:
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Space Management**: RES, FIT, DITTO control allocation and verify constraints
+**Inline Assembly**: END terminates inline PASM blocks within Spin2 methods
 
 These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.
 
@@ -18780,45 +19287,140 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 ## Execution Mode Variants
 
-The execution mode constants include additional variants for automatic cog selection:
+The execution mode constants include additional variants for automatic cog selection. These variants combine the base execution mode (COGEXEC or HUBEXEC) with automatic resource selection flags, eliminating the need to manually specify cog IDs.
 
 ::: constheader
 ### COGEXEC_NEW {#cogexec_new}
 Auto-Select Cog For Cog Execution
 
-Auto-selects available cog for COGEXEC.
+Auto-selects available cog for COGEXEC mode.
 :::
 
-Automatically selects the next available cog for COGEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+Execution mode constant for automatically selecting an available cog with COG RAM execution.
+
+#### Encoding
+Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves this to the appropriate bit pattern for COGINIT's Dest operand.
+
+#### Description
+COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 496 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
+
+#### Usage
+```pasm
+' Start any available cog with code load
+                coginit #COGEXEC_NEW, ##@cog_code  wc
+        if_c    jmp     #no_cog_available
+```
+
+#### Notes
+- Use WC to detect if no cog was available (C=1 on failure)
+- With WC and register Dest, the launched cog's ID is returned
+- Equivalent to COGEXEC with N=1 in the %E_N_xVVV encoding
+
+#### Related Constants
+- [COGEXEC](#cogexec) — Base cog execution mode (specific cog)
+- [COGEXEC_NEW_PAIR](#cogexec_new_pair) — Auto-select adjacent cog pair variant
+
 
 ::: constheader
 ### COGEXEC_NEW_PAIR {#cogexec_new_pair}
 Auto-Select Cog Pair For Cog Execution
 
-Auto-selects adjacent cog pair for COGEXEC.
+Auto-selects adjacent cog pair for COGEXEC mode.
 :::
 
-Automatically selects an adjacent pair of available cogs for COGEXEC mode. Used when paired cog operations require two adjacent cogs.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with COG RAM execution.
+
+#### Encoding
+Combines COGEXEC base mode with both the N (new cog) and pair selection flags set.
+
+#### Description
+COGEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs (0-1, 2-3, 4-5, or 6-7), load code into the first cog, and start execution. Adjacent cog pairs can share their LUT memory via SETLUTS, enabling efficient inter-cog communication and data sharing.
+
+#### Usage
+```pasm
+' Start a cog pair for LUT sharing
+                coginit #COGEXEC_NEW_PAIR, ##@pair_code  wc
+        if_c    jmp     #no_pair_available
+```
+
+#### Notes
+- Requires two adjacent, stopped cogs to succeed
+- The returned cog ID is the lower of the pair (0, 2, 4, or 6)
+- Adjacent pairs can share LUT memory for fast inter-cog communication
+- Use SETLUTS to configure LUT sharing after both cogs are running
+
+#### Related Constants
+- [COGEXEC](#cogexec) — Base cog execution mode
+- [COGEXEC_NEW](#cogexec_new) — Single cog auto-select variant
+
 
 ::: constheader
 ### HUBEXEC_NEW {#hubexec_new}
 Auto-Select Cog For Hub Execution
 
-Auto-selects available cog for HUBEXEC.
+Auto-selects available cog for HUBEXEC mode.
 :::
 
-Automatically selects the next available cog for HUBEXEC mode. Eliminates the need to manually specify cog ID when any available cog will suffice.
+Execution mode constant for automatically selecting an available cog with Hub RAM execution.
+
+#### Encoding
+Combines HUBEXEC base mode with the N (new cog) flag set.
+
+#### Description
+HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 496-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
+
+#### Usage
+```pasm
+' Start any available cog in hub execution mode
+                coginit #HUBEXEC_NEW, ##@hub_code  wc
+        if_c    jmp     #no_cog_available
+```
+
+#### Notes
+- Hub execution allows unlimited code size
+- Instruction fetching uses the FIFO/streamer mechanism
+- Slower than cog execution due to Hub RAM access timing
+- Use WC to detect failure and retrieve the launched cog's ID
+
+#### Related Constants
+- [HUBEXEC](#hubexec) — Base hub execution mode (specific cog)
+- [HUBEXEC_NEW_PAIR](#hubexec_new_pair) — Auto-select adjacent cog pair variant
+
 
 ::: constheader
 ### HUBEXEC_NEW_PAIR {#hubexec_new_pair}
 Auto-Select Cog Pair For Hub Execution
 
-Auto-selects adjacent cog pair for HUBEXEC.
+Auto-selects adjacent cog pair for HUBEXEC mode.
 :::
 
-Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
+Execution mode constant for automatically selecting an adjacent pair of available cogs with Hub RAM execution.
 
-These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
+#### Encoding
+Combines HUBEXEC base mode with both the N (new cog) and pair selection flags set.
+
+#### Description
+HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from Hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
+
+#### Usage
+```pasm
+' Start a cog pair for hub execution with LUT sharing
+                coginit #HUBEXEC_NEW_PAIR, ##@hub_pair_code  wc
+        if_c    jmp     #no_pair_available
+```
+
+#### Notes
+- Combines unlimited hub code size with LUT sharing capability
+- Requires two adjacent, stopped cogs to succeed
+- The returned cog ID is the lower of the pair
+- Use SETLUTS to configure LUT sharing after both cogs are running
+
+#### Related Constants
+- [HUBEXEC](#hubexec) — Base hub execution mode
+- [HUBEXEC_NEW](#hubexec_new) — Single cog auto-select variant
+
+
+These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification. Always use WC with COGINIT when using these variants to detect allocation failures.
 
 
 
