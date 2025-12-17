@@ -15,7 +15,7 @@ Wait For Attention
 
 ---
 
-**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution.
+**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
@@ -56,7 +56,7 @@ Wait For Counter Event
 
 ---
 
-**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution.
+**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
@@ -72,7 +72,7 @@ Wait For Counter Event
 
 **Explanation:**
 
-WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3).
+WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3). Specifically, the flag is set when the MSB of (CT - CTx) equals 0, providing a precise mathematical definition of "passes" that handles counter wraparound correctly.
 
 The flags are cleared by execution of ADDCT*n*, POLLCT*n*, WAITCT*n*, JCT*n*, or JNCT*n* instructions (where *n* is 1, 2, or 3).
 

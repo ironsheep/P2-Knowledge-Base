@@ -105,6 +105,8 @@ Scale
 
 SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts the 32-bit product by 16 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled unsigned 16-bit values for subsequent operations.
 
+The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
+
 ::: pasm2
         SCA     factor, #$8000  ' Scale by 0.5 (32768/65536)
         ADD     result, #0      ' Add scaled value
@@ -140,6 +142,8 @@ Scale Signed
 **Explanation:**
 
 SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right shifts the 32-bit product by 14 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled signed values for subsequent operations.
+
+The instruction following SCAS is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
 
 
 

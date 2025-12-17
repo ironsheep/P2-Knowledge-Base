@@ -238,6 +238,8 @@ When the pin is later driven as output, it will immediately be at the desired le
 
 If WCZ is specified, the C and Z flags are set to the original output state of the base pin.
 
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after a FLT instruction to see the updated direction state.
+
 
 
 ::: instrheader
@@ -277,6 +279,8 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within t
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTH to see the updated direction state.
+
 
 
 ::: instrheader
@@ -315,6 +319,8 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTL to see the updated direction state.
 
 
 
@@ -356,6 +362,8 @@ When Dest is a register, the register's value bits \[10:0] are used as-is to for
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTNOT to see the updated direction state.
 
 
 
@@ -400,6 +408,6 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within t
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
-
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTRND to see the updated direction state.
 
 

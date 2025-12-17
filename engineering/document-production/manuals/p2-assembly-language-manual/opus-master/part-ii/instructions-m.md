@@ -183,6 +183,35 @@ The WC, WZ, or WCZ effect must be specified for the modifications to take effect
 
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
 
+**Modifier Constants:**
+
+| Value | Binary | Mnemonic | Description |
+|:-----:|:------:|:---------|:------------|
+| 0 | 0000 | _CLR | Always clear (result = 0) |
+| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
+| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 3 | 0011 | _NC | Copy inverse of C (not C) |
+| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
+| 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
+| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
+| 10 | 1010 | _Z | Copy Z |
+| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 12 | 1100 | _C | Copy C |
+| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
+| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 15 | 1111 | _SET | Always set (result = 1) |
+
+```pasm
+        MODCZ   _CLR, _SET      ' Clear C, set Z
+        MODCZ   _SET, _CLR      ' Set C, clear Z
+        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C          ' Swap C and Z values
+        MODCZ   _NC, _NZ        ' Invert both flags
+```
+
 
 
 ::: instrheader
