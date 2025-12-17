@@ -8040,6 +8040,8 @@ When the pin is later driven as output, it will immediately be at the desired le
 
 If WCZ is specified, the C and Z flags are set to the original output state of the base pin.
 
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after a FLT instruction to see the updated direction state.
+
 
 
 ::: instrheader
@@ -8079,6 +8081,8 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within t
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
 
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTH to see the updated direction state.
+
 
 
 ::: instrheader
@@ -8117,6 +8121,8 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTL to see the updated direction state.
 
 
 
@@ -8158,6 +8164,8 @@ When Dest is a register, the register's value bits \[10:0] are used as-is to for
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTNOT to see the updated direction state.
 
 
 
@@ -8202,7 +8210,7 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within t
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
-
+**Pipeline Note:** The new DIRx state is not data-forwarded to subsequent instructions; only the OUTx state is forwarded (the P2 has only one forwarding path, and OUT was prioritized). Any instruction that reads or modifies DIRx should be placed at least two instructions after FLTRND to see the updated direction state.
 
 
 
@@ -9734,6 +9742,35 @@ Common uses include implementing state machines where both flags represent state
 The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
+
+**Modifier Constants:**
+
+| Value | Binary | Mnemonic | Description |
+|:-----:|:------:|:---------|:------------|
+| 0 | 0000 | _CLR | Always clear (result = 0) |
+| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
+| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 3 | 0011 | _NC | Copy inverse of C (not C) |
+| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
+| 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
+| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
+| 10 | 1010 | _Z | Copy Z |
+| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 12 | 1100 | _C | Copy C |
+| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
+| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 15 | 1111 | _SET | Always set (result = 1) |
+
+```pasm
+        MODCZ   _CLR, _SET      ' Clear C, set Z
+        MODCZ   _SET, _CLR      ' Set C, clear Z
+        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C          ' Swap C and Z values
+        MODCZ   _NC, _NZ        ' Invert both flags
+```
 
 
 
@@ -12975,6 +13012,8 @@ Scale
 
 SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts the 32-bit product by 16 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled unsigned 16-bit values for subsequent operations.
 
+The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
+
 ::: pasm2
         SCA     factor, #$8000  ' Scale by 0.5 (32768/65536)
         ADD     result, #0      ' Add scaled value
@@ -13010,6 +13049,8 @@ Scale Signed
 **Explanation:**
 
 SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right shifts the 32-bit product by 14 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled signed values for subsequent operations.
+
+The instruction following SCAS is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
 
 
 
@@ -14712,7 +14753,7 @@ Wait For Attention
 
 ---
 
-**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution.
+**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
@@ -14753,7 +14794,7 @@ Wait For Counter Event
 
 ---
 
-**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution.
+**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
 
@@ -14769,7 +14810,7 @@ Wait For Counter Event
 
 **Explanation:**
 
-WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3).
+WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3). Specifically, the flag is set when the MSB of (CT - CTx) equals 0, providing a precise mathematical definition of "passes" that handles counter wraparound correctly.
 
 The flags are cleared by execution of ADDCT*n*, POLLCT*n*, WAITCT*n*, JCT*n*, or JNCT*n* instructions (where *n* is 1, 2, or 3).
 

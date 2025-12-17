@@ -53,51 +53,13 @@ The first 496 longs ($000-$1EF) serve as general-purpose registers available for
 
 Programs can use this space flexibly. A small program might dedicate most of the space to data storage and lookup tables. A larger program uses more space for code and less for data. The programmer controls this allocation through the assembler's ORG directive and RES directive for reserving data space.
 
-#### Parameter Registers ($1D8-$1DF)
-
-Within the general-purpose range, registers $1D8-$1DF have predefined names PR0-PR7 for Spin2/PASM2 interoperability:
-
-| Address | Register | Purpose |
-|:--------|:---------|:------------------------------------------------|
-| $1D8 | PR0 | Parameter/result register 0 |
-| $1D9 | PR1 | Parameter/result register 1 |
-| $1DA | PR2 | Parameter/result register 2 |
-| $1DB | PR3 | Parameter/result register 3 |
-| $1DC | PR4 | Parameter/result register 4 |
-| $1DD | PR5 | Parameter/result register 5 |
-| $1DE | PR6 | Parameter/result register 6 |
-| $1DF | PR7 | Parameter/result register 7 |
-
-These registers provide a communication mechanism between Spin2 and PASM2 code running in the same COG. Spin2 methods can read and write PR0-PR7, and inline PASM2 code can access the same values. For standalone PASM2 programs or code launched into a separate COG, these are simply general-purpose registers with convenient predefined names.
+Registers $1D8-$1DF have predefined symbols PR0-PR7 for Spin2 interoperability. For standalone PASM2 programs, these are ordinary general-purpose registers. See Part II: Special Registers for details on Spin2/PASM2 communication.
 
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
-```{=latex}
-\SpecialRegistersMapDiagram
-```
+The final 16 registers have dedicated hardware functions. Registers $1F0-$1F7 (IJMP3/IRET3, IJMP2/IRET2, IJMP1/IRET1, PA, PB) serve dual purposes: they function as interrupt vectors and call/return storage when those features are enabled, or as general-purpose RAM otherwise. Registers $1F8-$1FF (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) are fixed special registers that always provide their hardware I/O and pointer functions.
 
-The final 16 registers ($1F0-$1FF) have special hardware functions:
-
-| Address | Register | Access | Purpose |
-|:--------|:---------|:-------|:------------------------------------------------|
-| $1F0 | IJMP3 | R/W | Interrupt 3 jump address |
-| $1F1 | IRET3 | R/W | Interrupt 3 return address |
-| $1F2 | IJMP2 | R/W | Interrupt 2 jump address |
-| $1F3 | IRET2 | R/W | Interrupt 2 return address |
-| $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
-| $1F5 | IRET1 | R/W | Interrupt 1 return address |
-| $1F6 | PA | R/W | Port A scratch / pointer register |
-| $1F7 | PB | R/W | Port B scratch / pointer register |
-| $1F8 | PTRA | R/W | Pointer A register |
-| $1F9 | PTRB | R/W | Pointer B register |
-| $1FA | DIRA | R/W | Direction for pins 31-0 |
-| $1FB | DIRB | R/W | Direction for pins 63-32 |
-| $1FC | OUTA | R/W | Output for pins 31-0 |
-| $1FD | OUTB | R/W | Output for pins 63-32 |
-| $1FE | INA | R/O | Input from pins 31-0 |
-| $1FF | INB | R/O | Input from pins 63-32 |
-
-Registers $1F0-$1F7 serve dual purposes. When their associated hardware functions (interrupts, parameter passing) are not enabled, these registers function as ordinary general-purpose RAM. Registers $1F8-$1FF are fixed special-purpose registers that always provide their hardware functions when accessed.
+For complete documentation of each register, see Part II: Special Registers and Appendix C: Special Registers Quick Reference.
 
 ### 1.2.3 Register Addressing
 

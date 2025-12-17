@@ -2,9 +2,14 @@
 
 ## v1.3.0 (2025-12-15)
 
-**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, and enhanced flag documentation from PNut-TS compiler analysis.
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, and Chapter 1 structural cleanup.
 
 ### Part I: Architectural Foundation
+
+**Chapter 1 - The P2 Execution Model:**
+- Section 1.2.1: Condensed PR0-PR7 documentation to cross-reference (detailed documentation in Part II)
+- Section 1.2.2: Removed duplicate diagram and table; added cross-references to Part II and Appendix C
+- Section 1.2: Reduced redundancy (~35 lines) while preserving conceptual clarity
 
 **Chapter 3 - Flags and Conditional Execution:**
 - Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
@@ -85,6 +90,17 @@ OUT family:
 
 - COGINIT: Added execution mode constants reference table (COGEXEC, HUBEXEC, and _NEW variants)
 
+#### Parallax Draft Audit (corroborated against Silicon Documentation)
+
+- MODCZ: Added modifier constants table to instruction block (complements Appendix G)
+- WAITATN: Added event flag re-trigger clarification
+- WAITCT1/WAITCT2/WAITCT3: Added re-trigger clarification; added mathematical formula for counter comparison (MSB of CT - CTx = 0)
+- SCA, SCAS: Added interrupt shielding note
+
+#### Chip Gracey Confirmation
+
+- FLTC, FLTNC, FLTZ, FLTNZ, FLTH, FLTL, FLTNOT, FLTRND: Added pipeline data-forwarding caveat (DIRx not forwarded; only OUTx forwarded)
+
 ### Part III: Appendices
 
 **Appendix D - Predefined Constants:**
@@ -96,6 +112,9 @@ OUT family:
 **Source Material:**
 - WC-WZ-WCZ-Effects-Guide.md (PNut-TS compiler documentation)
 - PASM2-Authoring-Guide.md (PNut-TS compiler documentation)
+- Parallax PASM2 Manual Draft (2022-11-01)
+- Silicon Documentation v35 (lines 5152, 5206, 5299-5317, 5674)
+- Chip Gracey direct confirmation (2025-12-17)
 
 ---
 

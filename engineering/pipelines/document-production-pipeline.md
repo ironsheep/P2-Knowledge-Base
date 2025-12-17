@@ -1,6 +1,6 @@
 # Document Production Pipeline Tracker
 
-*Last Updated: 2025-08-25*
+*Last Updated: 2025-12-17*
 
 ## Purpose
 Track documents we've committed to producing, their current status, and readiness for production.
@@ -72,13 +72,48 @@ This is NOT a task list - it's a state tracker for document deliverables.
 **Note**: Large manual, will transition to Parallax branding  
 **⚠️ SOURCE CONSIDERATION**: PDF version available (`P2 Spin2 Documentation v51-250425.pdf`) - consider re-ingesting from PDF vs DOCX for better formatting fidelity and visual preservation
 
-#### Spin2 Reference Manual (Parallax Foundation)  
-**Status**: 🔴 Planned  
-**Source**: Parallax foundation + P2KB completion  
-**Format**: Official reference documentation  
-**Audience**: P2 Spin developers  
-**Template Stack**: p2kb-foundation + reference-manual + parallax-official  
+#### Spin2 Reference Manual (Parallax Foundation)
+**Status**: 🔴 Planned
+**Source**: Parallax foundation + P2KB completion
+**Format**: Official reference documentation
+**Audience**: P2 Spin developers
+**Template Stack**: p2kb-foundation + reference-manual + parallax-official
 **Note**: Large manual, will transition to Parallax branding
+
+#### P2 XBYTE Bytecode Engine Guide
+**Status**: 🔴 Planned
+**Source**: Silicon Documentation v35 (lines 1964-2500, 5674, 5991-5997)
+**Format**: Tutorial/reference hybrid (like Smart Pins manual)
+**Audience**: P2 developers building interpreters, VMs, or bytecode-based systems
+**Template Stack**: p2kb-foundation + tutorial-manual + iron-sheep-tech-review
+**Scope**: Complete XBYTE subsystem documentation with working examples
+**Content Outline**: See `manuals/p2-assembly-language-manual/audit/user-feedback-audit-2025-12-17.md` § "Opinion: XBYTE Warrants a Dedicated Manual"
+**Draft Content**: Full chapter draft in same audit document § "XBYTE Chapter - Complete Rewrite" (relocated from Assembly manual)
+**Proposed Chapters**:
+1. Introduction (bytecode interpretation concepts)
+2. XBYTE Mechanism (8-phase cycle, timing)
+3. LUT Table Design (entry format, skip patterns)
+4. Configuration Modes (all 9 modes with use cases)
+5. Bytecode Routines (design patterns, parameters)
+6. Branching & Control (relative/absolute, subroutines)
+7. Multiple Bytecode Sets (SETQ2 alternate tables)
+8. Debugging (GETBRK state, single-step technique)
+9. Complete Examples (Forth inner interpreter, VM, parser)
+10. Performance (optimization, cycle counting)
+
+**Rationale**: XBYTE is comparable in scope to Smart Pins - a complete subsystem enabling interpreters, Forth systems, and custom VMs. Too detailed for the Assembly Reference Manual's Part I overview.
+**Note**: Medium manual (~50-80 pages estimated)
+
+**Potential Approach - Spin2 Interpreter Integration:**
+The Spin2 interpreter source (v51) has been fully analyzed (`sources/spin2-v51/spin-interpreter-v51-complete-analysis.md`). The Spin2 interpreter uses a *traditional* dispatch architecture (word-based vector table, ~20-40 clock overhead) rather than XBYTE (LUT-based EXECF entries, 6-clock overhead). A potential expanded structure:
+```
+Part I: XBYTE Hardware Engine (Chapters 1-10)
+Part II: Case Studies
+  - Traditional Dispatch (Spin2 Interpreter TOO)
+  - XBYTE vs Traditional Comparison
+  - Converting Traditional to XBYTE
+```
+This would make the manual comprehensive for anyone building bytecode systems, showing both approaches. Decision deferred - noting here to preserve the thought.
 
 ### ⏸️ **Deferred Queue**
 
