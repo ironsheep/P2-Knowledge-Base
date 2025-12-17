@@ -320,51 +320,13 @@ The first 496 longs ($000-$1EF) serve as general-purpose registers available for
 
 Programs can use this space flexibly. A small program might dedicate most of the space to data storage and lookup tables. A larger program uses more space for code and less for data. The programmer controls this allocation through the assembler's ORG directive and RES directive for reserving data space.
 
-#### Parameter Registers ($1D8-$1DF)
-
-Within the general-purpose range, registers $1D8-$1DF have predefined names PR0-PR7 for Spin2/PASM2 interoperability:
-
-| Address | Register | Purpose |
-|:--------|:---------|:------------------------------------------------|
-| $1D8 | PR0 | Parameter/result register 0 |
-| $1D9 | PR1 | Parameter/result register 1 |
-| $1DA | PR2 | Parameter/result register 2 |
-| $1DB | PR3 | Parameter/result register 3 |
-| $1DC | PR4 | Parameter/result register 4 |
-| $1DD | PR5 | Parameter/result register 5 |
-| $1DE | PR6 | Parameter/result register 6 |
-| $1DF | PR7 | Parameter/result register 7 |
-
-These registers provide a communication mechanism between Spin2 and PASM2 code running in the same COG. Spin2 methods can read and write PR0-PR7, and inline PASM2 code can access the same values. For standalone PASM2 programs or code launched into a separate COG, these are simply general-purpose registers with convenient predefined names.
+Registers $1D8-$1DF have predefined symbols PR0-PR7 for Spin2 interoperability. For standalone PASM2 programs, these are ordinary general-purpose registers. See Part II: Special Registers for details on Spin2/PASM2 communication.
 
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
-```{=latex}
-\SpecialRegistersMapDiagram
-```
+The final 16 registers have dedicated hardware functions. Registers $1F0-$1F7 (IJMP3/IRET3, IJMP2/IRET2, IJMP1/IRET1, PA, PB) serve dual purposes: they function as interrupt vectors and call/return storage when those features are enabled, or as general-purpose RAM otherwise. Registers $1F8-$1FF (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) are fixed special registers that always provide their hardware I/O and pointer functions.
 
-The final 16 registers ($1F0-$1FF) have special hardware functions:
-
-| Address | Register | Access | Purpose |
-|:--------|:---------|:-------|:------------------------------------------------|
-| $1F0 | IJMP3 | R/W | Interrupt 3 jump address |
-| $1F1 | IRET3 | R/W | Interrupt 3 return address |
-| $1F2 | IJMP2 | R/W | Interrupt 2 jump address |
-| $1F3 | IRET2 | R/W | Interrupt 2 return address |
-| $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
-| $1F5 | IRET1 | R/W | Interrupt 1 return address |
-| $1F6 | PA | R/W | Port A scratch / pointer register |
-| $1F7 | PB | R/W | Port B scratch / pointer register |
-| $1F8 | PTRA | R/W | Pointer A register |
-| $1F9 | PTRB | R/W | Pointer B register |
-| $1FA | DIRA | R/W | Direction for pins 31-0 |
-| $1FB | DIRB | R/W | Direction for pins 63-32 |
-| $1FC | OUTA | R/W | Output for pins 31-0 |
-| $1FD | OUTB | R/W | Output for pins 63-32 |
-| $1FE | INA | R/O | Input from pins 31-0 |
-| $1FF | INB | R/O | Input from pins 63-32 |
-
-Registers $1F0-$1F7 serve dual purposes. When their associated hardware functions (interrupts, parameter passing) are not enabled, these registers function as ordinary general-purpose RAM. Registers $1F8-$1FF are fixed special-purpose registers that always provide their hardware functions when accessed.
+For complete documentation of each register, see Part II: Special Registers and Appendix C: Special Registers Quick Reference.
 
 ### 1.2.3 Register Addressing
 
@@ -384,6 +346,8 @@ The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, 
 Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of storage. All eight COGs can read and write any location in this space. Hub memory stores bytes, words (16-bit), and longs (32-bit) with appropriate address alignment.
 
 Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle the shared access timing automatically.
+
+Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
 
 ### 1.3.2 Hub Access Timing
 
@@ -412,6 +376,8 @@ Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast m
 
 LUT memory provides single-cycle access like COG RAM but occupies a separate address space. Programs access LUT memory at addresses $200-$3FF (relative to COG addressing) through dedicated LUT instructions. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
 
+LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
+
 The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications.
 
 ### 1.4.2 LUT Instructions
@@ -433,6 +399,8 @@ Most instructions complete in two clock cycles once the pipeline fills. The firs
 
 Hub memory instructions add variable delays waiting for Hub access windows. The egg-beater pattern means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
 
+When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than the egg-beater mechanism. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
+
 Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch requires four clocks as the pipeline flushes and refills from the branch target address.
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
@@ -452,11 +420,13 @@ Time-critical inner loops often execute in COG mode even when the main program r
 
 ### 1.6.2 Hub Execution Mode
 
-Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the same egg-beater access pattern used for data transfers. This adds variable delay to instruction fetch, slowing execution compared to COG mode.
+Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the egg-beater pattern used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
 
 Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
 
 `COGINIT` determines execution mode when starting a COG. The initialization parameter specifies either COG execution (code loaded from Hub to COG RAM, then executed) or Hub execution (code executed directly from Hub RAM). The `ORGH` assembler directive marks code intended for Hub execution, while `ORG` marks code for COG execution.
+
+⚠️ **Pitfall:** While executing from Hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during Hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and streamer modes that engage the FIFO. Code requiring these instructions must execute from COG RAM.
 
 ### 1.6.3 Switching Between Modes
 
@@ -471,7 +441,8 @@ The hardware automatically handles mode transitions. The programmer simply speci
 \item Each COG has 512 longs of private RAM plus 512 longs of LUT
 \item Hub memory (512KB) is shared among all COGs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
-\item COGs can execute from COG RAM (fast) or Hub RAM (larger capacity)
+\item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)
+\item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
 \item The pipeline provides single-cycle execution for most instructions
 \item No interrupts are required due to true parallel execution
 \end{keyconcepts}
@@ -2795,7 +2766,7 @@ Hub execution mode—often called "HUBEXEC mode"—executes instructions from hu
 
 In hub execution mode, each instruction fetch waits for the COG's hub access window. This adds 0-7 cycles of wait time per instruction, similar to how hub data access works. The average instruction fetch time becomes 2 (base) + 3.5 (average hub wait) = 5.5 cycles, roughly 2.75× slower than COG mode.
 
-Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($200 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the egg beater hub access mechanism. Code can be megabytes in size, limited only by available hub RAM.
+Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($200 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can be megabytes in size, limited only by available hub RAM.
 
 Despite the slower instruction fetch, hub mode remains useful for several scenarios:
 
@@ -3312,155 +3283,56 @@ The 16-lock limit rarely constrains applications—complex systems typically nee
 
 ## 5.6 XBYTE Bytecode Engine
 
-The P2 includes a hardware bytecode execution engine called XBYTE that accelerates interpreted languages and virtual machines. Traditional software interpreters spend 20-40 clock cycles dispatching each bytecode—reading the bytecode, looking up a handler address, and jumping to the handler. XBYTE reduces this overhead to just 6 clock cycles through dedicated hardware that automates the fetch-lookup-dispatch cycle. This acceleration makes the P2 practical for running bytecode interpreters at speeds approaching native code performance.
+XBYTE is a hardware bytecode dispatch mechanism. When a RET or _RET_ instruction returns to address $1FF, the hardware automatically fetches a bytecode from the FIFO, looks up a dispatch entry in LUT RAM, and branches to the handler routine. Total dispatch overhead is 6 clock cycles.
 
-### 5.6.1 XBYTE Operation
+### 5.6.1 Dispatch Cycle
 
-XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
+XBYTE executes as a phantom instruction triggered by returning to $1FF. The return does not pop the hardware stack, so repeated RET/_RET_ instructions fetch successive bytecodes.
 
-XBYTE is like a phantom instruction that executes on a hardware stack return (RET/_RET_) to address $1FF. Such a return does not pop the stack, so each additional RET/_RET_ causes another bytecode to be fetched and executed. This creates a continuous interpretation loop with minimal overhead.
+| Clock | Phase | Activity |
+|-------|-------|----------|
+| 1 | go | RFBYTE bytecode, SKIPF #0 |
+| 2 | get | MOV PA,bytecode, RDLUT |
+| 3 | go | RDLUT complete |
+| 4 | get | EXECF begin |
+| 5 | go | MOV PB,(GETPTR), MODCZ, branch |
+| 6-7 | | Pipeline flush/reload |
+| 8 | get | First instruction of handler |
 
-The execution cycle proceeds through eight clock phases:
+A handler ending with `_RET_` adds 2 clocks, making the minimum cycle 8 clocks total.
 
-+-------+-------+------------------------------------------+------------------------------+
-| Clock | Phase | Activity                                 | Description                  |
-+=======+=======+==========================================+==============================+
-| 1     | go    | RFBYTE bytecode, SKIPF #0                | Fetch bytecode from FIFO,    |
-|       |       |                                          | cancel any prior skip        |
-|       |       |                                          | pattern                      |
-+-------+-------+------------------------------------------+------------------------------+
-| 2     | get   | MOV PA,bytecode, RDLUT                   | Write bytecode to PA         |
-|       |       |                                          | ($1F6), start LUT read       |
-+-------+-------+------------------------------------------+------------------------------+
-| 3     | go    | RDLUT (data → D)                         | Complete LUT read, get       |
-|       |       |                                          | routine address and skip     |
-|       |       |                                          | pattern                      |
-+-------+-------+------------------------------------------+------------------------------+
-| 4     | get   | EXECF D (begin)                          | Start EXECF dispatch         |
-+-------+-------+------------------------------------------+------------------------------+
-| 5     | go    | MOV PB,(GETPTR), MODCZ, EXECF D (branch) | Write FIFO pointer to PB     |
-|       |       |                                          | ($1F7), optionally set C/Z,  |
-|       |       |                                          | branch                       |
-+-------+-------+------------------------------------------+------------------------------+
-| 6     | get   | flush pipeline                           | Pipeline flush for branch    |
-+-------+-------+------------------------------------------+------------------------------+
-| 7     | go    | reload pipeline                          | Pipeline reload              |
-+-------+-------+------------------------------------------+------------------------------+
-| 8     | get   | first instruction                        | First instruction of         |
-|       |       |                                          | bytecode routine executes    |
-+-------+-------+------------------------------------------+------------------------------+
+### 5.6.2 LUT Entry Format
 
-When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves. The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks.
+Each 32-bit LUT entry contains:
 
-### 5.6.2 LUT Table Format
+| Bits | Content |
+|------|---------|
+| [9:0] | Handler address in COG/LUT RAM |
+| [31:10] | SKIPF pattern (22 bits) |
 
-The bytecode translation table in LUT memory consists of long values that EXECF uses for dispatch. Each 32-bit LUT entry contains two fields:
+EXECF simultaneously branches and applies the skip pattern.
 
-- **Bits [9:0]**: Jump address in COG/LUT RAM ($000-$3FF)
-- **Bits [31:10]**: SKIPF pattern (22 bits) applied after the jump
+### 5.6.3 Configuration Summary
 
-When XBYTE dispatches to a bytecode routine, EXECF simultaneously jumps to the routine address and applies the skip pattern. This allows compact bytecode routines where common instruction sequences are shared and skip patterns select which instructions execute.
+XBYTE is configured via `_RET_ SETQ {#}D` with $1FF on the stack:
 
-### 5.6.3 Configuration Options
+| Mode | LUT Entries | Index Source |
+|------|-------------|--------------|
+| Full 8-bit | 256 | bytecode[7:0] |
+| 7-bit | 128 | bytecode[6:0] or [7:1] |
+| 6-bit | 64 | bytecode[5:0] or [7:2] |
+| 5-bit | 32 | bytecode[4:0] or [7:3] |
+| 4-bit | 16 | bytecode[3:0] or [7:4] |
 
-XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements. The SETQ/SETQ2 D value controls the mode:
+Smaller modes conserve LUT space. A compressed mode allows mixing individual and shared handlers.
 
-+------+----------------+-------------+-------------------+-----------+
-| Bits | SETQ D Pattern | LUT Base    | Index Calculation | Bytecodes |
-+======+================+=============+===================+===========+
-| 8    | %A0000000F     | %A00000000  | I = bytecode[7:0] | 256       |
-+------+----------------+-------------+-------------------+-----------+
-| 7    | %AAxx0010F     | %AA0000000  | I = bytecode[6:0] | 128       |
-+------+----------------+-------------+-------------------+-----------+
-| 7    | %AAxx0011F     | %AA0000000  | I = bytecode[7:1] | 128       |
-+------+----------------+-------------+-------------------+-----------+
-| 6    | %AAAx1010F     | %AAA000000  | I = bytecode[5:0] | 64        |
-+------+----------------+-------------+-------------------+-----------+
-| 6    | %AAAx1011F     | %AAA000000  | I = bytecode[7:2] | 64        |
-+------+----------------+-------------+-------------------+-----------+
-| 5    | %AAAAx100F     | %AAAA00000  | I = bytecode[4:0] | 32        |
-+------+----------------+-------------+-------------------+-----------+
-| 5    | %AAAAx101F     | %AAAA00000  | I = bytecode[7:3] | 32        |
-+------+----------------+-------------+-------------------+-----------+
-| 4    | %AAAAA110F     | %AAAAA0000  | I = bytecode[3:0] | 16        |
-+------+----------------+-------------+-------------------+-----------+
-| 4    | %AAAAA111F     | %AAAAA0000  | I = bytecode[7:4] | 16        |
-+------+----------------+-------------+-------------------+-----------+
+### 5.6.4 Handler Requirements
 
-The A bits specify the LUT base address where the dispatch table begins. The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code.
+- **Location:** COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
+- **Exit:** Must end with RET or _RET_
+- **Registers:** PA contains bytecode value; PB contains FIFO pointer
 
-A compressed mode (%ABBBB00xF where BBBB > 0) provides efficient handling of bytecode families:
-
-- If bytecode[7:4] < BBBB: Use full bytecode as index (individual handlers)
-- If bytecode[7:4] >= BBBB: Use bytecode[7:4] - BBBB as index (shared handlers)
-
-This allows 16 primary bytecodes with full dispatch plus up to 240 extended bytecodes using shared handlers, balancing bytecode variety against LUT consumption. When bytecodes share a handler, the full bytecode value in PA differentiates behavior within the routine.
-
-### 5.6.4 Flag Control
-
-The F bit (bit 0) of the SETQ/SETQ2 D value controls whether XBYTE writes the bytecode's index bits to the C and Z flags:
-
-| F Bit | Behavior |
-|-------|----------|
-| 0 | Do not affect flags on XBYTE dispatch |
-| 1 | Write bytecode index bit 1 to C, bit 0 to Z |
-
-This flag option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families. For example, four related bytecodes can share a single routine that uses conditional execution based on C and Z to differentiate behavior—useful for cases where a SKIPF pattern alone would be insufficient.
-
-### 5.6.5 Starting XBYTE
-
-XBYTE mode begins through a specific instruction sequence. First, push $1FF onto the hardware stack, then execute _RET_ SETQ to configure the mode and trigger XBYTE:
-
-```pasm
-                                        ' Setup before starting XBYTE:
-        setq2   #256-1                  ' Load 256 longs into LUT
-        rdlong  $100, #bytetable        ' Bytecode table at LUT $100
-
-        rdfast  #0, #bytecodes          ' Init FIFO at bytecode stream
-
-        push    #$1FF                   ' Push $1FF for XBYTE returns
-        _ret_   setq    #$100           ' Start XBYTE: LUT base=$100
-```
-
-The _RET_ SETQ instruction both configures XBYTE mode and returns to $1FF, which triggers the first bytecode fetch. Each bytecode routine ends with RET or _RET_, returning to $1FF to fetch the next bytecode.
-
-To alter the XBYTE mode for all subsequent bytecodes, execute another _RET_ SETQ instruction within a bytecode routine. To alter the mode for the next bytecode only, use _RET_ SETQ2 instead—the original mode automatically restores after one bytecode. This is useful for engaging singular bytecodes from alternate sets without having to restore the original mode afterward.
-
-### 5.6.6 Bytecode Routine Requirements
-
-Bytecode routines must follow these constraints:
-
-- **Location**: Must reside in COG RAM ($000-$1FF) or LUT RAM ($200-$3FF)
-- **Exit**: Must end with RET or _RET_ to return control to XBYTE
-- **Stack**: Hardware stack must not overflow (8 levels maximum)
-
-The PA register ($1F6) contains the current bytecode value, available as an immediate operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode using RFBYTE, RFWORD, or RFLONG.
-
-For maximum performance, use the _RET_ prefix on the final instruction:
-
-```pasm
-toggle_pin0
-        _ret_   drvnot  #0              ' Toggle pin 0, return (2 clocks)
-```
-
-This executes in just 2 clocks, making the complete XBYTE cycle only 8 clocks total.
-
-### 5.6.7 XBYTE Applications
-
-XBYTE enables efficient implementation of virtual machines and interpreters. Java bytecode interpreters, Forth threaded code systems, BASIC interpreters, and custom scripting languages all benefit from the reduced dispatch overhead. At 160 MHz, XBYTE can dispatch over 26 million bytecodes per second (considering only dispatch overhead), making interpreted languages practical for real-time applications.
-
-| Dispatch Method | Overhead | Relative Speed |
-|-----------------|----------|----------------|
-| Software dispatch | 20-40 clocks | 1× (baseline) |
-| XBYTE dispatch | 6 clocks | 3-7× faster |
-
-XBYTE is particularly effective for:
-
-- **Virtual machines**: Java, Python, or custom bytecode interpreters
-- **Threaded interpreters**: Forth direct/indirect threaded code
-- **Command processors**: Parsing and executing token streams
-- **Compression**: Executing compressed instruction sequences
-- **Protocol handling**: Processing token-based communication protocols
+**See:** SETQ, SETQ2 for configuration; EXECF, SKIPF for dispatch mechanism; RFBYTE, RDFAST for FIFO operations; GETBRK for debugging state
 
 
 ## 5.7 Boot Process
@@ -3627,305 +3499,56 @@ This performs a full hardware reset—all COGs stop, all I/O returns to high-imp
 
 ## 5.8 DEBUG Output
 
-The DEBUG statement provides built-in debugging output without requiring external serial drivers or dedicated COGs. When your program includes DEBUG statements, the compiler generates code that transmits formatted data over the serial connection to the development host. The host's debug window displays values, text, and even graphical visualizations—oscilloscope traces, plots, and logic analyzer views. This integrated debugging capability accelerates development by providing visibility into program behavior without consuming pins or writing serial communication code.
+DEBUG is a compile-time directive that generates serial output code. When enabled, DEBUG statements transmit formatted data over the serial connection to the development host, where the debug window displays values, text, and graphical visualizations.
 
-### 5.8.1 DEBUG Fundamentals
+### 5.8.1 Basic Usage
 
-DEBUG is a compile-time directive that generates serial output code. The compiler translates each DEBUG statement into instructions that format and transmit data at runtime. When DEBUG is disabled (via compiler option), these statements generate no code, allowing debug instrumentation to remain in source code without affecting production builds.
-
-The basic DEBUG syntax accepts text strings and formatted values:
+DEBUG statements output text strings and formatted values:
 
 ```pasm
-                debug("Hello from P2")                  ' Simple text message
-                debug("Count: ", udec(counter))     ' Text with decimal
-                debug("Address: ", uhex(ptr))           ' Hexadecimal display
-                debug("Flags: ", ubin(status))          ' Binary display
+                debug("Starting motor control")     ' Text message
+                debug("Speed: ", udec(speed))       ' Decimal value
+                debug("Status: ", uhex_(status))    ' Hex without name
 ```
 
-DEBUG output appears in the development environment's debug window—a terminal-style display that shows messages as they arrive. The serial connection typically runs at 2 Mbaud, providing high-throughput debugging without significant timing impact.
+The serial connection typically runs at 2 Mbaud. When DEBUG is disabled via compiler option, statements generate no code.
 
 ### 5.8.2 Value Formatters
 
-DEBUG provides formatters for displaying values in different numeric bases and formats. Each formatter follows a consistent naming pattern: the base prefix (U for unsigned, S for signed) followed by the radix (DEC, HEX, BIN).
+DEBUG provides formatters for numeric display. Each has unsigned (U prefix) and signed (S prefix) variants:
 
-| Formatter | Output Format | Example Output |
-|-----------|---------------|----------------|
-| UDEC | Unsigned decimal | `counter = 42` |
-| SDEC | Signed decimal | `temperature = -25` |
-| UHEX | Hexadecimal with $ | `address = $0400` |
-| SHEX | Signed hexadecimal | `offset = -$20` |
-| UBIN | Binary with % | `flags = %10110` |
-| SBIN | Signed binary | `mask = -%0101` |
-| FDEC | Floating point | `voltage = 3.14159` |
+| Base | Formatters | Output Example |
+|------|------------|----------------|
+| Decimal | UDEC, SDEC | `counter = 42` |
+| Hexadecimal | UHEX, SHEX | `addr = $0400` |
+| Binary | UBIN, SBIN | `flags = %10110` |
 
-**The Underscore Convention:** Each formatter has a variant with an underscore suffix that outputs only the value, omitting the variable name:
+Underscore suffix (UDEC_, UHEX_, etc.) outputs only the value, omitting the variable name.
 
-```pasm
-                debug(udec(count))                      ' Output: count = 42
-                debug(udec_(count))                     ' Output: 42
-                debug("Items: ", udec_(count))          ' Output: Items: 42
-```
+Size suffixes (_BYTE, _WORD, _LONG) control display width. Array variants (_BYTE_ARRAY, etc.) display multiple consecutive values.
 
-The underscore variants enable clean custom formatting. Without the underscore, formatters automatically include the variable name—useful for quick inspection but awkward when building custom output strings.
+### 5.8.3 Visual Debug Displays
 
-### 5.8.3 Sized Formatters
+DEBUG supports graphical display windows including:
+- **SCOPE** — Oscilloscope waveform display
+- **PLOT** — Data plotting and charts
+- **LOGIC** — Logic analyzer view
+- **TERM** — Dedicated terminal window
+- **BITMAP** — Pixel display
 
-Each formatter supports size suffixes that control the display width and value interpretation:
+Visual displays use a two-phase pattern: creation statement (with display type) establishes the window, update statements (backtick + name) send data points.
 
-| Suffix | Bit Width | Unsigned Range | Signed Range |
-|--------|-----------|----------------|--------------|
-| _BYTE | 8 bits | 0–255 | -128 to 127 |
-| _WORD | 16 bits | 0–65535 | -32768 to 32767 |
-| _LONG | 32 bits | 0–4294967295 | Full 32-bit |
+### 5.8.4 Multi-COG Programs
 
-Sized formatters ensure consistent output width and proper sign extension:
+When multiple COGs execute DEBUG statements, the system automatically prefixes each message with the COG number (Cog0: through Cog7:). This applies to text output only; visual displays are typically dedicated to specific COGs.
 
-```pasm
-                debug(uhex_byte(value))                 ' 2 hex digits: $xx
-                debug(uhex_word(value))                 ' 4 hex digits: $xxxx
-                debug(uhex_long(value))             ' 8 hex digits: $xxxxxxxx
-                debug(ubin_byte(flags))                 ' 8 binary digits
-```
+### 5.8.5 Performance Considerations
 
-### 5.8.4 Array Formatters
+⚠️ **Pitfall:** DEBUG transmits data serially—each statement can consume hundreds of microseconds. Never place DEBUG inside performance-critical loops. Use DEBUG before or after loops, or sample infrequently with conditional statements.
 
-DEBUG can display multiple consecutive values using array formatters. These combine a base formatter with an array type suffix:
+For production builds, disable DEBUG via compiler option. Statements compile to nothing—zero runtime impact.
 
-```pasm
-                debug(uhex_byte_array(@buffer, 16))     ' 16 bytes in hex
-                debug(udec_word_array(@samples, 8))     ' 8 words in decimal
-                debug(uhex_long_array(@data, 4))        ' 4 longs in hex
-                debug(udec_reg_array(@regs, 10))        ' 10 COG registers
-```
-
-Array formatters display values separated by commas, providing quick inspection of memory regions and data buffers. The `@` operator provides the address; the second parameter specifies the count.
-
-### 5.8.5 Special Formatters
-
-Beyond numeric values, DEBUG supports several special-purpose formatters:
-
-**String Display:**
-
-```pasm
-                debug(zstr(@message))               ' Zero-terminated string
-                debug(lstr(@text, length))          ' Length-specified string
-```
-
-**Boolean and Flag Display:**
-
-```pasm
-                debug(bool(enabled))                ' Displays TRUE or FALSE
-                debug(c_z)                          ' Shows C and Z flag values
-```
-
-**Conditional Output:**
-
-```pasm
-                debug(if(error_flag), "Error detected") ' Only outputs if
-                                                        '  condition true
-                debug(ifnot(ready), "Not ready")        ' Only outputs if
-                                                        '  condition false
-```
-
-### 5.8.6 Visual Debug Displays
-
-Beyond text output, DEBUG supports graphical display windows that visualize data in real time. Visual displays use a two-phase pattern: one statement **creates** the display window, and subsequent statements **update** it with new data.
-
-**Window Creation vs. Update:**
-
-The first DEBUG statement with a display name creates and configures the window. Inside loops, you update the existing window using the backtick-name syntax:
-
-```pasm
-                debug(`scope MySignal)          ' CREATE window (before loop)
-
-.loop           rdlong  adc_value, adc_ptr
-                debug(`MySignal adc_value)          ' UPDATE window (in loop)
-                waitms  #1
-                jmp     #.loop
-```
-
-The creation statement (with the display type keyword) establishes the window. Update statements (using just the backtick and name) send data points to the existing window. This separation is critical—creating windows inside loops would be extremely slow and waste resources.
-
-**SCOPE — Oscilloscope Display:**
-
-The SCOPE display provides multi-channel waveform visualization, similar to a digital oscilloscope:
-
-```pasm
-                debug(`scope MySignal)              ' Create scope window
-
-.loop           rdlong  adc_value, adc_ptr
-                debug(`MySignal adc_value)          ' Send sample to scope
-                waitms  #1
-                jmp     #.loop
-```
-
-SCOPE supports up to 8 channels, auto-scaling, triggering modes, and time base adjustment. Each update call adds one sample point; the display scrolls as new data arrives.
-
-**PLOT — Data Plotting:**
-
-The PLOT display creates line graphs, scatter plots, and trend charts:
-
-```pasm
-                debug(`plot Temperature)            ' Create plot window
-
-.loop           call    #read_temperature
-                debug(`Temperature temp_value)      ' Send data point to plot
-                waitms  #1000
-                jmp     #.loop
-```
-
-PLOT provides rolling or accumulating display modes, multiple data series, and statistical overlays including moving averages and min/max envelopes.
-
-**TERM — Terminal Display:**
-
-The TERM display provides a dedicated text terminal window, separate from the default debug output:
-
-```pasm
-                debug(`term Status)                           ' Create terminal
-                                                              '  window
-                debug(`Status "System initialized", 13)       ' Send text to
-                                                              '  terminal
-                debug(`Status "Temperature: ", sdec_(temp), "°C", 13)
-```
-
-TERM supports control characters (13 for newline, 9 for tab, 12 for clear screen) and provides a scrolling text buffer.
-
-**LOGIC — Logic Analyzer:**
-
-The LOGIC display shows digital signal timing as a logic analyzer view:
-
-```pasm
-                debug(`logic PortA)             ' Create logic analyzer
-
-.loop           rdbyte  port_state, port_addr
-                debug(`PortA port_state)            ' Send sample to analyzer
-                waitx   ##100
-                jmp     #.loop
-```
-
-LOGIC displays multiple digital channels with timing relationships, useful for debugging communication protocols and state machines.
-
-**BITMAP — Pixel Display:**
-
-The BITMAP display renders pixel data as an image:
-
-```pasm
-                debug(`bitmap Display, 320, 240)  ' Create bitmap
-                debug(`Display @framebuffer)                  ' Send pixel data
-```
-
-BITMAP creates a window showing raw pixel data, useful for graphics and video debugging.
-
-### 5.8.7 Practical DEBUG Patterns
-
-**Watching Values in Loops:**
-
-```pasm
-.loop           rdlong  sensor, sensor_addr
-                debug(sdec(sensor))                     ' Shows each reading
-                call    #process_data
-                djnz    count, #.loop
-```
-
-**Conditional Debug Output:**
-
-```pasm
-                cmp     error_code, #0          wz
-        if_nz   debug("Error: ", udec_(error_code), " at ", uhex_(location))
-```
-
-**Timing Measurement:**
-
-```pasm
-                getct   start_time
-                call    #function_under_test
-                getct   end_time
-                sub     end_time, start_time
-                debug("Execution time: ", udec_(end_time), " clocks")
-```
-
-**Multi-Value Inspection:**
-
-```pasm
-                debug("X:", sdec_(x), " Y:", sdec_(y), " Z:", sdec_(z))
-```
-
-**Memory Dump:**
-
-```pasm
-                debug("Buffer contents:", 13)
-                debug(uhex_byte_array_(@buffer, 32))
-```
-
-### 5.8.8 DEBUG Performance Considerations
-
-**CRITICAL WARNING:** Never place DEBUG statements inside performance-critical loops. DEBUG is a serial transmission mechanism—each statement can take thousands of clock cycles to format and transmit data. A tight loop with DEBUG inside will run orders of magnitude slower than the same loop without DEBUG. This isn't a subtle performance concern; it will fundamentally change your code's timing behavior.
-
-**What DEBUG Actually Costs:**
-
-- Each DEBUG statement requires cycles for formatting and transmission
-- Serial transmission at 2 Mbaud limits throughput to roughly 200,000 characters per second
-- A single `debug(udec(value))` statement may consume 100+ microseconds
-- Visual display updates (SCOPE, PLOT) add host-side processing overhead
-- In a loop running at 1 MHz, adding DEBUG drops effective frequency to kilohertz range
-
-**Safe DEBUG Patterns:**
-
-```pasm
-                ' WRONG - DEBUG inside tight loop destroys timing
-.bad_loop       rdlong  value, ptr
-                debug(udec_(value))                 ' This kills performance!
-                djnz    count, #.bad_loop
-
-                ' RIGHT - DEBUG outside performant loop
-.fast_loop      rdlong  value, ptr
-                call    #process_value
-                djnz    count, #.fast_loop
-                debug("Final: ", udec_(value))   ' Debug after loop
-
-                ' RIGHT - Conditional debug for occasional sampling
-.sample_loop    rdlong  value, ptr
-                incmod  sample_cnt, #999    wz
-        if_z    debug(udec_(value))             ' Every 1000th iteration
-                djnz    count, #.sample_loop
-```
-
-**Mitigation Strategies:**
-
-- Debug before or after performance-critical loops, never inside
-- Use conditional DEBUG with counters to sample infrequently
-- Remove DEBUG from timing-critical code paths entirely during development
-- Use the compiler's debug-disable option for production builds
-- For real-time monitoring, use hardware methods (pin toggles, scope probes)
-
-**Production Builds:**
-
-The compiler provides options to disable DEBUG entirely. When disabled, DEBUG statements compile to nothing—no code generated, no runtime impact. This allows debug instrumentation to remain in source code, ready for future debugging sessions, without affecting production performance.
-
-### 5.8.9 DEBUG and Multi-COG Programs
-
-When multiple COGs execute DEBUG statements, output interleaves in the debug window. Each COG's output appears as it transmits, which can create confusing mixed output when COGs debug simultaneously.
-
-**Automatic COG Identification:**
-
-For standard DEBUG output (not routed to a visual display window), the debug system automatically prefixes each message with the COG number (Cog0: through Cog7:). You do not need to manually add COG identification—it's built into the debug protocol:
-
-```pasm
-                debug("Starting motor control")     ' Output: Cog2: Starting
-                                                    '  motor control
-                debug(udec(speed))              ' Output: Cog2: speed = 1500
-```
-
-This automatic prefixing applies only to text output. Visual displays (SCOPE, PLOT, TERM, etc.) do not receive the COG prefix because they're typically dedicated to specific COGs or purposes.
-
-**Strategies for Multi-COG Debugging:**
-
-- Rely on automatic COG prefixes for text debug output—no manual prefix needed
-- Use separate TERM windows for each COG: `debug(`term COG0, ...)`, `debug(`term COG1, ...)`
-- Add brief delays between DEBUG calls in different COGs if message interleaving is problematic
-- Debug one COG at a time during initial development for clearest output
-
-The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access across COGs, ensuring atomic message transmission, but message ordering depends on execution timing.
+**See:** DEBUG instruction in Part II for complete syntax; P2 Debug Window Manual for visual display configuration, advanced formatters, and professional debugging techniques.
 
 
 ```{=latex}
@@ -3935,13 +3558,10 @@ The debug interrupt (a hidden fourth interrupt level) coordinates DEBUG access a
 \item The Streamer enables DMA-like high-speed data movement
 \item Events provide non-interrupt notification; interrupts are available when needed
 \item 16 hardware locks enable safe inter-COG synchronization
-\item XBYTE provides 6-cycle bytecode dispatch for interpreters and virtual machines
+\item XBYTE provides 6-cycle bytecode dispatch for interpreters and VMs
 \item The P2 boots from RCFAST (\textasciitilde20 MHz) and detects boot source via pin pull-ups
-\item Serial, SPI flash, and SD card boot modes support different deployment scenarios
 \item User code must configure the desired clock source after boot
-\item DEBUG provides built-in serial output with formatters and visual displays
-\item Visual DEBUG displays include oscilloscope, plot, logic analyzer, and bitmap views
-\item DEBUG can be disabled for production builds with zero runtime overhead
+\item DEBUG provides serial output with formatters; can be disabled for production
 \item The 8-COG architecture often eliminates the need for interrupts
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
@@ -5084,8 +4704,8 @@ Alter Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5132,8 +4752,8 @@ Alter Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5177,8 +4797,8 @@ Alter Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5223,8 +4843,8 @@ Alter Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5269,8 +4889,8 @@ Alter Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5355,8 +4975,8 @@ Alter Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5399,8 +5019,8 @@ Alter Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5441,8 +5061,8 @@ Alter Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5485,8 +5105,8 @@ Alter Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -5531,8 +5151,8 @@ Alter Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D\textsuperscript{1} | 2 |
-| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D\textsuperscript{1} | 2 |
+| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
 
 ```{=latex}
 \textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
@@ -7105,8 +6725,8 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit^1^ | --- | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7149,7 +6769,7 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7186,7 +6806,7 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7223,7 +6843,7 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7265,8 +6885,8 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit^1^ | --- | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7309,7 +6929,7 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -7473,8 +7093,8 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit^1^ | --- | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7515,7 +7135,7 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7554,7 +7174,7 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7595,7 +7215,7 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7639,8 +7259,8 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit^1^ | --- | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7681,7 +7301,7 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit\textsuperscript{1} | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit^1^ | DIRx, OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -7862,7 +7482,7 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
@@ -7900,7 +7520,7 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
@@ -7938,7 +7558,7 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
@@ -7976,7 +7596,7 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
@@ -8016,10 +7636,10 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -8063,7 +7683,7 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -8104,7 +7724,7 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -8145,7 +7765,7 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -8188,7 +7808,7 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -9165,8 +8785,8 @@ Jump If Pattern Match Event Set / Clear {#jnpat}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
@@ -9202,8 +8822,8 @@ Jump If CORDIC Empty Event Set / Clear {#jnqmt}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
@@ -9240,8 +8860,8 @@ Jump If Streamer Finished Event Set / Clear {#jnxfi}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
@@ -9277,8 +8897,8 @@ Jump If Streamer Empty Event Set / Clear {#jnxmt}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
@@ -9314,8 +8934,8 @@ Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
@@ -9351,8 +8971,8 @@ Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC\textsuperscript{1} | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
@@ -10618,10 +10238,10 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -10663,7 +10283,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -10702,7 +10322,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -10741,7 +10361,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -10780,7 +10400,7 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -11752,7 +11372,7 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
@@ -11790,7 +11410,7 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
@@ -12709,7 +12329,7 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
@@ -12852,7 +12472,7 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
@@ -12931,7 +12551,7 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
@@ -12967,7 +12587,7 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
@@ -13836,7 +13456,7 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
@@ -13872,7 +13492,7 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out\textsuperscript{1} | result == 0 | D | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
 
 \textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
