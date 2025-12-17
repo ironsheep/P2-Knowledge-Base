@@ -80,6 +80,8 @@ Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of sto
 
 Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle the shared access timing automatically.
 
+Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
+
 ### 1.3.2 Hub Access Timing
 
 The P2 uses an "egg-beater" access pattern to arbitrate Hub memory access among the eight COGs. Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
@@ -107,6 +109,8 @@ Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast m
 
 LUT memory provides single-cycle access like COG RAM but occupies a separate address space. Programs access LUT memory at addresses $200-$3FF (relative to COG addressing) through dedicated LUT instructions. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
 
+LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
+
 The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications.
 
 ### 1.4.2 LUT Instructions
@@ -128,6 +132,8 @@ Most instructions complete in two clock cycles once the pipeline fills. The firs
 
 Hub memory instructions add variable delays waiting for Hub access windows. The egg-beater pattern means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
 
+When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than the egg-beater mechanism. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
+
 Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch requires four clocks as the pipeline flushes and refills from the branch target address.
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
@@ -147,11 +153,13 @@ Time-critical inner loops often execute in COG mode even when the main program r
 
 ### 1.6.2 Hub Execution Mode
 
-Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the same egg-beater access pattern used for data transfers. This adds variable delay to instruction fetch, slowing execution compared to COG mode.
+Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the egg-beater pattern used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
 
 Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
 
 `COGINIT` determines execution mode when starting a COG. The initialization parameter specifies either COG execution (code loaded from Hub to COG RAM, then executed) or Hub execution (code executed directly from Hub RAM). The `ORGH` assembler directive marks code intended for Hub execution, while `ORG` marks code for COG execution.
+
+⚠️ **Pitfall:** While executing from Hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during Hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and streamer modes that engage the FIFO. Code requiring these instructions must execute from COG RAM.
 
 ### 1.6.3 Switching Between Modes
 
@@ -166,7 +174,8 @@ The hardware automatically handles mode transitions. The programmer simply speci
 \item Each COG has 512 longs of private RAM plus 512 longs of LUT
 \item Hub memory (512KB) is shared among all COGs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
-\item COGs can execute from COG RAM (fast) or Hub RAM (larger capacity)
+\item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)
+\item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
 \item The pipeline provides single-cycle execution for most instructions
 \item No interrupts are required due to true parallel execution
 \end{keyconcepts}

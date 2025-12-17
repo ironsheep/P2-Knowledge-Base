@@ -2,7 +2,7 @@
 
 ## v1.3.0 (2025-12-15)
 
-**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, and Chapter 1 structural cleanup.
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, user feedback audit (hub execution mechanism correction), and Chapter 5 scope alignment.
 
 ### Part I: Architectural Foundation
 
@@ -10,6 +10,20 @@
 - Section 1.2.1: Condensed PR0-PR7 documentation to cross-reference (detailed documentation in Part II)
 - Section 1.2.2: Removed duplicate diagram and table; added cross-references to Part II and Appendix C
 - Section 1.2: Reduced redundancy (~35 lines) while preserving conceptual clarity
+- Section 1.3.1: Added hub memory flexibility note (organization is application-defined)
+- Section 1.4.1: Added LUT code execution note (executes code at same speed as COG RAM)
+- Section 1.5: Added FIFO explanation for hub execution (distinct from egg-beater for data)
+- Section 1.6.2: Corrected hub execution mechanism—changed "egg-beater access pattern" to "FIFO hardware prefetch" (critical error fix from user feedback audit)
+- Section 1.6.2: Added FIFO limitation pitfall warning (RDFAST, WRFAST, streamer unavailable during Hub execution)
+- Key Concepts: Added LUT execution mode; added FIFO limitation bullet
+
+**Chapter 4 - Timing and Determinism:**
+- Section 4.8.2: Corrected hub execution mechanism—changed "egg beater hub access mechanism" to "FIFO prefetch mechanism" (consistency fix)
+
+**Chapter 5 - Special Hardware Overview:**
+- Section 5.6 XBYTE: Replaced with properly-scoped version (~151 lines → ~50 lines); removed marketing language; retained technical essentials with instruction cross-references
+- Section 5.8 DEBUG: Replaced with properly-scoped version (~301 lines → ~50 lines); content relocated to P2 Debug Window Manual; retained essential awareness for PASM2 programmers
+- Key Concepts: Condensed XBYTE and DEBUG bullets to match revised section scope
 
 **Chapter 3 - Flags and Conditional Execution:**
 - Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
@@ -113,8 +127,9 @@ OUT family:
 - WC-WZ-WCZ-Effects-Guide.md (PNut-TS compiler documentation)
 - PASM2-Authoring-Guide.md (PNut-TS compiler documentation)
 - Parallax PASM2 Manual Draft (2022-11-01)
-- Silicon Documentation v35 (lines 5152, 5206, 5299-5317, 5674)
+- Silicon Documentation v35 (lines 742-751 for hub FIFO, 5152, 5206, 5299-5317, 5674)
 - Chip Gracey direct confirmation (2025-12-17)
+- User feedback audit (2025-12-17): Community review identifying hub execution mechanism error
 
 ---
 
