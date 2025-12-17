@@ -309,3 +309,33 @@ Hypertargets for event instructions:
 \hypertarget{jse2}{}\hypertarget{jse3}{}\hypertarget{jse4}{}\hypertarget{jnse1}{}\hypertarget{jnse2}{}\hypertarget{jnse3}{}\hypertarget{jnse4}{}
 
 Text after hypertargets should have #hash and $dollar and _underscore escaped normally.
+
+## Pandoc Superscript Syntax Test (Bug Fix - Encoding table footnotes)
+This tests Pandoc's `^text^` superscript syntax used for footnote markers in encoding tables.
+The escape processor must NOT escape the caret characters in `^text^` patterns, because:
+1. Pandoc converts `^text^` to `\textsuperscript{text}` in LaTeX
+2. If we escape `^` to `\^{}`, Pandoc sees it as a literal caret
+3. Pandoc then outputs `^{}` to LaTeX, which is invalid outside math mode
+4. xelatex fails with "Missing $ inserted" error
+
+Simple superscript patterns (from encoding tables):
+D^1^ should become D\textsuperscript{1}
+D^2^ should become D\textsuperscript{2}
+Result^1^ for footnote reference
+
+Multiple superscripts in table-like context:
+| Result | Clks |
+|--------|------|
+| D^1^ | 2 |
+| S^2^ | 4 |
+
+Superscript with multiple characters:
+D^10^ for footnote 10
+Result^note^ for text superscript
+
+Mixed content with superscripts:
+The value D^1^ is adjusted by Src[17:9]^2^ per the auto-indexer^3^.
+
+Regular caret (NOT superscript) should still be escaped:
+Power expression: 2^9 = 512 (single caret, not paired)
+Bitwise XOR: a ^ b (spaces around caret)

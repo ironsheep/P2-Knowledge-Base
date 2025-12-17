@@ -5,14 +5,22 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-12-13 (v6 - Hypertarget protection and PASM2 absolute address protection added)
+- **Last Modified**: 2025-12-17 (v7 - Pandoc superscript syntax protection added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, grid tables, hypertarget commands, PASM2 absolute address syntax; escapes P2 literals
+- **Current Status**: Working correctly - protects code blocks, fenced divs, image paths, trailing backslashes, grid tables, hypertarget commands, PASM2 absolute address syntax, Pandoc superscript syntax; escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Hypertarget Command Protection** (NEW in v6)
+1. **Pandoc Superscript Syntax Protection** (NEW in v7)
+   - `^text^` patterns (Pandoc superscript syntax) are NOT escaped
+   - Pandoc converts `^text^` to `\textsuperscript{text}` in LaTeX
+   - Without protection, `^` becomes `\^{}` which Pandoc outputs as literal `^{}`
+   - Bare `^{}` in LaTeX causes "Missing $ inserted" error (invalid outside math mode)
+   - Standalone carets (like `2^9`) are still escaped correctly
+   - Test Case: `test-cases.md` → "Pandoc Superscript Syntax Test"
+
+2. **Hypertarget Command Protection** (v6)
    - `\hypertarget{anchor}{}` commands are NOT escaped
    - Used for Pandoc cross-reference anchors in combined instruction groups
    - Test Case: `test-cases.md` → "Hypertarget Anchor Commands Test"
@@ -130,6 +138,20 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-12-17: Version 7 Released
+- **Pandoc Superscript Syntax Protection**: `^text^` patterns are preserved for Pandoc processing
+- **Root Cause**: Encoding tables in PASM2 manual use `D^1^` notation for footnote references
+- **Bug Chain**:
+  1. Markdown has `D^1^` (Pandoc superscript syntax)
+  2. Escape script converted `^` to `\^{}` producing `D\^{}1\^{}`
+  3. Pandoc interpreted `\^` as escaped caret (literal character)
+  4. Pandoc output `D^{}1^{}` to LaTeX
+  5. Bare `^` in LaTeX (outside math mode) caused "Missing $ inserted" error
+- **Solution**: Protect `^text^` patterns before caret escaping, restore unchanged after
+- **Pattern**: `\^([^^\s]+)\^` matches paired carets with non-whitespace content
+- **Standalone carets** (like `2^9`) are still escaped correctly as `2\^{}9`
+- **Test Added**: "Pandoc Superscript Syntax Test" section in test-cases.md
 
 ### 2025-12-13: Version 6 Released
 - **Hypertarget Command Protection**: `\hypertarget{anchor}{}` commands are preserved

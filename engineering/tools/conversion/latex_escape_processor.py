@@ -173,7 +173,18 @@ def process_latex_escaping(input_file, output_file):
             placeholder = f'XPROTECTINLINECODE{len(protected_inline_code)}X'
             protected_inline_code.append(match.group(1))
             line = line.replace(match.group(1), placeholder, 1)
-        
+
+        # PROTECT PANDOC SUPERSCRIPT SYNTAX ^text^
+        # Pandoc converts ^text^ to \textsuperscript{text} in LaTeX
+        # If we escape ^ to \^{}, Pandoc outputs literal ^{} which breaks LaTeX
+        # Pattern: caret, one or more non-caret/non-whitespace chars, caret
+        protected_superscripts = []
+        superscript_pattern = r'\^([^^\s]+)\^'  # Match ^text^ but not standalone ^
+        for match in re.finditer(superscript_pattern, line):
+            placeholder = f'XPROTECTSUPERSCRIPT{len(protected_superscripts)}X'
+            protected_superscripts.append(match.group(0))
+            line = line.replace(match.group(0), placeholder, 1)
+
         # First, protect valid LaTeX commands by replacing them with placeholders
         protected_commands = []
         
@@ -352,6 +363,11 @@ def process_latex_escaping(input_file, output_file):
         for i, code in enumerate(protected_inline_code):
             placeholder = f'XPROTECTINLINECODE{i}X'
             line = line.replace(placeholder, code)
+
+        # 6b. Restore protected Pandoc superscript syntax (UNCHANGED - Pandoc converts to \textsuperscript)
+        for i, sup in enumerate(protected_superscripts):
+            placeholder = f'XPROTECTSUPERSCRIPT{i}X'
+            line = line.replace(placeholder, sup)
 
         # 7. Restore protected PASM2 absolute address syntax
         # These use double backslash in output for LaTeX to render single backslash

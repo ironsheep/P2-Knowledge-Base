@@ -73,20 +73,21 @@ YAML Knowledge Base → Opus Master → Workspace → PDF Forge → PDF
 
 ## Assembly Command
 
-To assemble all parts into a single markdown file for PDF generation:
+**Always use the assembly script in the workspace folder:**
 
 ```bash
-cat front-matter.md \
-    part-i/chapter-*.md \
-    part-ii/instructions-*.md \
-    part-ii/directives.md \
-    part-ii/constants.md \
-    part-ii/special-registers.md \
-    part-iii/appendix-*.md \
-    > ../../../workspace/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
+cd ../../../workspace/p2-assembly-language-manual
+./assemble-manual.sh
 ```
 
-Or use Pandoc's multi-file input capability.
+The script handles:
+- File verification (ensures all required files exist)
+- Part I/II/III section markers with proper pagination
+- Instruction categories navigation hub
+- All appendices in correct order
+- Statistics reporting
+
+**Never use raw `cat` commands** - the assembly script includes 41 files in specific order with proper markers that `cat` globs would miss.
 
 ---
 
