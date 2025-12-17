@@ -105,8 +105,8 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit^1^ | --- | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -149,7 +149,7 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -186,7 +186,7 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -223,7 +223,7 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -265,8 +265,8 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit\textsuperscript{1} | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit^1^ | --- | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -309,7 +309,7 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit\textsuperscript{1} | DIR bit\textsuperscript{1} | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
 
 \textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -473,8 +473,8 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit^1^ | --- | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -515,7 +515,7 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -554,7 +554,7 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -595,7 +595,7 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -639,8 +639,8 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit\textsuperscript{1} | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit^1^ | --- | OUT bit | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -681,7 +681,7 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit\textsuperscript{1} | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit^1^ | DIRx, OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 

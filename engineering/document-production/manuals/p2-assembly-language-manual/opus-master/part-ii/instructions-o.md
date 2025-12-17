@@ -114,10 +114,10 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -159,7 +159,7 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -198,7 +198,7 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -237,7 +237,7 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -276,7 +276,7 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit\textsuperscript{1} | OUT bit\textsuperscript{1} | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
