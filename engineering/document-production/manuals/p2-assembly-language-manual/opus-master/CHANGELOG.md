@@ -22,6 +22,7 @@
 
 **Chapter 5 - Special Hardware Overview:**
 - Section 5.6 XBYTE: Replaced with properly-scoped version (~151 lines → ~50 lines); removed marketing language; retained technical essentials with instruction cross-references
+- Section 5.7.3: Corrected boot pin post-boot statement—hardware (SPI Flash, SD card, serial interface) remains attached after boot; pins are under user code control but practical usage depends on connected hardware
 - Section 5.8 DEBUG: Replaced with properly-scoped version (~301 lines → ~50 lines); content relocated to P2 Debug Window Manual; retained essential awareness for PASM2 programmers
 - Key Concepts: Condensed XBYTE and DEBUG bullets to match revised section scope
 
@@ -154,6 +155,7 @@ OUT family:
 - Silicon Documentation v35 (lines 742-751 for hub FIFO, 5152, 5206, 5299-5317, 5674)
 - Chip Gracey direct confirmation (2025-12-17)
 - User feedback audit (2025-12-17): Community review identifying hub execution mechanism error
+- User feedback audit (2025-12-20): Boot pin post-boot statement correction; P2 Eval Board Rev C documentation ("hardwired" SD card socket), Edge Mini Breakout documentation (Flash SPI pin assignments)
 
 ---
 

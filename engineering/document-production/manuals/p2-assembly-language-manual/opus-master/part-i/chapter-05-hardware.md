@@ -582,7 +582,13 @@ The boot process uses pins P58-P63 for communication with external boot sources:
 | P59 | Data Out (MOSI) | Output |
 | P58 | Data In (MISO) | Input |
 
-After boot completes, these pins return to general-purpose I/O. Programs can reconfigure them for any purpose once execution begins.
+After boot completes, ROM control of these pins ends and user code takes over. However, the boot source hardware typically remains physically connected:
+
+- **SPI Flash (P58-P61):** The flash chip remains attached. User programs commonly continue using these pins to access flash storage for code snippets, lookup tables, audio files, or data logging.
+- **SD Card (P58-P61):** The SD card socket remains attached. User programs commonly continue using these pins for file system access.
+- **Serial (P62-P63):** On development boards, these pins typically remain connected to the USB-serial interface for debugging and host communication.
+
+The pins are available for user code to configure and use—but practical usage depends on what external hardware is connected to them.
 
 ### 5.7.4 The Boot Sequence
 
