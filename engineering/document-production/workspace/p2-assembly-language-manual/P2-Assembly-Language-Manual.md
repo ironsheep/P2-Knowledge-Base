@@ -622,10 +622,10 @@ The same flag state has different meanings depending on whether values are signe
 Use these when operands represent signed quantities (two's complement). The comparison correctly handles negative numbers:
 
 ```pasm
-        mov     x, ##-100               ' x = -100 (signed)
-        mov     y, #50                  ' y = 50
-        cmps    x, y            wc wz   ' Signed compare: -100 vs 50
-        if_lt   jmp     #x_is_smaller   ' True: -100 < 50 (signed)
+                mov     x, ##-100       ' x = -100 (signed)
+                mov     y, #50          ' y = 50
+                cmps    x, y    wc wz   ' Signed compare
+        if_lt   jmp     #x_is_smaller   ' True: -100 < 50
 ```
 
 **Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
@@ -633,10 +633,10 @@ Use these when operands represent signed quantities (two's complement). The comp
 Use these when operands represent unsigned quantities (addresses, bit patterns, counters):
 
 ```pasm
-        mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
-        cmp     addr, #0        wc wz   ' Unsigned compare
-        if_a    jmp     #addr_is_larger ' True: 2B > 0 (unsigned)
-                                        ' Note: IF_GT false (signed neg)
+                mov     addr, ##$80000000   ' addr = 2B (unsigned)
+                cmp     addr, #0    wc wz   ' Unsigned compare
+        if_a    jmp     #addr_is_larger     ' True: 2B > 0 (unsigned)
+                                            ' IF_GT false (signed neg)
 ```
 
 **Choosing the Right Comparison:**
@@ -658,11 +658,11 @@ Match your compare instruction to your condition alias for correct results:
 
 ```pasm
 ' Unsigned comparison
-        cmp     a, b            wc wz
+                cmp     a, b    wc wz
         if_ae   mov     result, #1      ' Unsigned: a >= b
 
 ' Signed comparison
-        cmps    a, b            wc wz
+                cmps    a, b    wc wz
         if_ge   mov     result, #1      ' Signed: a >= b
 ```
 
@@ -1264,22 +1264,22 @@ Local labels have these characteristics:
 ```pasm
 DAT             org
 
-send_byte       rdbyte  x, ptr                  ' Global: send_byte
-                call    #.wait                  ' Reference local .wait
-.loop           testp   tx_pin          wc      ' Local: .loop (scope: send_byte)
+send_byte       rdbyte  x, ptr              ' Global: send_byte
+                call    #.wait              ' Reference local .wait
+.loop           testp   tx_pin      wc      ' Local: .loop
         if_nc   jmp     #.loop
                 wypin   x, tx_pin
-.wait           testp   tx_pin          wc      ' Local: .wait (scope: send_byte)
+.wait           testp   tx_pin      wc      ' Local: .wait
         if_c    jmp     #.wait
                 ret
 
-recv_byte       testp   rx_pin          wc      ' Global: recv_byte
-                                                '  (new scope begins)
-        if_nc   jmp     #.wait                  ' Different .wait (new scope)
-.wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
+recv_byte       testp   rx_pin      wc      ' Global: recv_byte
+                                            '  (new scope begins)
+        if_nc   jmp     #.wait              ' Different .wait
+.wait           testp   rx_pin      wc      ' Local: .wait (recv_byte)
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin
-.loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
+.loop           shr     x, #24              ' Local: .loop (recv_byte)
                 ret
 ```
 
@@ -1330,8 +1330,8 @@ Three events create scope boundaries:
 ```pasm
 DAT             org
 
-func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
-.loop           djnz    x, #.loop               ' Local .loop in scope #1
+func_a          mov     x, #1               ' Global: func_a, scope #1
+.loop           djnz    x, #.loop           ' Local .loop in scope #1
 
 data_block      long    0, 0, 0, 0              ' Global: data_block,
                                                 '  scope #2 begins
@@ -1748,7 +1748,7 @@ Move and data manipulation instructions set flags based on the source or result 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 
 ```pasm
-        mov     temp, value     wc      ' Copy value, C = sign bit
+                mov     temp, value wc  ' Copy value, C = sign bit
         if_c    jmp     #negative       ' Branch if negative
 ```
 
@@ -2462,7 +2462,7 @@ The branching approach introduces timing variation:
 
 ```pasm
 ' With branch (2 or 4 cycles):
-        cmp     a, b            wz
+                cmp     a, b    wz
         if_z    jmp     #equal_case
         ' Not-equal path continues here
 ```
@@ -2473,7 +2473,7 @@ The conditional execution approach provides constant timing:
 
 ```pasm
 ' Without branch (2 cycles always):
-        cmp     a, b            wz
+                cmp     a, b    wz
         if_z    mov     result, #1
         if_nz   mov     result, #0
 ```
@@ -2661,15 +2661,15 @@ A WS2812 LED protocol example demonstrates the precision required:
 ' 1 bit: 160 cycles high, 90 cycles low
 
 send_bit
-        test    data, #31       wc      ' Get high bit into C flag
-        drvh    pin                     ' Start pulse (high)
+                test    data, #31   wc  ' Get bit into C flag
+                drvh    pin             ' Start pulse (high)
         if_c    waitx   ##160           ' 1-bit: wait 160 cycles
         if_nc   waitx   ##80            ' 0-bit: wait 80 cycles
-        drvl    pin                     ' End pulse (low)
+                drvl    pin             ' End pulse (low)
         if_c    waitx   ##90            ' 1-bit: wait 90 cycles
         if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
-        rol     data, #1                ' Shift to next bit
-        djnz    count, #send_bit
+                rol     data, #1        ' Shift to next bit
+                djnz    count, #send_bit
 ```
 
 This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
@@ -2903,9 +2903,8 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
 ```pasm
-        pollqmt             wc              ' C=1 if pipeline empty,
-                                            '  C=0 if results pending
-        if_nc   getqx   result              ' Retrieve if available
+                pollqmt         wc  ' C=1 if empty, C=0 if pending
+        if_nc   getqx   result      ' Retrieve if available
 ```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
@@ -3746,11 +3745,11 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
 
 ```pasm
-        augs    #$12345
-        nop                             ' This consumes the AUGS!
-        mov     x, #$678                ' Gets $678, NOT $12345678
+                augs    #$12345
+                nop                     ' This consumes the AUGS!
+                mov     x, #$678        ' Gets $678, NOT $12345678
 
-        augs    #$12345
+                augs    #$12345
         if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
                                         '  AUGS is still consumed
 ```
@@ -3914,7 +3913,7 @@ These forms enable strided access patterns:
 ' Read structure array (12-byte structures as 3 longs)
         mov     ptra, ##struct_array
 .loop   rdlong  field1, ptra++[3]       ' Read field1, skip to next struct
-        ' ... (to read all fields, use indexed without update for field2, field3)
+        ' ... (use indexed without update for field2, field3)
 ```
 
 ### 6.4.7 Complete PTRx Expression Summary
@@ -16650,7 +16649,7 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 #### Syntax
 ```pasm
 [label] RES     count           ' Reserve 'count' longs
-[label] RES     0               ' Create label at current address without reserving space
+[label] RES     0               ' Label at current address, no space
 ```
 
 #### Parameters
@@ -16714,8 +16713,8 @@ x       RES     1               ' x occupies 1 long
 When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
 
 ```pasm
-' Reserve space for a Spin2 structure (structure defined in CON block)
-mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
+' Reserve space for a Spin2 structure
+mystruct        RES     SIZEOF(point) / 4   ' Reserve longs for struct
 ```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
@@ -17161,9 +17160,9 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
-        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
-        wrlong  data, ptra[4]           ' Write long to Hub at PTRA + 4×4 = PTRA+16 bytes
+        rdlong  data, ptra++            ' Read long, PTRA += 4
+        rdbyte  char, ptra++            ' Read byte, PTRA += 1
+        wrlong  data, ptra[4]           ' Write at PTRA + 16 bytes
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
@@ -17197,9 +17196,9 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
-        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
-        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB + 8×4 = PTRB+32 bytes
+        rdlong  data, ptrb++            ' Read long, PTRB += 4
+        rdword  word, ptrb++            ' Read word, PTRB += 2
+        wrlong  data, ptrb[8]           ' Write at PTRB + 32 bytes
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
@@ -18793,10 +18792,10 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 #### Usage
 ```pasm
 ' Using FALSE for initialization
-        mov     flag, FALSE     ' Initialize flag to FALSE
+                mov     flag, FALSE     ' Initialize to FALSE
         ' ... some operations ...
-        cmp     x, y        wz  ' Compare x and y
-        if_e mov  flag, TRUE    ' Set flag to TRUE if equal
+                cmp     x, y        wz  ' Compare x and y
+        if_z    mov     flag, TRUE      ' Set TRUE if equal
 ```
 
 #### Notes
