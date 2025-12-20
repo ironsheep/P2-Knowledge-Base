@@ -3529,6 +3529,7 @@ Size suffixes (_BYTE, _WORD, _LONG) control display width. Array variants (_BYTE
 ### 5.8.3 Visual Debug Displays
 
 DEBUG supports graphical display windows including:
+
 - **SCOPE** — Oscilloscope waveform display
 - **PLOT** — Data plotting and charts
 - **LOGIC** — Logic analyzer view
@@ -3801,6 +3802,7 @@ Post-modify modes use the current pointer value for the memory access, then upda
 ```
 
 **Execution sequence for `RDLONG x, PTRA++`:**
+
 1. Read long from Hub address in PTRA
 2. Store value in register x
 3. Add 4 (SCALE for long) to PTRA
@@ -3834,6 +3836,7 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
 ```
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
+
 1. Add 4 (SCALE for long) to PTRA
 2. Read long from Hub address in updated PTRA
 3. Store value in register x
@@ -4146,6 +4149,7 @@ Any of the PTRx forms described in Section 6.4:
 **Variable:** Hub operations (2-9 cycles depending on Hub slot)
 
 For time-critical inner loops:
+
 - Frequently-used values should reside in COG registers
 - Large constants should be pre-loaded before entering the loop
 - Sequential Hub access benefits from PTRx with ++/--
@@ -6556,6 +6560,7 @@ CRCBIT iterates the CRC value in Dest using the current C flag and the polynomia
 The operation performs a single bit iteration of a CRC calculation. The C flag represents the input bit, and Src contains the CRC polynomial. Dest contains the running CRC value and is updated with the result of this iteration.
 
 The exact algorithm follows the standard CRC bit-wise computation:
+
 1. Shift the CRC value in Dest left by one bit
 2. If the original MSB XOR the input bit (C) is 1, XOR with the polynomial in Src
 
@@ -8289,18 +8294,21 @@ HUBSET configures the P2's clock system and hub parameters. The 32-bit value in 
 The D value contains multiple fields that control different aspects of the clock system:
 
 **Clock Source Selection (D[3:2]):**
+
 - `%00` - RCFAST internal oscillator (~20-25 MHz, boot default)
 - `%01` - RCSLOW internal oscillator (~20 kHz, low power mode)
 - `%10` - Crystal or external clock on XI pin
 - `%11` - PLL output
 
 **Crystal Configuration (D[1:0]):**
+
 - `%00` - XI/XO pins disabled (Hi-Z)
 - `%01` - XI/XO with 1MΩ feedback, no capacitors
 - `%10` - XI/XO with 1MΩ feedback, 15pF capacitors
 - `%11` - XI/XO with 1MΩ feedback, 30pF capacitors
 
 **PLL Configuration:**
+
 - D[27:24] - Input divider (PPPP field, divides XI input by 1-64)
 - D[23:14] - VCO multiplier (10-bit field, multiplies by 1-1024)
 - D[7:4] - Post divider (DDDD field, divides VCO by 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30)
@@ -8308,6 +8316,7 @@ The D value contains multiple fields that control different aspects of the clock
 - D[8] - Crystal oscillator enable
 
 **System Reset:**
+
 - D[31] - Write 1 to reset the entire chip
 
 The clock switching is glitch-free, and the system automatically falls back to RCFAST if the selected clock source fails. Proper timing must be observed when switching clock sources to allow for oscillator stabilization.
@@ -11802,6 +11811,7 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 - **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
 
 **Forbidden instructions in REP blocks:**
+
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
 - Conditional branches: DJNZ, DJZ, TJZ, TJNZ, IJZ, IJNZ
 - Any instruction that modifies PC
@@ -13612,6 +13622,7 @@ SKIPF can ONLY leap over instructions when executing from **COG or LUT memory**.
 **Best Practice:** Use SKIP for code in Hub memory (ORGH sections), SKIPF for code in COG/LUT memory (ORG sections).
 
 **REP Compatibility:**
+
 - SKIP is fully compatible with REP—cancellation maintains instruction counts
 - SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
 - Recommendation: Use SKIP within REP blocks for predictable behavior
@@ -15088,6 +15099,7 @@ WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 
 **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
 The standard configuration sequence is:
+
 1. DIRL pin — Reset smart pin (required)
 2. WRPIN mode, pin — Configure smart pin mode
 3. WXPIN x, pin — Set X parameter
@@ -16013,6 +16025,7 @@ The filename must not contain path separator characters. The following character
 | `\|` | Pipe |
 
 The compiler searches for the file in the following order:
+
 1. **Current directory** — The directory containing the source file
 2. **Library directory** — The compiler's built-in library location
 3. **Include directories** — Directories specified via compiler options†
@@ -16534,10 +16547,12 @@ Verify at compile time that the current address has not exceeded a specified lim
 #### Behavior by Mode
 
 **In COG Mode (after ORG):**
+
 - `limit` is a long address (0 to $400)
 - Error: `Cog address exceeds FIT limit`
 
 **In Hub Mode (after ORGH):**
+
 - `limit` is a byte address
 - Error: `Hub address exceeds FIT limit`
 
