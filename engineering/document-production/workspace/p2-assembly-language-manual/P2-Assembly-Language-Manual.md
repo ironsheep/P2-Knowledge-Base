@@ -4464,7 +4464,7 @@ Add and Set Counter Event Trigger
 | EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
-**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
+**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jct1)
 
 **Explanation:**
 
@@ -4691,7 +4691,7 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 ## ALTB {#altb}
 Alter Bit
 
-[Register Indirection](#register-indirection) - Alters next BITxxx instruction's target bit address.
+[Register Indirection](#66-altx-modified-addressing) - Alters next BITxxx instruction's target bit address.
 :::
 
 **ALTB**  *Dest, {#}Src*\
@@ -4739,7 +4739,7 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 ## ALTD {#altd}
 Alter Destination
 
-[Register Indirection](#register-indirection) - Alters next instruction's Dest field.
+[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's Dest field.
 :::
 
 **ALTD**  *Dest, {#}Src*\
@@ -4784,7 +4784,7 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 ## ALTGB {#altgb}
 Alter Get Byte
 
-[Register Indirection](#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
+[Register Indirection](#66-altx-modified-addressing) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
 **ALTGB**  *Dest, {#}Src*\
@@ -4830,7 +4830,7 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 ## ALTGN {#altgn}
 Alter Get Nibble
 
-[Register Indirection](#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
+[Register Indirection](#66-altx-modified-addressing) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
 **ALTGN**  *Dest, {#}Src*\
@@ -4876,7 +4876,7 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 ## ALTGW {#altgw}
 Alter Get Word
 
-[Register Indirection](#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
+[Register Indirection](#66-altx-modified-addressing) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
 **ALTGW**  *Dest, {#}Src*\
@@ -4922,7 +4922,7 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 ## ALTI {#alti}
 Alter Instruction
 
-[Register Indirection](#register-indirection) - Alters multiple fields of the next instruction.
+[Register Indirection](#66-altx-modified-addressing) - Alters multiple fields of the next instruction.
 :::
 
 **ALTI**  *Dest, {#}Src*\
@@ -4962,7 +4962,7 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 ## ALTR {#altr}
 Alter Result
 
-[Register Indirection](#register-indirection) - Alters next instruction's result write address.
+[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's result write address.
 :::
 
 **ALTR**  *Dest, {#}Src*\
@@ -5006,7 +5006,7 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 ## ALTS {#alts}
 Alter Source
 
-[Register Indirection](#register-indirection) - Alters next instruction's Src field.
+[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's Src field.
 :::
 
 **ALTS**  *Dest, {#}Src*\
@@ -5048,7 +5048,7 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 ## ALTSB {#altsb}
 Alter Set Byte
 
-[Register Indirection](#register-indirection) - Alters next SETBYTE instruction's target byte.
+[Register Indirection](#66-altx-modified-addressing) - Alters next SETBYTE instruction's target byte.
 :::
 
 **ALTSB**  *Dest, {#}Src*\
@@ -5092,7 +5092,7 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 ## ALTSN {#altsn}
 Alter Set Nibble
 
-[Register Indirection](#register-indirection) - Alters next SETNIB instruction's target nibble.
+[Register Indirection](#66-altx-modified-addressing) - Alters next SETNIB instruction's target nibble.
 :::
 
 **ALTSN**  *Dest, {#}Src*\
@@ -5138,7 +5138,7 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 ## ALTSW {#altsw}
 Alter Set Word
 
-[Register Indirection](#register-indirection) - Alters next SETWORD instruction's target word.
+[Register Indirection](#66-altx-modified-addressing) - Alters next SETWORD instruction's target word.
 :::
 
 **ALTSW**  *Dest, {#}Src*\
@@ -5482,7 +5482,7 @@ Bit High
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
+**Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc)
 
 **Explanation:**
 
@@ -5519,7 +5519,7 @@ Bit Low
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
+**Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc)
 
 **Explanation:**
 
@@ -5556,7 +5556,7 @@ Bit Not
 | EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
+**Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc), [BITRND](#bitrnd)
 
 **Explanation:**
 
@@ -5593,7 +5593,7 @@ Bit Random
 | EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
+**Related:** [BITZ](#bitc), [BITNZ](#bitc), [BITC](#bitc), [BITNC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
 
 **Explanation:**
 
@@ -7691,7 +7691,7 @@ Float High
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
+**Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc)
 
 **Explanation:**
 
@@ -7732,7 +7732,7 @@ Float Low
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
+**Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc)
 
 **Explanation:**
 
@@ -7773,7 +7773,7 @@ Float Not
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
+**Related:** [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc), [FLTRND](#fltrnd)
 
 **Explanation:**
 
@@ -7816,7 +7816,7 @@ Float Random
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
+**Related:** [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 
 **Explanation:**
 
@@ -9868,7 +9868,7 @@ Multiplex Q
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
-**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxc), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
 **Explanation:**
 
@@ -9949,7 +9949,7 @@ Negate
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
-**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
+**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negc), [NEGZ](#negc), [NEGNZ](#negc)
 
 **Explanation:**
 
@@ -10295,7 +10295,7 @@ Output High
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
+**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outc), [DIRH](#dirh)
 
 **Explanation:**
 
@@ -10334,7 +10334,7 @@ Output Low
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
+**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outc), [DIRL](#dirl)
 
 **Explanation:**
 
@@ -10412,7 +10412,7 @@ Output Random
 
 \textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
+**Related:** [OUTC](#outc), [OUTNC](#outc), [OUTZ](#outc), [OUTNZ](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 
 **Explanation:**
 
@@ -10498,7 +10498,7 @@ Poll Counter Event
 | EEEE | 1101011 | CZ0 | 000000011 | 000100100 | CT3 Event | CT3 Event | --- | 2 |
 
 
-**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
+**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jct1)
 
 **Explanation:**
 
@@ -10671,7 +10671,7 @@ Poll Selectable Event
 | EEEE | 1101011 | CZ0 | 000000111 | 000100100 | SE4 Event | SE4 Event | --- | 2 |
 
 
-**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
+**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
 
 **Explanation:**
 
@@ -11794,7 +11794,7 @@ Repeat Block
 | EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
+**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jct1)
 
 **Explanation:**
 
@@ -12871,7 +12871,7 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 ## SETD {#setd}
 Set Destination Field
 
-[Register Indirection](#register-indirection) - Sets the D field of a template for use with ALTI instruction.
+[Register Indirection](#66-altx-modified-addressing) - Sets the D field of a template for use with ALTI instruction.
 :::
 
 **SETD**  *Dest, {#}Src*
@@ -13193,7 +13193,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 ## SETR {#setr}
 Set Result Field
 
-[Register Indirection](#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
+[Register Indirection](#66-altx-modified-addressing) - Sets the Result field of a template for use with ALTI instruction.
 :::
 
 **SETR**  *Dest, {#}Src*
@@ -13225,7 +13225,7 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 ## SETS {#sets}
 Set Source Field
 
-[Register Indirection](#register-indirection) - Sets the S field of a template for use with ALTI instruction.
+[Register Indirection](#66-altx-modified-addressing) - Sets the S field of a template for use with ALTI instruction.
 :::
 
 **SETS**  *Dest, {#}Src*
@@ -13309,7 +13309,7 @@ Set Selectable Event (1, 2, 3, Or 4)
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100011 | --- | --- | --- | 2 |
 
 
-**Related:** [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
+**Related:** [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
 
 **Explanation:**
 
@@ -14436,7 +14436,7 @@ Wait For Counter Event
 | EEEE | 1101011 | CZ0 | 000010011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
+**Related:** [ADDCT1](#addct1), [ADDCT2](#addct1), [ADDCT3](#addct1), [POLLCT1](#pollct1), [POLLCT2](#pollct1), [POLLCT3](#pollct1), [JCT1](#jct1), [JCT2](#jct1), [JCT3](#jct1)
 
 **Explanation:**
 
@@ -14575,7 +14575,7 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 | EEEE | 1101011 | CZ0 | 000010111 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
-**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
+**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
 
 **Explanation:**
 
@@ -14607,7 +14607,7 @@ Wait Cycles
 | EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | 0 | 0 | --- | 2 + D |
 
 
-**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
+**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct1), [WAITCT3](#waitct1)
 
 **Explanation:**
 
@@ -18159,11 +18159,11 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [BITC](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = C |
 | [BITH](#bith) | Bits D[S[9:5]+S[4:0]:S[4:0]] = 1 |
 | [BITL](#bitl) | Bits D[S[9:5]+S[4:0]:S[4:0]] = 0 |
-| [BITNC](#bitnc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !C |
+| [BITNC](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !C |
 | [BITNOT](#bitnot) | Toggle bits D[S[9:5]+S[4:0]:S[4:0]] |
-| [BITNZ](#bitnz) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z |
+| [BITNZ](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z |
 | [BITRND](#bitrnd) | Bits D[S[9:5]+S[4:0]:S[4:0]] = RNDs |
-| [BITZ](#bitz) | Bits D[S[9:5]+S[4:0]:S[4:0]] = Z |
+| [BITZ](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = Z |
 | [BMASK](#bmask) | Get LSB-justified bit mask of size (D[4:0] + 1) into D |
 | [CMP](#cmp) | Compare D to S |
 | [CMPM](#cmpm) | Compare D to S, get MSB of difference into C |
@@ -18196,17 +18196,17 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [MUL](#mul) | D = unsigned (D[15:0] * S[15:0]) |
 | [MULS](#muls) | D = signed (D[15:0] * S[15:0]) |
 | [MUXC](#muxc) | Mux C into each D bit that is '1' in S |
-| [MUXNC](#muxnc) | Mux !C into each D bit that is '1' in S |
+| [MUXNC](#muxc) | Mux !C into each D bit that is '1' in S |
 | [MUXNIBS](#muxnibs) | For each non-zero nibble in S, copy that nibble into the corresponding D nibble |
 | [MUXNITS](#muxnits) | For each non-zero bit pair in S, copy that bit pair into the corresponding D bits |
-| [MUXNZ](#muxnz) | Mux !Z into each D bit that is '1' in S |
+| [MUXNZ](#muxc) | Mux !Z into each D bit that is '1' in S |
 | [MUXQ](#muxq) | Used after SETQ |
-| [MUXZ](#muxz) | Mux Z into each D bit that is '1' in S |
+| [MUXZ](#muxc) | Mux Z into each D bit that is '1' in S |
 | [NEG](#neg) | Negate D |
 | [NEGC](#negc) | Negate D by C |
-| [NEGNC](#negnc) | Negate D by !C |
-| [NEGNZ](#negnz) | Negate D by !Z |
-| [NEGZ](#negz) | Negate D by Z |
+| [NEGNC](#negc) | Negate D by !C |
+| [NEGNZ](#negc) | Negate D by !Z |
+| [NEGZ](#negc) | Negate D by Z |
 | [NOT](#not) | Get !D into D |
 | [ONES](#ones) | Get number of '1's in D into D |
 | [OR](#or) | OR S into D |
@@ -18245,17 +18245,17 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [SUBSX](#subsx) | Subtract (S + C) from D, signed and extended |
 | [SUBX](#subx) | Subtract (S + C) from D, extended |
 | [SUMC](#sumc) | Sum +/-S into D by C |
-| [SUMNC](#sumnc) | Sum +/-S into D by !C |
-| [SUMNZ](#sumnz) | Sum +/-S into D by !Z |
-| [SUMZ](#sumz) | Sum +/-S into D by Z |
+| [SUMNC](#sumc) | Sum +/-S into D by !C |
+| [SUMNZ](#sumc) | Sum +/-S into D by !Z |
+| [SUMZ](#sumc) | Sum +/-S into D by Z |
 | [TEST](#test) | Test D |
 | [TESTB](#testb) | Test bit S[4:0] of D, XOR into C/Z |
 | [TESTBN](#testbn) | Test bit S[4:0] of !D, XOR into C/Z |
 | [TESTN](#testn) | Test D with !S |
 | [WRC](#wrc) | Write 0 or 1 to D, according to C |
-| [WRNC](#wrnc) | Write 0 or 1 to D, according to !C |
-| [WRNZ](#wrnz) | Write 0 or 1 to D, according to !Z |
-| [WRZ](#wrz) | Write 0 or 1 to D, according to Z |
+| [WRNC](#wrc) | Write 0 or 1 to D, according to !C |
+| [WRNZ](#wrc) | Write 0 or 1 to D, according to !Z |
+| [WRZ](#wrc) | Write 0 or 1 to D, according to Z |
 | [XOR](#xor) | XOR S into D |
 | [XORO32](#xoro32) | Iterate D with xoroshiro32+ PRNG algorithm |
 | [ZEROX](#zerox) | Zero-extend D above bit S[4:0] |
@@ -18291,13 +18291,13 @@ Branch instructions control program flow by modifying the program counter. This 
 | [RETA](#reta) | Return by reading hub long at --PTRA |
 | [RETB](#retb) | Return by reading hub long at --PTRB |
 | [RETI0](#reti0) | Return from INT0 |
-| [RETI1](#reti1) | Return from INT1 |
-| [RETI2](#reti2) | Return from INT2 |
-| [RETI3](#reti3) | Return from INT3 |
+| [RETI1](#reti0) | Return from INT1 |
+| [RETI2](#reti0) | Return from INT2 |
+| [RETI3](#reti0) | Return from INT3 |
 | [RESI0](#resi0) | Resume from INT0 |
-| [RESI1](#resi1) | Resume from INT1 |
-| [RESI2](#resi2) | Resume from INT2 |
-| [RESI3](#resi3) | Resume from INT3 |
+| [RESI1](#resi0) | Resume from INT1 |
+| [RESI2](#resi0) | Resume from INT2 |
+| [RESI3](#resi0) | Resume from INT3 |
 
 ### Test and Branch Instructions
 
@@ -18405,11 +18405,11 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 | [OUTC](#outc) | OUT bits of pins = C |
 | [OUTH](#outh) | OUT bits of pins = 1 (high) |
 | [OUTL](#outl) | OUT bits of pins = 0 (low) |
-| [OUTNC](#outnc) | OUT bits of pins = !C |
+| [OUTNC](#outc) | OUT bits of pins = !C |
 | [OUTNOT](#outnot) | Toggle OUT bits of pins |
-| [OUTNZ](#outnz) | OUT bits of pins = !Z |
+| [OUTNZ](#outc) | OUT bits of pins = !Z |
 | [OUTRND](#outrnd) | OUT bits of pins = random |
-| [OUTZ](#outz) | OUT bits of pins = Z |
+| [OUTZ](#outc) | OUT bits of pins = Z |
 
 ### Drive Control (Direction + Output)
 
@@ -18431,11 +18431,11 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 | [FLTC](#fltc) | Set pins to input, preset output = C |
 | [FLTH](#flth) | Set pins to input, preset output high |
 | [FLTL](#fltl) | Set pins to input, preset output low |
-| [FLTNC](#fltnc) | Set pins to input, preset output = !C |
+| [FLTNC](#fltc) | Set pins to input, preset output = !C |
 | [FLTNOT](#fltnot) | Set pins to input, toggle preset output |
-| [FLTNZ](#fltnz) | Set pins to input, preset output = !Z |
+| [FLTNZ](#fltc) | Set pins to input, preset output = !Z |
 | [FLTRND](#fltrnd) | Set pins to input, random preset output |
-| [FLTZ](#fltz) | Set pins to input, preset output = Z |
+| [FLTZ](#fltc) | Set pins to input, preset output = Z |
 
 ### Pin Testing
 
@@ -18468,13 +18468,13 @@ Event instructions monitor and respond to system events including counter/timer 
 | Instruction | Description |
 |-------------|-------------|
 | [ADDCT1](#addct1) | Set CT1 event to trigger on CT = D + S |
-| [ADDCT2](#addct2) | Set CT2 event to trigger on CT = D + S |
-| [ADDCT3](#addct3) | Set CT3 event to trigger on CT = D + S |
+| [ADDCT2](#addct1) | Set CT2 event to trigger on CT = D + S |
+| [ADDCT3](#addct1) | Set CT3 event to trigger on CT = D + S |
 | [SETPAT](#setpat) | Set pin pattern for PAT event |
 | [SETSE1](#setse1) | Set SE1 event configuration |
-| [SETSE2](#setse2) | Set SE2 event configuration |
-| [SETSE3](#setse3) | Set SE3 event configuration |
-| [SETSE4](#setse4) | Set SE4 event configuration |
+| [SETSE2](#setse1) | Set SE2 event configuration |
+| [SETSE3](#setse1) | Set SE3 event configuration |
+| [SETSE4](#setse1) | Set SE4 event configuration |
 
 ### Event Polling
 
@@ -18482,16 +18482,16 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [POLLATN](#pollatn) | Get ATN event flag into C/Z, then clear |
 | [POLLCT1](#pollct1) | Get CT1 event flag into C/Z, then clear |
-| [POLLCT2](#pollct2) | Get CT2 event flag into C/Z, then clear |
-| [POLLCT3](#pollct3) | Get CT3 event flag into C/Z, then clear |
+| [POLLCT2](#pollct1) | Get CT2 event flag into C/Z, then clear |
+| [POLLCT3](#pollct1) | Get CT3 event flag into C/Z, then clear |
 | [POLLFBW](#pollfbw) | Get FBW event flag into C/Z, then clear |
 | [POLLINT](#pollint) | Get INT event flag into C/Z, then clear |
 | [POLLPAT](#pollpat) | Get PAT event flag into C/Z, then clear |
 | [POLLQMT](#pollqmt) | Get QMT event flag into C/Z, then clear |
 | [POLLSE1](#pollse1) | Get SE1 event flag into C/Z, then clear |
-| [POLLSE2](#pollse2) | Get SE2 event flag into C/Z, then clear |
-| [POLLSE3](#pollse3) | Get SE3 event flag into C/Z, then clear |
-| [POLLSE4](#pollse4) | Get SE4 event flag into C/Z, then clear |
+| [POLLSE2](#pollse1) | Get SE2 event flag into C/Z, then clear |
+| [POLLSE3](#pollse1) | Get SE3 event flag into C/Z, then clear |
+| [POLLSE4](#pollse1) | Get SE4 event flag into C/Z, then clear |
 | [POLLXFI](#pollxfi) | Get XFI event flag into C/Z, then clear |
 | [POLLXMT](#pollxmt) | Get XMT event flag into C/Z, then clear |
 | [POLLXRL](#pollxrl) | Get XRL event flag into C/Z, then clear |
@@ -18503,15 +18503,15 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [WAITATN](#waitatn) | Wait for ATN event flag, then clear |
 | [WAITCT1](#waitct1) | Wait for CT1 event flag, then clear |
-| [WAITCT2](#waitct2) | Wait for CT2 event flag, then clear |
-| [WAITCT3](#waitct3) | Wait for CT3 event flag, then clear |
+| [WAITCT2](#waitct1) | Wait for CT2 event flag, then clear |
+| [WAITCT3](#waitct1) | Wait for CT3 event flag, then clear |
 | [WAITFBW](#waitfbw) | Wait for FBW event flag, then clear |
 | [WAITINT](#waitint) | Wait for INT event flag, then clear |
 | [WAITPAT](#waitpat) | Wait for PAT event flag, then clear |
 | [WAITSE1](#waitse1) | Wait for SE1 event flag, then clear |
-| [WAITSE2](#waitse2) | Wait for SE2 event flag, then clear |
-| [WAITSE3](#waitse3) | Wait for SE3 event flag, then clear |
-| [WAITSE4](#waitse4) | Wait for SE4 event flag, then clear |
+| [WAITSE2](#waitse1) | Wait for SE2 event flag, then clear |
+| [WAITSE3](#waitse1) | Wait for SE3 event flag, then clear |
+| [WAITSE4](#waitse1) | Wait for SE4 event flag, then clear |
 | [WAITXFI](#waitxfi) | Wait for XFI event flag, then clear |
 | [WAITXMT](#waitxmt) | Wait for XMT event flag, then clear |
 | [WAITXRL](#waitxrl) | Wait for XRL event flag, then clear |
@@ -18523,22 +18523,22 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [JATN](#jatn) | Jump to S if ATN event flag is set |
 | [JCT1](#jct1) | Jump to S if CT1 event flag is set |
-| [JCT2](#jct2) | Jump to S if CT2 event flag is set |
-| [JCT3](#jct3) | Jump to S if CT3 event flag is set |
+| [JCT2](#jct1) | Jump to S if CT2 event flag is set |
+| [JCT3](#jct1) | Jump to S if CT3 event flag is set |
 | [JFBW](#jfbw) | Jump to S if FBW event flag is set |
 | [JINT](#jint) | Jump to S if INT event flag is set |
 | [JNATN](#jnatn) | Jump to S if ATN event flag is clear |
-| [JNCT1](#jnct1) | Jump to S if CT1 event flag is clear |
-| [JNCT2](#jnct2) | Jump to S if CT2 event flag is clear |
-| [JNCT3](#jnct3) | Jump to S if CT3 event flag is clear |
+| [JNCT1](#jct1) | Jump to S if CT1 event flag is clear |
+| [JNCT2](#jct1) | Jump to S if CT2 event flag is clear |
+| [JNCT3](#jct1) | Jump to S if CT3 event flag is clear |
 | [JNFBW](#jnfbw) | Jump to S if FBW event flag is clear |
 | [JNINT](#jnint) | Jump to S if INT event flag is clear |
 | [JNPAT](#jnpat) | Jump to S if PAT event flag is clear |
 | [JNQMT](#jnqmt) | Jump to S if QMT event flag is clear |
-| [JNSE1](#jnse1) | Jump to S if SE1 event flag is clear |
-| [JNSE2](#jnse2) | Jump to S if SE2 event flag is clear |
-| [JNSE3](#jnse3) | Jump to S if SE3 event flag is clear |
-| [JNSE4](#jnse4) | Jump to S if SE4 event flag is clear |
+| [JNSE1](#jse1) | Jump to S if SE1 event flag is clear |
+| [JNSE2](#jse1) | Jump to S if SE2 event flag is clear |
+| [JNSE3](#jse1) | Jump to S if SE3 event flag is clear |
+| [JNSE4](#jse1) | Jump to S if SE4 event flag is clear |
 | [JNXFI](#jnxfi) | Jump to S if XFI event flag is clear |
 | [JNXMT](#jnxmt) | Jump to S if XMT event flag is clear |
 | [JNXRL](#jnxrl) | Jump to S if XRL event flag is clear |
@@ -18546,9 +18546,9 @@ Event instructions monitor and respond to system events including counter/timer 
 | [JPAT](#jpat) | Jump to S if PAT event flag is set |
 | [JQMT](#jqmt) | Jump to S if QMT event flag is set |
 | [JSE1](#jse1) | Jump to S if SE1 event flag is set |
-| [JSE2](#jse2) | Jump to S if SE2 event flag is set |
-| [JSE3](#jse3) | Jump to S if SE3 event flag is set |
-| [JSE4](#jse4) | Jump to S if SE4 event flag is set |
+| [JSE2](#jse1) | Jump to S if SE2 event flag is set |
+| [JSE3](#jse1) | Jump to S if SE3 event flag is set |
+| [JSE4](#jse1) | Jump to S if SE4 event flag is set |
 | [JXFI](#jxfi) | Jump to S if XFI event flag is set |
 | [JXMT](#jxmt) | Jump to S if XMT event flag is set |
 | [JXRL](#jxrl) | Jump to S if XRL event flag is set |
@@ -18572,15 +18572,15 @@ Interrupt instructions control the cog's three-level interrupt system (INT1, INT
 | [COGBRK](#cogbrk) | If in debug ISR, trigger breakpoint in cog D[3:0] |
 | [GETBRK](#getbrk) | Get breakpoint/cog status into D |
 | [NIXINT1](#nixint1) | Cancel INT1 |
-| [NIXINT2](#nixint2) | Cancel INT2 |
-| [NIXINT3](#nixint3) | Cancel INT3 |
+| [NIXINT2](#nixint1) | Cancel INT2 |
+| [NIXINT3](#nixint1) | Cancel INT3 |
 | [SETINT1](#setint1) | Set INT1 source to D[3:0] |
-| [SETINT2](#setint2) | Set INT2 source to D[3:0] |
-| [SETINT3](#setint3) | Set INT3 source to D[3:0] |
+| [SETINT2](#setint1) | Set INT2 source to D[3:0] |
+| [SETINT3](#setint1) | Set INT3 source to D[3:0] |
 | [STALLI](#stalli) | Stall interrupts |
 | [TRGINT1](#trgint1) | Trigger INT1, regardless of STALLI mode |
-| [TRGINT2](#trgint2) | Trigger INT2, regardless of STALLI mode |
-| [TRGINT3](#trgint3) | Trigger INT3, regardless of STALLI mode |
+| [TRGINT2](#trgint1) | Trigger INT2, regardless of STALLI mode |
+| [TRGINT3](#trgint1) | Trigger INT3, regardless of STALLI mode |
 
 
 ## COG Control and Locks {#cog-control-and-locks-ref}
