@@ -739,6 +739,47 @@ For production builds, disable DEBUG via compiler option. Statements compile to 
 **See:** DEBUG instruction in Part II for complete syntax; P2 Debug Window Manual for visual display configuration, advanced formatters, and professional debugging techniques.
 
 
+### 5.8.6 Debug Configuration
+
+The debug system operates at three distinct levels, each controlled by CON constants:
+
+- **Code Instrumentation (Compile-Time):** DEBUG_DISABLE and DEBUG_MASK control whether debug statements generate code
+- **Output Infrastructure (Runtime):** DEBUG_COGS, DEBUG_BAUD, and related constants configure the debug serial system
+- **Breakpoint Configuration:** DEBUG_MAIN and DEBUG_COGINIT configure automatic breaks for single-step debugging
+
+**Selective Debug with debug[N]():**
+
+The `debug[N]()` form categorizes debug statements into channels (0-31) that compile selectively based on DEBUG_MASK:
+
+```pasm
+CON
+  DBG_INIT  = 0
+  DBG_ERROR = 3
+  DEBUG_MASK = (1 << DBG_INIT) | (1 << DBG_ERROR)
+
+DAT
+        org
+entry   debug[DBG_INIT]("Starting")   ' COMPILED - bit 0 set
+        debug[1]("Motor status")       ' NOT compiled - bit 1 clear
+        debug[DBG_ERROR]("Fault!")     ' COMPILED - bit 3 set
+```
+
+Disabled channels produce zero code—no runtime overhead exists. Standard `debug()` statements without channel numbers are unaffected by DEBUG_MASK and compile whenever debug is enabled.
+
+**Compile-Time vs Runtime Filtering:**
+
+DEBUG_MASK and DEBUG_COGS operate at different levels:
+
+| Constant | Level | Controls |
+|----------|-------|----------|
+| DEBUG_MASK | Compile-time | Whether `debug[N]()` generates code |
+| DEBUG_COGS | Runtime | Whether a COG can produce debug output |
+
+For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing COG must have its bit set in DEBUG_COGS.
+
+**See:** Appendix E (Debug Configuration Constants) for complete constant documentation including DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD, and breakpoint configuration.
+
+
 ```{=latex}
 \begin{keyconcepts}
 \item The CORDIC coprocessor provides 54-cycle hardware math (multiply, divide, sqrt, trig)

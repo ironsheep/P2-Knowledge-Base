@@ -445,6 +445,477 @@ These variants simplify cog management by allowing the system to automatically a
 
 
 
+## Debug Configuration Constants
+
+The P2's debug system operates at three distinct levels, each controlled by CON constants defined in the program. Code instrumentation constants control whether DEBUG statements compile into the program. Output infrastructure constants configure the debug serial communication system. Breakpoint constants configure automatic breaks for single-step debugging.
+
+### Code Instrumentation Constants
+
+These constants control compile-time behavior. When debug statements are disabled, the assembler generates no code for them—zero runtime overhead.
+
+::: constheader
+### DEBUG_DISABLE {#debug-disable}
+Disable All Debug Statements
+
+Prevents all DEBUG statements from compiling (0 = enabled, non-zero = disabled).
+:::
+
+Compile-time constant that globally disables all DEBUG statements.
+
+#### Value
+
+| Value | Effect |
+|-------|--------|
+| 0 or undefined | DEBUG statements compile normally |
+| Non-zero | All DEBUG statements are omitted from compilation |
+
+#### Description
+
+DEBUG_DISABLE provides a master switch for debug output. When defined as any non-zero value, the assembler skips all DEBUG statements entirely—no code is generated, no runtime overhead exists. This enables maintaining debug instrumentation in source code while producing release binaries with zero debug footprint.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_DISABLE = 1       ' Set to 1 for release, 0 for development
+
+DAT
+        org
+entry   debug("This generates no code when DEBUG_DISABLE = 1")
+        ' ... program code ...
+```
+
+#### Notes
+
+- Must be defined as an integer constant in a CON block
+- Affects both standard `debug()` and selective `debug[N]()` statements
+- The check occurs at compile time; disabled statements produce zero bytes
+- Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks
+
+#### Related Constants
+
+- [DEBUG_MASK](#debug-mask) — Selective channel control
+
+
+
+::: constheader
+### DEBUG_MASK {#debug-mask}
+Selective Debug Channel Mask
+
+32-bit mask controlling which debug[N]() channels compile (bit N = channel N).
+:::
+
+Compile-time constant enabling selective debug channel compilation.
+
+#### Value
+
+| Bit | Channel | Binary Mask |
+|-----|---------|-------------|
+| 0 | debug[0] | %00000000_00000000_00000000_00000001 |
+| 1 | debug[1] | %00000000_00000000_00000000_00000010 |
+| 2 | debug[2] | %00000000_00000000_00000000_00000100 |
+| ... | ... | ... |
+| 31 | debug[31] | %10000000_00000000_00000000_00000000 |
+
+#### Description
+
+DEBUG_MASK provides fine-grained control over debug output by channel. Each bit in the 32-bit mask corresponds to a debug channel numbered 0 through 31. The `debug[N]()` statement compiles only if bit N is set in DEBUG_MASK. Standard `debug()` statements without a channel number are unaffected by DEBUG_MASK.
+
+This mechanism enables categorizing debug output by subsystem, verbosity level, or development phase. Changing a single constant recompiles only the desired debug channels.
+
+#### Usage
+
+```spin2
+CON
+  ' Channel assignments
+  DBG_INIT   = 0              ' Initialization messages
+  DBG_MOTOR  = 1              ' Motor control
+  DBG_SENSOR = 2              ' Sensor readings
+  DBG_ERROR  = 3              ' Error conditions
+
+  ' Enable only initialization and errors
+  DEBUG_MASK = (1 << DBG_INIT) | (1 << DBG_ERROR)
+
+DAT
+        org
+entry   debug[DBG_INIT]("Starting")     ' COMPILED - bit 0 set
+        debug[DBG_MOTOR]("Motor on")    ' NOT compiled - bit 1 clear
+        debug[DBG_SENSOR]("Reading")    ' NOT compiled - bit 2 clear
+        debug[DBG_ERROR]("Fault!")      ' COMPILED - bit 3 set
+```
+
+#### Notes
+
+- Must be defined as an integer constant for `debug[N]()` to compile
+- If DEBUG_MASK is undefined, using `debug[N]()` causes a compile error
+- A mask of 0 disables all numbered channels; standard `debug()` still works
+- A mask of $FFFF_FFFF (-1) enables all 32 channels
+- Channel numbers outside 0-31 cause a compile error
+
+#### Related Constants
+
+- [DEBUG_DISABLE](#debug-disable) — Global debug disable
+- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+
+
+
+### Output Infrastructure Constants
+
+These constants configure the debug output system that handles all DEBUG statement output. They are patched into the debugger binary and affect serial communication parameters and output formatting.
+
+::: constheader
+### DEBUG_COGS {#debug-cogs}
+Debug-Enabled COG Mask
+
+8-bit mask specifying which COGs can produce debug output (bit N = COG N).
+:::
+
+Runtime constant controlling which COGs can trigger debug output.
+
+#### Value
+
+| Bit | COG | Binary Mask |
+|-----|-----|-------------|
+| 0 | COG 0 | %00000001 |
+| 1 | COG 1 | %00000010 |
+| 2 | COG 2 | %00000100 |
+| 3 | COG 3 | %00001000 |
+| 4 | COG 4 | %00010000 |
+| 5 | COG 5 | %00100000 |
+| 6 | COG 6 | %01000000 |
+| 7 | COG 7 | %10000000 |
+
+#### Description
+
+DEBUG_COGS controls runtime debug capability per COG. If a COG's bit is clear, DEBUG statements executing on that COG produce no output—the debug interrupt is ignored. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS controls runtime output permission.
+
+For a DEBUG statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK allows it or it's a standard `debug()`), and the executing COG must have its bit set in DEBUG_COGS.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_COGS = %00000011      ' Only COGs 0 and 1 produce output
+
+DAT
+        org
+entry   debug("From COG 0")           ' Output appears
+        cogspin(NEWCOG, worker, @stack)
+
+worker  debug("From worker")          ' Output only if on COG 0 or 1
+```
+
+#### Notes
+
+- Default behavior (undefined): all COGs can produce debug output
+- Must be defined as an integer constant
+- Reduces debug overhead in multi-COG applications
+- Useful for isolating debug output from specific COGs during development
+
+#### Related Constants
+
+- [DEBUG_MASK](#debug-mask) — Compile-time channel filtering
+
+
+
+::: constheader
+### DEBUG_DELAY {#debug-delay}
+Debug Startup Delay
+
+Milliseconds to wait before debug system begins operation.
+:::
+
+Startup delay before any debug output occurs.
+
+#### Value
+
+| Type | Range |
+|------|-------|
+| Integer | 0 to practical limit (milliseconds) |
+
+#### Description
+
+DEBUG_DELAY specifies a delay in milliseconds before the debug system begins operation. This delay occurs before the application launches, providing time for serial terminals to connect and synchronize. The delay is calculated as `(CLKFREQ / 1000) * DEBUG_DELAY` and executed during debugger initialization.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_DELAY = 2000          ' Wait 2 seconds for terminal connection
+
+DAT
+        org
+entry   debug("This appears after 2 seconds")
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Value is in milliseconds
+- The delay occurs before any application code executes
+- Useful when the host serial terminal needs connection time
+
+#### Related Constants
+
+- [DEBUG_BAUD](#debug-baud) — Communication baud rate
+
+
+
+::: constheader
+### DEBUG_TIMESTAMP {#debug-timestamp}
+Enable Debug Timestamps
+
+Adds timing information to all debug output.
+:::
+
+Enables timestamps in debug messages.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Timestamps enabled |
+| Undefined | No timestamps |
+
+#### Description
+
+DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message includes a timestamp relative to program start. This aids timing analysis and performance profiling by showing when events occur.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_TIMESTAMP = TRUE
+
+DAT
+        org
+entry   debug("Started")              ' Output includes timestamp
+        waitms(100)
+        debug("After delay")          ' Timestamp shows ~100ms elapsed
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables timestamps
+- Timestamps appear on all debug output, not selectively
+- Useful for profiling and timing-sensitive debugging
+
+#### Related Constants
+
+- [DEBUG_DELAY](#debug-delay) — Startup delay
+
+
+
+::: constheader
+### DEBUG_PIN_TX {#debug-pin-tx}
+Debug Transmit Pin
+
+P2 pin number for debug serial transmit.
+:::
+
+Configures the debug serial transmit pin.
+
+#### Value
+
+| Type | Default | Range |
+|------|---------|-------|
+| Integer | 62 | 0-63 |
+
+#### Description
+
+DEBUG_PIN_TX specifies which P2 pin transmits debug serial data to the host. The default pin 62 matches standard development board configurations where pins 62-63 connect to the USB-serial interface.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_PIN_TX = 62           ' Use default transmit pin
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- DEBUG_PIN is an alias for DEBUG_PIN_TX
+- Default matches Parallax development board pinout
+
+#### Related Constants
+
+- [DEBUG_PIN_RX](#debug-pin-rx) — Receive pin
+- [DEBUG_BAUD](#debug-baud) — Baud rate
+
+
+
+::: constheader
+### DEBUG_PIN_RX {#debug-pin-rx}
+Debug Receive Pin
+
+P2 pin number for debug serial receive.
+:::
+
+Configures the debug serial receive pin.
+
+#### Value
+
+| Type | Default | Range |
+|------|---------|-------|
+| Integer | 63 | 0-63 |
+
+#### Description
+
+DEBUG_PIN_RX specifies which P2 pin receives debug serial data from the host. The default pin 63 matches standard development board configurations.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_PIN_RX = 63           ' Use default receive pin
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Used for bidirectional debug communication with host
+- Default matches Parallax development board pinout
+
+#### Related Constants
+
+- [DEBUG_PIN_TX](#debug-pin-tx) — Transmit pin
+- [DEBUG_BAUD](#debug-baud) — Baud rate
+
+
+
+::: constheader
+### DEBUG_BAUD {#debug-baud}
+Debug Baud Rate
+
+Serial communication speed for debug output.
+:::
+
+Configures the debug serial baud rate.
+
+#### Value
+
+| Type | Default | Typical Values |
+|------|---------|----------------|
+| Integer | DOWNLOAD_BAUD | 115200, 230400, 921600, 2000000 |
+
+#### Description
+
+DEBUG_BAUD sets the serial communication speed for all debug output. Higher baud rates reduce debug overhead but require host terminal support. The default uses the same baud rate as the download connection.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_BAUD = 2_000_000      ' 2 Mbaud for fast debug output
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Higher rates reduce per-statement timing impact
+- Host terminal must support the configured rate
+- 2 Mbaud is common for development; lower rates for compatibility
+
+#### Related Constants
+
+- [DEBUG_PIN_TX](#debug-pin-tx) — Transmit pin
+- [DEBUG_PIN_RX](#debug-pin-rx) — Receive pin
+
+
+
+### Breakpoint Configuration Constants
+
+These constants configure automatic breakpoints for single-step debugging. They instruct the debugger to halt execution at specific points, enabling interactive debugging.
+
+::: constheader
+### DEBUG_MAIN {#debug-main}
+Break at Program Start
+
+Triggers a breakpoint when the main program begins.
+:::
+
+Configures the debugger to break at program entry.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Break at main entry |
+| Undefined | No automatic break |
+
+#### Description
+
+DEBUG_MAIN instructs the debugger to trigger a breakpoint at the start of the main program. Execution halts before any user code runs, allowing single-stepping from the first instruction. This is essential for debugging initialization issues or understanding program flow from the beginning.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_MAIN = TRUE           ' Break at program start
+
+PUB main()
+  ' Debugger breaks here before any code executes
+  initialize()
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables the break
+- Takes precedence over DEBUG_COGINIT if both are defined
+- Enables single-stepping from program entry
+- Used for debugging startup and initialization code
+
+#### Related Constants
+
+- [DEBUG_COGINIT](#debug-coginit) — Break on COG initialization
+
+
+
+::: constheader
+### DEBUG_COGINIT {#debug-coginit}
+Break on COG Initialization
+
+Triggers a breakpoint when any COG is initialized.
+:::
+
+Configures the debugger to break on COG startup.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Break on each COGINIT/COGSPIN |
+| Undefined | No automatic break |
+
+#### Description
+
+DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT or COGSPIN instruction executes. This enables debugging multi-COG applications by providing an opportunity to examine state before each new COG begins execution.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_COGINIT = TRUE        ' Break on every COG initialization
+
+PUB main()
+  cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables the break
+- DEBUG_MAIN takes precedence if both are defined
+- Useful for debugging COG startup and inter-COG coordination
+- Each COGINIT or COGSPIN triggers a separate break
+
+#### Related Constants
+
+- [DEBUG_MAIN](#debug-main) — Break at program start
+- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+
+
+
 ## Hardware Configuration Constants
 
 The P2 provides extensive predefined constants for configuring its sophisticated hardware subsystems. These constants are documented in dedicated reference sections:
@@ -471,9 +942,10 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 | Numeric Limits | 2 | NEGX, POSX for bounds checking |
 | Mathematical | 1 | PI for CORDIC and floating-point |
 | Execution Mode | 6 | COGEXEC, HUBEXEC and variants |
+| Debug Configuration | 10 | DEBUG_DISABLE, DEBUG_MASK, infrastructure |
 | SmartPin | 59 | Pin configuration and modes |
 | Streamer | 85 | Data streaming and video |
-| **Total** | **155** | Core predefined constants |
+| **Total** | **165** | Core predefined constants |
 
 *Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
 
