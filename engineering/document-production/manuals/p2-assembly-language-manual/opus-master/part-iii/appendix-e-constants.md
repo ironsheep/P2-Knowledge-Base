@@ -1,4 +1,4 @@
-# Appendix D: Predefined Constants
+# Appendix E: Predefined Constants
 
 PASM2 provides a set of predefined constants that the assembler substitutes at compile time. These constants do not generate code themselves but provide standardized values for common operations including boolean logic, numeric bounds, mathematical calculations, and execution mode control.
 

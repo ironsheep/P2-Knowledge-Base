@@ -1,4 +1,4 @@
-# Appendix C: Special Registers Quick Reference
+# Appendix D: Special Registers Quick Reference
 
 ## Register Summary
 

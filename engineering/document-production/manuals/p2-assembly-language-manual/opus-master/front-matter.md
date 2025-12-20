@@ -146,8 +146,9 @@ This manual serves multiple audiences and use cases. The organization is designe
 **Part III: Appendices** — Quick reference materials:
 
 - Appendix A: Instruction Encoding Summary
-- Appendix B: Instructions by Category
-- Appendix C: Special Registers Reference
+- Appendix B: Condition Code Reference
+- Appendix C: Categorical Instruction Index
+- Appendix D: Special Registers Reference
 - Appendix D: Predefined Constants
 - Appendix E: Smart Pin Mode Constants
 - Appendix F: Streamer Mode Constants
@@ -162,9 +163,11 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **"I need encoding details"** → Appendix A (encoding summary tables)
 
-**"I need to find instructions by category"** → Appendix B (grouped by function: arithmetic, logic, memory, etc.)
+**"I need to find instructions by category"** → Appendix C (grouped by function: arithmetic, logic, memory, etc.)
 
-**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix C (summary table)
+**"I need to understand condition codes"** → Appendix B (complete IF_x reference with all aliases)
+
+**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix D (summary table)
 
 **"I need Smart Pin configuration values"** → Appendix E (Smart Pin Mode Constants)
 

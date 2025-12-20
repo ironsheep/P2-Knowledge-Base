@@ -2,7 +2,7 @@
 
 ## v1.3.0 (2025-12-15)
 
-**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, user feedback audit (hub execution mechanism correction), and Chapter 5 scope alignment.
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, user feedback audit (hub execution mechanism correction), and Chapter 5 scope alignment.
 
 ### Part I: Architectural Foundation
 
@@ -25,7 +25,15 @@
 - Section 5.8 DEBUG: Replaced with properly-scoped version (~301 lines → ~50 lines); content relocated to P2 Debug Window Manual; retained essential awareness for PASM2 programmers
 - Key Concepts: Condensed XBYTE and DEBUG bullets to match revised section scope
 
+**Chapter 2 - The Instruction Format:**
+- Section 2.2.1: Simplified condition code table; full alias documentation moved to Appendix B
+- Section 2.2.2: Condensed _RET_ documentation with cross-reference to Appendix B for advanced patterns
+- Section 2.2.3: Renamed from "Signed vs. Unsigned Comparison Condition Codes" to "Comparison Condition Aliases"; clarified that alias choice (IF_A vs IF_GT) is stylistic, not functional
+
 **Chapter 3 - Flags and Conditional Execution:**
+- Section 3.3.3: Replaced 16-row condition table with brief summary and cross-reference to Appendix B
+- Section 3.3.4: Unified comparison alias documentation; both terminology styles (Magnitude/Arithmetic) now presented as equivalent
+- Section 3.7.6: Corrected alias terminology in multi-long pattern summary
 - Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
 - Added Section 3.4.4 "Move and Data Instructions" with flag behavior table for MOV, NEG, ABS, NOT, ENCOD, DECOD
 
@@ -117,7 +125,23 @@ OUT family:
 
 ### Part III: Appendices
 
-**Appendix D - Predefined Constants:**
+**Appendix Restructuring:**
+- Added new Appendix B: Condition Code Reference (canonical source for all IF_x conditions, aliases, and _RET_ behavior)
+- Renumbered subsequent appendices: B→C (Categorical Index), C→D (Special Registers), D→E (Constants), E→F (Smart Pin), F→G (Streamer), G→H (Reserved Words), H→I (Glossary), I→J (Known Bugs)
+- Updated cross-references in front-matter and chapters
+
+**Appendix B - Condition Code Reference (NEW):**
+- Complete 16-condition table with EEEE encodings and all aliases
+- Comparison aliases presented as two equivalent terminology styles (Magnitude: IF_A/IF_B; Arithmetic: IF_GT/IF_LT)
+- Flag state aliases (IF_00, IF_01, IF_10, IF_11, IF_0X, IF_1X, IF_X0, IF_X1)
+- Logical aliases (IF_SAME, IF_DIFF, IF_NOT_xx)
+- Commutative forms reference
+- Complete _RET_ documentation with XBYTE patterns and timing
+
+**Appendix H - Reserved Words (formerly Appendix G):**
+- Comparison alias section headers changed from "Unsigned/Signed" to "Magnitude/Arithmetic terminology"
+
+**Appendix D - Predefined Constants (formerly Appendix C):**
 - COGEXEC_NEW: Expanded with encoding note, description, usage example, and related constants
 - COGEXEC_NEW_PAIR: Expanded with LUT sharing documentation and usage example
 - HUBEXEC_NEW: Expanded with hub execution details and usage example

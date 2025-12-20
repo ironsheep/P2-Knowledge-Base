@@ -1,5 +1,5 @@
 ::: instrheader
-# Appendix I: Known Silicon Bugs {#appendix-i}
+# Appendix J: Known Silicon Bugs {#appendix-j}
 :::
 
 This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P Rev B/C silicon.

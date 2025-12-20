@@ -38,99 +38,49 @@ When WC is specified in source code, the assembler sets bit 20 to 1. When WZ is 
 
 The condition field enables conditional execution of any instruction. The instruction executes only if the specified condition is true based on the current C and Z flags.
 
-### 2.2.1 Condition Code Table
+### 2.2.1 Condition Code Summary
 
-| EEEE | Primary Mnemonic | Aliases | Condition | Description |
-|:-----|:-----------------|:--------|:----------|:------------|
-| 0000 | _RET_ | | Always | Execute, then return if no branch |
-| 0001 | IF_NC_AND_NZ | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 | C=0 AND Z=0 | After CMP: greater than (signed) / above (unsigned) |
-| 0010 | IF_NC_AND_Z | IF_Z_AND_NC, IF_01 | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | IF_GE, IF_AE, IF_0X | C=0 | After CMP: greater or equal (signed) / above or equal (unsigned) |
-| 0100 | IF_C_AND_NZ | IF_NZ_AND_C, IF_10 | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | IF_NE, IF_X0 | Z=0 | Not zero; after CMP: not equal |
-| 0110 | IF_C_NE_Z | IF_Z_NE_C, IF_DIFF | C≠Z | C and Z flags differ |
-| 0111 | IF_NC_OR_NZ | IF_NZ_OR_NC, IF_NOT_11 | C=0 OR Z=0 | Not both flags set |
-| 1000 | IF_C_AND_Z | IF_Z_AND_C, IF_11 | C=1 AND Z=1 | Both flags set |
-| 1001 | IF_C_EQ_Z | IF_Z_EQ_C, IF_SAME | C=Z | C and Z flags same |
-| 1010 | IF_Z | IF_E, IF_X1 | Z=1 | Zero; after CMP: equal |
-| 1011 | IF_NC_OR_Z | IF_Z_OR_NC, IF_NOT_10 | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | IF_LT, IF_B, IF_1X | C=1 | After CMP: less than (signed) / below (unsigned) |
-| 1101 | IF_C_OR_NZ | IF_NZ_OR_C, IF_NOT_01 | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 | C=1 OR Z=1 | After CMP: less or equal (signed) / below or equal (unsigned) |
-| 1111 | IF_ALWAYS | | Always | Unconditional (default when no prefix) |
+The 4-bit EEEE field encodes sixteen conditions:
 
-**Alias Categories:**
+| EEEE | Primary Mnemonic | Condition | Description |
+|:-----|:-----------------|:----------|:------------|
+| 0000 | _RET_ | Always | Execute, then return if no branch |
+| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | No carry and not zero |
+| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
+| 0011 | IF_NC | C=0 | No carry (C flag clear) |
+| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
+| 0101 | IF_NZ | Z=0 | Not zero (Z flag clear) |
+| 0110 | IF_C_NE_Z | C≠Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not both flags set |
+| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Both flags set |
+| 1001 | IF_C_EQ_Z | C=Z | C and Z flags same |
+| 1010 | IF_Z | Z=1 | Zero (Z flag set) |
+| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
+| 1100 | IF_C | C=1 | Carry (C flag set) |
+| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
+| 1111 | IF_ALWAYS | Always | Unconditional (default) |
 
-- **Commutative forms:** IF_NZ_AND_NC = IF_NC_AND_NZ (same condition, alternate word order)
-- **Comparison aliases:** IF_GT, IF_GE, IF_LT, IF_LE (signed); IF_A, IF_AE, IF_B, IF_BE (unsigned)
-- **Equality aliases:** IF_E (equal), IF_NE (not equal)
-- **Flag pattern aliases:** IF_SAME (C=Z), IF_DIFF (C≠Z)
-- **Bit pattern aliases:** IF_00, IF_01, IF_10, IF_11 (exact CZ pattern); IF_0X, IF_1X, IF_X0, IF_X1 (partial match); IF_NOT_xx (inverted)
+> **📖 Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.2 The _RET_ Condition
 
-The condition code 0000 (`_RET_`) has special behavior that differs from all other conditions. Unlike other condition codes which control whether the instruction executes, `_RET_` means: **"Always execute the instruction, then return if the instruction did not branch."**
+The condition code 0000 (`_RET_`) has special behavior: it means **"Always execute the instruction, then return if the instruction did not branch."**
 
 When an instruction has EEEE=0000:
 
 1. **The instruction always executes** (condition 0000 means "always" for `_RET_`)
 2. **If the instruction does not branch**: Return by popping stack[19:0] into PC
 3. **If the instruction branches** (JMP, CALL, etc.): No return occurs—the branch takes precedence
-4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags from the stack
-
-This is fundamentally different from the RET instruction, which optionally restores C and Z flags when WC/WZ/WCZ effects are specified.
+4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags
 
 **Basic Usage:**
 
 ```pasm
-        _ret_   add     x, y            ' ADD then return (flags same)
+        _ret_   add     x, y            ' ADD then return
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
 ```
-
-**Branch Behavior—No Return When Instruction Branches:**
-
-When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
-
-```pasm
-        _ret_   jmp     #somewhere      ' JMP executes, NO return
-        _ret_   call    #subroutine     ' CALL executes, NO return
-        _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
-```
-
-**SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
-
-The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
-
-```pasm
-' Start XBYTE: SETQ configures mode, returns to $1FF
-        push    #$1FF                   ' Push $1FF for XBYTE returns
-        _ret_   setq    #$100           ' LUT base $100, then return
-
-' Change XBYTE mode permanently
-        _ret_   setq    #$200           ' New LUT base for all bytecodes
-
-' Change XBYTE mode for next bytecode only
-        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
-```
-
-**SKIP/SKIPF with _RET_—Branch Before Skipping:**
-
-Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
-
-```pasm
-        push    #routine                ' Push target address
-        _ret_   skipf   pattern         ' SKIPF then branch with skip active
-```
-
-**Timing:**
-
-The `_RET_` prefix adds overhead to the base instruction timing:
-
-| Execution Mode | Additional Cycles |
-|----------------|-------------------|
-| COG/LUT        | +2 cycles         |
-| Hub            | +11 to +18 cycles |
 
 **Single-Instruction Subroutines:**
 
@@ -139,23 +89,20 @@ The `_RET_` prefix enables efficient single-instruction subroutines:
 ```pasm
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
-
-read_input                              ' Subroutine: read input
-        _ret_   mov     result, ina     ' MOV, then return
 ```
 
-This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
+This is significantly faster than a separate instruction followed by RET.
 
-### 2.2.3 Signed vs. Unsigned Comparison Condition Codes
+**Timing:** The `_RET_` prefix adds +2 cycles in COG/LUT mode, or +11 to +18 cycles in Hub mode.
 
-When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two parallel sets of comparison aliases: **signed** (using two's complement interpretation) and **unsigned** (treating values as positive magnitudes).
+> **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
-**Why Two Sets?**
+### 2.2.3 Comparison Condition Aliases
 
-The same flag state has different meanings depending on whether values are signed or unsigned:
+When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two equivalent terminology styles for comparison aliases:
 
-| Comparison Result | Flag State | Unsigned Alias | Signed Alias |
-|:------------------|:-----------|:---------------|:-------------|
+| Comparison Result | Flag State | Magnitude Style | Arithmetic Style |
+|:------------------|:-----------|:----------------|:-----------------|
 | Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
 | Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
 | Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
@@ -163,53 +110,44 @@ The same flag state has different meanings depending on whether values are signe
 | Equal | Z=1 | IF_E | IF_E |
 | Not equal | Z=0 | IF_NE | IF_NE |
 
-**Signed Comparisons (IF_LT, IF_GT, IF_LE, IF_GE):**
+Both styles encode to identical condition codes—the choice is purely stylistic. Use whichever terminology reads best for your code.
 
-Use these when operands represent signed quantities (two's complement). The comparison correctly handles negative numbers:
+**Magnitude terminology** (A = Above, B = Below) reads naturally with values like addresses, counts, and sizes:
+
+```pasm
+        mov     addr, ##$80000000       ' addr = 2,147,483,648
+        cmp     addr, #0        wc wz   ' Compare
+        if_a    jmp     #addr_is_larger ' "addr is above zero"
+```
+
+**Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with values like temperatures, positions, and deltas:
 
 ```pasm
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
         cmps    x, y            wc wz   ' Signed compare: -100 vs 50
-        if_lt   jmp     #x_is_smaller   ' True: -100 < 50 (signed)
+        if_lt   jmp     #x_is_smaller   ' "x is less than y"
 ```
-
-**Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
-
-Use these when operands represent unsigned quantities (addresses, bit patterns, counters):
-
-```pasm
-        mov     addr, ##$80000000       ' addr = 2,147,483,648 (unsigned)
-        cmp     addr, #0        wc wz   ' Unsigned compare
-        if_a    jmp     #addr_is_larger ' True: 2B > 0 (unsigned)
-                                        ' Note: IF_GT false (signed neg)
-```
-
-**Choosing the Right Comparison:**
-
-| Data Type | Use | Example |
-|:----------|:----|:--------|
-| Memory addresses | Unsigned (IF_A, IF_B, etc.) | `cmp ptr, limit wc` then `if_ae` |
-| Loop counters (0 to N) | Unsigned | `cmp count, #MAX wc` then `if_b` |
-| Signed integers | Signed (IF_GT, IF_LT, etc.) | `cmps temp, #0 wc` then `if_lt` |
-| Temperature, position, velocity | Signed | `cmps delta, #0 wc wz` then `if_ge` |
-| Bit patterns, masks | Unsigned | `cmp flags, mask wc wz` |
 
 **CMP vs. CMPS:**
+
+The distinction that matters is the **compare instruction**, not the alias style:
 
 - **CMP** performs unsigned subtraction (for setting flags)
 - **CMPS** performs signed subtraction (for setting flags)
 
-Match your compare instruction to your condition alias for correct results:
+After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
 
 ```pasm
-' Unsigned comparison
+' Unsigned comparison - either style works
         cmp     a, b            wc wz
-        if_ae   mov     result, #1      ' Unsigned: a >= b
+        if_ae   mov     result, #1      ' "a is above or equal to b"
+        if_ge   mov     result, #1      ' "a is greater or equal to b" (same)
 
-' Signed comparison
+' Signed comparison - either style works
         cmps    a, b            wc wz
-        if_ge   mov     result, #1      ' Signed: a >= b
+        if_ge   mov     result, #1      ' "a is greater or equal to b"
+        if_ae   mov     result, #1      ' "a is above or equal to b" (same)
 ```
 
 ### 2.2.4 Conditional Execution Patterns
@@ -596,14 +534,14 @@ From this entry:
 
 ### 2.8.4 Using Categories for Discovery
 
-Instructions are grouped by category in Appendix B. When looking for "an instruction that does X," consult the categorical index:
+Instructions are grouped by category in Appendix C. When looking for "an instruction that does X," consult the categorical index:
 
 - **Math Instructions:** ADD, SUB, MUL, etc.
 - **Logic Instructions:** AND, OR, XOR, etc.
 - **Branch/Jump Instructions:** JMP, CALL, DJNZ, etc.
 - **Hub Memory Instructions:** RDLONG, WRLONG, etc.
 
-**Tip:** In the PDF version, the category name in each entry's header block is a clickable link that jumps directly to that category's listing in Appendix B.
+**Tip:** In the PDF version, the category name in each entry's header block is a clickable link that jumps directly to that category's listing in Appendix C.
 
 ### 2.8.5 Navigating with Links
 
@@ -611,7 +549,7 @@ The PDF version of this manual includes extensive cross-reference links to help 
 
 **In the entry header block:**
 
-- The **Category name** links to Appendix B's categorical listing
+- The **Category name** links to Appendix C's categorical listing
 
 **In the Related line:**
 

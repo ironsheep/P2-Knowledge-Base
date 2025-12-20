@@ -15528,7 +15528,7 @@ ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for u
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 15 directives organized into six functional categories: origin control, memory definition, size verification, alignment, space management, and inline assembly control.
+The P2 assembler provides 15 directives organized into seven functional categories: origin control, memory definition, size verification, alignment, code replication, space management, and inline assembly control.
 
 
 
@@ -16413,9 +16413,9 @@ In this case, the ALIGNW directive causes one zero ($00) byte to emit after Tabl
 
 
 
-## Space Management Directives
+## Code Replication Directive
 
-Space management directives control memory allocation and verify size constraints. These directives either reserve space without initialization or verify that code fits within specified limits.
+The code replication directive generates multiple copies of instruction or data blocks at compile time. Unlike runtime repetition (REP instruction), code replication expands during assembly, producing distinct instruction copies with optional iteration-based variation.
 
 ::: dirheader
 ### DITTO {#ditto}
@@ -16508,6 +16508,10 @@ DAT
 - [ORGH](#orgh) — Set hub origin (not allowed inside DITTO)
 
 
+
+## Space Management Directives
+
+Space management directives control memory allocation and verify size constraints. FIT verifies that code fits within specified address limits, while RES reserves COG/LUT RAM space without initialization.
 
 ::: dirheader
 ### FIT {#fit}
@@ -16871,7 +16875,8 @@ The P2 assembler's 15 directives provide complete control over memory layout and
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
 **Alignment**: ALIGNL, ALIGNW optimize memory access
-**Space Management**: RES, FIT, DITTO control allocation and verify constraints
+**Code Replication**: DITTO generates multiple copies of instruction/data blocks at compile time
+**Space Management**: RES, FIT control allocation and verify constraints
 **Inline Assembly**: END terminates inline PASM blocks within Spin2 methods
 
 These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.
@@ -18032,7 +18037,92 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 - Special instructions (ASMCLK, DEBUG) are compiler directives, not executable instructions
 
 
-# Appendix B: Categorical Instruction Index
+# Appendix B: Condition Code Reference
+
+This appendix provides the complete reference for all P2 condition codes (the EEEE field in instruction encoding). Every instruction can be made conditional by prefixing it with one of these condition mnemonics.
+
+## Complete Condition Code Table
+
+| EEEE | Primary Mnemonic | Condition | All Aliases |
+|:-----|:-----------------|:----------|:------------|
+| 0000 | _RET_ | Always + return | — |
+| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
+| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
+| 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
+| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | IF_NZ_AND_C, IF_10 |
+| 0101 | IF_NZ | Z=0 | IF_NE, IF_X0 |
+| 0110 | IF_C_NE_Z | C≠Z | IF_Z_NE_C, IF_DIFF |
+| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | IF_NZ_OR_NC, IF_NOT_11 |
+| 1000 | IF_C_AND_Z | C=1 AND Z=1 | IF_Z_AND_C, IF_11 |
+| 1001 | IF_C_EQ_Z | C=Z | IF_Z_EQ_C, IF_SAME |
+| 1010 | IF_Z | Z=1 | IF_E, IF_X1 |
+| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | IF_Z_OR_NC, IF_NOT_10 |
+| 1100 | IF_C | C=1 | IF_LT, IF_B, IF_1X |
+| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | IF_NZ_OR_C, IF_NOT_01 |
+| 1110 | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
+| 1111 | IF_ALWAYS | Always | — |
+
+## Alias Categories
+
+**Comparison Aliases** — Use after CMP (unsigned) or CMPS (signed):
+
+| Relationship | Unsigned | Signed | Primary |
+|:-------------|:---------|:-------|:--------|
+| Greater than | IF_A | IF_GT | IF_NC_AND_NZ |
+| Greater or equal | IF_AE | IF_GE | IF_NC |
+| Less than | IF_B | IF_LT | IF_C |
+| Less or equal | IF_BE | IF_LE | IF_C_OR_Z |
+| Equal | IF_E | IF_E | IF_Z |
+| Not equal | IF_NE | IF_NE | IF_NZ |
+
+**Flag State Aliases** — Express exact C/Z bit patterns:
+
+| Alias | C | Z | Primary |
+|:------|:--|:--|:--------|
+| IF_00 | 0 | 0 | IF_NC_AND_NZ |
+| IF_01 | 0 | 1 | IF_NC_AND_Z |
+| IF_10 | 1 | 0 | IF_C_AND_NZ |
+| IF_11 | 1 | 1 | IF_C_AND_Z |
+| IF_0X | 0 | * | IF_NC |
+| IF_1X | 1 | * | IF_C |
+| IF_X0 | * | 0 | IF_NZ |
+| IF_X1 | * | 1 | IF_Z |
+
+**Logical Aliases:**
+
+| Alias | Meaning | Primary |
+|:------|:--------|:--------|
+| IF_SAME | C equals Z | IF_C_EQ_Z |
+| IF_DIFF | C differs from Z | IF_C_NE_Z |
+| IF_NOT_00 | Not both clear | IF_C_OR_Z |
+| IF_NOT_01 | Not (C=0, Z=1) | IF_C_OR_NZ |
+| IF_NOT_10 | Not (C=1, Z=0) | IF_NC_OR_Z |
+| IF_NOT_11 | Not both set | IF_NC_OR_NZ |
+
+**Commutative Forms** — These pairs are identical:
+
+- IF_NC_AND_NZ = IF_NZ_AND_NC
+- IF_NC_AND_Z = IF_Z_AND_NC
+- IF_C_AND_NZ = IF_NZ_AND_C
+- IF_C_AND_Z = IF_Z_AND_C
+- IF_NC_OR_NZ = IF_NZ_OR_NC
+- IF_NC_OR_Z = IF_Z_OR_NC
+- IF_C_OR_NZ = IF_NZ_OR_C
+- IF_C_OR_Z = IF_Z_OR_C
+- IF_C_EQ_Z = IF_Z_EQ_C
+- IF_C_NE_Z = IF_Z_NE_C
+
+## The _RET_ Condition (EEEE=0000)
+
+The `_RET_` prefix has unique behavior: the instruction always executes, then the COG returns by popping the stack into PC (unless the instruction itself branched). This enables single-instruction subroutines:
+
+```pasm
+toggle_led      _ret_   drvnot  #LED_PIN        ' Toggle and return
+```
+
+See Section 2.2.2 for complete `_RET_` documentation.
+
+# Appendix C: Categorical Instruction Index
 
 This appendix organizes P2 instructions by functional category, helping you find instructions based on what you want to accomplish rather than by alphabetical order. Each instruction name links to its detailed reference in Part II.
 
@@ -18597,7 +18687,7 @@ Miscellaneous instructions provide utility functions including immediate value e
 | [WAITX](#waitx) | Wait 2 + D clocks |
 
 
-# Appendix C: Special Registers Quick Reference
+# Appendix D: Special Registers Quick Reference
 
 ## Register Summary
 
@@ -18638,7 +18728,7 @@ Miscellaneous instructions provide utility functions including immediate value e
 *For complete documentation, see Part II: Special Registers.*
 
 
-# Appendix D: Predefined Constants
+# Appendix E: Predefined Constants
 
 PASM2 provides a set of predefined constants that the assembler substitutes at compile time. These constants do not generate code themselves but provide standardized values for common operations including boolean logic, numeric bounds, mathematical calculations, and execution mode control.
 
@@ -19118,7 +19208,7 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 *Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
 
 
-# Appendix E: Smart Pin Mode Constants
+# Appendix F: Smart Pin Mode Constants
 
 PASM2 provides an extensive set of predefined constants for configuring the P2's 64 Smart Pins. These constants replace complex 32-bit configuration patterns with readable symbolic names, making SmartPin programming practical and maintainable.
 
@@ -19468,7 +19558,7 @@ SmartPin constants are designed to be combined using OR operations. The bit fiel
 
 
 
-# Appendix F: Streamer Mode Constants
+# Appendix G: Streamer Mode Constants
 
 PASM2 provides predefined constants for configuring the P2's Streamer—a powerful DMA-like engine that transfers data between hub RAM, LUT RAM, pins, and DAC outputs. These constants replace complex bit patterns with readable symbolic names.
 
@@ -19833,7 +19923,7 @@ The Streamer supports various data packing/unpacking modes:
 
 
 
-# Appendix G: Reserved Words Reference
+# Appendix H: Reserved Words Reference
 
 This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
@@ -20803,7 +20893,7 @@ All X_* constants are reserved words and cannot be used as user-defined symbols.
 
 
 
-# Appendix H: Glossary of Encoding Terms
+# Appendix I: Glossary of Encoding Terms
 
 This glossary defines the terms used throughout the instruction encoding tables, syntax descriptions, and opcode documentation in this manual.
 
@@ -20889,7 +20979,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 
 
 ::: instrheader
-# Appendix I: Known Silicon Bugs {#appendix-i}
+# Appendix J: Known Silicon Bugs {#appendix-j}
 :::
 
 This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P Rev B/C silicon.

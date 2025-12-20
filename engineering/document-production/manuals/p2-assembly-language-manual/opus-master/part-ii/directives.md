@@ -2,7 +2,7 @@
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 15 directives organized into six functional categories: origin control, memory definition, size verification, alignment, space management, and inline assembly control.
+The P2 assembler provides 15 directives organized into seven functional categories: origin control, memory definition, size verification, alignment, code replication, space management, and inline assembly control.
 
 
 
@@ -887,9 +887,9 @@ In this case, the ALIGNW directive causes one zero ($00) byte to emit after Tabl
 
 
 
-## Space Management Directives
+## Code Replication Directive
 
-Space management directives control memory allocation and verify size constraints. These directives either reserve space without initialization or verify that code fits within specified limits.
+The code replication directive generates multiple copies of instruction or data blocks at compile time. Unlike runtime repetition (REP instruction), code replication expands during assembly, producing distinct instruction copies with optional iteration-based variation.
 
 ::: dirheader
 ### DITTO {#ditto}
@@ -982,6 +982,10 @@ DAT
 - [ORGH](#orgh) — Set hub origin (not allowed inside DITTO)
 
 
+
+## Space Management Directives
+
+Space management directives control memory allocation and verify size constraints. FIT verifies that code fits within specified address limits, while RES reserves COG/LUT RAM space without initialization.
 
 ::: dirheader
 ### FIT {#fit}
@@ -1345,7 +1349,8 @@ The P2 assembler's 15 directives provide complete control over memory layout and
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
 **Alignment**: ALIGNL, ALIGNW optimize memory access
-**Space Management**: RES, FIT, DITTO control allocation and verify constraints
+**Code Replication**: DITTO generates multiple copies of instruction/data blocks at compile time
+**Space Management**: RES, FIT control allocation and verify constraints
 **Inline Assembly**: END terminates inline PASM blocks within Spin2 methods
 
 These directives execute at assembly time, shaping the binary output without affecting runtime execution. Understanding and using directives effectively is essential for efficient P2 assembly programming.

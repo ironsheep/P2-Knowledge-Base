@@ -1,4 +1,4 @@
-# Appendix F: Streamer Mode Constants
+# Appendix G: Streamer Mode Constants
 
 PASM2 provides predefined constants for configuring the P2's Streamer—a powerful DMA-like engine that transfers data between hub RAM, LUT RAM, pins, and DAC outputs. These constants replace complex bit patterns with readable symbolic names.
 

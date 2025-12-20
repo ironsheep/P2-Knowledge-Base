@@ -245,64 +245,43 @@ The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when 
 
 For real-time code, deterministic timing often matters more than average speed.
 
-### 3.3.3 Complete Condition Table
+### 3.3.3 Available Conditions
 
-The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus the special `_RET_` prefix (EEEE=0000) which executes the instruction and then returns. Many conditions have multiple names—aliases that make code more readable in different contexts:
+The P2 provides sixteen conditions covering all possible combinations of C and Z flag states. Each condition can be expressed using its primary mnemonic or one of several aliases designed to make code more readable in specific contexts.
 
-| Condition | Aliases | C | Z | True When |
-|-----------|---------|---|---|-----------|
-| IF_ALWAYS | (none) | * | * | Always executes (unconditional, EEEE=1111) |
-| _RET_ | (none) | * | * | Always executes, then returns if no branch (EEEE=0000) |
-| IF_C | IF_B | 1 | * | C = 1 (carry set, below) |
-| IF_NC | IF_AE, IF_NB | 0 | * | C = 0 (no carry, above or equal) |
-| IF_Z | IF_E | * | 1 | Z = 1 (zero, equal) |
-| IF_NZ | IF_NE | * | 0 | Z = 0 (not zero, not equal) |
-| IF_C_AND_Z | IF_BE | 1 | 1 | C = 1 AND Z = 1 (below or equal) |
-| IF_C_AND_NZ | (none) | 1 | 0 | C = 1 AND Z = 0 |
-| IF_NC_AND_Z | (none) | 0 | 1 | C = 0 AND Z = 1 |
-| IF_NC_AND_NZ | IF_A, IF_NE | 0 | 0 | C = 0 AND Z = 0 (above) |
-| IF_C_OR_Z | (none) | 1 or * | * or 1 | C = 1 OR Z = 1 |
-| IF_C_OR_NZ | (none) | 1 or * | 0 or * | C = 1 OR Z = 0 |
-| IF_NC_OR_Z | (none) | 0 or * | * or 1 | C = 0 OR Z = 1 |
-| IF_NC_OR_NZ | (none) | 0 or * | 0 or * | C = 0 OR Z = 0 |
-| IF_C_EQ_Z | (none) | same | same | C equals Z (both 0 or both 1) |
-| IF_C_NE_Z | (none) | diff | diff | C differs from Z (one 0, one 1) |
+The most commonly used conditions are:
 
-The asterisk (*) in the C or Z column means "don't care"—the condition is true regardless of that flag's value. For OR conditions, the notation "1 or *" means C=1 makes the condition true regardless of Z, or Z matching the specified pattern makes it true regardless of C.
+- **IF_C** / **IF_NC** — Test the C flag (set / clear)
+- **IF_Z** / **IF_NZ** — Test the Z flag (set / clear)
+- **IF_ALWAYS** — Unconditional execution (the default)
+- **_RET_** — Execute instruction, then return
+
+> **📖 Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
 
 ### 3.3.4 Comparison Condition Aliases
 
-After a comparison instruction, certain IF_x conditions correspond to familiar relational operators. The aliases make comparison-based conditionals read naturally:
+After a comparison instruction (CMP or CMPS), the C and Z flags can be tested with aliases that express relational operators. Two equivalent terminology styles are available:
 
-**Unsigned Comparisons (CMP)**
+| Condition | Magnitude Style | Arithmetic Style | Relational | Meaning |
+|-----------|-----------------|------------------|------------|---------|
+| IF_C | IF_B | IF_LT | < | a is less than b |
+| IF_NC | IF_AE | IF_GE | >= | a is greater or equal to b |
+| IF_Z | IF_E | IF_E | == | a equals b |
+| IF_NZ | IF_NE | IF_NE | != | a not equal to b |
+| IF_NC_AND_NZ | IF_A | IF_GT | > | a is greater than b |
+| IF_C_OR_Z | IF_BE | IF_LE | <= | a is less or equal to b |
 
-After `CMP a, b WC WZ`, the flags indicate the relationship between unsigned values:
+**Both styles encode to identical condition codes**—the choice is purely stylistic. Use whichever terminology reads best for your code:
 
-| Condition | Alias | Relational Operator | Meaning |
-|-----------|-------|---------------------|---------|
-| IF_C | IF_B | < | a is below (less than) b |
-| IF_NC | IF_AE | >= | a is above or equal to b |
-| IF_Z | IF_E | == | a equals b |
-| IF_NZ | IF_NE | != | a not equal to b |
-| IF_NC_AND_NZ | IF_A | > | a is above (greater than) b |
-| IF_C_OR_Z | IF_BE | <= | a is below or equal to b |
+- **Magnitude terminology** (A = Above, B = Below) reads naturally with addresses, counts, and sizes
+- **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with temperatures, positions, and deltas
 
-The aliases IF_B (below), IF_AE (above or equal), IF_BE (below or equal), and IF_A (above) correspond exactly to unsigned relational operators. After comparing two unsigned values, these aliases express the intended test clearly.
+**The compare instruction determines the comparison type:**
 
-**Signed Comparisons (CMPS)**
+- **CMP** performs unsigned subtraction—flags reflect unsigned ordering
+- **CMPS** performs signed subtraction—flags reflect signed ordering
 
-After `CMPS a, b WC WZ`, the same condition names apply but with signed interpretation:
-
-| Condition | Relational Operator | Meaning |
-|-----------|---------------------|---------|
-| IF_C | < | a is less than b (signed) |
-| IF_NC | >= | a is greater or equal to b (signed) |
-| IF_Z | == | a equals b |
-| IF_NZ | != | a not equal to b |
-| IF_NC_AND_NZ | > | a is greater than b (signed) |
-| IF_C_OR_Z | <= | a is less or equal to b (signed) |
-
-The conditions are identical, but the comparison instruction (CMP vs. CMPS) determines whether the interpretation is unsigned or signed. Equality (IF_Z) and inequality (IF_NZ) work identically for both—the bit patterns either match or they don't.
+Either alias style works correctly with either compare instruction. The choice of CMP vs. CMPS determines whether $80000000 is treated as a large positive number or a negative number. The alias you use afterward is simply a matter of which terminology reads better in your code.
 
 
 ## 3.4 Flag Behavior by Instruction Category
@@ -710,9 +689,11 @@ This differs from carry/borrow, which indicates overflow in unsigned arithmetic.
 
 After a multi-long comparison:
 
-- **Unsigned:** Use IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
-- **Signed:** Use IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
-- **Either:** Use IF_Z (equal), IF_NZ (not equal)
+- **Magnitude terminology:** IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
+- **Arithmetic terminology:** IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
+- **Equality (either style):** IF_Z (equal), IF_NZ (not equal)
+
+Both terminology styles encode to identical condition codes—choose whichever reads best for your code. The choice of CMP vs. CMPS (not the alias style) determines whether values are compared as unsigned or signed.
 
 
 ```{=latex}

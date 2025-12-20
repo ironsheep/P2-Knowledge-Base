@@ -1,4 +1,4 @@
-# Appendix G: Reserved Words Reference
+# Appendix H: Reserved Words Reference
 
 This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
@@ -466,22 +466,22 @@ These are the canonical condition names:
 
 ### Comparison Aliases (15)
 
-Convenient aliases for post-comparison conditional execution:
+Convenient aliases for post-comparison conditional execution. Two equivalent terminology styles are available—both encode to identical condition codes:
 
-**Unsigned comparison aliases:**
+**Magnitude terminology aliases:**
 
 - **IF_A** - Above (same as IF_NC_AND_NZ)
 - **IF_AE** - Above or equal (same as IF_NC)
 - **IF_B** - Below (same as IF_C)
-- **IF_BE** - Below or equal (same as IF_C_OR_Z or IF_NC_OR_Z)
+- **IF_BE** - Below or equal (same as IF_C_OR_Z)
 - **IF_E** - Equal (same as IF_Z)
 - **IF_NE** - Not equal (same as IF_NZ)
 
-**Signed comparison aliases:**
+**Arithmetic terminology aliases:**
 
 - **IF_GE** - Greater or equal (same as IF_NC)
 - **IF_GT** - Greater than (same as IF_NC_AND_NZ)
-- **IF_LE** - Less or equal (same as IF_NC_OR_Z)
+- **IF_LE** - Less or equal (same as IF_C_OR_Z)
 - **IF_LT** - Less than (same as IF_C)
 
 **Other aliases:**
