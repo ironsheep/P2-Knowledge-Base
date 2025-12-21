@@ -17,8 +17,8 @@ Style conventions for P2 Assembly Language Reference Manual changelog entries.
 
 - Content corrections (encoding tables, flag effects, timing)
 - New documentation (instructions, directives, examples)
-- Structural improvements (table rendering, navigation)
-- Presentation changes (colors, formatting)
+- User-visible rendering fixes (broken tables, navigation issues)
+- Significant visual changes users would notice
 
 ## What to Exclude
 
@@ -28,6 +28,9 @@ Style conventions for P2 Assembly Language Reference Manual changelog entries.
 - "Key finding" editorial statements
 - Internal process notes
 - Debugging details
+- Pipeline/tooling implementation details (Lua filters, LaTeX workarounds)
+- Trivial visual changes (symbol standardization, minor formatting)
+- Internal regressions fixed before release (if v1.2 worked, v1.3 works, no entry needed)
 
 ---
 
@@ -72,6 +75,8 @@ Examples:
 - `Encoding tables: Fixed multi-page rendering`
 - `Timing tables: Fixed table header rendering`
 
+**Presentation test:** Only include if users would have noticed the problem. "Tables were cut off" = yes. "Changed internal symbol encoding" = no.
+
 ---
 
 ## Section Structure
@@ -90,11 +95,10 @@ Examples:
 - Instruction fixes grouped by type
 
 ### Part III: Appendices
-- Appendix fixes
-
-### Presentation
-- Visual/rendering changes
+- Appendix fixes (including user-visible rendering fixes)
 ```
+
+**Note:** Presentation/rendering fixes belong in the relevant Part section (e.g., Appendix A rendering fix goes in Part III). Avoid separate "Presentation" sections—they tend to accumulate internal implementation details.
 
 ---
 

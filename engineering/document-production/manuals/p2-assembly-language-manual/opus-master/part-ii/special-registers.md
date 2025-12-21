@@ -206,7 +206,7 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 ### PR0-PR7 {#pr0-pr7}
 
-Addresses $1D8-$1DF. Communication registers shared between PASM2 and Spin2.
+Addresses $1D8-$1DF. Eight general-purpose registers with predefined symbols.
 
 **Access**: Read/Write
 
@@ -223,24 +223,9 @@ Addresses $1D8-$1DF. Communication registers shared between PASM2 and Spin2.
 | $1DE | PR6 |
 | $1DF | PR7 |
 
-**Usage**: For PASM2 code that is either inline (within a Spin2 method) or called by a Spin2 method, registers $1D8-$1DF are readable and writable by both languages using the symbols PR0-PR7. This provides a communication mechanism between Spin2 and PASM2 code running in the same COG.
+**Usage**: For standalone PASM2 programs, these are ordinary general-purpose registers available for any purpose. The compiler reserves the symbols PR0-PR7 as aliases for these addresses.
 
-**Important**: PASM2 code that is launched into another COG does not share this register space with Spin2—each COG has its own independent PR0-PR7.
-
-**Example**:
-```pasm
-' Spin2 can read/write PR registers
-PR0 := 100
-value := PR1
-
-' Inline PASM2 can access same registers
-org
-  mov   PR2, PR0           ' Copy PR0 to PR2
-  add   PR0, #1            ' Increment PR0
-end
-```
-
-**Related**: [PA](#pa), [PB](#pb)
+**Note**: The PR0-PR7 symbols exist primarily for Spin2 inline assembly interoperability. See the Spin2 Language Manual for Spin2/PASM2 communication patterns.
 
 
 

@@ -2,38 +2,39 @@
 
 ## v1.3.0 (2025-12-15)
 
-**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, systematic corrections from internal consistency audit, enhanced flag documentation from PNut-TS compiler analysis, Parallax draft audit, user feedback audit (hub execution mechanism correction), and Chapter 5 scope alignment.
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, flag effect corrections, Chapter 5 scope refinement.
 
 ### Part I: Architectural Foundation
 
 **Chapter 1 - The P2 Execution Model:**
 - Section 1.2.1: Condensed PR0-PR7 documentation to cross-reference (detailed documentation in Part II)
 - Section 1.2.2: Removed duplicate diagram and table; added cross-references to Part II and Appendix C
-- Section 1.2: Reduced redundancy (~35 lines) while preserving conceptual clarity
+- Section 1.2: Reduced redundancy
 - Section 1.3.1: Added hub memory flexibility note (organization is application-defined)
 - Section 1.4.1: Added LUT code execution note (executes code at same speed as COG RAM)
 - Section 1.5: Added FIFO explanation for hub execution (distinct from egg-beater for data)
-- Section 1.6.2: Corrected hub execution mechanism—changed "egg-beater access pattern" to "FIFO hardware prefetch" (critical error fix from user feedback audit)
+- Section 1.6.2: Corrected hub execution mechanism to FIFO hardware prefetch
 - Section 1.6.2: Added FIFO limitation pitfall warning (RDFAST, WRFAST, streamer unavailable during Hub execution)
 - Key Concepts: Added LUT execution mode; added FIFO limitation bullet
 
 **Chapter 4 - Timing and Determinism:**
-- Section 4.8.2: Corrected hub execution mechanism—changed "egg beater hub access mechanism" to "FIFO prefetch mechanism" (consistency fix)
+- Section 4.7: Corrected cycle counter description to 64-bit (Rev B/C silicon)
+- Section 4.8.2: Corrected hub execution mechanism terminology
 
 **Chapter 5 - Special Hardware Overview:**
-- Section 5.6 XBYTE: Replaced with properly-scoped version (~151 lines → ~50 lines); removed marketing language; retained technical essentials with instruction cross-references
-- Section 5.7.3: Corrected boot pin post-boot statement—hardware (SPI Flash, SD card, serial interface) remains attached after boot; pins are under user code control but practical usage depends on connected hardware
-- Section 5.8 DEBUG: Replaced with properly-scoped version (~301 lines → ~50 lines); content relocated to P2 Debug Window Manual; retained essential awareness for PASM2 programmers
-- Key Concepts: Condensed XBYTE and DEBUG bullets to match revised section scope
+- Section 5.6 XBYTE: Documentation condensed
+- Section 5.7.3: Corrected boot pin post-boot statement (hardware remains attached; pins under user control)
+- Section 5.8 DEBUG: Documentation condensed; detailed coverage expected in P2 Debug Window Manual
+- Key Concepts: Condensed XBYTE and DEBUG bullets
 
 **Chapter 2 - The Instruction Format:**
-- Section 2.2.1: Simplified condition code table; full alias documentation moved to Appendix B
-- Section 2.2.2: Condensed _RET_ documentation with cross-reference to Appendix B for advanced patterns
-- Section 2.2.3: Renamed from "Signed vs. Unsigned Comparison Condition Codes" to "Comparison Condition Aliases"; clarified that alias choice (IF_A vs IF_GT) is stylistic, not functional
+- Section 2.2.1: Simplified condition code table; IF_ALWAYS clarified; moved to Appendix B
+- Section 2.2.2: Condensed _RET_ documentation with cross-reference to Appendix B
+- Section 2.2.3: Renamed to "Comparison Condition Aliases"; clarified alias choice is stylistic
 
 **Chapter 3 - Flags and Conditional Execution:**
-- Section 3.3.3: Replaced 16-row condition table with brief summary and cross-reference to Appendix B
-- Section 3.3.4: Unified comparison alias documentation; both terminology styles (Magnitude/Arithmetic) now presented as equivalent
+- Section 3.3.3: Replaced condition table with summary; IF_ALWAYS clarified; cross-reference to Appendix B
+- Section 3.3.4: Unified comparison alias documentation (Magnitude/Arithmetic terminology)
 - Section 3.7.6: Corrected alias terminology in multi-long pattern summary
 - Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
 - Added Section 3.4.4 "Move and Data Instructions" with flag behavior table for MOV, NEG, ABS, NOT, ENCOD, DECOD
@@ -41,6 +42,7 @@
 ### Part II: Directives
 
 **New Documentation:**
+
 - END: Added inline assembly termination directive (syntax, examples, restrictions)
 
 **Enhanced Documentation:**
@@ -58,10 +60,10 @@
 
 #### Encoding Table Corrections
 
-**Signed Arithmetic C Flag (5 instructions):**
-- ADDS, ADDSX, SUBS, SUBSX, CMPS: C flag description now uses "correct sign of" wording to clarify borrow/carry behavior for signed operations
+**Signed Arithmetic C Flag:**
+- ADDS, ADDSX, SUBS, SUBSX, CMPS: C flag wording clarified for signed operations
 
-**Z Flag Notation Standardization (71 occurrences):**
+**Z Flag Notation Standardization:**
 - Standardized comparison operators across all encoding tables: `Result = 0` → `result == 0`
 - CMP family: `D = S` → `(D == S)` for clarity
 - Extended results: `Z AND (Result = 0)` → `Z AND (result == 0)`
@@ -76,112 +78,70 @@
 
 #### Narrative Documentation Corrections
 
-**C Flag WCZ Effect Documentation (12 instructions):**
+**C Flag WCZ Effect Documentation:**
 
 DIR family:
-- DIRH, DIRL: Added missing C flag behavior to WCZ explanation
+- DIRH, DIRL: Added C flag behavior to WCZ explanation
 
 DRV family:
-- DRVC/DRVNC, DRVH, DRVL, DRVZ/DRVNZ: Added missing C flag behavior to WCZ explanation
+- DRVC/DRVNC, DRVH, DRVL, DRVZ/DRVNZ: Added C flag behavior to WCZ explanation
 
 OUT family:
-- OUTH, OUTL, OUTNOT: Corrected WCZ explanation (removed incorrect "C flag is not affected"); now documents C and Z both set to original output state
+- OUTH, OUTL, OUTNOT: Corrected WCZ explanation; C and Z both set to original output state
 
 #### Terminology Standardization
 
-**C Flag Terminology (10 instructions):**
-- NEG, NEGC, NEGNC, NEGZ, NEGNZ: Changed "Sign of result" / "Sign" to "MSB of result"
-- MUXC, MUXNC, MUXNZ, MUXZ, XOR: Changed "Parity" to "parity of result"
+**C Flag Terminology:**
+- NEG, NEGC, NEGNC, NEGZ, NEGNZ: Standardized to "MSB of result"
+- MUXC, MUXNC, MUXNZ, MUXZ, XOR: Standardized to "parity of result"
 
-**Shift/Rotate Instructions (8 instructions):**
-- RCL, RCR, ROL, ROR, SAL, SAR, SHL, SHR: Added footnote clarifying edge case when S[4:0] = 0
+**Shift/Rotate Instructions:**
+- RCL, RCR, ROL, ROR, SAL, SAR, SHL, SHR: Added footnote for S[4:0] = 0 edge case
 
-**Limit Instructions (4 instructions):**
-- FGE, FGES, FLE, FLES: Added footnote explaining "limit enforced" means C = 1 if D changed, else C = 0
+**Limit Instructions:**
+- FGE, FGES, FLE, FLES: Added footnote for "limit enforced" semantics
 
-**Pin I/O Flag Descriptions (standardized with footnotes):**
-- OUT family (8 instructions): Changed verbose "Original OUTx base bit" / "orig out" to "OUT bit" with footnote
-- FLT family (8 instructions): Changed "Original OUTx base bit" to "OUT bit" with footnote
-- DIR family (8 instructions): Changed "DIRx" / "Original DIRx base bit" to "DIR bit" with footnote
-- DRV family (8 instructions): Changed "DIRx* + OUTx" to "OUT bit" with footnote
+**Pin I/O Flag Descriptions:**
+- OUT, FLT, DIR, DRV families: Standardized flag terminology with footnotes
 
 **Miscellaneous:**
-- XOR: Z flag changed from "Zero" to "result == 0"
-- ZEROX: C flag changed from "MSB" to "MSB of result"; Z flag changed from "Zero" to "result == 0"
+- XOR: Z flag standardized to "result == 0"
+- ZEROX: C and Z flags standardized
 
 #### Documentation Additions
 
 - COGINIT: Added execution mode constants reference table (COGEXEC, HUBEXEC, and _NEW variants)
-
-#### Parallax Draft Audit (corroborated against Silicon Documentation)
-
-- MODCZ: Added modifier constants table to instruction block (complements Appendix G)
+- MODCZ: Added modifier constants table (complements Appendix G)
 - WAITATN: Added event flag re-trigger clarification
-- WAITCT1/WAITCT2/WAITCT3: Added re-trigger clarification; added mathematical formula for counter comparison (MSB of CT - CTx = 0)
+- WAITCT1/WAITCT2/WAITCT3: Added re-trigger clarification and counter comparison formula
 - SCA, SCAS: Added interrupt shielding note
-
-#### Chip Gracey Confirmation
-
-- FLTC, FLTNC, FLTZ, FLTNZ, FLTH, FLTL, FLTNOT, FLTRND: Added pipeline data-forwarding caveat (DIRx not forwarded; only OUTx forwarded)
+- FLT family: Added pipeline data-forwarding caveat (DIRx not forwarded; only OUTx forwarded)
+- PTRA/PTRB: Code example comments trimmed
+- GETCT: Corrected encoding table, code example, and WC effect description
 
 ### Part III: Appendices
 
 **Appendix Restructuring:**
-- Added new Appendix B: Condition Code Reference (canonical source for all IF_x conditions, aliases, and _RET_ behavior)
-- Renumbered subsequent appendices: B→C (Categorical Index), C→D (Special Registers), D→E (Constants), E→F (Smart Pin), F→G (Streamer), G→H (Reserved Words), H→I (Glossary), I→J (Known Bugs)
-- Updated cross-references in front-matter and chapters
+- Added new Appendix B: Condition Code Reference
+- Renumbered subsequent appendices (B→C through I→J)
+- Updated cross-references
 
 **Appendix B - Condition Code Reference (NEW):**
-- Complete 16-condition table with EEEE encodings and all aliases
-- Comparison aliases presented as two equivalent terminology styles (Magnitude: IF_A/IF_B; Arithmetic: IF_GT/IF_LT)
-- Flag state aliases (IF_00, IF_01, IF_10, IF_11, IF_0X, IF_1X, IF_X0, IF_X1)
-- Logical aliases (IF_SAME, IF_DIFF, IF_NOT_xx)
-- Commutative forms reference
-- Complete _RET_ documentation with XBYTE patterns and timing
-
-**Appendix H - Reserved Words (formerly Appendix G):**
-- Comparison alias section headers changed from "Unsigned/Signed" to "Magnitude/Arithmetic terminology"
+- Complete 16-condition table with EEEE encodings and aliases
+- IF_ALWAYS clarified (encoding used when no condition specified)
+- Comparison aliases (Magnitude/Arithmetic terminology)
+- Flag state aliases, logical aliases, commutative forms
+- Complete _RET_ documentation with XBYTE patterns
 
 **Appendix D - Predefined Constants (formerly Appendix C):**
-- COGEXEC_NEW: Expanded with encoding note, description, usage example, and related constants
-- COGEXEC_NEW_PAIR: Expanded with LUT sharing documentation and usage example
-- HUBEXEC_NEW: Expanded with hub execution details and usage example
-- HUBEXEC_NEW_PAIR: Expanded with combined benefits documentation and usage example
+- COGEXEC_NEW, COGEXEC_NEW_PAIR, HUBEXEC_NEW, HUBEXEC_NEW_PAIR: Expanded with encoding, usage examples
 
-**Source Material:**
-- WC-WZ-WCZ-Effects-Guide.md (PNut-TS compiler documentation)
-- PASM2-Authoring-Guide.md (PNut-TS compiler documentation)
-- Parallax PASM2 Manual Draft (2022-11-01)
-- Silicon Documentation v35 (lines 742-751 for hub FIFO, 5152, 5206, 5299-5317, 5674)
-- Chip Gracey direct confirmation (2025-12-17)
-- User feedback audit (2025-12-17): Community review identifying hub execution mechanism error
-- User feedback audit (2025-12-20): Boot pin post-boot statement correction; P2 Eval Board Rev C documentation ("hardwired" SD card socket), Edge Mini Breakout documentation (Flash SPI pin assignments)
-- User feedback audit (2025-12-21): PDF rendering corrections, footnote symbols, code line length
+**Appendix E - Debug Configuration:**
+- DEBUG_MAIN, DEBUG_COGINIT: Examples corrected
 
-### Additional Corrections (2025-12-21)
-
-**Part I:**
-- Chapter 2, Section 2.2.1: IF_ALWAYS clarified (encoding used when no condition specified, not "the default")
-- Chapter 3, Section 3.3.3: IF_ALWAYS clarified (same correction)
-- Chapter 4, Section 4.7: Corrected cycle counter description to 64-bit (Rev B/C silicon)
-
-**Part II:**
-- Special Registers: PTRA/PTRB code example comments trimmed for line length
-- Shift/Rotate instructions (8): Footnote symbol changed from superscript to † (dagger)
-- Pin I/O instructions (OUT, FLT, DRV families): Footnote symbol changed from superscript to †
-- GETCT: Corrected encoding table columns, code example (WC placement), and WC effect description; updated related sections to reflect 64-bit counter (Rev B/C)
-
-**Part III:**
-- Appendix B: IF_ALWAYS clarified (same correction as Chapter 2)
-- Appendix E: DEBUG_MAIN, DEBUG_COGINIT examples corrected (symbol presence sufficient; removed "= TRUE")
-- Appendix H: IF_ALWAYS clarified (same correction)
-
-### Presentation
-
-- Encoding tables (Appendix A): Fixed multi-page rendering regression
-- Grid tables: Converted to pipe format for Lua filter compatibility (Chapters 4-5, Appendices G, J)
-- Not-equal symbols: Changed ≠ to != for LaTeX compatibility
-- Footnote symbols: Changed ^1^ to † (dagger) for proper PDF rendering
+**Appendix H - Reserved Words (formerly Appendix G):**
+- Comparison alias headers updated to Magnitude/Arithmetic terminology
+- IF_ALWAYS clarified
 
 ---
 

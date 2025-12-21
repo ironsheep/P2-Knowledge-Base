@@ -35,7 +35,7 @@ DAT
 | Address Range | Memory | Notes |
 |---------------|--------|-------|
 | $000 - $1EF | COG RAM | General purpose registers |
-| $1F0 - $1FF | COG RAM | Special purpose registers (PR0-PR7, etc.) |
+| $1F0 - $1FF | COG RAM | Special purpose registers (PTRA, DIRA, etc.) |
 | $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
