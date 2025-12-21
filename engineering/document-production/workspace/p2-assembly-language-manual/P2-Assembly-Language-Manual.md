@@ -193,11 +193,13 @@ PASM2 code examples follow standard formatting conventions:
 ```pasm
 label           instruction     D,S             ' Comment
                 instruction     D,#immediate    ' Indented code
+        IF_C    instruction     D,S     WCZ     ' With condition and effects
 ```
 
 - Labels are flush left
 - Instructions are indented to column 16 (two tabs or 8 spaces)
 - Operands follow the instruction
+- Conditions precede the instruction; effects follow operands (see Chapter 3)
 - Comments start with a single quote (') and explain the operation
 - 8-character column alignment for readability
 
