@@ -168,6 +168,7 @@ OUT family:
 - Special Registers: PTRA/PTRB code example comments trimmed for line length
 - Shift/Rotate instructions (8): Footnote symbol changed from superscript to † (dagger)
 - Pin I/O instructions (OUT, FLT, DRV families): Footnote symbol changed from superscript to †
+- GETCT: Corrected encoding table columns, code example (WC placement), and WC effect description
 
 **Part III:**
 - Appendix B: IF_ALWAYS clarified (same correction as Chapter 2)

@@ -100,7 +100,7 @@ Get System Counter
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | CT[63:32] if WC | --- | 2 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | --- | --- | D (CT[31:0], or CT[63:32] if WC) | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1)
@@ -111,11 +111,11 @@ GETCT retrieves the current value of the system counter CT into the Dest registe
 
 The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
 
-**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to the C flag's associated result location. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
 
 ```pasm
-        getct   low_word wc     ' Get lower 32 bits, upper 32 to result
-        getct   high_word       ' Get upper 32 bits (if needed for verification)
+        getct   low_word        ' Get lower 32 bits (CT[31:0])
+        getct   high_word wc    ' Get upper 32 bits (CT[63:32])
 ```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
