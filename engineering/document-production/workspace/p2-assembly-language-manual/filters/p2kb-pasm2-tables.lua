@@ -1,7 +1,7 @@
 -- P2KB PASM2 Table Formatting Filter
 -- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
--- Version: 6.1 - Fixed longtblr for encoding tables (Appendix A) to allow multi-page tables
+-- Version: 6.2 - Extended 2-column full-width detection (Description, Behavior, Explanation)
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -263,22 +263,23 @@ local function is_constant_value_description_table(el)
   return false
 end
 
--- Detect if this is an "Instruction | Description" table (Appendix B pattern)
--- These 2-column tables should have consistent widths: ~20% instruction, ~80% description
+-- Detect if this is a 2-column table with long descriptions (Appendix B, Chapter 4 patterns)
+-- These tables need full width: ~20% identifier, ~80% description/behavior
+-- Patterns: "Instruction | Description", "X | Behavior", "X | Description", etc.
 local function is_instruction_description_table(el)
   if #el.colspecs ~= 2 then
     return false
   end
 
-  -- Check header row for "Instruction", "Description" pattern
+  -- Check header row for patterns where column 2 contains long text
   if el.head and el.head.rows and #el.head.rows > 0 then
     local header_row = el.head.rows[1]
     if header_row.cells and #header_row.cells >= 2 then
-      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
       local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
 
-      -- Match "Instruction | Description" pattern
-      if h1:match("instruction") and h2:match("description") then
+      -- Match tables where column 2 typically has long paragraph-style content
+      -- Note: "meaning" and "purpose" often have short entries, so exclude them
+      if h2:match("description") or h2:match("behavior") or h2:match("explanation") then
         return true
       end
     end
