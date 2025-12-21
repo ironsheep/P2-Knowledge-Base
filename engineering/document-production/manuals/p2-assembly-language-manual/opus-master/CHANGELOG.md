@@ -1,6 +1,6 @@
 # P2 Assembly Language Reference Manual - Changelog
 
-## v1.3.0 (2025-12-15)
+## v1.3.0 (2025-12-21)
 
 **Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, flag effect corrections, Chapter 5 scope refinement.
 

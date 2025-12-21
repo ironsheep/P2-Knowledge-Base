@@ -1,5 +1,150 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v1.3.0 (2025-12-21)
+
+**Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, flag effect corrections, Chapter 5 scope refinement.
+
+### Part I: Architectural Foundation
+
+**Chapter 1 - The P2 Execution Model:**
+- Section 1.2.1: Condensed PR0-PR7 documentation to cross-reference (detailed documentation in Part II)
+- Section 1.2.2: Removed duplicate diagram and table; added cross-references to Part II and Appendix C
+- Section 1.2: Reduced redundancy
+- Section 1.3.1: Added hub memory flexibility note (organization is application-defined)
+- Section 1.4.1: Added LUT code execution note (executes code at same speed as COG RAM)
+- Section 1.5: Added FIFO explanation for hub execution (distinct from egg-beater for data)
+- Section 1.6.2: Corrected hub execution mechanism to FIFO hardware prefetch
+- Section 1.6.2: Added FIFO limitation pitfall warning (RDFAST, WRFAST, streamer unavailable during Hub execution)
+- Key Concepts: Added LUT execution mode; added FIFO limitation bullet
+
+**Chapter 4 - Timing and Determinism:**
+- Section 4.7: Corrected cycle counter description to 64-bit (Rev B/C silicon)
+- Section 4.8.2: Corrected hub execution mechanism terminology
+
+**Chapter 5 - Special Hardware Overview:**
+- Section 5.6 XBYTE: Documentation condensed
+- Section 5.7.3: Corrected boot pin post-boot statement (hardware remains attached; pins under user control)
+- Section 5.8 DEBUG: Documentation condensed; detailed coverage expected in P2 Debug Window Manual
+- Key Concepts: Condensed XBYTE and DEBUG bullets
+
+**Chapter 2 - The Instruction Format:**
+- Section 2.2.1: Simplified condition code table; IF_ALWAYS clarified; moved to Appendix B
+- Section 2.2.2: Condensed _RET_ documentation with cross-reference to Appendix B
+- Section 2.2.3: Renamed to "Comparison Condition Aliases"; clarified alias choice is stylistic
+
+**Chapter 3 - Flags and Conditional Execution:**
+- Section 3.3.3: Replaced condition table with summary; IF_ALWAYS clarified; cross-reference to Appendix B
+- Section 3.3.4: Unified comparison alias documentation (Magnitude/Arithmetic terminology)
+- Section 3.7.6: Corrected alias terminology in multi-long pattern summary
+- Added Section 3.2.6 "Effect Availability" documenting effect permission categories and WCZ validation rules
+- Added Section 3.4.4 "Move and Data Instructions" with flag behavior table for MOV, NEG, ABS, NOT, ENCOD, DECOD
+
+### Part II: Directives
+
+**New Documentation:**
+
+- END: Added inline assembly termination directive (syntax, examples, restrictions)
+
+**Enhanced Documentation:**
+- ORG: Added `$` symbol explanation, COG/LUT memory regions table, auto-limit behavior, restrictions table
+- ORGH: Added behavior by context, address constraints (Spin2 vs PASM-only), mode switching example, restrictions table
+- ORGF: Added COG-mode-only restriction, restrictions table
+- RES: Added RES 0 alias technique, key characteristics, RES vs LONG comparison table, restrictions table
+- FIT: Added behavior by mode (COG vs Hub), common limit values table, additional examples
+
+**Structural:**
+- Directive count updated from 14 to 15
+- Added "Inline Assembly Directives" category
+
+### Part II: Instruction Reference
+
+#### Encoding Table Corrections
+
+**Signed Arithmetic C Flag:**
+- ADDS, ADDSX, SUBS, SUBSX, CMPS: C flag wording clarified for signed operations
+
+**Z Flag Notation Standardization:**
+- Standardized comparison operators across all encoding tables: `Result = 0` → `result == 0`
+- CMP family: `D = S` → `(D == S)` for clarity
+- Extended results: `Z AND (Result = 0)` → `Z AND (result == 0)`
+
+**Column Alignment Fixes:**
+- CALL: Removed erroneous "K and PC" from C column; corrected table structure
+- CALLD: Removed erroneous "Pxxx and PC" and "D and PC"; C flag corrected to `S[31]`
+
+**Z Flag Structure Fixes:**
+- MUL, MULS: Fixed table corruption from pipe character; now `(S == 0) OR (D == 0)`
+- TEST, TESTN: Z flag standardized to `(D == 0)`, `((D & S) == 0)`, `((D & !S) == 0)`
+
+#### Narrative Documentation Corrections
+
+**C Flag WCZ Effect Documentation:**
+
+DIR family:
+- DIRH, DIRL: Added C flag behavior to WCZ explanation
+
+DRV family:
+- DRVC/DRVNC, DRVH, DRVL, DRVZ/DRVNZ: Added C flag behavior to WCZ explanation
+
+OUT family:
+- OUTH, OUTL, OUTNOT: Corrected WCZ explanation; C and Z both set to original output state
+
+#### Terminology Standardization
+
+**C Flag Terminology:**
+- NEG, NEGC, NEGNC, NEGZ, NEGNZ: Standardized to "MSB of result"
+- MUXC, MUXNC, MUXNZ, MUXZ, XOR: Standardized to "parity of result"
+
+**Shift/Rotate Instructions:**
+- RCL, RCR, ROL, ROR, SAL, SAR, SHL, SHR: Added footnote for S[4:0] = 0 edge case
+
+**Limit Instructions:**
+- FGE, FGES, FLE, FLES: Added footnote for "limit enforced" semantics
+
+**Pin I/O Flag Descriptions:**
+- OUT, FLT, DIR, DRV families: Standardized flag terminology with footnotes
+
+**Miscellaneous:**
+- XOR: Z flag standardized to "result == 0"
+- ZEROX: C and Z flags standardized
+
+#### Documentation Additions
+
+- COGINIT: Added execution mode constants reference table (COGEXEC, HUBEXEC, and _NEW variants)
+- MODCZ: Added modifier constants table (complements Appendix G)
+- WAITATN: Added event flag re-trigger clarification
+- WAITCT1/WAITCT2/WAITCT3: Added re-trigger clarification and counter comparison formula
+- SCA, SCAS: Added interrupt shielding note
+- FLT family: Added pipeline data-forwarding caveat (DIRx not forwarded; only OUTx forwarded)
+- PTRA/PTRB: Code example comments trimmed
+- GETCT: Corrected encoding table, code example, and WC effect description
+
+### Part III: Appendices
+
+**Appendix Restructuring:**
+- Added new Appendix B: Condition Code Reference
+- Renumbered subsequent appendices (B→C through I→J)
+- Updated cross-references
+
+**Appendix B - Condition Code Reference (NEW):**
+- Complete 16-condition table with EEEE encodings and aliases
+- IF_ALWAYS clarified (encoding used when no condition specified)
+- Comparison aliases (Magnitude/Arithmetic terminology)
+- Flag state aliases, logical aliases, commutative forms
+- Complete _RET_ documentation with XBYTE patterns
+
+**Appendix D - Predefined Constants (formerly Appendix C):**
+- COGEXEC_NEW, COGEXEC_NEW_PAIR, HUBEXEC_NEW, HUBEXEC_NEW_PAIR: Expanded with encoding, usage examples
+
+**Appendix E - Debug Configuration:**
+- DEBUG_MAIN, DEBUG_COGINIT: Examples corrected
+
+**Appendix H - Reserved Words (formerly Appendix G):**
+- Comparison alias headers updated to Magnitude/Arithmetic terminology
+- IF_ALWAYS clarified
+
+---
+
 ## v1.2.0 (2025-12-13)
 
 **Community Feedback Release** - Additional corrections from user review of v1.0.0.

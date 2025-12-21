@@ -2599,7 +2599,7 @@ Deterministic timing eliminates the jitter and uncertainty common in systems wit
 
 ### 4.7.1 The Cycle Counter
 
-The P2 provides a global 32-bit cycle counter that increments every clock cycle. This counter runs continuously from power-on and wraps around after reaching its maximum value. COGs read the counter using the GETCT instruction, which returns the current counter value.
+The P2 provides a global 64-bit cycle counter (Rev B/C silicon) that increments every clock cycle. This counter runs continuously from power-on. COGs read the counter using the GETCT instruction, which returns the lower 32 bits by default. The lower 32 bits wrap around after reaching their maximum value.
 
 Measuring code execution time involves reading the counter before and after the code section of interest:
 
@@ -2618,7 +2618,7 @@ The cycle counter is global across all COGs—all COGs read the same counter val
 
 ### 4.7.2 Counter Wrap-Around
 
-The 32-bit cycle counter wraps around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time must handle wrap-around correctly.
+The lower 32 bits of the cycle counter wrap around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time using the lower 32 bits must handle wrap-around correctly.
 
 Subtraction using unsigned arithmetic naturally handles wrap-around. When end_time is less than start_time (because wrap-around occurred), the subtraction `end_time - start_time` produces the correct elapsed time due to modular arithmetic:
 
@@ -5158,6 +5158,13 @@ Bitwise And
 
 AND performs a bitwise AND of the value in Src into that of Dest, storing the result in Dest. Each bit in the result is 1 only if the corresponding bits in both Dest and Src are 1.
 
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 0 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
+
 If the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of high (1) bits, or is cleared (0) if it contains an even number of high bits. This parity calculation is useful for error detection.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
@@ -5192,6 +5199,13 @@ And Not
 **Explanation:**
 
 ANDN performs a bitwise AND of Dest with the inverse of Src (!Src), storing the result in Dest. This effectively clears bits in Dest wherever the corresponding bits in Src are set.
+
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 0 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
 
 ANDN is particularly useful for clearing specific bits while leaving others unchanged. For example, to clear bits 7:4 of a register while preserving all other bits, use ANDN with a mask that has 1s in positions 7:4.
 
@@ -7888,22 +7902,22 @@ Get System Counter
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | D | CT[63:32] if WC | --- | 2 |
+| EEEE | 1101011 | C00 | DDDDDDDDD | 000011010 | --- | --- | D (CT[31:0], or CT[63:32] if WC) | 2 |
 
 
 **Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-GETCT retrieves the current value of the system counter CT into the Dest register. On Rev B/C silicon, the system counter is a 64-bit counter that is reset to zero on system reset and increments by one on every clock cycle. The lower 32 bits (CT[31:0]) are always returned in Dest.
+GETCT retrieves the current value of the system counter CT into the Dest register. On Rev B/C silicon, the system counter is a 64-bit counter that is reset to zero on system reset and increments by one on every clock cycle. By default, the lower 32 bits (CT[31:0]) are returned in Dest.
 
 The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all COGs and provides the foundation for timing operations and synchronization.
 
-**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to the C flag's associated result location. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
 
 ```pasm
-        getct   low_word wc     ' Get lower 32 bits, upper 32 to result
-        getct   high_word       ' Get upper 32 bits (if needed for verification)
+        getct   low_word        ' Get lower 32 bits (CT[31:0])
+        getct   high_word wc    ' Get upper 32 bits (CT[63:32])
 ```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
@@ -10065,6 +10079,11 @@ Bitwise Not
 
 NOT performs a bitwise NOT operation, inverting all bits of the value in Src (syntax 1) or Dest (syntax 2), and stores the result into Dest. Each 0 bit becomes 1, and each 1 bit becomes 0.
 
+| Input | Result |
+|:-----:|:------:|
+| 0 | 1 |
+| 1 | 0 |
+
 When using syntax 1, NOT inverts the Src operand and stores the result into Dest. When using syntax 2 (where Src is omitted), NOT inverts the value already in Dest and stores the result back into Dest.
 
 If the WC or WCZ effect is specified, the C flag is set to the inverse of bit 31 of the source operand. For syntax 1, this is the inverse of S[31]; for syntax 2, this is the inverse of D[31].
@@ -10152,13 +10171,12 @@ OR performs a bitwise OR operation between the values in Dest and Src, storing t
 
 The bitwise OR operation follows this truth table for each bit position:
 
-```
-Dest  Src   Result
-  0    0      0
-  0    1      1
-  1    0      1
-  1    1      1
-```
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 1 |
 
 If the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of high bits, or is cleared (0) if it contains an even number of high bits. This provides a parity indication of the result.
 
@@ -13924,10 +13942,10 @@ Test Bit
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
-**TESTB**  *Dest, {#}Src*  **WC/WZ**\
-**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**\
-**TESTB**  *Dest, {#}Src*  **ORC/ORZ**\
-**TESTB**  *Dest, {#}Src*  **XORC/XORZ**
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
@@ -13971,10 +13989,10 @@ Test Bit Negated
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
-**TESTBN**  *Dest, {#}Src*  **WC/WZ**\
-**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**\
-**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**\
-**TESTBN**  *Dest, {#}Src*  **XORC/XORZ**
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
@@ -14050,15 +14068,15 @@ Test Pin / Test Pin Negated {#testpn}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
-**TESTP**  *{#}Dest*  **WC/WZ**\
-**TESTP**  *{#}Dest*  **ANDC/ANDZ**\
-**TESTP**  *{#}Dest*  **ORC/ORZ**\
-**TESTP**  *{#}Dest*  **XORC/XORZ**
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
 
-**TESTPN**  *{#}Dest*  **WC/WZ**\
-**TESTPN**  *{#}Dest*  **ANDC/ANDZ**\
-**TESTPN**  *{#}Dest*  **ORC/ORZ**\
-**TESTPN**  *{#}Dest*  **XORC/XORZ**
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
@@ -15287,6 +15305,13 @@ Exclusive Or
 
 XOR performs a bitwise exclusive OR operation between Dest and Src, storing the result in Dest. Each bit position in the result is set to 1 if the corresponding bits in Dest and Src differ, or 0 if they match.
 
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
 The exclusive OR operation has several important properties:
 
 - XORing a value with itself produces zero (useful for clearing registers)
@@ -15513,7 +15538,7 @@ DAT
 | Address Range | Memory | Notes |
 |---------------|--------|-------|
 | $000 - $1EF | COG RAM | General purpose registers |
-| $1F0 - $1FF | COG RAM | Special purpose registers (PR0-PR7, etc.) |
+| $1F0 - $1FF | COG RAM | Special purpose registers (PTRA, DIRA, etc.) |
 | $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
@@ -17042,7 +17067,7 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 ### PR0-PR7 {#pr0-pr7}
 
-Addresses $1D8-$1DF. Communication registers shared between PASM2 and Spin2.
+Addresses $1D8-$1DF. Eight general-purpose registers with predefined symbols.
 
 **Access**: Read/Write
 
@@ -17059,24 +17084,9 @@ Addresses $1D8-$1DF. Communication registers shared between PASM2 and Spin2.
 | $1DE | PR6 |
 | $1DF | PR7 |
 
-**Usage**: For PASM2 code that is either inline (within a Spin2 method) or called by a Spin2 method, registers $1D8-$1DF are readable and writable by both languages using the symbols PR0-PR7. This provides a communication mechanism between Spin2 and PASM2 code running in the same COG.
+**Usage**: For standalone PASM2 programs, these are ordinary general-purpose registers available for any purpose. The compiler reserves the symbols PR0-PR7 as aliases for these addresses.
 
-**Important**: PASM2 code that is launched into another COG does not share this register space with Spin2—each COG has its own independent PR0-PR7.
-
-**Example**:
-```pasm
-' Spin2 can read/write PR registers
-PR0 := 100
-value := PR1
-
-' Inline PASM2 can access same registers
-org
-  mov   PR2, PR0           ' Copy PR0 to PR2
-  add   PR0, #1            ' Increment PR0
-end
-```
-
-**Related**: [PA](#pa), [PB](#pb)
+**Note**: The PR0-PR7 symbols exist primarily for Spin2 inline assembly interoperability. See the Spin2 Language Manual for Spin2/PASM2 communication patterns.
 
 
 
@@ -17391,13 +17401,13 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
 
 ### System Counter (CT)
 
-The system counter is a free-running 32-bit counter that increments on every system clock cycle. It is global across all cogs—all cogs reading CT simultaneously receive the same value.
+The system counter is a free-running 64-bit counter (Rev B/C silicon) that increments on every system clock cycle. It is global across all cogs—all cogs reading CT simultaneously receive the same value. GETCT returns the lower 32 bits by default, or the upper 32 bits with WC.
 
 **Access**: Read via GETCT, used by ADDCT1/ADDCT2/ADDCT3 and WAITCT1/WAITCT2/WAITCT3
 
 **Resolution**: System clock cycles (typically 200 MHz = 5ns resolution)
 
-**Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The counter wraps at 32 bits. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait for CT to reach that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
+**Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The lower 32 bits wrap approximately every 21.5 seconds at 200 MHz. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait for CT to reach that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
 
 **Example**:
 ```pasm
