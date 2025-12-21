@@ -117,6 +117,13 @@ Exclusive Or
 
 XOR performs a bitwise exclusive OR operation between Dest and Src, storing the result in Dest. Each bit position in the result is set to 1 if the corresponding bits in Dest and Src differ, or 0 if they match.
 
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
 The exclusive OR operation has several important properties:
 
 - XORing a value with itself produces zero (useful for clearing registers)

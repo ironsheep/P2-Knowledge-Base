@@ -76,13 +76,12 @@ OR performs a bitwise OR operation between the values in Dest and Src, storing t
 
 The bitwise OR operation follows this truth table for each bit position:
 
-```
-Dest  Src   Result
-  0    0      0
-  0    1      1
-  1    0      1
-  1    1      1
-```
+| Dest | Src | Result |
+|:----:|:---:|:------:|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 1 |
 
 If the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of high bits, or is cleared (0) if it contains an even number of high bits. This provides a parity indication of the result.
 

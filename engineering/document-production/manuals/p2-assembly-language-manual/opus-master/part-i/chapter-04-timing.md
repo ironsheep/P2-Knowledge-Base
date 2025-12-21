@@ -562,7 +562,7 @@ Deterministic timing eliminates the jitter and uncertainty common in systems wit
 
 ### 4.7.1 The Cycle Counter
 
-The P2 provides a global 32-bit cycle counter that increments every clock cycle. This counter runs continuously from power-on and wraps around after reaching its maximum value. COGs read the counter using the GETCT instruction, which returns the current counter value.
+The P2 provides a global 64-bit cycle counter (Rev B/C silicon) that increments every clock cycle. This counter runs continuously from power-on. COGs read the counter using the GETCT instruction, which returns the lower 32 bits by default. The lower 32 bits wrap around after reaching their maximum value.
 
 Measuring code execution time involves reading the counter before and after the code section of interest:
 
@@ -581,7 +581,7 @@ The cycle counter is global across all COGs—all COGs read the same counter val
 
 ### 4.7.2 Counter Wrap-Around
 
-The 32-bit cycle counter wraps around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time must handle wrap-around correctly.
+The lower 32 bits of the cycle counter wrap around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time using the lower 32 bits must handle wrap-around correctly.
 
 Subtraction using unsigned arithmetic naturally handles wrap-around. When end_time is less than start_time (because wrap-around occurred), the subtraction `end_time - start_time` produces the correct elapsed time due to modular arithmetic:
 

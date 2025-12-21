@@ -163,12 +163,13 @@ OUT family:
 **Part I:**
 - Chapter 2, Section 2.2.1: IF_ALWAYS clarified (encoding used when no condition specified, not "the default")
 - Chapter 3, Section 3.3.3: IF_ALWAYS clarified (same correction)
+- Chapter 4, Section 4.7: Corrected cycle counter description to 64-bit (Rev B/C silicon)
 
 **Part II:**
 - Special Registers: PTRA/PTRB code example comments trimmed for line length
 - Shift/Rotate instructions (8): Footnote symbol changed from superscript to † (dagger)
 - Pin I/O instructions (OUT, FLT, DRV families): Footnote symbol changed from superscript to †
-- GETCT: Corrected encoding table columns, code example (WC placement), and WC effect description
+- GETCT: Corrected encoding table columns, code example (WC placement), and WC effect description; updated related sections to reflect 64-bit counter (Rev B/C)
 
 **Part III:**
 - Appendix B: IF_ALWAYS clarified (same correction as Chapter 2)
