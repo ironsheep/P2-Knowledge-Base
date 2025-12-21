@@ -50,7 +50,7 @@ The 4-bit EEEE field encodes sixteen conditions:
 | 0011 | IF_NC | C=0 | No carry (C flag clear) |
 | 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
 | 0101 | IF_NZ | Z=0 | Not zero (Z flag clear) |
-| 0110 | IF_C_NE_Z | C≠Z | C and Z flags differ |
+| 0110 | IF_C_NE_Z | C!=Z | C and Z flags differ |
 | 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not both flags set |
 | 1000 | IF_C_AND_Z | C=1 AND Z=1 | Both flags set |
 | 1001 | IF_C_EQ_Z | C=Z | C and Z flags same |
@@ -59,7 +59,7 @@ The 4-bit EEEE field encodes sixteen conditions:
 | 1100 | IF_C | C=1 | Carry (C flag set) |
 | 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
 | 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
-| 1111 | IF_ALWAYS | Always | Unconditional (default) |
+| 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
 > **📖 Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
 

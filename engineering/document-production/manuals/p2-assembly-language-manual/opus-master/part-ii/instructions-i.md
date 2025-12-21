@@ -41,7 +41,7 @@ IJZ and IJNZ increment Dest and conditionally jump based on whether the result i
 | Instruction | Jumps when |
 |-------------|------------|
 | IJZ | result == 0 |
-| IJNZ | Result ≠ 0 |
+| IJNZ | Result != 0 |
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 

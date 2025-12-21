@@ -146,8 +146,9 @@ This manual serves multiple audiences and use cases. The organization is designe
 **Part III: Appendices** — Quick reference materials:
 
 - Appendix A: Instruction Encoding Summary
-- Appendix B: Instructions by Category
-- Appendix C: Special Registers Reference
+- Appendix B: Condition Code Reference
+- Appendix C: Categorical Instruction Index
+- Appendix D: Special Registers Reference
 - Appendix D: Predefined Constants
 - Appendix E: Smart Pin Mode Constants
 - Appendix F: Streamer Mode Constants
@@ -162,9 +163,11 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **"I need encoding details"** → Appendix A (encoding summary tables)
 
-**"I need to find instructions by category"** → Appendix B (grouped by function: arithmetic, logic, memory, etc.)
+**"I need to find instructions by category"** → Appendix C (grouped by function: arithmetic, logic, memory, etc.)
 
-**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix C (summary table)
+**"I need to understand condition codes"** → Appendix B (complete IF_x reference with all aliases)
+
+**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix D (summary table)
 
 **"I need Smart Pin configuration values"** → Appendix E (Smart Pin Mode Constants)
 
@@ -492,99 +495,49 @@ When WC is specified in source code, the assembler sets bit 20 to 1. When WZ is 
 
 The condition field enables conditional execution of any instruction. The instruction executes only if the specified condition is true based on the current C and Z flags.
 
-### 2.2.1 Condition Code Table
+### 2.2.1 Condition Code Summary
 
-| EEEE | Primary Mnemonic | Aliases | Condition | Description |
-|:-----|:-----------------|:--------|:----------|:------------|
-| 0000 | _RET_ | | Always | Execute, then return if no branch |
-| 0001 | IF_NC_AND_NZ | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 | C=0 AND Z=0 | After CMP: greater than (signed) / above (unsigned) |
-| 0010 | IF_NC_AND_Z | IF_Z_AND_NC, IF_01 | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | IF_GE, IF_AE, IF_0X | C=0 | After CMP: greater or equal (signed) / above or equal (unsigned) |
-| 0100 | IF_C_AND_NZ | IF_NZ_AND_C, IF_10 | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | IF_NE, IF_X0 | Z=0 | Not zero; after CMP: not equal |
-| 0110 | IF_C_NE_Z | IF_Z_NE_C, IF_DIFF | C≠Z | C and Z flags differ |
-| 0111 | IF_NC_OR_NZ | IF_NZ_OR_NC, IF_NOT_11 | C=0 OR Z=0 | Not both flags set |
-| 1000 | IF_C_AND_Z | IF_Z_AND_C, IF_11 | C=1 AND Z=1 | Both flags set |
-| 1001 | IF_C_EQ_Z | IF_Z_EQ_C, IF_SAME | C=Z | C and Z flags same |
-| 1010 | IF_Z | IF_E, IF_X1 | Z=1 | Zero; after CMP: equal |
-| 1011 | IF_NC_OR_Z | IF_Z_OR_NC, IF_NOT_10 | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | IF_LT, IF_B, IF_1X | C=1 | After CMP: less than (signed) / below (unsigned) |
-| 1101 | IF_C_OR_NZ | IF_NZ_OR_C, IF_NOT_01 | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 | C=1 OR Z=1 | After CMP: less or equal (signed) / below or equal (unsigned) |
-| 1111 | IF_ALWAYS | | Always | Unconditional (default when no prefix) |
+The 4-bit EEEE field encodes sixteen conditions:
 
-**Alias Categories:**
+| EEEE | Primary Mnemonic | Condition | Description |
+|:-----|:-----------------|:----------|:------------|
+| 0000 | _RET_ | Always | Execute, then return if no branch |
+| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | No carry and not zero |
+| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
+| 0011 | IF_NC | C=0 | No carry (C flag clear) |
+| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
+| 0101 | IF_NZ | Z=0 | Not zero (Z flag clear) |
+| 0110 | IF_C_NE_Z | C!=Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not both flags set |
+| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Both flags set |
+| 1001 | IF_C_EQ_Z | C=Z | C and Z flags same |
+| 1010 | IF_Z | Z=1 | Zero (Z flag set) |
+| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
+| 1100 | IF_C | C=1 | Carry (C flag set) |
+| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
+| 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
-- **Commutative forms:** IF_NZ_AND_NC = IF_NC_AND_NZ (same condition, alternate word order)
-- **Comparison aliases:** IF_GT, IF_GE, IF_LT, IF_LE (signed); IF_A, IF_AE, IF_B, IF_BE (unsigned)
-- **Equality aliases:** IF_E (equal), IF_NE (not equal)
-- **Flag pattern aliases:** IF_SAME (C=Z), IF_DIFF (C≠Z)
-- **Bit pattern aliases:** IF_00, IF_01, IF_10, IF_11 (exact CZ pattern); IF_0X, IF_1X, IF_X0, IF_X1 (partial match); IF_NOT_xx (inverted)
+> **📖 Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
 
 ### 2.2.2 The _RET_ Condition
 
-The condition code 0000 (`_RET_`) has special behavior that differs from all other conditions. Unlike other condition codes which control whether the instruction executes, `_RET_` means: **"Always execute the instruction, then return if the instruction did not branch."**
+The condition code 0000 (`_RET_`) has special behavior: it means **"Always execute the instruction, then return if the instruction did not branch."**
 
 When an instruction has EEEE=0000:
 
 1. **The instruction always executes** (condition 0000 means "always" for `_RET_`)
 2. **If the instruction does not branch**: Return by popping stack[19:0] into PC
 3. **If the instruction branches** (JMP, CALL, etc.): No return occurs—the branch takes precedence
-4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags from the stack
-
-This is fundamentally different from the RET instruction, which optionally restores C and Z flags when WC/WZ/WCZ effects are specified.
+4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags
 
 **Basic Usage:**
 
 ```pasm
-        _ret_   add     x, y            ' ADD then return (flags same)
+        _ret_   add     x, y            ' ADD then return
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
 ```
-
-**Branch Behavior—No Return When Instruction Branches:**
-
-When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
-
-```pasm
-        _ret_   jmp     #somewhere      ' JMP executes, NO return
-        _ret_   call    #subroutine     ' CALL executes, NO return
-        _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
-```
-
-**SETQ/SETQ2 Special Cases—XBYTE Bytecode Interpreter:**
-
-The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
-
-```pasm
-' Start XBYTE: SETQ configures mode, returns to $1FF
-        push    #$1FF                   ' Push $1FF for XBYTE returns
-        _ret_   setq    #$100           ' LUT base $100, then return
-
-' Change XBYTE mode permanently
-        _ret_   setq    #$200           ' New LUT base for all bytecodes
-
-' Change XBYTE mode for next bytecode only
-        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
-```
-
-**SKIP/SKIPF with _RET_—Branch Before Skipping:**
-
-Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
-
-```pasm
-        push    #routine                ' Push target address
-        _ret_   skipf   pattern         ' SKIPF then branch with skip active
-```
-
-**Timing:**
-
-The `_RET_` prefix adds overhead to the base instruction timing:
-
-| Execution Mode | Additional Cycles |
-|----------------|-------------------|
-| COG/LUT        | +2 cycles         |
-| Hub            | +11 to +18 cycles |
 
 **Single-Instruction Subroutines:**
 
@@ -593,23 +546,20 @@ The `_RET_` prefix enables efficient single-instruction subroutines:
 ```pasm
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
-
-read_input                              ' Subroutine: read input
-        _ret_   mov     result, ina     ' MOV, then return
 ```
 
-This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
+This is significantly faster than a separate instruction followed by RET.
 
-### 2.2.3 Signed vs. Unsigned Comparison Condition Codes
+**Timing:** The `_RET_` prefix adds +2 cycles in COG/LUT mode, or +11 to +18 cycles in Hub mode.
 
-When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two parallel sets of comparison aliases: **signed** (using two's complement interpretation) and **unsigned** (treating values as positive magnitudes).
+> **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
-**Why Two Sets?**
+### 2.2.3 Comparison Condition Aliases
 
-The same flag state has different meanings depending on whether values are signed or unsigned:
+When comparing values with CMP, CMPS, SUB, or similar instructions, the resulting C and Z flags can be tested with condition prefixes that express comparison semantics. The P2 provides two equivalent terminology styles for comparison aliases:
 
-| Comparison Result | Flag State | Unsigned Alias | Signed Alias |
-|:------------------|:-----------|:---------------|:-------------|
+| Comparison Result | Flag State | Magnitude Style | Arithmetic Style |
+|:------------------|:-----------|:----------------|:-----------------|
 | Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
 | Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
 | Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
@@ -617,53 +567,44 @@ The same flag state has different meanings depending on whether values are signe
 | Equal | Z=1 | IF_E | IF_E |
 | Not equal | Z=0 | IF_NE | IF_NE |
 
-**Signed Comparisons (IF_LT, IF_GT, IF_LE, IF_GE):**
+Both styles encode to identical condition codes—the choice is purely stylistic. Use whichever terminology reads best for your code.
 
-Use these when operands represent signed quantities (two's complement). The comparison correctly handles negative numbers:
-
-```pasm
-                mov     x, ##-100       ' x = -100 (signed)
-                mov     y, #50          ' y = 50
-                cmps    x, y    wc wz   ' Signed compare
-        if_lt   jmp     #x_is_smaller   ' True: -100 < 50
-```
-
-**Unsigned Comparisons (IF_B, IF_A, IF_BE, IF_AE):**
-
-Use these when operands represent unsigned quantities (addresses, bit patterns, counters):
+**Magnitude terminology** (A = Above, B = Below) reads naturally with values like addresses, counts, and sizes:
 
 ```pasm
-                mov     addr, ##$80000000   ' addr = 2B (unsigned)
-                cmp     addr, #0    wc wz   ' Unsigned compare
-        if_a    jmp     #addr_is_larger     ' True: 2B > 0 (unsigned)
-                                            ' IF_GT false (signed neg)
+        mov     addr, ##$80000000       ' addr = 2,147,483,648
+        cmp     addr, #0        wc wz   ' Compare
+        if_a    jmp     #addr_is_larger ' "addr is above zero"
 ```
 
-**Choosing the Right Comparison:**
+**Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with values like temperatures, positions, and deltas:
 
-| Data Type | Use | Example |
-|:----------|:----|:--------|
-| Memory addresses | Unsigned (IF_A, IF_B, etc.) | `cmp ptr, limit wc` then `if_ae` |
-| Loop counters (0 to N) | Unsigned | `cmp count, #MAX wc` then `if_b` |
-| Signed integers | Signed (IF_GT, IF_LT, etc.) | `cmps temp, #0 wc` then `if_lt` |
-| Temperature, position, velocity | Signed | `cmps delta, #0 wc wz` then `if_ge` |
-| Bit patterns, masks | Unsigned | `cmp flags, mask wc wz` |
+```pasm
+        mov     x, ##-100               ' x = -100 (signed)
+        mov     y, #50                  ' y = 50
+        cmps    x, y            wc wz   ' Signed compare: -100 vs 50
+        if_lt   jmp     #x_is_smaller   ' "x is less than y"
+```
 
 **CMP vs. CMPS:**
+
+The distinction that matters is the **compare instruction**, not the alias style:
 
 - **CMP** performs unsigned subtraction (for setting flags)
 - **CMPS** performs signed subtraction (for setting flags)
 
-Match your compare instruction to your condition alias for correct results:
+After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
 
 ```pasm
-' Unsigned comparison
-                cmp     a, b    wc wz
-        if_ae   mov     result, #1      ' Unsigned: a >= b
+' Unsigned comparison - either style works
+        cmp     a, b            wc wz
+        if_ae   mov     result, #1      ' "a is above or equal to b"
+        if_ge   mov     result, #1      ' "a is greater or equal to b" (same)
 
-' Signed comparison
-                cmps    a, b    wc wz
-        if_ge   mov     result, #1      ' Signed: a >= b
+' Signed comparison - either style works
+        cmps    a, b            wc wz
+        if_ge   mov     result, #1      ' "a is greater or equal to b"
+        if_ae   mov     result, #1      ' "a is above or equal to b" (same)
 ```
 
 ### 2.2.4 Conditional Execution Patterns
@@ -1050,14 +991,14 @@ From this entry:
 
 ### 2.8.4 Using Categories for Discovery
 
-Instructions are grouped by category in Appendix B. When looking for "an instruction that does X," consult the categorical index:
+Instructions are grouped by category in Appendix C. When looking for "an instruction that does X," consult the categorical index:
 
 - **Math Instructions:** ADD, SUB, MUL, etc.
 - **Logic Instructions:** AND, OR, XOR, etc.
 - **Branch/Jump Instructions:** JMP, CALL, DJNZ, etc.
 - **Hub Memory Instructions:** RDLONG, WRLONG, etc.
 
-**Tip:** In the PDF version, the category name in each entry's header block is a clickable link that jumps directly to that category's listing in Appendix B.
+**Tip:** In the PDF version, the category name in each entry's header block is a clickable link that jumps directly to that category's listing in Appendix C.
 
 ### 2.8.5 Navigating with Links
 
@@ -1065,7 +1006,7 @@ The PDF version of this manual includes extensive cross-reference links to help 
 
 **In the entry header block:**
 
-- The **Category name** links to Appendix B's categorical listing
+- The **Category name** links to Appendix C's categorical listing
 
 **In the Related line:**
 
@@ -1264,22 +1205,22 @@ Local labels have these characteristics:
 ```pasm
 DAT             org
 
-send_byte       rdbyte  x, ptr              ' Global: send_byte
-                call    #.wait              ' Reference local .wait
-.loop           testp   tx_pin      wc      ' Local: .loop
+send_byte       rdbyte  x, ptr                  ' Global: send_byte
+                call    #.wait                  ' Reference local .wait
+.loop           testp   tx_pin          wc      ' Local: .loop (scope: send_byte)
         if_nc   jmp     #.loop
                 wypin   x, tx_pin
-.wait           testp   tx_pin      wc      ' Local: .wait
+.wait           testp   tx_pin          wc      ' Local: .wait (scope: send_byte)
         if_c    jmp     #.wait
                 ret
 
-recv_byte       testp   rx_pin      wc      ' Global: recv_byte
-                                            '  (new scope begins)
-        if_nc   jmp     #.wait              ' Different .wait
-.wait           testp   rx_pin      wc      ' Local: .wait (recv_byte)
+recv_byte       testp   rx_pin          wc      ' Global: recv_byte
+                                                '  (new scope begins)
+        if_nc   jmp     #.wait                  ' Different .wait (new scope)
+.wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin
-.loop           shr     x, #24              ' Local: .loop (recv_byte)
+.loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
                 ret
 ```
 
@@ -1330,8 +1271,8 @@ Three events create scope boundaries:
 ```pasm
 DAT             org
 
-func_a          mov     x, #1               ' Global: func_a, scope #1
-.loop           djnz    x, #.loop           ' Local .loop in scope #1
+func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
+.loop           djnz    x, #.loop               ' Local .loop in scope #1
 
 data_block      long    0, 0, 0, 0              ' Global: data_block,
                                                 '  scope #2 begins
@@ -1455,7 +1396,7 @@ This consistency makes WZ predictable. After any arithmetic, logical, or shift o
 
 The extended arithmetic instructions—ADDX, SUBX, ADDSX, SUBSX, CMPX, CMPSX—use a modified Z flag update rule:
 
-```
+```text
 Z = Z AND (result == 0)
 ```
 
@@ -1621,64 +1562,43 @@ The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when 
 
 For real-time code, deterministic timing often matters more than average speed.
 
-### 3.3.3 Complete Condition Table
+### 3.3.3 Available Conditions
 
-The P2 provides sixteen conditions that cover all possible combinations of the C and Z flag states, plus the special `_RET_` prefix (EEEE=0000) which executes the instruction and then returns. Many conditions have multiple names—aliases that make code more readable in different contexts:
+The P2 provides sixteen conditions covering all possible combinations of C and Z flag states. Each condition can be expressed using its primary mnemonic or one of several aliases designed to make code more readable in specific contexts.
 
-| Condition | Aliases | C | Z | True When |
-|-----------|---------|---|---|-----------|
-| IF_ALWAYS | (none) | * | * | Always executes (unconditional, EEEE=1111) |
-| _RET_ | (none) | * | * | Always executes, then returns if no branch (EEEE=0000) |
-| IF_C | IF_B | 1 | * | C = 1 (carry set, below) |
-| IF_NC | IF_AE, IF_NB | 0 | * | C = 0 (no carry, above or equal) |
-| IF_Z | IF_E | * | 1 | Z = 1 (zero, equal) |
-| IF_NZ | IF_NE | * | 0 | Z = 0 (not zero, not equal) |
-| IF_C_AND_Z | IF_BE | 1 | 1 | C = 1 AND Z = 1 (below or equal) |
-| IF_C_AND_NZ | (none) | 1 | 0 | C = 1 AND Z = 0 |
-| IF_NC_AND_Z | (none) | 0 | 1 | C = 0 AND Z = 1 |
-| IF_NC_AND_NZ | IF_A, IF_NE | 0 | 0 | C = 0 AND Z = 0 (above) |
-| IF_C_OR_Z | (none) | 1 or * | * or 1 | C = 1 OR Z = 1 |
-| IF_C_OR_NZ | (none) | 1 or * | 0 or * | C = 1 OR Z = 0 |
-| IF_NC_OR_Z | (none) | 0 or * | * or 1 | C = 0 OR Z = 1 |
-| IF_NC_OR_NZ | (none) | 0 or * | 0 or * | C = 0 OR Z = 0 |
-| IF_C_EQ_Z | (none) | same | same | C equals Z (both 0 or both 1) |
-| IF_C_NE_Z | (none) | diff | diff | C differs from Z (one 0, one 1) |
+The most commonly used conditions are:
 
-The asterisk (*) in the C or Z column means "don't care"—the condition is true regardless of that flag's value. For OR conditions, the notation "1 or *" means C=1 makes the condition true regardless of Z, or Z matching the specified pattern makes it true regardless of C.
+- **IF_C** / **IF_NC** — Test the C flag (set / clear)
+- **IF_Z** / **IF_NZ** — Test the Z flag (set / clear)
+- **(no condition)** — When omitted, instructions execute unconditionally (encodes as EEEE=1111)
+- **_RET_** — Execute instruction, then return
+
+> **📖 Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.
 
 ### 3.3.4 Comparison Condition Aliases
 
-After a comparison instruction, certain IF_x conditions correspond to familiar relational operators. The aliases make comparison-based conditionals read naturally:
+After a comparison instruction (CMP or CMPS), the C and Z flags can be tested with aliases that express relational operators. Two equivalent terminology styles are available:
 
-**Unsigned Comparisons (CMP)**
+| Condition | Magnitude Style | Arithmetic Style | Relational | Meaning |
+|-----------|-----------------|------------------|------------|---------|
+| IF_C | IF_B | IF_LT | < | a is less than b |
+| IF_NC | IF_AE | IF_GE | >= | a is greater or equal to b |
+| IF_Z | IF_E | IF_E | == | a equals b |
+| IF_NZ | IF_NE | IF_NE | != | a not equal to b |
+| IF_NC_AND_NZ | IF_A | IF_GT | > | a is greater than b |
+| IF_C_OR_Z | IF_BE | IF_LE | <= | a is less or equal to b |
 
-After `CMP a, b WC WZ`, the flags indicate the relationship between unsigned values:
+**Both styles encode to identical condition codes**—the choice is purely stylistic. Use whichever terminology reads best for your code:
 
-| Condition | Alias | Relational Operator | Meaning |
-|-----------|-------|---------------------|---------|
-| IF_C | IF_B | < | a is below (less than) b |
-| IF_NC | IF_AE | >= | a is above or equal to b |
-| IF_Z | IF_E | == | a equals b |
-| IF_NZ | IF_NE | != | a not equal to b |
-| IF_NC_AND_NZ | IF_A | > | a is above (greater than) b |
-| IF_C_OR_Z | IF_BE | <= | a is below or equal to b |
+- **Magnitude terminology** (A = Above, B = Below) reads naturally with addresses, counts, and sizes
+- **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with temperatures, positions, and deltas
 
-The aliases IF_B (below), IF_AE (above or equal), IF_BE (below or equal), and IF_A (above) correspond exactly to unsigned relational operators. After comparing two unsigned values, these aliases express the intended test clearly.
+**The compare instruction determines the comparison type:**
 
-**Signed Comparisons (CMPS)**
+- **CMP** performs unsigned subtraction—flags reflect unsigned ordering
+- **CMPS** performs signed subtraction—flags reflect signed ordering
 
-After `CMPS a, b WC WZ`, the same condition names apply but with signed interpretation:
-
-| Condition | Relational Operator | Meaning |
-|-----------|---------------------|---------|
-| IF_C | < | a is less than b (signed) |
-| IF_NC | >= | a is greater or equal to b (signed) |
-| IF_Z | == | a equals b |
-| IF_NZ | != | a not equal to b |
-| IF_NC_AND_NZ | > | a is greater than b (signed) |
-| IF_C_OR_Z | <= | a is less or equal to b (signed) |
-
-The conditions are identical, but the comparison instruction (CMP vs. CMPS) determines whether the interpretation is unsigned or signed. Equality (IF_Z) and inequality (IF_NZ) work identically for both—the bit patterns either match or they don't.
+Either alias style works correctly with either compare instruction. The choice of CMP vs. CMPS determines whether $80000000 is treated as a large positive number or a negative number. The alias you use afterward is simply a matter of which terminology reads better in your code.
 
 
 ## 3.4 Flag Behavior by Instruction Category
@@ -1748,7 +1668,7 @@ Move and data manipulation instructions set flags based on the source or result 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 
 ```pasm
-                mov     temp, value wc  ' Copy value, C = sign bit
+        mov     temp, value     wc      ' Copy value, C = sign bit
         if_c    jmp     #negative       ' Branch if negative
 ```
 
@@ -2086,9 +2006,11 @@ This differs from carry/borrow, which indicates overflow in unsigned arithmetic.
 
 After a multi-long comparison:
 
-- **Unsigned:** Use IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
-- **Signed:** Use IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
-- **Either:** Use IF_Z (equal), IF_NZ (not equal)
+- **Magnitude terminology:** IF_B (below), IF_AE (above/equal), IF_A (above), IF_BE (below/equal)
+- **Arithmetic terminology:** IF_LT (less than), IF_GE (greater/equal), IF_GT (greater), IF_LE (less/equal)
+- **Equality (either style):** IF_Z (equal), IF_NZ (not equal)
+
+Both terminology styles encode to identical condition codes—choose whichever reads best for your code. The choice of CMP vs. CMPS (not the alias style) determines whether values are compared as unsigned or signed.
 
 
 ```{=latex}
@@ -2322,16 +2244,10 @@ The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting f
 
 RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 
-+--------+---------------------------------------------------------------------------------+
-| D[31]  | Behavior                                                                        |
-+========+=================================================================================+
-| 0      | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST,      |
-|        | also wait until FIFO begins receiving data. Ready to use immediately after      |
-|        | instruction completes.                                                          |
-+--------+---------------------------------------------------------------------------------+
-| 1      | No-wait mode—takes only 2 clocks. Code must allow sufficient time before        |
-|        | accessing FIFO data.                                                            |
-+--------+---------------------------------------------------------------------------------+
+| D[31] | Behavior |
+|-------|----------|
+| 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
+| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
 
 The no-wait mode is useful when you need to reconfigure the FIFO quickly and can guarantee enough cycles will pass before the first FIFO access.
 
@@ -2462,7 +2378,7 @@ The branching approach introduces timing variation:
 
 ```pasm
 ' With branch (2 or 4 cycles):
-                cmp     a, b    wz
+        cmp     a, b            wz
         if_z    jmp     #equal_case
         ' Not-equal path continues here
 ```
@@ -2473,7 +2389,7 @@ The conditional execution approach provides constant timing:
 
 ```pasm
 ' Without branch (2 cycles always):
-                cmp     a, b    wz
+        cmp     a, b            wz
         if_z    mov     result, #1
         if_nz   mov     result, #0
 ```
@@ -2661,15 +2577,15 @@ A WS2812 LED protocol example demonstrates the precision required:
 ' 1 bit: 160 cycles high, 90 cycles low
 
 send_bit
-                test    data, #31   wc  ' Get bit into C flag
-                drvh    pin             ' Start pulse (high)
+        test    data, #31       wc      ' Get high bit into C flag
+        drvh    pin                     ' Start pulse (high)
         if_c    waitx   ##160           ' 1-bit: wait 160 cycles
         if_nc   waitx   ##80            ' 0-bit: wait 80 cycles
-                drvl    pin             ' End pulse (low)
+        drvl    pin                     ' End pulse (low)
         if_c    waitx   ##90            ' 1-bit: wait 90 cycles
         if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
-                rol     data, #1        ' Shift to next bit
-                djnz    count, #send_bit
+        rol     data, #1                ' Shift to next bit
+        djnz    count, #send_bit
 ```
 
 This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
@@ -2903,8 +2819,9 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
 ```pasm
-                pollqmt         wc  ' C=1 if empty, C=0 if pending
-        if_nc   getqx   result      ' Retrieve if available
+        pollqmt             wc              ' C=1 if pipeline empty,
+                                            '  C=0 if results pending
+        if_nc   getqx   result              ' Retrieve if available
 ```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
@@ -2989,27 +2906,14 @@ The Smart Pin's autonomous operation is particularly significant. Once configure
 
 Smart Pins support 64 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
-+-------------+-------------------------------------+-----------------------------------+
-| Category    | Example Modes                       | Typical Applications              |
-+=============+=====================================+===================================+
-| Digital I/O | Repository mode, registered input,  | Debounced buttons, event          |
-|             | long pulse accumulator              | counting, pulse measurement       |
-+-------------+-------------------------------------+-----------------------------------+
-| Serial      | UART transmit/receive, synchronous  | Communication with peripherals    |
-|             | serial, SPI                         | and other systems                 |
-+-------------+-------------------------------------+-----------------------------------+
-| PWM         | PWM/duty mode, triangle/sawtooth    | Motor control, LED dimming,       |
-|             | mode, incremental mode              | audio generation                  |
-+-------------+-------------------------------------+-----------------------------------+
-| Analog      | DAC output, ADC sampling,           | Sensor interfacing, analog        |
-|             | comparator                          | signal generation                 |
-+-------------+-------------------------------------+-----------------------------------+
-| Timing      | Period measurement, pulse width     | Frequency measurement, event      |
-|             | measurement, timeout                | timing, watchdog                  |
-+-------------+-------------------------------------+-----------------------------------+
-| Quadrature  | Quadrature encoder input            | Rotary encoder reading, motor     |
-|             |                                     | position feedback                 |
-+-------------+-------------------------------------+-----------------------------------+
+| Category | Example Modes | Typical Applications |
+|----------|---------------|----------------------|
+| Digital I/O | Repository mode, registered input, long pulse accumulator | Debounced buttons, event counting, pulse measurement |
+| Serial | UART transmit/receive, synchronous serial, SPI | Communication with peripherals and other systems |
+| PWM | PWM/duty mode, triangle/sawtooth mode, incremental mode | Motor control, LED dimming, audio generation |
+| Analog | DAC output, ADC sampling, comparator | Sensor interfacing, analog signal generation |
+| Timing | Period measurement, pulse width measurement, timeout | Frequency measurement, event timing, watchdog |
+| Quadrature | Quadrature encoder input | Rotary encoder reading, motor position feedback |
 
 Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the Smart Pin's operation.
 
@@ -3399,7 +3303,13 @@ The boot process uses pins P58-P63 for communication with external boot sources:
 | P59 | Data Out (MOSI) | Output |
 | P58 | Data In (MISO) | Input |
 
-After boot completes, these pins return to general-purpose I/O. Programs can reconfigure them for any purpose once execution begins.
+After boot completes, ROM control of these pins ends and user code takes over. However, the boot source hardware typically remains physically connected:
+
+- **SPI Flash (P58-P61):** The flash chip remains attached. User programs commonly continue using these pins to access flash storage for code snippets, lookup tables, audio files, or data logging.
+- **SD Card (P58-P61):** The SD card socket remains attached. User programs commonly continue using these pins for file system access.
+- **Serial (P62-P63):** On development boards, these pins typically remain connected to the USB-serial interface for debugging and host communication.
+
+The pins are available for user code to configure and use—but practical usage depends on what external hardware is connected to them.
 
 ### 5.7.4 The Boot Sequence
 
@@ -3529,7 +3439,6 @@ Size suffixes (_BYTE, _WORD, _LONG) control display width. Array variants (_BYTE
 ### 5.8.3 Visual Debug Displays
 
 DEBUG supports graphical display windows including:
-
 - **SCOPE** — Oscilloscope waveform display
 - **PLOT** — Data plotting and charts
 - **LOGIC** — Logic analyzer view
@@ -3549,6 +3458,47 @@ When multiple COGs execute DEBUG statements, the system automatically prefixes e
 For production builds, disable DEBUG via compiler option. Statements compile to nothing—zero runtime impact.
 
 **See:** DEBUG instruction in Part II for complete syntax; P2 Debug Window Manual for visual display configuration, advanced formatters, and professional debugging techniques.
+
+
+### 5.8.6 Debug Configuration
+
+The debug system operates at three distinct levels, each controlled by CON constants:
+
+- **Code Instrumentation (Compile-Time):** DEBUG_DISABLE and DEBUG_MASK control whether debug statements generate code
+- **Output Infrastructure (Runtime):** DEBUG_COGS, DEBUG_BAUD, and related constants configure the debug serial system
+- **Breakpoint Configuration:** DEBUG_MAIN and DEBUG_COGINIT configure automatic breaks for single-step debugging
+
+**Selective Debug with debug[N]():**
+
+The `debug[N]()` form categorizes debug statements into channels (0-31) that compile selectively based on DEBUG_MASK:
+
+```pasm
+CON
+  DBG_INIT  = 0
+  DBG_ERROR = 3
+  DEBUG_MASK = (1 << DBG_INIT) | (1 << DBG_ERROR)
+
+DAT
+        org
+entry   debug[DBG_INIT]("Starting")   ' COMPILED - bit 0 set
+        debug[1]("Motor status")       ' NOT compiled - bit 1 clear
+        debug[DBG_ERROR]("Fault!")     ' COMPILED - bit 3 set
+```
+
+Disabled channels produce zero code—no runtime overhead exists. Standard `debug()` statements without channel numbers are unaffected by DEBUG_MASK and compile whenever debug is enabled.
+
+**Compile-Time vs Runtime Filtering:**
+
+DEBUG_MASK and DEBUG_COGS operate at different levels:
+
+| Constant | Level | Controls |
+|----------|-------|----------|
+| DEBUG_MASK | Compile-time | Whether `debug[N]()` generates code |
+| DEBUG_COGS | Runtime | Whether a COG can produce debug output |
+
+For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing COG must have its bit set in DEBUG_COGS.
+
+**See:** Appendix E (Debug Configuration Constants) for complete constant documentation including DEBUG_DELAY, DEBUG_TIMESTAMP, DEBUG_BAUD, and breakpoint configuration.
 
 
 ```{=latex}
@@ -3746,11 +3696,11 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
 
 ```pasm
-                augs    #$12345
-                nop                     ' This consumes the AUGS!
-                mov     x, #$678        ' Gets $678, NOT $12345678
+        augs    #$12345
+        nop                             ' This consumes the AUGS!
+        mov     x, #$678                ' Gets $678, NOT $12345678
 
-                augs    #$12345
+        augs    #$12345
         if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
                                         '  AUGS is still consumed
 ```
@@ -3802,7 +3752,6 @@ Post-modify modes use the current pointer value for the memory access, then upda
 ```
 
 **Execution sequence for `RDLONG x, PTRA++`:**
-
 1. Read long from Hub address in PTRA
 2. Store value in register x
 3. Add 4 (SCALE for long) to PTRA
@@ -3836,7 +3785,6 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
 ```
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
-
 1. Add 4 (SCALE for long) to PTRA
 2. Read long from Hub address in updated PTRA
 3. Store value in register x
@@ -3916,7 +3864,7 @@ These forms enable strided access patterns:
 ' Read structure array (12-byte structures as 3 longs)
         mov     ptra, ##struct_array
 .loop   rdlong  field1, ptra++[3]       ' Read field1, skip to next struct
-        ' ... (use indexed without update for field2, field3)
+        ' ... (to read all fields, use indexed without update for field2, field3)
 ```
 
 ### 6.4.7 Complete PTRx Expression Summary
@@ -4149,7 +4097,6 @@ Any of the PTRx forms described in Section 6.4:
 **Variable:** Hub operations (2-9 cycles depending on Hub slot)
 
 For time-critical inner loops:
-
 - Frequently-used values should reside in COG registers
 - Large constants should be pre-loaded before entering the loop
 - Sequential Hub access benefits from PTRx with ++/--
@@ -4464,7 +4411,7 @@ Add and Set Counter Event Trigger
 | EEEE | 1010011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
-**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jct1)
+**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
@@ -4691,7 +4638,7 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 ## ALTB {#altb}
 Alter Bit
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next BITxxx instruction's target bit address.
+[Register Indirection](#register-indirection) - Alters next BITxxx instruction's target bit address.
 :::
 
 **ALTB**  *Dest, {#}Src*\
@@ -4707,11 +4654,11 @@ Alter Bit
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001100 | 111 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -4739,7 +4686,7 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 ## ALTD {#altd}
 Alter Destination
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's Dest field.
+[Register Indirection](#register-indirection) - Alters next instruction's Dest field.
 :::
 
 **ALTD**  *Dest, {#}Src*\
@@ -4755,11 +4702,11 @@ Alter Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001100 | 011 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -4784,7 +4731,7 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 ## ALTGB {#altgb}
 Alter Get Byte
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next GETBYTE/ROLBYTE instruction's target byte.
+[Register Indirection](#register-indirection) - Alters next GETBYTE/ROLBYTE instruction's target byte.
 :::
 
 **ALTGB**  *Dest, {#}Src*\
@@ -4800,11 +4747,11 @@ Alter Get Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001011 | 011 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -4830,7 +4777,7 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 ## ALTGN {#altgn}
 Alter Get Nibble
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next GETNIB/ROLNIB instruction's target nibble.
+[Register Indirection](#register-indirection) - Alters next GETNIB/ROLNIB instruction's target nibble.
 :::
 
 **ALTGN**  *Dest, {#}Src*\
@@ -4846,11 +4793,11 @@ Alter Get Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001010 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001010 | 111 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -4876,7 +4823,7 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 ## ALTGW {#altgw}
 Alter Get Word
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next GETWORD/ROLWORD instruction's target word.
+[Register Indirection](#register-indirection) - Alters next GETWORD/ROLWORD instruction's target word.
 :::
 
 **ALTGW**  *Dest, {#}Src*\
@@ -4892,11 +4839,11 @@ Alter Get Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001011 | 111 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -4922,7 +4869,7 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 ## ALTI {#alti}
 Alter Instruction
 
-[Register Indirection](#66-altx-modified-addressing) - Alters multiple fields of the next instruction.
+[Register Indirection](#register-indirection) - Alters multiple fields of the next instruction.
 :::
 
 **ALTI**  *Dest, {#}Src*\
@@ -4962,7 +4909,7 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 ## ALTR {#altr}
 Alter Result
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's result write address.
+[Register Indirection](#register-indirection) - Alters next instruction's result write address.
 :::
 
 **ALTR**  *Dest, {#}Src*\
@@ -4978,11 +4925,11 @@ Alter Result
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001100 | 001 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -5006,7 +4953,7 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 ## ALTS {#alts}
 Alter Source
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next instruction's Src field.
+[Register Indirection](#register-indirection) - Alters next instruction's Src field.
 :::
 
 **ALTS**  *Dest, {#}Src*\
@@ -5022,11 +4969,11 @@ Alter Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001100 | 101 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -5048,7 +4995,7 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 ## ALTSB {#altsb}
 Alter Set Byte
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next SETBYTE instruction's target byte.
+[Register Indirection](#register-indirection) - Alters next SETBYTE instruction's target byte.
 :::
 
 **ALTSB**  *Dest, {#}Src*\
@@ -5064,11 +5011,11 @@ Alter Set Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001011 | 001 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -5092,7 +5039,7 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 ## ALTSN {#altsn}
 Alter Set Nibble
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next SETNIB instruction's target nibble.
+[Register Indirection](#register-indirection) - Alters next SETNIB instruction's target nibble.
 :::
 
 **ALTSN**  *Dest, {#}Src*\
@@ -5108,11 +5055,11 @@ Alter Set Nibble
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001010 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001010 | 101 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -5138,7 +5085,7 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 ## ALTSW {#altsw}
 Alter Set Word
 
-[Register Indirection](#66-altx-modified-addressing) - Alters next SETWORD instruction's target word.
+[Register Indirection](#register-indirection) - Alters next SETWORD instruction's target word.
 :::
 
 **ALTSW**  *Dest, {#}Src*\
@@ -5154,11 +5101,11 @@ Alter Set Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D^1^ | 2 |
-| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D^1^ | 2 |
+| EEEE | 1001011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D† | 2 |
+| EEEE | 1001011 | 101 | DDDDDDDDD | 000000000 | --- | --- | D† | 2 |
 
 ```{=latex}
-\textsuperscript{1} Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
+† Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In syntax 2, the auto-indexer value is 0.
 ```
 
 
@@ -5482,7 +5429,7 @@ Bit High
 | EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc)
+**Related:** [BITL](#bitl), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
 **Explanation:**
 
@@ -5519,7 +5466,7 @@ Bit Low
 | EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc)
+**Related:** [BITH](#bith), [BITNOT](#bitnot), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz)
 
 **Explanation:**
 
@@ -5556,7 +5503,7 @@ Bit Not
 | EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitc), [BITZ](#bitc), [BITNZ](#bitc), [BITRND](#bitrnd)
+**Related:** [BITH](#bith), [BITL](#bitl), [BITC](#bitc), [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd)
 
 **Explanation:**
 
@@ -5593,7 +5540,7 @@ Bit Random
 | EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | original D[S[4:0]] | original D[S[4:0]] | D | 2 |
 
 
-**Related:** [BITZ](#bitc), [BITNZ](#bitc), [BITC](#bitc), [BITNC](#bitc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
+**Related:** [BITZ](#bitz), [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
 
 **Explanation:**
 
@@ -6560,7 +6507,6 @@ CRCBIT iterates the CRC value in Dest using the current C flag and the polynomia
 The operation performs a single bit iteration of a CRC calculation. The C flag represents the input bit, and Src contains the CRC polynomial. Dest contains the running CRC value and is updated with the result of this iteration.
 
 The exact algorithm follows the standard CRC bit-wise computation:
-
 1. Shift the CRC value in Dest left by one bit
 2. If the original MSB XOR the input bit (C) is 1, XOR with the polynomial in Src
 
@@ -6729,10 +6675,10 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit^1^ | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit† | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit† | --- | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRL](#dirl), [DIRH](#dirh), [DIRNOT](#dirnot), [DIRRND](#dirrnd)
 
@@ -6773,9 +6719,9 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit† | DIR bit† | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRL](#dirl), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -6810,9 +6756,9 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit† | DIR bit† | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -6847,9 +6793,9 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit† | DIR bit† | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh), [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz)
 
@@ -6889,10 +6835,10 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit^1^ | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit^1^ | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit† | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit† | --- | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRNOT](#dirnot), [DIRRND](#dirrnd), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -6933,9 +6879,9 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit^1^ | DIR bit^1^ | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit† | DIR bit† | DIR bit | 2 |
 
-\textsuperscript{1} Original direction state of the base pin (D[5:0]) before instruction executes.
+† Original direction state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DIRC](#dirc), [DIRNC](#dirnc), [DIRZ](#dirz), [DIRNZ](#dirnz), [DIRNOT](#dirnot), [DIRL](#dirl), [DIRH](#dirh)
 
@@ -7062,7 +7008,7 @@ DJZ and DJNZ decrement Dest and conditionally jump based on whether the result i
 | Instruction | Jumps when |
 |-------------|------------|
 | DJZ | result == 0 |
-| DJNZ | Result ≠ 0 |
+| DJNZ | Result != 0 |
 
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
@@ -7097,10 +7043,10 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit^1^ | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit† | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit† | --- | OUT bit | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -7139,9 +7085,9 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit† | OUT bit† | OUT bit | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7178,9 +7124,9 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit† | OUT bit† | OUT bit | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7219,9 +7165,9 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit^1^ | OUT bit^1^ | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit† | OUT bit† | OUT bit | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVRND](#drvrnd), [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz)
 
@@ -7263,10 +7209,10 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit^1^ | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit^1^ | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit† | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit† | --- | OUT bit | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVC](#drvc), [DRVNC](#drvnc), [DRVH](#drvh), [DRVL](#drvl), [DRVNOT](#drvnot), [DRVRND](#drvrnd)
 
@@ -7305,9 +7251,9 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit^1^ | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit† | DIRx, OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [DRVH](#drvh), [DRVL](#drvl), [DRVC](#drvc), [DRVNC](#drvnc), [DRVZ](#drvz), [DRVNZ](#drvnz), [DRVNOT](#drvnot)
 
@@ -7486,9 +7432,9 @@ Force Greater or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
+| EEEE | 0011000 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced† | result == 0 | D | 2 |
 
-\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
+† C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
 
@@ -7524,9 +7470,9 @@ Force Greater or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
+| EEEE | 0011010 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced† | result == 0 | D | 2 |
 
-\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
+† C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
 
@@ -7562,9 +7508,9 @@ Force Less or Equal
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
+| EEEE | 0011001 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced† | result == 0 | D | 2 |
 
-\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
+† C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
 
@@ -7600,9 +7546,9 @@ Force Less or Equal Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced^1^ | result == 0 | D | 2 |
+| EEEE | 0011011 | CZI | DDDDDDDDD | SSSSSSSSS | limit enforced† | result == 0 | D | 2 |
 
-\textsuperscript{1} C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
+† C = 1 if limit was enforced (D changed), else C = 0 (D unchanged).
 
 **Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
 
@@ -7640,12 +7586,12 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
@@ -7687,11 +7633,11 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc)
+**Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
 **Explanation:**
 
@@ -7728,11 +7674,11 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc)
+**Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
 
 **Explanation:**
 
@@ -7769,11 +7715,11 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc), [FLTRND](#fltrnd)
+**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
 
 **Explanation:**
 
@@ -7812,11 +7758,11 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [FLTC](#fltc), [FLTNC](#fltc), [FLTZ](#fltc), [FLTNZ](#fltc), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
+**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
 
 **Explanation:**
 
@@ -8294,21 +8240,18 @@ HUBSET configures the P2's clock system and hub parameters. The 32-bit value in 
 The D value contains multiple fields that control different aspects of the clock system:
 
 **Clock Source Selection (D[3:2]):**
-
 - `%00` - RCFAST internal oscillator (~20-25 MHz, boot default)
 - `%01` - RCSLOW internal oscillator (~20 kHz, low power mode)
 - `%10` - Crystal or external clock on XI pin
 - `%11` - PLL output
 
 **Crystal Configuration (D[1:0]):**
-
 - `%00` - XI/XO pins disabled (Hi-Z)
 - `%01` - XI/XO with 1MΩ feedback, no capacitors
 - `%10` - XI/XO with 1MΩ feedback, 15pF capacitors
 - `%11` - XI/XO with 1MΩ feedback, 30pF capacitors
 
 **PLL Configuration:**
-
 - D[27:24] - Input divider (PPPP field, divides XI input by 1-64)
 - D[23:14] - VCO multiplier (10-bit field, multiplies by 1-1024)
 - D[7:4] - Post divider (DDDD field, divides VCO by 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30)
@@ -8316,7 +8259,6 @@ The D value contains multiple fields that control different aspects of the clock
 - D[8] - Crystal oscillator enable
 
 **System Reset:**
-
 - D[31] - Write 1 to reset the entire chip
 
 The clock switching is glitch-free, and the system automatically falls back to RCFAST if the selected clock source fails. Proper timing must be observed when switching clock sources to allow for oscillator stabilization.
@@ -8390,7 +8332,7 @@ IJZ and IJNZ increment Dest and conditionally jump based on whether the result i
 | Instruction | Jumps when |
 |-------------|------------|
 | IJZ | result == 0 |
-| IJNZ | Result ≠ 0 |
+| IJNZ | Result != 0 |
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
@@ -9868,7 +9810,7 @@ Multiplex Q
 | EEEE | 1001111 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
-**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxc), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
+**Related:** [SETQ](#setq), [MUXC](#muxc), [MUXZ](#muxz), [MUXNIBS](#muxnibs), [MUXNITS](#muxnits)
 
 **Explanation:**
 
@@ -9949,7 +9891,7 @@ Negate
 | EEEE | 0110011 | CZ0 | DDDDDDDDD | DDDDDDDDD | MSB of result | result == 0 | D | 2 |
 
 
-**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negc), [NEGZ](#negc), [NEGNZ](#negc)
+**Related:** [ABS](#abs), [NEGC](#negc), [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz)
 
 **Explanation:**
 
@@ -10246,12 +10188,12 @@ Output By Flag State
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit^1^ | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
@@ -10291,11 +10233,11 @@ Output High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001001 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outc), [DIRH](#dirh)
+**Related:** [OUTL](#outl), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRH](#dirh)
 
 **Explanation:**
 
@@ -10330,11 +10272,11 @@ Output Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001000 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outc), [DIRL](#dirl)
+**Related:** [OUTH](#outh), [OUTNOT](#outnot), [OUTC](#outc), [OUTNC](#outnc), [DIRL](#dirl)
 
 **Explanation:**
 
@@ -10369,9 +10311,9 @@ Output Not (Toggle)
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001111 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
 **Related:** [OUTH](#outh), [OUTL](#outl), [OUTRND](#outrnd), [NOT](#not), [DRVNOT](#drvnot)
 
@@ -10408,11 +10350,11 @@ Output Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit^1^ | OUT bit^1^ | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001110 | OUT bit† | OUT bit† | OUTx | 2 |
 
-\textsuperscript{1} Original output state of the base pin (D[5:0]) before instruction executes.
+† Original output state of the base pin (D[5:0]) before instruction executes.
 
-**Related:** [OUTC](#outc), [OUTNC](#outc), [OUTZ](#outc), [OUTNZ](#outc), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
+**Related:** [OUTC](#outc), [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot)
 
 **Explanation:**
 
@@ -10498,7 +10440,7 @@ Poll Counter Event
 | EEEE | 1101011 | CZ0 | 000000011 | 000100100 | CT3 Event | CT3 Event | --- | 2 |
 
 
-**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jct1)
+**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
@@ -10671,7 +10613,7 @@ Poll Selectable Event
 | EEEE | 1101011 | CZ0 | 000000111 | 000100100 | SE4 Event | SE4 Event | --- | 2 |
 
 
-**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
+**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -11380,9 +11322,9 @@ Rotate Carry Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
@@ -11418,9 +11360,9 @@ Rotate Carry Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
@@ -11794,7 +11736,7 @@ Repeat Block
 | EEEE | 1100110 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 2 |
 
 
-**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jct1)
+**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
@@ -11811,7 +11753,6 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 - **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
 
 **Forbidden instructions in REP blocks:**
-
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
 - Conditional branches: DJNZ, DJZ, TJZ, TJNZ, IJZ, IJNZ
 - Any instruction that modifies PC
@@ -12338,9 +12279,9 @@ Rotate Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -12481,9 +12422,9 @@ Rotate Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
@@ -12560,9 +12501,9 @@ Shift Arithmetic Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -12596,9 +12537,9 @@ Shift Arithmetic Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
@@ -12871,7 +12812,7 @@ Sets the colorspace converter CY parameter to the value in Dest. This instructio
 ## SETD {#setd}
 Set Destination Field
 
-[Register Indirection](#66-altx-modified-addressing) - Sets the D field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the D field of a template for use with ALTI instruction.
 :::
 
 **SETD**  *Dest, {#}Src*
@@ -13193,7 +13134,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 ## SETR {#setr}
 Set Result Field
 
-[Register Indirection](#66-altx-modified-addressing) - Sets the Result field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the Result field of a template for use with ALTI instruction.
 :::
 
 **SETR**  *Dest, {#}Src*
@@ -13225,7 +13166,7 @@ SETR can also be used in self-modifying register RAM code, though it affects the
 ## SETS {#sets}
 Set Source Field
 
-[Register Indirection](#66-altx-modified-addressing) - Sets the S field of a template for use with ALTI instruction.
+[Register Indirection](#register-indirection) - Sets the S field of a template for use with ALTI instruction.
 :::
 
 **SETS**  *Dest, {#}Src*
@@ -13309,7 +13250,7 @@ Set Selectable Event (1, 2, 3, Or 4)
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000100011 | --- | --- | --- | 2 |
 
 
-**Related:** [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
+**Related:** [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -13465,9 +13406,9 @@ Shift Left
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -13501,9 +13442,9 @@ Shift Right
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out^1^ | result == 0 | D | 2 |
+| EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-\textsuperscript{1} If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -13622,7 +13563,6 @@ SKIPF can ONLY leap over instructions when executing from **COG or LUT memory**.
 **Best Practice:** Use SKIP for code in Hub memory (ORGH sections), SKIPF for code in COG/LUT memory (ORG sections).
 
 **REP Compatibility:**
-
 - SKIP is fully compatible with REP—cancellation maintains instruction counts
 - SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
 - Recommendation: Use SKIP within REP blocks for predictable behavior
@@ -14192,7 +14132,7 @@ TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and con
 | Instruction | Jumps when |
 |-------------|------------|
 | TJF | Dest = $FFFF_FFFF (full) |
-| TJNF | Dest ≠ $FFFF_FFFF (not full) |
+| TJNF | Dest != $FFFF_FFFF (not full) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
 
@@ -14278,7 +14218,7 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 | Instruction | Jumps when |
 |-------------|------------|
 | TJZ | Dest = 0 |
-| TJNZ | Dest ≠ 0 |
+| TJNZ | Dest != 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
@@ -14436,7 +14376,7 @@ Wait For Counter Event
 | EEEE | 1101011 | CZ0 | 000010011 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct1), [ADDCT3](#addct1), [POLLCT1](#pollct1), [POLLCT2](#pollct1), [POLLCT3](#pollct1), [JCT1](#jct1), [JCT2](#jct1), [JCT3](#jct1)
+**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
 **Explanation:**
 
@@ -14575,7 +14515,7 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 | EEEE | 1101011 | CZ0 | 000010111 | 000100100 | Timeout | Timeout | --- | 2+ |
 
 
-**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jse1)
+**Related:** [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
 **Explanation:**
 
@@ -14607,7 +14547,7 @@ Wait Cycles
 | EEEE | 1101011 | CZL | DDDDDDDDD | 000011111 | 0 | 0 | --- | 2 + D |
 
 
-**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct1), [WAITCT3](#waitct1)
+**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
 
 **Explanation:**
 
@@ -15099,7 +15039,6 @@ WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 
 **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
 The standard configuration sequence is:
-
 1. DIRL pin — Reset smart pin (required)
 2. WRPIN mode, pin — Configure smart pin mode
 3. WXPIN x, pin — Set X parameter
@@ -16025,7 +15964,6 @@ The filename must not contain path separator characters. The following character
 | `\|` | Pipe |
 
 The compiler searches for the file in the following order:
-
 1. **Current directory** — The directory containing the source file
 2. **Library directory** — The compiler's built-in library location
 3. **Include directories** — Directories specified via compiler options†
@@ -16547,12 +16485,10 @@ Verify at compile time that the current address has not exceeded a specified lim
 #### Behavior by Mode
 
 **In COG Mode (after ORG):**
-
 - `limit` is a long address (0 to $400)
 - Error: `Cog address exceeds FIT limit`
 
 **In Hub Mode (after ORGH):**
-
 - `limit` is a byte address
 - Error: `Hub address exceeds FIT limit`
 
@@ -16664,7 +16600,7 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 #### Syntax
 ```pasm
 [label] RES     count           ' Reserve 'count' longs
-[label] RES     0               ' Label at current address, no space
+[label] RES     0               ' Create label at current address without reserving space
 ```
 
 #### Parameters
@@ -16728,8 +16664,8 @@ x       RES     1               ' x occupies 1 long
 When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
 
 ```pasm
-' Reserve space for a Spin2 structure
-mystruct        RES     SIZEOF(point) / 4   ' Reserve longs for struct
+' Reserve space for a Spin2 structure (structure defined in CON block)
+mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
 ```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
@@ -17175,9 +17111,9 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long, PTRA += 4
-        rdbyte  char, ptra++            ' Read byte, PTRA += 1
-        wrlong  data, ptra[4]           ' Write at PTRA + 16 bytes
+        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
+        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
+        wrlong  data, ptra[4]           ' Address: PTRA + (4 × 4) = PTRA+16
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
@@ -17211,9 +17147,9 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long, PTRB += 4
-        rdword  word, ptrb++            ' Read word, PTRB += 2
-        wrlong  data, ptrb[8]           ' Write at PTRB + 32 bytes
+        rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
+        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
+        wrlong  data, ptrb[8]           ' Address: PTRB + (8 × 4) = PTRB+32
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
@@ -18053,9 +17989,12 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 
 # Appendix B: Condition Code Reference
 
-This appendix provides the complete reference for all P2 condition codes (the EEEE field in instruction encoding). Every instruction can be made conditional by prefixing it with one of these condition mnemonics.
+This appendix is the **canonical reference** for all P2 condition codes. The EEEE field (bits 31-28) of every instruction specifies one of sixteen conditions that control whether the instruction executes based on the current C and Z flag states.
 
-## Complete Condition Code Table
+Every instruction can be made conditional by prefixing it with one of these condition mnemonics. When the condition is false, the instruction does not execute but still consumes its normal execution time (2 clock cycles for most instructions).
+
+
+## B.1 Complete Condition Code Table
 
 | EEEE | Primary Mnemonic | Condition | All Aliases |
 |:-----|:-----------------|:----------|:------------|
@@ -18065,7 +18004,7 @@ This appendix provides the complete reference for all P2 condition codes (the EE
 | 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
 | 0100 | IF_C_AND_NZ | C=1 AND Z=0 | IF_NZ_AND_C, IF_10 |
 | 0101 | IF_NZ | Z=0 | IF_NE, IF_X0 |
-| 0110 | IF_C_NE_Z | C≠Z | IF_Z_NE_C, IF_DIFF |
+| 0110 | IF_C_NE_Z | C!=Z | IF_Z_NE_C, IF_DIFF |
 | 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | IF_NZ_OR_NC, IF_NOT_11 |
 | 1000 | IF_C_AND_Z | C=1 AND Z=1 | IF_Z_AND_C, IF_11 |
 | 1001 | IF_C_EQ_Z | C=Z | IF_Z_EQ_C, IF_SAME |
@@ -18076,20 +18015,33 @@ This appendix provides the complete reference for all P2 condition codes (the EE
 | 1110 | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
 | 1111 | IF_ALWAYS | Always | — |
 
-## Alias Categories
 
-**Comparison Aliases** — Use after CMP (unsigned) or CMPS (signed):
+## B.2 Alias Categories
 
-| Relationship | Unsigned | Signed | Primary |
-|:-------------|:---------|:-------|:--------|
-| Greater than | IF_A | IF_GT | IF_NC_AND_NZ |
-| Greater or equal | IF_AE | IF_GE | IF_NC |
-| Less than | IF_B | IF_LT | IF_C |
-| Less or equal | IF_BE | IF_LE | IF_C_OR_Z |
-| Equal | IF_E | IF_E | IF_Z |
-| Not equal | IF_NE | IF_NE | IF_NZ |
+The P2 provides multiple aliases for the same condition codes, enabling programmers to express intent clearly in different contexts.
 
-**Flag State Aliases** — Express exact C/Z bit patterns:
+### B.2.1 Comparison Aliases
+
+After a comparison instruction (CMP or CMPS), condition aliases express relational comparisons. Two equivalent terminology styles are available—choose whichever reads best for your code:
+
+| Relationship | Magnitude Style | Arithmetic Style | Primary | Flag State |
+|:-------------|:----------------|:-----------------|:--------|:-----------|
+| Greater than | IF_A (Above) | IF_GT (Greater Than) | IF_NC_AND_NZ | C=0, Z=0 |
+| Greater or equal | IF_AE (Above or Equal) | IF_GE (Greater or Equal) | IF_NC | C=0 |
+| Less than | IF_B (Below) | IF_LT (Less Than) | IF_C | C=1 |
+| Less or equal | IF_BE (Below or Equal) | IF_LE (Less or Equal) | IF_C_OR_Z | C=1 OR Z=1 |
+| Equal | IF_E | IF_E | IF_Z | Z=1 |
+| Not equal | IF_NE | IF_NE | IF_NZ | Z=0 |
+
+**Magnitude terminology** (A = Above, B = Below) reads naturally with unsigned values like addresses, counts, and sizes.
+
+**Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with signed values like temperatures, positions, and deltas.
+
+Both styles encode to the same condition codes—the choice is purely stylistic. Use whichever terminology makes your code's intent clearer.
+
+### B.2.2 Flag State Aliases
+
+Express exact C/Z bit patterns directly:
 
 | Alias | C | Z | Primary |
 |:------|:--|:--|:--------|
@@ -18102,7 +18054,11 @@ This appendix provides the complete reference for all P2 condition codes (the EE
 | IF_X0 | * | 0 | IF_NZ |
 | IF_X1 | * | 1 | IF_Z |
 
-**Logical Aliases:**
+The asterisk (*) indicates "don't care"—the condition is true regardless of that flag's value.
+
+### B.2.3 Logical Aliases
+
+Express logical relationships between flag states:
 
 | Alias | Meaning | Primary |
 |:------|:--------|:--------|
@@ -18113,28 +18069,120 @@ This appendix provides the complete reference for all P2 condition codes (the EE
 | IF_NOT_10 | Not (C=1, Z=0) | IF_NC_OR_Z |
 | IF_NOT_11 | Not both set | IF_NC_OR_NZ |
 
-**Commutative Forms** — These pairs are identical:
+### B.2.4 Commutative Forms
 
-- IF_NC_AND_NZ = IF_NZ_AND_NC
-- IF_NC_AND_Z = IF_Z_AND_NC
-- IF_C_AND_NZ = IF_NZ_AND_C
-- IF_C_AND_Z = IF_Z_AND_C
-- IF_NC_OR_NZ = IF_NZ_OR_NC
-- IF_NC_OR_Z = IF_Z_OR_NC
-- IF_C_OR_NZ = IF_NZ_OR_C
-- IF_C_OR_Z = IF_Z_OR_C
-- IF_C_EQ_Z = IF_Z_EQ_C
-- IF_C_NE_Z = IF_Z_NE_C
+These pairs are identical—the operand order in the name is interchangeable:
 
-## The _RET_ Condition (EEEE=0000)
+| Form 1 | Form 2 |
+|:-------|:-------|
+| IF_NC_AND_NZ | IF_NZ_AND_NC |
+| IF_NC_AND_Z | IF_Z_AND_NC |
+| IF_C_AND_NZ | IF_NZ_AND_C |
+| IF_C_AND_Z | IF_Z_AND_C |
+| IF_NC_OR_NZ | IF_NZ_OR_NC |
+| IF_NC_OR_Z | IF_Z_OR_NC |
+| IF_C_OR_NZ | IF_NZ_OR_C |
+| IF_C_OR_Z | IF_Z_OR_C |
+| IF_C_EQ_Z | IF_Z_EQ_C |
+| IF_C_NE_Z | IF_Z_NE_C |
 
-The `_RET_` prefix has unique behavior: the instruction always executes, then the COG returns by popping the stack into PC (unless the instruction itself branched). This enables single-instruction subroutines:
+
+## B.3 The _RET_ Condition (EEEE=0000)
+
+The condition code 0000 (`_RET_`) has special behavior that differs from all other conditions. Unlike other condition codes which control whether the instruction executes, `_RET_` means: **"Always execute the instruction, then return if the instruction did not branch."**
+
+### B.3.1 Behavior
+
+When an instruction has EEEE=0000:
+
+1. **The instruction always executes** (condition 0000 means "always" for `_RET_`)
+2. **If the instruction does not branch**: Return by popping stack[19:0] into PC
+3. **If the instruction branches** (JMP, CALL, etc.): No return occurs—the branch takes precedence
+4. **No context restore**: Unlike `RET WCZ`, the `_RET_` prefix does NOT restore C or Z flags from the stack
+
+This is fundamentally different from the RET instruction, which optionally restores C and Z flags when WC/WZ/WCZ effects are specified.
+
+### B.3.2 Basic Usage
 
 ```pasm
-toggle_led      _ret_   drvnot  #LED_PIN        ' Toggle and return
+        _ret_   add     x, y            ' ADD then return (flags unchanged)
+        _ret_   drvnot  #0              ' Toggle pin 0, then return
+        _ret_   mov     result, temp    ' Copy to result, then return
 ```
 
-See Section 2.2.2 for complete `_RET_` documentation.
+### B.3.3 Branch Behavior
+
+When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
+
+```pasm
+        _ret_   jmp     #somewhere      ' JMP executes, NO return
+        _ret_   call    #subroutine     ' CALL executes, NO return
+        _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
+```
+
+For DJNZ and similar conditional branches: if the branch is taken, no return occurs; if the branch is not taken (counter reaches zero), the return executes.
+
+### B.3.4 XBYTE Bytecode Interpreter
+
+The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
+
+```pasm
+' Start XBYTE: SETQ configures mode, returns to $1FF
+        push    #$1FF                   ' Push $1FF for XBYTE returns
+        _ret_   setq    #$100           ' LUT base $100, then return
+
+' Change XBYTE mode permanently
+        _ret_   setq    #$200           ' New LUT base for all bytecodes
+
+' Change XBYTE mode for next bytecode only
+        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
+```
+
+### B.3.5 SKIP/SKIPF with _RET_
+
+Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
+
+```pasm
+        push    #routine                ' Push target address
+        _ret_   skipf   pattern         ' SKIPF then branch with skip active
+```
+
+### B.3.6 Timing
+
+The `_RET_` prefix adds overhead to the base instruction timing:
+
+| Execution Mode | Additional Cycles |
+|:---------------|:------------------|
+| COG/LUT | +2 cycles |
+| Hub | +11 to +18 cycles |
+
+### B.3.7 Single-Instruction Subroutines
+
+The `_RET_` prefix enables efficient single-instruction subroutines:
+
+```pasm
+toggle_pin0                             ' Subroutine: toggle pin 0
+        _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
+
+read_input                              ' Subroutine: read input
+        _ret_   mov     result, ina     ' MOV, then return
+```
+
+This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
+
+
+## B.4 Conditional Execution Timing
+
+When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This provides deterministic timing—critical for real-time operations:
+
+```pasm
+                cmp     a, b            wc wz   ' 2 cycles - always
+        if_z    mov     result, #1              ' 2 cycles - whether Z=1 or not
+        if_nz   mov     result, #0              ' 2 cycles - whether Z=0 or not
+                                                ' Total: always 6 cycles
+```
+
+This timing predictability enables branchless programming where instruction timing remains constant regardless of data values.
 
 # Appendix C: Categorical Instruction Index
 
@@ -18159,11 +18207,11 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [BITC](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = C |
 | [BITH](#bith) | Bits D[S[9:5]+S[4:0]:S[4:0]] = 1 |
 | [BITL](#bitl) | Bits D[S[9:5]+S[4:0]:S[4:0]] = 0 |
-| [BITNC](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !C |
+| [BITNC](#bitnc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !C |
 | [BITNOT](#bitnot) | Toggle bits D[S[9:5]+S[4:0]:S[4:0]] |
-| [BITNZ](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z |
+| [BITNZ](#bitnz) | Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z |
 | [BITRND](#bitrnd) | Bits D[S[9:5]+S[4:0]:S[4:0]] = RNDs |
-| [BITZ](#bitc) | Bits D[S[9:5]+S[4:0]:S[4:0]] = Z |
+| [BITZ](#bitz) | Bits D[S[9:5]+S[4:0]:S[4:0]] = Z |
 | [BMASK](#bmask) | Get LSB-justified bit mask of size (D[4:0] + 1) into D |
 | [CMP](#cmp) | Compare D to S |
 | [CMPM](#cmpm) | Compare D to S, get MSB of difference into C |
@@ -18196,17 +18244,17 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [MUL](#mul) | D = unsigned (D[15:0] * S[15:0]) |
 | [MULS](#muls) | D = signed (D[15:0] * S[15:0]) |
 | [MUXC](#muxc) | Mux C into each D bit that is '1' in S |
-| [MUXNC](#muxc) | Mux !C into each D bit that is '1' in S |
+| [MUXNC](#muxnc) | Mux !C into each D bit that is '1' in S |
 | [MUXNIBS](#muxnibs) | For each non-zero nibble in S, copy that nibble into the corresponding D nibble |
 | [MUXNITS](#muxnits) | For each non-zero bit pair in S, copy that bit pair into the corresponding D bits |
-| [MUXNZ](#muxc) | Mux !Z into each D bit that is '1' in S |
+| [MUXNZ](#muxnz) | Mux !Z into each D bit that is '1' in S |
 | [MUXQ](#muxq) | Used after SETQ |
-| [MUXZ](#muxc) | Mux Z into each D bit that is '1' in S |
+| [MUXZ](#muxz) | Mux Z into each D bit that is '1' in S |
 | [NEG](#neg) | Negate D |
 | [NEGC](#negc) | Negate D by C |
-| [NEGNC](#negc) | Negate D by !C |
-| [NEGNZ](#negc) | Negate D by !Z |
-| [NEGZ](#negc) | Negate D by Z |
+| [NEGNC](#negnc) | Negate D by !C |
+| [NEGNZ](#negnz) | Negate D by !Z |
+| [NEGZ](#negz) | Negate D by Z |
 | [NOT](#not) | Get !D into D |
 | [ONES](#ones) | Get number of '1's in D into D |
 | [OR](#or) | OR S into D |
@@ -18245,17 +18293,17 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [SUBSX](#subsx) | Subtract (S + C) from D, signed and extended |
 | [SUBX](#subx) | Subtract (S + C) from D, extended |
 | [SUMC](#sumc) | Sum +/-S into D by C |
-| [SUMNC](#sumc) | Sum +/-S into D by !C |
-| [SUMNZ](#sumc) | Sum +/-S into D by !Z |
-| [SUMZ](#sumc) | Sum +/-S into D by Z |
+| [SUMNC](#sumnc) | Sum +/-S into D by !C |
+| [SUMNZ](#sumnz) | Sum +/-S into D by !Z |
+| [SUMZ](#sumz) | Sum +/-S into D by Z |
 | [TEST](#test) | Test D |
 | [TESTB](#testb) | Test bit S[4:0] of D, XOR into C/Z |
 | [TESTBN](#testbn) | Test bit S[4:0] of !D, XOR into C/Z |
 | [TESTN](#testn) | Test D with !S |
 | [WRC](#wrc) | Write 0 or 1 to D, according to C |
-| [WRNC](#wrc) | Write 0 or 1 to D, according to !C |
-| [WRNZ](#wrc) | Write 0 or 1 to D, according to !Z |
-| [WRZ](#wrc) | Write 0 or 1 to D, according to Z |
+| [WRNC](#wrnc) | Write 0 or 1 to D, according to !C |
+| [WRNZ](#wrnz) | Write 0 or 1 to D, according to !Z |
+| [WRZ](#wrz) | Write 0 or 1 to D, according to Z |
 | [XOR](#xor) | XOR S into D |
 | [XORO32](#xoro32) | Iterate D with xoroshiro32+ PRNG algorithm |
 | [ZEROX](#zerox) | Zero-extend D above bit S[4:0] |
@@ -18291,13 +18339,13 @@ Branch instructions control program flow by modifying the program counter. This 
 | [RETA](#reta) | Return by reading hub long at --PTRA |
 | [RETB](#retb) | Return by reading hub long at --PTRB |
 | [RETI0](#reti0) | Return from INT0 |
-| [RETI1](#reti0) | Return from INT1 |
-| [RETI2](#reti0) | Return from INT2 |
-| [RETI3](#reti0) | Return from INT3 |
+| [RETI1](#reti1) | Return from INT1 |
+| [RETI2](#reti2) | Return from INT2 |
+| [RETI3](#reti3) | Return from INT3 |
 | [RESI0](#resi0) | Resume from INT0 |
-| [RESI1](#resi0) | Resume from INT1 |
-| [RESI2](#resi0) | Resume from INT2 |
-| [RESI3](#resi0) | Resume from INT3 |
+| [RESI1](#resi1) | Resume from INT1 |
+| [RESI2](#resi2) | Resume from INT2 |
+| [RESI3](#resi3) | Resume from INT3 |
 
 ### Test and Branch Instructions
 
@@ -18405,11 +18453,11 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 | [OUTC](#outc) | OUT bits of pins = C |
 | [OUTH](#outh) | OUT bits of pins = 1 (high) |
 | [OUTL](#outl) | OUT bits of pins = 0 (low) |
-| [OUTNC](#outc) | OUT bits of pins = !C |
+| [OUTNC](#outnc) | OUT bits of pins = !C |
 | [OUTNOT](#outnot) | Toggle OUT bits of pins |
-| [OUTNZ](#outc) | OUT bits of pins = !Z |
+| [OUTNZ](#outnz) | OUT bits of pins = !Z |
 | [OUTRND](#outrnd) | OUT bits of pins = random |
-| [OUTZ](#outc) | OUT bits of pins = Z |
+| [OUTZ](#outz) | OUT bits of pins = Z |
 
 ### Drive Control (Direction + Output)
 
@@ -18431,11 +18479,11 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 | [FLTC](#fltc) | Set pins to input, preset output = C |
 | [FLTH](#flth) | Set pins to input, preset output high |
 | [FLTL](#fltl) | Set pins to input, preset output low |
-| [FLTNC](#fltc) | Set pins to input, preset output = !C |
+| [FLTNC](#fltnc) | Set pins to input, preset output = !C |
 | [FLTNOT](#fltnot) | Set pins to input, toggle preset output |
-| [FLTNZ](#fltc) | Set pins to input, preset output = !Z |
+| [FLTNZ](#fltnz) | Set pins to input, preset output = !Z |
 | [FLTRND](#fltrnd) | Set pins to input, random preset output |
-| [FLTZ](#fltc) | Set pins to input, preset output = Z |
+| [FLTZ](#fltz) | Set pins to input, preset output = Z |
 
 ### Pin Testing
 
@@ -18468,13 +18516,13 @@ Event instructions monitor and respond to system events including counter/timer 
 | Instruction | Description |
 |-------------|-------------|
 | [ADDCT1](#addct1) | Set CT1 event to trigger on CT = D + S |
-| [ADDCT2](#addct1) | Set CT2 event to trigger on CT = D + S |
-| [ADDCT3](#addct1) | Set CT3 event to trigger on CT = D + S |
+| [ADDCT2](#addct2) | Set CT2 event to trigger on CT = D + S |
+| [ADDCT3](#addct3) | Set CT3 event to trigger on CT = D + S |
 | [SETPAT](#setpat) | Set pin pattern for PAT event |
 | [SETSE1](#setse1) | Set SE1 event configuration |
-| [SETSE2](#setse1) | Set SE2 event configuration |
-| [SETSE3](#setse1) | Set SE3 event configuration |
-| [SETSE4](#setse1) | Set SE4 event configuration |
+| [SETSE2](#setse2) | Set SE2 event configuration |
+| [SETSE3](#setse3) | Set SE3 event configuration |
+| [SETSE4](#setse4) | Set SE4 event configuration |
 
 ### Event Polling
 
@@ -18482,16 +18530,16 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [POLLATN](#pollatn) | Get ATN event flag into C/Z, then clear |
 | [POLLCT1](#pollct1) | Get CT1 event flag into C/Z, then clear |
-| [POLLCT2](#pollct1) | Get CT2 event flag into C/Z, then clear |
-| [POLLCT3](#pollct1) | Get CT3 event flag into C/Z, then clear |
+| [POLLCT2](#pollct2) | Get CT2 event flag into C/Z, then clear |
+| [POLLCT3](#pollct3) | Get CT3 event flag into C/Z, then clear |
 | [POLLFBW](#pollfbw) | Get FBW event flag into C/Z, then clear |
 | [POLLINT](#pollint) | Get INT event flag into C/Z, then clear |
 | [POLLPAT](#pollpat) | Get PAT event flag into C/Z, then clear |
 | [POLLQMT](#pollqmt) | Get QMT event flag into C/Z, then clear |
 | [POLLSE1](#pollse1) | Get SE1 event flag into C/Z, then clear |
-| [POLLSE2](#pollse1) | Get SE2 event flag into C/Z, then clear |
-| [POLLSE3](#pollse1) | Get SE3 event flag into C/Z, then clear |
-| [POLLSE4](#pollse1) | Get SE4 event flag into C/Z, then clear |
+| [POLLSE2](#pollse2) | Get SE2 event flag into C/Z, then clear |
+| [POLLSE3](#pollse3) | Get SE3 event flag into C/Z, then clear |
+| [POLLSE4](#pollse4) | Get SE4 event flag into C/Z, then clear |
 | [POLLXFI](#pollxfi) | Get XFI event flag into C/Z, then clear |
 | [POLLXMT](#pollxmt) | Get XMT event flag into C/Z, then clear |
 | [POLLXRL](#pollxrl) | Get XRL event flag into C/Z, then clear |
@@ -18503,15 +18551,15 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [WAITATN](#waitatn) | Wait for ATN event flag, then clear |
 | [WAITCT1](#waitct1) | Wait for CT1 event flag, then clear |
-| [WAITCT2](#waitct1) | Wait for CT2 event flag, then clear |
-| [WAITCT3](#waitct1) | Wait for CT3 event flag, then clear |
+| [WAITCT2](#waitct2) | Wait for CT2 event flag, then clear |
+| [WAITCT3](#waitct3) | Wait for CT3 event flag, then clear |
 | [WAITFBW](#waitfbw) | Wait for FBW event flag, then clear |
 | [WAITINT](#waitint) | Wait for INT event flag, then clear |
 | [WAITPAT](#waitpat) | Wait for PAT event flag, then clear |
 | [WAITSE1](#waitse1) | Wait for SE1 event flag, then clear |
-| [WAITSE2](#waitse1) | Wait for SE2 event flag, then clear |
-| [WAITSE3](#waitse1) | Wait for SE3 event flag, then clear |
-| [WAITSE4](#waitse1) | Wait for SE4 event flag, then clear |
+| [WAITSE2](#waitse2) | Wait for SE2 event flag, then clear |
+| [WAITSE3](#waitse3) | Wait for SE3 event flag, then clear |
+| [WAITSE4](#waitse4) | Wait for SE4 event flag, then clear |
 | [WAITXFI](#waitxfi) | Wait for XFI event flag, then clear |
 | [WAITXMT](#waitxmt) | Wait for XMT event flag, then clear |
 | [WAITXRL](#waitxrl) | Wait for XRL event flag, then clear |
@@ -18523,22 +18571,22 @@ Event instructions monitor and respond to system events including counter/timer 
 |-------------|-------------|
 | [JATN](#jatn) | Jump to S if ATN event flag is set |
 | [JCT1](#jct1) | Jump to S if CT1 event flag is set |
-| [JCT2](#jct1) | Jump to S if CT2 event flag is set |
-| [JCT3](#jct1) | Jump to S if CT3 event flag is set |
+| [JCT2](#jct2) | Jump to S if CT2 event flag is set |
+| [JCT3](#jct3) | Jump to S if CT3 event flag is set |
 | [JFBW](#jfbw) | Jump to S if FBW event flag is set |
 | [JINT](#jint) | Jump to S if INT event flag is set |
 | [JNATN](#jnatn) | Jump to S if ATN event flag is clear |
-| [JNCT1](#jct1) | Jump to S if CT1 event flag is clear |
-| [JNCT2](#jct1) | Jump to S if CT2 event flag is clear |
-| [JNCT3](#jct1) | Jump to S if CT3 event flag is clear |
+| [JNCT1](#jnct1) | Jump to S if CT1 event flag is clear |
+| [JNCT2](#jnct2) | Jump to S if CT2 event flag is clear |
+| [JNCT3](#jnct3) | Jump to S if CT3 event flag is clear |
 | [JNFBW](#jnfbw) | Jump to S if FBW event flag is clear |
 | [JNINT](#jnint) | Jump to S if INT event flag is clear |
 | [JNPAT](#jnpat) | Jump to S if PAT event flag is clear |
 | [JNQMT](#jnqmt) | Jump to S if QMT event flag is clear |
-| [JNSE1](#jse1) | Jump to S if SE1 event flag is clear |
-| [JNSE2](#jse1) | Jump to S if SE2 event flag is clear |
-| [JNSE3](#jse1) | Jump to S if SE3 event flag is clear |
-| [JNSE4](#jse1) | Jump to S if SE4 event flag is clear |
+| [JNSE1](#jnse1) | Jump to S if SE1 event flag is clear |
+| [JNSE2](#jnse2) | Jump to S if SE2 event flag is clear |
+| [JNSE3](#jnse3) | Jump to S if SE3 event flag is clear |
+| [JNSE4](#jnse4) | Jump to S if SE4 event flag is clear |
 | [JNXFI](#jnxfi) | Jump to S if XFI event flag is clear |
 | [JNXMT](#jnxmt) | Jump to S if XMT event flag is clear |
 | [JNXRL](#jnxrl) | Jump to S if XRL event flag is clear |
@@ -18546,9 +18594,9 @@ Event instructions monitor and respond to system events including counter/timer 
 | [JPAT](#jpat) | Jump to S if PAT event flag is set |
 | [JQMT](#jqmt) | Jump to S if QMT event flag is set |
 | [JSE1](#jse1) | Jump to S if SE1 event flag is set |
-| [JSE2](#jse1) | Jump to S if SE2 event flag is set |
-| [JSE3](#jse1) | Jump to S if SE3 event flag is set |
-| [JSE4](#jse1) | Jump to S if SE4 event flag is set |
+| [JSE2](#jse2) | Jump to S if SE2 event flag is set |
+| [JSE3](#jse3) | Jump to S if SE3 event flag is set |
+| [JSE4](#jse4) | Jump to S if SE4 event flag is set |
 | [JXFI](#jxfi) | Jump to S if XFI event flag is set |
 | [JXMT](#jxmt) | Jump to S if XMT event flag is set |
 | [JXRL](#jxrl) | Jump to S if XRL event flag is set |
@@ -18572,15 +18620,15 @@ Interrupt instructions control the cog's three-level interrupt system (INT1, INT
 | [COGBRK](#cogbrk) | If in debug ISR, trigger breakpoint in cog D[3:0] |
 | [GETBRK](#getbrk) | Get breakpoint/cog status into D |
 | [NIXINT1](#nixint1) | Cancel INT1 |
-| [NIXINT2](#nixint1) | Cancel INT2 |
-| [NIXINT3](#nixint1) | Cancel INT3 |
+| [NIXINT2](#nixint2) | Cancel INT2 |
+| [NIXINT3](#nixint3) | Cancel INT3 |
 | [SETINT1](#setint1) | Set INT1 source to D[3:0] |
-| [SETINT2](#setint1) | Set INT2 source to D[3:0] |
-| [SETINT3](#setint1) | Set INT3 source to D[3:0] |
+| [SETINT2](#setint2) | Set INT2 source to D[3:0] |
+| [SETINT3](#setint3) | Set INT3 source to D[3:0] |
 | [STALLI](#stalli) | Stall interrupts |
 | [TRGINT1](#trgint1) | Trigger INT1, regardless of STALLI mode |
-| [TRGINT2](#trgint1) | Trigger INT2, regardless of STALLI mode |
-| [TRGINT3](#trgint1) | Trigger INT3, regardless of STALLI mode |
+| [TRGINT2](#trgint2) | Trigger INT2, regardless of STALLI mode |
+| [TRGINT3](#trgint3) | Trigger INT3, regardless of STALLI mode |
 
 
 ## COG Control and Locks {#cog-control-and-locks-ref}
@@ -18807,10 +18855,10 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 #### Usage
 ```pasm
 ' Using FALSE for initialization
-                mov     flag, FALSE     ' Initialize to FALSE
+        mov     flag, FALSE     ' Initialize flag to FALSE
         ' ... some operations ...
-                cmp     x, y        wz  ' Compare x and y
-        if_z    mov     flag, TRUE      ' Set TRUE if equal
+        cmp     x, y        wz  ' Compare x and y
+        if_e mov  flag, TRUE    ' Set flag to TRUE if equal
 ```
 
 #### Notes
@@ -19189,6 +19237,477 @@ These variants simplify cog management by allowing the system to automatically a
 
 
 
+## Debug Configuration Constants
+
+The P2's debug system operates at three distinct levels, each controlled by CON constants defined in the program. Code instrumentation constants control whether DEBUG statements compile into the program. Output infrastructure constants configure the debug serial communication system. Breakpoint constants configure automatic breaks for single-step debugging.
+
+### Code Instrumentation Constants
+
+These constants control compile-time behavior. When debug statements are disabled, the assembler generates no code for them—zero runtime overhead.
+
+::: constheader
+### DEBUG_DISABLE {#debug-disable}
+Disable All Debug Statements
+
+Prevents all DEBUG statements from compiling (0 = enabled, non-zero = disabled).
+:::
+
+Compile-time constant that globally disables all DEBUG statements.
+
+#### Value
+
+| Value | Effect |
+|-------|--------|
+| 0 or undefined | DEBUG statements compile normally |
+| Non-zero | All DEBUG statements are omitted from compilation |
+
+#### Description
+
+DEBUG_DISABLE provides a master switch for debug output. When defined as any non-zero value, the assembler skips all DEBUG statements entirely—no code is generated, no runtime overhead exists. This enables maintaining debug instrumentation in source code while producing release binaries with zero debug footprint.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_DISABLE = 1       ' Set to 1 for release, 0 for development
+
+DAT
+        org
+entry   debug("This generates no code when DEBUG_DISABLE = 1")
+        ' ... program code ...
+```
+
+#### Notes
+
+- Must be defined as an integer constant in a CON block
+- Affects both standard `debug()` and selective `debug[N]()` statements
+- The check occurs at compile time; disabled statements produce zero bytes
+- Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks
+
+#### Related Constants
+
+- [DEBUG_MASK](#debug-mask) — Selective channel control
+
+
+
+::: constheader
+### DEBUG_MASK {#debug-mask}
+Selective Debug Channel Mask
+
+32-bit mask controlling which debug[N]() channels compile (bit N = channel N).
+:::
+
+Compile-time constant enabling selective debug channel compilation.
+
+#### Value
+
+| Bit | Channel | Binary Mask |
+|-----|---------|-------------|
+| 0 | debug[0] | %00000000_00000000_00000000_00000001 |
+| 1 | debug[1] | %00000000_00000000_00000000_00000010 |
+| 2 | debug[2] | %00000000_00000000_00000000_00000100 |
+| ... | ... | ... |
+| 31 | debug[31] | %10000000_00000000_00000000_00000000 |
+
+#### Description
+
+DEBUG_MASK provides fine-grained control over debug output by channel. Each bit in the 32-bit mask corresponds to a debug channel numbered 0 through 31. The `debug[N]()` statement compiles only if bit N is set in DEBUG_MASK. Standard `debug()` statements without a channel number are unaffected by DEBUG_MASK.
+
+This mechanism enables categorizing debug output by subsystem, verbosity level, or development phase. Changing a single constant recompiles only the desired debug channels.
+
+#### Usage
+
+```spin2
+CON
+  ' Channel assignments
+  DBG_INIT   = 0              ' Initialization messages
+  DBG_MOTOR  = 1              ' Motor control
+  DBG_SENSOR = 2              ' Sensor readings
+  DBG_ERROR  = 3              ' Error conditions
+
+  ' Enable only initialization and errors
+  DEBUG_MASK = (1 << DBG_INIT) | (1 << DBG_ERROR)
+
+DAT
+        org
+entry   debug[DBG_INIT]("Starting")     ' COMPILED - bit 0 set
+        debug[DBG_MOTOR]("Motor on")    ' NOT compiled - bit 1 clear
+        debug[DBG_SENSOR]("Reading")    ' NOT compiled - bit 2 clear
+        debug[DBG_ERROR]("Fault!")      ' COMPILED - bit 3 set
+```
+
+#### Notes
+
+- Must be defined as an integer constant for `debug[N]()` to compile
+- If DEBUG_MASK is undefined, using `debug[N]()` causes a compile error
+- A mask of 0 disables all numbered channels; standard `debug()` still works
+- A mask of $FFFF_FFFF (-1) enables all 32 channels
+- Channel numbers outside 0-31 cause a compile error
+
+#### Related Constants
+
+- [DEBUG_DISABLE](#debug-disable) — Global debug disable
+- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+
+
+
+### Output Infrastructure Constants
+
+These constants configure the debug output system that handles all DEBUG statement output. They are patched into the debugger binary and affect serial communication parameters and output formatting.
+
+::: constheader
+### DEBUG_COGS {#debug-cogs}
+Debug-Enabled COG Mask
+
+8-bit mask specifying which COGs can produce debug output (bit N = COG N).
+:::
+
+Runtime constant controlling which COGs can trigger debug output.
+
+#### Value
+
+| Bit | COG | Binary Mask |
+|-----|-----|-------------|
+| 0 | COG 0 | %00000001 |
+| 1 | COG 1 | %00000010 |
+| 2 | COG 2 | %00000100 |
+| 3 | COG 3 | %00001000 |
+| 4 | COG 4 | %00010000 |
+| 5 | COG 5 | %00100000 |
+| 6 | COG 6 | %01000000 |
+| 7 | COG 7 | %10000000 |
+
+#### Description
+
+DEBUG_COGS controls runtime debug capability per COG. If a COG's bit is clear, DEBUG statements executing on that COG produce no output—the debug interrupt is ignored. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS controls runtime output permission.
+
+For a DEBUG statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK allows it or it's a standard `debug()`), and the executing COG must have its bit set in DEBUG_COGS.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_COGS = %00000011      ' Only COGs 0 and 1 produce output
+
+DAT
+        org
+entry   debug("From COG 0")           ' Output appears
+        cogspin(NEWCOG, worker, @stack)
+
+worker  debug("From worker")          ' Output only if on COG 0 or 1
+```
+
+#### Notes
+
+- Default behavior (undefined): all COGs can produce debug output
+- Must be defined as an integer constant
+- Reduces debug overhead in multi-COG applications
+- Useful for isolating debug output from specific COGs during development
+
+#### Related Constants
+
+- [DEBUG_MASK](#debug-mask) — Compile-time channel filtering
+
+
+
+::: constheader
+### DEBUG_DELAY {#debug-delay}
+Debug Startup Delay
+
+Milliseconds to wait before debug system begins operation.
+:::
+
+Startup delay before any debug output occurs.
+
+#### Value
+
+| Type | Range |
+|------|-------|
+| Integer | 0 to practical limit (milliseconds) |
+
+#### Description
+
+DEBUG_DELAY specifies a delay in milliseconds before the debug system begins operation. This delay occurs before the application launches, providing time for serial terminals to connect and synchronize. The delay is calculated as `(CLKFREQ / 1000) * DEBUG_DELAY` and executed during debugger initialization.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_DELAY = 2000          ' Wait 2 seconds for terminal connection
+
+DAT
+        org
+entry   debug("This appears after 2 seconds")
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Value is in milliseconds
+- The delay occurs before any application code executes
+- Useful when the host serial terminal needs connection time
+
+#### Related Constants
+
+- [DEBUG_BAUD](#debug-baud) — Communication baud rate
+
+
+
+::: constheader
+### DEBUG_TIMESTAMP {#debug-timestamp}
+Enable Debug Timestamps
+
+Adds timing information to all debug output.
+:::
+
+Enables timestamps in debug messages.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Timestamps enabled |
+| Undefined | No timestamps |
+
+#### Description
+
+DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message includes a timestamp relative to program start. This aids timing analysis and performance profiling by showing when events occur.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_TIMESTAMP = TRUE
+
+DAT
+        org
+entry   debug("Started")              ' Output includes timestamp
+        waitms(100)
+        debug("After delay")          ' Timestamp shows ~100ms elapsed
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables timestamps
+- Timestamps appear on all debug output, not selectively
+- Useful for profiling and timing-sensitive debugging
+
+#### Related Constants
+
+- [DEBUG_DELAY](#debug-delay) — Startup delay
+
+
+
+::: constheader
+### DEBUG_PIN_TX {#debug-pin-tx}
+Debug Transmit Pin
+
+P2 pin number for debug serial transmit.
+:::
+
+Configures the debug serial transmit pin.
+
+#### Value
+
+| Type | Default | Range |
+|------|---------|-------|
+| Integer | 62 | 0-63 |
+
+#### Description
+
+DEBUG_PIN_TX specifies which P2 pin transmits debug serial data to the host. The default pin 62 matches standard development board configurations where pins 62-63 connect to the USB-serial interface.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_PIN_TX = 62           ' Use default transmit pin
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- DEBUG_PIN is an alias for DEBUG_PIN_TX
+- Default matches Parallax development board pinout
+
+#### Related Constants
+
+- [DEBUG_PIN_RX](#debug-pin-rx) — Receive pin
+- [DEBUG_BAUD](#debug-baud) — Baud rate
+
+
+
+::: constheader
+### DEBUG_PIN_RX {#debug-pin-rx}
+Debug Receive Pin
+
+P2 pin number for debug serial receive.
+:::
+
+Configures the debug serial receive pin.
+
+#### Value
+
+| Type | Default | Range |
+|------|---------|-------|
+| Integer | 63 | 0-63 |
+
+#### Description
+
+DEBUG_PIN_RX specifies which P2 pin receives debug serial data from the host. The default pin 63 matches standard development board configurations.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_PIN_RX = 63           ' Use default receive pin
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Used for bidirectional debug communication with host
+- Default matches Parallax development board pinout
+
+#### Related Constants
+
+- [DEBUG_PIN_TX](#debug-pin-tx) — Transmit pin
+- [DEBUG_BAUD](#debug-baud) — Baud rate
+
+
+
+::: constheader
+### DEBUG_BAUD {#debug-baud}
+Debug Baud Rate
+
+Serial communication speed for debug output.
+:::
+
+Configures the debug serial baud rate.
+
+#### Value
+
+| Type | Default | Typical Values |
+|------|---------|----------------|
+| Integer | DOWNLOAD_BAUD | 115200, 230400, 921600, 2000000 |
+
+#### Description
+
+DEBUG_BAUD sets the serial communication speed for all debug output. Higher baud rates reduce debug overhead but require host terminal support. The default uses the same baud rate as the download connection.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_BAUD = 2_000_000      ' 2 Mbaud for fast debug output
+```
+
+#### Notes
+
+- Must be defined as an integer constant
+- Higher rates reduce per-statement timing impact
+- Host terminal must support the configured rate
+- 2 Mbaud is common for development; lower rates for compatibility
+
+#### Related Constants
+
+- [DEBUG_PIN_TX](#debug-pin-tx) — Transmit pin
+- [DEBUG_PIN_RX](#debug-pin-rx) — Receive pin
+
+
+
+### Breakpoint Configuration Constants
+
+These constants configure automatic breakpoints for single-step debugging. They instruct the debugger to halt execution at specific points, enabling interactive debugging.
+
+::: constheader
+### DEBUG_MAIN {#debug-main}
+Break at Program Start
+
+Triggers a breakpoint when the main program begins.
+:::
+
+Configures the debugger to break at program entry.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Break at main entry |
+| Undefined | No automatic break |
+
+#### Description
+
+DEBUG_MAIN instructs the debugger to trigger a breakpoint at the start of the main program. Execution halts before any user code runs, allowing single-stepping from the first instruction. This is essential for debugging initialization issues or understanding program flow from the beginning.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_MAIN                  ' Break at program start
+
+PUB main()
+  ' Debugger breaks here before any code executes
+  initialize()
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables the break
+- Takes precedence over DEBUG_COGINIT if both are defined
+- Enables single-stepping from program entry
+- Used for debugging startup and initialization code
+
+#### Related Constants
+
+- [DEBUG_COGINIT](#debug-coginit) — Break on COG initialization
+
+
+
+::: constheader
+### DEBUG_COGINIT {#debug-coginit}
+Break on COG Initialization
+
+Triggers a breakpoint when any COG is initialized.
+:::
+
+Configures the debugger to break on COG startup.
+
+#### Value
+
+| Definition | Effect |
+|------------|--------|
+| Defined (any value) | Break on each COGINIT/COGSPIN |
+| Undefined | No automatic break |
+
+#### Description
+
+DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT or COGSPIN instruction executes. This enables debugging multi-COG applications by providing an opportunity to examine state before each new COG begins execution.
+
+#### Usage
+
+```spin2
+CON
+  DEBUG_COGINIT               ' Break on every COG initialization
+
+PUB main()
+  cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here
+```
+
+#### Notes
+
+- The value is irrelevant; defining the symbol enables the break
+- DEBUG_MAIN takes precedence if both are defined
+- Useful for debugging COG startup and inter-COG coordination
+- Each COGINIT or COGSPIN triggers a separate break
+
+#### Related Constants
+
+- [DEBUG_MAIN](#debug-main) — Break at program start
+- [DEBUG_COGS](#debug-cogs) — Runtime COG filtering
+
+
+
 ## Hardware Configuration Constants
 
 The P2 provides extensive predefined constants for configuring its sophisticated hardware subsystems. These constants are documented in dedicated reference sections:
@@ -19215,9 +19734,10 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 | Numeric Limits | 2 | NEGX, POSX for bounds checking |
 | Mathematical | 1 | PI for CORDIC and floating-point |
 | Execution Mode | 6 | COGEXEC, HUBEXEC and variants |
+| Debug Configuration | 10 | DEBUG_DISABLE, DEBUG_MASK, infrastructure |
 | SmartPin | 59 | Pin configuration and modes |
 | Streamer | 85 | Data streaming and video |
-| **Total** | **155** | Core predefined constants |
+| **Total** | **165** | Core predefined constants |
 
 *Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
 
@@ -19718,24 +20238,13 @@ These modes capture data from pins/ADCs and write to hub RAM via WRFAST FIFO.
 
 These modes capture ADC samples and optionally write to hub RAM.
 
-+----------------------------+------------------------------+------------------------------------------+
-| Constant                   | Value                        | Description                              |
-+============================+==============================+==========================================+
-| X_1ADC8_0P_1DAC8_WFBYTE    | %1111_0000_0000_0010 << 16   | 1 ADC to 8-bit, 0 pins, 1 DAC,           |
-|                            |                              | write byte                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_1ADC8_8P_2DAC8_WFWORD    | %1111_0000_0000_0011 << 16   | 1 ADC to 8-bit, 8 pins, 2 DACs,          |
-|                            |                              | write word                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_2ADC8_0P_2DAC8_WFWORD    | %1111_0000_0000_0100 << 16   | 2 ADCs to 8-bit, 0 pins, 2 DACs,         |
-|                            |                              | write word                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_2ADC8_16P_4DAC8_WFLONG   | %1111_0000_0000_0101 << 16   | 2 ADCs to 8-bit, 16 pins, 4 DACs,        |
-|                            |                              | write long                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_4ADC8_0P_4DAC8_WFLONG    | %1111_0000_0000_0110 << 16   | 4 ADCs to 8-bit, 0 pins, 4 DACs,         |
-|                            |                              | write long                               |
-+----------------------------+------------------------------+------------------------------------------+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| X_1ADC8_0P_1DAC8_WFBYTE | %1111_0000_0000_0010 << 16 | 1 ADC to 8-bit, 0 pins, 1 DAC, write byte |
+| X_1ADC8_8P_2DAC8_WFWORD | %1111_0000_0000_0011 << 16 | 1 ADC to 8-bit, 8 pins, 2 DACs, write word |
+| X_2ADC8_0P_2DAC8_WFWORD | %1111_0000_0000_0100 << 16 | 2 ADCs to 8-bit, 0 pins, 2 DACs, write word |
+| X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 << 16 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
+| X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 << 16 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
 
 
 
@@ -19758,47 +20267,24 @@ These flags modify Streamer behavior and are combined with mode constants using 
 
 The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) are active and how they're configured. The naming convention uses X for disabled channels, 0/1 for channel values, and N suffix for inverted output.
 
-+------------------+------------------------------+------------------------------------------+
-| Constant         | Value                        | Description                              |
-+==================+==============================+==========================================+
-| X_DACS_OFF       | (default - no bits set)      | Disable all DAC outputs                  |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_0_0_0   | %0000_0000_0000_0000 << 16   | All 4 DAC channels output 0              |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0_0   | %0000_0001_0000_0000 << 16   | DAC channels 3,2 disabled;               |
-|                  |                              | 1,0 output 0                             |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_0_X_X   | %0000_0010_0000_0000 << 16   | DAC channels 3,2 output 0;               |
-|                  |                              | 1,0 disabled                             |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_X_0   | %0000_0011_0000_0000 << 16   | Only DAC channel 0 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0_X   | %0000_0100_0000_0000 << 16   | Only DAC channel 1 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_0_X_X   | %0000_0101_0000_0000 << 16   | Only DAC channel 2 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_X_X_X   | %0000_0110_0000_0000 << 16   | Only DAC channel 3 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0N0_0N0   | %0000_0111_0000_0000 << 16   | Channels 3,1 normal;                     |
-|                  |                              | channels 2,0 inverted                    |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0N0   | %0000_1000_0000_0000 << 16   | Channels 1,0 enabled;                    |
-|                  |                              | channel 0 inverted                       |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0N0_X_X   | %0000_1001_0000_0000 << 16   | Channels 3,2 enabled;                    |
-|                  |                              | channel 2 inverted                       |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1_0_1_0   | %0000_1010_0000_0000 << 16   | Alternating 1,0 pattern                  |
-|                  |                              | across all channels                      |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_1_0   | %0000_1011_0000_0000 << 16   | Channels 1,0 with 1,0 pattern            |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1_0_X_X   | %0000_1100_0000_0000 << 16   | Channels 3,2 with 1,0 pattern            |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1N1_0N0   | %0000_1101_0000_0000 << 16   | All channels; odd inverted               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_3_2_1_0   | %0000_1110_0000_0000 << 16   | Use all 4 DAC channels (standard)        |
-+------------------+------------------------------+------------------------------------------+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| X_DACS_OFF | (default - no bits set) | Disable all DAC outputs |
+| X_DACS_0_0_0_0 | %0000_0000_0000_0000 << 16 | All 4 DAC channels output 0 |
+| X_DACS_X_X_0_0 | %0000_0001_0000_0000 << 16 | DAC channels 3,2 disabled; 1,0 output 0 |
+| X_DACS_0_0_X_X | %0000_0010_0000_0000 << 16 | DAC channels 3,2 output 0; 1,0 disabled |
+| X_DACS_X_X_X_0 | %0000_0011_0000_0000 << 16 | Only DAC channel 0 enabled |
+| X_DACS_X_X_0_X | %0000_0100_0000_0000 << 16 | Only DAC channel 1 enabled |
+| X_DACS_X_0_X_X | %0000_0101_0000_0000 << 16 | Only DAC channel 2 enabled |
+| X_DACS_0_X_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 3 enabled |
+| X_DACS_0N0_0N0 | %0000_0111_0000_0000 << 16 | Channels 3,1 normal; channels 2,0 inverted |
+| X_DACS_X_X_0N0 | %0000_1000_0000_0000 << 16 | Channels 1,0 enabled; channel 0 inverted |
+| X_DACS_0N0_X_X | %0000_1001_0000_0000 << 16 | Channels 3,2 enabled; channel 2 inverted |
+| X_DACS_1_0_1_0 | %0000_1010_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
+| X_DACS_X_X_1_0 | %0000_1011_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
+| X_DACS_1_0_X_X | %0000_1100_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
+| X_DACS_1N1_0N0 | %0000_1101_0000_0000 << 16 | All channels; odd inverted |
+| X_DACS_3_2_1_0 | %0000_1110_0000_0000 << 16 | Use all 4 DAC channels (standard) |
 
 ### Pin Output Control
 
@@ -19872,25 +20358,16 @@ Streamer constant names follow a consistent pattern:
 X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 ```
 
-+------------------+----------------------------------------------+
-| Component        | Meaning                                      |
-+==================+==============================================+
-| X_               | Streamer constant prefix                     |
-+------------------+----------------------------------------------+
-| RF               | Read from FIFO (hub RAM)                     |
-+------------------+----------------------------------------------+
-| WF               | Write to FIFO (hub RAM)                      |
-+------------------+----------------------------------------------+
-| IMM              | Immediate data                               |
-+------------------+----------------------------------------------+
-| BYTE/WORD/LONG   | Data unit size                               |
-+------------------+----------------------------------------------+
-| _nP              | Number of pins used                          |
-+------------------+----------------------------------------------+
-| _nDACn           | Number of DAC channels, bits per channel     |
-+------------------+----------------------------------------------+
-| LUT              | Data passes through LUT                      |
-+------------------+----------------------------------------------+
+| Component | Meaning |
+|-----------|---------|
+| X_ | Streamer constant prefix |
+| RF | Read from FIFO (hub RAM) |
+| WF | Write to FIFO (hub RAM) |
+| IMM | Immediate data |
+| BYTE/WORD/LONG | Data unit size |
+| _nP | Number of pins used |
+| _nDACn | Number of DAC channels, bits per channel |
+| LUT | Data passes through LUT |
 
 
 
@@ -20386,7 +20863,7 @@ Conditional execution prefixes (IF_xxx) that can be applied to any instruction. 
 
 These are the canonical condition names:
 
-- **IF_ALWAYS** - Always execute (default, can be omitted; EEEE=1111)
+- **IF_ALWAYS** - Always execute (EEEE=1111; this is the encoding used when no condition is specified)
 - **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
 - **IF_C** - Execute if C=1
 - **IF_NC** - Execute if C=0
@@ -20405,22 +20882,22 @@ These are the canonical condition names:
 
 ### Comparison Aliases (15)
 
-Convenient aliases for post-comparison conditional execution:
+Convenient aliases for post-comparison conditional execution. Two equivalent terminology styles are available—both encode to identical condition codes:
 
-**Unsigned comparison aliases:**
+**Magnitude terminology aliases:**
 
 - **IF_A** - Above (same as IF_NC_AND_NZ)
 - **IF_AE** - Above or equal (same as IF_NC)
 - **IF_B** - Below (same as IF_C)
-- **IF_BE** - Below or equal (same as IF_C_OR_Z or IF_NC_OR_Z)
+- **IF_BE** - Below or equal (same as IF_C_OR_Z)
 - **IF_E** - Equal (same as IF_Z)
 - **IF_NE** - Not equal (same as IF_NZ)
 
-**Signed comparison aliases:**
+**Arithmetic terminology aliases:**
 
 - **IF_GE** - Greater or equal (same as IF_NC)
 - **IF_GT** - Greater than (same as IF_NC_AND_NZ)
-- **IF_LE** - Less or equal (same as IF_NC_OR_Z)
+- **IF_LE** - Less or equal (same as IF_C_OR_Z)
 - **IF_LT** - Less than (same as IF_C)
 
 **Other aliases:**
@@ -21068,15 +21545,10 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
 
 ## Summary Table
 
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
-| Bug                        | Trigger Condition              | Consequence                      | Workaround                    |
-+============================+================================+==================================+===============================+
-| ALTx cancels block         | ALTx/AUGx between SETQ         | PTRx advances by single-long     | Manually adjust PTRx          |
-| PTRx delta                 | and RD/WR/WMLONG               | delta instead of block delta     | after transfer                |
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
-| AUGS leaks to ALTx         | ALTx with #S between           | ALTx receives unintended         | Use register for ALTx         |
-|                            | AUGS and target                | augmented value                  | S operand                     |
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
+| Bug | Trigger Condition | Consequence | Workaround |
+|-----|-------------------|-------------|------------|
+| ALTx cancels block PTRx delta | ALTx/AUGx between SETQ and RD/WR/WMLONG | PTRx advances by single-long delta instead of block delta | Manually adjust PTRx after transfer |
+| AUGS leaks to ALTx | ALTx with #S between AUGS and target | ALTx receives unintended augmented value | Use register for ALTx S operand |
 
 ---
 

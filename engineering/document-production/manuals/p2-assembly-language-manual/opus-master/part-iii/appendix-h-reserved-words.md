@@ -447,7 +447,7 @@ Conditional execution prefixes (IF_xxx) that can be applied to any instruction. 
 
 These are the canonical condition names:
 
-- **IF_ALWAYS** - Always execute (default, can be omitted; EEEE=1111)
+- **IF_ALWAYS** - Always execute (EEEE=1111; this is the encoding used when no condition is specified)
 - **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
 - **IF_C** - Execute if C=1
 - **IF_NC** - Execute if C=0

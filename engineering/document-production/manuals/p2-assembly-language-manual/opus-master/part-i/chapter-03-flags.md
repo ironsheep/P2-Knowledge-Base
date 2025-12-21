@@ -79,7 +79,7 @@ This consistency makes WZ predictable. After any arithmetic, logical, or shift o
 
 The extended arithmetic instructions—ADDX, SUBX, ADDSX, SUBSX, CMPX, CMPSX—use a modified Z flag update rule:
 
-```
+```text
 Z = Z AND (result == 0)
 ```
 
@@ -253,7 +253,7 @@ The most commonly used conditions are:
 
 - **IF_C** / **IF_NC** — Test the C flag (set / clear)
 - **IF_Z** / **IF_NZ** — Test the Z flag (set / clear)
-- **IF_ALWAYS** — Unconditional execution (the default)
+- **(no condition)** — When omitted, instructions execute unconditionally (encodes as EEEE=1111)
 - **_RET_** — Execute instruction, then return
 
 > **📖 Complete Reference:** For the full table of all sixteen conditions with their EEEE encodings, flag state patterns, and complete alias listings (comparison aliases, flag state aliases, logical aliases, and commutative forms), see **Appendix B: Condition Code Reference**.

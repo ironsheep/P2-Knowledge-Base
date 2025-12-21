@@ -265,7 +265,7 @@ TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and con
 | Instruction | Jumps when |
 |-------------|------------|
 | TJF | Dest = $FFFF_FFFF (full) |
-| TJNF | Dest ≠ $FFFF_FFFF (not full) |
+| TJNF | Dest != $FFFF_FFFF (not full) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
 
@@ -351,7 +351,7 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 | Instruction | Jumps when |
 |-------------|------------|
 | TJZ | Dest = 0 |
-| TJNZ | Dest ≠ 0 |
+| TJNZ | Dest != 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 

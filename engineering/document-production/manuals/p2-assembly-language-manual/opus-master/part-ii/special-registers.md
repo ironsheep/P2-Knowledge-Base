@@ -279,7 +279,7 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
         rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
         rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
-        wrlong  data, ptra[4]           ' Write long to Hub at PTRA + 4×4 = PTRA+16 bytes
+        wrlong  data, ptra[4]           ' Address: PTRA + (4 × 4) = PTRA+16
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
@@ -315,7 +315,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
         mov     ptrb, ##hub_source      ' Set PTRB to source address
         rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
         rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
-        wrlong  data, ptrb[8]           ' Write long to Hub at PTRB + 8×4 = PTRB+32 bytes
+        wrlong  data, ptrb[8]           ' Address: PTRB + (8 × 4) = PTRB+32
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr

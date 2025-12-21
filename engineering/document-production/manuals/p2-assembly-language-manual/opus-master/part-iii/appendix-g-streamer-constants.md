@@ -144,24 +144,13 @@ These modes capture data from pins/ADCs and write to hub RAM via WRFAST FIFO.
 
 These modes capture ADC samples and optionally write to hub RAM.
 
-+----------------------------+------------------------------+------------------------------------------+
-| Constant                   | Value                        | Description                              |
-+============================+==============================+==========================================+
-| X_1ADC8_0P_1DAC8_WFBYTE    | %1111_0000_0000_0010 << 16   | 1 ADC to 8-bit, 0 pins, 1 DAC,           |
-|                            |                              | write byte                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_1ADC8_8P_2DAC8_WFWORD    | %1111_0000_0000_0011 << 16   | 1 ADC to 8-bit, 8 pins, 2 DACs,          |
-|                            |                              | write word                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_2ADC8_0P_2DAC8_WFWORD    | %1111_0000_0000_0100 << 16   | 2 ADCs to 8-bit, 0 pins, 2 DACs,         |
-|                            |                              | write word                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_2ADC8_16P_4DAC8_WFLONG   | %1111_0000_0000_0101 << 16   | 2 ADCs to 8-bit, 16 pins, 4 DACs,        |
-|                            |                              | write long                               |
-+----------------------------+------------------------------+------------------------------------------+
-| X_4ADC8_0P_4DAC8_WFLONG    | %1111_0000_0000_0110 << 16   | 4 ADCs to 8-bit, 0 pins, 4 DACs,         |
-|                            |                              | write long                               |
-+----------------------------+------------------------------+------------------------------------------+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| X_1ADC8_0P_1DAC8_WFBYTE | %1111_0000_0000_0010 << 16 | 1 ADC to 8-bit, 0 pins, 1 DAC, write byte |
+| X_1ADC8_8P_2DAC8_WFWORD | %1111_0000_0000_0011 << 16 | 1 ADC to 8-bit, 8 pins, 2 DACs, write word |
+| X_2ADC8_0P_2DAC8_WFWORD | %1111_0000_0000_0100 << 16 | 2 ADCs to 8-bit, 0 pins, 2 DACs, write word |
+| X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 << 16 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
+| X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 << 16 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
 
 
 
@@ -184,47 +173,24 @@ These flags modify Streamer behavior and are combined with mode constants using 
 
 The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) are active and how they're configured. The naming convention uses X for disabled channels, 0/1 for channel values, and N suffix for inverted output.
 
-+------------------+------------------------------+------------------------------------------+
-| Constant         | Value                        | Description                              |
-+==================+==============================+==========================================+
-| X_DACS_OFF       | (default - no bits set)      | Disable all DAC outputs                  |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_0_0_0   | %0000_0000_0000_0000 << 16   | All 4 DAC channels output 0              |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0_0   | %0000_0001_0000_0000 << 16   | DAC channels 3,2 disabled;               |
-|                  |                              | 1,0 output 0                             |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_0_X_X   | %0000_0010_0000_0000 << 16   | DAC channels 3,2 output 0;               |
-|                  |                              | 1,0 disabled                             |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_X_0   | %0000_0011_0000_0000 << 16   | Only DAC channel 0 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0_X   | %0000_0100_0000_0000 << 16   | Only DAC channel 1 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_0_X_X   | %0000_0101_0000_0000 << 16   | Only DAC channel 2 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0_X_X_X   | %0000_0110_0000_0000 << 16   | Only DAC channel 3 enabled               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0N0_0N0   | %0000_0111_0000_0000 << 16   | Channels 3,1 normal;                     |
-|                  |                              | channels 2,0 inverted                    |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_0N0   | %0000_1000_0000_0000 << 16   | Channels 1,0 enabled;                    |
-|                  |                              | channel 0 inverted                       |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_0N0_X_X   | %0000_1001_0000_0000 << 16   | Channels 3,2 enabled;                    |
-|                  |                              | channel 2 inverted                       |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1_0_1_0   | %0000_1010_0000_0000 << 16   | Alternating 1,0 pattern                  |
-|                  |                              | across all channels                      |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_X_X_1_0   | %0000_1011_0000_0000 << 16   | Channels 1,0 with 1,0 pattern            |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1_0_X_X   | %0000_1100_0000_0000 << 16   | Channels 3,2 with 1,0 pattern            |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_1N1_0N0   | %0000_1101_0000_0000 << 16   | All channels; odd inverted               |
-+------------------+------------------------------+------------------------------------------+
-| X_DACS_3_2_1_0   | %0000_1110_0000_0000 << 16   | Use all 4 DAC channels (standard)        |
-+------------------+------------------------------+------------------------------------------+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| X_DACS_OFF | (default - no bits set) | Disable all DAC outputs |
+| X_DACS_0_0_0_0 | %0000_0000_0000_0000 << 16 | All 4 DAC channels output 0 |
+| X_DACS_X_X_0_0 | %0000_0001_0000_0000 << 16 | DAC channels 3,2 disabled; 1,0 output 0 |
+| X_DACS_0_0_X_X | %0000_0010_0000_0000 << 16 | DAC channels 3,2 output 0; 1,0 disabled |
+| X_DACS_X_X_X_0 | %0000_0011_0000_0000 << 16 | Only DAC channel 0 enabled |
+| X_DACS_X_X_0_X | %0000_0100_0000_0000 << 16 | Only DAC channel 1 enabled |
+| X_DACS_X_0_X_X | %0000_0101_0000_0000 << 16 | Only DAC channel 2 enabled |
+| X_DACS_0_X_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 3 enabled |
+| X_DACS_0N0_0N0 | %0000_0111_0000_0000 << 16 | Channels 3,1 normal; channels 2,0 inverted |
+| X_DACS_X_X_0N0 | %0000_1000_0000_0000 << 16 | Channels 1,0 enabled; channel 0 inverted |
+| X_DACS_0N0_X_X | %0000_1001_0000_0000 << 16 | Channels 3,2 enabled; channel 2 inverted |
+| X_DACS_1_0_1_0 | %0000_1010_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
+| X_DACS_X_X_1_0 | %0000_1011_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
+| X_DACS_1_0_X_X | %0000_1100_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
+| X_DACS_1N1_0N0 | %0000_1101_0000_0000 << 16 | All channels; odd inverted |
+| X_DACS_3_2_1_0 | %0000_1110_0000_0000 << 16 | Use all 4 DAC channels (standard) |
 
 ### Pin Output Control
 
@@ -298,25 +264,16 @@ Streamer constant names follow a consistent pattern:
 X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 ```
 
-+------------------+----------------------------------------------+
-| Component        | Meaning                                      |
-+==================+==============================================+
-| X_               | Streamer constant prefix                     |
-+------------------+----------------------------------------------+
-| RF               | Read from FIFO (hub RAM)                     |
-+------------------+----------------------------------------------+
-| WF               | Write to FIFO (hub RAM)                      |
-+------------------+----------------------------------------------+
-| IMM              | Immediate data                               |
-+------------------+----------------------------------------------+
-| BYTE/WORD/LONG   | Data unit size                               |
-+------------------+----------------------------------------------+
-| _nP              | Number of pins used                          |
-+------------------+----------------------------------------------+
-| _nDACn           | Number of DAC channels, bits per channel     |
-+------------------+----------------------------------------------+
-| LUT              | Data passes through LUT                      |
-+------------------+----------------------------------------------+
+| Component | Meaning |
+|-----------|---------|
+| X_ | Streamer constant prefix |
+| RF | Read from FIFO (hub RAM) |
+| WF | Write to FIFO (hub RAM) |
+| IMM | Immediate data |
+| BYTE/WORD/LONG | Data unit size |
+| _nP | Number of pins used |
+| _nDACn | Number of DAC channels, bits per channel |
+| LUT | Data passes through LUT |
 
 
 

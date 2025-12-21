@@ -172,27 +172,14 @@ The Smart Pin's autonomous operation is particularly significant. Once configure
 
 Smart Pins support 64 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
-+-------------+-------------------------------------+-----------------------------------+
-| Category    | Example Modes                       | Typical Applications              |
-+=============+=====================================+===================================+
-| Digital I/O | Repository mode, registered input,  | Debounced buttons, event          |
-|             | long pulse accumulator              | counting, pulse measurement       |
-+-------------+-------------------------------------+-----------------------------------+
-| Serial      | UART transmit/receive, synchronous  | Communication with peripherals    |
-|             | serial, SPI                         | and other systems                 |
-+-------------+-------------------------------------+-----------------------------------+
-| PWM         | PWM/duty mode, triangle/sawtooth    | Motor control, LED dimming,       |
-|             | mode, incremental mode              | audio generation                  |
-+-------------+-------------------------------------+-----------------------------------+
-| Analog      | DAC output, ADC sampling,           | Sensor interfacing, analog        |
-|             | comparator                          | signal generation                 |
-+-------------+-------------------------------------+-----------------------------------+
-| Timing      | Period measurement, pulse width     | Frequency measurement, event      |
-|             | measurement, timeout                | timing, watchdog                  |
-+-------------+-------------------------------------+-----------------------------------+
-| Quadrature  | Quadrature encoder input            | Rotary encoder reading, motor     |
-|             |                                     | position feedback                 |
-+-------------+-------------------------------------+-----------------------------------+
+| Category | Example Modes | Typical Applications |
+|----------|---------------|----------------------|
+| Digital I/O | Repository mode, registered input, long pulse accumulator | Debounced buttons, event counting, pulse measurement |
+| Serial | UART transmit/receive, synchronous serial, SPI | Communication with peripherals and other systems |
+| PWM | PWM/duty mode, triangle/sawtooth mode, incremental mode | Motor control, LED dimming, audio generation |
+| Analog | DAC output, ADC sampling, comparator | Sensor interfacing, analog signal generation |
+| Timing | Period measurement, pulse width measurement, timeout | Frequency measurement, event timing, watchdog |
+| Quadrature | Quadrature encoder input | Rotary encoder reading, motor position feedback |
 
 Mode selection determines the pin's complete behavior: input vs. output, edge sensitivity, data format, timing parameters, and event generation. The mode value, written through WRPIN, configures all aspects of the Smart Pin's operation.
 

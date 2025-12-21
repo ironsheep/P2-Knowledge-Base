@@ -509,6 +509,21 @@
 % ==================== SYNTAX DISPLAY ====================
 % For displaying instruction syntax
 
+% Tight syntax forms - for multi-parameter instruction variants
+% Reduces line spacing when multiple parameter forms are shown together
+% Uses \linespread with \selectfont to immediately apply reduced spacing
+\newenvironment{syntaxforms}{%
+  \par\vspace{2pt}%
+  \begingroup
+  \linespread{0.8}\selectfont
+  \setlength{\parskip}{0pt}%
+  \noindent
+}{%
+  \par
+  \endgroup
+  \vspace{4pt}%
+}
+
 % Syntax box with monospace font
 \newtcolorbox{syntaxbox}{
   colback=pasm2-code-bg,

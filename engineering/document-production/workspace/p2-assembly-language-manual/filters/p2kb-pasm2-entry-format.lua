@@ -2,9 +2,10 @@
 -- Purpose: Format instruction entry elements properly:
 --   1. Convert Markdown --- to tight LaTeX horizontal rules (minimal spacing)
 --   2. Process multiple instruction syntax forms with proper line breaks
+--   3. Wrap multi-form syntax blocks in syntaxforms environment for tight spacing
 --
--- Version: 1.2
--- Date: 2025-12-02
+-- Version: 1.4
+-- Date: 2025-12-20
 
 -- Convert HorizontalRule to a tight LaTeX rule
 -- Markdown --- becomes a full-width rule with minimal spacing
@@ -25,8 +26,9 @@ end
 -- Syntax blocks have a VERY specific structure:
 --   **MNEMONIC** *operands* **{effects}**
 --   **MNEMONIC** *operands* **{effects}**
--- They contain ONLY: Strong, Emph, Space, SoftBreak elements
--- NO Str elements with actual words (prose)
+-- They contain ONLY: Strong, Emph, Space, SoftBreak, LineBreak elements
+-- NO top-level Str elements with actual words (prose)
+-- Note: Str elements INSIDE Emph are allowed (operand names like Src, Dest)
 local function is_syntax_paragraph(content)
   if #content < 1 then
     return false
@@ -44,9 +46,11 @@ local function is_syntax_paragraph(content)
     return false
   end
 
-  -- Check all elements - syntax paragraphs should NOT have prose words
-  -- They only have: Strong (mnemonic/effects), Emph (operands), Space, SoftBreak
+  -- Check TOP-LEVEL elements only - syntax paragraphs should NOT have prose words
+  -- They only have: Strong (mnemonic/effects), Emph (operands), Space, SoftBreak, LineBreak
+  -- Str elements inside Emph are fine (operand names like Src, Dest, etc.)
   for i, item in ipairs(content) do
+    -- Only check top-level Str elements, not those inside Emph/Strong
     if item.t == "Str" then
       local text = item.text
       -- Allow only whitespace, commas, and empty strings
@@ -98,6 +102,9 @@ function Para(elem)
   local new_content = {}
   local first_mnemonic_seen = false
 
+  -- Start with syntaxforms environment for tight line spacing
+  table.insert(new_content, pandoc.RawInline('latex', '\\begin{syntaxforms}'))
+
   for i, item in ipairs(content) do
     if item.t == "Strong" then
       local text = pandoc.utils.stringify(item)
@@ -116,6 +123,9 @@ function Para(elem)
 
     table.insert(new_content, item)
   end
+
+  -- Close syntaxforms environment
+  table.insert(new_content, pandoc.RawInline('latex', '\\end{syntaxforms}'))
 
   elem.content = new_content
   return elem

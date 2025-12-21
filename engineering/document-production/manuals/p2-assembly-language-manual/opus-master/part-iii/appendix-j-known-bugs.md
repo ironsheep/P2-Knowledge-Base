@@ -74,15 +74,10 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
 
 ## Summary Table
 
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
-| Bug                        | Trigger Condition              | Consequence                      | Workaround                    |
-+============================+================================+==================================+===============================+
-| ALTx cancels block         | ALTx/AUGx between SETQ         | PTRx advances by single-long     | Manually adjust PTRx          |
-| PTRx delta                 | and RD/WR/WMLONG               | delta instead of block delta     | after transfer                |
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
-| AUGS leaks to ALTx         | ALTx with #S between           | ALTx receives unintended         | Use register for ALTx         |
-|                            | AUGS and target                | augmented value                  | S operand                     |
-+----------------------------+--------------------------------+----------------------------------+-------------------------------+
+| Bug | Trigger Condition | Consequence | Workaround |
+|-----|-------------------|-------------|------------|
+| ALTx cancels block PTRx delta | ALTx/AUGx between SETQ and RD/WR/WMLONG | PTRx advances by single-long delta instead of block delta | Manually adjust PTRx after transfer |
+| AUGS leaks to ALTx | ALTx with #S between AUGS and target | ALTx receives unintended augmented value | Use register for ALTx S operand |
 
 ---
 

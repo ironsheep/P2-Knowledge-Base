@@ -852,7 +852,7 @@ DEBUG_MAIN instructs the debugger to trigger a breakpoint at the start of the ma
 
 ```spin2
 CON
-  DEBUG_MAIN = TRUE           ' Break at program start
+  DEBUG_MAIN                  ' Break at program start
 
 PUB main()
   ' Debugger breaks here before any code executes
@@ -896,7 +896,7 @@ DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT 
 
 ```spin2
 CON
-  DEBUG_COGINIT = TRUE        ' Break on every COG initialization
+  DEBUG_COGINIT               ' Break on every COG initialization
 
 PUB main()
   cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here

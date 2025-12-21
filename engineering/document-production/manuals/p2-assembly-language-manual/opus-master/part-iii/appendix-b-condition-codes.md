@@ -15,7 +15,7 @@ Every instruction can be made conditional by prefixing it with one of these cond
 | 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
 | 0100 | IF_C_AND_NZ | C=1 AND Z=0 | IF_NZ_AND_C, IF_10 |
 | 0101 | IF_NZ | Z=0 | IF_NE, IF_X0 |
-| 0110 | IF_C_NE_Z | C≠Z | IF_Z_NE_C, IF_DIFF |
+| 0110 | IF_C_NE_Z | C!=Z | IF_Z_NE_C, IF_DIFF |
 | 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | IF_NZ_OR_NC, IF_NOT_11 |
 | 1000 | IF_C_AND_Z | C=1 AND Z=1 | IF_Z_AND_C, IF_11 |
 | 1001 | IF_C_EQ_Z | C=Z | IF_Z_EQ_C, IF_SAME |

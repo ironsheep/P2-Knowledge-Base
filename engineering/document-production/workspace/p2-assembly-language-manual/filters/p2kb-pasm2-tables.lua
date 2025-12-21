@@ -1,15 +1,16 @@
 -- P2KB PASM2 Table Formatting Filter
--- Conservative fix: constrain tables to page width, last column wraps
+-- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
--- Version: 5.5 - Added auto-shrink for Comparison Condition Alias tables (3.3.4)
+-- Version: 6.1 - Fixed longtblr for encoding tables (Appendix A) to allow multi-page tables
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
--- - 2-8 column tables: Use tabularray with width=\linewidth
---   * If markdown specifies column widths (via grid table syntax), use those proportions
---   * If no widths specified, give ~15% each to first N-1 columns, last column flexible (X)
--- - This preserves existing table appearance while preventing overflow
--- - Last column uses X type (flexible width with word-wrap) when no width specified
+-- - Tables with long content patterns: Full page width with proportional columns
+--   * Constant | Value | Description (36-char binary patterns)
+--   * Condition Code tables (long alias lists)
+--   * Instruction | Description (Appendix B style)
+-- - All other tables: Auto-shrink to content width (no wrapping)
+-- - This produces cleaner output for short explanatory tables
 
 -- Count total data rows in a table (excluding header)
 local function count_data_rows(el)
@@ -128,8 +129,17 @@ local function handle_encoding_table(el)
   --   Cols 6-7 (C, Z): pasm2-enc-flags (light orange)
   --   Cols 8-9 (Result, Clks): pasm2-enc-result (light gray)
 
+  -- Count rows to decide between tblr and longtblr
+  -- Encoding tables like Appendix A can have 300+ rows
+  local row_count = count_data_rows(el)
+  local use_longtblr = row_count > 20  -- Use longtblr for tables with 20+ rows
+
   local latex = {}
-  table.insert(latex, "\\begin{tblr}{")
+  if use_longtblr then
+    table.insert(latex, "\\begin{longtblr}{")
+  else
+    table.insert(latex, "\\begin{tblr}{")
+  end
   table.insert(latex, "  width=\\linewidth,")
   table.insert(latex, "  rowsep=2pt,")
   table.insert(latex, "  colsep=4pt,")
@@ -152,6 +162,10 @@ local function handle_encoding_table(el)
   table.insert(latex, "  cell{1}{4-5}={bg=pasm2-enc-operand},")
   table.insert(latex, "  cell{1}{6-7}={bg=pasm2-enc-flags},")
   table.insert(latex, "  cell{1}{8-9}={bg=pasm2-enc-result},")
+  -- For longtblr, repeat header row on each page
+  if use_longtblr then
+    table.insert(latex, "  rowhead=1,")
+  end
   table.insert(latex, "  hlines,")
   table.insert(latex, "  vlines,")
   table.insert(latex, "}")
@@ -212,7 +226,11 @@ local function handle_encoding_table(el)
     end
   end
 
-  table.insert(latex, "\\end{tblr}")
+  if use_longtblr then
+    table.insert(latex, "\\end{longtblr}")
+  else
+    table.insert(latex, "\\end{tblr}")
+  end
 
   -- Return as RawBlock
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
@@ -320,64 +338,24 @@ local function is_condition_code_table(el)
   return false
 end
 
--- Detect tables that should auto-shrink to content width (no forced full-width)
--- These are compact reference tables where content is short and wrapping looks bad
-local function should_auto_shrink(el)
-  if not el.head or not el.head.rows or #el.head.rows == 0 then
-    return false
+-- Detect tables that NEED full page width due to long content
+-- These are tables where auto-shrink would cause overflow or look bad
+local function needs_full_width(el)
+  -- Check each detection function for long-content patterns
+  if is_constant_value_description_table(el) then
+    return true  -- 36-char binary patterns in Value column
   end
 
-  local header_row = el.head.rows[1]
-  if not header_row.cells then
-    return false
+  if is_condition_code_table(el) then
+    return true  -- Long comma-separated alias lists
   end
 
-  local num_cols = #el.colspecs
-
-  -- Get header texts
-  local headers = {}
-  for i, cell in ipairs(header_row.cells) do
-    headers[i] = pandoc.utils.stringify(cell.contents):lower()
+  if is_instruction_description_table(el) then
+    return true  -- Descriptions may be long paragraphs
   end
 
-  -- 2-column patterns (Chapter 4.2.2, 4.2.3)
-  if num_cols == 2 then
-    -- "Instruction Type | Typical Cycles"
-    if headers[1] and headers[2] and
-       headers[1]:match("instruction") and headers[2]:match("cycle") then
-      return true
-    end
-    -- "Notation | Meaning"
-    if headers[1] and headers[2] and
-       headers[1]:match("notation") and headers[2]:match("meaning") then
-      return true
-    end
-  end
-
-  -- 4-column pattern (Chapter 3.7.1)
-  -- "Instruction | Operation | C Flag | Z Flag"
-  if num_cols == 4 then
-    if headers[1] and headers[2] and headers[3] and headers[4] and
-       headers[1]:match("instruction") and headers[2]:match("operation") and
-       headers[3]:match("c flag") and headers[4]:match("z flag") then
-      return true
-    end
-    -- "Condition | Alias | Relational Operator | Meaning" (Section 3.3.4)
-    if headers[1] and headers[2] and headers[3] and headers[4] and
-       headers[1]:match("condition") and headers[2]:match("alias") and
-       headers[3]:match("relational") then
-      return true
-    end
-  end
-
-  -- 3-column pattern (Section 3.3.4)
-  -- "Condition | Relational Operator | Meaning"
-  if num_cols == 3 then
-    if headers[1] and headers[2] and headers[3] and
-       headers[1]:match("condition") and headers[2]:match("relational") and
-       headers[3]:match("meaning") then
-      return true
-    end
+  if is_operator_description_example_table(el) then
+    return true  -- Examples with code need controlled widths
   end
 
   return false
@@ -465,6 +443,8 @@ local function handle_auto_shrink_table(el)
   end
 
   table.insert(latex, "\\end{tblr}")
+  -- Add vertical space after table to separate from following content
+  table.insert(latex, "\\vspace{12pt}")
 
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
@@ -723,15 +703,16 @@ function Table(el)
     return handle_encoding_table(el)
   end
 
-  -- Handle auto-shrink tables (specific patterns that should size to content)
-  -- Check this BEFORE general content table handling
-  if should_auto_shrink(el) then
-    return handle_auto_shrink_table(el)
+  -- Handle tables that NEED full page width (long content patterns)
+  -- These would overflow if auto-shrunk
+  if num_cols >= 2 and num_cols <= 8 and needs_full_width(el) then
+    return handle_content_table(el)
   end
 
-  -- Handle 2-8 column content tables with page-width constraint
+  -- Default: auto-shrink tables to content width (no wrapping)
+  -- This produces cleaner output for short explanatory tables
   if num_cols >= 2 and num_cols <= 8 then
-    return handle_content_table(el)
+    return handle_auto_shrink_table(el)
   end
 
   -- For tables outside our handling (1 column or 10+ columns), pass through
