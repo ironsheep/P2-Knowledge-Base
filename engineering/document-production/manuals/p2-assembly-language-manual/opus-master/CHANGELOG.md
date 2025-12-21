@@ -156,6 +156,30 @@ OUT family:
 - Chip Gracey direct confirmation (2025-12-17)
 - User feedback audit (2025-12-17): Community review identifying hub execution mechanism error
 - User feedback audit (2025-12-20): Boot pin post-boot statement correction; P2 Eval Board Rev C documentation ("hardwired" SD card socket), Edge Mini Breakout documentation (Flash SPI pin assignments)
+- User feedback audit (2025-12-21): PDF rendering corrections, footnote symbols, code line length
+
+### Additional Corrections (2025-12-21)
+
+**Part I:**
+- Chapter 2, Section 2.2.1: IF_ALWAYS clarified (encoding used when no condition specified, not "the default")
+- Chapter 3, Section 3.3.3: IF_ALWAYS clarified (same correction)
+
+**Part II:**
+- Special Registers: PTRA/PTRB code example comments trimmed for line length
+- Shift/Rotate instructions (8): Footnote symbol changed from superscript to † (dagger)
+- Pin I/O instructions (OUT, FLT, DRV families): Footnote symbol changed from superscript to †
+
+**Part III:**
+- Appendix B: IF_ALWAYS clarified (same correction as Chapter 2)
+- Appendix E: DEBUG_MAIN, DEBUG_COGINIT examples corrected (symbol presence sufficient; removed "= TRUE")
+- Appendix H: IF_ALWAYS clarified (same correction)
+
+### Presentation
+
+- Encoding tables (Appendix A): Fixed multi-page rendering regression
+- Grid tables: Converted to pipe format for Lua filter compatibility (Chapters 4-5, Appendices G, J)
+- Not-equal symbols: Changed ≠ to != for LaTeX compatibility
+- Footnote symbols: Changed ^1^ to † (dagger) for proper PDF rendering
 
 ---
 
