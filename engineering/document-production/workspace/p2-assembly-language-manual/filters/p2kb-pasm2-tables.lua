@@ -1,7 +1,7 @@
 -- P2KB PASM2 Table Formatting Filter
 -- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
--- Version: 6.2 - Extended 2-column full-width detection (Description, Behavior, Explanation)
+-- Version: 6.7 - Fix: escape & and other special chars in longtable cells
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -59,143 +59,25 @@ end
 -- Handle 9-column encoding tables specially
 -- Columns 1-5 are fixed-width bit fields (EEEE, Opcode, CZI, D, S)
 -- Columns 6-9 are variable content (C, Z, Result, Clks)
--- Strategy: Set minimums for C, Z, Clks based on max content; give remainder to Result
--- Emits raw LaTeX tabularray with colored header zones
+-- Uses standard longtable for reliable multi-page support
 local function handle_encoding_table(el)
-  -- Fixed widths for bit field columns (total: ~0.43)
-  -- NOTE: Cols 1 & 3 have preto/appto padding (8pt total each)
-  -- Redistributed: took 0.010 from Opcode, 0.005 from CZI, gave to EEEE
-  local fixed_widths = {
-    0.070,  -- Col 1: EEEE (4 chars + 8pt padding) - was 0.055, increased to prevent line-wrap
-    0.090,  -- Col 2: Opcode (7 chars) - was 0.100, reduced slightly
-    0.050,  -- Col 3: CZI (3 chars + 8pt padding) - was 0.055, reduced to balance whitespace
-    0.110,  -- Col 4: D (9 chars)
-    0.110,  -- Col 5: S (9 chars)
-  }
-
-  -- Total available for columns 6-9 (leave margin for borders/padding)
-  -- Fixed cols total ~0.43, so remaining is ~0.52 for flexible cols + margins
-  local remaining = 0.52
-
-  -- Measure content length in columns 6-9
-  local content_lens = {}
-  for i = 6, 9 do
-    content_lens[i] = get_max_column_length(el, i)
-  end
-
-  -- Calculate widths based on content with minimum constraints
-  -- Strategy: Calculate what each column NEEDS, then distribute remaining space proportionally
-  -- C (col 6): min 0.06, content like "DIRx + OUTx" needs more
-  -- Z (col 7): min 0.06, content like "Z AND (D == S + C)" needs more
-  -- Result (col 8): min 0.15, typically short content like "OUT bit"
-  -- Clks (col 9): min 0.06, typically "2" or similar
-
-  local flex_widths = {}
-
-  -- Width per character (approximate) - about 0.008 per char for small font
-  local char_width = 0.008
-
-  -- Calculate content-based width for each column
-  local c_need = math.max(0.06, content_lens[6] * char_width + 0.02)
-  local z_need = math.max(0.06, content_lens[7] * char_width + 0.02)
-  local result_need = math.max(0.15, content_lens[8] * char_width + 0.02)
-  local clks_need = math.max(0.06, content_lens[9] * char_width + 0.02)
-
-  local total_need = c_need + z_need + result_need + clks_need
-
-  -- If total need fits in remaining, use proportional distribution
-  -- Otherwise, cap the largest columns and give priority to C and Z (flag columns)
-  if total_need <= remaining then
-    -- Everything fits - distribute extra space proportionally
-    local extra = remaining - total_need
-    local scale = 1 + (extra / total_need)
-    flex_widths[6] = c_need * scale
-    flex_widths[7] = z_need * scale
-    flex_widths[8] = result_need * scale
-    flex_widths[9] = clks_need * scale
-  else
-    -- Need to fit into remaining - prioritize C and Z, cap Result
-    flex_widths[6] = math.min(c_need, 0.14)
-    flex_widths[7] = math.min(z_need, 0.12)
-    flex_widths[9] = math.min(clks_need, 0.10)
-    local used = flex_widths[6] + flex_widths[7] + flex_widths[9]
-    flex_widths[8] = math.max(0.15, remaining - used)
-  end
-
-  -- Build tabularray LaTeX with colored headers
-  -- Header color zones:
-  --   Cols 1-3 (EEEE, Opcode, CZI): pasm2-enc-instruction (light blue)
-  --   Cols 4-5 (D, S): pasm2-enc-operand (light green)
-  --   Cols 6-7 (C, Z): pasm2-enc-flags (light orange)
-  --   Cols 8-9 (Result, Clks): pasm2-enc-result (light gray)
-
-  -- Count rows to decide between tblr and longtblr
-  -- Encoding tables like Appendix A can have 300+ rows
+  -- Count rows to decide between tabular and longtable
   local row_count = count_data_rows(el)
-  local use_longtblr = row_count > 20  -- Use longtblr for tables with 20+ rows
-
-  local latex = {}
-  if use_longtblr then
-    table.insert(latex, "\\begin{longtblr}{")
-  else
-    table.insert(latex, "\\begin{tblr}{")
-  end
-  table.insert(latex, "  width=\\linewidth,")
-  table.insert(latex, "  rowsep=2pt,")
-  table.insert(latex, "  colsep=4pt,")
-  -- Column widths (all centered, Result too since user wants centered)
-  table.insert(latex, string.format("  column{1}={wd=%.3f\\linewidth, halign=c, font=\\ttfamily\\small},", fixed_widths[1]))
-  table.insert(latex, string.format("  column{2}={wd=%.3f\\linewidth, halign=c, font=\\ttfamily\\small},", fixed_widths[2]))
-  table.insert(latex, string.format("  column{3}={wd=%.3f\\linewidth, halign=c, font=\\ttfamily\\small},", fixed_widths[3]))
-  table.insert(latex, string.format("  column{4}={wd=%.3f\\linewidth, halign=c, font=\\ttfamily\\small},", fixed_widths[4]))
-  table.insert(latex, string.format("  column{5}={wd=%.3f\\linewidth, halign=c, font=\\ttfamily\\small},", fixed_widths[5]))
-  table.insert(latex, string.format("  column{6}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[6]))
-  table.insert(latex, string.format("  column{7}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[7]))
-  table.insert(latex, string.format("  column{8}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[8]))
-  table.insert(latex, string.format("  column{9}={wd=%.3f\\linewidth, halign=c, font=\\small},", flex_widths[9]))
-  -- Header row styling with color zones and inner padding
-  -- Add padding to narrow columns (EEEE, CZI) so text doesn't butt against borders
-  table.insert(latex, "  row{1}={font=\\bfseries\\footnotesize},")
-  table.insert(latex, "  cell{1}{1}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")
-  table.insert(latex, "  cell{1}{2}={bg=pasm2-enc-instruction},")
-  table.insert(latex, "  cell{1}{3}={bg=pasm2-enc-instruction, preto={\\hspace{4pt}}, appto={\\hspace{4pt}}},")
-  table.insert(latex, "  cell{1}{4-5}={bg=pasm2-enc-operand},")
-  table.insert(latex, "  cell{1}{6-7}={bg=pasm2-enc-flags},")
-  table.insert(latex, "  cell{1}{8-9}={bg=pasm2-enc-result},")
-  -- For longtblr, repeat header row on each page
-  if use_longtblr then
-    table.insert(latex, "  rowhead=1,")
-  end
-  table.insert(latex, "  hlines,")
-  table.insert(latex, "  vlines,")
-  table.insert(latex, "}")
+  local use_longtable = row_count > 20  -- Use longtable for tables with 20+ rows
 
   -- Helper to render cell contents as LaTeX
-  -- Also handles \textsuperscript{N} patterns that come from markdown as literal text
   local function cell_to_latex(cell)
     if not cell or not cell.contents then
       return ""
     end
-    local content = cell.contents
-    if #content == 0 then
+    if #cell.contents == 0 then
       return ""
     end
-    -- Get plain text first
-    local text = pandoc.utils.stringify(content)
-    -- The \textsuperscript pattern is stored as literal text in markdown
-    -- We need to ensure the backslash is preserved for LaTeX
-    -- In the markdown, it's written as \textsuperscript{1} but pandoc reads
-    -- the backslash as literal, so stringify gives us "\\textsuperscript{1}"
-    -- which when output to LaTeX becomes the correct command
-    -- Actually, let's check what we get and ensure it works:
-    -- If text contains the pattern, it should work as-is since we're emitting raw LaTeX
-    return text
+    return pandoc.utils.stringify(cell.contents)
   end
 
-  -- Extract header row (should be first row from markdown table)
+  -- Extract header row
   local headers = {"EEEE", "Opcode", "CZI", "Dest", "Src", "C", "Z", "Result", "Clks"}
-
-  -- Check if table has header
   if el.head and el.head.rows and #el.head.rows > 0 then
     local header_row = el.head.rows[1]
     if header_row.cells then
@@ -207,7 +89,75 @@ local function handle_encoding_table(el)
     end
   end
 
-  table.insert(latex, "  " .. table.concat(headers, " & ") .. " \\\\")
+  local latex = {}
+
+  if use_longtable then
+    -- Use standard longtable for reliable page breaks
+    -- Column spec: p{width} for fixed columns, centered
+    table.insert(latex, "\\begin{longtable}{|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.055\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.075\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.04\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.095\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.095\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.12\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.12\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.17\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.05\\linewidth}|}")
+
+    -- Build colored header row (cell colors for each zone)
+    local header_row = "\\cellcolor{pasm2-enc-instruction}\\textbf{" .. headers[1] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-instruction}\\textbf{" .. headers[2] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-instruction}\\textbf{" .. headers[3] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-operand}\\textbf{" .. headers[4] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-operand}\\textbf{" .. headers[5] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-flags}\\textbf{" .. headers[6] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-flags}\\textbf{" .. headers[7] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-result}\\textbf{" .. headers[8] .. "} & " ..
+                       "\\cellcolor{pasm2-enc-result}\\textbf{" .. headers[9] .. "} \\\\"
+
+    -- First head (first page only)
+    table.insert(latex, "\\hline")
+    table.insert(latex, header_row)
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\endfirsthead")
+
+    -- Continuation head (subsequent pages)
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\multicolumn{9}{|c|}{\\textit{(continued from previous page)}} \\\\")
+    table.insert(latex, "\\hline")
+    table.insert(latex, header_row)
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\endhead")
+
+    -- Footer (bottom of each page except last)
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\multicolumn{9}{|r|}{\\textit{(continued on next page)}} \\\\")
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\endfoot")
+
+    -- Last footer
+    table.insert(latex, "\\hline")
+    table.insert(latex, "\\endlastfoot")
+
+  else
+    -- Use tblr for short tables (preserves nice formatting)
+    table.insert(latex, "\\begin{tblr}{")
+    table.insert(latex, "  width=\\linewidth,")
+    table.insert(latex, "  rowsep=2pt,")
+    table.insert(latex, "  colsep=4pt,")
+    table.insert(latex, "  column{1}={wd=0.070\\linewidth, halign=c, font=\\ttfamily\\small},")
+    table.insert(latex, "  column{2}={wd=0.090\\linewidth, halign=c, font=\\ttfamily\\small},")
+    table.insert(latex, "  column{3}={wd=0.050\\linewidth, halign=c, font=\\ttfamily\\small},")
+    table.insert(latex, "  column{4}={wd=0.110\\linewidth, halign=c, font=\\ttfamily\\small},")
+    table.insert(latex, "  column{5}={wd=0.110\\linewidth, halign=c, font=\\ttfamily\\small},")
+    table.insert(latex, "  column{6}={wd=0.100\\linewidth, halign=c, font=\\small},")
+    table.insert(latex, "  column{7}={wd=0.100\\linewidth, halign=c, font=\\small},")
+    table.insert(latex, "  column{8}={wd=0.170\\linewidth, halign=c, font=\\small},")
+    table.insert(latex, "  column{9}={wd=0.080\\linewidth, halign=c, font=\\small},")
+    table.insert(latex, "  row{1}={font=\\bfseries\\footnotesize},")
+    table.insert(latex, "  cell{1}{1}={bg=pasm2-enc-instruction},")
+    table.insert(latex, "  cell{1}{2}={bg=pasm2-enc-instruction},")
+    table.insert(latex, "  cell{1}{3}={bg=pasm2-enc-instruction},")
+    table.insert(latex, "  cell{1}{4-5}={bg=pasm2-enc-operand},")
+    table.insert(latex, "  cell{1}{6-7}={bg=pasm2-enc-flags},")
+    table.insert(latex, "  cell{1}{8-9}={bg=pasm2-enc-result},")
+    table.insert(latex, "  hlines,")
+    table.insert(latex, "  vlines,")
+    table.insert(latex, "}")
+    table.insert(latex, "  " .. table.concat(headers, " & ") .. " \\\\")
+  end
 
   -- Add data rows
   for _, body in ipairs(el.bodies) do
@@ -226,13 +176,133 @@ local function handle_encoding_table(el)
     end
   end
 
-  if use_longtblr then
-    table.insert(latex, "\\end{longtblr}")
+  if use_longtable then
+    table.insert(latex, "\\end{longtable}")
   else
     table.insert(latex, "\\end{tblr}")
   end
 
   -- Return as RawBlock
+  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
+end
+
+-- Detect if this is a 6-column encoding master table (Appendix A pattern)
+-- Headers: Instruction | Opcode | CZI | Cycles | C Effect | Z Effect
+local function is_encoding_master_table(el)
+  if #el.colspecs ~= 6 then
+    return false
+  end
+
+  -- Check header row for encoding table pattern
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 6 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
+      local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+      local h3 = pandoc.utils.stringify(header_row.cells[3].contents):lower()
+
+      -- Match "Instruction | Opcode | CZI | ..." pattern
+      if h1:match("instruction") and h2:match("opcode") and h3:match("czi") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
+-- Handle 6-column encoding master table (Appendix A)
+-- Uses standard longtable for reliable multi-page support
+local function handle_encoding_master_table(el)
+  local row_count = count_data_rows(el)
+
+  -- Helper to render cell contents as LaTeX (with escaping)
+  local function cell_to_latex(cell)
+    if not cell or not cell.contents then
+      return ""
+    end
+    if #cell.contents == 0 then
+      return ""
+    end
+    local text = pandoc.utils.stringify(cell.contents)
+    -- Escape special LaTeX characters in cell content
+    text = text:gsub("&", "\\&")
+    text = text:gsub("%%", "\\%%")
+    text = text:gsub("#", "\\#")
+    text = text:gsub("_", "\\_")
+    return text
+  end
+
+  -- Extract header row
+  local headers = {"Instruction", "Opcode", "CZI", "Cycles", "C Effect", "Z Effect"}
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells then
+      for i, cell in ipairs(header_row.cells) do
+        if i <= 6 then
+          headers[i] = cell_to_latex(cell)
+        end
+      end
+    end
+  end
+
+  local latex = {}
+
+  -- Always use longtable for this table (it has 300+ rows)
+  -- Column spec: fixed widths for all columns
+  table.insert(latex, "\\begin{longtable}{|>{\\raggedright\\arraybackslash}p{0.14\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.10\\linewidth}|>{\\centering\\arraybackslash}p{0.05\\linewidth}|>{\\centering\\arraybackslash}p{0.07\\linewidth}|>{\\raggedright\\arraybackslash\\small}p{0.26\\linewidth}|>{\\raggedright\\arraybackslash\\small}p{0.26\\linewidth}|}")
+
+  -- Build header row
+  local header_row_tex = "\\textbf{" .. headers[1] .. "} & " ..
+                         "\\textbf{" .. headers[2] .. "} & " ..
+                         "\\textbf{" .. headers[3] .. "} & " ..
+                         "\\textbf{" .. headers[4] .. "} & " ..
+                         "\\textbf{" .. headers[5] .. "} & " ..
+                         "\\textbf{" .. headers[6] .. "} \\\\"
+
+  -- First head (first page only)
+  table.insert(latex, "\\hline")
+  table.insert(latex, header_row_tex)
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\endfirsthead")
+
+  -- Continuation head (subsequent pages)
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\multicolumn{6}{|c|}{\\textit{Instruction Encodings (continued)}} \\\\")
+  table.insert(latex, "\\hline")
+  table.insert(latex, header_row_tex)
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\endhead")
+
+  -- Footer (bottom of each page except last)
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\multicolumn{6}{|r|}{\\textit{(continued on next page)}} \\\\")
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\endfoot")
+
+  -- Last footer
+  table.insert(latex, "\\hline")
+  table.insert(latex, "\\endlastfoot")
+
+  -- Add data rows
+  for _, body in ipairs(el.bodies) do
+    if body.body then
+      for _, row in ipairs(body.body) do
+        local cells = {}
+        for i, cell in ipairs(row.cells) do
+          if i <= 6 then
+            table.insert(cells, cell_to_latex(cell))
+          end
+        end
+        if #cells == 6 then
+          table.insert(latex, "  " .. table.concat(cells, " & ") .. " \\\\")
+        end
+      end
+    end
+  end
+
+  table.insert(latex, "\\end{longtable}")
+
   return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
@@ -606,7 +676,6 @@ local function handle_content_table(el)
   -- Build tabularray LaTeX
   local latex = {}
   if use_longtblr then
-    -- longtblr allows page breaks within table; no caption/label needed
     table.insert(latex, "\\begin{longtblr}{")
   else
     table.insert(latex, "\\begin{tblr}{")
@@ -644,7 +713,7 @@ local function handle_content_table(el)
     table.insert(latex, "  row{1}={font=\\bfseries},")
   end
 
-  -- For longtblr, specify header row to repeat on each page
+  -- For longtblr, repeat header row on each page (inner key for older tabularray)
   if use_longtblr then
     table.insert(latex, "  rowhead=1,")
   end
@@ -702,6 +771,11 @@ function Table(el)
   -- Handle 9-column encoding tables specially (fixed widths with colored headers)
   if num_cols == 9 then
     return handle_encoding_table(el)
+  end
+
+  -- Handle 6-column encoding master table (Appendix A) - uses longtable for page breaks
+  if num_cols == 6 and is_encoding_master_table(el) then
+    return handle_encoding_master_table(el)
   end
 
   -- Handle tables that NEED full page width (long content patterns)

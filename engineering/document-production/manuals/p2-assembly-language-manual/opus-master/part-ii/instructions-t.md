@@ -55,10 +55,10 @@ Test Bit
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit and optionally combines with flag.
 :::
 
-**TESTB**  *Dest, {#}Src*  **WC/WZ**\
-**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**\
-**TESTB**  *Dest, {#}Src*  **ORC/ORZ**\
-**TESTB**  *Dest, {#}Src*  **XORC/XORZ**
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTB**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
@@ -102,10 +102,10 @@ Test Bit Negated
 [Arithmetic Operations](#arithmetic-operations) - Tests a specific bit inverted and optionally combines with flag.
 :::
 
-**TESTBN**  *Dest, {#}Src*  **WC/WZ**\
-**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**\
-**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**\
-**TESTBN**  *Dest, {#}Src*  **XORC/XORZ**
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**WC/WZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTBN**  *Dest, {#}Src*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
@@ -181,15 +181,15 @@ Test Pin / Test Pin Negated {#testpn}
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
-**TESTP**  *{#}Dest*  **WC/WZ**\
-**TESTP**  *{#}Dest*  **ANDC/ANDZ**\
-**TESTP**  *{#}Dest*  **ORC/ORZ**\
-**TESTP**  *{#}Dest*  **XORC/XORZ**
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTP**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
 
-**TESTPN**  *{#}Dest*  **WC/WZ**\
-**TESTPN**  *{#}Dest*  **ANDC/ANDZ**\
-**TESTPN**  *{#}Dest*  **ORC/ORZ**\
-**TESTPN**  *{#}Dest*  **XORC/XORZ**
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**WC/WZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ANDC/ANDZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**ORC/ORZ**\
+**TESTPN**  *{#}Dest*&nbsp;&nbsp;**XORC/XORZ**
 
 ---
 
