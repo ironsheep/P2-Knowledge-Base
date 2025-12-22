@@ -76,11 +76,11 @@ The Src parameter provides either the data source (for immediate transfers) or a
 
 XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
 
-::: pasm2
+```pasm2
         XINIT   mode, data         ' Start data transfer
         WYPIN   count, #clk_pin    ' Start clock generation
         WAITXFI                    ' Wait for completion
-:::
+```
 
 This parallel operation eliminates CPU intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
 
@@ -171,13 +171,13 @@ The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bi
 - Fast execution (2 clocks per random number)
 - Small state requirement (single 32-bit value)
 
-::: pasm2
+```pasm2
         MOV     seed, initial_value  ' Initialize with non-zero seed
 
 .loop   XORO32  seed                 ' Advance PRNG state
         MOV     random_val, 0        ' Next instruction receives random in S
         ' Process random_val...
-:::
+```
 
 The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value.
 

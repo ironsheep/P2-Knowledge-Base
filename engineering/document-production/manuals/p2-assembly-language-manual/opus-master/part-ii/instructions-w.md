@@ -35,9 +35,9 @@ To set an optional timeout, insert a SETQ instruction (with a future System Coun
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
-::: pasm2
+```pasm2
         WAITATN                ' Wait for attention from another cog
-:::
+```
 
 
 
@@ -171,10 +171,10 @@ WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline u
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-::: pasm2
+```pasm2
         SETPAT  mask, pattern  ' Set up pattern detector
         WAITPAT                ' Wait for pattern match
-:::
+```
 
 
 
@@ -247,9 +247,9 @@ WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
-::: pasm2
+```pasm2
         WAITX   #99            ' Wait 101 clock cycles (2 + 99)
-:::
+```
 
 
 
@@ -534,9 +534,9 @@ WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the low
 
 The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
-::: pasm2
+```pasm2
         WRBYTE  value, ptra++  ' Write byte, increment pointer
-:::
+```
 
 
 
@@ -614,10 +614,10 @@ Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the m
 
 Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written.
 
-::: pasm2
+```pasm2
         WRFAST  #0, buffer_addr  ' Set up FIFO write to buffer
         WFLONG  data               ' Write data to FIFO
-:::
+```
 
 
 
@@ -653,10 +653,10 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
 
-::: pasm2
+```pasm2
         SETQ    #16-1          ' Set up for 16-long block transfer
         WRLONG  buffer, ptra   ' Write 16 longs to hub
-:::
+```
 
 **Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
 
@@ -694,9 +694,9 @@ When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. O
 
 WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage.
 
-::: pasm2
+```pasm2
         WRLUT   value, #100    ' Write to LUT address 100
-:::
+```
 
 
 
@@ -739,12 +739,12 @@ The standard configuration sequence is:
 
 WRPIN #0, pin clears all smart pin configuration.
 
-::: pasm2
+```pasm2
         DIRL    #10            ' Reset pin 10
         WRPIN   pwm_mode, #10  ' Configure for PWM
         WXPIN   period, #10    ' Set period
         DIRH    #10            ' Enable
-:::
+```
 
 
 
@@ -852,8 +852,8 @@ WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves mult
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. This dual purpose makes WYPIN essential for continuous smart pin operation—it both provides new data and signals that previous results have been processed.
 
-::: pasm2
+```pasm2
         WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
-:::
+```
 
 

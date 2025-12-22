@@ -39,13 +39,13 @@ For example, if Dest contains $FFFF_FFFF and Src contains 7, ZEROX clears bits 3
 
 The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit positions 0 through 31 to be specified. This makes ZEROX particularly useful for extracting and zero-extending bit fields from packed data structures or network protocols.
 
-::: pasm2
+```pasm2
         ' Extract lower byte and zero-extend
         MOV     data, big_value
         ZEROX   data, #7         ' Keep bits 7-0, clear bits 31-8
                                  ' If big_value was $FFFF_FFFF,
                                  ' data becomes $0000_00FF
-:::
+```
 
 ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for unsigned values), SIGNX fills upper bits with the value of the designated bit (for signed values). Use ZEROX when working with unsigned data, and SIGNX when working with signed data that needs proper sign extension.
 

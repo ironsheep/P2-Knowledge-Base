@@ -41,10 +41,10 @@ If the WZ or WCZ effect is specified, the Z flag is set to 1 if Dest (or Dest AN
 
 TEST is non-destructive—it does not modify Dest.
 
-::: pasm2
+```pasm2
         TEST    flags WCZ      ' Test all bits for parity and zero
         TEST    value, #$FF WZ ' Test low byte for zero
-:::
+```
 
 
 
@@ -88,10 +88,10 @@ TESTB reads the state (0 or 1) of a bit in Dest designated by Src, and either st
 
 TESTB is useful for examining individual bits without modifying the register value.
 
-::: pasm2
+```pasm2
         TESTB   flags, #7 WC   ' Test bit 7, store in C
         TESTB   mask, #3 ANDC  ' AND bit 3 with current C
-:::
+```
 
 
 
@@ -224,11 +224,11 @@ TESTP reads the state (0 or 1) of the I/O pin designated by Dest, and either sto
 
 Both instructions read the actual pin state from the IN register, not the output register. This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
 
-::: pasm2
+```pasm2
         TESTP   #10 WC         ' Read pin 10 state into C
         TESTP   sensor_pin WZ  ' Test sensor pin, store in Z
         TESTPN  #button WC     ' C=1 if active-low button pressed
-:::
+```
 
 
 
@@ -355,10 +355,10 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
-::: pasm2
+```pasm2
         TJNZ    count, #loop   ' Loop while count <> 0
         TJZ     count, #done   ' Exit when count = 0
-:::
+```
 
 Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
@@ -394,10 +394,10 @@ TJV tests the value in Dest against C and jumps to the address described by Src 
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
-::: pasm2
+```pasm2
         ADDS    result, delta WC  ' Signed add, update C
         TJV     result, #overflow_handler
-:::
+```
 
 
 

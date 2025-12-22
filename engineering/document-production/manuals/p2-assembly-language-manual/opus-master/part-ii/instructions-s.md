@@ -34,9 +34,9 @@ Shift Arithmetic Left
 
 SAL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to that of the original Dest[0]. SAL is the complement of SAR for bit streams but not for math operations. For swift 32-bit integer multiplication by a power-of-two, use SHL instead.
 
-::: pasm2
+```pasm2
         SAL     data, #4       ' Shift left 4 bits, extending LSB
-:::
+```
 
 
 
@@ -70,9 +70,9 @@ Shift Arithmetic Right
 
 SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
 
-::: pasm2
+```pasm2
         SAR     value, #3      ' Divide signed value by 8
-:::
+```
 
 
 
@@ -107,10 +107,10 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 
 The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
 
-::: pasm2
+```pasm2
         SCA     factor, ##$8000  ' Scale by 0.5 (32768/65536)
         ADD     result, #0      ' Add scaled value
-:::
+```
 
 
 
@@ -180,9 +180,9 @@ Set Byte
 
 SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte and register described by a prior ALTSB instruction. No other bits are modified. N (0-3) identifies a value's individual bytes by position in least-significant byte order. The second syntax is intended for use after an ALTSB instruction in a loop to iteratively affect a series of byte values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETBYTE data, #$FF, #2  ' Set byte 2 of data to $FF
-:::
+```
 
 
 
@@ -489,9 +489,9 @@ Set Nibble
 
 SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibble and register described by a prior ALTSN instruction. No other bits are modified. N (0-7) identifies a value's individual nibbles by position in least-significant nibble order. The second syntax is intended for use after an ALTSN instruction in a loop to iteratively affect a series of nibble values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETNIB  data, #$A, #5   ' Set nibble 5 of data to $A
-:::
+```
 
 
 
@@ -610,10 +610,10 @@ Set Q Register
 
 Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer count. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx instructions to provide additional parameters.
 
-::: pasm2
+```pasm2
         SETQ    #16-1          ' Set up for 16-long block transfer
         RDLONG  buffer, ptra   ' Read 16 longs from hub
-:::
+```
 
 **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
 
@@ -645,10 +645,10 @@ Set Q For LUT Transfers
 
 Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of COG RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
 
-::: pasm2
+```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
-:::
+```
 
 **Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
@@ -816,9 +816,9 @@ Set Word
 
 SETWORD stores Src[15:0] into the word identified by N within Dest, or the word and register described by a prior ALTSW instruction. No other bits are modified. N (0-1) identifies a value's individual words by position in least-significant word order. The second syntax is intended for use after an ALTSW instruction in a loop to iteratively affect a series of word values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETWORD data, ##$ABCD, #1  ' Set high word of data to $ABCD
-:::
+```
 
 
 
@@ -939,9 +939,9 @@ Shift Left
 
 SHL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to 0. This is useful for bit-stream manipulation as well as for swift multiplication; signed or unsigned 32-bit integer multiplication by a power-of-two. Care must be taken for power-of-two multiplications since upper bits shift through the MSB (sign bit), mangling large signed values.
 
-::: pasm2
+```pasm2
         SHL     value, #2      ' Multiply by 4
-:::
+```
 
 
 
@@ -975,9 +975,9 @@ Shift Right
 
 SHR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to 0. This is useful for bit-stream manipulation as well as for swift division; unsigned 32-bit integer division by a power-of-two. For similar division of a signed value, use SAR instead.
 
-::: pasm2
+```pasm2
         SHR     value, #3      ' Divide unsigned by 8
-:::
+```
 
 
 
@@ -1010,9 +1010,9 @@ Sign Extend
 
 SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value of that identified bit, i.e. sign-extending the value. This is handy when converting encoded or received signed values from a small bit width to a large bit width, i.e. 32 bits.
 
-::: pasm2
+```pasm2
         SIGNX   value, #7      ' Sign-extend 8-bit value to 32 bits
-:::
+```
 
 
 
@@ -1043,12 +1043,12 @@ Skip Instructions
 
 Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cancelled for each '1' bit in Dest[0]-Dest[31]. Each set bit causes the corresponding sequential instruction to be cancelled (replaced with NOP).
 
-::: pasm2
+```pasm2
         SKIP    #%10101        ' Skip instructions 0, 2, 4
         NOP                    ' Skipped (bit 0)
         ADD     x, #1          ' Executed (bit 1 = 0)
         NOP                    ' Skipped (bit 2)
-:::
+```
 
 
 
@@ -1175,11 +1175,11 @@ Disallow Interrupts
 
 STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
 
-::: pasm2
+```pasm2
         STALLI                 ' Disable interrupts
         ' Critical section...
         ALLOWI                 ' Re-enable interrupts
-:::
+```
 
 
 
@@ -1212,9 +1212,9 @@ Subtract
 
 SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. To subtract unsigned multi-long values, use SUB followed by SUBX as described in Subtracting Two Multi-Long Values. SUB and SUBX are also used in subtracting signed multi-long values with SUBSX ending the sequence.
 
-::: pasm2
+```pasm2
         SUB     count, #1 WZ   ' Decrement count, set Z if zero
-:::
+```
 
 
 
