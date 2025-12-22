@@ -443,11 +443,11 @@ DJZ and DJNZ decrement Dest and conditionally jump based on whether the result i
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
 Example loop:
-```pasm
+::: pasm2
         mov     count, #10              ' Set loop counter to 10
 .loop   ' loop body here
         djnz    count, #.loop           ' Decrement and loop if not zero
-```
+:::
 
 Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 

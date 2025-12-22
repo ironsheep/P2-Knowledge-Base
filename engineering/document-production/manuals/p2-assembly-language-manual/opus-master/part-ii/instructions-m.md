@@ -204,13 +204,13 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 | 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
-```pasm
+::: pasm2
         MODCZ   _CLR, _SET      ' Clear C, set Z
         MODCZ   _SET, _CLR      ' Set C, clear Z
         MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
         MODCZ   _Z, _C          ' Swap C and Z values
         MODCZ   _NC, _NZ        ' Invert both flags
-```
+:::
 
 
 
@@ -287,27 +287,27 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result writte
 
 MOV with immediate values is commonly used for register initialization:
 
-```pasm
+::: pasm2
         mov     counter, #100           ' Initialize counter to 100
         mov     mask, ##$FFFF_0000      ' Load 32-bit constant using AUGS
-```
+:::
 
 MOV between registers is used for preserving values and working with temporary copies:
 
-```pasm
+::: pasm2
         mov     temp, value             ' Save value in temp
         add     value, increment        ' Modify value
         mov     result, value           ' Copy final result
-```
+:::
 
 When combined with flag effects, MOV enables efficient value testing:
 
-```pasm
+::: pasm2
                 mov     data, source  wz        ' Copy and test if zero
         if_nz   call    #process                ' Process only if non-zero
                 mov     signed, value  wc       ' Copy and test sign bit
         if_c    neg     signed, signed          ' Make positive if negative
-```
+:::
 
 
 
@@ -389,20 +389,20 @@ If the WZ effect is specified, the Z flag is set (1) if either Dest or Src equal
 
 MUL is commonly used for scaling operations in fixed-point arithmetic:
 
-```pasm
+::: pasm2
         mov     value, ##1000           ' Value = 1000
         mul     value, #25              ' Multiply by 25: value = 25000
-```
+:::
 
 For fixed-point math with 16-bit fractional parts:
 
-```pasm
+::: pasm2
         ' Multiply two 16.16 fixed-point numbers
         ' Result in upper 16 bits needs shifting
         mov     temp, frac1
         mul     temp, frac2             ' temp = product (low 16 of each)
         shr     temp, #16               ' Adjust for fixed-point scale
-```
+:::
 
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
@@ -490,19 +490,19 @@ If the WZ effect is specified, the Z flag is set (1) if either Dest or Src equal
 
 MULS is commonly used for signed arithmetic and physics calculations:
 
-```pasm
+::: pasm2
         mov     velocity, signed_speed
         muls    velocity, time          ' velocity = speed * time (signed)
-```
+:::
 
 For signed fixed-point math with 16-bit fractional parts:
 
-```pasm
+::: pasm2
         ' Multiply two signed 16.16 fixed-point numbers
         mov     temp, signed_frac1
         muls    temp, signed_frac2      ' Signed multiplication
         sar     temp, #16               ' Arithmetic shift to preserve sign
-```
+:::
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
@@ -558,11 +558,11 @@ MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag
 
 Example: Conditionally set bits based on a comparison:
 
-```pasm
+::: pasm2
         cmp     value, limit  wc        ' Set C if value < limit
         muxc    status, #$01            ' Set bit 0 if less than
         muxnc   status, #$02            ' Set bit 1 if greater or equal
-```
+:::
 
 If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
 
@@ -602,11 +602,11 @@ For example, if Dest = $1234_5678 and Src = $0A00_0C0D, the result is Dest = $1A
 
 This instruction is useful for sparse updates where only certain nibbles need modification:
 
-```pasm
+::: pasm2
         ' Update only the changed nibbles in a configuration register
         mov     config, current_config
         muxnibs config, changes         ' Apply non-zero changes only
-```
+:::
 
 MUXNIBS is commonly used in graphics operations for palette updates, bit-field modifications where fields are naturally nibble-aligned, and efficient sparse data updates. It provides a single-instruction way to perform selective nibble replacement that would otherwise require multiple mask and merge operations.
 
@@ -648,11 +648,11 @@ This instruction is particularly useful for pixel graphics operations where 2-bi
 
 MUXNITS provides parallel conditional updates across all sixteen bit pair positions in a single 2-clock operation:
 
-```pasm
+::: pasm2
         ' Update specific 2-bit fields in a packed structure
         mov     state, current_state
         muxnits state, updates          ' Apply non-zero updates only
-```
+:::
 
 The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
 
@@ -688,14 +688,14 @@ MUXQ performs selective bit copying from Src to Dest based on a mask previously 
 
 MUXQ must be preceded by SETQ to load the mask into Q:
 
-```pasm
+::: pasm2
         setq    mask                    ' Load mask into Q
         muxq    dest, source            ' Copy masked bits from source
-```
+:::
 
 This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
 
-```pasm
+::: pasm2
         ' Traditional approach (3 instructions):
         andn    dest, mask              ' Clear masked bits
         and     temp, source, mask      ' Extract source bits
@@ -704,23 +704,23 @@ This provides atomic masked bit updates that are more efficient than separate AN
         ' MUXQ approach (2 instructions):
         setq    mask                    ' Set mask
         muxq    dest, source            ' Atomic masked copy
-```
+:::
 
 MUXQ is critical for parallel I/O operations, especially driving multiple pins simultaneously:
 
-```pasm
+::: pasm2
         ' Update multiple RGB LED pins atomically
         setq    rgb_mask                ' Mask for RGB pins
         muxq    outa, rgb_data          ' Update all RGB pins together
-```
+:::
 
 The Q register mask enables sophisticated bit manipulation:
 
-```pasm
+::: pasm2
         ' Update specific configuration bits
         setq    ##$00FF_FF00            ' Mask for middle bytes
         muxq    config, new_values      ' Update only those bytes
-```
+:::
 
 MUXQ is particularly valuable for HUB75 RGB panel driving and other applications requiring atomic multi-pin updates. It executes in 2 clock cycles, providing high-performance parallel bit operations essential for real-time graphics and control applications.
 

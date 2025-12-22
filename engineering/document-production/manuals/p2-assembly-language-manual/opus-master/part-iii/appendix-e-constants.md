@@ -24,12 +24,12 @@ Logical true constant with all bits set.
 The TRUE constant represents a boolean true condition with all 32 bits set to 1. In two's complement signed representation, this equals -1. The all-bits-set pattern makes TRUE particularly useful for bitwise masking operations where a true condition must affect all bits.
 
 #### Usage
-```pasm
+::: pasm2
 ' Using TRUE in conditional logic
                 cmp     x, #0       wz      ' Compare x with 0
                 mov     result, TRUE        ' Default to TRUE
         if_z    mov     result, FALSE       ' Set to FALSE if x was 0
-```
+:::
 
 #### Notes
 - Standard boolean true value in PASM2
@@ -61,13 +61,13 @@ Logical false constant with all bits cleared.
 The FALSE constant represents a boolean false condition with all 32 bits cleared to 0. This zero value serves as the standard false representation in PASM2 and provides a clean starting state for flag initialization.
 
 #### Usage
-```pasm
+::: pasm2
 ' Using FALSE for initialization
         mov     flag, FALSE     ' Initialize flag to FALSE
         ' ... some operations ...
         cmp     x, y        wz  ' Compare x and y
         if_e mov  flag, TRUE    ' Set flag to TRUE if equal
-```
+:::
 
 #### Notes
 - Standard boolean false value in PASM2
@@ -101,7 +101,7 @@ Most negative value in 32-bit signed integer representation.
 NEGX represents the maximum negative integer value in 32-bit two's complement representation (-2³¹). This constant marks the lower boundary of the signed integer range and serves as a critical reference point for underflow detection and saturation arithmetic.
 
 #### Usage
-```pasm
+::: pasm2
 ' Checking for negative underflow
                 cmps    value, NEGX     wc      ' Check if below min negative
         if_c    jmp     #underflow              ' Jump if underflow
@@ -109,7 +109,7 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 ' Using NEGX as lower limit
                 mov     limit, NEGX             ' Set limit to max negative
                 maxs    value, limit            ' Clamp to not go below NEGX
-```
+:::
 
 #### Notes
 - Represents -2³¹ in decimal notation
@@ -142,7 +142,7 @@ Most positive value in 32-bit signed integer representation.
 POSX represents the maximum positive integer value in 32-bit two's complement representation (2³¹ - 1). This constant marks the upper boundary of the signed integer range and serves as a critical reference point for overflow detection and saturation arithmetic.
 
 #### Usage
-```pasm
+::: pasm2
 ' Checking for positive overflow
                 cmp     value, POSX     wc      ' Check if exceeds max positive
         if_nc   jmp     #overflow               ' Jump if overflow
@@ -150,7 +150,7 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 ' Using POSX as upper limit
                 mov     limit, POSX             ' Set limit to max positive
                 mins    value, limit            ' Clamp to not exceed POSX
-```
+:::
 
 #### Notes
 - Represents 2³¹ - 1 in decimal notation
@@ -185,7 +185,7 @@ IEEE 754 single-precision floating-point representation of π.
 The PI constant provides the mathematical constant π encoded in IEEE 754 single-precision floating-point format. This encoding allows direct use with the P2's CORDIC operations and floating-point calculations without runtime conversion overhead.
 
 #### Usage
-```pasm
+::: pasm2
 ' Using PI with CORDIC rotation
         mov     angle, PI           ' Load PI constant
         shr     angle, #1           ' Divide by 2 for PI/2 (90 degrees)
@@ -196,7 +196,7 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
         qmul    x, ##180            ' Multiply PI by 180
         qdiv    x, ##$80000000      ' Divide by 2³¹ for scaling
         getqx   degrees             ' Get degrees conversion factor
-```
+:::
 
 #### Notes
 - IEEE 754 single-precision format provides approximately 7 decimal digits of precision
@@ -230,13 +230,13 @@ Execution mode constant for loading code from hub RAM to cog RAM.
 COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COGINIT loads 496 longs from hub RAM into cog RAM registers $000-$1F7 and begins execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start specific cog with code load
         COGINIT #COGEXEC+1, #$100   ' Load and start Cog 1 from Hub RAM $100
 
 ' Start Cog 5 with code at label
         COGINIT #COGEXEC+5, @code   ' Load and start Cog 5 from @code
-```
+:::
 
 #### Syntax
 ```
@@ -277,13 +277,13 @@ Execution mode constant for executing code directly from hub RAM.
 HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COGINIT starts the target cog executing instructions directly from hub RAM without loading code to cog RAM. This mode removes code size restrictions at the cost of slower instruction fetch times.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start specific cog with hub execution
         COGINIT #HUBEXEC+1, #$400   ' Cog 1 from Hub RAM $400
 
 ' Start Cog 5 with hub execution at label
         COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
-```
+:::
 
 #### Syntax
 ```
@@ -326,11 +326,11 @@ Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves
 COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 496 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start any available cog with code load
                 coginit #COGEXEC_NEW, ##@cog_code  wc
         if_c    jmp     #no_cog_available
-```
+:::
 
 #### Notes
 - Use WC to detect if no cog was available (C=1 on failure)
@@ -358,11 +358,11 @@ Combines COGEXEC base mode with both the N (new cog) and pair selection flags se
 COGEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs (0-1, 2-3, 4-5, or 6-7), load code into the first cog, and start execution. Adjacent cog pairs can share their LUT memory via SETLUTS, enabling efficient inter-cog communication and data sharing.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start a cog pair for LUT sharing
                 coginit #COGEXEC_NEW_PAIR, ##@pair_code  wc
         if_c    jmp     #no_pair_available
-```
+:::
 
 #### Notes
 - Requires two adjacent, stopped cogs to succeed
@@ -391,11 +391,11 @@ Combines HUBEXEC base mode with the N (new cog) flag set.
 HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 496-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start any available cog in hub execution mode
                 coginit #HUBEXEC_NEW, ##@hub_code  wc
         if_c    jmp     #no_cog_available
-```
+:::
 
 #### Notes
 - Hub execution allows unlimited code size
@@ -424,11 +424,11 @@ Combines HUBEXEC base mode with both the N (new cog) and pair selection flags se
 HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from Hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
 
 #### Usage
-```pasm
+::: pasm2
 ' Start a cog pair for hub execution with LUT sharing
                 coginit #HUBEXEC_NEW_PAIR, ##@hub_pair_code  wc
         if_c    jmp     #no_pair_available
-```
+:::
 
 #### Notes
 - Combines unlimited hub code size with LUT sharing capability

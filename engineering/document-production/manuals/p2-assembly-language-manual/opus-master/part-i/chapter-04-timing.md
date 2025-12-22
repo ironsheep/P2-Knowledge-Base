@@ -39,9 +39,9 @@ The VCO operates optimally between 100-200 MHz. Higher frequencies are possible 
 
 Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
 
-```pasm
+::: pasm2
         hubset  ##config_value          ' Configure clock system
-```
+:::
 
 The configuration value contains fields for crystal mode, clock source selection, and PLL parameters. Key fields include:
 
@@ -64,11 +64,11 @@ Switching clock sources requires a careful sequence to ensure glitch-free transi
 3. **Switch sources**: Change the SS field to select the new clock source
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 
-```pasm
+::: pasm2
         hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable xtal
         waitx   ##20_000_000/100                            ' Wait ~10ms
         hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch
-```
+:::
 
 The P2 provides automatic fallback to RCFAST if the selected clock source fails, preventing system lockup from clock problems.
 
@@ -172,10 +172,10 @@ SETQ enables burst transfers that read or write multiple consecutive longs in a 
 
 The SETQ instruction takes one parameter specifying how many additional longs to transfer. The hub access instruction that follows SETQ performs a burst of that many consecutive transfers:
 
-```pasm
+::: pasm2
         setq    #15                     ' Transfer 16 longs total
         rdlong  buffer, ptr             ' Burst read from Hub
-```
+:::
 
 This code reads 16 consecutive longs from hub memory starting at address `ptr` and stores them in COG RAM starting at address `buffer`. The first long experiences normal hub window wait (0-7 cycles), but each subsequent long transfers in just one additional cycle. The total time is approximately 2 (SETQ) + 2 (RDLONG base) + wait (0-7) + 1 + 15 (subsequent longs) = 20-27 cycles—far faster than 16 separate RDLONG instructions, which would average 16 × (2 + 3.5 + 1) = 104 cycles.
 
@@ -195,13 +195,13 @@ Each COG has access to a shared FIFO buffer that can operate in either read mode
 
 RDFAST configures the FIFO for reading from hub memory. The D operand provides a block count (number of 64-byte blocks before wrapping), and the S operand provides the starting hub address:
 
-```pasm
+::: pasm2
         rdfast  #0, ptr                 ' Start continuous read FIFO
 loop
         rflong  data                    ' Read from FIFO (fast, no hub wait)
         ' ... process data ...
         jmp     #loop                   ' Continue reading
-```
+:::
 
 The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
 
@@ -220,13 +220,13 @@ The no-wait mode is useful when you need to reconfigure the FIFO quickly and can
 
 WRFAST configures the FIFO for writing to hub memory:
 
-```pasm
+::: pasm2
         wrfast  #0, ptr                 ' Start continuous write FIFO
 loop
         ' ... generate data ...
         wflong  data                    ' Write to FIFO (fast, no hub wait)
         jmp     #loop                   ' Continue writing
-```
+:::
 
 The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
 
@@ -236,9 +236,9 @@ The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer 
 
 The FIFO supports circular buffer operation for continuous streaming. When configured with a non-zero block count, the FIFO wraps back to the starting address after transferring the specified number of 64-byte blocks:
 
-```pasm
+::: pasm2
         rdfast  #16, audio_buffer       ' Read 16 blocks (1KB), then wrap
-```
+:::
 
 For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count when you don't want wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
 
@@ -246,12 +246,12 @@ For wrapping mode, the hub start address must be long-aligned (address ends in %
 
 The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. It sets a new start address and block count that take effect when the current blocks are fully read or written:
 
-```pasm
+::: pasm2
         rdfast  #16, buffer_a           ' Start reading from buffer A
         ' ... reading proceeds ...
         fblock  #16, buffer_b           ' Queue buffer B for when A completes
         ' ... FIFO seamlessly transitions to buffer B on wrap
-```
+:::
 
 FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity enables dynamic, seamless streaming between hub RAM and pins/DACs—essential for continuous audio/video output where buffer switches must be glitch-free.
 
@@ -341,23 +341,23 @@ Conditional execution provides an alternative to branching that eliminates timin
 
 The branching approach introduces timing variation:
 
-```pasm
+::: pasm2
 ' With branch (2 or 4 cycles):
         cmp     a, b            wz
         if_z    jmp     #equal_case
         ' Not-equal path continues here
-```
+:::
 
 When `a` equals `b`, this code takes 2 (CMP) + 4 (JMP taken) = 6 cycles. When `a` differs from `b`, the code takes 2 (CMP) + 2 (JMP not taken) = 4 cycles. The 2-cycle variation complicates timing analysis.
 
 The conditional execution approach provides constant timing:
 
-```pasm
+::: pasm2
 ' Without branch (2 cycles always):
         cmp     a, b            wz
         if_z    mov     result, #1
         if_nz   mov     result, #0
-```
+:::
 
 This code takes 2 (CMP) + 2 (first MOV, executed if Z set) + 2 (second MOV, executed if Z clear) = 6 cycles when Z is set, or 2 (CMP) + 2 (first MOV, skipped) + 2 (second MOV, executed) = 6 cycles when Z is clear. Both paths take exactly 6 cycles.
 
@@ -372,9 +372,9 @@ Conditional execution works for simple cases where both branches are short. For 
 
 WAITX provides precise, cycle-accurate delays by pausing execution for a specified number of clock cycles:
 
-```pasm
+::: pasm2
         waitx   ##100                   ' Wait exactly 100 cycles
-```
+:::
 
 The instruction accepts a value specifying the delay duration. Execution resumes exactly after that many cycles have elapsed. This precision makes WAITX essential for timing-critical operations like bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.
 
@@ -386,25 +386,25 @@ The P2 provides a global cycle counter that increments every clock cycle. COGs c
 
 Each COG has three independent counter match registers (CT1, CT2, CT3). Programs load target counter values into these registers using ADDCT1, ADDCT2, or ADDCT3, then wait for the counter to reach those values using WAITCT1, WAITCT2, or WAITCT3:
 
-```pasm
+::: pasm2
         getct   time                    ' Read current time
         addct1  time, ##1000            ' Set CT1 = time + 1000
         ' ... do work ...
         waitct1                         ' Wait until counter reaches CT1
-```
+:::
 
 This pattern ensures that the wait completes exactly 1,000 cycles after the GETCT instruction, regardless of how long the intervening work takes. If the work completes in 800 cycles, WAITCT1 waits 200 more cycles. If the work takes 1,200 cycles, WAITCT1 returns immediately (the deadline has already passed).
 
 For periodic operations, adding a fixed delta to the counter match register each iteration eliminates drift:
 
-```pasm
+::: pasm2
         getct   time                    ' Initialize time base
 loop
         addct1  time, ##1000            ' Next deadline = previous + 1000
         ' ... generate pulse or process data ...
         waitct1                         ' Wait for next period
         jmp     #loop
-```
+:::
 
 Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
 
@@ -416,13 +416,13 @@ While HUBSET's primary purpose is configuring hub execution mode, it also provid
 
 For applications that need consistent hub access timing without entering hub execution mode, careful scheduling provides an alternative. If a loop performs hub access at regular intervals aligned with the 8-cycle egg beater period, the hub wait time remains consistent across iterations:
 
-```pasm
+::: pasm2
 loop
         ' ... exactly 8 cycles of work ...
         rdlong  data, ptr               ' Hub access occurs at same phase
         ' ... more work ...
         jmp     #loop                   ' Loop maintains 8-cycle alignment
-```
+:::
 
 This technique requires precise cycle counting and works only when the loop body contains an integer multiple of 8 cycles.
 
@@ -447,28 +447,28 @@ Many real-time applications require loops that execute with precise, predictable
 
 Consider a loop that reads data from hub memory, processes it, and repeats:
 
-```pasm
+::: pasm2
 ' 8-cycle loop body (fits in one Hub window period)
 loop
         rdlong  data, ptr               ' 2 + wait cycles
         add     ptr, #4                 ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
-```
+:::
 
 This loop body must account for hub access timing variation. If the loop starts aligned with the COG's hub window, RDLONG waits 0 cycles and the loop takes 2 + 2 + 4 = 8 cycles. If the loop starts just after the hub window, RDLONG waits 7 cycles and the loop takes 9 + 2 + 4 = 15 cycles.
 
 For truly cycle-exact timing, loops must either eliminate hub access or align hub access with the egg beater rotation. One approach uses COG RAM for all data, avoiding hub access entirely:
 
-```pasm
+::: pasm2
 loop
         add     data, #1                ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
         ' Exactly 6 cycles per iteration
-```
+:::
 
 Another approach aligns the loop body to an 8-cycle boundary and ensures hub access occurs at the same phase each iteration:
 
-```pasm
+::: pasm2
 loop
         rdlong  data, ptr               ' 2 + wait (same wait each time)
         add     result, data            ' 2 cycles
@@ -476,7 +476,7 @@ loop
         djnz    count, #loop            ' 4 cycles (taken)
         nop                             ' 2 cycles - padding to 16 total
         ' Loop body = 16 cycles (2× hub period)
-```
+:::
 
 If the first iteration experiences 3 cycles of hub wait, every subsequent iteration also experiences 3 cycles of wait because the 16-cycle loop maintains alignment with the 8-cycle hub period.
 
@@ -486,7 +486,7 @@ Programs can hide hub access latency by overlapping computation with hub waiting
 
 The SETQ-based burst transfer provides one form of pipelining—while later longs transfer, the program can begin processing earlier longs. A more general approach separates hub access from computation:
 
-```pasm
+::: pasm2
 loop
         rdlong  next_data, next_ptr     ' Start fetching next data
         add     next_ptr, #4
@@ -495,7 +495,7 @@ loop
         sub     current_data, offset
         mov     current_data, next_data ' Previous fetch is now ready
         djnz    count, #loop
-```
+:::
 
 This pattern keeps hub access and computation overlapped—the RDLONG for iteration N+1 occurs while iteration N's computation proceeds. The technique works best when computation time roughly equals hub access time, maximizing overlap.
 
@@ -505,15 +505,15 @@ CORDIC operations take 54 cycles to compute results, but the instruction that st
 
 A simple example shows the pattern:
 
-```pasm
+::: pasm2
         qmul    a, b                    ' Start multiply
         ' ... 54 cycles of other work ...
         getqx   result                  ' Get result (low 32 bits)
-```
+:::
 
 For maximum efficiency, interleave multiple CORDIC operations with other work:
 
-```pasm
+::: pasm2
         qmul    a1, b1                  ' Start first multiply
         ' ... some work ...
         qmul    a2, b2                  ' Start second multiply
@@ -521,7 +521,7 @@ For maximum efficiency, interleave multiple CORDIC operations with other work:
         getqx   result1                 ' Get first result
         ' ... more work ...
         getqx   result2                 ' Get second result
-```
+:::
 
 The key constraint is that at least 54 cycles must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
 
@@ -533,7 +533,7 @@ Bit-banging—directly controlling I/O pins with software timing—requires cycl
 
 A WS2812 LED protocol example demonstrates the precision required:
 
-```pasm
+::: pasm2
 ' WS2812 requires precise pulse widths:
 ' 0 bit: 400ns high, 850ns low
 ' 1 bit: 800ns high, 450ns low
@@ -551,7 +551,7 @@ send_bit
         if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
         rol     data, #1                ' Shift to next bit
         djnz    count, #send_bit
-```
+:::
 
 This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
 
@@ -566,12 +566,12 @@ The P2 provides a global 64-bit cycle counter (Rev B/C silicon) that increments 
 
 Measuring code execution time involves reading the counter before and after the code section of interest:
 
-```pasm
+::: pasm2
         getct   start_time              ' Read cycle counter
         ' ... code to measure ...
         getct   end_time                ' Read cycle counter again
         sub     end_time, start_time    ' Elapsed cycles
-```
+:::
 
 The difference between the two readings gives the exact number of cycles elapsed. This measurement includes the cycles consumed by GETCT itself (2 cycles each), so precise measurements should account for this overhead.
 
@@ -585,11 +585,11 @@ The lower 32 bits of the cycle counter wrap around every 2³² cycles. At 320 MH
 
 Subtraction using unsigned arithmetic naturally handles wrap-around. When end_time is less than start_time (because wrap-around occurred), the subtraction `end_time - start_time` produces the correct elapsed time due to modular arithmetic:
 
-```pasm
+::: pasm2
         mov     start_time, ##$FFFF_FFF0  ' Near wrap-around
         mov     end_time,   ##$0000_0010  ' After wrap-around
         sub     end_time, start_time      ' Result: $20 (32 cycles)
-```
+:::
 
 This automatic wrap-around handling works for elapsed times up to 2³¹ cycles (half the counter range). For longer measurements, code must count wrap-around events explicitly or use multiple counter values.
 
@@ -599,7 +599,7 @@ GETCT enables detailed performance profiling of assembly code. By measuring exec
 
 A common profiling pattern measures loop iteration time:
 
-```pasm
+::: pasm2
         mov     iterations, ##1000
         getct   start_time
 loop
@@ -607,11 +607,11 @@ loop
         djnz    iterations, #loop
         getct   end_time
         sub     elapsed, end_time, start_time
-```
+:::
 
 The total elapsed time divided by the iteration count gives the average time per iteration. For more detailed profiling, place multiple GETCT measurements within the loop to identify which parts of the loop consume the most time:
 
-```pasm
+::: pasm2
 loop
         getct   time1
         ' ... section A ...
@@ -622,7 +622,7 @@ loop
         sub     timeB, time3, time2       ' Section B timing
         ' Store or accumulate timing data
         djnz    iterations, #loop
-```
+:::
 
 This approach provides cycle-accurate timing for each code section, enabling precise optimization. The overhead of GETCT instructions affects absolute timing but not the relative timing between sections.
 

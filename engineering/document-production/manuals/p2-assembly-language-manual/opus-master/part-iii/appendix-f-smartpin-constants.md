@@ -22,10 +22,10 @@ Bits [31..0] = %AAAA_BBBB_FFF_PPPPPPPPPPPPP_TT_MMMMM_0
 
 Constants are combined using OR operations to build the complete configuration:
 
-```pasm
+::: pasm2
         mov     mode, ##P_PWM_TRIANGLE | P_OE | P_LOCAL_A
         wrpin   mode, #56
-```
+:::
 
 
 
@@ -287,40 +287,40 @@ Constants are combined using OR operations to build the complete configuration:
 
 ### PWM Output Configuration
 
-```pasm
+::: pasm2
 ' Configure pin 56 for triangle PWM output
         mov     mode, ##P_PWM_TRIANGLE | P_OE
         wrpin   mode, #56
         wxpin   ##10000, #56        ' Period = 10000 clocks
         wypin   ##5000, #56         ' Duty = 50%
         dirh    #56                 ' Enable output
-```
+:::
 
 ### ADC Input with Gain
 
-```pasm
+::: pasm2
 ' Configure pin 32 for ADC with 10x gain
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
         wxpin   ##14, #32           ' 14-bit resolution
         dirl    #32                 ' Input mode
-```
+:::
 
 ### Open-Drain Output (I2C-style)
 
-```pasm
+::: pasm2
 ' Configure for open-drain with 1.5kΩ pull-up
         mov     mode, ##P_HIGH_FLOAT | P_LOW_1K5
         wrpin   mode, #44
-```
+:::
 
 ### Schmitt Trigger Input with Filter
 
-```pasm
+::: pasm2
 ' Debounced button input
         mov     mode, ##P_SCHMITT_A | P_FILT3_AB
         wrpin   mode, #0
-```
+:::
 
 
 
@@ -328,12 +328,12 @@ Constants are combined using OR operations to build the complete configuration:
 
 SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
 
-```pasm
+::: pasm2
 ' Complex config: Async TX, inverted, fast drive
         mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
         or      mode, ##P_HIGH_FAST | P_LOW_FAST
         wrpin   mode, pin
-```
+:::
 
 
 

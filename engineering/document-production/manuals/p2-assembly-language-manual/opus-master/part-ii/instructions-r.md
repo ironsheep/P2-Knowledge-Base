@@ -464,17 +464,17 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
 
 **Example using instruction count:**
-```pasm
+::: pasm2
 ' Hardcoded count - fragile if code changes
                 rep     #4, count               ' Repeat next 4 instructions
                 rdlong  x, ptr
                 add     ptr, #4
                 add     sum, x
                 djnz    n, #$-3                 ' Problem: count must match!
-```
+:::
 
 **Example using local label (preferred):**
-```pasm
+::: pasm2
 ' Label-based count - automatically correct
 process_data    rep     @.end, count            ' Repeat until .end label
                 rdlong  x, ptr                  ' Instructions between REP
@@ -487,7 +487,7 @@ fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
                 wrbyte  value, ptr
                 add     ptr, #1
 .done
-```
+:::
 
 **Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 

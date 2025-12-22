@@ -291,11 +291,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 To compare unsigned multi-long values (64-bit or larger), use CMP for the least significant long, then CMPX for each subsequent long. For example, to compare two 64-bit values:
 
-```pasm
+::: pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C and Z now reflect the 64-bit comparison result
-```
+:::
 
 CMP is fundamental for implementing conditional logic and control flow based on numeric comparisons.
 
@@ -410,11 +410,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for the least significant long, optionally followed by CMPX for middle longs, and finally CMPSX for the most significant long. The final CMPSX accounts for sign extension properly. For example, to compare two 64-bit signed values:
 
-```pasm
+::: pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs unsigned
         cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C and Z now reflect the signed 64-bit comparison result
-```
+:::
 
 
 
@@ -493,11 +493,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 For signed multi-long comparisons, use CMP for the least significant long, optionally CMPX for middle longs, and CMPSX for the most significant long:
 
-```pasm
+::: pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C=1 if signed value < other, Z=1 if equal
-```
+:::
 
 
 
@@ -536,11 +536,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 For unsigned multi-long comparisons, use CMP for the least significant long, then CMPX for each subsequent long:
 
-```pasm
+::: pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C=1 if unsigned value < other, Z=1 if equal
-```
+:::
 
 
 
@@ -575,15 +575,15 @@ In the intended use case, the cog receiving an attention request knows which oth
 
 For example, to signal cog 3:
 
-```pasm
+::: pasm2
         cogatn  #%0000_1000           ' Signal cog 3 (bit 3 = 1)
-```
+:::
 
 To signal multiple cogs simultaneously:
 
-```pasm
+::: pasm2
         cogatn  #%0001_0010           ' Signal cogs 1 and 4
-```
+:::
 
 COGATN is useful for implementing inter-cog communication, synchronization, and event notification without requiring polling of shared memory.
 
@@ -620,9 +620,9 @@ This instruction is part of the P2's debugging infrastructure and is typically u
 
 For example, to trigger a breakpoint in cog 2:
 
-```pasm
+::: pasm2
         cogbrk  #2                    ' Break cog 2 (must be in debug ISR)
-```
+:::
 
 COGBRK is a specialized instruction primarily used by development and debugging tools rather than in typical application code.
 
@@ -663,15 +663,15 @@ When used with the WC effect, COGID checks the status of the cog specified by De
 
 For example, to get the current cog's ID:
 
-```pasm
+::: pasm2
         cogid   myid                  ' Store this cog's ID in myid
-```
+:::
 
 To check if cog 3 is running:
 
-```pasm
+::: pasm2
         cogid   #3              wc    ' C=1 if cog 3 is running
-```
+:::
 
 
 
@@ -732,28 +732,28 @@ Common usage examples:
 
 Load and start a specific cog from Hub RAM:
 
-```pasm
+::: pasm2
         coginit #1, #$100             ' Load and start cog 1 from Hub $100
-```
+:::
 
 Start a free cog:
 
-```pasm
+::: pasm2
                 coginit #COGEXEC_NEW, addr  wc  ' Find free cog, load, start
         if_c    jmp     #no_cog_available       ' Branch if no cog available
-```
+:::
 
 Skip load and execute from Hub RAM:
 
-```pasm
+::: pasm2
         coginit #HUBEXEC+3, addr      ' Cog 3 hub exec mode
-```
+:::
 
 Start a cog pair for LUT sharing:
 
-```pasm
+::: pasm2
         coginit #HUBEXEC_NEW_PAIR, addr   ' Start free cog pair
-```
+:::
 
 
 
@@ -788,16 +788,16 @@ The cog specified by the lower 3 bits of Dest (0-7) is immediately halted. All r
 
 For example, to stop cog 4:
 
-```pasm
+::: pasm2
         cogstop #4                    ' Stop cog 4
-```
+:::
 
 To stop the current cog (terminate self):
 
-```pasm
+::: pasm2
         cogid   myid                  ' Get my cog ID
         cogstop myid                  ' Stop myself
-```
+:::
 
 COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any Hub memory it may have been using.
 
@@ -839,12 +839,12 @@ The exact algorithm follows the standard CRC bit-wise computation:
 
 CRCBIT is typically used in a loop to process data one bit at a time:
 
-```pasm
+::: pasm2
         mov     crc, #0               ' Initialize CRC
 .loop   rcl     data, #1        wc    ' Get next bit into C
         crcbit  crc, poly             ' Update CRC with bit
         djnz    count, #.loop         ' Repeat for all bits
-```
+:::
 
 For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
@@ -882,13 +882,13 @@ The instruction performs four CRC bit iterations in sequence, using the lowest 4
 
 The typical usage pattern is:
 
-```pasm
+::: pasm2
         setq    data                  ' Load data into Q
         mov     crc, #0               ' Initialize CRC
 .loop   crcnib  crc, poly             ' Process 4 bits from Q[3:0]
         ' Q is automatically shifted left by 4
         djnz    count, #.loop         ' Repeat for all nibbles
-```
+:::
 
 CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providing a 4x speedup for CRC calculations. The automatic Q shift simplifies the loop logic for multi-nibble processing.
 

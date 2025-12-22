@@ -46,10 +46,10 @@ Address $1F0. Interrupt 3 call address. Stores the address where execution jumps
 **Usage**: When the INT3 event is triggered, the cog saves the current PC in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
         mov     IJMP3, ##int3_handler   ' Set INT3 handler address
         setint3 #event_ct1              ' Enable INT3 for CT1 event
-```
+:::
 
 **Related**: [IRET3](#iret3), SETINT3, RETI3
 
@@ -64,11 +64,11 @@ Address $1F1. Interrupt 3 return address. Stores the return address when interru
 **Usage**: When INT3 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
 int3_handler
         ' Handle interrupt...
         reti3                           ' Return to saved address in IRET3
-```
+:::
 
 **Related**: [IJMP3](#ijmp3), SETINT3, RETI3
 
@@ -83,10 +83,10 @@ Address $1F2. Interrupt 2 call address. Stores the address where execution jumps
 **Usage**: When the INT2 event is triggered, the cog saves the current PC in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
         mov     IJMP2, ##int2_handler   ' Set INT2 handler address
         setint2 #event_ct2              ' Enable INT2 for CT2 event
-```
+:::
 
 **Related**: [IRET2](#iret2), SETINT2, RETI2
 
@@ -101,11 +101,11 @@ Address $1F3. Interrupt 2 return address. Stores the return address when interru
 **Usage**: When INT2 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
 int2_handler
         ' Handle interrupt...
         reti2                           ' Return to saved address in IRET2
-```
+:::
 
 **Related**: [IJMP2](#ijmp2), SETINT2, RETI2
 
@@ -120,10 +120,10 @@ Address $1F4. Interrupt 1 call address. Stores the address where execution jumps
 **Usage**: When the INT1 event is triggered, the cog saves the current PC in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
         mov     IJMP1, ##int1_handler   ' Set INT1 handler address
         setint1 #event_ct3              ' Enable INT1 for CT3 event
-```
+:::
 
 **Related**: [IRET1](#iret1), SETINT1, RETI1
 
@@ -138,11 +138,11 @@ Address $1F5. Interrupt 1 return address. Stores the return address when interru
 **Usage**: When INT1 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
-```pasm
+::: pasm2
 int1_handler
         ' Handle interrupt...
         reti1                           ' Return to saved address in IRET1
-```
+:::
 
 **Related**: [IJMP1](#ijmp1), SETINT1, RETI1
 
@@ -163,14 +163,14 @@ Address $1F6. Multi-purpose register A. Serves multiple special functions or can
 When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 **Example**:
-```pasm
+::: pasm2
         calld   PA, #subroutine         ' Return info in PA, call
         callpa  param, #handler         ' Copy param to PA, call
         loc     PA, #label              ' Store label address in PA
 
         ' Using PA as general RAM
         mov     PA, #42                 ' Regular register usage
-```
+:::
 
 **Related**: [PB](#pb), CALLD, CALLPA, LOC
 
@@ -191,14 +191,14 @@ Address $1F7. Multi-purpose register B. Serves multiple special functions or can
 When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 **Example**:
-```pasm
+::: pasm2
         calld   PB, #subroutine         ' Return info in PB, call
         callpb  param, #handler         ' Copy param to PB, call
         loc     PB, #label              ' Store label address in PB
 
         ' Using PB as general RAM
         mov     PB, ##hub_addr          ' Regular register usage
-```
+:::
 
 **Related**: [PA](#pa), CALLD, CALLPB, LOC
 
@@ -260,7 +260,7 @@ The increment/decrement amount (SCALE) depends on the instruction:
 Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 
 **Example**:
-```pasm
+::: pasm2
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
         rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
         rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
@@ -269,7 +269,7 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
         rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
-```
+:::
 
 **Related**: [PTRB](#ptrb), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
 
@@ -296,7 +296,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 - `++PTRB[index]` — Pre-update indexed: PTRB += index × SCALE, then use PTRB
 
 **Example**:
-```pasm
+::: pasm2
         mov     ptrb, ##hub_source      ' Set PTRB to source address
         rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
         rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
@@ -304,7 +304,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
-```
+:::
 
 **Related**: [PTRA](#ptra), RDLONG, WRLONG, COGINIT
 
@@ -325,14 +325,14 @@ Address $1FA. Direction register A for pins 0-31. Controls whether each pin is a
 **Usage**: DIRA controls the direction of pins 0-31. Setting a bit to 1 configures the corresponding pin as an output, while 0 configures it as an input. Changes take effect immediately. When a pin is configured as an output, the value in the corresponding OUTA bit is driven onto the pin. When configured as an input, the pin state can be read from INA.
 
 **Example**:
-```pasm
+::: pasm2
         mov     DIRA, ##$00FF_0000      ' Set pins 16-23 as outputs
         or      DIRA, #1                ' Set pin 0 as output
         andn    DIRA, ##$0000_00FF      ' Set pins 0-7 as inputs
 
         ' Atomic direction change
         mov     DIRA, new_directions    ' Change all 32 directions
-```
+:::
 
 **Related**: [DIRB](#dirb), [OUTA](#outa), [INA](#ina), DIRC, DIRH, DIRL
 
@@ -353,11 +353,11 @@ Address $1FB. Direction register B for pins 32-63. Controls whether each pin is 
 **Usage**: DIRB controls the direction of pins 32-63. Setting a bit to 1 configures the corresponding pin as an output, while 0 configures it as an input. The bit positions map to pins 32-63, where bit 0 controls pin 32 and bit 31 controls pin 63.
 
 **Example**:
-```pasm
+::: pasm2
         mov     DIRB, #0                ' Set all pins 32-63 as inputs
         or      DIRB, ##$8000_0000      ' Set pin 63 as output
         andn    DIRB, ##$0000_FFFF      ' Set pins 32-47 as inputs
-```
+:::
 
 **Related**: [DIRA](#dira), [OUTB](#outb), [INB](#inb)
 
@@ -378,7 +378,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 **Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. Reading OUTA returns the current output register state, not the actual pin states (use INA to read pin states). When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
 
 **Example**:
-```pasm
+::: pasm2
         mov     OUTA, #0                ' Clear all outputs 0-31
         or      OUTA, #1                ' Set pin 0 high
         xor     OUTA, ##$0000_00FF      ' Toggle pins 0-7
@@ -386,7 +386,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 
         ' Atomic pattern change
         mov     OUTA, new_pattern       ' Change all 32 outputs atomically
-```
+:::
 
 **Related**: [OUTB](#outb), [DIRA](#dira), [INA](#ina), OUTC, OUTH, OUTL
 
@@ -407,12 +407,12 @@ Address $1FD. Output register B for pins 32-63. Sets the output state for pins c
 **Usage**: OUTB sets the output state for pins 32-63. Only affects pins configured as outputs via DIRB. The bit positions map to pins 32-63, where bit 0 controls pin 32 and bit 31 controls pin 63. When multiple cogs drive the same pin, the outputs are OR'd together.
 
 **Example**:
-```pasm
+::: pasm2
         mov     OUTB, pattern           ' Set output pattern for pins 32-63
         andn    OUTB, mask              ' Clear specific outputs
         or      OUTB, ##$8000_0000      ' Set pin 63 high
         xor     OUTB, toggle_mask       ' Toggle specific pins
-```
+:::
 
 **Related**: [OUTA](#outa), [DIRB](#dirb), [INB](#inb)
 
@@ -433,7 +433,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 **Usage**: INA returns the actual electrical state of pins 0-31, regardless of whether they are configured as inputs or outputs. This allows output pins to be read back to verify their state. Reading INA captures the pin states at the moment the instruction executes, providing a consistent snapshot of all 32 pins. INA also serves as the debug interrupt call address when debug interrupts are enabled.
 
 **Example**:
-```pasm
+::: pasm2
                 mov     state, INA              ' Read all pins 0-31
                 test    INA, #1             wz  ' Test if pin 0 is high
         if_nz   jmp     #pin_high
@@ -443,7 +443,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
                 ' Wait for pin high
 .wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
-```
+:::
 
 **Related**: [INB](#inb), [DIRA](#dira), [OUTA](#outa)
 
@@ -464,14 +464,14 @@ Address $1FF. Input register B for pins 32-63. Reads the current state of pins r
 **Usage**: INB returns the actual electrical state of pins 32-63, regardless of whether they are configured as inputs or outputs. The bit positions map to pins 32-63, where bit 0 represents pin 32 and bit 31 represents pin 63. INB also serves as the debug interrupt return address when debug interrupts are enabled.
 
 **Example**:
-```pasm
+::: pasm2
                 mov     state, INB              ' Read all pins 32-63
                 test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
         if_z    jmp     #pin_low
 
                 ' Copy input pattern to output
                 mov     OUTB, INB
-```
+:::
 
 **Related**: [INA](#ina), [DIRB](#dirb), [OUTB](#outb)
 
@@ -492,13 +492,13 @@ The program counter is a 20-bit register that holds the Hub RAM address of the c
 **Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in Hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
 
 **Example**:
-```pasm
+::: pasm2
         getpc   current_addr            ' Read current PC value
 
         ' PC modified by control flow
         jmp     #target                 ' Sets PC to target address
         call    #subroutine             ' Saves PC+4, jumps to subroutine
-```
+:::
 
 **Related**: GETPC, JMP, CALL, CALLD
 
@@ -519,7 +519,7 @@ The Q register is a 32-bit auxiliary register used for CORDIC operations, divisi
 The Q register contents are volatile—CORDIC and division operations overwrite previous values. Read results immediately after the operation completes.
 
 **Example**:
-```pasm
+::: pasm2
         qrotate x, y, angle             ' Perform rotation
         getqx   result_x                ' Get X result from Q
         getqy   result_y                ' Get Y result from Q
@@ -532,7 +532,7 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
         qdiv    dividend, divisor       ' Quotient goes to Q
         getqx   quotient                ' Read quotient from Q
         getqy   remainder               ' Read remainder from Q
-```
+:::
 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
 
@@ -549,7 +549,7 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
 **Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The lower 32 bits wrap approximately every 21.5 seconds at 200 MHz. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait for CT to reach that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
 
 **Example**:
-```pasm
+::: pasm2
                 getct   target                  ' Get current time
                 addct1  target, ##delay_cycles  ' target = now + delay
                 waitct1                         ' Wait for CT to reach it
@@ -562,7 +562,7 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
                 cmp     now, timeout        wc  ' Check if timeout exceeded
         if_nc   jmp     #timed_out
                 jmp     #.loop
-```
+:::
 
 **Related**: GETCT, ADDCT1, ADDCT2, ADDCT3, WAITCT1, WAITCT2, WAITCT3
 
@@ -579,7 +579,7 @@ The hardware random number generator produces true random numbers based on therm
 **Usage**: Each execution of GETRND returns a new 32-bit random value. The generator runs continuously in hardware, so consecutive reads produce different values. The randomness quality is suitable for cryptographic applications.
 
 **Example**:
-```pasm
+::: pasm2
         getrnd  random_value            ' Get 32-bit random number
 
         ' Generate random in range 0-99
@@ -590,7 +590,7 @@ The hardware random number generator produces true random numbers based on therm
         ' Random bit
         getrnd  temp
         shr     temp, #31               ' Get bit 31 (random 0 or 1)
-```
+:::
 
 **Related**: GETRND, QMUL (for scaling random values)
 
@@ -613,7 +613,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 - **WCZ**: Sets both flags
 
 **Example**:
-```pasm
+::: pasm2
                 cmp     value, #100         wz  ' Compare, set Z if equal
         if_z    jmp     #equal
 
@@ -624,7 +624,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
         if_c    jmp     #overflow
 
                 shr     data, #1            wc  ' Shift right, C = bit out
-```
+:::
 
 **Related**: All conditional execution (IF_xx), CMP, TEST, and ALU instructions with WC/WZ/WCZ
 
@@ -635,74 +635,74 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 ### Pin Control
 
 Toggle a pin:
-```pasm
+::: pasm2
         xor     OUTA, pin_mask          ' Toggle pin atomically
-```
+:::
 
 Wait for pin high:
-```pasm
+::: pasm2
 .wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
-```
+:::
 
 Copy inputs to outputs:
-```pasm
+::: pasm2
         mov     OUTA, INA               ' Mirror inputs to outputs
-```
+:::
 
 Set multiple pins atomically:
-```pasm
+::: pasm2
         mov     OUTA, new_pattern       ' All 32 pins change simultaneously
-```
+:::
 
 
 
 ### Hub RAM Access
 
 Block read with pointer:
-```pasm
+::: pasm2
         mov     ptra, ##hub_buffer
         setq    #count-1                ' Transfer 'count' longs
         rdlong  cog_buffer, ptra++      ' Read block, auto-increment PTRA
-```
+:::
 
 Dual buffer operation:
-```pasm
+::: pasm2
         mov     ptra, ##source_buffer
         mov     ptrb, ##dest_buffer
         setq    #15                     ' Transfer 16 longs
         rdlong  temp, ptra++            ' Read from PTRA
         setq    #15
         wrlong  temp, ptrb++            ' Write to PTRB
-```
+:::
 
 
 
 ### Interrupt Setup
 
 Configure interrupt handler:
-```pasm
+::: pasm2
         mov     IJMP1, ##handler_addr   ' Set handler address
         setint1 #event_ct1              ' Enable INT1 for CT1 event
 
 handler_addr
         ' ... handle interrupt ...
         reti1                           ' Return to interrupted code
-```
+:::
 
 
 
 ### Timing Operations
 
 Precise delay:
-```pasm
+::: pasm2
         getct   target                  ' Get current time
         addct1  target, ##delay_cycles  ' Add delay
         waitct1                         ' Wait until target time
-```
+:::
 
 Timeout detection:
-```pasm
+::: pasm2
                 getct   deadline
                 add     deadline, ##max_time
 .loop           ' ... do work ...
@@ -711,7 +711,7 @@ Timeout detection:
         if_nc   jmp     #timeout
                 ' ... continue if not timed out ...
                 jmp     #.loop
-```
+:::
 
 
 
