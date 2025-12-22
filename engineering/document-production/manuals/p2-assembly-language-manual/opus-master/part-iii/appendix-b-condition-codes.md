@@ -187,7 +187,7 @@ This is significantly faster than a separate instruction followed by RET (which 
 When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This provides deterministic timing—critical for real-time operations:
 
 ::: pasm2
-                cmp     a, b            wc wz   ' 2 cycles - always
+                cmp     a, b            wcz     ' 2 cycles - always
         if_z    mov     result, #1              ' 2 cycles - whether Z=1 or not
         if_nz   mov     result, #0              ' 2 cycles - whether Z=0 or not
                                                 ' Total: always 6 cycles

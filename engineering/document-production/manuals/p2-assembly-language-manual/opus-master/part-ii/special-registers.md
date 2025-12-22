@@ -520,7 +520,8 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
 
 **Example**:
 ::: pasm2
-        qrotate x, y, angle             ' Perform rotation
+        setq    y                       ' Y coordinate via Q
+        qrotate x, angle                ' Rotate (X, Y) by angle
         getqx   result_x                ' Get X result from Q
         getqy   result_y                ' Get Y result from Q
 

@@ -40,7 +40,7 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
 
 ::: pasm2
-                cmp     a, b            wc wz   ' Set flags once
+                cmp     a, b            wcz     ' Set flags once
         if_c    mov     min, a                  ' Use C here
         if_nc   mov     min, b                  ' And here
         if_z    mov     equal, #1               ' And use Z here
@@ -87,8 +87,8 @@ Instead of simply replacing Z with the zero test, these instructions AND the new
 
 ::: pasm2
 ' 64-bit addition: [hi:lo] += [bhi:blo]
-        add     lo, blo         wc wz   ' Add low 32 bits, Z = (lo_result == 0)
-        addx    hi, bhi         wc wz   ' High + carry, Z = Z AND (hi==0)
+        add     lo, blo         wcz     ' Add low 32 bits, Z = (lo_result == 0)
+        addx    hi, bhi         wcz     ' High + carry, Z = Z AND (hi==0)
         ' Z is now 1 only if BOTH lo and hi were zero
         '  (entire 64-bit result is zero)
 :::
@@ -103,7 +103,7 @@ Without this AND behavior, the final Z flag would only reflect the last 32-bit o
         add     result, value   wcz     ' Update both flags
 :::
 
-When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. This is exactly equivalent to specifying both WC and WZ, but requires less typing and produces more readable code.
+When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. You can specify WC to update only C, WZ to update only Z, or WCZ to update both—these are the three valid effect options.
 
 WCZ is common after comparisons where both the ordering (C) and equality (Z) matter, or after arithmetic operations where both carry detection and zero detection are needed.
 
@@ -210,7 +210,7 @@ The P2 allows any instruction to execute conditionally based on the current flag
 Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (2 clock cycles). When the condition is true, the instruction executes normally:
 
 ::: pasm2
-                cmp     a, b            wc wz   ' Compare, set flags
+                cmp     a, b            wcz     ' Compare, set flags
         if_z    mov     result, #1              ' Only if Z=1 (equal)
         if_nz   mov     result, #0              ' Only if Z=0 (not equal)
 :::

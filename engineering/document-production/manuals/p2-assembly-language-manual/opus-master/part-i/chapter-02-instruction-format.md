@@ -116,7 +116,7 @@ Both styles encode to identical condition codes—the choice is purely stylistic
 
 ::: pasm2
         mov     addr, ##$80000000       ' addr = 2,147,483,648
-        cmp     addr, #0        wc wz   ' Compare
+        cmp     addr, #0        wcz     ' Compare
         if_a    jmp     #addr_is_larger ' "addr is above zero"
 :::
 
@@ -125,7 +125,7 @@ Both styles encode to identical condition codes—the choice is purely stylistic
 ::: pasm2
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
-        cmps    x, y            wc wz   ' Signed compare: -100 vs 50
+        cmps    x, y            wcz     ' Signed compare: -100 vs 50
         if_lt   jmp     #x_is_smaller   ' "x is less than y"
 :::
 
@@ -140,12 +140,12 @@ After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect si
 
 ::: pasm2
 ' Unsigned comparison - either style works
-        cmp     a, b            wc wz
+        cmp     a, b            wcz
         if_ae   mov     result, #1      ' "a is above or equal to b"
         if_ge   mov     result, #1      ' "a is greater or equal to b" (same)
 
 ' Signed comparison - either style works
-        cmps    a, b            wc wz
+        cmps    a, b            wcz
         if_ge   mov     result, #1      ' "a is greater or equal to b"
         if_ae   mov     result, #1      ' "a is above or equal to b" (same)
 :::
@@ -156,12 +156,12 @@ Conditional execution eliminates branches, providing deterministic timing:
 
 ::: pasm2
 ' Instead of branching:
-                cmp     a, b            wc wz
+                cmp     a, b            wcz
         if_z    jmp     #equal_handler          ' 4 cycles if taken
                 mov     result, #0
 
 ' Use conditional execution:
-                cmp     a, b            wc wz
+                cmp     a, b            wcz
         if_z    mov     result, #1              ' Always 2 cycles
         if_nz   mov     result, #0              ' Always 2 cycles
 :::

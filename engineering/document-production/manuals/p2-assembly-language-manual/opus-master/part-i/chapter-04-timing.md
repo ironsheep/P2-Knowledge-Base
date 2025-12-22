@@ -606,7 +606,8 @@ loop
         ' ... code to profile ...
         djnz    iterations, #loop
         getct   end_time
-        sub     elapsed, end_time, start_time
+        mov     elapsed, end_time
+        sub     elapsed, start_time
 :::
 
 The total elapsed time divided by the iteration count gives the average time per iteration. For more detailed profiling, place multiple GETCT measurements within the loop to identify which parts of the loop consume the most time:
@@ -618,8 +619,10 @@ loop
         getct   time2
         ' ... section B ...
         getct   time3
-        sub     timeA, time2, time1       ' Section A timing
-        sub     timeB, time3, time2       ' Section B timing
+        mov     timeA, time2
+        sub     timeA, time1              ' Section A timing
+        mov     timeB, time3
+        sub     timeB, time2              ' Section B timing
         ' Store or accumulate timing data
         djnz    iterations, #loop
 :::

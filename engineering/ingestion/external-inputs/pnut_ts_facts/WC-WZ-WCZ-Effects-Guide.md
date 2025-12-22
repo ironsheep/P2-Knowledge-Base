@@ -20,6 +20,20 @@ This document provides a comprehensive explanation of the WC, WZ, and WCZ instru
 
 ---
 
+## Quick Reference: Effect Support by Instruction Category
+
+| Category | Allowed Effects | Instructions |
+|----------|----------------|--------------|
+| **Most ALU ops** | WC, WZ, WCZ | ADD, SUB, CMP, AND, OR, XOR, MOV, SHL, SHR, etc. |
+| **WCZ-only (40)** | WCZ only | BIT*, DIR*, DRV*, FLT*, OUT* |
+| **WC-only (9)** | WC only | COGID, COGINIT, GETCT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN |
+| **WZ-only (5)** | WZ only | MODZ, MUL, MULS, SCA, SCAS |
+| **Extended (4)** | WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, XORZ (no WCZ) | TESTP, TESTPN, TESTB, TESTBN |
+
+**Important**: You cannot write `WC WZ` as separate tokens. Use `WCZ` to update both flags.
+
+---
+
 ## 1. Overview: What Are C and Z?
 
 The Propeller 2 has two status flags that can be modified by instructions and used for conditional execution:
@@ -85,7 +99,7 @@ The **Z flag** (Zero) is a single-bit status flag that typically indicates:
         SUB     a, b        WCZ     ' Update both C and Z flags
 ```
 
-### Yes, WCZ = WC + WZ
+### WCZ = WC + WZ (But You Cannot Write Both Separately)
 
 **WCZ is exactly equivalent to specifying both WC and WZ together.** It's a convenience shorthand:
 
@@ -95,6 +109,13 @@ The **Z flag** (Zero) is a single-bit status flag that typically indicates:
 | WZ | No | **Yes** | `01` |
 | WC | **Yes** | No | `10` |
 | WCZ | **Yes** | **Yes** | `11` |
+
+**Important**: You cannot write `WC WZ` as separate tokens on the same instruction. The parser treats effects as single tokens. If you need both flags updated, you **must** use `WCZ`:
+
+```spin2
+        ADD     x, y    WC WZ   ' ERROR - invalid syntax!
+        ADD     x, y    WCZ     ' Correct - updates both flags
+```
 
 ---
 
@@ -154,14 +175,6 @@ You may need to preserve one flag while updating another:
 #### 2. Separate Condition Testing
 
 Different flags often represent different conditions:
-
-```spin2
-        SUB     count, #1   WC WZ   ' Alternative syntax (same as WCZ)
-        if_z    JMP #done           ' If count reached zero
-        if_c    JMP #underflow      ' If count went negative (unsigned)
-```
-
-Wait - actually you cannot write `WC WZ` as separate tokens. Let me correct that:
 
 ```spin2
         SUB     count, #1   WCZ     ' Update both flags
@@ -333,9 +346,9 @@ Some instructions only produce meaningful results for **one flag**:
 
 | Scenario | Example | Why |
 |----------|---------|-----|
-| Only C meaningful | `LOCKTRY` | C=1 means lock acquired, Z has no defined meaning |
-| Only Z meaningful | Some I/O ops | Result only indicates zero/non-zero, no carry concept |
-| Neither meaningful | `NOP`, `COGID` | No result that relates to C or Z |
+| Only C meaningful | `LOCKTRY`, `COGID` | C=1 means lock acquired or cog is on; Z has no defined meaning |
+| Only Z meaningful | `MUL`, `MULS` | Z=1 if either operand was zero; no carry concept |
+| Neither meaningful | `NOP` | No result that relates to C or Z |
 | Both meaningful | `ADD`, `CMP` | C=overflow/compare, Z=zero result |
 
 #### WCZ Is NOT Just "WC + WZ"
@@ -390,11 +403,94 @@ Most ALU instructions support all effects:
 
 ### Instructions with Restricted Effects
 
-Some instructions only support specific effects:
-- `NOP` - No effects allowed (error if attempted)
-- `TESTP` - Uses extended effects (ANDC, ANDZ, ORC, ORZ, XORC, XORZ)
-- `TESTB` - Uses extended effects only
-- Some hub memory instructions - Restricted based on operation
+Some instructions only support specific effects. The PNut-TS compiler implementation reveals several distinct categories:
+
+#### WCZ-Only Instructions (40 instructions)
+
+These instructions **only accept WCZ** - not WC or WZ individually. This is because for these pin/bit operations, both C and Z are set to the **same value** (the original state of the bit/pin before modification), so it doesn't make sense to update just one flag.
+
+| Category | Instructions (8 each) |
+|----------|----------------------|
+| BIT* | BITL, BITH, BITC, BITNC, BITZ, BITNZ, BITRND, BITNOT |
+| DIR* | DIRL, DIRH, DIRC, DIRNC, DIRZ, DIRNZ, DIRRND, DIRNOT |
+| DRV* | DRVL, DRVH, DRVC, DRVNC, DRVZ, DRVNZ, DRVRND, DRVNOT |
+| FLT* | FLTL, FLTH, FLTC, FLTNC, FLTZ, FLTNZ, FLTRND, FLTNOT |
+| OUT* | OUTL, OUTH, OUTC, OUTNC, OUTZ, OUTNZ, OUTRND, OUTNOT |
+
+```spin2
+        DRVH    #pin        WCZ     ' Valid - C and Z both set to original OUT state
+        DRVH    #pin        WC      ' ERROR: This effect is not allowed for this instruction
+        DRVH    #pin        WZ      ' ERROR: This effect is not allowed for this instruction
+        DRVH    #pin                ' Valid - no effect, flags unchanged
+```
+
+The compiler uses a special `tryWCZ()` function that specifically checks for WCZ (value 0b11). If you use WC or WZ alone, the standard effect validation rejects it.
+
+#### WC Only Instructions (9 instructions)
+
+These have `allowedEffects = 0b10` and only support WC:
+
+| Instruction | C Flag Meaning |
+|-------------|----------------|
+| COGID | 1 if cog is on |
+| COGINIT | 1 if no free cog |
+| GETCT | CT[32] (bit 32 of counter) |
+| LOCKNEW | 1 if no LOCK available |
+| LOCKREL | 1 if lock was already free |
+| LOCKTRY | 1 if got LOCK |
+| MODC | cccc[{C,Z}] |
+| RDPIN | modal result |
+| RQPIN | modal result |
+
+```spin2
+        COGID   result      WC      ' Valid - C = 1 if cog is on
+        COGID   result      WZ      ' ERROR: This effect is not allowed
+        COGID   result      WCZ     ' ERROR: This effect is not allowed
+```
+
+#### WZ Only Instructions (5 instructions)
+
+These have `allowedEffects = 0b01` and only support WZ:
+
+| Instruction | Z Flag Meaning |
+|-------------|----------------|
+| MODZ | zzzz[{C,Z}] |
+| MUL | (S == 0) \| (D == 0) |
+| MULS | (S == 0) \| (D == 0) |
+| SCA | result == 0 |
+| SCAS | result == 0 |
+
+```spin2
+        MUL     a, b        WZ      ' Valid - Z = 1 if either operand was 0
+        MUL     a, b        WC      ' ERROR: This effect is not allowed
+        MUL     a, b        WCZ     ' ERROR: This effect is not allowed
+```
+
+#### Extended Effects Only - TEST* Instructions (4 instructions)
+
+These use `getCorZ()` which supports WC, WZ, and extended effects, but **explicitly rejects WCZ**:
+
+- TESTP, TESTPN, TESTB, TESTBN
+
+Supported effects: WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, XORZ
+
+```spin2
+        TESTP   #pin        WC      ' Valid
+        TESTP   #pin        WZ      ' Valid
+        TESTP   #pin        ANDC    ' Valid - C = C AND pin_state
+        TESTP   #pin        WCZ     ' ERROR: Expected WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ
+```
+
+#### Branch Instructions (5 instructions - register mode only)
+
+CALL, CALLA, CALLB, CALLD, JMP support all effects only when using register mode:
+
+```spin2
+        CALL    #address            ' Immediate mode - no effects supported
+        CALL    reg         WCZ     ' Register mode - WC, WZ, WCZ all valid
+        JMP     #label              ' Immediate mode - no effects
+        JMP     reg         WC      ' Register mode - effects supported
+```
 
 ### Effect Validation
 
@@ -475,8 +571,6 @@ Test bits and combine results:
 
 ```spin2
 ' Compare 64-bit values: [hi1:lo1] vs [hi2:lo2]
-        CMP     lo1, lo2        WC WZ   ' Note: WC WZ is not valid syntax!
-        ' Correct version:
         CMP     lo1, lo2        WCZ     ' Compare low, set both flags
         CMPX    hi1, hi2        WCZ     ' Compare high with extended
         if_c    JMP #less_than          ' [hi1:lo1] < [hi2:lo2]
@@ -581,9 +675,8 @@ Test bits and combine results:
 ### Pattern 5: Multi-Condition Testing
 
 ```spin2
-        CMP     x, #0           WC      ' C=1 if x < 0 (wait, that's unsigned!)
-        ' For signed: use CMPS
-        CMPS    x, #0           WC      ' C=1 if x < 0 (signed)
+        ' Note: CMP is unsigned, CMPS is signed
+        CMPS    x, #0           WC      ' C=1 if x < 0 (signed comparison)
         CMPS    x, #100         WZ      ' Z=1 if x == 100
         if_c_or_z  JMP #special         ' If x<0 OR x==100
 ```
@@ -671,10 +764,15 @@ Using WC, WZ, or WCZ adds no execution time. Use them freely when you need flag 
 
 **Key Takeaways:**
 1. **WCZ = WC + WZ** - It's a shorthand for updating both flags
-2. **Flags persist** - They only change when explicitly modified
-3. **Not all instructions support all effects** - The compiler validates
-4. **Extended effects** (ANDC, ORC, etc.) combine logic with flag updates
-5. **Zero cost** - Effects don't slow down execution
+2. **You cannot write `WC WZ`** - Effects are single tokens; use `WCZ` for both
+3. **Flags persist** - They only change when explicitly modified
+4. **Not all instructions support all effects** - The compiler validates:
+   - 40 instructions (BIT\*, DIR\*, DRV\*, FLT\*, OUT\*) accept **only WCZ**
+   - 9 instructions accept **only WC** (COGID, COGINIT, GETCT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN)
+   - 5 instructions accept **only WZ** (MODZ, MUL, MULS, SCA, SCAS)
+   - 4 instructions (TESTP, TESTPN, TESTB, TESTBN) accept WC/WZ/extended but **not WCZ**
+5. **Extended effects** (ANDC, ORC, etc.) combine logic with flag updates
+6. **Zero cost** - Effects don't slow down execution
 
 ---
 
