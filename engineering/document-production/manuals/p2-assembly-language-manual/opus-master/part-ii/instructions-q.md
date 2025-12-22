@@ -36,7 +36,7 @@ QDIV performs high-precision unsigned division using the P2's 54-stage pipelined
 The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not used) as the upper 32 bits with the Dest operand as the lower 32 bits: {SETQ, Dest}. The denominator is specified in the Src operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
 
 ::: pasm2
-        QDIV    #1000000, #3   ' {0, 1000000} / 3
+        QDIV    ##1000000, #3  ' {0, 1000000} / 3
         ' Wait 55 clocks...
         GETQX   quotient       ' Get 333333
         GETQY   remainder      ' Get 1
@@ -117,7 +117,7 @@ QFRAC performs fractional division using the P2's 54-stage pipelined CORDIC solv
 The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in Dest and the fractional part is in SETQ.
 
 ::: pasm2
-        SETQ    #$C0000000     ' 0.75 in 32-bit fraction format
+        SETQ    ##$C0000000    ' 0.75 in 32-bit fraction format
         QFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875
         ' Wait 55 clocks...
         GETQX   quotient       ' Get integer quotient
@@ -156,7 +156,7 @@ QLOG performs integer to logarithm conversion using the P2's 54-stage pipelined 
 The instruction takes the unsigned integer value in the Dest operand. After 55 clocks, the logarithm result can be retrieved using GETQX.
 
 ::: pasm2
-        QLOG    #1000          ' Begin log conversion
+        QLOG    ##1000         ' Begin log conversion
         ' Wait 55 clocks...
         GETQX   log_result     ' Get 5:27 logarithm
 :::
@@ -194,7 +194,7 @@ QMUL performs high-precision unsigned multiplication using the P2's 54-stage pip
 After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
 
 ::: pasm2
-        QMUL    #1000000, #2000000
+        QMUL    ##1000000, ##2000000
         ' Wait 55 clocks...
         GETQX   lower_32       ' Get lower 32 bits
         GETQY   upper_32       ' Get upper 32 bits
@@ -239,7 +239,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 
 ::: pasm2
         SETQ    #200           ' Set Y coordinate
-        QROTATE #100, #$20000000  ' X=100, angle=45 degrees
+        QROTATE #100, ##$20000000 ' X=100, angle=45 degrees
         ' Wait 55 clocks...
         GETQX   new_x          ' Get rotated X
         GETQY   new_y          ' Get rotated Y
@@ -280,7 +280,7 @@ The 64-bit input is formed by concatenating the Src operand as the upper 32 bits
 The result is the largest integer whose square does not exceed the input value.
 
 ::: pasm2
-        QSQRT   #1000000, #0   ' sqrt(1000000) = 1000
+        QSQRT   ##1000000, #0  ' sqrt(1000000) = 1000
         ' Wait 55 clocks...
         GETQX   sqrt_result    ' Get 1000
 :::

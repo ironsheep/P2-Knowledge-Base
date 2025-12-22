@@ -108,7 +108,7 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
 
 ::: pasm2
-        SCA     factor, #$8000  ' Scale by 0.5 (32768/65536)
+        SCA     factor, ##$8000  ' Scale by 0.5 (32768/65536)
         ADD     result, #0      ' Add scaled value
 :::
 
@@ -817,7 +817,7 @@ Set Word
 SETWORD stores Src[15:0] into the word identified by N within Dest, or the word and register described by a prior ALTSW instruction. No other bits are modified. N (0-1) identifies a value's individual words by position in least-significant word order. The second syntax is intended for use after an ALTSW instruction in a loop to iteratively affect a series of word values within contiguous long registers.
 
 ::: pasm2
-        SETWORD data, #$ABCD, #1  ' Set high word of data to $ABCD
+        SETWORD data, ##$ABCD, #1  ' Set high word of data to $ABCD
 :::
 
 

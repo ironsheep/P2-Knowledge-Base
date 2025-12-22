@@ -143,10 +143,10 @@ The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execu
         _ret_   setq    #$100           ' LUT base $100, then return
 
 ' Change XBYTE mode permanently
-        _ret_   setq    #$200           ' New LUT base for all bytecodes
+        _ret_   setq    ##$200           ' New LUT base for all bytecodes
 
 ' Change XBYTE mode for next bytecode only
-        _ret_   setq2   #$300           ' Temporary LUT base for one bytecode
+        _ret_   setq2   ##$300           ' Temporary LUT base for one bytecode
 :::
 
 ### B.3.5 SKIP/SKIPF with _RET_
