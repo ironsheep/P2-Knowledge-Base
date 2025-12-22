@@ -1,5 +1,28 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v1.4.0 (2025-12-22)
+
+**Code Example & Effect Reference** - Corrected code examples; added effect support reference.
+
+### Part I: Architectural Foundation
+
+**Chapter 4 - Timing and Determinism:**
+- Section 4.7.3: Corrected SUB syntax in profiling examples
+
+### Part II: Instruction Reference
+
+**Code Example Corrections:**
+- Effect syntax: Corrected `wc wz` to `wcz` in multiple examples
+- Addressing modes: Corrected `#` to `##` for 32-bit immediate values
+- QROTATE example: Corrected to use SETQ for Y coordinate
+
+### Part III: Appendices
+
+**Appendix C - Categorical Instruction Index:**
+- Added Effect Support Reference section
+- Documents WCZ-only, WC-only, WZ-only, and extended effect instructions
+
+
 ## v1.3.0 (2025-12-21)
 
 **Directives, Flags & Compiler Integration Release** - Expanded directive documentation, new Condition Code Reference appendix, flag effect corrections, Chapter 5 scope refinement.

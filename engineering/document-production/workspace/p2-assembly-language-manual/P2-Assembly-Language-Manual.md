@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large December 2025\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.3\par}
+{\large\color{blue}Version 1.4\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -1488,36 +1488,27 @@ The comparison sets C, and two subsequent operations execute without modifying i
 
 ### 3.2.6 Effect Availability
 
-Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations.
+Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations. The assembler validates effect usage and reports an error when an invalid effect is specified.
 
-**Effect Permission Categories:**
+**Effect Categories:**
 
-| Permission | Allowed Effects | Reason |
-|------------|-----------------|--------|
-| None | (no effects) | Instruction produces no meaningful flag result |
-| WC only | WC | Only the C flag has a defined meaning |
-| WZ only | WZ | Only the Z flag has a defined meaning |
-| Full | WC, WZ, WCZ | Both flags have defined meanings |
+- **Full support (WC, WZ, WCZ):** Most ALU instructions—ADD, SUB, CMP, AND, OR, MOV, etc.—support all three effects because both flags have independent, meaningful interpretations.
 
-**Why WCZ Requires Both Flags:**
+- **WCZ only:** Pin and bit manipulation instructions (DRV*, BIT*, DIR*, FLT*, OUT*) set both flags to the same value—the original state before modification. Using WC or WZ alone is not allowed; use WCZ or omit effects entirely.
 
-Although WCZ encodes as the combination of WC and WZ bits, the assembler validates that both individual effects are meaningful before allowing WCZ. Using WCZ on an instruction that only supports WC would set Z to an undefined value—the assembler prevents this by requiring full effect support for WCZ.
+- **WC only or WZ only:** Some instructions produce meaningful output for only one flag. For example, LOCKTRY sets C to indicate lock acquisition but has no meaningful Z output.
+
+- **Extended effects (no WCZ):** The TEST* instructions (TESTP, TESTPN, TESTB, TESTBN) support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ.
 
 ::: pasm2
-' Example: LOCKTRY only produces meaningful C (lock acquired)
-        locktry #0              wc      ' Valid: C = lock acquired
-        locktry #0              wz      ' ERROR: Z has no meaning
-        locktry #0              wcz     ' ERROR: WCZ requires both to be valid
+' Examples of effect restrictions
+        add     x, y            wcz     ' Full support: WC, WZ, or WCZ
+        drvh    #pin            wcz     ' WCZ only: WC or WZ alone not allowed
+        locktry #0              wc      ' WC only: WZ and WCZ not allowed
+        testp   #pin            andc    ' Extended: WC, WZ, ANDC, etc. (no WCZ)
 :::
 
-**Common Restrictions:**
-
-- **NOP**: No effects allowed (and no condition prefix)
-- **LOCKTRY/LOCKREL**: WC only (C indicates lock status)
-- **TESTP/TESTPN/TESTB/TESTBN**: Support both basic effects (WC, WZ) and extended effects (ANDC, ORC, etc.) as documented in Section 3.2.4
-- **Some Hub memory operations**: May have restricted effect support
-
-The Part II instruction reference documents the allowed effects for each instruction in its encoding table. When an invalid effect is specified, the assembler produces the error: "This effect is not allowed for this instruction."
+Each instruction entry in Part II documents its allowed effects in the encoding table. For a complete reference of effect restrictions by instruction category, see **Appendix C: Categorical Instruction Index**.
 
 
 ## 3.3 Conditional Execution
@@ -18763,6 +18754,99 @@ Miscellaneous instructions provide utility functions including immediate value e
 | [SETQ](#setq) | Set Q register to D |
 | [SETQ2](#setq2) | Set Q register to D (for LUT transfers) |
 | [WAITX](#waitx) | Wait 2 + D clocks |
+
+
+## Effect Support Reference {#effect-support-ref}
+
+Not all instructions support all flag effect modifiers (WC, WZ, WCZ). This section provides a quick reference for effect restrictions. Each instruction entry in Part II also documents its allowed effects.
+
+**Important:** You cannot write `WC WZ` as separate tokens. Use `WCZ` to update both flags.
+
+### Effect Categories
+
+| Category | Allowed Effects | Reason |
+|----------|-----------------|--------|
+| Full | WC, WZ, WCZ | Both flags have independent, meaningful values |
+| WCZ only | WCZ | Both flags set to the same value |
+| WC only | WC | Only C has a defined meaning |
+| WZ only | WZ | Only Z has a defined meaning |
+| Extended | WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, XORZ (no WCZ) | Bit/pin test with accumulation |
+| None | (no effects) | No meaningful flag output |
+
+### Instructions by Effect Support
+
+| Category | Count | Instructions |
+|----------|-------|--------------|
+| **Full (WC/WZ/WCZ)** | ~300 | ADD, SUB, CMP, AND, OR, XOR, MOV, SHL, SHR, and most other ALU operations |
+| **WCZ only** | 40 | BITC, BITH, BITL, BITNC, BITNOT, BITNZ, BITRND, BITZ, DIRC, DIRH, DIRL, DIRNC, DIRNOT, DIRNZ, DIRRND, DIRZ, DRVC, DRVH, DRVL, DRVNC, DRVNOT, DRVNZ, DRVRND, DRVZ, FLTC, FLTH, FLTL, FLTNC, FLTNOT, FLTNZ, FLTRND, FLTZ, OUTC, OUTH, OUTL, OUTNC, OUTNOT, OUTNZ, OUTRND, OUTZ |
+| **WC only** | 9 | COGID, COGINIT, GETCT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN |
+| **WZ only** | 5 | MODZ, MUL, MULS, SCA, SCAS |
+| **Extended** | 4 | TESTP, TESTPN, TESTB, TESTBN |
+
+### WCZ-Only Instructions
+
+The 40 WCZ-only instructions all follow the same pattern: they set both C and Z to the **same value**—the original state of the targeted bit or pin before the instruction modifies it. Because both flags receive identical information, updating only one flag would be meaningless.
+
+These fall into five families of eight instructions each:
+
+| Family | Instructions | Operation |
+|--------|--------------|-----------|
+| BIT* | BITC, BITH, BITL, BITNC, BITNOT, BITNZ, BITRND, BITZ | Modify bit(s) in register |
+| DIR* | DIRC, DIRH, DIRL, DIRNC, DIRNOT, DIRNZ, DIRRND, DIRZ | Set pin direction |
+| DRV* | DRVC, DRVH, DRVL, DRVNC, DRVNOT, DRVNZ, DRVRND, DRVZ | Set pin direction and output |
+| FLT* | FLTC, FLTH, FLTL, FLTNC, FLTNOT, FLTNZ, FLTRND, FLTZ | Float pin (set to input) |
+| OUT* | OUTC, OUTH, OUTL, OUTNC, OUTNOT, OUTNZ, OUTRND, OUTZ | Set pin output level |
+
+### WC-Only Instructions
+
+These nine instructions produce meaningful output only for the C flag:
+
+| Instruction | C Flag Meaning |
+|-------------|----------------|
+| COGID | 1 if cog is running |
+| COGINIT | 1 if no free cog available |
+| GETCT | CT[32] (bit 32 of system counter) |
+| LOCKNEW | 1 if no lock available |
+| LOCKREL | 1 if lock was already free |
+| LOCKTRY | 1 if lock was acquired |
+| MODC | Result of cccc expression |
+| RDPIN | Modal result (depends on Smart Pin mode) |
+| RQPIN | Modal result (depends on Smart Pin mode) |
+
+### WZ-Only Instructions
+
+These five instructions produce meaningful output only for the Z flag:
+
+| Instruction | Z Flag Meaning |
+|-------------|----------------|
+| MODZ | Result of zzzz expression |
+| MUL | 1 if either operand was zero |
+| MULS | 1 if either operand was zero |
+| SCA | 1 if result equals zero |
+| SCAS | 1 if result equals zero |
+
+### Extended Effect Instructions
+
+The TESTP, TESTPN, TESTB, and TESTBN instructions support WC, WZ, and extended effects, but explicitly reject WCZ. The extended effects combine the test result with the existing flag value using logical operations:
+
+| Effect | Operation |
+|--------|-----------|
+| ANDC | C = C AND test_result |
+| ANDZ | Z = Z AND test_result |
+| ORC | C = C OR test_result |
+| ORZ | Z = Z OR test_result |
+| XORC | C = C XOR test_result |
+| XORZ | Z = Z XOR test_result |
+
+These extended effects enable testing multiple bits or pins and accumulating the results into a single flag:
+
+::: pasm2
+' Test if ALL of pins 0, 4, and 7 are high
+        testp   #0              wc      ' C = pin 0 state
+        testp   #4              andc    ' C = C AND pin 4 state
+        testp   #7              andc    ' C = C AND pin 7 state
+        if_c    jmp     #all_high       ' Branch if all three are high
+:::
 
 
 # Appendix D: Special Registers Quick Reference

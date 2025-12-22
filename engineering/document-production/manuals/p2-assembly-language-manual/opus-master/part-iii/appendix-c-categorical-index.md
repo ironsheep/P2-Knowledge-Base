@@ -562,3 +562,96 @@ Miscellaneous instructions provide utility functions including immediate value e
 | [SETQ2](#setq2) | Set Q register to D (for LUT transfers) |
 | [WAITX](#waitx) | Wait 2 + D clocks |
 
+
+## Effect Support Reference {#effect-support-ref}
+
+Not all instructions support all flag effect modifiers (WC, WZ, WCZ). This section provides a quick reference for effect restrictions. Each instruction entry in Part II also documents its allowed effects.
+
+**Important:** You cannot write `WC WZ` as separate tokens. Use `WCZ` to update both flags.
+
+### Effect Categories
+
+| Category | Allowed Effects | Reason |
+|----------|-----------------|--------|
+| Full | WC, WZ, WCZ | Both flags have independent, meaningful values |
+| WCZ only | WCZ | Both flags set to the same value |
+| WC only | WC | Only C has a defined meaning |
+| WZ only | WZ | Only Z has a defined meaning |
+| Extended | WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, XORZ (no WCZ) | Bit/pin test with accumulation |
+| None | (no effects) | No meaningful flag output |
+
+### Instructions by Effect Support
+
+| Category | Count | Instructions |
+|----------|-------|--------------|
+| **Full (WC/WZ/WCZ)** | ~300 | ADD, SUB, CMP, AND, OR, XOR, MOV, SHL, SHR, and most other ALU operations |
+| **WCZ only** | 40 | BITC, BITH, BITL, BITNC, BITNOT, BITNZ, BITRND, BITZ, DIRC, DIRH, DIRL, DIRNC, DIRNOT, DIRNZ, DIRRND, DIRZ, DRVC, DRVH, DRVL, DRVNC, DRVNOT, DRVNZ, DRVRND, DRVZ, FLTC, FLTH, FLTL, FLTNC, FLTNOT, FLTNZ, FLTRND, FLTZ, OUTC, OUTH, OUTL, OUTNC, OUTNOT, OUTNZ, OUTRND, OUTZ |
+| **WC only** | 9 | COGID, COGINIT, GETCT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN |
+| **WZ only** | 5 | MODZ, MUL, MULS, SCA, SCAS |
+| **Extended** | 4 | TESTP, TESTPN, TESTB, TESTBN |
+
+### WCZ-Only Instructions
+
+The 40 WCZ-only instructions all follow the same pattern: they set both C and Z to the **same value**—the original state of the targeted bit or pin before the instruction modifies it. Because both flags receive identical information, updating only one flag would be meaningless.
+
+These fall into five families of eight instructions each:
+
+| Family | Instructions | Operation |
+|--------|--------------|-----------|
+| BIT* | BITC, BITH, BITL, BITNC, BITNOT, BITNZ, BITRND, BITZ | Modify bit(s) in register |
+| DIR* | DIRC, DIRH, DIRL, DIRNC, DIRNOT, DIRNZ, DIRRND, DIRZ | Set pin direction |
+| DRV* | DRVC, DRVH, DRVL, DRVNC, DRVNOT, DRVNZ, DRVRND, DRVZ | Set pin direction and output |
+| FLT* | FLTC, FLTH, FLTL, FLTNC, FLTNOT, FLTNZ, FLTRND, FLTZ | Float pin (set to input) |
+| OUT* | OUTC, OUTH, OUTL, OUTNC, OUTNOT, OUTNZ, OUTRND, OUTZ | Set pin output level |
+
+### WC-Only Instructions
+
+These nine instructions produce meaningful output only for the C flag:
+
+| Instruction | C Flag Meaning |
+|-------------|----------------|
+| COGID | 1 if cog is running |
+| COGINIT | 1 if no free cog available |
+| GETCT | CT[32] (bit 32 of system counter) |
+| LOCKNEW | 1 if no lock available |
+| LOCKREL | 1 if lock was already free |
+| LOCKTRY | 1 if lock was acquired |
+| MODC | Result of cccc expression |
+| RDPIN | Modal result (depends on Smart Pin mode) |
+| RQPIN | Modal result (depends on Smart Pin mode) |
+
+### WZ-Only Instructions
+
+These five instructions produce meaningful output only for the Z flag:
+
+| Instruction | Z Flag Meaning |
+|-------------|----------------|
+| MODZ | Result of zzzz expression |
+| MUL | 1 if either operand was zero |
+| MULS | 1 if either operand was zero |
+| SCA | 1 if result equals zero |
+| SCAS | 1 if result equals zero |
+
+### Extended Effect Instructions
+
+The TESTP, TESTPN, TESTB, and TESTBN instructions support WC, WZ, and extended effects, but explicitly reject WCZ. The extended effects combine the test result with the existing flag value using logical operations:
+
+| Effect | Operation |
+|--------|-----------|
+| ANDC | C = C AND test_result |
+| ANDZ | Z = Z AND test_result |
+| ORC | C = C OR test_result |
+| ORZ | Z = Z OR test_result |
+| XORC | C = C XOR test_result |
+| XORZ | Z = Z XOR test_result |
+
+These extended effects enable testing multiple bits or pins and accumulating the results into a single flag:
+
+::: pasm2
+' Test if ALL of pins 0, 4, and 7 are high
+        testp   #0              wc      ' C = pin 0 state
+        testp   #4              andc    ' C = C AND pin 4 state
+        testp   #7              andc    ' C = C AND pin 7 state
+        if_c    jmp     #all_high       ' Branch if all three are high
+:::
+

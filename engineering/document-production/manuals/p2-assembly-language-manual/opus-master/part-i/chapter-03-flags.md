@@ -169,36 +169,27 @@ The comparison sets C, and two subsequent operations execute without modifying i
 
 ### 3.2.6 Effect Availability
 
-Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations.
+Not all instructions support all effect modifiers. Each instruction defines which effects are valid based on whether its C and Z outputs have meaningful interpretations. The assembler validates effect usage and reports an error when an invalid effect is specified.
 
-**Effect Permission Categories:**
+**Effect Categories:**
 
-| Permission | Allowed Effects | Reason |
-|------------|-----------------|--------|
-| None | (no effects) | Instruction produces no meaningful flag result |
-| WC only | WC | Only the C flag has a defined meaning |
-| WZ only | WZ | Only the Z flag has a defined meaning |
-| Full | WC, WZ, WCZ | Both flags have defined meanings |
+- **Full support (WC, WZ, WCZ):** Most ALU instructions—ADD, SUB, CMP, AND, OR, MOV, etc.—support all three effects because both flags have independent, meaningful interpretations.
 
-**Why WCZ Requires Both Flags:**
+- **WCZ only:** Pin and bit manipulation instructions (DRV*, BIT*, DIR*, FLT*, OUT*) set both flags to the same value—the original state before modification. Using WC or WZ alone is not allowed; use WCZ or omit effects entirely.
 
-Although WCZ encodes as the combination of WC and WZ bits, the assembler validates that both individual effects are meaningful before allowing WCZ. Using WCZ on an instruction that only supports WC would set Z to an undefined value—the assembler prevents this by requiring full effect support for WCZ.
+- **WC only or WZ only:** Some instructions produce meaningful output for only one flag. For example, LOCKTRY sets C to indicate lock acquisition but has no meaningful Z output.
+
+- **Extended effects (no WCZ):** The TEST* instructions (TESTP, TESTPN, TESTB, TESTBN) support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ.
 
 ::: pasm2
-' Example: LOCKTRY only produces meaningful C (lock acquired)
-        locktry #0              wc      ' Valid: C = lock acquired
-        locktry #0              wz      ' ERROR: Z has no meaning
-        locktry #0              wcz     ' ERROR: WCZ requires both to be valid
+' Examples of effect restrictions
+        add     x, y            wcz     ' Full support: WC, WZ, or WCZ
+        drvh    #pin            wcz     ' WCZ only: WC or WZ alone not allowed
+        locktry #0              wc      ' WC only: WZ and WCZ not allowed
+        testp   #pin            andc    ' Extended: WC, WZ, ANDC, etc. (no WCZ)
 :::
 
-**Common Restrictions:**
-
-- **NOP**: No effects allowed (and no condition prefix)
-- **LOCKTRY/LOCKREL**: WC only (C indicates lock status)
-- **TESTP/TESTPN/TESTB/TESTBN**: Support both basic effects (WC, WZ) and extended effects (ANDC, ORC, etc.) as documented in Section 3.2.4
-- **Some Hub memory operations**: May have restricted effect support
-
-The Part II instruction reference documents the allowed effects for each instruction in its encoding table. When an invalid effect is specified, the assembler produces the error: "This effect is not allowed for this instruction."
+Each instruction entry in Part II documents its allowed effects in the encoding table. For a complete reference of effect restrictions by instruction category, see **Appendix C: Categorical Instruction Index**.
 
 
 ## 3.3 Conditional Execution
