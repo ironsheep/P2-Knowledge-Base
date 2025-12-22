@@ -190,11 +190,11 @@ UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), an
 
 PASM2 code examples follow standard formatting conventions:
 
-::: pasm2
+```pasm2
 label           instruction     D,S             ' Comment
                 instruction     D,#immediate    ' Indented code
         IF_C    instruction     D,S     WCZ     ' With condition and effects
-:::
+```
 
 - Labels are flush left
 - Instructions are indented to column 16 (two tabs or 8 spaces)
@@ -535,20 +535,20 @@ When an instruction has EEEE=0000:
 
 **Basic Usage:**
 
-::: pasm2
+```pasm2
         _ret_   add     x, y            ' ADD then return
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
-:::
+```
 
 **Single-Instruction Subroutines:**
 
 The `_RET_` prefix enables efficient single-instruction subroutines:
 
-::: pasm2
+```pasm2
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
-:::
+```
 
 This is significantly faster than a separate instruction followed by RET.
 
@@ -573,20 +573,20 @@ Both styles encode to identical condition codes—the choice is purely stylistic
 
 **Magnitude terminology** (A = Above, B = Below) reads naturally with values like addresses, counts, and sizes:
 
-::: pasm2
+```pasm2
         mov     addr, ##$80000000       ' addr = 2,147,483,648
         cmp     addr, #0        wcz     ' Compare
         if_a    jmp     #addr_is_larger ' "addr is above zero"
-:::
+```
 
 **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with values like temperatures, positions, and deltas:
 
-::: pasm2
+```pasm2
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
         cmps    x, y            wcz     ' Signed compare: -100 vs 50
         if_lt   jmp     #x_is_smaller   ' "x is less than y"
-:::
+```
 
 **CMP vs. CMPS:**
 
@@ -597,7 +597,7 @@ The distinction that matters is the **compare instruction**, not the alias style
 
 After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
 
-::: pasm2
+```pasm2
 ' Unsigned comparison - either style works
         cmp     a, b            wcz
         if_ae   mov     result, #1      ' "a is above or equal to b"
@@ -607,13 +607,13 @@ After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect si
         cmps    a, b            wcz
         if_ge   mov     result, #1      ' "a is greater or equal to b"
         if_ae   mov     result, #1      ' "a is above or equal to b" (same)
-:::
+```
 
 ### 2.2.4 Conditional Execution Patterns
 
 Conditional execution eliminates branches, providing deterministic timing:
 
-::: pasm2
+```pasm2
 ' Instead of branching:
                 cmp     a, b            wcz
         if_z    jmp     #equal_handler          ' 4 cycles if taken
@@ -623,32 +623,32 @@ Conditional execution eliminates branches, providing deterministic timing:
                 cmp     a, b            wcz
         if_z    mov     result, #1              ' Always 2 cycles
         if_nz   mov     result, #0              ' Always 2 cycles
-:::
+```
 
 Common patterns:
 
 **Minimum/Maximum:**
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare unsigned
         if_c    mov     min, a                  ' min = a if a < b
         if_nc   mov     min, b                  ' min = b if a >= b
-:::
+```
 
 **Conditional Assignment:**
-::: pasm2
+```pasm2
                 test    flags, #MASK    wz      ' Test bit
         if_nz   mov     mode, #1                ' Set if bit present
-:::
+```
 
 **Multi-way Selection:**
-::: pasm2
+```pasm2
                 cmp     selector, #0    wz
         if_z    mov     result, value0
                 cmp     selector, #1    wz
         if_z    mov     result, value1
                 cmp     selector, #2    wz
         if_z    mov     result, value2
-:::
+```
 
 
 ## 2.3 Reading Encoding Tables
@@ -798,10 +798,10 @@ The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 - S is a 9-bit unsigned value (0-511)
 - This value is used directly as the operand
 
-::: pasm2
+```pasm2
         add     result, counter         ' S = register address (I=0)
         add     result, #100            ' S = immediate 100 (I=1)
-:::
+```
 
 ### 2.5.3 When S is Fixed
 
@@ -820,11 +820,11 @@ The fixed value distinguishes this instruction from others sharing the same opco
 
 The `#` prefix before an operand indicates an immediate value:
 
-::: pasm2
+```pasm2
         add     result, #100            ' Add immediate 100
         add     result, value           ' Add contents of register 'value'
         mov     x, #$1FF                ' Load maximum 9-bit value (511)
-:::
+```
 
 When `#` is used:
 
@@ -844,10 +844,10 @@ Values outside this range require augmentation (see Section 2.7).
 
 The `$` symbol represents the current assembly address:
 
-::: pasm2
+```pasm2
 loop    add     counter, #1
         djnz    count, #$-1             ' Jump back one instruction
-:::
+```
 
 When used with `#`, it becomes an immediate representing the address.
 
@@ -858,11 +858,11 @@ When used with `#`, it becomes an immediate representing the address.
 
 The `##` prefix indicates a full 32-bit immediate value:
 
-::: pasm2
+```pasm2
         mov     dest, ##$12345678       ' Load full 32-bit value
         add     counter, ##1000000      ' Add 1 million
         mov     ptr, ##hub_data         ' Load 20-bit Hub address
-:::
+```
 
 ### 2.7.2 AUGS and AUGD Instructions
 
@@ -873,7 +873,7 @@ The assembler implements 32-bit immediates by inserting AUG instructions:
 
 The AUG instruction provides the upper 23 bits, which combine with the lower 9 bits from the next instruction:
 
-::: pasm2
+```pasm2
 ' What the programmer writes:
         mov     dest, ##$12345678
 
@@ -881,7 +881,7 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
         augs    #$12345                 ' Upper 23 bits: $12345
         mov     dest, #$678             ' Lower 9 bits: $678
                                         ' Combined: $12345678
-:::
+```
 
 ### 2.7.3 Augmentation Behavior
 
@@ -904,11 +904,11 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 | `##Dest` only | 1 (AUGD) | +2 cycles |
 | `##Dest, ##Src` | 2 (AUGD + AUGS) | +4 cycles |
 
-::: pasm2
+```pasm2
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
         wrlong  ##dest, ##addr          ' 6 cycles (AUGD+AUGS+instr)
-:::
+```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
 
@@ -921,11 +921,11 @@ Augmentation is needed when:
 - 32-bit constants are needed
 - Pin masks exceed 9 bits
 
-::: pasm2
+```pasm2
         wrlong  value, ##$1000          ' Hub address $1000 (> 511)
         mov     mask, ##$FFFF0000       ' 32-bit mask
         waitx   ##1000000               ' Delay > 511 cycles
-:::
+```
 
 
 ## 2.8 How to Use This Manual
@@ -1116,35 +1116,35 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 
 The `+` prefix on comparison operators indicates unsigned comparison. This matters when comparing values that may have the high bit set:
 
-::: pasm2
+```pasm2
 ' Signed comparison: $80000000 is negative (-2147483648)
         IF  $80000000 < 0       ' True: negative < 0
 
 ' Unsigned comparison: $80000000 is positive (2147483648)
         IF  $80000000 +< 0      ' False: 2147483648 is not < 0
-:::
+```
 
 Use signed comparisons (`<`, `>`, etc.) for values representing signed quantities. Use unsigned comparisons (`+<`, `+>`, etc.) for addresses, bit patterns, or values that should never be negative.
 
 ### 2.9.4 Practical Examples
 
 **Bit field construction:**
-::: pasm2
+```pasm2
 PIN_MODE    EQU  %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
 MASK_BITS   EQU  (1 << NUM_BITS) - 1              ' Create bit mask
-:::
+```
 
 **Buffer calculations:**
-::: pasm2
+```pasm2
 BUFFER_END  EQU  BUFFER_START + BUFFER_SIZE - 1
 WRAP_MASK   EQU  BUFFER_SIZE - 1                  ' For power-of-2 buffers
-:::
+```
 
 **Conditional assembly values:**
-::: pasm2
+```pasm2
 DELAY_MS    EQU  (CLKFREQ / 1000) #> 1            ' At least 1 tick
 TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
-:::
+```
 
 
 ## 2.10 Labels and Symbol Scoping
@@ -1156,9 +1156,9 @@ PASM2 supports two scoping levels for labels within DAT blocks: global labels an
 Global labels are defined by placing an identifier at the start of a line without any prefix character.
 
 **Syntax:**
-::: pasm2
+```pasm2
 labelname       instruction     operands        ' comment
-:::
+```
 
 Global labels have these characteristics:
 
@@ -1170,7 +1170,7 @@ Global labels have these characteristics:
 - Maximum length: 30 characters
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 ' Global labels - visible everywhere in DAT block
@@ -1183,17 +1183,17 @@ data_table      long    $DEAD_BEEF              ' Data with global label
 
 math_helper     abs     x                       ' Another routine
                 ret
-:::
+```
 
 ### 2.10.2 Local Labels
 
 Local labels are defined by prefixing an identifier with either a dot (`.`) or colon (`:`). Both prefix characters are functionally equivalent.
 
 **Syntax:**
-::: pasm2
+```pasm2
 .labelname      instruction     operands        ' comment
 :labelname      instruction     operands        ' comment
-:::
+```
 
 Local labels have these characteristics:
 
@@ -1204,7 +1204,7 @@ Local labels have these characteristics:
 - Must begin with a letter or underscore after the prefix
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 send_byte       rdbyte  x, ptr                  ' Global: send_byte
@@ -1224,7 +1224,7 @@ recv_byte       testp   rx_pin          wc      ' Global: recv_byte
                 rdpin   x, rx_pin
 .loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
                 ret
-:::
+```
 
 The example demonstrates how `.loop` and `.wait` can be reused in both `send_byte` and `recv_byte` without collision. Each global label creates a new local scope.
 
@@ -1243,7 +1243,7 @@ PASM2 provides several operators for referencing labels in different contexts:
 | `$$` | Current Hub address | PASM (ORGH mode) |
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 routine         jmp     #.skip                  ' Jump to local label
@@ -1259,7 +1259,7 @@ routine         jmp     #.skip                  ' Jump to local label
                 orgh
 hub_data        byte    "Hello", 0
 hub_routine     long    @routine                ' Hub address of COG routine
-:::
+```
 
 ### 2.10.4 Scope Boundary Rules
 
@@ -1270,7 +1270,7 @@ Three events create scope boundaries:
 3. **End of DAT block** — Terminates all label scopes
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
@@ -1284,7 +1284,7 @@ func_b          mov     y, #2                   ' Global: func_b,
 .loop           djnz    y, #.loop               ' Local .loop in scope #3
                                                 '  (different)
 .done           ret                             ' Local .done in scope #3
-:::
+```
 
 ### 2.10.5 Best Practices
 
@@ -1358,12 +1358,12 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 
 Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' Set flags once
         if_c    mov     min, a                  ' Use C here
         if_nc   mov     min, b                  ' And here
         if_z    mov     equal, #1               ' And use Z here
-:::
+```
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
 
@@ -1376,9 +1376,9 @@ Every instruction can optionally specify which flags to update using effect modi
 
 ### 3.2.1 The WC Effect
 
-::: pasm2
+```pasm2
         add     result, value   wc      ' Update C flag based on carry
-:::
+```
 
 When WC (Write C) is specified, the instruction updates the C flag according to its specific C condition while leaving Z unchanged. For ADD, this means C is set if the addition produces a carry out of bit 31. For CMP, this means C is set if the first operand is less than the second. Each instruction defines its own C condition as documented in the instruction reference.
 
@@ -1386,9 +1386,9 @@ The key insight: WC means "update C according to this instruction's C rule." The
 
 ### 3.2.2 The WZ Effect
 
-::: pasm2
+```pasm2
         add     result, value   wz      ' Update Z flag based on result
-:::
+```
 
 When WZ (Write Z) is specified, the instruction updates the Z flag based on whether the result equals zero, while leaving C unchanged. Z=1 indicates a zero result; Z=0 indicates a non-zero result. This behavior is consistent across nearly all instructions—the Z flag always reflects "is the result zero?"
 
@@ -1404,13 +1404,13 @@ Z = Z AND (result == 0)
 
 Instead of simply replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
 
-::: pasm2
+```pasm2
 ' 64-bit addition: [hi:lo] += [bhi:blo]
         add     lo, blo         wcz     ' Add low 32 bits, Z = (lo_result == 0)
         addx    hi, bhi         wcz     ' High + carry, Z = Z AND (hi==0)
         ' Z is now 1 only if BOTH lo and hi were zero
         '  (entire 64-bit result is zero)
-:::
+```
 
 Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
 
@@ -1418,9 +1418,9 @@ Without this AND behavior, the final Z flag would only reflect the last 32-bit o
 
 ### 3.2.3 The WCZ Effect
 
-::: pasm2
+```pasm2
         add     result, value   wcz     ' Update both flags
-:::
+```
 
 When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. You can specify WC to update only C, WZ to update only Z, or WCZ to update both—these are the three valid effect options.
 
@@ -1445,7 +1445,7 @@ Unlike WC and WZ which replace the flag value, these effects combine the tested 
 
 The most common use is testing whether ALL bits in a set are high (AND), or whether ANY bit in a set is high (OR):
 
-::: pasm2
+```pasm2
 ' Test if ALL of pins 0, 4, and 7 are high (AND pattern)
         testp   #0              wc      ' C = pin 0 state
         testp   #4              andc    ' C = C AND pin 4 state
@@ -1457,7 +1457,7 @@ The most common use is testing whether ALL bits in a set are high (AND), or whet
         testpn  #4              andc    ' C = C AND NOT pin 4
         testpn  #7              andc    ' C = C AND NOT pin 7
         ' C = 0 if ANY pin is high, C = 1 if ALL pins are low
-:::
+```
 
 **TESTB vs TESTP:**
 
@@ -1469,20 +1469,20 @@ The most common use is testing whether ALL bits in a set are high (AND), or whet
 
 ### 3.2.5 No Effect (Default)
 
-::: pasm2
+```pasm2
         add     result, value           ' Execute operation, preserve flags
-:::
+```
 
 When no effect is specified, the instruction executes normally but leaves both C and Z unchanged. This is not a "do nothing" mode—the operation completes, the destination is written, and timing is identical to the flagged version. Only the flags are preserved.
 
 This behavior enables using flag values across multiple instructions without interference:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Set C based on comparison
                 mov     temp, c                 ' Does not modify C
                 add     temp, d                 ' Does not modify C
         if_c    mov     result, temp            ' Tests original C
-:::
+```
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
 
@@ -1500,13 +1500,13 @@ Not all instructions support all effect modifiers. Each instruction defines whic
 
 - **Extended effects (no WCZ):** The TEST* instructions (TESTP, TESTPN, TESTB, TESTBN) support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ.
 
-::: pasm2
+```pasm2
 ' Examples of effect restrictions
         add     x, y            wcz     ' Full support: WC, WZ, or WCZ
         drvh    #pin            wcz     ' WCZ only: WC or WZ alone not allowed
         locktry #0              wc      ' WC only: WZ and WCZ not allowed
         testp   #pin            andc    ' Extended: WC, WZ, ANDC, etc. (no WCZ)
-:::
+```
 
 Each instruction entry in Part II documents its allowed effects in the encoding table. For a complete reference of effect restrictions by instruction category, see **Appendix C: Categorical Instruction Index**.
 
@@ -1519,11 +1519,11 @@ The P2 allows any instruction to execute conditionally based on the current flag
 
 Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (2 clock cycles). When the condition is true, the instruction executes normally:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' Compare, set flags
         if_z    mov     result, #1              ' Only if Z=1 (equal)
         if_nz   mov     result, #0              ' Only if Z=0 (not equal)
-:::
+```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly three clock cycles regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes.
 
@@ -1535,21 +1535,21 @@ When a conditional instruction's condition is false, the instruction does not ex
 
 Consider this example:
 
-::: pasm2
+```pasm2
                 test    flags, #BIT_READY  wz   ' Check ready bit
         if_nz   rdlong  data, ptr               ' Read if ready
         if_nz   add     ptr, #4                 ' Advance if read occurred
-:::
+```
 
 This sequence takes exactly three clock cycles whether the ready bit is set or clear. If implementing the same logic with branches:
 
-::: pasm2
+```pasm2
                 test    flags, #BIT_READY  wz
         if_z    jmp     #skip
                 rdlong  data, ptr
                 add     ptr, #4
 skip
-:::
+```
 
 The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when ready (test + not-jump + rdlong + add). The timing varies by 100%. The conditional version maintains constant 3-cycle timing.
 
@@ -1660,10 +1660,10 @@ Move and data manipulation instructions set flags based on the source or result 
 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 
-::: pasm2
+```pasm2
         mov     temp, value     wc      ' Copy value, C = sign bit
         if_c    jmp     #negative       ' Branch if negative
-:::
+```
 
 NEG sets C=1 if the source was non-zero, which indicates that negation actually changed the value. When the source is zero, negation produces zero and C=0.
 
@@ -1678,10 +1678,10 @@ Understanding common flag usage patterns accelerates learning and provides templ
 
 Testing whether a specific bit is set uses TEST with WZ:
 
-::: pasm2
+```pasm2
                 test    value, #%00000100  wz   ' Test bit 2
         if_nz   jmp     #bit_set                ' Jump if bit is set
-:::
+```
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
 
@@ -1691,19 +1691,19 @@ The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pa
 
 Adding values wider than 32 bits requires propagating the carry between word additions:
 
-::: pasm2
+```pasm2
         add     x_lo, y_lo      wc      ' Add low words, capture carry
         addx    x_hi, y_hi              ' Add high words plus carry
-:::
+```
 
 The first ADD adds the low 32 bits and sets C if the addition carries out. The ADDX instruction (Add with Carry) adds the high 32 bits plus the carry from the first addition. This extends to any number of words:
 
-::: pasm2
+```pasm2
         add     x0, y0          wc      ' Add word 0
         addx    x1, y1          wc      ' Add word 1 plus carry
         addx    x2, y2          wc      ' Add word 2 plus carry
         addx    x3, y3                  ' Add word 3 plus carry
-:::
+```
 
 Each ADDX uses the carry from the previous addition and generates a new carry for the next addition. The result is 128-bit (4 × 32-bit) addition with correct carry propagation.
 
@@ -1711,30 +1711,30 @@ Each ADDX uses the carry from the previous addition and generates a new carry fo
 
 Selecting between two values based on a comparison uses conditional moves:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare a and b
         if_c    mov     result, a               ' If a < b, result = a
         if_nc   mov     result, b               ' If a >= b, result = b
-:::
+```
 
 This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves executes, storing the smaller value in result. The sequence takes exactly three clock cycles regardless of which value is smaller.
 
 For maximum of two values, invert the conditions:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare a and b
         if_c    mov     result, b               ' If a < b, result = b
         if_nc   mov     result, a               ' If a >= b, result = a
-:::
+```
 
 ### 3.5.4 Branchless Absolute Value
 
 Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
 
-::: pasm2
+```pasm2
                 abs     result, value   wc      ' Absolute value, C = negative
         if_c    neg     result                  ' Correct if was negative
-:::
+```
 
 Wait—this looks wrong. If ABS already computes the absolute value, why negate it afterward?
 
@@ -1748,10 +1748,10 @@ Most code doesn't care about this edge case and can simply use `ABS result, valu
 
 Updating a counter only when a condition is met uses conditional arithmetic:
 
-::: pasm2
+```pasm2
                 test    flags, #FLAG_READY  wz  ' Test ready flag
         if_nz   add     count, #1               ' Increment if ready
-:::
+```
 
 This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—two clock cycles regardless of flag state.
 
@@ -1759,13 +1759,13 @@ This increments `count` only when the ready flag is set. No branches are needed,
 
 Checking whether a value falls within a range combines comparison and logical conditions:
 
-::: pasm2
+```pasm2
                 cmp     value, min      wc      ' Check if value < min
         if_c    jmp     #out_of_range           ' Too small
                 cmp     value, max      wc      ' Check if value >= max
         if_nc   jmp     #out_of_range           ' Too large
                 ' Value is in range [min, max)
-:::
+```
 
 This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
 
@@ -1778,19 +1778,19 @@ Beyond basic conditional execution, the P2 provides specialized instructions for
 
 The MODC and MODZ instructions modify flags directly without performing computations:
 
-::: pasm2
+```pasm2
         modc    _set    wc      ' Set C flag to 1
         modz    _clr    wz      ' Clear Z flag to 0
-:::
+```
 
 MODC sets C according to a 4-bit modifier constant, and MODZ sets Z similarly. The WC and WZ effects are required for the modification to take effect; without them, the result is computed but discarded. Common modifier constants include `_set` (always 1), `_clr` (always 0), `_c` (current C), and `_z` (current Z).
 
 The MODCZ instruction can modify both flags simultaneously:
 
-::: pasm2
+```pasm2
         modcz   _clr, _set  wcz ' Clear C, set Z
         modcz   _set, _set  wcz ' Set both flags
-:::
+```
 
 MODCZ accepts two operands specifying operations for C and Z respectively. The WC, WZ, or WCZ effect must be specified for the flags to be modified. Modifier constants include `_clr` (clear to 0), `_set` (set to 1), `_nc` (inverted C), `_nz` (inverted Z), and others that enable complex flag manipulation in a single instruction.
 
@@ -1798,21 +1798,21 @@ MODCZ accepts two operands specifying operations for C and Z respectively. The W
 
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
-::: pasm2
+```pasm2
         muxc    value, #mask    ' C=1: set bits; C=0: clear bits
         muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
         muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
         muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
-:::
+```
 
 These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
 
-::: pasm2
+```pasm2
         test    input, #BIT0    wc      ' Test bit 0 of input
         muxc    output, #%0001          ' Copy bit 0 to output bit 0
         test    input, #BIT1    wc      ' Test bit 1 of input
         muxc    output, #%0010          ' Copy bit 1 to output bit 1
-:::
+```
 
 This pattern extracts and repositions bits based on flag tests, enabling bit-field manipulation.
 
@@ -1820,7 +1820,7 @@ This pattern extracts and repositions bits based on flag tests, enabling bit-fie
 
 Sometimes you need to preserve flag values across operations that might modify them. The P2 does not provide a dedicated flag save/restore mechanism, but you can use register operations:
 
-::: pasm2
+```pasm2
         ' Save flags
         wrc     temp            ' Write C to temp[0]
         wrz     temp            ' Write Z to temp[1]
@@ -1830,7 +1830,7 @@ Sometimes you need to preserve flag values across operations that might modify t
         ' Restore flags
         testb   temp, #0        wc      ' Read temp[0] into C
         testb   temp, #1        wz      ' Read temp[1] into Z
-:::
+```
 
 The WRC instruction writes C to the specified bit of a register (typically bit 0), and WRZ writes Z to a specified bit (typically bit 1). TESTB tests a specific bit and sets C or Z accordingly, effectively restoring the saved flag values.
 
@@ -1840,7 +1840,7 @@ An alternative approach uses MODCZ with computed values, but the TESTB pattern i
 
 Flags can encode state transitions in compact state machines. Instead of comparing state variables and branching, use flags to select the next state:
 
-::: pasm2
+```pasm2
                 ' Current state determines which flags are set
                 test    state, #STATE_IDLE      wz
         if_z    jmp     #handle_idle
@@ -1848,7 +1848,7 @@ Flags can encode state transitions in compact state machines. Instead of compari
         if_z    jmp     #handle_active
                 test    state, #STATE_DONE      wz
         if_z    jmp     #handle_done
-:::
+```
 
 This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
@@ -1913,39 +1913,39 @@ The X variants are critical because they:
 
 **64-bit unsigned addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Add low longs, C = carry, Z = (A0 == 0)
         ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry,
                                   '  Z = Z AND (A1 == 0)
         ' After: C = overflow, Z = (entire 64-bit result == 0)
-:::
+```
 
 **128-bit unsigned addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' A0 = A0 + B0
         ADDX    A1, B1    WCZ     ' A1 = A1 + B1 + carry
         ADDX    A2, B2    WCZ     ' A2 = A2 + B2 + carry
         ADDX    A3, B3    WCZ     ' A3 = A3 + B3 + carry
         ' After: C = overflow beyond 128 bits, Z = (entire 128-bit result == 0)
-:::
+```
 
 **64-bit unsigned subtraction** (A = A - B):
 
-::: pasm2
+```pasm2
         SUB     A0, B0    WCZ     ' Subtract low longs, C = borrow
         SUBX    A1, B1    WCZ     ' Subtract high longs - borrow
         ' After: C = underflow (B > A), Z = (result == 0)
-:::
+```
 
 **64-bit unsigned comparison** (compare A to B):
 
-::: pasm2
+```pasm2
         CMP     A0, B0    WCZ     ' Compare low longs
         CMPX    A1, B1    WCZ     ' Compare high longs with borrow
         ' After: C = (A < B), Z = (A == B)
         ' Use IF_B (below) or IF_AE (above/equal) for unsigned branches
-:::
+```
 
 ### 3.7.4 Signed Multi-Long Examples
 
@@ -1953,30 +1953,30 @@ For signed operations, the final instruction must be an SX variant to correctly 
 
 **64-bit signed addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Add low longs (unsigned, generates carry)
         ADDSX   A1, B1    WCZ     ' Add high longs + carry, C = true sign
         ' After: C = true sign of result (1 = negative), Z = (result == 0)
-:::
+```
 
 **128-bit signed addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Unsigned add for low long
         ADDX    A1, B1    WCZ     ' Unsigned add + carry for middle longs
         ADDX    A2, B2    WCZ     ' Unsigned add + carry
         ADDSX   A3, B3    WCZ     ' Signed add for high long, C = true sign
         ' After: C = 1 if result is negative, Z = (result == 0)
-:::
+```
 
 **64-bit signed comparison** (compare A to B):
 
-::: pasm2
+```pasm2
         CMP     A0, B0    WCZ     ' Compare low longs
         CMPSX   A1, B1    WCZ     ' Compare high, C = sign of difference
         ' After: C = (A < B) signed, Z = (A == B)
         ' Use IF_LT (less than) or IF_GE (greater/equal) for signed branches
-:::
+```
 
 ### 3.7.5 Understanding "True Sign"
 
@@ -2067,9 +2067,9 @@ The VCO operates optimally between 100-200 MHz. Higher frequencies are possible 
 
 Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
 
-::: pasm2
+```pasm2
         hubset  ##config_value          ' Configure clock system
-:::
+```
 
 The configuration value contains fields for crystal mode, clock source selection, and PLL parameters. Key fields include:
 
@@ -2092,11 +2092,11 @@ Switching clock sources requires a careful sequence to ensure glitch-free transi
 3. **Switch sources**: Change the SS field to select the new clock source
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 
-::: pasm2
+```pasm2
         hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable xtal
         waitx   ##20_000_000/100                            ' Wait ~10ms
         hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch
-:::
+```
 
 The P2 provides automatic fallback to RCFAST if the selected clock source fails, preventing system lockup from clock problems.
 
@@ -2200,10 +2200,10 @@ SETQ enables burst transfers that read or write multiple consecutive longs in a 
 
 The SETQ instruction takes one parameter specifying how many additional longs to transfer. The hub access instruction that follows SETQ performs a burst of that many consecutive transfers:
 
-::: pasm2
+```pasm2
         setq    #15                     ' Transfer 16 longs total
         rdlong  buffer, ptr             ' Burst read from Hub
-:::
+```
 
 This code reads 16 consecutive longs from hub memory starting at address `ptr` and stores them in COG RAM starting at address `buffer`. The first long experiences normal hub window wait (0-7 cycles), but each subsequent long transfers in just one additional cycle. The total time is approximately 2 (SETQ) + 2 (RDLONG base) + wait (0-7) + 1 + 15 (subsequent longs) = 20-27 cycles—far faster than 16 separate RDLONG instructions, which would average 16 × (2 + 3.5 + 1) = 104 cycles.
 
@@ -2223,13 +2223,13 @@ Each COG has access to a shared FIFO buffer that can operate in either read mode
 
 RDFAST configures the FIFO for reading from hub memory. The D operand provides a block count (number of 64-byte blocks before wrapping), and the S operand provides the starting hub address:
 
-::: pasm2
+```pasm2
         rdfast  #0, ptr                 ' Start continuous read FIFO
 loop
         rflong  data                    ' Read from FIFO (fast, no hub wait)
         ' ... process data ...
         jmp     #loop                   ' Continue reading
-:::
+```
 
 The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
 
@@ -2248,13 +2248,13 @@ The no-wait mode is useful when you need to reconfigure the FIFO quickly and can
 
 WRFAST configures the FIFO for writing to hub memory:
 
-::: pasm2
+```pasm2
         wrfast  #0, ptr                 ' Start continuous write FIFO
 loop
         ' ... generate data ...
         wflong  data                    ' Write to FIFO (fast, no hub wait)
         jmp     #loop                   ' Continue writing
-:::
+```
 
 The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
 
@@ -2264,9 +2264,9 @@ The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer 
 
 The FIFO supports circular buffer operation for continuous streaming. When configured with a non-zero block count, the FIFO wraps back to the starting address after transferring the specified number of 64-byte blocks:
 
-::: pasm2
+```pasm2
         rdfast  #16, audio_buffer       ' Read 16 blocks (1KB), then wrap
-:::
+```
 
 For wrapping mode, the hub start address must be long-aligned (address ends in %00) since there won't be an extra cycle to read/write a partial long at block boundaries. Use 0 for block count when you don't want wrapping—the FIFO will sequence through the entire 1MB hub map before wrapping.
 
@@ -2274,12 +2274,12 @@ For wrapping mode, the hub start address must be long-aligned (address ends in %
 
 The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. It sets a new start address and block count that take effect when the current blocks are fully read or written:
 
-::: pasm2
+```pasm2
         rdfast  #16, buffer_a           ' Start reading from buffer A
         ' ... reading proceeds ...
         fblock  #16, buffer_b           ' Queue buffer B for when A completes
         ' ... FIFO seamlessly transitions to buffer B on wrap
-:::
+```
 
 FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK with streamer activity enables dynamic, seamless streaming between hub RAM and pins/DACs—essential for continuous audio/video output where buffer switches must be glitch-free.
 
@@ -2369,23 +2369,23 @@ Conditional execution provides an alternative to branching that eliminates timin
 
 The branching approach introduces timing variation:
 
-::: pasm2
+```pasm2
 ' With branch (2 or 4 cycles):
         cmp     a, b            wz
         if_z    jmp     #equal_case
         ' Not-equal path continues here
-:::
+```
 
 When `a` equals `b`, this code takes 2 (CMP) + 4 (JMP taken) = 6 cycles. When `a` differs from `b`, the code takes 2 (CMP) + 2 (JMP not taken) = 4 cycles. The 2-cycle variation complicates timing analysis.
 
 The conditional execution approach provides constant timing:
 
-::: pasm2
+```pasm2
 ' Without branch (2 cycles always):
         cmp     a, b            wz
         if_z    mov     result, #1
         if_nz   mov     result, #0
-:::
+```
 
 This code takes 2 (CMP) + 2 (first MOV, executed if Z set) + 2 (second MOV, executed if Z clear) = 6 cycles when Z is set, or 2 (CMP) + 2 (first MOV, skipped) + 2 (second MOV, executed) = 6 cycles when Z is clear. Both paths take exactly 6 cycles.
 
@@ -2400,9 +2400,9 @@ Conditional execution works for simple cases where both branches are short. For 
 
 WAITX provides precise, cycle-accurate delays by pausing execution for a specified number of clock cycles:
 
-::: pasm2
+```pasm2
         waitx   ##100                   ' Wait exactly 100 cycles
-:::
+```
 
 The instruction accepts a value specifying the delay duration. Execution resumes exactly after that many cycles have elapsed. This precision makes WAITX essential for timing-critical operations like bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.
 
@@ -2414,25 +2414,25 @@ The P2 provides a global cycle counter that increments every clock cycle. COGs c
 
 Each COG has three independent counter match registers (CT1, CT2, CT3). Programs load target counter values into these registers using ADDCT1, ADDCT2, or ADDCT3, then wait for the counter to reach those values using WAITCT1, WAITCT2, or WAITCT3:
 
-::: pasm2
+```pasm2
         getct   time                    ' Read current time
         addct1  time, ##1000            ' Set CT1 = time + 1000
         ' ... do work ...
         waitct1                         ' Wait until counter reaches CT1
-:::
+```
 
 This pattern ensures that the wait completes exactly 1,000 cycles after the GETCT instruction, regardless of how long the intervening work takes. If the work completes in 800 cycles, WAITCT1 waits 200 more cycles. If the work takes 1,200 cycles, WAITCT1 returns immediately (the deadline has already passed).
 
 For periodic operations, adding a fixed delta to the counter match register each iteration eliminates drift:
 
-::: pasm2
+```pasm2
         getct   time                    ' Initialize time base
 loop
         addct1  time, ##1000            ' Next deadline = previous + 1000
         ' ... generate pulse or process data ...
         waitct1                         ' Wait for next period
         jmp     #loop
-:::
+```
 
 Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
 
@@ -2444,13 +2444,13 @@ While HUBSET's primary purpose is configuring hub execution mode, it also provid
 
 For applications that need consistent hub access timing without entering hub execution mode, careful scheduling provides an alternative. If a loop performs hub access at regular intervals aligned with the 8-cycle egg beater period, the hub wait time remains consistent across iterations:
 
-::: pasm2
+```pasm2
 loop
         ' ... exactly 8 cycles of work ...
         rdlong  data, ptr               ' Hub access occurs at same phase
         ' ... more work ...
         jmp     #loop                   ' Loop maintains 8-cycle alignment
-:::
+```
 
 This technique requires precise cycle counting and works only when the loop body contains an integer multiple of 8 cycles.
 
@@ -2475,28 +2475,28 @@ Many real-time applications require loops that execute with precise, predictable
 
 Consider a loop that reads data from hub memory, processes it, and repeats:
 
-::: pasm2
+```pasm2
 ' 8-cycle loop body (fits in one Hub window period)
 loop
         rdlong  data, ptr               ' 2 + wait cycles
         add     ptr, #4                 ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
-:::
+```
 
 This loop body must account for hub access timing variation. If the loop starts aligned with the COG's hub window, RDLONG waits 0 cycles and the loop takes 2 + 2 + 4 = 8 cycles. If the loop starts just after the hub window, RDLONG waits 7 cycles and the loop takes 9 + 2 + 4 = 15 cycles.
 
 For truly cycle-exact timing, loops must either eliminate hub access or align hub access with the egg beater rotation. One approach uses COG RAM for all data, avoiding hub access entirely:
 
-::: pasm2
+```pasm2
 loop
         add     data, #1                ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
         ' Exactly 6 cycles per iteration
-:::
+```
 
 Another approach aligns the loop body to an 8-cycle boundary and ensures hub access occurs at the same phase each iteration:
 
-::: pasm2
+```pasm2
 loop
         rdlong  data, ptr               ' 2 + wait (same wait each time)
         add     result, data            ' 2 cycles
@@ -2504,7 +2504,7 @@ loop
         djnz    count, #loop            ' 4 cycles (taken)
         nop                             ' 2 cycles - padding to 16 total
         ' Loop body = 16 cycles (2× hub period)
-:::
+```
 
 If the first iteration experiences 3 cycles of hub wait, every subsequent iteration also experiences 3 cycles of wait because the 16-cycle loop maintains alignment with the 8-cycle hub period.
 
@@ -2514,7 +2514,7 @@ Programs can hide hub access latency by overlapping computation with hub waiting
 
 The SETQ-based burst transfer provides one form of pipelining—while later longs transfer, the program can begin processing earlier longs. A more general approach separates hub access from computation:
 
-::: pasm2
+```pasm2
 loop
         rdlong  next_data, next_ptr     ' Start fetching next data
         add     next_ptr, #4
@@ -2523,7 +2523,7 @@ loop
         sub     current_data, offset
         mov     current_data, next_data ' Previous fetch is now ready
         djnz    count, #loop
-:::
+```
 
 This pattern keeps hub access and computation overlapped—the RDLONG for iteration N+1 occurs while iteration N's computation proceeds. The technique works best when computation time roughly equals hub access time, maximizing overlap.
 
@@ -2533,15 +2533,15 @@ CORDIC operations take 54 cycles to compute results, but the instruction that st
 
 A simple example shows the pattern:
 
-::: pasm2
+```pasm2
         qmul    a, b                    ' Start multiply
         ' ... 54 cycles of other work ...
         getqx   result                  ' Get result (low 32 bits)
-:::
+```
 
 For maximum efficiency, interleave multiple CORDIC operations with other work:
 
-::: pasm2
+```pasm2
         qmul    a1, b1                  ' Start first multiply
         ' ... some work ...
         qmul    a2, b2                  ' Start second multiply
@@ -2549,7 +2549,7 @@ For maximum efficiency, interleave multiple CORDIC operations with other work:
         getqx   result1                 ' Get first result
         ' ... more work ...
         getqx   result2                 ' Get second result
-:::
+```
 
 The key constraint is that at least 54 cycles must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
 
@@ -2561,7 +2561,7 @@ Bit-banging—directly controlling I/O pins with software timing—requires cycl
 
 A WS2812 LED protocol example demonstrates the precision required:
 
-::: pasm2
+```pasm2
 ' WS2812 requires precise pulse widths:
 ' 0 bit: 400ns high, 850ns low
 ' 1 bit: 800ns high, 450ns low
@@ -2579,7 +2579,7 @@ send_bit
         if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
         rol     data, #1                ' Shift to next bit
         djnz    count, #send_bit
-:::
+```
 
 This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
 
@@ -2594,12 +2594,12 @@ The P2 provides a global 64-bit cycle counter (Rev B/C silicon) that increments 
 
 Measuring code execution time involves reading the counter before and after the code section of interest:
 
-::: pasm2
+```pasm2
         getct   start_time              ' Read cycle counter
         ' ... code to measure ...
         getct   end_time                ' Read cycle counter again
         sub     end_time, start_time    ' Elapsed cycles
-:::
+```
 
 The difference between the two readings gives the exact number of cycles elapsed. This measurement includes the cycles consumed by GETCT itself (2 cycles each), so precise measurements should account for this overhead.
 
@@ -2613,11 +2613,11 @@ The lower 32 bits of the cycle counter wrap around every 2³² cycles. At 320 MH
 
 Subtraction using unsigned arithmetic naturally handles wrap-around. When end_time is less than start_time (because wrap-around occurred), the subtraction `end_time - start_time` produces the correct elapsed time due to modular arithmetic:
 
-::: pasm2
+```pasm2
         mov     start_time, ##$FFFF_FFF0  ' Near wrap-around
         mov     end_time,   ##$0000_0010  ' After wrap-around
         sub     end_time, start_time      ' Result: $20 (32 cycles)
-:::
+```
 
 This automatic wrap-around handling works for elapsed times up to 2³¹ cycles (half the counter range). For longer measurements, code must count wrap-around events explicitly or use multiple counter values.
 
@@ -2627,7 +2627,7 @@ GETCT enables detailed performance profiling of assembly code. By measuring exec
 
 A common profiling pattern measures loop iteration time:
 
-::: pasm2
+```pasm2
         mov     iterations, ##1000
         getct   start_time
 loop
@@ -2636,11 +2636,11 @@ loop
         getct   end_time
         mov     elapsed, end_time
         sub     elapsed, start_time
-:::
+```
 
 The total elapsed time divided by the iteration count gives the average time per iteration. For more detailed profiling, place multiple GETCT measurements within the loop to identify which parts of the loop consume the most time:
 
-::: pasm2
+```pasm2
 loop
         getct   time1
         ' ... section A ...
@@ -2653,7 +2653,7 @@ loop
         sub     timeB, time2              ' Section B timing
         ' Store or accumulate timing data
         djnz    iterations, #loop
-:::
+```
 
 This approach provides cycle-accurate timing for each code section, enabling precise optimization. The overhead of GETCT instructions affects absolute timing but not the relative timing between sections.
 
@@ -2758,12 +2758,12 @@ Each operation produces one or two 32-bit results, retrieved through [GETQX](#ge
 
 CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 54-cycle computation period—attempting to retrieve results before this period completes produces undefined values.
 
-::: pasm2
+```pasm2
         qmul    multiplicand, multiplier    ' Start 32x32 multiply
         ' ... 54 cycles of other useful work ...
         getqx   product_lo                  ' Get low 32 bits
         getqy   product_hi                  ' Get high 32 bits
-:::
+```
 
 The 54-cycle computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
 
@@ -2777,7 +2777,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 **Fill Phase:** Submit multiple operations before expecting any results. During this phase, you queue operations without retrieving results, filling the pipeline:
 
-::: pasm2
+```pasm2
         ' Fill phase - queue first 6 operations
         qmul    a0, b0                      ' Operation 0 enters pipeline
         qmul    a1, b1                      ' Operation 1 (8 clocks later)
@@ -2786,27 +2786,27 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
         qmul    a4, b4                      ' Operation 4
         qmul    a5, b5                      ' Operation 5
         ' Pipeline now filling, first result not ready yet
-:::
+```
 
 **Steady-State Phase:** Once the pipeline fills, retrieve one result and submit one new operation each access slot. This phase achieves maximum throughput—one result per 8 clocks:
 
-::: pasm2
+```pasm2
         ' Steady state - retrieve previous, submit next
 .loop   getqx   result_lo                   ' Get result from ~54 clocks ago
         getqy   result_hi
         qmul    a_next, b_next              ' Submit next operation
         ' ... process result, prepare next operands ...
         djnz    count, #.loop
-:::
+```
 
 **Drain Phase:** After submitting the final operation, continue retrieving remaining results without submitting new operations:
 
-::: pasm2
+```pasm2
         ' Drain phase - retrieve final results
         getqx   result_lo                   ' Get remaining results
         getqy   result_hi
         ' ... repeat for each operation still in pipeline ...
-:::
+```
 
 ### 5.1.5 Result Retrieval Timing
 
@@ -2814,11 +2814,11 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
-::: pasm2
+```pasm2
         pollqmt             wc              ' C=1 if pipeline empty,
                                             '  C=0 if results pending
         if_nc   getqx   result              ' Retrieve if available
-:::
+```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
 
@@ -2826,7 +2826,7 @@ The CORDIC generates Event 15 when GETQX or GETQY executes with no results avail
 
 This example processes an array of coordinate pairs, rotating each by a fixed angle. The pipeline keeps multiple rotations in flight:
 
-::: pasm2
+```pasm2
 ' Rotate 16 coordinate pairs by angle
 ' Input: point_array (pairs of X,Y longs), angle
 ' Output: rotated coordinates written back to array
@@ -2868,7 +2868,7 @@ queue_rotation
         setq    y                           ' Y coordinate to Q register
         qrotate x, angle                    ' Start rotation
         ret
-:::
+```
 
 This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 54 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
 
@@ -3080,11 +3080,11 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 
 Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
 
-::: pasm2
+```pasm2
                 pollse1         wc          ' Test event 1, C if occurred
         if_c    jmp     #handler                ' Branch to handler only if
                                                 '  event fired
-:::
+```
 
 This pattern branches to handler code only when the event occurred.
 
@@ -3122,7 +3122,7 @@ The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from 
 
 Typical lock usage follows a four-phase pattern: allocate, acquire-use-release loop, deallocate:
 
-::: pasm2
+```pasm2
                 locknew lock_id         wc      ' Allocate lock from pool
         if_c    jmp     #no_locks               ' Handle pool exhaustion
 
@@ -3139,7 +3139,7 @@ critical_section
                 jmp     #critical_section       ' Repeat access cycle
 
 done            lockret lock_id                 ' Return lock to pool
-:::
+```
 
 The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this COG has exclusive access—all other COGs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
 
@@ -3151,14 +3151,14 @@ Locks solve multiple classes of multi-COG coordination problems:
 
 When multiple COGs read and modify Hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
 
-::: pasm2
+```pasm2
                 locktry queue_lock      wc
         if_nc   jmp     #retry
                 rdlong  head, queue_head        ' Read
                 add     head, #1                ' Modify
                 wrlong  head, queue_head        ' Write back
                 lockrel queue_lock              ' Complete atomic update
-:::
+```
 
 Without the lock, two COGs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
 
@@ -3166,12 +3166,12 @@ Without the lock, two COGs might simultaneously read the same `head` value, incr
 
 When multiple COGs share hardware resources (specific Smart Pin, display controller, audio output), locks coordinate exclusive access:
 
-::: pasm2
+```pasm2
                 locktry display_lock    wc      ' Acquire display
         if_nc   jmp     #retry
                 ' ... draw graphics, write text ...
                 lockrel display_lock            ' Release for other COGs
-:::
+```
 
 **Producer/Consumer Synchronization:**
 
@@ -3368,7 +3368,7 @@ Loaded programs must include a validation header. The loader computes a 32-bit s
 
 User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-25 MHz. For applications requiring precise timing, configure an external crystal or the PLL early in your program:
 
-::: pasm2
+```pasm2
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
                 ' Enable crystal oscillator with 15pF caps
                 hubset  ##%0000_0001_0000_0000_0000_0000_00_10
@@ -3382,7 +3382,7 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
                 waitx   ##20_000_000/10000
                 ' Switch to PLL output
                 hubset  ##%0000_0001_0000_1000_0000_0010_00_11
-:::
+```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
 
@@ -3394,10 +3394,10 @@ The boot ROM cannot know what clock source your hardware provides. Some boards u
 
 The HUBSET instruction can trigger a hardware reset, returning the chip to the boot sequence:
 
-::: pasm2
+```pasm2
                 hubset  ##$1000_0000                ' Generate reset pulse,
                                                     '  reboot chip
-:::
+```
 
 This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
 
@@ -3410,11 +3410,11 @@ DEBUG is a compile-time directive that generates serial output code. When enable
 
 DEBUG statements output text strings and formatted values:
 
-::: pasm2
+```pasm2
                 debug("Starting motor control")     ' Text message
                 debug("Speed: ", udec(speed))       ' Decimal value
                 debug("Status: ", uhex_(status))    ' Hex without name
-:::
+```
 
 The serial connection typically runs at 2 Mbaud. When DEBUG is disabled via compiler option, statements generate no code.
 
@@ -3468,7 +3468,7 @@ The debug system operates at three distinct levels, each controlled by CON const
 
 The `debug[N]()` form categorizes debug statements into channels (0-31) that compile selectively based on DEBUG_MASK:
 
-::: pasm2
+```pasm2
 CON
   DBG_INIT  = 0
   DBG_ERROR = 3
@@ -3479,7 +3479,7 @@ DAT
 entry   debug[DBG_INIT]("Starting")   ' COMPILED - bit 0 set
         debug[1]("Motor status")       ' NOT compiled - bit 1 clear
         debug[DBG_ERROR]("Fault!")     ' COMPILED - bit 3 set
-:::
+```
 
 Disabled channels produce zero code—no runtime overhead exists. Standard `debug()` statements without channel numbers are unaffected by DEBUG_MASK and compile whenever debug is enabled.
 
@@ -3533,29 +3533,29 @@ The most basic addressing mode specifies COG registers directly by address. Both
 
 The destination field (D) in every instruction specifies a 9-bit COG register address ($000-$1FF). The instruction reads from and/or writes to this register:
 
-::: pasm2
+```pasm2
         add     result, value           ' result is destination register
         mov     counter, #0             ' counter is destination register
         test    flags, #MASK    wz      ' flags is destination (read-only here)
-:::
+```
 
 The assembler translates symbolic register names to their addresses. Programmers define registers using labels or the RES directive:
 
-::: pasm2
+```pasm2
 result          res     1               ' Reserve one long at current address
 counter         res     1
 flags           res     1
-:::
+```
 
 ### 6.1.2 Register as Source
 
 When the I bit (bit 18) is clear, the source field (S) specifies a register address. The instruction reads the value from that register:
 
-::: pasm2
+```pasm2
         add     x, y                    ' y is source register (I=0)
         mov     dest, source            ' source is register (I=0)
         cmp     a, b            wc      ' b is source register (I=0)
-:::
+```
 
 Direct register addressing provides single-cycle access to COG RAM. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
 
@@ -3583,11 +3583,11 @@ Immediate addressing embeds a constant value directly in the instruction rather 
 
 The `#` prefix before an operand indicates an immediate value:
 
-::: pasm2
+```pasm2
         add     x, #100                 ' Add immediate value 100
         mov     counter, #0             ' Load zero
         cmp     value, #255     wc      ' Compare against 255
-:::
+```
 
 When `#` is used:
 
@@ -3599,11 +3599,11 @@ When `#` is used:
 
 The 9-bit immediate field is always treated as unsigned (0-511). For instructions that interpret operands as signed values, the 9-bit value is sign-extended:
 
-::: pasm2
+```pasm2
         mov     x, #$1FF                ' x = 511 or -1 (sign-extended)
         add     x, #1                   ' Add 1
         sub     x, #10                  ' Subtract 10
-:::
+```
 
 Values outside the 0-511 range require augmentation (see Section 6.3).
 
@@ -3611,11 +3611,11 @@ Values outside the 0-511 range require augmentation (see Section 6.3).
 
 The `$` symbol represents the current assembly address:
 
-::: pasm2
+```pasm2
 loop    add     counter, #1
         djnz    count, #$-1             ' Jump back one instruction (to ADD)
         jmp     #$                      ' Infinite loop (jump to self)
-:::
+```
 
 When used with `#`, it becomes an immediate value representing the address. This is useful for relative branches and self-referencing code.
 
@@ -3628,17 +3628,17 @@ When values exceed 9 bits, PASM2 uses augmentation to provide full 32-bit immedi
 
 The `##` prefix indicates a full 32-bit immediate value:
 
-::: pasm2
+```pasm2
         mov     dest, ##$12345678       ' Load full 32-bit value
         add     counter, ##1000000      ' Add one million
         mov     ptr, ##hub_buffer       ' Load 20-bit Hub address
-:::
+```
 
 ### 6.3.2 How Augmentation Works
 
 The assembler implements `##` by inserting an AUGS or AUGD instruction before the target instruction:
 
-::: pasm2
+```pasm2
 ' What the programmer writes:
         mov     dest, ##$12345678
 
@@ -3646,7 +3646,7 @@ The assembler implements `##` by inserting an AUGS or AUGD instruction before th
         augs    #$12345                 ' Upper 23 bits
         mov     dest, #$678             ' Lower 9 bits
                                         ' Combined: $12345678
-:::
+```
 
 The AUG instruction provides bits 31-9, which combine with the 9-bit field from the next instruction to form the complete 32-bit value.
 
@@ -3659,7 +3659,7 @@ Two augmentation instructions exist:
 
 Both operands can be augmented simultaneously:
 
-::: pasm2
+```pasm2
 ' What the programmer writes:
         wrlong  ##value, ##address      ' Both operands augmented
 
@@ -3667,7 +3667,7 @@ Both operands can be augmented simultaneously:
         augd    #value_upper            ' Augment D field
         augs    #address_upper          ' Augment S field
         wrlong  #value_lower, #address_lower
-:::
+```
 
 ### 6.3.4 Augmentation Timing
 
@@ -3679,11 +3679,11 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 | `##Dest` only | +2 cycles (AUGD) |
 | `##Dest, ##Src` | +4 cycles (AUGD + AUGS) |
 
-::: pasm2
+```pasm2
         mov     x, #100                 ' 2 cycles
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
         wrlong  ##data, ##addr          ' 6+ cycles (2+2+2: AUGD+AUGS+instr)
-:::
+```
 
 **Performance Note:** In time-critical code, large constants should be loaded into registers once and reused, rather than using `##` repeatedly inside loops.
 
@@ -3691,7 +3691,7 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 
 The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
 
-::: pasm2
+```pasm2
         augs    #$12345
         nop                             ' This consumes the AUGS!
         mov     x, #$678                ' Gets $678, NOT $12345678
@@ -3699,7 +3699,7 @@ The augmented value applies only to the immediately following instruction. If an
         augs    #$12345
         if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
                                         '  AUGS is still consumed
-:::
+```
 
 The assembler handles this automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to instruction sequencing.
 
@@ -3712,11 +3712,11 @@ The P2 provides two dedicated pointer registers—PTRA ($1F8) and PTRB ($1F9)—
 
 The simplest pointer usage reads or writes Hub memory at the address in PTRA or PTRB:
 
-::: pasm2
+```pasm2
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
         rdbyte  x, ptra                 ' Read byte from Hub at PTRA
         wrlong  y, ptrb                 ' Write long to Hub at PTRB
-:::
+```
 
 ### 6.4.2 The SCALE Factor
 
@@ -3740,12 +3740,12 @@ This automatic scaling makes sequential memory access natural—each operation a
 
 Post-modify modes use the current pointer value for the memory access, then update the pointer afterward:
 
-::: pasm2
+```pasm2
         rdbyte  x, ptra++               ' Read byte at PTRA, then PTRA += 1
         rdword  y, ptrb++               ' Read word at PTRB, then PTRB += 2
         rdlong  z, ptra--               ' Read long at PTRA, then PTRA -= 4
         wrbyte  x, ptrb--               ' Write byte at PTRB, then PTRB -= 1
-:::
+```
 
 **Execution sequence for `RDLONG x, PTRA++`:**
 1. Read long from Hub address in PTRA
@@ -3754,7 +3754,7 @@ Post-modify modes use the current pointer value for the memory access, then upda
 
 Post-modify is ideal for sequential forward or backward traversal:
 
-::: pasm2
+```pasm2
 ' Read 10 bytes sequentially
         mov     ptra, ##source
         rep     @.end, #10
@@ -3767,18 +3767,18 @@ Post-modify is ideal for sequential forward or backward traversal:
         rep     @.done, #count
         wrlong  value, ptrb--           ' Write long, move backward
 .done
-:::
+```
 
 ### 6.4.4 Pre-Increment and Pre-Decrement
 
 Pre-modify modes update the pointer first, then use the new value for memory access:
 
-::: pasm2
+```pasm2
         rdbyte  x, ++ptra               ' PTRA += 1, then read byte at new PTRA
         rdword  y, ++ptrb               ' PTRB += 2, then read word at new PTRB
         rdlong  z, --ptra               ' PTRA -= 4, then read long at new PTRA
         wrbyte  x, --ptrb               ' PTRB -= 1, then write byte
-:::
+```
 
 **Execution sequence for `RDLONG x, ++PTRA`:**
 1. Add 4 (SCALE for long) to PTRA
@@ -3787,7 +3787,7 @@ Pre-modify modes update the pointer first, then use the new value for memory acc
 
 Pre-modify is useful for stack operations and accessing elements relative to a base:
 
-::: pasm2
+```pasm2
 ' Push onto stack (stack grows upward)
         wrlong  value, ptra++           ' Post: write at current, then advance
 
@@ -3797,18 +3797,18 @@ Pre-modify is useful for stack operations and accessing elements relative to a b
 ' Skip first element, read second
         mov     ptra, ##array
         rdlong  x, ++ptra               ' Skip element 0, read element 1
-:::
+```
 
 ### 6.4.5 Indexed Pointer Access (Non-Updating)
 
 Indexed mode accesses memory at an offset from the pointer without modifying the pointer:
 
-::: pasm2
+```pasm2
         rdlong  x, ptra[0]              ' Read at PTRA + 0*4 = PTRA
         rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = PTRA + 20 bytes
         rdbyte  z, ptrb[-3]             ' Read at PTRB - 3 bytes
         wrword  w, ptra[10]             ' Write at PTRA + 20 bytes
-:::
+```
 
 The index is multiplied by SCALE:
 
@@ -3822,7 +3822,7 @@ The index is multiplied by SCALE:
 
 Indexed mode is ideal for accessing structure fields or array elements:
 
-::: pasm2
+```pasm2
 ' Access structure fields
         mov     ptra, ##my_struct
         rdlong  id, ptra[0]             ' First field (offset 0)
@@ -3832,24 +3832,24 @@ Indexed mode is ideal for accessing structure fields or array elements:
 ' Access array element
         mov     ptra, ##long_array
         rdlong  x, ptra[index]          ' Read array[index]
-:::
+```
 
 ### 6.4.6 Indexed Pointer with Update (Compound Forms)
 
 Compound forms combine indexing with pointer update:
 
-::: pasm2
+```pasm2
         rdlong  x, ptra++[5]            ' Read at PTRA, then PTRA += 20
         rdlong  y, ptra--[3]            ' Read at PTRA, then PTRA -= 12
         rdlong  z, ++ptra[5]            ' PTRA += 5*4, then read at new PTRA
         rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
-:::
+```
 
 **Index Range (updating):** 1 to 16 (special encoding: 1-15 normal, 16 encoded as 0)
 
 These forms enable strided access patterns:
 
-::: pasm2
+```pasm2
 ' Read every 4th long (stride of 16 bytes)
         mov     ptra, ##data
         rep     @.end, #count
@@ -3861,7 +3861,7 @@ These forms enable strided access patterns:
         mov     ptra, ##struct_array
 .loop   rdlong  field1, ptra++[3]       ' Read field1, skip to next struct
         ' ... (to read all fields, use indexed without update for field2, field3)
-:::
+```
 
 ### 6.4.7 Complete PTRx Expression Summary
 
@@ -3884,20 +3884,20 @@ All expressions work identically with PTRB.
 
 For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
 
-::: pasm2
+```pasm2
         rdlong  x, ptra[##1000]         ' Index 1000 (4000 byte offset)
         rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
-:::
+```
 
 With AUGS, the index becomes a 20-bit value, and the index is **not scaled**—it represents the actual byte offset:
 
-::: pasm2
+```pasm2
 ' Without AUGS: index is scaled
         rdlong  x, ptra[10]             ' Offset = 10 * 4 = 40 bytes
 
 ' With AUGS: index is NOT scaled (direct byte offset)
         rdlong  x, ptra[##40]           ' Offset = 40 bytes (same result)
-:::
+```
 
 
 ## 6.5 Block Transfers with SETQ and Pointers
@@ -3906,10 +3906,10 @@ The SETQ instruction enables efficient multi-long transfers between Hub memory a
 
 ### 6.5.1 Basic Block Transfer
 
-::: pasm2
+```pasm2
         setq    #15                     ' Transfer 16 longs (count - 1)
         rdlong  first_reg, ptra         ' Read 16 consecutive longs
-:::
+```
 
 SETQ specifies the count minus one. The transfer moves `count+1` longs at one long per clock cycle.
 
@@ -3917,7 +3917,7 @@ SETQ specifies the count minus one. The transfer moves `count+1` longs at one lo
 
 When using PTRx with SETQ block transfers, the pointer updates by the **total transfer size**:
 
-::: pasm2
+```pasm2
 ' Post-increment: read from current PTRA, then advance by total transfer size
         setq    #15                     ' 16 longs
         rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 64
@@ -3933,24 +3933,24 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ' Pre-decrement: move back first, then read
         setq    #15
         rdlong  buffer, --ptra          ' PTRA -= 64, then read 16 longs
-:::
+```
 
 **Critical:** With SETQ block transfers, the index field is **overridden** by the block count. An arbitrary index cannot be specified:
 
-::: pasm2
+```pasm2
 ' This does NOT work as expected:
         setq    #15
         rdlong  buffer, ptra++[5]       ' Index [5] IGNORED! Uses block count
-:::
+```
 
 ### 6.5.3 SETQ2 for LUT Transfers
 
 SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 
-::: pasm2
+```pasm2
         setq2   #31                     ' Transfer 32 longs
         rdlong  lut_addr, ptra++        ' Read 32 longs into LUT
-:::
+```
 
 ### 6.5.4 Hardware Bug: ALTx/AUGS Between SETQ and Transfer
 
@@ -3958,7 +3958,7 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 **SILICON BUG:** Do not place ALTx, AUGS, or AUGD instructions between SETQ/SETQ2 and the block transfer instruction when using PTRx expressions.
 :::
 
-::: pasm2
+```pasm2
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
         altd    dest_reg                ' ALTD cancels block-size PTRx delta!
@@ -3967,7 +3967,7 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 ' CORRECT CODE - No intervening instruction
         setq    #15
         rdlong  dest_reg, ptra++        ' PTRA correctly increments by 64
-:::
+```
 
 **Impact:** The data transfer completes correctly (16 longs are read), but PTRA only increments by the normal single-operation amount (4 bytes) instead of the block amount (64 bytes).
 
@@ -3982,10 +3982,10 @@ The ALT instructions modify how the following instruction interprets its operand
 
 ALTD modifies the destination field of the next instruction:
 
-::: pasm2
+```pasm2
         altd    index, #base            ' Next D = base + index
         mov     0-0, value              ' Actually writes to base[index]
-:::
+```
 
 The assembler uses `0-0` as a placeholder for the modified destination.
 
@@ -3993,19 +3993,19 @@ The assembler uses `0-0` as a placeholder for the modified destination.
 
 ALTS modifies the source field of the next instruction:
 
-::: pasm2
+```pasm2
         alts    index, #table           ' Next S = table + index
         mov     result, 0-0             ' Actually reads from table[index]
-:::
+```
 
 ### 6.6.3 ALTI (Alter Both)
 
 ALTI can modify both destination and source fields, plus the instruction opcode:
 
-::: pasm2
+```pasm2
         alti    index, #template        ' Modify D, S, and opcode
         add     0-0, 0-0                ' Both operands modified
-:::
+```
 
 ### 6.6.4 ALTx with AUGS Interaction
 
@@ -4013,7 +4013,7 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
 **SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the AUGS value affects both the ALTx and its intended target.
 :::
 
-::: pasm2
+```pasm2
 ' BUGGY CODE - AUGS affects both instructions
         augs    #$12340000
         altd    index, #$100            ' #$100 becomes #$12340100! (bug)
@@ -4024,7 +4024,7 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
         augs    #$12340000
         altd    index, base             ' Register not affected by AUGS
         mov     0-0, #$5678             ' Only this gets augmented
-:::
+```
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
 
@@ -4037,36 +4037,36 @@ Hub memory instructions accept several address expression forms:
 
 A register containing a Hub address:
 
-::: pasm2
+```pasm2
         mov     addr, ##$1000
         rdlong  x, addr                 ' Read from Hub address in register
-:::
+```
 
 ### 6.7.2 Immediate Address
 
 An 8-bit immediate Hub address (limited range):
 
-::: pasm2
+```pasm2
         rdlong  x, #$80                 ' Read from Hub address $80
-:::
+```
 
 ### 6.7.3 Augmented Immediate Address
 
 A 20-bit Hub address using AUGS:
 
-::: pasm2
+```pasm2
         rdlong  x, ##$12345             ' Read from Hub address $12345
-:::
+```
 
 ### 6.7.4 Pointer Expressions
 
 Any of the PTRx forms described in Section 6.4:
 
-::: pasm2
+```pasm2
         rdlong  x, ptra                 ' Basic pointer
         rdlong  x, ptra++               ' With update
         rdlong  x, ptra[5]              ' With index
-:::
+```
 
 
 ## 6.8 Address Mode Selection Guide
@@ -4370,10 +4370,10 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Des
 
 To add unsigned multi-long values (64-bit or larger), use ADD for the least significant long, then ADDX for each subsequent long. ADDX carries the overflow from the previous addition into the current one. For example, to add two 64-bit values:
 
-::: pasm2
+```pasm2
         add     value_lo, addend_lo  wc    ' Add low longs, capture carry
         addx    value_hi, addend_hi        ' Add high longs with carry-in
-:::
+```
 
 ADD and ADDX are also used for adding signed multi-long values, with ADDSX ending the sequence to properly handle sign extension.
 
@@ -5239,11 +5239,11 @@ Set Clock Mode
 
 For external clock modes, the expansion sequence is:
 
-::: pasm2
+```pasm2
                 hubset  ##clkmode_ & !%11       ' Start ext clock, RCFAST
                 waitx   ##20_000_000/100        ' Wait ~10ms for stability
                 hubset  ##clkmode_              ' Switch to target mode
-:::
+```
 
 **Related:** [HUBSET](#hubset), [WAITX](#waitx)
 
@@ -5265,14 +5265,14 @@ As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. T
 
 To disable the automatic clock-setter and use ASMCLK manually, define:
 
-::: pasm2
+```pasm2
 CON
   _AUTOCLK = 0                  ' Disable automatic clock-setter
-:::
+```
 
 **Example:**
 
-::: pasm2
+```pasm2
 CON
   _clkfreq = 200_000_000            ' 200 MHz target
   _xtlfreq = 20_000_000             ' 20 MHz crystal
@@ -5281,7 +5281,7 @@ DAT
                 org     0
                 asmclk              ' Set clock to 200 MHz
                 ' ... program continues
-:::
+```
 
 
 
@@ -5634,10 +5634,10 @@ In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction. A size valu
 
 A bit mask is often useful in bitwise operations (AND, OR, XOR) to filter out or affect special groups of bits. For example:
 
-::: pasm2
+```pasm2
         bmask   mask, #7               ' Create 8-bit mask ($FF)
         and     data, mask             ' Keep only lower 8 bits
-:::
+```
 
 The first syntax form uses Src to specify the size, while the second syntax form (without Src) uses the value already in Dest to determine the mask size. Both forms write the resulting mask back to Dest.
 
@@ -5974,11 +5974,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 To compare unsigned multi-long values (64-bit or larger), use CMP for the least significant long, then CMPX for each subsequent long. For example, to compare two 64-bit values:
 
-::: pasm2
+```pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C and Z now reflect the 64-bit comparison result
-:::
+```
 
 CMP is fundamental for implementing conditional logic and control flow based on numeric comparisons.
 
@@ -6093,11 +6093,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for the least significant long, optionally followed by CMPX for middle longs, and finally CMPSX for the most significant long. The final CMPSX accounts for sign extension properly. For example, to compare two 64-bit signed values:
 
-::: pasm2
+```pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs unsigned
         cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C and Z now reflect the signed 64-bit comparison result
-:::
+```
 
 
 
@@ -6176,11 +6176,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 For signed multi-long comparisons, use CMP for the least significant long, optionally CMPX for middle longs, and CMPSX for the most significant long:
 
-::: pasm2
+```pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C=1 if signed value < other, Z=1 if equal
-:::
+```
 
 
 
@@ -6219,11 +6219,11 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 For unsigned multi-long comparisons, use CMP for the least significant long, then CMPX for each subsequent long:
 
-::: pasm2
+```pasm2
         cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C=1 if unsigned value < other, Z=1 if equal
-:::
+```
 
 
 
@@ -6258,15 +6258,15 @@ In the intended use case, the cog receiving an attention request knows which oth
 
 For example, to signal cog 3:
 
-::: pasm2
+```pasm2
         cogatn  #%0000_1000           ' Signal cog 3 (bit 3 = 1)
-:::
+```
 
 To signal multiple cogs simultaneously:
 
-::: pasm2
+```pasm2
         cogatn  #%0001_0010           ' Signal cogs 1 and 4
-:::
+```
 
 COGATN is useful for implementing inter-cog communication, synchronization, and event notification without requiring polling of shared memory.
 
@@ -6303,9 +6303,9 @@ This instruction is part of the P2's debugging infrastructure and is typically u
 
 For example, to trigger a breakpoint in cog 2:
 
-::: pasm2
+```pasm2
         cogbrk  #2                    ' Break cog 2 (must be in debug ISR)
-:::
+```
 
 COGBRK is a specialized instruction primarily used by development and debugging tools rather than in typical application code.
 
@@ -6346,15 +6346,15 @@ When used with the WC effect, COGID checks the status of the cog specified by De
 
 For example, to get the current cog's ID:
 
-::: pasm2
+```pasm2
         cogid   myid                  ' Store this cog's ID in myid
-:::
+```
 
 To check if cog 3 is running:
 
-::: pasm2
+```pasm2
         cogid   #3              wc    ' C=1 if cog 3 is running
-:::
+```
 
 
 
@@ -6415,28 +6415,28 @@ Common usage examples:
 
 Load and start a specific cog from Hub RAM:
 
-::: pasm2
+```pasm2
         coginit #1, #$100             ' Load and start cog 1 from Hub $100
-:::
+```
 
 Start a free cog:
 
-::: pasm2
+```pasm2
                 coginit #COGEXEC_NEW, addr  wc  ' Find free cog, load, start
         if_c    jmp     #no_cog_available       ' Branch if no cog available
-:::
+```
 
 Skip load and execute from Hub RAM:
 
-::: pasm2
+```pasm2
         coginit #HUBEXEC+3, addr      ' Cog 3 hub exec mode
-:::
+```
 
 Start a cog pair for LUT sharing:
 
-::: pasm2
+```pasm2
         coginit #HUBEXEC_NEW_PAIR, addr   ' Start free cog pair
-:::
+```
 
 
 
@@ -6471,16 +6471,16 @@ The cog specified by the lower 3 bits of Dest (0-7) is immediately halted. All r
 
 For example, to stop cog 4:
 
-::: pasm2
+```pasm2
         cogstop #4                    ' Stop cog 4
-:::
+```
 
 To stop the current cog (terminate self):
 
-::: pasm2
+```pasm2
         cogid   myid                  ' Get my cog ID
         cogstop myid                  ' Stop myself
-:::
+```
 
 COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any Hub memory it may have been using.
 
@@ -6522,12 +6522,12 @@ The exact algorithm follows the standard CRC bit-wise computation:
 
 CRCBIT is typically used in a loop to process data one bit at a time:
 
-::: pasm2
+```pasm2
         mov     crc, #0               ' Initialize CRC
 .loop   rcl     data, #1        wc    ' Get next bit into C
         crcbit  crc, poly             ' Update CRC with bit
         djnz    count, #.loop         ' Repeat for all bits
-:::
+```
 
 For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
@@ -6565,13 +6565,13 @@ The instruction performs four CRC bit iterations in sequence, using the lowest 4
 
 The typical usage pattern is:
 
-::: pasm2
+```pasm2
         setq    data                  ' Load data into Q
         mov     crc, #0               ' Initialize CRC
 .loop   crcnib  crc, poly             ' Process 4 bits from Q[3:0]
         ' Q is automatically shifted left by 4
         djnz    count, #.loop         ' Repeat for all nibbles
-:::
+```
 
 CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providing a 4x speedup for CRC calculations. The automatic Q shift simplifies the loop logic for multi-nibble processing.
 
@@ -7023,11 +7023,11 @@ DJZ and DJNZ decrement Dest and conditionally jump based on whether the result i
 DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
 Example loop:
-::: pasm2
+```pasm2
         mov     count, #10              ' Set loop counter to 10
 .loop   ' loop body here
         djnz    count, #.loop           ' Decrement and loop if not zero
-:::
+```
 
 Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
@@ -7909,10 +7909,10 @@ The CT counter provides a continuous, monotonic time reference. The lower 32 bit
 
 **64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
 
-::: pasm2
+```pasm2
         getct   low_word        ' Get lower 32 bits (CT[31:0])
         getct   high_word wc    ' Get upper 32 bits (CT[63:32])
-:::
+```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
@@ -8275,22 +8275,22 @@ The clock switching is glitch-free, and the system automatically falls back to R
 
 Example: Enable a 20 MHz crystal with 15pF capacitors:
 
-::: pasm2
+```pasm2
         hubset  ##%00_10              ' Enable crystal with 15pF caps
         waitx   ##20_000_000/100      ' Wait 10ms for stabilization
         hubset  ##%10_10              ' Switch to crystal clock
-:::
+```
 
 Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
 
-::: pasm2
+```pasm2
         hubset  ##%00_10                        ' Enable crystal
         waitx   ##20_000_000/100                ' Wait 10ms
         hubset  ##%10_10                        ' Switch to crystal
         hubset  ##%0001_0000_0000_00001010_10  ' PLL: /1 * 16 / 2
         waitx   ##20_000_000/10000              ' Wait 100µs for PLL lock
         hubset  ##%0001_0000_0000_00001010_11  ' Switch to PLL output
-:::
+```
 
 In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.
 
@@ -8389,7 +8389,7 @@ INCMOD does not limit Dest within the specified range. If Dest begins at a value
 
 A common usage pattern for INCMOD is managing circular buffers:
 
-::: pasm2
+```pasm2
                 ' Increment tail index with modulo for circular buffer
                 incmod  tail_idx, #BUF_SIZE-1  wc
         if_c    jmp     #buffer_wrapped
@@ -8397,11 +8397,11 @@ A common usage pattern for INCMOD is managing circular buffers:
                 ' Safe to add data at tail
                 add     buffer_ptr, tail_idx
                 wrbyte  new_data, buffer_ptr
-:::
+```
 
 INCMOD is also ideal for round-robin scheduling across a fixed number of resources:
 
-::: pasm2
+```pasm2
                 ' Round-robin through 8 ports (0-7)
 .loop
                 ' Service current port
@@ -8412,7 +8412,7 @@ INCMOD is also ideal for round-robin scheduling across a fixed number of resourc
         if_nc   jmp     #.loop
 
                 ' All ports serviced, continue
-:::
+```
 
 
 
@@ -9344,13 +9344,13 @@ The simultaneous update of both flags makes MODCZ more powerful than using separ
 | 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
-::: pasm2
+```pasm2
         MODCZ   _CLR, _SET      ' Clear C, set Z
         MODCZ   _SET, _CLR      ' Set C, clear Z
         MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
         MODCZ   _Z, _C          ' Swap C and Z values
         MODCZ   _NC, _NZ        ' Invert both flags
-:::
+```
 
 
 
@@ -9427,27 +9427,27 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result writte
 
 MOV with immediate values is commonly used for register initialization:
 
-::: pasm2
+```pasm2
         mov     counter, #100           ' Initialize counter to 100
         mov     mask, ##$FFFF_0000      ' Load 32-bit constant using AUGS
-:::
+```
 
 MOV between registers is used for preserving values and working with temporary copies:
 
-::: pasm2
+```pasm2
         mov     temp, value             ' Save value in temp
         add     value, increment        ' Modify value
         mov     result, value           ' Copy final result
-:::
+```
 
 When combined with flag effects, MOV enables efficient value testing:
 
-::: pasm2
+```pasm2
                 mov     data, source  wz        ' Copy and test if zero
         if_nz   call    #process                ' Process only if non-zero
                 mov     signed, value  wc       ' Copy and test sign bit
         if_c    neg     signed, signed          ' Make positive if negative
-:::
+```
 
 
 
@@ -9529,20 +9529,20 @@ If the WZ effect is specified, the Z flag is set (1) if either Dest or Src equal
 
 MUL is commonly used for scaling operations in fixed-point arithmetic:
 
-::: pasm2
+```pasm2
         mov     value, ##1000           ' Value = 1000
         mul     value, #25              ' Multiply by 25: value = 25000
-:::
+```
 
 For fixed-point math with 16-bit fractional parts:
 
-::: pasm2
+```pasm2
         ' Multiply two 16.16 fixed-point numbers
         ' Result in upper 16 bits needs shifting
         mov     temp, frac1
         mul     temp, frac2             ' temp = product (low 16 of each)
         shr     temp, #16               ' Adjust for fixed-point scale
-:::
+```
 
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
@@ -9630,19 +9630,19 @@ If the WZ effect is specified, the Z flag is set (1) if either Dest or Src equal
 
 MULS is commonly used for signed arithmetic and physics calculations:
 
-::: pasm2
+```pasm2
         mov     velocity, signed_speed
         muls    velocity, time          ' velocity = speed * time (signed)
-:::
+```
 
 For signed fixed-point math with 16-bit fractional parts:
 
-::: pasm2
+```pasm2
         ' Multiply two signed 16.16 fixed-point numbers
         mov     temp, signed_frac1
         muls    temp, signed_frac2      ' Signed multiplication
         sar     temp, #16               ' Arithmetic shift to preserve sign
-:::
+```
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
@@ -9698,11 +9698,11 @@ MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag
 
 Example: Conditionally set bits based on a comparison:
 
-::: pasm2
+```pasm2
         cmp     value, limit  wc        ' Set C if value < limit
         muxc    status, #$01            ' Set bit 0 if less than
         muxnc   status, #$02            ' Set bit 1 if greater or equal
-:::
+```
 
 If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
 
@@ -9742,11 +9742,11 @@ For example, if Dest = $1234_5678 and Src = $0A00_0C0D, the result is Dest = $1A
 
 This instruction is useful for sparse updates where only certain nibbles need modification:
 
-::: pasm2
+```pasm2
         ' Update only the changed nibbles in a configuration register
         mov     config, current_config
         muxnibs config, changes         ' Apply non-zero changes only
-:::
+```
 
 MUXNIBS is commonly used in graphics operations for palette updates, bit-field modifications where fields are naturally nibble-aligned, and efficient sparse data updates. It provides a single-instruction way to perform selective nibble replacement that would otherwise require multiple mask and merge operations.
 
@@ -9788,11 +9788,11 @@ This instruction is particularly useful for pixel graphics operations where 2-bi
 
 MUXNITS provides parallel conditional updates across all sixteen bit pair positions in a single 2-clock operation:
 
-::: pasm2
+```pasm2
         ' Update specific 2-bit fields in a packed structure
         mov     state, current_state
         muxnits state, updates          ' Apply non-zero updates only
-:::
+```
 
 The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
 
@@ -9828,14 +9828,14 @@ MUXQ performs selective bit copying from Src to Dest based on a mask previously 
 
 MUXQ must be preceded by SETQ to load the mask into Q:
 
-::: pasm2
+```pasm2
         setq    mask                    ' Load mask into Q
         muxq    dest, source            ' Copy masked bits from source
-:::
+```
 
 This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
 
-::: pasm2
+```pasm2
         ' Traditional approach (3 instructions):
         andn    dest, mask              ' Clear masked bits
         and     temp, source, mask      ' Extract source bits
@@ -9844,23 +9844,23 @@ This provides atomic masked bit updates that are more efficient than separate AN
         ' MUXQ approach (2 instructions):
         setq    mask                    ' Set mask
         muxq    dest, source            ' Atomic masked copy
-:::
+```
 
 MUXQ is critical for parallel I/O operations, especially driving multiple pins simultaneously:
 
-::: pasm2
+```pasm2
         ' Update multiple RGB LED pins atomically
         setq    rgb_mask                ' Mask for RGB pins
         muxq    outa, rgb_data          ' Update all RGB pins together
-:::
+```
 
 The Q register mask enables sophisticated bit manipulation:
 
-::: pasm2
+```pasm2
         ' Update specific configuration bits
         setq    ##$00FF_FF00            ' Mask for middle bytes
         muxq    config, new_values      ' Update only those bytes
-:::
+```
 
 MUXQ is particularly valuable for HUB75 RGB panel driving and other applications requiring atomic multi-pin updates. It executes in 2 clock cycles, providing high-performance parallel bit operations essential for real-time graphics and control applications.
 
@@ -11776,17 +11776,17 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
 
 **Example using instruction count:**
-::: pasm2
+```pasm2
 ' Hardcoded count - fragile if code changes
                 rep     #4, count               ' Repeat next 4 instructions
                 rdlong  x, ptr
                 add     ptr, #4
                 add     sum, x
                 djnz    n, #$-3                 ' Problem: count must match!
-:::
+```
 
 **Example using local label (preferred):**
-::: pasm2
+```pasm2
 ' Label-based count - automatically correct
 process_data    rep     @.end, count            ' Repeat until .end label
                 rdlong  x, ptr                  ' Instructions between REP
@@ -11799,7 +11799,7 @@ fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
                 wrbyte  value, ptr
                 add     ptr, #1
 .done
-:::
+```
 
 **Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 
@@ -15514,7 +15514,7 @@ Within DAT blocks, the `$` symbol represents the current origin address:
 - **In COG mode** (after ORG): `$` returns the current COG address in longs (0-$3FF)
 - **In Hub mode** (after ORGH): `$` returns the current Hub address in bytes
 
-::: pasm2
+```pasm2
 DAT
         ORG     0
         ' $ = 0 (COG address 0)
@@ -15525,7 +15525,7 @@ DAT
         ' $ = $400 (Hub address $400)
         BYTE    0
         ' $ = $401 (Hub address $401)
-:::
+```
 
 ### COG/LUT Memory Regions
 
@@ -15545,11 +15545,11 @@ Sets assembly origin to a specific COG/LUT RAM address.
 Set the assembly origin to a specific COG or LUT RAM address. All subsequent instructions assemble starting from this address.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORG                     ' Reset to COG address 0, limit $1F8
         ORG     address         ' Set COG address, auto-calculate limit
         ORG     address, limit  ' Set COG address and limit
-:::
+```
 
 #### Parameters
 | Parameter | Range | Description |
@@ -15576,7 +15576,7 @@ Set the assembly origin to a specific COG or LUT RAM address. All subsequent ins
 Use ORG to position code or data at specific COG/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
 
 #### Example
-::: pasm2
+```pasm2
         ORG     0               ' Start at COG address 0
 entry   jmp     #main           ' First instruction at address 0
 
@@ -15588,7 +15588,7 @@ lut_code
         MOV     PA, #0          ' LUT address $200
         RET                     ' LUT address $201
         FIT     $400            ' Verify fits in LUT
-:::
+```
 
 #### Restrictions
 
@@ -15625,9 +15625,9 @@ Advances to specified address, filling with zeros.
 Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which only sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORGF    address
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -15638,7 +15638,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
         ORG     0
 entry   jmp     #main
@@ -15653,7 +15653,7 @@ block_start
         ' ... code ...
         ORGF    block_start + 64   ' Ensure block is exactly 64 longs
 block_end
-:::
+```
 
 #### Restrictions
 
@@ -15692,11 +15692,11 @@ Sets assembly origin to a Hub RAM address.
 Set the assembly origin to a Hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORGH                    ' Reset to current hub position (or $400)
         ORGH    address         ' Set hub address
         ORGH    address, limit  ' Set hub address and limit
-:::
+```
 
 #### Parameters
 | Parameter | Range | Description |
@@ -15732,7 +15732,7 @@ The $400 minimum for Spin2 objects reserves space for the Spin2 interpreter.
 Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in Hub RAM. DAT blocks start in Hub mode by default. Use ORGH to explicitly set hub addresses or to switch back to Hub mode after using ORG.
 
 #### Example
-::: pasm2
+```pasm2
         ORGH    $400            ' Start at hub address $400
         ' Hub-exec code here
 
@@ -15745,13 +15745,13 @@ hubData LONG    $DEADBEEF       ' Hub address $1000
         ORGH    $400, $800      ' Hub from $400 to $800 limit
         BYTE    0[1024]         ' 1KB of data
         FIT     $800            ' Verify fits within limit
-:::
+```
 
 #### Mode Switching
 
 A DAT block can switch between COG and Hub modes multiple times:
 
-::: pasm2
+```pasm2
 DAT
         ORGH                    ' Hub mode: bytecode tables
 bc_vectors
@@ -15767,7 +15767,7 @@ routine1
         ORGH                    ' Back to hub mode
 hub_data
         LONG    $12345678
-:::
+```
 
 #### Restrictions
 
@@ -15811,10 +15811,10 @@ Stores 8-bit values at the current address.
 Declare byte data in memory. Stores 8-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] BYTE    value[, value...]
 [label] BYTE    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -15828,13 +15828,13 @@ Use BYTE to define individual bytes, byte arrays, or strings. Each value occupie
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing buffers or padding.
 
 #### Example
-::: pasm2
+```pasm2
 text    byte    "Hello P2", 0   ' String with null terminator
 data    byte    $FF, $00, $55   ' Hex values
 nums    byte    1, 2, 3, 4, 5   ' Decimal values
 zeros   byte    0[256]          ' 256 zero bytes (buffer initialization)
 pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
-:::
+```
 
 #### Notes
 - Each value occupies exactly 1 byte
@@ -15861,10 +15861,10 @@ Stores 32-bit values at the current address.
 Declare long data in memory. Stores 32-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] LONG    value[, value...]
 [label] LONG    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -15878,13 +15878,13 @@ Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
 #### Example
-::: pasm2
+```pasm2
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
 ptrs    long    @start, @end    ' Address pointers
 buffer  long    0[32]           ' 32 zero longs (128 bytes)
 clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
-:::
+```
 
 #### Notes
 - Each value occupies 4 bytes
@@ -15911,10 +15911,10 @@ Stores 16-bit values at the current address.
 Declare word data in memory. Stores 16-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] WORD    value[, value...]
 [label] WORD    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -15928,12 +15928,12 @@ Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
 #### Example
-::: pasm2
+```pasm2
 counts  word    1000, 2000, 3000    ' Decimal values
 addr    word    @buffer             ' Address reference (lower 16 bits)
 zeros   word    0[64]               ' 64 zero words (128 bytes)
 sine    word    $8000[256]          ' Initialize sine table with midpoint values
-:::
+```
 
 #### Notes
 - Each value occupies 2 bytes
@@ -15960,9 +15960,9 @@ Includes raw binary file data at the current address.
 Include the contents of a binary file at the current assembly address. The raw bytes from the specified file are inserted directly into the assembled output.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] FILE    "filename"
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -15997,7 +15997,7 @@ Use FILE to embed binary resources directly into your program—font data, looku
 FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI methods.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Include a font file for VGA text display
 font_data   file    "8x8_font.bin"      ' 2KB font bitmap
@@ -16011,10 +16011,10 @@ splash      file    "logo.raw"          ' Splash screen bitmap
 
 ' Calculate included file size at assembly time
             long    @font_end - @font_data  ' Store font size in bytes
-:::
+```
 
 #### Example: Text File Inclusion
-::: pasm2
+```pasm2
 DAT
 ' Include text file for display
 text_data   file    "message.txt"
@@ -16024,7 +16024,7 @@ PUB ShowText() | ptr, len
     ptr := @text_data
     len := @text_end - @text_data
     ' Process text bytes...
-:::
+```
 
 #### Notes
 - FILE reads the file at assembly time—the file must exist during compilation
@@ -16048,17 +16048,17 @@ PUB ShowText() | ptr, len
 BYTE, WORD, and LONG declarations can be mixed within a single data block to create packed data structures. Each type specifier affects only the values that follow it until the next type specifier or end of line.
 
 #### Example: Protocol Packet Header
-::: pasm2
+```pasm2
 DAT
 ' Packet header: 1-byte type, 2-byte length, 4-byte timestamp
 packet_hdr
         byte    $01             ' Packet type (1 byte)
         word    $0100           ' Length field (2 bytes)
         long    0               ' Timestamp placeholder (4 bytes)
-:::
+```
 
 #### Example: Mixed Data Block
-::: pasm2
+```pasm2
 DAT
 ' Sensor configuration block with mixed sizes
 sensor_cfg
@@ -16067,7 +16067,7 @@ sensor_cfg
         word    1000            ' Sample rate (Hz)
         long    @callback       ' Callback address
         byte    "SENS", 0       ' Name string with terminator
-:::
+```
 
 #### Notes
 - Data elements pack contiguously regardless of size
@@ -16093,10 +16093,10 @@ Stores byte values with compile-time range checking.
 Declare byte data with compile-time range validation. Works identically to BYTE for storage, but generates an assembly error if any value exceeds the valid byte range. This catches potential truncation errors during compilation.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] BYTEFIT  value [, value...]
 [label] BYTEFIT  value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -16118,7 +16118,7 @@ The combined range allows both signed (-128 to +127) and unsigned (0 to 255) byt
 Use BYTEFIT instead of BYTE for compile-time verification that values fit in 8 bits. BYTEFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Valid BYTEFIT values
 byteData    BYTEFIT   -$80              ' Minimum signed value: -128
@@ -16134,7 +16134,7 @@ gammaTable  BYTEFIT   0, 1, 2, 3, 4, 5, 7, 9, 12, 15
 ' The following would cause compile errors:
 '           BYTEFIT   256               ' ERROR: 256 > 255
 '           BYTEFIT   -129              ' ERROR: -129 < -128
-:::
+```
 
 #### Error Message
 When values exceed the valid range, the compiler produces:
@@ -16165,10 +16165,10 @@ Stores word values with compile-time range checking.
 Declare word data with compile-time range validation. Works identically to WORD for storage, but generates an assembly error if any value exceeds the valid word range. This catches potential truncation errors during compilation.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] WORDFIT  value [, value...]
 [label] WORDFIT  value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -16190,7 +16190,7 @@ The combined range allows both signed (-32768 to +32767) and unsigned (0 to 6553
 Use WORDFIT instead of WORD for compile-time verification that values fit in 16 bits. WORDFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Valid WORDFIT values
 wordData    WORDFIT   -$8000            ' Minimum signed value: -32768
@@ -16206,7 +16206,7 @@ adcGains    WORDFIT   32768, 33000, 32500, 32768
 ' The following would cause compile errors:
 '           WORDFIT   65536             ' ERROR: 65536 > 65535
 '           WORDFIT   -32769            ' ERROR: -32769 < -32768
-:::
+```
 
 #### Error Message
 When values exceed the valid range, the compiler produces:
@@ -16241,12 +16241,12 @@ Inserts padding bytes for 4-byte alignment.
 Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a long boundary.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
   code_and_data_statements
   ALIGNL
   data_statements
-:::
+```
 
 **Result:** The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.
 
@@ -16263,12 +16263,12 @@ ALIGNL is only allowed in DAT blocks, not in in-line PASM.
 
 The following creates a data table of a byte ($11), a word ($BBAA), and a long ($44332211) meant for access from Hub RAM.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
     T2      word    $BBAA
             long    $44332211
-:::
+```
 
 This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
@@ -16278,14 +16278,14 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 
 Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
 
             ALIGNL
     T2      word    $BBAA
             long    $44332211
-:::
+```
 
 In comparison, this data will be emitted as follows:
 
@@ -16318,12 +16318,12 @@ Inserts padding bytes for 2-byte alignment.
 Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a word boundary.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
   code_and_data_statements
   ALIGNW
   data_statements
-:::
+```
 
 **Result:** The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.
 
@@ -16340,12 +16340,12 @@ ALIGNW is only allowed in DAT blocks, not in in-line PASM.
 
 The following creates a data table of a byte ($11), two bytes ($AA, $BB), and a long ($44332211) meant for access from Hub RAM.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
     T2      byte    $AA, $BB
             long    $44332211
-:::
+```
 
 This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
@@ -16355,14 +16355,14 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 
 Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenient word-sized access), the ALIGNW directive achieves this, as follows.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
 
             ALIGNW
     T2      byte    $AA, $BB
             long    $44332211
-:::
+```
 
 In comparison, this data will be emitted as follows:
 
@@ -16398,12 +16398,12 @@ Repeats a block of code or data with iteration index access.
 Replicate a block of instructions or data a specified number of times at compile time. The special `$$` symbol provides access to the current iteration index within the block.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
         DITTO   count           ' Start block, repeat count times
         ' ... code or data ...
         DITTO   END             ' End block
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -16415,7 +16415,7 @@ DAT
 Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO was introduced in PNut version 50.
 
 #### Example
-::: pasm2
+```pasm2
 CON
   NumChannels = 8
   BasePin = 16
@@ -16439,13 +16439,13 @@ DAT
         WXPIN   ##PinX, #BasePin + $$
         DRVL    #BasePin + $$
         DITTO   END
-:::
+```
 
 #### Zero Count Behavior
 
 When count is 0, the entire block is skipped with no output generated:
 
-::: pasm2
+```pasm2
 CON
   MotorCount = 0                ' No motors in this build
 
@@ -16453,7 +16453,7 @@ DAT
         DITTO   MotorCount      ' Block skipped entirely
         ' ... motor init code ...
         DITTO   END
-:::
+```
 
 #### Restrictions
 
@@ -16494,9 +16494,9 @@ Generates error if current address exceeds limit.
 Verify at compile time that the current address has not exceeded a specified limit. FIT is a safety check that produces an error if code or data is too large.
 
 #### Syntax
-::: pasm2
+```pasm2
         FIT     limit           ' Verify current address <= limit
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -16529,7 +16529,7 @@ Use FIT to verify that code does not exceed available space. This is essential f
 FIT does nothing if the limit is not exceeded—it is purely a compile-time check.
 
 #### Example: Standard COG Program
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -16540,10 +16540,10 @@ entry   ASMCLK                  ' Set clock
 vars    RES     10
 
         FIT     $1F0            ' Ensure user area only
-:::
+```
 
 #### Example: Split COG/LUT Program
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -16561,10 +16561,10 @@ lut_routine
         RET
 
         FIT     $400            ' Must fit in LUT
-:::
+```
 
 #### Example: Hub Data Table
-::: pasm2
+```pasm2
 DAT
         ORGH    $400
 
@@ -16572,10 +16572,10 @@ sinTable
         LONG    0[256]          ' Sine lookup table
 
         FIT     $800            ' Table must not exceed $800
-:::
+```
 
 #### Example: Calculated Limits
-::: pasm2
+```pasm2
 CON
   OVERLAY_END = $300
 
@@ -16583,7 +16583,7 @@ DAT
         ORG     0
         ' ... overlay code ...
         FIT     OVERLAY_END     ' Must fit before overlay area
-:::
+```
 
 #### Restrictions
 
@@ -16619,10 +16619,10 @@ Allocates COG/LUT RAM without initialization.
 Reserve space in COG or LUT RAM without initializing. Allocates memory space but generates no object code.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] RES     count           ' Reserve 'count' longs
 [label] RES     0               ' Create label at current address without reserving space
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -16641,7 +16641,7 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 Use RES to allocate variables and buffers in COG RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in COG/LUT RAM—Hub RAM variables must use LONG with initial values or be allocated at runtime.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -16652,13 +16652,13 @@ entry   MOV     temp, #100
 temp    RES     1               ' Reserve 1 long for temporary variable
 value   RES     1               ' Reserve 1 long for value storage
 buffer  RES     16              ' Reserve 16 longs for buffer
-:::
+```
 
 #### Zero-Count Label (Alias Technique)
 
 RES with a count of 0 creates a label at the current address without reserving any space. This technique creates aliases—multiple names for the same register:
 
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -16667,7 +16667,7 @@ ma      RES     0               ' ma is alias for x (RES 0 = no space)
 x       RES     1               ' x occupies 1 long
 
 ' Both ma and x refer to the same COG address
-:::
+```
 
 💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
 
@@ -16684,10 +16684,10 @@ x       RES     1               ' x occupies 1 long
 
 When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
 
-::: pasm2
+```pasm2
 ' Reserve space for a Spin2 structure (structure defined in CON block)
 mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
-:::
+```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
 
@@ -16729,7 +16729,7 @@ Terminates an inline assembly block within a Spin2 method.
 Terminate an inline assembly block and return to Spin2 execution. The compiler automatically inserts a RET instruction at the END location.
 
 #### Syntax
-::: pasm2
+```pasm2
 PUB/PRI MethodName() | locals
   ' Spin2 code
 
@@ -16738,7 +16738,7 @@ PUB/PRI MethodName() | locals
   END                           ' End inline PASM, implicit RET
 
   ' Spin2 code continues
-:::
+```
 
 #### Parameters
 
@@ -16757,7 +16757,7 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 
 #### Example: Pin Toggle
 
-::: pasm2
+```pasm2
 PUB FastToggle(pin) | mask
 
   mask := 1 << pin              ' Spin2 code
@@ -16767,11 +16767,11 @@ PUB FastToggle(pin) | mask
   END                           ' End inline PASM, implicit RET
 
   ' Execution returns here
-:::
+```
 
 #### Example: I2C Start Sequence
 
-::: pasm2
+```pasm2
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
@@ -16786,13 +16786,13 @@ PUB start() | scl, sda, tix
                 DRVL    scl     ' SCL low
                 WAITX   tix     ' Delay
   END
-:::
+```
 
 #### Example: Local Variable Access
 
 Inline PASM accesses local variables by name:
 
-::: pasm2
+```pasm2
 PUB Example() | value, result
 
   value := 100
@@ -16803,7 +16803,7 @@ PUB Example() | value, result
   END
 
   ' result now contains 150
-:::
+```
 
 #### Restrictions
 
@@ -16901,10 +16901,10 @@ Address $1F0. Interrupt 3 call address. Stores the address where execution jumps
 **Usage**: When the INT3 event is triggered, the cog saves the current PC in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     IJMP3, ##int3_handler   ' Set INT3 handler address
         setint3 #event_ct1              ' Enable INT3 for CT1 event
-:::
+```
 
 **Related**: [IRET3](#iret3), SETINT3, RETI3
 
@@ -16919,11 +16919,11 @@ Address $1F1. Interrupt 3 return address. Stores the return address when interru
 **Usage**: When INT3 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
 int3_handler
         ' Handle interrupt...
         reti3                           ' Return to saved address in IRET3
-:::
+```
 
 **Related**: [IJMP3](#ijmp3), SETINT3, RETI3
 
@@ -16938,10 +16938,10 @@ Address $1F2. Interrupt 2 call address. Stores the address where execution jumps
 **Usage**: When the INT2 event is triggered, the cog saves the current PC in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     IJMP2, ##int2_handler   ' Set INT2 handler address
         setint2 #event_ct2              ' Enable INT2 for CT2 event
-:::
+```
 
 **Related**: [IRET2](#iret2), SETINT2, RETI2
 
@@ -16956,11 +16956,11 @@ Address $1F3. Interrupt 2 return address. Stores the return address when interru
 **Usage**: When INT2 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
 int2_handler
         ' Handle interrupt...
         reti2                           ' Return to saved address in IRET2
-:::
+```
 
 **Related**: [IJMP2](#ijmp2), SETINT2, RETI2
 
@@ -16975,10 +16975,10 @@ Address $1F4. Interrupt 1 call address. Stores the address where execution jumps
 **Usage**: When the INT1 event is triggered, the cog saves the current PC in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     IJMP1, ##int1_handler   ' Set INT1 handler address
         setint1 #event_ct3              ' Enable INT1 for CT3 event
-:::
+```
 
 **Related**: [IRET1](#iret1), SETINT1, RETI1
 
@@ -16993,11 +16993,11 @@ Address $1F5. Interrupt 1 return address. Stores the return address when interru
 **Usage**: When INT1 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
-::: pasm2
+```pasm2
 int1_handler
         ' Handle interrupt...
         reti1                           ' Return to saved address in IRET1
-:::
+```
 
 **Related**: [IJMP1](#ijmp1), SETINT1, RETI1
 
@@ -17018,14 +17018,14 @@ Address $1F6. Multi-purpose register A. Serves multiple special functions or can
 When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 **Example**:
-::: pasm2
+```pasm2
         calld   PA, #subroutine         ' Return info in PA, call
         callpa  param, #handler         ' Copy param to PA, call
         loc     PA, #label              ' Store label address in PA
 
         ' Using PA as general RAM
         mov     PA, #42                 ' Regular register usage
-:::
+```
 
 **Related**: [PB](#pb), CALLD, CALLPA, LOC
 
@@ -17046,14 +17046,14 @@ Address $1F7. Multi-purpose register B. Serves multiple special functions or can
 When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 **Example**:
-::: pasm2
+```pasm2
         calld   PB, #subroutine         ' Return info in PB, call
         callpb  param, #handler         ' Copy param to PB, call
         loc     PB, #label              ' Store label address in PB
 
         ' Using PB as general RAM
         mov     PB, ##hub_addr          ' Regular register usage
-:::
+```
 
 **Related**: [PA](#pa), CALLD, CALLPB, LOC
 
@@ -17115,7 +17115,7 @@ The increment/decrement amount (SCALE) depends on the instruction:
 Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
         rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
         rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
@@ -17124,7 +17124,7 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
         rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
-:::
+```
 
 **Related**: [PTRB](#ptrb), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
 
@@ -17151,7 +17151,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 - `++PTRB[index]` — Pre-update indexed: PTRB += index × SCALE, then use PTRB
 
 **Example**:
-::: pasm2
+```pasm2
         mov     ptrb, ##hub_source      ' Set PTRB to source address
         rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
         rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
@@ -17159,7 +17159,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 
         ' COGINIT sets PTRB in launched cog
         coginit cognumber, ##code_addr  ' PTRB in target cog gets code_addr
-:::
+```
 
 **Related**: [PTRA](#ptra), RDLONG, WRLONG, COGINIT
 
@@ -17180,14 +17180,14 @@ Address $1FA. Direction register A for pins 0-31. Controls whether each pin is a
 **Usage**: DIRA controls the direction of pins 0-31. Setting a bit to 1 configures the corresponding pin as an output, while 0 configures it as an input. Changes take effect immediately. When a pin is configured as an output, the value in the corresponding OUTA bit is driven onto the pin. When configured as an input, the pin state can be read from INA.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     DIRA, ##$00FF_0000      ' Set pins 16-23 as outputs
         or      DIRA, #1                ' Set pin 0 as output
         andn    DIRA, ##$0000_00FF      ' Set pins 0-7 as inputs
 
         ' Atomic direction change
         mov     DIRA, new_directions    ' Change all 32 directions
-:::
+```
 
 **Related**: [DIRB](#dirb), [OUTA](#outa), [INA](#ina), DIRC, DIRH, DIRL
 
@@ -17208,11 +17208,11 @@ Address $1FB. Direction register B for pins 32-63. Controls whether each pin is 
 **Usage**: DIRB controls the direction of pins 32-63. Setting a bit to 1 configures the corresponding pin as an output, while 0 configures it as an input. The bit positions map to pins 32-63, where bit 0 controls pin 32 and bit 31 controls pin 63.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     DIRB, #0                ' Set all pins 32-63 as inputs
         or      DIRB, ##$8000_0000      ' Set pin 63 as output
         andn    DIRB, ##$0000_FFFF      ' Set pins 32-47 as inputs
-:::
+```
 
 **Related**: [DIRA](#dira), [OUTB](#outb), [INB](#inb)
 
@@ -17233,7 +17233,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 **Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. Reading OUTA returns the current output register state, not the actual pin states (use INA to read pin states). When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     OUTA, #0                ' Clear all outputs 0-31
         or      OUTA, #1                ' Set pin 0 high
         xor     OUTA, ##$0000_00FF      ' Toggle pins 0-7
@@ -17241,7 +17241,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 
         ' Atomic pattern change
         mov     OUTA, new_pattern       ' Change all 32 outputs atomically
-:::
+```
 
 **Related**: [OUTB](#outb), [DIRA](#dira), [INA](#ina), OUTC, OUTH, OUTL
 
@@ -17262,12 +17262,12 @@ Address $1FD. Output register B for pins 32-63. Sets the output state for pins c
 **Usage**: OUTB sets the output state for pins 32-63. Only affects pins configured as outputs via DIRB. The bit positions map to pins 32-63, where bit 0 controls pin 32 and bit 31 controls pin 63. When multiple cogs drive the same pin, the outputs are OR'd together.
 
 **Example**:
-::: pasm2
+```pasm2
         mov     OUTB, pattern           ' Set output pattern for pins 32-63
         andn    OUTB, mask              ' Clear specific outputs
         or      OUTB, ##$8000_0000      ' Set pin 63 high
         xor     OUTB, toggle_mask       ' Toggle specific pins
-:::
+```
 
 **Related**: [OUTA](#outa), [DIRB](#dirb), [INB](#inb)
 
@@ -17288,7 +17288,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 **Usage**: INA returns the actual electrical state of pins 0-31, regardless of whether they are configured as inputs or outputs. This allows output pins to be read back to verify their state. Reading INA captures the pin states at the moment the instruction executes, providing a consistent snapshot of all 32 pins. INA also serves as the debug interrupt call address when debug interrupts are enabled.
 
 **Example**:
-::: pasm2
+```pasm2
                 mov     state, INA              ' Read all pins 0-31
                 test    INA, #1             wz  ' Test if pin 0 is high
         if_nz   jmp     #pin_high
@@ -17298,7 +17298,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
                 ' Wait for pin high
 .wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
-:::
+```
 
 **Related**: [INB](#inb), [DIRA](#dira), [OUTA](#outa)
 
@@ -17319,14 +17319,14 @@ Address $1FF. Input register B for pins 32-63. Reads the current state of pins r
 **Usage**: INB returns the actual electrical state of pins 32-63, regardless of whether they are configured as inputs or outputs. The bit positions map to pins 32-63, where bit 0 represents pin 32 and bit 31 represents pin 63. INB also serves as the debug interrupt return address when debug interrupts are enabled.
 
 **Example**:
-::: pasm2
+```pasm2
                 mov     state, INB              ' Read all pins 32-63
                 test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
         if_z    jmp     #pin_low
 
                 ' Copy input pattern to output
                 mov     OUTB, INB
-:::
+```
 
 **Related**: [INA](#ina), [DIRB](#dirb), [OUTB](#outb)
 
@@ -17347,13 +17347,13 @@ The program counter is a 20-bit register that holds the Hub RAM address of the c
 **Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in Hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
 
 **Example**:
-::: pasm2
+```pasm2
         getpc   current_addr            ' Read current PC value
 
         ' PC modified by control flow
         jmp     #target                 ' Sets PC to target address
         call    #subroutine             ' Saves PC+4, jumps to subroutine
-:::
+```
 
 **Related**: GETPC, JMP, CALL, CALLD
 
@@ -17374,7 +17374,7 @@ The Q register is a 32-bit auxiliary register used for CORDIC operations, divisi
 The Q register contents are volatile—CORDIC and division operations overwrite previous values. Read results immediately after the operation completes.
 
 **Example**:
-::: pasm2
+```pasm2
         setq    y                       ' Y coordinate via Q
         qrotate x, angle                ' Rotate (X, Y) by angle
         getqx   result_x                ' Get X result from Q
@@ -17388,7 +17388,7 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
         qdiv    dividend, divisor       ' Quotient goes to Q
         getqx   quotient                ' Read quotient from Q
         getqy   remainder               ' Read remainder from Q
-:::
+```
 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
 
@@ -17405,7 +17405,7 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
 **Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The lower 32 bits wrap approximately every 21.5 seconds at 200 MHz. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait for CT to reach that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
 
 **Example**:
-::: pasm2
+```pasm2
                 getct   target                  ' Get current time
                 addct1  target, ##delay_cycles  ' target = now + delay
                 waitct1                         ' Wait for CT to reach it
@@ -17418,7 +17418,7 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
                 cmp     now, timeout        wc  ' Check if timeout exceeded
         if_nc   jmp     #timed_out
                 jmp     #.loop
-:::
+```
 
 **Related**: GETCT, ADDCT1, ADDCT2, ADDCT3, WAITCT1, WAITCT2, WAITCT3
 
@@ -17435,7 +17435,7 @@ The hardware random number generator produces true random numbers based on therm
 **Usage**: Each execution of GETRND returns a new 32-bit random value. The generator runs continuously in hardware, so consecutive reads produce different values. The randomness quality is suitable for cryptographic applications.
 
 **Example**:
-::: pasm2
+```pasm2
         getrnd  random_value            ' Get 32-bit random number
 
         ' Generate random in range 0-99
@@ -17446,7 +17446,7 @@ The hardware random number generator produces true random numbers based on therm
         ' Random bit
         getrnd  temp
         shr     temp, #31               ' Get bit 31 (random 0 or 1)
-:::
+```
 
 **Related**: GETRND, QMUL (for scaling random values)
 
@@ -17469,7 +17469,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 - **WCZ**: Sets both flags
 
 **Example**:
-::: pasm2
+```pasm2
                 cmp     value, #100         wz  ' Compare, set Z if equal
         if_z    jmp     #equal
 
@@ -17480,7 +17480,7 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
         if_c    jmp     #overflow
 
                 shr     data, #1            wc  ' Shift right, C = bit out
-:::
+```
 
 **Related**: All conditional execution (IF_xx), CMP, TEST, and ALU instructions with WC/WZ/WCZ
 
@@ -17491,74 +17491,74 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 ### Pin Control
 
 Toggle a pin:
-::: pasm2
+```pasm2
         xor     OUTA, pin_mask          ' Toggle pin atomically
-:::
+```
 
 Wait for pin high:
-::: pasm2
+```pasm2
 .wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
-:::
+```
 
 Copy inputs to outputs:
-::: pasm2
+```pasm2
         mov     OUTA, INA               ' Mirror inputs to outputs
-:::
+```
 
 Set multiple pins atomically:
-::: pasm2
+```pasm2
         mov     OUTA, new_pattern       ' All 32 pins change simultaneously
-:::
+```
 
 
 
 ### Hub RAM Access
 
 Block read with pointer:
-::: pasm2
+```pasm2
         mov     ptra, ##hub_buffer
         setq    #count-1                ' Transfer 'count' longs
         rdlong  cog_buffer, ptra++      ' Read block, auto-increment PTRA
-:::
+```
 
 Dual buffer operation:
-::: pasm2
+```pasm2
         mov     ptra, ##source_buffer
         mov     ptrb, ##dest_buffer
         setq    #15                     ' Transfer 16 longs
         rdlong  temp, ptra++            ' Read from PTRA
         setq    #15
         wrlong  temp, ptrb++            ' Write to PTRB
-:::
+```
 
 
 
 ### Interrupt Setup
 
 Configure interrupt handler:
-::: pasm2
+```pasm2
         mov     IJMP1, ##handler_addr   ' Set handler address
         setint1 #event_ct1              ' Enable INT1 for CT1 event
 
 handler_addr
         ' ... handle interrupt ...
         reti1                           ' Return to interrupted code
-:::
+```
 
 
 
 ### Timing Operations
 
 Precise delay:
-::: pasm2
+```pasm2
         getct   target                  ' Get current time
         addct1  target, ##delay_cycles  ' Add delay
         waitct1                         ' Wait until target time
-:::
+```
 
 Timeout detection:
-::: pasm2
+```pasm2
                 getct   deadline
                 add     deadline, ##max_time
 .loop           ' ... do work ...
@@ -17567,7 +17567,7 @@ Timeout detection:
         if_nc   jmp     #timeout
                 ' ... continue if not timed out ...
                 jmp     #.loop
-:::
+```
 
 
 
@@ -18111,21 +18111,21 @@ This is fundamentally different from the RET instruction, which optionally resto
 
 ### B.3.2 Basic Usage
 
-::: pasm2
+```pasm2
         _ret_   add     x, y            ' ADD then return (flags unchanged)
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
-:::
+```
 
 ### B.3.3 Branch Behavior
 
 When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
 
-::: pasm2
+```pasm2
         _ret_   jmp     #somewhere      ' JMP executes, NO return
         _ret_   call    #subroutine     ' CALL executes, NO return
         _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
-:::
+```
 
 For DJNZ and similar conditional branches: if the branch is taken, no return occurs; if the branch is not taken (counter reaches zero), the return executes.
 
@@ -18133,7 +18133,7 @@ For DJNZ and similar conditional branches: if the branch is taken, no return occ
 
 The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
 
-::: pasm2
+```pasm2
 ' Start XBYTE: SETQ configures mode, returns to $1FF
         push    #$1FF                   ' Push $1FF for XBYTE returns
         _ret_   setq    #$100           ' LUT base $100, then return
@@ -18143,16 +18143,16 @@ The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execu
 
 ' Change XBYTE mode for next bytecode only
         _ret_   setq2   ##$300           ' Temporary LUT base for one bytecode
-:::
+```
 
 ### B.3.5 SKIP/SKIPF with _RET_
 
 Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
 
-::: pasm2
+```pasm2
         push    #routine                ' Push target address
         _ret_   skipf   pattern         ' SKIPF then branch with skip active
-:::
+```
 
 ### B.3.6 Timing
 
@@ -18167,13 +18167,13 @@ The `_RET_` prefix adds overhead to the base instruction timing:
 
 The `_RET_` prefix enables efficient single-instruction subroutines:
 
-::: pasm2
+```pasm2
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
 
 read_input                              ' Subroutine: read input
         _ret_   mov     result, ina     ' MOV, then return
-:::
+```
 
 This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
 
@@ -18182,12 +18182,12 @@ This is significantly faster than a separate instruction followed by RET (which 
 
 When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This provides deterministic timing—critical for real-time operations:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' 2 cycles - always
         if_z    mov     result, #1              ' 2 cycles - whether Z=1 or not
         if_nz   mov     result, #0              ' 2 cycles - whether Z=0 or not
                                                 ' Total: always 6 cycles
-:::
+```
 
 This timing predictability enables branchless programming where instruction timing remains constant regardless of data values.
 
@@ -18840,13 +18840,13 @@ The TESTP, TESTPN, TESTB, and TESTBN instructions support WC, WZ, and extended e
 
 These extended effects enable testing multiple bits or pins and accumulating the results into a single flag:
 
-::: pasm2
+```pasm2
 ' Test if ALL of pins 0, 4, and 7 are high
         testp   #0              wc      ' C = pin 0 state
         testp   #4              andc    ' C = C AND pin 4 state
         testp   #7              andc    ' C = C AND pin 7 state
         if_c    jmp     #all_high       ' Branch if all three are high
-:::
+```
 
 
 # Appendix D: Special Registers Quick Reference
@@ -18916,12 +18916,12 @@ Logical true constant with all bits set.
 The TRUE constant represents a boolean true condition with all 32 bits set to 1. In two's complement signed representation, this equals -1. The all-bits-set pattern makes TRUE particularly useful for bitwise masking operations where a true condition must affect all bits.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Using TRUE in conditional logic
                 cmp     x, #0       wz      ' Compare x with 0
                 mov     result, TRUE        ' Default to TRUE
         if_z    mov     result, FALSE       ' Set to FALSE if x was 0
-:::
+```
 
 #### Notes
 - Standard boolean true value in PASM2
@@ -18953,13 +18953,13 @@ Logical false constant with all bits cleared.
 The FALSE constant represents a boolean false condition with all 32 bits cleared to 0. This zero value serves as the standard false representation in PASM2 and provides a clean starting state for flag initialization.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Using FALSE for initialization
         mov     flag, FALSE     ' Initialize flag to FALSE
         ' ... some operations ...
         cmp     x, y        wz  ' Compare x and y
         if_e mov  flag, TRUE    ' Set flag to TRUE if equal
-:::
+```
 
 #### Notes
 - Standard boolean false value in PASM2
@@ -18993,7 +18993,7 @@ Most negative value in 32-bit signed integer representation.
 NEGX represents the maximum negative integer value in 32-bit two's complement representation (-2³¹). This constant marks the lower boundary of the signed integer range and serves as a critical reference point for underflow detection and saturation arithmetic.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Checking for negative underflow
                 cmps    value, NEGX     wc      ' Check if below min negative
         if_c    jmp     #underflow              ' Jump if underflow
@@ -19001,7 +19001,7 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 ' Using NEGX as lower limit
                 mov     limit, NEGX             ' Set limit to max negative
                 maxs    value, limit            ' Clamp to not go below NEGX
-:::
+```
 
 #### Notes
 - Represents -2³¹ in decimal notation
@@ -19034,7 +19034,7 @@ Most positive value in 32-bit signed integer representation.
 POSX represents the maximum positive integer value in 32-bit two's complement representation (2³¹ - 1). This constant marks the upper boundary of the signed integer range and serves as a critical reference point for overflow detection and saturation arithmetic.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Checking for positive overflow
                 cmp     value, POSX     wc      ' Check if exceeds max positive
         if_nc   jmp     #overflow               ' Jump if overflow
@@ -19042,7 +19042,7 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 ' Using POSX as upper limit
                 mov     limit, POSX             ' Set limit to max positive
                 mins    value, limit            ' Clamp to not exceed POSX
-:::
+```
 
 #### Notes
 - Represents 2³¹ - 1 in decimal notation
@@ -19077,7 +19077,7 @@ IEEE 754 single-precision floating-point representation of π.
 The PI constant provides the mathematical constant π encoded in IEEE 754 single-precision floating-point format. This encoding allows direct use with the P2's CORDIC operations and floating-point calculations without runtime conversion overhead.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Using PI with CORDIC rotation
         mov     angle, PI           ' Load PI constant
         shr     angle, #1           ' Divide by 2 for PI/2 (90 degrees)
@@ -19088,7 +19088,7 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
         qmul    x, ##180            ' Multiply PI by 180
         qdiv    x, ##$80000000      ' Divide by 2³¹ for scaling
         getqx   degrees             ' Get degrees conversion factor
-:::
+```
 
 #### Notes
 - IEEE 754 single-precision format provides approximately 7 decimal digits of precision
@@ -19122,13 +19122,13 @@ Execution mode constant for loading code from hub RAM to cog RAM.
 COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COGINIT loads 496 longs from hub RAM into cog RAM registers $000-$1F7 and begins execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start specific cog with code load
         COGINIT #COGEXEC+1, #$100   ' Load and start Cog 1 from Hub RAM $100
 
 ' Start Cog 5 with code at label
         COGINIT #COGEXEC+5, @code   ' Load and start Cog 5 from @code
-:::
+```
 
 #### Syntax
 ```
@@ -19169,13 +19169,13 @@ Execution mode constant for executing code directly from hub RAM.
 HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COGINIT starts the target cog executing instructions directly from hub RAM without loading code to cog RAM. This mode removes code size restrictions at the cost of slower instruction fetch times.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start specific cog with hub execution
         COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from Hub RAM $400
 
 ' Start Cog 5 with hub execution at label
         COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
-:::
+```
 
 #### Syntax
 ```
@@ -19218,11 +19218,11 @@ Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves
 COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 496 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start any available cog with code load
                 coginit #COGEXEC_NEW, ##@cog_code  wc
         if_c    jmp     #no_cog_available
-:::
+```
 
 #### Notes
 - Use WC to detect if no cog was available (C=1 on failure)
@@ -19250,11 +19250,11 @@ Combines COGEXEC base mode with both the N (new cog) and pair selection flags se
 COGEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs (0-1, 2-3, 4-5, or 6-7), load code into the first cog, and start execution. Adjacent cog pairs can share their LUT memory via SETLUTS, enabling efficient inter-cog communication and data sharing.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start a cog pair for LUT sharing
                 coginit #COGEXEC_NEW_PAIR, ##@pair_code  wc
         if_c    jmp     #no_pair_available
-:::
+```
 
 #### Notes
 - Requires two adjacent, stopped cogs to succeed
@@ -19283,11 +19283,11 @@ Combines HUBEXEC base mode with the N (new cog) flag set.
 HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 496-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start any available cog in hub execution mode
                 coginit #HUBEXEC_NEW, ##@hub_code  wc
         if_c    jmp     #no_cog_available
-:::
+```
 
 #### Notes
 - Hub execution allows unlimited code size
@@ -19316,11 +19316,11 @@ Combines HUBEXEC base mode with both the N (new cog) and pair selection flags se
 HUBEXEC_NEW_PAIR instructs COGINIT to find an adjacent pair of available cogs and start them executing from Hub RAM. This combines the unlimited code size of hub execution with the LUT sharing capability of cog pairs.
 
 #### Usage
-::: pasm2
+```pasm2
 ' Start a cog pair for hub execution with LUT sharing
                 coginit #HUBEXEC_NEW_PAIR, ##@hub_pair_code  wc
         if_c    jmp     #no_pair_available
-:::
+```
 
 #### Notes
 - Combines unlimited hub code size with LUT sharing capability
@@ -19866,10 +19866,10 @@ Bits [31..0] = %AAAA_BBBB_FFF_PPPPPPPPPPPPP_TT_MMMMM_0
 
 Constants are combined using OR operations to build the complete configuration:
 
-::: pasm2
+```pasm2
         mov     mode, ##P_PWM_TRIANGLE | P_OE | P_LOCAL_A
         wrpin   mode, #56
-:::
+```
 
 
 
@@ -20131,40 +20131,40 @@ Constants are combined using OR operations to build the complete configuration:
 
 ### PWM Output Configuration
 
-::: pasm2
+```pasm2
 ' Configure pin 56 for triangle PWM output
         mov     mode, ##P_PWM_TRIANGLE | P_OE
         wrpin   mode, #56
         wxpin   ##10000, #56        ' Period = 10000 clocks
         wypin   ##5000, #56         ' Duty = 50%
         dirh    #56                 ' Enable output
-:::
+```
 
 ### ADC Input with Gain
 
-::: pasm2
+```pasm2
 ' Configure pin 32 for ADC with 10x gain
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
         wxpin   ##14, #32           ' 14-bit resolution
         dirl    #32                 ' Input mode
-:::
+```
 
 ### Open-Drain Output (I2C-style)
 
-::: pasm2
+```pasm2
 ' Configure for open-drain with 1.5kΩ pull-up
         mov     mode, ##P_HIGH_FLOAT | P_LOW_1K5
         wrpin   mode, #44
-:::
+```
 
 ### Schmitt Trigger Input with Filter
 
-::: pasm2
+```pasm2
 ' Debounced button input
         mov     mode, ##P_SCHMITT_A | P_FILT3_AB
         wrpin   mode, #0
-:::
+```
 
 
 
@@ -20172,12 +20172,12 @@ Constants are combined using OR operations to build the complete configuration:
 
 SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
 
-::: pasm2
+```pasm2
 ' Complex config: Async TX, inverted, fast drive
         mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
         or      mode, ##P_HIGH_FAST | P_LOW_FAST
         wrpin   mode, pin
-:::
+```
 
 
 
@@ -20413,40 +20413,40 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
 
 ### Video Pixel Streaming
 
-::: pasm2
+```pasm2
 ' Stream RGB24 video data to VGA pins
         rdfast  #0, video_buffer       ' Set up FIFO from video buffer
         mov     mode, ##X_RFLONG_RGB24 | X_PINS_ON
         xinit   mode, ##25_000_000     ' 25 MHz pixel clock
-:::
+```
 
 ### Audio DAC Output
 
-::: pasm2
+```pasm2
 ' Stream 8-bit audio samples to DAC
         rdfast  #0, audio_buffer
         mov     mode, ##X_RFBYTE_1P_1DAC1 | X_DACS_3_2_1_0
         xinit   mode, ##44100          ' 44.1 kHz sample rate
-:::
+```
 
 ### ADC Capture to Memory
 
-::: pasm2
+```pasm2
 ' Capture ADC samples to hub RAM
         wrfast  #0, capture_buffer     ' Set up FIFO for writing
         mov     mode, ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON
         xinit   mode, ##100_000        ' 100 kHz sample rate
-:::
+```
 
 ### LUT-Based Color Mapping
 
-::: pasm2
+```pasm2
 ' Stream bytes through LUT for palette lookup
         rdfast  #0, sprite_data
         mov     mode, ##X_RFLONG_8X4_LUT | X_PINS_ON
         setluts #0                      ' Use LUT for color palette
         xinit   mode, nco_value
-:::
+```
 
 
 
@@ -20475,11 +20475,11 @@ X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 
 Streamer mode and control flags are combined using OR:
 
-::: pasm2
+```pasm2
 ' Full-featured video mode
         mov     mode, ##X_RFLONG_RGB24 | X_PINS_ON | X_DACS_3_2_1_0
         xinit   mode, nco_rate
-:::
+```
 
 
 
@@ -21049,11 +21049,11 @@ Combine instruction result with existing flag using logic operation:
 
 **Usage:** Effect keywords appear after the instruction's operands:
 
-::: pasm2
+```pasm2
 ADD   x, y  WC      ' Update C flag with carry
 CMP   a, b  WCZ     ' Update both C and Z flags
 TEST  val, mask  ANDZ   ' AND test result with Z flag
-:::
+```
 
 
 
@@ -21077,21 +21077,21 @@ When naming labels, variables, and symbols in your PASM2 code:
 
 ::: antipattern
 
-::: pasm2
+```pasm2
 ' WRONG - uses reserved words as labels
 add         mov   x, #1      ' Error: 'add' is instruction
 or          jmp   #loop      ' Error: 'or' is instruction
 byte        long  $0         ' Error: 'byte' is directive
-:::
+```
 
 :::
 
-::: pasm2
+```pasm2
 ' CORRECT - uses valid label names
 add_routine     mov   x, #1
 choice_or       jmp   #loop
 byte_data       long  $0
-:::
+```
 
 
 
@@ -21364,13 +21364,13 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 **Common MODCZ Usage:**
-::: pasm2
+```pasm2
         MODCZ   _CLR, _SET      ' Clear C, set Z
         MODCZ   _SET, _CLR      ' Set C, clear Z
         MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
         MODCZ   _Z, _C          ' Swap C and Z values
         MODCZ   _NC, _NZ        ' Invert both flags
-:::
+```
 
 **Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
 
