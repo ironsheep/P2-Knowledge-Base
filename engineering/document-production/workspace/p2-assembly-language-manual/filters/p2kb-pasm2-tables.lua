@@ -409,6 +409,36 @@ local function is_condition_code_table(el)
   return false
 end
 
+-- Detect if this is a table with long comma-separated instruction lists (Chapter 3 pattern)
+-- 3 columns where column 2 or 3 has "Instructions" header
+local function is_category_instructions_table(el)
+  if #el.colspecs ~= 3 then
+    return false
+  end
+
+  -- Check header row for pattern with "Instructions" in column 2 or 3
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 3 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents):lower()
+      local h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+      local h3 = pandoc.utils.stringify(header_row.cells[3].contents):lower()
+
+      -- Match "Category | Count | Instructions" pattern (column 3 has long lists)
+      if (h1:match("category") or h1:match("type")) and h3:match("instruction") then
+        return true
+      end
+
+      -- Match "Family | Instructions | Operation" pattern (column 2 has long lists)
+      if h1:match("family") and h2:match("instruction") then
+        return true
+      end
+    end
+  end
+
+  return false
+end
+
 -- Detect tables that NEED full page width due to long content
 -- These are tables where auto-shrink would cause overflow or look bad
 local function needs_full_width(el)
@@ -427,6 +457,10 @@ local function needs_full_width(el)
 
   if is_operator_description_example_table(el) then
     return true  -- Examples with code need controlled widths
+  end
+
+  if is_category_instructions_table(el) then
+    return true  -- Long comma-separated instruction lists
   end
 
   return false
@@ -542,6 +576,10 @@ local function handle_content_table(el)
   -- Needs optimized widths: EEEE is narrow, Aliases needs room for comma-separated lists
   local is_cond_code = is_condition_code_table(el)
 
+  -- Special handling for "Category | Count | Instructions" tables (Chapter 3)
+  -- Column 3 has long comma-separated instruction lists that need wrapping
+  local is_cat_instr = is_category_instructions_table(el)
+
   -- Extract column widths from Pandoc's colspecs
   -- colspecs is a list of {alignment, width} pairs
   -- width is nil if not specified, or a fraction (0.0-1.0) of line width
@@ -615,6 +653,35 @@ local function handle_content_table(el)
     widths[3] = 0.30
     widths[4] = 0.13
     widths[5] = 0.30
+    has_widths = true
+  elseif is_cat_instr then
+    -- Tables with long instruction lists in column 2 or 3
+    -- Check which pattern we have by looking at headers
+    local h2 = ""
+    if el.head and el.head.rows and #el.head.rows > 0 then
+      local header_row = el.head.rows[1]
+      if header_row.cells and header_row.cells[2] then
+        h2 = pandoc.utils.stringify(header_row.cells[2].contents):lower()
+      end
+    end
+
+    if h2:match("instruction") then
+      -- "Family | Instructions | Operation" pattern
+      -- Column 1 (Family): 10% - like "BIT*", "DIR*"
+      -- Column 2 (Instructions): 55% - comma-separated lists
+      -- Column 3 (Operation): 30% - short descriptions
+      widths[1] = 0.10
+      widths[2] = 0.55
+      widths[3] = 0.30
+    else
+      -- "Category | Count | Instructions" pattern
+      -- Column 1 (Category): 18% - like "Full (WC/WZ/WCZ)"
+      -- Column 2 (Count): 8% - just numbers like "~300"
+      -- Column 3 (Instructions): 69% - long comma-separated instruction lists
+      widths[1] = 0.18
+      widths[2] = 0.08
+      widths[3] = 0.69
+    end
     has_widths = true
   elseif has_widths and total_specified > 0 then
     -- Scale widths to sum to ~0.95 (leave room for padding)
