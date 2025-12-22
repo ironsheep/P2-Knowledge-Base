@@ -11013,12 +11013,12 @@ QDIV performs high-precision unsigned division using the P2's 54-stage pipelined
 
 The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not used) as the upper 32 bits with the Dest operand as the lower 32 bits: {SETQ, Dest}. The denominator is specified in the Src operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
 
-::: pasm2
+```pasm2
         QDIV    ##1000000, #3  ' {0, 1000000} / 3
         ' Wait 55 clocks...
         GETQX   quotient       ' Get 333333
         GETQY   remainder      ' Get 1
-:::
+```
 
 Division by zero produces undefined results. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
 
@@ -11055,11 +11055,11 @@ The instruction takes the logarithm value in the Dest operand, which must be in 
 
 QEXP is the complement of QLOG and is commonly used together with QLOG to perform power calculations.
 
-::: pasm2
+```pasm2
         QEXP    log_value      ' Begin exponential conversion
         ' Wait 55 clocks...
         GETQX   integer_result ' Get 32-bit integer
-:::
+```
 
 
 
@@ -11094,13 +11094,13 @@ QFRAC performs fractional division using the P2's 54-stage pipelined CORDIC solv
 
 The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in Dest and the fractional part is in SETQ.
 
-::: pasm2
+```pasm2
         SETQ    ##$C0000000    ' 0.75 in 32-bit fraction format
         QFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875
         ' Wait 55 clocks...
         GETQX   quotient       ' Get integer quotient
         GETQY   remainder      ' Get fractional remainder
-:::
+```
 
 
 
@@ -11133,11 +11133,11 @@ QLOG performs integer to logarithm conversion using the P2's 54-stage pipelined 
 
 The instruction takes the unsigned integer value in the Dest operand. After 55 clocks, the logarithm result can be retrieved using GETQX.
 
-::: pasm2
+```pasm2
         QLOG    ##1000         ' Begin log conversion
         ' Wait 55 clocks...
         GETQX   log_result     ' Get 5:27 logarithm
-:::
+```
 
 
 
@@ -11171,12 +11171,12 @@ QMUL performs high-precision unsigned multiplication using the P2's 54-stage pip
 
 After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
 
-::: pasm2
+```pasm2
         QMUL    ##1000000, ##2000000
         ' Wait 55 clocks...
         GETQX   lower_32       ' Get lower 32 bits
         GETQY   upper_32       ' Get upper 32 bits
-:::
+```
 
 Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allowing efficient pipelining.
 
@@ -11215,13 +11215,13 @@ The instruction takes the X coordinate from Dest and the Y coordinate from the S
 
 This instruction can also be used for polar to cartesian conversion by setting X (Dest) to the length, Y (SETQ) to 0, and the angle (Src) to the desired angle.
 
-::: pasm2
+```pasm2
         SETQ    #200           ' Set Y coordinate
         QROTATE #100, ##$20000000 ' X=100, angle=45 degrees
         ' Wait 55 clocks...
         GETQX   new_x          ' Get rotated X
         GETQY   new_y          ' Get rotated Y
-:::
+```
 
 
 
@@ -11257,11 +11257,11 @@ The 64-bit input is formed by concatenating the Src operand as the upper 32 bits
 
 The result is the largest integer whose square does not exceed the input value.
 
-::: pasm2
+```pasm2
         QSQRT   ##1000000, #0  ' sqrt(1000000) = 1000
         ' Wait 55 clocks...
         GETQX   sqrt_result    ' Get 1000
-:::
+```
 
 For 32-bit square roots, use Src=0.
 
@@ -11301,12 +11301,12 @@ The angle result uses P2's standard angle units where $00000000 = 0°, $40000000
 
 QVECTOR is the inverse operation of QROTATE.
 
-::: pasm2
+```pasm2
         QVECTOR #100, #200     ' Begin conversion
         ' Wait 55 clocks...
         GETQX   length         ' Get polar length
         GETQY   angle          ' Get polar angle
-:::
+```
 
 
 
@@ -12525,9 +12525,9 @@ Shift Arithmetic Left
 
 SAL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to that of the original Dest[0]. SAL is the complement of SAR for bit streams but not for math operations. For swift 32-bit integer multiplication by a power-of-two, use SHL instead.
 
-::: pasm2
+```pasm2
         SAL     data, #4       ' Shift left 4 bits, extending LSB
-:::
+```
 
 
 
@@ -12561,9 +12561,9 @@ Shift Arithmetic Right
 
 SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
 
-::: pasm2
+```pasm2
         SAR     value, #3      ' Divide signed value by 8
-:::
+```
 
 
 
@@ -12598,10 +12598,10 @@ SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts 
 
 The instruction following SCA is shielded from interrupts. This ensures the scaled value is correctly applied to the next instruction's S operand before any interrupt can occur.
 
-::: pasm2
+```pasm2
         SCA     factor, ##$8000  ' Scale by 0.5 (32768/65536)
         ADD     result, #0      ' Add scaled value
-:::
+```
 
 
 
@@ -12671,9 +12671,9 @@ Set Byte
 
 SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte and register described by a prior ALTSB instruction. No other bits are modified. N (0-3) identifies a value's individual bytes by position in least-significant byte order. The second syntax is intended for use after an ALTSB instruction in a loop to iteratively affect a series of byte values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETBYTE data, #$FF, #2  ' Set byte 2 of data to $FF
-:::
+```
 
 
 
@@ -12980,9 +12980,9 @@ Set Nibble
 
 SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibble and register described by a prior ALTSN instruction. No other bits are modified. N (0-7) identifies a value's individual nibbles by position in least-significant nibble order. The second syntax is intended for use after an ALTSN instruction in a loop to iteratively affect a series of nibble values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETNIB  data, #$A, #5   ' Set nibble 5 of data to $A
-:::
+```
 
 
 
@@ -13101,10 +13101,10 @@ Set Q Register
 
 Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer count. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx instructions to provide additional parameters.
 
-::: pasm2
+```pasm2
         SETQ    #16-1          ' Set up for 16-long block transfer
         RDLONG  buffer, ptra   ' Read 16 longs from hub
-:::
+```
 
 **Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
 
@@ -13136,10 +13136,10 @@ Set Q For LUT Transfers
 
 Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of COG RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
 
-::: pasm2
+```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
-:::
+```
 
 **Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
@@ -13307,9 +13307,9 @@ Set Word
 
 SETWORD stores Src[15:0] into the word identified by N within Dest, or the word and register described by a prior ALTSW instruction. No other bits are modified. N (0-1) identifies a value's individual words by position in least-significant word order. The second syntax is intended for use after an ALTSW instruction in a loop to iteratively affect a series of word values within contiguous long registers.
 
-::: pasm2
+```pasm2
         SETWORD data, ##$ABCD, #1  ' Set high word of data to $ABCD
-:::
+```
 
 
 
@@ -13430,9 +13430,9 @@ Shift Left
 
 SHL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to 0. This is useful for bit-stream manipulation as well as for swift multiplication; signed or unsigned 32-bit integer multiplication by a power-of-two. Care must be taken for power-of-two multiplications since upper bits shift through the MSB (sign bit), mangling large signed values.
 
-::: pasm2
+```pasm2
         SHL     value, #2      ' Multiply by 4
-:::
+```
 
 
 
@@ -13466,9 +13466,9 @@ Shift Right
 
 SHR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to 0. This is useful for bit-stream manipulation as well as for swift division; unsigned 32-bit integer division by a power-of-two. For similar division of a signed value, use SAR instead.
 
-::: pasm2
+```pasm2
         SHR     value, #3      ' Divide unsigned by 8
-:::
+```
 
 
 
@@ -13501,9 +13501,9 @@ Sign Extend
 
 SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value of that identified bit, i.e. sign-extending the value. This is handy when converting encoded or received signed values from a small bit width to a large bit width, i.e. 32 bits.
 
-::: pasm2
+```pasm2
         SIGNX   value, #7      ' Sign-extend 8-bit value to 32 bits
-:::
+```
 
 
 
@@ -13534,12 +13534,12 @@ Skip Instructions
 
 Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cancelled for each '1' bit in Dest[0]-Dest[31]. Each set bit causes the corresponding sequential instruction to be cancelled (replaced with NOP).
 
-::: pasm2
+```pasm2
         SKIP    #%10101        ' Skip instructions 0, 2, 4
         NOP                    ' Skipped (bit 0)
         ADD     x, #1          ' Executed (bit 1 = 0)
         NOP                    ' Skipped (bit 2)
-:::
+```
 
 
 
@@ -13666,11 +13666,11 @@ Disallow Interrupts
 
 STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
 
-::: pasm2
+```pasm2
         STALLI                 ' Disable interrupts
         ' Critical section...
         ALLOWI                 ' Re-enable interrupts
-:::
+```
 
 
 
@@ -13703,9 +13703,9 @@ Subtract
 
 SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. To subtract unsigned multi-long values, use SUB followed by SUBX as described in Subtracting Two Multi-Long Values. SUB and SUBX are also used in subtracting signed multi-long values with SUBSX ending the sequence.
 
-::: pasm2
+```pasm2
         SUB     count, #1 WZ   ' Decrement count, set Z if zero
-:::
+```
 
 
 
@@ -13922,10 +13922,10 @@ If the WZ or WCZ effect is specified, the Z flag is set to 1 if Dest (or Dest AN
 
 TEST is non-destructive—it does not modify Dest.
 
-::: pasm2
+```pasm2
         TEST    flags WCZ      ' Test all bits for parity and zero
         TEST    value, #$FF WZ ' Test low byte for zero
-:::
+```
 
 
 
@@ -13969,10 +13969,10 @@ TESTB reads the state (0 or 1) of a bit in Dest designated by Src, and either st
 
 TESTB is useful for examining individual bits without modifying the register value.
 
-::: pasm2
+```pasm2
         TESTB   flags, #7 WC   ' Test bit 7, store in C
         TESTB   mask, #3 ANDC  ' AND bit 3 with current C
-:::
+```
 
 
 
@@ -14105,11 +14105,11 @@ TESTP reads the state (0 or 1) of the I/O pin designated by Dest, and either sto
 
 Both instructions read the actual pin state from the IN register, not the output register. This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
 
-::: pasm2
+```pasm2
         TESTP   #10 WC         ' Read pin 10 state into C
         TESTP   sensor_pin WZ  ' Test sensor pin, store in Z
         TESTPN  #button WC     ' C=1 if active-low button pressed
-:::
+```
 
 
 
@@ -14236,10 +14236,10 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
-::: pasm2
+```pasm2
         TJNZ    count, #loop   ' Loop while count <> 0
         TJZ     count, #done   ' Exit when count = 0
-:::
+```
 
 Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
@@ -14275,10 +14275,10 @@ TJV tests the value in Dest against C and jumps to the address described by Src 
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
-::: pasm2
+```pasm2
         ADDS    result, delta WC  ' Signed add, update C
         TJV     result, #overflow_handler
-:::
+```
 
 
 
@@ -14357,9 +14357,9 @@ To set an optional timeout, insert a SETQ instruction (with a future System Coun
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
-::: pasm2
+```pasm2
         WAITATN                ' Wait for attention from another cog
-:::
+```
 
 
 
@@ -14493,10 +14493,10 @@ WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline u
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-::: pasm2
+```pasm2
         SETPAT  mask, pattern  ' Set up pattern detector
         WAITPAT                ' Wait for pattern match
-:::
+```
 
 
 
@@ -14569,9 +14569,9 @@ WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
-::: pasm2
+```pasm2
         WAITX   #99            ' Wait 101 clock cycles (2 + 99)
-:::
+```
 
 
 
@@ -14856,9 +14856,9 @@ WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the low
 
 The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
-::: pasm2
+```pasm2
         WRBYTE  value, ptra++  ' Write byte, increment pointer
-:::
+```
 
 
 
@@ -14936,10 +14936,10 @@ Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the m
 
 Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written.
 
-::: pasm2
+```pasm2
         WRFAST  #0, buffer_addr  ' Set up FIFO write to buffer
         WFLONG  data               ' Write data to FIFO
-:::
+```
 
 
 
@@ -14975,10 +14975,10 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
 
-::: pasm2
+```pasm2
         SETQ    #16-1          ' Set up for 16-long block transfer
         WRLONG  buffer, ptra   ' Write 16 longs to hub
-:::
+```
 
 **Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
 
@@ -15016,9 +15016,9 @@ When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. O
 
 WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage.
 
-::: pasm2
+```pasm2
         WRLUT   value, #100    ' Write to LUT address 100
-:::
+```
 
 
 
@@ -15061,12 +15061,12 @@ The standard configuration sequence is:
 
 WRPIN #0, pin clears all smart pin configuration.
 
-::: pasm2
+```pasm2
         DIRL    #10            ' Reset pin 10
         WRPIN   pwm_mode, #10  ' Configure for PWM
         WXPIN   period, #10    ' Set period
         DIRH    #10            ' Enable
-:::
+```
 
 
 
@@ -15174,9 +15174,9 @@ WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves mult
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. This dual purpose makes WYPIN essential for continuous smart pin operation—it both provides new data and signals that previous results have been processed.
 
-::: pasm2
+```pasm2
         WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
-:::
+```
 
 
 
@@ -15258,11 +15258,11 @@ The Src parameter provides either the data source (for immediate transfers) or a
 
 XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
 
-::: pasm2
+```pasm2
         XINIT   mode, data         ' Start data transfer
         WYPIN   count, #clk_pin    ' Start clock generation
         WAITXFI                    ' Wait for completion
-:::
+```
 
 This parallel operation eliminates CPU intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
 
@@ -15353,13 +15353,13 @@ The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bi
 - Fast execution (2 clocks per random number)
 - Small state requirement (single 32-bit value)
 
-::: pasm2
+```pasm2
         MOV     seed, initial_value  ' Initialize with non-zero seed
 
 .loop   XORO32  seed                 ' Advance PRNG state
         MOV     random_val, 0        ' Next instruction receives random in S
         ' Process random_val...
-:::
+```
 
 The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value.
 
@@ -15483,13 +15483,13 @@ For example, if Dest contains $FFFF_FFFF and Src contains 7, ZEROX clears bits 3
 
 The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit positions 0 through 31 to be specified. This makes ZEROX particularly useful for extracting and zero-extending bit fields from packed data structures or network protocols.
 
-::: pasm2
+```pasm2
         ' Extract lower byte and zero-extend
         MOV     data, big_value
         ZEROX   data, #7         ' Keep bits 7-0, clear bits 31-8
                                  ' If big_value was $FFFF_FFFF,
                                  ' data becomes $0000_00FF
-:::
+```
 
 ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for unsigned values), SIGNX fills upper bits with the value of the designated bit (for signed values). Use ZEROX when working with unsigned data, and SIGNX when working with signed data that needs proper sign extension.
 
@@ -21585,11 +21585,11 @@ When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer
 
 **Example of Bug:**
 
-::: pasm2
+```pasm2
         SETQ    #16-1           ' Ready to load 16 longs
         ALTD    start_reg       ' BUG: Cancels block-size PTRx delta!
         RDLONG  0, ptra++       ' ptra += 4 (not 64!)
-:::
+```
 
 **Expected Behavior:** After reading 16 longs with `ptra++`, ptra should advance by 64 bytes (16 × 4).
 
@@ -21599,13 +21599,13 @@ When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer
 
 Manually adjust PTRx after the block transfer, or restructure code to avoid ALTx/AUGx instructions between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG.
 
-::: pasm2
+```pasm2
         ' Workaround: Adjust pointer manually after transfer
         SETQ    #16-1           ' Ready to load 16 longs
         ALTD    start_reg       ' Alter start register
         RDLONG  0, ptra++       ' ptra only advances by 4
         ADD     ptra, #(16-1)*4 ' Manually add remaining 60 bytes
-:::
+```
 
 ---
 
@@ -21619,11 +21619,11 @@ When AUGS precedes an instruction with an immediate #S operand (its intended tar
 
 **Example of Bug:**
 
-::: pasm2
+```pasm2
         AUGS    #$FFFFF123      ' Intended for ADD instruction
         ALTD    index, #base    ' WARNING: #base also receives AUGS value!
         ADD     0-0, #$123      ' #$123 is augmented as expected, cancels AUGS
-:::
+```
 
 **Expected Behavior:** AUGS should only affect the ADD instruction's #$123 operand.
 
@@ -21633,13 +21633,13 @@ When AUGS precedes an instruction with an immediate #S operand (its intended tar
 
 Use a register instead of an immediate for the ALTx instruction's S operand when an AUGS is active.
 
-::: pasm2
+```pasm2
         ' Workaround: Use register instead of immediate in ALTx
         MOV     temp, #base     ' Load base into register first
         AUGS    #$FFFFF123      ' Intended for ADD instruction
         ALTD    index, temp     ' Register operand - unaffected by AUGS
         ADD     0-0, #$123      ' Only ADD gets the augmented value
-:::
+```
 
 ---
 

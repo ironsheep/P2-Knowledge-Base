@@ -433,6 +433,11 @@ local function is_category_instructions_table(el)
       if h1:match("family") and h2:match("instruction") then
         return true
       end
+
+      -- Match "Category | Example Modes | Typical Applications" pattern (Chapter 5)
+      if h1:match("category") and (h2:match("mode") or h2:match("example")) and h3:match("application") then
+        return true
+      end
     end
   end
 
@@ -673,6 +678,14 @@ local function handle_content_table(el)
       widths[1] = 0.10
       widths[2] = 0.55
       widths[3] = 0.30
+    elseif h2:match("mode") or h2:match("example") then
+      -- "Category | Example Modes | Typical Applications" pattern (Chapter 5)
+      -- Column 1 (Category): 12% - like "Digital I/O", "Serial"
+      -- Column 2 (Example Modes): 40% - comma-separated mode names
+      -- Column 3 (Typical Applications): 43% - comma-separated application descriptions
+      widths[1] = 0.12
+      widths[2] = 0.40
+      widths[3] = 0.43
     else
       -- "Category | Count | Instructions" pattern
       -- Column 1 (Category): 18% - like "Full (WC/WZ/WCZ)"
