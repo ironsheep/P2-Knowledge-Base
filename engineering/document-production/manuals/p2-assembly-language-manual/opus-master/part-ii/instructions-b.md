@@ -272,10 +272,10 @@ In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction. A size valu
 
 A bit mask is often useful in bitwise operations (AND, OR, XOR) to filter out or affect special groups of bits. For example:
 
-::: pasm2
+```pasm2
         bmask   mask, #7               ' Create 8-bit mask ($FF)
         and     data, mask             ' Keep only lower 8 bits
-:::
+```
 
 The first syntax form uses Src to specify the size, while the second syntax form (without Src) uses the value already in Dest to determine the mask size. Both forms write the resulting mask back to Dest.
 

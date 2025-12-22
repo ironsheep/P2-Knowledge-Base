@@ -219,40 +219,40 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
 
 ### Video Pixel Streaming
 
-::: pasm2
+```pasm2
 ' Stream RGB24 video data to VGA pins
         rdfast  #0, video_buffer       ' Set up FIFO from video buffer
         mov     mode, ##X_RFLONG_RGB24 | X_PINS_ON
         xinit   mode, ##25_000_000     ' 25 MHz pixel clock
-:::
+```
 
 ### Audio DAC Output
 
-::: pasm2
+```pasm2
 ' Stream 8-bit audio samples to DAC
         rdfast  #0, audio_buffer
         mov     mode, ##X_RFBYTE_1P_1DAC1 | X_DACS_3_2_1_0
         xinit   mode, ##44100          ' 44.1 kHz sample rate
-:::
+```
 
 ### ADC Capture to Memory
 
-::: pasm2
+```pasm2
 ' Capture ADC samples to hub RAM
         wrfast  #0, capture_buffer     ' Set up FIFO for writing
         mov     mode, ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON
         xinit   mode, ##100_000        ' 100 kHz sample rate
-:::
+```
 
 ### LUT-Based Color Mapping
 
-::: pasm2
+```pasm2
 ' Stream bytes through LUT for palette lookup
         rdfast  #0, sprite_data
         mov     mode, ##X_RFLONG_8X4_LUT | X_PINS_ON
         setluts #0                      ' Use LUT for color palette
         xinit   mode, nco_value
-:::
+```
 
 
 
@@ -281,11 +281,11 @@ X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 
 Streamer mode and control flags are combined using OR:
 
-::: pasm2
+```pasm2
 ' Full-featured video mode
         mov     mode, ##X_RFLONG_RGB24 | X_PINS_ON | X_DACS_3_2_1_0
         xinit   mode, nco_rate
-:::
+```
 
 
 

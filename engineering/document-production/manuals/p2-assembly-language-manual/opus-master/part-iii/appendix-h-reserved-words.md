@@ -533,11 +533,11 @@ Combine instruction result with existing flag using logic operation:
 
 **Usage:** Effect keywords appear after the instruction's operands:
 
-::: pasm2
+```pasm2
 ADD   x, y  WC      ' Update C flag with carry
 CMP   a, b  WCZ     ' Update both C and Z flags
 TEST  val, mask  ANDZ   ' AND test result with Z flag
-:::
+```
 
 
 
@@ -561,21 +561,21 @@ When naming labels, variables, and symbols in your PASM2 code:
 
 ::: antipattern
 
-::: pasm2
+```pasm2
 ' WRONG - uses reserved words as labels
 add         mov   x, #1      ' Error: 'add' is instruction
 or          jmp   #loop      ' Error: 'or' is instruction
 byte        long  $0         ' Error: 'byte' is directive
-:::
+```
 
 :::
 
-::: pasm2
+```pasm2
 ' CORRECT - uses valid label names
 add_routine     mov   x, #1
 choice_or       jmp   #loop
 byte_data       long  $0
-:::
+```
 
 
 
@@ -848,13 +848,13 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 **Common MODCZ Usage:**
-::: pasm2
+```pasm2
         MODCZ   _CLR, _SET      ' Clear C, set Z
         MODCZ   _SET, _CLR      ' Set C, clear Z
         MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
         MODCZ   _Z, _C          ' Swap C and Z values
         MODCZ   _NC, _NZ        ' Invert both flags
-:::
+```
 
 **Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
 

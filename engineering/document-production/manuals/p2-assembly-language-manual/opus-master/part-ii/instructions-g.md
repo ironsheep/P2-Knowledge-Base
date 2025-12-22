@@ -113,10 +113,10 @@ The CT counter provides a continuous, monotonic time reference. The lower 32 bit
 
 **64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
 
-::: pasm2
+```pasm2
         getct   low_word        ' Get lower 32 bits (CT[31:0])
         getct   high_word wc    ' Get upper 32 bits (CT[63:32])
-:::
+```
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 

@@ -88,7 +88,7 @@ INCMOD does not limit Dest within the specified range. If Dest begins at a value
 
 A common usage pattern for INCMOD is managing circular buffers:
 
-::: pasm2
+```pasm2
                 ' Increment tail index with modulo for circular buffer
                 incmod  tail_idx, #BUF_SIZE-1  wc
         if_c    jmp     #buffer_wrapped
@@ -96,11 +96,11 @@ A common usage pattern for INCMOD is managing circular buffers:
                 ' Safe to add data at tail
                 add     buffer_ptr, tail_idx
                 wrbyte  new_data, buffer_ptr
-:::
+```
 
 INCMOD is also ideal for round-robin scheduling across a fixed number of resources:
 
-::: pasm2
+```pasm2
                 ' Round-robin through 8 ports (0-7)
 .loop
                 ' Service current port
@@ -111,7 +111,7 @@ INCMOD is also ideal for round-robin scheduling across a fixed number of resourc
         if_nc   jmp     #.loop
 
                 ' All ports serviced, continue
-:::
+```
 
 
 

@@ -17,7 +17,7 @@ Within DAT blocks, the `$` symbol represents the current origin address:
 - **In COG mode** (after ORG): `$` returns the current COG address in longs (0-$3FF)
 - **In Hub mode** (after ORGH): `$` returns the current Hub address in bytes
 
-::: pasm2
+```pasm2
 DAT
         ORG     0
         ' $ = 0 (COG address 0)
@@ -28,7 +28,7 @@ DAT
         ' $ = $400 (Hub address $400)
         BYTE    0
         ' $ = $401 (Hub address $401)
-:::
+```
 
 ### COG/LUT Memory Regions
 
@@ -48,11 +48,11 @@ Sets assembly origin to a specific COG/LUT RAM address.
 Set the assembly origin to a specific COG or LUT RAM address. All subsequent instructions assemble starting from this address.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORG                     ' Reset to COG address 0, limit $1F8
         ORG     address         ' Set COG address, auto-calculate limit
         ORG     address, limit  ' Set COG address and limit
-:::
+```
 
 #### Parameters
 | Parameter | Range | Description |
@@ -79,7 +79,7 @@ Set the assembly origin to a specific COG or LUT RAM address. All subsequent ins
 Use ORG to position code or data at specific COG/LUT RAM addresses. This is essential for creating interrupt vectors, placing time-critical code at optimal locations, organizing cog memory layout, or positioning code in LUT RAM.
 
 #### Example
-::: pasm2
+```pasm2
         ORG     0               ' Start at COG address 0
 entry   jmp     #main           ' First instruction at address 0
 
@@ -91,7 +91,7 @@ lut_code
         MOV     PA, #0          ' LUT address $200
         RET                     ' LUT address $201
         FIT     $400            ' Verify fits in LUT
-:::
+```
 
 #### Restrictions
 
@@ -128,9 +128,9 @@ Advances to specified address, filling with zeros.
 Set origin with fill—advance to specified address, filling intervening space with zeros. Unlike ORG which only sets the address counter, ORGF fills the gap between the current address and the target address with zero bytes.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORGF    address
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -141,7 +141,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
         ORG     0
 entry   jmp     #main
@@ -156,7 +156,7 @@ block_start
         ' ... code ...
         ORGF    block_start + 64   ' Ensure block is exactly 64 longs
 block_end
-:::
+```
 
 #### Restrictions
 
@@ -195,11 +195,11 @@ Sets assembly origin to a Hub RAM address.
 Set the assembly origin to a Hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
 
 #### Syntax
-::: pasm2
+```pasm2
         ORGH                    ' Reset to current hub position (or $400)
         ORGH    address         ' Set hub address
         ORGH    address, limit  ' Set hub address and limit
-:::
+```
 
 #### Parameters
 | Parameter | Range | Description |
@@ -235,7 +235,7 @@ The $400 minimum for Spin2 objects reserves space for the Spin2 interpreter.
 Use ORGH when switching from cog-exec code to hub-exec code, or when defining data that resides in Hub RAM. DAT blocks start in Hub mode by default. Use ORGH to explicitly set hub addresses or to switch back to Hub mode after using ORG.
 
 #### Example
-::: pasm2
+```pasm2
         ORGH    $400            ' Start at hub address $400
         ' Hub-exec code here
 
@@ -248,13 +248,13 @@ hubData LONG    $DEADBEEF       ' Hub address $1000
         ORGH    $400, $800      ' Hub from $400 to $800 limit
         BYTE    0[1024]         ' 1KB of data
         FIT     $800            ' Verify fits within limit
-:::
+```
 
 #### Mode Switching
 
 A DAT block can switch between COG and Hub modes multiple times:
 
-::: pasm2
+```pasm2
 DAT
         ORGH                    ' Hub mode: bytecode tables
 bc_vectors
@@ -270,7 +270,7 @@ routine1
         ORGH                    ' Back to hub mode
 hub_data
         LONG    $12345678
-:::
+```
 
 #### Restrictions
 
@@ -314,10 +314,10 @@ Stores 8-bit values at the current address.
 Declare byte data in memory. Stores 8-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] BYTE    value[, value...]
 [label] BYTE    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -331,13 +331,13 @@ Use BYTE to define individual bytes, byte arrays, or strings. Each value occupie
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing buffers or padding.
 
 #### Example
-::: pasm2
+```pasm2
 text    byte    "Hello P2", 0   ' String with null terminator
 data    byte    $FF, $00, $55   ' Hex values
 nums    byte    1, 2, 3, 4, 5   ' Decimal values
 zeros   byte    0[256]          ' 256 zero bytes (buffer initialization)
 pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
-:::
+```
 
 #### Notes
 - Each value occupies exactly 1 byte
@@ -364,10 +364,10 @@ Stores 32-bit values at the current address.
 Declare long data in memory. Stores 32-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] LONG    value[, value...]
 [label] LONG    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -381,13 +381,13 @@ Use LONG to define 32-bit integers, addresses, or any data requiring full 32-bit
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing register buffers or lookup tables.
 
 #### Example
-::: pasm2
+```pasm2
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
 ptrs    long    @start, @end    ' Address pointers
 buffer  long    0[32]           ' 32 zero longs (128 bytes)
 clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
-:::
+```
 
 #### Notes
 - Each value occupies 4 bytes
@@ -414,10 +414,10 @@ Stores 16-bit values at the current address.
 Declare word data in memory. Stores 16-bit values at the current address.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] WORD    value[, value...]
 [label] WORD    value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -431,12 +431,12 @@ Use WORD to define 16-bit integers or data elements. Each value occupies 2 bytes
 The repetition syntax `value[count]` creates multiple copies of the same value, useful for initializing tables or buffers.
 
 #### Example
-::: pasm2
+```pasm2
 counts  word    1000, 2000, 3000    ' Decimal values
 addr    word    @buffer             ' Address reference (lower 16 bits)
 zeros   word    0[64]               ' 64 zero words (128 bytes)
 sine    word    $8000[256]          ' Initialize sine table with midpoint values
-:::
+```
 
 #### Notes
 - Each value occupies 2 bytes
@@ -463,9 +463,9 @@ Includes raw binary file data at the current address.
 Include the contents of a binary file at the current assembly address. The raw bytes from the specified file are inserted directly into the assembled output.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] FILE    "filename"
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -500,7 +500,7 @@ Use FILE to embed binary resources directly into your program—font data, looku
 FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI methods.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Include a font file for VGA text display
 font_data   file    "8x8_font.bin"      ' 2KB font bitmap
@@ -514,10 +514,10 @@ splash      file    "logo.raw"          ' Splash screen bitmap
 
 ' Calculate included file size at assembly time
             long    @font_end - @font_data  ' Store font size in bytes
-:::
+```
 
 #### Example: Text File Inclusion
-::: pasm2
+```pasm2
 DAT
 ' Include text file for display
 text_data   file    "message.txt"
@@ -527,7 +527,7 @@ PUB ShowText() | ptr, len
     ptr := @text_data
     len := @text_end - @text_data
     ' Process text bytes...
-:::
+```
 
 #### Notes
 - FILE reads the file at assembly time—the file must exist during compilation
@@ -551,17 +551,17 @@ PUB ShowText() | ptr, len
 BYTE, WORD, and LONG declarations can be mixed within a single data block to create packed data structures. Each type specifier affects only the values that follow it until the next type specifier or end of line.
 
 #### Example: Protocol Packet Header
-::: pasm2
+```pasm2
 DAT
 ' Packet header: 1-byte type, 2-byte length, 4-byte timestamp
 packet_hdr
         byte    $01             ' Packet type (1 byte)
         word    $0100           ' Length field (2 bytes)
         long    0               ' Timestamp placeholder (4 bytes)
-:::
+```
 
 #### Example: Mixed Data Block
-::: pasm2
+```pasm2
 DAT
 ' Sensor configuration block with mixed sizes
 sensor_cfg
@@ -570,7 +570,7 @@ sensor_cfg
         word    1000            ' Sample rate (Hz)
         long    @callback       ' Callback address
         byte    "SENS", 0       ' Name string with terminator
-:::
+```
 
 #### Notes
 - Data elements pack contiguously regardless of size
@@ -596,10 +596,10 @@ Stores byte values with compile-time range checking.
 Declare byte data with compile-time range validation. Works identically to BYTE for storage, but generates an assembly error if any value exceeds the valid byte range. This catches potential truncation errors during compilation.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] BYTEFIT  value [, value...]
 [label] BYTEFIT  value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -621,7 +621,7 @@ The combined range allows both signed (-128 to +127) and unsigned (0 to 255) byt
 Use BYTEFIT instead of BYTE for compile-time verification that values fit in 8 bits. BYTEFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Valid BYTEFIT values
 byteData    BYTEFIT   -$80              ' Minimum signed value: -128
@@ -637,7 +637,7 @@ gammaTable  BYTEFIT   0, 1, 2, 3, 4, 5, 7, 9, 12, 15
 ' The following would cause compile errors:
 '           BYTEFIT   256               ' ERROR: 256 > 255
 '           BYTEFIT   -129              ' ERROR: -129 < -128
-:::
+```
 
 #### Error Message
 When values exceed the valid range, the compiler produces:
@@ -668,10 +668,10 @@ Stores word values with compile-time range checking.
 Declare word data with compile-time range validation. Works identically to WORD for storage, but generates an assembly error if any value exceeds the valid word range. This catches potential truncation errors during compilation.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] WORDFIT  value [, value...]
 [label] WORDFIT  value[count]
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -693,7 +693,7 @@ The combined range allows both signed (-32768 to +32767) and unsigned (0 to 6553
 Use WORDFIT instead of WORD for compile-time verification that values fit in 16 bits. WORDFIT catches overflow errors during assembly rather than silently truncating values. Particularly valuable when values derive from calculations or constants subject to change.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
 ' Valid WORDFIT values
 wordData    WORDFIT   -$8000            ' Minimum signed value: -32768
@@ -709,7 +709,7 @@ adcGains    WORDFIT   32768, 33000, 32500, 32768
 ' The following would cause compile errors:
 '           WORDFIT   65536             ' ERROR: 65536 > 65535
 '           WORDFIT   -32769            ' ERROR: -32769 < -32768
-:::
+```
 
 #### Error Message
 When values exceed the valid range, the compiler produces:
@@ -744,12 +744,12 @@ Inserts padding bytes for 4-byte alignment.
 Align to long boundary (4-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a long boundary.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
   code_and_data_statements
   ALIGNL
   data_statements
-:::
+```
 
 **Result:** The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.
 
@@ -766,12 +766,12 @@ ALIGNL is only allowed in DAT blocks, not in in-line PASM.
 
 The following creates a data table of a byte ($11), a word ($BBAA), and a long ($44332211) meant for access from Hub RAM.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
     T2      word    $BBAA
             long    $44332211
-:::
+```
 
 This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the word $BBAA stores as bytes $AA, $BB and the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
@@ -781,14 +781,14 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 
 Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
 
             ALIGNL
     T2      word    $BBAA
             long    $44332211
-:::
+```
 
 In comparison, this data will be emitted as follows:
 
@@ -821,12 +821,12 @@ Inserts padding bytes for 2-byte alignment.
 Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a word boundary.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
   code_and_data_statements
   ALIGNW
   data_statements
-:::
+```
 
 **Result:** The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.
 
@@ -843,12 +843,12 @@ ALIGNW is only allowed in DAT blocks, not in in-line PASM.
 
 The following creates a data table of a byte ($11), two bytes ($AA, $BB), and a long ($44332211) meant for access from Hub RAM.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
     T2      byte    $AA, $BB
             long    $44332211
-:::
+```
 
 This data is emitted into the Hub memory image as shown below. The actual starting address depends on preceding code and data; the relative layout remains constant. The L#, W#, and B# labels denote contiguous long, word, and byte boundaries. Note that P2 is little-endian, so the long $44332211 stores as bytes $11, $22, $33, $44 in memory order.
 
@@ -858,14 +858,14 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 
 Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenient word-sized access), the ALIGNW directive achieves this, as follows.
 
-::: pasm2
+```pasm2
 DAT
     T1      byte    $11
 
             ALIGNW
     T2      byte    $AA, $BB
             long    $44332211
-:::
+```
 
 In comparison, this data will be emitted as follows:
 
@@ -901,12 +901,12 @@ Repeats a block of code or data with iteration index access.
 Replicate a block of instructions or data a specified number of times at compile time. The special `$$` symbol provides access to the current iteration index within the block.
 
 #### Syntax
-::: pasm2
+```pasm2
 DAT
         DITTO   count           ' Start block, repeat count times
         ' ... code or data ...
         DITTO   END             ' End block
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -918,7 +918,7 @@ DAT
 Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO was introduced in PNut version 50.
 
 #### Example
-::: pasm2
+```pasm2
 CON
   NumChannels = 8
   BasePin = 16
@@ -942,13 +942,13 @@ DAT
         WXPIN   ##PinX, #BasePin + $$
         DRVL    #BasePin + $$
         DITTO   END
-:::
+```
 
 #### Zero Count Behavior
 
 When count is 0, the entire block is skipped with no output generated:
 
-::: pasm2
+```pasm2
 CON
   MotorCount = 0                ' No motors in this build
 
@@ -956,7 +956,7 @@ DAT
         DITTO   MotorCount      ' Block skipped entirely
         ' ... motor init code ...
         DITTO   END
-:::
+```
 
 #### Restrictions
 
@@ -997,9 +997,9 @@ Generates error if current address exceeds limit.
 Verify at compile time that the current address has not exceeded a specified limit. FIT is a safety check that produces an error if code or data is too large.
 
 #### Syntax
-::: pasm2
+```pasm2
         FIT     limit           ' Verify current address <= limit
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -1032,7 +1032,7 @@ Use FIT to verify that code does not exceed available space. This is essential f
 FIT does nothing if the limit is not exceeded—it is purely a compile-time check.
 
 #### Example: Standard COG Program
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -1043,10 +1043,10 @@ entry   ASMCLK                  ' Set clock
 vars    RES     10
 
         FIT     $1F0            ' Ensure user area only
-:::
+```
 
 #### Example: Split COG/LUT Program
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -1064,10 +1064,10 @@ lut_routine
         RET
 
         FIT     $400            ' Must fit in LUT
-:::
+```
 
 #### Example: Hub Data Table
-::: pasm2
+```pasm2
 DAT
         ORGH    $400
 
@@ -1075,10 +1075,10 @@ sinTable
         LONG    0[256]          ' Sine lookup table
 
         FIT     $800            ' Table must not exceed $800
-:::
+```
 
 #### Example: Calculated Limits
-::: pasm2
+```pasm2
 CON
   OVERLAY_END = $300
 
@@ -1086,7 +1086,7 @@ DAT
         ORG     0
         ' ... overlay code ...
         FIT     OVERLAY_END     ' Must fit before overlay area
-:::
+```
 
 #### Restrictions
 
@@ -1122,10 +1122,10 @@ Allocates COG/LUT RAM without initialization.
 Reserve space in COG or LUT RAM without initializing. Allocates memory space but generates no object code.
 
 #### Syntax
-::: pasm2
+```pasm2
 [label] RES     count           ' Reserve 'count' longs
 [label] RES     0               ' Create label at current address without reserving space
-:::
+```
 
 #### Parameters
 | Parameter | Description |
@@ -1144,7 +1144,7 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 Use RES to allocate variables and buffers in COG RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in COG/LUT RAM—Hub RAM variables must use LONG with initial values or be allocated at runtime.
 
 #### Example
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -1155,13 +1155,13 @@ entry   MOV     temp, #100
 temp    RES     1               ' Reserve 1 long for temporary variable
 value   RES     1               ' Reserve 1 long for value storage
 buffer  RES     16              ' Reserve 16 longs for buffer
-:::
+```
 
 #### Zero-Count Label (Alias Technique)
 
 RES with a count of 0 creates a label at the current address without reserving any space. This technique creates aliases—multiple names for the same register:
 
-::: pasm2
+```pasm2
 DAT
         ORG     0
 
@@ -1170,7 +1170,7 @@ ma      RES     0               ' ma is alias for x (RES 0 = no space)
 x       RES     1               ' x occupies 1 long
 
 ' Both ma and x refer to the same COG address
-:::
+```
 
 💡 **Tip:** Use RES 0 aliases to give meaningful names for overlapping register uses—for example, `float_a` and `int_x` can be aliases when the same register serves different purposes at different times.
 
@@ -1187,10 +1187,10 @@ x       RES     1               ' x occupies 1 long
 
 When reserving space for Spin2-declared structures, use the SIZEOF() operator to calculate the correct size in longs:
 
-::: pasm2
+```pasm2
 ' Reserve space for a Spin2 structure (structure defined in CON block)
 mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
-:::
+```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.
 
@@ -1232,7 +1232,7 @@ Terminates an inline assembly block within a Spin2 method.
 Terminate an inline assembly block and return to Spin2 execution. The compiler automatically inserts a RET instruction at the END location.
 
 #### Syntax
-::: pasm2
+```pasm2
 PUB/PRI MethodName() | locals
   ' Spin2 code
 
@@ -1241,7 +1241,7 @@ PUB/PRI MethodName() | locals
   END                           ' End inline PASM, implicit RET
 
   ' Spin2 code continues
-:::
+```
 
 #### Parameters
 
@@ -1260,7 +1260,7 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 
 #### Example: Pin Toggle
 
-::: pasm2
+```pasm2
 PUB FastToggle(pin) | mask
 
   mask := 1 << pin              ' Spin2 code
@@ -1270,11 +1270,11 @@ PUB FastToggle(pin) | mask
   END                           ' End inline PASM, implicit RET
 
   ' Execution returns here
-:::
+```
 
 #### Example: I2C Start Sequence
 
-::: pasm2
+```pasm2
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
@@ -1289,13 +1289,13 @@ PUB start() | scl, sda, tix
                 DRVL    scl     ' SCL low
                 WAITX   tix     ' Delay
   END
-:::
+```
 
 #### Example: Local Variable Access
 
 Inline PASM accesses local variables by name:
 
-::: pasm2
+```pasm2
 PUB Example() | value, result
 
   value := 100
@@ -1306,7 +1306,7 @@ PUB Example() | value, result
   END
 
   ' result now contains 150
-:::
+```
 
 #### Restrictions
 

@@ -39,12 +39,12 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 
 Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' Set flags once
         if_c    mov     min, a                  ' Use C here
         if_nc   mov     min, b                  ' And here
         if_z    mov     equal, #1               ' And use Z here
-:::
+```
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
 
@@ -57,9 +57,9 @@ Every instruction can optionally specify which flags to update using effect modi
 
 ### 3.2.1 The WC Effect
 
-::: pasm2
+```pasm2
         add     result, value   wc      ' Update C flag based on carry
-:::
+```
 
 When WC (Write C) is specified, the instruction updates the C flag according to its specific C condition while leaving Z unchanged. For ADD, this means C is set if the addition produces a carry out of bit 31. For CMP, this means C is set if the first operand is less than the second. Each instruction defines its own C condition as documented in the instruction reference.
 
@@ -67,9 +67,9 @@ The key insight: WC means "update C according to this instruction's C rule." The
 
 ### 3.2.2 The WZ Effect
 
-::: pasm2
+```pasm2
         add     result, value   wz      ' Update Z flag based on result
-:::
+```
 
 When WZ (Write Z) is specified, the instruction updates the Z flag based on whether the result equals zero, while leaving C unchanged. Z=1 indicates a zero result; Z=0 indicates a non-zero result. This behavior is consistent across nearly all instructions—the Z flag always reflects "is the result zero?"
 
@@ -85,13 +85,13 @@ Z = Z AND (result == 0)
 
 Instead of simply replacing Z with the zero test, these instructions AND the new zero status with the existing Z flag. This behavior is essential for multi-precision arithmetic:
 
-::: pasm2
+```pasm2
 ' 64-bit addition: [hi:lo] += [bhi:blo]
         add     lo, blo         wcz     ' Add low 32 bits, Z = (lo_result == 0)
         addx    hi, bhi         wcz     ' High + carry, Z = Z AND (hi==0)
         ' Z is now 1 only if BOTH lo and hi were zero
         '  (entire 64-bit result is zero)
-:::
+```
 
 Without this AND behavior, the final Z flag would only reflect the last 32-bit operation, losing information about whether the full multi-precision result was zero. The AND logic accumulates zero detection across all operations in the chain.
 
@@ -99,9 +99,9 @@ Without this AND behavior, the final Z flag would only reflect the last 32-bit o
 
 ### 3.2.3 The WCZ Effect
 
-::: pasm2
+```pasm2
         add     result, value   wcz     ' Update both flags
-:::
+```
 
 When WCZ (Write C and Z) is specified, both flags are updated according to their respective conditions. You can specify WC to update only C, WZ to update only Z, or WCZ to update both—these are the three valid effect options.
 
@@ -126,7 +126,7 @@ Unlike WC and WZ which replace the flag value, these effects combine the tested 
 
 The most common use is testing whether ALL bits in a set are high (AND), or whether ANY bit in a set is high (OR):
 
-::: pasm2
+```pasm2
 ' Test if ALL of pins 0, 4, and 7 are high (AND pattern)
         testp   #0              wc      ' C = pin 0 state
         testp   #4              andc    ' C = C AND pin 4 state
@@ -138,7 +138,7 @@ The most common use is testing whether ALL bits in a set are high (AND), or whet
         testpn  #4              andc    ' C = C AND NOT pin 4
         testpn  #7              andc    ' C = C AND NOT pin 7
         ' C = 0 if ANY pin is high, C = 1 if ALL pins are low
-:::
+```
 
 **TESTB vs TESTP:**
 
@@ -150,20 +150,20 @@ The most common use is testing whether ALL bits in a set are high (AND), or whet
 
 ### 3.2.5 No Effect (Default)
 
-::: pasm2
+```pasm2
         add     result, value           ' Execute operation, preserve flags
-:::
+```
 
 When no effect is specified, the instruction executes normally but leaves both C and Z unchanged. This is not a "do nothing" mode—the operation completes, the destination is written, and timing is identical to the flagged version. Only the flags are preserved.
 
 This behavior enables using flag values across multiple instructions without interference:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Set C based on comparison
                 mov     temp, c                 ' Does not modify C
                 add     temp, d                 ' Does not modify C
         if_c    mov     result, temp            ' Tests original C
-:::
+```
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
 
@@ -181,13 +181,13 @@ Not all instructions support all effect modifiers. Each instruction defines whic
 
 - **Extended effects (no WCZ):** The TEST* instructions (TESTP, TESTPN, TESTB, TESTBN) support WC, WZ, and extended effects (ANDC, ORC, XORC, ANDZ, ORZ, XORZ) for accumulating multiple tests, but reject WCZ.
 
-::: pasm2
+```pasm2
 ' Examples of effect restrictions
         add     x, y            wcz     ' Full support: WC, WZ, or WCZ
         drvh    #pin            wcz     ' WCZ only: WC or WZ alone not allowed
         locktry #0              wc      ' WC only: WZ and WCZ not allowed
         testp   #pin            andc    ' Extended: WC, WZ, ANDC, etc. (no WCZ)
-:::
+```
 
 Each instruction entry in Part II documents its allowed effects in the encoding table. For a complete reference of effect restrictions by instruction category, see **Appendix C: Categorical Instruction Index**.
 
@@ -200,11 +200,11 @@ The P2 allows any instruction to execute conditionally based on the current flag
 
 Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (2 clock cycles). When the condition is true, the instruction executes normally:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' Compare, set flags
         if_z    mov     result, #1              ' Only if Z=1 (equal)
         if_nz   mov     result, #0              ' Only if Z=0 (not equal)
-:::
+```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly three clock cycles regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes.
 
@@ -216,21 +216,21 @@ When a conditional instruction's condition is false, the instruction does not ex
 
 Consider this example:
 
-::: pasm2
+```pasm2
                 test    flags, #BIT_READY  wz   ' Check ready bit
         if_nz   rdlong  data, ptr               ' Read if ready
         if_nz   add     ptr, #4                 ' Advance if read occurred
-:::
+```
 
 This sequence takes exactly three clock cycles whether the ready bit is set or clear. If implementing the same logic with branches:
 
-::: pasm2
+```pasm2
                 test    flags, #BIT_READY  wz
         if_z    jmp     #skip
                 rdlong  data, ptr
                 add     ptr, #4
 skip
-:::
+```
 
 The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when ready (test + not-jump + rdlong + add). The timing varies by 100%. The conditional version maintains constant 3-cycle timing.
 
@@ -341,10 +341,10 @@ Move and data manipulation instructions set flags based on the source or result 
 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 
-::: pasm2
+```pasm2
         mov     temp, value     wc      ' Copy value, C = sign bit
         if_c    jmp     #negative       ' Branch if negative
-:::
+```
 
 NEG sets C=1 if the source was non-zero, which indicates that negation actually changed the value. When the source is zero, negation produces zero and C=0.
 
@@ -359,10 +359,10 @@ Understanding common flag usage patterns accelerates learning and provides templ
 
 Testing whether a specific bit is set uses TEST with WZ:
 
-::: pasm2
+```pasm2
                 test    value, #%00000100  wz   ' Test bit 2
         if_nz   jmp     #bit_set                ' Jump if bit is set
-:::
+```
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
 
@@ -372,19 +372,19 @@ The condition IF_NZ tests "not zero," which corresponds to "bit is set." This pa
 
 Adding values wider than 32 bits requires propagating the carry between word additions:
 
-::: pasm2
+```pasm2
         add     x_lo, y_lo      wc      ' Add low words, capture carry
         addx    x_hi, y_hi              ' Add high words plus carry
-:::
+```
 
 The first ADD adds the low 32 bits and sets C if the addition carries out. The ADDX instruction (Add with Carry) adds the high 32 bits plus the carry from the first addition. This extends to any number of words:
 
-::: pasm2
+```pasm2
         add     x0, y0          wc      ' Add word 0
         addx    x1, y1          wc      ' Add word 1 plus carry
         addx    x2, y2          wc      ' Add word 2 plus carry
         addx    x3, y3                  ' Add word 3 plus carry
-:::
+```
 
 Each ADDX uses the carry from the previous addition and generates a new carry for the next addition. The result is 128-bit (4 × 32-bit) addition with correct carry propagation.
 
@@ -392,30 +392,30 @@ Each ADDX uses the carry from the previous addition and generates a new carry fo
 
 Selecting between two values based on a comparison uses conditional moves:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare a and b
         if_c    mov     result, a               ' If a < b, result = a
         if_nc   mov     result, b               ' If a >= b, result = b
-:::
+```
 
 This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves executes, storing the smaller value in result. The sequence takes exactly three clock cycles regardless of which value is smaller.
 
 For maximum of two values, invert the conditions:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare a and b
         if_c    mov     result, b               ' If a < b, result = b
         if_nc   mov     result, a               ' If a >= b, result = a
-:::
+```
 
 ### 3.5.4 Branchless Absolute Value
 
 Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
 
-::: pasm2
+```pasm2
                 abs     result, value   wc      ' Absolute value, C = negative
         if_c    neg     result                  ' Correct if was negative
-:::
+```
 
 Wait—this looks wrong. If ABS already computes the absolute value, why negate it afterward?
 
@@ -429,10 +429,10 @@ Most code doesn't care about this edge case and can simply use `ABS result, valu
 
 Updating a counter only when a condition is met uses conditional arithmetic:
 
-::: pasm2
+```pasm2
                 test    flags, #FLAG_READY  wz  ' Test ready flag
         if_nz   add     count, #1               ' Increment if ready
-:::
+```
 
 This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—two clock cycles regardless of flag state.
 
@@ -440,13 +440,13 @@ This increments `count` only when the ready flag is set. No branches are needed,
 
 Checking whether a value falls within a range combines comparison and logical conditions:
 
-::: pasm2
+```pasm2
                 cmp     value, min      wc      ' Check if value < min
         if_c    jmp     #out_of_range           ' Too small
                 cmp     value, max      wc      ' Check if value >= max
         if_nc   jmp     #out_of_range           ' Too large
                 ' Value is in range [min, max)
-:::
+```
 
 This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
 
@@ -459,19 +459,19 @@ Beyond basic conditional execution, the P2 provides specialized instructions for
 
 The MODC and MODZ instructions modify flags directly without performing computations:
 
-::: pasm2
+```pasm2
         modc    _set    wc      ' Set C flag to 1
         modz    _clr    wz      ' Clear Z flag to 0
-:::
+```
 
 MODC sets C according to a 4-bit modifier constant, and MODZ sets Z similarly. The WC and WZ effects are required for the modification to take effect; without them, the result is computed but discarded. Common modifier constants include `_set` (always 1), `_clr` (always 0), `_c` (current C), and `_z` (current Z).
 
 The MODCZ instruction can modify both flags simultaneously:
 
-::: pasm2
+```pasm2
         modcz   _clr, _set  wcz ' Clear C, set Z
         modcz   _set, _set  wcz ' Set both flags
-:::
+```
 
 MODCZ accepts two operands specifying operations for C and Z respectively. The WC, WZ, or WCZ effect must be specified for the flags to be modified. Modifier constants include `_clr` (clear to 0), `_set` (set to 1), `_nc` (inverted C), `_nz` (inverted Z), and others that enable complex flag manipulation in a single instruction.
 
@@ -479,21 +479,21 @@ MODCZ accepts two operands specifying operations for C and Z respectively. The W
 
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
-::: pasm2
+```pasm2
         muxc    value, #mask    ' C=1: set bits; C=0: clear bits
         muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
         muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
         muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
-:::
+```
 
 These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
 
-::: pasm2
+```pasm2
         test    input, #BIT0    wc      ' Test bit 0 of input
         muxc    output, #%0001          ' Copy bit 0 to output bit 0
         test    input, #BIT1    wc      ' Test bit 1 of input
         muxc    output, #%0010          ' Copy bit 1 to output bit 1
-:::
+```
 
 This pattern extracts and repositions bits based on flag tests, enabling bit-field manipulation.
 
@@ -501,7 +501,7 @@ This pattern extracts and repositions bits based on flag tests, enabling bit-fie
 
 Sometimes you need to preserve flag values across operations that might modify them. The P2 does not provide a dedicated flag save/restore mechanism, but you can use register operations:
 
-::: pasm2
+```pasm2
         ' Save flags
         wrc     temp            ' Write C to temp[0]
         wrz     temp            ' Write Z to temp[1]
@@ -511,7 +511,7 @@ Sometimes you need to preserve flag values across operations that might modify t
         ' Restore flags
         testb   temp, #0        wc      ' Read temp[0] into C
         testb   temp, #1        wz      ' Read temp[1] into Z
-:::
+```
 
 The WRC instruction writes C to the specified bit of a register (typically bit 0), and WRZ writes Z to a specified bit (typically bit 1). TESTB tests a specific bit and sets C or Z accordingly, effectively restoring the saved flag values.
 
@@ -521,7 +521,7 @@ An alternative approach uses MODCZ with computed values, but the TESTB pattern i
 
 Flags can encode state transitions in compact state machines. Instead of comparing state variables and branching, use flags to select the next state:
 
-::: pasm2
+```pasm2
                 ' Current state determines which flags are set
                 test    state, #STATE_IDLE      wz
         if_z    jmp     #handle_idle
@@ -529,7 +529,7 @@ Flags can encode state transitions in compact state machines. Instead of compari
         if_z    jmp     #handle_active
                 test    state, #STATE_DONE      wz
         if_z    jmp     #handle_done
-:::
+```
 
 This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
@@ -594,39 +594,39 @@ The X variants are critical because they:
 
 **64-bit unsigned addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Add low longs, C = carry, Z = (A0 == 0)
         ADDX    A1, B1    WCZ     ' Add high longs + carry, C = carry,
                                   '  Z = Z AND (A1 == 0)
         ' After: C = overflow, Z = (entire 64-bit result == 0)
-:::
+```
 
 **128-bit unsigned addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' A0 = A0 + B0
         ADDX    A1, B1    WCZ     ' A1 = A1 + B1 + carry
         ADDX    A2, B2    WCZ     ' A2 = A2 + B2 + carry
         ADDX    A3, B3    WCZ     ' A3 = A3 + B3 + carry
         ' After: C = overflow beyond 128 bits, Z = (entire 128-bit result == 0)
-:::
+```
 
 **64-bit unsigned subtraction** (A = A - B):
 
-::: pasm2
+```pasm2
         SUB     A0, B0    WCZ     ' Subtract low longs, C = borrow
         SUBX    A1, B1    WCZ     ' Subtract high longs - borrow
         ' After: C = underflow (B > A), Z = (result == 0)
-:::
+```
 
 **64-bit unsigned comparison** (compare A to B):
 
-::: pasm2
+```pasm2
         CMP     A0, B0    WCZ     ' Compare low longs
         CMPX    A1, B1    WCZ     ' Compare high longs with borrow
         ' After: C = (A < B), Z = (A == B)
         ' Use IF_B (below) or IF_AE (above/equal) for unsigned branches
-:::
+```
 
 ### 3.7.4 Signed Multi-Long Examples
 
@@ -634,30 +634,30 @@ For signed operations, the final instruction must be an SX variant to correctly 
 
 **64-bit signed addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Add low longs (unsigned, generates carry)
         ADDSX   A1, B1    WCZ     ' Add high longs + carry, C = true sign
         ' After: C = true sign of result (1 = negative), Z = (result == 0)
-:::
+```
 
 **128-bit signed addition** (A = A + B):
 
-::: pasm2
+```pasm2
         ADD     A0, B0    WCZ     ' Unsigned add for low long
         ADDX    A1, B1    WCZ     ' Unsigned add + carry for middle longs
         ADDX    A2, B2    WCZ     ' Unsigned add + carry
         ADDSX   A3, B3    WCZ     ' Signed add for high long, C = true sign
         ' After: C = 1 if result is negative, Z = (result == 0)
-:::
+```
 
 **64-bit signed comparison** (compare A to B):
 
-::: pasm2
+```pasm2
         CMP     A0, B0    WCZ     ' Compare low longs
         CMPSX   A1, B1    WCZ     ' Compare high, C = sign of difference
         ' After: C = (A < B) signed, Z = (A == B)
         ' Use IF_LT (less than) or IF_GE (greater/equal) for signed branches
-:::
+```
 
 ### 3.7.5 Understanding "True Sign"
 

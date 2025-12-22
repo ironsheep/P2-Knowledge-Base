@@ -78,10 +78,10 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Des
 
 To add unsigned multi-long values (64-bit or larger), use ADD for the least significant long, then ADDX for each subsequent long. ADDX carries the overflow from the previous addition into the current one. For example, to add two 64-bit values:
 
-::: pasm2
+```pasm2
         add     value_lo, addend_lo  wc    ' Add low longs, capture carry
         addx    value_hi, addend_hi        ' Add high longs with carry-in
-:::
+```
 
 ADD and ADDX are also used for adding signed multi-long values, with ADDSX ending the sequence to properly handle sign extension.
 
@@ -947,11 +947,11 @@ Set Clock Mode
 
 For external clock modes, the expansion sequence is:
 
-::: pasm2
+```pasm2
                 hubset  ##clkmode_ & !%11       ' Start ext clock, RCFAST
                 waitx   ##20_000_000/100        ' Wait ~10ms for stability
                 hubset  ##clkmode_              ' Switch to target mode
-:::
+```
 
 **Related:** [HUBSET](#hubset), [WAITX](#waitx)
 
@@ -973,14 +973,14 @@ As of compiler version v35v (September 2022), ASMCLK is typically unnecessary. T
 
 To disable the automatic clock-setter and use ASMCLK manually, define:
 
-::: pasm2
+```pasm2
 CON
   _AUTOCLK = 0                  ' Disable automatic clock-setter
-:::
+```
 
 **Example:**
 
-::: pasm2
+```pasm2
 CON
   _clkfreq = 200_000_000            ' 200 MHz target
   _xtlfreq = 20_000_000             ' 20 MHz crystal
@@ -989,7 +989,7 @@ DAT
                 org     0
                 asmclk              ' Set clock to 200 MHz
                 ' ... program continues
-:::
+```
 
 
 

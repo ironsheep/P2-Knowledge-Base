@@ -115,21 +115,21 @@ This is fundamentally different from the RET instruction, which optionally resto
 
 ### B.3.2 Basic Usage
 
-::: pasm2
+```pasm2
         _ret_   add     x, y            ' ADD then return (flags unchanged)
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
-:::
+```
 
 ### B.3.3 Branch Behavior
 
 When `_RET_` prefixes a branching instruction, the branch executes normally but no return occurs because the instruction itself changed PC:
 
-::: pasm2
+```pasm2
         _ret_   jmp     #somewhere      ' JMP executes, NO return
         _ret_   call    #subroutine     ' CALL executes, NO return
         _ret_   djnz    counter, #loop  ' Branch: no return; zero: return
-:::
+```
 
 For DJNZ and similar conditional branches: if the branch is taken, no return occurs; if the branch is not taken (counter reaches zero), the return executes.
 
@@ -137,7 +137,7 @@ For DJNZ and similar conditional branches: if the branch is taken, no return occ
 
 The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execution mechanism. When the top of the hardware stack holds $1FF, these combinations configure XBYTE mode:
 
-::: pasm2
+```pasm2
 ' Start XBYTE: SETQ configures mode, returns to $1FF
         push    #$1FF                   ' Push $1FF for XBYTE returns
         _ret_   setq    #$100           ' LUT base $100, then return
@@ -147,16 +147,16 @@ The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execu
 
 ' Change XBYTE mode for next bytecode only
         _ret_   setq2   ##$300           ' Temporary LUT base for one bytecode
-:::
+```
 
 ### B.3.5 SKIP/SKIPF with _RET_
 
 Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern begins:
 
-::: pasm2
+```pasm2
         push    #routine                ' Push target address
         _ret_   skipf   pattern         ' SKIPF then branch with skip active
-:::
+```
 
 ### B.3.6 Timing
 
@@ -171,13 +171,13 @@ The `_RET_` prefix adds overhead to the base instruction timing:
 
 The `_RET_` prefix enables efficient single-instruction subroutines:
 
-::: pasm2
+```pasm2
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
 
 read_input                              ' Subroutine: read input
         _ret_   mov     result, ina     ' MOV, then return
-:::
+```
 
 This is significantly faster than a separate instruction followed by RET (which would take at least 4 additional cycles).
 
@@ -186,11 +186,11 @@ This is significantly faster than a separate instruction followed by RET (which 
 
 When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This provides deterministic timing—critical for real-time operations:
 
-::: pasm2
+```pasm2
                 cmp     a, b            wcz     ' 2 cycles - always
         if_z    mov     result, #1              ' 2 cycles - whether Z=1 or not
         if_nz   mov     result, #0              ' 2 cycles - whether Z=0 or not
                                                 ' Total: always 6 cycles
-:::
+```
 
 This timing predictability enables branchless programming where instruction timing remains constant regardless of data values.

@@ -190,11 +190,11 @@ UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), an
 
 PASM2 code examples follow standard formatting conventions:
 
-::: pasm2
+```pasm2
 label           instruction     D,S             ' Comment
                 instruction     D,#immediate    ' Indented code
         IF_C    instruction     D,S     WCZ     ' With condition and effects
-:::
+```
 
 - Labels are flush left
 - Instructions are indented to column 16 (two tabs or 8 spaces)

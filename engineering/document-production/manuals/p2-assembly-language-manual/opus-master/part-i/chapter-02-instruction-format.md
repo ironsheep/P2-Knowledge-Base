@@ -76,20 +76,20 @@ When an instruction has EEEE=0000:
 
 **Basic Usage:**
 
-::: pasm2
+```pasm2
         _ret_   add     x, y            ' ADD then return
         _ret_   drvnot  #0              ' Toggle pin 0, then return
         _ret_   mov     result, temp    ' Copy to result, then return
-:::
+```
 
 **Single-Instruction Subroutines:**
 
 The `_RET_` prefix enables efficient single-instruction subroutines:
 
-::: pasm2
+```pasm2
 toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
-:::
+```
 
 This is significantly faster than a separate instruction followed by RET.
 
@@ -114,20 +114,20 @@ Both styles encode to identical condition codes—the choice is purely stylistic
 
 **Magnitude terminology** (A = Above, B = Below) reads naturally with values like addresses, counts, and sizes:
 
-::: pasm2
+```pasm2
         mov     addr, ##$80000000       ' addr = 2,147,483,648
         cmp     addr, #0        wcz     ' Compare
         if_a    jmp     #addr_is_larger ' "addr is above zero"
-:::
+```
 
 **Arithmetic terminology** (GT = Greater Than, LT = Less Than) reads naturally with values like temperatures, positions, and deltas:
 
-::: pasm2
+```pasm2
         mov     x, ##-100               ' x = -100 (signed)
         mov     y, #50                  ' y = 50
         cmps    x, y            wcz     ' Signed compare: -100 vs 50
         if_lt   jmp     #x_is_smaller   ' "x is less than y"
-:::
+```
 
 **CMP vs. CMPS:**
 
@@ -138,7 +138,7 @@ The distinction that matters is the **compare instruction**, not the alias style
 
 After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
 
-::: pasm2
+```pasm2
 ' Unsigned comparison - either style works
         cmp     a, b            wcz
         if_ae   mov     result, #1      ' "a is above or equal to b"
@@ -148,13 +148,13 @@ After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect si
         cmps    a, b            wcz
         if_ge   mov     result, #1      ' "a is greater or equal to b"
         if_ae   mov     result, #1      ' "a is above or equal to b" (same)
-:::
+```
 
 ### 2.2.4 Conditional Execution Patterns
 
 Conditional execution eliminates branches, providing deterministic timing:
 
-::: pasm2
+```pasm2
 ' Instead of branching:
                 cmp     a, b            wcz
         if_z    jmp     #equal_handler          ' 4 cycles if taken
@@ -164,32 +164,32 @@ Conditional execution eliminates branches, providing deterministic timing:
                 cmp     a, b            wcz
         if_z    mov     result, #1              ' Always 2 cycles
         if_nz   mov     result, #0              ' Always 2 cycles
-:::
+```
 
 Common patterns:
 
 **Minimum/Maximum:**
-::: pasm2
+```pasm2
                 cmp     a, b            wc      ' Compare unsigned
         if_c    mov     min, a                  ' min = a if a < b
         if_nc   mov     min, b                  ' min = b if a >= b
-:::
+```
 
 **Conditional Assignment:**
-::: pasm2
+```pasm2
                 test    flags, #MASK    wz      ' Test bit
         if_nz   mov     mode, #1                ' Set if bit present
-:::
+```
 
 **Multi-way Selection:**
-::: pasm2
+```pasm2
                 cmp     selector, #0    wz
         if_z    mov     result, value0
                 cmp     selector, #1    wz
         if_z    mov     result, value1
                 cmp     selector, #2    wz
         if_z    mov     result, value2
-:::
+```
 
 
 ## 2.3 Reading Encoding Tables
@@ -339,10 +339,10 @@ The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 - S is a 9-bit unsigned value (0-511)
 - This value is used directly as the operand
 
-::: pasm2
+```pasm2
         add     result, counter         ' S = register address (I=0)
         add     result, #100            ' S = immediate 100 (I=1)
-:::
+```
 
 ### 2.5.3 When S is Fixed
 
@@ -361,11 +361,11 @@ The fixed value distinguishes this instruction from others sharing the same opco
 
 The `#` prefix before an operand indicates an immediate value:
 
-::: pasm2
+```pasm2
         add     result, #100            ' Add immediate 100
         add     result, value           ' Add contents of register 'value'
         mov     x, #$1FF                ' Load maximum 9-bit value (511)
-:::
+```
 
 When `#` is used:
 
@@ -385,10 +385,10 @@ Values outside this range require augmentation (see Section 2.7).
 
 The `$` symbol represents the current assembly address:
 
-::: pasm2
+```pasm2
 loop    add     counter, #1
         djnz    count, #$-1             ' Jump back one instruction
-:::
+```
 
 When used with `#`, it becomes an immediate representing the address.
 
@@ -399,11 +399,11 @@ When used with `#`, it becomes an immediate representing the address.
 
 The `##` prefix indicates a full 32-bit immediate value:
 
-::: pasm2
+```pasm2
         mov     dest, ##$12345678       ' Load full 32-bit value
         add     counter, ##1000000      ' Add 1 million
         mov     ptr, ##hub_data         ' Load 20-bit Hub address
-:::
+```
 
 ### 2.7.2 AUGS and AUGD Instructions
 
@@ -414,7 +414,7 @@ The assembler implements 32-bit immediates by inserting AUG instructions:
 
 The AUG instruction provides the upper 23 bits, which combine with the lower 9 bits from the next instruction:
 
-::: pasm2
+```pasm2
 ' What the programmer writes:
         mov     dest, ##$12345678
 
@@ -422,7 +422,7 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
         augs    #$12345                 ' Upper 23 bits: $12345
         mov     dest, #$678             ' Lower 9 bits: $678
                                         ' Combined: $12345678
-:::
+```
 
 ### 2.7.3 Augmentation Behavior
 
@@ -445,11 +445,11 @@ Each AUG instruction adds **+2 clock cycles** to the total execution time. When 
 | `##Dest` only | 1 (AUGD) | +2 cycles |
 | `##Dest, ##Src` | 2 (AUGD + AUGS) | +4 cycles |
 
-::: pasm2
+```pasm2
         mov     x, #100                 ' 2 cycles (no augmentation)
         mov     x, ##100000             ' 4 cycles (2 + 2 for AUGS)
         wrlong  ##dest, ##addr          ' 6 cycles (AUGD+AUGS+instr)
-:::
+```
 
 **Critical Timing Note:** In time-critical code, consider keeping values in registers rather than using repeated `##` augmentation, especially inside loops.
 
@@ -462,11 +462,11 @@ Augmentation is needed when:
 - 32-bit constants are needed
 - Pin masks exceed 9 bits
 
-::: pasm2
+```pasm2
         wrlong  value, ##$1000          ' Hub address $1000 (> 511)
         mov     mask, ##$FFFF0000       ' 32-bit mask
         waitx   ##1000000               ' Delay > 511 cycles
-:::
+```
 
 
 ## 2.8 How to Use This Manual
@@ -657,35 +657,35 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 
 The `+` prefix on comparison operators indicates unsigned comparison. This matters when comparing values that may have the high bit set:
 
-::: pasm2
+```pasm2
 ' Signed comparison: $80000000 is negative (-2147483648)
         IF  $80000000 < 0       ' True: negative < 0
 
 ' Unsigned comparison: $80000000 is positive (2147483648)
         IF  $80000000 +< 0      ' False: 2147483648 is not < 0
-:::
+```
 
 Use signed comparisons (`<`, `>`, etc.) for values representing signed quantities. Use unsigned comparisons (`+<`, `+>`, etc.) for addresses, bit patterns, or values that should never be negative.
 
 ### 2.9.4 Practical Examples
 
 **Bit field construction:**
-::: pasm2
+```pasm2
 PIN_MODE    EQU  %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
 MASK_BITS   EQU  (1 << NUM_BITS) - 1              ' Create bit mask
-:::
+```
 
 **Buffer calculations:**
-::: pasm2
+```pasm2
 BUFFER_END  EQU  BUFFER_START + BUFFER_SIZE - 1
 WRAP_MASK   EQU  BUFFER_SIZE - 1                  ' For power-of-2 buffers
-:::
+```
 
 **Conditional assembly values:**
-::: pasm2
+```pasm2
 DELAY_MS    EQU  (CLKFREQ / 1000) #> 1            ' At least 1 tick
 TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
-:::
+```
 
 
 ## 2.10 Labels and Symbol Scoping
@@ -697,9 +697,9 @@ PASM2 supports two scoping levels for labels within DAT blocks: global labels an
 Global labels are defined by placing an identifier at the start of a line without any prefix character.
 
 **Syntax:**
-::: pasm2
+```pasm2
 labelname       instruction     operands        ' comment
-:::
+```
 
 Global labels have these characteristics:
 
@@ -711,7 +711,7 @@ Global labels have these characteristics:
 - Maximum length: 30 characters
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 ' Global labels - visible everywhere in DAT block
@@ -724,17 +724,17 @@ data_table      long    $DEAD_BEEF              ' Data with global label
 
 math_helper     abs     x                       ' Another routine
                 ret
-:::
+```
 
 ### 2.10.2 Local Labels
 
 Local labels are defined by prefixing an identifier with either a dot (`.`) or colon (`:`). Both prefix characters are functionally equivalent.
 
 **Syntax:**
-::: pasm2
+```pasm2
 .labelname      instruction     operands        ' comment
 :labelname      instruction     operands        ' comment
-:::
+```
 
 Local labels have these characteristics:
 
@@ -745,7 +745,7 @@ Local labels have these characteristics:
 - Must begin with a letter or underscore after the prefix
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 send_byte       rdbyte  x, ptr                  ' Global: send_byte
@@ -765,7 +765,7 @@ recv_byte       testp   rx_pin          wc      ' Global: recv_byte
                 rdpin   x, rx_pin
 .loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
                 ret
-:::
+```
 
 The example demonstrates how `.loop` and `.wait` can be reused in both `send_byte` and `recv_byte` without collision. Each global label creates a new local scope.
 
@@ -784,7 +784,7 @@ PASM2 provides several operators for referencing labels in different contexts:
 | `$$` | Current Hub address | PASM (ORGH mode) |
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 routine         jmp     #.skip                  ' Jump to local label
@@ -800,7 +800,7 @@ routine         jmp     #.skip                  ' Jump to local label
                 orgh
 hub_data        byte    "Hello", 0
 hub_routine     long    @routine                ' Hub address of COG routine
-:::
+```
 
 ### 2.10.4 Scope Boundary Rules
 
@@ -811,7 +811,7 @@ Three events create scope boundaries:
 3. **End of DAT block** — Terminates all label scopes
 
 **Example:**
-::: pasm2
+```pasm2
 DAT             org
 
 func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
@@ -825,7 +825,7 @@ func_b          mov     y, #2                   ' Global: func_b,
 .loop           djnz    y, #.loop               ' Local .loop in scope #3
                                                 '  (different)
 .done           ret                             ' Local .done in scope #3
-:::
+```
 
 ### 2.10.5 Best Practices
 

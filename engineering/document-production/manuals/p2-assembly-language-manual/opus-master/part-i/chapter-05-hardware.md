@@ -28,12 +28,12 @@ Each operation produces one or two 32-bit results, retrieved through [GETQX](#ge
 
 CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 54-cycle computation period—attempting to retrieve results before this period completes produces undefined values.
 
-::: pasm2
+```pasm2
         qmul    multiplicand, multiplier    ' Start 32x32 multiply
         ' ... 54 cycles of other useful work ...
         getqx   product_lo                  ' Get low 32 bits
         getqy   product_hi                  ' Get high 32 bits
-:::
+```
 
 The 54-cycle computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
 
@@ -47,7 +47,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 **Fill Phase:** Submit multiple operations before expecting any results. During this phase, you queue operations without retrieving results, filling the pipeline:
 
-::: pasm2
+```pasm2
         ' Fill phase - queue first 6 operations
         qmul    a0, b0                      ' Operation 0 enters pipeline
         qmul    a1, b1                      ' Operation 1 (8 clocks later)
@@ -56,27 +56,27 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
         qmul    a4, b4                      ' Operation 4
         qmul    a5, b5                      ' Operation 5
         ' Pipeline now filling, first result not ready yet
-:::
+```
 
 **Steady-State Phase:** Once the pipeline fills, retrieve one result and submit one new operation each access slot. This phase achieves maximum throughput—one result per 8 clocks:
 
-::: pasm2
+```pasm2
         ' Steady state - retrieve previous, submit next
 .loop   getqx   result_lo                   ' Get result from ~54 clocks ago
         getqy   result_hi
         qmul    a_next, b_next              ' Submit next operation
         ' ... process result, prepare next operands ...
         djnz    count, #.loop
-:::
+```
 
 **Drain Phase:** After submitting the final operation, continue retrieving remaining results without submitting new operations:
 
-::: pasm2
+```pasm2
         ' Drain phase - retrieve final results
         getqx   result_lo                   ' Get remaining results
         getqy   result_hi
         ' ... repeat for each operation still in pipeline ...
-:::
+```
 
 ### 5.1.5 Result Retrieval Timing
 
@@ -84,11 +84,11 @@ The GETQX and GETQY instructions retrieve results in submission order. If a resu
 
 For non-blocking result checking, use POLLQMT to test whether the CORDIC pipeline is empty:
 
-::: pasm2
+```pasm2
         pollqmt             wc              ' C=1 if pipeline empty,
                                             '  C=0 if results pending
         if_nc   getqx   result              ' Retrieve if available
-:::
+```
 
 The CORDIC generates Event 15 when GETQX or GETQY executes with no results available. This event can trigger an interrupt or be polled, useful for detecting programming errors where retrieval occurs before any operations were queued.
 
@@ -96,7 +96,7 @@ The CORDIC generates Event 15 when GETQX or GETQY executes with no results avail
 
 This example processes an array of coordinate pairs, rotating each by a fixed angle. The pipeline keeps multiple rotations in flight:
 
-::: pasm2
+```pasm2
 ' Rotate 16 coordinate pairs by angle
 ' Input: point_array (pairs of X,Y longs), angle
 ' Output: rotated coordinates written back to array
@@ -138,7 +138,7 @@ queue_rotation
         setq    y                           ' Y coordinate to Q register
         qrotate x, angle                    ' Start rotation
         ret
-:::
+```
 
 This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 54 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
 
@@ -350,11 +350,11 @@ Poll instructions test event flags without blocking. If the event has occurred, 
 
 Polling enables responsive event handling within loops. Code can check multiple events in sequence, responding to whichever occurred, without blocking on any single event:
 
-::: pasm2
+```pasm2
                 pollse1         wc          ' Test event 1, C if occurred
         if_c    jmp     #handler                ' Branch to handler only if
                                                 '  event fired
-:::
+```
 
 This pattern branches to handler code only when the event occurred.
 
@@ -392,7 +392,7 @@ The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from 
 
 Typical lock usage follows a four-phase pattern: allocate, acquire-use-release loop, deallocate:
 
-::: pasm2
+```pasm2
                 locknew lock_id         wc      ' Allocate lock from pool
         if_c    jmp     #no_locks               ' Handle pool exhaustion
 
@@ -409,7 +409,7 @@ critical_section
                 jmp     #critical_section       ' Repeat access cycle
 
 done            lockret lock_id                 ' Return lock to pool
-:::
+```
 
 The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this COG has exclusive access—all other COGs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
 
@@ -421,14 +421,14 @@ Locks solve multiple classes of multi-COG coordination problems:
 
 When multiple COGs read and modify Hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
 
-::: pasm2
+```pasm2
                 locktry queue_lock      wc
         if_nc   jmp     #retry
                 rdlong  head, queue_head        ' Read
                 add     head, #1                ' Modify
                 wrlong  head, queue_head        ' Write back
                 lockrel queue_lock              ' Complete atomic update
-:::
+```
 
 Without the lock, two COGs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
 
@@ -436,12 +436,12 @@ Without the lock, two COGs might simultaneously read the same `head` value, incr
 
 When multiple COGs share hardware resources (specific Smart Pin, display controller, audio output), locks coordinate exclusive access:
 
-::: pasm2
+```pasm2
                 locktry display_lock    wc      ' Acquire display
         if_nc   jmp     #retry
                 ' ... draw graphics, write text ...
                 lockrel display_lock            ' Release for other COGs
-:::
+```
 
 **Producer/Consumer Synchronization:**
 
@@ -638,7 +638,7 @@ Loaded programs must include a validation header. The loader computes a 32-bit s
 
 User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-25 MHz. For applications requiring precise timing, configure an external crystal or the PLL early in your program:
 
-::: pasm2
+```pasm2
 ' Configure 20 MHz crystal with PLL for 160 MHz operation
                 ' Enable crystal oscillator with 15pF caps
                 hubset  ##%0000_0001_0000_0000_0000_0000_00_10
@@ -652,7 +652,7 @@ User code starts executing with the RCFAST clock source—an internal RC oscilla
                 waitx   ##20_000_000/10000
                 ' Switch to PLL output
                 hubset  ##%0000_0001_0000_1000_0000_0010_00_11
-:::
+```
 
 The ASMCLK directive provides a convenient shorthand when using standard crystal configurations. It generates the appropriate HUBSET sequence based on the _clkfreq and _clkmode constants defined in your program.
 
@@ -664,10 +664,10 @@ The boot ROM cannot know what clock source your hardware provides. Some boards u
 
 The HUBSET instruction can trigger a hardware reset, returning the chip to the boot sequence:
 
-::: pasm2
+```pasm2
                 hubset  ##$1000_0000                ' Generate reset pulse,
                                                     '  reboot chip
-:::
+```
 
 This performs a full hardware reset—all COGs stop, all I/O returns to high-impedance, the clock reverts to RCFAST, and the boot ROM executes from the beginning. Use this for implementing watchdog recovery, firmware updates, or returning to the boot loader.
 
@@ -680,11 +680,11 @@ DEBUG is a compile-time directive that generates serial output code. When enable
 
 DEBUG statements output text strings and formatted values:
 
-::: pasm2
+```pasm2
                 debug("Starting motor control")     ' Text message
                 debug("Speed: ", udec(speed))       ' Decimal value
                 debug("Status: ", uhex_(status))    ' Hex without name
-:::
+```
 
 The serial connection typically runs at 2 Mbaud. When DEBUG is disabled via compiler option, statements generate no code.
 
@@ -738,7 +738,7 @@ The debug system operates at three distinct levels, each controlled by CON const
 
 The `debug[N]()` form categorizes debug statements into channels (0-31) that compile selectively based on DEBUG_MASK:
 
-::: pasm2
+```pasm2
 CON
   DBG_INIT  = 0
   DBG_ERROR = 3
@@ -749,7 +749,7 @@ DAT
 entry   debug[DBG_INIT]("Starting")   ' COMPILED - bit 0 set
         debug[1]("Motor status")       ' NOT compiled - bit 1 clear
         debug[DBG_ERROR]("Fault!")     ' COMPILED - bit 3 set
-:::
+```
 
 Disabled channels produce zero code—no runtime overhead exists. Standard `debug()` statements without channel numbers are unaffected by DEBUG_MASK and compile whenever debug is enabled.
 

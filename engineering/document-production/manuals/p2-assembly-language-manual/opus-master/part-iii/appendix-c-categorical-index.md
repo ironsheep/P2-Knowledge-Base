@@ -647,11 +647,11 @@ The TESTP, TESTPN, TESTB, and TESTBN instructions support WC, WZ, and extended e
 
 These extended effects enable testing multiple bits or pins and accumulating the results into a single flag:
 
-::: pasm2
+```pasm2
 ' Test if ALL of pins 0, 4, and 7 are high
         testp   #0              wc      ' C = pin 0 state
         testp   #4              andc    ' C = C AND pin 4 state
         testp   #7              andc    ' C = C AND pin 7 state
         if_c    jmp     #all_high       ' Branch if all three are high
-:::
+```
 
