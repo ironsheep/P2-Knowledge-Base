@@ -1,6 +1,6 @@
 title: PASM2 Getting Started - Core Assembly Essentials
 id: pasm2-getting-started
-version: 1.1.0
+version: 1.2.0
 content_base: "/engineering/knowledge-base/P2/language/pasm2"
 layer: "Foundation - Assembly Mechanics"
 purpose: Minimal viable knowledge for writing functional PASM2 code
@@ -36,6 +36,72 @@ knowledge_progression:
         when: "Need high-speed pin sequencing (video, audio)"
   
   note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
+
+file_structure:
+  overview: |
+    PASM2 code exists within Spin2 file structure. A minimal PASM2-only program uses CON and DAT
+    blocks. The CON block defines constants, while the DAT block contains the assembly code. Even
+    "pure assembly" programs use this structure - there is no separate PASM2-only file format.
+
+  required_blocks:
+    CON:
+      purpose: "Define compile-time constants"
+      required_constant:
+        _clkfreq:
+          description: "System clock frequency in Hz - REQUIRED for timing"
+          typical_values:
+            - "200_000_000 (200 MHz)"
+            - "300_000_000 (300 MHz)"
+          note: "Affects all timing calculations (WAITMS, baud rates, etc.)"
+      common_constants:
+        - "Pin assignments (LED_PIN, TX_PIN, etc.)"
+        - "Timing values (BAUD_RATE, DELAY_MS)"
+        - "Configuration values"
+      example: |
+        CON
+          _clkfreq = 200_000_000    ' Required: system clock
+          LED_PIN  = 56             ' Pin assignment
+          BAUD     = 115_200        ' Communication rate
+
+    DAT:
+      purpose: "Contains PASM2 code and initialized data"
+      structure: |
+        The DAT block holds your assembly code between ORG and FIT directives,
+        plus any data declarations (lookup tables, strings, buffers).
+      entry_point: |
+        The first instruction after ORG is the program entry point. For cog code,
+        ORG defaults to address 0 - this is where execution begins when the cog starts.
+
+  minimal_program:
+    description: "Complete minimal PASM2-only program structure"
+    example: |
+      CON
+        _clkfreq = 200_000_000      ' System clock frequency (required)
+        LED_PIN  = 56               ' Pin assignment
+
+      DAT
+              ORG                   ' Cog code starts at address 0
+      ' ──────────────────────────────────────────────────────────
+      ' Entry point - execution begins here when cog starts
+      ' ──────────────────────────────────────────────────────────
+      entry   DRVH    #LED_PIN      ' Turn on LED
+      .loop   WAITMS  #500          ' Wait 500ms (uses _clkfreq)
+              DRVNOT  #LED_PIN      ' Toggle LED
+              JMP     #.loop        ' Repeat forever
+
+              FIT     $1F0          ' Verify code fits in cog (496 longs)
+
+  cog_vs_hub_execution:
+    cog_code:
+      directive: "ORG (or ORG $000)"
+      location: "Loaded into cog memory"
+      entry: "Execution starts at ORG address (typically 0)"
+      limit: "496 longs maximum (use FIT $1F0 to verify)"
+    hub_code:
+      directive: "ORGH"
+      location: "Executes from hub memory"
+      entry: "Execution starts at ORGH address"
+      use_case: "Larger programs that exceed cog memory"
 
 instruction_format:
   basic_syntax:
@@ -457,6 +523,56 @@ assembler_directives:
     syntax: "WORD  value"
     description: "Define 16-bit data"
     example: "data  WORD  1000, 2000, 3000"
+
+string_handling:
+  overview: |
+    Strings in PASM2 are defined as BYTE data in the DAT block. They are typically
+    null-terminated (ending with 0) for compatibility with string processing routines.
+
+  defining_strings:
+    syntax: 'label  BYTE  "text", 0'
+    location: "DAT block, typically after code or in separate data section"
+    termination: "Add 0 (null) for null-terminated strings"
+    examples:
+      simple: |
+        message     BYTE  "Hello, World!", 0
+      multiple: |
+        greeting    BYTE  "Hello", 0
+        farewell    BYTE  "Goodbye", 0
+      with_escapes: |
+        newline_msg BYTE  "Line 1", 13, 10, "Line 2", 0    ' CR LF between lines
+
+  accessing_strings:
+    description: "Use hub address operator @ to get string pointer"
+    pattern: |
+      DAT
+              ORG
+      entry   MOV     PTRA, ##@message    ' Get hub address of string
+      .loop   RDBYTE  char, PTRA++  WZ    ' Read byte, increment pointer
+        IF_Z  JMP     #.done              ' Zero = end of string
+              ' Process character in 'char'
+              JMP     #.loop
+      .done   ' String processing complete
+
+      char    LONG    0
+      message BYTE    "Hello", 0
+
+  common_patterns:
+    send_string: "Loop reading bytes until null, send each to output"
+    compare_strings: "Compare byte-by-byte until mismatch or both null"
+    string_length: "Count bytes until null terminator"
+
+debugging_support:
+  overview: "DEBUG statements output runtime data to terminal during development"
+  basic_example: |
+    DEBUG("Counter: ", UDEC(count))
+  see_also:
+    pasm2_debug:
+      key: p2kbPasm2Debug
+      description: "Complete PASM2 DEBUG reference"
+    guide:
+      key: p2kbSpin2DbgDebugNewUserGuide
+      description: "DEBUG beginner tutorial"
 
 critical_gotchas:
   - "All instructions are 32-bit (one long per instruction)"

@@ -1,6 +1,6 @@
 title: Spin2 Getting Started - Core Language Essentials
 id: spin2-getting-started
-version: 1.1.0
+version: 1.2.0
 content_base: "/engineering/knowledge-base/P2/language/spin2"
 layer: "Foundation - Language Mechanics"
 purpose: Minimal viable knowledge for writing functional Spin2 code
@@ -41,16 +41,26 @@ core_block_types:
   CON:
     purpose: "Define compile-time constants"
     syntax: "CON { optional label }"
+    required_constant:
+      _clkfreq:
+        description: "System clock frequency in Hz - REQUIRED for timing"
+        typical_values:
+          - "200_000_000 (200 MHz)"
+          - "300_000_000 (300 MHz)"
+        note: "Affects WAITMS, WAITUS, baud rate calculations, and all timing"
     common_uses:
       - Pin assignments
       - Configuration values
       - Timing constants
       - Enumeration definitions
     example: |
+      CON
+        _clkfreq = 200_000_000    ' Required: system clock frequency
+
       CON { pin assignments }
         LED_PIN = 56
         BAUD_RATE = 115_200
-        
+
       CON { enumeration }
         #0, STATE_IDLE, STATE_ACTIVE, STATE_ERROR
 
@@ -403,12 +413,16 @@ string_handling:
       - '"jm_nstr" - number to string conversion'
 
 debugging_support:
-  debug_statement:
-    syntax: 'DEBUG("format", values)'
-    usage: "Live debug output to terminal"
-    example: |
-      DEBUG("Value: ", DEC value)
-      DEBUG("Position: x=", DEC x, " y=", DEC y)
+  overview: "DEBUG statements output runtime data to terminal during development"
+  basic_example: |
+    DEBUG("Value: ", DEC value)
+  see_also:
+    statement:
+      key: p2kbSpin2Debug
+      description: "Complete DEBUG statement reference"
+    formatters:
+      key: p2kbSpin2DbgDebugFormattersOverview
+      description: "Format specifiers (DEC, HEX, BIN, etc.)"
 
 next_steps:
   essential_reading:
