@@ -1124,7 +1124,7 @@ Reserve space in COG or LUT RAM without initializing. Allocates memory space but
 #### Syntax
 ```pasm2
 [label] RES     count           ' Reserve 'count' longs
-[label] RES     0               ' Create label at current address without reserving space
+[label] RES     0               ' Create label here, no space reserved
 ```
 
 #### Parameters

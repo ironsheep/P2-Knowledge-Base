@@ -248,12 +248,11 @@ See `templates/README.md` for detailed template and diagram documentation.
 
 ## PASM2 Code Block Guidelines
 
-Code blocks use monospace Verbatim environment with line numbers. To prevent overflow:
+Code blocks use monospace Verbatim environment with line numbers. **No overflow is acceptable.**
 
 | Constraint | Value | Notes |
 |------------|-------|-------|
-| **Maximum line length** | 85 characters | Includes leading spaces and comments |
-| **Current longest** | 89 characters | Slightly over but acceptable |
+| **Hard maximum** | 85 characters | Lines exceeding this MUST be fixed |
 | **Safe target** | 80 characters | Comfortable margin for all content |
 
 **Comment length tips:**
