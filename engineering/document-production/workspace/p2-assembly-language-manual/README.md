@@ -246,6 +246,28 @@ See `templates/README.md` for detailed template and diagram documentation.
 
 ---
 
+## PASM2 Code Block Guidelines
+
+Code blocks use monospace Verbatim environment with line numbers. To prevent overflow:
+
+| Constraint | Value | Notes |
+|------------|-------|-------|
+| **Maximum line length** | 85 characters | Includes leading spaces and comments |
+| **Current longest** | 89 characters | Slightly over but acceptable |
+| **Safe target** | 80 characters | Comfortable margin for all content |
+
+**Comment length tips:**
+- Instruction + operands typically use 30-40 characters
+- Leaves 40-50 characters for comments
+- Use continuation comments for longer explanations
+
+**Example well-formatted line (81 chars):**
+```
+.loop           testp   tx_pin          wc      ' Local: .loop (scope: send)
+```
+
+---
+
 ## PDF Forge Configuration
 
 The `request.json` file configures PDF Forge:

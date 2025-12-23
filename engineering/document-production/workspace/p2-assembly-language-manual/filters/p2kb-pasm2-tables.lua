@@ -438,6 +438,11 @@ local function is_category_instructions_table(el)
       if h1:match("category") and (h2:match("mode") or h2:match("example")) and h3:match("application") then
         return true
       end
+
+      -- Match "Category | Allowed Effects | Reason" pattern (Appendix C)
+      if h1:match("category") and h2:match("effect") and h3:match("reason") then
+        return true
+      end
     end
   end
 
@@ -686,6 +691,14 @@ local function handle_content_table(el)
       widths[1] = 0.12
       widths[2] = 0.40
       widths[3] = 0.43
+    elseif h2:match("effect") then
+      -- "Category | Allowed Effects | Reason" pattern (Appendix C)
+      -- Column 1 (Category): 12% - like "Full", "Extended"
+      -- Column 2 (Allowed Effects): 45% - lists like "WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, XORZ"
+      -- Column 3 (Reason): 38% - explanatory text
+      widths[1] = 0.12
+      widths[2] = 0.45
+      widths[3] = 0.38
     else
       -- "Category | Count | Instructions" pattern
       -- Column 1 (Category): 18% - like "Full (WC/WZ/WCZ)"
