@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-12T09:49:58.396586",
+    "generated": "2025-12-23T01:13:26.696750",
     "total_entries": 970,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -1322,7 +1322,7 @@
     },
     "p2kbGuidePasm2GettingStarted": {
       "path": "deliverables/ai/P2/guides/pasm2-getting-started.yaml",
-      "mtime": 1764977160
+      "mtime": 1766452367
     },
     "p2kbGuideQuickQueries": {
       "path": "deliverables/ai/P2/guides/quick-queries.yaml",
@@ -1330,7 +1330,7 @@
     },
     "p2kbGuideSpin2GettingStarted": {
       "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
-      "mtime": 1764465080
+      "mtime": 1766452367
     },
     "p2kbHw7SegmentDisplay7SegmentDisplay": {
       "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
