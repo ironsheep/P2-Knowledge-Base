@@ -1,0 +1,171 @@
+' ***** Ultrasonic Goertzel Demo (output + input + display)
+'
+' The P2 Goertzel circuit measures up to four ADC input signals for magnitude and phase
+' correlation of four internal reference signals, which can also be output to form closed-
+' looped systems.
+'
+' In this demo, the Goertzel circuit outputs a reference sine pattern to two DAC pins
+' which differentially drive a 40 kHz ultrasonic transducer. Another identical transducer
+' is connected between GND and an ADC pin, so that its ADC bitstream can be used as input
+' to the correlator. On each clock cycle, the correlator multiplies the ADC bit (+1 or -1)
+' by the current reference sine and cosine values, accumulating the products into separate
+' sine and cosine accumulators. The accumulators can be periodically sampled and converted
+' from cartesian to polar form, in order to get the magnitude and phase of the incoming
+' signal(s) relative to the internal reference sine and cosine signals. The Goertzel
+' measurement is done over 1 to 65,534 complete waveform cycles. The more cycles that are
+' measured, the more precise the measurement.
+'
+' On every clock cycle the Goertzel circuit effectively does this in sequence:
+'
+'	t := LUT[nco[30:22]]		(the LUT can be partitioned in 1/2's, 1/4's, etc)
+'	nco += xfrq			(set by SETXFRQ instruction)
+'	cog_dac_3 := t.byte[3] ^ $80	(cog DAC channel 3 playable on pins %xxxx_11)
+'	cog_dac_2 := t.byte[2] ^ $80	(cog DAC channel 2 playable on pins %xxxx_10)
+'	cog_dac_1 := t.byte[1] ^ $80	(cog DAC channel 1 playable on pins %xxxx_01)
+'	cog_dac_0 := t.byte[0] ^ $80	(cog DAC channel 0 playable on pins %xxxx_00)
+'	sin := t.byte[3] sign-extended
+'	cos := t.byte[2] sign-extended
+'	m := ADC_bit ? 1 : -1
+'	sin_accumulator += sin * m	(32-bit sin accumulator)
+'	cos_accumulator += cos * m	(32-bit cos accumulator)
+'
+' After each XCONT, GETXACC can read and clear the accumulators in one clock cycle:
+'
+'	capture sin_accumulator for conveyance to GETXACC's D
+'	capture cos_accumulator for conveyance to next instruction's S
+'	sin_accumulator := sin * m	(clear to current sin * m)
+'	cos_accumulator := cos * m	(clear to current cos * m)
+'
+' The Goertzel circuit may also be used to simply detect magnitude of a frequency within a
+' noisy signal. In that case, no reference outputs would be needed, because there is no
+' feedback loop.
+'
+'
+CON _clkfreq = 200_000_000
+
+VAR table[512]       'lut data, 512 * 4 bytes                    - read once at start
+    dacpins          '[0] dac pins to drive +/- sine output      - read once at start
+    adcpin           '[1] adc pin to sense return signal         - read once at start
+    adcmag           '[2] adc mag 0..4 = 1x,3x,10x,31x,100x      - read once at start
+    frequency        '[3] output frequency                       - read on every measurement
+    cycles           '[4] number of cycles per measurement       - read on every measurement
+    magnitude        '[5] measured magnitude (32-bit)            - written on every measurement
+    phase            '[6] measured phase (32-bit)                - written on every measurement
+    done             '[7] done flag = 1                          - written on every measurement
+
+
+PUB go() | i, cos, sin, t
+
+  'write sin/cos bytes into lut data for Goertzel use
+  debug(`scope p title 'LUT data' size 512 255 samples 512 rate 512)
+  debug(`p 'cos' -127 127 255 0)
+  debug(`p 'sin' -127 127 255 0)
+  repeat i from 0 to 511
+    cos,sin := polxy(127, i << -9)
+    t.byte[3] := sin	'byte3 is used for Goertzel sine
+    t.byte[2] := cos	'byte2 is used for Goertzel cosine
+    t.byte[1] := 0	'byte1 is not needed for this demo
+    t.byte[0] := sin	'byte0 is used for +/- sine output
+    table[i] := t
+    debug(`p `(cos,sin))
+
+  'set operating parameters
+  dacpins   := 0 addpins 1	'differential DAC outputs on P0 and P1 connect to one 40 kHz transducer
+  adcpin    := 8		'ADC input on P8 and GND connect to the other 40 kHz transducer
+  adcmag    := 4		'full 100x magnification on ADC
+  frequency := 40_000		'40 kHz output/input
+  cycles    := 400		'40 kHz / 400 cycles = 100 measurements per second
+
+  'start Goertzel program in another cog
+  coginit(newcog, @goertzel, @table)
+
+  'show each measurement as it comes in
+  debug(`scope_xy s pos 0 340 'Goertzel' samples 1 dotsize 20 range 10_000_000 polar logscale)
+  repeat
+    repeat until done
+    done~
+    debug(`s `(magnitude, phase))
+
+
+DAT             org
+
+' Goertzel program that runs in cog
+
+goertzel        setq2   #$200-1			'load lut from table
+                rdlong  0,ptra++
+
+' configure dac and adc pins
+
+                setq    #3-1                    'read pin data
+                rdlong  .dacpins,ptra++
+
+                mov     .x,.adcpin              'set dds d operand
+                and     .x,#%111100
+                shl     .x,#19-2
+                or      .dds_d,.x
+
+                mov     .x,.adcpin              'set dds s operand
+                and     .x,#%000011
+                decod   .dds_s,.x
+                shl     .dds_s,#12
+
+                fle     .adcmag,#4              'enable adc pin
+                shl     .adcmag,#15
+                add     .adcmode,.adcmag
+                wrpin   .adcmode,.adcpin
+
+                cogid   .x                      'enable dac pins
+                setnib  .dacmode,.x,#2
+                wrpin   .dacmode,.dacpins
+		drvl    .dacpins
+
+                mov     .done,#1                'set done flag
+
+' get Goertzel frequency and cycles, start new measurement, output prior results, loop
+
+.loop           setq    #2-1                    'read input data
+                rdlong  .frequency,ptra++
+
+                rdlong  .x,#@clkfreq            'compute NCO frequency
+                shl     .x,#1
+                qfrac   .frequency,.x
+                getqx   .y
+
+                setword .dds_d,.cycles,#0       'set cycles
+
+                setq    .y                      'issue Goertzel command with updated frequency
+                xcont   .dds_d,.dds_s
+
+                getxacc .x                      'get prior Goertzel reading, cosine first
+                mov     .y,0-0                  '..then sine
+
+                qvector .x,.y                   'convert (x,y) to (magnitude,phase)
+                getqx   .magnitude              'get magnitude
+                getqy   .phase                  'get phase
+
+                setq    #3-1                    'write output data
+                wrlong  .magnitude,ptra++
+
+                sub     ptra,#5*4		'point ptra back to .frequency
+
+                jmp     #.loop                  'loop for next measurement
+
+'Data
+
+.adcmode        long    p_adc_1x                      'ADC mode
+.dacmode        long    p_dac_124r_3v + p_channel     'DAC mode
+
+.dds_d          long    x_dds_goertzel_sinc1 + x_dacs_0n0_0n0       'streamer mode
+
+.dds_s          res     1       'workspace
+.x              res     1
+.y              res     1
+
+.dacpins        res     1       'read once at start
+.adcpin         res     1
+.adcmag         res     1
+.frequency      res     1       'read on every measurement
+.cycles         res     1
+.magnitude      res     1       'written on every measurement
+.phase          res     1
+.done           res     1
