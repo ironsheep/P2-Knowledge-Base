@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-27T05:44:59.643128",
+    "generated": "2025-12-27T06:26:35.318676",
     "total_entries": 971,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -1338,11 +1338,11 @@
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1764449566
+      "mtime": 1766816757
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1764449566
+      "mtime": 1766815250
     },
     "p2kbHwAddonDigitalIoBoardAddonDigitalIoBoard": {
       "path": "deliverables/ai/P2/hardware/addon-digital-io-board.yaml",
@@ -1352,9 +1352,13 @@
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
       "mtime": 1764449566
     },
+    "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
+      "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
+      "mtime": 1766816757
+    },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1764449566
+      "mtime": 1766815250
     },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
@@ -1370,7 +1374,7 @@
     },
     "p2kbHwAddonServoHeaderAddonServoHeader": {
       "path": "deliverables/ai/P2/hardware/addon-servo-header.yaml",
-      "mtime": 1766814113
+      "mtime": 1766815250
     },
     "p2kbHwButtonsBoardButtonsBoard": {
       "path": "deliverables/ai/P2/hardware/buttons_board.yaml",
@@ -1382,7 +1386,7 @@
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1764449566
+      "mtime": 1766815250
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
@@ -1400,17 +1404,13 @@
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
       "mtime": 1764449566
     },
-    "p2kbHwGoertzelBoardGoertzelBoard": {
-      "path": "deliverables/ai/P2/hardware/goertzel_board.yaml",
-      "mtime": 1764449566
-    },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
       "mtime": 1764449566
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
-      "mtime": 1764449566
+      "mtime": 1766815250
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
