@@ -199,3 +199,5 @@ engineering/document-production/manuals/p2-smart-pins-tutorial/TITUS-MIGRATION-A
 /engineering/document-production/workspace/p2-assembly-language-manual/outbound
 engineering/document-production/manuals/p2-smart-pins-tutorial/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial.md.backup-20251213-pre-audit-fixes
 *.backup-pasm-conversion
+engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-PCB-OS.dip
+engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH-0721-SCHEMATIC-OS.dch
