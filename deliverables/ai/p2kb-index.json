@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2025-12-23T01:13:26.696750",
-    "total_entries": 970,
+    "generated": "2025-12-27T05:44:59.643128",
+    "total_entries": 971,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
   },
@@ -1367,6 +1367,10 @@
     "p2kbHwAddonSerialHostAddonSerialHost": {
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
       "mtime": 1764449566
+    },
+    "p2kbHwAddonServoHeaderAddonServoHeader": {
+      "path": "deliverables/ai/P2/hardware/addon-servo-header.yaml",
+      "mtime": 1766814113
     },
     "p2kbHwButtonsBoardButtonsBoard": {
       "path": "deliverables/ai/P2/hardware/buttons_board.yaml",
