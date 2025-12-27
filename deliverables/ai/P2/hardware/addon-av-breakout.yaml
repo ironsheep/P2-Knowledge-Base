@@ -1,9 +1,11 @@
-# P2 Eval A/V Breakout Add-on Board - Hardware Specification  
+# P2 Eval A/V Breakout Add-on Board - Hardware Specification
 # Part Number: 64006H
 # Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+# Enhanced: 2025-12-27 with Quick Bytes source code references
 
 hardware_type: "addon_board"
 part_number: "64006H"
+p2kb_key: "p2kbHwAddonAvBreakout"
 manufacturer: "Parallax Inc."
 series: "P2 Eval Add-on Boards"
 status: "active_production"
@@ -181,12 +183,43 @@ applications:
     - "Audio processing demonstrations"
     - "A/V system integration projects"
     
+# RESOURCE REFERENCES (MANDATORY - with URLs)
+resources:
+  quick_bytes:
+    - title: "DVI/VGA Text Driver Demo"
+      url: "https://www.parallax.com/dvi-vga-text-driver-demo/"
+      description: "Text mode video driver for DVI and VGA output"
+      source_package: "p2textdriver0_92b.zip"
+
+    - title: "Video Hardware Character Map"
+      url: "https://www.parallax.com/video-hardware-character-map/"
+      description: "Hardware-accelerated character map for video displays"
+      source_package: "P2-Character-Map-Code.zip"
+
+    - title: "Simple Video Driver - Images"
+      url: "https://www.parallax.com/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3/"
+      description: "Image display using simple video driver"
+      source_package: "P2-Image-Format-Code.zip"
+
+    - title: "Simple Sound Engine Demo"
+      url: "https://www.parallax.com/simple-sound-engine-demo/"
+      description: "Audio synthesis and playback engine"
+      source_package: "simpleSound*.zip"
+      note: "Requires Parallax account for download"
+
+  obex:
+    - id: "video_drivers"
+      name: "P2 Video Drivers"
+      description: "Various video output drivers for VGA, DVI, composite"
+      recommendation: "Check OBEX for latest video driver versions"
+
 documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
   related:
     - "VGA timing specifications"
     - "Audio amplifier design guidelines"
     - "P2 DAC programming examples"
+    - "Quick Bytes video tutorials"
     
 availability:
   vendor: "Parallax Inc."
