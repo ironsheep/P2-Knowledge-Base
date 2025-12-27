@@ -2,20 +2,22 @@
 # Part Number: P2-EC32MB / 64000-ES
 # Revision: Rev B
 # Documentation: P2-EC32MB Edge Module Rev B Guide v2.0
+# Enhanced: 2025-12-27 with full PSRAM code-generation technical details
 
 hardware_type: "edge_module"
 part_number: "P2-EC32MB"
 alternate_part: "64000-ES"
+p2kb_key: "p2kbHwEdge32mbModule"
 manufacturer: "Parallax Inc."
 revision: "Rev B"
 status: "active_production"
 
 basic_info:
   name: "P2 Edge 32MB Module"
-  description: "Enhanced P2 Edge module with 32MB flash for memory-intensive applications"
+  description: "Enhanced P2 Edge module with 32MB PSRAM for memory-intensive applications"
   category: "microcontroller_module"
   form_factor: "edge_connector_module"
-  
+
 specifications:
   microcontroller:
     chip: "P2X8C4M64P"
@@ -25,106 +27,306 @@ specifications:
     cores: 8
     io_pins: 64
     smart_pins: 64
-    
+
   memory:
-    flash_type: "SPI Flash"
-    flash_part: "W25Q256JV"
-    flash_size: "32MB"
-    flash_organization: "Boot partition + large user space"
-    flash_advantage: "64x larger than standard module"
-    ram_hub: "512KB"
-    ram_cog: "2KB per cog (8 cogs)"
-    ram_lut: "16KB (2KB per cog)"
-    
+    hub_ram: "512KB (internal)"
+    cog_ram: "2KB per cog (8 cogs)"
+    lut_ram: "16KB (2KB per cog)"
+
+    psram:
+      type: "PSRAM (Pseudo-Static RAM)"
+      size_mb: 32
+      size_bytes: 33554432
+      bus_width: 16
+      address_bits: 25
+      organization: "Two 16MB banks (0 and 1)"
+
+    flash:
+      type: "SPI Flash"
+      part: "W25Q256JV"
+      size_mb: 32
+      purpose: "Boot and code storage"
+
   physical:
     dimensions:
       length: "2.7 inches"
-      width: "1.4 inches"  
+      width: "1.4 inches"
       height: "0.25 inches"
-    weight: "TBD"
     connector: "80-pin edge connector"
     mounting: "Via carrier boards"
-    
+
   electrical:
     supply_voltage: "3.3V"
     core_voltage: "1.8V (onboard regulator)"
-    current_consumption: "Slightly higher than standard due to larger flash"
     temperature_range: "Industrial grade"
-    
+
+# PIN MAPPING (MANDATORY) - Fixed for this module
+pin_mapping:
+  description: "Fixed pin assignments for PSRAM on P2-EC32MB module"
+
+  psram:
+    data_bus_base: 40
+    data_bus_pins: "P40-P55"
+    data_bus_width: 16
+    clock_pin: 56
+    chip_enable_pin: 57
+    address_bits: 25
+
+  psram_pins_detailed:
+    P40: "PSRAM D0"
+    P41: "PSRAM D1"
+    P42: "PSRAM D2"
+    P43: "PSRAM D3"
+    P44: "PSRAM D4"
+    P45: "PSRAM D5"
+    P46: "PSRAM D6"
+    P47: "PSRAM D7"
+    P48: "PSRAM D8"
+    P49: "PSRAM D9"
+    P50: "PSRAM D10"
+    P51: "PSRAM D11"
+    P52: "PSRAM D12"
+    P53: "PSRAM D13"
+    P54: "PSRAM D14"
+    P55: "PSRAM D15"
+    P56: "PSRAM CLK"
+    P57: "PSRAM CE#"
+
+  reserved_pins:
+    P58: "Flash SPI DO/MISO"
+    P59: "Flash SPI DI/MOSI"
+    P60: "Flash SPI CLK"
+    P61: "Flash SPI CS"
+    P62: "Serial TXD to PC"
+    P63: "Serial RXD from PC"
+
+# PROTOCOL CONSTRAINTS (MANDATORY)
+protocol_constraints:
+  psram:
+    max_clock_hz: 160000000
+    recommended_clock: "sysclk/2"
+    supported_rates:
+      - mode: "sysclk/1"
+        description: "Fast mode - maximum throughput"
+      - mode: "sysclk/2"
+        description: "Standard mode - reliable operation"
+      - mode: "sysclk/3"
+        description: "Conservative mode"
+      - mode: "sysclk/4"
+        description: "Low-power mode"
+
+    max_cs_low_us: 8
+    cs_low_note: "Chip select must go high within 8 microseconds to allow refresh"
+
+    burst_size:
+      calculation: "((MAX_CS_LOW_USEC * (freq/1000000)) - 132) >> 4) << 4"
+      typical_at_200mhz: "approximately 1280 bytes per burst"
+
+    input_delay:
+      description: "Automatically computed based on system clock frequency"
+      delay_table:
+        - freq_under_mhz: 92
+          delay: 7
+        - freq_under_mhz: 150
+          delay: 8
+        - freq_under_mhz: 206
+          delay: 9
+        - freq_under_mhz: 258
+          delay: 10
+        - freq_under_mhz: 310
+          delay: 11
+        - freq_under_mhz: 333
+          delay: 12
+        - freq_over_mhz: 333
+          delay: 13
+
+    address_space:
+      range: "0x00000000 - 0x01FFFFFF"
+      size_hex: "0x2000000"
+      wrap_behavior: "Only 25 LSBs used, address wraps at 32MB"
+      bank_0: "0x00000000 - 0x00FFFFFF (16MB)"
+      bank_1: "0x01000000 - 0x01FFFFFF (16MB)"
+
+# SIGNAL USAGE DEFINITIONS (MANDATORY)
+signals:
+  psram_data:
+    pins: "P40-P55"
+    direction: "bidirectional"
+    width: 16
+    function: "PSRAM data bus"
+    timing: "Synchronous with CLK"
+
+  psram_clock:
+    pin: "P56"
+    direction: "output"
+    function: "PSRAM clock"
+    timing: "System clock divided"
+
+  psram_chip_enable:
+    pin: "P57"
+    direction: "output"
+    function: "PSRAM chip select"
+    logic: "active_low"
+    max_low_time_us: 8
+
+# CODE PATTERNS (from OBEX PSRAM driver)
+code_patterns:
+  spin2:
+    obex_driver_usage: |
+      OBJ
+        psram : "psram"
+
+      PUB main() | err
+        err := psram.start()             ' Initialize PSRAM driver
+        IF err >= 0
+          psram.write(@src_buf, $100000, 1024)  ' Write 1KB to address 0x100000
+          psram.read(@dst_buf, $100000, 1024)   ' Read it back
+
+    initialization: |
+      ' Start PSRAM driver with automatic configuration
+      PUB start() : result
+        return startx(0, 0, 0, -1)
+
+      ' Extended start with custom parameters
+      PUB startx(freq, burst, delay, desiredcog) : result
+        ' freq: 0 = use current clkfreq
+        ' burst: 0 = auto-compute for 8us CS low time
+        ' delay: 0 = auto-compute from frequency table
+        ' desiredcog: -1 = auto-allocate cog
+
+    read_burst: |
+      PUB read(dstHubAddr, srcPsramAddr, count) : result
+        ' Read from PSRAM to Hub RAM
+        ' dstHubAddr: Hub RAM destination address
+        ' srcPsramAddr: PSRAM source address (25-bit)
+        ' count: Number of bytes to read
+        ' Returns: 0 on success, negative error code on failure
+
+    write_burst: |
+      PUB write(srcHubAddr, dstPsramAddr, count) : result
+        ' Write from Hub RAM to PSRAM
+        ' srcHubAddr: Hub RAM source address
+        ' dstPsramAddr: PSRAM destination address (25-bit)
+        ' count: Number of bytes to write
+        ' Returns: 0 on success, negative error code on failure
+
+    fill_memory: |
+      PUB fillBytes(addr, pattern, count, listPtr) : r
+        return fill(addr, pattern, count, listPtr, 1)
+
+      PUB fillWords(addr, pattern, count, listPtr) : r
+        return fill(addr, pattern, count, listPtr, 2)
+
+      PUB fillLongs(addr, pattern, count, listPtr) : r
+        return fill(addr, pattern, count, listPtr, 4)
+
+    configuration: |
+      ' Adjust timing after initialization
+      PUB setFrequency(freq)
+        ' Update delay for new frequency
+
+      PUB setBurst(burst)
+        ' Set maximum burst size
+
+      PUB setQos(cog, qos)
+        ' Configure per-cog priority and burst limits
+
+    error_codes: |
+      CON
+        ERR_INVALID      = -6   ' Invalid arguments
+        ERR_TOO_SLOW     = -14  ' P2 frequency too low
+        ERR_INACTIVE     = -15  ' Driver not running
+        ERR_ABORTED      = -16  ' Driver was shutdown
+        ERR_NO_LOCK      = -26  ' No LOCK available
+        ERR_MAILBOX_BUSY = -28  ' Mailbox operation pending
+
+# RESOURCE REFERENCES (MANDATORY - with URLs)
+resources:
+  obex:
+    id: 4162
+    name: "MegaYume - Mega Drive Emulator (contains PSRAM drivers)"
+    author: "Roger Loh (rogloh)"
+    url: "https://obex.parallax.com/obex/megayume-mega-drive-emulator/"
+    driver_files:
+      - "psram.spin2"
+      - "psram16drv.spin2"
+    license: "MIT"
+    features:
+      - "16-bit PSRAM burst read/write"
+      - "Fill operations (byte/word/long)"
+      - "Multi-cog mailbox access"
+      - "Automatic timing configuration"
+      - "QoS per-cog priority control"
+
+  documentation:
+    primary: "P2-EC32MB Edge Module Rev B Guide v2.0"
+    related:
+      - "P2 Silicon Documentation"
+      - "PSRAM driver documentation in OBEX"
+
+# Original content preserved below
 pinout:
   total_pins: 64
   io_pins: "P0-P63 (all smart pins)"
   power_pins: "3.3V, 1.8V, GND"
   programming_pins: "Via carrier board USB/serial"
   crystal_pins: "Internal 20MHz crystal"
-  pin_limitation_note: "P32-P55 not accessible on compact carriers"
-  
+  psram_pins: "P40-P57 dedicated to PSRAM"
+  available_gpio: "P0-P39 (40 pins for user I/O)"
+
 compatibility:
   carriers:
     - part: "64029"
       name: "P2 Edge Standard Breakout"
       pin_access: "All 64 pins accessible"
       form_factor: "Standard development"
-      efficiency: "Oversized for 40-pin usage"
-    - part: "64019" 
+      psram_note: "PSRAM pins (P40-P57) exposed but dedicated"
+    - part: "64019"
       name: "P2 Edge Mini Breakout"
       pin_access: "40 pins accessible (P32-P55 blocked)"
       form_factor: "Compact development"
-      efficiency: "Perfect match"
+      psram_note: "PSRAM pins not on headers (internal to module)"
     - part: "64020"
       name: "P2 Edge Module Breadboard"
       pin_access: "All 64 pins + prototyping"
       form_factor: "Educational/prototype"
-      efficiency: "Massive overkill but functional"
-  
-  optimal_pairings:
-    - carrier: "64019"
-      rating: "5_stars"
-      reason: "Perfect efficiency - 40 pins accessible, compact size"
-    - carrier: "64020"
-      rating: "4_stars"  
-      reason: "Professional development platform"
-      
-  alternatives:
-    - part: "P2-EC"
-      name: "P2 Edge Standard Module"
-      difference: "4MB flash vs 32MB"
-      use_case: "Standard applications"
-      
+      psram_note: "Full access to PSRAM pins if needed"
+
 use_cases:
   primary:
-    - "Graphics applications requiring large image storage"
+    - "Graphics applications requiring large framebuffers"
     - "Audio applications with extensive sample libraries"
-    - "Multi-language firmware with multiple code bases"
-    - "Data logging with extensive local storage"
-    - "Video processing and buffering applications"
+    - "Video processing and buffering (emulators, video players)"
+    - "Large data structure storage beyond Hub RAM"
+    - "External memory for game assets"
   secondary:
-    - "Educational platforms demonstrating memory management"
+    - "Educational platforms demonstrating external memory"
     - "Prototyping memory-intensive algorithms"
-    - "IoT devices with offline data caching"
-    
+    - "High-resolution display buffers"
+
 advantages:
-  - "32MB flash (64x larger than standard)"
+  - "32MB PSRAM (64x Hub RAM capacity)"
+  - "16-bit parallel interface for high bandwidth"
+  - "Automatic timing configuration"
+  - "Multi-cog concurrent access via mailboxes"
   - "Same physical form factor as standard module"
   - "Compatible with all Edge carriers"
-  - "Ideal for memory-intensive applications"
-  - "Perfect pairing with Mini Breakout (40-pin usage)"
-  
+
 limitations:
-  - "Higher cost than standard module"
-  - "Slightly higher power consumption"
-  - "Requires carrier board for development"
-  - "32MB may be overkill for simple applications"
-  - "Limited pin access on compact carriers (by design)"
-  
+  - "PSRAM requires refresh (8us max CS low)"
+  - "Dedicates cog for PSRAM driver"
+  - "P40-P57 dedicated to PSRAM (not available for GPIO)"
+  - "Higher latency than Hub RAM access"
+  - "Requires driver initialization before use"
+
 development_workflow:
-  - "Identify memory-intensive requirements"
-  - "Select Mini Breakout for optimal pairing"
-  - "Insert module into carrier"
-  - "Develop using large flash capabilities"
-  - "Test memory management strategies"
-  - "Deploy to custom carrier for production"
-  
+  - "Insert P2-EC32MB into carrier board"
+  - "Include psram.spin2 driver in project"
+  - "Call psram.start() to initialize (uses one cog)"
+  - "Use psram.read() and psram.write() for data transfer"
+  - "Manage 8us CS timing constraint (driver handles automatically)"
+  - "Consider cog mailbox for multi-cog access"
+
 programming:
   methods:
     - "USB via carrier board"
@@ -132,43 +334,46 @@ programming:
   tools:
     - "PropellerTool"
     - "PNut"
-    - "VS Code with Spin2 extension"
+    - "FlexProp"
   languages:
     - "Spin2"
     - "PASM2"
     - "C (via FlexProp)"
-  memory_considerations:
-    - "Multi-image boot configurations"
-    - "Data storage partitioning"
-    - "Wear leveling strategies"
-    
+
+  psram_considerations:
+    - "Initialize PSRAM driver before use"
+    - "Plan data layout within 32MB address space"
+    - "Use burst transfers for efficiency"
+    - "Handle driver errors appropriately"
+
 target_applications:
-  graphics:
-    - "LED matrix displays"
-    - "VGA/HDMI video generation"
-    - "Image processing and storage"
+  video:
+    - "Video game emulators (NES, SNES, Genesis)"
+    - "VGA/HDMI framebuffers"
+    - "Video playback from storage"
   audio:
-    - "Digital audio workstations"
-    - "Sample-based music synthesis"
-    - "Voice recording and playback"
+    - "Large sample libraries"
+    - "Multi-track audio buffers"
+    - "Sound effect storage"
   data:
-    - "Sensor data logging"
-    - "Configuration storage"
-    - "Offline data caching"
-    
+    - "Large lookup tables"
+    - "Image storage and processing"
+    - "Temporary computation buffers"
+
 documentation:
   primary: "P2-EC32MB Edge Module Rev B Guide v2.0"
   related:
     - "P2 Silicon Documentation"
     - "Edge carrier board guides"
     - "PASM2/Spin2 language references"
-    
+    - "PSRAM driver documentation"
+
 availability:
   vendor: "Parallax Inc."
   website: "parallax.com"
   part_lookup: "Search for P2-EC32MB or 64000-ES"
   distributor_network: "Yes"
-  
+
 quality_rating: "production"
 recommendation_score: 5
 educational_value: "high"

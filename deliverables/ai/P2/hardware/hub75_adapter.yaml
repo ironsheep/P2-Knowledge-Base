@@ -1,7 +1,9 @@
 component: HUB75 Adapter
 part_number: 64032
+p2kb_key: "p2kbHwHub75Adapter"
 category: addon
 manufacturer: Iron Sheep Productions, LLC
+status: "retiring_limited_stock"
 description: |
   RGB LED matrix adapter board providing 3.3V to 5V level shifting for driving HUB75 protocol LED panels.
   Supports multiple panel configurations and LED driver chips.
@@ -206,6 +208,29 @@ notes:
   - Automatic chip detection and configuration
   
 source: P2 HUB75 LED Matrix Driver Study
+
+# RESOURCE REFERENCES (MANDATORY - with URLs)
+resources:
+  obex:
+    id: 2850
+    name: "P2-HUB75 LED Matrix Driver"
+    author: "Stephen M Moraco (Iron Sheep Productions)"
+    url: "https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/"
+    driver_file: "isp_hub75_matrix.spin2"
+    license: "MIT"
+    complexity: "complex_driver"
+    recommendation: "Use OBEX driver - do not attempt to implement manually"
+
+  github:
+    url: "https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver"
+    documentation: "Comprehensive API and panel configuration guides"
+    examples: "Multiple demo applications included"
+
+  quick_bytes: []
+
 documentation:
-  - https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver
-  - P2 Object Exchange (OBEX)
+  primary: "GitHub repository documentation"
+  obex: "P2 Object Exchange (OBEX)"
+  related:
+    - "HUB75 protocol specification"
+    - "Panel-specific LED driver datasheets"

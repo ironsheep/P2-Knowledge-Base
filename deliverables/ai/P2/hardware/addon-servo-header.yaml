@@ -1,0 +1,386 @@
+# P2 Eval Servo Header Add-on Board - Hardware Specification
+# Part Number: 64006D
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+# Created: 2025-12-27 with full code-generation technical details
+
+hardware_type: "addon_board"
+part_number: "64006D"
+p2kb_key: "p2kbHwAddonServoHeader"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Servo Header Add-on Board"
+  description: "Eight 3-pin servo connectors for controlling RC servos via Smart Pin PWM"
+  category: "motor_control"
+  form_factor: "small_addon"
+
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    servo_connectors: 8
+    servo_connector_type: "3-pin male header (Signal, +5V, GND)"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+
+  electrical:
+    signal_voltage: "3.3V from P2 (compatible with most servos)"
+    servo_power: "5V from header pin 11 (must be supplied externally for >8 servos)"
+    signal_current_ma: 1
+    io_pins_used: 8
+
+# PIN MAPPING BY HEADER POSITION (MANDATORY)
+pin_mapping:
+  description: "Pin assignments when board is attached at each header position"
+
+  header_a:
+    base_pin: 0
+    p2_pins: "P0-P7"
+    servo_0: "P0"
+    servo_1: "P1"
+    servo_2: "P2"
+    servo_3: "P3"
+    servo_4: "P4"
+    servo_5: "P5"
+    servo_6: "P6"
+    servo_7: "P7"
+
+  header_b:
+    base_pin: 8
+    p2_pins: "P8-P15"
+    servo_0: "P8"
+    servo_1: "P9"
+    servo_2: "P10"
+    servo_3: "P11"
+    servo_4: "P12"
+    servo_5: "P13"
+    servo_6: "P14"
+    servo_7: "P15"
+
+  header_c:
+    base_pin: 16
+    p2_pins: "P16-P23"
+    servo_0: "P16"
+    servo_1: "P17"
+    servo_2: "P18"
+    servo_3: "P19"
+    servo_4: "P20"
+    servo_5: "P21"
+    servo_6: "P22"
+    servo_7: "P23"
+
+  header_d:
+    base_pin: 24
+    p2_pins: "P24-P31"
+    servo_0: "P24"
+    servo_1: "P25"
+    servo_2: "P26"
+    servo_3: "P27"
+    servo_4: "P28"
+    servo_5: "P29"
+    servo_6: "P30"
+    servo_7: "P31"
+
+  header_e:
+    base_pin: 32
+    p2_pins: "P32-P39"
+    servo_0: "P32"
+    servo_1: "P33"
+    servo_2: "P34"
+    servo_3: "P35"
+    servo_4: "P36"
+    servo_5: "P37"
+    servo_6: "P38"
+    servo_7: "P39"
+
+  header_f:
+    base_pin: 40
+    p2_pins: "P40-P47"
+    servo_0: "P40"
+    servo_1: "P41"
+    servo_2: "P42"
+    servo_3: "P43"
+    servo_4: "P44"
+    servo_5: "P45"
+    servo_6: "P46"
+    servo_7: "P47"
+
+  header_g:
+    base_pin: 48
+    p2_pins: "P48-P55"
+    servo_0: "P48"
+    servo_1: "P49"
+    servo_2: "P50"
+    servo_3: "P51"
+    servo_4: "P52"
+    servo_5: "P53"
+    servo_6: "P54"
+    servo_7: "P55"
+
+  header_h:
+    base_pin: 56
+    p2_pins: "P56-P63"
+    note: "NOT RECOMMENDED: P58-P63 used by Flash SPI and Serial"
+    servo_0: "P56"
+    servo_1: "P57"
+    servo_2: "P58"
+    servo_3: "P59"
+    servo_4: "P60"
+    servo_5: "P61"
+    servo_6: "P62"
+    servo_7: "P63"
+
+# SIGNAL USAGE DEFINITIONS (MANDATORY)
+signals:
+  servo_pwm:
+    count: 8
+    header_pins: [1, 2, 3, 4, 5, 6, 7, 8]
+    offset_from_base: [0, 1, 2, 3, 4, 5, 6, 7]
+    drive_type: "PWM output"
+    function: "RC servo position control"
+    direction: "output"
+    signal_level: "3.3V (compatible with most servos)"
+    smart_pin_mode: "P_PWM_SAWTOOTH | P_OE"
+
+  servo_timing:
+    pwm_frequency_hz: 50
+    period_ms: 20
+    pulse_min_us: 600
+    pulse_center_us: 1500
+    pulse_max_us: 2400
+    angle_range_degrees: 180
+    resolution_us: 1
+
+# PROTOCOL CONSTRAINTS (MANDATORY)
+protocol_constraints:
+  pwm:
+    frequency_hz: 50
+    period_ms: 20
+    period_clocks: "clkfreq / 50"
+    unit_timing: "clkfreq / 1_000_000"
+    notes: "Standard RC servo timing - 50Hz, 1-2ms pulse width"
+
+  pulse_width:
+    min_us: 600
+    center_us: 1500
+    max_us: 2400
+    typical_range_us: "1000-2000"
+    extended_range_us: "600-2400"
+    degrees_per_10us: 1
+
+  power:
+    max_servos_from_board: 8
+    external_power_threshold: 8
+    notes: "When using >8 servos on breadboard, supply external 5V (not to P2 I/O pins)"
+
+  pin_restrictions:
+    avoid_pins: "58-63"
+    reason: "Reserved for Flash SPI and Serial programming"
+    per_port: "All servos must use either A pins (0-31) or B pins (32-63) per driver instance"
+
+# SMART PIN CONFIGURATION DETAILS
+smart_pin_config:
+  mode: "P_PWM_SAWTOOTH | P_OE"
+  x_register:
+    word_high: "clkfreq / 1_000_000"
+    word_low: "20_000"
+    description: "High word = unit timing (1us), Low word = period (20ms)"
+  y_register: "pulse_width_us"
+  update_method: "wypin(pin, new_pulse_us)"
+
+# CODE PATTERNS (from OBEX 2876)
+code_patterns:
+  spin2:
+    obex_driver_usage: |
+      OBJ
+        servo : "jm_servo"
+
+      PUB main()
+        servo.start(0, 90)               ' Start servo on P0 at 90 degrees
+        servo.write(0, 45)               ' Move to 45 degrees
+        servo.write(1, 1500)             ' Move using microseconds
+
+    single_servo_init: |
+      PUB init_servo(pin, angle_deg) | x, us
+        ' Initialize single servo using Smart Pin
+        angle_deg := 0 #> angle_deg <# 180
+        us := angle_deg * 10 + 600       ' Convert degrees to microseconds
+
+        x.word[0] := clkfreq / 1_000_000 ' Unit timing (1 microsecond)
+        x.word[1] := 20_000              ' Period (20ms = 50Hz)
+
+        pinstart(pin, P_OE | P_PWM_SAWTOOTH, x, us)
+
+    set_position_degrees: |
+      PUB set_servo_degrees(pin, angle) | us
+        angle := 0 #> angle <# 180       ' Clamp to valid range
+        us := angle * 10 + 600           ' Convert to microseconds
+        wypin(pin, us)                   ' Update Smart Pin
+
+    set_position_microseconds: |
+      PUB set_servo_us(pin, us)
+        us := 600 #> us <# 2400          ' Clamp to valid range
+        wypin(pin, us)                   ' Update Smart Pin
+
+    stop_servo: |
+      PUB stop_servo(pin)
+        pinclear(pin)                    ' Disable Smart Pin
+        pinfloat(pin)                    ' Release output driver
+
+    multi_servo_init: |
+      ' Initialize multiple servos (from OBEX jm_servo_multi)
+      CON
+        SVO_BASE = 0
+        N_SERVOS = 8
+
+      VAR
+        word usecs[N_SERVOS]             ' Position storage
+
+      PUB init_all_servos(base_pin) | i, x
+        x.word[0] := clkfreq / 1_000_000
+        x.word[1] := 20_000
+
+        REPEAT i FROM 0 TO N_SERVOS - 1
+          usecs[i] := 1500               ' Center position
+          pinstart(base_pin + i, P_OE | P_PWM_SAWTOOTH, x, 1500)
+
+    update_all_servos: |
+      PUB write_all_servos(base_pin) | i
+        REPEAT i FROM 0 TO N_SERVOS - 1
+          wypin(base_pin + i, usecs[i])
+
+# RESOURCE REFERENCES (MANDATORY - with URLs)
+resources:
+  obex:
+    id: 2876
+    name: "Servo"
+    author: "Jon 'JonnyMac' McPhalen"
+    url: "https://obex.parallax.com/obex/servo/"
+    driver_file: "jm_servo.spin2"
+    license: "MIT"
+    features:
+      - "Single servo control via Smart Pin"
+      - "Degree or microsecond positioning"
+      - "600-2400us pulse range"
+      - "Simple start/write/stop API"
+
+  related_obex:
+    - id: "jm_servo_multi"
+      name: "Multiple Servo Control"
+      description: "Control up to 32 servos per instance (64 with two instances)"
+      url: "https://obex.parallax.com/obex/servo/"
+
+  quick_bytes:
+    - title: "Multiple Servo Control (up to 64) Object"
+      url: "https://www.parallax.com/multiple-servo-control-up-to-64-object/"
+      description: "Controlling up to 64 servos, Smart Pin PWM configuration"
+
+# SERVO SPECIFICATIONS
+servo_compatibility:
+  signal_level: "3.3V (most servos accept 3.3V as logic high)"
+  power_voltage: "5V (from board header or external supply)"
+  connector_pinout:
+    pin_1: "Signal (white/yellow wire)"
+    pin_2: "Power +5V (red wire)"
+    pin_3: "Ground (black/brown wire)"
+
+  standard_servos:
+    - type: "Standard RC servos"
+      pulse_range: "1000-2000us"
+      rotation: "180 degrees"
+    - type: "Extended range servos"
+      pulse_range: "600-2400us"
+      rotation: "180+ degrees"
+    - type: "Continuous rotation servos"
+      center: "1500us = stopped"
+      forward: ">1500us"
+      reverse: "<1500us"
+
+use_cases:
+  primary:
+    - "RC servo motor control"
+    - "Robotics and animatronics"
+    - "Pan-tilt camera mounts"
+    - "Gripper and manipulator control"
+  secondary:
+    - "Educational servo programming"
+    - "Hobby projects"
+    - "Position feedback systems"
+    - "Automated positioning"
+
+advantages:
+  - "8 servo outputs in compact form factor"
+  - "Smart Pin PWM eliminates CPU overhead"
+  - "Standard 3-pin servo connectors"
+  - "No external driver IC required"
+  - "Microsecond precision positioning"
+  - "Compatible with most RC servos"
+
+limitations:
+  - "5V power limited by host board supply"
+  - "For >8 servos, external 5V required"
+  - "3.3V signal (some servos prefer 5V logic)"
+  - "8 channels maximum per board"
+
+development_workflow:
+  - "Connect servo board to P2 host at desired header"
+  - "Connect servos to 3-pin headers (observe polarity)"
+  - "Provide adequate 5V power for servo motors"
+  - "Use OBEX jm_servo.spin2 driver or direct Smart Pin"
+  - "Initialize with pinstart() using P_PWM_SAWTOOTH | P_OE"
+  - "Update positions with wypin(pin, microseconds)"
+
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on host board"
+    conflicts: "Each servo uses one pin - check with other add-ons"
+    power_sharing: "Servos draw significant current - check supply"
+
+  multiple_boards:
+    max_boards: 8
+    max_servos: 64
+    note: "Two driver instances for 64 servos (A and B pin groups)"
+
+educational_value:
+  concepts_taught:
+    - "PWM signal generation"
+    - "Smart Pin configuration"
+    - "Servo motor control principles"
+    - "Position vs. pulse width relationship"
+    - "Motor power requirements"
+
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "P2 Smart Pins PWM programming guide"
+    - "RC servo motor specifications"
+    - "Robotics programming examples"
+
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006D or Servo Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+
+quality_rating: "educational_excellent"
+recommendation_score: 5
+educational_value: "high"
+complexity_level: "beginner_to_intermediate"
+
+# Cross-references
+ecosystem_position: "motor_control"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"

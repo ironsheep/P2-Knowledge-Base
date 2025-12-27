@@ -1,9 +1,11 @@
 # P2 Eval Control Add-on Board - Hardware Specification
 # Part Number: 64006A
 # Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+# Enhanced: 2025-12-27 with full code-generation technical details
 
 hardware_type: "addon_board"
 part_number: "64006A"
+p2kb_key: "p2kbHwAddonControlBoard"
 manufacturer: "Parallax Inc."
 series: "P2 Eval Add-on Boards"
 status: "active_production"
@@ -13,14 +15,14 @@ basic_info:
   description: "Four push-buttons and four blue LEDs for user interface control"
   category: "user_interface"
   form_factor: "small_addon"
-  
+
 specifications:
   requires_host: true
   compatible_hosts:
     - "P2 Eval Board (64000)"
     - "P2 Edge Module Breadboard (64020)"
     - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
-    
+
   physical:
     size: "Small module"
     connector: "2x6 pass-through socket"
@@ -29,12 +31,240 @@ specifications:
     hole_diameter: "3.2mm (126 mil)"
     pad_ring: "5mm (200 mil)"
     standoff_recommendation: "9.5mm long standoff for support"
-    
+
   electrical:
     supply_voltage: "3.3V from host"
-    current_consumption: "Low - LEDs draw ~4mA each when lit"
+    current_per_led_ma: 4
+    total_current_ma: 16
     io_pins_used: 8
-    
+
+# PIN MAPPING BY HEADER POSITION (MANDATORY)
+# When board is attached at each header, these are the P2 pins used
+pin_mapping:
+  description: "Pin assignments when board is attached at each header position"
+
+  header_a:
+    base_pin: 0
+    p2_pins: "P0-P7"
+    led_0: "P0"
+    led_1: "P1"
+    led_2: "P2"
+    led_3: "P3"
+    switch_0: "P4"
+    switch_1: "P5"
+    switch_2: "P6"
+    switch_3: "P7"
+
+  header_b:
+    base_pin: 8
+    p2_pins: "P8-P15"
+    led_0: "P8"
+    led_1: "P9"
+    led_2: "P10"
+    led_3: "P11"
+    switch_0: "P12"
+    switch_1: "P13"
+    switch_2: "P14"
+    switch_3: "P15"
+
+  header_c:
+    base_pin: 16
+    p2_pins: "P16-P23"
+    led_0: "P16"
+    led_1: "P17"
+    led_2: "P18"
+    led_3: "P19"
+    switch_0: "P20"
+    switch_1: "P21"
+    switch_2: "P22"
+    switch_3: "P23"
+
+  header_d:
+    base_pin: 24
+    p2_pins: "P24-P31"
+    led_0: "P24"
+    led_1: "P25"
+    led_2: "P26"
+    led_3: "P27"
+    switch_0: "P28"
+    switch_1: "P29"
+    switch_2: "P30"
+    switch_3: "P31"
+
+  header_e:
+    base_pin: 32
+    p2_pins: "P32-P39"
+    led_0: "P32"
+    led_1: "P33"
+    led_2: "P34"
+    led_3: "P35"
+    switch_0: "P36"
+    switch_1: "P37"
+    switch_2: "P38"
+    switch_3: "P39"
+
+  header_f:
+    base_pin: 40
+    p2_pins: "P40-P47"
+    led_0: "P40"
+    led_1: "P41"
+    led_2: "P42"
+    led_3: "P43"
+    switch_0: "P44"
+    switch_1: "P45"
+    switch_2: "P46"
+    switch_3: "P47"
+
+  header_g:
+    base_pin: 48
+    p2_pins: "P48-P55"
+    led_0: "P48"
+    led_1: "P49"
+    led_2: "P50"
+    led_3: "P51"
+    switch_0: "P52"
+    switch_1: "P53"
+    switch_2: "P54"
+    switch_3: "P55"
+
+  header_h:
+    base_pin: 56
+    p2_pins: "P56-P63"
+    note: "CAUTION: P58-P63 used by Flash SPI and Serial - not recommended"
+    led_0: "P56"
+    led_1: "P57"
+    led_2: "P58"
+    led_3: "P59"
+    switch_0: "P60"
+    switch_1: "P61"
+    switch_2: "P62"
+    switch_3: "P63"
+
+# SIGNAL USAGE DEFINITIONS (MANDATORY)
+signals:
+  leds:
+    count: 4
+    header_pins: [1, 2, 3, 4]
+    offset_from_base: [0, 1, 2, 3]
+    drive_type: "active_high"
+    function: "LED indicator control"
+    direction: "output"
+    circuit: "P2_Pin → 470Ω → LED_Anode → Cathode → GND"
+    resistor_ohms: 470
+    current_ma: 4
+    voltage_drop_led_v: 2.0
+    smart_pin_mode: "P_PWM_SAWTOOTH | P_OE"
+    smart_pin_mode_simple: "Standard output (no smart pin needed)"
+
+  switches:
+    count: 4
+    header_pins: [5, 6, 7, 8]
+    offset_from_base: [4, 5, 6, 7]
+    logic: "active_high"
+    function: "User input buttons"
+    direction: "input"
+    circuit: "P2_Pin → 470Ω → Switch → 3.3V (pressed=HIGH)"
+    pull_resistor: "15kΩ internal pull-down via P_LOW_15K"
+    debounce: "Software required (no hardware debounce capacitor)"
+    smart_pin_mode: "P_LOW_15K"
+    smart_pin_note: "Use wrpin() to configure internal pull-down"
+
+# PHYSICAL LAYOUT REMAPPING (from OBEX driver)
+layout_remapping:
+  description: |
+    The physical layout of buttons/LEDs differs from pin order.
+    OBEX driver remaps for MSB..LSB order when viewed left-to-right, top-to-bottom.
+  physical_layout: |
+    [3]  [2]
+    (*)CONTROL
+    [1]  [0]
+  led_remap:
+    logical_0: "base+0"
+    logical_1: "base+1"
+    logical_2: "base+3"
+    logical_3: "base+2"
+  button_remap:
+    logical_0: "base+5"
+    logical_1: "base+4"
+    logical_2: "base+7"
+    logical_3: "base+6"
+
+# PROTOCOL CONSTRAINTS
+protocol_constraints:
+  pwm:
+    recommended_frequency_hz: 1000
+    min_frequency_hz: 50
+    max_frequency_hz: 100000
+    notes: "Higher frequencies waste CPU cycles without visible benefit"
+    brightness_levels: 256
+
+  timing:
+    button_debounce_ms: 20
+    led_response_time_ns: 100
+
+# CODE PATTERNS (from OBEX 2869)
+code_patterns:
+  spin2:
+    obex_driver_usage: |
+      OBJ
+        ctrl : "jm_p2-es_control"
+
+      PUB main() | btn
+        ctrl.start(0)                    ' Initialize at base pin 0 (Header A)
+        ctrl.wr_leds(%1010)              ' Light LEDs 1 and 3
+        btn := ctrl.rd_btns()            ' Read all 4 buttons as 4-bit value
+
+    initialization: |
+      PUB init_control_board(base_pin)
+        ' LEDs: base..base+3
+        PINLOW(base_pin ADDPINS 3)       ' Set LEDs low (off)
+
+        ' Buttons: base+4..base+7 with internal pull-downs
+        WRPIN(base_pin+4 ADDPINS 3, P_LOW_15K)
+        PINLOW(base_pin+4 ADDPINS 3)     ' Activate pull-downs
+
+    led_control: |
+      PUB led_on(base_pin, led_num)
+        PINHIGH(base_pin + led_num)
+
+      PUB led_off(base_pin, led_num)
+        PINLOW(base_pin + led_num)
+
+      PUB led_pwm(base_pin, led_num, brightness)
+        ' brightness: 0-255
+        PINSTART(base_pin + led_num, P_PWM_SAWTOOTH | P_OE, 255, brightness)
+
+    button_read: |
+      PUB read_button(base_pin, btn_num) : pressed
+        ' Returns TRUE if button pressed (active high)
+        pressed := PINREAD(base_pin + 4 + btn_num)
+
+      PUB read_all_buttons(base_pin) : buttons
+        ' Returns 4-bit value with button states
+        buttons := PINREAD(base_pin+4 ADDPINS 3) & $F
+
+# RESOURCE REFERENCES (MANDATORY - with URLs)
+resources:
+  obex:
+    id: 2869
+    name: "P2ES Control"
+    author: "Jon 'JonnyMac' McPhalen"
+    url: "https://obex.parallax.com/obex/p2es-control/"
+    driver_file: "jm_p2-es_control.spin2"
+    license: "MIT"
+
+  quick_bytes:
+    - title: "LEDs – Beyond the Basics"
+      url: "https://www.parallax.com/leds-beyond-the-basics/"
+      description: "PWM brightness control, gamma correction, Smart Pin configuration"
+
+  related_obex:
+    - id: 2867
+      name: "Accessory Board Buttons"
+      url: "https://obex.parallax.com/obex/accessory-board-buttons/"
+      author: "Bryan Thomas"
+
+# Original content preserved below
 components:
   leds:
     quantity: 4
@@ -43,26 +273,16 @@ components:
     series_resistor: "470Ω"
     current: "~4mA each"
     brightness_control: "PWM capable"
-    pins: "P0, P1, P2, P3"
-    
+    pins: "base+0, base+1, base+2, base+3"
+
   switches:
     quantity: 4
     type: "Tactile push switches"
     control: "Active high"
     series_resistor: "470Ω"
     protection: "I/O pin can be driven low while button pressed"
-    pins: "P4, P5, P6, P7"
-    
-pin_assignments:
-  P0: "Blue LED with 470Ω series resistor (active high)"
-  P1: "Blue LED with 470Ω series resistor (active high)"
-  P2: "Blue LED with 470Ω series resistor (active high)"
-  P3: "Blue LED with 470Ω series resistor (active high)"
-  P4: "Tactile push switch with 470Ω series resistor (active high)"
-  P5: "Tactile push switch with 470Ω series resistor (active high)"
-  P6: "Tactile push switch with 470Ω series resistor (active high)"
-  P7: "Tactile push switch with 470Ω series resistor (active high)"
-  
+    pins: "base+4, base+5, base+6, base+7"
+
 use_cases:
   primary:
     - "User interface control for embedded applications"
@@ -74,7 +294,7 @@ use_cases:
     - "Game controller inputs"
     - "Process control panels"
     - "Interactive learning projects"
-    
+
 advantages:
   - "Simple user interface in compact package"
   - "LEDs positioned next to corresponding buttons"
@@ -82,48 +302,32 @@ advantages:
   - "I/O pin protection during button presses"
   - "PWM brightness control capable"
   - "Low current consumption"
-  
+
 limitations:
   - "Fixed button and LED positions"
   - "Only 4 inputs and 4 outputs"
   - "Requires P2 Eval Board or Edge system"
   - "Blue LEDs only (not multi-color)"
-  
-programming_examples:
-  basic_led_control: |
-    ' Light LED on P0
-    DIRH P0
-    OUTH P0
-    
-  button_reading: |
-    ' Read button on P4
-    DIRNOT P4
-    IF INA.[P4]
-      ' Button is pressed
-    
-  pwm_brightness: |
-    ' PWM brightness control on LED P1
-    DIRH P1
-    ' Use smart pin PWM mode for brightness
-    
+
 development_workflow:
   - "Connect to P2 Eval Board or Edge carrier"
-  - "Use pins P0-P7 for LED and button control"
+  - "Identify header position (A-H) to determine base pin"
+  - "Use OBEX jm_p2-es_control.spin2 driver or custom code"
+  - "Initialize with start(base_pin)"
   - "Implement button debouncing in software"
   - "Use PWM for LED brightness effects"
-  - "Can stack with other compatible add-on boards"
-  
+
 compatibility:
   stacking:
     position: "Any 2x6 header position on host board"
     conflicts: "Check pin assignments with other add-ons"
     power_sharing: "Low power - compatible with multiple boards"
-    
+
   mounting:
     eval_board: "Can mount all 8 add-on boards simultaneously"
     edge_carriers: "Compatible with 2x6 headers"
     standoff_support: "Recommended for mechanical stability"
-    
+
 educational_value:
   concepts_taught:
     - "Digital I/O control"
@@ -131,27 +335,22 @@ educational_value:
     - "LED current limiting"
     - "Active high/low logic"
     - "PWM brightness control"
-    
-  course_integration:
-    - "Embedded systems programming"
-    - "User interface design"
-    - "Digital logic concepts"
-    - "Interactive system development"
-    
+    - "Smart Pin configuration"
+
 documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
   related:
     - "P2 Eval Board documentation"
     - "Smart Pins PWM programming guide"
     - "Digital I/O programming examples"
-    
+
 availability:
   vendor: "Parallax Inc."
   website: "parallax.com"
   part_lookup: "Search for 64006A or Control Add-on"
   bundle_option: "Part of complete accessory set (64006-ES)"
   individual_purchase: "Available separately"
-  
+
 quality_rating: "educational_excellent"
 recommendation_score: 5
 educational_value: "high"
