@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-01-03",
-    "last_updated": "2026-01-03T23:01:09.570977",
+    "last_updated": "2026-01-03T23:04:21.177305",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-03T23:01:09.570977",
+    "extraction_date": "2026-01-03T23:04:21.177305",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18249,7 +18249,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-03T23:01:09.570977",
+    "extraction_date": "2026-01-03T23:04:21.177305",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18445,8 +18445,7 @@
               "SIZEOF",
               "BYTE",
               "WORD",
-              "LONG",
-              "typed-pointers"
+              "LONG"
             ],
             "oneliner": "Define composite data types with named members (requires Spin2_v45)"
           },
@@ -19019,7 +19018,6 @@
               "Null pointer value is 0 - check before dereferencing"
             ],
             "related": [
-              "STRUCT",
               "BYTE",
               "WORD",
               "LONG",

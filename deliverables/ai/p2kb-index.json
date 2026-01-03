@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2026-01-03T23:00:07.564687",
+    "generated": "2026-01-03T23:04:21.148498",
     "total_entries": 974,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -3474,7 +3474,7 @@
     },
     "p2kbSpin2KwSTRUCT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml",
-      "mtime": 1767481173
+      "mtime": 1767481422
     },
     "p2kbSpin2KwTO": {
       "path": "deliverables/ai/P2/language/spin2/keywords/TO.yaml",
@@ -3862,7 +3862,7 @@
     },
     "p2kbSpin2OpFIELD": {
       "path": "deliverables/ai/P2/language/spin2/operators/FIELD.yaml",
-      "mtime": 1767481173
+      "mtime": 1767481422
     },
     "p2kbSpin2OpModuloAdd": {
       "path": "deliverables/ai/P2/language/spin2/operators/modulo_add.yaml",
@@ -4166,7 +4166,7 @@
     },
     "p2kbSpin2OpTypedPointers": {
       "path": "deliverables/ai/P2/language/spin2/operators/typed-pointers.yaml",
-      "mtime": 1767481173
+      "mtime": 1767481422
     },
     "p2kbSpin2AnimationEngine": {
       "path": "deliverables/ai/P2/language/spin2/patterns/applications/animation_engine.yaml",
