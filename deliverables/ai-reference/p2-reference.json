@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2025-12-27",
-    "last_updated": "2025-12-27T06:26:48.881599",
+    "release_date": "2026-01-03",
+    "last_updated": "2026-01-03T23:01:09.570977",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2025-12-27T06:26:48.881599",
+    "extraction_date": "2026-01-03T23:01:09.570977",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18249,10 +18249,10 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2025-12-27T06:26:48.881599",
+    "extraction_date": "2026-01-03T23:01:09.570977",
     "categories": {
       "keywords": {
-        "count": 36,
+        "count": 37,
         "elements": {
           "LOOKDOWNZ": {
             "keyword": "LOOKDOWNZ",
@@ -18314,6 +18314,141 @@
             "examples": [
               "IF temperature > 80\n  turn_on_fan()"
             ]
+          },
+          "STRUCT": {
+            "keyword": "STRUCT",
+            "type": "keyword",
+            "category": "Data Types",
+            "requires_version": "Spin2_v45",
+            "version_directive": "{Spin2_v45}",
+            "description": "Defines composite data types containing multiple named members.\nStructures provide a way to organize related data into logical units with \nconvenient member access using dot notation.\nREQUIRES: {Spin2_v45} or later version directive at the start of the source file.\n",
+            "location": "CON block (structure definition)",
+            "syntax": {
+              "basic": "STRUCT structName(member1, member2, ...)",
+              "typed_members": "STRUCT structName(BYTE x, WORD y, LONG z)",
+              "array_members": "STRUCT structName(data[count])",
+              "nested": "STRUCT outer(inner innerMember)",
+              "alias": "STRUCT newName = existingStruct"
+            },
+            "member_types": [
+              {
+                "type": "BYTE",
+                "size": "1 byte"
+              },
+              {
+                "type": "WORD",
+                "size": "2 bytes"
+              },
+              {
+                "type": "LONG (default)",
+                "size": "4 bytes"
+              },
+              {
+                "type": "structName",
+                "size": "Size of that structure"
+              },
+              {
+                "type": "type[n]",
+                "size": "n * element size"
+              }
+            ],
+            "examples": [
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)           ' x and y are LONGs (8 bytes total)\n",
+                "description": "Basic structure with default LONG members"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT tinyPoint(BYTE x, BYTE y)     ' 2 bytes total\n  STRUCT colorPoint(WORD x, WORD y, BYTE color)  ' 5 bytes total\n",
+                "description": "Typed members with explicit BYTE, WORD, LONG"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)\n  STRUCT line(point a, point b)        ' Contains two points (16 bytes)\n  STRUCT triangle(point p1, point p2, point p3)\n",
+                "description": "Nested structures"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT buffer(BYTE data[256])        ' 256-byte array member\n  STRUCT matrix(WORD row[4], WORD col[4])\n",
+                "description": "Array members within structures"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)\n\nVAR\n  point myPoint                        ' Single instance\n  point points[10]                     ' Array of structures\n  ^point pPoint                        ' Pointer to structure\n",
+                "description": "Declaring structure variables and pointers"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)\n\nPUB example() | point p1, point p2\n  p1.x := 100                          ' Access via dot notation\n  p1.y := 200\n  p2 := p1                             ' Copy entire structure\n  p1 := 50, 75                         ' Multi-value assignment\n  p1 :=: p2                            ' Swap structures\n",
+                "description": "Structure member access and operations"
+              }
+            ],
+            "operations": [
+              {
+                "operation": "Access member",
+                "syntax": "var.member",
+                "example": "p.x := 100"
+              },
+              {
+                "operation": "Nested access",
+                "syntax": "var.nested.member",
+                "example": "line.a.x := 0"
+              },
+              {
+                "operation": "Assignment",
+                "syntax": "a := b",
+                "description": "Copy entire structure"
+              },
+              {
+                "operation": "Multi-value assign",
+                "syntax": "s := v1, v2, ...",
+                "description": "Assign multiple members at once"
+              },
+              {
+                "operation": "Swap",
+                "syntax": "a :=: b",
+                "description": "Swap two structures"
+              },
+              {
+                "operation": "Clear",
+                "syntax": "s~",
+                "description": "Zero all members"
+              },
+              {
+                "operation": "Set all bits",
+                "syntax": "s~~",
+                "description": "Set all bits to 1"
+              },
+              {
+                "operation": "Compare",
+                "syntax": "a == b / a <> b",
+                "description": "Test equality/inequality"
+              },
+              {
+                "operation": "Size",
+                "syntax": "SIZEOF(structName)",
+                "description": "Get size in bytes"
+              }
+            ],
+            "pointer_syntax": {
+              "declaration": "^structName ptr",
+              "access": "ptr.member",
+              "dereference": "[ptr]",
+              "post_increment": "ptr[++].member",
+              "pre_increment": "[++]ptr.member"
+            },
+            "notes": [
+              "REQUIRES {Spin2_v45} or later at start of source file",
+              "Members default to LONG if no type specified",
+              "Structures can be nested to any depth",
+              "Use SIZEOF() to get structure size in bytes",
+              "Structure pointers (^structName) also require {Spin2_v45}",
+              "Pass large structures by pointer for efficiency",
+              "Structures larger than 15 LONGs use BYTEMOVE internally for assignment"
+            ],
+            "related": [
+              "SIZEOF",
+              "BYTE",
+              "WORD",
+              "LONG",
+              "typed-pointers"
+            ],
+            "oneliner": "Define composite data types with named members (requires Spin2_v45)"
           },
           "IFNOT": {
             "keyword": "IFNOT",
@@ -18493,10 +18628,46 @@
           "BYTEFIT": {
             "keyword": "BYTEFIT",
             "type": "keyword",
-            "category": "Data Types",
-            "description": "Expression that fits in a byte constant\n",
+            "category": "Data Declaration Directives",
+            "description": "Data declaration directive for DAT blocks that stores 8-bit values with compile-time range validation.\nWorks like BYTE but validates that values fit within the byte range (-$80 to $FF).\nPrevents silent truncation by catching overflow errors at compile time.\n",
+            "syntax": [
+              "BYTEFIT value [, value2, ...]",
+              "BYTEFIT value[count]"
+            ],
+            "valid_range": {
+              "minimum": "-$80 (-128)",
+              "maximum": "$FF (255)",
+              "note": "Combined signed/unsigned range allows both signed (-128 to 127) and unsigned (0 to 255) values"
+            },
+            "location": "DAT blocks only",
             "examples": [
-              "CON\n  SMALL_VALUE = BYTEFIT(200)"
+              {
+                "code": "DAT\n  byteData    BYTEFIT   -$80              ' Minimum signed value: -128\n              BYTEFIT   $FF               ' Maximum unsigned value: 255\n              BYTEFIT   0, 100, 200, 255  ' Multiple values\n",
+                "description": "Valid BYTEFIT values within range"
+              },
+              {
+                "code": "DAT\n  ' These would cause compile errors:\n  ' BYTEFIT   256                         ' Too large for byte\n  ' BYTEFIT   -129                        ' Too negative for signed byte\n",
+                "description": "Values outside range cause compile-time errors"
+              },
+              {
+                "code": "DAT\n  zeros       BYTEFIT   0[100]            ' Fill 100 bytes with 0\n  pattern     BYTEFIT   $AA[50], $55[50]  ' Alternating pattern\n",
+                "description": "Using multipliers for repeated values"
+              }
+            ],
+            "comparison_with_byte": "BYTE silently truncates values that don't fit (stores low 8 bits only).\nBYTEFIT validates and produces compile error if value exceeds range.\nUse BYTEFIT when data integrity is critical.\n",
+            "error_message": "BYTEFIT values must range from -$80 to $FF",
+            "notes": [
+              "Part of base Spin2 language - no version directive required",
+              "DAT block directive, not a function",
+              "No parentheses required - syntax is BYTEFIT value, not BYTEFIT(value)",
+              "Compile-time validation only - no runtime overhead",
+              "Useful for lookup tables, configuration data, and protocol structures"
+            ],
+            "related": [
+              "WORDFIT",
+              "BYTE",
+              "WORD",
+              "LONG"
             ]
           },
           "LONG": {
@@ -18583,10 +18754,46 @@
           "WORDFIT": {
             "keyword": "WORDFIT",
             "type": "keyword",
-            "category": "Data Types",
-            "description": "Expression that fits in a word constant\n",
+            "category": "Data Declaration Directives",
+            "description": "Data declaration directive for DAT blocks that stores 16-bit values with compile-time range validation.\nWorks like WORD but validates that values fit within the word range (-$8000 to $FFFF).\nPrevents silent truncation by catching overflow errors at compile time.\n",
+            "syntax": [
+              "WORDFIT value [, value2, ...]",
+              "WORDFIT value[count]"
+            ],
+            "valid_range": {
+              "minimum": "-$8000 (-32768)",
+              "maximum": "$FFFF (65535)",
+              "note": "Combined signed/unsigned range allows both signed (-32768 to 32767) and unsigned (0 to 65535) values"
+            },
+            "location": "DAT blocks only",
             "examples": [
-              "CON\n  MID_VALUE = WORDFIT(32000)"
+              {
+                "code": "DAT\n  wordData    WORDFIT   -$8000            ' Minimum signed value: -32768\n              WORDFIT   $FFFF             ' Maximum unsigned value: 65535\n              WORDFIT   1000, 30000       ' Multiple values\n",
+                "description": "Valid WORDFIT values within range"
+              },
+              {
+                "code": "DAT\n  ' These would cause compile errors:\n  ' WORDFIT   65536                       ' Too large for word\n  ' WORDFIT   -32769                      ' Too negative for signed word\n  ' WORDFIT   $10000                      ' Exceeds $FFFF\n",
+                "description": "Values outside range cause compile-time errors"
+              },
+              {
+                "code": "DAT\n  pattern     WORDFIT   $ABCD[50]         ' Fill 50 words with $ABCD\n  adcOffsets  WORDFIT   -1024, -512, 0, 512, 1024\n",
+                "description": "Using multipliers and signed values"
+              }
+            ],
+            "comparison_with_word": "WORD silently truncates values that don't fit (stores low 16 bits only).\nWORDFIT validates and produces compile error if value exceeds range.\nUse WORDFIT when data integrity is critical.\n",
+            "error_message": "WORDFIT values must range from -$8000 to $FFFF",
+            "notes": [
+              "Part of base Spin2 language - no version directive required",
+              "DAT block directive, not a function",
+              "No parentheses required - syntax is WORDFIT value, not WORDFIT(value)",
+              "Compile-time validation only - no runtime overhead",
+              "Useful for ADC calibration data, 16-bit lookup tables, and sensor data"
+            ],
+            "related": [
+              "BYTEFIT",
+              "BYTE",
+              "WORD",
+              "LONG"
             ]
           },
           "WHILE": {
@@ -18622,7 +18829,7 @@
         }
       },
       "operators": {
-        "count": 75,
+        "count": 77,
         "elements": {
           "^^": {
             "operator": "^^",
@@ -18671,6 +18878,154 @@
             "type": "operator",
             "description": "Bit manipulation\n",
             "category": "Shift/Rotate"
+          },
+          "unknown": {
+            "name": "Typed Pointers",
+            "type": "operator",
+            "category": "Pointer Types",
+            "requires_version": "Spin2_v45",
+            "version_directive": "{Spin2_v45}",
+            "description": "Typed pointer declarations using ^BYTE, ^WORD, ^LONG, and ^structName syntax.\nPointers are 32-bit values holding memory addresses with type information\nthat enables proper pointer arithmetic and type-safe dereferencing.\nREQUIRES: {Spin2_v45} or later version directive at the start of the source file.\n\nNote: Basic pointer operations using @ (address-of) and BYTE[]/WORD[]/LONG[] \nmemory access are part of base Spin2 and do NOT require a version directive.\n",
+            "pointer_types": [
+              {
+                "type": "^BYTE",
+                "points_to": "8-bit data",
+                "increment_size": "1 byte"
+              },
+              {
+                "type": "^WORD",
+                "points_to": "16-bit data",
+                "increment_size": "2 bytes"
+              },
+              {
+                "type": "^LONG",
+                "points_to": "32-bit data",
+                "increment_size": "4 bytes"
+              },
+              {
+                "type": "^structName",
+                "points_to": "Structure data",
+                "increment_size": "Structure size in bytes"
+              }
+            ],
+            "syntax": {
+              "var_declaration": "^TYPE varName",
+              "local_declaration": "PUB method() | ^TYPE ptr",
+              "parameter": "PUB method(^TYPE ptr)",
+              "return_value": "PUB method() : ^TYPE result"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v45}\nVAR\n  ^BYTE  pByteData          ' Pointer to byte data\n  ^WORD  pWordData          ' Pointer to word data\n  ^LONG  pLongData          ' Pointer to long data\n",
+                "description": "VAR block pointer declarations"
+              },
+              {
+                "code": "{Spin2_v45}\nVAR\n  BYTE  buffer[256]\n  \nPUB example() | ^BYTE ptr\n  ptr := @buffer            ' Get address of buffer\n  BYTE[ptr] := $FF          ' Write through pointer\n  ptr++                     ' Advance by 1 byte\n",
+                "description": "Local pointer variable with address-of and increment"
+              },
+              {
+                "code": "{Spin2_v45}\nPUB processBuffer(^BYTE pBuffer, LONG length)\n  repeat length\n    BYTE[pBuffer++] := 0    ' Clear and advance\n",
+                "description": "Pointer as method parameter"
+              },
+              {
+                "code": "{Spin2_v45}\nVAR\n  LONG values[100]\n  \nPUB getValues() : ^LONG result\n  result := @values\n",
+                "description": "Returning a pointer from a method"
+              },
+              {
+                "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)\n  \nVAR\n  point points[10]\n  ^point ptr\n  \nPUB example()\n  ptr := @points[0]\n  ptr.x := 100              ' Access member through pointer\n  ptr++                     ' Advance by 8 bytes (size of point)\n",
+                "description": "Structure pointer with member access"
+              }
+            ],
+            "operations": {
+              "address_of": {
+                "syntax": "ptr := @variable",
+                "description": "Get address of variable, array element, or structure member"
+              },
+              "read_through_pointer": {
+                "syntax": "value := BYTE[ptr] / WORD[ptr] / LONG[ptr]",
+                "description": "Read value at pointer address"
+              },
+              "write_through_pointer": {
+                "syntax": "BYTE[ptr] := value",
+                "description": "Write value at pointer address"
+              },
+              "indexed_access": {
+                "syntax": "value := BYTE[ptr][index]",
+                "description": "Access element at offset from pointer"
+              },
+              "increment": {
+                "syntax": "ptr++",
+                "description": "Advance pointer by element size"
+              },
+              "decrement": {
+                "syntax": "ptr--",
+                "description": "Move pointer back by element size"
+              },
+              "pre_increment": {
+                "syntax": "++ptr",
+                "description": "Increment first, then use"
+              },
+              "post_increment": {
+                "syntax": "ptr++",
+                "description": "Use current value, then increment"
+              },
+              "bracket_post_increment": {
+                "syntax": "ptr[++]",
+                "description": "Return current address, then advance"
+              },
+              "bracket_pre_increment": {
+                "syntax": "[++]ptr",
+                "description": "Advance first, then return new address"
+              },
+              "struct_member_access": {
+                "syntax": "ptr.member",
+                "description": "Access structure member through pointer"
+              },
+              "struct_dereference": {
+                "syntax": "[ptr]",
+                "description": "Access entire structure through pointer"
+              }
+            },
+            "pointer_arithmetic": [
+              {
+                "type": "^BYTE",
+                "ptr++": "Advances by 1 byte"
+              },
+              {
+                "type": "^WORD",
+                "ptr++": "Advances by 2 bytes"
+              },
+              {
+                "type": "^LONG",
+                "ptr++": "Advances by 4 bytes"
+              },
+              {
+                "type": "^structName",
+                "ptr++": "Advances by structure size"
+              }
+            ],
+            "common_patterns": {
+              "array_traversal": "PUB clearBuffer() | ^BYTE ptr\n  ptr := @buffer\n  repeat 256\n    BYTE[ptr++] := 0\n    \n",
+              "string_length": "PUB strlen(^BYTE pStr) : length\n  length := 0\n  repeat while BYTE[pStr++] <> 0\n    length++\n    \n",
+              "structure_array": "PUB scalePoints(scale) | ^point ptr\n  ptr := @points\n  repeat 100\n    ptr.x *= scale\n    ptr.y *= scale\n    ptr++\n"
+            },
+            "notes": [
+              "REQUIRES {Spin2_v45} or later at start of source file",
+              "Basic @ and BYTE[]/WORD[]/LONG[] are base Spin2 (no version needed)",
+              "Typed pointers enable type-safe pointer arithmetic",
+              "Pointers themselves cannot be arrays: ^BYTE ptr[10] is invalid",
+              "Initialize pointers before use to avoid accessing invalid memory",
+              "P2 handles misaligned access but aligned is more efficient",
+              "Null pointer value is 0 - check before dereferencing"
+            ],
+            "related": [
+              "STRUCT",
+              "BYTE",
+              "WORD",
+              "LONG",
+              "SIZEOF"
+            ],
+            "oneliner": "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"
           },
           "-.": {
             "operator": "-.",
@@ -18882,232 +19237,6 @@
             "type": "operator",
             "description": "Max/min limiting\n",
             "category": "Limit"
-          },
-          "unknown": {
-            "topic": "Operator Precedence",
-            "type": "reference",
-            "description": "Spin2 operator evaluation order (1=highest priority)",
-            "category": "Language Rules",
-            "precedence_table": [
-              {
-                "level": 1,
-                "operators": [
-                  "++",
-                  "--",
-                  "??"
-                ],
-                "type": "Var-modify",
-                "note": "Pre/post inc/dec/random"
-              },
-              {
-                "level": 2,
-                "operators": [
-                  "!",
-                  "NOT",
-                  "-",
-                  "ABS",
-                  "||",
-                  "^^",
-                  "ENCOD",
-                  "DECOD",
-                  "ONES",
-                  "SQRT",
-                  "QLOG",
-                  "QEXP"
-                ],
-                "type": "Unary",
-                "note": "Single operand operations"
-              },
-              {
-                "level": 3,
-                "operators": [
-                  ">>",
-                  "<<",
-                  "SAR",
-                  "ROR",
-                  "ROL",
-                  "REV",
-                  "ZEROX",
-                  "SIGNX"
-                ],
-                "type": "Shift/Rotate",
-                "note": "Bit manipulation"
-              },
-              {
-                "level": 4,
-                "operators": [
-                  "&"
-                ],
-                "type": "Binary AND"
-              },
-              {
-                "level": 5,
-                "operators": [
-                  "^"
-                ],
-                "type": "Binary XOR"
-              },
-              {
-                "level": 6,
-                "operators": [
-                  "|"
-                ],
-                "type": "Binary OR"
-              },
-              {
-                "level": 7,
-                "operators": [
-                  "*",
-                  "*."
-                ],
-                "type": "Multiply"
-              },
-              {
-                "level": 8,
-                "operators": [
-                  "/",
-                  "/.",
-                  "//",
-                  "+/"
-                ],
-                "type": "Divide",
-                "note": "Div/float/mod/unsigned"
-              },
-              {
-                "level": 9,
-                "operators": [
-                  "+",
-                  "+."
-                ],
-                "type": "Add"
-              },
-              {
-                "level": 10,
-                "operators": [
-                  "-",
-                  "-."
-                ],
-                "type": "Subtract"
-              },
-              {
-                "level": 11,
-                "operators": [
-                  "#>",
-                  "<#"
-                ],
-                "type": "Limit",
-                "note": "Max/min"
-              },
-              {
-                "level": 12,
-                "operators": [
-                  "<",
-                  "+<",
-                  ">",
-                  "+>",
-                  "<=",
-                  "+<=",
-                  ">=",
-                  "+>=",
-                  "<=>",
-                  "+<=>"
-                ],
-                "type": "Compare",
-                "note": "Signed/unsigned"
-              },
-              {
-                "level": 13,
-                "operators": [
-                  "==",
-                  "<>",
-                  "===",
-                  "<>>"
-                ],
-                "type": "Equality",
-                "note": "Logical/bitwise"
-              },
-              {
-                "level": 14,
-                "operators": [
-                  "&&",
-                  "AND",
-                  "!&&"
-                ],
-                "type": "Logical AND"
-              },
-              {
-                "level": 15,
-                "operators": [
-                  "||",
-                  "OR",
-                  "XOR",
-                  "!||"
-                ],
-                "type": "Logical OR"
-              },
-              {
-                "level": 16,
-                "operators": [
-                  "?",
-                  ":"
-                ],
-                "type": "Ternary",
-                "note": "PUB/PRI only"
-              },
-              {
-                "level": 17,
-                "operators": [
-                  ":=",
-                  "+=",
-                  "-=",
-                  "*=",
-                  "/=",
-                  "//=",
-                  "+/=",
-                  "#>=",
-                  "<#=",
-                  "&=",
-                  "|=",
-                  "^=",
-                  ">>=",
-                  "<<=",
-                  "SAR=",
-                  "ROR=",
-                  "ROL=",
-                  "REV=",
-                  "ZEROX=",
-                  "SIGNX=",
-                  "AND=",
-                  "OR=",
-                  "XOR="
-                ],
-                "type": "Assignment",
-                "note": "PUB/PRI only (lowest priority)"
-              }
-            ],
-            "examples": [
-              {
-                "code": "x := a + b * c",
-                "evaluation": "x := a + (b * c)",
-                "reason": "Multiply (7) before Add (9)"
-              },
-              {
-                "code": "x := a & b | c",
-                "evaluation": "x := (a & b) | c",
-                "reason": "AND (4) before OR (6)"
-              },
-              {
-                "code": "x := !a && b || c",
-                "evaluation": "x := ((!a) && b) || c",
-                "reason": "Unary (2), Logical AND (14), Logical OR (15)"
-              }
-            ],
-            "notes": [
-              "Lower numbers = higher priority (execute first)",
-              "Assignment operators have lowest priority",
-              "Ternary and assignment only in PUB/PRI blocks",
-              "Use parentheses to override default precedence"
-            ]
           },
           "||": {
             "operator": "||",
@@ -25729,13 +25858,51 @@
           "DITTO": {
             "directive": "DITTO",
             "type": "assembly_directive",
-            "description": "Repeat last instruction (v50+)\n",
-            "syntax": "['DITTO']",
+            "category": "Code Replication",
+            "requires_version": "Spin2_v50",
+            "version_directive": "{Spin2_v50}",
+            "description": "Code/data replication directive that repeats a block of instructions or data a specified number of times.\nThe special $$ symbol provides the current iteration index (0 to count-1).\nRequires Spin2 version 50 or later - must include {Spin2_v50} directive at file start.\n",
+            "syntax": {
+              "block_start": "DITTO count",
+              "block_end": "DITTO END",
+              "iteration_index": "$$"
+            },
             "examples": [
-              "DITTO  // Repeat previous instruction"
+              {
+                "code": "{Spin2_v50}\nDAT\n        DITTO   4                   ' Repeat 4 times\n        LONG    $77777777 + $$      ' Each long gets different value\n        DITTO   END\n",
+                "description": "Data replication with iteration index - produces 4 LONGs with values $77777777, $77777778, $77777779, $7777777A"
+              },
+              {
+                "code": "{Spin2_v50}\nDAT\n        ORG     0\n        DITTO   8                   ' Repeat for 8 pins\n        DRVH    #BasePin + $$       ' Drive pins BasePin+0 through BasePin+7\n        DITTO   END\n",
+                "description": "Instruction replication for pin initialization"
+              },
+              {
+                "code": "{Spin2_v50}\nCON\n  MotorCount = 4\nDAT\n        DITTO   MotorCount\n        WYPIN   speed + $$, #BasePin + $$ * 2\n        DITTO   END\n",
+                "description": "Using constants and expressions with iteration index"
+              }
+            ],
+            "restrictions": [
+              "ORG not allowed within a DITTO block",
+              "ORGH not allowed within a DITTO block",
+              "$$ only valid inside DITTO block",
+              "Count must be non-negative integer",
+              "Block must end with DITTO END"
+            ],
+            "zero_count_behavior": "When count is 0, block produces no output - completely skipped",
+            "notes": [
+              "REQUIRES {Spin2_v50} or later version directive at start of source file",
+              "Works in both COG/LUT mode and ORGH (hub) mode",
+              "$$ evaluates to 0 on first iteration, count-1 on last",
+              "Compile-time replication - no runtime overhead",
+              "Useful for lookup tables, pin initialization, unrolled loops"
+            ],
+            "related": [
+              "REP",
+              "ORG",
+              "ORGH"
             ],
             "group": "Assembly",
-            "last_updated": "2025-09-19T16:04:17.649232"
+            "oneliner": "Code/data replication directive with iteration index (requires Spin2_v50)"
           },
           "Include Binary File": {
             "directive": "FILE",
@@ -26167,10 +26334,10 @@
       }
     },
     "statistics": {
-      "total_elements": 256,
+      "total_elements": 259,
       "by_category": {
-        "keywords": 36,
-        "operators": 75,
+        "keywords": 37,
+        "operators": 77,
         "methods": 89,
         "registers": 18,
         "assembly_directives": 12,
