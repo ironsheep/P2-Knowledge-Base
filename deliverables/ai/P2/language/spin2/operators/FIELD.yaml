@@ -170,6 +170,5 @@ related:
   - BYTE
   - WORD
   - LONG
-  - typed-pointers
 
 oneliner: "Access packed bit-fields in memory for efficient small-value storage"

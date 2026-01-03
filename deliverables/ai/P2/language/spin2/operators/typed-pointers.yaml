@@ -175,7 +175,6 @@ notes:
   - "Null pointer value is 0 - check before dereferencing"
 
 related:
-  - STRUCT
   - BYTE
   - WORD
   - LONG

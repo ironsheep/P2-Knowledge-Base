@@ -135,6 +135,5 @@ related:
   - BYTE
   - WORD
   - LONG
-  - typed-pointers
 
 oneliner: "Define composite data types with named members (requires Spin2_v45)"
