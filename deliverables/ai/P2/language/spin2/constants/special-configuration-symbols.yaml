@@ -67,11 +67,27 @@ debug_output_control:
   DEBUG_MASK:
     description: |
       32-bit mask for selective DEBUG compilation.
-      Use DEBUG[bit](params) to gate specific statements.
+      Use DEBUG[bit](params) to gate specific debug statements.
+      Each bit corresponds to a debug channel (0-31).
+      REQUIRES: {Spin2_v46} or later version directive.
+    requires_version: "Spin2_v46"
+    version_directive: "{Spin2_v46}"
     default: "undefined"
     example: |
-      CON DEBUG_MASK = %00001111  ' Enable bits 0-3
-      DEBUG[0]("This only compiles if bit 0 is set")
+      {Spin2_v46}
+      CON
+        DEBUG_MASK = %00001111  ' Enable channels 0-3
+      
+      PUB main()
+        DEBUG[0]("Channel 0 message")   ' Compiled - bit 0 set
+        DEBUG[1]("Channel 1 message")   ' Compiled - bit 1 set
+        DEBUG[4]("Channel 4 message")   ' NOT compiled - bit 4 not set
+    notes:
+      - "Requires {Spin2_v46} or later at start of source file"
+      - "Standard debug() without channel number is always available"
+      - "Each bit enables corresponding debug[N]() channel"
+      - "Mask of 0 disables all numbered channels"
+      - "Mask of $FFFF_FFFF enables all 32 channels"
     
   DEBUG_DELAY:
     description: Startup delay in milliseconds before DEBUG messages begin
@@ -155,13 +171,15 @@ usage_examples:
       _CLKFREQ = 200_000_000   ' 200 MHz
       
   selective_debug: |
+    {Spin2_v46}                          ' Required for DEBUG_MASK/debug[N]()
     CON
-      DEBUG_MASK = %00000011   ' Enable debug bits 0 and 1
+      DEBUG_MASK = %00000011             ' Enable debug channels 0 and 1
       
     PUB main()
-      DEBUG[0]("Development message")   ' Only if bit 0 set
-      DEBUG[1]("Testing message")       ' Only if bit 1 set
-      DEBUG[2]("This won't compile")    ' Bit 2 not set
+      DEBUG[0]("Development message")   ' Compiled - bit 0 set
+      DEBUG[1]("Testing message")       ' Compiled - bit 1 set
+      DEBUG[2]("This won't compile")    ' NOT compiled - bit 2 not set
+      DEBUG("Always available")         ' Standard debug() always works
       
   debugger_control: |
     CON

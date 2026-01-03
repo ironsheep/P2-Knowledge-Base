@@ -1,39 +1,85 @@
 directive: BYTEFIT
 name: BYTEFIT
-description: 'Constrain expression to fit within byte range (0-255)
+category: Data Declaration Directives
+description: |
+  Data declaration directive for DAT blocks that stores 8-bit values with compile-time range validation.
+  Works identically to BYTE for storage but adds validation that values fit within the byte range.
+  Catches potential overflow errors during compilation rather than silently truncating.
 
-  Generates assembly error if expression value exceeds byte range
-
-  Used to ensure compile-time verification that values fit in 8 bits
-
-  '
-category: Assembly Directives
 documentation_level: complete
-syntax: BYTEFIT(expression)
-parameters:
-- name: expression
-  type: constant expression
-  range: 0-255
-  description: Expression that must evaluate to a value fitting in 8 bits (0-255)
+
+syntax: "BYTEFIT value [, value2, ...]"
+alternate_syntax: "BYTEFIT value[count]"
+
+valid_range:
+  minimum: "-$80 (-128)"
+  maximum: "$FF (255)"
+  combined_range: "Allows both signed byte values (-128 to 127) and unsigned byte values (0 to 255)"
+
+storage_size: "8 bits (1 byte) per value"
+
 examples:
-- code: 'DAT
-           byte  BYTEFIT(100)      '' OK: 100 fits in a byte
-    '
-  description: Valid byte value passes BYTEFIT check
-- code: 'CON
-      SMALL_VAL = BYTEFIT(200)     '' OK: 200 fits in byte range
-    '
-  description: Use BYTEFIT in constant definition
-- code: 'DAT
-           byte  BYTEFIT(256)      '' ERROR: 256 exceeds byte range
-    '
-  description: Value exceeding byte range causes assembly error
+  - code: |
+      DAT
+        byteData    BYTEFIT   -$80              ' Minimum signed value
+                    BYTEFIT   $FF               ' Maximum unsigned value
+                    BYTEFIT   0, 100, 200, 255  ' Multiple values on one line
+    description: "Valid BYTEFIT declarations within allowed range"
+
+  - code: |
+      DAT
+        ' Compile-time errors - values out of range:
+        ' bad1      BYTEFIT   256               ' 256 > 255
+        ' bad2      BYTEFIT   -129              ' -129 < -128
+        ' bad3      BYTEFIT   $100              ' $100 > $FF
+    description: "Out-of-range values cause compile errors"
+
+  - code: |
+      DAT
+        zeros       BYTEFIT   0[100]            ' Fill 100 bytes with value 0
+        mixed       BYTEFIT   0[10], 255[5], 128[3]
+    description: "Using count multipliers for repeated values"
+
+  - code: |
+      CON
+        BASE_VALUE = 100
+        MULTIPLIER = 2
+      
+      DAT
+        computed    BYTEFIT   BASE_VALUE * MULTIPLIER    ' 200, fits in byte
+    description: "Expressions evaluated and validated at compile time"
+
+comparison:
+  - feature: "Storage size"
+    BYTE: "8 bits"
+    BYTEFIT: "8 bits"
+  - feature: "Range checking"
+    BYTE: "No - silently truncates"
+    BYTEFIT: "Yes - compile error if out of range"
+  - feature: "Truncation behavior"
+    BYTE: "Stores low 8 bits only"
+    BYTEFIT: "Prevents truncation via error"
+
+error_message: "BYTEFIT values must range from -$80 to $FF"
+
+use_cases:
+  - "Lookup tables where data integrity is critical"
+  - "Protocol headers and command codes"
+  - "Sensor calibration data"
+  - "Configuration values derived from constants"
+  - "Any byte data where overflow would indicate a bug"
+
 notes:
-- Compile-time constraint only - no runtime overhead
-- Useful for catching overflow errors during assembly
-- Expression must be resolvable at compile time
-- Generates error if value is negative or exceeds 255
+  - "Part of base Spin2/PASM2 language - no version directive required"
+  - "No parentheses in syntax - BYTEFIT value, not BYTEFIT(value)"
+  - "Compile-time validation only - zero runtime overhead"
+  - "Can only be used in DAT blocks"
+  - "Prefer BYTEFIT over BYTE when values come from calculations or constants"
+
 related:
-- WORDFIT
-- BYTE
-oneliner: Constrain expression to fit within byte range (0-255)
+  - WORDFIT
+  - BYTE
+  - WORD
+  - LONG
+
+oneliner: "Byte data declaration with compile-time range validation (-$80 to $FF)"

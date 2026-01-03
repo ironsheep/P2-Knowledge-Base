@@ -1,50 +1,143 @@
 directive: DITTO
 name: DITTO
-description: 'Repeat the previous instruction
-
-  Inserts a copy of the immediately preceding instruction at the current location
-
-  Useful for creating repeated instruction sequences without copy-paste
-
-  Introduced in Spin2/PASM2 version 50+
-
-  '
 category: Assembly Directives
 documentation_level: complete
-syntax: DITTO
+
+requires_version: "Spin2_v50"
+version_directive: "{Spin2_v50}"
+
+description: |
+  Powerful code/data replication directive for DAT blocks that repeats a block of 
+  instructions or data a specified number of times. The special $$ symbol provides 
+  the current iteration index (0 to count-1), enabling parameterized replication.
+  
+  REQUIRES: {Spin2_v50} or later version directive at the start of the source file.
+
+syntax:
+  block_start: "DITTO count"
+  block_end: "DITTO END"  
+  iteration_index: "$$"
+
+components:
+  - component: "DITTO count"
+    description: "Starts a DITTO block; count is the number of iterations (0 or more)"
+  - component: "$$"
+    description: "Special symbol evaluating to current iteration index (0 to count-1)"
+  - component: "DITTO END"
+    description: "Marks the end of the DITTO block"
+
 examples:
-- code: 'DAT
-           nop               '' First NOP
-           ditto             '' Second NOP (repeat of previous)
-           ditto             '' Third NOP (repeat of previous)
-    '
-  description: Repeat NOP instruction multiple times
-- code: 'DAT
-           wrlong  data, ptra++   '' Write and increment pointer
-           ditto                   '' Repeat the wrlong with ptra++
-           ditto                   '' And again
-           ditto                   '' Four total writes
-    '
-  description: Repeat memory write instruction for unrolled loop
-- code: 'DAT
-    '' Initialize 8 consecutive registers to zero
-           mov     reg+0, #0
-           ditto                   '' reg+1
-           ditto                   '' reg+2
-           ditto                   '' reg+3
-           ditto                   '' reg+4
-           ditto                   '' reg+5
-           ditto                   '' reg+6
-           ditto                   '' reg+7
-    '
-  description: Initialize multiple registers with repeated MOV
+  - code: |
+      {Spin2_v50}
+      DAT
+              DITTO   4                   ' Repeat 4 times
+              LONG    $77777777 + $$      ' Each long gets different value
+              DITTO   END
+      
+      ' Produces:
+      '   LONG  $77777777   (when $$ = 0)
+      '   LONG  $77777778   (when $$ = 1)
+      '   LONG  $77777779   (when $$ = 2)
+      '   LONG  $7777777A   (when $$ = 3)
+    description: "Simple data replication with iteration index"
+
+  - code: |
+      {Spin2_v50}
+      DAT
+              ORG     0
+              DITTO   8                   ' Repeat for 8 pins
+              DRVH    #BasePin + $$       ' Drive high: pins BasePin+0 through +7
+              DITTO   END
+    description: "Instruction replication equivalent to 8 DRVH instructions"
+
+  - code: |
+      {Spin2_v50}
+      CON
+        MotorCount = 4
+        BasePin = 8
+      
+      DAT
+              ORG     0
+              DITTO   MotorCount
+              WYPIN   speed + $$, #BasePin + $$ * 2 + 0
+              RDPIN   position + $$, #BasePin + $$ * 2 + 1
+              DITTO   END
+    description: "Multi-line DITTO block for motor control with calculated pin numbers"
+
+  - code: |
+      {Spin2_v50}
+      DAT
+              DITTO   4
+              LONG    1 << $$             ' Produces 1, 2, 4, 8 (bit patterns)
+              DITTO   END
+    description: "Using $$ in expressions for computed values"
+
+  - code: |
+      {Spin2_v50}
+      CON
+        MotorCount = 0                    ' No motors in this build
+      
+      DAT
+              DITTO   MotorCount          ' If count = 0, nothing generated
+              ' ... motor code ...
+              DITTO   END
+    description: "Zero count - block completely skipped (useful for conditional compilation)"
+
+restrictions:
+  not_allowed_inside:
+    - directive: "ORG"
+      error: "ORG not allowed within a DITTO block"
+    - directive: "ORGH"
+      error: "ORGH not allowed within a DITTO block"
+  
+  other_restrictions:
+    - "$$ only valid inside DITTO block - error outside"
+    - "Count must be non-negative integer"
+    - "Block must be properly terminated with DITTO END"
+
+iteration_index:
+  symbol: "$$"
+  first_iteration: 0
+  last_iteration: "count - 1"
+  outside_block_error: '"$$" (DITTO index) is only allowed within a DITTO block, inside a DAT block'
+
+error_messages:
+  - error: "DITTO count must be a positive integer or zero"
+    cause: "Negative count value"
+  - error: "Expected END"
+    cause: "DITTO END not properly formatted"
+  - error: "Expected DITTO END"
+    cause: "Block not terminated or nested incorrectly"
+  - error: "ORG not allowed within a DITTO block"
+    cause: "ORG directive inside DITTO"
+  - error: "ORGH not allowed within a DITTO block"
+    cause: "ORGH directive inside DITTO"
+
+use_cases:
+  - "Pin initialization tables"
+  - "Indexed data structures and lookup tables"
+  - "Motor/servo control arrays"
+  - "Channel configuration"
+  - "Loop unrolling for performance"
+  - "Sine/cosine table generation"
+
+benefits:
+  - "Maintainability - change count in one place"
+  - "Readability - intent is clear"
+  - "Parameterization - use constants for count"
+  - "Flexibility - expressions with $$ enable complex patterns"
+  - "Zero-cost - replication happens at compile time"
+
 notes:
-- Introduced in Spin2/PASM2 version 50 and later
-- DITTO copies the exact previous instruction including all operands and effects
-- Useful for loop unrolling and repeated initialization sequences
-- Must follow a valid instruction - cannot be first in a DAT block
-- The repeated instruction appears in listing output for clarity
+  - "REQUIRES {Spin2_v50} or later version directive at start of source file"
+  - "Works in both COG/LUT mode and ORGH (hub) mode"
+  - "$$ symbol only valid within DITTO block"
+  - "Zero count produces no output - useful for conditional code generation"
+  - "Compile-time replication - zero runtime overhead"
+
 related:
-- REP
-- ORG
-oneliner: Repeat the previous instruction
+  - REP
+  - ORG
+  - ORGH
+
+oneliner: "Code/data replication directive with iteration index $$ (requires Spin2_v50)"

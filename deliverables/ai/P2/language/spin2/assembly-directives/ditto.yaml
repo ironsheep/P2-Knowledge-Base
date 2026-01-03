@@ -1,10 +1,68 @@
 directive: DITTO
 type: assembly_directive
-description: 'Repeat last instruction (v50+)
+category: Code Replication
 
-  '
-syntax: '[''DITTO'']'
+requires_version: "Spin2_v50"
+version_directive: "{Spin2_v50}"
+
+description: |
+  Code/data replication directive that repeats a block of instructions or data a specified number of times.
+  The special $$ symbol provides the current iteration index (0 to count-1).
+  Requires Spin2 version 50 or later - must include {Spin2_v50} directive at file start.
+
+syntax:
+  block_start: "DITTO count"
+  block_end: "DITTO END"
+  iteration_index: "$$"
+
 examples:
-- DITTO  // Repeat previous instruction
+  - code: |
+      {Spin2_v50}
+      DAT
+              DITTO   4                   ' Repeat 4 times
+              LONG    $77777777 + $$      ' Each long gets different value
+              DITTO   END
+    description: "Data replication with iteration index - produces 4 LONGs with values $77777777, $77777778, $77777779, $7777777A"
+
+  - code: |
+      {Spin2_v50}
+      DAT
+              ORG     0
+              DITTO   8                   ' Repeat for 8 pins
+              DRVH    #BasePin + $$       ' Drive pins BasePin+0 through BasePin+7
+              DITTO   END
+    description: "Instruction replication for pin initialization"
+
+  - code: |
+      {Spin2_v50}
+      CON
+        MotorCount = 4
+      DAT
+              DITTO   MotorCount
+              WYPIN   speed + $$, #BasePin + $$ * 2
+              DITTO   END
+    description: "Using constants and expressions with iteration index"
+
+restrictions:
+  - "ORG not allowed within a DITTO block"
+  - "ORGH not allowed within a DITTO block"
+  - "$$ only valid inside DITTO block"
+  - "Count must be non-negative integer"
+  - "Block must end with DITTO END"
+
+zero_count_behavior: "When count is 0, block produces no output - completely skipped"
+
+notes:
+  - "REQUIRES {Spin2_v50} or later version directive at start of source file"
+  - "Works in both COG/LUT mode and ORGH (hub) mode"
+  - "$$ evaluates to 0 on first iteration, count-1 on last"
+  - "Compile-time replication - no runtime overhead"
+  - "Useful for lookup tables, pin initialization, unrolled loops"
+
+related:
+  - REP
+  - ORG
+  - ORGH
+
 group: Assembly
-last_updated: '2025-09-19T16:04:17.649232'
+oneliner: "Code/data replication directive with iteration index (requires Spin2_v50)"

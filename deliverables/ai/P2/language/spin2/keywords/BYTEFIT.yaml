@@ -1,9 +1,59 @@
-keyword: "BYTEFIT"
+keyword: BYTEFIT
 type: keyword
-category: "Data Types"
+category: Data Declaration Directives
 description: |
-  Expression that fits in a byte constant
+  Data declaration directive for DAT blocks that stores 8-bit values with compile-time range validation.
+  Works like BYTE but validates that values fit within the byte range (-$80 to $FF).
+  Prevents silent truncation by catching overflow errors at compile time.
+
+syntax:
+  - "BYTEFIT value [, value2, ...]"
+  - "BYTEFIT value[count]"
+
+valid_range:
+  minimum: "-$80 (-128)"
+  maximum: "$FF (255)"
+  note: "Combined signed/unsigned range allows both signed (-128 to 127) and unsigned (0 to 255) values"
+
+location: DAT blocks only
+
 examples:
-  - |
-    CON
-      SMALL_VALUE = BYTEFIT(200)
+  - code: |
+      DAT
+        byteData    BYTEFIT   -$80              ' Minimum signed value: -128
+                    BYTEFIT   $FF               ' Maximum unsigned value: 255
+                    BYTEFIT   0, 100, 200, 255  ' Multiple values
+    description: "Valid BYTEFIT values within range"
+
+  - code: |
+      DAT
+        ' These would cause compile errors:
+        ' BYTEFIT   256                         ' Too large for byte
+        ' BYTEFIT   -129                        ' Too negative for signed byte
+    description: "Values outside range cause compile-time errors"
+
+  - code: |
+      DAT
+        zeros       BYTEFIT   0[100]            ' Fill 100 bytes with 0
+        pattern     BYTEFIT   $AA[50], $55[50]  ' Alternating pattern
+    description: "Using multipliers for repeated values"
+
+comparison_with_byte: |
+  BYTE silently truncates values that don't fit (stores low 8 bits only).
+  BYTEFIT validates and produces compile error if value exceeds range.
+  Use BYTEFIT when data integrity is critical.
+
+error_message: "BYTEFIT values must range from -$80 to $FF"
+
+notes:
+  - "Part of base Spin2 language - no version directive required"
+  - "DAT block directive, not a function"
+  - "No parentheses required - syntax is BYTEFIT value, not BYTEFIT(value)"
+  - "Compile-time validation only - no runtime overhead"
+  - "Useful for lookup tables, configuration data, and protocol structures"
+
+related:
+  - WORDFIT
+  - BYTE
+  - WORD
+  - LONG

@@ -1,0 +1,140 @@
+keyword: STRUCT
+type: keyword
+category: Data Types
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+description: |
+  Defines composite data types containing multiple named members.
+  Structures provide a way to organize related data into logical units with 
+  convenient member access using dot notation.
+  REQUIRES: {Spin2_v45} or later version directive at the start of the source file.
+
+location: CON block (structure definition)
+
+syntax:
+  basic: "STRUCT structName(member1, member2, ...)"
+  typed_members: "STRUCT structName(BYTE x, WORD y, LONG z)"
+  array_members: "STRUCT structName(data[count])"
+  nested: "STRUCT outer(inner innerMember)"
+  alias: "STRUCT newName = existingStruct"
+
+member_types:
+  - type: "BYTE"
+    size: "1 byte"
+  - type: "WORD"
+    size: "2 bytes"
+  - type: "LONG (default)"
+    size: "4 bytes"
+  - type: "structName"
+    size: "Size of that structure"
+  - type: "type[n]"
+    size: "n * element size"
+
+examples:
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)           ' x and y are LONGs (8 bytes total)
+    description: "Basic structure with default LONG members"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT tinyPoint(BYTE x, BYTE y)     ' 2 bytes total
+        STRUCT colorPoint(WORD x, WORD y, BYTE color)  ' 5 bytes total
+    description: "Typed members with explicit BYTE, WORD, LONG"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)
+        STRUCT line(point a, point b)        ' Contains two points (16 bytes)
+        STRUCT triangle(point p1, point p2, point p3)
+    description: "Nested structures"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT buffer(BYTE data[256])        ' 256-byte array member
+        STRUCT matrix(WORD row[4], WORD col[4])
+    description: "Array members within structures"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)
+      
+      VAR
+        point myPoint                        ' Single instance
+        point points[10]                     ' Array of structures
+        ^point pPoint                        ' Pointer to structure
+    description: "Declaring structure variables and pointers"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)
+      
+      PUB example() | point p1, point p2
+        p1.x := 100                          ' Access via dot notation
+        p1.y := 200
+        p2 := p1                             ' Copy entire structure
+        p1 := 50, 75                         ' Multi-value assignment
+        p1 :=: p2                            ' Swap structures
+    description: "Structure member access and operations"
+
+operations:
+  - operation: "Access member"
+    syntax: "var.member"
+    example: "p.x := 100"
+  - operation: "Nested access"
+    syntax: "var.nested.member"
+    example: "line.a.x := 0"
+  - operation: "Assignment"
+    syntax: "a := b"
+    description: "Copy entire structure"
+  - operation: "Multi-value assign"
+    syntax: "s := v1, v2, ..."
+    description: "Assign multiple members at once"
+  - operation: "Swap"
+    syntax: "a :=: b"
+    description: "Swap two structures"
+  - operation: "Clear"
+    syntax: "s~"
+    description: "Zero all members"
+  - operation: "Set all bits"
+    syntax: "s~~"
+    description: "Set all bits to 1"
+  - operation: "Compare"
+    syntax: "a == b / a <> b"
+    description: "Test equality/inequality"
+  - operation: "Size"
+    syntax: "SIZEOF(structName)"
+    description: "Get size in bytes"
+
+pointer_syntax:
+  declaration: "^structName ptr"
+  access: "ptr.member"
+  dereference: "[ptr]"
+  post_increment: "ptr[++].member"
+  pre_increment: "[++]ptr.member"
+
+notes:
+  - "REQUIRES {Spin2_v45} or later at start of source file"
+  - "Members default to LONG if no type specified"
+  - "Structures can be nested to any depth"
+  - "Use SIZEOF() to get structure size in bytes"
+  - "Structure pointers (^structName) also require {Spin2_v45}"
+  - "Pass large structures by pointer for efficiency"
+  - "Structures larger than 15 LONGs use BYTEMOVE internally for assignment"
+
+related:
+  - SIZEOF
+  - BYTE
+  - WORD
+  - LONG
+  - typed-pointers
+
+oneliner: "Define composite data types with named members (requires Spin2_v45)"

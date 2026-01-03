@@ -1,0 +1,184 @@
+name: Typed Pointers
+type: operator
+category: Pointer Types
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+description: |
+  Typed pointer declarations using ^BYTE, ^WORD, ^LONG, and ^structName syntax.
+  Pointers are 32-bit values holding memory addresses with type information
+  that enables proper pointer arithmetic and type-safe dereferencing.
+  REQUIRES: {Spin2_v45} or later version directive at the start of the source file.
+  
+  Note: Basic pointer operations using @ (address-of) and BYTE[]/WORD[]/LONG[] 
+  memory access are part of base Spin2 and do NOT require a version directive.
+
+pointer_types:
+  - type: "^BYTE"
+    points_to: "8-bit data"
+    increment_size: "1 byte"
+  - type: "^WORD"
+    points_to: "16-bit data"
+    increment_size: "2 bytes"
+  - type: "^LONG"
+    points_to: "32-bit data"
+    increment_size: "4 bytes"
+  - type: "^structName"
+    points_to: "Structure data"
+    increment_size: "Structure size in bytes"
+
+syntax:
+  var_declaration: "^TYPE varName"
+  local_declaration: "PUB method() | ^TYPE ptr"
+  parameter: "PUB method(^TYPE ptr)"
+  return_value: "PUB method() : ^TYPE result"
+
+examples:
+  - code: |
+      {Spin2_v45}
+      VAR
+        ^BYTE  pByteData          ' Pointer to byte data
+        ^WORD  pWordData          ' Pointer to word data
+        ^LONG  pLongData          ' Pointer to long data
+    description: "VAR block pointer declarations"
+
+  - code: |
+      {Spin2_v45}
+      VAR
+        BYTE  buffer[256]
+        
+      PUB example() | ^BYTE ptr
+        ptr := @buffer            ' Get address of buffer
+        BYTE[ptr] := $FF          ' Write through pointer
+        ptr++                     ' Advance by 1 byte
+    description: "Local pointer variable with address-of and increment"
+
+  - code: |
+      {Spin2_v45}
+      PUB processBuffer(^BYTE pBuffer, LONG length)
+        repeat length
+          BYTE[pBuffer++] := 0    ' Clear and advance
+    description: "Pointer as method parameter"
+
+  - code: |
+      {Spin2_v45}
+      VAR
+        LONG values[100]
+        
+      PUB getValues() : ^LONG result
+        result := @values
+    description: "Returning a pointer from a method"
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)
+        
+      VAR
+        point points[10]
+        ^point ptr
+        
+      PUB example()
+        ptr := @points[0]
+        ptr.x := 100              ' Access member through pointer
+        ptr++                     ' Advance by 8 bytes (size of point)
+    description: "Structure pointer with member access"
+
+operations:
+  address_of:
+    syntax: "ptr := @variable"
+    description: "Get address of variable, array element, or structure member"
+    
+  read_through_pointer:
+    syntax: "value := BYTE[ptr] / WORD[ptr] / LONG[ptr]"
+    description: "Read value at pointer address"
+    
+  write_through_pointer:
+    syntax: "BYTE[ptr] := value"
+    description: "Write value at pointer address"
+    
+  indexed_access:
+    syntax: "value := BYTE[ptr][index]"
+    description: "Access element at offset from pointer"
+    
+  increment:
+    syntax: "ptr++"
+    description: "Advance pointer by element size"
+    
+  decrement:
+    syntax: "ptr--"
+    description: "Move pointer back by element size"
+    
+  pre_increment:
+    syntax: "++ptr"
+    description: "Increment first, then use"
+    
+  post_increment:
+    syntax: "ptr++"
+    description: "Use current value, then increment"
+    
+  bracket_post_increment:
+    syntax: "ptr[++]"
+    description: "Return current address, then advance"
+    
+  bracket_pre_increment:
+    syntax: "[++]ptr"
+    description: "Advance first, then return new address"
+    
+  struct_member_access:
+    syntax: "ptr.member"
+    description: "Access structure member through pointer"
+    
+  struct_dereference:
+    syntax: "[ptr]"
+    description: "Access entire structure through pointer"
+
+pointer_arithmetic:
+  - type: "^BYTE"
+    "ptr++": "Advances by 1 byte"
+  - type: "^WORD"
+    "ptr++": "Advances by 2 bytes"
+  - type: "^LONG"
+    "ptr++": "Advances by 4 bytes"
+  - type: "^structName"
+    "ptr++": "Advances by structure size"
+
+common_patterns:
+  array_traversal: |
+    PUB clearBuffer() | ^BYTE ptr
+      ptr := @buffer
+      repeat 256
+        BYTE[ptr++] := 0
+        
+  string_length: |
+    PUB strlen(^BYTE pStr) : length
+      length := 0
+      repeat while BYTE[pStr++] <> 0
+        length++
+        
+  structure_array: |
+    PUB scalePoints(scale) | ^point ptr
+      ptr := @points
+      repeat 100
+        ptr.x *= scale
+        ptr.y *= scale
+        ptr++
+
+notes:
+  - "REQUIRES {Spin2_v45} or later at start of source file"
+  - "Basic @ and BYTE[]/WORD[]/LONG[] are base Spin2 (no version needed)"
+  - "Typed pointers enable type-safe pointer arithmetic"
+  - "Pointers themselves cannot be arrays: ^BYTE ptr[10] is invalid"
+  - "Initialize pointers before use to avoid accessing invalid memory"
+  - "P2 handles misaligned access but aligned is more efficient"
+  - "Null pointer value is 0 - check before dereferencing"
+
+related:
+  - STRUCT
+  - BYTE
+  - WORD
+  - LONG
+  - SIZEOF
+
+oneliner: "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"

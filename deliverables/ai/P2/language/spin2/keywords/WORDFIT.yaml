@@ -1,9 +1,60 @@
-keyword: "WORDFIT"
+keyword: WORDFIT
 type: keyword
-category: "Data Types"
+category: Data Declaration Directives
 description: |
-  Expression that fits in a word constant
+  Data declaration directive for DAT blocks that stores 16-bit values with compile-time range validation.
+  Works like WORD but validates that values fit within the word range (-$8000 to $FFFF).
+  Prevents silent truncation by catching overflow errors at compile time.
+
+syntax:
+  - "WORDFIT value [, value2, ...]"
+  - "WORDFIT value[count]"
+
+valid_range:
+  minimum: "-$8000 (-32768)"
+  maximum: "$FFFF (65535)"
+  note: "Combined signed/unsigned range allows both signed (-32768 to 32767) and unsigned (0 to 65535) values"
+
+location: DAT blocks only
+
 examples:
-  - |
-    CON
-      MID_VALUE = WORDFIT(32000)
+  - code: |
+      DAT
+        wordData    WORDFIT   -$8000            ' Minimum signed value: -32768
+                    WORDFIT   $FFFF             ' Maximum unsigned value: 65535
+                    WORDFIT   1000, 30000       ' Multiple values
+    description: "Valid WORDFIT values within range"
+
+  - code: |
+      DAT
+        ' These would cause compile errors:
+        ' WORDFIT   65536                       ' Too large for word
+        ' WORDFIT   -32769                      ' Too negative for signed word
+        ' WORDFIT   $10000                      ' Exceeds $FFFF
+    description: "Values outside range cause compile-time errors"
+
+  - code: |
+      DAT
+        pattern     WORDFIT   $ABCD[50]         ' Fill 50 words with $ABCD
+        adcOffsets  WORDFIT   -1024, -512, 0, 512, 1024
+    description: "Using multipliers and signed values"
+
+comparison_with_word: |
+  WORD silently truncates values that don't fit (stores low 16 bits only).
+  WORDFIT validates and produces compile error if value exceeds range.
+  Use WORDFIT when data integrity is critical.
+
+error_message: "WORDFIT values must range from -$8000 to $FFFF"
+
+notes:
+  - "Part of base Spin2 language - no version directive required"
+  - "DAT block directive, not a function"
+  - "No parentheses required - syntax is WORDFIT value, not WORDFIT(value)"
+  - "Compile-time validation only - no runtime overhead"
+  - "Useful for ADC calibration data, 16-bit lookup tables, and sensor data"
+
+related:
+  - BYTEFIT
+  - BYTE
+  - WORD
+  - LONG

@@ -1,0 +1,175 @@
+name: FIELD Operator
+type: operator
+category: Memory Access
+
+description: |
+  Provides access to packed bit-fields stored in memory. The FIELD operator enables 
+  efficient manipulation of data structures where multiple values are packed into 
+  bytes, words, or longs (1-bit flags, 2-bit states, 12-bit IDs, etc.).
+  
+  Part of base Spin2 language - no version directive required.
+
+syntax:
+  create_pointer: "fieldPtr := ^@variable.[highBit..lowBit]"
+  read_field: "value := FIELD[fieldPtr][index]"
+  write_field: "FIELD[fieldPtr][index] := value"
+
+field_pointer_creation:
+  operator: "^@"
+  syntax: "^@variable.[highBit..lowBit]"
+  description: |
+    Creates a field pointer that encodes the base address and bit range.
+    The width is (highBit - lowBit + 1) bits.
+
+examples:
+  - code: |
+      DAT
+        flagStorage   BYTE    0[100]        ' 100 bytes = 800 1-bit flags
+        
+      VAR
+        LONG  flagField                     ' Field pointer
+        
+      PUB Initialize()
+        flagField := ^@flagStorage.[0]      ' 1-bit fields (bit 0 only)
+        
+      PUB SetFlag(index)
+        FIELD[flagField][index]~~           ' Set flag to 1
+        
+      PUB ClearFlag(index)
+        FIELD[flagField][index]~            ' Clear flag to 0
+        
+      PUB TestFlag(index) : isSet
+        isSet := FIELD[flagField][index]    ' Returns 0 or 1
+    description: "Boolean flag array using 1-bit fields"
+
+  - code: |
+      CON
+        ' Block states (2-bit values)
+        B_FREE = %00
+        B_TEMP = %01
+        B_HEAD = %10
+        B_BODY = %11
+        
+      DAT
+        stateStorage  BYTE    0[64]         ' 64 bytes = 256 2-bit states
+        
+      VAR
+        LONG  stateField
+        
+      PUB Initialize()
+        stateField := ^@stateStorage.[1..0] ' 2-bit fields
+        
+      PUB SetState(block, state)
+        FIELD[stateField][block] := state
+        
+      PUB GetState(block) : state
+        state := FIELD[stateField][block]
+    description: "2-bit state machine states packed in memory"
+
+  - code: |
+      DAT
+        idStorage     WORD    0[150]        ' WORDs for 12-bit IDs
+        
+      VAR
+        LONG  idField
+        
+      PUB Initialize()
+        idField := ^@idStorage.[11..0]      ' 12-bit fields
+        
+      PUB SetID(index, id)
+        FIELD[idField][index] := id         ' id: 0 to 4095
+        
+      PUB GetID(index) : id
+        id := FIELD[idField][index]
+    description: "12-bit ID values packed in word storage"
+
+bitfield_specifications:
+  - specifier: ".[0]"
+    width: "1 bit"
+    values_per_byte: 8
+    max_value: 1
+  - specifier: ".[1..0]"
+    width: "2 bits"
+    values_per_byte: 4
+    max_value: 3
+  - specifier: ".[3..0]"
+    width: "4 bits"
+    values_per_byte: 2
+    max_value: 15
+  - specifier: ".[7..0]"
+    width: "8 bits"
+    values_per_byte: 1
+    max_value: 255
+  - specifier: ".[11..0]"
+    width: "12 bits"
+    values_per_word: 1
+    max_value: 4095
+
+operations:
+  read:
+    syntax: "value := FIELD[ptr][index]"
+    description: "Read field at index"
+  write:
+    syntax: "FIELD[ptr][index] := value"
+    description: "Write value to field at index"
+  increment:
+    syntax: "FIELD[ptr][index]++"
+    description: "Increment field value"
+  decrement:
+    syntax: "FIELD[ptr][index]--"
+    description: "Decrement field value"
+  clear:
+    syntax: "FIELD[ptr][index]~"
+    description: "Set field to zero"
+  set_all_bits:
+    syntax: "FIELD[ptr][index]~~"
+    description: "Set all field bits to 1"
+  modify_assign:
+    syntax: "FIELD[ptr][index] op= value"
+    description: "Modify-and-assign (+=, -=, &=, |=, ^=)"
+
+storage_calculation: |
+  bytes_needed = (count * field_width_bits + 7) / 8
+  
+  Examples:
+  - 100 1-bit flags: (100 * 1 + 7) / 8 = 13 bytes
+  - 50 2-bit states: (50 * 2 + 7) / 8 = 13 bytes
+  - 200 12-bit IDs: (200 * 12 + 7) / 8 = 300 bytes
+
+use_cases:
+  - "Boolean flag arrays (1-bit per flag)"
+  - "State machine states (2-4 bits per state)"
+  - "Packed ID tables (12-bit IDs)"
+  - "Memory-efficient sensor readings"
+  - "Flash file system block management"
+  - "Bitmap graphics manipulation"
+
+performance_notes:
+  - "Field pointer creation (^@) computed once; store and reuse"
+  - "Access has overhead vs direct array; saves memory for small values"
+  - "Fields pack contiguously across byte/word boundaries"
+  - "Write involves read-modify-write of containing byte/word"
+
+when_to_use_field:
+  use_field:
+    - "Arrays of many small values (flags, states, IDs)"
+    - "Memory efficiency is important"
+    - "Dynamic indexing at runtime"
+  use_direct_bitfield:
+    - "Single values with known bit positions"
+    - "One-off bitfield operations"
+
+notes:
+  - "Part of base Spin2 language - no version directive required"
+  - "Field pointer encodes both address and bit range"
+  - "Use BYTE storage for fields up to 8 bits"
+  - "Use WORD storage for fields 9-16 bits"
+  - "Fields are NOT aligned - they pack contiguously"
+
+related:
+  - BYTE
+  - WORD
+  - LONG
+  - typed-pointers
+
+oneliner: "Access packed bit-fields in memory for efficient small-value storage"

@@ -385,6 +385,69 @@ common_patterns:
           STATE_ACTIVE:
             doWork()
 
+language_version_directives:
+  purpose: |
+    Some Spin2 language extensions require a version directive at the very start
+    of your source file. The directive specifies the minimum language version needed.
+    Features work with the specified version AND ALL LATER VERSIONS.
+    
+  syntax: "{Spin2_vNN}"
+  placement: "Must be the FIRST thing in the source file, before any code"
+  
+  version_requirements:
+    Spin2_v45:
+      directive: "{Spin2_v45}"
+      features:
+        - "STRUCT - composite data types with named members"
+        - "Typed pointers - ^BYTE, ^WORD, ^LONG, ^structName declarations"
+        - "Structure pointers and member access via dot notation"
+      example: |
+        {Spin2_v45}
+        CON
+          STRUCT point(x, y)
+        VAR
+          point myPoint
+          ^point pPoint
+          
+    Spin2_v46:
+      directive: "{Spin2_v46}"
+      features:
+        - "DEBUG_MASK - selective debug channel compilation"
+        - "debug[N]() - channel-specific debug statements"
+      example: |
+        {Spin2_v46}
+        CON
+          DEBUG_MASK = %0011          ' Enable channels 0 and 1
+        PUB main()
+          debug[0]("Channel 0 message")
+          debug[1]("Channel 1 message")
+          
+    Spin2_v50:
+      directive: "{Spin2_v50}"
+      features:
+        - "DITTO - code/data replication directive"
+        - "$ (double-dollar) - iteration index within DITTO blocks"
+      example: |
+        {Spin2_v50}
+        DAT
+                DITTO   4
+                LONG    $77777777 + $   ' $ is 0, 1, 2, 3
+                DITTO   END
+                
+  base_language_features:
+    description: "These features do NOT require a version directive"
+    features:
+      - "BYTEFIT, WORDFIT - data declarations with range validation"
+      - "FIELD operator - packed bit-field access"
+      - "Inline PASM (ORG...END)"
+      - "All basic Spin2 syntax, operators, and built-in methods"
+      - "@ address-of operator and BYTE[]/WORD[]/LONG[] memory access"
+      
+  note: |
+    When using a version directive, you get that version's features AND all
+    features from earlier versions. For example, {Spin2_v50} includes all
+    features from v45, v46, and v50.
+
 critical_gotchas:
   - "Symbol names limited to 30 characters maximum"
   - "Parameters default to LONG but can be ^BYTE/^WORD/^LONG/^STRUCT pointers"
