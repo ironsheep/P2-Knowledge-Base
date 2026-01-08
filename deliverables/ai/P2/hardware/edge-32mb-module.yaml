@@ -1,113 +1,451 @@
 # P2 Edge 32MB Module - Hardware Specification
 # Part Number: P2-EC32MB / 64000-ES
 # Revision: Rev B
-# Documentation: P2-EC32MB Edge Module Rev B Guide v2.0
-# Enhanced: 2025-12-27 with full PSRAM code-generation technical details
+# Source Document: P2-EC32MB Edge Module Rev B Guide v2.0 (May 23, 2022)
+# YAML Corrected: 2025-01-08 - Fixed memory specs, dimensions, pin mappings, added performance data
 
+# =============================================================================
+# IDENTIFICATION
+# =============================================================================
 hardware_type: "edge_module"
 part_number: "P2-EC32MB"
 alternate_part: "64000-ES"
 p2kb_key: "p2kbHwEdge32mbModule"
 manufacturer: "Parallax Inc."
-revision: "Rev B"
+module_revision: "Rev B"
+document_version: "v2.0"
+document_date: "2022-05-23"
 status: "active_production"
 
+# =============================================================================
+# BASIC INFORMATION
+# =============================================================================
 basic_info:
-  name: "P2 Edge 32MB Module"
-  description: "Enhanced P2 Edge module with 32MB PSRAM for memory-intensive applications"
+  name: "P2 Edge Module with 32MB RAM"
+  description: |
+    Enhanced P2 Edge module with 32MB PSRAM for memory-intensive applications.
+    Includes P2X8C4M64P microcontroller, 16MB SPI flash, 32MB PSRAM, crystal
+    oscillator, power regulators, microSD socket, and dual status LEDs.
+    Multi-layer PCB design optimized for low-noise analog and digital operation.
   category: "microcontroller_module"
   form_factor: "edge_connector_module"
+  pcb_layers: 6
 
+# =============================================================================
+# MICROCONTROLLER SPECIFICATIONS
+# =============================================================================
 specifications:
   microcontroller:
     chip: "P2X8C4M64P"
-    revision: "Rev D"
+    alternate_marking: "P2X8C4M64PES"  # Limited early batch, identical function
+    package: "100-pin TQFP"
     architecture: "32-bit multi-cog"
-    clock_speed: "20MHz crystal, PLL to 320MHz"
     cores: 8
-    io_pins: 64
+    hub_ram: "512 KB"
+    cog_ram: "2 KB per cog"
+    lut_ram: "2 KB per cog"
     smart_pins: 64
 
+    clock:
+      crystal: "20 MHz TCXO"
+      crystal_precision: "+/- 0.5 PPM"
+      crystal_type: "Temperature-compensated crystal oscillator"
+      recommended_max_mhz: 180
+      overclock_tested_mhz: 320
+      note: "Operating frequency set in code via PLL multiply/divide registers"
+
+# =============================================================================
+# MEMORY SUBSYSTEMS
+# =============================================================================
   memory:
-    hub_ram: "512KB (internal)"
-    cog_ram: "2KB per cog (8 cogs)"
-    lut_ram: "16KB (2KB per cog)"
+    # Internal P2 memory
+    hub_ram:
+      size: "512 KB"
+      type: "Internal SRAM"
+      access: "Shared by all 8 cogs"
 
-    psram:
-      type: "PSRAM (Pseudo-Static RAM)"
-      size_mb: 32
-      size_bytes: 33554432
-      bus_width: 16
-      address_bits: 25
-      organization: "Two 16MB banks (0 and 1)"
+    cog_ram:
+      size_per_cog: "2 KB"
+      total: "16 KB"
+      access: "Private to each cog"
 
+    lut_ram:
+      size_per_cog: "2 KB"
+      total: "16 KB"
+      access: "Private to each cog, dual-purpose lookup/RAM"
+
+    # On-module Flash Memory
     flash:
       type: "SPI Flash"
-      part: "W25Q256JV"
-      size_mb: 32
-      purpose: "Boot and code storage"
+      part_number: "W25Q128JVSIM"
+      manufacturer: "Winbond"
+      size_mb: 16
+      size_bits: "128 Mbit"
+      interface: "SPI"
+      purpose: "Boot code storage, user data, program storage"
+      pins_used: "P58-P61 (shared with microSD)"
 
+    # On-module PSRAM - CRITICAL FOR CODE GENERATION
+    psram:
+      type: "PSRAM (Pseudo-Static RAM)"
+      total_size_mb: 32
+      total_size_bytes: 33554432
+
+      # Chip specifications
+      chip:
+        part_number: "APS6404L-3SQR-ZR"
+        manufacturer: "AP Memory"
+        quantity: 4
+        size_per_chip_mb: 8
+        size_per_chip_bits: "64 Mbit"
+        interface_per_chip: "QSPI (4-bit)"
+        max_clock_mhz: 133
+        alternate_clock_mhz: 84  # Lower power / conservative mode
+
+      # Combined bus architecture
+      bus:
+        combined_width_bits: 16
+        organization: "4 parallel QSPI chips with shared CLK/CE"
+        burst_transfer_rate: ">300 MB/s"
+        typical_burst_rate_mbs: 308
+
+      # Access mode flexibility
+      access_modes:
+        - mode: "4-bit"
+          chips_used: 1
+          description: "Single bank, lowest throughput"
+        - mode: "8-bit"
+          chips_used: 2
+          description: "Two banks parallel"
+        - mode: "16-bit"
+          chips_used: 4
+          description: "All banks parallel, maximum throughput (308 MB/s)"
+
+      # Bank organization
+      banks:
+        - id: 0
+          pins: "P40-P43"
+          signals: "SIO[3:0]"
+          size_mb: 8
+        - id: 1
+          pins: "P44-P47"
+          signals: "SIO[3:0]"
+          size_mb: 8
+        - id: 2
+          pins: "P48-P51"
+          signals: "SIO[3:0]"
+          size_mb: 8
+        - id: 3
+          pins: "P52-P55"
+          signals: "SIO[3:0]"
+          size_mb: 8
+
+      common_signals:
+        clock:
+          pin: "P56"
+          function: "PSRAM CLK (all 4 chips)"
+        chip_enable:
+          pin: "P57"
+          function: "PSRAM CE# (all 4 chips, active low)"
+
+      # Timing constraints - CRITICAL
+      timing:
+        max_cs_low_us: 8
+        cs_low_note: "Chip enable must go HIGH within 8 microseconds to allow internal DRAM refresh"
+        refresh: "Automatic during CE# high periods"
+
+      # Address space
+      address_space:
+        range: "0x00000000 - 0x01FFFFFF"
+        size_bytes: "0x2000000 (33,554,432)"
+        address_bits: 25
+        wrap_behavior: "Only 25 LSBs used, address wraps at 32MB boundary"
+
+# =============================================================================
+# PHYSICAL SPECIFICATIONS
+# =============================================================================
   physical:
     dimensions:
-      length: "2.7 inches"
-      width: "1.4 inches"
-      height: "0.25 inches"
-    connector: "80-pin edge connector"
-    mounting: "Via carrier boards"
+      length_inches: 2.04
+      length_mm: 51.7
+      width_inches: 1.45
+      width_mm: 37.0
+      height_inches: 0.25
+      height_mm: 6.35
 
+    mounting:
+      holes: 2
+      hole_connection: "Ground plane"
+      orientation_hole: 1
+      orientation_hole_plated: false
+
+    edge_connector:
+      type: "Double-sided card edge"
+      ways: 80
+      contacts_per_side: 40
+      pitch_inches: 0.05
+      pitch_mm: 1.27
+
+    pcb:
+      layers: 6
+      features:
+        - "Solid thermal plane for low temperature rise"
+        - "Signal reference planes isolating each signal layer"
+        - "Optimized for low-noise analog and digital operation"
+
+# =============================================================================
+# ELECTRICAL SPECIFICATIONS
+# =============================================================================
   electrical:
-    supply_voltage: "3.3V"
-    core_voltage: "1.8V (onboard regulator)"
-    temperature_range: "Industrial grade"
+    # Power input
+    input_power:
+      voltage_min_vdc: 5
+      voltage_max_vdc: 16
+      voltage_absolute_max_vdc: 16
+      current_min_ma: 100
+      current_typical_ma: "500-1000"
+      current_max_ma: 3000
+      reverse_polarity_protection: true
 
-# PIN MAPPING (MANDATORY) - Fixed for this module
+    # VDD - P2 Core supply
+    vdd_regulator:
+      type: "Switching buck regulator"
+      voltage: "1.8V"
+      max_current_a: 3
+      switching_freq_khz: 750
+      protection:
+        - "Short-circuit (20ms shutdown, 2.5ms retry cycle)"
+        - "Over-current"
+        - "Brownout detection (~1.5V threshold)"
+
+    # VIO - I/O pin supplies
+    vio_regulators:
+      type: "Low-noise LDO"
+      voltage: "3.3V"
+      quantity: 8
+      current_per_regulator_ma: 300
+      protection:
+        - "Short-circuit"
+        - "Over-current"
+      note: "One LDO per 8-pin group for isolation and local regulation"
+
+    # I/O characteristics
+    io_pins:
+      logic_voltage: "3.3V"
+      source_current_ma: 30
+      sink_current_ma: 30
+      current_budget_per_group_ma: 300
+
+    # Environmental
+    temperature:
+      operating_min_c: -40
+      operating_max_c: 85
+      operating_min_f: -40
+      operating_max_f: 185
+
+# =============================================================================
+# PIN MAPPING - DEDICATED HARDWARE ASSIGNMENTS
+# =============================================================================
 pin_mapping:
-  description: "Fixed pin assignments for PSRAM on P2-EC32MB module"
+  description: "Complete I/O pin assignments for P2-EC32MB module"
 
-  psram:
-    data_bus_base: 40
-    data_bus_pins: "P40-P55"
-    data_bus_width: 16
-    clock_pin: 56
-    chip_enable_pin: 57
-    address_bits: 25
+  # Summary counts
+  summary:
+    total_smart_pins: 64
+    fully_free: 38          # P0-P37
+    led_buffered: 2         # P38-P39 (usable, high-Z buffer attached)
+    psram_dedicated: 18     # P40-P57
+    flash_sd_shared: 4      # P58-P61
+    serial_programming: 2   # P62-P63
+    edge_connector_accessible: 46  # P0-P39 + P58-P63
 
-  psram_pins_detailed:
-    P40: "PSRAM D0"
-    P41: "PSRAM D1"
-    P42: "PSRAM D2"
-    P43: "PSRAM D3"
-    P44: "PSRAM D4"
-    P45: "PSRAM D5"
-    P46: "PSRAM D6"
-    P47: "PSRAM D7"
-    P48: "PSRAM D8"
-    P49: "PSRAM D9"
-    P50: "PSRAM D10"
-    P51: "PSRAM D11"
-    P52: "PSRAM D12"
-    P53: "PSRAM D13"
-    P54: "PSRAM D14"
-    P55: "PSRAM D15"
-    P56: "PSRAM CLK"
-    P57: "PSRAM CE#"
+  # Fully free pins - no dedicated hardware
+  free_pins:
+    P0_P7:
+      pins: "P0-P7"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V00"
+      current_budget_ma: 300
+    P8_P15:
+      pins: "P8-P15"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V08"
+      current_budget_ma: 300
+    P16_P23:
+      pins: "P16-P23"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V16"
+      current_budget_ma: 300
+    P24_P31:
+      pins: "P24-P31"
+      count: 8
+      status: "Fully free with restriction"
+      vio_regulator: "V24"
+      current_budget_ma: 300
+      warning: "Avoid high-speed simultaneous switching at system clock frequency"
+    P32_P37:
+      pins: "P32-P37"
+      count: 6
+      status: "Fully free"
+      vio_regulator: "V32"
+      current_budget_ma: 300  # Shared with P38-P39
 
-  reserved_pins:
-    P58: "Flash SPI DO/MISO"
-    P59: "Flash SPI DI/MOSI"
-    P60: "Flash SPI CLK"
-    P61: "Flash SPI CS"
-    P62: "Serial TXD to PC"
-    P63: "Serial RXD from PC"
+  # LED buffered pins
+  led_pins:
+    P38:
+      function: "Buffered LED (accent color)"
+      status: "Usable - high-impedance buffer attached"
+      vio_regulator: "V32"
+      buffer: "Dual Schmitt-trigger, high-Z input"
+      led_visible: "Both sides of PCB"
+      control: "DIP switch to disable LED power"
+      note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
+    P39:
+      function: "Buffered LED (accent color)"
+      status: "Usable - high-impedance buffer attached"
+      vio_regulator: "V32"
+      buffer: "Dual Schmitt-trigger, high-Z input"
+      led_visible: "Both sides of PCB"
+      control: "DIP switch to disable LED power"
+      note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
 
-# PROTOCOL CONSTRAINTS (MANDATORY)
+  # PSRAM dedicated pins
+  psram_pins:
+    P40_P43:
+      function: "PSRAM Bank 0 data"
+      signals: "SIO[3:0]"
+      direction: "Bidirectional"
+      status: "Dedicated to PSRAM"
+    P44_P47:
+      function: "PSRAM Bank 1 data"
+      signals: "SIO[3:0]"
+      direction: "Bidirectional"
+      status: "Dedicated to PSRAM"
+    P48_P51:
+      function: "PSRAM Bank 2 data"
+      signals: "SIO[3:0]"
+      direction: "Bidirectional"
+      status: "Dedicated to PSRAM"
+    P52_P55:
+      function: "PSRAM Bank 3 data"
+      signals: "SIO[3:0]"
+      direction: "Bidirectional"
+      status: "Dedicated to PSRAM"
+    P56:
+      function: "PSRAM CLK"
+      direction: "Output"
+      status: "Dedicated to PSRAM"
+      note: "Common clock for all 4 PSRAM chips"
+    P57:
+      function: "PSRAM CE#"
+      direction: "Output"
+      logic: "Active low"
+      status: "Dedicated to PSRAM"
+      note: "Common chip enable, must release within 8us for refresh"
+
+  # Flash and microSD shared pins
+  flash_sd_pins:
+    P58:
+      primary: "Flash SPI DO (MISO)"
+      secondary: "microSD DAT0/MISO"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+    P59:
+      primary: "Flash SPI DI (MOSI)"
+      secondary: "microSD CMD/MOSI"
+      tertiary: "Boot mode select (with pull-up/pull-down resistors)"
+      vio_regulator: "V56"
+      status: "Shared - Flash, microSD, boot mode"
+    P60:
+      primary: "Flash SPI CLK"
+      secondary: "microSD DAT3/CS (active low)"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+    P61:
+      primary: "Flash SPI CS"
+      secondary: "microSD CLK"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+
+  # Serial programming pins
+  serial_pins:
+    P62:
+      function: "Serial TXD (P2 transmits)"
+      direction: "Output from P2"
+      purpose: "Prop-Plug RX connection"
+      vio_regulator: "V56"
+    P63:
+      function: "Serial RXD (P2 receives)"
+      direction: "Input to P2"
+      purpose: "Prop-Plug TX connection"
+      vio_regulator: "V56"
+
+  # Reset pin
+  reset:
+    RESn:
+      function: "Reset input"
+      logic: "Active low"
+      pull_up: "10K to 3.3V (internal)"
+      behavior: "All cogs disabled, I/O pins floating when low"
+      recovery: "Restart 3ms after low-to-high transition"
+      max_voltage: "3.6V"
+
+# =============================================================================
+# BOOT MODE CONFIGURATION
+# =============================================================================
+boot_modes:
+  description: "DIP switch settings for boot mode selection"
+  switches:
+    LED: "Enable/disable onboard LEDs (P38, P39)"
+    FLASH: "Flash boot enable"
+    triangle_up: "P59 pull-up (boot option)"
+    triangle_down: "P59 pull-down (boot option)"
+
+  warning: "Only switch ONE of triangle_up or triangle_down ON to avoid inconsistent behavior"
+
+  configurations:
+    - flash: "OFF"
+      up: "OFF"
+      down: "OFF"
+      mode: "Serial window 60 seconds (default when SD not inserted)"
+    - flash: "OFF"
+      up: "ON"
+      down: "OFF"
+      mode: "Serial window 60 seconds, overrides Flash and SD"
+    - flash: "ON"
+      up: "OFF"
+      down: "OFF"
+      mode: "Serial 100ms, then SPI flash. If flash fails, serial 60s"
+    - flash: "ON"
+      up: "OFF"
+      down: "ON"
+      mode: "SPI flash only (fast boot). If fails, shutdown"
+    - flash: "OFF"
+      up: "OFF"
+      down: "ON"
+      mode: "SD card with serial fallback. If fails, serial 60s"
+    - flash: "OFF"
+      up: "OFF"
+      down: "OFF"
+      mode: "SD card only (when SD inserted). If fails, shutdown"
+
+# =============================================================================
+# PROTOCOL CONSTRAINTS - FOR DRIVER DEVELOPMENT
+# =============================================================================
 protocol_constraints:
   psram:
-    max_clock_hz: 160000000
+    # Hardware limits from PSRAM chip
+    chip_max_clock_mhz: 133
+    chip_alternate_clock_mhz: 84
+
+    # Recommended driver settings
     recommended_clock: "sysclk/2"
     supported_rates:
       - mode: "sysclk/1"
-        description: "Fast mode - maximum throughput"
+        description: "Fast mode - check stability"
       - mode: "sysclk/2"
         description: "Standard mode - reliable operation"
       - mode: "sysclk/3"
@@ -115,13 +453,16 @@ protocol_constraints:
       - mode: "sysclk/4"
         description: "Low-power mode"
 
+    # Critical timing
     max_cs_low_us: 8
-    cs_low_note: "Chip select must go high within 8 microseconds to allow refresh"
+    cs_low_note: "Must release CE# within 8us for internal DRAM refresh"
 
+    # Burst calculation
     burst_size:
       calculation: "((MAX_CS_LOW_USEC * (freq/1000000)) - 132) >> 4) << 4"
       typical_at_200mhz: "approximately 1280 bytes per burst"
 
+    # Input delay configuration (from driver)
     input_delay:
       description: "Automatically computed based on system clock frequency"
       delay_table:
@@ -140,36 +481,19 @@ protocol_constraints:
         - freq_over_mhz: 333
           delay: 13
 
-    address_space:
-      range: "0x00000000 - 0x01FFFFFF"
-      size_hex: "0x2000000"
-      wrap_behavior: "Only 25 LSBs used, address wraps at 32MB"
-      bank_0: "0x00000000 - 0x00FFFFFF (16MB)"
-      bank_1: "0x01000000 - 0x01FFFFFF (16MB)"
+  flash:
+    interface: "SPI"
+    max_clock_mhz: 133  # Per W25Q128JV datasheet
+    addressing: "24-bit (16MB)"
 
-# SIGNAL USAGE DEFINITIONS (MANDATORY)
-signals:
-  psram_data:
-    pins: "P40-P55"
-    direction: "bidirectional"
-    width: 16
-    function: "PSRAM data bus"
-    timing: "Synchronous with CLK"
+  serial:
+    max_baud: 2000000
+    pins: "P62 (TX), P63 (RX)"
+    compatible_programmer: "PropPlug #32201"
 
-  psram_clock:
-    pin: "P56"
-    direction: "output"
-    function: "PSRAM clock"
-    timing: "System clock divided"
-
-  psram_chip_enable:
-    pin: "P57"
-    direction: "output"
-    function: "PSRAM chip select"
-    logic: "active_low"
-    max_low_time_us: 8
-
-# CODE PATTERNS (from OBEX PSRAM driver)
+# =============================================================================
+# CODE PATTERNS - PSRAM DRIVER USAGE
+# =============================================================================
 code_patterns:
   spin2:
     obex_driver_usage: |
@@ -177,7 +501,7 @@ code_patterns:
         psram : "psram"
 
       PUB main() | err
-        err := psram.start()             ' Initialize PSRAM driver
+        err := psram.start()                  ' Initialize PSRAM driver (uses 1 cog)
         IF err >= 0
           psram.write(@src_buf, $100000, 1024)  ' Write 1KB to address 0x100000
           psram.read(@dst_buf, $100000, 1024)   ' Read it back
@@ -194,23 +518,21 @@ code_patterns:
         ' delay: 0 = auto-compute from frequency table
         ' desiredcog: -1 = auto-allocate cog
 
-    read_burst: |
+    read_write: |
       PUB read(dstHubAddr, srcPsramAddr, count) : result
         ' Read from PSRAM to Hub RAM
         ' dstHubAddr: Hub RAM destination address
-        ' srcPsramAddr: PSRAM source address (25-bit)
+        ' srcPsramAddr: PSRAM source address (25-bit, 0-33554431)
         ' count: Number of bytes to read
         ' Returns: 0 on success, negative error code on failure
 
-    write_burst: |
       PUB write(srcHubAddr, dstPsramAddr, count) : result
         ' Write from Hub RAM to PSRAM
         ' srcHubAddr: Hub RAM source address
         ' dstPsramAddr: PSRAM destination address (25-bit)
         ' count: Number of bytes to write
-        ' Returns: 0 on success, negative error code on failure
 
-    fill_memory: |
+    fill_operations: |
       PUB fillBytes(addr, pattern, count, listPtr) : r
         return fill(addr, pattern, count, listPtr, 1)
 
@@ -220,27 +542,18 @@ code_patterns:
       PUB fillLongs(addr, pattern, count, listPtr) : r
         return fill(addr, pattern, count, listPtr, 4)
 
-    configuration: |
-      ' Adjust timing after initialization
-      PUB setFrequency(freq)
-        ' Update delay for new frequency
-
-      PUB setBurst(burst)
-        ' Set maximum burst size
-
-      PUB setQos(cog, qos)
-        ' Configure per-cog priority and burst limits
-
     error_codes: |
       CON
         ERR_INVALID      = -6   ' Invalid arguments
-        ERR_TOO_SLOW     = -14  ' P2 frequency too low
+        ERR_TOO_SLOW     = -14  ' P2 frequency too low for PSRAM
         ERR_INACTIVE     = -15  ' Driver not running
         ERR_ABORTED      = -16  ' Driver was shutdown
         ERR_NO_LOCK      = -26  ' No LOCK available
         ERR_MAILBOX_BUSY = -28  ' Mailbox operation pending
 
-# RESOURCE REFERENCES (MANDATORY - with URLs)
+# =============================================================================
+# RESOURCES AND REFERENCES
+# =============================================================================
 resources:
   obex:
     id: 4162
@@ -259,92 +572,60 @@ resources:
       - "QoS per-cog priority control"
 
   documentation:
-    primary: "P2-EC32MB Edge Module Rev B Guide v2.0"
+    primary:
+      title: "P2-EC32MB Edge Module Rev B Guide v2.0"
+      date: "2022-05-23"
+      publisher: "Parallax Inc."
     related:
-      - "P2 Silicon Documentation"
+      - "P2 Silicon Documentation (Propeller 2 Datasheet)"
+      - "AP Memory APS6404L PSRAM Datasheet"
+      - "Winbond W25Q128JV Flash Datasheet"
       - "PSRAM driver documentation in OBEX"
 
-# Original content preserved below
-pinout:
-  total_pins: 64
-  io_pins: "P0-P63 (all smart pins)"
-  power_pins: "3.3V, 1.8V, GND"
-  programming_pins: "Via carrier board USB/serial"
-  crystal_pins: "Internal 20MHz crystal"
-  psram_pins: "P40-P57 dedicated to PSRAM"
-  available_gpio: "P0-P39 (40 pins for user I/O)"
+  edge_connectors:
+    - part: "450-00308"
+      type: "Card Edge Socket, Through Hole, Right Angle"
+    - part: "450-00309"
+      type: "Card Edge Socket, Straight, SMT"
+    - part: "450-00310"
+      type: "Card Edge Socket, Straight, Through Hole"
 
+# =============================================================================
+# CARRIER BOARD COMPATIBILITY
+# =============================================================================
 compatibility:
   carriers:
     - part: "64029"
       name: "P2 Edge Standard Breakout"
       pin_access: "All 64 pins accessible"
       form_factor: "Standard development"
-      psram_note: "PSRAM pins (P40-P57) exposed but dedicated"
+      psram_note: "PSRAM pins (P40-P57) exposed at headers but dedicated to PSRAM"
     - part: "64019"
       name: "P2 Edge Mini Breakout"
-      pin_access: "40 pins accessible (P32-P55 blocked)"
+      pin_access: "P0-P31, P58-P63 accessible"
       form_factor: "Compact development"
-      psram_note: "PSRAM pins not on headers (internal to module)"
+      psram_note: "PSRAM pins internal to module, not on headers"
     - part: "64020"
       name: "P2 Edge Module Breadboard"
-      pin_access: "All 64 pins + prototyping"
+      pin_access: "All 64 pins + prototyping area"
       form_factor: "Educational/prototype"
-      psram_note: "Full access to PSRAM pins if needed"
+      psram_note: "Full access to all pins including PSRAM"
 
+# =============================================================================
+# USE CASES AND APPLICATIONS
+# =============================================================================
 use_cases:
   primary:
-    - "Graphics applications requiring large framebuffers"
+    - "Graphics applications requiring large framebuffers (VGA, HDMI)"
+    - "Video game emulators (NES, SNES, Genesis, etc.)"
     - "Audio applications with extensive sample libraries"
-    - "Video processing and buffering (emulators, video players)"
-    - "Large data structure storage beyond Hub RAM"
-    - "External memory for game assets"
+    - "Video playback and buffering"
+    - "Large data structure storage beyond 512KB Hub RAM"
   secondary:
     - "Educational platforms demonstrating external memory"
     - "Prototyping memory-intensive algorithms"
     - "High-resolution display buffers"
-
-advantages:
-  - "32MB PSRAM (64x Hub RAM capacity)"
-  - "16-bit parallel interface for high bandwidth"
-  - "Automatic timing configuration"
-  - "Multi-cog concurrent access via mailboxes"
-  - "Same physical form factor as standard module"
-  - "Compatible with all Edge carriers"
-
-limitations:
-  - "PSRAM requires refresh (8us max CS low)"
-  - "Dedicates cog for PSRAM driver"
-  - "P40-P57 dedicated to PSRAM (not available for GPIO)"
-  - "Higher latency than Hub RAM access"
-  - "Requires driver initialization before use"
-
-development_workflow:
-  - "Insert P2-EC32MB into carrier board"
-  - "Include psram.spin2 driver in project"
-  - "Call psram.start() to initialize (uses one cog)"
-  - "Use psram.read() and psram.write() for data transfer"
-  - "Manage 8us CS timing constraint (driver handles automatically)"
-  - "Consider cog mailbox for multi-cog access"
-
-programming:
-  methods:
-    - "USB via carrier board"
-    - "Prop Plug via carrier board"
-  tools:
-    - "PropellerTool"
-    - "PNut"
-    - "FlexProp"
-  languages:
-    - "Spin2"
-    - "PASM2"
-    - "C (via FlexProp)"
-
-  psram_considerations:
-    - "Initialize PSRAM driver before use"
-    - "Plan data layout within 32MB address space"
-    - "Use burst transfers for efficiency"
-    - "Handle driver errors appropriately"
+    - "Data logging with large buffers"
 
 target_applications:
   video:
@@ -360,27 +641,98 @@ target_applications:
     - "Image storage and processing"
     - "Temporary computation buffers"
 
-documentation:
-  primary: "P2-EC32MB Edge Module Rev B Guide v2.0"
-  related:
-    - "P2 Silicon Documentation"
-    - "Edge carrier board guides"
-    - "PASM2/Spin2 language references"
-    - "PSRAM driver documentation"
+# =============================================================================
+# ADVANTAGES AND LIMITATIONS
+# =============================================================================
+advantages:
+  - "32MB PSRAM - 64x Hub RAM capacity"
+  - "16-bit parallel interface for high bandwidth (>300 MB/s)"
+  - "Automatic timing configuration in driver"
+  - "Multi-cog concurrent access via mailboxes"
+  - "Same physical form factor as standard P2-EC module"
+  - "Compatible with all Edge carrier boards"
+  - "16MB Flash for large programs and data"
+  - "High-precision TCXO (+/- 0.5 PPM)"
+  - "6-layer PCB with thermal plane"
+  - "Wide input voltage range (5-16 VDC)"
 
+limitations:
+  - "PSRAM requires refresh - 8us max CS low time"
+  - "Dedicates 1 cog for PSRAM driver"
+  - "P40-P57 dedicated to PSRAM (18 pins not available for GPIO)"
+  - "Higher latency than Hub RAM access"
+  - "Requires driver initialization before PSRAM use"
+  - "P24-P31 have simultaneous switching restrictions"
+
+# =============================================================================
+# DEVELOPMENT WORKFLOW
+# =============================================================================
+development_workflow:
+  - "Insert P2-EC32MB into carrier board (Mini, Standard, or Breadboard)"
+  - "Connect power supply (5-16 VDC)"
+  - "Connect PropPlug or USB-serial for programming"
+  - "Set boot mode DIP switches as needed"
+  - "Include psram.spin2 driver in project"
+  - "Call psram.start() to initialize (allocates 1 cog)"
+  - "Use psram.read() and psram.write() for data transfer"
+  - "Driver automatically handles 8us refresh timing"
+  - "For multi-cog access, use cog mailbox interface"
+
+programming:
+  interface:
+    type: "Serial"
+    max_baud: 2000000
+    pins: "P62 (TX from P2), P63 (RX to P2)"
+
+  tools:
+    - name: "PropPlug"
+      part: "32201"
+      note: "USB-to-serial programmer"
+    - name: "Propeller Tool"
+      type: "IDE"
+    - name: "PNut"
+      type: "Compiler"
+    - name: "FlexProp"
+      type: "IDE/Compiler (supports C)"
+
+  languages:
+    - "Spin2"
+    - "PASM2"
+    - "C (via FlexProp)"
+
+# =============================================================================
+# VENDOR INFORMATION
+# =============================================================================
 availability:
   vendor: "Parallax Inc."
-  website: "parallax.com"
+  website: "https://www.parallax.com"
   part_lookup: "Search for P2-EC32MB or 64000-ES"
-  distributor_network: "Yes"
+  distributor_network: true
 
+# =============================================================================
+# QUALITY RATINGS
+# =============================================================================
 quality_rating: "production"
 recommendation_score: 5
 educational_value: "high"
 production_readiness: "excellent"
 memory_class: "high_capacity"
 
-# Cross-references
+# =============================================================================
+# CROSS-REFERENCES
+# =============================================================================
 ecosystem_position: "memory_enhanced_module"
 hardware_family: "p2_edge"
-optimal_carrier: "64019_mini_breakout"
+related_modules:
+  - key: "p2kbHwEdgeModule"
+    name: "P2 Edge Module (Standard)"
+    note: "Base module without PSRAM"
+  - key: "p2kbHwEdgeMiniBreakout"
+    name: "P2 Edge Mini Breakout"
+    note: "Compact carrier board"
+  - key: "p2kbHwEdgeStandardBreakout"
+    name: "P2 Edge Standard Breakout"
+    note: "Full-featured carrier board"
+  - key: "p2kbHwEdgeBreadboard"
+    name: "P2 Edge Module Breadboard"
+    note: "Prototyping carrier board"

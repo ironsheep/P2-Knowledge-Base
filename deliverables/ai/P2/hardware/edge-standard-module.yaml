@@ -1,140 +1,576 @@
 # P2 Edge Standard Module - Hardware Specification
 # Part Number: P2-EC
 # Revision: Rev D
-# Documentation: P2-EC Edge Module Rev D Product Guide v3.0
+# Source Document: P2-EC Edge Module Rev D Product Guide v3.0 (June 3, 2022)
+# YAML Corrected: 2025-01-08 - Fixed flash specs, dimensions, pin mappings, added full detail
 
+# =============================================================================
+# IDENTIFICATION
+# =============================================================================
 hardware_type: "edge_module"
 part_number: "P2-EC"
+p2kb_key: "p2kbHwEdgeModule"
 manufacturer: "Parallax Inc."
-revision: "Rev D"
+module_revision: "Rev D"
+document_version: "v3.0"
+document_date: "2022-06-03"
 status: "active_production"
 
+# =============================================================================
+# BASIC INFORMATION
+# =============================================================================
 basic_info:
-  name: "P2 Edge Standard Module"
-  description: "Base P2 Edge module with standard 4MB flash configuration"
+  name: "P2 Edge Module"
+  description: |
+    Standard P2 Edge module - the foundation Propeller 2 development platform.
+    Includes P2X8C4M64P microcontroller, 16MB SPI flash, crystal oscillator,
+    power regulators, microSD socket, and dual status LEDs. Multi-layer PCB
+    design optimized for low-noise analog and digital operation. All 64 smart
+    pins accessible at the edge connector.
   category: "microcontroller_module"
   form_factor: "edge_connector_module"
-  
+  pcb_layers: 6
+
+# =============================================================================
+# MICROCONTROLLER SPECIFICATIONS
+# =============================================================================
 specifications:
   microcontroller:
     chip: "P2X8C4M64P"
-    revision: "Rev D"
+    alternate_marking: "P2X8C4M64PES"  # Limited early batch, identical function
+    package: "100-pin TQFP (exposed pad)"
     architecture: "32-bit multi-cog"
-    clock_speed: "20MHz crystal, PLL to 320MHz"
     cores: 8
-    io_pins: 64
+    hub_ram: "512 KB"
+    cog_ram: "2 KB per cog"
+    lut_ram: "2 KB per cog"
     smart_pins: 64
-    
+
+    clock:
+      crystal: "20 MHz TCXO"
+      crystal_precision: "+/- 0.5 PPM"
+      crystal_type: "Temperature-compensated crystal oscillator"
+      recommended_max_mhz: 180
+      overclock_tested_mhz: 320
+      note: "Operating frequency set in code via PLL multiply/divide registers"
+
+# =============================================================================
+# MEMORY SUBSYSTEMS
+# =============================================================================
   memory:
-    flash_type: "SPI Flash"
-    flash_part: "W25Q32"
-    flash_size: "4MB"
-    flash_organization: "Boot partition + user space"
-    ram_hub: "512KB"
-    ram_cog: "2KB per cog (8 cogs)"
-    ram_lut: "16KB (2KB per cog)"
-    
+    # Internal P2 memory
+    hub_ram:
+      size: "512 KB"
+      type: "Internal SRAM"
+      access: "Shared by all 8 cogs"
+
+    cog_ram:
+      size_per_cog: "2 KB"
+      total: "16 KB"
+      access: "Private to each cog"
+
+    lut_ram:
+      size_per_cog: "2 KB"
+      total: "16 KB"
+      access: "Private to each cog, dual-purpose lookup/RAM"
+
+    # On-module Flash Memory
+    flash:
+      type: "SPI Flash"
+      part_number: "W25Q128JVSIM"
+      manufacturer: "Winbond"
+      size_mb: 16
+      size_bits: "128 Mbit"
+      interface: "SPI"
+      purpose: "Boot code storage, user data, program storage"
+      pins_used: "P58-P61 (shared with microSD)"
+
+    # NO PSRAM on standard module
+    psram: null
+    psram_note: "Standard P2-EC module does not include PSRAM. See P2-EC32MB for 32MB PSRAM variant."
+
+# =============================================================================
+# PHYSICAL SPECIFICATIONS
+# =============================================================================
   physical:
     dimensions:
-      length: "2.7 inches"
-      width: "1.4 inches"  
-      height: "0.25 inches"
-    weight: "TBD"
-    connector: "80-pin edge connector"
-    mounting: "Via carrier boards"
-    
+      length_inches: 2.04
+      length_mm: 51.7
+      width_inches: 1.45
+      width_mm: 37.0
+      height_inches: 0.25
+      height_mm: 6.35
+
+    mounting:
+      holes: 2
+      hole_connection: "Ground plane"
+      orientation_hole: 1
+      orientation_hole_plated: false
+
+    edge_connector:
+      type: "Double-sided card edge"
+      ways: 80
+      contacts_per_side: 40
+      pitch_inches: 0.05
+      pitch_mm: 1.27
+
+    pcb:
+      layers: 6
+      features:
+        - "Solid thermal planes for low temperature rise"
+        - "Signal reference planes isolating each signal layer"
+        - "Optimized for low-noise analog and digital operation"
+
+# =============================================================================
+# ELECTRICAL SPECIFICATIONS
+# =============================================================================
   electrical:
-    supply_voltage: "3.3V"
-    core_voltage: "1.8V (onboard regulator)"
-    current_consumption: "TBD - depends on usage"
-    temperature_range: "Industrial grade"
-    
-pinout:
-  total_pins: 64
-  io_pins: "P0-P63 (all smart pins)"
-  power_pins: "3.3V, 1.8V, GND"
-  programming_pins: "Via carrier board USB/serial"
-  crystal_pins: "Internal 20MHz crystal"
-  
+    # Power input
+    input_power:
+      voltage_min_vdc: 5
+      voltage_max_vdc: 16
+      voltage_absolute_max_vdc: 16
+      current_min_ma: 100
+      current_typical_ma: "500-1000"
+      current_max_ma: 3000
+      reverse_polarity_protection: true
+
+    # VDD - P2 Core supply
+    vdd_regulator:
+      type: "Switching buck regulator"
+      voltage: "1.8V"
+      max_current_a: 3
+      switching_freq_khz: 750
+      protection:
+        - "Short-circuit (20ms shutdown, 2.5ms retry cycle)"
+        - "Over-current"
+        - "Brownout detection (~1.5V threshold)"
+
+    # VIO - I/O pin supplies
+    vio_regulators:
+      type: "Low-noise LDO"
+      voltage: "3.3V"
+      quantity: 8
+      current_per_regulator_ma: 300
+      protection:
+        - "Short-circuit"
+        - "Over-current"
+      note: "One LDO per 8-pin group for isolation and local regulation"
+
+    # I/O characteristics
+    io_pins:
+      logic_voltage: "3.3V"
+      max_voltage: "3.6V"
+      source_current_ma: 30
+      sink_current_ma: 30
+      current_budget_per_group_ma: 300
+
+    # Environmental
+    temperature:
+      operating_min_c: -40
+      operating_max_c: 85
+      operating_min_f: -40
+      operating_max_f: 185
+
+# =============================================================================
+# PIN MAPPING - DEDICATED HARDWARE ASSIGNMENTS
+# =============================================================================
+pin_mapping:
+  description: "Complete I/O pin assignments for P2-EC standard module"
+
+  # Summary counts - KEY DIFFERENCE from 32MB module
+  summary:
+    total_smart_pins: 64
+    fully_free: 56            # P0-P55 (more than 32MB module!)
+    led_buffered: 2           # P56-P57 (different pins than 32MB!)
+    flash_sd_shared: 4        # P58-P61
+    serial_programming: 2     # P62-P63
+    edge_connector_accessible: 64  # ALL pins accessible (no internal PSRAM)
+
+  # KEY DIFFERENCE: No PSRAM, so P40-P57 are available for user I/O
+  # (except P56-P57 have LED buffers)
+
+  # Fully free pins - no dedicated hardware
+  free_pins:
+    P0_P7:
+      pins: "P0-P7"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V00"
+      current_budget_ma: 300
+    P8_P15:
+      pins: "P8-P15"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V08"
+      current_budget_ma: 300
+    P16_P23:
+      pins: "P16-P23"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V16"
+      current_budget_ma: 300
+    P24_P31:
+      pins: "P24-P31"
+      count: 8
+      status: "Fully free with restriction"
+      vio_regulator: "V24"
+      current_budget_ma: 300
+      warning: "Avoid high-speed simultaneous switching at system clock frequency"
+    P32_P39:
+      pins: "P32-P39"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V32"
+      current_budget_ma: 300
+    P40_P47:
+      pins: "P40-P47"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V40"
+      current_budget_ma: 300
+      note: "On 32MB module, these are dedicated to PSRAM"
+    P48_P55:
+      pins: "P48-P55"
+      count: 8
+      status: "Fully free"
+      vio_regulator: "V48"
+      current_budget_ma: 300
+      note: "On 32MB module, these are dedicated to PSRAM"
+
+  # LED buffered pins - DIFFERENT PINS than 32MB module!
+  led_pins:
+    P56:
+      function: "Buffered LED"
+      status: "Usable - high-impedance buffer attached"
+      vio_regulator: "V56"
+      buffer: "Dual Schmitt-trigger, high-Z input"
+      led_visible: "Both sides of PCB"
+      control: "DIP switch to disable LED power"
+      note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
+    P57:
+      function: "Buffered LED"
+      status: "Usable - high-impedance buffer attached"
+      vio_regulator: "V56"
+      buffer: "Dual Schmitt-trigger, high-Z input"
+      led_visible: "Both sides of PCB"
+      control: "DIP switch to disable LED power"
+      note: "High-Z by default; LEDs sensitive to nearby objects. Drive high/low or enable pull-ups to control."
+
+  # Flash and microSD shared pins
+  flash_sd_pins:
+    P58:
+      primary: "Flash SPI DO (MISO)"
+      secondary: "microSD DAT0/MISO"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+    P59:
+      primary: "Flash SPI DI (MOSI)"
+      secondary: "microSD CMD/MOSI"
+      tertiary: "Boot mode select (with pull-up/pull-down resistors)"
+      vio_regulator: "V56"
+      status: "Shared - Flash, microSD, boot mode"
+    P60:
+      primary: "Flash SPI CLK"
+      secondary: "microSD DAT3/CS (active low)"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+    P61:
+      primary: "Flash SPI CS"
+      secondary: "microSD CLK"
+      vio_regulator: "V56"
+      status: "Shared - Flash and microSD"
+
+  # Serial programming pins
+  serial_pins:
+    P62:
+      function: "Serial TXD (P2 transmits)"
+      direction: "Output from P2"
+      purpose: "Prop-Plug RX connection"
+      vio_regulator: "V56"
+    P63:
+      function: "Serial RXD (P2 receives)"
+      direction: "Input to P2"
+      purpose: "Prop-Plug TX connection"
+      vio_regulator: "V56"
+
+  # Reset pin
+  reset:
+    RESn:
+      function: "Reset input"
+      logic: "Active low"
+      pull_up: "10K to 3.3V (internal)"
+      behavior: "All cogs disabled, I/O pins floating when low"
+      recovery: "Restart 3ms after low-to-high transition"
+      max_voltage: "3.6V"
+
+# =============================================================================
+# BOOT MODE CONFIGURATION
+# =============================================================================
+boot_modes:
+  description: "DIP switch settings for boot mode selection"
+  switches:
+    LED: "Enable/disable onboard LEDs (P56, P57)"
+    FLASH: "Flash boot enable"
+    triangle_up: "P59 pull-up (boot option)"
+    triangle_down: "P59 pull-down (boot option)"
+
+  warning: "Only switch ONE of triangle_up or triangle_down ON to avoid inconsistent behavior"
+
+  configurations:
+    - flash: "OFF"
+      up: "OFF"
+      down: "OFF"
+      mode: "Serial window 60 seconds (default when SD not inserted)"
+    - flash: "OFF"
+      up: "ON"
+      down: "OFF"
+      mode: "Serial window 60 seconds, overrides Flash and SD"
+    - flash: "ON"
+      up: "OFF"
+      down: "OFF"
+      mode: "Serial 100ms, then SPI flash. If flash fails, serial 60s"
+    - flash: "ON"
+      up: "OFF"
+      down: "ON"
+      mode: "SPI flash only (fast boot). If fails, shutdown"
+    - flash: "OFF"
+      up: "OFF"
+      down: "ON"
+      mode: "SD card with serial fallback. If fails, serial 60s"
+    - flash: "OFF"
+      up: "OFF"
+      down: "OFF"
+      mode: "SD card only (when SD inserted). If fails, shutdown"
+
+# =============================================================================
+# PROTOCOL CONSTRAINTS - FOR DRIVER DEVELOPMENT
+# =============================================================================
+protocol_constraints:
+  flash:
+    interface: "SPI"
+    max_clock_mhz: 133  # Per W25Q128JV datasheet
+    addressing: "24-bit (16MB)"
+
+  serial:
+    max_baud: 2000000
+    pins: "P62 (TX), P63 (RX)"
+    compatible_programmer: "PropPlug #32201"
+
+# =============================================================================
+# RESOURCES AND REFERENCES
+# =============================================================================
+resources:
+  documentation:
+    primary:
+      title: "P2-EC Edge Module Rev D Product Guide v3.0"
+      date: "2022-06-03"
+      publisher: "Parallax Inc."
+    related:
+      - "P2 Silicon Documentation (Propeller 2 Datasheet)"
+      - "Winbond W25Q128JV Flash Datasheet"
+
+  edge_connectors:
+    - part: "450-00308"
+      type: "Card Edge Socket, Through Hole, Right Angle"
+    - part: "450-00309"
+      type: "Card Edge Socket, Straight, SMT"
+    - part: "450-00310"
+      type: "Card Edge Socket, Straight, Through Hole"
+
+# =============================================================================
+# CARRIER BOARD COMPATIBILITY
+# =============================================================================
 compatibility:
   carriers:
     - part: "64029"
       name: "P2 Edge Standard Breakout"
       pin_access: "All 64 pins accessible"
       form_factor: "Standard development"
-    - part: "64019" 
+    - part: "64019"
       name: "P2 Edge Mini Breakout"
-      pin_access: "40 pins accessible"
+      pin_access: "P0-P31, P58-P63 accessible (40 pins)"
       form_factor: "Compact development"
     - part: "64020"
       name: "P2 Edge Module Breadboard"
-      pin_access: "All 64 pins + prototyping"
+      pin_access: "All 64 pins + prototyping area"
       form_factor: "Educational/prototype"
-  
+
   alternatives:
     - part: "P2-EC32MB"
       name: "P2 Edge 32MB Module"
-      difference: "32MB flash vs 4MB"
-      use_case: "Memory-intensive applications"
-      
+      key_difference: "Adds 32MB PSRAM (not flash!) for memory-intensive applications"
+      tradeoff: "P40-P57 dedicated to PSRAM, only 40 GPIO fully free"
+      use_case: "Video framebuffers, audio samples, large data structures"
+
+# =============================================================================
+# USE CASES AND APPLICATIONS
+# =============================================================================
 use_cases:
-  - "Standard P2 development platform"
-  - "Production deployment (with custom carrier)"
-  - "Educational and training platforms"
-  - "Prototyping and proof-of-concept"
-  - "Multi-peripheral projects requiring full pin access"
-  
+  primary:
+    - "Standard P2 development platform"
+    - "Production deployment with custom carrier"
+    - "Educational and training platforms"
+    - "Prototyping and proof-of-concept"
+    - "Multi-peripheral projects requiring full 56-pin access"
+  secondary:
+    - "Applications not requiring external RAM"
+    - "Cost-sensitive production designs"
+    - "Projects using P40-P57 for user I/O"
+
+target_applications:
+  gpio_intensive:
+    - "Multi-channel sensor arrays"
+    - "Display interfaces (VGA, LCD)"
+    - "Motor control with many channels"
+    - "LED matrix drivers"
+  communication:
+    - "Multi-protocol bridges"
+    - "Industrial automation"
+    - "Robotics control"
+  general:
+    - "Data acquisition"
+    - "Process control"
+    - "Test equipment"
+
+# =============================================================================
+# ADVANTAGES AND LIMITATIONS
+# =============================================================================
 advantages:
+  - "56 fully free smart pins (P0-P55)"
+  - "All 64 pins accessible at edge connector"
+  - "16MB Flash for large programs and data"
+  - "High-precision TCXO (+/- 0.5 PPM)"
+  - "6-layer PCB with thermal plane"
+  - "Wide input voltage range (5-16 VDC)"
   - "Modular design - replaceable/upgradeable"
-  - "All 64 smart pins available"
-  - "Standard 4MB flash sufficient for most applications"
+  - "Compatible with all Edge carrier boards"
+  - "microSD card socket for additional storage"
   - "Production-ready form factor"
-  - "Compatible with multiple carrier options"
-  
+
 limitations:
+  - "No external RAM (512KB Hub RAM only)"
   - "Requires carrier board for development"
-  - "4MB flash may be insufficient for complex applications"
-  - "Cannot access pins without carrier"
-  - "Additional cost vs integrated solutions"
-  
+  - "P56-P63 have dedicated hardware (8 pins)"
+  - "P24-P31 have simultaneous switching restrictions"
+
+# =============================================================================
+# COMPARISON WITH 32MB MODULE
+# =============================================================================
+comparison_with_32mb:
+  this_module:
+    psram: "None"
+    fully_free_pins: 56
+    led_pins: "P56, P57"
+    psram_pins: "N/A - available for GPIO"
+
+  ec32mb_module:
+    psram: "32MB (4x 8MB QSPI)"
+    fully_free_pins: 38
+    led_pins: "P38, P39"
+    psram_pins: "P40-P57 dedicated"
+
+  note: "Choose P2-EC for maximum GPIO, P2-EC32MB for external memory"
+
+# =============================================================================
+# DEVELOPMENT WORKFLOW
+# =============================================================================
 development_workflow:
-  - "Select appropriate carrier board"
-  - "Insert module into carrier"
-  - "Connect USB programming cable"
-  - "Develop using Spin2/PASM2"
+  - "Select appropriate carrier board (Mini, Standard, or Breadboard)"
+  - "Insert P2-EC module into carrier board"
+  - "Connect power supply (5-16 VDC)"
+  - "Connect PropPlug or USB-serial for programming"
+  - "Set boot mode DIP switches as needed"
+  - "Develop using Spin2/PASM2 or C (FlexProp)"
   - "Test with carrier peripherals"
   - "Deploy to custom carrier for production"
-  
+
 programming:
-  methods:
-    - "USB via carrier board"
-    - "Prop Plug via carrier board"
+  interface:
+    type: "Serial"
+    max_baud: 2000000
+    pins: "P62 (TX from P2), P63 (RX to P2)"
+
   tools:
-    - "PropellerTool"
-    - "PNut"
-    - "VS Code with Spin2 extension"
+    - name: "PropPlug"
+      part: "32201"
+      note: "USB-to-serial programmer"
+    - name: "Propeller Tool"
+      type: "IDE"
+    - name: "PNut"
+      type: "Compiler"
+    - name: "FlexProp"
+      type: "IDE/Compiler (supports C)"
+
   languages:
     - "Spin2"
     - "PASM2"
     - "C (via FlexProp)"
-    
-documentation:
-  primary: "P2-EC Edge Module Rev D Product Guide v3.0"
-  related:
-    - "P2 Silicon Documentation"
-    - "Carrier board guides"
-    - "PASM2/Spin2 language references"
-    
+
+# =============================================================================
+# REVISION HISTORY (from source document)
+# =============================================================================
+revision_history:
+  - version: "1.0"
+    changes: "Original release"
+  - version: "1.5"
+    release: "Rev B"
+    changes:
+      - "Silk screen markings added/improved"
+      - "Narrow/adjust edge pads for thicker copper plating"
+      - "Increase copper plating from 1.5oz to 2oz"
+      - "LED color changed from green to white"
+  - version: "1.6"
+    changes: "Edge Connector Pin Assignments P24-P31 updated"
+  - version: "1.7"
+    changes: "Edge Connector Pin Assignments P24-P31 updated"
+  - version: "2.0"
+    release: "Rev C"
+    changes:
+      - "microSD card socket added"
+      - "Power supply VIN max increased from 5.5V to 16V"
+      - "Clock source changed from low precision crystal to TCXO"
+  - version: "3.0"
+    release: "Rev D"
+    changes:
+      - "Switching power supplies changed (supply issues)"
+      - "Max current increased from 2A to 3A"
+      - "Switching frequency changed from 2.5MHz to 750kHz"
+      - "Layer count increased from 4 to 6"
+      - "Additional thermal PCB layer"
+
+# =============================================================================
+# VENDOR INFORMATION
+# =============================================================================
 availability:
   vendor: "Parallax Inc."
-  website: "parallax.com"
-  distributor_network: "Yes"
-  
+  website: "https://www.parallax.com"
+  part_lookup: "Search for P2-EC"
+  distributor_network: true
+
+# =============================================================================
+# QUALITY RATINGS
+# =============================================================================
 quality_rating: "production"
 recommendation_score: 5
 educational_value: "high"
 production_readiness: "excellent"
 
-# Cross-references
+# =============================================================================
+# CROSS-REFERENCES
+# =============================================================================
 ecosystem_position: "foundation_module"
 hardware_family: "p2_edge"
+related_modules:
+  - key: "p2kbHwEdge32mbModule"
+    name: "P2 Edge 32MB Module"
+    note: "Enhanced module with 32MB PSRAM"
+  - key: "p2kbHwEdgeMiniBreakout"
+    name: "P2 Edge Mini Breakout"
+    note: "Compact carrier board"
+  - key: "p2kbHwEdgeStandardBreakout"
+    name: "P2 Edge Standard Breakout"
+    note: "Full-featured carrier board"
+  - key: "p2kbHwEdgeBreadboard"
+    name: "P2 Edge Module Breadboard"
+    note: "Prototyping carrier board"
