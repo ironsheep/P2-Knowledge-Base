@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2026-01-03T23:04:21.148498",
+    "generated": "2026-01-08T05:23:14.233296",
     "total_entries": 974,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -1386,7 +1386,7 @@
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1766815250
+      "mtime": 1767849756
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
@@ -1402,7 +1402,7 @@
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1764449566
+      "mtime": 1767849756
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
