@@ -2,6 +2,21 @@
 
 This document describes the `STRUCT` feature in Spin2/PASM2, which allows you to define composite data types containing multiple named members. Structures provide a way to organize related data into logical units with convenient member access syntax.
 
+## Language Version Requirement
+
+**STRUCT is a language extension that requires Spin2 version 45 or later.**
+
+To use structures in your code, you must include the language version directive at the very beginning of your source file:
+
+```spin2
+{Spin2_v45}
+CON
+  STRUCT point(x, y)
+  ' ... rest of your code
+```
+
+The directive `{Spin2_v45}` (or a later version like `{Spin2_v51}`) must appear before any other code. Without this directive, the compiler will not recognize the `STRUCT` keyword.
+
 ## Overview
 
 Structures in Spin2 allow you to:

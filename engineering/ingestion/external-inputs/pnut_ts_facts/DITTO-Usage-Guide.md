@@ -1,6 +1,22 @@
 # DITTO Directive Usage Guide for Spin2/PASM2
 
-This document describes the `DITTO` directive in the Spin2 and PASM2 languages for the Parallax Propeller 2 (P2) microcontroller as implemented in the PNut-TS compiler. This feature was introduced in PNut version 50.
+This document describes the `DITTO` directive in the Spin2 and PASM2 languages for the Parallax Propeller 2 (P2) microcontroller as implemented in the PNut-TS compiler.
+
+## Language Version Requirement
+
+**The DITTO directive requires Spin2 version 50 or later.**
+
+To use the DITTO directive in your code, you must include the language version directive at the very beginning of your source file:
+
+```spin2
+{Spin2_v50}
+DAT
+        DITTO   4
+        LONG    $77777777 + $$
+        DITTO   END
+```
+
+The directive `{Spin2_v50}` (or a later version like `{Spin2_v51}`) must appear before any other code. Without this directive, the compiler will not recognize the `DITTO` keyword or the `$$` iteration index symbol.
 
 ## Overview
 
@@ -353,13 +369,6 @@ DAT
 | `ORG not allowed within a DITTO block` | ORG directive inside DITTO |
 | `ORGH not allowed within a DITTO block` | ORGH directive inside DITTO |
 | `"$$" (DITTO index) is only allowed within a DITTO block, inside a DAT block` | Using `$$` outside DITTO |
-
----
-
-## Version Information
-
-- **Introduced:** PNut v50
-- **Compiler Support:** PNut-TS fully supports DITTO as of the v50-compatible release
 
 ---
 

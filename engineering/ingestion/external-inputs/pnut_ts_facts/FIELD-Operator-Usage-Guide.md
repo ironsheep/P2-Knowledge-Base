@@ -2,6 +2,12 @@
 
 This document describes the `FIELD` operator in Spin2/PASM2, which provides access to packed bit-fields stored in memory. The FIELD operator enables efficient manipulation of data structures where multiple values are packed into bytes, words, or longs.
 
+## Language Version
+
+The `FIELD` operator is part of the base Spin2 language and does not require a special language version directive. It works with any supported Spin2 version.
+
+If your code uses other language extensions (such as `STRUCT`), you may still need a version directive like `{Spin2_v45}` for those features, but `FIELD` itself is always available.
+
 ## Overview
 
 The `FIELD` operator allows you to:

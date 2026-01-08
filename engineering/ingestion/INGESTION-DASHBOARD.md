@@ -1,19 +1,33 @@
 # Ingestion Dashboard - Source Content Status
 
 **Generated**: 2025-09-01  
-**Updated**: 2025-09-26 - Added Quick Bytes ingestion planning  
+**Updated**: 2025-01-06 - Added P1 sources section and ingestion plan  
 **Purpose**: Track extraction status for all ingested sources (documents, images, code)
 
 ## 🏆 Authoritative Sources Summary
+
+### P2 (Propeller 2)
 
 | Category | Count | Trust Level | Status |
 |----------|-------|-------------|--------|
 | **Core Technical** | 3 | 🏆 100% AUTHORITATIVE | Silicon Doc, Spin2 v51, P2 Datasheet |
 | **Hardware Boards** | 6 | 🏆 100% AUTHORITATIVE | All Edge modules & Eval Board |
 | **Add-On Modules** | 4+ | 🏆 100% AUTHORITATIVE | WiFi, PropPlug, Motor Driver, etc |
-| **Total Authoritative Sources** | **13+** | **🏆 AUTHORITATIVE** | All Official Parallax Documentation |
+| **Total P2 Authoritative** | **13+** | **🏆 AUTHORITATIVE** | All Official Parallax Documentation |
+
+### P1 (Propeller 1)
+
+| Category | Count | Trust Level | Status |
+|----------|-------|-------------|--------|
+| **Core Technical** | 2 | 🏆 100% AUTHORITATIVE | P1 Manual v1.2, P1 Datasheet v1.4 |
+| **Errata & Supplements** | 2 | 🏆 100% AUTHORITATIVE | Manual Errata, XBee Errata |
+| **Educational** | 2 | 🏆 100% AUTHORITATIVE | PE Labs Fundamentals, XBee Tutorial |
+| **Application Notes** | 17 | 🏆 100% AUTHORITATIVE | AN001-AN015, AN018-AN019 |
+| **Total P1 Authoritative** | **23** | **🏆 AUTHORITATIVE** | Complete P1 documentation set |
 
 ## Quick Status Summary
+
+### P2 Sources
 
 | Source | Authority | Original Doc | Images | Code | Audit Doc | Completeness |
 |--------|-----------|-------------|--------|------|-----------|--------------|
@@ -29,6 +43,19 @@
 | wx-wifi-module | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ✅ Complete | 100% |
 | propplug-rev-e | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ✅ Complete | 100% |
 | Others | Various | ... | ... | ... | ... | ... |
+
+### P1 Sources
+
+| Source | Authority | Original Doc | Images | Code | Audit Doc | Completeness |
+|--------|-----------|-------------|--------|------|-----------|--------------|
+| p1-propeller-manual-v1.2 | 🏆 AUTHORITATIVE | ✅ PDF | ⏳ Pending | ⏳ Pending | ✅ Complete | 60% |
+| p1-datasheet-v1.4 | 🏆 AUTHORITATIVE | ✅ PDF | ⏳ Pending | N/A | ✅ Complete | 60% |
+| desilva-p1-tutorial | GREEN | ✅ PDF | ⏳ Pending | ⏳ Pending | ❓ Check | 40% |
+| p1-propeller-manual-errata | 🏆 AUTHORITATIVE | ✅ PDF | N/A | N/A | ⏳ PLANNED | 0% |
+| p1-pe-labs-fundamentals | 🏆 AUTHORITATIVE | ✅ PDF | ⏳ Pending | ⏳ Pending | ⏳ PLANNED | 0% |
+| p1-xbee-tutorial | 🏆 AUTHORITATIVE | ✅ PDF | ⏳ Pending | ⏳ Pending | ⏳ PLANNED | 0% |
+| p1-xbee-tutorial-errata | 🏆 AUTHORITATIVE | ✅ PDF | N/A | N/A | ⏳ PLANNED | 0% |
+| p1-appnotes (17 docs) | 🏆 AUTHORITATIVE | ✅ PDF | ⏳ Pending | ⏳ Pending | ⏳ PLANNED | 0% |
 
 ## Detailed Source Status
 
@@ -99,8 +126,7 @@ Includes:
 - **Audit**: `pasm2-spreadsheet-audit.md`
 - **Status**: Data source, processed
 
-### 10. **Other Sources** ❓ NEED REVIEW
-- desilva-p1-tutorial
+### 10. **Other P2 Sources** ❓ NEED REVIEW
 - marketing-materials
 - p2-eval-add-on-boards
 - p2-wx-adapter
@@ -110,6 +136,60 @@ Includes:
 - propplug-rev-e
 - rom-booter
 - universal-motor-driver
+
+---
+
+## P1 (Propeller 1) Detailed Source Status
+
+**Ingestion Plan**: [P1 Sources Ingestion Plan](plans/p1-sources-ingestion-plan.md)
+
+### 11. **p1-propeller-manual-v1.2/** ⚠️ PARTIALLY INGESTED
+- **Original**: `P1 P8X32A-Web-PropellerManual-v1.2.pdf` (399 pages)
+- **Text**: ✅ `P1-PropellerManual-v1.2-extracted.txt`
+- **Images**: ❌ Not extracted
+- **Code**: ❌ Not extracted (manual contains Spin1/PASM1 examples)
+- **Audit**: ✅ `p1-propeller-manual-v1.2-complete-extraction-audit.md`
+- **Status**: Text and audit complete; images and code pending
+
+### 12. **p1-datasheet-v1.4/** ⚠️ PARTIALLY INGESTED
+- **Original**: `P8X32A-Propeller-Datasheet-v1.4.0.pdf` (36 pages)
+- **Text**: ✅ `p1-datasheet-v1.4-extracted.txt`
+- **Images**: ❌ Not extracted (pinout diagrams, timing charts)
+- **Code**: N/A (datasheet, no code examples)
+- **Audit**: ✅ `p1-datasheet-v1.4-complete-extraction-audit.md`
+- **Status**: Text and audit complete; images pending
+
+### 13. **desilva-p1-tutorial/** ⏳ EXTRACTED
+- **Original**: De Silva P1 Tutorial v1.21 (40 pages)
+- **Text**: ✅ Extracted
+- **Images**: ❌ Not extracted
+- **Code**: ❌ Not extracted
+- **Audit**: ❓ Needs formal 5-pass validation
+- **Status**: Basic extraction done; full validation pending
+
+### 14. **P1 Sources - PLANNED** (21 new documents)
+
+**Source Location**: `external-inputs/P1/` and `external-inputs/P1/AppNotes/`
+
+| Category | Documents | Status |
+|----------|-----------|--------|
+| **Core/Errata** | Propeller Manual Errata v1.1 | ⏳ PLANNED |
+| **Educational** | PE Labs Fundamentals v1.2 | ⏳ PLANNED |
+| **Communication** | XBee Tutorial v1.0.1, XBee Errata v1.0 | ⏳ PLANNED |
+| **App Notes** | AN001-AN015, AN018-AN019 (17 docs) | ⏳ PLANNED |
+
+**App Notes Topics**:
+- **Architecture**: Counters (AN001), Execution Time (AN009), Stack Space (AN019)
+- **Data/Algorithms**: Data Structures (AN003), Coroutines (AN014)
+- **Storage**: SD Filesystem (AN006), SRAM (AN012)
+- **Analog**: Sigma-Delta ADC (AN008), Schmitt Trigger (AN015)
+- **Display**: VGA GUI (AN004), VGA Menus (AN005), WMF Menus (AN013)
+- **Communication**: GPS NMEA (AN002), XBee Softload (AN007), PC Comm (AN018)
+- **Hardware**: Mixed Voltage (AN010), Simple Template (AN011)
+
+**Note**: AN016 and AN017 do not exist - these were never published by Parallax.
+
+---
 
 ## Key Findings
 
@@ -130,6 +210,23 @@ Includes:
 4. Complete pasm2-manual development
 
 ## 🆕 Planned Ingestions
+
+### P1 Sources (Official Parallax Documents) - PLANNED
+- **Source**: `external-inputs/P1/` and `external-inputs/P1/AppNotes/`
+- **Content**: 21 new P1 documents (4 root-level + 17 application notes)
+- **Plan Status**: ✅ COMPLETE - Ready for ingestion
+- **Plan Document**: [P1 Sources Ingestion Plan](plans/p1-sources-ingestion-plan.md)
+- **Key Documents**:
+  - Propeller Manual Errata v1.1
+  - PE Labs Fundamentals v1.2
+  - XBee Tutorial v1.0.1 + Errata
+  - 17 Application Notes (AN001-AN015, AN018-AN019)
+- **Topics Covered**:
+  - Counters, Data Structures, Coroutines, Stack Management
+  - SD Filesystem, ADC, SRAM, VGA, GPS, XBee
+  - PC Communication, Mixed Voltage, Execution Timing
+- **Authority**: 🏆 AUTHORITATIVE (all official Parallax publications)
+- **Benefits**: Complete P1 coverage for P1→P2 migration guides
 
 ### Quick Bytes (Parallax Community Tutorials) - READY TO EXECUTE
 - **Source**: https://www.parallax.com/propeller-2/quick-bytes/

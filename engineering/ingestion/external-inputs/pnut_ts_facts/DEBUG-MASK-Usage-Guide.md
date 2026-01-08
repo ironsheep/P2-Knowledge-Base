@@ -2,6 +2,26 @@
 
 This document describes the debug configuration constants and the selective `debug[N]()` form in the Spin2 and PASM2 languages for the Parallax Propeller 2 (P2) microcontroller.
 
+## Language Version Requirement
+
+**The selective debug feature (`debug[N]()` with `DEBUG_MASK`) requires Spin2 version 46 or later.**
+
+To use selective debug channels in your code, you must include the language version directive at the very beginning of your source file:
+
+```spin2
+{Spin2_v46}
+CON
+  DEBUG_MASK = %0101          ' Enable channels 0 and 2
+
+PUB go()
+  debug[0]("Channel 0 message")
+  debug[2]("Channel 2 message")
+```
+
+The directive `{Spin2_v46}` (or a later version like `{Spin2_v51}`) must appear before any other code.
+
+**Note**: Basic debug statements (`debug()` without channel numbers) and most debug configuration constants (`DEBUG_DISABLE`, `DEBUG_COGS`, etc.) are part of the base Spin2 language and do not require a version directive.
+
 ## Overview
 
 The P2's debug system operates at three distinct levels:

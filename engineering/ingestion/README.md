@@ -88,14 +88,31 @@ See **[AUTHORITATIVE-SOURCES.md](AUTHORITATIVE-SOURCES.md)** for complete catalo
 
 ### P1 (Propeller 1) Sources
 
-**Status**: Building P1 knowledge base in parallel with P2
-**Purpose**: Enable P1→P2 migration guides, provide template for P2 manual, support dual-processor AI
+**Status**: Building P1 knowledge base in parallel with P2  
+**Purpose**: Enable P1→P2 migration guides, provide template for P2 manual, support dual-processor AI  
+**Ingestion Plan**: [P1 Sources Ingestion Plan](plans/p1-sources-ingestion-plan.md)
+
+#### Already Ingested
 
 | Document | Version | Date | Authority | Status | Pages | Notes |
 |----------|---------|------|-----------|--------|-------|-------|
 | **P1 Propeller Manual** | 1.2.0 | 2011-06-14 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 399 | First systematic P1 ingestion, template for P2 manual |
 | **De Silva P1 Tutorial** | 1.21 | 2007-08-21 | GREEN | ⏳ EXTRACTED | 40 | Need formal 5-pass validation |
 | **P1 Datasheet** | 1.4.0 | 2011-06-14 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 36 | Hardware/electrical specs, complements P1 Manual |
+
+#### Planned P1 Ingestions (21 New Sources)
+
+| Document | Version | Authority | Status | Category |
+|----------|---------|-----------|--------|----------|
+| **Propeller Manual Errata** | 1.1 | 🏆 AUTHORITATIVE | ⏳ PLANNED | Core |
+| **PE Labs Fundamentals** | 1.2 | 🏆 AUTHORITATIVE | ⏳ PLANNED | Educational |
+| **XBee Tutorial** | 1.0.1 | 🏆 AUTHORITATIVE | ⏳ PLANNED | Communication |
+| **XBee Tutorial Errata** | 1.0 | 🏆 AUTHORITATIVE | ⏳ PLANNED | Communication |
+| **App Notes (17 docs)** | Various | 🏆 AUTHORITATIVE | ⏳ PLANNED | Technical |
+
+**App Notes Coverage**: AN001-AN015, AN018-AN019 (Counters, GPS, Data Structures, VGA, SD Cards, XBee, ADC, Execution Time, Mixed Voltage, SRAM, Coroutines, Schmitt Trigger, PC Comm, Stack Space)
+
+**Source Location**: `external-inputs/P1/` and `external-inputs/P1/AppNotes/`
 
 ### Trust Level Summary
 

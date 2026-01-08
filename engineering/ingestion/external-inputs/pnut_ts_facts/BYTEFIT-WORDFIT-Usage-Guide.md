@@ -2,6 +2,10 @@
 
 This document describes the `BYTEFIT` and `WORDFIT` directives in the Spin2 and PASM2 languages for the Parallax Propeller 2 (P2) microcontroller as implemented in the PNut-TS compiler.
 
+## Language Version
+
+The `BYTEFIT` and `WORDFIT` directives are part of the base Spin2 language and do not require a special language version directive. They work with any supported Spin2 version.
+
 ## Overview
 
 `BYTEFIT` and `WORDFIT` are data declaration directives used in DAT blocks that work similarly to `BYTE` and `WORD`, but with **compile-time range validation**. They ensure that the values you declare actually fit within the specified size, catching potential overflow errors during compilation rather than at runtime.

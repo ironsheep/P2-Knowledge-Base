@@ -2,6 +2,25 @@
 
 This document describes pointers in Spin2/PASM2, including typed pointers (`^BYTE`, `^WORD`, `^LONG`), structure pointers (`^structName`), and all the operations that can be performed with them.
 
+## Language Version Requirement
+
+**Typed pointers are a language extension that requires Spin2 version 45 or later.**
+
+To use typed pointers (`^BYTE`, `^WORD`, `^LONG`) or structure pointers (`^structName`) in your code, you must include the language version directive at the very beginning of your source file:
+
+```spin2
+{Spin2_v45}
+VAR
+  ^BYTE  pByteData
+  ^WORD  pWordData
+  ^LONG  pLongData
+  ' ... rest of your code
+```
+
+The directive `{Spin2_v45}` (or a later version like `{Spin2_v51}`) must appear before any other code. Without this directive, the compiler will not recognize the `^` pointer type syntax.
+
+**Note**: Basic pointer operations using `@` (address-of) and `BYTE[]`/`WORD[]`/`LONG[]` memory access are part of the base Spin2 language and do not require a version directive.
+
 ## Overview
 
 Pointers in Spin2 are 32-bit values that hold memory addresses. They enable:
