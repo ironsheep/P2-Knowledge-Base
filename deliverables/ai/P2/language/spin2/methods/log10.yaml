@@ -1,0 +1,79 @@
+method: LOG10
+type: method
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Computes the base-10 (common) logarithm of a floating-point value. Returns the 
+  exponent that 10 must be raised to in order to produce the input value 
+  (10^result = input). Computed internally as LOG2(x) * log10(2).
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := LOG10(float_value)"
+
+parameters:
+  - name: "float_value"
+    type: "float"
+    description: "Positive floating-point number (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "Base-10 logarithm result as 32-bit float"
+
+bytecode: "$CA (bc_log10)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB main() | x, result
+        x := 100.0
+        result := LOG10(x)                     ' result = 2.0 (10^2 = 100)
+    description: "Basic base-10 logarithm"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB log10_examples() | result
+        result := LOG10(1.0)                   ' result = 0.0 (10^0 = 1)
+        result := LOG10(10.0)                  ' result = 1.0 (10^1 = 10)
+        result := LOG10(1000.0)                ' result = 3.0 (10^3 = 1000)
+        result := LOG10(0.1)                   ' result = -1.0 (10^-1 = 0.1)
+    description: "Common logarithm values"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB amplitude_to_db(amplitude) : db
+        ' Convert linear amplitude to decibels
+        ' dB = 20 * log10(amplitude)
+        db := 20.0 *. LOG10(amplitude)
+    description: "Convert amplitude to decibels"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB scientific_exponent(value) : exponent
+        ' Get the order of magnitude (scientific notation exponent)
+        if value > 0.0
+          exponent := TRUNC(LOG10(value))
+    description: "Calculate order of magnitude"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Returns NaN if input is negative or zero"
+  - "Computed as LOG2(x) * log10(2) internally"
+  - "Commonly used for decibel calculations"
+  - "Inverse of EXP10() function"
+  - "Also called 'common logarithm'"
+
+related:
+  - EXP10
+  - LOG2
+  - LOG
+  - QLOG
+
+see_also:
+  - "Floating-point math"
+  - "Decibel calculations"
+  - "Scientific notation"
+
+oneliner: "Base-10 (common) logarithm of floating-point value (requires Spin2_v51)"

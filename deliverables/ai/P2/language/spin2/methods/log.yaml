@@ -1,0 +1,79 @@
+method: LOG
+type: method
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Computes the natural logarithm (base e, where e ≈ 2.71828) of a floating-point 
+  value. Returns the exponent that e must be raised to in order to produce the 
+  input value (e^result = input). Computed internally as LOG2(x) * ln(2).
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := LOG(float_value)"
+
+parameters:
+  - name: "float_value"
+    type: "float"
+    description: "Positive floating-point number (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "Natural logarithm result as 32-bit float"
+
+bytecode: "$CC (bc_log)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      CON
+        E = 2.718281828                        ' Euler's number
+      
+      PUB main() | result
+        result := LOG(E)                       ' result ≈ 1.0 (e^1 = e)
+    description: "Natural logarithm of e"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB log_examples() | result
+        result := LOG(1.0)                     ' result = 0.0 (e^0 = 1)
+        result := LOG(2.0)                     ' result ≈ 0.693147
+        result := LOG(10.0)                    ' result ≈ 2.302585
+    description: "Common natural logarithm values"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB half_life_decay(initial, half_life, time) : remaining
+        ' Exponential decay: N = N0 * e^(-λt) where λ = ln(2)/half_life
+        remaining := initial *. EXP(-0.693147 *. time /. half_life)
+    description: "Radioactive decay calculation"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB compound_time(principal, final, rate) : years
+        ' Time to grow from principal to final at continuous rate
+        ' t = ln(final/principal) / rate
+        years := LOG(final /. principal) /. rate
+    description: "Continuous compound interest time calculation"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Returns NaN if input is negative or zero"
+  - "Computed as LOG2(x) * ln(2) internally"
+  - "Used in exponential growth/decay calculations"
+  - "Inverse of EXP() function"
+  - "Also called 'ln' in mathematical notation"
+
+related:
+  - EXP
+  - LOG2
+  - LOG10
+  - QLOG
+
+see_also:
+  - "Floating-point math"
+  - "Exponential functions"
+  - "Natural logarithm"
+
+oneliner: "Natural logarithm (base e) of floating-point value (requires Spin2_v51)"

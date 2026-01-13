@@ -1,8 +1,15 @@
 method: TASKNEXT
 type: method
-description: |
-  Yield control to next task in round-robin schedule
 category: Task Operations
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Yield control to the next task in round-robin schedule. This is the primary 
+  mechanism for cooperative multitasking - tasks must call TASKNEXT() to allow 
+  other tasks to run.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "TASKNEXT()"
 parameters: []
 returns:
@@ -10,28 +17,32 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Cooperative yield
-      repeat
-        do_work_chunk()
-        TASKNEXT()  ' Let other tasks run
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI worker_task()
+        repeat
+          do_work_chunk()
+          TASKNEXT()                           ' Let other tasks run
     description: "Yield after work chunk"
   - code: |
-      ' Polling with yield
-      repeat
-        if data_ready
-          process_data()
-        TASKNEXT()  ' Don't hog CPU
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI poller_task()
+        repeat
+          if data_ready
+            process_data()
+          TASKNEXT()                           ' Don't hog CPU
     description: "Polling with cooperation"
   - code: |
-      ' Long computation with yields
-      repeat i from 0 to 1000
-        calculate_step(i)
-        if i // 10 == 0
-          TASKNEXT()  ' Yield every 10 iterations
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI compute_task() | i
+        repeat i from 0 to 1000
+          calculate_step(i)
+          if i // 10 == 0
+            TASKNEXT()                         ' Yield every 10 iterations
     description: "Periodic yielding in long loop"
 notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Voluntary context switch"
-  - "Enables cooperative multitasking"
+  - "Essential for cooperative multitasking"
   - "Current task pauses, next task runs"
   - "Returns when task gets control again"
   - "Essential for task cooperation"

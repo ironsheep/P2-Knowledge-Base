@@ -1,0 +1,81 @@
+method: ENDIANL
+type: method
+category: Byte Manipulation
+
+requires_version: "Spin2_v52"
+version_directive: "{Spin2_v52}"
+
+description: |
+  Reverses the byte order of a 32-bit long value, converting between big-endian 
+  and little-endian formats. Equivalent to MOVBYTS(value, %%0123). Useful for 
+  network protocol handling where data is often transmitted in big-endian format.
+  REQUIRES: {Spin2_v52} or later version directive at start of source file.
+
+syntax: "result := ENDIANL(value)"
+
+parameters:
+  - name: "value"
+    type: "long"
+    description: "32-bit value to byte-swap"
+
+returns:
+  type: "long"
+  description: "Value with byte order reversed"
+
+bytecode: "$E6 (bc_endianl)"
+
+byte_transformation:
+  input: "$12_34_56_78 (bytes: 12, 34, 56, 78)"
+  output: "$78_56_34_12 (bytes: 78, 56, 34, 12)"
+  description: "All 4 bytes are reversed"
+
+examples:
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB main() | value, swapped
+        value := $12_34_56_78
+        swapped := ENDIANL(value)              ' swapped = $78_56_34_12
+    description: "Basic 32-bit endian swap"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB network_to_host(net_long) : host_long
+        ' Convert network byte order (big-endian) to host (little-endian)
+        host_long := ENDIANL(net_long)
+    description: "Network to host byte order conversion"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB read_big_endian_long(addr) : value
+        ' Read a big-endian long from memory and convert to native
+        value := ENDIANL(LONG[addr])
+    description: "Read big-endian data from memory"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB verify_reversible() | original, swapped
+        ' Double swap returns original value
+        original := $AABBCCDD
+        swapped := ENDIANL(ENDIANL(original))  ' swapped = $AABBCCDD
+    description: "Double application returns original"
+
+notes:
+  - "REQUIRES {Spin2_v52} or later at start of source file"
+  - "Equivalent to MOVBYTS(value, %%0123)"
+  - "Double application returns original value"
+  - "Useful for network protocol handling (big-endian)"
+  - "P2 is little-endian; network protocols often big-endian"
+  - "Uses PASM2 MOVBYTS instruction internally"
+
+related:
+  - ENDIANW
+  - MOVBYTS
+  - BYTESWAP
+  - LONGSWAP
+
+see_also:
+  - "Byte manipulation"
+  - "Endian conversion"
+  - "Network protocols"
+
+oneliner: "Reverse byte order of 32-bit long (requires Spin2_v52)"

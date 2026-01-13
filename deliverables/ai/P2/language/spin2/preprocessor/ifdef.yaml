@@ -1,0 +1,123 @@
+directive: "#IFDEF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Begins a conditional compilation block that is compiled only if the specified 
+  symbol IS defined. The block extends until a matching #ELSE, #ELSEIFDEF, 
+  #ELSEIFNDEF, or #ENDIF directive. Conditional blocks can be nested up to 8 
+  levels deep.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: |
+    #IFDEF symbol
+        ' code compiled if symbol is defined
+    #ENDIF
+  with_else: |
+    #IFDEF symbol
+        ' code compiled if symbol is defined
+    #ELSE
+        ' code compiled if symbol is NOT defined
+    #ENDIF
+  with_elseif: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFDEF symbol2
+        ' code for symbol2
+    #ELSE
+        ' default code
+    #ENDIF
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to test (case-sensitive)"
+
+examples:
+  - code: |
+      ' Basic conditional - no version directive needed
+      #DEFINE DEBUG_MODE
+      
+      PUB main()
+      #IFDEF DEBUG_MODE
+          debug("Application starting...")
+      #ENDIF
+          run_main_loop()
+    description: "Basic conditional compilation"
+    
+  - code: |
+      ' Debug vs Release build pattern
+      #DEFINE DEBUG_BUILD
+      
+      PUB log_message(msg)
+      #IFDEF DEBUG_BUILD
+          debug(msg)
+          waitms(10)              ' Allow debug output to complete
+      #ELSE
+          ' Release build - no debug overhead
+      #ENDIF
+    description: "Debug vs release build configuration"
+    
+  - code: |
+      ' Nested conditionals for hardware variants
+      #DEFINE USE_DISPLAY
+      #DEFINE DISPLAY_OLED
+      
+      PUB init_display()
+      #IFDEF USE_DISPLAY
+          #IFDEF DISPLAY_OLED
+              oled.init(SDA_PIN, SCL_PIN)
+          #ELSEIFDEF DISPLAY_LCD
+              lcd.init(RS_PIN, EN_PIN, D4_PIN)
+          #ELSE
+              debug("Unknown display type")
+          #ENDIF
+      #ENDIF
+    description: "Nested conditionals for hardware configuration"
+    
+  - code: |
+      ' Feature gating with multiple conditions
+      #DEFINE FEATURE_NETWORK
+      #DEFINE FEATURE_STORAGE
+      
+      PUB system_init()
+          init_core()
+      #IFDEF FEATURE_NETWORK
+          init_network()
+      #ENDIF
+      #IFDEF FEATURE_STORAGE
+          init_storage()
+      #ENDIF
+      #IFDEF FEATURE_NETWORK
+          #IFDEF FEATURE_STORAGE
+              init_network_storage()    ' Only if BOTH features enabled
+          #ENDIF
+      #ENDIF
+    description: "Feature gating with combined conditions"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Maximum nesting depth is 8 levels"
+  - "Every #IFDEF must have a matching #ENDIF"
+  - "Can be combined with #ELSE for if-else logic"
+  - "Can be chained with #ELSEIFDEF/#ELSEIFNDEF for multi-way selection"
+  - "Code in non-matching blocks is completely removed - no runtime overhead"
+
+related:
+  - ifndef
+  - else
+  - elseifdef
+  - elseifndef
+  - endif
+  - define
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Build configurations"
+
+oneliner: "Compile block if preprocessor symbol is defined (v47+)"

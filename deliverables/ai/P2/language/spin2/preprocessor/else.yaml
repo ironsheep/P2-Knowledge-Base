@@ -1,0 +1,121 @@
+directive: "#ELSE"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Provides an alternative branch in a conditional compilation block. The code 
+  following #ELSE is compiled when all preceding conditions (#IFDEF, #IFNDEF, 
+  #ELSEIFDEF, #ELSEIFNDEF) were false. #ELSE is optional and must be the last 
+  branch before #ENDIF.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  with_ifdef: |
+    #IFDEF symbol
+        ' code if symbol defined
+    #ELSE
+        ' code if symbol NOT defined
+    #ENDIF
+  with_ifndef: |
+    #IFNDEF symbol
+        ' code if symbol NOT defined
+    #ELSE
+        ' code if symbol IS defined
+    #ENDIF
+  with_chain: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFDEF symbol2
+        ' code for symbol2
+    #ELSE
+        ' default code (neither symbol1 nor symbol2)
+    #ENDIF
+
+examples:
+  - code: |
+      ' Basic if-else pattern - no version directive needed
+      #DEFINE RELEASE_BUILD
+      
+      #IFDEF DEBUG_BUILD
+          CON DEBUG_ENABLED = true
+      #ELSE
+          CON DEBUG_ENABLED = false
+      #ENDIF
+    description: "Basic if-else conditional"
+    
+  - code: |
+      ' Default vs custom configuration
+      #IFDEF CUSTOM_PIN_LAYOUT
+          CON PIN_TX = CUSTOM_TX
+          CON PIN_RX = CUSTOM_RX
+      #ELSE
+          ' Default P2 Edge pins
+          CON PIN_TX = 62
+          CON PIN_RX = 63
+      #ENDIF
+    description: "Custom configuration with defaults"
+    
+  - code: |
+      ' Multi-way selection with fallback
+      #IFDEF SENSOR_TYPE_DHT22
+          OBJ sensor : "dht22_driver"
+      #ELSEIFDEF SENSOR_TYPE_BME280
+          OBJ sensor : "bme280_driver"
+      #ELSEIFDEF SENSOR_TYPE_SHT31
+          OBJ sensor : "sht31_driver"
+      #ELSE
+          ' No sensor driver - use stub
+          OBJ sensor : "sensor_stub"
+      #ENDIF
+    description: "Object selection with stub fallback"
+    
+  - code: |
+      ' Nested conditionals with else branches
+      #IFDEF HAS_DISPLAY
+          #IFDEF DISPLAY_COLOR
+              init_color_display()
+          #ELSE
+              init_mono_display()
+          #ENDIF
+      #ELSE
+          ' No display - use serial output
+          init_serial_output()
+      #ENDIF
+    description: "Nested conditionals with else at each level"
+    
+  - code: |
+      ' Compile-time error on invalid configuration
+      #IFDEF VALID_CONFIG_A
+          setup_config_a()
+      #ELSEIFDEF VALID_CONFIG_B
+          setup_config_b()
+      #ELSE
+          ' Force compile error for invalid config
+          INVALID_CONFIGURATION_ERROR
+      #ENDIF
+    description: "Compile-time configuration validation"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "#ELSE is optional in conditional blocks"
+  - "#ELSE must appear after all #ELSEIFDEF/#ELSEIFNDEF directives"
+  - "#ELSE must appear immediately before #ENDIF"
+  - "Only one #ELSE allowed per conditional block"
+  - "Code after #ELSE is compiled when all previous conditions were false"
+  - "#ELSE takes no parameters"
+
+related:
+  - ifdef
+  - ifndef
+  - elseifdef
+  - elseifndef
+  - endif
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Default code paths"
+
+oneliner: "Alternative branch when all preceding conditions are false (v47+)"

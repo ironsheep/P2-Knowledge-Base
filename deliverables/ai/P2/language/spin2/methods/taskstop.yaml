@@ -1,8 +1,15 @@
 method: TASKSTOP
 type: method
-description: |
-  Stop and terminate a running task
 category: Task Operations
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Permanently stop and terminate a running task. The task is immediately 
+  terminated and its task ID becomes available for reuse. Use THISTASK (-1) 
+  to stop the currently executing task.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "TASKSTOP(TaskID)"
 parameters:
   - name: "TaskID"
@@ -13,23 +20,28 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Stop specific task
-      TASKSTOP(2)  ' Stop task ID 2
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB main()
+        TASKSTOP(2)                            ' Stop task ID 2
     description: "Stop task by ID"
   - code: |
-      ' Task stops itself
-      PUB background_task()
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI background_task()
         repeat
           if shutdown_flag
-            TASKSTOP(THISTASK)  ' Stop self
+            TASKSTOP(THISTASK)                 ' Stop self
+          do_work()
+          TASKNEXT()
     description: "Task self-termination"
   - code: |
-      ' Stop all tasks except main
-      repeat task_id from 1 to 31
-        if TASKCHK(task_id)
-          TASKSTOP(task_id)
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB shutdown_all_tasks() | task_id
+        repeat task_id from 1 to 31
+          if TASKCHK(task_id)
+            TASKSTOP(task_id)
     description: "Stop all secondary tasks"
 notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Immediately terminates the task"
   - "Task's stack space can be reused"
   - "THISTASK (-1) stops current task"

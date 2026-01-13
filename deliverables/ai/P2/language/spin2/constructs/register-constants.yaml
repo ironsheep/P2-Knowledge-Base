@@ -1,0 +1,149 @@
+construct: Register Constants
+type: language_feature
+category: CON Block Features
+
+minimum_version: "v50"
+
+description: |
+  V50 allows register names (INA, INB, OUTA, OUTB, DIRA, DIRB, etc.) to be used 
+  as constant values in CON blocks. This enables defining named constants based 
+  on register addresses for indirect register access and improved code readability.
+  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
+
+location: CON block
+
+syntax: "constant_name = register_name"
+
+available_registers:
+  input_registers:
+    - name: "INA"
+      description: "Port A input pins (P0-P31)"
+    - name: "INB"
+      description: "Port B input pins (P32-P63)"
+      
+  output_registers:
+    - name: "OUTA"
+      description: "Port A output values"
+    - name: "OUTB"
+      description: "Port B output values"
+      
+  direction_registers:
+    - name: "DIRA"
+      description: "Port A direction (0=input, 1=output)"
+    - name: "DIRB"
+      description: "Port B direction (0=input, 1=output)"
+
+examples:
+  - code: |
+      CON
+        INPUT_REG = INA
+        OUTPUT_REG = OUTA
+        DIRECTION_REG = DIRA
+      
+      PUB setup_pins()
+        reg[DIRECTION_REG] := %11111111        ' Set P0-P7 as outputs
+        reg[OUTPUT_REG] := %10101010           ' Set output pattern
+    description: "Named constants for indirect register access"
+    
+  - code: |
+      CON
+        ' Port assignments
+        SENSOR_INPUT = INA
+        LED_OUTPUT = OUTA
+        LED_DIRECTION = DIRA
+      
+      PUB init_hardware()
+        reg[LED_DIRECTION] := LED_PINS
+        reg[LED_OUTPUT] := 0
+      
+      PUB read_sensors() : value
+        value := reg[SENSOR_INPUT] & SENSOR_MASK
+    description: "Hardware abstraction using register constants"
+    
+  - code: |
+      CON
+        ' Define port configuration table
+        PORT_A_IN = INA
+        PORT_A_OUT = OUTA
+        PORT_A_DIR = DIRA
+        PORT_B_IN = INB
+        PORT_B_OUT = OUTB
+        PORT_B_DIR = DIRB
+      
+      VAR
+        long port_config[6]
+      
+      PUB init_ports()
+        port_config[0] := PORT_A_IN
+        port_config[1] := PORT_A_OUT
+        port_config[2] := PORT_A_DIR
+        port_config[3] := PORT_B_IN
+        port_config[4] := PORT_B_OUT
+        port_config[5] := PORT_B_DIR
+    description: "Building port configuration tables"
+    
+  - code: |
+      CON
+        ' Platform-specific pin mapping
+        #IFDEF PLATFORM_A
+          MAIN_INPUT = INA
+          MAIN_OUTPUT = OUTA
+        #ELSE
+          MAIN_INPUT = INB
+          MAIN_OUTPUT = OUTB
+        #ENDIF
+      
+      PUB platform_read() : value
+        value := reg[MAIN_INPUT]
+    description: "Platform abstraction with preprocessor"
+    
+  - code: |
+      CON
+        ' Register addresses for inline assembly
+        INA_ADDR = INA
+        OUTA_ADDR = OUTA
+      
+      PUB fast_io() | value
+        org
+              rdlong  value, ##INA_ADDR        ' Read via constant
+        end
+    description: "Register constants in inline assembly"
+
+use_cases:
+  - "Hardware abstraction layers"
+  - "Indirect register access patterns"
+  - "Configuration tables for multi-port systems"
+  - "Platform-specific code with preprocessor"
+  - "Register address lookup tables"
+  - "Self-documenting I/O code"
+
+notes:
+  - "Available in PNut/pnut_ts v50 and later compilers"
+  - "No version directive required - this is NOT a gated feature"
+  - "Only valid inside CON blocks"
+  - "Returns the register's address/index value"
+  - "Useful for indirect register addressing via reg[]"
+  - "Improves code readability and maintainability"
+  - "Enables hardware abstraction patterns"
+
+restrictions:
+  - "Can only be used in CON blocks"
+  - "Cannot be used as variable initializers in VAR"
+  - "The constant gets the register address, not the register content"
+
+related:
+  - INA
+  - INB
+  - OUTA
+  - OUTB
+  - DIRA
+  - DIRB
+  - REG
+
+see_also:
+  - "CON block"
+  - "Register access"
+  - "Indirect addressing"
+  - "Hardware abstraction"
+
+oneliner: "Use register names (INA, OUTA, DIRA, etc.) as constants in CON blocks (v50+)"

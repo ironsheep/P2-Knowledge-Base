@@ -1,0 +1,81 @@
+method: ENDIANW
+type: method
+category: Byte Manipulation
+
+requires_version: "Spin2_v52"
+version_directive: "{Spin2_v52}"
+
+description: |
+  Reverses the byte order of the lower 16 bits (word) of a value. The upper 16 
+  bits of the result are always cleared to zero. Useful for converting 16-bit 
+  values between big-endian and little-endian formats.
+  REQUIRES: {Spin2_v52} or later version directive at start of source file.
+
+syntax: "result := ENDIANW(value)"
+
+parameters:
+  - name: "value"
+    type: "long"
+    description: "Value containing word to byte-swap in lower 16 bits"
+
+returns:
+  type: "long"
+  description: "Byte-swapped word in lower 16 bits, upper 16 bits cleared"
+
+bytecode: "$E8 (bc_endianw)"
+
+byte_transformation:
+  input: "$AA_BB_12_34 (word portion: $1234)"
+  output: "$00_00_34_12 (swapped word, upper cleared)"
+  description: "Only lower 16 bits processed, upper bits zeroed"
+
+examples:
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB main() | value, swapped
+        value := $00_00_12_34
+        swapped := ENDIANW(value)              ' swapped = $00_00_34_12
+    description: "Basic 16-bit endian swap"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB network_word_to_host(net_word) : host_word
+        ' Convert network byte order (big-endian) to host (little-endian)
+        host_word := ENDIANW(net_word)
+    description: "Network to host word conversion"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB read_big_endian_word(addr) : value
+        ' Read a big-endian word from memory and convert to native
+        value := ENDIANW(WORD[addr])
+    description: "Read big-endian word from memory"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB upper_bits_cleared() | value, result
+        ' Upper 16 bits are always cleared
+        value := $AA_BB_12_34
+        result := ENDIANW(value)               ' result = $00_00_34_12
+        ' Note: $AABB is discarded
+    description: "Upper bits cleared regardless of input"
+
+notes:
+  - "REQUIRES {Spin2_v52} or later at start of source file"
+  - "Only lower 16 bits are processed"
+  - "Upper 16 bits of result are ALWAYS zero"
+  - "Input upper bits are ignored, not preserved"
+  - "Double application returns original word (with upper bits zeroed)"
+  - "Implemented by shifting word to upper half, then MOVBYTS %%0123"
+
+related:
+  - ENDIANL
+  - MOVBYTS
+  - WORDSWAP
+
+see_also:
+  - "Byte manipulation"
+  - "Endian conversion"
+  - "16-bit protocols"
+
+oneliner: "Reverse byte order of 16-bit word, clear upper bits (requires Spin2_v52)"

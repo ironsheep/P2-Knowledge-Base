@@ -1,0 +1,79 @@
+method: EXP10
+type: method
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Computes 10 raised to the power of a floating-point exponent (10^x). Computed 
+  internally as EXP2(x / log10(2)). Returns the antilogarithm base 10, useful 
+  for decibel-to-linear conversions and scientific notation.
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := EXP10(float_exponent)"
+
+parameters:
+  - name: "float_exponent"
+    type: "float"
+    description: "Exponent value (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "10^exponent result as 32-bit float"
+
+bytecode: "$D0 (bc_exp10)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB main() | result
+        result := EXP10(2.0)                   ' result = 100.0 (10^2)
+    description: "Basic power of 10"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB exp10_examples() | result
+        result := EXP10(0.0)                   ' result = 1.0 (10^0)
+        result := EXP10(1.0)                   ' result = 10.0 (10^1)
+        result := EXP10(-1.0)                  ' result = 0.1 (10^-1)
+        result := EXP10(0.5)                   ' result ≈ 3.162 (√10)
+        result := EXP10(3.0)                   ' result = 1000.0 (10^3)
+    description: "Common powers of 10"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB db_to_amplitude(db) : amplitude
+        ' Convert decibels to linear amplitude
+        ' amplitude = 10^(dB/20)
+        amplitude := EXP10(db /. 20.0)
+    description: "Convert decibels to amplitude"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB from_scientific(mantissa, exponent) : value
+        ' Convert scientific notation to float
+        ' e.g., 3.5 x 10^6 = from_scientific(3.5, 6)
+        value := mantissa *. EXP10(FLOAT(exponent))
+    description: "Convert scientific notation to value"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Computed as EXP2(x / log10(2)) internally"
+  - "Returns NaN for extreme exponents (overflow/underflow)"
+  - "Commonly used for dB-to-linear conversions"
+  - "Inverse of LOG10() function"
+  - "Useful for scientific notation calculations"
+
+related:
+  - LOG10
+  - EXP2
+  - EXP
+  - POW
+
+see_also:
+  - "Floating-point math"
+  - "Decibel calculations"
+  - "Scientific notation"
+
+oneliner: "Compute 10^x for floating-point exponent (requires Spin2_v51)"

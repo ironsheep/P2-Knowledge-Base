@@ -1,0 +1,132 @@
+directive: "#ELSEIFDEF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Provides an else-if branch in a conditional compilation block that is compiled 
+  when the preceding condition was false AND the specified symbol IS defined.
+  Allows chaining multiple conditions without deep nesting. Must appear between 
+  #IFDEF/#IFNDEF and #ENDIF.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFDEF symbol2
+        ' code for symbol2 (when symbol1 not defined)
+    #ENDIF
+  chained: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFDEF symbol2
+        ' code for symbol2
+    #ELSEIFDEF symbol3
+        ' code for symbol3
+    #ELSE
+        ' default code
+    #ENDIF
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to test (case-sensitive)"
+
+examples:
+  - code: |
+      ' Platform selection - no version directive needed
+      #IFDEF TARGET_P2_EDGE
+          #DEFINE FLASH_SIZE  $800000
+          #DEFINE RAM_SIZE    $80000
+      #ELSEIFDEF TARGET_P2_EVAL
+          #DEFINE FLASH_SIZE  $200000
+          #DEFINE RAM_SIZE    $80000
+      #ELSEIFDEF TARGET_P2_CUSTOM
+          #DEFINE FLASH_SIZE  CUSTOM_FLASH
+          #DEFINE RAM_SIZE    CUSTOM_RAM
+      #ELSE
+          ' Default: P2 chip only
+          #DEFINE FLASH_SIZE  0
+          #DEFINE RAM_SIZE    $80000
+      #ENDIF
+    description: "Multi-platform configuration selection"
+    
+  - code: |
+      ' Communication protocol selection
+      #IFDEF USE_USB
+          OBJ
+              comm : "usb_serial"
+      #ELSEIFDEF USE_WIFI
+          OBJ
+              comm : "wifi_socket"
+      #ELSEIFDEF USE_BLUETOOTH
+          OBJ
+              comm : "bluetooth_spp"
+      #ELSE
+          OBJ
+              comm : "serial_simple"
+      #ENDIF
+    description: "Object selection based on communication type"
+    
+  - code: |
+      ' Debug level configuration
+      #IFDEF LOG_LEVEL_VERBOSE
+          #DEFINE LOG_DEBUG   1
+          #DEFINE LOG_INFO    1
+          #DEFINE LOG_WARN    1
+          #DEFINE LOG_ERROR   1
+      #ELSEIFDEF LOG_LEVEL_INFO
+          #DEFINE LOG_INFO    1
+          #DEFINE LOG_WARN    1
+          #DEFINE LOG_ERROR   1
+      #ELSEIFDEF LOG_LEVEL_WARN
+          #DEFINE LOG_WARN    1
+          #DEFINE LOG_ERROR   1
+      #ELSEIFDEF LOG_LEVEL_ERROR
+          #DEFINE LOG_ERROR   1
+      #ELSE
+          ' Silent mode - no logging
+      #ENDIF
+    description: "Tiered logging level configuration"
+    
+  - code: |
+      ' Display driver selection with fallback
+      #DEFINE USE_OLED
+      
+      #IFDEF USE_LCD_16X2
+          CON LCD_COLS = 16
+          CON LCD_ROWS = 2
+      #ELSEIFDEF USE_LCD_20X4
+          CON LCD_COLS = 20
+          CON LCD_ROWS = 4
+      #ELSEIFDEF USE_OLED
+          CON OLED_WIDTH = 128
+          CON OLED_HEIGHT = 64
+      #ENDIF
+    description: "Display type configuration"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Must appear after #IFDEF or #IFNDEF"
+  - "Must appear before #ELSE (if present) and #ENDIF"
+  - "Multiple #ELSEIFDEF directives can be chained"
+  - "Only the first matching branch is compiled"
+  - "Reduces nesting depth compared to nested #IFDEF blocks"
+  - "Maximum nesting depth of 8 levels applies to the outer block"
+
+related:
+  - ifdef
+  - ifndef
+  - elseifndef
+  - else
+  - endif
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Multi-way selection"
+
+oneliner: "Else-if branch when preprocessor symbol IS defined (v47+)"

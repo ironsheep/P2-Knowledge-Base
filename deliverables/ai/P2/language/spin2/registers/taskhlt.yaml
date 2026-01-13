@@ -1,9 +1,96 @@
-register: "TASKHLT"
+register: TASKHLT
 type: register
-category: "Task Management"
+category: Task Management
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
 description: |
-  Task halt register (v47+)
+  The TASKHLT register holds the halt status bits for all 32 tasks in the current 
+  cog. Each bit corresponds to a task ID (0-31), where a set bit indicates that 
+  task is currently halted. Note that the bits are stored in reverse order - bit 0 
+  corresponds to task 31, and bit 31 corresponds to task 0.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
+
+address: "512 ($200)"
+size: "32-bit"
+access: read_write
+
+bit_layout:
+  - bit: "0"
+    task: "31"
+    description: "Task 31 halt status"
+  - bit: "1"
+    task: "30"
+    description: "Task 30 halt status"
+  - bit: "..."
+    task: "..."
+    description: "..."
+  - bit: "30"
+    task: "1"
+    description: "Task 1 halt status"
+  - bit: "31"
+    task: "0"
+    description: "Task 0 halt status (main task)"
+
+syntax:
+  read: "status := TASKHLT"
+  write: "TASKHLT := value"
+
 examples:
-  - "TASKHLT := task_flags"
-address: "512"
-access: "read_write"
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB check_task_halted(task_id) : halted
+        ' Note: bits are reversed - task 0 is bit 31, task 31 is bit 0
+        halted := (TASKHLT >> (31 - task_id)) & 1
+    description: "Check if a specific task is halted"
+    
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB count_halted_tasks() : count | i
+        count := 0
+        repeat i from 0 to 31
+          if (TASKHLT >> (31 - i)) & 1
+            count++
+    description: "Count number of halted tasks"
+    
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB any_tasks_halted() : result
+        result := TASKHLT <> 0
+    description: "Quick check if any tasks are halted"
+    
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB monitor_tasks() | status
+        repeat
+          status := TASKHLT
+          if status
+            debug("Halted tasks: ", ubin(status))
+          waitms(100)
+    description: "Monitor task halt status"
+
+notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
+  - "Bits are stored in REVERSE order (bit 0 = task 31, bit 31 = task 0)"
+  - "A set bit (1) indicates the task is halted"
+  - "A clear bit (0) indicates the task is running or stopped"
+  - "Task 0 is typically the main program task"
+  - "Use TASKCHK() for simpler status checking of individual tasks"
+  - "Direct TASKHLT access useful for bulk task monitoring"
+  - "Writing to TASKHLT can force-halt or force-resume tasks"
+
+related:
+  - TASKHALT
+  - TASKCONT
+  - TASKRESUME
+  - TASKCHK
+  - NEWTASK
+  - THISTASK
+
+see_also:
+  - "Task management"
+  - "Multi-tasking"
+  - "Task status monitoring"
+
+oneliner: "Register containing halt status bits for all 32 tasks (requires Spin2_v47)"

@@ -1,0 +1,94 @@
+operator: POW
+type: binary_operator
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Binary operator that computes the first operand raised to the power of the 
+  second operand (x^y). Both operands and the result are floating-point values.
+  Computed internally as EXP2(exponent * LOG2(base)).
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := base POW exponent"
+
+operands:
+  - name: "base"
+    type: "float"
+    description: "Base value (IEEE 754 single precision)"
+  - name: "exponent"
+    type: "float"
+    description: "Exponent value (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "base^exponent result as 32-bit float"
+
+precedence:
+  level: 6
+  associates: "left"
+  same_level: "+, -, +., -."
+
+bytecode: "$C6 (bc_pow)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB main() | result
+        result := 2.0 POW 3.0                  ' result = 8.0 (2^3)
+    description: "Basic power operation"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB pow_examples() | result
+        result := 10.0 POW 2.0                 ' result = 100.0
+        result := 2.0 POW 0.5                  ' result ≈ 1.414 (√2)
+        result := 2.0 POW -1.0                 ' result = 0.5 (1/2)
+        result := 27.0 POW (1.0 /. 3.0)        ' result ≈ 3.0 (cube root)
+    description: "Various power calculations"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB nth_root(value, n) : root
+        ' Calculate nth root: value^(1/n)
+        root := value POW (1.0 /. FLOAT(n))
+    description: "Calculate nth root using POW"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB compound_interest(principal, rate, years) : final
+        ' A = P(1 + r)^t
+        final := principal *. ((1.0 +. rate) POW FLOAT(years))
+    description: "Compound interest calculation"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB distance_3d(x, y, z) : dist
+        ' d = √(x² + y² + z²)
+        dist := ((x *. x) +. (y *. y) +. (z *. z)) POW 0.5
+    description: "3D distance calculation"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Computed as EXP2(exponent * LOG2(base)) internally"
+  - "Returns NaN if base is negative (except for integer exponents)"
+  - "Returns NaN for 0^0 (mathematically undefined)"
+  - "Left-associative: a POW b POW c = (a POW b) POW c"
+  - "Same precedence as + and - operators"
+  - "For integer powers of 2, EXP2() is more efficient"
+
+related:
+  - LOG2
+  - EXP2
+  - LOG
+  - EXP
+  - LOG10
+  - EXP10
+
+see_also:
+  - "Floating-point math"
+  - "Exponential functions"
+  - "Root calculations"
+
+oneliner: "Compute x^y (power) for floating-point operands (requires Spin2_v51)"

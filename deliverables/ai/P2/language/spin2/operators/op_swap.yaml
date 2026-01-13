@@ -1,7 +1,115 @@
 operator: ":=:"
-type: operator
-description: |
-  Swap operator
+type: assignment_operator
 category: Assignment
+
+minimum_version: "v46"
+
+description: |
+  Swap operator that atomically exchanges the values of two variables.
+  Works with scalar variables (BYTE, WORD, LONG) and structure instances.
+  Both operands must be the same type and size.
+  Available in PNut/pnut_ts v46 and later compilers. No version directive required.
+
+syntax: "variable1 :=: variable2"
+
+operands:
+  - name: "variable1"
+    type: "any assignable"
+    description: "First variable to swap"
+  - name: "variable2"
+    type: "any assignable"
+    description: "Second variable (must be same type as first)"
+
+behavior:
+  - "Exchanges values atomically in single operation"
+  - "Both operands are both read and written"
+  - "Type checking ensures both operands are compatible"
+  - "Works with scalars, structures, and pointer targets"
+
 examples:
-  - "a :=: b  // swap values of a and b"
+  - code: |
+      PUB swap_demo() | a, b
+        a := 10
+        b := 20
+        a :=: b                                ' Swap values
+        ' Now: a = 20, b = 10
+    description: "Basic variable swap"
+    
+  - code: |
+      CON
+        STRUCT point(x, y)
+      
+      VAR
+        point p1, p2
+      
+      PUB swap_points()
+        p1.x := 10
+        p1.y := 20
+        p2.x := 30
+        p2.y := 40
+        p1 :=: p2                              ' Swap entire structures
+        ' Now: p1 = (30,40), p2 = (10,20)
+    description: "Swapping structure instances"
+    
+  - code: |
+      VAR
+        byte buffer1[10], buffer2[10]
+      
+      PUB swap_bytes() | i
+        ' Initialize buffers
+        repeat i from 0 to 9
+          buffer1[i] := i
+          buffer2[i] := i + 100
+        
+        repeat i from 0 to 9
+          buffer1[i] :=: buffer2[i]            ' Swap element by element
+    description: "Swapping array elements"
+    
+  - code: |
+      PUB bubble_sort(arr, count) | i, j
+        repeat i from 0 to count - 2
+          repeat j from 0 to count - i - 2
+            if long[arr][j] > long[arr][j + 1]
+              long[arr][j] :=: long[arr][j + 1]  ' Swap adjacent elements
+    description: "Using swap in sorting algorithm"
+    
+  - code: |
+      VAR
+        long x, y, z
+      
+      PUB rotate_left()
+        ' Rotate values: x <- y <- z <- x
+        x :=: y                                ' x<->y: x gets old y
+        y :=: z                                ' y<->z: y gets old z, z gets original x
+    description: "Rotating values with chained swaps"
+
+comparison:
+  - traditional: |
+      temp := a
+      a := b
+      b := temp
+    swap_operator: "a :=: b"
+    description: "Three operations vs one operator"
+
+notes:
+  - "Available in PNut/pnut_ts v46 and later compilers"
+  - "No version directive required - this is NOT a gated feature"
+  - "Both operands must be the same type"
+  - "Works with variables, array elements, and structure members"
+  - "For large structures, uses BYTEMOVE internally for efficiency"
+  - "Cannot swap constants or immediate values"
+  - "Requires both operands to be writable (lvalues)"
+
+related:
+  - STRUCT
+  - BYTESWAP
+  - WORDSWAP
+  - LONGSWAP
+  - BYTEMOVE
+
+see_also:
+  - "Memory operations"
+  - "Structure operations"
+  - "Assignment operators"
+
+oneliner: "Atomically swap values of two variables (v46+)"

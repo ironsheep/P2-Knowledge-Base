@@ -1,0 +1,85 @@
+method: EXP
+type: method
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Computes e (Euler's number ≈ 2.71828) raised to the power of a floating-point 
+  exponent (e^x). Computed internally as EXP2(x / ln(2)). Returns the natural 
+  antilogarithm, essential for exponential growth/decay calculations.
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := EXP(float_exponent)"
+
+parameters:
+  - name: "float_exponent"
+    type: "float"
+    description: "Exponent value (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "e^exponent result as 32-bit float"
+
+bytecode: "$D2 (bc_exp)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB main() | result
+        result := EXP(1.0)                     ' result ≈ 2.71828 (e^1 = e)
+    description: "Basic natural exponential"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB exp_examples() | result
+        result := EXP(0.0)                     ' result = 1.0 (e^0)
+        result := EXP(-1.0)                    ' result ≈ 0.36788 (1/e)
+        result := EXP(2.0)                     ' result ≈ 7.389 (e^2)
+        result := EXP(-2.0)                    ' result ≈ 0.1353 (e^-2)
+    description: "Common natural exponential values"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB exponential_decay(initial, decay_rate, time) : remaining
+        ' N(t) = N0 * e^(-λt)
+        remaining := initial *. EXP(-decay_rate *. time)
+    description: "Exponential decay model"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB continuous_compound(principal, rate, time) : final
+        ' A = P * e^(rt) - continuous compound interest
+        final := principal *. EXP(rate *. time)
+    description: "Continuous compound interest"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB gaussian(x, mean, stddev) : probability
+        ' Normal distribution probability density
+        ' f(x) = (1/(σ√(2π))) * e^(-((x-μ)²)/(2σ²))
+        probability := EXP(-0.5 *. ((x -. mean) /. stddev) *. ((x -. mean) /. stddev))
+        probability := probability /. (stddev *. 2.506628)  ' stddev * √(2π)
+    description: "Gaussian/normal distribution"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Computed as EXP2(x / ln(2)) internally"
+  - "Returns NaN for extreme exponents (overflow/underflow)"
+  - "Essential for exponential growth/decay models"
+  - "Inverse of LOG() function"
+  - "e ≈ 2.718281828 (Euler's number)"
+
+related:
+  - LOG
+  - EXP2
+  - EXP10
+  - POW
+
+see_also:
+  - "Floating-point math"
+  - "Exponential functions"
+  - "Natural exponential"
+
+oneliner: "Compute e^x (natural exponential) for floating-point exponent (requires Spin2_v51)"

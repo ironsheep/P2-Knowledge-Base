@@ -1,8 +1,15 @@
 method: TASKSPIN
 type: method
-description: |
-  Start a new Spin2 task within the current cog
 category: Task Operations
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Start a new Spin2 task within the current cog. Tasks enable cooperative 
+  multitasking where multiple execution contexts share the same cog but have 
+  independent stacks and program counters.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "TASKSPIN(TaskID, Method({Parameters}), StackAddress)"
 parameters:
   - name: "TaskID"
@@ -19,24 +26,37 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Start a new task
+      {Spin2_v47}                              ' REQUIRED directive
       VAR
         LONG task_stack[64]
       
-      TASKSPIN(NEWTASK, background_process(), @task_stack)
+      PUB main()
+        TASKSPIN(NEWTASK, background_process(), @task_stack)
+        repeat
+          main_work()
+          TASKNEXT()
     description: "Start background task"
   - code: |
-      ' Start specific task ID
-      TASKSPIN(2, sensor_monitor(16, 1000), @sensor_stack)
-    description: "Start task with ID 2"
+      {Spin2_v47}                              ' REQUIRED directive
+      VAR
+        LONG sensor_stack[64]
+      
+      PUB main()
+        TASKSPIN(2, sensor_monitor(16, 1000), @sensor_stack)
+    description: "Start task with specific ID"
   - code: |
-      ' Multiple tasks
-      TASKSPIN(NEWTASK, task1(), @stack1)
-      TASKSPIN(NEWTASK, task2(), @stack2)
-      TASKSPIN(NEWTASK, task3(), @stack3)
+      {Spin2_v47}                              ' REQUIRED directive
+      VAR
+        LONG stack1[64], stack2[64], stack3[64]
+      
+      PUB main()
+        TASKSPIN(NEWTASK, task1(), @stack1)
+        TASKSPIN(NEWTASK, task2(), @stack2)
+        TASKSPIN(NEWTASK, task3(), @stack3)
     description: "Start multiple tasks"
 notes:
-  - "Up to 32 tasks per cog (v47+ feature)"
+  - "REQUIRES {Spin2_v47} or later at start of source file"
+  - "Up to 32 tasks per cog (IDs 0-31)"
   - "Tasks share cog but have separate stacks"
   - "Cooperative multitasking within cog"
   - "NEWTASK (-1) auto-assigns next available ID"

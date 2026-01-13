@@ -1,0 +1,120 @@
+directive: "#IFNDEF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Begins a conditional compilation block that is compiled only if the specified 
+  symbol is NOT defined. This is the inverse of #IFDEF. The block extends until 
+  a matching #ELSE, #ELSEIFDEF, #ELSEIFNDEF, or #ENDIF directive. Commonly used 
+  for include guards and default configurations.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: |
+    #IFNDEF symbol
+        ' code compiled if symbol is NOT defined
+    #ENDIF
+  with_else: |
+    #IFNDEF symbol
+        ' code compiled if symbol is NOT defined
+    #ELSE
+        ' code compiled if symbol IS defined
+    #ENDIF
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to test (case-sensitive)"
+
+examples:
+  - code: |
+      ' Default configuration pattern - no version directive needed
+      #IFNDEF CUSTOM_BAUD_RATE
+          #DEFINE BAUD_RATE  115200
+      #ELSE
+          #DEFINE BAUD_RATE  CUSTOM_BAUD_RATE
+      #ENDIF
+      
+      PUB init_serial()
+          serial.start(BAUD_RATE)
+    description: "Default value with override capability"
+    
+  - code: |
+      ' Include guard pattern (prevent double-inclusion effects)
+      #IFNDEF MY_LIBRARY_INCLUDED
+      #DEFINE MY_LIBRARY_INCLUDED
+      
+      CON
+          LIB_VERSION = 100
+      
+      PUB lib_init()
+          ' Library initialization code
+      
+      #ENDIF   ' MY_LIBRARY_INCLUDED
+    description: "Include guard pattern"
+    
+  - code: |
+      ' Production vs development defaults
+      #IFNDEF DEVELOPMENT_MODE
+          ' Production defaults
+          #DEFINE LOG_LEVEL_ERRORS_ONLY
+          #DEFINE OPTIMIZE_FOR_SPEED
+      #ELSE
+          ' Development defaults
+          #DEFINE LOG_LEVEL_VERBOSE
+          #DEFINE INCLUDE_DIAGNOSTICS
+      #ENDIF
+    description: "Production vs development build defaults"
+    
+  - code: |
+      ' Hardware fallback configuration
+      #IFNDEF PIN_LED
+          #DEFINE PIN_LED  56       ' Default LED pin
+      #ENDIF
+      #IFNDEF PIN_BUTTON
+          #DEFINE PIN_BUTTON  57    ' Default button pin
+      #ENDIF
+      
+      PUB setup()
+          pinlow(PIN_LED)
+          pinfloat(PIN_BUTTON)
+    description: "Fallback pin definitions with override capability"
+    
+  - code: |
+      ' Combining #IFNDEF with #IFDEF
+      #IFNDEF SILENT_MODE
+          #IFDEF VERBOSE_OUTPUT
+              #DEFINE LOG_EVERYTHING
+          #ELSE
+              #DEFINE LOG_IMPORTANT
+          #ENDIF
+      #ENDIF
+    description: "Combined conditional logic"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "#IFNDEF is the logical inverse of #IFDEF"
+  - "Maximum nesting depth is 8 levels"
+  - "Every #IFNDEF must have a matching #ENDIF"
+  - "Commonly used for include guards and default configurations"
+  - "Useful for providing defaults that can be overridden externally"
+
+related:
+  - ifdef
+  - else
+  - elseifdef
+  - elseifndef
+  - endif
+  - define
+  - undef
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Include guards"
+  - "Default configurations"
+
+oneliner: "Compile block if preprocessor symbol is NOT defined (v47+)"

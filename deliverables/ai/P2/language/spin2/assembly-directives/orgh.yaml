@@ -1,10 +1,142 @@
 directive: ORGH
 type: assembly_directive
-description: 'Set origin address for hub RAM
+category: Assembly Directives
 
-  '
-syntax: '[''ORGH address'']'
+description: |
+  Sets the origin address for hub RAM assembly code. In DAT blocks, ORGH positions 
+  code/data at a specific hub address. In V50+, ORGH also enables inline hub-execute 
+  assembly within Spin2 methods for performance-critical code sections.
+
+location: DAT block, or inline within PUB/PRI methods (V50+)
+
+syntax:
+  dat_block: "ORGH [address]"
+  inline_spin2: |
+    PUB/PRI method()
+        ORGH
+            ' Hub-execute PASM2 code
+        END
+
+parameters:
+  - name: "address"
+    type: "integer"
+    description: "Hub address for code/data placement (DAT block usage)"
+    optional: true
+    default: "Current location"
+
 examples:
-- ORGH $400  // Start at hub address $400
-group: Assembly
-last_updated: '2025-09-19T16:04:17.648610'
+  - code: |
+      DAT
+              orgh $400
+      data    long    0[16]                    ' 16 longs at hub address $400
+    description: "Basic hub address origin in DAT block"
+
+  - code: |
+      DAT
+              orgh                              ' Continue from current hub address
+      table   long    100, 200, 300, 400
+    description: "ORGH without address continues from current location"
+
+  - code: |
+      DAT
+              org                               ' Cog code
+      cog_routine
+              mov     pa, #1
+              ret
+      
+              orgh                              ' Switch to hub code
+      hub_data
+              long    0[256]                    ' Large buffer in hub RAM
+    description: "Mixed cog and hub sections in DAT block"
+
+  - code: |
+      PUB fast_copy(src, dst, count) | i
+        ORGH
+              mov     ptrb, dst
+              mov     ptra, src
+              rep     @.end, count
+              rdlong  i, ptra++
+              wrlong  i, ptrb++
+      .end
+        END
+    description: "V50+ inline hub-execute assembly in Spin2 method"
+
+  - code: |
+      PUB fast_fill(addr, value, count)
+        ORGH
+              mov     ptra, addr
+              rep     @.end, count
+              wrlong  value, ptra++
+      .end
+        END
+    description: "V50+ inline assembly for fast memory fill"
+
+  - code: |
+      PUB compute_checksum(addr, bytes) : sum | temp
+        sum := 0
+        ORGH
+              mov     ptra, addr
+              mov     pr0, bytes
+              mov     sum, #0
+      .loop
+              rdbyte  temp, ptra++
+              add     sum, temp
+              djnz    pr0, #.loop
+        END
+    description: "V50+ inline assembly with return value"
+
+inline_assembly:
+  description: |
+    V50+ feature: ORGH can be used within Spin2 methods to embed hub-execute
+    PASM2 code. The assembly runs in hub-execute mode directly in hub RAM.
+  minimum_version: "v50"
+  syntax: "ORGH ... END"
+  features:
+    - "Code executes in hub RAM (hub-execute mode)"
+    - "Maximum size: $FFFF longs including auto-added RET"
+    - "RET instruction automatically added at end"
+    - "First 16 local variables saved/restored around inline block"
+    - "Access to method parameters and local variables"
+  comparison:
+    - feature: "Execution location"
+      org: "Cog RAM"
+      orgh: "Hub RAM"
+    - feature: "Code loading"
+      org: "Copied to cog registers"
+      orgh: "Executed in place"
+    - feature: "Size limit"
+      org: "$11F longs"
+      orgh: "$FFFF longs"
+    - feature: "Speed"
+      org: "Fastest"
+      orgh: "Slightly slower"
+  bytecode: "$D6 (bc_orgh)"
+  error_messages:
+    - "ORGH inline block exceeds $FFFF longs (including the added RET instruction)"
+    - "ORG/ORGH inline block is empty"
+
+restrictions:
+  - "ORGH not allowed inside a DITTO block"
+  - "Cannot use ORGH and ORG in same inline block"
+  - "Inline blocks must end with END directive"
+
+notes:
+  - "In DAT blocks, ORGH sets hub origin for subsequent code/data"
+  - "Default address continues from current compilation position"
+  - "V50+: ORGH enables inline hub-execute assembly in Spin2 methods"
+  - "Hub-execute code runs in place, no cog RAM copy required"
+  - "For inline blocks, ORG uses cog RAM, ORGH uses hub RAM"
+  - "Choose ORG for speed-critical tiny routines, ORGH for larger code"
+
+related:
+  - ORG
+  - END
+  - DITTO
+  - DAT
+
+see_also:
+  - "Inline assembly"
+  - "Hub-execute mode"
+  - "DAT block directives"
+
+oneliner: "Set hub RAM origin address; V50+ enables inline hub-execute assembly"

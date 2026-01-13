@@ -1,0 +1,137 @@
+constant: DEBUG_MASK
+type: constant
+category: Debug Constants
+
+minimum_version: "v46"
+
+description: |
+  User-defined constant that enables selective DEBUG output by channel. When 
+  DEBUG_MASK is defined in a CON block, DEBUG statements can use channel indices
+  (DEBUG[n]). Each bit in the mask corresponds to a channel (0-31). Only channels
+  with their corresponding bit set are compiled; others are completely omitted.
+  Available in PNut/pnut_ts v46 and later compilers. No version directive required.
+
+value: "User-defined bitmask (0 to $FFFF_FFFF)"
+
+location: CON block
+
+syntax:
+  definition: "DEBUG_MASK = %bitmask"
+  usage: "DEBUG[channel](output)"
+
+channel_mapping:
+  description: "Each bit enables the corresponding channel"
+  bit_0: "Channel 0"
+  bit_1: "Channel 1"
+  bit_n: "Channel n"
+  range: "Channels 0-31"
+
+examples:
+  - code: |
+      CON
+        DEBUG_MASK = %00000011                 ' Enable channels 0 and 1 only
+      
+      PUB main()
+        DEBUG[0]("Channel 0 - compiled")       ' Compiled - bit 0 set
+        DEBUG[1]("Channel 1 - compiled")       ' Compiled - bit 1 set
+        DEBUG[2]("Channel 2 - NOT compiled")   ' Omitted - bit 2 not set
+    description: "Basic selective debug with two channels"
+    
+  - code: |
+      CON
+        ' Debug categories as bitmask
+        DEBUG_MASK = DBG_INIT | DBG_MAIN | DBG_ERROR
+        
+        DBG_INIT  = %00000001                  ' Channel 0: Initialization
+        DBG_MAIN  = %00000010                  ' Channel 1: Main loop
+        DBG_COMMS = %00000100                  ' Channel 2: Communications
+        DBG_ERROR = %00001000                  ' Channel 3: Errors
+      
+      PUB main()
+        DEBUG[0]("Initializing...")            ' Compiled
+        DEBUG[1]("Main loop started")          ' Compiled
+        DEBUG[2]("Comms data received")        ' NOT compiled (bit not in mask)
+        DEBUG[3]("Error occurred!")            ' Compiled
+    description: "Named debug categories with selective compilation"
+    
+  - code: |
+      CON
+        #IFDEF DEBUG_BUILD
+          DEBUG_MASK = $FFFFFFFF               ' All channels in debug build
+        #ELSE
+          DEBUG_MASK = %00001000               ' Only errors in release
+        #ENDIF
+      
+      PUB process() | status
+        DEBUG[0]("Processing...")              ' Only in DEBUG_BUILD
+        status := do_work()
+        if status < 0
+          DEBUG[3]("Error: ", sdec(status))    ' Always compiled
+    description: "Conditional debug levels using preprocessor"
+    
+  - code: |
+      CON
+        ' Per-cog debug control
+        COG_DEBUG_MASK = %00000111             ' Cogs 0, 1, 2 enabled
+        DEBUG_MASK = COG_DEBUG_MASK
+      
+      PUB cog0_main()
+        DEBUG[0]("Cog 0 running")              ' Compiled
+        
+      PUB cog1_main()
+        DEBUG[1]("Cog 1 running")              ' Compiled
+        
+      PUB cog3_main()
+        DEBUG[3]("Cog 3 running")              ' NOT compiled
+    description: "Multi-cog debug channel assignment"
+    
+  - code: |
+      CON
+        DEBUG_MASK = $FF                       ' Channels 0-7 enabled
+      
+      PUB trace_levels()
+        DEBUG[0]("CRITICAL: System failure")   ' Level 0 - Critical
+        DEBUG[1]("ERROR: Operation failed")    ' Level 1 - Error
+        DEBUG[2]("WARNING: Low memory")        ' Level 2 - Warning
+        DEBUG[3]("INFO: Connection ok")        ' Level 3 - Info
+        DEBUG[4]("DEBUG: Value = 42")          ' Level 4 - Debug
+        DEBUG[5]("TRACE: Entering function")   ' Level 5 - Trace
+    description: "Logging levels using debug channels"
+
+usage_patterns:
+  - pattern: "Category separation"
+    description: "Use channels for different subsystems (init, comms, errors)"
+  - pattern: "Verbosity levels"
+    description: "Use channels for different log levels (error, warning, info)"
+  - pattern: "Cog-specific debug"
+    description: "Assign one channel per cog for multi-cog debugging"
+  - pattern: "Build configurations"
+    description: "Change DEBUG_MASK based on build type (debug vs release)"
+
+compilation_behavior:
+  - "DEBUG[n] with bit n NOT set: Entire statement omitted (no code generated)"
+  - "DEBUG[n] with bit n SET: Statement compiled normally"
+  - "Without DEBUG_MASK defined: DEBUG[n] syntax is an error"
+  - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK"
+
+notes:
+  - "Available in PNut/pnut_ts v46 and later compilers"
+  - "No version directive required - this is NOT a gated feature"
+  - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
+  - "Channel numbers must be 0-31"
+  - "Unset channels generate NO code (complete elimination)"
+  - "Use constants to name channels for readability"
+  - "Plain DEBUG() without channel index ignores the mask"
+  - "Useful for reducing code size in release builds"
+
+related:
+  - DEBUG_END_SESSION
+  - DEBUG_DISABLE
+  - DEBUG
+
+see_also:
+  - "DEBUG commands"
+  - "Conditional compilation"
+  - "Multi-cog debugging"
+
+oneliner: "Bitmask constant for selective DEBUG channel compilation (v46+)"

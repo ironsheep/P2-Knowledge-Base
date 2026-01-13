@@ -1,0 +1,115 @@
+directive: "#ELSEIFNDEF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Provides an else-if branch in a conditional compilation block that is compiled 
+  when the preceding condition was false AND the specified symbol is NOT defined.
+  This is the inverse of #ELSEIFDEF. Useful for testing absence of symbols in 
+  chained conditionals.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFNDEF symbol2
+        ' code when symbol1 defined AND symbol2 NOT defined
+    #ENDIF
+  mixed: |
+    #IFDEF symbol1
+        ' code for symbol1
+    #ELSEIFDEF symbol2
+        ' code for symbol2
+    #ELSEIFNDEF symbol3
+        ' code when symbol1, symbol2 not defined AND symbol3 also not defined
+    #ENDIF
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to test (case-sensitive)"
+
+examples:
+  - code: |
+      ' Feature dependency checking - no version directive needed
+      #IFDEF ADVANCED_FEATURES
+          ' Advanced mode with all features
+          init_advanced()
+      #ELSEIFNDEF MINIMAL_BUILD
+          ' Standard mode (not minimal, not advanced)
+          init_standard()
+      #ELSE
+          ' Minimal build
+          init_minimal()
+      #ENDIF
+    description: "Feature tier selection with absence check"
+    
+  - code: |
+      ' Error checking for required configurations
+      #IFDEF NETWORK_ENABLED
+          #IFNDEF IP_ADDRESS
+              ' ERROR: Network enabled but no IP configured
+              #DEFINE CONFIG_ERROR
+          #ENDIF
+      #ELSEIFNDEF STANDALONE_MODE
+          ' Neither network nor standalone - check serial
+          #IFNDEF SERIAL_ENABLED
+              #DEFINE CONFIG_ERROR
+          #ENDIF
+      #ENDIF
+      
+      #IFDEF CONFIG_ERROR
+          ' This will cause a compile error by using undefined symbol
+          CONFIGURATION_ERROR_CHECK_SETTINGS
+      #ENDIF
+    description: "Configuration validation logic"
+    
+  - code: |
+      ' Fallback chain with absence tests
+      #IFDEF CUSTOM_CLOCK_FREQ
+          CON _clkfreq = CUSTOM_CLOCK_FREQ
+      #ELSEIFNDEF LOW_POWER_MODE
+          CON _clkfreq = 200_000_000    ' Full speed default
+      #ELSE
+          CON _clkfreq = 20_000_000     ' Low power mode
+      #ENDIF
+    description: "Clock frequency selection with low-power fallback"
+    
+  - code: |
+      ' Mixed #ELSEIFDEF and #ELSEIFNDEF
+      #IFDEF BOARD_TYPE_A
+          #DEFINE PIN_COUNT  64
+      #ELSEIFDEF BOARD_TYPE_B
+          #DEFINE PIN_COUNT  48
+      #ELSEIFNDEF MINIMAL_PINS
+          #DEFINE PIN_COUNT  32       ' Standard if not minimal
+      #ELSE
+          #DEFINE PIN_COUNT  16       ' Minimal pin count
+      #ENDIF
+    description: "Mixed presence and absence tests"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Must appear after #IFDEF or #IFNDEF"
+  - "Must appear before #ELSE (if present) and #ENDIF"
+  - "Can be mixed with #ELSEIFDEF in the same chain"
+  - "Tests for absence of symbol (inverse of #ELSEIFDEF)"
+  - "Only the first matching branch is compiled"
+
+related:
+  - ifdef
+  - ifndef
+  - elseifdef
+  - else
+  - endif
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Symbol absence testing"
+
+oneliner: "Else-if branch when preprocessor symbol is NOT defined (v47+)"

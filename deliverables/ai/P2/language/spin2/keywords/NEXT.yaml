@@ -1,12 +1,79 @@
-keyword: "NEXT"
+keyword: NEXT
 type: keyword
-category: "Control Flow"
+category: Control Flow
+
 description: |
-  Continue to next iteration of loop
-syntax: "NEXT"
+  Continues execution at the next iteration of a REPEAT loop, skipping any 
+  remaining code in the current iteration. In v52+, an optional level parameter 
+  allows continuing an outer loop in nested loop structures.
+
+syntax:
+  basic: "NEXT"
+  with_level: "NEXT level"
+
+parameters:
+  - name: "level"
+    type: "integer"
+    range: "1-16"
+    optional: true
+    minimum_version: "v52"
+    description: "Which loop level to continue (1 = innermost, default)"
+
 examples:
-  - |
-    REPEAT i FROM 1 TO 10
-      IF i == 5
-        NEXT
-      process(i)
+  - code: |
+      ' Basic NEXT - skip to next iteration
+      REPEAT i FROM 1 TO 10
+        IF i == 5
+          NEXT                                 ' Skip when i=5
+        debug(udec(i))                         ' Prints 1,2,3,4,6,7,8,9,10
+    description: "Skip iteration with basic NEXT"
+    
+  - code: |
+      ' Skip even numbers
+      REPEAT i FROM 1 TO 20
+        IF (i & 1) == 0
+          NEXT                                 ' Skip even numbers
+        process_odd(i)
+    description: "Filter using NEXT"
+    
+  - code: |
+      ' V52: NEXT with level parameter - no version directive needed
+      REPEAT a FROM 1 TO 10                    ' Level 3 (outermost)
+        REPEAT b FROM 1 TO 10                  ' Level 2
+          REPEAT c FROM 1 TO 10                ' Level 1 (innermost)
+            IF some_condition
+              NEXT                             ' Continue c loop (level 1)
+            IF other_condition
+              NEXT 2                           ' Continue b loop (level 2)
+            IF third_condition
+              NEXT 3                           ' Continue a loop (level 3)
+    description: "V52 level parameter for nested loops"
+    
+  - code: |
+      ' V52: Skip outer loop iteration from inner loop
+      REPEAT row FROM 0 TO 9                   ' Outer loop
+        REPEAT col FROM 0 TO 9                 ' Inner loop
+          IF skip_row_condition(row, col)
+            NEXT 2                             ' Skip to next row
+          process_cell(row, col)
+    description: "Continue outer loop from inner loop"
+
+notes:
+  - "NEXT without parameter continues innermost loop (same as NEXT 1)"
+  - "V52+: NEXT level continues the Nth enclosing loop"
+  - "Level 1 = innermost loop, higher = outer loops"
+  - "Maximum level is 16"
+  - "Error if level exceeds actual nesting depth"
+  - "V52 level feature requires v52+ compiler (no directive needed)"
+  - "Stack frames for skipped loops are properly cleaned up"
+
+related:
+  - QUIT
+  - REPEAT
+
+see_also:
+  - "Loop control"
+  - "Control flow"
+  - "Nested loops"
+
+oneliner: "Continue to next loop iteration, optionally at specified nesting level (v52+)"

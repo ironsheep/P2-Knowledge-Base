@@ -1,0 +1,120 @@
+feature: Preprocessor System
+type: overview
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  The Spin2 preprocessor provides conditional compilation and symbol definition 
+  capabilities. Preprocessor directives begin with # and are processed before 
+  compilation, allowing code to be included or excluded based on defined symbols.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+directives:
+  - directive: "#DEFINE"
+    purpose: "Define a preprocessor symbol"
+    file: "define.yaml"
+  - directive: "#UNDEF"
+    purpose: "Undefine a previously defined symbol"
+    file: "undef.yaml"
+  - directive: "#IFDEF"
+    purpose: "Compile block if symbol is defined"
+    file: "ifdef.yaml"
+  - directive: "#IFNDEF"
+    purpose: "Compile block if symbol is NOT defined"
+    file: "ifndef.yaml"
+  - directive: "#ELSEIFDEF"
+    purpose: "Else-if branch when symbol is defined"
+    file: "elseifdef.yaml"
+  - directive: "#ELSEIFNDEF"
+    purpose: "Else-if branch when symbol is NOT defined"
+    file: "elseifndef.yaml"
+  - directive: "#ELSE"
+    purpose: "Else branch for conditionals"
+    file: "else.yaml"
+  - directive: "#ENDIF"
+    purpose: "End conditional compilation block"
+    file: "endif.yaml"
+
+syntax:
+  symbol_definition: "#DEFINE symbol"
+  conditional_block: |
+    #IFDEF symbol
+        ' code compiled if symbol defined
+    #ELSE
+        ' code compiled if symbol not defined
+    #ENDIF
+
+key_characteristics:
+  - characteristic: "Case sensitivity"
+    description: "Symbol names are case-sensitive (DEBUG_MODE != debug_mode)"
+  - characteristic: "Maximum nesting"
+    description: "Up to 8 levels of nested conditionals supported"
+  - characteristic: "Symbol scope"
+    description: "Symbols persist from definition until end of file or #UNDEF"
+  - characteristic: "External symbols"
+    description: "Symbols can be defined via -D command line option (v48+)"
+
+examples:
+  - code: |
+      ' Debug build configuration - no version directive needed
+      #DEFINE DEBUG_MODE
+      
+      PUB main()
+      #IFDEF DEBUG_MODE
+          debug("Debug build - diagnostics enabled")
+      #ENDIF
+          run_application()
+    description: "Basic conditional compilation for debug builds"
+    
+  - code: |
+      ' Platform-specific code selection
+      #DEFINE TARGET_P2_REV_B
+      
+      PUB init_hardware()
+      #IFDEF TARGET_P2_REV_B
+          configure_rev_b_pins()
+      #ELSEIFDEF TARGET_P2_REV_A
+          configure_rev_a_pins()
+      #ELSE
+          configure_default_pins()
+      #ENDIF
+    description: "Multi-platform code selection"
+    
+  - code: |
+      ' Nested conditionals (up to 8 levels)
+      #IFDEF FEATURE_SERIAL
+          #IFDEF USE_HIGH_SPEED
+              serial.start(921600)
+          #ELSE
+              serial.start(115200)
+          #ENDIF
+      #ENDIF
+    description: "Nested conditional compilation"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Maximum nesting depth is 8 levels"
+  - "Symbols defined with #DEFINE persist until #UNDEF or end of file"
+  - "External symbols can be defined via command line with -D option (v48+)"
+  - "The __DEBUG__ symbol is automatically defined when debug output is enabled"
+  - "Preprocessor runs before compilation - no runtime overhead"
+
+related:
+  - define
+  - undef
+  - ifdef
+  - ifndef
+  - elseifdef
+  - elseifndef
+  - else
+  - endif
+  - external-symbols
+
+see_also:
+  - "Conditional compilation"
+  - "Build configurations"
+  - "Debug builds"
+
+oneliner: "Preprocessor system for conditional compilation (v47+ compiler, no directive)"

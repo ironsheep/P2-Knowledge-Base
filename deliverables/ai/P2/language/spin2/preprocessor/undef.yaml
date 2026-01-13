@@ -1,0 +1,96 @@
+directive: "#UNDEF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Removes a previously defined preprocessor symbol. After #UNDEF, the symbol 
+  will no longer be recognized by #IFDEF and will be recognized by #IFNDEF.
+  Useful for conditionally redefining symbols or disabling features partway 
+  through a file.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: "#UNDEF symbol"
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to undefine (case-sensitive)"
+
+examples:
+  - code: |
+      ' Define then undefine a symbol - no version directive needed
+      #DEFINE TEMP_FEATURE
+      
+      #IFDEF TEMP_FEATURE
+          ' This code IS compiled
+          debug("Feature enabled here")
+      #ENDIF
+      
+      #UNDEF TEMP_FEATURE
+      
+      #IFDEF TEMP_FEATURE
+          ' This code is NOT compiled
+          debug("Feature disabled now")
+      #ENDIF
+    description: "Basic symbol undefinition"
+    
+  - code: |
+      ' Conditional redefinition pattern
+      #DEFINE LOG_LEVEL_VERBOSE
+      
+      PUB section_one()
+      #IFDEF LOG_LEVEL_VERBOSE
+          debug("Verbose: Entering section one")
+      #ENDIF
+          process_section_one()
+      
+      ' Disable verbose logging for performance-critical section
+      #UNDEF LOG_LEVEL_VERBOSE
+      
+      PUB critical_section()
+          ' No debug output here even if VERBOSE was defined
+          fast_processing()
+      
+      ' Re-enable if needed
+      #DEFINE LOG_LEVEL_VERBOSE
+    description: "Temporarily disable feature for code sections"
+    
+  - code: |
+      ' Guard against external definition
+      #IFDEF CUSTOM_CONFIG
+          ' Use external configuration
+      #ELSE
+          ' Define defaults
+          #DEFINE USE_DEFAULT_PINS
+          #DEFINE USE_DEFAULT_SPEED
+      #ENDIF
+      
+      ' Later, clear defaults if custom was loaded
+      #IFDEF CUSTOM_CONFIG
+          #UNDEF USE_DEFAULT_PINS
+          #UNDEF USE_DEFAULT_SPEED
+      #ENDIF
+    description: "Managing default vs custom configuration symbols"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Undefining a non-existent symbol is allowed (no error)"
+  - "External symbols (defined via -D) cannot be undefined with #UNDEF"
+  - "After #UNDEF, the symbol can be redefined with #DEFINE"
+
+related:
+  - define
+  - ifdef
+  - ifndef
+  - external-symbols
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Symbol management"
+
+oneliner: "Remove a previously defined preprocessor symbol (v47+)"

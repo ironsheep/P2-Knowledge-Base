@@ -1,0 +1,118 @@
+method: MOVBYTS
+type: method
+category: Byte Manipulation
+
+minimum_version: "v52"
+
+description: |
+  Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each 
+  digit in the pattern (0-3) specifies which source byte maps to that destination 
+  position. This is the Spin2 function version of the PASM2 MOVBYTS instruction.
+  Available in PNut/pnut_ts v52 and later compilers. No version directive required.
+
+syntax: "result := MOVBYTS(value, order)"
+
+parameters:
+  - name: "value"
+    type: "long"
+    description: "32-bit value whose bytes will be rearranged"
+  - name: "order"
+    type: "long"
+    description: "Quaternary pattern specifying byte arrangement (%%3210 format)"
+
+returns:
+  type: "long"
+  description: "Value with bytes rearranged per pattern"
+
+bytecode: "$E4 (bc_movbyts)"
+
+byte_positions:
+  - position: "Byte 0"
+    bits: "7:0"
+    description: "Lowest byte"
+  - position: "Byte 1"
+    bits: "15:8"
+    description: "Second byte"
+  - position: "Byte 2"
+    bits: "23:16"
+    description: "Third byte"
+  - position: "Byte 3"
+    bits: "31:24"
+    description: "Highest byte"
+
+common_patterns:
+  - pattern: "%%0123"
+    effect: "Reverse byte order"
+    example: "$12_34_56_78 → $78_56_34_12"
+  - pattern: "%%3210"
+    effect: "Identity (no change)"
+    example: "$12_34_56_78 → $12_34_56_78"
+  - pattern: "%%0000"
+    effect: "Broadcast byte 0 to all"
+    example: "$12_34_56_78 → $78_78_78_78"
+  - pattern: "%%3333"
+    effect: "Broadcast byte 3 to all"
+    example: "$12_34_56_78 → $12_12_12_12"
+  - pattern: "%%1032"
+    effect: "Swap adjacent pairs"
+    example: "$12_34_56_78 → $34_12_78_56"
+  - pattern: "%%0321"
+    effect: "Rotate right 1 byte"
+    example: "$12_34_56_78 → $78_12_34_56"
+  - pattern: "%%2103"
+    effect: "Rotate left 1 byte"
+    example: "$12_34_56_78 → $34_56_78_12"
+
+examples:
+  - code: |
+      ' Reverse byte order - no version directive needed, just v52+ compiler
+      PUB reverse_bytes(value) : result
+        result := MOVBYTS(value, %%0123)
+        ' $12_34_56_78 becomes $78_56_34_12
+    description: "Reverse byte order (big/little endian swap)"
+    
+  - code: |
+      ' Broadcast lowest byte to all positions
+      PUB broadcast_low(value) : result
+        result := MOVBYTS(value, %%0000)
+        ' $12_34_56_78 becomes $78_78_78_78
+    description: "Broadcast byte 0 to all positions"
+    
+  - code: |
+      ' Swap word-aligned byte pairs
+      PUB swap_pairs(value) : result
+        result := MOVBYTS(value, %%1032)
+        ' $12_34_56_78 becomes $34_12_78_56
+    description: "Swap adjacent byte pairs"
+    
+  - code: |
+      ' Extract and replicate specific byte
+      PUB replicate_byte(value, which) : result
+        case which
+          0: result := MOVBYTS(value, %%0000)
+          1: result := MOVBYTS(value, %%1111)
+          2: result := MOVBYTS(value, %%2222)
+          3: result := MOVBYTS(value, %%3333)
+    description: "Replicate any byte to all positions"
+
+notes:
+  - "Available in v52+ compilers - no version directive required"
+  - "Pattern uses quaternary (base-4) notation with %% prefix"
+  - "Each digit specifies source byte for that position"
+  - "Digit 0 = lowest byte, digit 3 = highest byte"
+  - "More flexible than ENDIANL/ENDIANW for custom patterns"
+  - "Maps to PASM2 MOVBYTS instruction"
+
+related:
+  - ENDIANL
+  - ENDIANW
+  - BYTESWAP
+  - WORDSWAP
+  - LONGSWAP
+
+see_also:
+  - "Byte manipulation"
+  - "Endian conversion"
+  - "PASM2 MOVBYTS instruction"
+
+oneliner: "Rearrange bytes by quaternary pattern (v52+ compiler)"

@@ -1,0 +1,142 @@
+feature: Conditional DEBUG
+type: pasm2-feature
+category: Debug Instructions
+
+minimum_version: "v47"
+
+description: |
+  DEBUG instructions in PASM2 assembly code can be prefixed with execution 
+  condition codes. The DEBUG output is only generated when the specified 
+  condition is met. This allows for efficient conditional debugging without 
+  requiring separate conditional branch instructions.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: "IF_condition DEBUG(...)"
+  conditions:
+    - "IF_C / IF_NC    - Carry set / not set"
+    - "IF_Z / IF_NZ    - Zero set / not set"
+    - "IF_C_AND_Z      - Both carry and zero set"
+    - "IF_C_AND_NZ     - Carry set and zero not set"
+    - "IF_NC_AND_Z     - Carry not set and zero set"
+    - "IF_NC_AND_NZ    - Neither carry nor zero set"
+    - "IF_C_OR_Z       - Carry or zero (or both) set"
+    - "IF_C_OR_NZ      - Carry set or zero not set"
+    - "IF_NC_OR_Z      - Carry not set or zero set"
+    - "IF_NC_OR_NZ     - Carry not set or zero not set"
+    - "IF_C_EQ_Z       - Carry equals zero"
+    - "IF_C_NE_Z       - Carry not equal to zero"
+    - "IF_A / IF_B     - Above (unsigned) / Below (unsigned)"
+    - "IF_AE / IF_BE   - Above or equal / Below or equal"
+    - "IF_NOT_00 / IF_NOT_01 / IF_NOT_10 / IF_NOT_11"
+    - "IF_00 / IF_01 / IF_10 / IF_11"
+
+implementation: |
+  When a condition other than unconditional or _RET_ is present, the compiler 
+  generates an IF_<opposite> SKIP #1 instruction before the BRK instruction 
+  that implements DEBUG. This efficiently skips the debug output when the 
+  condition is not met.
+
+examples:
+  - code: |
+      ' Conditional DEBUG based on flags - no version directive needed
+      DAT             org
+      
+      test_flags      mov     x, #5
+                      cmp     x, #10          wc      ' Set carry if x < 10
+              if_c    DEBUG("x is less than 10")
+              if_nc   DEBUG("x is >= 10")
+                      ret
+      
+      x               long    0
+    description: "Basic conditional DEBUG with carry flag"
+    
+  - code: |
+      ' Zero flag conditional DEBUG
+      DAT             org
+      
+      check_zero      test    value, #$FF     wz      ' Set Z if value is zero
+              if_z    DEBUG("Value is zero")
+              if_nz   DEBUG("Value is non-zero: ", uhex(value))
+                      ret
+      
+      value           long    0
+    description: "Conditional DEBUG with zero flag"
+    
+  - code: |
+      ' Combined flag conditions
+      DAT             org
+      
+      analyze         cmp     a, b            wcz     ' Set both C and Z
+              if_c_and_z    DEBUG("a == b AND overflow")
+              if_c_and_nz   DEBUG("a < b")
+              if_nc_and_z   DEBUG("a == b")
+              if_nc_and_nz  DEBUG("a > b")
+                      ret
+      
+      a               long    0
+      b               long    0
+    description: "Combined C and Z flag conditions"
+    
+  - code: |
+      ' Loop iteration debugging
+      DAT             org
+      
+      loop            mov     count, #10
+      .loop           ' Do work here
+                      nop
+                      
+                      djnz    count, #.loop   wz      ' Z set when done
+              if_z    DEBUG("Loop complete")
+              if_nz   DEBUG("Iteration: ", udec(count))
+                      ret
+      
+      count           long    0
+    description: "Conditional DEBUG in loop iterations"
+    
+  - code: |
+      ' Error condition monitoring
+      DAT             org
+      
+      process         rdlong  result, ptra            ' Read result
+                      test    result, #$8000_0000 wz  ' Check error bit
+              if_nz   DEBUG("ERROR: result = ", uhex(result))
+                      cmp     result, #0      wz
+              if_z    DEBUG("Warning: zero result")
+                      ret
+      
+      result          long    0
+    description: "Error condition monitoring with DEBUG"
+
+generated_code: |
+  The compiler translates conditional DEBUG:
+  
+      if_c    DEBUG("message")
+  
+  Into:
+  
+      if_nc   skip    #1              ' Skip BRK if condition NOT met
+              brk     #debug_data     ' BRK with debug parameters
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Prior to v47, conditions before DEBUG caused compile errors"
+  - "All standard PASM2 condition codes are supported"
+  - "_RET_ before DEBUG is allowed (no SKIP generated)"
+  - "Unconditional DEBUG (no prefix) always executes"
+  - "Condition is inverted in the generated SKIP instruction"
+  - "Minimal overhead when condition is not met (just SKIP)"
+  - "Useful for debugging complex PASM2 algorithms"
+
+related:
+  - debug
+  - skip
+  - brk
+
+see_also:
+  - "DEBUG instruction"
+  - "Condition codes"
+  - "PASM2 debugging"
+  - "Flag-based execution"
+
+oneliner: "Execute DEBUG only when condition flags match (v47+)"

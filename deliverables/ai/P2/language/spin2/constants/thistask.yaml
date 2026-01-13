@@ -1,32 +1,53 @@
 constant: THISTASK
 type: constant
-description: |
-  Constant for referring to the current task
 category: Task Constants
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Constant for referring to the currently executing task. Used with TASKSTOP 
+  and TASKHALT to allow a task to stop or halt itself without needing to know 
+  its own task ID.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
 value: -1
 syntax: "TASKSTOP(THISTASK)"
 examples:
   - code: |
-      ' Task stops itself
-      TASKSTOP(THISTASK)
-    description: "Self-termination"
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI worker_task()
+        repeat
+          if shutdown_requested
+            TASKSTOP(THISTASK)                 ' Task terminates itself
+          process_work()
+          TASKNEXT()
+    description: "Self-termination when shutdown requested"
   - code: |
-      ' Task halts itself
-      if wait_condition
-        TASKHALT(THISTASK)
-    description: "Self-halt"
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI background_task()
+        repeat
+          if wait_for_signal
+            TASKHALT(THISTASK)                 ' Pause until resumed
+          do_work()
+          TASKNEXT()
+    description: "Self-halt to wait for external resume"
   - code: |
-      ' Error handling
-      if error_occurred
-        debug("Task ", udec(TASKID()), " stopping")
-        TASKSTOP(THISTASK)
-    description: "Error self-termination"
+      {Spin2_v47}                              ' REQUIRED directive
+      PRI monitored_task()
+        repeat
+          if error_occurred
+            debug("Task ", udec(TASKID()), " stopping due to error")
+            TASKSTOP(THISTASK)
+          safe_operation()
+          TASKNEXT()
+    description: "Error handling with self-termination"
 notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Value is -1"
-  - "Used with TASKSTOP/TASKHALT for current task"
-  - "Allows task to control itself"
-  - "Same value as NEWTASK but different context"
-  - "Part of v47+ task features"
+  - "Used with TASKSTOP to permanently stop current task"
+  - "Used with TASKHALT to temporarily pause current task"
+  - "Allows task to control itself without knowing its ID"
+  - "Same numeric value as NEWTASK but different semantic context"
 related:
   - NEWTASK
   - TASKSTOP

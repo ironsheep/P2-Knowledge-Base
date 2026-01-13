@@ -1,0 +1,113 @@
+directive: "#ENDIF"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Terminates a conditional compilation block started by #IFDEF or #IFNDEF.
+  Every #IFDEF and #IFNDEF must have exactly one matching #ENDIF. Missing 
+  #ENDIF directives cause a compile error.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: |
+    #IFDEF symbol
+        ' conditional code
+    #ENDIF
+  with_comment: |
+    #IFDEF MY_FEATURE
+        ' feature code
+    #ENDIF   ' MY_FEATURE (comment for clarity)
+
+examples:
+  - code: |
+      ' Basic conditional block - no version directive needed
+      #DEFINE FEATURE_ENABLED
+      
+      #IFDEF FEATURE_ENABLED
+          PUB feature_init()
+              debug("Feature initialized")
+      #ENDIF
+    description: "Basic conditional block termination"
+    
+  - code: |
+      ' Multiple independent conditionals
+      #IFDEF FEATURE_A
+          init_feature_a()
+      #ENDIF
+      
+      #IFDEF FEATURE_B
+          init_feature_b()
+      #ENDIF
+      
+      #IFDEF FEATURE_C
+          init_feature_c()
+      #ENDIF
+    description: "Multiple independent conditional blocks"
+    
+  - code: |
+      ' Nested conditionals require matching #ENDIF for each level
+      #IFDEF OUTER_CONDITION
+          debug("Outer true")
+          #IFDEF INNER_CONDITION
+              debug("Inner true")
+          #ENDIF   ' INNER_CONDITION
+      #ENDIF   ' OUTER_CONDITION
+    description: "Nested conditionals with labeled #ENDIF"
+    
+  - code: |
+      ' Complex nesting (up to 8 levels)
+      #IFDEF LEVEL_1
+          #IFDEF LEVEL_2
+              #IFDEF LEVEL_3
+                  ' Deeply nested code
+                  process_nested()
+              #ENDIF   ' LEVEL_3
+          #ENDIF   ' LEVEL_2
+      #ENDIF   ' LEVEL_1
+    description: "Deep nesting with labeled terminators"
+    
+  - code: |
+      ' Complete conditional with all branches
+      #IFDEF CONFIG_A
+          ' Config A code
+      #ELSEIFDEF CONFIG_B
+          ' Config B code
+      #ELSEIFNDEF CONFIG_MINIMAL
+          ' Standard config code
+      #ELSE
+          ' Fallback code
+      #ENDIF   ' CONFIG selection
+    description: "Complete conditional block with all branch types"
+
+error_messages:
+  - error: "Expected #ENDIF"
+    cause: "Missing #ENDIF for a conditional block"
+    solution: "Add #ENDIF to close the #IFDEF/#IFNDEF block"
+  - error: "Unexpected #ENDIF"
+    cause: "#ENDIF without matching #IFDEF/#IFNDEF"
+    solution: "Remove extra #ENDIF or add missing #IFDEF/#IFNDEF"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Every #IFDEF and #IFNDEF MUST have a matching #ENDIF"
+  - "#ENDIF takes no parameters"
+  - "Comments after #ENDIF are recommended for clarity in nested blocks"
+  - "Missing #ENDIF causes compile error: 'Expected #ENDIF'"
+  - "Extra #ENDIF causes compile error: 'Unexpected #ENDIF'"
+  - "Proper nesting is required - #ENDIF closes innermost open block"
+
+related:
+  - ifdef
+  - ifndef
+  - else
+  - elseifdef
+  - elseifndef
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Block termination"
+
+oneliner: "Terminate a conditional compilation block (v47+)"

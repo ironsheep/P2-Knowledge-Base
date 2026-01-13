@@ -1,12 +1,94 @@
-keyword: "QUIT"
+keyword: QUIT
 type: keyword
-category: "Control Flow"
+category: Control Flow
+
 description: |
-  Exit loop immediately
-syntax: "QUIT"
+  Exits a REPEAT loop immediately, continuing execution after the loop. In v52+, 
+  an optional level parameter allows exiting multiple nested loops at once.
+
+syntax:
+  basic: "QUIT"
+  with_level: "QUIT level"
+
+parameters:
+  - name: "level"
+    type: "integer"
+    range: "1-16"
+    optional: true
+    minimum_version: "v52"
+    description: "How many loop levels to exit (1 = innermost only, default)"
+
 examples:
-  - |
-    REPEAT
-      IF error_condition
-        QUIT
-      process_data()
+  - code: |
+      ' Basic QUIT - exit loop
+      REPEAT
+        IF error_condition
+          QUIT                                 ' Exit the loop
+        process_data()
+      ' Execution continues here after QUIT
+    description: "Exit loop with basic QUIT"
+    
+  - code: |
+      ' Search with early exit
+      REPEAT i FROM 0 TO array_size - 1
+        IF array[i] == target
+          found_index := i
+          QUIT                                 ' Found it, stop searching
+      ' found_index contains result (or unchanged if not found)
+    description: "Early exit when condition met"
+    
+  - code: |
+      ' V52: QUIT with level parameter - no version directive needed
+      REPEAT a FROM 1 TO 10                    ' Level 3 (outermost)
+        REPEAT b FROM 1 TO 10                  ' Level 2
+          REPEAT c FROM 1 TO 10                ' Level 1 (innermost)
+            IF found_it
+              QUIT 3                           ' Exit ALL three loops
+            IF skip_rest_of_b
+              QUIT 2                           ' Exit c and b loops
+            IF skip_rest_of_c
+              QUIT                             ' Exit c loop only (level 1)
+    description: "V52 level parameter for nested loops"
+    
+  - code: |
+      ' V52: Exit multiple loops on error
+      REPEAT outer FROM 0 TO max_outer
+        REPEAT inner FROM 0 TO max_inner
+          result := process(outer, inner)
+          IF result < 0
+            error_code := result
+            QUIT 2                             ' Exit both loops on error
+      IF error_code < 0
+        handle_error(error_code)
+    description: "Exit all loops on error condition"
+    
+  - code: |
+      ' V52: Matrix search with multi-level exit
+      REPEAT row FROM 0 TO rows - 1
+        REPEAT col FROM 0 TO cols - 1
+          IF matrix[row][col] == target
+            found_row := row
+            found_col := col
+            QUIT 2                             ' Exit both loops
+      ' found_row/found_col contain result
+    description: "2D search with immediate exit on find"
+
+notes:
+  - "QUIT without parameter exits innermost loop (same as QUIT 1)"
+  - "V52+: QUIT level exits N enclosing loops"
+  - "Level 1 = exit innermost only, level 2 = exit two loops, etc."
+  - "Maximum level is 16"
+  - "Error if level exceeds actual nesting depth"
+  - "V52 level feature requires v52+ compiler (no directive needed)"
+  - "All intermediate loop stack frames are properly cleaned up"
+
+related:
+  - NEXT
+  - REPEAT
+
+see_also:
+  - "Loop control"
+  - "Control flow"
+  - "Early exit"
+
+oneliner: "Exit loop immediately, optionally exiting multiple nesting levels (v52+)"

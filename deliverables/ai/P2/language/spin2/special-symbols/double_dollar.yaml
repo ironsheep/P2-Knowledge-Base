@@ -1,7 +1,123 @@
 symbol: "$$"
 type: special_symbol
-category: "Special"
+category: Special Symbols
+
 description: |
-  Current assembly address
+  The $$ symbol has dual meaning depending on context:
+  
+  1. PASM2 CONTEXT: Current cog address - the address of the instruction where 
+     $$ appears. Used for relative address calculations, jump offsets, and 
+     position-independent code.
+  
+  2. DITTO CONTEXT (V50+): Iteration index - inside a DITTO block, $$ equals
+     the current iteration number (0 to count-1). Used for generating indexed
+     sequences, lookup tables, and repetitive patterns.
+
+contexts:
+  pasm2_address:
+    description: "Current cog address in assembly code"
+    location: "DAT block, ORG sections"
+    value: "Address of current instruction (in cog longs)"
+    usage: "Relative addressing, position calculations"
+    
+  ditto_index:
+    description: "Current iteration index in DITTO block"
+    location: "Inside DITTO ... DITTO END blocks"
+    value: "0 to count-1 for each iteration"
+    minimum_version: "v50"
+    requires_version: "Spin2_v50"
+    version_directive: "{Spin2_v50}"
+
 examples:
-  - "distance := target - $$"
+  - code: |
+      DAT
+              org
+              
+      routine mov     pa, #1
+              jmp     #$$                        ' Jump to self (infinite loop)
+    description: "PASM2: $$ as current cog address for self-jump"
+    
+  - code: |
+      DAT
+              org
+              
+      table   jmp     #table_end                 ' Skip over table
+      entry0  long    0
+      entry1  long    100
+      entry2  long    200
+      table_end
+              mov     pa, entry0 + ($$ - entry0) ' Calculate relative offset
+    description: "PASM2: Using $$ for relative address calculation"
+    
+  - code: |
+      DAT
+              org
+              
+      start   mov     pa, #$$ + 3                ' pa = address of 'start' + 3
+              ' ... 
+    description: "PASM2: $$ plus offset for forward reference"
+    
+  - code: |
+      {Spin2_v50}
+      DAT
+              org
+              
+              DITTO 8
+              long    $$                         ' Generates: 0, 1, 2, 3, 4, 5, 6, 7
+              DITTO END
+    description: "V50+ DITTO: $$ as iteration index for simple sequence"
+    
+  - code: |
+      {Spin2_v50}
+      DAT
+              org
+              
+              DITTO 8
+              long    $$ * 100                   ' Generates: 0, 100, 200, ..., 700
+              DITTO END
+    description: "V50+ DITTO: $$ multiplied for scaled sequence"
+    
+  - code: |
+      {Spin2_v50}
+      DAT
+              org
+              
+              DITTO 4
+              mov     reg + $$, #0               ' Clear reg+0, reg+1, reg+2, reg+3
+              DITTO END
+    description: "V50+ DITTO: $$ for indexed register operations"
+    
+  - code: |
+      {Spin2_v50}
+      DAT
+              org
+              
+      ' Generate sine lookup table (0-90 degrees in 16 steps)
+              DITTO 16
+              long    round(sin(float($$) * PI / 30.0) * 65535.0)
+              DITTO END
+    description: "V50+ DITTO: $$ in mathematical expressions for lookup tables"
+
+notes:
+  - "In PASM2, $$ represents current cog address (not hub address)"
+  - "Value is in cog longs (0-$1FF range for cog RAM)"
+  - "V50+: Inside DITTO block, $$ becomes iteration index (0 to count-1)"
+  - "V50+: DITTO usage requires {Spin2_v50} version directive"
+  - "Context determines meaning - compiler resolves based on location"
+  - "Single $ represents current hub address (different from $$)"
+
+error_messages:
+  - "'$$' (DITTO index) is only allowed within a DITTO block, inside a DAT block"
+
+related:
+  - "$"
+  - DITTO
+  - ORG
+  - JMP
+
+see_also:
+  - "Assembly address symbols"
+  - "DITTO directive"
+  - "Position-independent code"
+
+oneliner: "Current cog address (PASM2) or DITTO iteration index (V50+)"

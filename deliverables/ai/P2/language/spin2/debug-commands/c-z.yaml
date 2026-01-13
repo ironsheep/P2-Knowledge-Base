@@ -1,0 +1,129 @@
+formatter: C_Z
+type: debug_formatter
+category: Debug Flag Formatters
+
+requires_version: "Spin2_v46"
+version_directive: "{Spin2_v46}"
+
+description: |
+  Debug formatter that displays the current state of the Carry (C) and Zero (Z)
+  processor flags. Outputs in the format "C=n Z=n" where n is 0 or 1.
+  Essential for debugging PASM2 inline assembly and understanding flag behavior.
+  REQUIRES: {Spin2_v46} or later version directive at start of source file.
+
+syntax:
+  basic: "DEBUG(C_Z)"
+  with_label: "DEBUG(\"Flags: \", C_Z)"
+
+output_format: "C=n Z=n"
+
+output_values:
+  C: "0 or 1 (Carry flag state)"
+  Z: "0 or 1 (Zero flag state)"
+
+examples:
+  - code: |
+      {Spin2_v46}                              ' REQUIRED directive
+      PUB flag_demo() | x
+        x := 0
+        DEBUG(C_Z)                             ' Shows: C=0 Z=1 (zero result)
+        x := 1
+        DEBUG(C_Z)                             ' Shows: C=0 Z=0 (non-zero result)
+    description: "Basic flag state display"
+    
+  - code: |
+      {Spin2_v46}                              ' REQUIRED directive
+      PUB inline_asm_debug() | a, b
+        a := $FFFFFFFF
+        b := 1
+        org
+              add     a, b        wc, wz      ' Add with flag update
+        end
+        DEBUG("After ADD: ", C_Z)              ' Shows: C=1 Z=1 (overflow to 0)
+    description: "Debug inline assembly flag results"
+    
+  - code: |
+      {Spin2_v46}                              ' REQUIRED directive
+      PUB test_compare() | x, y
+        x := 100
+        y := 200
+        org
+              cmp     x, y        wc, wz      ' Compare sets flags
+        end
+        DEBUG("x vs y: ", C_Z)                 ' C=1 means x < y
+    description: "Debug comparison results"
+    
+  - code: |
+      {Spin2_v46}                              ' REQUIRED directive
+      PUB shift_debug() | value
+        value := %00000001
+        org
+              shl     value, #8   wc, wz      ' Shift left, check for overflow
+        end
+        DEBUG("After SHL: ", C_Z, " Value: ", UHEX(value))
+    description: "Debug shift operations with multiple formatters"
+    
+  - code: |
+      {Spin2_v46}                              ' REQUIRED directive
+      PUB conditional_debug() | result
+        result := some_operation()
+        org
+              test    result, result  wz      ' Test if zero
+        end
+        if_z
+          DEBUG("Result is ZERO - ", C_Z)
+        else
+          DEBUG("Result is NON-ZERO - ", C_Z)
+    description: "Conditional debugging with flag inspection"
+
+flag_meanings:
+  carry_flag:
+    description: "Set when arithmetic operation produces carry/borrow"
+    set_when:
+      - "ADD overflow"
+      - "SUB/CMP when second operand > first"
+      - "Shift out of MSB/LSB"
+      - "Various PASM2 operations with WC"
+    cleared_when:
+      - "No carry/borrow occurred"
+      - "Explicitly cleared"
+      
+  zero_flag:
+    description: "Set when operation result equals zero"
+    set_when:
+      - "Result of operation is exactly 0"
+      - "TEST finds no matching bits"
+      - "Various PASM2 operations with WZ"
+    cleared_when:
+      - "Result is non-zero"
+      - "Explicitly cleared"
+
+use_cases:
+  - "Debugging PASM2 inline assembly code"
+  - "Verifying arithmetic overflow conditions"
+  - "Understanding comparison results"
+  - "Debugging conditional branching logic"
+  - "Analyzing shift/rotate operations"
+  - "Testing bit manipulation results"
+
+notes:
+  - "REQUIRES {Spin2_v46} or later at start of source file"
+  - "Reads actual processor flag state at time of DEBUG call"
+  - "Most useful after inline assembly with WC/WZ modifiers"
+  - "Flags may change between operations - capture immediately"
+  - "C_Z has no underscore variant (always shows both labels)"
+  - "Combine with other formatters for complete state display"
+
+related:
+  - DEBUG
+  - DEBUG_MASK
+  - ORG
+  - END
+
+see_also:
+  - "Debug formatters"
+  - "Inline assembly"
+  - "PASM2 flag operations"
+  - "Conditional execution"
+
+oneliner: "Display Carry (C) and Zero (Z) flag states (requires Spin2_v46)"

@@ -19,6 +19,7 @@ syntax:
   array_members: "STRUCT structName(data[count])"
   nested: "STRUCT outer(inner innerMember)"
   alias: "STRUCT newName = existingStruct"
+  export_import: "object.struct_t varName"
 
 member_types:
   - type: "BYTE"
@@ -85,6 +86,49 @@ examples:
         p1 :=: p2                            ' Swap structures
     description: "Structure member access and operations"
 
+  - code: |
+      ' ===== Child Object: sensor.spin2 =====
+      {Spin2_v45}
+      CON
+        STRUCT reading_t(LONG timestamp, LONG value, BYTE status)
+        STRUCT config_t(WORD rate, BYTE flags, BYTE channel)
+      
+      VAR
+        reading_t last_reading
+      
+      PUB get_reading() : reading_t result
+        result := last_reading
+    description: "V49+ structure export: Structures in CON blocks are automatically exported"
+
+  - code: |
+      ' ===== Parent Object: main.spin2 =====
+      {Spin2_v45}
+      OBJ
+        sens : "sensor"
+      
+      VAR
+        sens.reading_t  my_reading           ' Import structure from sensor object
+        sens.config_t   my_config
+      
+      PUB main()
+        my_reading := sens.get_reading()
+        debug("Value: ", sdec(my_reading.value))
+        debug("Status: ", uhex(my_reading.status))
+    description: "V49+ structure import: Use object.struct_t syntax to access exported structures"
+
+  - code: |
+      {Spin2_v45}
+      OBJ
+        gfx : "graphics"
+      
+      VAR
+        gfx.point_t   cursor_pos
+        gfx.rect_t    window_bounds[10]      ' Array of imported structures
+      
+      PUB draw_at(gfx.point_t pos)           ' Imported struct as parameter type
+        gfx.move_to(pos.x, pos.y)
+    description: "V49+ imported structures in declarations, arrays, and method parameters"
+
 operations:
   - operation: "Access member"
     syntax: "var.member"
@@ -121,6 +165,24 @@ pointer_syntax:
   post_increment: "ptr[++].member"
   pre_increment: "[++]ptr.member"
 
+export_import:
+  description: |
+    V49+ feature: Structures defined in CON blocks are automatically exported
+    and can be imported by parent objects using object.struct_t notation.
+  export_syntax: "STRUCT name_t(...)  ' In child object CON block - auto-exported"
+  import_syntax: "object.struct_t varName  ' In parent object"
+  valid_in:
+    - "VAR block declarations"
+    - "Local variable declarations (PUB/PRI)"
+    - "Method parameter types"
+    - "Method return types"
+  minimum_version: "v49"
+  notes:
+    - "Child object must be compiled first"
+    - "Structure definition is included in object file"
+    - "Structure layout (size, alignment) is preserved exactly"
+    - "No additional version directive needed beyond {Spin2_v45}"
+
 notes:
   - "REQUIRES {Spin2_v45} or later at start of source file"
   - "Members default to LONG if no type specified"
@@ -129,6 +191,10 @@ notes:
   - "Structure pointers (^structName) also require {Spin2_v45}"
   - "Pass large structures by pointer for efficiency"
   - "Structures larger than 15 LONGs use BYTEMOVE internally for assignment"
+  - "V49+: Structures defined in CON blocks are automatically exported to parent objects"
+  - "V49+: Use object.struct_t syntax to reference structures from child objects"
+  - "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters"
+  - "V49+: Structure layout (size, alignment) is preserved exactly when imported"
 
 related:
   - SIZEOF

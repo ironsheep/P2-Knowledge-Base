@@ -1,0 +1,87 @@
+directive: "#DEFINE"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Defines a preprocessor symbol that can be tested with #IFDEF or #IFNDEF 
+  conditional compilation directives. The symbol persists from the point of 
+  definition until the end of the file or until removed with #UNDEF.
+  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+
+syntax:
+  basic: "#DEFINE symbol"
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to define (case-sensitive)"
+
+examples:
+  - code: |
+      ' Define a simple symbol - no version directive needed
+      #DEFINE DEBUG_MODE
+      
+      PUB main()
+      #IFDEF DEBUG_MODE
+          debug("Debug mode is enabled")
+      #ENDIF
+    description: "Basic symbol definition for conditional compilation"
+    
+  - code: |
+      ' Define multiple configuration symbols
+      #DEFINE USE_SERIAL
+      #DEFINE BAUD_RATE_HIGH
+      #DEFINE TARGET_REV_B
+      
+      PUB init()
+      #IFDEF USE_SERIAL
+          #IFDEF BAUD_RATE_HIGH
+              serial.start(921600)
+          #ELSE
+              serial.start(115200)
+          #ENDIF
+      #ENDIF
+    description: "Multiple symbol definitions for build configuration"
+    
+  - code: |
+      ' Feature flags pattern
+      #DEFINE FEATURE_LED_CONTROL
+      #DEFINE FEATURE_TEMP_SENSOR
+      ' #DEFINE FEATURE_MOTOR_CONTROL   ' Commented out - disabled
+      
+      PUB setup()
+      #IFDEF FEATURE_LED_CONTROL
+          init_leds()
+      #ENDIF
+      #IFDEF FEATURE_TEMP_SENSOR
+          init_temp_sensor()
+      #ENDIF
+      #IFDEF FEATURE_MOTOR_CONTROL
+          init_motors()           ' Not compiled - symbol not defined
+      #ENDIF
+    description: "Feature flag pattern for modular builds"
+
+notes:
+  - "Available in v47+ compilers - no version directive required"
+  - "Symbol names are case-sensitive (DEBUG != debug)"
+  - "Symbol persists until end of file or #UNDEF"
+  - "Symbols have no value - they are either defined or not defined"
+  - "Maximum symbol name length is 31 characters"
+  - "Up to 16 external symbols can be defined via command line"
+  - "Defining an already-defined symbol is allowed (no error)"
+
+related:
+  - undef
+  - ifdef
+  - ifndef
+  - elseifdef
+  - elseifndef
+
+see_also:
+  - "Preprocessor system"
+  - "Conditional compilation"
+  - "Build configurations"
+
+oneliner: "Define a preprocessor symbol for conditional compilation (v47+)"

@@ -1,0 +1,162 @@
+construct: Escape Strings
+type: string_literal
+category: String Syntax
+
+minimum_version: "v50"
+
+description: |
+  String literal syntax that supports escape character sequences. Using the @\"
+  prefix enables interpretation of backslash escape sequences within the string.
+  Standard @"..." strings do NOT process escapes; only @\"..." strings do.
+  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
+
+syntax:
+  escape_string: "@\\\"string with \\n escapes\""
+  standard_string: "@\"string without escapes\""
+
+escape_sequences:
+  - escape: "\\a"
+    value: 7
+    description: "Alarm bell (BEL)"
+    
+  - escape: "\\b"
+    value: 8
+    description: "Backspace (BS)"
+    
+  - escape: "\\t"
+    value: 9
+    description: "Horizontal tab (HT)"
+    
+  - escape: "\\n"
+    value: 10
+    description: "New line / line feed (LF)"
+    
+  - escape: "\\f"
+    value: 12
+    description: "Form feed (FF)"
+    
+  - escape: "\\r"
+    value: 13
+    description: "Carriage return (CR)"
+    
+  - escape: "\\\\"
+    value: 92
+    description: "Literal backslash"
+    
+  - escape: "\\\""
+    value: 34
+    description: "Literal double quote"
+    
+  - escape: "\\xNN"
+    value: "1-255"
+    description: "Hexadecimal character code (NN = 01 to FF)"
+
+examples:
+  - code: |
+      PUB string_demo()
+        ' Standard string - no escape processing
+        debug(@"Hello World")                  ' Output: Hello World
+        
+        ' Escape string - processes \n as newline
+        debug(@\"Line 1\nLine 2")              ' Output: Line 1
+                                               '         Line 2
+    description: "Standard vs escape string comparison"
+    
+  - code: |
+      PUB formatted_output()
+        ' Tab-separated values
+        debug(@\"Name\tAge\tCity")
+        debug(@\"Alice\t25\tBoston")
+        debug(@\"Bob\t30\tDenver")
+    description: "Using tabs for columnar output"
+    
+  - code: |
+      PUB multiline_message()
+        debug(@\"=== STATUS REPORT ===\n")
+        debug(@\"Temperature: 25°C\n")
+        debug(@\"Humidity: 45%\n")
+        debug(@\"===================\n")
+    description: "Multi-line output with newlines"
+    
+  - code: |
+      PUB quote_in_string()
+        ' Include quotes inside string
+        debug(@\"She said \"Hello World\"")    ' Output: She said "Hello World"
+    description: "Escaped quotes within string"
+    
+  - code: |
+      PUB hex_characters()
+        ' Using hex escape for special characters
+        debug(@\"Hex value: \x41\x42\x43")     ' Output: Hex value: ABC
+        debug(@\"Copyright \xA9 2025")         ' Output: Copyright © 2025
+    description: "Hexadecimal character codes"
+    
+  - code: |
+      PUB file_paths()
+        ' Windows-style paths need escaped backslashes
+        debug(@\"Path: C:\\Users\\Data\\file.txt")
+    description: "Escaped backslashes for file paths"
+    
+  - code: |
+      PUB control_codes()
+        ' Carriage return for overwriting line
+        debug(@\"Progress: 0%")
+        waitms(500)
+        debug(@\"\rProgress: 50%")             ' Overwrites previous output
+        waitms(500)
+        debug(@\"\rProgress: 100%\n")
+    description: "Using carriage return for progress display"
+    
+  - code: |
+      PUB bell_alert()
+        ' Sound terminal bell on error
+        if error_detected
+          debug(@\"\aERROR: Check sensor!")    ' \a sounds bell
+    description: "Terminal bell for alerts"
+
+restrictions:
+  - escape: "\\x00"
+    note: "Not allowed - would terminate string prematurely"
+  - unknown_escape: "Passes through literally (e.g., \\q becomes \\q)"
+
+comparison:
+  standard_string:
+    prefix: "@\""
+    escapes: "Not processed"
+    backslash: "Literal backslash character"
+    use_case: "Simple strings, no special characters needed"
+    
+  escape_string:
+    prefix: "@\\\""
+    escapes: "Processed"
+    backslash: "Escape character prefix"
+    use_case: "Formatted output, special characters"
+
+error_messages:
+  - error: "Expected a string character"
+    cause: "Unterminated escape sequence"
+  - error: "Invalid escape character"
+    cause: "Unknown escape sequence (may pass through)"
+
+notes:
+  - "Available in PNut/pnut_ts v50 and later compilers"
+  - "No version directive required - this is NOT a gated feature"
+  - "Standard @\"...\" strings do NOT process escapes"
+  - "Only @\\\"...\" strings process escape sequences"
+  - "\\x00 is not allowed (would terminate string)"
+  - "Unknown escapes pass the backslash through literally"
+  - "Escape strings are null-terminated like standard strings"
+  - "Use standard strings when no escapes needed (simpler)"
+
+related:
+  - DEBUG
+  - BYTEMOVE
+  - STRCOMP
+  - STRSIZE
+
+see_also:
+  - "String handling"
+  - "DEBUG output"
+  - "Character codes"
+
+oneliner: "String syntax @\\\"...\\\" with escape sequences like \\n, \\t, \\xNN (v50+)"

@@ -1,0 +1,80 @@
+method: LOG2
+type: method
+category: Floating-Point Math
+
+requires_version: "Spin2_v51"
+version_directive: "{Spin2_v51}"
+
+description: |
+  Computes the base-2 logarithm of a floating-point value. Returns the exponent 
+  that 2 must be raised to in order to produce the input value (2^result = input).
+  Uses the CORDIC QLOG instruction internally for efficient computation.
+  REQUIRES: {Spin2_v51} or later version directive at start of source file.
+
+syntax: "result := LOG2(float_value)"
+
+parameters:
+  - name: "float_value"
+    type: "float"
+    description: "Positive floating-point number (IEEE 754 single precision)"
+
+returns:
+  type: "float"
+  description: "Base-2 logarithm result as 32-bit float"
+
+bytecode: "$C8 (bc_log2)"
+
+examples:
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB main() | x, result
+        x := 8.0
+        result := LOG2(x)                      ' result = 3.0 (2^3 = 8)
+    description: "Basic base-2 logarithm"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB log_examples() | result
+        result := LOG2(1.0)                    ' result = 0.0 (2^0 = 1)
+        result := LOG2(2.0)                    ' result = 1.0 (2^1 = 2)
+        result := LOG2(4.0)                    ' result = 2.0 (2^2 = 4)
+        result := LOG2(0.5)                    ' result = -1.0 (2^-1 = 0.5)
+    description: "Common logarithm values"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB bits_needed(max_value) : bits
+        ' Calculate minimum bits needed to represent a value
+        if max_value > 0.0
+          bits := TRUNC(LOG2(max_value)) + 1
+        else
+          bits := 1
+    description: "Calculate bits needed for a value"
+    
+  - code: |
+      {Spin2_v51}                              ' REQUIRED directive
+      PUB octave_from_freq(freq) : octave
+        ' Calculate musical octave from frequency (A4 = 440Hz)
+        octave := TRUNC(LOG2(freq / 440.0)) + 4
+    description: "Calculate musical octave from frequency"
+
+notes:
+  - "REQUIRES {Spin2_v51} or later at start of source file"
+  - "Returns NaN if input is negative or zero"
+  - "Uses hardware CORDIC QLOG instruction internally"
+  - "Input must be IEEE 754 single-precision float"
+  - "Result is IEEE 754 single-precision float"
+  - "Inverse of EXP2() function"
+
+related:
+  - EXP2
+  - LOG10
+  - LOG
+  - QLOG
+
+see_also:
+  - "Floating-point math"
+  - "Logarithmic functions"
+  - "CORDIC operations"
+
+oneliner: "Base-2 logarithm of floating-point value (requires Spin2_v51)"

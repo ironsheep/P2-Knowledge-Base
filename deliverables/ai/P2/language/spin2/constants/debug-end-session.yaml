@@ -1,0 +1,81 @@
+constant: DEBUG_END_SESSION
+type: constant
+category: Debug Constants
+
+requires_version: "Spin2_v52"
+version_directive: "{Spin2_v52}"
+
+description: |
+  Predefined constant (value 27) that, when sent via DEBUG(), cleanly terminates 
+  the debug session. The debug display receives this as a control code, sets 
+  DebugActive to false, and closes the debug window.
+  REQUIRES: {Spin2_v52} or later version directive at start of source file.
+
+value: 27
+
+syntax: "DEBUG(DEBUG_END_SESSION)"
+
+examples:
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB main()
+        debug("Starting program...")
+        
+        ' ... program execution ...
+        
+        debug("Program complete, closing debug")
+        DEBUG(DEBUG_END_SESSION)               ' Closes debug window
+    description: "Close debug session at program end"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB shutdown()
+        debug("Shutting down...")
+        waitms(100)                            ' Allow output to display
+        DEBUG(DEBUG_END_SESSION)
+        ' After this, debug window closes
+    description: "Clean shutdown with debug closure"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      PUB conditional_debug_end(close_debug)
+        if close_debug
+          debug("Closing debug session")
+          DEBUG(DEBUG_END_SESSION)
+    description: "Conditional debug session termination"
+    
+  - code: |
+      {Spin2_v52}                              ' REQUIRED directive
+      CON
+        END_DEBUG = DEBUG_END_SESSION          ' Can use in CON assignments
+      
+      PUB cleanup()
+        DEBUG(END_DEBUG)                       ' Same effect
+    description: "Using constant in CON block"
+
+debug_behavior:
+  - step: "DEBUG(DEBUG_END_SESSION) called"
+  - step: "Character code 27 sent to debug display"
+  - step: "Debug display sets DebugActive = false"
+  - step: "Debug window closes"
+  - step: "Debug session ends cleanly"
+
+notes:
+  - "REQUIRES {Spin2_v52} or later at start of source file"
+  - "Value is 27 (ASCII ESC character)"
+  - "Programmatically terminates debug session"
+  - "Debug window closes when this is received"
+  - "Useful for automated test sequences"
+  - "Can be used in CON block assignments"
+  - "Equivalent to DEBUG(27)"
+
+related:
+  - DEBUG_MASK
+  - DEBUG_DISABLE
+
+see_also:
+  - "DEBUG commands"
+  - "Debug session management"
+  - "Program termination"
+
+oneliner: "Constant (27) to programmatically end debug session (requires Spin2_v52)"

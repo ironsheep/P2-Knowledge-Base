@@ -1,8 +1,15 @@
 method: TASKRESUME
 type: method
-description: |
-  Resume a halted task
 category: Task Operations
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Resume a task that was previously halted with TASKHALT. The task continues 
+  execution from where it was paused, with all state preserved. Also known as 
+  TASKCONT in some documentation.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "TASKRESUME(TaskID)"
 parameters:
   - name: "TaskID"
@@ -13,23 +20,27 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Resume paused task
-      TASKRESUME(3)  ' Resume task 3
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB main()
+        TASKRESUME(3)                          ' Resume task 3
     description: "Resume single task"
   - code: |
-      ' Synchronized resume
-      TASKHALT(worker1)
-      TASKHALT(worker2)
-      prepare_data()
-      TASKRESUME(worker1)
-      TASKRESUME(worker2)
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB synchronized_start()
+        TASKHALT(worker1)
+        TASKHALT(worker2)
+        prepare_data()
+        TASKRESUME(worker1)
+        TASKRESUME(worker2)
     description: "Synchronized task resumption"
   - code: |
-      ' Conditional resume
-      if not buffer_full
-        TASKRESUME(producer_task)
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB flow_control()
+        if not buffer_full
+          TASKRESUME(producer_task)
     description: "Resume producer when buffer has space"
 notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Resumes task halted with TASKHALT"
   - "Task continues from where it was halted"
   - "All state preserved during halt"

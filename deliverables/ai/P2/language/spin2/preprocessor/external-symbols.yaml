@@ -1,0 +1,138 @@
+feature: External Preprocessor Symbols
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v48"
+
+description: |
+  Preprocessor symbols can be defined externally before compilation using the 
+  command-line -D option. This allows the same source code to be compiled with 
+  different configurations without modifying the source files. External symbols 
+  behave like #DEFINE symbols but cannot be undefined with #UNDEF.
+  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+
+syntax:
+  define_symbol: "-D symbol"
+  define_with_value: "-D symbol=value"
+
+command_line:
+  pnut: "pnut -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
+  pnut_ts: "pnut_ts -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
+
+parameters:
+  - name: "symbol"
+    type: "identifier"
+    description: "Name of the symbol to define (case-sensitive, max 31 chars)"
+  - name: "value"
+    type: "string"
+    description: "Optional value to associate with the symbol"
+
+limits:
+  max_symbols: 16
+  max_name_length: 31
+
+predefined_symbols:
+  - symbol: "__DEBUG__"
+    description: "Automatically defined when debug output is enabled"
+    example: |
+      #IFDEF __DEBUG__
+          ' Code compiled only when debug is enabled
+      #ENDIF
+
+examples:
+  - code: |
+      ' Source file: myprogram.spin2
+      ' Compile with: pnut_ts -DDEBUG_MODE myprogram.spin2
+      
+      PUB main()
+      #IFDEF DEBUG_MODE
+          debug("Debug mode enabled via command line")
+      #ENDIF
+          run_application()
+    description: "Basic external symbol usage"
+    
+  - code: |
+      ' Build script defines target platform
+      ' Compile with: pnut_ts -DTARGET_P2_EDGE myprogram.spin2
+      
+      #IFDEF TARGET_P2_EDGE
+          CON FLASH_SIZE = $800000
+      #ELSEIFDEF TARGET_P2_EVAL
+          CON FLASH_SIZE = $200000
+      #ELSE
+          CON FLASH_SIZE = 0
+      #ENDIF
+    description: "Platform selection via external symbol"
+    
+  - code: |
+      ' Multiple external symbols for build configuration
+      ' Compile with: pnut_ts -DRELEASE -DOPTIMIZE -DVERSION=100 app.spin2
+      
+      #IFDEF RELEASE
+          #IFNDEF DEBUG_MODE
+              ' Release build without debug
+          #ENDIF
+      #ENDIF
+      
+      #IFDEF OPTIMIZE
+          ' Include optimization passes
+      #ENDIF
+    description: "Multiple build configuration symbols"
+    
+  - code: |
+      ' Using __DEBUG__ predefined symbol
+      ' When compiled with debug enabled, __DEBUG__ is automatically defined
+      
+      PUB log(msg)
+      #IFDEF __DEBUG__
+          debug(msg)
+      #ELSE
+          ' Silent in non-debug builds
+      #ENDIF
+    description: "Using the predefined __DEBUG__ symbol"
+    
+  - code: |
+      ' External symbols cannot be undefined
+      ' This is intentional - preserves build system control
+      
+      ' Compile with: pnut_ts -DBUILD_CONFIG myprogram.spin2
+      
+      #IFDEF BUILD_CONFIG
+          ' This block is ALWAYS compiled when -DBUILD_CONFIG is used
+          ' #UNDEF BUILD_CONFIG would have no effect on external symbols
+      #ENDIF
+    description: "External symbols persist (cannot be #UNDEF'd)"
+
+use_cases:
+  - case: "CI/CD builds"
+    description: "Define RELEASE, DEBUG, or TEST symbols from build scripts"
+  - case: "Platform targeting"
+    description: "Define TARGET_* symbols to select hardware configuration"
+  - case: "Feature flags"
+    description: "Enable/disable features without source modification"
+  - case: "Version embedding"
+    description: "Pass version numbers into compilation"
+
+notes:
+  - "Available in v48+ compilers - no version directive required"
+  - "Symbol names are case-sensitive"
+  - "Maximum of 16 external symbols can be defined"
+  - "Maximum symbol name length is 31 characters"
+  - "External symbols CANNOT be undefined with #UNDEF in source"
+  - "External symbols have priority over source-defined symbols"
+  - "The __DEBUG__ symbol is predefined when debug output is enabled"
+  - "Useful for build automation and configuration management"
+
+related:
+  - define
+  - undef
+  - ifdef
+  - ifndef
+
+see_also:
+  - "Preprocessor system"
+  - "Build configurations"
+  - "Command-line compilation"
+  - "CI/CD integration"
+
+oneliner: "Define preprocessor symbols from command line for build configuration (v48+)"
