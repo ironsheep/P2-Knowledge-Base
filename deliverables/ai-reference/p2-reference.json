@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-01-08",
-    "last_updated": "2026-01-08T05:23:18.411483",
+    "release_date": "2026-01-13",
+    "last_updated": "2026-01-13T23:52:30.590470",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-08T05:23:18.411483",
+    "extraction_date": "2026-01-13T23:52:30.590470",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18249,7 +18249,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-08T05:23:18.411483",
+    "extraction_date": "2026-01-13T23:52:30.590470",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18328,7 +18328,8 @@
               "typed_members": "STRUCT structName(BYTE x, WORD y, LONG z)",
               "array_members": "STRUCT structName(data[count])",
               "nested": "STRUCT outer(inner innerMember)",
-              "alias": "STRUCT newName = existingStruct"
+              "alias": "STRUCT newName = existingStruct",
+              "export_import": "object.struct_t varName"
             },
             "member_types": [
               {
@@ -18376,6 +18377,18 @@
               {
                 "code": "{Spin2_v45}\nCON\n  STRUCT point(x, y)\n\nPUB example() | point p1, point p2\n  p1.x := 100                          ' Access via dot notation\n  p1.y := 200\n  p2 := p1                             ' Copy entire structure\n  p1 := 50, 75                         ' Multi-value assignment\n  p1 :=: p2                            ' Swap structures\n",
                 "description": "Structure member access and operations"
+              },
+              {
+                "code": "' ===== Child Object: sensor.spin2 =====\n{Spin2_v45}\nCON\n  STRUCT reading_t(LONG timestamp, LONG value, BYTE status)\n  STRUCT config_t(WORD rate, BYTE flags, BYTE channel)\n\nVAR\n  reading_t last_reading\n\nPUB get_reading() : reading_t result\n  result := last_reading\n",
+                "description": "V49+ structure export: Structures in CON blocks are automatically exported"
+              },
+              {
+                "code": "' ===== Parent Object: main.spin2 =====\n{Spin2_v45}\nOBJ\n  sens : \"sensor\"\n\nVAR\n  sens.reading_t  my_reading           ' Import structure from sensor object\n  sens.config_t   my_config\n\nPUB main()\n  my_reading := sens.get_reading()\n  debug(\"Value: \", sdec(my_reading.value))\n  debug(\"Status: \", uhex(my_reading.status))\n",
+                "description": "V49+ structure import: Use object.struct_t syntax to access exported structures"
+              },
+              {
+                "code": "{Spin2_v45}\nOBJ\n  gfx : \"graphics\"\n\nVAR\n  gfx.point_t   cursor_pos\n  gfx.rect_t    window_bounds[10]      ' Array of imported structures\n\nPUB draw_at(gfx.point_t pos)           ' Imported struct as parameter type\n  gfx.move_to(pos.x, pos.y)\n",
+                "description": "V49+ imported structures in declarations, arrays, and method parameters"
               }
             ],
             "operations": [
@@ -18432,6 +18445,24 @@
               "post_increment": "ptr[++].member",
               "pre_increment": "[++]ptr.member"
             },
+            "export_import": {
+              "description": "V49+ feature: Structures defined in CON blocks are automatically exported\nand can be imported by parent objects using object.struct_t notation.\n",
+              "export_syntax": "STRUCT name_t(...)  ' In child object CON block - auto-exported",
+              "import_syntax": "object.struct_t varName  ' In parent object",
+              "valid_in": [
+                "VAR block declarations",
+                "Local variable declarations (PUB/PRI)",
+                "Method parameter types",
+                "Method return types"
+              ],
+              "minimum_version": "v49",
+              "notes": [
+                "Child object must be compiled first",
+                "Structure definition is included in object file",
+                "Structure layout (size, alignment) is preserved exactly",
+                "No additional version directive needed beyond {Spin2_v45}"
+              ]
+            },
             "notes": [
               "REQUIRES {Spin2_v45} or later at start of source file",
               "Members default to LONG if no type specified",
@@ -18439,7 +18470,11 @@
               "Use SIZEOF() to get structure size in bytes",
               "Structure pointers (^structName) also require {Spin2_v45}",
               "Pass large structures by pointer for efficiency",
-              "Structures larger than 15 LONGs use BYTEMOVE internally for assignment"
+              "Structures larger than 15 LONGs use BYTEMOVE internally for assignment",
+              "V49+: Structures defined in CON blocks are automatically exported to parent objects",
+              "V49+: Use object.struct_t syntax to reference structures from child objects",
+              "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters",
+              "V49+: Structure layout (size, alignment) is preserved exactly when imported"
             ],
             "related": [
               "SIZEOF",
@@ -18503,11 +18538,58 @@
             "keyword": "NEXT",
             "type": "keyword",
             "category": "Control Flow",
-            "description": "Continue to next iteration of loop\n",
-            "syntax": "NEXT",
+            "description": "Continues execution at the next iteration of a REPEAT loop, skipping any \nremaining code in the current iteration. In v52+, an optional level parameter \nallows continuing an outer loop in nested loop structures.\n",
+            "syntax": {
+              "basic": "NEXT",
+              "with_level": "NEXT level"
+            },
+            "parameters": [
+              {
+                "name": "level",
+                "type": "integer",
+                "range": "1-16",
+                "optional": true,
+                "minimum_version": "v52",
+                "description": "Which loop level to continue (1 = innermost, default)"
+              }
+            ],
             "examples": [
-              "REPEAT i FROM 1 TO 10\n  IF i == 5\n    NEXT\n  process(i)"
-            ]
+              {
+                "code": "' Basic NEXT - skip to next iteration\nREPEAT i FROM 1 TO 10\n  IF i == 5\n    NEXT                                 ' Skip when i=5\n  debug(udec(i))                         ' Prints 1,2,3,4,6,7,8,9,10\n",
+                "description": "Skip iteration with basic NEXT"
+              },
+              {
+                "code": "' Skip even numbers\nREPEAT i FROM 1 TO 20\n  IF (i & 1) == 0\n    NEXT                                 ' Skip even numbers\n  process_odd(i)\n",
+                "description": "Filter using NEXT"
+              },
+              {
+                "code": "' V52: NEXT with level parameter - no version directive needed\nREPEAT a FROM 1 TO 10                    ' Level 3 (outermost)\n  REPEAT b FROM 1 TO 10                  ' Level 2\n    REPEAT c FROM 1 TO 10                ' Level 1 (innermost)\n      IF some_condition\n        NEXT                             ' Continue c loop (level 1)\n      IF other_condition\n        NEXT 2                           ' Continue b loop (level 2)\n      IF third_condition\n        NEXT 3                           ' Continue a loop (level 3)\n",
+                "description": "V52 level parameter for nested loops"
+              },
+              {
+                "code": "' V52: Skip outer loop iteration from inner loop\nREPEAT row FROM 0 TO 9                   ' Outer loop\n  REPEAT col FROM 0 TO 9                 ' Inner loop\n    IF skip_row_condition(row, col)\n      NEXT 2                             ' Skip to next row\n    process_cell(row, col)\n",
+                "description": "Continue outer loop from inner loop"
+              }
+            ],
+            "notes": [
+              "NEXT without parameter continues innermost loop (same as NEXT 1)",
+              "V52+: NEXT level continues the Nth enclosing loop",
+              "Level 1 = innermost loop, higher = outer loops",
+              "Maximum level is 16",
+              "Error if level exceeds actual nesting depth",
+              "V52 level feature requires v52+ compiler (no directive needed)",
+              "Stack frames for skipped loops are properly cleaned up"
+            ],
+            "related": [
+              "QUIT",
+              "REPEAT"
+            ],
+            "see_also": [
+              "Loop control",
+              "Control flow",
+              "Nested loops"
+            ],
+            "oneliner": "Continue to next loop iteration, optionally at specified nesting level (v52+)"
           },
           "FILE": {
             "keyword": "FILE",
@@ -18523,11 +18605,62 @@
             "keyword": "QUIT",
             "type": "keyword",
             "category": "Control Flow",
-            "description": "Exit loop immediately\n",
-            "syntax": "QUIT",
+            "description": "Exits a REPEAT loop immediately, continuing execution after the loop. In v52+, \nan optional level parameter allows exiting multiple nested loops at once.\n",
+            "syntax": {
+              "basic": "QUIT",
+              "with_level": "QUIT level"
+            },
+            "parameters": [
+              {
+                "name": "level",
+                "type": "integer",
+                "range": "1-16",
+                "optional": true,
+                "minimum_version": "v52",
+                "description": "How many loop levels to exit (1 = innermost only, default)"
+              }
+            ],
             "examples": [
-              "REPEAT\n  IF error_condition\n    QUIT\n  process_data()"
-            ]
+              {
+                "code": "' Basic QUIT - exit loop\nREPEAT\n  IF error_condition\n    QUIT                                 ' Exit the loop\n  process_data()\n' Execution continues here after QUIT\n",
+                "description": "Exit loop with basic QUIT"
+              },
+              {
+                "code": "' Search with early exit\nREPEAT i FROM 0 TO array_size - 1\n  IF array[i] == target\n    found_index := i\n    QUIT                                 ' Found it, stop searching\n' found_index contains result (or unchanged if not found)\n",
+                "description": "Early exit when condition met"
+              },
+              {
+                "code": "' V52: QUIT with level parameter - no version directive needed\nREPEAT a FROM 1 TO 10                    ' Level 3 (outermost)\n  REPEAT b FROM 1 TO 10                  ' Level 2\n    REPEAT c FROM 1 TO 10                ' Level 1 (innermost)\n      IF found_it\n        QUIT 3                           ' Exit ALL three loops\n      IF skip_rest_of_b\n        QUIT 2                           ' Exit c and b loops\n      IF skip_rest_of_c\n        QUIT                             ' Exit c loop only (level 1)\n",
+                "description": "V52 level parameter for nested loops"
+              },
+              {
+                "code": "' V52: Exit multiple loops on error\nREPEAT outer FROM 0 TO max_outer\n  REPEAT inner FROM 0 TO max_inner\n    result := process(outer, inner)\n    IF result < 0\n      error_code := result\n      QUIT 2                             ' Exit both loops on error\nIF error_code < 0\n  handle_error(error_code)\n",
+                "description": "Exit all loops on error condition"
+              },
+              {
+                "code": "' V52: Matrix search with multi-level exit\nREPEAT row FROM 0 TO rows - 1\n  REPEAT col FROM 0 TO cols - 1\n    IF matrix[row][col] == target\n      found_row := row\n      found_col := col\n      QUIT 2                             ' Exit both loops\n' found_row/found_col contain result\n",
+                "description": "2D search with immediate exit on find"
+              }
+            ],
+            "notes": [
+              "QUIT without parameter exits innermost loop (same as QUIT 1)",
+              "V52+: QUIT level exits N enclosing loops",
+              "Level 1 = exit innermost only, level 2 = exit two loops, etc.",
+              "Maximum level is 16",
+              "Error if level exceeds actual nesting depth",
+              "V52 level feature requires v52+ compiler (no directive needed)",
+              "All intermediate loop stack frames are properly cleaned up"
+            ],
+            "related": [
+              "NEXT",
+              "REPEAT"
+            ],
+            "see_also": [
+              "Loop control",
+              "Control flow",
+              "Early exit"
+            ],
+            "oneliner": "Exit loop immediately, optionally exiting multiple nesting levels (v52+)"
           },
           "BYTE": {
             "keyword": "BYTE",
@@ -18828,7 +18961,7 @@
         }
       },
       "operators": {
-        "count": 77,
+        "count": 78,
         "elements": {
           "^^": {
             "operator": "^^",
@@ -19301,6 +19434,82 @@
             "description": "Bit manipulation\n",
             "category": "Shift/Rotate"
           },
+          "POW": {
+            "operator": "POW",
+            "type": "binary_operator",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Binary operator that computes the first operand raised to the power of the \nsecond operand (x^y). Both operands and the result are floating-point values.\nComputed internally as EXP2(exponent * LOG2(base)).\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := base POW exponent",
+            "operands": [
+              {
+                "name": "base",
+                "type": "float",
+                "description": "Base value (IEEE 754 single precision)"
+              },
+              {
+                "name": "exponent",
+                "type": "float",
+                "description": "Exponent value (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "base^exponent result as 32-bit float"
+            },
+            "precedence": {
+              "level": 6,
+              "associates": "left",
+              "same_level": "+, -, +., -."
+            },
+            "bytecode": "$C6 (bc_pow)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := 2.0 POW 3.0                  ' result = 8.0 (2^3)\n",
+                "description": "Basic power operation"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB pow_examples() | result\n  result := 10.0 POW 2.0                 ' result = 100.0\n  result := 2.0 POW 0.5                  ' result \u2248 1.414 (\u221a2)\n  result := 2.0 POW -1.0                 ' result = 0.5 (1/2)\n  result := 27.0 POW (1.0 /. 3.0)        ' result \u2248 3.0 (cube root)\n",
+                "description": "Various power calculations"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB nth_root(value, n) : root\n  ' Calculate nth root: value^(1/n)\n  root := value POW (1.0 /. FLOAT(n))\n",
+                "description": "Calculate nth root using POW"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB compound_interest(principal, rate, years) : final\n  ' A = P(1 + r)^t\n  final := principal *. ((1.0 +. rate) POW FLOAT(years))\n",
+                "description": "Compound interest calculation"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB distance_3d(x, y, z) : dist\n  ' d = \u221a(x\u00b2 + y\u00b2 + z\u00b2)\n  dist := ((x *. x) +. (y *. y) +. (z *. z)) POW 0.5\n",
+                "description": "3D distance calculation"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Computed as EXP2(exponent * LOG2(base)) internally",
+              "Returns NaN if base is negative (except for integer exponents)",
+              "Returns NaN for 0^0 (mathematically undefined)",
+              "Left-associative: a POW b POW c = (a POW b) POW c",
+              "Same precedence as + and - operators",
+              "For integer powers of 2, EXP2() is more efficient"
+            ],
+            "related": [
+              "LOG2",
+              "EXP2",
+              "LOG",
+              "EXP",
+              "LOG10",
+              "EXP10"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Exponential functions",
+              "Root calculations"
+            ],
+            "oneliner": "Compute x^y (power) for floating-point operands (requires Spin2_v51)"
+          },
           "+>": {
             "operator": "+>",
             "type": "operator",
@@ -19483,12 +19692,80 @@
           },
           ":=:": {
             "operator": ":=:",
-            "type": "operator",
-            "description": "Swap operator\n",
+            "type": "assignment_operator",
             "category": "Assignment",
+            "minimum_version": "v46",
+            "description": "Swap operator that atomically exchanges the values of two variables.\nWorks with scalar variables (BYTE, WORD, LONG) and structure instances.\nBoth operands must be the same type and size.\nAvailable in PNut/pnut_ts v46 and later compilers. No version directive required.\n",
+            "syntax": "variable1 :=: variable2",
+            "operands": [
+              {
+                "name": "variable1",
+                "type": "any assignable",
+                "description": "First variable to swap"
+              },
+              {
+                "name": "variable2",
+                "type": "any assignable",
+                "description": "Second variable (must be same type as first)"
+              }
+            ],
+            "behavior": [
+              "Exchanges values atomically in single operation",
+              "Both operands are both read and written",
+              "Type checking ensures both operands are compatible",
+              "Works with scalars, structures, and pointer targets"
+            ],
             "examples": [
-              "a :=: b  // swap values of a and b"
-            ]
+              {
+                "code": "PUB swap_demo() | a, b\n  a := 10\n  b := 20\n  a :=: b                                ' Swap values\n  ' Now: a = 20, b = 10\n",
+                "description": "Basic variable swap"
+              },
+              {
+                "code": "CON\n  STRUCT point(x, y)\n\nVAR\n  point p1, p2\n\nPUB swap_points()\n  p1.x := 10\n  p1.y := 20\n  p2.x := 30\n  p2.y := 40\n  p1 :=: p2                              ' Swap entire structures\n  ' Now: p1 = (30,40), p2 = (10,20)\n",
+                "description": "Swapping structure instances"
+              },
+              {
+                "code": "VAR\n  byte buffer1[10], buffer2[10]\n\nPUB swap_bytes() | i\n  ' Initialize buffers\n  repeat i from 0 to 9\n    buffer1[i] := i\n    buffer2[i] := i + 100\n  \n  repeat i from 0 to 9\n    buffer1[i] :=: buffer2[i]            ' Swap element by element\n",
+                "description": "Swapping array elements"
+              },
+              {
+                "code": "PUB bubble_sort(arr, count) | i, j\n  repeat i from 0 to count - 2\n    repeat j from 0 to count - i - 2\n      if long[arr][j] > long[arr][j + 1]\n        long[arr][j] :=: long[arr][j + 1]  ' Swap adjacent elements\n",
+                "description": "Using swap in sorting algorithm"
+              },
+              {
+                "code": "VAR\n  long x, y, z\n\nPUB rotate_left()\n  ' Rotate values: x <- y <- z <- x\n  x :=: y                                ' x<->y: x gets old y\n  y :=: z                                ' y<->z: y gets old z, z gets original x\n",
+                "description": "Rotating values with chained swaps"
+              }
+            ],
+            "comparison": [
+              {
+                "traditional": "temp := a\na := b\nb := temp\n",
+                "swap_operator": "a :=: b",
+                "description": "Three operations vs one operator"
+              }
+            ],
+            "notes": [
+              "Available in PNut/pnut_ts v46 and later compilers",
+              "No version directive required - this is NOT a gated feature",
+              "Both operands must be the same type",
+              "Works with variables, array elements, and structure members",
+              "For large structures, uses BYTEMOVE internally for efficiency",
+              "Cannot swap constants or immediate values",
+              "Requires both operands to be writable (lvalues)"
+            ],
+            "related": [
+              "STRUCT",
+              "BYTESWAP",
+              "WORDSWAP",
+              "LONGSWAP",
+              "BYTEMOVE"
+            ],
+            "see_also": [
+              "Memory operations",
+              "Structure operations",
+              "Assignment operators"
+            ],
+            "oneliner": "Atomically swap values of two variables (v46+)"
           },
           "SQRT": {
             "operator": "SQRT",
@@ -19613,7 +19890,7 @@
         }
       },
       "methods": {
-        "count": 89,
+        "count": 98,
         "elements": {
           "GETCRC": {
             "method": "GETCRC",
@@ -19835,6 +20112,65 @@
               "Zero-based indexing",
               "Input validation"
             ]
+          },
+          "EXP10": {
+            "method": "EXP10",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes 10 raised to the power of a floating-point exponent (10^x). Computed \ninternally as EXP2(x / log10(2)). Returns the antilogarithm base 10, useful \nfor decibel-to-linear conversions and scientific notation.\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := EXP10(float_exponent)",
+            "parameters": [
+              {
+                "name": "float_exponent",
+                "type": "float",
+                "description": "Exponent value (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "10^exponent result as 32-bit float"
+            },
+            "bytecode": "$D0 (bc_exp10)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP10(2.0)                   ' result = 100.0 (10^2)\n",
+                "description": "Basic power of 10"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB exp10_examples() | result\n  result := EXP10(0.0)                   ' result = 1.0 (10^0)\n  result := EXP10(1.0)                   ' result = 10.0 (10^1)\n  result := EXP10(-1.0)                  ' result = 0.1 (10^-1)\n  result := EXP10(0.5)                   ' result \u2248 3.162 (\u221a10)\n  result := EXP10(3.0)                   ' result = 1000.0 (10^3)\n",
+                "description": "Common powers of 10"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB db_to_amplitude(db) : amplitude\n  ' Convert decibels to linear amplitude\n  ' amplitude = 10^(dB/20)\n  amplitude := EXP10(db /. 20.0)\n",
+                "description": "Convert decibels to amplitude"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB from_scientific(mantissa, exponent) : value\n  ' Convert scientific notation to float\n  ' e.g., 3.5 x 10^6 = from_scientific(3.5, 6)\n  value := mantissa *. EXP10(FLOAT(exponent))\n",
+                "description": "Convert scientific notation to value"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Computed as EXP2(x / log10(2)) internally",
+              "Returns NaN for extreme exponents (overflow/underflow)",
+              "Commonly used for dB-to-linear conversions",
+              "Inverse of LOG10() function",
+              "Useful for scientific notation calculations"
+            ],
+            "related": [
+              "LOG10",
+              "EXP2",
+              "EXP",
+              "POW"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Decibel calculations",
+              "Scientific notation"
+            ],
+            "oneliner": "Compute 10^x for floating-point exponent (requires Spin2_v51)"
           },
           "GETCT": {
             "method": "GETCT",
@@ -20125,6 +20461,69 @@
               "language/spin2/methods/cogstop.yaml",
               "architecture/cog.yaml"
             ]
+          },
+          "ENDIANW": {
+            "method": "ENDIANW",
+            "type": "method",
+            "category": "Byte Manipulation",
+            "requires_version": "Spin2_v52",
+            "version_directive": "{Spin2_v52}",
+            "description": "Reverses the byte order of the lower 16 bits (word) of a value. The upper 16 \nbits of the result are always cleared to zero. Useful for converting 16-bit \nvalues between big-endian and little-endian formats.\nREQUIRES: {Spin2_v52} or later version directive at start of source file.\n",
+            "syntax": "result := ENDIANW(value)",
+            "parameters": [
+              {
+                "name": "value",
+                "type": "long",
+                "description": "Value containing word to byte-swap in lower 16 bits"
+              }
+            ],
+            "returns": {
+              "type": "long",
+              "description": "Byte-swapped word in lower 16 bits, upper 16 bits cleared"
+            },
+            "bytecode": "$E8 (bc_endianw)",
+            "byte_transformation": {
+              "input": "$AA_BB_12_34 (word portion: $1234)",
+              "output": "$00_00_34_12 (swapped word, upper cleared)",
+              "description": "Only lower 16 bits processed, upper bits zeroed"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB main() | value, swapped\n  value := $00_00_12_34\n  swapped := ENDIANW(value)              ' swapped = $00_00_34_12\n",
+                "description": "Basic 16-bit endian swap"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB network_word_to_host(net_word) : host_word\n  ' Convert network byte order (big-endian) to host (little-endian)\n  host_word := ENDIANW(net_word)\n",
+                "description": "Network to host word conversion"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB read_big_endian_word(addr) : value\n  ' Read a big-endian word from memory and convert to native\n  value := ENDIANW(WORD[addr])\n",
+                "description": "Read big-endian word from memory"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB upper_bits_cleared() | value, result\n  ' Upper 16 bits are always cleared\n  value := $AA_BB_12_34\n  result := ENDIANW(value)               ' result = $00_00_34_12\n  ' Note: $AABB is discarded\n",
+                "description": "Upper bits cleared regardless of input"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v52} or later at start of source file",
+              "Only lower 16 bits are processed",
+              "Upper 16 bits of result are ALWAYS zero",
+              "Input upper bits are ignored, not preserved",
+              "Double application returns original word (with upper bits zeroed)",
+              "Implemented by shifting word to upper half, then MOVBYTS %%0123"
+            ],
+            "related": [
+              "ENDIANL",
+              "MOVBYTS",
+              "WORDSWAP"
+            ],
+            "see_also": [
+              "Byte manipulation",
+              "Endian conversion",
+              "16-bit protocols"
+            ],
+            "oneliner": "Reverse byte order of 16-bit word, clear upper bits (requires Spin2_v52)"
           },
           "COGSPIN": {
             "method": "COGSPIN",
@@ -21124,8 +21523,10 @@
           "TASKNEXT": {
             "method": "TASKNEXT",
             "type": "method",
-            "description": "Yield control to next task in round-robin schedule\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Yield control to the next task in round-robin schedule. This is the primary \nmechanism for cooperative multitasking - tasks must call TASKNEXT() to allow \nother tasks to run.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKNEXT()",
             "parameters": [],
             "returns": {
@@ -21134,21 +21535,22 @@
             },
             "examples": [
               {
-                "code": "' Cooperative yield\nrepeat\n  do_work_chunk()\n  TASKNEXT()  ' Let other tasks run\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI worker_task()\n  repeat\n    do_work_chunk()\n    TASKNEXT()                           ' Let other tasks run\n",
                 "description": "Yield after work chunk"
               },
               {
-                "code": "' Polling with yield\nrepeat\n  if data_ready\n    process_data()\n  TASKNEXT()  ' Don't hog CPU\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI poller_task()\n  repeat\n    if data_ready\n      process_data()\n    TASKNEXT()                           ' Don't hog CPU\n",
                 "description": "Polling with cooperation"
               },
               {
-                "code": "' Long computation with yields\nrepeat i from 0 to 1000\n  calculate_step(i)\n  if i // 10 == 0\n    TASKNEXT()  ' Yield every 10 iterations\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI compute_task() | i\n  repeat i from 0 to 1000\n    calculate_step(i)\n    if i // 10 == 0\n      TASKNEXT()                         ' Yield every 10 iterations\n",
                 "description": "Periodic yielding in long loop"
               }
             ],
             "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
               "Voluntary context switch",
-              "Enables cooperative multitasking",
+              "Essential for cooperative multitasking",
               "Current task pauses, next task runs",
               "Returns when task gets control again",
               "Essential for task cooperation",
@@ -21579,8 +21981,10 @@
           "TASKHALT": {
             "method": "TASKHALT",
             "type": "method",
-            "description": "Pause/halt a running task temporarily\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Temporarily halt/pause a running task. The task's state and stack are \npreserved, and execution can be resumed later with TASKRESUME (or TASKCONT). \nUse THISTASK (-1) to halt the currently executing task.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKHALT(TaskID)",
             "parameters": [
               {
@@ -21595,19 +21999,20 @@
             },
             "examples": [
               {
-                "code": "' Pause a task\nTASKHALT(3)  ' Pause task 3\n' Do critical work...\nTASKRESUME(3)  ' Resume task 3\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB critical_section()\n  TASKHALT(3)                            ' Pause task 3\n  do_critical_work()\n  TASKRESUME(3)                          ' Resume task 3\n",
                 "description": "Pause and resume task"
               },
               {
-                "code": "' Pause all tasks for critical section\nrepeat task_id from 1 to 31\n  if TASKCHK(task_id)\n    TASKHALT(task_id)\n' Critical section\nrepeat task_id from 1 to 31\n  if TASKCHK(task_id)\n    TASKRESUME(task_id)\n",
-                "description": "Pause all tasks temporarily"
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB freeze_all_tasks() | task_id\n  repeat task_id from 1 to 31\n    if TASKCHK(task_id)\n      TASKHALT(task_id)\n",
+                "description": "Pause all secondary tasks"
               },
               {
-                "code": "' Conditional task pause\nif buffer_full\n  TASKHALT(producer_task)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB flow_control()\n  if buffer_full\n    TASKHALT(producer_task)\n",
                 "description": "Pause producer when buffer full"
               }
             ],
             "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
               "Task is paused, not terminated",
               "State and stack preserved",
               "Use TASKRESUME to continue",
@@ -22299,8 +22704,10 @@
           "SIZEOF": {
             "method": "SIZEOF",
             "type": "method",
-            "description": "Get size of structure or data type in bytes\n",
             "category": "Miscellaneous",
+            "requires_version": "Spin2_v45",
+            "version_directive": "{Spin2_v45}",
+            "description": "Returns the size in bytes of a structure definition. Evaluated at compile time \nand can be used for buffer allocation and memory management.\nREQUIRES: {Spin2_v45} or later version directive at start of source file.\n\nNOTE (v51a): SIZEOF() is restricted to DAT, VAR, PUB, and PRI blocks. Using \nSIZEOF() in CON or OBJ blocks will cause a compile error.\n",
             "syntax": "size := SIZEOF(Structure)",
             "parameters": [
               {
@@ -22315,31 +22722,34 @@
             },
             "examples": [
               {
-                "code": "CON\n  ' Define structure\n  POINT = LONG[2]  ' X, Y coordinates\n\nPUB main()\n  size := SIZEOF(POINT)  ' Returns 8 (2 longs * 4 bytes)\n",
-                "description": "Get structure size"
+                "code": "{Spin2_v45}                              ' REQUIRED directive\nCON\n  STRUCT point(x, y)                     ' 8 bytes (2 longs)\n\nPUB main() | size\n  size := SIZEOF(point)                  ' Returns 8\n",
+                "description": "Get structure size in PUB method"
               },
               {
-                "code": "CON\n  ' Complex structure\n  HEADER = LONG + WORD[4] + BYTE[16]\n\nVAR\n  BYTE buffer[SIZEOF(HEADER)]\n",
-                "description": "Allocate buffer for structure"
+                "code": "{Spin2_v45}                              ' REQUIRED directive\nCON\n  STRUCT header(LONG id, WORD flags, BYTE data[16])\n\nVAR\n  BYTE buffer[SIZEOF(header)]            ' SIZEOF in VAR block OK\n",
+                "description": "Allocate buffer using SIZEOF in VAR block"
               },
               {
-                "code": "CON\n  ' Nested structures\n  VECTOR3 = LONG[3]\n  MATRIX3 = VECTOR3[3]\n\nPUB get_size()\n  return SIZEOF(MATRIX3)  ' Returns 36 (9 longs * 4)\n",
-                "description": "Size of nested structure"
+                "code": "{Spin2_v45}                              ' REQUIRED directive\nCON\n  STRUCT vector3(x, y, z)\n  STRUCT matrix3(vector3 row[3])\n\nDAT\n  matrix_size   LONG  SIZEOF(matrix3)   ' SIZEOF in DAT block OK\n",
+                "description": "SIZEOF in DAT block"
               }
             ],
             "notes": [
-              "Structures defined in CON section",
-              "Returns total byte count",
-              "Accounts for data type sizes (BYTE=1, WORD=2, LONG=4)",
-              "Useful for buffer allocation",
-              "Compile-time evaluation",
-              "Works with arrays and nested structures"
+              "REQUIRES {Spin2_v45} or later at start of source file",
+              "V51a RESTRICTION: SIZEOF() only allowed in DAT, VAR, PUB, PRI blocks",
+              "V51a RESTRICTION: Using SIZEOF() in CON or OBJ blocks causes compile error",
+              "Returns total byte count of structure",
+              "Accounts for member sizes (BYTE=1, WORD=2, LONG=4)",
+              "Compile-time evaluation - no runtime cost",
+              "Works with arrays and nested structures",
+              "Useful for buffer allocation and memory management"
             ],
             "timing": {
               "description": "Compile-time constant",
               "cycles": "N/A - resolved at compile time"
             },
             "related": [
+              "STRUCT",
               "BYTE",
               "WORD",
               "LONG"
@@ -22349,6 +22759,65 @@
               "CON section",
               "Memory allocation"
             ]
+          },
+          "LOG10": {
+            "method": "LOG10",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes the base-10 (common) logarithm of a floating-point value. Returns the \nexponent that 10 must be raised to in order to produce the input value \n(10^result = input). Computed internally as LOG2(x) * log10(2).\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := LOG10(float_value)",
+            "parameters": [
+              {
+                "name": "float_value",
+                "type": "float",
+                "description": "Positive floating-point number (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "Base-10 logarithm result as 32-bit float"
+            },
+            "bytecode": "$CA (bc_log10)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | x, result\n  x := 100.0\n  result := LOG10(x)                     ' result = 2.0 (10^2 = 100)\n",
+                "description": "Basic base-10 logarithm"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB log10_examples() | result\n  result := LOG10(1.0)                   ' result = 0.0 (10^0 = 1)\n  result := LOG10(10.0)                  ' result = 1.0 (10^1 = 10)\n  result := LOG10(1000.0)                ' result = 3.0 (10^3 = 1000)\n  result := LOG10(0.1)                   ' result = -1.0 (10^-1 = 0.1)\n",
+                "description": "Common logarithm values"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB amplitude_to_db(amplitude) : db\n  ' Convert linear amplitude to decibels\n  ' dB = 20 * log10(amplitude)\n  db := 20.0 *. LOG10(amplitude)\n",
+                "description": "Convert amplitude to decibels"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB scientific_exponent(value) : exponent\n  ' Get the order of magnitude (scientific notation exponent)\n  if value > 0.0\n    exponent := TRUNC(LOG10(value))\n",
+                "description": "Calculate order of magnitude"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Returns NaN if input is negative or zero",
+              "Computed as LOG2(x) * log10(2) internally",
+              "Commonly used for decibel calculations",
+              "Inverse of EXP10() function",
+              "Also called 'common logarithm'"
+            ],
+            "related": [
+              "EXP10",
+              "LOG2",
+              "LOG",
+              "QLOG"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Decibel calculations",
+              "Scientific notation"
+            ],
+            "oneliner": "Base-10 (common) logarithm of floating-point value (requires Spin2_v51)"
           },
           "LOCKRET": {
             "method": "LOCKRET",
@@ -22408,8 +22877,10 @@
           "TASKID": {
             "method": "TASKID",
             "type": "method",
-            "description": "Get the current task's ID\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Get the ID of the currently executing task. Returns an integer from 0-31 \nrepresenting this task's slot in the cog's task table. The main task is \ntypically ID 0.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "id := TASKID()",
             "parameters": [],
             "returns": {
@@ -22418,20 +22889,21 @@
             },
             "examples": [
               {
-                "code": "' Get current task ID\nmy_id := TASKID()\ndebug(\"Running as task \", udec(my_id))\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI worker_task()\n  debug(\"Running as task \", udec(TASKID()))\n  repeat\n    do_work()\n    TASKNEXT()\n",
                 "description": "Display current task ID"
               },
               {
-                "code": "' Task-specific behavior\ncase TASKID()\n  0: main_task_work()\n  1: worker1_work()\n  2: worker2_work()\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI generic_worker()\n  case TASKID()\n    0: main_task_work()\n    1: worker1_work()\n    2: worker2_work()\n",
                 "description": "Task-specific execution"
               },
               {
-                "code": "' Store task ID for later\nVAR\n  LONG task_ids[32]\n\ntask_ids[TASKID()] := GETCT()  ' Store start time\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nVAR\n  LONG task_start_times[32]\n\nPRI worker_task()\n  task_start_times[TASKID()] := GETCT()\n  repeat\n    do_work()\n    TASKNEXT()\n",
                 "description": "Track task timing"
               }
             ],
             "notes": [
-              "Returns ID of currently executing task",
+              "REQUIRES {Spin2_v47} or later at start of source file",
+              "Returns ID of currently executing task (0-31)",
               "Main task is typically ID 0",
               "Useful for task-specific storage/behavior",
               "Each task has unique ID 0-31",
@@ -22612,11 +23084,195 @@
               "PASM interaction"
             ]
           },
+          "LOG": {
+            "method": "LOG",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes the natural logarithm (base e, where e \u2248 2.71828) of a floating-point \nvalue. Returns the exponent that e must be raised to in order to produce the \ninput value (e^result = input). Computed internally as LOG2(x) * ln(2).\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := LOG(float_value)",
+            "parameters": [
+              {
+                "name": "float_value",
+                "type": "float",
+                "description": "Positive floating-point number (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "Natural logarithm result as 32-bit float"
+            },
+            "bytecode": "$CC (bc_log)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nCON\n  E = 2.718281828                        ' Euler's number\n\nPUB main() | result\n  result := LOG(E)                       ' result \u2248 1.0 (e^1 = e)\n",
+                "description": "Natural logarithm of e"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB log_examples() | result\n  result := LOG(1.0)                     ' result = 0.0 (e^0 = 1)\n  result := LOG(2.0)                     ' result \u2248 0.693147\n  result := LOG(10.0)                    ' result \u2248 2.302585\n",
+                "description": "Common natural logarithm values"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB half_life_decay(initial, half_life, time) : remaining\n  ' Exponential decay: N = N0 * e^(-\u03bbt) where \u03bb = ln(2)/half_life\n  remaining := initial *. EXP(-0.693147 *. time /. half_life)\n",
+                "description": "Radioactive decay calculation"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB compound_time(principal, final, rate) : years\n  ' Time to grow from principal to final at continuous rate\n  ' t = ln(final/principal) / rate\n  years := LOG(final /. principal) /. rate\n",
+                "description": "Continuous compound interest time calculation"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Returns NaN if input is negative or zero",
+              "Computed as LOG2(x) * ln(2) internally",
+              "Used in exponential growth/decay calculations",
+              "Inverse of EXP() function",
+              "Also called 'ln' in mathematical notation"
+            ],
+            "related": [
+              "EXP",
+              "LOG2",
+              "LOG10",
+              "QLOG"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Exponential functions",
+              "Natural logarithm"
+            ],
+            "oneliner": "Natural logarithm (base e) of floating-point value (requires Spin2_v51)"
+          },
+          "MOVBYTS": {
+            "method": "MOVBYTS",
+            "type": "method",
+            "category": "Byte Manipulation",
+            "minimum_version": "v52",
+            "description": "Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each \ndigit in the pattern (0-3) specifies which source byte maps to that destination \nposition. This is the Spin2 function version of the PASM2 MOVBYTS instruction.\nAvailable in PNut/pnut_ts v52 and later compilers. No version directive required.\n",
+            "syntax": "result := MOVBYTS(value, order)",
+            "parameters": [
+              {
+                "name": "value",
+                "type": "long",
+                "description": "32-bit value whose bytes will be rearranged"
+              },
+              {
+                "name": "order",
+                "type": "long",
+                "description": "Quaternary pattern specifying byte arrangement (%%3210 format)"
+              }
+            ],
+            "returns": {
+              "type": "long",
+              "description": "Value with bytes rearranged per pattern"
+            },
+            "bytecode": "$E4 (bc_movbyts)",
+            "byte_positions": [
+              {
+                "position": "Byte 0",
+                "bits": "7:0",
+                "description": "Lowest byte"
+              },
+              {
+                "position": "Byte 1",
+                "bits": "15:8",
+                "description": "Second byte"
+              },
+              {
+                "position": "Byte 2",
+                "bits": "23:16",
+                "description": "Third byte"
+              },
+              {
+                "position": "Byte 3",
+                "bits": "31:24",
+                "description": "Highest byte"
+              }
+            ],
+            "common_patterns": [
+              {
+                "pattern": "%%0123",
+                "effect": "Reverse byte order",
+                "example": "$12_34_56_78 \u2192 $78_56_34_12"
+              },
+              {
+                "pattern": "%%3210",
+                "effect": "Identity (no change)",
+                "example": "$12_34_56_78 \u2192 $12_34_56_78"
+              },
+              {
+                "pattern": "%%0000",
+                "effect": "Broadcast byte 0 to all",
+                "example": "$12_34_56_78 \u2192 $78_78_78_78"
+              },
+              {
+                "pattern": "%%3333",
+                "effect": "Broadcast byte 3 to all",
+                "example": "$12_34_56_78 \u2192 $12_12_12_12"
+              },
+              {
+                "pattern": "%%1032",
+                "effect": "Swap adjacent pairs",
+                "example": "$12_34_56_78 \u2192 $34_12_78_56"
+              },
+              {
+                "pattern": "%%0321",
+                "effect": "Rotate right 1 byte",
+                "example": "$12_34_56_78 \u2192 $78_12_34_56"
+              },
+              {
+                "pattern": "%%2103",
+                "effect": "Rotate left 1 byte",
+                "example": "$12_34_56_78 \u2192 $34_56_78_12"
+              }
+            ],
+            "examples": [
+              {
+                "code": "' Reverse byte order - no version directive needed, just v52+ compiler\nPUB reverse_bytes(value) : result\n  result := MOVBYTS(value, %%0123)\n  ' $12_34_56_78 becomes $78_56_34_12\n",
+                "description": "Reverse byte order (big/little endian swap)"
+              },
+              {
+                "code": "' Broadcast lowest byte to all positions\nPUB broadcast_low(value) : result\n  result := MOVBYTS(value, %%0000)\n  ' $12_34_56_78 becomes $78_78_78_78\n",
+                "description": "Broadcast byte 0 to all positions"
+              },
+              {
+                "code": "' Swap word-aligned byte pairs\nPUB swap_pairs(value) : result\n  result := MOVBYTS(value, %%1032)\n  ' $12_34_56_78 becomes $34_12_78_56\n",
+                "description": "Swap adjacent byte pairs"
+              },
+              {
+                "code": "' Extract and replicate specific byte\nPUB replicate_byte(value, which) : result\n  case which\n    0: result := MOVBYTS(value, %%0000)\n    1: result := MOVBYTS(value, %%1111)\n    2: result := MOVBYTS(value, %%2222)\n    3: result := MOVBYTS(value, %%3333)\n",
+                "description": "Replicate any byte to all positions"
+              }
+            ],
+            "notes": [
+              "Available in v52+ compilers - no version directive required",
+              "Pattern uses quaternary (base-4) notation with %% prefix",
+              "Each digit specifies source byte for that position",
+              "Digit 0 = lowest byte, digit 3 = highest byte",
+              "More flexible than ENDIANL/ENDIANW for custom patterns",
+              "Maps to PASM2 MOVBYTS instruction"
+            ],
+            "related": [
+              "ENDIANL",
+              "ENDIANW",
+              "BYTESWAP",
+              "WORDSWAP",
+              "LONGSWAP"
+            ],
+            "see_also": [
+              "Byte manipulation",
+              "Endian conversion",
+              "PASM2 MOVBYTS instruction"
+            ],
+            "oneliner": "Rearrange bytes by quaternary pattern (v52+ compiler)"
+          },
           "TASKCHK": {
             "method": "TASKCHK",
             "type": "method",
-            "description": "Check if a task is running\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Check the status of a task. Returns a value indicating whether the task is \nunused (0), running (1), or halted (2). This allows monitoring task states \nwithout affecting them.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "result := TASKCHK(TaskID)",
             "parameters": [
               {
@@ -22627,26 +23283,28 @@
             ],
             "returns": {
               "type": "integer",
-              "description": "TRUE (-1) if task is running, FALSE (0) if not"
+              "description": "0 = unused/stopped, 1 = running, 2 = halted"
             },
             "examples": [
               {
-                "code": "' Check if task is running\nif TASKCHK(5)\n  ' Task 5 is active\n",
-                "description": "Check single task status"
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB check_task(task_id) | status\n  status := TASKCHK(task_id)\n  case status\n    0: debug(\"Task unused/stopped\")\n    1: debug(\"Task running\")\n    2: debug(\"Task halted\")\n",
+                "description": "Check detailed task status"
               },
               {
-                "code": "' Count active tasks\ncount := 0\nrepeat task_id from 0 to 31\n  if TASKCHK(task_id)\n    count++\n",
-                "description": "Count running tasks"
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB count_active_tasks() : count | task_id\n  count := 0\n  repeat task_id from 0 to 31\n    if TASKCHK(task_id)\n      count++\n",
+                "description": "Count running or halted tasks"
               },
               {
-                "code": "' Wait for task to finish\nrepeat while TASKCHK(worker_task)\n  TASKNEXT()  ' Yield while waiting\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI wait_for_task(task_id)\n  repeat while TASKCHK(task_id)\n    TASKNEXT()                           ' Yield while waiting\n",
                 "description": "Wait for task completion"
               }
             ],
             "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
               "Non-destructive status check",
-              "Returns TRUE for running or halted tasks",
-              "Returns FALSE for stopped/unused tasks",
+              "Returns 0 for unused/stopped tasks",
+              "Returns 1 for running tasks",
+              "Returns 2 for halted tasks",
               "Useful for task monitoring",
               "Can check any task ID 0-31"
             ],
@@ -22711,8 +23369,10 @@
           "TASKSTOP": {
             "method": "TASKSTOP",
             "type": "method",
-            "description": "Stop and terminate a running task\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Permanently stop and terminate a running task. The task is immediately \nterminated and its task ID becomes available for reuse. Use THISTASK (-1) \nto stop the currently executing task.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKSTOP(TaskID)",
             "parameters": [
               {
@@ -22727,19 +23387,20 @@
             },
             "examples": [
               {
-                "code": "' Stop specific task\nTASKSTOP(2)  ' Stop task ID 2\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB main()\n  TASKSTOP(2)                            ' Stop task ID 2\n",
                 "description": "Stop task by ID"
               },
               {
-                "code": "' Task stops itself\nPUB background_task()\n  repeat\n    if shutdown_flag\n      TASKSTOP(THISTASK)  ' Stop self\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPRI background_task()\n  repeat\n    if shutdown_flag\n      TASKSTOP(THISTASK)                 ' Stop self\n    do_work()\n    TASKNEXT()\n",
                 "description": "Task self-termination"
               },
               {
-                "code": "' Stop all tasks except main\nrepeat task_id from 1 to 31\n  if TASKCHK(task_id)\n    TASKSTOP(task_id)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB shutdown_all_tasks() | task_id\n  repeat task_id from 1 to 31\n    if TASKCHK(task_id)\n      TASKSTOP(task_id)\n",
                 "description": "Stop all secondary tasks"
               }
             ],
             "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
               "Immediately terminates the task",
               "Task's stack space can be reused",
               "THISTASK (-1) stops current task",
@@ -23109,8 +23770,10 @@
           "TASKRESUME": {
             "method": "TASKRESUME",
             "type": "method",
-            "description": "Resume a halted task\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Resume a task that was previously halted with TASKHALT. The task continues \nexecution from where it was paused, with all state preserved. Also known as \nTASKCONT in some documentation.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKRESUME(TaskID)",
             "parameters": [
               {
@@ -23125,19 +23788,20 @@
             },
             "examples": [
               {
-                "code": "' Resume paused task\nTASKRESUME(3)  ' Resume task 3\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB main()\n  TASKRESUME(3)                          ' Resume task 3\n",
                 "description": "Resume single task"
               },
               {
-                "code": "' Synchronized resume\nTASKHALT(worker1)\nTASKHALT(worker2)\nprepare_data()\nTASKRESUME(worker1)\nTASKRESUME(worker2)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB synchronized_start()\n  TASKHALT(worker1)\n  TASKHALT(worker2)\n  prepare_data()\n  TASKRESUME(worker1)\n  TASKRESUME(worker2)\n",
                 "description": "Synchronized task resumption"
               },
               {
-                "code": "' Conditional resume\nif not buffer_full\n  TASKRESUME(producer_task)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB flow_control()\n  if not buffer_full\n    TASKRESUME(producer_task)\n",
                 "description": "Resume producer when buffer has space"
               }
             ],
             "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
               "Resumes task halted with TASKHALT",
               "Task continues from where it was halted",
               "All state preserved during halt",
@@ -23994,11 +24658,136 @@
               "VAR section"
             ]
           },
+          "EXP": {
+            "method": "EXP",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes e (Euler's number \u2248 2.71828) raised to the power of a floating-point \nexponent (e^x). Computed internally as EXP2(x / ln(2)). Returns the natural \nantilogarithm, essential for exponential growth/decay calculations.\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := EXP(float_exponent)",
+            "parameters": [
+              {
+                "name": "float_exponent",
+                "type": "float",
+                "description": "Exponent value (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "e^exponent result as 32-bit float"
+            },
+            "bytecode": "$D2 (bc_exp)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP(1.0)                     ' result \u2248 2.71828 (e^1 = e)\n",
+                "description": "Basic natural exponential"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB exp_examples() | result\n  result := EXP(0.0)                     ' result = 1.0 (e^0)\n  result := EXP(-1.0)                    ' result \u2248 0.36788 (1/e)\n  result := EXP(2.0)                     ' result \u2248 7.389 (e^2)\n  result := EXP(-2.0)                    ' result \u2248 0.1353 (e^-2)\n",
+                "description": "Common natural exponential values"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB exponential_decay(initial, decay_rate, time) : remaining\n  ' N(t) = N0 * e^(-\u03bbt)\n  remaining := initial *. EXP(-decay_rate *. time)\n",
+                "description": "Exponential decay model"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB continuous_compound(principal, rate, time) : final\n  ' A = P * e^(rt) - continuous compound interest\n  final := principal *. EXP(rate *. time)\n",
+                "description": "Continuous compound interest"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB gaussian(x, mean, stddev) : probability\n  ' Normal distribution probability density\n  ' f(x) = (1/(\u03c3\u221a(2\u03c0))) * e^(-((x-\u03bc)\u00b2)/(2\u03c3\u00b2))\n  probability := EXP(-0.5 *. ((x -. mean) /. stddev) *. ((x -. mean) /. stddev))\n  probability := probability /. (stddev *. 2.506628)  ' stddev * \u221a(2\u03c0)\n",
+                "description": "Gaussian/normal distribution"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Computed as EXP2(x / ln(2)) internally",
+              "Returns NaN for extreme exponents (overflow/underflow)",
+              "Essential for exponential growth/decay models",
+              "Inverse of LOG() function",
+              "e \u2248 2.718281828 (Euler's number)"
+            ],
+            "related": [
+              "LOG",
+              "EXP2",
+              "EXP10",
+              "POW"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Exponential functions",
+              "Natural exponential"
+            ],
+            "oneliner": "Compute e^x (natural exponential) for floating-point exponent (requires Spin2_v51)"
+          },
+          "EXP2": {
+            "method": "EXP2",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes 2 raised to the power of a floating-point exponent (2^x). Uses the \nhardware CORDIC QEXP instruction internally for efficient computation. Returns \nthe antilogarithm base 2.\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := EXP2(float_exponent)",
+            "parameters": [
+              {
+                "name": "float_exponent",
+                "type": "float",
+                "description": "Exponent value (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "2^exponent result as 32-bit float"
+            },
+            "bytecode": "$CE (bc_exp2)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP2(3.0)                    ' result = 8.0 (2^3)\n",
+                "description": "Basic power of 2"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB exp2_examples() | result\n  result := EXP2(0.0)                    ' result = 1.0 (2^0)\n  result := EXP2(1.0)                    ' result = 2.0 (2^1)\n  result := EXP2(-1.0)                   ' result = 0.5 (2^-1)\n  result := EXP2(0.5)                    ' result \u2248 1.414 (\u221a2)\n  result := EXP2(10.0)                   ' result = 1024.0 (2^10)\n",
+                "description": "Common powers of 2"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB binary_scale(value, shift) : scaled\n  ' Scale value by power of 2 (like bit shifting but for floats)\n  scaled := value *. EXP2(FLOAT(shift))\n",
+                "description": "Binary scaling for floating-point values"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB octave_to_freq(octave, semitone) : freq\n  ' Calculate frequency from octave and semitone\n  ' A4 (octave 4, semitone 0) = 440Hz\n  freq := 440.0 *. EXP2(FLOAT(octave - 4) +. FLOAT(semitone) /. 12.0)\n",
+                "description": "Calculate musical frequency from octave"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Uses hardware CORDIC QEXP instruction internally",
+              "Returns NaN for extreme exponents (overflow/underflow)",
+              "Useful for binary scaling and DSP applications",
+              "Inverse of LOG2() function",
+              "More efficient than general POW for powers of 2"
+            ],
+            "related": [
+              "LOG2",
+              "EXP10",
+              "EXP",
+              "POW",
+              "QEXP"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Exponential functions",
+              "CORDIC operations"
+            ],
+            "oneliner": "Compute 2^x for floating-point exponent (requires Spin2_v51)"
+          },
           "TASKSPIN": {
             "method": "TASKSPIN",
             "type": "method",
-            "description": "Start a new Spin2 task within the current cog\n",
             "category": "Task Operations",
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Start a new Spin2 task within the current cog. Tasks enable cooperative \nmultitasking where multiple execution contexts share the same cog but have \nindependent stacks and program counters.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKSPIN(TaskID, Method({Parameters}), StackAddress)",
             "parameters": [
               {
@@ -24023,20 +24812,21 @@
             },
             "examples": [
               {
-                "code": "' Start a new task\nVAR\n  LONG task_stack[64]\n\nTASKSPIN(NEWTASK, background_process(), @task_stack)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nVAR\n  LONG task_stack[64]\n\nPUB main()\n  TASKSPIN(NEWTASK, background_process(), @task_stack)\n  repeat\n    main_work()\n    TASKNEXT()\n",
                 "description": "Start background task"
               },
               {
-                "code": "' Start specific task ID\nTASKSPIN(2, sensor_monitor(16, 1000), @sensor_stack)\n",
-                "description": "Start task with ID 2"
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nVAR\n  LONG sensor_stack[64]\n\nPUB main()\n  TASKSPIN(2, sensor_monitor(16, 1000), @sensor_stack)\n",
+                "description": "Start task with specific ID"
               },
               {
-                "code": "' Multiple tasks\nTASKSPIN(NEWTASK, task1(), @stack1)\nTASKSPIN(NEWTASK, task2(), @stack2)\nTASKSPIN(NEWTASK, task3(), @stack3)\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nVAR\n  LONG stack1[64], stack2[64], stack3[64]\n\nPUB main()\n  TASKSPIN(NEWTASK, task1(), @stack1)\n  TASKSPIN(NEWTASK, task2(), @stack2)\n  TASKSPIN(NEWTASK, task3(), @stack3)\n",
                 "description": "Start multiple tasks"
               }
             ],
             "notes": [
-              "Up to 32 tasks per cog (v47+ feature)",
+              "REQUIRES {Spin2_v47} or later at start of source file",
+              "Up to 32 tasks per cog (IDs 0-31)",
               "Tasks share cog but have separate stacks",
               "Cooperative multitasking within cog",
               "NEWTASK (-1) auto-assigns next available ID",
@@ -24433,6 +25223,70 @@
               "language/spin2/methods/wordmove.yaml",
               "language/spin2/methods/longfill.yaml"
             ]
+          },
+          "ENDIANL": {
+            "method": "ENDIANL",
+            "type": "method",
+            "category": "Byte Manipulation",
+            "requires_version": "Spin2_v52",
+            "version_directive": "{Spin2_v52}",
+            "description": "Reverses the byte order of a 32-bit long value, converting between big-endian \nand little-endian formats. Equivalent to MOVBYTS(value, %%0123). Useful for \nnetwork protocol handling where data is often transmitted in big-endian format.\nREQUIRES: {Spin2_v52} or later version directive at start of source file.\n",
+            "syntax": "result := ENDIANL(value)",
+            "parameters": [
+              {
+                "name": "value",
+                "type": "long",
+                "description": "32-bit value to byte-swap"
+              }
+            ],
+            "returns": {
+              "type": "long",
+              "description": "Value with byte order reversed"
+            },
+            "bytecode": "$E6 (bc_endianl)",
+            "byte_transformation": {
+              "input": "$12_34_56_78 (bytes: 12, 34, 56, 78)",
+              "output": "$78_56_34_12 (bytes: 78, 56, 34, 12)",
+              "description": "All 4 bytes are reversed"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB main() | value, swapped\n  value := $12_34_56_78\n  swapped := ENDIANL(value)              ' swapped = $78_56_34_12\n",
+                "description": "Basic 32-bit endian swap"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB network_to_host(net_long) : host_long\n  ' Convert network byte order (big-endian) to host (little-endian)\n  host_long := ENDIANL(net_long)\n",
+                "description": "Network to host byte order conversion"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB read_big_endian_long(addr) : value\n  ' Read a big-endian long from memory and convert to native\n  value := ENDIANL(LONG[addr])\n",
+                "description": "Read big-endian data from memory"
+              },
+              {
+                "code": "{Spin2_v52}                              ' REQUIRED directive\nPUB verify_reversible() | original, swapped\n  ' Double swap returns original value\n  original := $AABBCCDD\n  swapped := ENDIANL(ENDIANL(original))  ' swapped = $AABBCCDD\n",
+                "description": "Double application returns original"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v52} or later at start of source file",
+              "Equivalent to MOVBYTS(value, %%0123)",
+              "Double application returns original value",
+              "Useful for network protocol handling (big-endian)",
+              "P2 is little-endian; network protocols often big-endian",
+              "Uses PASM2 MOVBYTS instruction internally"
+            ],
+            "related": [
+              "ENDIANW",
+              "MOVBYTS",
+              "BYTESWAP",
+              "LONGSWAP"
+            ],
+            "see_also": [
+              "Byte manipulation",
+              "Endian conversion",
+              "Network protocols"
+            ],
+            "oneliner": "Reverse byte order of 32-bit long (requires Spin2_v52)"
           },
           "WORDSWAP": {
             "method": "WORDSWAP",
@@ -25152,6 +26006,65 @@
               "language/spin2/methods/bytemove.yaml"
             ]
           },
+          "LOG2": {
+            "method": "LOG2",
+            "type": "method",
+            "category": "Floating-Point Math",
+            "requires_version": "Spin2_v51",
+            "version_directive": "{Spin2_v51}",
+            "description": "Computes the base-2 logarithm of a floating-point value. Returns the exponent \nthat 2 must be raised to in order to produce the input value (2^result = input).\nUses the CORDIC QLOG instruction internally for efficient computation.\nREQUIRES: {Spin2_v51} or later version directive at start of source file.\n",
+            "syntax": "result := LOG2(float_value)",
+            "parameters": [
+              {
+                "name": "float_value",
+                "type": "float",
+                "description": "Positive floating-point number (IEEE 754 single precision)"
+              }
+            ],
+            "returns": {
+              "type": "float",
+              "description": "Base-2 logarithm result as 32-bit float"
+            },
+            "bytecode": "$C8 (bc_log2)",
+            "examples": [
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | x, result\n  x := 8.0\n  result := LOG2(x)                      ' result = 3.0 (2^3 = 8)\n",
+                "description": "Basic base-2 logarithm"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB log_examples() | result\n  result := LOG2(1.0)                    ' result = 0.0 (2^0 = 1)\n  result := LOG2(2.0)                    ' result = 1.0 (2^1 = 2)\n  result := LOG2(4.0)                    ' result = 2.0 (2^2 = 4)\n  result := LOG2(0.5)                    ' result = -1.0 (2^-1 = 0.5)\n",
+                "description": "Common logarithm values"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB bits_needed(max_value) : bits\n  ' Calculate minimum bits needed to represent a value\n  if max_value > 0.0\n    bits := TRUNC(LOG2(max_value)) + 1\n  else\n    bits := 1\n",
+                "description": "Calculate bits needed for a value"
+              },
+              {
+                "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB octave_from_freq(freq) : octave\n  ' Calculate musical octave from frequency (A4 = 440Hz)\n  octave := TRUNC(LOG2(freq / 440.0)) + 4\n",
+                "description": "Calculate musical octave from frequency"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v51} or later at start of source file",
+              "Returns NaN if input is negative or zero",
+              "Uses hardware CORDIC QLOG instruction internally",
+              "Input must be IEEE 754 single-precision float",
+              "Result is IEEE 754 single-precision float",
+              "Inverse of EXP2() function"
+            ],
+            "related": [
+              "EXP2",
+              "LOG10",
+              "LOG",
+              "QLOG"
+            ],
+            "see_also": [
+              "Floating-point math",
+              "Logarithmic functions",
+              "CORDIC operations"
+            ],
+            "oneliner": "Base-2 logarithm of floating-point value (requires Spin2_v51)"
+          },
           "PINLOW": {
             "method": "PINLOW",
             "aliases": [
@@ -25568,12 +26481,85 @@
             "register": "TASKHLT",
             "type": "register",
             "category": "Task Management",
-            "description": "Task halt register (v47+)\n",
-            "examples": [
-              "TASKHLT := task_flags"
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "The TASKHLT register holds the halt status bits for all 32 tasks in the current \ncog. Each bit corresponds to a task ID (0-31), where a set bit indicates that \ntask is currently halted. Note that the bits are stored in reverse order - bit 0 \ncorresponds to task 31, and bit 31 corresponds to task 0.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
+            "address": "512 ($200)",
+            "size": "32-bit",
+            "access": "read_write",
+            "bit_layout": [
+              {
+                "bit": "0",
+                "task": "31",
+                "description": "Task 31 halt status"
+              },
+              {
+                "bit": "1",
+                "task": "30",
+                "description": "Task 30 halt status"
+              },
+              {
+                "bit": "...",
+                "task": "...",
+                "description": "..."
+              },
+              {
+                "bit": "30",
+                "task": "1",
+                "description": "Task 1 halt status"
+              },
+              {
+                "bit": "31",
+                "task": "0",
+                "description": "Task 0 halt status (main task)"
+              }
             ],
-            "address": "512",
-            "access": "read_write"
+            "syntax": {
+              "read": "status := TASKHLT",
+              "write": "TASKHLT := value"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB check_task_halted(task_id) : halted\n  ' Note: bits are reversed - task 0 is bit 31, task 31 is bit 0\n  halted := (TASKHLT >> (31 - task_id)) & 1\n",
+                "description": "Check if a specific task is halted"
+              },
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB count_halted_tasks() : count | i\n  count := 0\n  repeat i from 0 to 31\n    if (TASKHLT >> (31 - i)) & 1\n      count++\n",
+                "description": "Count number of halted tasks"
+              },
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB any_tasks_halted() : result\n  result := TASKHLT <> 0\n",
+                "description": "Quick check if any tasks are halted"
+              },
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB monitor_tasks() | status\n  repeat\n    status := TASKHLT\n    if status\n      debug(\"Halted tasks: \", ubin(status))\n    waitms(100)\n",
+                "description": "Monitor task halt status"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
+              "Bits are stored in REVERSE order (bit 0 = task 31, bit 31 = task 0)",
+              "A set bit (1) indicates the task is halted",
+              "A clear bit (0) indicates the task is running or stopped",
+              "Task 0 is typically the main program task",
+              "Use TASKCHK() for simpler status checking of individual tasks",
+              "Direct TASKHLT access useful for bulk task monitoring",
+              "Writing to TASKHLT can force-halt or force-resume tasks"
+            ],
+            "related": [
+              "TASKHALT",
+              "TASKCONT",
+              "TASKRESUME",
+              "TASKCHK",
+              "NEWTASK",
+              "THISTASK"
+            ],
+            "see_also": [
+              "Task management",
+              "Multi-tasking",
+              "Task status monitoring"
+            ],
+            "oneliner": "Register containing halt status bits for all 32 tasks (requires Spin2_v47)"
           },
           "IRET2": {
             "register": "IRET2",
@@ -25845,13 +26831,112 @@
           "ORGH": {
             "directive": "ORGH",
             "type": "assembly_directive",
-            "description": "Set origin address for hub RAM\n",
-            "syntax": "['ORGH address']",
-            "examples": [
-              "ORGH $400  // Start at hub address $400"
+            "category": "Assembly Directives",
+            "description": "Sets the origin address for hub RAM assembly code. In DAT blocks, ORGH positions \ncode/data at a specific hub address. In V50+, ORGH also enables inline hub-execute \nassembly within Spin2 methods for performance-critical code sections.\n",
+            "location": "DAT block, or inline within PUB/PRI methods (V50+)",
+            "syntax": {
+              "dat_block": "ORGH [address]",
+              "inline_spin2": "PUB/PRI method()\n    ORGH\n        ' Hub-execute PASM2 code\n    END\n"
+            },
+            "parameters": [
+              {
+                "name": "address",
+                "type": "integer",
+                "description": "Hub address for code/data placement (DAT block usage)",
+                "optional": true,
+                "default": "Current location"
+              }
             ],
-            "group": "Assembly",
-            "last_updated": "2025-09-19T16:04:17.648610"
+            "examples": [
+              {
+                "code": "DAT\n        orgh $400\ndata    long    0[16]                    ' 16 longs at hub address $400\n",
+                "description": "Basic hub address origin in DAT block"
+              },
+              {
+                "code": "DAT\n        orgh                              ' Continue from current hub address\ntable   long    100, 200, 300, 400\n",
+                "description": "ORGH without address continues from current location"
+              },
+              {
+                "code": "DAT\n        org                               ' Cog code\ncog_routine\n        mov     pa, #1\n        ret\n\n        orgh                              ' Switch to hub code\nhub_data\n        long    0[256]                    ' Large buffer in hub RAM\n",
+                "description": "Mixed cog and hub sections in DAT block"
+              },
+              {
+                "code": "PUB fast_copy(src, dst, count) | i\n  ORGH\n        mov     ptrb, dst\n        mov     ptra, src\n        rep     @.end, count\n        rdlong  i, ptra++\n        wrlong  i, ptrb++\n.end\n  END\n",
+                "description": "V50+ inline hub-execute assembly in Spin2 method"
+              },
+              {
+                "code": "PUB fast_fill(addr, value, count)\n  ORGH\n        mov     ptra, addr\n        rep     @.end, count\n        wrlong  value, ptra++\n.end\n  END\n",
+                "description": "V50+ inline assembly for fast memory fill"
+              },
+              {
+                "code": "PUB compute_checksum(addr, bytes) : sum | temp\n  sum := 0\n  ORGH\n        mov     ptra, addr\n        mov     pr0, bytes\n        mov     sum, #0\n.loop\n        rdbyte  temp, ptra++\n        add     sum, temp\n        djnz    pr0, #.loop\n  END\n",
+                "description": "V50+ inline assembly with return value"
+              }
+            ],
+            "inline_assembly": {
+              "description": "V50+ feature: ORGH can be used within Spin2 methods to embed hub-execute\nPASM2 code. The assembly runs in hub-execute mode directly in hub RAM.\n",
+              "minimum_version": "v50",
+              "syntax": "ORGH ... END",
+              "features": [
+                "Code executes in hub RAM (hub-execute mode)",
+                "Maximum size: $FFFF longs including auto-added RET",
+                "RET instruction automatically added at end",
+                "First 16 local variables saved/restored around inline block",
+                "Access to method parameters and local variables"
+              ],
+              "comparison": [
+                {
+                  "feature": "Execution location",
+                  "org": "Cog RAM",
+                  "orgh": "Hub RAM"
+                },
+                {
+                  "feature": "Code loading",
+                  "org": "Copied to cog registers",
+                  "orgh": "Executed in place"
+                },
+                {
+                  "feature": "Size limit",
+                  "org": "$11F longs",
+                  "orgh": "$FFFF longs"
+                },
+                {
+                  "feature": "Speed",
+                  "org": "Fastest",
+                  "orgh": "Slightly slower"
+                }
+              ],
+              "bytecode": "$D6 (bc_orgh)",
+              "error_messages": [
+                "ORGH inline block exceeds $FFFF longs (including the added RET instruction)",
+                "ORG/ORGH inline block is empty"
+              ]
+            },
+            "restrictions": [
+              "ORGH not allowed inside a DITTO block",
+              "Cannot use ORGH and ORG in same inline block",
+              "Inline blocks must end with END directive"
+            ],
+            "notes": [
+              "In DAT blocks, ORGH sets hub origin for subsequent code/data",
+              "Default address continues from current compilation position",
+              "V50+: ORGH enables inline hub-execute assembly in Spin2 methods",
+              "Hub-execute code runs in place, no cog RAM copy required",
+              "For inline blocks, ORG uses cog RAM, ORGH uses hub RAM",
+              "Choose ORG for speed-critical tiny routines, ORGH for larger code"
+            ],
+            "related": [
+              "ORG",
+              "END",
+              "DITTO",
+              "DAT"
+            ],
+            "see_also": [
+              "Inline assembly",
+              "Hub-execute mode",
+              "DAT block directives"
+            ],
+            "oneliner": "Set hub RAM origin address; V50+ enables inline hub-execute assembly"
           },
           "DITTO": {
             "directive": "DITTO",
@@ -26074,7 +27159,7 @@
         }
       },
       "debug_commands": {
-        "count": 11,
+        "count": 12,
         "elements": {
           "PC_KEY": {
             "command": "PC_KEY",
@@ -26268,11 +27353,77 @@
           "$$": {
             "symbol": "$$",
             "type": "special_symbol",
-            "category": "Special",
-            "description": "Current assembly address\n",
+            "category": "Special Symbols",
+            "description": "The $$ symbol has dual meaning depending on context:\n\n1. PASM2 CONTEXT: Current cog address - the address of the instruction where \n   $$ appears. Used for relative address calculations, jump offsets, and \n   position-independent code.\n\n2. DITTO CONTEXT (V50+): Iteration index - inside a DITTO block, $$ equals\n   the current iteration number (0 to count-1). Used for generating indexed\n   sequences, lookup tables, and repetitive patterns.\n",
+            "contexts": {
+              "pasm2_address": {
+                "description": "Current cog address in assembly code",
+                "location": "DAT block, ORG sections",
+                "value": "Address of current instruction (in cog longs)",
+                "usage": "Relative addressing, position calculations"
+              },
+              "ditto_index": {
+                "description": "Current iteration index in DITTO block",
+                "location": "Inside DITTO ... DITTO END blocks",
+                "value": "0 to count-1 for each iteration",
+                "minimum_version": "v50",
+                "requires_version": "Spin2_v50",
+                "version_directive": "{Spin2_v50}"
+              }
+            },
             "examples": [
-              "distance := target - $$"
-            ]
+              {
+                "code": "DAT\n        org\n        \nroutine mov     pa, #1\n        jmp     #$$                        ' Jump to self (infinite loop)\n",
+                "description": "PASM2: $$ as current cog address for self-jump"
+              },
+              {
+                "code": "DAT\n        org\n        \ntable   jmp     #table_end                 ' Skip over table\nentry0  long    0\nentry1  long    100\nentry2  long    200\ntable_end\n        mov     pa, entry0 + ($$ - entry0) ' Calculate relative offset\n",
+                "description": "PASM2: Using $$ for relative address calculation"
+              },
+              {
+                "code": "DAT\n        org\n        \nstart   mov     pa, #$$ + 3                ' pa = address of 'start' + 3\n        ' ... \n",
+                "description": "PASM2: $$ plus offset for forward reference"
+              },
+              {
+                "code": "{Spin2_v50}\nDAT\n        org\n        \n        DITTO 8\n        long    $$                         ' Generates: 0, 1, 2, 3, 4, 5, 6, 7\n        DITTO END\n",
+                "description": "V50+ DITTO: $$ as iteration index for simple sequence"
+              },
+              {
+                "code": "{Spin2_v50}\nDAT\n        org\n        \n        DITTO 8\n        long    $$ * 100                   ' Generates: 0, 100, 200, ..., 700\n        DITTO END\n",
+                "description": "V50+ DITTO: $$ multiplied for scaled sequence"
+              },
+              {
+                "code": "{Spin2_v50}\nDAT\n        org\n        \n        DITTO 4\n        mov     reg + $$, #0               ' Clear reg+0, reg+1, reg+2, reg+3\n        DITTO END\n",
+                "description": "V50+ DITTO: $$ for indexed register operations"
+              },
+              {
+                "code": "{Spin2_v50}\nDAT\n        org\n        \n' Generate sine lookup table (0-90 degrees in 16 steps)\n        DITTO 16\n        long    round(sin(float($$) * PI / 30.0) * 65535.0)\n        DITTO END\n",
+                "description": "V50+ DITTO: $$ in mathematical expressions for lookup tables"
+              }
+            ],
+            "notes": [
+              "In PASM2, $$ represents current cog address (not hub address)",
+              "Value is in cog longs (0-$1FF range for cog RAM)",
+              "V50+: Inside DITTO block, $$ becomes iteration index (0 to count-1)",
+              "V50+: DITTO usage requires {Spin2_v50} version directive",
+              "Context determines meaning - compiler resolves based on location",
+              "Single $ represents current hub address (different from $$)"
+            ],
+            "error_messages": [
+              "'$$' (DITTO index) is only allowed within a DITTO block, inside a DAT block"
+            ],
+            "related": [
+              "$",
+              "DITTO",
+              "ORG",
+              "JMP"
+            ],
+            "see_also": [
+              "Assembly address symbols",
+              "DITTO directive",
+              "Position-independent code"
+            ],
+            "oneliner": "Current cog address (PASM2) or DITTO iteration index (V50+)"
           },
           "~~": {
             "symbol": "~~",
@@ -26332,14 +27483,14 @@
       }
     },
     "statistics": {
-      "total_elements": 259,
+      "total_elements": 270,
       "by_category": {
         "keywords": 37,
-        "operators": 77,
-        "methods": 89,
+        "operators": 78,
+        "methods": 98,
         "registers": 18,
         "assembly_directives": 12,
-        "debug_commands": 11,
+        "debug_commands": 12,
         "special_symbols": 12,
         "system_variables": 3
       }

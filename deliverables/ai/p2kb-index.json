@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2026-01-08T05:23:14.233296",
-    "total_entries": 974,
+    "generated": "2026-01-13T23:52:26.043023",
+    "total_entries": 1000,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
   },
@@ -1784,6 +1784,10 @@
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
       "mtime": 1764449566
     },
+    "p2kbPasm2ConditionalDebug": {
+      "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
+      "mtime": 1768348299
+    },
     "p2kbPasm2Crcbit": {
       "path": "deliverables/ai/P2/language/pasm2/crcbit.yaml",
       "mtime": 1764449566
@@ -3158,7 +3162,7 @@
     },
     "p2kbSpin2AsmOrgh": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/orgh.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2AsmRes": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/res.yaml",
@@ -3176,9 +3180,17 @@
       "path": "deliverables/ai/P2/language/spin2/concepts/inline_pasm2.yaml",
       "mtime": 1764977160
     },
+    "p2kbSpin2DebugEndSession": {
+      "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2DebugMask": {
+      "path": "deliverables/ai/P2/language/spin2/constants/debug-mask.yaml",
+      "mtime": 1768348299
+    },
     "p2kbSpin2Newtask": {
       "path": "deliverables/ai/P2/language/spin2/constants/newtask.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
@@ -3186,7 +3198,7 @@
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Abort": {
       "path": "deliverables/ai/P2/language/spin2/constructs/abort.yaml",
@@ -3199,6 +3211,10 @@
     "p2kbSpin2Case": {
       "path": "deliverables/ai/P2/language/spin2/constructs/case.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2EscapeStrings": {
+      "path": "deliverables/ai/P2/language/spin2/constructs/escape-strings.yaml",
+      "mtime": 1768348299
     },
     "p2kbSpin2IfElseifElse": {
       "path": "deliverables/ai/P2/language/spin2/constructs/if_elseif_else.yaml",
@@ -3219,6 +3235,10 @@
     "p2kbSpin2Quit": {
       "path": "deliverables/ai/P2/language/spin2/constructs/quit.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2RegisterConstants": {
+      "path": "deliverables/ai/P2/language/spin2/constructs/register-constants.yaml",
+      "mtime": 1768348299
     },
     "p2kbSpin2Repeat": {
       "path": "deliverables/ai/P2/language/spin2/constructs/repeat.yaml",
@@ -3251,6 +3271,10 @@
     "p2kbSpin2VscodePnutDocumentationStyle": {
       "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2DbgCZ": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/c-z.yaml",
+      "mtime": 1768348299
     },
     "p2kbSpin2DbgDebugFormattersArrays": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml",
@@ -3314,7 +3338,7 @@
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
@@ -3434,7 +3458,7 @@
     },
     "p2kbSpin2KwNEXT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/NEXT.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2KwOBJ": {
       "path": "deliverables/ai/P2/language/spin2/keywords/OBJ.yaml",
@@ -3454,7 +3478,7 @@
     },
     "p2kbSpin2KwQUIT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/QUIT.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2KwREPEAT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/REPEAT.yaml",
@@ -3474,7 +3498,7 @@
     },
     "p2kbSpin2KwSTRUCT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml",
-      "mtime": 1767481422
+      "mtime": 1768348299
     },
     "p2kbSpin2KwTO": {
       "path": "deliverables/ai/P2/language/spin2/keywords/TO.yaml",
@@ -3564,6 +3588,26 @@
       "path": "deliverables/ai/P2/language/spin2/methods/cogstop.yaml",
       "mtime": 1764449566
     },
+    "p2kbSpin2Endianl": {
+      "path": "deliverables/ai/P2/language/spin2/methods/endianl.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Endianw": {
+      "path": "deliverables/ai/P2/language/spin2/methods/endianw.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Exp": {
+      "path": "deliverables/ai/P2/language/spin2/methods/exp.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Exp10": {
+      "path": "deliverables/ai/P2/language/spin2/methods/exp10.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Exp2": {
+      "path": "deliverables/ai/P2/language/spin2/methods/exp2.yaml",
+      "mtime": 1768348299
+    },
     "p2kbSpin2Getcrc": {
       "path": "deliverables/ai/P2/language/spin2/methods/getcrc.yaml",
       "mtime": 1764449566
@@ -3612,6 +3656,18 @@
       "path": "deliverables/ai/P2/language/spin2/methods/locktry.yaml",
       "mtime": 1764449566
     },
+    "p2kbSpin2Log": {
+      "path": "deliverables/ai/P2/language/spin2/methods/log.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Log10": {
+      "path": "deliverables/ai/P2/language/spin2/methods/log10.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Log2": {
+      "path": "deliverables/ai/P2/language/spin2/methods/log2.yaml",
+      "mtime": 1768348299
+    },
     "p2kbSpin2Long": {
       "path": "deliverables/ai/P2/language/spin2/methods/long.yaml",
       "mtime": 1764449566
@@ -3651,6 +3707,10 @@
     "p2kbSpin2Lstring": {
       "path": "deliverables/ai/P2/language/spin2/methods/lstring.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2Movbyts": {
+      "path": "deliverables/ai/P2/language/spin2/methods/movbyts.yaml",
+      "mtime": 1768348299
     },
     "p2kbSpin2Muldiv64": {
       "path": "deliverables/ai/P2/language/spin2/methods/muldiv64.yaml",
@@ -3754,7 +3814,7 @@
     },
     "p2kbSpin2Sizeof": {
       "path": "deliverables/ai/P2/language/spin2/methods/sizeof.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Sqrt": {
       "path": "deliverables/ai/P2/language/spin2/methods/sqrt.yaml",
@@ -3778,31 +3838,31 @@
     },
     "p2kbSpin2Taskchk": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskchk.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskhalt": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskhalt.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskid": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskid.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Tasknext": {
       "path": "deliverables/ai/P2/language/spin2/methods/tasknext.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskresume": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskresume.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskspin.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskstop.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Taskwait": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskwait.yaml",
@@ -3907,6 +3967,10 @@
     "p2kbSpin2OpOpONES": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ONES.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2OpOpPOW": {
+      "path": "deliverables/ai/P2/language/spin2/operators/op_POW.yaml",
+      "mtime": 1768348299
     },
     "p2kbSpin2OpOpQEXP": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_QEXP.yaml",
@@ -4146,7 +4210,7 @@
     },
     "p2kbSpin2OpOpSwap": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_swap.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2OpOpTernary": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ternary.yaml",
@@ -4348,6 +4412,46 @@
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/single_object.yaml",
       "mtime": 1764449566
     },
+    "p2kbSpin2Define": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/define.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Else": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/else.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Elseifdef": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/elseifdef.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Elseifndef": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/elseifndef.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Endif": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/endif.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2ExternalSymbols": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/external-symbols.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Ifdef": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/ifdef.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Ifndef": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/ifndef.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2PreprocessorOverview": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/preprocessor-overview.yaml",
+      "mtime": 1768348299
+    },
+    "p2kbSpin2Undef": {
+      "path": "deliverables/ai/P2/language/spin2/preprocessor/undef.yaml",
+      "mtime": 1768348299
+    },
     "p2kbSpin2RegDira": {
       "path": "deliverables/ai/P2/language/spin2/registers/dira.yaml",
       "mtime": 1764449566
@@ -4418,7 +4522,7 @@
     },
     "p2kbSpin2RegTaskhlt": {
       "path": "deliverables/ai/P2/language/spin2/registers/taskhlt.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2Sym": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/..yaml",
@@ -4446,7 +4550,7 @@
     },
     "p2kbSpin2SymDoubleDollar": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/double_dollar.yaml",
-      "mtime": 1764449566
+      "mtime": 1768348299
     },
     "p2kbSpin2SymDoubleDot": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/double_dot.yaml",
