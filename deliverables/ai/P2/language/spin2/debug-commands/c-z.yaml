@@ -118,6 +118,7 @@ related:
   - language/spin2/statements/debug.yaml
   - language/spin2/constants/debug-mask.yaml
   - language/spin2/assembly-directives/org.yaml
+  - language/spin2/constructs/inline_pasm.yaml
 
 see_also:
   - "Debug formatters"

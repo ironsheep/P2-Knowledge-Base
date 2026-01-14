@@ -130,6 +130,7 @@ notes:
 
 related:
   - language/spin2/assembly-directives/org.yaml
+  - language/spin2/constructs/inline_pasm.yaml
   - language/spin2/assembly-directives/ditto.yaml
   - language/spin2/keywords/DAT.yaml
 
