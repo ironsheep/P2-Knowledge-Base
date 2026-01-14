@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.2.0",
-    "generated": "2026-01-14T00:23:33.918716",
+    "generated": "2026-01-14T01:30:24.672084",
     "total_entries": 1000,
     "total_categories": 47,
     "source": "deliverables/ai/P2/"
@@ -3162,7 +3162,7 @@
     },
     "p2kbSpin2AsmOrgh": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/orgh.yaml",
-      "mtime": 1768350169
+      "mtime": 1768354177
     },
     "p2kbSpin2AsmRes": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/res.yaml",
@@ -3274,7 +3274,7 @@
     },
     "p2kbSpin2DbgCZ": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/c-z.yaml",
-      "mtime": 1768350169
+      "mtime": 1768354177
     },
     "p2kbSpin2DbgDebugFormattersArrays": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml",
