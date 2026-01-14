@@ -30,6 +30,29 @@ python3 engineering/tools/validate-crossref-keys.py
 - Must show **100% resolution rate** before proceeding
 - If failures: fix YAML content (not the index)
 
+#### Cross-Reference Best Practices
+
+**Use full paths** in `related:` fields for reliable resolution:
+```yaml
+# CORRECT - full path resolves reliably:
+related:
+  - language/spin2/methods/exp.yaml
+  - language/spin2/operators/op_POW.yaml
+  - language/spin2/constructs/inline_pasm.yaml
+
+# FRAGILE - bare names may not resolve:
+related:
+  - EXP      # Validator may not find correct key
+  - POW      # Ambiguous without path context
+```
+
+**Never remove references** - they were intended to refer to something:
+- If target file doesn't exist, find where that concept IS documented
+- Reference that file instead of deleting the reference
+- Example: `END` has no standalone file, but is documented in `inline_pasm.yaml`
+
+**Why this matters**: The index generator and validator use different key transformation logic. Full paths bypass this inconsistency and ensure 100% resolution.
+
 ### Step 3: Commit YAML Changes
 ```bash
 git add deliverables/ai/P2/path/to/changed.yaml
