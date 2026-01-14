@@ -101,11 +101,11 @@ notes:
   - "Requires both operands to be writable (lvalues)"
 
 related:
-  - STRUCT
-  - BYTESWAP
-  - WORDSWAP
-  - LONGSWAP
-  - BYTEMOVE
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/methods/byteswap.yaml
+  - language/spin2/methods/wordswap.yaml
+  - language/spin2/methods/longswap.yaml
+  - language/spin2/methods/bytemove.yaml
 
 see_also:
   - "Memory operations"

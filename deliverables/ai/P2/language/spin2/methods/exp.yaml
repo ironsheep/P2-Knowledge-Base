@@ -72,10 +72,10 @@ notes:
   - "e ≈ 2.718281828 (Euler's number)"
 
 related:
-  - LOG
-  - EXP2
-  - EXP10
-  - POW
+  - language/spin2/methods/log.yaml
+  - language/spin2/methods/exp2.yaml
+  - language/spin2/methods/exp10.yaml
+  - language/spin2/operators/op_POW.yaml
 
 see_also:
   - "Floating-point math"

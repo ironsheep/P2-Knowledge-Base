@@ -125,9 +125,9 @@ notes:
   - "Useful for reducing code size in release builds"
 
 related:
-  - DEBUG_END_SESSION
-  - DEBUG_DISABLE
-  - DEBUG
+  - language/spin2/constants/debug-end-session.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - language/spin2/statements/debug.yaml
 
 see_also:
   - "DEBUG commands"

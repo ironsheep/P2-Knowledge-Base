@@ -129,10 +129,9 @@ notes:
   - "Choose ORG for speed-critical tiny routines, ORGH for larger code"
 
 related:
-  - ORG
-  - END
-  - DITTO
-  - DAT
+  - language/spin2/assembly-directives/org.yaml
+  - language/spin2/assembly-directives/ditto.yaml
+  - language/spin2/keywords/DAT.yaml
 
 see_also:
   - "Inline assembly"

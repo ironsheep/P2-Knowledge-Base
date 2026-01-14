@@ -66,10 +66,10 @@ notes:
   - "Also called 'common logarithm'"
 
 related:
-  - EXP10
-  - LOG2
-  - LOG
-  - QLOG
+  - language/spin2/methods/exp10.yaml
+  - language/spin2/methods/log2.yaml
+  - language/spin2/methods/log.yaml
+  - language/spin2/methods/qlog.yaml
 
 see_also:
   - "Floating-point math"

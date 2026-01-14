@@ -132,13 +132,12 @@ restrictions:
   - "The constant gets the register address, not the register content"
 
 related:
-  - INA
-  - INB
-  - OUTA
-  - OUTB
-  - DIRA
-  - DIRB
-  - REG
+  - language/spin2/registers/ina.yaml
+  - language/spin2/registers/inb.yaml
+  - language/spin2/registers/outa.yaml
+  - language/spin2/registers/outb.yaml
+  - language/spin2/registers/dira.yaml
+  - language/spin2/registers/dirb.yaml
 
 see_also:
   - "CON block"

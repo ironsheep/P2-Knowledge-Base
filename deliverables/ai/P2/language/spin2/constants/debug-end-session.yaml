@@ -70,8 +70,8 @@ notes:
   - "Equivalent to DEBUG(27)"
 
 related:
-  - DEBUG_MASK
-  - DEBUG_DISABLE
+  - language/spin2/constants/debug-mask.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
 
 see_also:
   - "DEBUG commands"

@@ -65,11 +65,11 @@ notes:
   - "More efficient than general POW for powers of 2"
 
 related:
-  - LOG2
-  - EXP10
-  - EXP
-  - POW
-  - QEXP
+  - language/spin2/methods/log2.yaml
+  - language/spin2/methods/exp10.yaml
+  - language/spin2/methods/exp.yaml
+  - language/spin2/operators/op_POW.yaml
+  - language/spin2/methods/qexp.yaml
 
 see_also:
   - "Floating-point math"

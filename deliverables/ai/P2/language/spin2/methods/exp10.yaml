@@ -66,10 +66,10 @@ notes:
   - "Useful for scientific notation calculations"
 
 related:
-  - LOG10
-  - EXP2
-  - EXP
-  - POW
+  - language/spin2/methods/log10.yaml
+  - language/spin2/methods/exp2.yaml
+  - language/spin2/methods/exp.yaml
+  - language/spin2/operators/op_POW.yaml
 
 see_also:
   - "Floating-point math"

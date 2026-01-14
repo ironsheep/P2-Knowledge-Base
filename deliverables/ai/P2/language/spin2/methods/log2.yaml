@@ -67,10 +67,10 @@ notes:
   - "Inverse of EXP2() function"
 
 related:
-  - EXP2
-  - LOG10
-  - LOG
-  - QLOG
+  - language/spin2/methods/exp2.yaml
+  - language/spin2/methods/log10.yaml
+  - language/spin2/methods/log.yaml
+  - language/spin2/methods/qlog.yaml
 
 see_also:
   - "Floating-point math"

@@ -115,10 +115,9 @@ notes:
   - "Combine with other formatters for complete state display"
 
 related:
-  - DEBUG
-  - DEBUG_MASK
-  - ORG
-  - END
+  - language/spin2/statements/debug.yaml
+  - language/spin2/constants/debug-mask.yaml
+  - language/spin2/assembly-directives/org.yaml
 
 see_also:
   - "Debug formatters"

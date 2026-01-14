@@ -81,12 +81,11 @@ notes:
   - "Writing to TASKHLT can force-halt or force-resume tasks"
 
 related:
-  - TASKHALT
-  - TASKCONT
-  - TASKRESUME
-  - TASKCHK
-  - NEWTASK
-  - THISTASK
+  - language/spin2/methods/taskhalt.yaml
+  - language/spin2/methods/taskresume.yaml
+  - language/spin2/methods/taskchk.yaml
+  - language/spin2/constants/newtask.yaml
+  - language/spin2/constants/thistask.yaml
 
 see_also:
   - "Task management"

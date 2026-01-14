@@ -110,7 +110,7 @@ related:
   - elseifndef
   - else
   - endif
-  - external-symbols
+  - language/spin2/preprocessor/external-symbols.yaml
 
 see_also:
   - "Conditional compilation"

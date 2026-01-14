@@ -59,10 +59,10 @@ timing:
   description: "Compile-time constant"
   cycles: "N/A - resolved at compile time"
 related:
-  - STRUCT
-  - BYTE
-  - WORD
-  - LONG
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
 see_also:
   - "Structure definitions"
   - "CON section"

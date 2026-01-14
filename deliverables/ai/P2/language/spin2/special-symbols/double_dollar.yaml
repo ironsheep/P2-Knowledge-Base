@@ -110,10 +110,10 @@ error_messages:
   - "'$$' (DITTO index) is only allowed within a DITTO block, inside a DAT block"
 
 related:
-  - "$"
-  - DITTO
-  - ORG
-  - JMP
+  - language/spin2/special-symbols/dollar.yaml
+  - language/spin2/assembly-directives/ditto.yaml
+  - language/spin2/assembly-directives/org.yaml
+  - language/pasm2/jmp.yaml
 
 see_also:
   - "Assembly address symbols"

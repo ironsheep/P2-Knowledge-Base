@@ -79,12 +79,12 @@ notes:
   - "For integer powers of 2, EXP2() is more efficient"
 
 related:
-  - LOG2
-  - EXP2
-  - LOG
-  - EXP
-  - LOG10
-  - EXP10
+  - language/spin2/methods/log2.yaml
+  - language/spin2/methods/exp2.yaml
+  - language/spin2/methods/log.yaml
+  - language/spin2/methods/exp.yaml
+  - language/spin2/methods/log10.yaml
+  - language/spin2/methods/exp10.yaml
 
 see_also:
   - "Floating-point math"

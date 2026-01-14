@@ -66,10 +66,10 @@ notes:
   - "Also called 'ln' in mathematical notation"
 
 related:
-  - EXP
-  - LOG2
-  - LOG10
-  - QLOG
+  - language/spin2/methods/exp.yaml
+  - language/spin2/methods/log2.yaml
+  - language/spin2/methods/log10.yaml
+  - language/spin2/methods/qlog.yaml
 
 see_also:
   - "Floating-point math"
