@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-01-13",
-    "last_updated": "2026-01-13T23:52:30.590470",
+    "release_date": "2026-01-14",
+    "last_updated": "2026-01-14T00:23:33.949970",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-13T23:52:30.590470",
+    "extraction_date": "2026-01-14T00:23:33.949970",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18249,7 +18249,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-13T23:52:30.590470",
+    "extraction_date": "2026-01-14T00:23:33.949970",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19496,12 +19496,12 @@
               "For integer powers of 2, EXP2() is more efficient"
             ],
             "related": [
-              "LOG2",
-              "EXP2",
-              "LOG",
-              "EXP",
-              "LOG10",
-              "EXP10"
+              "language/spin2/methods/log2.yaml",
+              "language/spin2/methods/exp2.yaml",
+              "language/spin2/methods/log.yaml",
+              "language/spin2/methods/exp.yaml",
+              "language/spin2/methods/log10.yaml",
+              "language/spin2/methods/exp10.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -19754,11 +19754,11 @@
               "Requires both operands to be writable (lvalues)"
             ],
             "related": [
-              "STRUCT",
-              "BYTESWAP",
-              "WORDSWAP",
-              "LONGSWAP",
-              "BYTEMOVE"
+              "language/spin2/keywords/STRUCT.yaml",
+              "language/spin2/methods/byteswap.yaml",
+              "language/spin2/methods/wordswap.yaml",
+              "language/spin2/methods/longswap.yaml",
+              "language/spin2/methods/bytemove.yaml"
             ],
             "see_also": [
               "Memory operations",
@@ -20160,10 +20160,10 @@
               "Useful for scientific notation calculations"
             ],
             "related": [
-              "LOG10",
-              "EXP2",
-              "EXP",
-              "POW"
+              "language/spin2/methods/log10.yaml",
+              "language/spin2/methods/exp2.yaml",
+              "language/spin2/methods/exp.yaml",
+              "language/spin2/operators/op_POW.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -22749,10 +22749,10 @@
               "cycles": "N/A - resolved at compile time"
             },
             "related": [
-              "STRUCT",
-              "BYTE",
-              "WORD",
-              "LONG"
+              "language/spin2/keywords/STRUCT.yaml",
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml"
             ],
             "see_also": [
               "Structure definitions",
@@ -22807,10 +22807,10 @@
               "Also called 'common logarithm'"
             ],
             "related": [
-              "EXP10",
-              "LOG2",
-              "LOG",
-              "QLOG"
+              "language/spin2/methods/exp10.yaml",
+              "language/spin2/methods/log2.yaml",
+              "language/spin2/methods/log.yaml",
+              "language/spin2/methods/qlog.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -23131,10 +23131,10 @@
               "Also called 'ln' in mathematical notation"
             ],
             "related": [
-              "EXP",
-              "LOG2",
-              "LOG10",
-              "QLOG"
+              "language/spin2/methods/exp.yaml",
+              "language/spin2/methods/log2.yaml",
+              "language/spin2/methods/log10.yaml",
+              "language/spin2/methods/qlog.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -24709,10 +24709,10 @@
               "e \u2248 2.718281828 (Euler's number)"
             ],
             "related": [
-              "LOG",
-              "EXP2",
-              "EXP10",
-              "POW"
+              "language/spin2/methods/log.yaml",
+              "language/spin2/methods/exp2.yaml",
+              "language/spin2/methods/exp10.yaml",
+              "language/spin2/operators/op_POW.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -24768,11 +24768,11 @@
               "More efficient than general POW for powers of 2"
             ],
             "related": [
-              "LOG2",
-              "EXP10",
-              "EXP",
-              "POW",
-              "QEXP"
+              "language/spin2/methods/log2.yaml",
+              "language/spin2/methods/exp10.yaml",
+              "language/spin2/methods/exp.yaml",
+              "language/spin2/operators/op_POW.yaml",
+              "language/spin2/methods/qexp.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -26053,10 +26053,10 @@
               "Inverse of EXP2() function"
             ],
             "related": [
-              "EXP2",
-              "LOG10",
-              "LOG",
-              "QLOG"
+              "language/spin2/methods/exp2.yaml",
+              "language/spin2/methods/log10.yaml",
+              "language/spin2/methods/log.yaml",
+              "language/spin2/methods/qlog.yaml"
             ],
             "see_also": [
               "Floating-point math",
@@ -26547,12 +26547,11 @@
               "Writing to TASKHLT can force-halt or force-resume tasks"
             ],
             "related": [
-              "TASKHALT",
-              "TASKCONT",
-              "TASKRESUME",
-              "TASKCHK",
-              "NEWTASK",
-              "THISTASK"
+              "language/spin2/methods/taskhalt.yaml",
+              "language/spin2/methods/taskresume.yaml",
+              "language/spin2/methods/taskchk.yaml",
+              "language/spin2/constants/newtask.yaml",
+              "language/spin2/constants/thistask.yaml"
             ],
             "see_also": [
               "Task management",
@@ -26926,10 +26925,9 @@
               "Choose ORG for speed-critical tiny routines, ORGH for larger code"
             ],
             "related": [
-              "ORG",
-              "END",
-              "DITTO",
-              "DAT"
+              "language/spin2/assembly-directives/org.yaml",
+              "language/spin2/assembly-directives/ditto.yaml",
+              "language/spin2/keywords/DAT.yaml"
             ],
             "see_also": [
               "Inline assembly",
@@ -27413,10 +27411,10 @@
               "'$$' (DITTO index) is only allowed within a DITTO block, inside a DAT block"
             ],
             "related": [
-              "$",
-              "DITTO",
-              "ORG",
-              "JMP"
+              "language/spin2/special-symbols/dollar.yaml",
+              "language/spin2/assembly-directives/ditto.yaml",
+              "language/spin2/assembly-directives/org.yaml",
+              "language/pasm2/jmp.yaml"
             ],
             "see_also": [
               "Assembly address symbols",
