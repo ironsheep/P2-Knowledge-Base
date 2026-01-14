@@ -120,11 +120,57 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
 
-**Experienced P1 Users**: Review Chapter 1 for key differences between P1 and P2, particularly the enhanced instruction set and Smart Pin capabilities. Then use Part II as your primary reference, as the instruction-by-instruction format will feel familiar.
+**Experienced P1 Users**: See "For P1 Developers" below for a specification comparison and overview of new capabilities. Then use Part II as the primary reference—the instruction-by-instruction format will feel familiar.
 
 **Looking Up a Specific Instruction**: Go directly to Part II, which is organized alphabetically by instruction name. Each entry provides complete syntax, encoding, behavior, and examples.
 
 **Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
+
+### For P1 Developers
+
+The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs sharing Hub memory—while dramatically expanding capabilities.
+
+**Specification Comparison**
+
+| | P1 | P2 |
+|---|---|---|
+| Clock | 80 MHz | 320 MHz |
+| Hub RAM | 32 KB | 512 KB |
+| COG RAM | 512 longs | 512 + 512 LUT |
+| I/O | 32 pins | 64 Smart Pins |
+| Math | Software | CORDIC |
+| Interrupts | None | 3 per COG |
+| Instructions | ~60 | 359 |
+
+**Architecture That Transfers**
+
+- Eight independent COGs with true parallel execution
+- Shared Hub memory with round-robin deterministic access
+- Private COG RAM for fast local operations
+- Wired-OR I/O model preventing pin contention
+- Hardware locks for inter-COG synchronization
+- Spin/PASM language structure
+
+**New in P2**
+
+- **Smart Pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
+- **Lookup RAM** — 512 additional longs per COG for tables and overflow code
+- **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
+- **Streamer** — Background DMA between Hub, LUT, and pins
+- **Interrupts** — Three levels per COG with 16 event sources
+- **COGATN** — Hardware inter-COG attention signaling
+- **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
+- **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
+- **Hub Execution** — Run code directly from 512 KB Hub RAM
+
+**Changed from P1**
+
+- **Counters**: CTRA/CTRB replaced by Smart Pin event system
+- **Video**: VCFG/VSCL/WAITVID replaced by Streamer and DAC capabilities
+- **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
+- **Boot Pins**: P28-P31 changed to P58-P63
+
+Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
 
 ### Manual Structure
 

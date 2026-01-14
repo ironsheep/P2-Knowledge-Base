@@ -14,7 +14,7 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
 
 - Executes instructions independently and simultaneously
-- Has its own dedicated memory and registers
+- Has its own dedicated 512-long register file
 - Operates at full clock speed with deterministic timing
 - Shares access to a common Hub memory
 
@@ -30,7 +30,7 @@ Each COG operates independently. One COG can execute a tight control loop while 
 
 Each COG has a unique identifier from 0 to 7. A COG can determine its own identifier using the `COGID` instruction, which writes the COG number to the destination register. This capability allows the same code to run on multiple COGs while behaving differently based on COG identity.
 
-COGs communicate through shared Hub memory, hardware locks, and attention signals. The `COGATN` instruction allows one COG to signal another COG through hardware attention flags, providing fast inter-COG notification without polling shared memory locations.
+COGs can communicate with each other through shared Hub memory, hardware locks, and attention signals. The `COGATN` instruction allows one COG to signal other COGs through hardware attention flags, providing fast inter-COG notification without polling shared memory locations.
 
 ### 1.1.3 Starting and Stopping COGs
 
@@ -66,38 +66,7 @@ For complete documentation of each register, see Part II: Special Registers and 
 PASM2 instructions use 9-bit fields to specify source (S) and destination (D) register addresses. Nine bits provide 512 possible values, addressing the complete COG RAM space from $000 to $1FF. The instruction encoding dedicates specific bit positions to these address fields, and the assembler automatically encodes symbolic register names into the appropriate bit patterns.
 
 
-## 1.3 Hub Memory
-
-```{=latex}
-\HubMemoryDiagram
-```
-
-The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
-
-### 1.3.1 Hub Address Space
-
-Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of storage. All eight COGs can read and write any location in this space. Hub memory stores bytes, words (16-bit), and longs (32-bit) with appropriate address alignment.
-
-Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle the shared access timing automatically.
-
-Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
-
-### 1.3.2 Hub Access Timing
-
-The P2 uses an "egg-beater" access pattern to arbitrate Hub memory access among the eight COGs. Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
-
-This pattern creates deterministic but variable timing. A Hub access completes immediately if the requesting COG's window is currently active. Otherwise, the COG waits 0-7 clock cycles for its next window. This variability means Hub instructions take 2-9 clocks depending on when the instruction executes relative to the egg-beater rotation.
-
-Despite this variability, the timing remains deterministic. The maximum wait is always seven clocks, and timing patterns repeat every eight clocks. Programs that require precise timing use COG execution mode for critical sections and Hub memory only for data storage and inter-COG communication.
-
-### 1.3.3 Hub Instructions
-
-PASM2 provides six instructions for Hub memory access. `RDBYTE` reads a byte, `RDWORD` reads a word, and `RDLONG` reads a long from Hub memory to a COG register. `WRBYTE`, `WRWORD`, and `WRLONG` write the corresponding data sizes from a COG register to Hub memory.
-
-The `SETQ` instruction enhances Hub access efficiency by enabling burst transfers. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers.
-
-
-## 1.4 LUT Memory
+## 1.3 LUT Memory
 
 ```{=latex}
 \LutMemoryMapDiagram
@@ -105,23 +74,60 @@ The `SETQ` instruction enhances Hub access efficiency by enabling burst transfer
 
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
 
-### 1.4.1 LUT Characteristics
+### 1.3.1 LUT Characteristics
 
-LUT memory provides single-cycle access like COG RAM but occupies a separate address space. Programs access LUT memory at addresses $200-$3FF (relative to COG addressing) through dedicated LUT instructions. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
+LUT memory occupies a separate address space from COG RAM, addressed at $200-$3FF relative to COG addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions, which take 3 clock cycles—one cycle longer than COG register operations. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
 
 LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
 
-The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications.
+The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications. A common application is paletted VGA display, where the LUT stores a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real-time.
 
-### 1.4.2 LUT Instructions
+### 1.3.2 LUT Instructions
 
 `RDLUT` reads a value from LUT memory to a COG register. `WRLUT` writes a value from a COG register to LUT memory. These instructions work similarly to regular COG memory operations but target the separate LUT address space.
 
 Programs often load the LUT with data from Hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in Hub memory.
 
-### 1.4.3 LUT Sharing Between COGs
+### 1.3.3 LUT Sharing Between COGs
 
 The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+
+
+## 1.4 Hub Memory
+
+```{=latex}
+\HubMemoryDiagram
+```
+
+The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
+
+### 1.4.1 Hub Address Space
+
+Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of storage. All eight COGs can read and write any location in this space. Hub memory stores bytes, words (16-bit), and longs (32-bit) with appropriate address alignment.
+
+Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle the shared access timing automatically.
+
+Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
+
+⚠️ **Pitfall:** Hub addresses below $400 overlap with the region from which COGs load initial code during COGINIT. Writing to this area while COGs are being started can cause unpredictable behavior. Programs that dynamically start COGs should avoid using low hub addresses for shared data storage.
+
+### 1.4.2 Hub Access Timing
+
+The P2 uses round-robin arbitration to share Hub memory access among the eight COGs—a rotating pattern commonly called the "egg-beater." Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
+
+This pattern creates deterministic but variable timing. A Hub access completes immediately if the requesting COG's window is currently active. Otherwise, the COG waits 0-7 clock cycles for its next window. This variability means Hub instructions take 2-9 clocks depending on when the instruction executes relative to the hub rotation.
+
+Despite this variability, the timing remains deterministic. The maximum wait is always seven clocks, and timing patterns repeat every eight clocks. Programs that require precise timing use COG execution mode for critical sections and Hub memory only for data storage and inter-COG communication.
+
+### 1.4.3 Hub Instructions
+
+PASM2 provides six primary instructions for Hub memory access. `RDBYTE` reads a byte, `RDWORD` reads a word, and `RDLONG` reads a long from Hub memory to a COG register. `WRBYTE`, `WRWORD`, and `WRLONG` write the corresponding data sizes from a COG register to Hub memory.
+
+The `SETQ` instruction enhances Hub access efficiency by enabling burst transfers. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers.
+
+For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous Hub transfers. The FIFO prefetches data automatically, hiding Hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for seamless ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
+
+The CORDIC coprocessor also interacts with Hub memory. CORDIC operations can read operands from and write results to Hub addresses, enabling efficient processing of large datasets stored in Hub RAM.
 
 
 ## 1.5 The Execution Pipeline
@@ -130,9 +136,9 @@ The P2 implements a simple two-stage pipeline that balances execution speed with
 
 Most instructions complete in two clock cycles once the pipeline fills. The first instruction takes two clocks to reach completion. Subsequent instructions complete at a rate of one per two clocks, giving an effective throughput of one instruction every two clocks in steady-state execution.
 
-Hub memory instructions add variable delays waiting for Hub access windows. The egg-beater pattern means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
+Hub memory instructions add variable delays waiting for Hub access windows. The hub access rotation means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
 
-When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than the egg-beater mechanism. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
+When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than rotating hub access. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
 
 Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch requires four clocks as the pipeline flushes and refills from the branch target address.
 
@@ -153,9 +159,9 @@ Time-critical inner loops often execute in COG mode even when the main program r
 
 ### 1.6.2 Hub Execution Mode
 
-Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the egg-beater pattern used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
+Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the hub rotation used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
 
-Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
+Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. In practice, Hub-executed code typically resides at addresses $400 and above—the `ORGH` directive defaults to $400, reserving low addresses for COG initialization data. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
 
 `COGINIT` determines execution mode when starting a COG. The initialization parameter specifies either COG execution (code loaded from Hub to COG RAM, then executed) or Hub execution (code executed directly from Hub RAM). The `ORGH` assembler directive marks code intended for Hub execution, while `ORG` marks code for COG execution.
 
@@ -171,13 +177,13 @@ The hardware automatically handles mode transitions. The programmer simply speci
 ```{=latex}
 \begin{keyconcepts}
 \item The P2 has 8 independent COGs executing in true parallel
-\item Each COG has 512 longs of private RAM plus 512 longs of LUT
+\item Each COG has 512 longs of private RAM plus 512 longs of private LUT
 \item Hub memory (512KB) is shared among all COGs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
 \item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)
 \item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
-\item The pipeline provides single-cycle execution for most instructions
-\item No interrupts are required due to true parallel execution
+\item The pipeline provides two-clock execution for most instructions
+\item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided
 \end{keyconcepts}
 ```
 
