@@ -660,7 +660,7 @@ def print_report(results: Dict):
 
 def main():
     """Main entry point."""
-    base_path = Path("/workspaces/P2-Knowledge-Base")
+    base_path = Path.cwd()
     index_path = base_path / "deliverables" / "ai" / "p2kb-index.json"
 
     print("Loading index...")
