@@ -9,12 +9,32 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Set SE2 event configuration to D[8:0].'
+description: |
+  Set SE2 event configuration to D[8:0]. Configures selectable event 2 to trigger
+  on the specified pin, LUT, or lock condition. Also clears the SE2 event flag.
+
+  IMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.
+  See setse1.yaml for complete D[8:0] encoding table.
+d_encoding_summary: |
+  D[8:0] encoding (see setse1.yaml for full details):
+  %000_xx_xxxx = LUT access events
+  %000_01_LLLL = Lock rises, %000_10_LLLL = Lock falls, %000_11_LLLL = Lock changes
+  %001_PPPPPP = Pin rises, %010_PPPPPP = Pin falls, %011_PPPPPP = Pin changes
+  %10x_PPPPPP = Pin low, %11x_PPPPPP = Pin high
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: PASM2 Manual 2022-11-01
-documentation_level: enhanced
+examples:
+  - code: "SETSE2  #%001_000010"
+    description: "Configure SE2 for pin 2 rising edge"
+  - code: "SETSE2  #%011_000011"
+    description: "Configure SE2 for pin 3 any edge"
+related:
+  - language/pasm2/setse1.yaml
+  - language/pasm2/waitse2.yaml
+  - language/pasm2/pollse2.yaml
+documentation_source: Silicon Doc v35, PASM2 Manual 2022-11-01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511
@@ -25,6 +45,6 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SETSE2 {#}D
-last_updated: '2025-09-19T16:04:17.308734'
+last_updated: '2026-01-17'
 category: Event
-oneliner: Configuration
+oneliner: Configure selectable event 2 for pin/LUT/lock triggers

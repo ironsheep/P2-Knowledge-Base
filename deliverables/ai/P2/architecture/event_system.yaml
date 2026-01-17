@@ -71,15 +71,30 @@ event_selectors:
 
 instructions:
   - instruction: "SETSE1"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 001100000"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100000"
     description: "Configure selectable event 1"
     operation: |
-      SE1 := D[5:0] event source configuration
-      D[7:6] = mode bits for edge/level/state
+      SE1 := D[8:0] event configuration (9 bits)
+      SETSE can ONLY configure pin, LUT, or lock events (NOT timer/ATN/pattern events)
+    d_encoding_table: |
+      D[8:0] encoding (from Silicon Doc v35):
+      %000_00_00AA = this cog reads LUT address %1111111AA
+      %000_00_01AA = this cog writes LUT address %1111111AA
+      %000_00_10AA = odd/even companion cog reads LUT address %1111111AA
+      %000_00_11AA = odd/even companion cog writes LUT address %1111111AA
+      %000_01_LLLL = hub lock %LLLL rises
+      %000_10_LLLL = hub lock %LLLL falls
+      %000_11_LLLL = hub lock %LLLL changes
+      %001_PPPPPP = INA/INB bit of pin %PPPPPP rises (positive edge)
+      %010_PPPPPP = INA/INB bit of pin %PPPPPP falls (negative edge)
+      %011_PPPPPP = INA/INB bit of pin %PPPPPP changes (any edge)
+      %10x_PPPPPP = INA/INB bit of pin %PPPPPP is low (level)
+      %11x_PPPPPP = INA/INB bit of pin %PPPPPP is high (level)
     usage_example: |
-      SETSE1  #%01_000010     ' Positive edge on pin 2
-      SETSE1  #%10_000010     ' Negative edge on pin 2
-      SETSE1  #%11_000002     ' Any edge on pin 2
+      SETSE1  #%001_000010     ' Positive edge on pin 2 (9-bit: pin rises)
+      SETSE1  #%010_000010     ' Negative edge on pin 2 (9-bit: pin falls)
+      SETSE1  #%011_000010     ' Any edge on pin 2 (9-bit: pin changes)
+      SETSE1  #%000_01_0101    ' Lock 5 rises
   
   - instruction: "SETSE2"
     encoding: "EEEE 1101011 00L DDDDDDDDD 001100001"
@@ -152,73 +167,100 @@ instructions:
       SETPAT  mask, pattern   ' Set pattern to detect
 
 event_configurations:
-  edge_detection:
+  pin_edge_detection:
+    note: "SETSE uses D[8:6] as mode bits (3 bits, not 2)"
     modes:
-      - mode: "%00"
-        description: "Level detection (state)"
-        behavior: "Event when pin(s) at specified level"
-      
-      - mode: "%01"
-        description: "Positive edge"
-        behavior: "Event on low-to-high transition"
-      
-      - mode: "%10"
-        description: "Negative edge"
-        behavior: "Event on high-to-low transition"
-      
-      - mode: "%11"
-        description: "Any edge"
-        behavior: "Event on any transition"
-    
+      - mode: "%001_PPPPPP"
+        description: "Pin rises (positive edge)"
+        behavior: "Event on low-to-high transition of pin PPPPPP"
+
+      - mode: "%010_PPPPPP"
+        description: "Pin falls (negative edge)"
+        behavior: "Event on high-to-low transition of pin PPPPPP"
+
+      - mode: "%011_PPPPPP"
+        description: "Pin changes (any edge)"
+        behavior: "Event on any transition of pin PPPPPP"
+
     setup_example: |
       ' Detect positive edge on pin 5
-      SETSE1  #%01_000101
-      WAITSE1                 ' Wait for positive edge
+      SETSE1  #%001_000101     ' 9-bit: pin 5 rises
+      WAITSE1                   ' Wait for positive edge
+
+  pin_level_detection:
+    modes:
+      - mode: "%10x_PPPPPP"
+        description: "Pin is low (level)"
+        behavior: "Event while pin PPPPPP is low"
+
+      - mode: "%11x_PPPPPP"
+        description: "Pin is high (level)"
+        behavior: "Event while pin PPPPPP is high"
+
+    setup_example: |
+      ' Wait for pin 3 to go high
+      SETSE1  #%110_000011     ' 9-bit: pin 3 is high
+      WAITSE1
   
   pattern_matching:
-    description: "Match specific pin patterns"
-    
+    description: "Match specific pin patterns using dedicated WAITPAT (not SETSE)"
+    note: "Pattern match uses WAITPAT directly - SETSE cannot configure pattern events"
+
     setup_example: |
       ' Wait for pins 7:0 = $A5
       MOV     mask, #$FF
       MOV     pattern, #$A5
       SETPAT  mask, pattern
-      SETSE2  #%00_111000    ' Pattern match event
-      WAITSE2                 ' Wait for pattern
+      WAITPAT                 ' Wait for pattern match (dedicated instruction)
   
   timer_events:
-    description: "Events based on counter comparisons"
-    
+    description: "Events based on counter comparisons using dedicated WAITCTn (not SETSE)"
+    note: "Timer events use WAITCT1/2/3 directly - SETSE cannot configure timer events"
+
     setup_example: |
       ' Setup 1ms timer event
       GETCT   timeout
       ADDCT1  timeout, ##160_000  ' 1ms at 160MHz
-      SETSE3  #%00_110001    ' CT >= CT1 event
-      WAITSE3                 ' Wait for timeout
+      WAITCT1                     ' Wait for CT >= CT1 (dedicated instruction)
 
 programming_patterns:
   - pattern: "multi_event_monitor"
     description: "Monitor multiple events simultaneously"
+    note: |
+      IMPORTANT: SETSE can ONLY configure pin/LUT/lock events.
+      Timer (CT), ATN, pattern, and streamer events have dedicated POLL/WAIT instructions.
+      There is NO single instruction to wait for any of multiple selectable events -
+      must use polling loop or map events to interrupts.
     code: |
-      ' Setup multiple events
-      SETSE1  #%01_000001     ' Positive edge pin 1
-      SETSE2  #%10_000002     ' Negative edge pin 2
-      SETSE3  #%00_110001     ' Timer CT1
-      SETSE4  #%00_111111     ' ATN event
-      
+      ' Setup multiple PIN events (SETSE is limited to pins/LUT/locks)
+      SETSE1  #%001_000001     ' Pin 1 rises (positive edge)
+      SETSE2  #%010_000010     ' Pin 2 falls (negative edge)
+      SETSE3  #%011_000011     ' Pin 3 changes (any edge)
+      SETSE4  #%000_01_0000    ' Lock 0 rises
+
+      ' Also configure timer for timeout
+      GETCT   timeout
+      ADDCT1  timeout, ##160_000
+
       event_loop:
           POLLSE1 WC
-          IF_C    CALL #handle_se1
-          
+          IF_C    CALL #handle_pin1
+
           POLLSE2 WC
-          IF_C    CALL #handle_se2
-          
+          IF_C    CALL #handle_pin2
+
           POLLSE3 WC
-          IF_C    CALL #handle_se3
-          
+          IF_C    CALL #handle_pin3
+
           POLLSE4 WC
-          IF_C    CALL #handle_se4
-          
+          IF_C    CALL #handle_lock
+
+          POLLCT1 WC            ' Timer uses dedicated POLL instruction
+          IF_C    CALL #handle_timeout
+
+          POLLATN WC            ' ATN uses dedicated POLL instruction
+          IF_C    CALL #handle_atn
+
           JMP     #event_loop
   
   - pattern: "event_driven_state_machine"
@@ -231,16 +273,18 @@ programming_patterns:
           IF_Z    JMP #active_state
           CMP     state, #STATE_DONE WZ
           IF_Z    JMP #done_state
-          
+
       idle_state:
-          SETSE1  #%01_000000     ' Start button
+          SETSE1  #%001_000000     ' Pin 0 rises (start button positive edge)
           WAITSE1
           MOV     state, #STATE_ACTIVE
           JMP     #state_machine
-          
+
       active_state:
-          SETSE1  #%00_110001     ' Timer event
-          WAITSE1
+          ' Timer events use WAITCT directly (not SETSE)
+          GETCT   timeout
+          ADDCT1  timeout, ##16_000_000
+          WAITCT1                   ' Wait for timer (dedicated instruction)
           MOV     state, #STATE_DONE
           JMP     #state_machine
   
@@ -266,18 +310,17 @@ programming_patterns:
       sample_loop:
           GETCT   next_sample
           ADDCT2  next_sample, ##16_000  ' 100us
-          SETSE1  #%00_110010           ' CT >= CT2
-          WAITSE1                        ' Wait for timer
-          
+          WAITCT2                        ' Wait for timer (dedicated instruction)
+
           ' Sample all inputs
           RDPIN   sample1, #0
           RDPIN   sample2, #1
           RDPIN   sample3, #2
-          
+
           ' Store samples
           WRLONG  sample1, ptr
           ADD     ptr, #12
-          
+
           JMP     #sample_loop
 
 event_interrupt_mapping:
@@ -340,14 +383,13 @@ common_applications:
       ' Wait for response with timeout
       GETCT   timeout
       ADDCT1  timeout, ##16_000_000     ' 100ms timeout
-      SETSE1  #%00_110001               ' Timer event
-      SETSE2  #%01_000000 | DATA_PIN    ' Data arrival
-      
-      ' Race between timeout and data
+      SETSE1  #%001_000000 | DATA_PIN   ' Data pin rises (positive edge)
+
+      ' Race between timeout and data using polling loop
       JMPREL  #0                         ' Pipeline sync
-      POLLSE1 WC                        ' Check timeout
+      POLLCT1 WC                        ' Check timeout (dedicated instruction)
       IF_C    JMP #timeout_handler
-      POLLSE2 WC                        ' Check data
+      POLLSE1 WC                        ' Check data pin event
       IF_C    JMP #data_received
       JMP     #$-4                      ' Keep checking
 
@@ -386,14 +428,44 @@ limitations:
   - limitation: "four_selectable_events"
     description: "Only 4 SE events available per COG"
     workaround: "Reconfigure events dynamically or use interrupts"
-  
+
   - limitation: "no_event_queuing"
     description: "Events are flags, not queued"
     workaround: "Must handle before next occurrence"
-  
+
   - limitation: "cog_local_events"
     description: "Events are per-COG, not global"
     workaround: "Use ATN for inter-COG event notification"
+
+  - limitation: "no_multi_event_wait"
+    description: "No single instruction to wait for any of multiple SE events"
+    workaround: "Use polling loop (POLLSE1..4) or map events to interrupts via SETINT"
+
+  - limitation: "setse_limited_sources"
+    description: "SETSE can ONLY configure pin, LUT, or lock events"
+    workaround: "Timer events use WAITCT1/2/3, ATN uses WAITATN, pattern uses WAITPAT"
+
+critical_distinction:
+  title: "SETSE vs SETINT Encoding (Common Source of Confusion)"
+  explanation: |
+    There are TWO separate encoding systems that are often confused:
+
+    1. SETSE D[8:0] - Configures WHAT triggers a Selectable Event (SE1-4)
+       - 9-bit encoding for pin edges/levels, LUT accesses, lock states
+       - CANNOT configure timer, ATN, pattern, streamer, or CORDIC events
+       - Example: SETSE1 #%001_000010 = pin 2 rises
+
+    2. SETINT D[3:0] - Configures WHAT triggers an Interrupt (INT1-3)
+       - 4-bit code selecting from 16 interrupt sources:
+         0=off, 1=CT1, 2=CT2, 3=CT3, 4=SE1, 5=SE2, 6=SE3, 7=SE4,
+         8=pattern, 9=FIFO, 10=streamer ready, 11=streamer done,
+         12=NCO roll, 13=LUT $1FF read, 14=ATN, 15=CORDIC empty
+       - Example: SETINT1 #4 = INT1 triggered by SE1 event
+
+    To wait for timer/ATN/pattern events without interrupts, use dedicated instructions:
+    - Timer: WAITCT1, WAITCT2, WAITCT3, POLLCT1, POLLCT2, POLLCT3
+    - ATN: WAITATN, POLLATN
+    - Pattern: WAITPAT, POLLPAT
 
 related_topics:
   - topic: "interrupts"
