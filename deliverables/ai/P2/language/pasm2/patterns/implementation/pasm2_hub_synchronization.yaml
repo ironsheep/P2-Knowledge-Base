@@ -22,6 +22,6 @@ implementation: |
 resources:
   hub_memory: "Variable"
   timing: "Hub window dependent"
-combines_with:
-  - "pasm2_cog_communication"
-  - "pasm2_interrupt_handling"
+# combines_with: Future patterns to be added
+#   - pasm2_cog_communication
+#   - pasm2_interrupt_handling

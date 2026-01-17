@@ -23,4 +23,3 @@ resources:
   memory: "COG RAM only"
 combines_with:
   - "pasm2_hub_synchronization"
-  - "pasm2_cog_communication"

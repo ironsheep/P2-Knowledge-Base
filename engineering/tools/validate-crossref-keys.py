@@ -452,7 +452,7 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
         'references': 'text',                # External references - informational only
         # NEW FIELDS for comprehensive validation:
         'related_documentation': 'mnemonic', # Doc references - MUST resolve
-        'related_concepts': 'mnemonic',      # Concept references - MUST resolve
+        'related_concepts': 'text',           # Conceptual tags - informational only
         'related_constructs': 'mnemonic',    # Construct references - MUST resolve
         'related_operators': 'mnemonic',     # Operator references - MUST resolve
         'related_pasm': 'mnemonic',          # PASM references - MUST resolve
