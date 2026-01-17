@@ -57,7 +57,27 @@ This document tracks technical debt related to the P2 Knowledge Base content (YA
 
 ## Future Debt Items
 
-*Add new items here as discovered*
+### Missing PASM2 Implementation Patterns
+
+**Status**: Open
+**Priority**: LOW
+**Discovered**: 2026-01-17
+
+**Issue**: Two PASM2 implementation patterns are referenced but don't exist:
+- `pasm2_cog_communication` - Inter-COG communication patterns
+- `pasm2_interrupt_handling` - Interrupt handling patterns
+
+**Location**: `deliverables/ai/P2/language/pasm2/patterns/implementation/`
+
+**Referenced by** (currently commented out):
+- `pasm2_initialization.yaml` - `combines_with` field
+- `pasm2_hub_synchronization.yaml` - `combines_with` field
+
+**Resolution**: When patterns are created, uncomment the `combines_with` references in the above files.
+
+**Context**: References commented out in commit `2016a08` to achieve 100% cross-reference validation.
+
+---
 
 ---
 
@@ -76,4 +96,4 @@ This document tracks technical debt related to the P2 Knowledge Base content (YA
 
 ---
 
-*Last Updated: 2025-11-29*
+*Last Updated: 2026-01-17*
