@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-01-17",
-    "last_updated": "2026-01-17T02:11:42.046743",
+    "last_updated": "2026-01-17T20:10:32.773715",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-17T02:11:42.046743",
+    "extraction_date": "2026-01-17T20:10:32.773715",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -7954,7 +7954,7 @@
             "mnemonic": "SETSE1",
             "syntax": "SETSE1  {#}D",
             "brief_description": "",
-            "oneliner": "Configuration",
+            "oneliner": "Configure selectable event 1 for pin/LUT/lock triggers",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000100000",
@@ -7964,7 +7964,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE1 event configuration to D[8:0].",
+            "description": "Set SE1 event configuration to D[8:0]. Configures selectable event 1 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE1 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nTimer (CT), ATN, pattern match, streamer, and CORDIC events cannot be configured\nwith SETSE - they have dedicated WAIT/POLL instructions.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -7978,7 +7978,14 @@
             "syntax_variants": [
               "SETSE1 {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/setse2.yaml",
+              "language/pasm2/setse3.yaml",
+              "language/pasm2/setse4.yaml",
+              "language/pasm2/waitse1.yaml",
+              "language/pasm2/pollse1.yaml",
+              "architecture/event_system.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -7993,8 +8000,8 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "PASM2 Manual 2022-11-01",
-            "documentation_level": "enhanced"
+            "documentation_source": "Silicon Doc v35, PASM2 Manual 2022-11-01",
+            "documentation_level": "comprehensive"
           },
           "JNPAT": {
             "mnemonic": "JNPAT",
@@ -8598,7 +8605,7 @@
             "mnemonic": "SETSE2",
             "syntax": "SETSE2  {#}D",
             "brief_description": "",
-            "oneliner": "Configuration",
+            "oneliner": "Configure selectable event 2 for pin/LUT/lock triggers",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000100001",
@@ -8608,7 +8615,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE2 event configuration to D[8:0].",
+            "description": "Set SE2 event configuration to D[8:0]. Configures selectable event 2 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE2 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -8622,7 +8629,11 @@
             "syntax_variants": [
               "SETSE2 {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/setse1.yaml",
+              "language/pasm2/waitse2.yaml",
+              "language/pasm2/pollse2.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -8637,8 +8648,8 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "PASM2 Manual 2022-11-01",
-            "documentation_level": "enhanced"
+            "documentation_source": "Silicon Doc v35, PASM2 Manual 2022-11-01",
+            "documentation_level": "comprehensive"
           },
           "JNATN": {
             "mnemonic": "JNATN",
@@ -9041,7 +9052,7 @@
             "mnemonic": "SETSE3",
             "syntax": "SETSE3  {#}D",
             "brief_description": "",
-            "oneliner": "Configuration",
+            "oneliner": "Configure selectable event 3 for pin/LUT/lock triggers",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000100010",
@@ -9051,7 +9062,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE3 event configuration to D[8:0].",
+            "description": "Set SE3 event configuration to D[8:0]. Configures selectable event 3 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE3 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -9065,7 +9076,11 @@
             "syntax_variants": [
               "SETSE3 {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/setse1.yaml",
+              "language/pasm2/waitse3.yaml",
+              "language/pasm2/pollse3.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -9080,8 +9095,8 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "PASM2 Manual 2022-11-01",
-            "documentation_level": "enhanced"
+            "documentation_source": "Silicon Doc v35, PASM2 Manual 2022-11-01",
+            "documentation_level": "comprehensive"
           },
           "JFBW": {
             "mnemonic": "JFBW",
@@ -9239,7 +9254,7 @@
             "mnemonic": "SETSE4",
             "syntax": "SETSE4  {#}D",
             "brief_description": "",
-            "oneliner": "Configuration",
+            "oneliner": "Configure selectable event 4 for pin/LUT/lock triggers",
             "encoding": [
               {
                 "bits": "EEEE 1101011 00L DDDDDDDDD 000100011",
@@ -9249,7 +9264,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE4 event configuration to D[8:0].",
+            "description": "Set SE4 event configuration to D[8:0]. Configures selectable event 4 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE4 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -9263,7 +9278,11 @@
             "syntax_variants": [
               "SETSE4 {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/setse1.yaml",
+              "language/pasm2/waitse4.yaml",
+              "language/pasm2/pollse4.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -9278,8 +9297,8 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "PASM2 Manual 2022-11-01",
-            "documentation_level": "enhanced"
+            "documentation_source": "Silicon Doc v35, PASM2 Manual 2022-11-01",
+            "documentation_level": "comprehensive"
           },
           "WAITSE2": {
             "mnemonic": "WAITSE2",
@@ -18249,7 +18268,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-17T02:11:42.046743",
+    "extraction_date": "2026-01-17T20:10:32.773715",
     "categories": {
       "keywords": {
         "count": 37,
