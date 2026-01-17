@@ -236,21 +236,19 @@ language/spin2/patterns/structural/framework_pattern.yaml (pattern_id: framework
 | `language/spin2/constructs/case.yaml` | `if_elseif_else.yaml` | `p2kbSpin2IfElseifElse` |
 | `language/spin2/constructs/case.yaml` | `repeat.yaml` | `p2kbSpin2Repeat` |
 | `language/spin2/constructs/method_definition.yaml` | `blocks.yaml` | `p2kbSpin2Blocks` |
-| `language/spin2/constructs/method_definition.yaml` | `var_dat_con_obj.yaml` | REMOVE (file doesn't exist) or replace with `p2kbSpin2KwVAR`, `p2kbSpin2KwDAT`, `p2kbSpin2KwCON` |
+| `language/spin2/constructs/method_definition.yaml` | `var_dat_con_obj.yaml` | Replace with 4 keys: `p2kbSpin2KwVAR`, `p2kbSpin2KwDAT`, `p2kbSpin2KwCON`, `p2kbSpin2KwOBJ` |
 | `language/spin2/constructs/method_definition.yaml` | `inline_pasm.yaml` | `p2kbSpin2InlinePasm` |
 
 #### 5D: related_operators (3 references in 1 file)
 
-**Note**: No single "comparison.yaml" or "logical.yaml" exists. These are generic references.
-Options:
-1. Replace with specific operators: `p2kbSpin2OpOpGt`, `p2kbSpin2OpOpLt`, `p2kbSpin2OpOpEqeq`
-2. Replace with the precedence guide: `p2kbSpin2OpPrecedence`
-3. REMOVE these generic references since operators are well-documented elsewhere
+**Note**: No single "comparison.yaml" or "logical.yaml" exists. These are generic references that must be replaced with ALL specific operators they represent.
 
-| File | Current Reference | Recommended Fix |
-|------|-------------------|-----------------|
-| `language/spin2/constructs/if_elseif_else.yaml` | `operators/comparison.yaml` | REMOVE or use `p2kbSpin2OpPrecedence` |
-| `language/spin2/constructs/if_elseif_else.yaml` | `operators/logical.yaml` | REMOVE or use `p2kbSpin2OpOpAndand` |
+**DECISION**: Replace generic operator references with complete sets of specific operator keys.
+
+| File | Current Reference | Fix To |
+|------|-------------------|--------|
+| `language/spin2/constructs/if_elseif_else.yaml` | `operators/comparison.yaml` | Replace with: `p2kbSpin2OpOpEqeq`, `p2kbSpin2OpOpLtgt`, `p2kbSpin2OpOpLt`, `p2kbSpin2OpOpGt`, `p2kbSpin2OpOpLteq`, `p2kbSpin2OpOpGteq` |
+| `language/spin2/constructs/if_elseif_else.yaml` | `operators/logical.yaml` | Replace with: `p2kbSpin2OpOpAndand`, `p2kbSpin2OpOpOror`, `p2kbSpin2OpOpNot`, `p2kbSpin2OpOpXorxor` |
 | `language/spin2/constructs/if_elseif_else.yaml` | `operators/ternary.yaml` | `p2kbSpin2OpOpTernary` |
 
 #### 5E: related_symbols (6 references in 1 file)
@@ -258,18 +256,9 @@ Options:
 **Note**: These symbols (`_clkfreq`, `_xtlfreq`, etc.) are documented in `special-configuration-symbols.yaml`.
 The symbols don't have individual YAML files - they're fields within that document.
 
-**Solution**: Add aliases in `special-configuration-symbols.yaml` OR reference the parent document.
+**DECISION**: Add aliases to `special-configuration-symbols.yaml` so symbol references resolve via the alias system.
 
-| File | Current Reference | Fix To |
-|------|-------------------|--------|
-| `language/pasm2/asmclk.yaml` | `_clkfreq` | `p2kbSpin2SpecialConfigurationSymbols` |
-| `language/pasm2/asmclk.yaml` | `_xtlfreq` | `p2kbSpin2SpecialConfigurationSymbols` |
-| `language/pasm2/asmclk.yaml` | `_xinfreq` | `p2kbSpin2SpecialConfigurationSymbols` |
-| `language/pasm2/asmclk.yaml` | `_rcslow` | `p2kbSpin2SpecialConfigurationSymbols` |
-| `language/pasm2/asmclk.yaml` | `_rcfast` | `p2kbSpin2SpecialConfigurationSymbols` |
-| `language/pasm2/asmclk.yaml` | `_AUTOCLK` | `p2kbSpin2SpecialConfigurationSymbols` |
-
-**Alternative**: Add these as aliases in `special-configuration-symbols.yaml`:
+**Action**: Add `aliases` field to `special-configuration-symbols.yaml`:
 ```yaml
 aliases:
   - _CLKFREQ
@@ -277,11 +266,25 @@ aliases:
   - _XTLFREQ
   - _xtlfreq
   - _XINFREQ
+  - _xinfreq
+  - _RCSLOW
   - _rcslow
+  - _RCFAST
   - _rcfast
   - _AUTOCLK
 ```
+
 This allows `_clkfreq` to resolve via alias to `p2kbSpin2SpecialConfigurationSymbols`.
+The `asmclk.yaml` references can stay as-is (`_clkfreq`, `_xtlfreq`, etc.) - they will resolve via aliases.
+
+| File | Current Reference | Status |
+|------|-------------------|--------|
+| `language/pasm2/asmclk.yaml` | `_clkfreq` | Will resolve via alias |
+| `language/pasm2/asmclk.yaml` | `_xtlfreq` | Will resolve via alias |
+| `language/pasm2/asmclk.yaml` | `_xinfreq` | Will resolve via alias |
+| `language/pasm2/asmclk.yaml` | `_rcslow` | Will resolve via alias |
+| `language/pasm2/asmclk.yaml` | `_rcfast` | Will resolve via alias |
+| `language/pasm2/asmclk.yaml` | `_AUTOCLK` | Will resolve via alias |
 
 #### 5F: combines_with (34 references in 29 files) - CRITICAL
 
@@ -353,10 +356,22 @@ language/spin2/patterns/applications/test_harness.yaml
 language/spin2/patterns/structural/framework_pattern.yaml
 ```
 
-**Some combines_with references point to patterns that may not exist yet:**
-- `timing_control` - exists
-- `several_objects` - may not exist (in event_dispatcher.yaml)
-- Check for other missing targets during validation
+**Pattern existence verified**: All referenced patterns exist:
+- `timing_control` ✓ exists (`spin2_timing_control.yaml`)
+- `several_objects` ✓ exists (`structural/several_objects.yaml`)
+- All other pattern_ids verified present
+
+**NEW ISSUE DISCOVERED**: Some `combines_with` entries include descriptions instead of pure pattern IDs:
+- `"state_machine for coordination"` should be `"state_machine"`
+- `"buffer_management for data flow"` should be `"buffer_management"`
+- `"no_objects for utilities"` should be `"no_objects"`
+- `"timing_control for coordination"` should be `"timing_control"`
+- `"event_dispatcher for coordination"` should be `"event_dispatcher"`
+- `"resource_pool for sharing"` should be `"resource_pool"`
+- `"Any pattern as utility"` should be REMOVED (generic placeholder)
+- `"any pattern"` should be REMOVED (generic placeholder)
+
+**Action**: Clean these entries during Phase 5F - strip descriptions, keep only pattern IDs.
 
 ---
 
@@ -433,7 +448,7 @@ Query: "PINH"
 | Fundamentals | 4 | Fix `related_documentation`, `related_concepts` paths → keys |
 | Constructs | 7 | Fix `related_constructs` bare filenames → keys |
 | Concepts | 2 | Fix `related_concepts` relative paths → keys/mnemonics |
-| Operators | 1 | Fix `related_operators` paths → keys or remove |
+| Operators | 1 | Fix `related_operators` paths → expand to full operator sets |
 | Directives | 1 | Fix `related_symbols` → parent doc key or add aliases |
 
 ### YAMLs Requiring Alias Declarations (~8 files)
@@ -480,22 +495,25 @@ All pattern files with `combines_with` references - verify `pattern_id` field ex
 7. **Verify pattern_id fields** (Phase 4)
    - Check all 24 pattern files have `pattern_id`
    - Add missing `pattern_id` fields
-8. **Run validator** - combines_with errors should be resolved
-9. **Fix fundamentals** (Phase 5A) - 4 files
-10. **Fix concepts** (Phase 5B) - 4 files
-11. **Fix constructs** (Phase 5C) - 7 files
-12. **Fix operators** (Phase 5D) - 1 file
-13. **Fix symbols** (Phase 5E) - 1 file
-14. **Run validator** after each batch - errors should decrease
+8. **Clean combines_with entries** (Phase 5F data quality)
+   - Strip descriptions from pattern IDs (e.g., "state_machine for coordination" → "state_machine")
+   - Remove generic placeholders ("Any pattern as utility", "any pattern")
+9. **Run validator** - combines_with errors should be resolved
+10. **Fix fundamentals** (Phase 5A) - 4 files
+11. **Fix concepts** (Phase 5B) - 4 files
+12. **Fix constructs** (Phase 5C) - 7 files
+13. **Fix operators** (Phase 5D) - 1 file (expand to full operator sets)
+14. **Fix symbols** (Phase 5E) - aliases already added, no file changes needed
+15. **Run validator** after each batch - errors should decrease
 
 ### Stage 4: Final Validation
-15. **Final validation** - expect 0 unresolved references
-16. **Regenerate index** one final time
-17. **Run full validation suite** including `validate-dod-release.py`
-18. **Commit all changes** with descriptive message
+16. **Final validation** - expect 0 unresolved references
+17. **Regenerate index** one final time
+18. **Run full validation suite** including `validate-dod-release.py`
+19. **Commit all changes** with descriptive message
 
 ### Stage 5: MCP Server Update (User Action)
-19. **User updates MCP server** per specification in this document
+20. **User updates MCP server** per specification in this document
 
 ---
 
