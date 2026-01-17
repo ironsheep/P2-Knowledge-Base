@@ -1,9 +1,11 @@
 {
   "system": {
-    "version": "3.2.0",
-    "generated": "2026-01-14T01:30:24.672084",
+    "version": "3.4.0",
+    "generated": "2026-01-17T01:34:52.181541",
     "total_entries": 1000,
     "total_categories": 47,
+    "total_aliases": 933,
+    "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -601,6 +603,2861 @@
       "p2kbGuidePasm2GettingStarted",
       "p2kbGuideQuickQueries",
       "p2kbGuideSpin2GettingStarted"
+    ]
+  },
+  "aliases": {
+    "ABS": [
+      "p2kbPasm2Abs",
+      "p2kbSpin2Abs"
+    ],
+    "ADD": [
+      "p2kbPasm2Add"
+    ],
+    "ADDCT1": [
+      "p2kbPasm2Addct1"
+    ],
+    "ADDCT2": [
+      "p2kbPasm2Addct2"
+    ],
+    "ADDCT3": [
+      "p2kbPasm2Addct3"
+    ],
+    "ADDPIX": [
+      "p2kbPasm2Addpix"
+    ],
+    "ADDS": [
+      "p2kbPasm2Adds"
+    ],
+    "ADDSX": [
+      "p2kbPasm2Addsx"
+    ],
+    "ADDX": [
+      "p2kbPasm2Addx"
+    ],
+    "AKPIN": [
+      "p2kbPasm2Akpin",
+      "p2kbSpin2Akpin"
+    ],
+    "ALLOWI": [
+      "p2kbPasm2Allowi"
+    ],
+    "ALTB": [
+      "p2kbPasm2Altb"
+    ],
+    "ALTD": [
+      "p2kbPasm2Altd"
+    ],
+    "ALTGB": [
+      "p2kbPasm2Altgb"
+    ],
+    "ALTGN": [
+      "p2kbPasm2Altgn"
+    ],
+    "ALTGW": [
+      "p2kbPasm2Altgw"
+    ],
+    "ALTI": [
+      "p2kbPasm2Alti"
+    ],
+    "ALTR": [
+      "p2kbPasm2Altr"
+    ],
+    "ALTS": [
+      "p2kbPasm2Alts"
+    ],
+    "ALTSB": [
+      "p2kbPasm2Altsb"
+    ],
+    "ALTSN": [
+      "p2kbPasm2Altsn"
+    ],
+    "ALTSW": [
+      "p2kbPasm2Altsw"
+    ],
+    "AND": [
+      "p2kbPasm2And"
+    ],
+    "ANDN": [
+      "p2kbPasm2Andn"
+    ],
+    "ASMCLK": [
+      "p2kbPasm2Asmclk"
+    ],
+    "AUGD": [
+      "p2kbPasm2Augd"
+    ],
+    "AUGS": [
+      "p2kbPasm2Augs"
+    ],
+    "BITC": [
+      "p2kbPasm2Bitc"
+    ],
+    "BITH": [
+      "p2kbPasm2Bith"
+    ],
+    "BITL": [
+      "p2kbPasm2Bitl"
+    ],
+    "BITNC": [
+      "p2kbPasm2Bitnc"
+    ],
+    "BITNOT": [
+      "p2kbPasm2Bitnot"
+    ],
+    "BITNZ": [
+      "p2kbPasm2Bitnz"
+    ],
+    "BITRND": [
+      "p2kbPasm2Bitrnd"
+    ],
+    "BITZ": [
+      "p2kbPasm2Bitz"
+    ],
+    "BLNPIX": [
+      "p2kbPasm2Blnpix"
+    ],
+    "BMASK": [
+      "p2kbPasm2Bmask"
+    ],
+    "BRK": [
+      "p2kbPasm2Brk"
+    ],
+    "BYTE": [
+      "p2kbSpin2Byte"
+    ],
+    "BYTECOMP": [
+      "p2kbSpin2Bytecomp"
+    ],
+    "BYTEFILL": [
+      "p2kbSpin2Bytefill"
+    ],
+    "BYTEMOVE": [
+      "p2kbSpin2Bytemove"
+    ],
+    "BYTESWAP": [
+      "p2kbSpin2Byteswap"
+    ],
+    "CALL": [
+      "p2kbPasm2Call",
+      "p2kbSpin2Call"
+    ],
+    "CALLA": [
+      "p2kbPasm2Calla"
+    ],
+    "CALLB": [
+      "p2kbPasm2Callb"
+    ],
+    "CALLD": [
+      "p2kbPasm2Calld"
+    ],
+    "CALLPA": [
+      "p2kbPasm2Callpa"
+    ],
+    "CALLPB": [
+      "p2kbPasm2Callpb"
+    ],
+    "CLKSET": [
+      "p2kbSpin2Clkset"
+    ],
+    "CMP": [
+      "p2kbPasm2Cmp"
+    ],
+    "CMPM": [
+      "p2kbPasm2Cmpm"
+    ],
+    "CMPR": [
+      "p2kbPasm2Cmpr"
+    ],
+    "CMPS": [
+      "p2kbPasm2Cmps"
+    ],
+    "CMPSUB": [
+      "p2kbPasm2Cmpsub"
+    ],
+    "CMPSX": [
+      "p2kbPasm2Cmpsx"
+    ],
+    "CMPX": [
+      "p2kbPasm2Cmpx"
+    ],
+    "COGATN": [
+      "p2kbPasm2Cogatn",
+      "p2kbSpin2Cogatn"
+    ],
+    "COGBRK": [
+      "p2kbPasm2Cogbrk"
+    ],
+    "COGCHK": [
+      "p2kbSpin2Cogchk"
+    ],
+    "COGID": [
+      "p2kbPasm2Cogid",
+      "p2kbSpin2Cogid"
+    ],
+    "COGINIT": [
+      "p2kbPasm2Coginit",
+      "p2kbSpin2Coginit"
+    ],
+    "COGSPIN": [
+      "p2kbSpin2Cogspin"
+    ],
+    "COGSTOP": [
+      "p2kbPasm2Cogstop",
+      "p2kbSpin2Cogstop"
+    ],
+    "CRCBIT": [
+      "p2kbPasm2Crcbit"
+    ],
+    "CRCNIB": [
+      "p2kbPasm2Crcnib"
+    ],
+    "DEBUG": [
+      "p2kbPasm2Debug"
+    ],
+    "DECMOD": [
+      "p2kbPasm2Decmod"
+    ],
+    "DECOD": [
+      "p2kbPasm2Decod"
+    ],
+    "DIRC": [
+      "p2kbPasm2Dirc"
+    ],
+    "DIRH": [
+      "p2kbPasm2Dirh"
+    ],
+    "DIRL": [
+      "p2kbPasm2Dirl"
+    ],
+    "DIRNC": [
+      "p2kbPasm2Dirnc"
+    ],
+    "DIRNOT": [
+      "p2kbPasm2Dirnot"
+    ],
+    "DIRNZ": [
+      "p2kbPasm2Dirnz"
+    ],
+    "DIRRND": [
+      "p2kbPasm2Dirrnd"
+    ],
+    "DIRZ": [
+      "p2kbPasm2Dirz"
+    ],
+    "DJF": [
+      "p2kbPasm2Djf"
+    ],
+    "DJNF": [
+      "p2kbPasm2Djnf"
+    ],
+    "DJNZ": [
+      "p2kbPasm2Djnz"
+    ],
+    "DJZ": [
+      "p2kbPasm2Djz"
+    ],
+    "DRVC": [
+      "p2kbPasm2Drvc"
+    ],
+    "DRVH": [
+      "p2kbPasm2Drvh"
+    ],
+    "DRVL": [
+      "p2kbPasm2Drvl"
+    ],
+    "DRVNC": [
+      "p2kbPasm2Drvnc"
+    ],
+    "DRVNOT": [
+      "p2kbPasm2Drvnot"
+    ],
+    "DRVNZ": [
+      "p2kbPasm2Drvnz"
+    ],
+    "DRVRND": [
+      "p2kbPasm2Drvrnd"
+    ],
+    "DRVZ": [
+      "p2kbPasm2Drvz"
+    ],
+    "ENCOD": [
+      "p2kbPasm2Encod"
+    ],
+    "ENDIANL": [
+      "p2kbSpin2Endianl"
+    ],
+    "ENDIANW": [
+      "p2kbSpin2Endianw"
+    ],
+    "EXECF": [
+      "p2kbPasm2Execf"
+    ],
+    "EXP": [
+      "p2kbSpin2Exp"
+    ],
+    "EXP10": [
+      "p2kbSpin2Exp10"
+    ],
+    "EXP2": [
+      "p2kbSpin2Exp2"
+    ],
+    "FBLOCK": [
+      "p2kbPasm2Fblock"
+    ],
+    "FGE": [
+      "p2kbPasm2Fge"
+    ],
+    "FGES": [
+      "p2kbPasm2Fges"
+    ],
+    "FLE": [
+      "p2kbPasm2Fle"
+    ],
+    "FLES": [
+      "p2kbPasm2Fles"
+    ],
+    "FLTC": [
+      "p2kbPasm2Fltc"
+    ],
+    "FLTH": [
+      "p2kbPasm2Flth"
+    ],
+    "FLTL": [
+      "p2kbPasm2Fltl"
+    ],
+    "FLTNC": [
+      "p2kbPasm2Fltnc"
+    ],
+    "FLTNOT": [
+      "p2kbPasm2Fltnot"
+    ],
+    "FLTNZ": [
+      "p2kbPasm2Fltnz"
+    ],
+    "FLTRND": [
+      "p2kbPasm2Fltrnd"
+    ],
+    "FLTZ": [
+      "p2kbPasm2Fltz"
+    ],
+    "GETBRK": [
+      "p2kbPasm2Getbrk"
+    ],
+    "GETBYTE": [
+      "p2kbPasm2Getbyte"
+    ],
+    "GETCRC": [
+      "p2kbSpin2Getcrc"
+    ],
+    "GETCT": [
+      "p2kbPasm2Getct",
+      "p2kbSpin2Getct"
+    ],
+    "GETMS": [
+      "p2kbSpin2Getms"
+    ],
+    "GETNIB": [
+      "p2kbPasm2Getnib"
+    ],
+    "GETPTR": [
+      "p2kbPasm2Getptr"
+    ],
+    "GETQX": [
+      "p2kbPasm2Getqx"
+    ],
+    "GETQY": [
+      "p2kbPasm2Getqy"
+    ],
+    "GETREGS": [
+      "p2kbSpin2Getregs"
+    ],
+    "GETRND": [
+      "p2kbPasm2Getrnd",
+      "p2kbSpin2Getrnd"
+    ],
+    "GETSCP": [
+      "p2kbPasm2Getscp"
+    ],
+    "GETSEC": [
+      "p2kbSpin2Getsec"
+    ],
+    "GETWORD": [
+      "p2kbPasm2Getword"
+    ],
+    "GETXACC": [
+      "p2kbPasm2Getxacc"
+    ],
+    "HUBSET": [
+      "p2kbPasm2Hubset",
+      "p2kbSpin2Hubset"
+    ],
+    "IJNZ": [
+      "p2kbPasm2Ijnz"
+    ],
+    "IJZ": [
+      "p2kbPasm2Ijz"
+    ],
+    "INCMOD": [
+      "p2kbPasm2Incmod"
+    ],
+    "JATN": [
+      "p2kbPasm2Jatn"
+    ],
+    "JCT1": [
+      "p2kbPasm2Jct1"
+    ],
+    "JCT2": [
+      "p2kbPasm2Jct2"
+    ],
+    "JCT3": [
+      "p2kbPasm2Jct3"
+    ],
+    "JFBW": [
+      "p2kbPasm2Jfbw"
+    ],
+    "JINT": [
+      "p2kbPasm2Jint"
+    ],
+    "JMP": [
+      "p2kbPasm2Jmp"
+    ],
+    "JMPREL": [
+      "p2kbPasm2Jmprel"
+    ],
+    "JNATN": [
+      "p2kbPasm2Jnatn"
+    ],
+    "JNCT1": [
+      "p2kbPasm2Jnct1"
+    ],
+    "JNCT2": [
+      "p2kbPasm2Jnct2"
+    ],
+    "JNCT3": [
+      "p2kbPasm2Jnct3"
+    ],
+    "JNFBW": [
+      "p2kbPasm2Jnfbw"
+    ],
+    "JNINT": [
+      "p2kbPasm2Jnint"
+    ],
+    "JNPAT": [
+      "p2kbPasm2Jnpat"
+    ],
+    "JNQMT": [
+      "p2kbPasm2Jnqmt"
+    ],
+    "JNSE1": [
+      "p2kbPasm2Jnse1"
+    ],
+    "JNSE2": [
+      "p2kbPasm2Jnse2"
+    ],
+    "JNSE3": [
+      "p2kbPasm2Jnse3"
+    ],
+    "JNSE4": [
+      "p2kbPasm2Jnse4"
+    ],
+    "JNXFI": [
+      "p2kbPasm2Jnxfi"
+    ],
+    "JNXMT": [
+      "p2kbPasm2Jnxmt"
+    ],
+    "JNXRL": [
+      "p2kbPasm2Jnxrl"
+    ],
+    "JNXRO": [
+      "p2kbPasm2Jnxro"
+    ],
+    "JPAT": [
+      "p2kbPasm2Jpat"
+    ],
+    "JQMT": [
+      "p2kbPasm2Jqmt"
+    ],
+    "JSE1": [
+      "p2kbPasm2Jse1"
+    ],
+    "JSE2": [
+      "p2kbPasm2Jse2"
+    ],
+    "JSE3": [
+      "p2kbPasm2Jse3"
+    ],
+    "JSE4": [
+      "p2kbPasm2Jse4"
+    ],
+    "JXFI": [
+      "p2kbPasm2Jxfi"
+    ],
+    "JXMT": [
+      "p2kbPasm2Jxmt"
+    ],
+    "JXRL": [
+      "p2kbPasm2Jxrl"
+    ],
+    "JXRO": [
+      "p2kbPasm2Jxro"
+    ],
+    "LOC": [
+      "p2kbPasm2Loc"
+    ],
+    "LOCKCHK": [
+      "p2kbSpin2Lockchk"
+    ],
+    "LOCKNEW": [
+      "p2kbPasm2Locknew",
+      "p2kbSpin2Locknew"
+    ],
+    "LOCKREL": [
+      "p2kbPasm2Lockrel",
+      "p2kbSpin2Lockrel"
+    ],
+    "LOCKRET": [
+      "p2kbPasm2Lockret",
+      "p2kbSpin2Lockret"
+    ],
+    "LOCKTRY": [
+      "p2kbPasm2Locktry",
+      "p2kbSpin2Locktry"
+    ],
+    "LOG": [
+      "p2kbSpin2Log"
+    ],
+    "LOG10": [
+      "p2kbSpin2Log10"
+    ],
+    "LOG2": [
+      "p2kbSpin2Log2"
+    ],
+    "LONG": [
+      "p2kbSpin2Long"
+    ],
+    "LONGCOMP": [
+      "p2kbSpin2Longcomp"
+    ],
+    "LONGFILL": [
+      "p2kbSpin2Longfill"
+    ],
+    "LONGMOVE": [
+      "p2kbSpin2Longmove"
+    ],
+    "LONGSWAP": [
+      "p2kbSpin2Longswap"
+    ],
+    "LOOKDOWN": [
+      "p2kbSpin2Lookdown"
+    ],
+    "LOOKDOWNZ": [
+      "p2kbSpin2Lookdownz"
+    ],
+    "LOOKUP": [
+      "p2kbSpin2Lookup"
+    ],
+    "LOOKUPZ": [
+      "p2kbSpin2Lookupz"
+    ],
+    "LSTRING": [
+      "p2kbSpin2Lstring"
+    ],
+    "MERGEB": [
+      "p2kbPasm2Mergeb"
+    ],
+    "MERGEW": [
+      "p2kbPasm2Mergew"
+    ],
+    "MIXPIX": [
+      "p2kbPasm2Mixpix"
+    ],
+    "MODC": [
+      "p2kbPasm2Modc"
+    ],
+    "MODCZ": [
+      "p2kbPasm2Modcz"
+    ],
+    "MODZ": [
+      "p2kbPasm2Modz"
+    ],
+    "MOV": [
+      "p2kbPasm2Mov"
+    ],
+    "MOVBYTS": [
+      "p2kbPasm2Movbyts",
+      "p2kbSpin2Movbyts"
+    ],
+    "MUL": [
+      "p2kbPasm2Mul"
+    ],
+    "MULDIV64": [
+      "p2kbSpin2Muldiv64"
+    ],
+    "MULPIX": [
+      "p2kbPasm2Mulpix"
+    ],
+    "MULS": [
+      "p2kbPasm2Muls"
+    ],
+    "MUXC": [
+      "p2kbPasm2Muxc"
+    ],
+    "MUXNC": [
+      "p2kbPasm2Muxnc"
+    ],
+    "MUXNIBS": [
+      "p2kbPasm2Muxnibs"
+    ],
+    "MUXNITS": [
+      "p2kbPasm2Muxnits"
+    ],
+    "MUXNZ": [
+      "p2kbPasm2Muxnz"
+    ],
+    "MUXQ": [
+      "p2kbPasm2Muxq"
+    ],
+    "MUXZ": [
+      "p2kbPasm2Muxz"
+    ],
+    "NAN": [
+      "p2kbSpin2Nan"
+    ],
+    "NEG": [
+      "p2kbPasm2Neg"
+    ],
+    "NEGC": [
+      "p2kbPasm2Negc"
+    ],
+    "NEGNC": [
+      "p2kbPasm2Negnc"
+    ],
+    "NEGNZ": [
+      "p2kbPasm2Negnz"
+    ],
+    "NEGZ": [
+      "p2kbPasm2Negz"
+    ],
+    "NIXINT1": [
+      "p2kbPasm2Nixint1"
+    ],
+    "NIXINT2": [
+      "p2kbPasm2Nixint2"
+    ],
+    "NIXINT3": [
+      "p2kbPasm2Nixint3"
+    ],
+    "NOP": [
+      "p2kbPasm2Nop"
+    ],
+    "NOT": [
+      "p2kbPasm2Not"
+    ],
+    "ONES": [
+      "p2kbPasm2Ones"
+    ],
+    "OR": [
+      "p2kbPasm2Or"
+    ],
+    "OUTC": [
+      "p2kbPasm2Outc"
+    ],
+    "OUTH": [
+      "p2kbPasm2Outh"
+    ],
+    "OUTL": [
+      "p2kbPasm2Outl"
+    ],
+    "OUTNC": [
+      "p2kbPasm2Outnc"
+    ],
+    "OUTNOT": [
+      "p2kbPasm2Outnot"
+    ],
+    "OUTNZ": [
+      "p2kbPasm2Outnz"
+    ],
+    "OUTRND": [
+      "p2kbPasm2Outrnd"
+    ],
+    "OUTZ": [
+      "p2kbPasm2Outz"
+    ],
+    "PINCLEAR": [
+      "p2kbSpin2Pinclear"
+    ],
+    "PINF": [
+      "p2kbSpin2Pinfloat"
+    ],
+    "PINFLOAT": [
+      "p2kbSpin2Pinfloat"
+    ],
+    "PINH": [
+      "p2kbSpin2Pinhigh"
+    ],
+    "PINHIGH": [
+      "p2kbSpin2Pinhigh"
+    ],
+    "PINL": [
+      "p2kbSpin2Pinlow"
+    ],
+    "PINLOW": [
+      "p2kbSpin2Pinlow"
+    ],
+    "PINR": [
+      "p2kbSpin2Pinread"
+    ],
+    "PINREAD": [
+      "p2kbSpin2Pinread"
+    ],
+    "PINSTART": [
+      "p2kbSpin2Pinstart"
+    ],
+    "PINT": [
+      "p2kbSpin2Pintoggle"
+    ],
+    "PINTOGGLE": [
+      "p2kbSpin2Pintoggle"
+    ],
+    "PINW": [
+      "p2kbSpin2Pinwrite"
+    ],
+    "PINWRITE": [
+      "p2kbSpin2Pinwrite"
+    ],
+    "POLLATN": [
+      "p2kbPasm2Pollatn",
+      "p2kbSpin2Pollatn"
+    ],
+    "POLLCT": [
+      "p2kbSpin2Pollct"
+    ],
+    "POLLCT1": [
+      "p2kbPasm2Pollct1"
+    ],
+    "POLLCT2": [
+      "p2kbPasm2Pollct2"
+    ],
+    "POLLCT3": [
+      "p2kbPasm2Pollct3"
+    ],
+    "POLLFBW": [
+      "p2kbPasm2Pollfbw"
+    ],
+    "POLLINT": [
+      "p2kbPasm2Pollint"
+    ],
+    "POLLPAT": [
+      "p2kbPasm2Pollpat"
+    ],
+    "POLLQMT": [
+      "p2kbPasm2Pollqmt"
+    ],
+    "POLLSE1": [
+      "p2kbPasm2Pollse1"
+    ],
+    "POLLSE2": [
+      "p2kbPasm2Pollse2"
+    ],
+    "POLLSE3": [
+      "p2kbPasm2Pollse3"
+    ],
+    "POLLSE4": [
+      "p2kbPasm2Pollse4"
+    ],
+    "POLLXFI": [
+      "p2kbPasm2Pollxfi"
+    ],
+    "POLLXMT": [
+      "p2kbPasm2Pollxmt"
+    ],
+    "POLLXRL": [
+      "p2kbPasm2Pollxrl"
+    ],
+    "POLLXRO": [
+      "p2kbPasm2Pollxro"
+    ],
+    "POLXY": [
+      "p2kbSpin2Polxy"
+    ],
+    "POP": [
+      "p2kbPasm2Pop"
+    ],
+    "POPA": [
+      "p2kbPasm2Popa"
+    ],
+    "POPB": [
+      "p2kbPasm2Popb"
+    ],
+    "PUSH": [
+      "p2kbPasm2Push"
+    ],
+    "PUSHA": [
+      "p2kbPasm2Pusha"
+    ],
+    "PUSHB": [
+      "p2kbPasm2Pushb"
+    ],
+    "QCOS": [
+      "p2kbSpin2Qcos"
+    ],
+    "QDIV": [
+      "p2kbPasm2Qdiv"
+    ],
+    "QEXP": [
+      "p2kbPasm2Qexp",
+      "p2kbSpin2Qexp"
+    ],
+    "QFRAC": [
+      "p2kbPasm2Qfrac"
+    ],
+    "QLOG": [
+      "p2kbPasm2Qlog",
+      "p2kbSpin2Qlog"
+    ],
+    "QMUL": [
+      "p2kbPasm2Qmul"
+    ],
+    "QROTATE": [
+      "p2kbPasm2Qrotate"
+    ],
+    "QSIN": [
+      "p2kbSpin2Qsin"
+    ],
+    "QSQRT": [
+      "p2kbPasm2Qsqrt"
+    ],
+    "QVECTOR": [
+      "p2kbPasm2Qvector"
+    ],
+    "RCL": [
+      "p2kbPasm2Rcl"
+    ],
+    "RCR": [
+      "p2kbPasm2Rcr"
+    ],
+    "RCZL": [
+      "p2kbPasm2Rczl"
+    ],
+    "RCZR": [
+      "p2kbPasm2Rczr"
+    ],
+    "RDBYTE": [
+      "p2kbPasm2Rdbyte"
+    ],
+    "RDFAST": [
+      "p2kbPasm2Rdfast"
+    ],
+    "RDLONG": [
+      "p2kbPasm2Rdlong"
+    ],
+    "RDLUT": [
+      "p2kbPasm2Rdlut"
+    ],
+    "RDPIN": [
+      "p2kbPasm2Rdpin",
+      "p2kbSpin2Rdpin"
+    ],
+    "RDWORD": [
+      "p2kbPasm2Rdword"
+    ],
+    "RECV": [
+      "p2kbSpin2Recv"
+    ],
+    "REGEXEC": [
+      "p2kbSpin2Regexec"
+    ],
+    "REGLOAD": [
+      "p2kbSpin2Regload"
+    ],
+    "REP": [
+      "p2kbPasm2Rep"
+    ],
+    "RESI0": [
+      "p2kbPasm2Resi0"
+    ],
+    "RESI1": [
+      "p2kbPasm2Resi1"
+    ],
+    "RESI2": [
+      "p2kbPasm2Resi2"
+    ],
+    "RESI3": [
+      "p2kbPasm2Resi3"
+    ],
+    "RET": [
+      "p2kbPasm2Ret"
+    ],
+    "RETA": [
+      "p2kbPasm2Reta"
+    ],
+    "RETB": [
+      "p2kbPasm2Retb"
+    ],
+    "RETI0": [
+      "p2kbPasm2Reti0"
+    ],
+    "RETI1": [
+      "p2kbPasm2Reti1"
+    ],
+    "RETI2": [
+      "p2kbPasm2Reti2"
+    ],
+    "RETI3": [
+      "p2kbPasm2Reti3"
+    ],
+    "REV": [
+      "p2kbPasm2Rev"
+    ],
+    "RFBYTE": [
+      "p2kbPasm2Rfbyte"
+    ],
+    "RFLONG": [
+      "p2kbPasm2Rflong"
+    ],
+    "RFVAR": [
+      "p2kbPasm2Rfvar"
+    ],
+    "RFVARS": [
+      "p2kbPasm2Rfvars"
+    ],
+    "RFWORD": [
+      "p2kbPasm2Rfword"
+    ],
+    "RGBEXP": [
+      "p2kbPasm2Rgbexp"
+    ],
+    "RGBSQZ": [
+      "p2kbPasm2Rgbsqz"
+    ],
+    "ROL": [
+      "p2kbPasm2Rol"
+    ],
+    "ROLBYTE": [
+      "p2kbPasm2Rolbyte"
+    ],
+    "ROLNIB": [
+      "p2kbPasm2Rolnib"
+    ],
+    "ROLWORD": [
+      "p2kbPasm2Rolword"
+    ],
+    "ROR": [
+      "p2kbPasm2Ror"
+    ],
+    "ROTXY": [
+      "p2kbSpin2Rotxy"
+    ],
+    "RQPIN": [
+      "p2kbPasm2Rqpin",
+      "p2kbSpin2Rqpin"
+    ],
+    "SAL": [
+      "p2kbPasm2Sal"
+    ],
+    "SAR": [
+      "p2kbPasm2Sar"
+    ],
+    "SCA": [
+      "p2kbPasm2Sca"
+    ],
+    "SCAS": [
+      "p2kbPasm2Scas"
+    ],
+    "SEND": [
+      "p2kbSpin2Send"
+    ],
+    "SETBYTE": [
+      "p2kbPasm2Setbyte"
+    ],
+    "SETCFRQ": [
+      "p2kbPasm2Setcfrq"
+    ],
+    "SETCI": [
+      "p2kbPasm2Setci"
+    ],
+    "SETCMOD": [
+      "p2kbPasm2Setcmod"
+    ],
+    "SETCQ": [
+      "p2kbPasm2Setcq"
+    ],
+    "SETCY": [
+      "p2kbPasm2Setcy"
+    ],
+    "SETD": [
+      "p2kbPasm2Setd"
+    ],
+    "SETDACS": [
+      "p2kbPasm2Setdacs"
+    ],
+    "SETINT1": [
+      "p2kbPasm2Setint1"
+    ],
+    "SETINT2": [
+      "p2kbPasm2Setint2"
+    ],
+    "SETINT3": [
+      "p2kbPasm2Setint3"
+    ],
+    "SETLUTS": [
+      "p2kbPasm2Setluts"
+    ],
+    "SETNIB": [
+      "p2kbPasm2Setnib"
+    ],
+    "SETPAT": [
+      "p2kbPasm2Setpat"
+    ],
+    "SETPIV": [
+      "p2kbPasm2Setpiv"
+    ],
+    "SETPIX": [
+      "p2kbPasm2Setpix"
+    ],
+    "SETQ": [
+      "p2kbPasm2Setq"
+    ],
+    "SETQ2": [
+      "p2kbPasm2Setq2"
+    ],
+    "SETR": [
+      "p2kbPasm2Setr"
+    ],
+    "SETREGS": [
+      "p2kbSpin2Setregs"
+    ],
+    "SETS": [
+      "p2kbPasm2Sets"
+    ],
+    "SETSCP": [
+      "p2kbPasm2Setscp"
+    ],
+    "SETSE1": [
+      "p2kbPasm2Setse1"
+    ],
+    "SETSE2": [
+      "p2kbPasm2Setse2"
+    ],
+    "SETSE3": [
+      "p2kbPasm2Setse3"
+    ],
+    "SETSE4": [
+      "p2kbPasm2Setse4"
+    ],
+    "SETWORD": [
+      "p2kbPasm2Setword"
+    ],
+    "SETXFRQ": [
+      "p2kbPasm2Setxfrq"
+    ],
+    "SEUSSF": [
+      "p2kbPasm2Seussf"
+    ],
+    "SEUSSR": [
+      "p2kbPasm2Seussr"
+    ],
+    "SHL": [
+      "p2kbPasm2Shl"
+    ],
+    "SHR": [
+      "p2kbPasm2Shr"
+    ],
+    "SIGNX": [
+      "p2kbPasm2Signx"
+    ],
+    "SIZEOF": [
+      "p2kbSpin2Sizeof"
+    ],
+    "SKIP": [
+      "p2kbPasm2Skip"
+    ],
+    "SKIPF": [
+      "p2kbPasm2Skipf"
+    ],
+    "SPLITB": [
+      "p2kbPasm2Splitb"
+    ],
+    "SPLITW": [
+      "p2kbPasm2Splitw"
+    ],
+    "SQRT": [
+      "p2kbSpin2Sqrt"
+    ],
+    "STALLI": [
+      "p2kbPasm2Stalli"
+    ],
+    "STRCOMP": [
+      "p2kbSpin2Strcomp"
+    ],
+    "STRCOPY": [
+      "p2kbSpin2Strcopy"
+    ],
+    "STRING": [
+      "p2kbSpin2String"
+    ],
+    "STRSIZE": [
+      "p2kbSpin2Strsize"
+    ],
+    "SUB": [
+      "p2kbPasm2Sub"
+    ],
+    "SUBR": [
+      "p2kbPasm2Subr"
+    ],
+    "SUBS": [
+      "p2kbPasm2Subs"
+    ],
+    "SUBSX": [
+      "p2kbPasm2Subsx"
+    ],
+    "SUBX": [
+      "p2kbPasm2Subx"
+    ],
+    "SUMC": [
+      "p2kbPasm2Sumc"
+    ],
+    "SUMNC": [
+      "p2kbPasm2Sumnc"
+    ],
+    "SUMNZ": [
+      "p2kbPasm2Sumnz"
+    ],
+    "SUMZ": [
+      "p2kbPasm2Sumz"
+    ],
+    "TASKCHK": [
+      "p2kbSpin2Taskchk"
+    ],
+    "TASKHALT": [
+      "p2kbSpin2Taskhalt"
+    ],
+    "TASKID": [
+      "p2kbSpin2Taskid"
+    ],
+    "TASKNEXT": [
+      "p2kbSpin2Tasknext"
+    ],
+    "TASKRESUME": [
+      "p2kbSpin2Taskresume"
+    ],
+    "TASKSPIN": [
+      "p2kbSpin2Taskspin"
+    ],
+    "TASKSTOP": [
+      "p2kbSpin2Taskstop"
+    ],
+    "TASKWAIT": [
+      "p2kbSpin2Taskwait"
+    ],
+    "TEST": [
+      "p2kbPasm2Test"
+    ],
+    "TESTB": [
+      "p2kbPasm2Testb"
+    ],
+    "TESTBN": [
+      "p2kbPasm2Testbn"
+    ],
+    "TESTN": [
+      "p2kbPasm2Testn"
+    ],
+    "TESTP": [
+      "p2kbPasm2Testp"
+    ],
+    "TESTPN": [
+      "p2kbPasm2Testpn"
+    ],
+    "TJF": [
+      "p2kbPasm2Tjf"
+    ],
+    "TJNF": [
+      "p2kbPasm2Tjnf"
+    ],
+    "TJNS": [
+      "p2kbPasm2Tjns"
+    ],
+    "TJNZ": [
+      "p2kbPasm2Tjnz"
+    ],
+    "TJS": [
+      "p2kbPasm2Tjs"
+    ],
+    "TJV": [
+      "p2kbPasm2Tjv"
+    ],
+    "TJZ": [
+      "p2kbPasm2Tjz"
+    ],
+    "TRGINT1": [
+      "p2kbPasm2Trgint1"
+    ],
+    "TRGINT2": [
+      "p2kbPasm2Trgint2"
+    ],
+    "TRGINT3": [
+      "p2kbPasm2Trgint3"
+    ],
+    "WAITATN": [
+      "p2kbPasm2Waitatn",
+      "p2kbSpin2Waitatn"
+    ],
+    "WAITCT": [
+      "p2kbSpin2Waitct"
+    ],
+    "WAITCT1": [
+      "p2kbPasm2Waitct1"
+    ],
+    "WAITCT2": [
+      "p2kbPasm2Waitct2"
+    ],
+    "WAITCT3": [
+      "p2kbPasm2Waitct3"
+    ],
+    "WAITFBW": [
+      "p2kbPasm2Waitfbw"
+    ],
+    "WAITINT": [
+      "p2kbPasm2Waitint"
+    ],
+    "WAITMS": [
+      "p2kbSpin2Waitms"
+    ],
+    "WAITPAT": [
+      "p2kbPasm2Waitpat"
+    ],
+    "WAITSE1": [
+      "p2kbPasm2Waitse1"
+    ],
+    "WAITSE2": [
+      "p2kbPasm2Waitse2"
+    ],
+    "WAITSE3": [
+      "p2kbPasm2Waitse3"
+    ],
+    "WAITSE4": [
+      "p2kbPasm2Waitse4"
+    ],
+    "WAITUS": [
+      "p2kbSpin2Waitus"
+    ],
+    "WAITX": [
+      "p2kbPasm2Waitx"
+    ],
+    "WAITXFI": [
+      "p2kbPasm2Waitxfi"
+    ],
+    "WAITXMT": [
+      "p2kbPasm2Waitxmt"
+    ],
+    "WAITXRL": [
+      "p2kbPasm2Waitxrl"
+    ],
+    "WAITXRO": [
+      "p2kbPasm2Waitxro"
+    ],
+    "WFBYTE": [
+      "p2kbPasm2Wfbyte"
+    ],
+    "WFLONG": [
+      "p2kbPasm2Wflong"
+    ],
+    "WFWORD": [
+      "p2kbPasm2Wfword"
+    ],
+    "WMLONG": [
+      "p2kbPasm2Wmlong"
+    ],
+    "WORD": [
+      "p2kbSpin2Word"
+    ],
+    "WORDCOMP": [
+      "p2kbSpin2Wordcomp"
+    ],
+    "WORDFILL": [
+      "p2kbSpin2Wordfill"
+    ],
+    "WORDMOVE": [
+      "p2kbSpin2Wordmove"
+    ],
+    "WORDSWAP": [
+      "p2kbSpin2Wordswap"
+    ],
+    "WRBYTE": [
+      "p2kbPasm2Wrbyte"
+    ],
+    "WRC": [
+      "p2kbPasm2Wrc"
+    ],
+    "WRFAST": [
+      "p2kbPasm2Wrfast"
+    ],
+    "WRLONG": [
+      "p2kbPasm2Wrlong"
+    ],
+    "WRLUT": [
+      "p2kbPasm2Wrlut"
+    ],
+    "WRNC": [
+      "p2kbPasm2Wrnc"
+    ],
+    "WRNZ": [
+      "p2kbPasm2Wrnz"
+    ],
+    "WRPIN": [
+      "p2kbPasm2Wrpin",
+      "p2kbSpin2Wrpin"
+    ],
+    "WRWORD": [
+      "p2kbPasm2Wrword"
+    ],
+    "WRZ": [
+      "p2kbPasm2Wrz"
+    ],
+    "WXPIN": [
+      "p2kbPasm2Wxpin",
+      "p2kbSpin2Wxpin"
+    ],
+    "WYPIN": [
+      "p2kbPasm2Wypin",
+      "p2kbSpin2Wypin"
+    ],
+    "XCONT": [
+      "p2kbPasm2Xcont"
+    ],
+    "XINIT": [
+      "p2kbPasm2Xinit"
+    ],
+    "XOR": [
+      "p2kbPasm2Xor"
+    ],
+    "XORO32": [
+      "p2kbPasm2Xoro32"
+    ],
+    "XSTOP": [
+      "p2kbPasm2Xstop"
+    ],
+    "XYPOL": [
+      "p2kbSpin2Xypol"
+    ],
+    "XZERO": [
+      "p2kbPasm2Xzero"
+    ],
+    "ZEROX": [
+      "p2kbPasm2Zerox"
+    ],
+    "_AUTOCLK": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_CLKFREQ": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_CLKMODE": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_RCFAST": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_RCSLOW": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_XINFREQ": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_XTLFREQ": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_clkfreq": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_clkmode": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_rcfast": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_rcslow": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_xinfreq": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_xtlfreq": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "abs": [
+      "p2kbPasm2Abs",
+      "p2kbSpin2Abs"
+    ],
+    "add": [
+      "p2kbPasm2Add"
+    ],
+    "addct1": [
+      "p2kbPasm2Addct1"
+    ],
+    "addct2": [
+      "p2kbPasm2Addct2"
+    ],
+    "addct3": [
+      "p2kbPasm2Addct3"
+    ],
+    "addpix": [
+      "p2kbPasm2Addpix"
+    ],
+    "adds": [
+      "p2kbPasm2Adds"
+    ],
+    "addsx": [
+      "p2kbPasm2Addsx"
+    ],
+    "addx": [
+      "p2kbPasm2Addx"
+    ],
+    "akpin": [
+      "p2kbPasm2Akpin",
+      "p2kbSpin2Akpin"
+    ],
+    "allowi": [
+      "p2kbPasm2Allowi"
+    ],
+    "altb": [
+      "p2kbPasm2Altb"
+    ],
+    "altd": [
+      "p2kbPasm2Altd"
+    ],
+    "altgb": [
+      "p2kbPasm2Altgb"
+    ],
+    "altgn": [
+      "p2kbPasm2Altgn"
+    ],
+    "altgw": [
+      "p2kbPasm2Altgw"
+    ],
+    "alti": [
+      "p2kbPasm2Alti"
+    ],
+    "altr": [
+      "p2kbPasm2Altr"
+    ],
+    "alts": [
+      "p2kbPasm2Alts"
+    ],
+    "altsb": [
+      "p2kbPasm2Altsb"
+    ],
+    "altsn": [
+      "p2kbPasm2Altsn"
+    ],
+    "altsw": [
+      "p2kbPasm2Altsw"
+    ],
+    "and": [
+      "p2kbPasm2And"
+    ],
+    "andn": [
+      "p2kbPasm2Andn"
+    ],
+    "animation_engine": [
+      "p2kbSpin2AnimationEngine"
+    ],
+    "array_architecture": [
+      "p2kbSpin2ArrayArchitecture"
+    ],
+    "asm_integration": [
+      "p2kbArchAsmIntegrationAnalysis"
+    ],
+    "asmclk": [
+      "p2kbPasm2Asmclk"
+    ],
+    "audio_processor": [
+      "p2kbSpin2AudioProcessor"
+    ],
+    "augd": [
+      "p2kbPasm2Augd"
+    ],
+    "augs": [
+      "p2kbPasm2Augs"
+    ],
+    "bitc": [
+      "p2kbPasm2Bitc"
+    ],
+    "bith": [
+      "p2kbPasm2Bith"
+    ],
+    "bitl": [
+      "p2kbPasm2Bitl"
+    ],
+    "bitnc": [
+      "p2kbPasm2Bitnc"
+    ],
+    "bitnot": [
+      "p2kbPasm2Bitnot"
+    ],
+    "bitnz": [
+      "p2kbPasm2Bitnz"
+    ],
+    "bitrnd": [
+      "p2kbPasm2Bitrnd"
+    ],
+    "bitz": [
+      "p2kbPasm2Bitz"
+    ],
+    "blnpix": [
+      "p2kbPasm2Blnpix"
+    ],
+    "bmask": [
+      "p2kbPasm2Bmask"
+    ],
+    "brk": [
+      "p2kbPasm2Brk"
+    ],
+    "buffer_management": [
+      "p2kbArchBufferManagementAnalysis",
+      "p2kbSpin2Spin2BufferManagement"
+    ],
+    "byte": [
+      "p2kbSpin2Byte"
+    ],
+    "bytecomp": [
+      "p2kbSpin2Bytecomp"
+    ],
+    "bytefill": [
+      "p2kbSpin2Bytefill"
+    ],
+    "bytemove": [
+      "p2kbSpin2Bytemove"
+    ],
+    "byteswap": [
+      "p2kbSpin2Byteswap"
+    ],
+    "call": [
+      "p2kbPasm2Call",
+      "p2kbSpin2Call"
+    ],
+    "calla": [
+      "p2kbPasm2Calla"
+    ],
+    "callb": [
+      "p2kbPasm2Callb"
+    ],
+    "calld": [
+      "p2kbPasm2Calld"
+    ],
+    "callpa": [
+      "p2kbPasm2Callpa"
+    ],
+    "callpb": [
+      "p2kbPasm2Callpb"
+    ],
+    "clkset": [
+      "p2kbSpin2Clkset"
+    ],
+    "cmp": [
+      "p2kbPasm2Cmp"
+    ],
+    "cmpm": [
+      "p2kbPasm2Cmpm"
+    ],
+    "cmpr": [
+      "p2kbPasm2Cmpr"
+    ],
+    "cmps": [
+      "p2kbPasm2Cmps"
+    ],
+    "cmpsub": [
+      "p2kbPasm2Cmpsub"
+    ],
+    "cmpsx": [
+      "p2kbPasm2Cmpsx"
+    ],
+    "cmpx": [
+      "p2kbPasm2Cmpx"
+    ],
+    "cog_management": [
+      "p2kbArchCogManagementAnalysis",
+      "p2kbSpin2Spin2CogManagement"
+    ],
+    "cogatn": [
+      "p2kbPasm2Cogatn",
+      "p2kbSpin2Cogatn"
+    ],
+    "cogbrk": [
+      "p2kbPasm2Cogbrk"
+    ],
+    "cogchk": [
+      "p2kbSpin2Cogchk"
+    ],
+    "cogid": [
+      "p2kbPasm2Cogid",
+      "p2kbSpin2Cogid"
+    ],
+    "coginit": [
+      "p2kbPasm2Coginit",
+      "p2kbSpin2Coginit"
+    ],
+    "cogspin": [
+      "p2kbSpin2Cogspin"
+    ],
+    "cogstop": [
+      "p2kbPasm2Cogstop",
+      "p2kbSpin2Cogstop"
+    ],
+    "communication_handler": [
+      "p2kbSpin2CommunicationHandler"
+    ],
+    "configuration_manager": [
+      "p2kbSpin2ConfigurationManager"
+    ],
+    "crcbit": [
+      "p2kbPasm2Crcbit"
+    ],
+    "crcnib": [
+      "p2kbPasm2Crcnib"
+    ],
+    "data_logger": [
+      "p2kbSpin2DataLogger"
+    ],
+    "debug": [
+      "p2kbPasm2Debug"
+    ],
+    "debug_enabled": [
+      "p2kbSpin2DebugEnabled"
+    ],
+    "decmod": [
+      "p2kbPasm2Decmod"
+    ],
+    "decod": [
+      "p2kbPasm2Decod"
+    ],
+    "diagnostic_output": [
+      "p2kbSpin2Spin2DiagnosticOutput"
+    ],
+    "dirc": [
+      "p2kbPasm2Dirc"
+    ],
+    "dirh": [
+      "p2kbPasm2Dirh"
+    ],
+    "dirl": [
+      "p2kbPasm2Dirl"
+    ],
+    "dirnc": [
+      "p2kbPasm2Dirnc"
+    ],
+    "dirnot": [
+      "p2kbPasm2Dirnot"
+    ],
+    "dirnz": [
+      "p2kbPasm2Dirnz"
+    ],
+    "dirrnd": [
+      "p2kbPasm2Dirrnd"
+    ],
+    "dirz": [
+      "p2kbPasm2Dirz"
+    ],
+    "display_driver": [
+      "p2kbSpin2DisplayDriver"
+    ],
+    "djf": [
+      "p2kbPasm2Djf"
+    ],
+    "djnf": [
+      "p2kbPasm2Djnf"
+    ],
+    "djnz": [
+      "p2kbPasm2Djnz"
+    ],
+    "djz": [
+      "p2kbPasm2Djz"
+    ],
+    "drvc": [
+      "p2kbPasm2Drvc"
+    ],
+    "drvh": [
+      "p2kbPasm2Drvh"
+    ],
+    "drvl": [
+      "p2kbPasm2Drvl"
+    ],
+    "drvnc": [
+      "p2kbPasm2Drvnc"
+    ],
+    "drvnot": [
+      "p2kbPasm2Drvnot"
+    ],
+    "drvnz": [
+      "p2kbPasm2Drvnz"
+    ],
+    "drvrnd": [
+      "p2kbPasm2Drvrnd"
+    ],
+    "drvz": [
+      "p2kbPasm2Drvz"
+    ],
+    "dual_communication": [
+      "p2kbSpin2DualCommunication"
+    ],
+    "encod": [
+      "p2kbPasm2Encod"
+    ],
+    "endianl": [
+      "p2kbSpin2Endianl"
+    ],
+    "endianw": [
+      "p2kbSpin2Endianw"
+    ],
+    "error_handling": [
+      "p2kbSpin2Spin2ErrorHandling"
+    ],
+    "event_dispatcher": [
+      "p2kbSpin2Spin2EventDispatcher"
+    ],
+    "execf": [
+      "p2kbPasm2Execf"
+    ],
+    "exp": [
+      "p2kbSpin2Exp"
+    ],
+    "exp10": [
+      "p2kbSpin2Exp10"
+    ],
+    "exp2": [
+      "p2kbSpin2Exp2"
+    ],
+    "fblock": [
+      "p2kbPasm2Fblock"
+    ],
+    "few_objects": [
+      "p2kbSpin2FewObjects"
+    ],
+    "fge": [
+      "p2kbPasm2Fge"
+    ],
+    "fges": [
+      "p2kbPasm2Fges"
+    ],
+    "fle": [
+      "p2kbPasm2Fle"
+    ],
+    "fles": [
+      "p2kbPasm2Fles"
+    ],
+    "fltc": [
+      "p2kbPasm2Fltc"
+    ],
+    "flth": [
+      "p2kbPasm2Flth"
+    ],
+    "fltl": [
+      "p2kbPasm2Fltl"
+    ],
+    "fltnc": [
+      "p2kbPasm2Fltnc"
+    ],
+    "fltnot": [
+      "p2kbPasm2Fltnot"
+    ],
+    "fltnz": [
+      "p2kbPasm2Fltnz"
+    ],
+    "fltrnd": [
+      "p2kbPasm2Fltrnd"
+    ],
+    "fltz": [
+      "p2kbPasm2Fltz"
+    ],
+    "framework_pattern": [
+      "p2kbSpin2FrameworkPattern"
+    ],
+    "getbrk": [
+      "p2kbPasm2Getbrk"
+    ],
+    "getbyte": [
+      "p2kbPasm2Getbyte"
+    ],
+    "getcrc": [
+      "p2kbSpin2Getcrc"
+    ],
+    "getct": [
+      "p2kbPasm2Getct",
+      "p2kbSpin2Getct"
+    ],
+    "getms": [
+      "p2kbSpin2Getms"
+    ],
+    "getnib": [
+      "p2kbPasm2Getnib"
+    ],
+    "getptr": [
+      "p2kbPasm2Getptr"
+    ],
+    "getqx": [
+      "p2kbPasm2Getqx"
+    ],
+    "getqy": [
+      "p2kbPasm2Getqy"
+    ],
+    "getregs": [
+      "p2kbSpin2Getregs"
+    ],
+    "getrnd": [
+      "p2kbPasm2Getrnd",
+      "p2kbSpin2Getrnd"
+    ],
+    "getscp": [
+      "p2kbPasm2Getscp"
+    ],
+    "getsec": [
+      "p2kbSpin2Getsec"
+    ],
+    "getword": [
+      "p2kbPasm2Getword"
+    ],
+    "getxacc": [
+      "p2kbPasm2Getxacc"
+    ],
+    "hardware_specific_app": [
+      "p2kbSpin2HardwareSpecificApp"
+    ],
+    "hubset": [
+      "p2kbPasm2Hubset",
+      "p2kbSpin2Hubset"
+    ],
+    "ijnz": [
+      "p2kbPasm2Ijnz"
+    ],
+    "ijz": [
+      "p2kbPasm2Ijz"
+    ],
+    "incmod": [
+      "p2kbPasm2Incmod"
+    ],
+    "iot_device": [
+      "p2kbSpin2IotDevice"
+    ],
+    "jatn": [
+      "p2kbPasm2Jatn"
+    ],
+    "jct1": [
+      "p2kbPasm2Jct1"
+    ],
+    "jct2": [
+      "p2kbPasm2Jct2"
+    ],
+    "jct3": [
+      "p2kbPasm2Jct3"
+    ],
+    "jfbw": [
+      "p2kbPasm2Jfbw"
+    ],
+    "jint": [
+      "p2kbPasm2Jint"
+    ],
+    "jmp": [
+      "p2kbPasm2Jmp"
+    ],
+    "jmprel": [
+      "p2kbPasm2Jmprel"
+    ],
+    "jnatn": [
+      "p2kbPasm2Jnatn"
+    ],
+    "jnct1": [
+      "p2kbPasm2Jnct1"
+    ],
+    "jnct2": [
+      "p2kbPasm2Jnct2"
+    ],
+    "jnct3": [
+      "p2kbPasm2Jnct3"
+    ],
+    "jnfbw": [
+      "p2kbPasm2Jnfbw"
+    ],
+    "jnint": [
+      "p2kbPasm2Jnint"
+    ],
+    "jnpat": [
+      "p2kbPasm2Jnpat"
+    ],
+    "jnqmt": [
+      "p2kbPasm2Jnqmt"
+    ],
+    "jnse1": [
+      "p2kbPasm2Jnse1"
+    ],
+    "jnse2": [
+      "p2kbPasm2Jnse2"
+    ],
+    "jnse3": [
+      "p2kbPasm2Jnse3"
+    ],
+    "jnse4": [
+      "p2kbPasm2Jnse4"
+    ],
+    "jnxfi": [
+      "p2kbPasm2Jnxfi"
+    ],
+    "jnxmt": [
+      "p2kbPasm2Jnxmt"
+    ],
+    "jnxrl": [
+      "p2kbPasm2Jnxrl"
+    ],
+    "jnxro": [
+      "p2kbPasm2Jnxro"
+    ],
+    "jpat": [
+      "p2kbPasm2Jpat"
+    ],
+    "jqmt": [
+      "p2kbPasm2Jqmt"
+    ],
+    "jse1": [
+      "p2kbPasm2Jse1"
+    ],
+    "jse2": [
+      "p2kbPasm2Jse2"
+    ],
+    "jse3": [
+      "p2kbPasm2Jse3"
+    ],
+    "jse4": [
+      "p2kbPasm2Jse4"
+    ],
+    "jxfi": [
+      "p2kbPasm2Jxfi"
+    ],
+    "jxmt": [
+      "p2kbPasm2Jxmt"
+    ],
+    "jxrl": [
+      "p2kbPasm2Jxrl"
+    ],
+    "jxro": [
+      "p2kbPasm2Jxro"
+    ],
+    "layered_architecture": [
+      "p2kbSpin2Spin2LayeredArchitecture"
+    ],
+    "loc": [
+      "p2kbPasm2Loc"
+    ],
+    "lockchk": [
+      "p2kbSpin2Lockchk"
+    ],
+    "locknew": [
+      "p2kbPasm2Locknew",
+      "p2kbSpin2Locknew"
+    ],
+    "lockrel": [
+      "p2kbPasm2Lockrel",
+      "p2kbSpin2Lockrel"
+    ],
+    "lockret": [
+      "p2kbPasm2Lockret",
+      "p2kbSpin2Lockret"
+    ],
+    "locktry": [
+      "p2kbPasm2Locktry",
+      "p2kbSpin2Locktry"
+    ],
+    "log": [
+      "p2kbSpin2Log"
+    ],
+    "log10": [
+      "p2kbSpin2Log10"
+    ],
+    "log2": [
+      "p2kbSpin2Log2"
+    ],
+    "long": [
+      "p2kbSpin2Long"
+    ],
+    "longcomp": [
+      "p2kbSpin2Longcomp"
+    ],
+    "longfill": [
+      "p2kbSpin2Longfill"
+    ],
+    "longmove": [
+      "p2kbSpin2Longmove"
+    ],
+    "longswap": [
+      "p2kbSpin2Longswap"
+    ],
+    "lookdown": [
+      "p2kbSpin2Lookdown"
+    ],
+    "lookdownz": [
+      "p2kbSpin2Lookdownz"
+    ],
+    "lookup": [
+      "p2kbSpin2Lookup"
+    ],
+    "lookupz": [
+      "p2kbSpin2Lookupz"
+    ],
+    "lstring": [
+      "p2kbSpin2Lstring"
+    ],
+    "mailbox_communication": [
+      "p2kbSpin2Spin2MailboxCommunication"
+    ],
+    "memory_allocation": [
+      "p2kbSpin2Spin2MemoryAllocation"
+    ],
+    "memory_management": [
+      "p2kbArchMemoryManagementAnalysis"
+    ],
+    "mergeb": [
+      "p2kbPasm2Mergeb"
+    ],
+    "mergew": [
+      "p2kbPasm2Mergew"
+    ],
+    "mixpix": [
+      "p2kbPasm2Mixpix"
+    ],
+    "modc": [
+      "p2kbPasm2Modc"
+    ],
+    "modcz": [
+      "p2kbPasm2Modcz"
+    ],
+    "modz": [
+      "p2kbPasm2Modz"
+    ],
+    "monitoring_device": [
+      "p2kbSpin2MonitoringDevice"
+    ],
+    "motor_controller": [
+      "p2kbSpin2MotorController"
+    ],
+    "mov": [
+      "p2kbPasm2Mov"
+    ],
+    "movbyts": [
+      "p2kbPasm2Movbyts",
+      "p2kbSpin2Movbyts"
+    ],
+    "mul": [
+      "p2kbPasm2Mul"
+    ],
+    "muldiv64": [
+      "p2kbSpin2Muldiv64"
+    ],
+    "mulpix": [
+      "p2kbPasm2Mulpix"
+    ],
+    "muls": [
+      "p2kbPasm2Muls"
+    ],
+    "multi_display_system": [
+      "p2kbSpin2MultiDisplaySystem"
+    ],
+    "multi_instance_coordination": [
+      "p2kbSpin2MultiInstanceCoordination"
+    ],
+    "multi_motor_system": [
+      "p2kbSpin2MultiMotorSystem"
+    ],
+    "multimedia_device": [
+      "p2kbSpin2MultimediaDevice"
+    ],
+    "muxc": [
+      "p2kbPasm2Muxc"
+    ],
+    "muxnc": [
+      "p2kbPasm2Muxnc"
+    ],
+    "muxnibs": [
+      "p2kbPasm2Muxnibs"
+    ],
+    "muxnits": [
+      "p2kbPasm2Muxnits"
+    ],
+    "muxnz": [
+      "p2kbPasm2Muxnz"
+    ],
+    "muxq": [
+      "p2kbPasm2Muxq"
+    ],
+    "muxz": [
+      "p2kbPasm2Muxz"
+    ],
+    "nan": [
+      "p2kbSpin2Nan"
+    ],
+    "neg": [
+      "p2kbPasm2Neg"
+    ],
+    "negc": [
+      "p2kbPasm2Negc"
+    ],
+    "negnc": [
+      "p2kbPasm2Negnc"
+    ],
+    "negnz": [
+      "p2kbPasm2Negnz"
+    ],
+    "negz": [
+      "p2kbPasm2Negz"
+    ],
+    "nixint1": [
+      "p2kbPasm2Nixint1"
+    ],
+    "nixint2": [
+      "p2kbPasm2Nixint2"
+    ],
+    "nixint3": [
+      "p2kbPasm2Nixint3"
+    ],
+    "no_objects": [
+      "p2kbSpin2NoObjects",
+      "p2kbSpin2NoObjectsMinimal"
+    ],
+    "nop": [
+      "p2kbPasm2Nop"
+    ],
+    "not": [
+      "p2kbPasm2Not"
+    ],
+    "ones": [
+      "p2kbPasm2Ones"
+    ],
+    "or": [
+      "p2kbPasm2Or"
+    ],
+    "outc": [
+      "p2kbPasm2Outc"
+    ],
+    "outh": [
+      "p2kbPasm2Outh"
+    ],
+    "outl": [
+      "p2kbPasm2Outl"
+    ],
+    "outnc": [
+      "p2kbPasm2Outnc"
+    ],
+    "outnot": [
+      "p2kbPasm2Outnot"
+    ],
+    "outnz": [
+      "p2kbPasm2Outnz"
+    ],
+    "outrnd": [
+      "p2kbPasm2Outrnd"
+    ],
+    "outz": [
+      "p2kbPasm2Outz"
+    ],
+    "pasm2_hub_synchronization": [
+      "p2kbPasm2Pasm2HubSynchronization"
+    ],
+    "pasm2_initialization": [
+      "p2kbPasm2Pasm2Initialization"
+    ],
+    "pin_control": [
+      "p2kbSpin2Spin2PinControl"
+    ],
+    "pinclear": [
+      "p2kbSpin2Pinclear"
+    ],
+    "pinfloat": [
+      "p2kbSpin2Pinfloat"
+    ],
+    "pinhigh": [
+      "p2kbSpin2Pinhigh"
+    ],
+    "pinlow": [
+      "p2kbSpin2Pinlow"
+    ],
+    "pinread": [
+      "p2kbSpin2Pinread"
+    ],
+    "pinstart": [
+      "p2kbSpin2Pinstart"
+    ],
+    "pintoggle": [
+      "p2kbSpin2Pintoggle"
+    ],
+    "pinwrite": [
+      "p2kbSpin2Pinwrite"
+    ],
+    "plugin_system": [
+      "p2kbSpin2Spin2PluginSystem"
+    ],
+    "pollatn": [
+      "p2kbPasm2Pollatn",
+      "p2kbSpin2Pollatn"
+    ],
+    "pollct": [
+      "p2kbSpin2Pollct"
+    ],
+    "pollct1": [
+      "p2kbPasm2Pollct1"
+    ],
+    "pollct2": [
+      "p2kbPasm2Pollct2"
+    ],
+    "pollct3": [
+      "p2kbPasm2Pollct3"
+    ],
+    "pollfbw": [
+      "p2kbPasm2Pollfbw"
+    ],
+    "pollint": [
+      "p2kbPasm2Pollint"
+    ],
+    "pollpat": [
+      "p2kbPasm2Pollpat"
+    ],
+    "pollqmt": [
+      "p2kbPasm2Pollqmt"
+    ],
+    "pollse1": [
+      "p2kbPasm2Pollse1"
+    ],
+    "pollse2": [
+      "p2kbPasm2Pollse2"
+    ],
+    "pollse3": [
+      "p2kbPasm2Pollse3"
+    ],
+    "pollse4": [
+      "p2kbPasm2Pollse4"
+    ],
+    "pollxfi": [
+      "p2kbPasm2Pollxfi"
+    ],
+    "pollxmt": [
+      "p2kbPasm2Pollxmt"
+    ],
+    "pollxrl": [
+      "p2kbPasm2Pollxrl"
+    ],
+    "pollxro": [
+      "p2kbPasm2Pollxro"
+    ],
+    "polxy": [
+      "p2kbSpin2Polxy"
+    ],
+    "pop": [
+      "p2kbPasm2Pop"
+    ],
+    "popa": [
+      "p2kbPasm2Popa"
+    ],
+    "popb": [
+      "p2kbPasm2Popb"
+    ],
+    "protocol_implementation": [
+      "p2kbArchProtocolImplementationAnalysis",
+      "p2kbSpin2Spin2ProtocolImplementation"
+    ],
+    "push": [
+      "p2kbPasm2Push"
+    ],
+    "pusha": [
+      "p2kbPasm2Pusha"
+    ],
+    "pushb": [
+      "p2kbPasm2Pushb"
+    ],
+    "qcos": [
+      "p2kbSpin2Qcos"
+    ],
+    "qdiv": [
+      "p2kbPasm2Qdiv"
+    ],
+    "qexp": [
+      "p2kbPasm2Qexp",
+      "p2kbSpin2Qexp"
+    ],
+    "qfrac": [
+      "p2kbPasm2Qfrac"
+    ],
+    "qlog": [
+      "p2kbPasm2Qlog",
+      "p2kbSpin2Qlog"
+    ],
+    "qmul": [
+      "p2kbPasm2Qmul"
+    ],
+    "qrotate": [
+      "p2kbPasm2Qrotate"
+    ],
+    "qsin": [
+      "p2kbSpin2Qsin"
+    ],
+    "qsqrt": [
+      "p2kbPasm2Qsqrt"
+    ],
+    "qvector": [
+      "p2kbPasm2Qvector"
+    ],
+    "rcl": [
+      "p2kbPasm2Rcl"
+    ],
+    "rcr": [
+      "p2kbPasm2Rcr"
+    ],
+    "rczl": [
+      "p2kbPasm2Rczl"
+    ],
+    "rczr": [
+      "p2kbPasm2Rczr"
+    ],
+    "rdbyte": [
+      "p2kbPasm2Rdbyte"
+    ],
+    "rdfast": [
+      "p2kbPasm2Rdfast"
+    ],
+    "rdlong": [
+      "p2kbPasm2Rdlong"
+    ],
+    "rdlut": [
+      "p2kbPasm2Rdlut"
+    ],
+    "rdpin": [
+      "p2kbPasm2Rdpin",
+      "p2kbSpin2Rdpin"
+    ],
+    "rdword": [
+      "p2kbPasm2Rdword"
+    ],
+    "recv": [
+      "p2kbSpin2Recv"
+    ],
+    "regexec": [
+      "p2kbSpin2Regexec"
+    ],
+    "regload": [
+      "p2kbSpin2Regload"
+    ],
+    "rep": [
+      "p2kbPasm2Rep"
+    ],
+    "resi0": [
+      "p2kbPasm2Resi0"
+    ],
+    "resi1": [
+      "p2kbPasm2Resi1"
+    ],
+    "resi2": [
+      "p2kbPasm2Resi2"
+    ],
+    "resi3": [
+      "p2kbPasm2Resi3"
+    ],
+    "resource_pool": [
+      "p2kbSpin2Spin2ResourcePool"
+    ],
+    "ret": [
+      "p2kbPasm2Ret"
+    ],
+    "reta": [
+      "p2kbPasm2Reta"
+    ],
+    "retb": [
+      "p2kbPasm2Retb"
+    ],
+    "reti0": [
+      "p2kbPasm2Reti0"
+    ],
+    "reti1": [
+      "p2kbPasm2Reti1"
+    ],
+    "reti2": [
+      "p2kbPasm2Reti2"
+    ],
+    "reti3": [
+      "p2kbPasm2Reti3"
+    ],
+    "rev": [
+      "p2kbPasm2Rev"
+    ],
+    "rfbyte": [
+      "p2kbPasm2Rfbyte"
+    ],
+    "rflong": [
+      "p2kbPasm2Rflong"
+    ],
+    "rfvar": [
+      "p2kbPasm2Rfvar"
+    ],
+    "rfvars": [
+      "p2kbPasm2Rfvars"
+    ],
+    "rfword": [
+      "p2kbPasm2Rfword"
+    ],
+    "rgbexp": [
+      "p2kbPasm2Rgbexp"
+    ],
+    "rgbsqz": [
+      "p2kbPasm2Rgbsqz"
+    ],
+    "robotics": [
+      "p2kbSpin2Robotics"
+    ],
+    "rol": [
+      "p2kbPasm2Rol"
+    ],
+    "rolbyte": [
+      "p2kbPasm2Rolbyte"
+    ],
+    "rolnib": [
+      "p2kbPasm2Rolnib"
+    ],
+    "rolword": [
+      "p2kbPasm2Rolword"
+    ],
+    "ror": [
+      "p2kbPasm2Ror"
+    ],
+    "rotxy": [
+      "p2kbSpin2Rotxy"
+    ],
+    "rqpin": [
+      "p2kbPasm2Rqpin",
+      "p2kbSpin2Rqpin"
+    ],
+    "sal": [
+      "p2kbPasm2Sal"
+    ],
+    "sar": [
+      "p2kbPasm2Sar"
+    ],
+    "sca": [
+      "p2kbPasm2Sca"
+    ],
+    "scas": [
+      "p2kbPasm2Scas"
+    ],
+    "send": [
+      "p2kbSpin2Send"
+    ],
+    "sensor_fusion": [
+      "p2kbSpin2SensorFusion"
+    ],
+    "sensor_reader": [
+      "p2kbSpin2SensorReader"
+    ],
+    "setbyte": [
+      "p2kbPasm2Setbyte"
+    ],
+    "setcfrq": [
+      "p2kbPasm2Setcfrq"
+    ],
+    "setci": [
+      "p2kbPasm2Setci"
+    ],
+    "setcmod": [
+      "p2kbPasm2Setcmod"
+    ],
+    "setcq": [
+      "p2kbPasm2Setcq"
+    ],
+    "setcy": [
+      "p2kbPasm2Setcy"
+    ],
+    "setd": [
+      "p2kbPasm2Setd"
+    ],
+    "setdacs": [
+      "p2kbPasm2Setdacs"
+    ],
+    "setint1": [
+      "p2kbPasm2Setint1"
+    ],
+    "setint2": [
+      "p2kbPasm2Setint2"
+    ],
+    "setint3": [
+      "p2kbPasm2Setint3"
+    ],
+    "setluts": [
+      "p2kbPasm2Setluts"
+    ],
+    "setnib": [
+      "p2kbPasm2Setnib"
+    ],
+    "setpat": [
+      "p2kbPasm2Setpat"
+    ],
+    "setpiv": [
+      "p2kbPasm2Setpiv"
+    ],
+    "setpix": [
+      "p2kbPasm2Setpix"
+    ],
+    "setq": [
+      "p2kbPasm2Setq"
+    ],
+    "setq2": [
+      "p2kbPasm2Setq2"
+    ],
+    "setr": [
+      "p2kbPasm2Setr"
+    ],
+    "setregs": [
+      "p2kbSpin2Setregs"
+    ],
+    "sets": [
+      "p2kbPasm2Sets"
+    ],
+    "setscp": [
+      "p2kbPasm2Setscp"
+    ],
+    "setse1": [
+      "p2kbPasm2Setse1"
+    ],
+    "setse2": [
+      "p2kbPasm2Setse2"
+    ],
+    "setse3": [
+      "p2kbPasm2Setse3"
+    ],
+    "setse4": [
+      "p2kbPasm2Setse4"
+    ],
+    "setword": [
+      "p2kbPasm2Setword"
+    ],
+    "setxfrq": [
+      "p2kbPasm2Setxfrq"
+    ],
+    "seussf": [
+      "p2kbPasm2Seussf"
+    ],
+    "seussr": [
+      "p2kbPasm2Seussr"
+    ],
+    "several_objects": [
+      "p2kbSpin2SeveralObjects"
+    ],
+    "shared_memory": [
+      "p2kbSpin2Spin2SharedMemory"
+    ],
+    "shl": [
+      "p2kbPasm2Shl"
+    ],
+    "shr": [
+      "p2kbPasm2Shr"
+    ],
+    "signx": [
+      "p2kbPasm2Signx"
+    ],
+    "single_communication": [
+      "p2kbSpin2SingleCommunication"
+    ],
+    "single_object": [
+      "p2kbSpin2SingleObject"
+    ],
+    "sizeof": [
+      "p2kbSpin2Sizeof"
+    ],
+    "skip": [
+      "p2kbPasm2Skip"
+    ],
+    "skipf": [
+      "p2kbPasm2Skipf"
+    ],
+    "smart_pin_usage": [
+      "p2kbArchSmartPinUsageAnalysis"
+    ],
+    "splitb": [
+      "p2kbPasm2Splitb"
+    ],
+    "splitw": [
+      "p2kbPasm2Splitw"
+    ],
+    "sqrt": [
+      "p2kbSpin2Sqrt"
+    ],
+    "stalli": [
+      "p2kbPasm2Stalli"
+    ],
+    "state_machine": [
+      "p2kbArchStateMachineAnalysis",
+      "p2kbSpin2Spin2StateMachine"
+    ],
+    "strcomp": [
+      "p2kbSpin2Strcomp"
+    ],
+    "strcopy": [
+      "p2kbSpin2Strcopy"
+    ],
+    "string": [
+      "p2kbSpin2String"
+    ],
+    "strsize": [
+      "p2kbSpin2Strsize"
+    ],
+    "sub": [
+      "p2kbPasm2Sub"
+    ],
+    "subr": [
+      "p2kbPasm2Subr"
+    ],
+    "subs": [
+      "p2kbPasm2Subs"
+    ],
+    "subsx": [
+      "p2kbPasm2Subsx"
+    ],
+    "subx": [
+      "p2kbPasm2Subx"
+    ],
+    "sumc": [
+      "p2kbPasm2Sumc"
+    ],
+    "sumnc": [
+      "p2kbPasm2Sumnc"
+    ],
+    "sumnz": [
+      "p2kbPasm2Sumnz"
+    ],
+    "sumz": [
+      "p2kbPasm2Sumz"
+    ],
+    "taskchk": [
+      "p2kbSpin2Taskchk"
+    ],
+    "taskhalt": [
+      "p2kbSpin2Taskhalt"
+    ],
+    "taskid": [
+      "p2kbSpin2Taskid"
+    ],
+    "tasknext": [
+      "p2kbSpin2Tasknext"
+    ],
+    "taskresume": [
+      "p2kbSpin2Taskresume"
+    ],
+    "taskspin": [
+      "p2kbSpin2Taskspin"
+    ],
+    "taskstop": [
+      "p2kbSpin2Taskstop"
+    ],
+    "taskwait": [
+      "p2kbSpin2Taskwait"
+    ],
+    "test": [
+      "p2kbPasm2Test"
+    ],
+    "test_harness": [
+      "p2kbSpin2TestHarness"
+    ],
+    "testb": [
+      "p2kbPasm2Testb"
+    ],
+    "testbn": [
+      "p2kbPasm2Testbn"
+    ],
+    "testn": [
+      "p2kbPasm2Testn"
+    ],
+    "testp": [
+      "p2kbPasm2Testp"
+    ],
+    "testpn": [
+      "p2kbPasm2Testpn"
+    ],
+    "timing_control": [
+      "p2kbArchTimingControlAnalysis",
+      "p2kbSpin2Spin2TimingControl"
+    ],
+    "tjf": [
+      "p2kbPasm2Tjf"
+    ],
+    "tjnf": [
+      "p2kbPasm2Tjnf"
+    ],
+    "tjns": [
+      "p2kbPasm2Tjns"
+    ],
+    "tjnz": [
+      "p2kbPasm2Tjnz"
+    ],
+    "tjs": [
+      "p2kbPasm2Tjs"
+    ],
+    "tjv": [
+      "p2kbPasm2Tjv"
+    ],
+    "tjz": [
+      "p2kbPasm2Tjz"
+    ],
+    "trgint1": [
+      "p2kbPasm2Trgint1"
+    ],
+    "trgint2": [
+      "p2kbPasm2Trgint2"
+    ],
+    "trgint3": [
+      "p2kbPasm2Trgint3"
+    ],
+    "utility_library": [
+      "p2kbSpin2UtilityLibrary"
+    ],
+    "waitatn": [
+      "p2kbPasm2Waitatn",
+      "p2kbSpin2Waitatn"
+    ],
+    "waitct": [
+      "p2kbSpin2Waitct"
+    ],
+    "waitct1": [
+      "p2kbPasm2Waitct1"
+    ],
+    "waitct2": [
+      "p2kbPasm2Waitct2"
+    ],
+    "waitct3": [
+      "p2kbPasm2Waitct3"
+    ],
+    "waitfbw": [
+      "p2kbPasm2Waitfbw"
+    ],
+    "waitint": [
+      "p2kbPasm2Waitint"
+    ],
+    "waitms": [
+      "p2kbSpin2Waitms"
+    ],
+    "waitpat": [
+      "p2kbPasm2Waitpat"
+    ],
+    "waitse1": [
+      "p2kbPasm2Waitse1"
+    ],
+    "waitse2": [
+      "p2kbPasm2Waitse2"
+    ],
+    "waitse3": [
+      "p2kbPasm2Waitse3"
+    ],
+    "waitse4": [
+      "p2kbPasm2Waitse4"
+    ],
+    "waitus": [
+      "p2kbSpin2Waitus"
+    ],
+    "waitx": [
+      "p2kbPasm2Waitx"
+    ],
+    "waitxfi": [
+      "p2kbPasm2Waitxfi"
+    ],
+    "waitxmt": [
+      "p2kbPasm2Waitxmt"
+    ],
+    "waitxrl": [
+      "p2kbPasm2Waitxrl"
+    ],
+    "waitxro": [
+      "p2kbPasm2Waitxro"
+    ],
+    "wfbyte": [
+      "p2kbPasm2Wfbyte"
+    ],
+    "wflong": [
+      "p2kbPasm2Wflong"
+    ],
+    "wfword": [
+      "p2kbPasm2Wfword"
+    ],
+    "wmlong": [
+      "p2kbPasm2Wmlong"
+    ],
+    "word": [
+      "p2kbSpin2Word"
+    ],
+    "wordcomp": [
+      "p2kbSpin2Wordcomp"
+    ],
+    "wordfill": [
+      "p2kbSpin2Wordfill"
+    ],
+    "wordmove": [
+      "p2kbSpin2Wordmove"
+    ],
+    "wordswap": [
+      "p2kbSpin2Wordswap"
+    ],
+    "wrbyte": [
+      "p2kbPasm2Wrbyte"
+    ],
+    "wrc": [
+      "p2kbPasm2Wrc"
+    ],
+    "wrfast": [
+      "p2kbPasm2Wrfast"
+    ],
+    "wrlong": [
+      "p2kbPasm2Wrlong"
+    ],
+    "wrlut": [
+      "p2kbPasm2Wrlut"
+    ],
+    "wrnc": [
+      "p2kbPasm2Wrnc"
+    ],
+    "wrnz": [
+      "p2kbPasm2Wrnz"
+    ],
+    "wrpin": [
+      "p2kbPasm2Wrpin",
+      "p2kbSpin2Wrpin"
+    ],
+    "wrword": [
+      "p2kbPasm2Wrword"
+    ],
+    "wrz": [
+      "p2kbPasm2Wrz"
+    ],
+    "wxpin": [
+      "p2kbPasm2Wxpin",
+      "p2kbSpin2Wxpin"
+    ],
+    "wypin": [
+      "p2kbPasm2Wypin",
+      "p2kbSpin2Wypin"
+    ],
+    "xcont": [
+      "p2kbPasm2Xcont"
+    ],
+    "xinit": [
+      "p2kbPasm2Xinit"
+    ],
+    "xor": [
+      "p2kbPasm2Xor"
+    ],
+    "xoro32": [
+      "p2kbPasm2Xoro32"
+    ],
+    "xstop": [
+      "p2kbPasm2Xstop"
+    ],
+    "xypol": [
+      "p2kbSpin2Xypol"
+    ],
+    "xzero": [
+      "p2kbPasm2Xzero"
+    ],
+    "zerox": [
+      "p2kbPasm2Zerox"
     ]
   },
   "files": {
@@ -1346,7 +4203,7 @@
     },
     "p2kbHwAddonDigitalIoBoardAddonDigitalIoBoard": {
       "path": "deliverables/ai/P2/hardware/addon-digital-io-board.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
@@ -1450,19 +4307,19 @@
     },
     "p2kbLanguageCaseSensitivity": {
       "path": "deliverables/ai/P2/language/fundamentals/case-sensitivity.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbLanguageIdentifierRules": {
       "path": "deliverables/ai/P2/language/fundamentals/identifier-rules.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbLanguagePasmLabels": {
       "path": "deliverables/ai/P2/language/fundamentals/pasm-labels.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbLanguageVariableScopingBestPractices": {
       "path": "deliverables/ai/P2/language/fundamentals/variable-scoping-best-practices.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbPasm2Abs": {
       "path": "deliverables/ai/P2/language/pasm2/abs.yaml",
@@ -1570,7 +4427,7 @@
     },
     "p2kbPasm2Asmclk": {
       "path": "deliverables/ai/P2/language/pasm2/asmclk.yaml",
-      "mtime": 1764826476
+      "mtime": 1768613644
     },
     "p2kbPasm2Augd": {
       "path": "deliverables/ai/P2/language/pasm2/augd.yaml",
@@ -1726,11 +4583,11 @@
     },
     "p2kbPasm2CogHubExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbPasm2ConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbPasm2EventInterruptConfig": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/event_interrupt_config.yaml",
@@ -3194,7 +6051,7 @@
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1767481173
+      "mtime": 1768613644
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
@@ -3202,15 +6059,15 @@
     },
     "p2kbSpin2Abort": {
       "path": "deliverables/ai/P2/language/spin2/constructs/abort.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Blocks": {
       "path": "deliverables/ai/P2/language/spin2/constructs/blocks.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Case": {
       "path": "deliverables/ai/P2/language/spin2/constructs/case.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2EscapeStrings": {
       "path": "deliverables/ai/P2/language/spin2/constructs/escape-strings.yaml",
@@ -3218,23 +6075,23 @@
     },
     "p2kbSpin2IfElseifElse": {
       "path": "deliverables/ai/P2/language/spin2/constructs/if_elseif_else.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2MethodDefinition": {
       "path": "deliverables/ai/P2/language/spin2/constructs/method_definition.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Next": {
       "path": "deliverables/ai/P2/language/spin2/constructs/next.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Quit": {
       "path": "deliverables/ai/P2/language/spin2/constructs/quit.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2RegisterConstants": {
       "path": "deliverables/ai/P2/language/spin2/constructs/register-constants.yaml",
@@ -3242,7 +6099,7 @@
     },
     "p2kbSpin2Repeat": {
       "path": "deliverables/ai/P2/language/spin2/constructs/repeat.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2JohnnyMacDocumentationStyle": {
       "path": "deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml",
@@ -3546,11 +6403,11 @@
     },
     "p2kbSpin2Bytefill": {
       "path": "deliverables/ai/P2/language/spin2/methods/bytefill.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Bytemove": {
       "path": "deliverables/ai/P2/language/spin2/methods/bytemove.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Byteswap": {
       "path": "deliverables/ai/P2/language/spin2/methods/byteswap.yaml",
@@ -3566,27 +6423,27 @@
     },
     "p2kbSpin2Cogatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogatn.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Cogchk": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogchk.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Cogid": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogid.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Coginit": {
       "path": "deliverables/ai/P2/language/spin2/methods/coginit.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Cogspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogspin.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Cogstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogstop.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Endianl": {
       "path": "deliverables/ai/P2/language/spin2/methods/endianl.yaml",
@@ -3614,7 +6471,7 @@
     },
     "p2kbSpin2Getct": {
       "path": "deliverables/ai/P2/language/spin2/methods/getct.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Getms": {
       "path": "deliverables/ai/P2/language/spin2/methods/getms.yaml",
@@ -3678,11 +6535,11 @@
     },
     "p2kbSpin2Longfill": {
       "path": "deliverables/ai/P2/language/spin2/methods/longfill.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Longmove": {
       "path": "deliverables/ai/P2/language/spin2/methods/longmove.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Longswap": {
       "path": "deliverables/ai/P2/language/spin2/methods/longswap.yaml",
@@ -3726,19 +6583,19 @@
     },
     "p2kbSpin2Pinfloat": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinfloat.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pinhigh": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinhigh.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pinlow": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinlow.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pinread": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinread.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pinstart": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinstart.yaml",
@@ -3746,11 +6603,11 @@
     },
     "p2kbSpin2Pintoggle": {
       "path": "deliverables/ai/P2/language/spin2/methods/pintoggle.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pinwrite": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinwrite.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Pollatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/pollatn.yaml",
@@ -3878,11 +6735,11 @@
     },
     "p2kbSpin2Waitms": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitms.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Waitus": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitus.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Word": {
       "path": "deliverables/ai/P2/language/spin2/methods/word.yaml",
@@ -3906,15 +6763,15 @@
     },
     "p2kbSpin2Wrpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wrpin.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Wxpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wxpin.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Wypin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wypin.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Xypol": {
       "path": "deliverables/ai/P2/language/spin2/methods/xypol.yaml",
@@ -4322,7 +7179,7 @@
     },
     "p2kbSpin2UtilityLibrary": {
       "path": "deliverables/ai/P2/language/spin2/patterns/applications/utility_library.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Spin2BufferManagement": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_buffer_management.yaml",
@@ -4390,7 +7247,7 @@
     },
     "p2kbSpin2FewObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/few_objects.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2FrameworkPattern": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/framework_pattern.yaml",
@@ -4402,15 +7259,15 @@
     },
     "p2kbSpin2NoObjectsMinimal": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/no_objects_minimal.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2SeveralObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/several_objects.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2SingleObject": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/single_object.yaml",
-      "mtime": 1764449566
+      "mtime": 1768613644
     },
     "p2kbSpin2Define": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/define.yaml",

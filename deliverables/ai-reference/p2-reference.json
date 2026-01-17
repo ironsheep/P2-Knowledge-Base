@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-01-14",
-    "last_updated": "2026-01-14T00:23:33.949970",
+    "release_date": "2026-01-17",
+    "last_updated": "2026-01-17T01:34:56.965790",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-14T00:23:33.949970",
+    "extraction_date": "2026-01-17T01:34:56.965790",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18249,7 +18249,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-14T00:23:33.949970",
+    "extraction_date": "2026-01-17T01:34:56.965790",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20027,10 +20027,10 @@
               "invalid": "LONGFILL(@memory, -1, count)\n' Mark as uninitialized\n"
             },
             "related_methods": [
-              "BYTEFILL - Fill with byte value",
-              "WORDFILL - Fill with word value",
-              "LONGMOVE - Copy longs",
-              "LONGCOMP - Compare longs"
+              "BYTEFILL",
+              "WORDFILL",
+              "LONGMOVE",
+              "LONGCOMP"
             ],
             "performance_notes": [
               "Much faster than loops for large counts",
@@ -20231,12 +20231,12 @@
               "Bit-rate timing generation"
             ],
             "related_methods": [
-              "WAITCT - Wait for specific counter value",
-              "POLLCT - Check if counter value passed",
-              "WAITMS - Simple millisecond delay",
-              "WAITUS - Simple microsecond delay",
-              "GETMS - Get milliseconds since boot",
-              "GETSEC - Get seconds since boot"
+              "WAITCT",
+              "POLLCT",
+              "WAITMS",
+              "WAITUS",
+              "GETMS",
+              "GETSEC"
             ],
             "notes": [
               "Counter runs continuously from boot",
@@ -20435,10 +20435,10 @@
               "Parallel data processing"
             ],
             "related_methods": [
-              "COGSPIN - Start Spin2 code in a cog",
-              "COGSTOP - Stop a running cog",
-              "COGID - Get current cog ID",
-              "COGCHK - Check if cog is running"
+              "COGSPIN",
+              "COGSTOP",
+              "COGID",
+              "COGCHK"
             ],
             "memory_layout": "Cog RAM after COGINIT:\n$000-$1F7: Your PASM code/data (504 longs)\n$1F8-$1FF: Special registers (PTRA, PTRB, etc.)\n",
             "notes": [
@@ -20624,13 +20624,13 @@
               }
             },
             "related_methods": [
-              "COGINIT - Start PASM code in a cog",
-              "COGSTOP - Stop a running cog",
-              "COGID - Get current cog ID",
-              "COGCHK - Check if cog is running",
-              "LOCKNEW - Allocate lock for synchronization",
-              "LOCKTRY - Try to acquire lock",
-              "LOCKREL - Release lock"
+              "COGINIT",
+              "COGSTOP",
+              "COGID",
+              "COGCHK",
+              "LOCKNEW",
+              "LOCKTRY",
+              "LOCKREL"
             ],
             "synchronization": {
               "shared_variables": "Use locks for thread-safe access",
@@ -20780,10 +20780,10 @@
               "Activate chip select or enable lines"
             ],
             "related_methods": [
-              "PINLOW - Drive pin(s) low",
-              "PINTOGGLE - Toggle pin state",
-              "PINFLOAT - Release pin to high-impedance",
-              "PINWRITE - Write specific value to pins"
+              "PINLOW",
+              "PINTOGGLE",
+              "PINFLOAT",
+              "PINWRITE"
             ],
             "notes": [
               "Pin becomes an output if it wasn't already",
@@ -20906,10 +20906,10 @@
               "pasm": "POLLATN WC  ' Check and clear\nWAITATN     ' Wait for signal\n"
             },
             "related_methods": [
-              "POLLATN - Check for attention signal",
-              "WAITATN - Wait for attention signal",
-              "COGID - Get current cog ID",
-              "COGCHK - Check if cog is running"
+              "POLLATN",
+              "WAITATN",
+              "COGID",
+              "COGCHK"
             ],
             "synchronization_patterns": [
               {
@@ -21014,10 +21014,10 @@
               "Power saving (stopped cogs use less power)"
             ],
             "related_methods": [
-              "COGINIT - Start a cog",
-              "COGSPIN - Start Spin2 in a cog",
-              "COGID - Get current cog number",
-              "COGCHK - Check if cog is running"
+              "COGINIT",
+              "COGSPIN",
+              "COGID",
+              "COGCHK"
             ],
             "notes": [
               "Safe to call on already-stopped cog",
@@ -21114,11 +21114,11 @@
               "safe_left_shift": "' Move data 10 bytes to the left\nBYTEMOVE(@buffer[0], @buffer[10], 90)\n' Copies forward, no overlap issue\n"
             },
             "related_methods": [
-              "WORDMOVE - Copy words",
-              "LONGMOVE - Copy longs",
-              "BYTEFILL - Fill with byte value",
-              "BYTECOMP - Compare bytes",
-              "BYTESWAP - Swap byte regions"
+              "WORDMOVE",
+              "LONGMOVE",
+              "BYTEFILL",
+              "BYTECOMP",
+              "BYTESWAP"
             ],
             "performance_notes": [
               "Optimized for common cases",
@@ -21197,10 +21197,10 @@
               "Communication protocol delays"
             ],
             "related_methods": [
-              "WAITUS - Delay for microseconds",
-              "WAITCT - Wait for specific system counter value",
-              "GETCT - Get current system counter",
-              "POLLCT - Check if counter value passed"
+              "WAITUS",
+              "WAITCT",
+              "GETCT",
+              "POLLCT"
             ],
             "notes": [
               "Blocks execution - cog cannot do other work during delay",
@@ -21269,10 +21269,10 @@
               "Resource allocation by cog"
             ],
             "related_methods": [
-              "COGSTOP - Stop a cog",
-              "COGCHK - Check if cog is running",
-              "COGINIT - Start PASM in a cog",
-              "COGSPIN - Start Spin2 in a cog"
+              "COGSTOP",
+              "COGCHK",
+              "COGINIT",
+              "COGSPIN"
             ],
             "typical_patterns": [
               {
@@ -21358,10 +21358,10 @@
               "Switch from output to input mode"
             ],
             "related_methods": [
-              "PINHIGH - Drive pin(s) high",
-              "PINLOW - Drive pin(s) low",
-              "PINTOGGLE - Toggle pin state",
-              "PINREAD - Read floating pin state"
+              "PINHIGH",
+              "PINLOW",
+              "PINTOGGLE",
+              "PINREAD"
             ],
             "notes": [
               "Pin becomes an input and can be read with PINREAD",
@@ -21960,10 +21960,10 @@
               "Debug output without state management"
             ],
             "related_methods": [
-              "PINHIGH - Drive pin(s) high",
-              "PINLOW - Drive pin(s) low",
-              "PINFLOAT - Release pin to high-impedance",
-              "PINWRITE - Write specific value to pins"
+              "PINHIGH",
+              "PINLOW",
+              "PINFLOAT",
+              "PINWRITE"
             ],
             "notes": [
               "Pin becomes an output if it wasn't already",
@@ -22447,10 +22447,10 @@
               "Fine-grained delays"
             ],
             "related_methods": [
-              "WAITMS - Delay for milliseconds",
-              "WAITCT - Wait for specific system counter value",
-              "GETCT - Get current system counter",
-              "POLLCT - Check if counter value passed"
+              "WAITMS",
+              "WAITCT",
+              "GETCT",
+              "POLLCT"
             ],
             "notes": [
               "Blocks execution - cog cannot do other work during delay",
@@ -23735,11 +23735,11 @@
               "Protocol timing configuration"
             ],
             "related_methods": [
-              "WRPIN - Set smart pin mode",
-              "WYPIN - Set Y parameter",
-              "RDPIN - Read and acknowledge",
-              "RQPIN - Read without acknowledge",
-              "PINSTART - Complete setup"
+              "WRPIN",
+              "WYPIN",
+              "RDPIN",
+              "RQPIN",
+              "PINSTART"
             ],
             "timing_considerations": [
               "X value takes effect on next period",
@@ -23893,10 +23893,10 @@
               "Binary counter displays"
             ],
             "related_methods": [
-              "PINREAD - Read data from pins",
-              "PINHIGH - Drive all specified pins high",
-              "PINLOW - Drive all specified pins low",
-              "PINTOGGLE - Toggle pin states"
+              "PINREAD",
+              "PINHIGH",
+              "PINLOW",
+              "PINTOGGLE"
             ],
             "notes": [
               "All specified pins become outputs",
@@ -24150,11 +24150,11 @@
               "next": "Write new value to Y for next operation"
             },
             "related_methods": [
-              "WRPIN - Set smart pin mode",
-              "WXPIN - Set X parameter",
-              "RDPIN - Read and acknowledge",
-              "RQPIN - Read without acknowledge",
-              "AKPIN - Acknowledge smart pin"
+              "WRPIN",
+              "WXPIN",
+              "RDPIN",
+              "RQPIN",
+              "AKPIN"
             ],
             "notes": [
               "Y register is mode-dependent",
@@ -24465,10 +24465,10 @@
               "Poll for signal changes"
             ],
             "related_methods": [
-              "PINWRITE - Write data to pins",
-              "PINFLOAT - Set pins to input mode",
-              "AKPIN - Acknowledge smart pin",
-              "RDPIN - Read smart pin result"
+              "PINWRITE",
+              "PINFLOAT",
+              "AKPIN",
+              "RDPIN"
             ],
             "notes": [
               "Works regardless of pin direction (input or output)",
@@ -25037,10 +25037,10 @@
               "in_expressions": "running_count += COGCHK(n) & 1\nstatus := COGCHK(n) ? \"Running\" : \"Stopped\"\n"
             },
             "related_methods": [
-              "COGID - Get current cog ID",
-              "COGSTOP - Stop a cog",
-              "COGINIT - Start PASM in a cog",
-              "COGSPIN - Start Spin2 in a cog"
+              "COGID",
+              "COGSTOP",
+              "COGINIT",
+              "COGSPIN"
             ],
             "notes": [
               "Non-invasive - doesn't affect checked cog",
@@ -25198,11 +25198,11 @@
               "recommendation": "Always align long data on 4-byte boundaries"
             },
             "related_methods": [
-              "BYTEMOVE - Copy bytes",
-              "WORDMOVE - Copy words",
-              "LONGFILL - Fill with long value",
-              "LONGCOMP - Compare longs",
-              "LONGSWAP - Swap long regions"
+              "BYTEMOVE",
+              "WORDMOVE",
+              "LONGFILL",
+              "LONGCOMP",
+              "LONGSWAP"
             ],
             "notes": [
               "Count is in longs, not bytes",
@@ -25480,13 +25480,13 @@
               "Protocol generation"
             ],
             "related_methods": [
-              "WXPIN - Set X parameter",
-              "WYPIN - Set Y parameter",
-              "RDPIN - Read and acknowledge pin",
-              "RQPIN - Read without acknowledge",
-              "AKPIN - Acknowledge smart pin",
-              "PINSTART - Complete pin setup",
-              "PINCLEAR - Clear smart pin mode"
+              "WXPIN",
+              "WYPIN",
+              "RDPIN",
+              "RQPIN",
+              "AKPIN",
+              "PINSTART",
+              "PINCLEAR"
             ],
             "notes": [
               "Pin direction must be set after WRPIN",
@@ -25973,10 +25973,10 @@
               "$55": "Alternating bits (01010101)"
             },
             "related_methods": [
-              "WORDFILL - Fill with word value",
-              "LONGFILL - Fill with long value",
-              "BYTEMOVE - Copy bytes",
-              "BYTECOMP - Compare bytes"
+              "WORDFILL",
+              "LONGFILL",
+              "BYTEMOVE",
+              "BYTECOMP"
             ],
             "performance_comparison": {
               "manual_loop": "' Slower for large counts\nREPEAT i FROM 0 TO count-1\n  BYTE[dest][i] := value\n  \n",
@@ -26115,10 +26115,10 @@
               "Create logic 0 for communication"
             ],
             "related_methods": [
-              "PINHIGH - Drive pin(s) high",
-              "PINTOGGLE - Toggle pin state",
-              "PINFLOAT - Release pin to high-impedance",
-              "PINWRITE - Write specific value to pins"
+              "PINHIGH",
+              "PINTOGGLE",
+              "PINFLOAT",
+              "PINWRITE"
             ],
             "notes": [
               "Pin becomes an output if it wasn't already",
@@ -26926,6 +26926,7 @@
             ],
             "related": [
               "language/spin2/assembly-directives/org.yaml",
+              "language/spin2/constructs/inline_pasm.yaml",
               "language/spin2/assembly-directives/ditto.yaml",
               "language/spin2/keywords/DAT.yaml"
             ],
