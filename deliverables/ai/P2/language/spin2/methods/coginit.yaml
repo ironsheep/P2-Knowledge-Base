@@ -103,10 +103,10 @@ common_uses:
   - "Parallel data processing"
 
 related_methods:
-  - "COGSPIN - Start Spin2 code in a cog"
-  - "COGSTOP - Stop a running cog"
-  - "COGID - Get current cog ID"
-  - "COGCHK - Check if cog is running"
+  - "COGSPIN"
+  - "COGSTOP"
+  - "COGID"
+  - "COGCHK"
 
 memory_layout: |
   Cog RAM after COGINIT:

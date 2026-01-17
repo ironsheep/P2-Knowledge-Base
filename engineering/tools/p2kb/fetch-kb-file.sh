@@ -1,7 +1,7 @@
 #!/bin/bash
-# P2 Knowledge Base Fetch Script v3.2
-# Key-based access to YAML content with navigation support
-# Usage: ./fetch-kb-file.sh <key> | --help | --cached | --browse <category> | --search <term>
+# P2 Knowledge Base Fetch Script v3.4
+# Key-based access to YAML content with navigation and alias support
+# Usage: ./fetch-kb-file.sh <key|alias> | --help | --cached | --browse <category> | --search <term>
 
 set -e
 
@@ -26,15 +26,24 @@ VERBOSE=0
 
 show_help() {
     cat <<'EOF'
-P2 Knowledge Base Fetch Script v3.2
+P2 Knowledge Base Fetch Script v3.4
 
 USAGE:
-    fetch-kb-file.sh <key>              Fetch content by key
+    fetch-kb-file.sh <key|alias>        Fetch content by key or alias (e.g., MOV, WAITMS)
     fetch-kb-file.sh --cached           List downloaded keys
     fetch-kb-file.sh --browse <cat>     Browse keys in category
     fetch-kb-file.sh --search <term>    Search for keys (case-insensitive)
     fetch-kb-file.sh --categories       List all available categories
     fetch-kb-file.sh --help             Show this help
+
+ALIASES (v3.4 feature):
+    You can use instruction mnemonics, method names, or pattern IDs directly:
+      MOV       -> p2kbPasm2Mov        (PASM2 instruction)
+      WAITMS    -> p2kbSpin2Waitms     (Spin2 method)
+      COGINIT   -> p2kbPasm2Coginit AND p2kbSpin2Coginit (both!)
+
+    When an alias maps to MULTIPLE entries (e.g., ABS exists in both PASM2
+    and Spin2), ALL matches are returned. This preserves full information.
 
 CATEGORIES (for --browse):
     PASM2 Instructions:
@@ -60,7 +69,9 @@ CATEGORIES (for --browse):
       guides_getting_started
 
 EXAMPLES:
-    fetch-kb-file.sh p2kbPasm2Mov           # Get MOV instruction
+    fetch-kb-file.sh MOV                    # Get MOV (alias -> p2kbPasm2Mov)
+    fetch-kb-file.sh ABS                    # Get BOTH PASM2 and Spin2 ABS docs
+    fetch-kb-file.sh p2kbPasm2Mov           # Get MOV by canonical key
     fetch-kb-file.sh --browse pasm2_branch  # List all branch instructions
     fetch-kb-file.sh --search uart          # Find UART-related keys
     fetch-kb-file.sh --cached               # Show what's already downloaded
@@ -129,6 +140,27 @@ lookup_key() {
         jq -r ".files[\"$key\"].path // empty" "$INDEX_FILE"
     else
         grep -o "\"$key\":{\"path\":\"[^\"]*\"" "$INDEX_FILE" 2>/dev/null | sed 's/.*"path":"\([^"]*\)".*/\1/'
+    fi
+}
+
+# Look up alias in index - returns array of canonical keys (v3.4+)
+# Aliases are now arrays: "MOV": ["p2kbPasm2Mov"] or "ABS": ["p2kbPasm2Abs", "p2kbSpin2Abs"]
+lookup_alias() {
+    local alias="$1"
+    if command -v jq &>/dev/null; then
+        # Try exact match first, then uppercase, then lowercase
+        local keys=""
+        keys=$(jq -r ".aliases[\"$alias\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
+        if [[ -z "$keys" ]]; then
+            keys=$(jq -r ".aliases[\"${alias^^}\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
+        fi
+        if [[ -z "$keys" ]]; then
+            keys=$(jq -r ".aliases[\"${alias,,}\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
+        fi
+        echo "$keys"
+    else
+        # Fallback without jq - less reliable for arrays
+        grep -o "\"${alias}\":\[\"[^]]*\]" "$INDEX_FILE" 2>/dev/null | sed 's/.*\[\(.*\)\].*/\1/' | tr -d '"' | tr ',' '\n'
     fi
 }
 
@@ -236,7 +268,7 @@ cmd_categories() {
 }
 
 # =============================================================================
-# Command: --search <term> - Search for keys
+# Command: --search <term> - Search for keys and aliases
 # =============================================================================
 cmd_search() {
     local term="$1"
@@ -250,50 +282,54 @@ cmd_search() {
     refresh_index
 
     if command -v jq &>/dev/null; then
+        # Search both keys and aliases
         local keys=$(jq -r ".files | keys[] | select(test(\"$term\"; \"i\"))" "$INDEX_FILE" 2>/dev/null)
-        if [[ -z "$keys" ]]; then
-            echo "No keys found matching '$term'" >&2
-            exit 0
+        local aliases=$(jq -r ".aliases | to_entries[] | select(.key | test(\"$term\"; \"i\")) | \"\(.key) -> \(.value | join(\", \"))\"" "$INDEX_FILE" 2>/dev/null)
+
+        local found_something=0
+
+        if [[ -n "$keys" ]]; then
+            echo "=== Matching Keys ==="
+            echo "$keys"
+            local key_count=$(echo "$keys" | wc -l | tr -d ' ')
+            echo "" >&2
+            echo "Found: $key_count keys matching '$term'" >&2
+            found_something=1
         fi
-        echo "$keys"
-        local count=$(echo "$keys" | wc -l | tr -d ' ')
-        echo "" >&2
-        echo "Found: $count keys matching '$term'" >&2
+
+        if [[ -n "$aliases" ]]; then
+            if [[ $found_something -eq 1 ]]; then
+                echo ""
+            fi
+            echo "=== Matching Aliases ==="
+            echo "$aliases"
+            local alias_count=$(echo "$aliases" | wc -l | tr -d ' ')
+            echo "" >&2
+            echo "Found: $alias_count aliases matching '$term'" >&2
+            found_something=1
+        fi
+
+        if [[ $found_something -eq 0 ]]; then
+            echo "No keys or aliases found matching '$term'" >&2
+        fi
     else
-        # Fallback without jq
+        # Fallback without jq - only searches keys
         grep -o "\"p2kb[^\"]*\"" "$INDEX_FILE" | tr -d '"' | grep -i "$term"
     fi
     exit 0
 }
 
 # =============================================================================
-# Command: Fetch key
+# Command: Fetch key (with alias resolution v3.4)
 # =============================================================================
-cmd_fetch() {
+
+# Helper: fetch a single canonical key and output its content
+fetch_single_key() {
     local key="$1"
-
-    ensure_dirs
-    refresh_index
-
     local path=$(lookup_key "$key")
 
     if [[ -z "$path" ]]; then
-        error "Key '$key' not found in index"
-        echo "" >&2
-
-        # Find and show similar keys
-        local similar=$(find_similar_keys "$key")
-        if [[ -n "$similar" ]]; then
-            echo "Similar keys:" >&2
-            echo "$similar" | sed 's/^/  /' >&2
-        fi
-
-        echo "" >&2
-        echo "Tips:" >&2
-        echo "  - Use --search <term> to find keys" >&2
-        echo "  - Use --browse <category> to explore by category" >&2
-        echo "  - Use --categories to see all categories" >&2
-        exit 1
+        return 1
     fi
 
     log "Key: $key -> $path"
@@ -313,6 +349,74 @@ cmd_fetch() {
 
     # Output content
     cat "$cache_file"
+    return 0
+}
+
+cmd_fetch() {
+    local input="$1"
+
+    ensure_dirs
+    refresh_index
+
+    # 1. Try direct key lookup first
+    local path=$(lookup_key "$input")
+
+    if [[ -n "$path" ]]; then
+        # Direct key match - fetch it
+        fetch_single_key "$input"
+        return $?
+    fi
+
+    # 2. Try alias lookup (v3.4+)
+    local alias_keys=$(lookup_alias "$input")
+
+    if [[ -n "$alias_keys" ]]; then
+        local count=$(echo "$alias_keys" | grep -c '^' || echo 0)
+
+        if [[ $count -gt 1 ]]; then
+            # Multiple matches - output all with separators
+            echo "# ========================================" >&2
+            echo "# Alias '$input' resolved to $count entries:" >&2
+            echo "$alias_keys" | sed 's/^/#   /' >&2
+            echo "# ========================================" >&2
+            echo "" >&2
+        fi
+
+        local first=1
+        while IFS= read -r key; do
+            if [[ -n "$key" ]]; then
+                if [[ $first -eq 0 ]]; then
+                    # Separator between multiple results
+                    echo ""
+                    echo "# ========================================"
+                    echo "# Next entry: $key"
+                    echo "# ========================================"
+                fi
+                fetch_single_key "$key"
+                first=0
+            fi
+        done <<< "$alias_keys"
+        return 0
+    fi
+
+    # 3. Not found - show error with suggestions
+    error "Key or alias '$input' not found in index"
+    echo "" >&2
+
+    # Find and show similar keys
+    local similar=$(find_similar_keys "$input")
+    if [[ -n "$similar" ]]; then
+        echo "Similar keys:" >&2
+        echo "$similar" | sed 's/^/  /' >&2
+    fi
+
+    echo "" >&2
+    echo "Tips:" >&2
+    echo "  - Use --search <term> to find keys" >&2
+    echo "  - Use --browse <category> to explore by category" >&2
+    echo "  - Use --categories to see all categories" >&2
+    echo "  - Try common aliases: MOV, ADD, WAITMS, COGINIT" >&2
+    exit 1
 }
 
 # =============================================================================

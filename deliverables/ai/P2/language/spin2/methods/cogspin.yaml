@@ -197,13 +197,13 @@ production_patterns:
       - "Persistent across method calls"
 
 related_methods:
-  - "COGINIT - Start PASM code in a cog"
-  - "COGSTOP - Stop a running cog"
-  - "COGID - Get current cog ID"
-  - "COGCHK - Check if cog is running"
-  - "LOCKNEW - Allocate lock for synchronization"
-  - "LOCKTRY - Try to acquire lock"
-  - "LOCKREL - Release lock"
+  - "COGINIT"
+  - "COGSTOP"
+  - "COGID"
+  - "COGCHK"
+  - "LOCKNEW"
+  - "LOCKTRY"
+  - "LOCKREL"
 
 synchronization:
   shared_variables: "Use locks for thread-safe access"

@@ -165,9 +165,9 @@ compatibility:
 
 cross_references:
   related_hardware:
-    - "addon-control-board.yaml (64006A - LED-only version)"
-    - "addon-serial-host.yaml (64006B - Switch-only equivalent)"
-    - "p2-eval-board.yaml (main board compatibility)"
+    - "p2kbHwAddonControlBoardAddonControlBoard"  # 64006A - LED-only version
+    - "p2kbHwAddonSerialHostAddonSerialHost"  # 64006B - Switch-only equivalent
+    - "p2kbHwP2EvalBoardP2EvalBoard"  # main board compatibility
   documentation:
     - "P2 Smart Pins documentation (PWM and input modes)"
     - "P2 I/O electrical specifications"

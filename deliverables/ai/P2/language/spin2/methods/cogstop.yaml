@@ -83,10 +83,10 @@ common_uses:
   - "Power saving (stopped cogs use less power)"
 
 related_methods:
-  - "COGINIT - Start a cog"
-  - "COGSPIN - Start Spin2 in a cog"
-  - "COGID - Get current cog number"
-  - "COGCHK - Check if cog is running"
+  - "COGINIT"
+  - "COGSPIN"
+  - "COGID"
+  - "COGCHK"
 
 notes:
   - "Safe to call on already-stopped cog"

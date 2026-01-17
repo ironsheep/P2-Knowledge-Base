@@ -251,8 +251,8 @@ p2_specific_insights:
   object_limit: "512 unique objects maximum"
 
 related_constructs:
-  - "method_definition.yaml"
-  - "inline_pasm.yaml"
+  - "p2kbSpin2MethodDefinition"
+  - "p2kbSpin2InlinePasm"
   
 related_concepts:
   - "Memory management"

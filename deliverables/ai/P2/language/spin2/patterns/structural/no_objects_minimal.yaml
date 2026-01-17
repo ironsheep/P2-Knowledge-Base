@@ -21,5 +21,5 @@ resources:
   dependencies: 0
   cogs: 0
   
-combines_with:
-  - "Any pattern as utility"
+# Note: This pattern is self-contained and can be combined with any other pattern
+# No specific combines_with references needed

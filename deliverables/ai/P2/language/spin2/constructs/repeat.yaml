@@ -186,11 +186,11 @@ performance:
     - "Consider unrolling small fixed loops"
 
 related_constructs:
-  - "if_elseif_else.yaml"
-  - "case.yaml"
-  - "abort.yaml"
+  - "p2kbSpin2IfElseifElse"
+  - "p2kbSpin2Case"
+  - "p2kbSpin2Abort"
   
 related_methods:
-  - "language/spin2/methods/waitms.yaml"
-  - "language/spin2/methods/waitus.yaml"
-  - "language/spin2/methods/waitct.yaml"
+  - "WAITMS"
+  - "WAITUS"
+  - "WAITCT"

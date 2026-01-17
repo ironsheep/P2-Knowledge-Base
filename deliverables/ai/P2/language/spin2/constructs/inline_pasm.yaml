@@ -247,11 +247,13 @@ pitfalls:
     solution: "Use @ for hub addresses, # for immediates"
 
 related_constructs:
-  - "method_definition.yaml"
-  - "blocks.yaml"
+  - "p2kbSpin2MethodDefinition"
+  - "p2kbSpin2Blocks"
   
 related_pasm:
-  - "language/pasm2/*.yaml"
+  - "p2kbPasm2CogHubExecution"
+  - "p2kbPasm2ConditionalExecution"
+  - "p2kbPasm2SpecialRegisters"
   
 related_concepts:
   - "Hub execution model"

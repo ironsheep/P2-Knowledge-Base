@@ -90,10 +90,10 @@ return_value_usage:
     status := COGCHK(n) ? "Running" : "Stopped"
 
 related_methods:
-  - "COGID - Get current cog ID"
-  - "COGSTOP - Stop a cog"
-  - "COGINIT - Start PASM in a cog"
-  - "COGSPIN - Start Spin2 in a cog"
+  - "COGID"
+  - "COGSTOP"
+  - "COGINIT"
+  - "COGSPIN"
 
 notes:
   - "Non-invasive - doesn't affect checked cog"

@@ -208,8 +208,8 @@ pasm_equivalent:
     JMP #case_2
 
 related_constructs:
-  - "if_elseif_else.yaml"
-  - "repeat.yaml"
+  - "p2kbSpin2IfElseifElse"
+  - "p2kbSpin2Repeat"
   
 related_concepts:
   - "Jump table optimization"

@@ -65,10 +65,10 @@ common_uses:
   - "Debug output without state management"
 
 related_methods:
-  - "PINHIGH - Drive pin(s) high"
-  - "PINLOW - Drive pin(s) low"
-  - "PINFLOAT - Release pin to high-impedance"
-  - "PINWRITE - Write specific value to pins"
+  - "PINHIGH"
+  - "PINLOW"
+  - "PINFLOAT"
+  - "PINWRITE"
 
 notes:
   - "Pin becomes an output if it wasn't already"

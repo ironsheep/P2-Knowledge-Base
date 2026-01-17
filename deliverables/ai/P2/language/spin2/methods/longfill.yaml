@@ -115,10 +115,10 @@ memory_patterns:
     ' Mark as uninitialized
 
 related_methods:
-  - "BYTEFILL - Fill with byte value"
-  - "WORDFILL - Fill with word value"
-  - "LONGMOVE - Copy longs"
-  - "LONGCOMP - Compare longs"
+  - "BYTEFILL"
+  - "WORDFILL"
+  - "LONGMOVE"
+  - "LONGCOMP"
 
 performance_notes:
   - "Much faster than loops for large counts"

@@ -71,10 +71,10 @@ common_uses:
   - "Resource allocation by cog"
 
 related_methods:
-  - "COGSTOP - Stop a cog"
-  - "COGCHK - Check if cog is running"
-  - "COGINIT - Start PASM in a cog"
-  - "COGSPIN - Start Spin2 in a cog"
+  - "COGSTOP"
+  - "COGCHK"
+  - "COGINIT"
+  - "COGSPIN"
 
 typical_patterns:
   - pattern: "Per-cog data structures"

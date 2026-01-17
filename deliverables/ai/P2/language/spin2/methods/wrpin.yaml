@@ -118,13 +118,13 @@ common_uses:
   - "Protocol generation"
 
 related_methods:
-  - "WXPIN - Set X parameter"
-  - "WYPIN - Set Y parameter"
-  - "RDPIN - Read and acknowledge pin"
-  - "RQPIN - Read without acknowledge"
-  - "AKPIN - Acknowledge smart pin"
-  - "PINSTART - Complete pin setup"
-  - "PINCLEAR - Clear smart pin mode"
+  - "WXPIN"
+  - "WYPIN"
+  - "RDPIN"
+  - "RQPIN"
+  - "AKPIN"
+  - "PINSTART"
+  - "PINCLEAR"
 
 notes:
   - "Pin direction must be set after WRPIN"

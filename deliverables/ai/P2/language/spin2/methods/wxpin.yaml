@@ -120,11 +120,11 @@ common_uses:
   - "Protocol timing configuration"
 
 related_methods:
-  - "WRPIN - Set smart pin mode"
-  - "WYPIN - Set Y parameter"
-  - "RDPIN - Read and acknowledge"
-  - "RQPIN - Read without acknowledge"
-  - "PINSTART - Complete setup"
+  - "WRPIN"
+  - "WYPIN"
+  - "RDPIN"
+  - "RQPIN"
+  - "PINSTART"
 
 timing_considerations:
   - "X value takes effect on next period"

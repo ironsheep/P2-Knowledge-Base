@@ -104,10 +104,10 @@ typical_values:
   $55: "Alternating bits (01010101)"
 
 related_methods:
-  - "WORDFILL - Fill with word value"
-  - "LONGFILL - Fill with long value"
-  - "BYTEMOVE - Copy bytes"
-  - "BYTECOMP - Compare bytes"
+  - "WORDFILL"
+  - "LONGFILL"
+  - "BYTEMOVE"
+  - "BYTECOMP"
 
 performance_comparison:
   manual_loop: |

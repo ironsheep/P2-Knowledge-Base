@@ -44,4 +44,4 @@ comparison:
   quit: "Exits current loop only"
   next: "Skips to next iteration"
 
-related: ["quit.yaml", "next.yaml", "repeat.yaml", "method_definition.yaml"]
+related: ["p2kbSpin2Quit", "p2kbSpin2Next", "p2kbSpin2Repeat", "p2kbSpin2MethodDefinition"]

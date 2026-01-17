@@ -83,10 +83,10 @@ common_uses:
   - "Poll for signal changes"
 
 related_methods:
-  - "PINWRITE - Write data to pins"
-  - "PINFLOAT - Set pins to input mode"
-  - "AKPIN - Acknowledge smart pin"
-  - "RDPIN - Read smart pin result"
+  - "PINWRITE"
+  - "PINFLOAT"
+  - "AKPIN"
+  - "RDPIN"
 
 notes:
   - "Works regardless of pin direction (input or output)"

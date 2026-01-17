@@ -173,8 +173,8 @@ ai_code_generation_rules:
     - "Use descriptive names that include scope hints"
 
 related_documentation:
-  - "case-sensitivity.yaml"
-  - "identifier-rules.yaml"
-  - "../spin2/constructs/method_definition.yaml"
-  - "../spin2/keywords/VAR.yaml"
-  - "../spin2/keywords/DAT.yaml"
+  - "p2kbLanguageCaseSensitivity"
+  - "p2kbLanguageIdentifierRules"
+  - "p2kbSpin2MethodDefinition"
+  - "p2kbSpin2KwVAR"
+  - "p2kbSpin2KwDAT"

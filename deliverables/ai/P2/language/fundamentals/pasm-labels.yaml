@@ -82,8 +82,8 @@ extraction_date: "2025-01-23"
 verified_in: "PNUT compiler and Spin2 documentation"
 
 related_concepts:
-  - "identifier-rules.yaml"
-  - "case-sensitivity.yaml"
+  - "p2kbLanguageIdentifierRules"
+  - "p2kbLanguageCaseSensitivity"
   
 ai_generation_notes:
   critical_concept: |

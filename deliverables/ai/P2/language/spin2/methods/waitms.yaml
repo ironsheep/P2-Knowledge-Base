@@ -74,10 +74,10 @@ common_uses:
   - "Communication protocol delays"
 
 related_methods:
-  - "WAITUS - Delay for microseconds"
-  - "WAITCT - Wait for specific system counter value"
-  - "GETCT - Get current system counter"
-  - "POLLCT - Check if counter value passed"
+  - "WAITUS"
+  - "WAITCT"
+  - "GETCT"
+  - "POLLCT"
 
 notes:
   - "Blocks execution - cog cannot do other work during delay"

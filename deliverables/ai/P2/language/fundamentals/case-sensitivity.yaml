@@ -125,6 +125,6 @@ common_pitfalls:
     note: "Developers from C/Java/Python backgrounds often assume case sensitivity"
 
 related_documentation:
-  - "../spin2/constructs/method_definition.yaml"
-  - "identifier-rules.yaml"
-  - "variable-scoping-best-practices.yaml"
+  - "p2kbSpin2MethodDefinition"
+  - "p2kbLanguageIdentifierRules"
+  - "p2kbLanguageVariableScopingBestPractices"

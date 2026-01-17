@@ -111,11 +111,11 @@ overlap_examples:
     ' Copies forward, no overlap issue
 
 related_methods:
-  - "WORDMOVE - Copy words"
-  - "LONGMOVE - Copy longs"
-  - "BYTEFILL - Fill with byte value"
-  - "BYTECOMP - Compare bytes"
-  - "BYTESWAP - Swap byte regions"
+  - "WORDMOVE"
+  - "LONGMOVE"
+  - "BYTEFILL"
+  - "BYTECOMP"
+  - "BYTESWAP"
 
 performance_notes:
   - "Optimized for common cases"

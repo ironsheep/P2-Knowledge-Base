@@ -19,5 +19,5 @@ resources:
   dependencies: "4-7"
   cogs: "2-5 typical"
 combines_with:
-  - "event_dispatcher for coordination"
-  - "resource_pool for sharing"
+  - "event_dispatcher"
+  - "resource_pool"

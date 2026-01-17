@@ -433,6 +433,9 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
     # Build set of valid keys
     valid_keys = set(index.get('files', {}).keys())
 
+    # Load aliases for resolution (v3.3.0+)
+    aliases = index.get('aliases', {})
+
     # Fields to scan - categorized by how to handle them
     # 'mnemonic' - instruction names, validate as keys
     # 'component' - architecture component names
@@ -440,12 +443,24 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
     # 'text' - descriptive text, skip validation (informational)
     # 'mixed' - could be either, try to resolve but don't fail if not
     # 'nested_dict' - contains nested structure with paths, extract and validate
+    # Extended field list - now covers 15 reference field types
     CROSS_REF_FIELDS = {
         'related': 'mnemonic',              # Instruction mnemonics - MUST resolve
         'related_components': 'component',   # Component names - SHOULD resolve
         'cross_references': 'nested_dict',   # Nested dicts with file paths
         'see_also': 'text',                  # Descriptive text - informational only
         'references': 'text',                # External references - informational only
+        # NEW FIELDS for comprehensive validation:
+        'related_documentation': 'mnemonic', # Doc references - MUST resolve
+        'related_concepts': 'mnemonic',      # Concept references - MUST resolve
+        'related_constructs': 'mnemonic',    # Construct references - MUST resolve
+        'related_operators': 'mnemonic',     # Operator references - MUST resolve
+        'related_pasm': 'mnemonic',          # PASM references - MUST resolve
+        'related_methods': 'mnemonic',       # Method references - MUST resolve
+        'related_instructions': 'mnemonic',  # Instruction references - MUST resolve
+        'combines_with': 'mnemonic',         # Pattern combination refs - MUST resolve
+        'grouped_with': 'mnemonic',          # Grouping references - MUST resolve
+        'related_symbols': 'mnemonic',       # Symbol references - MUST resolve
     }
 
     results = {
@@ -501,9 +516,65 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
                     # Try to resolve the reference
                     resolved = False
                     tried_keys = []
+                    is_bad_format = False
 
-                    # 1. Try as file path
-                    if ref_type == 'path' or '.yaml' in ref or '/' in ref:
+                    # 0. Check for bad reference formats (bare filenames, relative paths)
+                    if ref.endswith('.yaml'):
+                        if ref.startswith('../') or ref.startswith('./'):
+                            # Relative path - BAD FORMAT
+                            is_bad_format = True
+                            results.setdefault('bad_format_refs', []).append({
+                                'file': rel_path,
+                                'field': field_name,
+                                'reference': ref,
+                                'issue': 'relative_path'
+                            })
+                        elif '/' not in ref:
+                            # Bare filename - BAD FORMAT
+                            is_bad_format = True
+                            results.setdefault('bad_format_refs', []).append({
+                                'file': rel_path,
+                                'field': field_name,
+                                'reference': ref,
+                                'issue': 'bare_filename'
+                            })
+
+                    # 1. Try alias lookup first (v3.4.0+ index feature - array-based)
+                    if not resolved and aliases:
+                        # Helper to check alias array
+                        def check_alias(alias_name):
+                            if alias_name in aliases:
+                                target_keys = aliases[alias_name]
+                                # v3.4.0: aliases are arrays, check if ANY key is valid
+                                if isinstance(target_keys, list):
+                                    for tk in target_keys:
+                                        if tk in valid_keys:
+                                            return True, f"alias:{alias_name}->{tk}"
+                                # Backward compat: single string (pre-3.4.0)
+                                elif target_keys in valid_keys:
+                                    return True, f"alias:{alias_name}->{target_keys}"
+                            return False, None
+
+                        # Try exact match
+                        ok, msg = check_alias(ref)
+                        if ok:
+                            resolved = True
+                            tried_keys.append(msg)
+                        else:
+                            # Try uppercase
+                            ok, msg = check_alias(ref.upper())
+                            if ok:
+                                resolved = True
+                                tried_keys.append(msg)
+                            else:
+                                # Try lowercase
+                                ok, msg = check_alias(ref.lower())
+                                if ok:
+                                    resolved = True
+                                    tried_keys.append(msg)
+
+                    # 2. Try as file path
+                    if not resolved and (ref_type == 'path' or '.yaml' in ref or '/' in ref):
                         key = transform_path_to_key(ref)
                         if key:
                             tried_keys.append(key)
@@ -520,7 +591,7 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
                                     resolved = True
                                     break
 
-                    # 2. Try as mnemonic
+                    # 3. Try as mnemonic
                     if not resolved and ref_type == 'mnemonic':
                         # First check if it's an informational reference
                         if is_informational_reference(ref):
@@ -575,14 +646,14 @@ def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
                                         resolved = True
                                         break
 
-                    # 3. Try as component name
+                    # 4. Try as component name
                     if not resolved and ref_type == 'component':
                         key = transform_component_to_key(ref, valid_keys)
                         if key:
                             tried_keys.append(key)
                             resolved = True  # transform_component_to_key already checks valid_keys
 
-                    # 4. Direct key lookup (maybe it's already a key)
+                    # 5. Direct key lookup (maybe it's already a key)
                     if not resolved:
                         if ref in valid_keys:
                             resolved = True
@@ -623,9 +694,12 @@ def print_report(results: Dict):
 
     print(f"\n📁 Files scanned: {results['total_files']}")
     print(f"📁 Files with cross-references: {results['files_with_refs']}")
+    bad_format_count = len(results.get('bad_format_refs', []))
     print(f"\n🔗 Total references: {results['total_refs']}")
     print(f"✅ Resolved references: {results['resolved_refs']}")
     print(f"❌ Unresolved references: {len(results['unresolved_refs'])}")
+    if bad_format_count > 0:
+        print(f"⚠️  Bad format references: {bad_format_count}")
 
     resolution_rate = (results['resolved_refs'] / results['total_refs'] * 100) if results['total_refs'] > 0 else 0
     print(f"\n📊 Resolution rate: {resolution_rate:.1f}%")
@@ -635,6 +709,32 @@ def print_report(results: Dict):
     print("-" * 70)
     for field, count in sorted(results['resolved_by_field'].items()):
         print(f"  {field}: {count} resolved")
+
+    # Report bad format references (bare filenames, relative paths)
+    bad_format_refs = results.get('bad_format_refs', [])
+    if bad_format_refs:
+        print("\n" + "-" * 70)
+        print("BAD FORMAT REFERENCES (require fixes):")
+        print("-" * 70)
+        # Group by issue type
+        relative_paths = [r for r in bad_format_refs if r['issue'] == 'relative_path']
+        bare_filenames = [r for r in bad_format_refs if r['issue'] == 'bare_filename']
+
+        if relative_paths:
+            print(f"\n🔸 Relative paths ({len(relative_paths)}):")
+            for ref_info in relative_paths[:10]:
+                print(f"   {ref_info['file']} [{ref_info['field']}]")
+                print(f"      → \"{ref_info['reference']}\"")
+            if len(relative_paths) > 10:
+                print(f"   ... and {len(relative_paths) - 10} more")
+
+        if bare_filenames:
+            print(f"\n🔸 Bare filenames ({len(bare_filenames)}):")
+            for ref_info in bare_filenames[:10]:
+                print(f"   {ref_info['file']} [{ref_info['field']}]")
+                print(f"      → \"{ref_info['reference']}\"")
+            if len(bare_filenames) > 10:
+                print(f"   ... and {len(bare_filenames) - 10} more")
 
     if results['unresolved_refs']:
         print("\n" + "-" * 70)
@@ -651,10 +751,13 @@ def print_report(results: Dict):
                 print(f"   ... and {len(refs) - 10} more")
 
     print("\n" + "=" * 70)
-    if len(results['unresolved_refs']) == 0:
+    total_issues = len(results['unresolved_refs']) + len(bad_format_refs)
+    if total_issues == 0:
         print("✅ ALL CROSS-REFERENCES VALIDATED SUCCESSFULLY")
     else:
-        print(f"⚠️  {len(results['unresolved_refs'])} REFERENCES NEED ATTENTION")
+        print(f"⚠️  {total_issues} REFERENCES NEED ATTENTION")
+        if bad_format_refs:
+            print(f"   ({len(bad_format_refs)} bad format, {len(results['unresolved_refs'])} unresolved)")
     print("=" * 70)
 
 

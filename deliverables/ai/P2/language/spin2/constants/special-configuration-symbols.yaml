@@ -5,6 +5,23 @@ description: |
 category: Configuration Constants
 documentation_level: complete
 
+# Aliases for cross-reference resolution
+# These allow references like "_clkfreq" to resolve to this document
+aliases:
+  - _CLKFREQ
+  - _clkfreq
+  - _XTLFREQ
+  - _xtlfreq
+  - _XINFREQ
+  - _xinfreq
+  - _RCSLOW
+  - _rcslow
+  - _RCFAST
+  - _rcfast
+  - _AUTOCLK
+  - _CLKMODE
+  - _clkmode
+
 # System Configuration Symbols
 system_configuration:
   DOWNLOAD_BAUD:
@@ -204,6 +221,6 @@ notes:
   - "DEBUG without parentheses enters debugger"
   
 related:
-  - debug.yaml
-  - debug-formatters-complete.yaml
-  - constants.yaml
+  - "p2kbSpin2Debug"
+  - "p2kbSpin2DbgDebugFormattersComplete"
+  - "p2kbSpin2RegisterConstants"

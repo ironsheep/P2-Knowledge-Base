@@ -98,10 +98,10 @@ receiving_methods:
     WAITATN     ' Wait for signal
 
 related_methods:
-  - "POLLATN - Check for attention signal"
-  - "WAITATN - Wait for attention signal"
-  - "COGID - Get current cog ID"
-  - "COGCHK - Check if cog is running"
+  - "POLLATN"
+  - "WAITATN"
+  - "COGID"
+  - "COGCHK"
 
 synchronization_patterns:
   - pattern: "Barrier synchronization"

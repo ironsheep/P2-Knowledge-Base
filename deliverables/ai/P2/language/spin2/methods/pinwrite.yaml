@@ -83,10 +83,10 @@ common_uses:
   - "Binary counter displays"
 
 related_methods:
-  - "PINREAD - Read data from pins"
-  - "PINHIGH - Drive all specified pins high"
-  - "PINLOW - Drive all specified pins low"
-  - "PINTOGGLE - Toggle pin states"
+  - "PINREAD"
+  - "PINHIGH"
+  - "PINLOW"
+  - "PINTOGGLE"
 
 notes:
   - "All specified pins become outputs"

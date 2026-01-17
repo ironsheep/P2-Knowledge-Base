@@ -192,6 +192,6 @@ common_pitfalls:
         LONG loop_count
 
 related_documentation:
-  - "case-sensitivity.yaml"
-  - "variable-scoping-best-practices.yaml"
-  - "../spin2/constructs/method_definition.yaml"
+  - "p2kbLanguageCaseSensitivity"
+  - "p2kbLanguageVariableScopingBestPractices"
+  - "p2kbSpin2MethodDefinition"

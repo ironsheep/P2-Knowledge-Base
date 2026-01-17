@@ -13,5 +13,5 @@ resources:
   dependencies: 1
   cogs: "0-1 (driver dependent)"
 combines_with:
-  - "no_objects for utilities"
-  - "timing_control for coordination"
+  - "no_objects"
+  - "timing_control"

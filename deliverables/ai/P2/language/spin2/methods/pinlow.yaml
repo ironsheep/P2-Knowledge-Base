@@ -58,10 +58,10 @@ common_uses:
   - "Create logic 0 for communication"
 
 related_methods:
-  - "PINHIGH - Drive pin(s) high"
-  - "PINTOGGLE - Toggle pin state"
-  - "PINFLOAT - Release pin to high-impedance"
-  - "PINWRITE - Write specific value to pins"
+  - "PINHIGH"
+  - "PINTOGGLE"
+  - "PINFLOAT"
+  - "PINWRITE"
 
 notes:
   - "Pin becomes an output if it wasn't already"

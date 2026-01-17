@@ -123,11 +123,11 @@ smart_pin_data_flow:
   next: "Write new value to Y for next operation"
 
 related_methods:
-  - "WRPIN - Set smart pin mode"
-  - "WXPIN - Set X parameter"
-  - "RDPIN - Read and acknowledge"
-  - "RQPIN - Read without acknowledge"
-  - "AKPIN - Acknowledge smart pin"
+  - "WRPIN"
+  - "WXPIN"
+  - "RDPIN"
+  - "RQPIN"
+  - "AKPIN"
 
 notes:
   - "Y register is mode-dependent"

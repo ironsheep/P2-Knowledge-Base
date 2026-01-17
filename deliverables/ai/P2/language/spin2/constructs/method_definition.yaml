@@ -285,9 +285,12 @@ pasm_integration: |
     END
 
 related_constructs:
-  - "blocks.yaml"
-  - "var_dat_con_obj.yaml"
-  - "inline_pasm.yaml"
+  - "p2kbSpin2Blocks"
+  - "p2kbSpin2KwVAR"
+  - "p2kbSpin2KwDAT"
+  - "p2kbSpin2KwCON"
+  - "p2kbSpin2KwOBJ"
+  - "p2kbSpin2InlinePasm"
   
 related_concepts:
   - "Object-oriented design"

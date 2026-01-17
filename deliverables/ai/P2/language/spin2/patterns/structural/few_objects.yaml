@@ -16,5 +16,5 @@ resources:
   dependencies: "2-3"
   cogs: "1-3 typical"
 combines_with:
-  - "state_machine for coordination"
-  - "buffer_management for data flow"
+  - "state_machine"
+  - "buffer_management"

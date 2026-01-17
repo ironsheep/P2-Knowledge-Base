@@ -50,4 +50,4 @@ comparison:
   next: "Skips to next iteration"
   abort: "Exits entire method"
 
-related: ["repeat.yaml", "next.yaml", "abort.yaml"]
+related: ["p2kbSpin2Repeat", "p2kbSpin2Next", "p2kbSpin2Abort"]

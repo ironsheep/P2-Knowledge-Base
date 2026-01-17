@@ -50,4 +50,4 @@ comparison:
   quit: "Exits loop entirely"
   abort: "Exits entire method"
 
-related: ["repeat.yaml", "quit.yaml", "abort.yaml"]
+related: ["p2kbSpin2Repeat", "p2kbSpin2Quit", "p2kbSpin2Abort"]

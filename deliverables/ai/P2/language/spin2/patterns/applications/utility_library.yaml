@@ -14,5 +14,5 @@ implementation: |
 resources:
   memory: "minimal"
   cogs: 0
-combines_with:
-  - "any pattern"
+# Note: This utility pattern can be combined with any application pattern
+# No specific combines_with references needed

@@ -430,12 +430,12 @@ why_this_matters:
     without consuming precious COG space permanently.
 
 related_concepts:
-  - "../instructions/jmp.yaml"
-  - "../instructions/call.yaml"
-  - "../instructions/coginit.yaml"
-  - "special_registers.yaml"
-  - "rep_instruction.yaml"
-  - "event_interrupt_config.yaml"
+  - "JMP"
+  - "CALL"
+  - "COGINIT"
+  - "p2kbPasm2SpecialRegisters"
+  - "p2kbPasm2RepInstruction"
+  - "p2kbPasm2EventInterruptConfig"
 
 references:
   - silicon_doc: Execution modes

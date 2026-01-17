@@ -1,6 +1,6 @@
-# P2 Knowledge Base Fetch Script v3.2
-# Key-based access to YAML content with navigation support
-# Usage: ./fetch-kb-file.ps1 <key> | -Help | -Cached | -Browse <category> | -Search <term>
+# P2 Knowledge Base Fetch Script v3.4
+# Key-based access to YAML content with navigation and alias support
+# Usage: ./fetch-kb-file.ps1 <key|alias> | -Help | -Cached | -Browse <category> | -Search <term>
 
 param(
     [Parameter(Position=0)]
@@ -34,15 +34,24 @@ $IndexMaxAge = 86400  # 24 hours in seconds
 
 function Show-Help {
     @"
-P2 Knowledge Base Fetch Script v3.2
+P2 Knowledge Base Fetch Script v3.4
 
 USAGE:
-    fetch-kb-file.ps1 <key>              Fetch content by key
+    fetch-kb-file.ps1 <key|alias>        Fetch content by key or alias (e.g., MOV, WAITMS)
     fetch-kb-file.ps1 -Cached            List downloaded keys
     fetch-kb-file.ps1 -Browse <cat>      Browse keys in category
     fetch-kb-file.ps1 -Search <term>     Search for keys (case-insensitive)
     fetch-kb-file.ps1 -Categories        List all available categories
     fetch-kb-file.ps1 -Help              Show this help
+
+ALIASES (v3.4 feature):
+    You can use instruction mnemonics, method names, or pattern IDs directly:
+      MOV       -> p2kbPasm2Mov        (PASM2 instruction)
+      WAITMS    -> p2kbSpin2Waitms     (Spin2 method)
+      COGINIT   -> p2kbPasm2Coginit AND p2kbSpin2Coginit (both!)
+
+    When an alias maps to MULTIPLE entries (e.g., ABS exists in both PASM2
+    and Spin2), ALL matches are returned. This preserves full information.
 
 CATEGORIES (for -Browse):
     PASM2 Instructions:
@@ -68,7 +77,9 @@ CATEGORIES (for -Browse):
       guides_getting_started
 
 EXAMPLES:
-    fetch-kb-file.ps1 p2kbPasm2Mov           # Get MOV instruction
+    fetch-kb-file.ps1 MOV                    # Get MOV (alias -> p2kbPasm2Mov)
+    fetch-kb-file.ps1 ABS                    # Get BOTH PASM2 and Spin2 ABS docs
+    fetch-kb-file.ps1 p2kbPasm2Mov           # Get MOV by canonical key
     fetch-kb-file.ps1 -Browse pasm2_branch   # List all branch instructions
     fetch-kb-file.ps1 -Search uart           # Find UART-related keys
     fetch-kb-file.ps1 -Cached                # Show what's already downloaded
@@ -169,6 +180,30 @@ function Lookup-Key {
     return $null
 }
 
+# Look up alias in index - returns array of canonical keys (v3.4+)
+# Aliases are now arrays: "MOV": ["p2kbPasm2Mov"] or "ABS": ["p2kbPasm2Abs", "p2kbSpin2Abs"]
+function Lookup-Alias {
+    param([string]$AliasName)
+    $index = Get-Index
+
+    # Try exact match first, then uppercase, then lowercase
+    $aliasVariants = @($AliasName, $AliasName.ToUpper(), $AliasName.ToLower())
+
+    foreach ($variant in $aliasVariants) {
+        if ($index.aliases.PSObject.Properties.Name -contains $variant) {
+            $aliasValue = $index.aliases.$variant
+            # v3.4: aliases are arrays
+            if ($aliasValue -is [array]) {
+                return $aliasValue
+            } else {
+                # Backward compat: single string (pre-3.4.0)
+                return @($aliasValue)
+            }
+        }
+    }
+    return @()
+}
+
 function Find-SimilarKeys {
     param([string]$KeyName)
     $index = Get-Index
@@ -260,7 +295,7 @@ function Invoke-Categories {
 }
 
 # =============================================================================
-# Command: -Search <term> - Search for keys
+# Command: -Search <term> - Search for keys and aliases
 # =============================================================================
 function Invoke-Search {
     param([string]$Term)
@@ -275,46 +310,50 @@ function Invoke-Search {
 
     $index = Get-Index
 
-    $matches = $index.files.PSObject.Properties.Name | Where-Object { $_ -match $Term }
+    # Search both keys and aliases
+    $keyMatches = $index.files.PSObject.Properties.Name | Where-Object { $_ -match $Term }
+    $aliasMatches = $index.aliases.PSObject.Properties | Where-Object { $_.Name -match $Term }
 
-    if ($matches) {
-        $matches | ForEach-Object { $_ }
+    $foundSomething = $false
+
+    if ($keyMatches) {
+        Write-Host "=== Matching Keys ===" -ForegroundColor Cyan
+        $keyMatches | ForEach-Object { $_ }
         Write-Host ""
-        Write-Host "Found: $(@($matches).Count) keys matching '$Term'" -ForegroundColor Gray
-    } else {
-        Write-Host "No keys found matching '$Term'" -ForegroundColor Yellow
+        Write-Host "Found: $(@($keyMatches).Count) keys matching '$Term'" -ForegroundColor Gray
+        $foundSomething = $true
+    }
+
+    if ($aliasMatches) {
+        if ($foundSomething) { Write-Host "" }
+        Write-Host "=== Matching Aliases ===" -ForegroundColor Cyan
+        $aliasMatches | ForEach-Object {
+            $targets = if ($_.Value -is [array]) { $_.Value -join ", " } else { $_.Value }
+            Write-Output "$($_.Name) -> $targets"
+        }
+        Write-Host ""
+        Write-Host "Found: $(@($aliasMatches).Count) aliases matching '$Term'" -ForegroundColor Gray
+        $foundSomething = $true
+    }
+
+    if (-not $foundSomething) {
+        Write-Host "No keys or aliases found matching '$Term'" -ForegroundColor Yellow
     }
     exit 0
 }
 
 # =============================================================================
-# Command: Fetch key
+# Command: Fetch key (with alias resolution v3.4)
 # =============================================================================
-function Invoke-Fetch {
-    param([string]$KeyName)
 
-    Ensure-Directories
-    Refresh-Index
+# Helper: fetch a single canonical key and output its content
+function Fetch-SingleKey {
+    param([string]$KeyName)
 
     $path = Lookup-Key -KeyName $KeyName
 
     if (-not $path) {
-        Write-Error-Message "Key '$KeyName' not found in index"
-        Write-Host ""
-
-        # Find and show similar keys
-        $similar = Find-SimilarKeys -KeyName $KeyName
-        if ($similar) {
-            Write-Host "Similar keys:" -ForegroundColor Yellow
-            $similar | ForEach-Object { Write-Host "  $_" }
-        }
-
-        Write-Host ""
-        Write-Host "Tips:" -ForegroundColor Yellow
-        Write-Host "  - Use -Search <term> to find keys"
-        Write-Host "  - Use -Browse <category> to explore by category"
-        Write-Host "  - Use -Categories to see all categories"
-        exit 1
+        return $false
     }
 
     Write-Log "Key: $KeyName -> $path"
@@ -332,7 +371,7 @@ function Invoke-Fetch {
             Write-Log "Cached to: $cacheFile"
         } catch {
             Write-Error-Message "Failed to fetch content: $_"
-            exit 1
+            return $false
         }
     } else {
         Write-Log "Using cached: $cacheFile"
@@ -340,6 +379,76 @@ function Invoke-Fetch {
 
     # Output content
     Get-Content $cacheFile -Raw
+    return $true
+}
+
+function Invoke-Fetch {
+    param([string]$Input)
+
+    Ensure-Directories
+    Refresh-Index
+
+    # 1. Try direct key lookup first
+    $path = Lookup-Key -KeyName $Input
+
+    if ($path) {
+        # Direct key match - fetch it
+        $result = Fetch-SingleKey -KeyName $Input
+        if (-not $result) { exit 1 }
+        return
+    }
+
+    # 2. Try alias lookup (v3.4+)
+    $aliasKeys = Lookup-Alias -AliasName $Input
+
+    if ($aliasKeys.Count -gt 0) {
+        if ($aliasKeys.Count -gt 1) {
+            # Multiple matches - output header to stderr
+            Write-Host "# ========================================" -ForegroundColor Cyan
+            Write-Host "# Alias '$Input' resolved to $($aliasKeys.Count) entries:" -ForegroundColor Cyan
+            $aliasKeys | ForEach-Object { Write-Host "#   $_" -ForegroundColor Cyan }
+            Write-Host "# ========================================" -ForegroundColor Cyan
+            Write-Host ""
+        }
+
+        $first = $true
+        foreach ($key in $aliasKeys) {
+            if (-not $first) {
+                # Separator between multiple results
+                Write-Output ""
+                Write-Output "# ========================================"
+                Write-Output "# Next entry: $key"
+                Write-Output "# ========================================"
+            }
+            Fetch-SingleKey -KeyName $key | Out-Null
+            # Re-output the cached content (Fetch-SingleKey returns $true/$false)
+            $cacheFile = "$CacheDir\$key.yaml"
+            if (Test-Path $cacheFile) {
+                Get-Content $cacheFile -Raw
+            }
+            $first = $false
+        }
+        return
+    }
+
+    # 3. Not found - show error with suggestions
+    Write-Error-Message "Key or alias '$Input' not found in index"
+    Write-Host ""
+
+    # Find and show similar keys
+    $similar = Find-SimilarKeys -KeyName $Input
+    if ($similar) {
+        Write-Host "Similar keys:" -ForegroundColor Yellow
+        $similar | ForEach-Object { Write-Host "  $_" }
+    }
+
+    Write-Host ""
+    Write-Host "Tips:" -ForegroundColor Yellow
+    Write-Host "  - Use -Search <term> to find keys"
+    Write-Host "  - Use -Browse <category> to explore by category"
+    Write-Host "  - Use -Categories to see all categories"
+    Write-Host "  - Try common aliases: MOV, ADD, WAITMS, COGINIT"
+    exit 1
 }
 
 # =============================================================================
@@ -367,7 +476,7 @@ if (-not [string]::IsNullOrEmpty($Search)) {
 }
 
 if (-not [string]::IsNullOrEmpty($Key)) {
-    Invoke-Fetch -KeyName $Key
+    Invoke-Fetch -Input $Key
     exit 0
 }
 

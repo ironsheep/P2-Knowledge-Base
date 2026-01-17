@@ -218,11 +218,26 @@ pasm_equivalent:
       IF_C    MOV y, #20
 
 related_constructs:
-  - "case.yaml"
-  - "repeat.yaml"
-  - "abort.yaml"
+  - "p2kbSpin2Case"
+  - "p2kbSpin2Repeat"
+  - "p2kbSpin2Abort"
   
 related_operators:
-  - "operators/comparison.yaml"
-  - "operators/logical.yaml"
-  - "operators/ternary.yaml"
+  # Comparison operators
+  - "p2kbSpin2OpOpEqeq"
+  - "p2kbSpin2OpOpLtgt"
+  - "p2kbSpin2OpOpLt"
+  - "p2kbSpin2OpOpGt"
+  - "p2kbSpin2OpOpLteq"
+  - "p2kbSpin2OpOpGteq"
+  - "p2kbSpin2OpOpLteqgt"
+  # Logical operators
+  - "p2kbSpin2OpOpAnd"
+  - "p2kbSpin2OpOpAndand"
+  - "p2kbSpin2OpOpOr"
+  - "p2kbSpin2OpOpOror"
+  - "p2kbSpin2OpOpXor"
+  - "p2kbSpin2OpOpXorxor"
+  - "p2kbSpin2OpOpNot"
+  # Ternary operator
+  - "p2kbSpin2OpOpTernary"

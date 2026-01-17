@@ -1,20 +1,21 @@
-# Propeller Knowledge Base - Root Manifest v3.2
+# Propeller Knowledge Base - Root Manifest v3.4
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
 # This is the entry point - fetch this first
 
-version: "3.2"
-last_updated: "2025-11-30"
+version: "3.4"
+last_updated: "2026-01-17"
 
 # ============================================================================
-# 🚨 MIGRATION REQUIRED - v3.1 and earlier users MUST upgrade
+# 🚨 MIGRATION REQUIRED - v3.3 and earlier users MUST upgrade
 # ============================================================================
 migration:
   required: true
-  from_version: "3.1"
-  to_version: "3.2"
+  from_version: "3.3"
+  to_version: "3.4"
   reason: |
-    v3.2 adds navigation commands (--browse, --search, --cached, --categories)
-    and moves index/cache to hidden location. Scripts remain in .p2kb-cache/.
+    v3.4 adds array-based alias resolution. Aliases like "ABS" or "COGINIT" now
+    return ALL matching entries (both PASM2 and Spin2 when applicable).
+    This preserves full information instead of "first match wins".
 
   ai_action_required: |
     ⚠️ HASH MISMATCH - YOUR CACHE IS OUTDATED
@@ -44,20 +45,22 @@ migration:
     Then fetch ai-instructions.yaml and follow upgrade_instructions to update CLAUDE.md.
 
 # ============================================================================
-# v3.2 Key-Based Access System with Navigation
+# v3.4 Key-Based Access System with Alias Resolution
 # ============================================================================
 index:
   location: "deliverables/ai/p2kb-index.json"
   compressed: "deliverables/ai/p2kb-index.json.gz"
-  description: "Master index mapping keys to YAML file paths with categories"
-  total_entries: 974
-  total_categories: 45
+  description: "Master index mapping keys to YAML file paths with categories and aliases"
+  total_entries: 1000
+  total_categories: 47
+  total_aliases: 933
+  multi_target_aliases: 54
+  alias_format: "array-based (v3.4+)"
 
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
-  version: "3.2"
-  content_hash: "sha256:81f8dcdf0009af6f483d21dca1fff83670a262766fb141290b761742704614c0"
-  description: "Setup and usage instructions for v3.2 key-based access with navigation"
+  version: "3.4"
+  description: "Setup and usage instructions for v3.4 with alias resolution"
 
 fetch_scripts:
   bash: "engineering/tools/p2kb/fetch-kb-file.sh"
@@ -66,9 +69,10 @@ fetch_scripts:
     - "--help: Show usage and commands"
     - "--cached: List downloaded keys"
     - "--browse <category>: Browse keys by category"
-    - "--search <term>: Search for keys"
+    - "--search <term>: Search for keys and aliases"
     - "--categories: List all categories"
-    - "<key>: Fetch content by key"
+    - "<key>: Fetch content by canonical key"
+    - "<alias>: Fetch content by alias (MOV, WAITMS, ABS) - returns ALL matches"
 
 refresh_scripts:
   bash: "engineering/tools/p2kb/refresh-kb.sh"
@@ -90,7 +94,7 @@ storage:
     windows: ".p2kb\\"
     description: "Hidden index and cache location"
 
-# Quick Start for v3.2
+# Quick Start for v3.4
 quickstart: |
   # 1. Download fetch script
   mkdir -p .p2kb-cache
@@ -100,13 +104,15 @@ quickstart: |
   # 2. See available commands
   .p2kb-cache/fetch-kb-file.sh --help
 
-  # 3. Find keys
+  # 3. Find keys or aliases
   .p2kb-cache/fetch-kb-file.sh --search mov
   .p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
 
-  # 4. Fetch content by key
-  .p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
-  .p2kb-cache/fetch-kb-file.sh p2kbArchCog
+  # 4. Fetch content by key OR alias (v3.4)
+  .p2kb-cache/fetch-kb-file.sh MOV           # Alias resolves to p2kbPasm2Mov
+  .p2kb-cache/fetch-kb-file.sh WAITMS        # Alias resolves to p2kbSpin2Waitms
+  .p2kb-cache/fetch-kb-file.sh ABS           # Returns BOTH PASM2 AND Spin2 docs!
+  .p2kb-cache/fetch-kb-file.sh p2kbArchCog   # Direct key also works
 
 # Knowledge Base Status
 knowledge_bases:

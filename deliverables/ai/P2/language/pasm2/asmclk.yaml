@@ -74,14 +74,13 @@ expansion_details:
     expands_to:
       - "HUBSET #0                   ' Stay in/switch to RCFAST mode"
 related_symbols:
-  - _clkfreq
-  - _xtlfreq
-  - _xinfreq
-  - _rcslow
-  - _rcfast
-  - _AUTOCLK
-  - clkmode
-  - clkfreq
+  - "_CLKFREQ"
+  - "_XTLFREQ"
+  - "_XINFREQ"
+  - "_RCSLOW"
+  - "_RCFAST"
+  - "_AUTOCLK"
+  - "_CLKMODE"
 related_instructions:
   - HUBSET
   - CLKSET

@@ -87,12 +87,12 @@ common_uses:
   - "Bit-rate timing generation"
 
 related_methods:
-  - "WAITCT - Wait for specific counter value"
-  - "POLLCT - Check if counter value passed"
-  - "WAITMS - Simple millisecond delay"
-  - "WAITUS - Simple microsecond delay"
-  - "GETMS - Get milliseconds since boot"
-  - "GETSEC - Get seconds since boot"
+  - "WAITCT"
+  - "POLLCT"
+  - "WAITMS"
+  - "WAITUS"
+  - "GETMS"
+  - "GETSEC"
 
 notes:
   - "Counter runs continuously from boot"

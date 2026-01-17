@@ -115,11 +115,11 @@ alignment_impact:
   recommendation: "Always align long data on 4-byte boundaries"
 
 related_methods:
-  - "BYTEMOVE - Copy bytes"
-  - "WORDMOVE - Copy words"
-  - "LONGFILL - Fill with long value"
-  - "LONGCOMP - Compare longs"
-  - "LONGSWAP - Swap long regions"
+  - "BYTEMOVE"
+  - "WORDMOVE"
+  - "LONGFILL"
+  - "LONGCOMP"
+  - "LONGSWAP"
 
 notes:
   - "Count is in longs, not bytes"

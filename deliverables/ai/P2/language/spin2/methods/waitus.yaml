@@ -83,10 +83,10 @@ common_uses:
   - "Fine-grained delays"
 
 related_methods:
-  - "WAITMS - Delay for milliseconds"
-  - "WAITCT - Wait for specific system counter value"
-  - "GETCT - Get current system counter"
-  - "POLLCT - Check if counter value passed"
+  - "WAITMS"
+  - "WAITCT"
+  - "GETCT"
+  - "POLLCT"
 
 notes:
   - "Blocks execution - cog cannot do other work during delay"

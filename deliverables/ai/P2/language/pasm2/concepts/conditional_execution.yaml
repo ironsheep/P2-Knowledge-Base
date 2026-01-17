@@ -329,7 +329,7 @@ why_this_matters:
     P2: CMP + Conditional execution (2 instructions, no penalty)
 
 related_concepts:
-  - "../instructions/cmp.yaml"
-  - "../instructions/test.yaml"
-  - "special_registers.yaml"
-  - "cog_hub_execution.yaml"
+  - "CMP"
+  - "TEST"
+  - "p2kbPasm2SpecialRegisters"
+  - "p2kbPasm2CogHubExecution"

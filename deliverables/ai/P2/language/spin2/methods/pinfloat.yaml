@@ -63,10 +63,10 @@ common_uses:
   - "Switch from output to input mode"
 
 related_methods:
-  - "PINHIGH - Drive pin(s) high"
-  - "PINLOW - Drive pin(s) low"
-  - "PINTOGGLE - Toggle pin state"
-  - "PINREAD - Read floating pin state"
+  - "PINHIGH"
+  - "PINLOW"
+  - "PINTOGGLE"
+  - "PINREAD"
 
 notes:
   - "Pin becomes an input and can be read with PINREAD"
