@@ -74,6 +74,11 @@
 \renewcommand{\fps@figure}{H}
 \makeatother
 
+% ==================== FIGURE NUMBERING ====================
+% Chapter-based figure numbering: Figure 1.1, 1.2, 2.1, etc.
+% Implements Rayman review item C1
+\counterwithin{figure}{chapter}
+
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=0.75in,left=1in,right=1in]{geometry}
 \RequirePackage{tcolorbox}

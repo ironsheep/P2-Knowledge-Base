@@ -120,21 +120,68 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
 
-**Experienced P1 Users**: Review Chapter 1 for key differences between P1 and P2, particularly the enhanced instruction set and Smart Pin capabilities. Then use Part II as your primary reference, as the instruction-by-instruction format will feel familiar.
+**Experienced P1 Users**: See "For P1 Developers" below for a specification comparison and overview of new capabilities. Then use Part II as the primary reference—the instruction-by-instruction format will feel familiar.
 
 **Looking Up a Specific Instruction**: Go directly to Part II, which is organized alphabetically by instruction name. Each entry provides complete syntax, encoding, behavior, and examples.
 
 **Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
 
+### For P1 Developers
+
+The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs sharing Hub memory—while dramatically expanding capabilities.
+
+**Specification Comparison**
+
+| | P1 | P2 |
+|---|---|---|
+| Clock | 80 MHz | 320 MHz |
+| Hub RAM | 32 KB | 512 KB |
+| COG RAM | 512 longs | 512 + 512 LUT |
+| I/O | 32 pins | 64 Smart Pins |
+| Math | Software | CORDIC |
+| Interrupts | None | 3 per COG |
+| Instructions | ~60 | 359 |
+
+**Architecture That Transfers**
+
+- Eight independent COGs with true parallel execution
+- Shared Hub memory with round-robin deterministic access
+- Private COG RAM for fast local operations
+- Wired-OR I/O model preventing pin contention
+- Hardware locks for inter-COG synchronization
+- Spin/PASM language structure
+
+**New in P2**
+
+- **Smart Pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
+- **Lookup RAM** — 512 additional longs per COG for tables and overflow code
+- **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
+- **Streamer** — Background DMA between Hub, LUT, and pins
+- **Interrupts** — Three levels per COG with 16 event sources
+- **COGATN** — Hardware inter-COG attention signaling
+- **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
+- **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
+- **Hub Execution** — Run code directly from 512 KB Hub RAM
+
+**Changed from P1**
+
+- **Counters**: CTRA/CTRB replaced by Smart Pin event system
+- **Video**: VCFG/VSCL/WAITVID replaced by Streamer and DAC capabilities
+- **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
+- **Boot Pins**: P28-P31 changed to P58-P63
+
+Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
+
 ### Manual Structure
 
-**Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
+**Part I: Architectural Foundation** — Six chapters explaining how the P2 works:
 
 - Chapter 1: The P2 Execution Model
 - Chapter 2: The Instruction Format
 - Chapter 3: Flags and Conditional Execution
 - Chapter 4: Timing and Determinism
 - Chapter 5: Special Hardware Overview
+- Chapter 6: Address Modes
 
 **Part II: Language Reference** — Complete documentation of all PASM2 elements:
 
@@ -149,11 +196,12 @@ This manual serves multiple audiences and use cases. The organization is designe
 - Appendix B: Condition Code Reference
 - Appendix C: Categorical Instruction Index
 - Appendix D: Special Registers Reference
-- Appendix D: Predefined Constants
-- Appendix E: Smart Pin Mode Constants
-- Appendix F: Streamer Mode Constants
-- Appendix G: Reserved Words Reference
-- Appendix H: Glossary of Encoding Terms
+- Appendix E: Predefined Constants
+- Appendix F: Smart Pin Mode Constants
+- Appendix G: Streamer Mode Constants
+- Appendix H: Reserved Words Reference
+- Appendix I: Glossary
+- Appendix J: Known Bugs
 
 ### Quick Navigation Guide
 
@@ -283,10 +331,14 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 \EightCogOverviewDiagram
 ```
 
+::: {.figurecaption #fig:eight-cog-overview}
+Eight-COG Architecture Overview
+:::
+
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
 
 - Executes instructions independently and simultaneously
-- Has its own dedicated memory and registers
+- Has its own dedicated 512-long register file
 - Operates at full clock speed with deterministic timing
 - Shares access to a common Hub memory
 
@@ -302,7 +354,7 @@ Each COG operates independently. One COG can execute a tight control loop while 
 
 Each COG has a unique identifier from 0 to 7. A COG can determine its own identifier using the `COGID` instruction, which writes the COG number to the destination register. This capability allows the same code to run on multiple COGs while behaving differently based on COG identity.
 
-COGs communicate through shared Hub memory, hardware locks, and attention signals. The `COGATN` instruction allows one COG to signal another COG through hardware attention flags, providing fast inter-COG notification without polling shared memory locations.
+COGs can communicate with each other through shared Hub memory, hardware locks, and attention signals. The `COGATN` instruction allows one COG to signal other COGs through hardware attention flags, providing fast inter-COG notification without polling shared memory locations.
 
 ### 1.1.3 Starting and Stopping COGs
 
@@ -316,6 +368,10 @@ The `COGSTOP` instruction halts a running COG. A COG can stop itself or another 
 ```{=latex}
 \CogMemoryMapDiagram
 ```
+
+::: {.figurecaption #fig:cog-memory-map}
+COG Memory Map
+:::
 
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
 
@@ -338,15 +394,50 @@ For complete documentation of each register, see Part II: Special Registers and 
 PASM2 instructions use 9-bit fields to specify source (S) and destination (D) register addresses. Nine bits provide 512 possible values, addressing the complete COG RAM space from $000 to $1FF. The instruction encoding dedicates specific bit positions to these address fields, and the assembler automatically encodes symbolic register names into the appropriate bit patterns.
 
 
-## 1.3 Hub Memory
+## 1.3 LUT Memory
+
+```{=latex}
+\LutMemoryMapDiagram
+```
+
+::: {.figurecaption #fig:lut-memory-map}
+LUT Memory Map
+:::
+
+Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
+
+### 1.3.1 LUT Characteristics
+
+LUT memory occupies a separate address space from COG RAM, addressed at $200-$3FF relative to COG addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions, which take 3 clock cycles—one cycle longer than COG register operations. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
+
+LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
+
+The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications. A common application is paletted VGA display, where the LUT stores a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real-time.
+
+### 1.3.2 LUT Instructions
+
+`RDLUT` reads a value from LUT memory to a COG register. `WRLUT` writes a value from a COG register to LUT memory. These instructions work similarly to regular COG memory operations but target the separate LUT address space.
+
+Programs often load the LUT with data from Hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in Hub memory.
+
+### 1.3.3 LUT Sharing Between COGs
+
+The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+
+
+## 1.4 Hub Memory
 
 ```{=latex}
 \HubMemoryDiagram
 ```
 
+::: {.figurecaption #fig:hub-memory-map}
+Hub Memory Organization
+:::
+
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
 
-### 1.3.1 Hub Address Space
+### 1.4.1 Hub Address Space
 
 Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of storage. All eight COGs can read and write any location in this space. Hub memory stores bytes, words (16-bit), and longs (32-bit) with appropriate address alignment.
 
@@ -354,59 +445,38 @@ Programs use Hub memory to share data between COGs, store large lookup tables, h
 
 Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
 
-### 1.3.2 Hub Access Timing
+⚠️ **Pitfall:** Hub addresses below $400 overlap with the region from which COGs load initial code during COGINIT. Writing to this area while COGs are being started can cause unpredictable behavior. Programs that dynamically start COGs should avoid using low hub addresses for shared data storage.
 
-The P2 uses an "egg-beater" access pattern to arbitrate Hub memory access among the eight COGs. Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
+### 1.4.2 Hub Access Timing
 
-This pattern creates deterministic but variable timing. A Hub access completes immediately if the requesting COG's window is currently active. Otherwise, the COG waits 0-7 clock cycles for its next window. This variability means Hub instructions take 2-9 clocks depending on when the instruction executes relative to the egg-beater rotation.
+The P2 uses round-robin arbitration to share Hub memory access among the eight COGs—a rotating pattern commonly called the "egg-beater." Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
+
+This pattern creates deterministic but variable timing. A Hub access completes immediately if the requesting COG's window is currently active. Otherwise, the COG waits 0-7 clock cycles for its next window. Hub RAM read/write instructions (RDLONG, WRLONG, etc.) take 9-16 clocks in COG/LUT execution mode, or 9-26 clocks in HUB execution mode where the FIFO contends for hub access. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
 
 Despite this variability, the timing remains deterministic. The maximum wait is always seven clocks, and timing patterns repeat every eight clocks. Programs that require precise timing use COG execution mode for critical sections and Hub memory only for data storage and inter-COG communication.
 
-### 1.3.3 Hub Instructions
+### 1.4.3 Hub Instructions
 
-PASM2 provides six instructions for Hub memory access. `RDBYTE` reads a byte, `RDWORD` reads a word, and `RDLONG` reads a long from Hub memory to a COG register. `WRBYTE`, `WRWORD`, and `WRLONG` write the corresponding data sizes from a COG register to Hub memory.
+PASM2 provides six primary instructions for Hub memory access. `RDBYTE` reads a byte, `RDWORD` reads a word, and `RDLONG` reads a long from Hub memory to a COG register. `WRBYTE`, `WRWORD`, and `WRLONG` write the corresponding data sizes from a COG register to Hub memory.
 
 The `SETQ` instruction enhances Hub access efficiency by enabling burst transfers. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers.
 
+For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous Hub transfers. The FIFO prefetches data automatically, hiding Hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for seamless ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
 
-## 1.4 LUT Memory
-
-```{=latex}
-\LutMemoryMapDiagram
-```
-
-Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
-
-### 1.4.1 LUT Characteristics
-
-LUT memory provides single-cycle access like COG RAM but occupies a separate address space. Programs access LUT memory at addresses $200-$3FF (relative to COG addressing) through dedicated LUT instructions. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
-
-LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
-
-The LUT integrates with the P2's streamer and cordic subsystems. The streamer can directly output LUT contents to pins for waveform generation, and cordic operations can store results in LUT memory. This integration makes the LUT particularly valuable for signal generation and digital signal processing applications.
-
-### 1.4.2 LUT Instructions
-
-`RDLUT` reads a value from LUT memory to a COG register. `WRLUT` writes a value from a COG register to LUT memory. These instructions work similarly to regular COG memory operations but target the separate LUT address space.
-
-Programs often load the LUT with data from Hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in Hub memory.
-
-### 1.4.3 LUT Sharing Between COGs
-
-The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+The CORDIC coprocessor also interacts with Hub memory. CORDIC operations can read operands from and write results to Hub addresses, enabling efficient processing of large datasets stored in Hub RAM.
 
 
 ## 1.5 The Execution Pipeline
 
-The P2 implements a simple two-stage pipeline that balances execution speed with hardware simplicity. The first stage fetches and decodes the instruction. The second stage reads operands, executes the operation, and writes results. This streamlined pipeline provides predictable timing without the complexity of deeper pipelines.
+The P2 implements a five-stage pipelined execution architecture. When the pipeline is full, each instruction effectively takes as little as two clock cycles to execute, providing high throughput while maintaining predictable timing.
 
-Most instructions complete in two clock cycles once the pipeline fills. The first instruction takes two clocks to reach completion. Subsequent instructions complete at a rate of one per two clocks, giving an effective throughput of one instruction every two clocks in steady-state execution.
+Most instructions complete in two clock cycles once the pipeline fills. The first instruction through the pipeline takes five clocks to reach completion. Once the pipeline is full, subsequent instructions complete at a rate of one per two clocks, giving an effective throughput of one instruction every two clocks in steady-state execution.
 
-Hub memory instructions add variable delays waiting for Hub access windows. The egg-beater pattern means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
+Hub memory instructions add variable delays waiting for Hub access windows. The hub access rotation means a Hub instruction might execute immediately or wait up to seven clocks for its COG's access slot. This variability affects only Hub memory operations; pure COG operations maintain consistent two-clock timing.
 
-When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than the egg-beater mechanism. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
+When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware to prefetch instructions rather than rotating hub access. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during Hub execution.
 
-Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch requires four clocks as the pipeline flushes and refills from the branch target address.
+Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch causes the pipeline to be flushed, so the first instruction following the branch takes at least five clock cycles as the pipeline refills from the branch target address.
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
 
@@ -425,9 +495,9 @@ Time-critical inner loops often execute in COG mode even when the main program r
 
 ### 1.6.2 Hub Execution Mode
 
-Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the egg-beater pattern used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
+Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the hub rotation used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
 
-Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
+Hub execution mode provides access to the full 512KB Hub address space, enabling programs far larger than COG memory could hold. In practice, Hub-executed code typically resides at addresses $400 and above—the `ORGH` directive defaults to $400, reserving low addresses for COG initialization data. The mode suits applications where code size exceeds available COG RAM and deterministic timing is less critical. User interface code, data processing algorithms, and high-level control logic typically run well in Hub execution mode.
 
 `COGINIT` determines execution mode when starting a COG. The initialization parameter specifies either COG execution (code loaded from Hub to COG RAM, then executed) or Hub execution (code executed directly from Hub RAM). The `ORGH` assembler directive marks code intended for Hub execution, while `ORG` marks code for COG execution.
 
@@ -443,13 +513,13 @@ The hardware automatically handles mode transitions. The programmer simply speci
 ```{=latex}
 \begin{keyconcepts}
 \item The P2 has 8 independent COGs executing in true parallel
-\item Each COG has 512 longs of private RAM plus 512 longs of LUT
+\item Each COG has 512 longs of private RAM plus 512 longs of private LUT
 \item Hub memory (512KB) is shared among all COGs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
 \item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)
 \item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
-\item The pipeline provides single-cycle execution for most instructions
-\item No interrupts are required due to true parallel execution
+\item The pipeline provides two-clock execution for most instructions
+\item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided
 \end{keyconcepts}
 ```
 
@@ -2055,13 +2125,13 @@ The Phase-Locked Loop (PLL) multiplies a reference clock to achieve higher frequ
 
 - **Input divider** (1-64): Divides the reference frequency before the VCO
 - **VCO multiplier** (1-1024): Multiplies to produce the VCO frequency
-- **Post divider** (1-30, even values): Divides the VCO output to the final frequency
+- **Post divider** (1, or 2-30 even): Divides the VCO output. Values 2, 4, 6...30 divide the VCO; value 1 passes VCO frequency directly (no division).
 
 The output frequency follows the equation: f_out = (f_ref / input_div) × multiplier / post_div
 
 For example, a 20 MHz crystal with input divider 1, multiplier 16, and post divider 2 produces: (20 MHz / 1) × 16 / 2 = 160 MHz.
 
-The VCO operates optimally between 100-200 MHz. Higher frequencies are possible but may reduce stability. The recommended maximum system clock is 180 MHz; overclocking to 250-320 MHz is possible but application-dependent.
+The VCO operates optimally between 100-200 MHz for stability. For overclocking, the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15), though stability becomes application-dependent.
 
 ### 4.1.3 The HUBSET Instruction
 
@@ -2133,7 +2203,7 @@ The following table shows typical cycle counts for different instruction categor
 | Branches (not taken) | 2 |
 | Branches (taken) | 4 |
 | Hub access | 2-16+ |
-| CORDIC operations | 2 (start), 54 (wait) |
+| CORDIC operations | 2 (start), 55 (wait) |
 
 Register operations like ADD, SUB, AND, and OR complete in 2 cycles whether they operate on registers or immediate values. This uniformity means that choosing between a register operand and an immediate operand has no performance impact—the decision is purely about code clarity and register pressure.
 
@@ -2141,7 +2211,7 @@ Branch instructions take 2 cycles when the branch is not taken and 4 cycles when
 
 Hub memory access instructions have variable timing because they must wait for the COG's hub access window. The base instruction time is 2 cycles, but the wait for hub access adds 0 to 7 additional cycles depending on when the instruction executes relative to the hub rotation pattern.
 
-CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 cycles, but the result is not available until 54 cycles after the operation starts. Programs can perform other work during this 54-cycle computation period and retrieve the result later with GETQX or GETQY.
+CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 clocks, but the result is not available until 55 clocks after the operation starts. Programs can perform other work during this 55-clock computation period and retrieve the result later with GETQX or GETQY.
 
 ### 4.2.3 Reading Cycle Counts
 
@@ -2168,29 +2238,33 @@ Variable range notation like "9..35" indicates that execution time depends on th
 
 ## 4.3 Hub Access Timing
 
-### 4.3.1 The Egg Beater Pattern
+### 4.3.1 Hub Access Rotation
 
 ```{=latex}
 \EggBeaterDiagram
 ```
 
-Hub memory access uses a round-robin "egg beater" pattern that gives each COG fair access to the shared hub RAM. The name comes from the visual similarity to a rotating egg beater, with each COG's access window spinning through the rotation in sequence.
+::: {.figurecaption #fig:egg-beater}
+Hub Access Rotation ("Egg Beater")
+:::
+
+Hub memory access uses round-robin arbitration that gives each COG fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each COG's access window spinning through the sequence in turn.
 
 The hub controller divides time into eight-cycle periods. Within each period, every COG gets exactly one cycle to access hub memory. The access windows rotate continuously through COGs 0, 1, 2, 3, 4, 5, 6, 7, then back to COG 0, repeating this pattern indefinitely. This rotation never stops and never changes—it runs continuously from the moment the chip powers on.
 
 When a COG executes an instruction that accesses hub memory (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), the instruction waits until that COG's window arrives, performs the memory access during the window, then completes. The wait time depends on when the instruction executes relative to the rotation pattern.
 
-This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the egg beater can achieve minimum wait times by scheduling hub access to align with its windows.
+This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the hub rotation can achieve minimum wait times by scheduling hub access to align with its windows.
 
 ### 4.3.2 Hub Access Latency
 
-When a COG executes a hub instruction, the actual wait time depends on timing relative to the egg beater rotation. Three scenarios illustrate the range of possibilities:
+When a COG executes a hub instruction, the actual wait time depends on timing relative to the hub rotation. Three scenarios illustrate the range of possibilities:
 
 **Best case:** The instruction executes just as the COG's hub window arrives. The memory access occurs immediately with zero wait cycles. The total instruction time equals the base instruction time (2 cycles) plus the memory access itself (1 cycle), for 3 cycles total.
 
 **Worst case:** The instruction executes just after the COG's hub window has passed. The instruction must wait for the rotation to complete—seven more COGs must take their turns before this COG's window comes around again. This adds 7 wait cycles to the instruction time, for 10 cycles total (2 base + 7 wait + 1 access).
 
-**Average case:** On average, an instruction that executes at a random time relative to the egg beater waits 3.5 cycles for its hub window. This average assumes no deliberate scheduling to align with windows.
+**Average case:** On average, an instruction that executes at a random time relative to the hub rotation waits 3.5 cycles for its hub window. This average assumes no deliberate scheduling to align with windows.
 
 The hub access latency directly impacts program performance when hub memory access is frequent. Programs that minimize hub access (by keeping frequently-accessed data in COG registers or COG RAM) avoid this latency. Programs that must access hub memory frequently achieve better performance by organizing hub access into bursts, which amortize the window wait time across multiple memory transfers.
 
@@ -2350,12 +2424,12 @@ While the P2 provides deterministic timing, four sources of variation exist. The
 
 | Source | Variation | Mitigation |
 |--------|-----------|------------|
-| Hub access wait | 0-7 cycles | HUBSET sync, careful scheduling |
+| Hub access wait | 0-7 cycles | Loop alignment, careful scheduling |
 | Branches | 2 vs 4 cycles | Conditional execution instead |
-| CORDIC wait | Up to 54 cycles | Interleave other work |
+| CORDIC wait | Up to 55 clocks | Interleave other work |
 | WAITX | Variable | Intentional delays |
 
-**Hub access wait** varies from 0 to 7 cycles depending on when a hub instruction executes relative to the egg beater rotation. This variation is deterministic—if a program executes a hub instruction at the same point in the egg beater cycle, the wait time is identical. Programs can eliminate this variation by synchronizing with the egg beater using HUBSET, or by scheduling hub access to occur at aligned points in loops.
+**Hub access wait** varies from 0 to 7 cycles depending on when a hub instruction executes relative to the hub rotation. This variation is deterministic—if a program executes a hub instruction at the same point in the rotation cycle, the wait time is identical. Programs can eliminate this variation by scheduling hub access to occur at aligned points in loops, ensuring the loop body is a multiple of 8 cycles so hub access always occurs at the same phase of the rotation.
 
 **Branch timing** varies because taken branches require 4 cycles while not-taken branches require only 2 cycles. This variation is completely predictable—the same branch decision always takes the same time. Programs can eliminate this variation by using conditional execution instead of branches, trading the variable 2-or-4-cycle branch for a fixed 2-cycle conditional instruction.
 
@@ -2436,25 +2510,7 @@ loop
 
 Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
 
-### 4.5.3 Hub Slot Synchronization
-
-Programs that need predictable hub access timing can synchronize with the egg beater rotation using HUBSET. This instruction provides control over hub timing parameters and can align a COG's execution with its hub access windows.
-
-While HUBSET's primary purpose is configuring hub execution mode, it also provides synchronization side effects. When a COG enters hub execution mode, it aligns with the hub rotation, ensuring that subsequent hub access occurs at known phases of the egg beater cycle.
-
-For applications that need consistent hub access timing without entering hub execution mode, careful scheduling provides an alternative. If a loop performs hub access at regular intervals aligned with the 8-cycle egg beater period, the hub wait time remains consistent across iterations:
-
-```pasm2
-loop
-        ' ... exactly 8 cycles of work ...
-        rdlong  data, ptr               ' Hub access occurs at same phase
-        ' ... more work ...
-        jmp     #loop                   ' Loop maintains 8-cycle alignment
-```
-
-This technique requires precise cycle counting and works only when the loop body contains an integer multiple of 8 cycles.
-
-### 4.5.4 Pin-Based Synchronization
+### 4.5.3 Pin-Based Synchronization
 
 Several instructions synchronize with pin state changes, enabling precise timing relative to external events:
 
@@ -2485,7 +2541,7 @@ loop
 
 This loop body must account for hub access timing variation. If the loop starts aligned with the COG's hub window, RDLONG waits 0 cycles and the loop takes 2 + 2 + 4 = 8 cycles. If the loop starts just after the hub window, RDLONG waits 7 cycles and the loop takes 9 + 2 + 4 = 15 cycles.
 
-For truly cycle-exact timing, loops must either eliminate hub access or align hub access with the egg beater rotation. One approach uses COG RAM for all data, avoiding hub access entirely:
+For truly cycle-exact timing, loops must either eliminate hub access or align hub access with the hub rotation. One approach uses COG RAM for all data, avoiding hub access entirely:
 
 ```pasm2
 loop
@@ -2529,13 +2585,13 @@ This pattern keeps hub access and computation overlapped—the RDLONG for iterat
 
 ### 4.6.3 CORDIC Pipelining
 
-CORDIC operations take 54 cycles to compute results, but the instruction that starts a CORDIC operation completes in just 2 cycles. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 54-cycle computation period, then retrieve the result.
+CORDIC operations take 55 clocks to compute results, but the instruction that starts a CORDIC operation completes in just 2 clocks. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 55-clock computation period, then retrieve the result.
 
 A simple example shows the pattern:
 
 ```pasm2
         qmul    a, b                    ' Start multiply
-        ' ... 54 cycles of other work ...
+        ' ... 55 clocks of other work ...
         getqx   result                  ' Get result (low 32 bits)
 ```
 
@@ -2551,7 +2607,7 @@ For maximum efficiency, interleave multiple CORDIC operations with other work:
         getqx   result2                 ' Get second result
 ```
 
-The key constraint is that at least 54 cycles must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
+The key constraint is that at least 55 clocks must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
 
 Multiple CORDIC operations can be in flight simultaneously, with results retrieved in order. Starting a new CORDIC operation does not invalidate results from previous operations until their results have been read.
 
@@ -2678,7 +2734,7 @@ Hub execution mode—often called "HUBEXEC mode"—executes instructions from hu
 
 In hub execution mode, each instruction fetch waits for the COG's hub access window. This adds 0-7 cycles of wait time per instruction, similar to how hub data access works. The average instruction fetch time becomes 2 (base) + 3.5 (average hub wait) = 5.5 cycles, roughly 2.75× slower than COG mode.
 
-Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($200 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can be megabytes in size, limited only by available hub RAM.
+Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($400 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can utilize the full 512 KB of hub RAM.
 
 Despite the slower instruction fetch, hub mode remains useful for several scenarios:
 
@@ -2697,7 +2753,7 @@ The following table shows typical execution times for common operations in both 
 | Simple ALU | 2 cycles | 8-23 cycles |
 | Branch taken | 4 cycles | 12-27 cycles |
 | Hub access | 2 + hub wait | 2 + hub wait |
-| CORDIC start | 2 cycles | 8-23 cycles |
+| CORDIC start | 2 clocks | 8-23 clocks |
 
 Simple ALU operations (ADD, SUB, AND, OR, etc.) take 2 cycles in COG mode but 8-23 cycles in hub mode. The hub mode time includes instruction fetch delay—the actual execution is still 2 cycles, but fetching the instruction adds the variable hub wait. The range 8-23 represents minimum (just hit hub window) to maximum (just missed hub window) timing.
 
@@ -2705,7 +2761,7 @@ Branch instructions take 4 cycles in COG mode when taken. In hub mode, the taken
 
 Hub access instructions show the same timing in both modes because the data access (as opposed to instruction fetch) uses the hub window mechanism regardless of where the instruction itself came from. A RDLONG takes 2 + hub wait whether executing from COG RAM or hub RAM.
 
-CORDIC operations start in 2 cycles in COG mode but take 8-23 cycles to start in hub mode (the 54-cycle computation time is the same in both modes). The instruction that starts the CORDIC operation must be fetched before it can execute, incurring hub fetch delay in hub mode.
+CORDIC operations start in 2 clocks in COG mode but take 8-23 clocks to start in hub mode (the 55-clock computation time is the same in both modes). The instruction that starts the CORDIC operation must be fetched before it can execute, incurring hub fetch delay in hub mode.
 
 The dramatic timing difference between modes—often 4× or more—makes COG mode strongly preferred for timing-critical code. Programs typically keep inner loops, interrupt handlers, and time-sensitive operations in COG RAM while using hub mode for larger, less-critical code sections.
 
@@ -2735,7 +2791,7 @@ The P2 includes specialized hardware subsystems that extend beyond basic instruc
 
 ## 5.1 CORDIC Coprocessor {#cordic-overview}
 
-The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—your code initiates an operation, performs other useful work for 54 clock cycles while the CORDIC computes, then retrieves the results.
+The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—your code initiates an operation, performs other useful work for 55 clock cycles while the CORDIC computes, then retrieves the results.
 
 ### 5.1.1 CORDIC Capabilities
 
@@ -2756,20 +2812,20 @@ Each operation produces one or two 32-bit results, retrieved through [GETQX](#ge
 
 ### 5.1.2 CORDIC Operation Flow
 
-CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 54-cycle computation period—attempting to retrieve results before this period completes produces undefined values.
+CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 55-clock computation period—attempting to retrieve results before this period completes produces undefined values.
 
 ```pasm2
         qmul    multiplicand, multiplier    ' Start 32x32 multiply
-        ' ... 54 cycles of other useful work ...
+        ' ... 55 clocks of other useful work ...
         getqx   product_lo                  ' Get low 32 bits
         getqy   product_hi                  ' Get high 32 bits
 ```
 
-The 54-cycle computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
+The 55-clock computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
 
 ### 5.1.3 CORDIC Pipelining
 
-The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clock cycles. With a 54-stage pipeline and 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
+The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clocks. The pipeline is 54 stages deep; results are available 55 clocks after queuing (1 clock to enter the pipeline, 54 clocks to process). With 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
 
 ### 5.1.4 The Pipeline Phases
 
@@ -2792,7 +2848,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 ```pasm2
         ' Steady state - retrieve previous, submit next
-.loop   getqx   result_lo                   ' Get result from ~54 clocks ago
+.loop   getqx   result_lo                   ' Get result from ~55 clocks ago
         getqy   result_hi
         qmul    a_next, b_next              ' Submit next operation
         ' ... process result, prepare next operands ...
@@ -2870,7 +2926,7 @@ queue_rotation
         ret
 ```
 
-This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 54 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
+This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 55 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
 
 ### 5.1.7 CORDIC Instructions Reference
 
@@ -3499,7 +3555,7 @@ For a debug statement to produce output, both conditions must be met: the statem
 
 ```{=latex}
 \begin{keyconcepts}
-\item The CORDIC coprocessor provides 54-cycle hardware math (multiply, divide, sqrt, trig)
+\item The CORDIC coprocessor provides 55-clock hardware math (multiply, divide, sqrt, trig)
 \item Smart Pins are 64 programmable I/O peripherals with local state machines
 \item The Streamer enables DMA-like high-speed data movement
 \item Events provide non-interrupt notification; interrupts are available when needed
@@ -3845,7 +3901,7 @@ Compound forms combine indexing with pointer update:
         rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
 ```
 
-**Index Range (updating):** 1 to 16 (special encoding: 1-15 normal, 16 encoded as 0)
+**Index Range (updating):** -16 to +16 (positive 1-16 for `++`/`++[]`, negative -16 to -1 for `--`/`--[]`; value 16 encoded as 0)
 
 These forms enable strided access patterns:
 
@@ -4090,7 +4146,9 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub operations (2-9 cycles depending on Hub slot)
+**Variable:** Hub operations (9-16 clocks in COG/LUT mode, 9-26 clocks in HUB mode)
+
+> **Timing Note:** Hub operations require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs). In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the maximum to 26 clocks.
 
 For time-critical inner loops:
 - Frequently-used values should reside in COG registers
@@ -4106,7 +4164,7 @@ For time-critical inner loops:
 \item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
 \item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms
 \item The SCALE factor (1/2/4) depends on instruction: byte=1, word=2, long=4
-\item Non-updating index range: -32 to +31; updating index range: 1 to 16
+\item Non-updating index range: -32 to +31; updating index range: -16 to +16
 \item SETQ block transfers override the index field; pointer updates by total transfer size
 \item SILICON BUG: ALTx/AUGS between SETQ and PTRx transfer breaks pointer update
 \item SILICON BUG: AUGS affects immediate operands in intervening ALTx instructions
@@ -8022,7 +8080,7 @@ If the WC or WCZ effect is specified, the C flag is set to X[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-The timing for GETQX varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
+GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
 
 
 
@@ -8060,7 +8118,7 @@ If the WC or WCZ effect is specified, the C flag is set to Y[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-The timing for GETQY varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
+GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
 
 
 
@@ -16276,6 +16334,10 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 \AlignLBeforeDiagram
 ```
 
+::: {.figurecaption #fig:alignl-before}
+Memory Layout Before ALIGNL
+:::
+
 Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
 ```pasm2
@@ -16292,6 +16354,10 @@ In comparison, this data will be emitted as follows:
 ```{=latex}
 \AlignLAfterDiagram
 ```
+
+::: {.figurecaption #fig:alignl-after}
+Memory Layout After ALIGNL
+:::
 
 In this case, the ALIGNL directive causes three zero ($00) bytes to emit after Table T1 to pad and align the start of Table T2 to the boundary of L1. After T2, the word and long pack sequentially—the long at offset 6 is still misaligned. To long-align the long as well, another ALIGNL would be needed before it.
 
@@ -16353,6 +16419,10 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 \AlignWBeforeDiagram
 ```
 
+::: {.figurecaption #fig:alignw-before}
+Memory Layout Before ALIGNW
+:::
+
 Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenient word-sized access), the ALIGNW directive achieves this, as follows.
 
 ```pasm2
@@ -16369,6 +16439,10 @@ In comparison, this data will be emitted as follows:
 ```{=latex}
 \AlignWAfterDiagram
 ```
+
+::: {.figurecaption #fig:alignw-after}
+Memory Layout After ALIGNW
+:::
 
 In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address. Note that the long after T2 packs sequentially at offset 4—it happens to be long-aligned here only because T2 is exactly 2 bytes; this is coincidental, not automatic.
 
@@ -18886,6 +18960,10 @@ These extended effects enable testing multiple bits or pins and accumulating the
 ```{=latex}
 \SpecialRegistersMapDiagram
 ```
+
+::: {.figurecaption #fig:special-registers-map}
+Special Registers Memory Map ($1F0–$1FF)
+:::
 
 *For complete documentation, see Part II: Special Registers.*
 

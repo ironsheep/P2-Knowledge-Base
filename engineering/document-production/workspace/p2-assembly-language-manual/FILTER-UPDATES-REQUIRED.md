@@ -2,7 +2,7 @@
 
 **Document:** P2 Assembly Language Manual
 **Purpose:** Track Lua filter and template changes needed for PDF generation
-**Status:** Pending implementation
+**Status:** ✅ IMPLEMENTED (2026-01-20)
 
 ---
 
@@ -41,38 +41,33 @@ Caption Text Here
 | Directives | `#fig:alignw-before` | Memory Layout Before ALIGNW |
 | Directives | `#fig:alignw-after` | Memory Layout After ALIGNW |
 
-### Implementation Required
+### Implementation ✅ COMPLETE
 
-#### A. Lua Filter: `p2kb-pasm2-figures.lua`
+#### A. Lua Filter: `p2kb-pasm2-figures.lua` ✅
 
-Create a filter that:
+**Created:** `filters/p2kb-pasm2-figures.lua`
 
-1. **Detects pattern:** Raw LaTeX block followed by `.figurecaption` div
-2. **Wraps in figure environment:**
-   ```latex
-   \begin{figure}[htbp]
-   \centering
-   <raw LaTeX content>
-   \caption{<div content>}
-   \label{<div id>}
-   \end{figure}
-   ```
-3. **Handles the div:** Converts content to `\caption{}` and ID to `\label{}`
+The filter:
+1. Detects RawBlock (latex) followed by `.figurecaption` Div
+2. Wraps them in `\begin{figure}[H]...\end{figure}`
+3. Extracts caption text and label ID from the Div
 
-#### B. LaTeX Preamble Addition
+**Added to:** `request.json` lua_filters array (first position)
 
-Add to template or `.sty` file:
+#### B. LaTeX Preamble Addition ✅
+
+**Added to:** `templates/p2kb-pasm2-foundation.sty` (after line 75)
 
 ```latex
-% Enable chapter-based figure numbering
+% ==================== FIGURE NUMBERING ====================
+% Chapter-based figure numbering: Figure 1.1, 1.2, 2.1, etc.
+% Implements Rayman review item C1
 \counterwithin{figure}{chapter}
 ```
 
-This makes figures number as 1.1, 1.2, 2.1, etc., resetting at each chapter.
-
 #### C. Cross-Reference Support
 
-Once implemented, prose can reference figures using:
+Prose can now reference figures using:
 
 ```markdown
 As shown in Figure \ref{fig:eight-cog-overview}, the P2 contains...
@@ -96,6 +91,20 @@ As shown in @fig:eight-cog-overview, the P2 contains...
 - Continue sequential from Part I (Figure 6.1, 6.2...)
 - Use section letters (Figure D.1 for Directives, Figure AD.1 for Appendix D)
 - Simple sequential throughout document (Figure 1, 2, 3...)
+
+---
+
+## Files to Deploy to Outbound
+
+The following files were modified/created and need to be copied to outbound for PDF Forge:
+
+| File | Type | Action |
+|------|------|--------|
+| `filters/p2kb-pasm2-figures.lua` | New filter | Copy to outbound (flat) |
+| `templates/p2kb-pasm2-foundation.sty` | Modified | Copy to outbound (flat) |
+| `request.json` | Modified | Copy to outbound |
+
+**Note:** The markdown content with `.figurecaption` divs is in the opus-master files. When the manual is assembled and escaped, those divs will be included automatically.
 
 ---
 

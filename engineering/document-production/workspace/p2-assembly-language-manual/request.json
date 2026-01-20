@@ -12,6 +12,7 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
+        "p2kb-pasm2-figures",
         "p2kb-pasm2-tables",
         "p2kb-pasm2-mnemonic-bold",
         "p2kb-pasm2-code-coloring",
