@@ -36,5 +36,9 @@
 \SpecialRegistersMapDiagram
 ```
 
+::: {.figurecaption #fig:special-registers-map}
+Special Registers Memory Map ($1F0–$1FF)
+:::
+
 *For complete documentation, see Part II: Special Registers.*
 

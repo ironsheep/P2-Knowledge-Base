@@ -146,6 +146,10 @@ Variable range notation like "9..35" indicates that execution time depends on th
 \EggBeaterDiagram
 ```
 
+::: {.figurecaption #fig:egg-beater}
+Hub Access Rotation ("Egg Beater")
+:::
+
 Hub memory access uses round-robin arbitration that gives each COG fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each COG's access window spinning through the sequence in turn.
 
 The hub controller divides time into eight-cycle periods. Within each period, every COG gets exactly one cycle to access hub memory. The access windows rotate continuously through COGs 0, 1, 2, 3, 4, 5, 6, 7, then back to COG 0, repeating this pattern indefinitely. This rotation never stops and never changes—it runs continuously from the moment the chip powers on.

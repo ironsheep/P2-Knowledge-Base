@@ -11,6 +11,10 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 \EightCogOverviewDiagram
 ```
 
+::: {.figurecaption #fig:eight-cog-overview}
+Eight-COG Architecture Overview
+:::
+
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
 
 - Executes instructions independently and simultaneously
@@ -45,6 +49,10 @@ The `COGSTOP` instruction halts a running COG. A COG can stop itself or another 
 \CogMemoryMapDiagram
 ```
 
+::: {.figurecaption #fig:cog-memory-map}
+COG Memory Map
+:::
+
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
 
 ### 1.2.1 General Purpose Registers ($000-$1EF)
@@ -72,6 +80,10 @@ PASM2 instructions use 9-bit fields to specify source (S) and destination (D) re
 \LutMemoryMapDiagram
 ```
 
+::: {.figurecaption #fig:lut-memory-map}
+LUT Memory Map
+:::
+
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
 
 ### 1.3.1 LUT Characteristics
@@ -98,6 +110,10 @@ The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent C
 ```{=latex}
 \HubMemoryDiagram
 ```
+
+::: {.figurecaption #fig:hub-memory-map}
+Hub Memory Organization
+:::
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
 

@@ -779,6 +779,10 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 \AlignLBeforeDiagram
 ```
 
+::: {.figurecaption #fig:alignl-before}
+Memory Layout Before ALIGNL
+:::
+
 Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
 
 ```pasm2
@@ -795,6 +799,10 @@ In comparison, this data will be emitted as follows:
 ```{=latex}
 \AlignLAfterDiagram
 ```
+
+::: {.figurecaption #fig:alignl-after}
+Memory Layout After ALIGNL
+:::
 
 In this case, the ALIGNL directive causes three zero ($00) bytes to emit after Table T1 to pad and align the start of Table T2 to the boundary of L1. After T2, the word and long pack sequentially—the long at offset 6 is still misaligned. To long-align the long as well, another ALIGNL would be needed before it.
 
@@ -856,6 +864,10 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 \AlignWBeforeDiagram
 ```
 
+::: {.figurecaption #fig:alignw-before}
+Memory Layout Before ALIGNW
+:::
+
 Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenient word-sized access), the ALIGNW directive achieves this, as follows.
 
 ```pasm2
@@ -872,6 +884,10 @@ In comparison, this data will be emitted as follows:
 ```{=latex}
 \AlignWAfterDiagram
 ```
+
+::: {.figurecaption #fig:alignw-after}
+Memory Layout After ALIGNW
+:::
 
 In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address. Note that the long after T2 packs sequentially at offset 4—it happens to be long-aligned here only because T2 is exactly 2 bytes; this is coincidental, not automatic.
 
