@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete PASM2 Instruction Set Documentation\par}
 \vspace{0.6cm}
-{\large December 2025\par}
+{\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.4\par}
+{\large\color{blue}Version 2.0\par}
 
 \vfill
 \begin{tcolorbox}[
