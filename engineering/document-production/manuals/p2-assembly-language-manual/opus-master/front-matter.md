@@ -314,3 +314,9 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*
+
+```{=latex}
+% Reset chapter counter before Part I begins
+% Ensures Chapter 1 figures are numbered 1.x, not 0.x
+\setcounter{chapter}{0}
+```

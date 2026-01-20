@@ -408,3 +408,25 @@ See `INDEX.md` in that directory for complete navigation.
 *Triggered by: Fabricated Hub Slot Synchronization section discovery*
 *Priority: HIGH - Manual credibility depends on content accuracy*
 *Result: Manual verified at 99% accuracy, 2 fabrications identified for removal*
+
+---
+
+## Follow-Up Audits (Incomplete)
+
+The following audit items were identified after sprint completion and remain to be addressed:
+
+### FA01: P1/P2 Comparison Instruction Counts
+
+**Location:** Front Matter, "For P1 Developers" section
+**Issue:** Explicit instruction count ("359 instructions") should be less explicit
+**Action Required:** Audit the P1/P2 comparison table and update instruction count references to match the silicon documentation style (use ranges or approximate values rather than exact counts that may become outdated)
+**Priority:** MEDIUM
+**Added:** 2026-01-20
+
+### FA02: Interrupt Precision Audit
+
+**Location:** Multiple locations throughout manual
+**Issue:** Interrupt discussions need to match silicon documentation precision
+**Action Required:** Audit all mentions of interrupts (3 per COG, 16 event sources, interrupt levels, etc.) and ensure they match exactly how the silicon documentation presents this information
+**Priority:** MEDIUM
+**Added:** 2026-01-20
