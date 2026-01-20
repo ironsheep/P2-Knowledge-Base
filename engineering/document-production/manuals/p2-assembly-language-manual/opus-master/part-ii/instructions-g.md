@@ -226,7 +226,7 @@ If the WC or WCZ effect is specified, the C flag is set to X[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-The timing for GETQX varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
+GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
 
 
 
@@ -264,7 +264,7 @@ If the WC or WCZ effect is specified, the C flag is set to Y[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-The timing for GETQY varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
+GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
 
 
 

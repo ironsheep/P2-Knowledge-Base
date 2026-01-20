@@ -327,7 +327,7 @@ Compound forms combine indexing with pointer update:
         rdlong  w, --ptra[3]            ' PTRA -= 3*4, then read at new PTRA
 ```
 
-**Index Range (updating):** 1 to 16 (special encoding: 1-15 normal, 16 encoded as 0)
+**Index Range (updating):** -16 to +16 (positive 1-16 for `++`/`++[]`, negative -16 to -1 for `--`/`--[]`; value 16 encoded as 0)
 
 These forms enable strided access patterns:
 
@@ -572,7 +572,9 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub operations (2-9 cycles depending on Hub slot)
+**Variable:** Hub operations (9-16 clocks in COG/LUT mode, 9-26 clocks in HUB mode)
+
+> **Timing Note:** Hub operations require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs). In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the maximum to 26 clocks.
 
 For time-critical inner loops:
 - Frequently-used values should reside in COG registers
@@ -588,7 +590,7 @@ For time-critical inner loops:
 \item Each AUG instruction adds +2 clock cycles; augmentation is consumed by the next instruction
 \item PTRA and PTRB support post-modify (PTRx++), pre-modify (++PTRx), and indexed (PTRx[n]) forms
 \item The SCALE factor (1/2/4) depends on instruction: byte=1, word=2, long=4
-\item Non-updating index range: -32 to +31; updating index range: 1 to 16
+\item Non-updating index range: -32 to +31; updating index range: -16 to +16
 \item SETQ block transfers override the index field; pointer updates by total transfer size
 \item SILICON BUG: ALTx/AUGS between SETQ and PTRx transfer breaks pointer update
 \item SILICON BUG: AUGS affects immediate operands in intervening ALTx instructions

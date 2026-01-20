@@ -27,13 +27,13 @@ The Phase-Locked Loop (PLL) multiplies a reference clock to achieve higher frequ
 
 - **Input divider** (1-64): Divides the reference frequency before the VCO
 - **VCO multiplier** (1-1024): Multiplies to produce the VCO frequency
-- **Post divider** (1-30, even values): Divides the VCO output to the final frequency
+- **Post divider** (1, or 2-30 even): Divides the VCO output. Values 2, 4, 6...30 divide the VCO; value 1 passes VCO frequency directly (no division).
 
 The output frequency follows the equation: f_out = (f_ref / input_div) × multiplier / post_div
 
 For example, a 20 MHz crystal with input divider 1, multiplier 16, and post divider 2 produces: (20 MHz / 1) × 16 / 2 = 160 MHz.
 
-The VCO operates optimally between 100-200 MHz. Higher frequencies are possible but may reduce stability. The recommended maximum system clock is 180 MHz; overclocking to 250-320 MHz is possible but application-dependent.
+The VCO operates optimally between 100-200 MHz for stability. For overclocking, the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15), though stability becomes application-dependent.
 
 ### 4.1.3 The HUBSET Instruction
 
@@ -105,7 +105,7 @@ The following table shows typical cycle counts for different instruction categor
 | Branches (not taken) | 2 |
 | Branches (taken) | 4 |
 | Hub access | 2-16+ |
-| CORDIC operations | 2 (start), 54 (wait) |
+| CORDIC operations | 2 (start), 55 (wait) |
 
 Register operations like ADD, SUB, AND, and OR complete in 2 cycles whether they operate on registers or immediate values. This uniformity means that choosing between a register operand and an immediate operand has no performance impact—the decision is purely about code clarity and register pressure.
 
@@ -113,7 +113,7 @@ Branch instructions take 2 cycles when the branch is not taken and 4 cycles when
 
 Hub memory access instructions have variable timing because they must wait for the COG's hub access window. The base instruction time is 2 cycles, but the wait for hub access adds 0 to 7 additional cycles depending on when the instruction executes relative to the hub rotation pattern.
 
-CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 cycles, but the result is not available until 55 cycles after the operation starts. Programs can perform other work during this 55-cycle computation period and retrieve the result later with GETQX or GETQY.
+CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 clocks, but the result is not available until 55 clocks after the operation starts. Programs can perform other work during this 55-clock computation period and retrieve the result later with GETQX or GETQY.
 
 ### 4.2.3 Reading Cycle Counts
 
@@ -324,7 +324,7 @@ While the P2 provides deterministic timing, four sources of variation exist. The
 |--------|-----------|------------|
 | Hub access wait | 0-7 cycles | Loop alignment, careful scheduling |
 | Branches | 2 vs 4 cycles | Conditional execution instead |
-| CORDIC wait | Up to 55 cycles | Interleave other work |
+| CORDIC wait | Up to 55 clocks | Interleave other work |
 | WAITX | Variable | Intentional delays |
 
 **Hub access wait** varies from 0 to 7 cycles depending on when a hub instruction executes relative to the hub rotation. This variation is deterministic—if a program executes a hub instruction at the same point in the rotation cycle, the wait time is identical. Programs can eliminate this variation by scheduling hub access to occur at aligned points in loops, ensuring the loop body is a multiple of 8 cycles so hub access always occurs at the same phase of the rotation.
@@ -483,13 +483,13 @@ This pattern keeps hub access and computation overlapped—the RDLONG for iterat
 
 ### 4.6.3 CORDIC Pipelining
 
-CORDIC operations take 55 cycles to compute results, but the instruction that starts a CORDIC operation completes in just 2 cycles. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 55-cycle computation period, then retrieve the result.
+CORDIC operations take 55 clocks to compute results, but the instruction that starts a CORDIC operation completes in just 2 clocks. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 55-clock computation period, then retrieve the result.
 
 A simple example shows the pattern:
 
 ```pasm2
         qmul    a, b                    ' Start multiply
-        ' ... 55 cycles of other work ...
+        ' ... 55 clocks of other work ...
         getqx   result                  ' Get result (low 32 bits)
 ```
 
@@ -505,7 +505,7 @@ For maximum efficiency, interleave multiple CORDIC operations with other work:
         getqx   result2                 ' Get second result
 ```
 
-The key constraint is that at least 55 cycles must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
+The key constraint is that at least 55 clocks must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
 
 Multiple CORDIC operations can be in flight simultaneously, with results retrieved in order. Starting a new CORDIC operation does not invalidate results from previous operations until their results have been read.
 
@@ -632,7 +632,7 @@ Hub execution mode—often called "HUBEXEC mode"—executes instructions from hu
 
 In hub execution mode, each instruction fetch waits for the COG's hub access window. This adds 0-7 cycles of wait time per instruction, similar to how hub data access works. The average instruction fetch time becomes 2 (base) + 3.5 (average hub wait) = 5.5 cycles, roughly 2.75× slower than COG mode.
 
-Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($200 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can be megabytes in size, limited only by available hub RAM.
+Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($400 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the FIFO prefetch mechanism. Code can utilize the full 512 KB of hub RAM.
 
 Despite the slower instruction fetch, hub mode remains useful for several scenarios:
 
@@ -651,7 +651,7 @@ The following table shows typical execution times for common operations in both 
 | Simple ALU | 2 cycles | 8-23 cycles |
 | Branch taken | 4 cycles | 12-27 cycles |
 | Hub access | 2 + hub wait | 2 + hub wait |
-| CORDIC start | 2 cycles | 8-23 cycles |
+| CORDIC start | 2 clocks | 8-23 clocks |
 
 Simple ALU operations (ADD, SUB, AND, OR, etc.) take 2 cycles in COG mode but 8-23 cycles in hub mode. The hub mode time includes instruction fetch delay—the actual execution is still 2 cycles, but fetching the instruction adds the variable hub wait. The range 8-23 represents minimum (just hit hub window) to maximum (just missed hub window) timing.
 
@@ -659,7 +659,7 @@ Branch instructions take 4 cycles in COG mode when taken. In hub mode, the taken
 
 Hub access instructions show the same timing in both modes because the data access (as opposed to instruction fetch) uses the hub window mechanism regardless of where the instruction itself came from. A RDLONG takes 2 + hub wait whether executing from COG RAM or hub RAM.
 
-CORDIC operations start in 2 cycles in COG mode but take 8-23 cycles to start in hub mode (the 55-cycle computation time is the same in both modes). The instruction that starts the CORDIC operation must be fetched before it can execute, incurring hub fetch delay in hub mode.
+CORDIC operations start in 2 clocks in COG mode but take 8-23 clocks to start in hub mode (the 55-clock computation time is the same in both modes). The instruction that starts the CORDIC operation must be fetched before it can execute, incurring hub fetch delay in hub mode.
 
 The dramatic timing difference between modes—often 4× or more—makes COG mode strongly preferred for timing-critical code. Programs typically keep inner loops, interrupt handlers, and time-sensitive operations in COG RAM while using hub mode for larger, less-critical code sections.
 

@@ -174,13 +174,14 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 ### Manual Structure
 
-**Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
+**Part I: Architectural Foundation** — Six chapters explaining how the P2 works:
 
 - Chapter 1: The P2 Execution Model
 - Chapter 2: The Instruction Format
 - Chapter 3: Flags and Conditional Execution
 - Chapter 4: Timing and Determinism
 - Chapter 5: Special Hardware Overview
+- Chapter 6: Address Modes
 
 **Part II: Language Reference** — Complete documentation of all PASM2 elements:
 
@@ -195,11 +196,12 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 - Appendix B: Condition Code Reference
 - Appendix C: Categorical Instruction Index
 - Appendix D: Special Registers Reference
-- Appendix D: Predefined Constants
-- Appendix E: Smart Pin Mode Constants
-- Appendix F: Streamer Mode Constants
-- Appendix G: Reserved Words Reference
-- Appendix H: Glossary of Encoding Terms
+- Appendix E: Predefined Constants
+- Appendix F: Smart Pin Mode Constants
+- Appendix G: Streamer Mode Constants
+- Appendix H: Reserved Words Reference
+- Appendix I: Glossary
+- Appendix J: Known Bugs
 
 ### Quick Navigation Guide
 

@@ -5,7 +5,7 @@ The P2 includes specialized hardware subsystems that extend beyond basic instruc
 
 ## 5.1 CORDIC Coprocessor {#cordic-overview}
 
-The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—your code initiates an operation, performs other useful work for 54 clock cycles while the CORDIC computes, then retrieves the results.
+The CORDIC (Coordinate Rotation Digital Computer) coprocessor provides hardware-accelerated mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC handles operations that would otherwise require hundreds of instructions: 32×32-bit multiplication producing 64-bit results, division with quotient and remainder, square root extraction, trigonometric computations, and logarithmic functions. The CORDIC operates as a queue-based coprocessor—your code initiates an operation, performs other useful work for 55 clock cycles while the CORDIC computes, then retrieves the results.
 
 ### 5.1.1 CORDIC Capabilities
 
@@ -26,20 +26,20 @@ Each operation produces one or two 32-bit results, retrieved through [GETQX](#ge
 
 ### 5.1.2 CORDIC Operation Flow
 
-CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 54-cycle computation period—attempting to retrieve results before this period completes produces undefined values.
+CORDIC operations follow a three-step pattern: queue the operation, wait for computation, retrieve results. The critical timing constraint is the 55-clock computation period—attempting to retrieve results before this period completes produces undefined values.
 
 ```pasm2
         qmul    multiplicand, multiplier    ' Start 32x32 multiply
-        ' ... 54 cycles of other useful work ...
+        ' ... 55 clocks of other useful work ...
         getqx   product_lo                  ' Get low 32 bits
         getqy   product_hi                  ' Get high 32 bits
 ```
 
-The 54-cycle computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
+The 55-clock computation period is fixed for all CORDIC operations. Efficient code interleaves CORDIC computations with other processing, ensuring the CPU remains productive while the coprocessor works. The CORDIC operates independently once queued, allowing the COG to execute unrelated instructions during the computation period.
 
 ### 5.1.3 CORDIC Pipelining
 
-The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clock cycles. With a 54-stage pipeline and 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
+The CORDIC is a fully pipelined, shared resource accessed through hub rotation—the same arbitration mechanism used for hub RAM. Each COG receives a CORDIC access slot every 8 clocks. The pipeline is 54 stages deep; results are available 55 clocks after queuing (1 clock to enter the pipeline, 54 clocks to process). With 8-clock access intervals, a single COG can have 6-7 operations in flight simultaneously (54 ÷ 8 ≈ 6.75). This deep pipelining enables sustained high throughput when processing multiple values.
 
 ### 5.1.4 The Pipeline Phases
 
@@ -62,7 +62,7 @@ Effective CORDIC usage follows a three-phase pattern: fill, steady-state, and dr
 
 ```pasm2
         ' Steady state - retrieve previous, submit next
-.loop   getqx   result_lo                   ' Get result from ~54 clocks ago
+.loop   getqx   result_lo                   ' Get result from ~55 clocks ago
         getqy   result_hi
         qmul    a_next, b_next              ' Submit next operation
         ' ... process result, prepare next operands ...
@@ -140,7 +140,7 @@ queue_rotation
         ret
 ```
 
-This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 54 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
+This pattern achieves one rotation result every ~20 instructions (the loop body), rather than waiting 55 clocks per rotation. For 16 points, the pipelined version completes in roughly 320 clocks versus 864 clocks for sequential processing—nearly 3× faster.
 
 ### 5.1.7 CORDIC Instructions Reference
 
@@ -769,7 +769,7 @@ For a debug statement to produce output, both conditions must be met: the statem
 
 ```{=latex}
 \begin{keyconcepts}
-\item The CORDIC coprocessor provides 54-cycle hardware math (multiply, divide, sqrt, trig)
+\item The CORDIC coprocessor provides 55-clock hardware math (multiply, divide, sqrt, trig)
 \item Smart Pins are 64 programmable I/O peripherals with local state machines
 \item The Streamer enables DMA-like high-speed data movement
 \item Events provide non-interrupt notification; interrupts are available when needed
