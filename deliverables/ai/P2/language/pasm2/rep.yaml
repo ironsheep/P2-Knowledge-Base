@@ -11,6 +11,16 @@ timing:
   type: fixed
 description: Execute next D[8:0] instructions S times. If S = 0, repeat instructions
   infinitely. If D[8:0] = 0, nothing repeats.
+constraints:
+  - Maximum 511 instructions with #immediate (9-bit D field); use ## or register for up to 2^32-1
+  - Maximum 511 iterations with #immediate; use ## or register for up to 2^32-1
+  - REP cannot be nested (single hardware counter)
+  - Interrupts stalled during execution
+  - Cannot use WC, WZ, or WCZ effects
+  - Branches within block cancel REP immediately
+extended_counts:
+  - "##count emits AUGS/AUGD prefix for 32-bit values"
+  - "Register-based counts support full 32-bit range at runtime"
 flags_affected:
   C: No effect
   Z: No effect

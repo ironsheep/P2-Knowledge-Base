@@ -141,39 +141,133 @@
 \end{center}
 }
 
-% ==================== HUB MEMORY DIAGRAM (from DeSilva) ====================
-% Shows Hub memory layout: 512KB shared memory
+% ==================== HUB MEMORY DIAGRAM (LEGACY) ====================
+% Simple Hub memory layout - kept for backward compatibility
 \newcommand{\HubMemoryDiagram}{%
+\HubMemoryLayoutDiagram% Redirect to new detailed diagram
+}
+
+% ==================== HUB MEMORY LAYOUT DIAGRAM (NEW) ====================
+% Side-by-side comparison of Spin2+PASM vs PASM-only memory layouts
+% Shows runtime Hub RAM organization (not binary file format)
+\newcommand{\HubMemoryLayoutDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
-    box/.style={
+    membox/.style={
         rectangle,
         draw=diagram-border,
-        fill=diagram-box,
-        minimum width=5cm,
+        minimum width=3.8cm,
         align=center,
-        font=\small
+        font=\scriptsize
+    },
+    splitbox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=1.8cm,
+        align=center,
+        font=\scriptsize
     },
     addr/.style={
-        font=\small\ttfamily,
+        font=\tiny\ttfamily,
+        text=diagram-text,
+        anchor=east
+    },
+    title/.style={
+        font=\small\bfseries,
+        text=diagram-text
+    },
+    subtitle/.style={
+        font=\tiny,
+        text=gray
+    },
+    annotation/.style={
+        font=\tiny,
         text=diagram-text
     }
 ]
 
-% Title
-\node[font=\bfseries] at (0, 4.5) {Hub Memory Layout:};
+% Define colors for memory regions
+\definecolor{hub-header}{HTML}{FFF8DC}      % Cornsilk - system header
+\definecolor{hub-interp}{HTML}{FFE4B5}      % Moccasin - interpreter
+\definecolor{hub-code}{HTML}{E0F0E0}        % Light green - program code
+\definecolor{hub-data}{HTML}{E0E8F0}        % Light blue - variables/data
+\definecolor{hub-free}{HTML}{F0F0F0}        % Light gray - free space
+\definecolor{hub-debug}{HTML}{FFE0E0}       % Light pink - debug region
 
-% Address labels
-\node[addr, anchor=east] at (-3.0, 3.8) {\$00000};
-\node[addr, anchor=east] at (-3.0, -2.8) {\$7FFFF (512KB)};
+% Column positions
+\def\leftcol{-3.2}
+\def\rightcol{3.2}
 
-% Memory sections
-\node[box, minimum height=1.5cm, fill=diagram-highlight] (prog) at (0, 3) {Your Program\\(Spin2/PASM2)};
-\node[box, minimum height=1.5cm] (vars) at (0, 1) {Variables\\Stack\\Data};
-\node[box, minimum height=2cm] (free) at (0, -1) {(Free Space)};
+% ===== TITLES =====
+\node[title] at (\leftcol, 6.8) {Spin2+PASM Program};
+\node[title] at (\rightcol, 6.8) {PASM-Only Program};
 
-% Draw outer border
-\draw[diagram-border, thick] (-2.7, 4) rectangle (2.7, -2.5);
+% ===== LEFT COLUMN: Spin2+PASM =====
+
+% Debug region (top, dashed to show optional)
+\node[membox, minimum height=0.8cm, fill=hub-debug, dashed] (ldebug) at (\leftcol, 6.0) {Debug Region\\(16 KB)};
+\node[addr] at (\leftcol-2.1, 6.3) {\$FC000};
+
+% Free space
+\node[membox, minimum height=1.4cm, fill=hub-free] (lfree) at (\leftcol, 4.85) {Free Space};
+
+% VAR variables
+\node[membox, minimum height=0.7cm, fill=hub-data] (lvar) at (\leftcol, 3.8) {VAR Variables};
+
+% Spin bytecode + PASM DAT
+\node[membox, minimum height=1.4cm, fill=hub-code] (lcode) at (\leftcol, 2.75) {Spin Bytecode\\+ PASM DAT};
+\node[addr] at (\leftcol-2.1, 3.3) {\$00400};
+
+% Interpreter space
+\node[membox, minimum height=0.9cm, fill=hub-interp] (linterp) at (\leftcol, 1.6) {Interpreter\\Space};
+\node[addr] at (\leftcol-2.1, 1.9) {\$00040};
+
+% System header
+\node[membox, minimum height=0.7cm, fill=hub-header] (lheader) at (\leftcol, 0.85) {System Header\\CLKFREQ/CLKMODE};
+\node[addr] at (\leftcol-2.1, 0.85) {\$00000};
+
+% Bottom address
+\node[addr] at (\leftcol-2.1, 5.65) {\$7FFFF};
+
+% ===== RIGHT COLUMN: PASM-Only =====
+
+% Debug region (top, dashed to show optional)
+\node[membox, minimum height=0.8cm, fill=hub-debug, dashed] (rdebug) at (\rightcol, 6.0) {Debug Region\\(16 KB)};
+\node[addr] at (\rightcol+2.1, 6.3) {\$FC000};
+
+% Free space
+\node[membox, minimum height=2.1cm, fill=hub-free] (rfree) at (\rightcol, 4.5) {Free Space};
+
+% Program code (main area)
+\node[membox, minimum height=2.0cm, fill=hub-code] (rcode) at (\rightcol, 2.4) {Program Code\\and Data};
+
+% Top region with split for clock-setter option
+% Left half: with clock-setter
+\node[splitbox, minimum height=1.0cm, fill=hub-header, anchor=east] (rclk) at (\rightcol, 0.95) {Clock-Setter\\(16 longs)};
+% Right half: without clock-setter (program starts immediately)
+\node[splitbox, minimum height=1.0cm, fill=hub-code, anchor=west] (rnoclk) at (\rightcol, 0.95) {Program\\Code};
+
+% Vertical divider line in split section
+\draw[diagram-border] (\rightcol, 0.45) -- (\rightcol, 1.45);
+
+% Labels for split
+\node[subtitle] at (\rightcol-0.95, 1.6) {non-RCFAST};
+\node[subtitle] at (\rightcol+0.95, 1.6) {RCFAST};
+
+% Address labels for right column
+\node[addr] at (\rightcol+2.1, 0.6) {\$00000};
+\node[addr] at (\rightcol+2.1, 5.3) {\$7FFFF};
+
+% ===== ANNOTATIONS =====
+\node[annotation, text width=3.5cm, align=center] at (\leftcol, -0.2) {Interpreter runs\\in COG RAM};
+\node[annotation, text width=3.5cm, align=center] at (\rightcol, -0.2) {No interpreter\\overhead};
+
+% Debug region note
+\node[annotation] at (0, 6.0) {\textit{(when debugging)}};
+
+% Outer borders
+\draw[diagram-border, thick] (\leftcol-2.0, 0.5) rectangle (\leftcol+2.0, 6.4);
+\draw[diagram-border, thick] (\rightcol-2.0, 0.45) rectangle (\rightcol+2.0, 6.4);
 
 \end{tikzpicture}
 \end{center}
@@ -413,6 +507,59 @@
 \end{center}
 }
 
+% ==================== EIGHT-COG SIMPLE DIAGRAM ====================
+% Simplified architecture diagram WITHOUT LUT sharing visualization
+% Shows 8 COGs around central Hub - basic architecture only
+% Used where LUT sharing details are not relevant
+\newcommand{\EightCogSimpleDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cogcircle/.style={
+        circle,
+        draw=diagram-border,
+        fill=mem-cog,
+        minimum size=1.3cm,
+        align=center,
+        font=\scriptsize\bfseries
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    spokestyle/.style={
+        thick,
+        diagram-border
+    }
+]
+
+% Central Hub as a circle
+\draw[diagram-border, thick, fill=mem-hub] (0, 0) circle (1.0cm);
+\node[font=\footnotesize\bfseries] at (0, 0) {HUB};
+
+% Clockwise rotating arrow inside hub to show rotation
+\draw[thick, green!50!black, ->]
+    ([shift={(60:0.6cm)}]0,0) arc (60:-240:0.6cm);
+
+% 8 COGs arranged in a ring - COG 0 at top, clockwise
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogcircle] (cog\i) at ({\angle}:2.7cm) {COG \i};
+    % Spoke lines from COGs to hub edge (no arrows)
+    \draw[spokestyle] (cog\i) -- ({\angle}:1.05cm);
+}
+
+% Annotations below diagram - basic architecture only (no LUT sharing)
+\node[annotation, text width=10cm, align=center] at (0, -4.3)
+    {All COGs access Hub simultaneously --- Max 8 clocks wait};
+\node[annotation, text width=10cm, align=center] at (0, -4.75)
+    {Each COG: Independent processor with 2KB RAM + 2KB LUT};
+\node[annotation, text width=10cm, align=center] at (0, -5.2)
+    {Hub: 512KB shared memory accessible by all COGs};
+
+\end{tikzpicture}
+\end{center}
+}
+
 % ==================== COG MEMORY MAP DIAGRAM (NEW) ====================
 % D1.2: COG memory map showing $000-$1FF address space
 \newcommand{\CogMemoryMapDiagram}{%
@@ -513,13 +660,12 @@
 \node[font=\bfseries] at (0, 3) {LUT RAM Address Space (\$200--\$3FF)};
 
 % Memory region
-\node[membox, fill=mem-lut, minimum height=3cm] (lut) at (0, 0.5) {Look-Up Table RAM\\(512 longs = 2KB)\\\\Tables, sine waves,\\COG-to-COG sharing};
+\node[membox, fill=mem-lut, minimum height=3cm] (lut) at (0, 0.5) {Look-Up Table RAM\\(512 longs = 2KB)};
 \node[addr] at (-3.0, 1.8) {\$200};
 \node[addr] at (-3.0, -0.8) {\$3FF};
 
 % Annotations
 \node[annotation] at (0, -1.5) {Accessible via RDLUT/WRLUT instructions};
-\node[annotation] at (0, -2.0) {Can be shared between adjacent COG pairs};
 
 \end{tikzpicture}
 \end{center}

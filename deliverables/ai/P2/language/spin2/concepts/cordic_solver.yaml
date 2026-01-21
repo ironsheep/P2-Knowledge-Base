@@ -1,0 +1,149 @@
+concept: cordic_solver
+title: CORDIC Solver - Hardware Math Functions
+category: math_operations
+description: Hardware-accelerated mathematical functions using the P2's built-in CORDIC solver
+
+overview: |
+  Spin2 provides high-level access to the P2's CORDIC (Coordinate Rotation Digital Computer) solver
+  through built-in math methods. These methods perform trigonometric, logarithmic, and coordinate
+  transformation operations with hardware acceleration. Unlike PASM2 where you must manage the
+  CORDIC pipeline directly, Spin2 methods handle all timing and synchronization automatically.
+
+key_features:
+  hardware_accelerated:
+    - All operations use dedicated CORDIC hardware
+    - Much faster than software implementations
+    - Full 32-bit precision
+
+  automatic_management:
+    - No pipeline management required
+    - No timing concerns for the programmer
+    - Interrupt-safe (interpreter handles protection)
+    - Results returned directly to variables
+
+  angle_format:
+    description: P2 uses a 32-bit angle representation
+    units:
+      - "$0000_0000 = 0 degrees"
+      - "$4000_0000 = 90 degrees"
+      - "$8000_0000 = 180 degrees"
+      - "$C000_0000 = 270 degrees"
+      - "$FFFF_FFFF = 359.99... degrees"
+    note: "Full circle = 2^32 units, providing high angular resolution"
+
+available_methods:
+  trigonometric:
+    qsin:
+      syntax: "result := QSIN(angle, length)"
+      description: "Calculate sine: result = length × sin(angle)"
+      example: "y := QSIN($4000_0000, 1000)  ' sin(90°) × 1000 = 1000"
+
+    qcos:
+      syntax: "result := QCOS(angle, length)"
+      description: "Calculate cosine: result = length × cos(angle)"
+      example: "x := QCOS($4000_0000, 1000)  ' cos(90°) × 1000 = 0"
+
+  coordinate_transforms:
+    rotxy:
+      syntax: "ROTXY(@x, @y, angle)"
+      description: "Rotate point (x,y) around origin by angle"
+      example: |
+        x := 100
+        y := 0
+        ROTXY(@x, @y, $2000_0000)  ' Rotate 45 degrees
+        ' x ≈ 71, y ≈ 71
+
+    polxy:
+      syntax: "POLXY(@x, @y, angle, length)"
+      description: "Polar to cartesian: convert (length, angle) to (x, y)"
+      example: |
+        POLXY(@x, @y, $4000_0000, 100)  ' 90° at radius 100
+        ' x = 0, y = 100
+
+    xypol:
+      syntax: "XYPOL(@length, @angle, x, y)"
+      description: "Cartesian to polar: convert (x, y) to (length, angle)"
+      example: |
+        XYPOL(@len, @ang, 100, 100)  ' Point at (100, 100)
+        ' len ≈ 141, ang = $2000_0000 (45°)
+
+  logarithmic:
+    qlog:
+      syntax: "result := QLOG(value)"
+      description: "Calculate base-2 logarithm in 5.27 fixed-point format"
+      example: "log_val := QLOG(1000)"
+
+    qexp:
+      syntax: "result := QEXP(log_value)"
+      description: "Calculate antilog (2^x) from 5.27 fixed-point format"
+      example: "value := QEXP(log_val)"
+
+  extended_precision:
+    muldiv64:
+      syntax: "result := MULDIV64(a, b, c)"
+      description: "Calculate (a × b) / c with 64-bit intermediate precision"
+      example: "avg := MULDIV64(total, 1000, count)  ' (total × 1000) / count"
+
+common_patterns:
+  sine_wave_generation:
+    code: |
+      repeat angle from 0 to $FFFF_FFFF step $0100_0000
+        amplitude := QSIN(angle, max_amplitude)
+        output(amplitude)
+    description: "Generate smooth sine wave output"
+
+  circular_motion:
+    code: |
+      repeat
+        x := center_x + QCOS(angle, radius)
+        y := center_y + QSIN(angle, radius)
+        draw_point(x, y)
+        angle += speed
+    description: "Animate object in circular path"
+
+  distance_calculation:
+    code: |
+      dx := x2 - x1
+      dy := y2 - y1
+      XYPOL(@distance, @unused, dx, dy)
+    description: "Calculate distance between two points"
+
+  angle_calculation:
+    code: |
+      dx := target_x - current_x
+      dy := target_y - current_y
+      XYPOL(@unused, @heading, dx, dy)
+    description: "Calculate angle to target"
+
+performance_notes:
+  - CORDIC methods are significantly faster than equivalent software math
+  - Operations complete in approximately 38-55 clock cycles
+  - Multiple CORDIC calls in sequence are handled efficiently by the interpreter
+  - No need to add delays or manage timing - interpreter handles everything
+
+comparison_with_pasm2:
+  spin2_advantages:
+    - Simpler syntax - just call the method
+    - Automatic timing management
+    - Interrupt-safe without extra code
+    - Results returned directly
+
+  pasm2_advantages:
+    - Pipeline control for maximum throughput
+    - Can overlap CORDIC with other operations
+    - Lower overhead for bulk operations
+
+  recommendation: |
+    Use Spin2 methods for most applications. Switch to inline PASM2 only when
+    processing large datasets where pipeline optimization provides significant benefit.
+
+related:
+  - language/spin2/methods/qsin.yaml
+  - language/spin2/methods/qcos.yaml
+  - language/spin2/methods/rotxy.yaml
+  - language/spin2/methods/polxy.yaml
+  - language/spin2/methods/xypol.yaml
+  - language/spin2/methods/qlog.yaml
+  - language/spin2/methods/qexp.yaml
+  - language/spin2/methods/muldiv64.yaml
+  - language/pasm2/concepts/cordic_solver.yaml

@@ -51,6 +51,8 @@ related:
   - XYPOL
   - QSIN
   - QCOS
+related_concepts:
+  - language/spin2/concepts/cordic_solver.yaml
 see_also:
   - "CORDIC operations"
   - "Coordinate rotation"

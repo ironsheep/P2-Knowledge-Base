@@ -446,7 +446,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
 
 **Critical Restrictions:**
 
@@ -463,14 +463,14 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
 
-**Example using instruction count:**
+**Example using instruction count (fragile):**
 ```pasm2
-' Hardcoded count - fragile if code changes
-                rep     #4, count               ' Repeat next 4 instructions
-                rdlong  x, ptr
-                add     ptr, #4
-                add     sum, x
-                djnz    n, #$-3                 ' Problem: count must match!
+' Hardcoded count - breaks if code changes
+                rep     #3, count               ' Repeat next 3 instructions
+                rdlong  x, ptr                  ' 1st
+                add     ptr, #4                 ' 2nd
+                add     sum, x                  ' 3rd
+                ' If you add code here, the count becomes wrong!
 ```
 
 **Example using local label (preferred):**
@@ -491,6 +491,114 @@ fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
 
 **Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 
+**Extended Count Capability:**
+
+Both the instruction count (D) and repetition count (S) can exceed the 9-bit immediate limit of 0-511 using two methods:
+
+| Form | Limit | Mechanism |
+|------|-------|-----------|
+| `#count` | 0-511 | 9-bit immediate field |
+| `##count` | 0 to 2^32-1 | AUGD/AUGS prefix emitted automatically |
+| `register` | 0 to 2^32-1 | Register value used at runtime |
+
+```pasm2
+' Extended repetition examples
+                rep     @.end, ##1000         ' 1000 iterations (AUGS prefix)
+                rep     @.end, big_count      ' Register-based count
+                rep     ##1000, ##2000        ' Both extended (rare)
+```
+
+**Memory Mode Constraints (for @label form):**
+
+The `@label` end position is constrained by both the execution mode and the 9-bit encoding limit:
+
+| Memory Mode | Address Range | @label Constraint |
+|-------------|---------------|-------------------|
+| COG only | $000-$1FF | min(511 instructions, $1FF - current) |
+| COG + LUT | $000-$3FF | min(511 instructions, $3FF - current) |
+| LUT only | $200-$3FF | min(511 instructions, $3FF - current) |
+| Hub (ORGH) | $00000-$7FFFF | 511 instructions (encoding limit) |
+
+REP blocks can span from COG RAM into LUT RAM when executing in combined COG+LUT mode.
+
+**Interrupt Protection Pattern:**
+
+A common PASM2 idiom uses REP with repetition count = 1 to stall interrupts during critical operations. (Note: This pattern is only needed in PASM2 code with interrupts enabled; Spin2 operators are already protected by the interpreter.)
+
+```pasm2
+' Protect CORDIC operation from interrupts
+                rep     @.stall, #1           ' Execute block once, atomically
+                qmul    y, x                  ' CORDIC multiply
+                getqx   x                     ' Get result
+                getqy   y                     ' Get overflow
+.stall
+```
+
+This works because REP stalls interrupt handling until all repeated instructions complete, even with just one iteration.
+
+**Extended Interrupt Stall:**
+
+For longer critical sequences, use a large instruction count with repetition = 1:
+
+```pasm2
+' Stall interrupts until ret/_ret_ is encountered
+op_quna         rep     #99, #1               ' Large count, exits on ret
+                qsqrt   x, #0                 ' CORDIC operations...
+                qlog    x
+                qexp    x
+                ...
+        _ret_   mov     result, x             ' REP ends at _ret_
+```
+
+The large instruction count (99) with repetition count of 1 creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction.
+
+**Conditional REP:**
+
+REP itself can be conditionally executed:
+
+```pasm2
+                testp   pin                   wc
+    if_c        rep     @.end, #5             ' Only repeat if C set
+                add     sum, #1
+.end
+```
+
+Instructions within the REP block can also be conditional:
+
+```pasm2
+                rep     @.end, #4
+                add     sum, #1
+                test    sum, #1               wz
+    if_z        add     result, #1            ' Conditional within block
+.end
+```
+
+**Bit-Bang I2C Pattern:**
+
+```pasm2
+' Output 8 bits, MSB first
+.wr_byte        rep     #8, #8                ' 8 instructions, 8 times
+                shl     data, #1              wc
+                drvc    sda                   ' Drive SDA with carry
+                drvh    scl                   ' Clock high
+                waitx   delay
+                drvl    scl                   ' Clock low
+                waitx   delay
+                nop
+                nop
+```
+
+**Array Operations:**
+
+```pasm2
+' Fill array with incrementing values
+                mov     counter, #0
+                loc     ptra, #\hub_array
+                rep     @.arr_end, #8
+                add     counter, #1
+                wrlong  counter, ptra++
+.arr_end
+```
 
 
 ::: instrheader

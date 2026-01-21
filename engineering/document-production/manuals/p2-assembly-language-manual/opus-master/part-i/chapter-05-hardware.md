@@ -150,6 +150,54 @@ This pattern achieves one rotation result every ~20 instructions (the loop body)
 
 Full instruction details, including operand formats and result interpretations, appear in Part II under each instruction's entry.
 
+### 5.1.8 Protecting Critical CORDIC Sequences
+
+**Note:** This section applies only to PASM2 code with interrupts enabled. Spin2 operators that use CORDIC (such as `*`, `/`, `SQRT`, `QSIN`, `QCOS`, etc.) are already protected by the Spin2 interpreter—no additional protection is needed when using Spin2.
+
+The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence. For timing-critical applications, this can cause incorrect results or undefined behavior.
+
+The P2 provides a simple protection mechanism using REP with a single iteration:
+
+```pasm2
+' Protect CORDIC operation from interrupts
+        rep     @.protect, #1         ' Execute block atomically
+        qmul    multiplicand, multiplier
+        ' ... other CORDIC work (up to 55 clocks) ...
+        getqx   result_lo
+        getqy   result_hi
+.protect
+```
+
+This idiom works because REP stalls interrupt handling until all repeated instructions complete—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption.
+
+**When to use interrupt protection:**
+
+- **DSP inner loops:** Where CORDIC operations must maintain precise timing relationships
+- **Fixed-point arithmetic chains:** Where one CORDIC result feeds immediately into another calculation
+- **Real-time control:** Where interrupt latency could cause result retrieval timing errors
+
+**When protection is unnecessary:**
+
+- **Spin2 code:** The Spin2 interpreter already protects CORDIC operations internally
+- **PASM2 without interrupts:** When no interrupts are enabled (SETINT not used)
+- **Background calculations:** Where the 55-clock window has explicit NOP padding or other work
+- **Pipelined processing:** Where the fill-steady-drain pattern naturally handles timing
+
+For longer critical sequences, use a large REP block count with one iteration:
+
+```pasm2
+' Extended interrupt-free zone
+        rep     #99, #1               ' 99 instructions, 1 iteration
+        qsqrt   value, #0             ' CORDIC operations
+        qlog    value
+        qexp    value
+        ' ... up to 99 total instructions ...
+        getqx   result
+_ret_   mov     output, result        ' REP exits at _ret_
+```
+
+The large instruction count (99) creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction encountered.
+
 
 ## 5.2 Smart Pins
 

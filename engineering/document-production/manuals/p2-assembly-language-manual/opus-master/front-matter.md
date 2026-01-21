@@ -140,7 +140,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
-| Instructions | ~60 | 359 |
+| Instructions | ~60 | ~360 |
 
 **Architecture That Transfers**
 

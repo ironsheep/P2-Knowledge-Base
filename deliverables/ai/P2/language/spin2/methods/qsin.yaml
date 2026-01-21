@@ -44,6 +44,8 @@ related:
   - QCOS
   - ROTXY
   - POLXY
+related_concepts:
+  - language/spin2/concepts/cordic_solver.yaml
 see_also:
   - "CORDIC operations"
   - "Trigonometric functions"

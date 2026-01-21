@@ -140,7 +140,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
-| Instructions | ~60 | 359 |
+| Instructions | ~60 | ~360 |
 
 **Architecture That Transfers**
 
@@ -334,7 +334,7 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 ## 1.1 The Eight-COG Architecture
 
 ```{=latex}
-\EightCogOverviewDiagram
+\EightCogSimpleDiagram
 ```
 
 ::: {.figurecaption #fig:eight-cog-overview}
@@ -428,17 +428,25 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 
 ### 1.3.3 LUT Sharing Between COGs
 
+```{=latex}
+\EightCogEggbeaterDiagram
+```
+
+::: {.figurecaption #fig:eight-cog-lut-sharing}
+Eight-COG Architecture with LUT Write Sharing
+:::
+
 The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.4 Hub Memory
 
 ```{=latex}
-\HubMemoryDiagram
+\HubMemoryLayoutDiagram
 ```
 
 ::: {.figurecaption #fig:hub-memory-map}
-Hub Memory Organization
+Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
 :::
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
@@ -2941,6 +2949,54 @@ This pattern achieves one rotation result every ~20 instructions (the loop body)
 **Result Retrieval:** [GETQX](#getqx), [GETQY](#getqy)
 
 Full instruction details, including operand formats and result interpretations, appear in Part II under each instruction's entry.
+
+### 5.1.8 Protecting Critical CORDIC Sequences
+
+**Note:** This section applies only to PASM2 code with interrupts enabled. Spin2 operators that use CORDIC (such as `*`, `/`, `SQRT`, `QSIN`, `QCOS`, etc.) are already protected by the Spin2 interpreter—no additional protection is needed when using Spin2.
+
+The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence. For timing-critical applications, this can cause incorrect results or undefined behavior.
+
+The P2 provides a simple protection mechanism using REP with a single iteration:
+
+```pasm2
+' Protect CORDIC operation from interrupts
+        rep     @.protect, #1         ' Execute block atomically
+        qmul    multiplicand, multiplier
+        ' ... other CORDIC work (up to 55 clocks) ...
+        getqx   result_lo
+        getqy   result_hi
+.protect
+```
+
+This idiom works because REP stalls interrupt handling until all repeated instructions complete—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption.
+
+**When to use interrupt protection:**
+
+- **DSP inner loops:** Where CORDIC operations must maintain precise timing relationships
+- **Fixed-point arithmetic chains:** Where one CORDIC result feeds immediately into another calculation
+- **Real-time control:** Where interrupt latency could cause result retrieval timing errors
+
+**When protection is unnecessary:**
+
+- **Spin2 code:** The Spin2 interpreter already protects CORDIC operations internally
+- **PASM2 without interrupts:** When no interrupts are enabled (SETINT not used)
+- **Background calculations:** Where the 55-clock window has explicit NOP padding or other work
+- **Pipelined processing:** Where the fill-steady-drain pattern naturally handles timing
+
+For longer critical sequences, use a large REP block count with one iteration:
+
+```pasm2
+' Extended interrupt-free zone
+        rep     #99, #1               ' 99 instructions, 1 iteration
+        qsqrt   value, #0             ' CORDIC operations
+        qlog    value
+        qexp    value
+        ' ... up to 99 total instructions ...
+        getqx   result
+_ret_   mov     output, result        ' REP exits at _ret_
+```
+
+The large instruction count (99) creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction encountered.
 
 
 ## 5.2 Smart Pins
@@ -5817,8 +5873,8 @@ Call Subroutine via PTRA
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 14-32 |
+| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 13+ |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 13+ |
 
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
@@ -5835,7 +5891,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
+CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 13+ cycles for Hub execution.
 
 
 
@@ -5861,8 +5917,8 @@ Call Subroutine via PTRB
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 14-32 |
+| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 13+ |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 13+ |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
@@ -5879,7 +5935,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 13+ cycles for Hub execution.
 
 
 
@@ -11822,7 +11878,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
 
 **Critical Restrictions:**
 
@@ -11839,14 +11895,14 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 The `@.label` syntax enables REP to automatically calculate the instruction count from a local label placed after the repeated block. The assembler computes the distance between REP and the label at assembly time. This approach is preferred over hardcoded counts because it remains correct when instructions are added or removed.
 
-**Example using instruction count:**
+**Example using instruction count (fragile):**
 ```pasm2
-' Hardcoded count - fragile if code changes
-                rep     #4, count               ' Repeat next 4 instructions
-                rdlong  x, ptr
-                add     ptr, #4
-                add     sum, x
-                djnz    n, #$-3                 ' Problem: count must match!
+' Hardcoded count - breaks if code changes
+                rep     #3, count               ' Repeat next 3 instructions
+                rdlong  x, ptr                  ' 1st
+                add     ptr, #4                 ' 2nd
+                add     sum, x                  ' 3rd
+                ' If you add code here, the count becomes wrong!
 ```
 
 **Example using local label (preferred):**
@@ -11867,6 +11923,114 @@ fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
 
 **Pitfall:** When using the label form, place the label immediately after the last repeated instruction. The label must be within the same local scope (same enclosing global label). See Chapter 2.10 for label scoping rules.
 
+**Extended Count Capability:**
+
+Both the instruction count (D) and repetition count (S) can exceed the 9-bit immediate limit of 0-511 using two methods:
+
+| Form | Limit | Mechanism |
+|------|-------|-----------|
+| `#count` | 0-511 | 9-bit immediate field |
+| `##count` | 0 to 2^32-1 | AUGD/AUGS prefix emitted automatically |
+| `register` | 0 to 2^32-1 | Register value used at runtime |
+
+```pasm2
+' Extended repetition examples
+                rep     @.end, ##1000         ' 1000 iterations (AUGS prefix)
+                rep     @.end, big_count      ' Register-based count
+                rep     ##1000, ##2000        ' Both extended (rare)
+```
+
+**Memory Mode Constraints (for @label form):**
+
+The `@label` end position is constrained by both the execution mode and the 9-bit encoding limit:
+
+| Memory Mode | Address Range | @label Constraint |
+|-------------|---------------|-------------------|
+| COG only | $000-$1FF | min(511 instructions, $1FF - current) |
+| COG + LUT | $000-$3FF | min(511 instructions, $3FF - current) |
+| LUT only | $200-$3FF | min(511 instructions, $3FF - current) |
+| Hub (ORGH) | $00000-$7FFFF | 511 instructions (encoding limit) |
+
+REP blocks can span from COG RAM into LUT RAM when executing in combined COG+LUT mode.
+
+**Interrupt Protection Pattern:**
+
+A common PASM2 idiom uses REP with repetition count = 1 to stall interrupts during critical operations. (Note: This pattern is only needed in PASM2 code with interrupts enabled; Spin2 operators are already protected by the interpreter.)
+
+```pasm2
+' Protect CORDIC operation from interrupts
+                rep     @.stall, #1           ' Execute block once, atomically
+                qmul    y, x                  ' CORDIC multiply
+                getqx   x                     ' Get result
+                getqy   y                     ' Get overflow
+.stall
+```
+
+This works because REP stalls interrupt handling until all repeated instructions complete, even with just one iteration.
+
+**Extended Interrupt Stall:**
+
+For longer critical sequences, use a large instruction count with repetition = 1:
+
+```pasm2
+' Stall interrupts until ret/_ret_ is encountered
+op_quna         rep     #99, #1               ' Large count, exits on ret
+                qsqrt   x, #0                 ' CORDIC operations...
+                qlog    x
+                qexp    x
+                ...
+        _ret_   mov     result, x             ' REP ends at _ret_
+```
+
+The large instruction count (99) with repetition count of 1 creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction.
+
+**Conditional REP:**
+
+REP itself can be conditionally executed:
+
+```pasm2
+                testp   pin                   wc
+    if_c        rep     @.end, #5             ' Only repeat if C set
+                add     sum, #1
+.end
+```
+
+Instructions within the REP block can also be conditional:
+
+```pasm2
+                rep     @.end, #4
+                add     sum, #1
+                test    sum, #1               wz
+    if_z        add     result, #1            ' Conditional within block
+.end
+```
+
+**Bit-Bang I2C Pattern:**
+
+```pasm2
+' Output 8 bits, MSB first
+.wr_byte        rep     #8, #8                ' 8 instructions, 8 times
+                shl     data, #1              wc
+                drvc    sda                   ' Drive SDA with carry
+                drvh    scl                   ' Clock high
+                waitx   delay
+                drvl    scl                   ' Clock low
+                waitx   delay
+                nop
+                nop
+```
+
+**Array Operations:**
+
+```pasm2
+' Fill array with incrementing values
+                mov     counter, #0
+                loc     ptra, #\hub_array
+                rep     @.arr_end, #8
+                add     counter, #1
+                wrlong  counter, ptra++
+.arr_end
+```
 
 
 ::: instrheader

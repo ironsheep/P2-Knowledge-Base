@@ -1,0 +1,177 @@
+concept: cordic_solver
+title: CORDIC Solver - Hardware Math Acceleration
+category: hardware_subsystems
+description: 54-stage pipelined math solver for multiplication, division, trigonometry, and transcendental functions
+
+overview: |
+  The CORDIC (Coordinate Rotation Digital Computer) solver provides hardware-accelerated
+  mathematical operations. While the P2's instruction set includes basic arithmetic, the CORDIC
+  handles operations that would otherwise require hundreds of instructions: 32x32-bit multiplication
+  producing 64-bit results, division with quotient and remainder, square root extraction,
+  trigonometric computations, and logarithmic functions.
+
+architecture:
+  pipeline_depth: 54
+  result_latency: 55 clocks (1 clock to enter + 54 stages)
+  access_interval: 8 clocks (hub rotation window)
+  max_in_flight: 6-7 operations per COG (54 / 8)
+  shared_resource: true
+  queue_based: true
+
+operations:
+  multiply:
+    instruction: QMUL
+    inputs: "D (32-bit), S (32-bit)"
+    outputs: "GETQX (low 32 bits), GETQY (high 32 bits)"
+    description: "32x32 unsigned multiply producing 64-bit result"
+
+  divide:
+    instruction: QDIV
+    inputs: "SETQ (upper 32 bits), D (lower 32 bits), S (divisor)"
+    outputs: "GETQX (quotient), GETQY (remainder)"
+    description: "64-bit / 32-bit unsigned division"
+
+  fractional_divide:
+    instruction: QFRAC
+    inputs: "D (upper 32 bits), SETQ (lower 32 bits), S (divisor)"
+    outputs: "GETQX (quotient), GETQY (remainder)"
+    description: "Fractional division with reversed operand arrangement"
+
+  square_root:
+    instruction: QSQRT
+    inputs: "D (lower 32 bits), S (upper 32 bits)"
+    outputs: "GETQX (32-bit root)"
+    description: "64-bit unsigned square root"
+
+  rotate:
+    instruction: QROTATE
+    inputs: "SETQ (Y coord), D (X coord), S (angle)"
+    outputs: "GETQX (rotated X), GETQY (rotated Y)"
+    description: "Coordinate rotation / polar-to-cartesian conversion"
+
+  vector:
+    instruction: QVECTOR
+    inputs: "D (X coord), S (Y coord)"
+    outputs: "GETQX (length), GETQY (angle)"
+    description: "Cartesian to polar conversion"
+
+  logarithm:
+    instruction: QLOG
+    inputs: "D (32-bit unsigned)"
+    outputs: "GETQX (5:27 log format)"
+    description: "Integer to logarithm conversion"
+
+  exponential:
+    instruction: QEXP
+    inputs: "D (5:27 log format)"
+    outputs: "GETQX (32-bit unsigned)"
+    description: "Logarithm to integer (antilog)"
+
+usage_patterns:
+  basic_pattern:
+    description: Queue, wait, retrieve
+    code: |
+      QMUL    multiplicand, multiplier   ' Queue operation
+      ' ... 55 clocks of other work ...
+      GETQX   product_lo                 ' Retrieve lower 32 bits
+      GETQY   product_hi                 ' Retrieve upper 32 bits
+
+  pipelined_pattern:
+    description: Maximum throughput via overlapped operations
+    phases:
+      - fill: "Queue 6-7 operations before expecting results"
+      - steady_state: "Retrieve one result, queue one operation per 8 clocks"
+      - drain: "Retrieve remaining results without queuing"
+    code: |
+      ' Fill phase
+      QMUL a0, b0
+      QMUL a1, b1
+      QMUL a2, b2
+      ' ... queue more ...
+
+      ' Steady state
+      .loop
+        GETQX result_lo
+        GETQY result_hi
+        QMUL  a_next, b_next
+        DJNZ  count, #.loop
+
+      ' Drain phase
+      REP @.drain, #6
+        GETQX result_lo
+        GETQY result_hi
+      .drain
+
+  non_blocking_check:
+    description: Check if results are available without blocking
+    code: |
+      POLLQMT             WC    ' C=1 if pipeline empty
+      IF_NC GETQX result        ' Retrieve only if available
+
+interrupt_protection:
+  applicability: |
+    This section applies only to PASM2 code with interrupts enabled. Spin2 operators that use
+    CORDIC (such as *, /, SQRT, QSIN, QCOS, etc.) are already protected by the Spin2 interpreter.
+  description: |
+    The 55-clock delay between queuing and retrieval creates a timing window vulnerable to
+    interrupts. For timing-critical PASM2 applications with interrupts enabled, use REP to
+    stall interrupts during the sequence.
+
+  basic_protection:
+    description: Protect a single CORDIC operation
+    code: |
+      REP     @.protect, #1         ' Execute block atomically
+      QMUL    multiplicand, multiplier
+      GETQX   result_lo
+      GETQY   result_hi
+      .protect
+
+  extended_protection:
+    description: Protect longer sequences until ret
+    code: |
+      REP     #99, #1               ' Large block, 1 iteration
+      QSQRT   value, #0
+      QLOG    value
+      QEXP    value
+      ' ... more operations ...
+      _ret_ MOV output, result      ' REP exits at _ret_
+
+  when_needed:
+    - DSP inner loops requiring precise timing
+    - Fixed-point arithmetic chains
+    - Real-time control applications
+
+  when_unnecessary:
+    - Spin2 code (interpreter protects CORDIC internally)
+    - PASM2 without interrupts (SETINT not used)
+    - Background calculations with explicit 55-clock padding
+    - Pipelined processing with fill-drain pattern
+
+result_retrieval:
+  blocking_behavior: |
+    GETQX and GETQY stall if the result is not yet ready. The COG waits automatically,
+    simplifying programming but potentially impacting performance if retrieval is premature.
+
+  event_generation: |
+    Event 15 is generated when GETQX/GETQY executes with no results available.
+    This detects programming errors where retrieval occurs before any operations were queued.
+
+timing_considerations:
+  - Results available exactly 55 clocks after queuing
+  - Each COG gets CORDIC access every 8 clocks (hub rotation)
+  - GETQX/GETQY will stall if called too early
+  - Pipeline is FIFO - results retrieved in submission order
+  - Multiple COGs share the CORDIC; no interference between COGs
+
+related:
+  - language/pasm2/qmul.yaml
+  - language/pasm2/qdiv.yaml
+  - language/pasm2/qfrac.yaml
+  - language/pasm2/qsqrt.yaml
+  - language/pasm2/qrotate.yaml
+  - language/pasm2/qvector.yaml
+  - language/pasm2/qlog.yaml
+  - language/pasm2/qexp.yaml
+  - language/pasm2/getqx.yaml
+  - language/pasm2/getqy.yaml
+  - language/pasm2/concepts/rep_instruction.yaml

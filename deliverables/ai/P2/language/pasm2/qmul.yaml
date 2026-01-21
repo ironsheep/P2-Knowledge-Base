@@ -117,6 +117,8 @@ related_instructions:
 - GETQY
 - QDIV
 - QFRAC
+related_concepts:
+- language/pasm2/concepts/cordic_solver.yaml
 operand_details:
   D: First multiplicand (32-bit unsigned)
   S: Second multiplicand (32-bit unsigned)
@@ -127,6 +129,16 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
   one CORDIC instruction per hub window (every 8 clocks).
 applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations,
   cryptographic operations, precise mathematical computations.
+interrupt_protection: |
+  For timing-critical PASM2 code with interrupts enabled, use REP with a single
+  iteration to stall interrupts during the 55-clock CORDIC window:
+    REP @.protect, #1
+    QMUL multiplicand, multiplier
+    GETQX result_lo
+    GETQY result_hi
+    .protect
+  Note: Spin2 operators are already protected by the interpreter.
+  See concepts/cordic_solver.yaml for detailed patterns.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 compiler_operand_format:

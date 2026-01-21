@@ -12,15 +12,23 @@ syntax:
   basic_form:
     - instruction: "REP #block_size, #count"
     - parameters:
-      - block_size: Number of instructions to repeat (1-64)
-      - count: Number of iterations (1-512)
+      - block_size: Number of instructions to repeat (0-511 with #, 0-2^32-1 with ## or register)
+      - count: Number of iterations (0-511 with #, 0-2^32-1 with ## or register)
     - example: "REP #4, #10  ' Repeat next 4 instructions 10 times"
+
+  extended_form:
+    - instruction: "REP ##block_size, ##count"
+    - parameters:
+      - block_size: Extended via AUGD prefix (0 to 2^32-1)
+      - count: Extended via AUGS prefix (0 to 2^32-1)
+    - example: "REP @.end, ##1000  ' 1000 iterations using AUGS prefix"
+    - note: "Compiler automatically emits AUGD/AUGS prefixes for values > 511"
 
   register_count:
     - instruction: "REP #block_size, register"
     - parameters:
       - block_size: Immediate instruction count
-      - register: Contains iteration count
+      - register: Contains iteration count (32-bit value at runtime)
     - example: "REP #3, loop_count  ' Repeat 3 instructions loop_count times"
 
   label_form:
@@ -34,6 +42,12 @@ syntax:
         SHL value, #1
         .loop_end
     - note: "Label must be within same local scope. See concepts/labels.yaml for scoping rules."
+
+  memory_mode_constraints:
+    - cog_only: "@label must be within $000-$1FF (512 longs) AND 511 instructions"
+    - cog_lut: "@label can span into LUT ($000-$3FF), limited to 511 instructions"
+    - lut_only: "@label must be within $200-$3FF AND 511 instructions"
+    - hub: "@label limited to 511 instructions (encoding constraint)"
 
 key_features:
   zero_overhead:
@@ -49,11 +63,12 @@ key_features:
     - Cannot be interrupted mid-block
 
   constraints:
-    - Maximum 64 instructions per block
-    - Maximum 512 iterations (immediate)
-    - No branches within REP block
-    - No REP nesting allowed
-    - Block must fit in cog RAM
+    - Maximum 511 instructions per block (9-bit D field)
+    - Maximum 512 iterations (immediate), unlimited with register
+    - No branches within REP block (branches cancel REP)
+    - No REP nesting allowed (single hardware counter)
+    - Interrupts stalled during REP execution
+    - Cannot use WC, WZ, or WCZ effects
 
 operational_details:
   execution_flow:
@@ -122,6 +137,38 @@ common_patterns:
         MUL multiplicand, coefficient
         ADD accumulator, multiplicand
     description: DSP MAC operation
+
+  interrupt_protection:
+    code: |
+      REP @.stall, #1
+        QMUL y, x          ' CORDIC multiply
+        GETQX x            ' Get result
+        GETQY y            ' Get overflow
+      .stall
+    description: Stall interrupts during critical CORDIC sequence
+
+  extended_interrupt_stall:
+    code: |
+      REP #99, #1          ' Large block count, 1 iteration
+        QSQRT x, #0
+        QLOG x
+        QEXP x
+        ...
+      _ret_ MOV result, x  ' REP exits at _ret_
+    description: Interrupt-free zone until ret/_ret_ or branch
+
+  i2c_bitbang:
+    code: |
+      REP #8, #8           ' 8 instructions, 8 iterations
+        SHL data, #1 WC
+        DRVC sda
+        DRVH scl
+        WAITX delay
+        DRVL scl
+        WAITX delay
+        NOP
+        NOP
+    description: Output 8 bits MSB-first on I2C bus
 
 optimization_tips:
   block_size:

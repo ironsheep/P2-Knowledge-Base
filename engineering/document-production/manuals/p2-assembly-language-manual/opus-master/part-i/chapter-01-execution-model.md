@@ -8,7 +8,7 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 ## 1.1 The Eight-COG Architecture
 
 ```{=latex}
-\EightCogOverviewDiagram
+\EightCogSimpleDiagram
 ```
 
 ::: {.figurecaption #fig:eight-cog-overview}
@@ -102,17 +102,25 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 
 ### 1.3.3 LUT Sharing Between COGs
 
+```{=latex}
+\EightCogEggbeaterDiagram
+```
+
+::: {.figurecaption #fig:eight-cog-lut-sharing}
+Eight-COG Architecture with LUT Write Sharing
+:::
+
 The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.4 Hub Memory
 
 ```{=latex}
-\HubMemoryDiagram
+\HubMemoryLayoutDiagram
 ```
 
 ::: {.figurecaption #fig:hub-memory-map}
-Hub Memory Organization
+Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
 :::
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
