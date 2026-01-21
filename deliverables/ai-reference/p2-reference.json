@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-01-17",
-    "last_updated": "2026-01-17T20:10:32.773715",
+    "release_date": "2026-01-21",
+    "last_updated": "2026-01-21T23:11:55.202099",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-17T20:10:32.773715",
+    "extraction_date": "2026-01-21T23:11:55.202099",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18268,7 +18268,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-17T20:10:32.773715",
+    "extraction_date": "2026-01-21T23:11:55.202099",
     "categories": {
       "keywords": {
         "count": 37,
@@ -21697,6 +21697,9 @@
               "ROTXY",
               "POLXY"
             ],
+            "related_concepts": [
+              "language/spin2/concepts/cordic_solver.yaml"
+            ],
             "see_also": [
               "CORDIC operations",
               "Trigonometric functions",
@@ -22234,6 +22237,9 @@
               "XYPOL",
               "QSIN",
               "QCOS"
+            ],
+            "related_concepts": [
+              "language/spin2/concepts/cordic_solver.yaml"
             ],
             "see_also": [
               "CORDIC operations",
@@ -26439,6 +26445,9 @@
               "QSIN",
               "ROTXY",
               "POLXY"
+            ],
+            "related_concepts": [
+              "language/spin2/concepts/cordic_solver.yaml"
             ],
             "see_also": [
               "CORDIC operations",
