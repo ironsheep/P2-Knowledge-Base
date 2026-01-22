@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-22T23:22:02.432752",
-    "total_entries": 1011,
+    "generated": "2026-01-22T23:24:43.431339",
+    "total_entries": 1010,
     "total_categories": 47,
     "total_aliases": 933,
     "multi_target_aliases": 54,
@@ -3460,10 +3460,6 @@
     ]
   },
   "files": {
-    "p2kbArchStreamerMonolithic202501": {
-      "path": "deliverables/ai/P2/architecture/_archive/streamer-monolithic-2025-01.yaml",
-      "mtime": 1769124063
-    },
     "p2kbArchClickModuleIntegration": {
       "path": "deliverables/ai/P2/architecture/click_module_integration.yaml",
       "mtime": 1764449566

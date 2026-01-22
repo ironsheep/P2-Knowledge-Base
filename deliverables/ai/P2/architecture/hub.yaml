@@ -224,7 +224,7 @@ related_components:
   fifo: "Streaming interface to hub"
   locks: "Synchronization primitives"
   smart_pins: "Can access hub via repository modes"
-  streamer: "DMA to/from hub"
+  architecture/streamer/overview.yaml: "DMA to/from hub"
 
 see_also:
   - "Egg beater timing diagrams"

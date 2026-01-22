@@ -200,7 +200,7 @@ performance:
   efficiency: "100% utilization possible with 54+ operations queued"
 
 related_components:
-  streamer: "Can use CORDIC results for DDS"
+  architecture/streamer/overview.yaml: "Can use CORDIC results for DDS"
   smart_pins: "CORDIC supports Goertzel mode calculations"
   math_instructions: "Complements MUL/MULS/SCA/SCAS instructions"
 
