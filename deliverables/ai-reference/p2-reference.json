@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-01-22",
-    "last_updated": "2026-01-22T00:32:36.420627",
+    "last_updated": "2026-01-22T23:22:07.280471",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-22T00:32:36.420627",
+    "extraction_date": "2026-01-22T23:22:07.280471",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -16710,7 +16710,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Bu er new streamer command to be issued on final NCO rollover of current command, continuing phase.                           2+",
+            "description": "Buffer new streamer command to execute on final NCO rollover, continuing phase.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16756,7 +16756,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Bu er new streamer command to be issued on final NCO rollover of current command, zeroing phase.                             2+",
+            "description": "Buffer new streamer command to be issued on final NCO rollover of current command, zeroing phase. Unlike XCONT which continues phase, XZERO resets phase accumulator to zero when the new command begins - essential for precise timing alignment in video sync generation and audio sample boundaries.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16802,7 +16802,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Get the streamer's Goertzel X accumulator into D and the Y accumulator into the next instruction's S, clear accumulators.",
+            "description": "Get the streamer's Goertzel X accumulator into D and the Y accumulator into the next instruction's S, clear accumulators. Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis. The X,Y values represent the real/imaginary components of the Goertzel filter output. Follow with QVECTOR to compute magnitude and phase from the X,Y pair.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16846,7 +16846,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set streamer NCO frequency to D.",
+            "description": "Set streamer NCO frequency to D. The NCO uses a 32-bit phase accumulator where D is added each clock cycle. Output frequency = (D \u00d7 clkfreq) / 2^32. For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits for 64-bit precision frequency control.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -18268,7 +18268,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-22T00:32:36.420627",
+    "extraction_date": "2026-01-22T23:22:07.280471",
     "categories": {
       "keywords": {
         "count": 37,
