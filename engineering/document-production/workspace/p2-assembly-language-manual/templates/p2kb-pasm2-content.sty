@@ -103,56 +103,50 @@
 % 2. Creates visual part page
 % 3. Does NOT force page break after (first chapter stays on same page)
 %
-% CRITICAL: titlesec (loaded in foundation.sty) completely replaces \chapter's
-% internal structure via \titleformat. The standard \patchcmd approach fails
-% because titlesec's \chapter no longer contains \clearpage tokens directly.
+% CRITICAL: The \chapter command has \clearpage built into its definition.
+% Even if the Lua filter doesn't add a \clearpage before the chapter header,
+% Pandoc still generates \chapter{...} which internally calls \clearpage.
 %
-% Solution: Patch \clearpage itself to be conditionally suppressible.
-% When \manualpart is called, it sets a flag. The next \clearpage checks
-% this flag and becomes a no-op if set. This works regardless of how
-% titlesec implements chapter page breaks internally.
+% Solution: Use etoolbox to patch \chapter with a conditional clearpage.
+% When \manualpart is called, it sets a flag. The patched \chapter checks
+% this flag and skips its internal clearpage if the flag is set.
 
-% Boolean flag: set by \manualpart, checked by \clearpage
+% Boolean flag: set by \manualpart, checked by patched \chapter
 \newbool{aftermanualpart}
 \boolfalse{aftermanualpart}
 
-% Save original clearpage and cleardoublepage
-\let\realclearpage\clearpage
-\let\realcleardoublepage\cleardoublepage
-
-% Redefine clearpage to be conditionally suppressible
-\renewcommand{\clearpage}{%
+% Conditional clearpage that respects the aftermanualpart flag
+\newcommand{\conditionalclearpage}{%
   \ifbool{aftermanualpart}{%
     \global\boolfalse{aftermanualpart}%   % Clear the flag
     % Skip clearpage - chapter stays on same page as part
   }{%
-    \realclearpage%                       % Normal page break
+    \clearpage%                           % Normal page break
   }%
 }
 
-% Redefine cleardoublepage similarly (for twoside documents)
-\renewcommand{\cleardoublepage}{%
-  \ifbool{aftermanualpart}{%
-    \global\boolfalse{aftermanualpart}%   % Clear the flag
-    % Skip cleardoublepage - chapter stays on same page as part
-  }{%
-    \realcleardoublepage%                 % Normal page break
-  }%
-}
+% Patch \chapter to use conditional clearpage instead of unconditional
+% The book class \chapter starts with: \if@openright\cleardoublepage\else\clearpage\fi
+% We patch both possibilities
+\makeatletter
+\patchcmd{\chapter}{\clearpage}{\conditionalclearpage}{}{}
+\patchcmd{\chapter}{\cleardoublepage}{\conditionalclearpage}{}{}
+\makeatother
 
 % Custom \manualpart command
 % Renders part title on its own page, chapter follows on same page
-% Uses \realclearpage to ensure it actually starts a new page
+% NOTE: The Lua filter replaces the # Part header entirely with \manualpart{},
+% so Pandoc does NOT generate a separate \chapter or \part for it.
 \newcommand{\manualpart}[1]{%
-  \realclearpage%                       % Start on new page (use real version!)
+  \clearpage%                           % Start on new page
   \thispagestyle{empty}%                % No header/footer on part page
   \refstepcounter{part}%                % Increment part counter for TOC
   \addcontentsline{toc}{part}{#1}%      % Add to TOC as part-level entry
-  \vspace*{0.25in}%                     % Small space from top
+  \vspace*{0.25in}%                     % Small space from top (was 3cm)
   {\centering\Huge\bfseries #1\par}%    % Large bold centered title
-  \vspace{0.5in}%                       % Modest space after title
+  \vspace{0.5in}%                       % Modest space after title (was 2cm)
   \nobreak%                             % Prevent page break here
-  \global\booltrue{aftermanualpart}%    % Set flag - suppress next clearpage
+  \global\booltrue{aftermanualpart}%    % Set flag for next \chapter
 }
 
 % Legacy alias for backward compatibility
