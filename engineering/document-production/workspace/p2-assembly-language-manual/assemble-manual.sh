@@ -109,7 +109,9 @@ assemble_section "front-matter.md" "Front Matter"
 echo "  Adding: Part I marker"
 cat >> "$OUTPUT" << 'EOF'
 
-# Part I: Architectural Foundation
+```{=latex}
+\part{Architectural Foundation}
+```
 
 EOF
 
@@ -125,7 +127,9 @@ assemble_section "part-i/chapter-06-address-modes.md" "Chapter 6: Address Modes"
 echo "  Adding: Part II marker"
 cat >> "$OUTPUT" << 'EOF'
 
-# Part II: Instruction Set Reference
+```{=latex}
+\part{Instruction Set Reference}
+```
 
 EOF
 
@@ -164,7 +168,9 @@ assemble_section "part-ii/special-registers.md" "Special Registers"
 echo "  Adding: Part III marker"
 cat >> "$OUTPUT" << 'EOF'
 
-# Part III: Reference Tables
+```{=latex}
+\part{Reference Tables}
+```
 
 EOF
 

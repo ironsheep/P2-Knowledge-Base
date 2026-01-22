@@ -315,14 +315,10 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*
 
+
 ```{=latex}
-% Reset chapter counter before Part I begins
-% Ensures Chapter 1 figures are numbered 1.x, not 0.x
-\setcounter{chapter}{0}
+\part{Architectural Foundation}
 ```
-
-
-# Part I: Architectural Foundation
 
 # Chapter 1: The P2 Execution Model
 
@@ -4237,7 +4233,9 @@ For time-critical inner loops:
 <!-- End of Chapter 6 -->
 
 
-# Part II: Instruction Set Reference
+```{=latex}
+\part{Instruction Set Reference}
+```
 
 # Instruction Categories {#instruction-categories}
 
@@ -17832,7 +17830,9 @@ Timeout detection:
 **Per-Cog Independence**: Each cog has its own independent copy of all special registers. Changes in one cog do not affect other cogs' registers, enabling parallel independent operation.
 
 
-# Part III: Reference Tables
+```{=latex}
+\part{Reference Tables}
+```
 
 # Appendix A: Instruction Encoding Master Table
 

@@ -153,24 +153,29 @@
 \newcommand{\HubMemoryLayoutDiagram}{%
 \begin{center}
 \begin{tikzpicture}[
+    % Memory blocks: no individual borders - we draw one outer border
     membox/.style={
         rectangle,
-        draw=diagram-border,
-        minimum width=3.8cm,
+        minimum width=3.6cm,
         align=center,
         font=\scriptsize
     },
     splitbox/.style={
         rectangle,
-        draw=diagram-border,
-        minimum width=1.8cm,
+        minimum width=1.8cm,  % Exactly half of membox width (3.6cm)
         align=center,
         font=\scriptsize
     },
-    addr/.style={
+    % Address labels positioned outside border
+    addrleft/.style={
         font=\tiny\ttfamily,
         text=diagram-text,
         anchor=east
+    },
+    addrright/.style={
+        font=\tiny\ttfamily,
+        text=diagram-text,
+        anchor=west
     },
     title/.style={
         font=\small\bfseries,
@@ -197,77 +202,83 @@
 % Column positions
 \def\leftcol{-3.2}
 \def\rightcol{3.2}
+\def\boxwidth{1.8}
+\def\borderpad{0.1}
 
 % ===== TITLES =====
-\node[title] at (\leftcol, 6.8) {Spin2+PASM Program};
-\node[title] at (\rightcol, 6.8) {PASM-Only Program};
+\node[title] at (\leftcol, 7.0) {Spin2+PASM Program};
+\node[title] at (\rightcol, 7.0) {PASM-Only Program};
 
 % ===== LEFT COLUMN: Spin2+PASM =====
+% Order: $00000 at TOP, highest addresses at BOTTOM
 
-% Debug region (top, dashed to show optional)
-\node[membox, minimum height=0.8cm, fill=hub-debug, dashed] (ldebug) at (\leftcol, 6.0) {Debug Region\\(16 KB)};
-\node[addr] at (\leftcol-2.1, 6.3) {\$FC000};
-
-% Free space
-\node[membox, minimum height=1.4cm, fill=hub-free] (lfree) at (\leftcol, 4.85) {Free Space};
-
-% VAR variables
-\node[membox, minimum height=0.7cm, fill=hub-data] (lvar) at (\leftcol, 3.8) {VAR Variables};
-
-% Spin bytecode + PASM DAT
-\node[membox, minimum height=1.4cm, fill=hub-code] (lcode) at (\leftcol, 2.75) {Spin Bytecode\\+ PASM DAT};
-\node[addr] at (\leftcol-2.1, 3.3) {\$00400};
+% System header (TOP - address $00000)
+\node[membox, minimum height=0.7cm, fill=hub-header] (lheader) at (\leftcol, 6.15) {System Header\\CLKFREQ/CLKMODE};
 
 % Interpreter space
-\node[membox, minimum height=0.9cm, fill=hub-interp] (linterp) at (\leftcol, 1.6) {Interpreter\\Space};
-\node[addr] at (\leftcol-2.1, 1.9) {\$00040};
+\node[membox, minimum height=0.9cm, fill=hub-interp] (linterp) at (\leftcol, 5.3) {Interpreter\\Space};
 
-% System header
-\node[membox, minimum height=0.7cm, fill=hub-header] (lheader) at (\leftcol, 0.85) {System Header\\CLKFREQ/CLKMODE};
-\node[addr] at (\leftcol-2.1, 0.85) {\$00000};
+% Spin bytecode + PASM DAT
+\node[membox, minimum height=1.4cm, fill=hub-code] (lcode) at (\leftcol, 4.05) {Spin Bytecode\\+ PASM DAT};
 
-% Bottom address
-\node[addr] at (\leftcol-2.1, 5.65) {\$7FFFF};
-
-% ===== RIGHT COLUMN: PASM-Only =====
-
-% Debug region (top, dashed to show optional)
-\node[membox, minimum height=0.8cm, fill=hub-debug, dashed] (rdebug) at (\rightcol, 6.0) {Debug Region\\(16 KB)};
-\node[addr] at (\rightcol+2.1, 6.3) {\$FC000};
+% VAR variables
+\node[membox, minimum height=0.7cm, fill=hub-data] (lvar) at (\leftcol, 2.95) {VAR Variables};
 
 % Free space
-\node[membox, minimum height=2.1cm, fill=hub-free] (rfree) at (\rightcol, 4.5) {Free Space};
+\node[membox, minimum height=1.4cm, fill=hub-free] (lfree) at (\leftcol, 1.85) {Free Space};
 
-% Program code (main area)
-\node[membox, minimum height=2.0cm, fill=hub-code] (rcode) at (\rightcol, 2.4) {Program Code\\and Data};
+% Debug region (BOTTOM - highest address, dashed to show optional)
+\node[membox, minimum height=0.8cm, fill=hub-debug, dashed, draw=diagram-border] (ldebug) at (\leftcol, 0.7) {Debug Region\\(16 KB)};
+
+% Draw outer border AFTER fills (so border is on top)
+\draw[diagram-border, thick] (\leftcol-\boxwidth-\borderpad, 0.25) rectangle (\leftcol+\boxwidth+\borderpad, 6.55);
+
+% Address labels OUTSIDE the border (to the left)
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 6.15) {\$00000};
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 5.6) {\$00040};
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 4.6) {\$00400};
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 1.1) {\$FC000};
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 0.35) {\$FFFFF};
+
+% ===== RIGHT COLUMN: PASM-Only =====
+% Order: $00000 at TOP, highest addresses at BOTTOM
 
 % Top region with split for clock-setter option
-% Left half: with clock-setter
-\node[splitbox, minimum height=1.0cm, fill=hub-header, anchor=east] (rclk) at (\rightcol, 0.95) {Clock-Setter\\(16 longs)};
-% Right half: without clock-setter (program starts immediately)
-\node[splitbox, minimum height=1.0cm, fill=hub-code, anchor=west] (rnoclk) at (\rightcol, 0.95) {Program\\Code};
+% Left half: with clock-setter (non-RCFAST)
+\node[splitbox, minimum height=1.0cm, fill=hub-header, anchor=east] (rclk) at (\rightcol, 5.95) {Clock-Setter\\(16 longs)};
+% Right half: without clock-setter (RCFAST - program starts immediately)
+\node[splitbox, minimum height=1.0cm, fill=hub-code, anchor=west] (rnoclk) at (\rightcol, 5.95) {Program\\Code};
+
+% Program code (main area)
+\node[membox, minimum height=2.0cm, fill=hub-code] (rcode) at (\rightcol, 4.2) {Program Code\\and Data};
+
+% Free space
+\node[membox, minimum height=2.1cm, fill=hub-free] (rfree) at (\rightcol, 2.0) {Free Space};
+
+% Debug region (BOTTOM - highest address, dashed to show optional)
+\node[membox, minimum height=0.8cm, fill=hub-debug, dashed, draw=diagram-border] (rdebug) at (\rightcol, 0.7) {Debug Region\\(16 KB)};
+
+% Draw outer border AFTER fills
+\draw[diagram-border, thick] (\rightcol-\boxwidth-\borderpad, 0.25) rectangle (\rightcol+\boxwidth+\borderpad, 6.55);
 
 % Vertical divider line in split section
-\draw[diagram-border] (\rightcol, 0.45) -- (\rightcol, 1.45);
+\draw[diagram-border] (\rightcol, 5.45) -- (\rightcol, 6.45);
 
-% Labels for split
-\node[subtitle] at (\rightcol-0.95, 1.6) {non-RCFAST};
-\node[subtitle] at (\rightcol+0.95, 1.6) {RCFAST};
+% Labels for split (above the boxes)
+\node[subtitle] at (\rightcol-0.9, 6.6) {non-RCFAST};
+\node[subtitle] at (\rightcol+0.9, 6.6) {RCFAST};
 
-% Address labels for right column
-\node[addr] at (\rightcol+2.1, 0.6) {\$00000};
-\node[addr] at (\rightcol+2.1, 5.3) {\$7FFFF};
+% Address labels OUTSIDE the border (to the right)
+\node[addrright] at (\rightcol+\boxwidth+0.2, 6.35) {\$00000};
+\node[addrright] at (\rightcol+\boxwidth+0.2, 1.1) {\$FC000};
+\node[addrright] at (\rightcol+\boxwidth+0.2, 0.35) {\$FFFFF};
 
 % ===== ANNOTATIONS =====
-\node[annotation, text width=3.5cm, align=center] at (\leftcol, -0.2) {Interpreter runs\\in COG RAM};
-\node[annotation, text width=3.5cm, align=center] at (\rightcol, -0.2) {No interpreter\\overhead};
+\node[annotation, text width=3.5cm, align=center] at (\leftcol, -0.3) {Interpreter runs\\in COG RAM};
+\node[annotation, text width=3.5cm, align=center] at (\rightcol, -0.3) {No interpreter\\overhead};
 
 % Debug region note
-\node[annotation] at (0, 6.0) {\textit{(when debugging)}};
-
-% Outer borders
-\draw[diagram-border, thick] (\leftcol-2.0, 0.5) rectangle (\leftcol+2.0, 6.4);
-\draw[diagram-border, thick] (\rightcol-2.0, 0.45) rectangle (\rightcol+2.0, 6.4);
+\node[annotation] at (0, 0.7) {\textit{(when debugging)}};
 
 \end{tikzpicture}
 \end{center}
