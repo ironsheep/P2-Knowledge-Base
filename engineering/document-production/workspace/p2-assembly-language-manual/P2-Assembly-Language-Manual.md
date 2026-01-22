@@ -317,7 +317,7 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 
 
 ```{=latex}
-\part{Architectural Foundation}
+\manualpart{Architectural Foundation}
 ```
 
 # Chapter 1: The P2 Execution Model
@@ -4234,7 +4234,7 @@ For time-critical inner loops:
 
 
 ```{=latex}
-\part{Instruction Set Reference}
+\manualpart{Instruction Set Reference}
 ```
 
 # Instruction Categories {#instruction-categories}
@@ -17820,7 +17820,7 @@ Timeout detection:
 
 
 ```{=latex}
-\part{Reference Tables}
+\manualpart{Reference Tables}
 ```
 
 # Appendix A: Instruction Encoding Master Table

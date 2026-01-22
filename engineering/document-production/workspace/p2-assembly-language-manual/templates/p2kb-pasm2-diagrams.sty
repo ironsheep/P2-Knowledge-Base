@@ -205,9 +205,9 @@
 \def\boxwidth{1.8}
 \def\borderpad{0.1}
 
-% ===== TITLES =====
-\node[title] at (\leftcol, 7.0) {Spin2+PASM Program};
-\node[title] at (\rightcol, 7.0) {PASM-Only Program};
+% ===== TITLES (above the border) =====
+\node[title] at (\leftcol, 7.4) {Spin2+PASM Program};
+\node[title] at (\rightcol, 7.4) {PASM-Only Program};
 
 % ===== LEFT COLUMN: Spin2+PASM =====
 % Order: $00000 at TOP, highest addresses at BOTTOM
@@ -231,10 +231,12 @@
 \node[membox, minimum height=0.8cm, fill=hub-debug, dashed, draw=diagram-border] (ldebug) at (\leftcol, 0.7) {Debug Region\\(16 KB)};
 
 % Draw outer border AFTER fills (so border is on top)
-\draw[diagram-border, thick] (\leftcol-\boxwidth-\borderpad, 0.25) rectangle (\leftcol+\boxwidth+\borderpad, 6.55);
+% Extended to 7.0 to accommodate RCFAST/non-RCFAST labels inside
+\draw[diagram-border, thick] (\leftcol-\boxwidth-\borderpad, 0.25) rectangle (\leftcol+\boxwidth+\borderpad, 7.0);
 
 % Address labels OUTSIDE the border (to the left)
-\node[addrleft] at (\leftcol-\boxwidth-0.2, 6.15) {\$00000};
+% $00000 at top of header box (6.15 center + 0.35 half-height = 6.5)
+\node[addrleft] at (\leftcol-\boxwidth-0.2, 6.5) {\$00000};
 \node[addrleft] at (\leftcol-\boxwidth-0.2, 5.6) {\$00040};
 \node[addrleft] at (\leftcol-\boxwidth-0.2, 4.6) {\$00400};
 \node[addrleft] at (\leftcol-\boxwidth-0.2, 1.1) {\$FC000};
@@ -259,17 +261,19 @@
 \node[membox, minimum height=0.8cm, fill=hub-debug, dashed, draw=diagram-border] (rdebug) at (\rightcol, 0.7) {Debug Region\\(16 KB)};
 
 % Draw outer border AFTER fills
-\draw[diagram-border, thick] (\rightcol-\boxwidth-\borderpad, 0.25) rectangle (\rightcol+\boxwidth+\borderpad, 6.55);
+% Extended to 7.0 to accommodate RCFAST/non-RCFAST labels inside
+\draw[diagram-border, thick] (\rightcol-\boxwidth-\borderpad, 0.25) rectangle (\rightcol+\boxwidth+\borderpad, 7.0);
 
-% Vertical divider line in split section
-\draw[diagram-border] (\rightcol, 5.45) -- (\rightcol, 6.45);
+% Vertical divider line in split section (extended up to labels)
+\draw[diagram-border] (\rightcol, 5.45) -- (\rightcol, 6.85);
 
-% Labels for split (above the boxes)
-\node[subtitle] at (\rightcol-0.9, 6.6) {non-RCFAST};
-\node[subtitle] at (\rightcol+0.9, 6.6) {RCFAST};
+% Labels for split (inside border, above the boxes)
+\node[subtitle] at (\rightcol-0.9, 6.75) {non-RCFAST};
+\node[subtitle] at (\rightcol+0.9, 6.75) {RCFAST};
 
 % Address labels OUTSIDE the border (to the right)
-\node[addrright] at (\rightcol+\boxwidth+0.2, 6.35) {\$00000};
+% $00000 at top of split box (5.95 center + 0.5 half-height = 6.45)
+\node[addrright] at (\rightcol+\boxwidth+0.2, 6.45) {\$00000};
 \node[addrright] at (\rightcol+\boxwidth+0.2, 1.1) {\$FC000};
 \node[addrright] at (\rightcol+\boxwidth+0.2, 0.35) {\$FFFFF};
 

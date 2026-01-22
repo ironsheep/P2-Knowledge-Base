@@ -110,7 +110,7 @@ echo "  Adding: Part I marker"
 cat >> "$OUTPUT" << 'EOF'
 
 ```{=latex}
-\part{Architectural Foundation}
+\manualpart{Architectural Foundation}
 ```
 
 EOF
@@ -128,7 +128,7 @@ echo "  Adding: Part II marker"
 cat >> "$OUTPUT" << 'EOF'
 
 ```{=latex}
-\part{Instruction Set Reference}
+\manualpart{Instruction Set Reference}
 ```
 
 EOF
@@ -169,7 +169,7 @@ echo "  Adding: Part III marker"
 cat >> "$OUTPUT" << 'EOF'
 
 ```{=latex}
-\part{Reference Tables}
+\manualpart{Reference Tables}
 ```
 
 EOF
