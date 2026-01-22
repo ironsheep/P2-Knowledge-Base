@@ -77,7 +77,14 @@
 % ==================== FIGURE NUMBERING ====================
 % Chapter-based figure numbering: Figure 1.1, 1.2, 2.1, etc.
 % Implements Rayman review item C1
-\counterwithin{figure}{chapter}
+%
+% Using explicit setup instead of \counterwithin for reliability:
+% 1. Reset figure counter at each chapter
+% 2. Format figure number as chapter.figure
+\makeatletter
+\@addtoreset{figure}{chapter}
+\makeatother
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
 
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=0.75in,left=1in,right=1in]{geometry}
