@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-21T23:11:29.877152",
-    "total_entries": 1002,
+    "generated": "2026-01-22T00:32:30.599695",
+    "total_entries": 1003,
     "total_categories": 47,
     "total_aliases": 933,
     "multi_target_aliases": 54,
@@ -3667,11 +3667,11 @@
     },
     "p2kbArchSmartPin11100SyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml",
-      "mtime": 1764449566
+      "mtime": 1769041891
     },
     "p2kbArchSmartPin11101SyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
-      "mtime": 1764449566
+      "mtime": 1769041891
     },
     "p2kbArchSmartPin11110AsyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
@@ -3681,9 +3681,13 @@
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml",
       "mtime": 1764449566
     },
+    "p2kbArchSpiImplementationGuide": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1769041891
+    },
     "p2kbArchSmartPinPatterns": {
       "path": "deliverables/ai/P2/architecture/smart_pin_patterns.yaml",
-      "mtime": 1764449566
+      "mtime": 1769041891
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
@@ -7451,7 +7455,7 @@
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",
-      "mtime": 1764449566
+      "mtime": 1769041891
     },
     "p2kbSpin2VarClkfreq": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/clkfreq.yaml",
