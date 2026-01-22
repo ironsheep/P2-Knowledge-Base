@@ -11,6 +11,23 @@ constants:
   pasm2: "P_SYNC_RX"  # Same constants work in PASM2
   mode_bits: "%11101"  # Binary value for reference
 
+# CRITICAL REQUIREMENTS - READ FIRST
+critical_requirements:
+  clock_routing: |
+    MANDATORY FOR SPI: The B-input provides the clock signal. By default, B-input
+    reads from the LOCAL pin (P_LOCAL_B), which is useless for SPI where the clock
+    is on a DIFFERENT pin.
+
+    YOU MUST ADD a pin-selection constant to route clock from the correct pin:
+    - P_PLUS1_B  = clock on pin+1 (most common for SPI)
+    - P_MINUS1_B = clock on pin-1
+    - P_PLUS2_B, P_PLUS3_B, P_MINUS2_B, P_MINUS3_B for other offsets
+
+    WRONG: mode := P_SYNC_RX                           ' NO CLOCK ROUTING!
+    RIGHT: mode := P_SYNC_RX | P_PLUS1_B               ' Clock from adjacent pin
+
+    Without pin routing, the smart pin will not see clock edges and will not receive data.
+
 # Operation
 operation: |
   Receives 1-32 bits synchronized with external clock. LSB first.

@@ -1,0 +1,182 @@
+# SPI Implementation Guide for P2 Smart Pins
+# CRITICAL: This file explains the most common mistake when implementing SPI
+
+concept: spi_smart_pin_implementation
+category: smart_pins
+priority: critical
+
+# THE MOST IMPORTANT THING TO KNOW
+critical_requirement: |
+  P2 smart pins for sync serial (SPI) require PIN JOINING to work.
+
+  The clock signal comes through the pin's B-input. By default, B-input reads
+  from the LOCAL pin (P_LOCAL_B = 0), which means the pin reads its own state
+  as the clock - this is useless for SPI!
+
+  YOU MUST add a pin-selection constant to route the clock from the actual
+  clock pin to the data pin's B-input:
+
+    P_PLUS1_B  - B-input from pin+1
+    P_MINUS1_B - B-input from pin-1
+    P_PLUS2_B  - B-input from pin+2
+    P_MINUS2_B - B-input from pin-2
+    P_PLUS3_B  - B-input from pin+3
+    P_MINUS3_B - B-input from pin-3
+
+common_mistake:
+  wrong_code: |
+    ' THIS WILL NOT WORK - no clock routing!
+    mode := P_SYNC_TX | P_OE
+    WRPIN(mosi_pin, mode)
+
+  correct_code: |
+    ' CORRECT - clock routed from adjacent pin
+    mode := P_SYNC_TX | P_OE | P_PLUS1_B
+    WRPIN(mosi_pin, mode)
+
+  explanation: |
+    Without P_PLUS1_B (or similar), the MOSI pin's B-input defaults to reading
+    from itself (P_LOCAL_B), so it never sees clock edges and never shifts data.
+
+recommended_pin_layout:
+  description: |
+    Place SPI pins adjacent to each other so pin-joining constants can reach
+    the clock. Common layouts:
+
+  layout_1:
+    comment: "Clock in middle - MOSI and MISO can both use small offsets"
+    pins:
+      MOSI: "N-1 (use P_PLUS1_B)"
+      CLK:  "N"
+      MISO: "N+1 (use P_MINUS1_B)"
+
+  layout_2:
+    comment: "Clock first - all data pins use P_MINUS offsets"
+    pins:
+      CLK:  "N"
+      MOSI: "N+1 (use P_MINUS1_B)"
+      MISO: "N+2 (use P_MINUS2_B)"
+
+  layout_3:
+    comment: "Clock last - all data pins use P_PLUS offsets"
+    pins:
+      MOSI: "N (use P_PLUS2_B)"
+      MISO: "N+1 (use P_PLUS1_B)"
+      CLK:  "N+2"
+
+complete_spi_master_example:
+  spin2: |
+    CON
+      ' Pin assignments - CLK in middle
+      SPI_MOSI = 40
+      SPI_CLK  = 41
+      SPI_MISO = 42
+      SPI_CS   = 43
+
+    PUB spi_init()
+      ' Clock generator using P_TRANSITION
+      PINSTART(SPI_CLK, P_TRANSITION | P_OE, clk_period, 0)
+
+      ' MOSI: sync TX with clock from pin+1
+      PINSTART(SPI_MOSI, P_SYNC_TX | P_OE | P_PLUS1_B, %1_00111, 0)
+
+      ' MISO: sync RX with clock from pin-1
+      PINSTART(SPI_MISO, P_SYNC_RX | P_MINUS1_B, %0_00111, 0)
+
+      ' CS as standard output
+      PINHIGH(SPI_CS)
+
+    PUB spi_transfer(tx_byte) : rx_byte
+      PINLOW(SPI_CS)                          ' Assert CS
+      WYPIN(SPI_MOSI, tx_byte)                ' Load TX data
+      WYPIN(SPI_CLK, 16)                      ' Generate 16 transitions (8 clocks)
+      REPEAT UNTIL PINREAD(SPI_MISO) < 0      ' Wait for RX complete
+      rx_byte := RDPIN(SPI_MISO) >> 24        ' Read and right-justify
+      PINHIGH(SPI_CS)                         ' Deassert CS
+
+  pasm2: |
+    DAT
+            ORG
+
+    ' Pin definitions
+    spi_mosi      LONG    40
+    spi_clk       LONG    41
+    spi_miso      LONG    42
+    spi_cs        LONG    43
+
+    ' Mode configurations with PIN JOINING
+    mosi_mode     LONG    P_SYNC_TX | P_OE | P_PLUS1_B   ' Clock from pin+1
+    miso_mode     LONG    P_SYNC_RX | P_MINUS1_B         ' Clock from pin-1
+    clk_mode      LONG    P_TRANSITION | P_OE
+
+    spi_init
+            ' Initialize clock generator
+            MOV     pa, spi_clk
+            WRPIN   clk_mode, pa
+            WXPIN   ##clk_period, pa
+            DIRH    pa
+
+            ' Initialize MOSI with clock routing
+            MOV     pa, spi_mosi
+            WRPIN   mosi_mode, pa
+            WXPIN   #%1_00111, pa              ' Start-stop, 8-bit
+            DIRH    pa
+
+            ' Initialize MISO with clock routing
+            MOV     pa, spi_miso
+            WRPIN   miso_mode, pa
+            WXPIN   #%0_00111, pa              ' Pre-edge, 8-bit
+            DIRH    pa
+
+            ' CS high (inactive)
+            MOV     pa, spi_cs
+            DIRH    pa
+            OUTH    pa
+            RET
+
+    ' Transfer one byte, returns received byte in PA
+    spi_transfer
+            ' Assert CS
+            MOV     pa, spi_cs
+            OUTL    pa
+
+            ' Load TX data
+            MOV     pa, spi_mosi
+            WYPIN   tx_data, pa
+
+            ' Generate clock transitions
+            MOV     pa, spi_clk
+            WYPIN   #16, pa                    ' 16 transitions = 8 clocks
+
+            ' Wait for RX complete
+            MOV     pa, spi_miso
+    .wait   TESTP   pa                  WC
+      IF_NC JMP     #.wait
+            RDPIN   rx_data, pa
+            SHR     rx_data, #24               ' Right-justify
+
+            ' Deassert CS
+            MOV     pa, spi_cs
+            OUTH    pa
+            RET
+
+    ' Variables
+    tx_data       RES     1
+    rx_data       RES     1
+
+related_files:
+  - architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml
+  - architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml
+  - architecture/smart_pin_patterns.yaml
+  - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
+
+search_keywords:
+  - SPI
+  - MOSI
+  - MISO
+  - synchronous serial
+  - pin joining
+  - P_PLUS1_B
+  - P_MINUS1_B
+  - clock routing
+  - smart pin serial

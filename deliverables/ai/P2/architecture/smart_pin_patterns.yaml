@@ -11,45 +11,87 @@ documentation_source: enhanced
 documentation_level: comprehensive
 
 spi_patterns:
+  # CRITICAL: SPI requires pin-joining constants (P_PLUS1_B etc.) to route
+  # the clock signal from an adjacent pin to the data pin's B-input.
+  # Without this, the smart pin will not see clock edges!
+
   spi_clock_generation:
     description: Generate continuous SPI clock using transition mode
-    mode: P_TRANSITION_OUTPUT
+    mode: P_TRANSITION
     setup: |
-      ' Configure SPI clock pin
-      wrpin   ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN
-      wxpin   #1, #SPI_CLK_PIN        ' Timebase = sysclk/2
-      wypin   #0, #SPI_CLK_PIN        ' Start transitions
-      dirh    #SPI_CLK_PIN             ' Enable smart pin
+      ' Configure SPI clock pin (e.g., pin 40)
+      wrpin   ##P_TRANSITION | P_OE, #SPI_CLK_PIN
+      wxpin   ##clk_period, #SPI_CLK_PIN  ' Clock period in sysclks
+      dirh    #SPI_CLK_PIN                 ' Enable smart pin
+      wypin   #16, #SPI_CLK_PIN            ' Generate 16 transitions (8 bits)
     source: flash_loader.spin2
-    
+
   spi_data_output:
     description: SPI MOSI using synchronous serial transmit
     mode: P_SYNC_TX
+    critical: |
+      MUST use P_PLUS1_B or P_MINUS1_B to route clock from adjacent pin!
+      Example pin layout: MOSI=41, CLK=40 → use P_MINUS1_B (clock is pin-1)
     setup: |
-      ' Configure MOSI pin
-      wrpin   ##P_SYNC_TX | P_OE, #SPI_MOSI_PIN
-      wxpin   ##SCK_PIN<<24 | 8, #SPI_MOSI_PIN  ' Clock pin + 8 bits
+      ' Configure MOSI pin (pin 41, clock on pin 40)
+      ' P_MINUS1_B routes B-input from pin-1 (the clock pin)
+      wrpin   ##P_SYNC_TX | P_OE | P_MINUS1_B, #SPI_MOSI_PIN
+      wxpin   #%1_00111, #SPI_MOSI_PIN    ' Start-stop mode, 8 bits
       dirh    #SPI_MOSI_PIN
-      
+
       ' Send byte
       wypin   data_byte, #SPI_MOSI_PIN
-      waitx   #16                      ' Wait for completion
+      ' Clock pin generates transitions, MOSI shifts data
     source: flash_loader.spin2
-    
+
   spi_data_input:
     description: SPI MISO using synchronous serial receive
     mode: P_SYNC_RX
+    critical: |
+      MUST use P_PLUS1_B or P_MINUS1_B to route clock from adjacent pin!
+      Example pin layout: MISO=42, CLK=40 → use P_MINUS2_B (clock is pin-2)
     setup: |
-      ' Configure MISO pin  
-      wrpin   ##P_SYNC_RX, #SPI_MISO_PIN
-      wxpin   ##SCK_PIN<<24 | 8, #SPI_MISO_PIN
+      ' Configure MISO pin (pin 42, clock on pin 40)
+      ' P_MINUS2_B routes B-input from pin-2 (the clock pin)
+      wrpin   ##P_SYNC_RX | P_MINUS2_B, #SPI_MISO_PIN
+      wxpin   #%0_00111, #SPI_MISO_PIN    ' Pre-edge sampling, 8 bits
       dirh    #SPI_MISO_PIN
-      
-      ' Receive byte
-      wypin   #0, #SPI_MISO_PIN       ' Trigger receive
-      waitx   #16
-      rdpin   data_byte, #SPI_MISO_PIN
+
+      ' Receive byte (clock pin triggers reception)
+      ' Wait for IN flag then read
+      testp   #SPI_MISO_PIN         wc
+      rdpin   data_byte, #SPI_MISO_PIN   ' Read and acknowledge
+      shr     data_byte, #24              ' Right-justify 8-bit data
     source: flash_loader.spin2
+
+  spi_full_duplex:
+    description: Complete SPI master with CLK, MOSI, MISO on adjacent pins
+    pin_layout: |
+      Recommended adjacent pin layout:
+        Pin N   = CLK  (P_TRANSITION mode)
+        Pin N+1 = MOSI (P_SYNC_TX | P_MINUS1_B - clock from pin-1)
+        Pin N+2 = MISO (P_SYNC_RX | P_MINUS2_B - clock from pin-2)
+    setup: |
+      ' Example: CLK=40, MOSI=41, MISO=42
+      CON
+        SPI_CLK  = 40
+        SPI_MOSI = 41
+        SPI_MISO = 42
+
+      ' Clock generator
+      wrpin   ##P_TRANSITION | P_OE, #SPI_CLK
+      wxpin   ##clk_period, #SPI_CLK
+      dirh    #SPI_CLK
+
+      ' MOSI: clock from pin-1
+      wrpin   ##P_SYNC_TX | P_OE | P_MINUS1_B, #SPI_MOSI
+      wxpin   #%1_00111, #SPI_MOSI       ' Start-stop, 8-bit
+      dirh    #SPI_MOSI
+
+      ' MISO: clock from pin-2
+      wrpin   ##P_SYNC_RX | P_MINUS2_B, #SPI_MISO
+      wxpin   #%0_00111, #SPI_MISO       ' Pre-edge, 8-bit
+      dirh    #SPI_MISO
 
 pwm_patterns:
   motor_pwm_with_deadtime:
