@@ -9,8 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: Bu er new streamer command to be issued on final NCO rollover of current
-  command, continuing phase.                           2+
+description: Buffer new streamer command to execute on final NCO rollover, continuing phase.
 flags_affected:
   C: No effect
   Z: No effect
@@ -29,3 +28,45 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.289286'
 category: Streamer
 oneliner: Buffer new streamer command, continuing phase
+
+examples:
+- context: Seamless video line chaining
+  code: |
+    ' Chain video segments without gaps
+    xinit   m_visible, #0     ' Start 640 visible pixels
+    xcont   m_front, sync0    ' Queue 16 front porch
+    xcont   m_sync, sync1     ' Queue 96 sync pulse  
+    xcont   m_back, sync0     ' Queue 48 back porch
+    waitxfi
+  source: VGA driver pattern
+
+- context: Continuous audio streaming
+  code: |
+    ' Seamless DAC output - phase continuity prevents pops
+    rdfast  #0, ##audio_buffer
+    xinit   audio_mode, #0     ' Start first buffer
+    xcont   audio_mode, #0     ' Chain next seamlessly
+  source: Audio streaming pattern
+
+patterns:
+- name: Command Chaining
+  description: |
+    XCONT buffers a command that executes when the current command's
+    count expires. Phase continuity prevents audio pops and timing glitches.
+    Unlike XZERO, the NCO phase continues without reset.
+
+notes:
+- Phase continues from previous command (no reset)
+- Use for seamless streaming where timing continuity matters
+- Must have active command - use XINIT to start initially
+- Stalls until command buffer is empty if buffer is full
+
+related_instructions:
+- XINIT: Start immediately with zero phase
+- XZERO: Buffer command with phase zero
+- WAITXFI: Wait for streamer to finish
+- WAITXMT: Wait for command buffer empty
+
+see_also:
+  - ../../architecture/streamer/overview.yaml
+  - ../../architecture/streamer/nco-timing.yaml

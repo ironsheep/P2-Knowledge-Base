@@ -1,0 +1,135 @@
+# Streamer Overview
+# Core concepts and capabilities - start here for general understanding
+
+component: streamer
+category: dma_engine
+description: |
+  High-speed data streaming engine with NCO timing control. Operates 
+  independently of COG execution for zero-overhead I/O operations.
+
+# What the streamer does
+capabilities:
+  - Stream data from Hub memory to pins/DACs at system clock rates
+  - Capture pin states and ADC readings to Hub memory
+  - Generate video signals (VGA, HDMI, composite)
+  - Output multi-channel audio via DAC
+  - Perform Goertzel frequency analysis in hardware
+  - Synthesize waveforms via DDS
+
+# Resources per COG
+resources_per_cog:
+  nco: "One 32-bit phase accumulator"
+  command_buffer: "Single-level (one pending command)"
+  dac_channels: "Four 8-bit channels (X0, X1, X2, X3)"
+  goertzel: "One analyzer unit"
+  lut_access: "Full access to COG's 512-entry LUT"
+
+# Data flow paths (which mode categories to use)
+data_paths:
+  hub_to_pins:
+    description: "Output Hub data to pins/DACs"
+    modes: "RDFAST modes (%1000-%1011)"
+    setup: "RDFAST instruction before streamer command"
+    
+  immediate_to_pins:
+    description: "Output S operand data to pins/DACs"
+    modes: "Immediate modes (%0100-%0111)"
+    setup: "Data in S operand"
+    
+  lut_lookup:
+    description: "Use data as LUT index, output LUT content"
+    modes: "LUT modes (%0000-%0011, %0111)"
+    setup: "Palette/table in LUT RAM"
+    
+  pins_to_hub:
+    description: "Capture pin states to Hub"
+    modes: "WRFAST modes (%1100-%1111)"
+    setup: "WRFAST instruction before streamer command"
+    
+  rgb_video:
+    description: "Hub data through colorspace converter"
+    modes: "RGB modes (%1011 with config)"
+    setup: "RDFAST + colorspace converter config"
+    
+  dds_goertzel:
+    description: "Waveform synthesis with frequency analysis"
+    modes: "DDS/Goertzel (%1111_x111)"
+    setup: "Sine/cosine table in LUT"
+
+# Instruction quick reference
+instructions:
+  SETXFRQ:
+    syntax: "SETXFRQ {#}D"
+    purpose: "Set NCO frequency (timing rate)"
+    details: nco-timing.yaml
+    
+  XINIT:
+    syntax: "XINIT {#}D,{#}S"
+    purpose: "Start immediately, zero phase"
+    note: "Use to begin streaming"
+    
+  XCONT:
+    syntax: "XCONT {#}D,{#}S"
+    purpose: "Buffer command, continue phase"
+    note: "Seamless chaining without gaps"
+    
+  XZERO:
+    syntax: "XZERO {#}D,{#}S"
+    purpose: "Buffer command, zero phase"
+    note: "Use at video line boundaries"
+    
+  XSTOP:
+    syntax: "XSTOP"
+    purpose: "Stop immediately"
+    note: "Equivalent to XINIT #0,#0"
+    
+  GETXACC:
+    syntax: "GETXACC D"
+    purpose: "Get Goertzel accumulators"
+    details: dds-goertzel.yaml
+
+# Command word structure (D operand)
+command_format:
+  D_31_28: "Mode selector"
+  D_27_24: "DAC routing (%dddd)"
+  D_23: "Enable pin output (%e) or WRFAST (%w)"
+  D_22_20: "Pin group (%ppp)"
+  D_19_16: "Mode-specific config"
+  D_15_0: "Count (NCO rollovers)"
+  
+  details:
+    modes: modes-reference.yaml
+    dac: dac-routing.yaml
+    pins: pin-selection.yaml
+
+# Typical usage pattern
+usage_pattern:
+  code: |
+    ' 1. Setup FIFO (for Hub modes)
+    rdfast  #0, ##buffer_addr
+    
+    ' 2. Set NCO frequency
+    setxfrq ##frequency_value
+    
+    ' 3. Start streaming
+    xinit   ##mode_command, #0
+    
+    ' 4. Chain additional commands
+    xcont   ##next_command, #0
+    
+    ' 5. Wait for completion
+    waitxfi
+
+# Events generated
+events:
+  EVENT_XMT: "Ready for new command (event 10)"
+  EVENT_XFI: "Finished, no pending command (event 11)"
+  EVENT_XRO: "NCO rollover occurred (event 12)"
+  EVENT_XRL: "Read LUT address $1FF (event 13)"
+
+# See also
+see_also:
+  - modes-reference.yaml
+  - dac-routing.yaml
+  - pin-selection.yaml
+  - nco-timing.yaml

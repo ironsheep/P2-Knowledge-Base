@@ -1,0 +1,149 @@
+# Pin Selection and Control
+# D[22:20] pin group and D[19:16] sub-pin selection
+
+component: streamer_pins
+description: Pin group selection via %ppp field and sub-pin selection
+
+# Pin group selection (32-pin blocks)
+pin_groups:
+  field: "D[22:20] (%ppp)"
+  description: "Selects which 32-pin block the streamer addresses"
+  
+  groups:
+    - ppp: "%000"
+      pins: "31..0"
+      description: "Lower 32 pins"
+      
+    - ppp: "%001"
+      pins: "39..8"
+      description: "Pins 8-39"
+      
+    - ppp: "%010"
+      pins: "47..16"
+      description: "Pins 16-47"
+      
+    - ppp: "%011"
+      pins: "55..24"
+      description: "Pins 24-55"
+      
+    - ppp: "%100"
+      pins: "63..32"
+      description: "Upper 32 pins"
+      
+    - ppp: "%101"
+      pins: "7..0, 63..40"
+      description: "Wrap-around (24 pins)"
+      
+    - ppp: "%110"
+      pins: "15..0, 63..48"
+      description: "Wrap-around (32 pins)"
+      
+    - ppp: "%111"
+      pins: "23..0, 63..56"
+      description: "Wrap-around (32 pins)"
+
+# Sub-pin selection (for <8 pin modes)
+sub_pin_selection:
+  field: "D[19:17] within mode config"
+  description: "Selects specific pins within the 32-pin group"
+  
+  table:
+    - bits: "%000"
+      1_pin: "Pin 0"
+      2_pin: "Pins 1..0"
+      4_pin: "Pins 3..0"
+      
+    - bits: "%001"
+      1_pin: "Pin 1"
+      2_pin: "Pins 3..2"
+      4_pin: "Pins 7..4"
+      
+    - bits: "%010"
+      1_pin: "Pin 2"
+      2_pin: "Pins 5..4"
+      4_pin: "Pins 11..8"
+      
+    - bits: "%011"
+      1_pin: "Pin 3"
+      2_pin: "Pins 7..6"
+      4_pin: "Pins 15..12"
+      
+    - bits: "%100"
+      1_pin: "Pin 4"
+      2_pin: "Pins 9..8"
+      4_pin: "Pins 19..16"
+      
+    - bits: "%101"
+      1_pin: "Pin 5"
+      2_pin: "Pins 11..10"
+      4_pin: "Pins 23..20"
+      
+    - bits: "%110"
+      1_pin: "Pin 6"
+      2_pin: "Pins 13..12"
+      4_pin: "Pins 27..24"
+      
+    - bits: "%111"
+      1_pin: "Pin 7"
+      2_pin: "Pins 15..14"
+      4_pin: "Pins 31..28"
+
+# Enable control
+enable_control:
+  field: "D[23]"
+  
+  output_modes:
+    bit_name: "%e"
+    value_0: "Pin output disabled (DACs only)"
+    value_1: "Pin output enabled"
+    symbol_0: X_PINS_OFF
+    symbol_1: X_PINS_ON
+    
+  input_modes:
+    bit_name: "%w"
+    value_0: "WRFAST disabled (DACs only)"
+    value_1: "WRFAST enabled"
+    symbol_0: X_WRITE_OFF
+    symbol_1: X_WRITE_ON
+
+# Alternate bit order
+alt_bit_order:
+  field: "D[16] (%a bit)"
+  description: "Controls bit ordering for 1/2/4-bit modes"
+  
+  values:
+    - value: "0"
+      symbol: X_ALT_OFF
+      order: "LSB first (default)"
+      
+    - value: "1"
+      symbol: X_ALT_ON
+      order: "MSB first"
+      
+  use_case: "Use X_ALT_ON for SPI protocols that transmit MSB first"
+
+# Pin base calculation
+pin_base_encoding:
+  description: "Pin base is encoded in upper bits of D[22:17]"
+  formula: "pin_base << 17"
+  example: |
+    ' For pin 20 as base:
+    mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count
+
+# Common pin configurations
+common_configs:
+  vga_pins_0_3:
+    description: "VGA on pins 0-3 (R,G,B,Sync)"
+    code: "mode + 0<<17"
+    
+  hdmi_pins_8_15:
+    description: "HDMI on 8-pin block starting at pin 8"
+    code: "mode + 8<<17"
+    
+  spi_single_pin:
+    description: "SPI data on single pin"
+    code: "X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON + pin<<17"
+
+see_also:
+  - dac-routing.yaml
+  - modes-reference.yaml

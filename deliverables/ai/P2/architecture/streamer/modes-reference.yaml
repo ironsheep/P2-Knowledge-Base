@@ -1,0 +1,293 @@
+# Streamer Modes Reference
+# Complete mode encoding table - use for mode selection and configuration
+
+component: streamer_modes
+description: All streamer mode encodings with D[31:28] and D[19:16] fields
+
+# Mode field location
+encoding:
+  mode_field: "D[31:28]"
+  config_field: "D[19:16]"
+  
+# Mode categories by D[31:28]
+categories:
+  immediate_lut:
+    range: "%0000-%0011"
+    description: "S operand → LUT index → Pins/DACs"
+    
+  immediate_direct:
+    range: "%0100-%0111"
+    description: "S operand → Pins/DACs directly"
+    
+  rdfast_lut:
+    range: "%0111 + config"
+    description: "Hub FIFO → LUT index → Pins/DACs"
+    
+  rdfast_direct:
+    range: "%1000-%1011"
+    description: "Hub FIFO → Pins/DACs directly"
+    
+  rgb_video:
+    range: "%1011 + config"
+    description: "Hub FIFO → Colorspace converter → Pins/DACs"
+    
+  capture:
+    range: "%1100-%1111"
+    description: "Pins → Hub FIFO"
+    
+  adc_capture:
+    range: "%1111 + config"
+    description: "ADC → Hub FIFO"
+    
+  dds_goertzel:
+    range: "%1111_x111"
+    description: "LUT → DACs + Goertzel analysis"
+
+# Complete mode table
+modes:
+  # Immediate → LUT → Pins/DACs
+  - mode: "%0000"
+    symbol: X_IMM_32X1_LUT
+    description: "32×1-bit immediate → LUT → 32 pins"
+    d_19_16: "LUT base %bbbb (address %bbbb_00000)"
+    
+  - mode: "%0001"
+    symbol: X_IMM_16X2_LUT
+    description: "16×2-bit immediate → LUT → 32 pins"
+    d_19_16: "LUT base %bbbb"
+    
+  - mode: "%0010"
+    symbol: X_IMM_8X4_LUT
+    description: "8×4-bit immediate → LUT → 32 pins"
+    d_19_16: "LUT base %bbbb"
+    
+  - mode: "%0011"
+    symbol: X_IMM_4X8_LUT
+    description: "4×8-bit immediate → LUT → 32 pins"
+    d_19_16: "LUT base %bbbb"
+
+  # Immediate → Pins/DACs
+  - mode: "%0100"
+    symbol: X_IMM_32X1_1DAC1
+    description: "32×1-bit immediate → 1 pin, 1 DAC bit"
+    d_19_16: "%0000"
+    
+  - mode: "%0101"
+    symbol: X_IMM_16X2_2DAC1
+    description: "16×2-bit immediate → 2 pins, 1 DAC bit"
+    d_19_16: "%0000"
+    
+  - mode: "%0101"
+    symbol: X_IMM_16X2_1DAC2
+    description: "16×2-bit immediate → 1 pin, 2 DAC bits"
+    d_19_16: "%0010"
+    
+  - mode: "%0110"
+    symbol: X_IMM_8X4_4DAC1
+    description: "8×4-bit immediate → 4 pins, 1 DAC bit"
+    d_19_16: "%0000"
+    
+  - mode: "%0110"
+    symbol: X_IMM_8X4_2DAC2
+    description: "8×4-bit immediate → 2 pins, 2 DAC bits"
+    d_19_16: "%0010"
+    
+  - mode: "%0110"
+    symbol: X_IMM_8X4_1DAC4
+    description: "8×4-bit immediate → 1 pin, 4 DAC bits"
+    d_19_16: "%0100"
+
+  # RDFAST → LUT → Pins/DACs
+  - mode: "%0111"
+    symbol: X_RFLONG_32X1_LUT
+    description: "RFLONG → 32×1-bit → LUT → 32 pins"
+    d_19_16: "%001a (a=alt bit order)"
+    s_field: "LUT base in S[3:0]"
+    
+  - mode: "%0111"
+    symbol: X_RFLONG_16X2_LUT
+    description: "RFLONG → 16×2-bit → LUT → 32 pins"
+    d_19_16: "%010a"
+    
+  - mode: "%0111"
+    symbol: X_RFLONG_8X4_LUT
+    description: "RFLONG → 8×4-bit → LUT → 32 pins"
+    d_19_16: "%011a"
+    
+  - mode: "%0111"
+    symbol: X_RFLONG_4X8_LUT
+    description: "RFLONG → 4×8-bit → LUT → 32 pins"
+    d_19_16: "%1000"
+
+  # RDFAST → Pins/DACs
+  - mode: "%1000"
+    symbol: X_RFBYTE_1P_1DAC1
+    description: "RFBYTE → 1 pin, 1 DAC bit"
+    d_19_16: "%pppp (sub-pin select)"
+    
+  - mode: "%1001"
+    symbol: X_RFBYTE_2P_2DAC1
+    description: "RFBYTE → 2 pins, 1 DAC bit"
+    d_19_16: "%ppp0"
+    
+  - mode: "%1001"
+    symbol: X_RFBYTE_2P_1DAC2
+    description: "RFBYTE → 2 pins, 2 DAC bits"
+    d_19_16: "%ppp0 + 2"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_4P_4DAC1
+    description: "RFBYTE → 4 pins, 1 DAC bit"
+    d_19_16: "%pp00"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_4P_2DAC2
+    description: "RFBYTE → 4 pins, 2 DAC bits"
+    d_19_16: "%pp00 + 2"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_4P_1DAC4
+    description: "RFBYTE → 4 pins, 4 DAC bits"
+    d_19_16: "%pp00 + 4"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_8P_4DAC2
+    description: "RFBYTE → 8 pins, 2 DAC bits"
+    d_19_16: "%p000 + 6"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_8P_2DAC4
+    description: "RFBYTE → 8 pins, 4 DAC bits"
+    d_19_16: "%p000 + 7"
+    
+  - mode: "%1010"
+    symbol: X_RFBYTE_8P_1DAC8
+    description: "RFBYTE → 8 pins, 8 DAC bits"
+    d_19_16: "%p000 + $E"
+    
+  - mode: "%1010"
+    symbol: X_RFWORD_16P_4DAC4
+    description: "RFWORD → 16 pins, 4 DAC bits"
+    d_19_16: "%0000 + $F"
+    
+  - mode: "%1011"
+    symbol: X_RFWORD_16P_2DAC8
+    description: "RFWORD → 16 pins, 8 DAC bits"
+    d_19_16: "%0000"
+    
+  - mode: "%1011"
+    symbol: X_RFLONG_32P_4DAC8
+    description: "RFLONG → 32 pins, 8 DAC bits"
+    d_19_16: "%0001"
+
+  # RGB Video modes
+  - mode: "%1011"
+    symbol: X_RFBYTE_LUMA8
+    description: "RFBYTE → 8-bit luminance → RGB"
+    d_19_16: "%0010"
+    
+  - mode: "%1011"
+    symbol: X_RFBYTE_RGBI8
+    description: "RFBYTE → RGBI 2:2:2:2 → RGB"
+    d_19_16: "%0011"
+    
+  - mode: "%1011"
+    symbol: X_RFBYTE_RGB8
+    description: "RFBYTE → RGB 3:3:2 → RGB"
+    d_19_16: "%0100"
+    
+  - mode: "%1011"
+    symbol: X_RFWORD_RGB16
+    description: "RFWORD → RGB 5:6:5 → RGB"
+    d_19_16: "%0101"
+    
+  - mode: "%1011"
+    symbol: X_RFLONG_RGB24
+    description: "RFLONG → RGB 8:8:8 → RGB"
+    d_19_16: "%0110"
+
+  # Capture modes (Pins → Hub)
+  - mode: "%1100"
+    symbol: X_1P_1DAC1_WFBYTE
+    description: "1 pin → WFBYTE"
+    d_19_16: "%pppp"
+    
+  - mode: "%1101"
+    symbol: X_2P_2DAC1_WFBYTE
+    description: "2 pins → WFBYTE"
+    d_19_16: "%ppp0"
+    
+  - mode: "%1110"
+    symbol: X_4P_4DAC1_WFBYTE
+    description: "4 pins → WFBYTE"
+    d_19_16: "%pp00"
+    
+  - mode: "%1110"
+    symbol: X_16P_4DAC4_WFWORD
+    description: "16 pins → WFWORD"
+    d_19_16: "%0000 + $F"
+    
+  - mode: "%1111"
+    symbol: X_16P_2DAC8_WFWORD
+    description: "16 pins → WFWORD"
+    d_19_16: "%0000"
+    
+  - mode: "%1111"
+    symbol: X_32P_4DAC8_WFLONG
+    description: "32 pins → WFLONG"
+    d_19_16: "%0001"
+
+  # ADC modes
+  - mode: "%1111"
+    symbol: X_1ADC8_0P_1DAC8_WFBYTE
+    description: "1 ADC → WFBYTE"
+    d_19_16: "%0010"
+    
+  - mode: "%1111"
+    symbol: X_1ADC8_8P_2DAC8_WFWORD
+    description: "1 ADC + 8 pins → WFWORD"
+    d_19_16: "%0011"
+    
+  - mode: "%1111"
+    symbol: X_2ADC8_0P_2DAC8_WFWORD
+    description: "2 ADC → WFWORD"
+    d_19_16: "%0100"
+    
+  - mode: "%1111"
+    symbol: X_2ADC8_16P_4DAC8_WFLONG
+    description: "2 ADC + 16 pins → WFLONG"
+    d_19_16: "%0101"
+    
+  - mode: "%1111"
+    symbol: X_4ADC8_0P_4DAC8_WFLONG
+    description: "4 ADC → WFLONG"
+    d_19_16: "%0110"
+
+  # DDS/Goertzel
+  - mode: "%1111"
+    symbol: X_DDS_GOERTZEL_SINC1
+    description: "DDS output + Goertzel SINC1"
+    d_19_16: "%0111"
+    details: dds-goertzel.yaml
+    
+  - mode: "%1111"
+    symbol: X_DDS_GOERTZEL_SINC2
+    description: "DDS output + Goertzel SINC2"
+    d_19_16: "%1000_0111"
+    details: dds-goertzel.yaml
+
+# Quick mode selection guide
+selection_guide:
+  video_rgb16: "X_RFWORD_RGB16 - Best balance of color/memory"
+  video_rgb24: "X_RFLONG_RGB24 - True color, more memory"
+  video_8bit: "X_RFBYTE_RGB8 - 256 colors, compact"
+  audio_mono: "X_RFBYTE_1P_1DAC1 - Single channel"
+  audio_stereo: "X_RFWORD_16P_2DAC8 - Two channels"
+  spi_output: "X_IMM_8X4_1DAC4 + X_ALT_ON - MSB first"
+  adc_capture: "X_1ADC8_0P_1DAC8_WFBYTE - Single ADC"
+  frequency_detect: "X_DDS_GOERTZEL_SINC1 - Tone detection"
+
+see_also:
+  - dac-routing.yaml
+  - pin-selection.yaml
+  - ../language/spin2/symbols/streamer-symbols.yaml

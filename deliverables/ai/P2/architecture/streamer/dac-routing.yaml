@@ -1,0 +1,183 @@
+# DAC Channel Routing Configuration
+# D[27:24] field controls how streamer data maps to DAC channels
+
+component: streamer_dac
+description: DAC channel routing via %dddd field in D[27:24]
+
+# DAC channel basics
+dac_channels:
+  count: 4
+  names: ["X0 (DAC0)", "X1 (DAC1)", "X2 (DAC2)", "X3 (DAC3)"]
+  resolution: "8-bit per channel"
+  
+# Complete routing table
+routing_table:
+  - dddd: "%0000"
+    symbol: X_DACS_OFF
+    dac3: "--"
+    dac2: "--"
+    dac1: "--"
+    dac0: "--"
+    description: "No DAC output (use SETDACS values)"
+    
+  - dddd: "%0001"
+    symbol: X_DACS_0_0_0_0
+    dac3: "X0"
+    dac2: "X0"
+    dac1: "X0"
+    dac0: "X0"
+    description: "X0 on all four channels (mono)"
+    
+  - dddd: "%0010"
+    symbol: X_DACS_X_X_0_0
+    dac3: "--"
+    dac2: "--"
+    dac1: "X0"
+    dac0: "X0"
+    description: "X0 on channels 0,1 only"
+    
+  - dddd: "%0011"
+    symbol: X_DACS_0_0_X_X
+    dac3: "X0"
+    dac2: "X0"
+    dac1: "--"
+    dac0: "--"
+    description: "X0 on channels 2,3 only"
+    
+  - dddd: "%0100"
+    symbol: X_DACS_X_X_X_0
+    dac3: "--"
+    dac2: "--"
+    dac1: "--"
+    dac0: "X0"
+    description: "X0 on channel 0 only"
+    
+  - dddd: "%0101"
+    symbol: X_DACS_X_X_0_X
+    dac3: "--"
+    dac2: "--"
+    dac1: "X0"
+    dac0: "--"
+    description: "X0 on channel 1 only"
+    
+  - dddd: "%0110"
+    symbol: X_DACS_X_0_X_X
+    dac3: "--"
+    dac2: "X0"
+    dac1: "--"
+    dac0: "--"
+    description: "X0 on channel 2 only"
+    
+  - dddd: "%0111"
+    symbol: X_DACS_0_X_X_X
+    dac3: "X0"
+    dac2: "--"
+    dac1: "--"
+    dac0: "--"
+    description: "X0 on channel 3 only"
+    
+  - dddd: "%1000"
+    symbol: X_DACS_0N0_0N0
+    dac3: "!X0"
+    dac2: "X0"
+    dac1: "!X0"
+    dac0: "X0"
+    description: "Differential pairs (X0 and inverted)"
+    
+  - dddd: "%1001"
+    symbol: X_DACS_X_X_0N0
+    dac3: "--"
+    dac2: "--"
+    dac1: "!X0"
+    dac0: "X0"
+    description: "Differential pair on channels 0,1"
+    
+  - dddd: "%1010"
+    symbol: X_DACS_0N0_X_X
+    dac3: "!X0"
+    dac2: "X0"
+    dac1: "--"
+    dac0: "--"
+    description: "Differential pair on channels 2,3"
+    
+  - dddd: "%1011"
+    symbol: X_DACS_1_0_1_0
+    dac3: "X1"
+    dac2: "X0"
+    dac1: "X1"
+    dac0: "X0"
+    description: "Stereo pairs (X0=L, X1=R)"
+    
+  - dddd: "%1100"
+    symbol: X_DACS_X_X_1_0
+    dac3: "--"
+    dac2: "--"
+    dac1: "X1"
+    dac0: "X0"
+    description: "Stereo on channels 0,1"
+    
+  - dddd: "%1101"
+    symbol: X_DACS_1_0_X_X
+    dac3: "X1"
+    dac2: "X0"
+    dac1: "--"
+    dac0: "--"
+    description: "Stereo on channels 2,3"
+    
+  - dddd: "%1110"
+    symbol: X_DACS_1N1_0N0
+    dac3: "!X1"
+    dac2: "X1"
+    dac1: "!X0"
+    dac0: "X0"
+    description: "Differential stereo"
+    
+  - dddd: "%1111"
+    symbol: X_DACS_3_2_1_0
+    dac3: "X3"
+    dac2: "X2"
+    dac1: "X1"
+    dac0: "X0"
+    description: "All four channels independent"
+
+# Legend
+legend:
+  "--": "No override (SETDACS value used)"
+  "!": "One's complement (inverted)"
+  "X0-X3": "Streamer data channels"
+
+# DAC to pin mapping (hardware constraint)
+pin_mapping:
+  description: "DAC channels drive pins based on pin's two LSBs"
+  mapping:
+    DAC0: "Pins %xxxx00 (0, 4, 8, 12, 16, 20, 24, 28...)"
+    DAC1: "Pins %xxxx01 (1, 5, 9, 13, 17, 21, 25, 29...)"
+    DAC2: "Pins %xxxx10 (2, 6, 10, 14, 18, 22, 26, 30...)"
+    DAC3: "Pins %xxxx11 (3, 7, 11, 15, 19, 23, 27, 31...)"
+  note: "This is a silicon constraint - each DAC can only drive pins matching its channel number in the two LSBs"
+
+# Common configurations
+common_configs:
+  mono_audio:
+    use: X_DACS_0_0_0_0
+    description: "Same signal on all DAC pins"
+    
+  stereo_audio:
+    use: X_DACS_X_X_1_0
+    description: "Left on DAC0 pins, right on DAC1 pins"
+    
+  differential_mono:
+    use: X_DACS_X_X_0N0
+    description: "Noise rejection for single channel"
+    
+  differential_stereo:
+    use: X_DACS_1N1_0N0
+    description: "Noise rejection for both channels"
+    
+  four_channel_video:
+    use: X_DACS_3_2_1_0
+    description: "R, G, B, Sync on separate channels"
+
+see_also:
+  - pin-selection.yaml
+  - modes-reference.yaml

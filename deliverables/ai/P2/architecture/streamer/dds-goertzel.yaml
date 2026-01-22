@@ -1,0 +1,182 @@
+# DDS/Goertzel Mode
+# Direct Digital Synthesis with Goertzel frequency analysis
+
+component: streamer_dds_goertzel
+description: Combined waveform synthesis and frequency detection
+
+# Mode variants
+modes:
+  sinc1:
+    symbol: X_DDS_GOERTZEL_SINC1
+    encoding: "%1111_0ppp_p111"
+    filter: "SINC1 (direct accumulation)"
+    q_factor: "Lower"
+    max_amplitude: "±127"
+    
+  sinc2:
+    symbol: X_DDS_GOERTZEL_SINC2
+    encoding: "%1111_1ppp_p111"
+    filter: "SINC2 (double integration)"
+    q_factor: "Higher (sharper selectivity)"
+    max_amplitude: "±10 (to prevent overflow)"
+
+# Operation (every clock cycle)
+operation:
+  description: |
+    Unlike other modes, DDS/Goertzel operates on EVERY system clock,
+    not just NCO rollovers. This enables high-frequency synthesis
+    and analysis.
+    
+  steps:
+    1: "Read LUT entry at NCO[30:22]"
+    2: "Advance NCO phase: NCO += frequency"
+    3: "Output LUT bytes to DACs (XOR $80 for unsigned)"
+    4: "Multiply ADC input by sine/cosine"
+    5: "Accumulate products in sine/cosine registers"
+    
+  dac_output:
+    dac3: "LUT.byte[3] ^ $80"
+    dac2: "LUT.byte[2] ^ $80"
+    dac1: "LUT.byte[1] ^ $80"
+    dac0: "LUT.byte[0] ^ $80"
+    
+  goertzel_calculation: |
+    sin := LUT.byte[3] (sign-extended)
+    cos := LUT.byte[2] (sign-extended)
+    m := ADC_bit ? +1 : -1
+    
+    sin_acc += sin * m
+    cos_acc += cos * m
+
+# LUT setup requirements
+lut_setup:
+  entries: 512
+  format: "32-bit long per entry"
+  
+  byte_layout:
+    byte_3: "Sine value (signed, for Goertzel)"
+    byte_2: "Cosine value (signed, for Goertzel)"
+    byte_1: "Optional (can be second waveform)"
+    byte_0: "Optional (can be output waveform)"
+    
+  example: |
+    ' Build 512-entry sine/cosine table
+    repeat i from 0 to 511
+      cos, sin := polxy(127, i << 23)
+      t.byte[3] := sin      ' Sine for Goertzel
+      t.byte[2] := cos      ' Cosine for Goertzel
+      t.byte[1] := 0        ' Unused
+      t.byte[0] := sin      ' DAC output
+      wrlut(t, i)
+      
+  sinc2_amplitude: |
+    ' For SINC2 mode, reduce amplitude to prevent overflow
+    repeat i from 0 to 511
+      cos, sin := polxy(10, i << 23)  ' ±10 max
+      ...
+
+# Reading results
+reading_results:
+  instruction: "GETXACC D"
+  
+  operation: |
+    1. Cosine accumulator → D register
+    2. Sine accumulator → next instruction's S operand
+    3. Both accumulators cleared after read
+    
+  example: |
+    getxacc cos_result       ' Cosine → D
+    mov     sin_result, 0-0  ' Sine → next S (trick)
+    
+  magnitude_calculation: |
+    ' Convert to magnitude/phase using CORDIC
+    qvector cos_result, sin_result
+    getqx   magnitude
+    getqy   phase
+
+# Frequency calculation
+frequency:
+  description: "NCO frequency for target detection/synthesis"
+  formula: "frequency = $1_0000_0000 * target_freq / clock_freq"
+  
+  note: |
+    DDS/Goertzel uses 33-bit frequency calculation internally,
+    providing sub-Hz resolution at typical system clocks.
+    
+  example: |
+    ' Detect 40 kHz at 200 MHz clock:
+    ' frequency = $1_0000_0000 * 40000 / 200000000
+    qfrac   ##40000, clkfreq
+    getqx   xfrq
+
+# SINC1 vs SINC2 comparison
+filter_comparison:
+  sinc1:
+    accumulation: "Direct"
+    selectivity: "Broader bandwidth"
+    amplitude: "Full range (±127)"
+    use_case: "General tone detection"
+    
+  sinc2:
+    accumulation: "Double integration"
+    selectivity: "Sharper, narrower bandwidth"
+    amplitude: "Reduced (±10 max)"
+    use_case: "Precise frequency discrimination"
+    
+  pitfall: |
+    SINC2 mode REQUIRES reduced waveform amplitude.
+    Full-scale values cause accumulator overflow and
+    incorrect results.
+
+# Applications
+applications:
+  ultrasonic_ranging:
+    description: "Distance measurement via sound reflection"
+    pattern: "Transmit burst, analyze echo frequency"
+    
+  dtmf_decoding:
+    description: "Detect dual-tone telephone signals"
+    pattern: "Analyze two frequencies simultaneously"
+    
+  tone_detection:
+    description: "Detect specific frequency presence"
+    pattern: "Compare magnitude to threshold"
+    
+  function_generator:
+    description: "Synthesize arbitrary waveforms"
+    pattern: "Load waveform to LUT, set output frequency"
+
+# Typical usage
+usage_pattern:
+  code: |
+    ' 1. Load sine/cosine table to LUT
+    setq2   #$200-1
+    rdlong  0, ##sine_table
+    
+    ' 2. Configure ADC pin
+    wrpin   ##P_ADC_100X, #adc_pin
+    drvl    #adc_pin
+    
+    ' 3. Configure DAC output (differential)
+    wrpin   ##P_DAC_124R_3V, dac_pins
+    drvl    dac_pins
+    
+    ' 4. Calculate and set frequency
+    qfrac   target_freq, clkfreq
+    getqx   xfrq
+    
+    ' 5. Start DDS/Goertzel
+    setword dds_cmd, cycles, #0
+    setq    xfrq
+    xcont   dds_cmd, #0
+    
+    ' 6. Read result
+    getxacc cos_acc
+    mov     sin_acc, 0-0
+    qvector cos_acc, sin_acc
+    getqx   magnitude
+
+see_also:
+  - modes-reference.yaml
+  - nco-timing.yaml
+  - ../../language/pasm2/getxacc.yaml

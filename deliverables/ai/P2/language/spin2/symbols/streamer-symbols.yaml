@@ -1,0 +1,436 @@
+# Streamer Symbols Reference
+# All X_* symbols for streamer configuration
+
+category: streamer
+description: Complete streamer symbol definitions with values
+total_symbols: 82
+
+# Mode symbols - Immediate → LUT
+immediate_lut_modes:
+  - symbol: X_IMM_32X1_LUT
+    value: "$0000_0000"
+    encoding: "%0000 << 28"
+    description: "32×1-bit immediate → LUT → pins"
+    
+  - symbol: X_IMM_16X2_LUT
+    value: "$1000_0000"
+    encoding: "%0001 << 28"
+    description: "16×2-bit immediate → LUT → pins"
+    
+  - symbol: X_IMM_8X4_LUT
+    value: "$2000_0000"
+    encoding: "%0010 << 28"
+    description: "8×4-bit immediate → LUT → pins"
+    
+  - symbol: X_IMM_4X8_LUT
+    value: "$3000_0000"
+    encoding: "%0011 << 28"
+    description: "4×8-bit immediate → LUT → pins"
+
+# Mode symbols - Immediate → Direct
+immediate_direct_modes:
+  - symbol: X_IMM_32X1_1DAC1
+    value: "$4000_0000"
+    encoding: "%0100 << 28"
+    description: "32×1-bit immediate → 1 pin"
+    
+  - symbol: X_IMM_16X2_2DAC1
+    value: "$5000_0000"
+    encoding: "%0101 << 28"
+    description: "16×2-bit immediate → 2 pins"
+    
+  - symbol: X_IMM_16X2_1DAC2
+    value: "$5002_0000"
+    encoding: "%0101 << 28 + 2<<16"
+    description: "16×2-bit immediate → 1 pin, 2 DAC"
+    
+  - symbol: X_IMM_8X4_4DAC1
+    value: "$6000_0000"
+    encoding: "%0110 << 28"
+    description: "8×4-bit immediate → 4 pins"
+    
+  - symbol: X_IMM_8X4_2DAC2
+    value: "$6002_0000"
+    encoding: "%0110 << 28 + 2<<16"
+    description: "8×4-bit immediate → 2 pins, 2 DAC"
+    
+  - symbol: X_IMM_8X4_1DAC4
+    value: "$6004_0000"
+    encoding: "%0110 << 28 + 4<<16"
+    description: "8×4-bit immediate → 1 pin, 4 DAC"
+    
+  - symbol: X_IMM_4X8_4DAC2
+    value: "$6006_0000"
+    encoding: "%0110 << 28 + 6<<16"
+    description: "4×8-bit immediate → 4 pins, 2 DAC"
+    
+  - symbol: X_IMM_4X8_2DAC4
+    value: "$6007_0000"
+    encoding: "%0110 << 28 + 7<<16"
+    description: "4×8-bit immediate → 2 pins, 4 DAC"
+    
+  - symbol: X_IMM_4X8_1DAC8
+    value: "$600E_0000"
+    encoding: "%0110 << 28 + $E<<16"
+    description: "4×8-bit immediate → 1 pin, 8 DAC"
+    
+  - symbol: X_IMM_2X16_4DAC4
+    value: "$600F_0000"
+    encoding: "%0110 << 28 + $F<<16"
+    description: "2×16-bit immediate → 4 pins, 4 DAC"
+    
+  - symbol: X_IMM_2X16_2DAC8
+    value: "$7000_0000"
+    encoding: "%0111 << 28"
+    description: "2×16-bit immediate → 2 pins, 8 DAC"
+    
+  - symbol: X_IMM_1X32_4DAC8
+    value: "$7001_0000"
+    encoding: "%0111 << 28 + 1<<16"
+    description: "1×32-bit immediate → 4 pins, 8 DAC"
+
+# Mode symbols - RDFAST → LUT
+rdfast_lut_modes:
+  - symbol: X_RFLONG_32X1_LUT
+    value: "$7002_0000"
+    encoding: "%0111 << 28 + 2<<16"
+    description: "RFLONG → 32×1-bit → LUT → pins"
+    
+  - symbol: X_RFLONG_16X2_LUT
+    value: "$7004_0000"
+    encoding: "%0111 << 28 + 4<<16"
+    description: "RFLONG → 16×2-bit → LUT → pins"
+    
+  - symbol: X_RFLONG_8X4_LUT
+    value: "$7006_0000"
+    encoding: "%0111 << 28 + 6<<16"
+    description: "RFLONG → 8×4-bit → LUT → pins"
+    
+  - symbol: X_RFLONG_4X8_LUT
+    value: "$7008_0000"
+    encoding: "%0111 << 28 + 8<<16"
+    description: "RFLONG → 4×8-bit → LUT → pins"
+
+# Mode symbols - RDFAST → Direct
+rdfast_direct_modes:
+  - symbol: X_RFBYTE_1P_1DAC1
+    value: "$8000_0000"
+    encoding: "%1000 << 28"
+    description: "RFBYTE → 1 pin"
+    
+  - symbol: X_RFBYTE_2P_2DAC1
+    value: "$9000_0000"
+    encoding: "%1001 << 28"
+    description: "RFBYTE → 2 pins"
+    
+  - symbol: X_RFBYTE_2P_1DAC2
+    value: "$9002_0000"
+    encoding: "%1001 << 28 + 2<<16"
+    description: "RFBYTE → 1 pin, 2 DAC"
+    
+  - symbol: X_RFBYTE_4P_4DAC1
+    value: "$A000_0000"
+    encoding: "%1010 << 28"
+    description: "RFBYTE → 4 pins"
+    
+  - symbol: X_RFBYTE_4P_2DAC2
+    value: "$A002_0000"
+    encoding: "%1010 << 28 + 2<<16"
+    description: "RFBYTE → 2 pins, 2 DAC"
+    
+  - symbol: X_RFBYTE_4P_1DAC4
+    value: "$A004_0000"
+    encoding: "%1010 << 28 + 4<<16"
+    description: "RFBYTE → 1 pin, 4 DAC"
+    
+  - symbol: X_RFBYTE_8P_4DAC2
+    value: "$A006_0000"
+    encoding: "%1010 << 28 + 6<<16"
+    description: "RFBYTE → 4 pins, 2 DAC"
+    
+  - symbol: X_RFBYTE_8P_2DAC4
+    value: "$A007_0000"
+    encoding: "%1010 << 28 + 7<<16"
+    description: "RFBYTE → 2 pins, 4 DAC"
+    
+  - symbol: X_RFBYTE_8P_1DAC8
+    value: "$A00E_0000"
+    encoding: "%1010 << 28 + $E<<16"
+    description: "RFBYTE → 1 pin, 8 DAC"
+    
+  - symbol: X_RFWORD_16P_4DAC4
+    value: "$A00F_0000"
+    encoding: "%1010 << 28 + $F<<16"
+    description: "RFWORD → 4 pins, 4 DAC"
+    
+  - symbol: X_RFWORD_16P_2DAC8
+    value: "$B000_0000"
+    encoding: "%1011 << 28"
+    description: "RFWORD → 2 pins, 8 DAC"
+    
+  - symbol: X_RFLONG_32P_4DAC8
+    value: "$B001_0000"
+    encoding: "%1011 << 28 + 1<<16"
+    description: "RFLONG → 4 pins, 8 DAC"
+
+# Mode symbols - RGB Video
+rgb_video_modes:
+  - symbol: X_RFBYTE_LUMA8
+    value: "$B002_0000"
+    encoding: "%1011 << 28 + 2<<16"
+    description: "RFBYTE → 8-bit luminance"
+    
+  - symbol: X_RFBYTE_RGBI8
+    value: "$B003_0000"
+    encoding: "%1011 << 28 + 3<<16"
+    description: "RFBYTE → RGBI 2:2:2:2"
+    
+  - symbol: X_RFBYTE_RGB8
+    value: "$B004_0000"
+    encoding: "%1011 << 28 + 4<<16"
+    description: "RFBYTE → RGB 3:3:2"
+    
+  - symbol: X_RFWORD_RGB16
+    value: "$B005_0000"
+    encoding: "%1011 << 28 + 5<<16"
+    description: "RFWORD → RGB 5:6:5"
+    
+  - symbol: X_RFLONG_RGB24
+    value: "$B006_0000"
+    encoding: "%1011 << 28 + 6<<16"
+    description: "RFLONG → RGB 8:8:8"
+
+# Mode symbols - Capture (WRFAST)
+capture_modes:
+  - symbol: X_1P_1DAC1_WFBYTE
+    value: "$C000_0000"
+    encoding: "%1100 << 28"
+    description: "1 pin → WFBYTE"
+    
+  - symbol: X_2P_2DAC1_WFBYTE
+    value: "$D000_0000"
+    encoding: "%1101 << 28"
+    description: "2 pins → WFBYTE"
+    
+  - symbol: X_2P_1DAC2_WFBYTE
+    value: "$D002_0000"
+    encoding: "%1101 << 28 + 2<<16"
+    description: "1 pin, 2 DAC → WFBYTE"
+    
+  - symbol: X_4P_4DAC1_WFBYTE
+    value: "$E000_0000"
+    encoding: "%1110 << 28"
+    description: "4 pins → WFBYTE"
+    
+  - symbol: X_4P_2DAC2_WFBYTE
+    value: "$E002_0000"
+    encoding: "%1110 << 28 + 2<<16"
+    description: "2 pins, 2 DAC → WFBYTE"
+    
+  - symbol: X_4P_1DAC4_WFBYTE
+    value: "$E004_0000"
+    encoding: "%1110 << 28 + 4<<16"
+    description: "1 pin, 4 DAC → WFBYTE"
+    
+  - symbol: X_8P_4DAC2_WFBYTE
+    value: "$E006_0000"
+    encoding: "%1110 << 28 + 6<<16"
+    description: "4 pins, 2 DAC → WFBYTE"
+    
+  - symbol: X_8P_2DAC4_WFBYTE
+    value: "$E007_0000"
+    encoding: "%1110 << 28 + 7<<16"
+    description: "2 pins, 4 DAC → WFBYTE"
+    
+  - symbol: X_8P_1DAC8_WFBYTE
+    value: "$E00E_0000"
+    encoding: "%1110 << 28 + $E<<16"
+    description: "1 pin, 8 DAC → WFBYTE"
+    
+  - symbol: X_16P_4DAC4_WFWORD
+    value: "$E00F_0000"
+    encoding: "%1110 << 28 + $F<<16"
+    description: "4 pins, 4 DAC → WFWORD"
+    
+  - symbol: X_16P_2DAC8_WFWORD
+    value: "$F000_0000"
+    encoding: "%1111 << 28"
+    description: "2 pins, 8 DAC → WFWORD"
+    
+  - symbol: X_32P_4DAC8_WFLONG
+    value: "$F001_0000"
+    encoding: "%1111 << 28 + 1<<16"
+    description: "4 pins, 8 DAC → WFLONG"
+
+# Mode symbols - ADC
+adc_modes:
+  - symbol: X_1ADC8_0P_1DAC8_WFBYTE
+    value: "$F002_0000"
+    encoding: "%1111 << 28 + 2<<16"
+    description: "1 ADC → WFBYTE"
+    
+  - symbol: X_1ADC8_8P_2DAC8_WFWORD
+    value: "$F003_0000"
+    encoding: "%1111 << 28 + 3<<16"
+    description: "1 ADC + 8 pins → WFWORD"
+    
+  - symbol: X_2ADC8_0P_2DAC8_WFWORD
+    value: "$F004_0000"
+    encoding: "%1111 << 28 + 4<<16"
+    description: "2 ADC → WFWORD"
+    
+  - symbol: X_2ADC8_16P_4DAC8_WFLONG
+    value: "$F005_0000"
+    encoding: "%1111 << 28 + 5<<16"
+    description: "2 ADC + 16 pins → WFLONG"
+    
+  - symbol: X_4ADC8_0P_4DAC8_WFLONG
+    value: "$F006_0000"
+    encoding: "%1111 << 28 + 6<<16"
+    description: "4 ADC → WFLONG"
+
+# Mode symbols - DDS/Goertzel
+dds_goertzel_modes:
+  - symbol: X_DDS_GOERTZEL_SINC1
+    value: "$F007_0000"
+    encoding: "%1111 << 28 + 7<<16"
+    description: "DDS + Goertzel SINC1 filter"
+    
+  - symbol: X_DDS_GOERTZEL_SINC2
+    value: "$F087_0000"
+    encoding: "%1111 << 28 + $87<<16"
+    description: "DDS + Goertzel SINC2 filter"
+
+# Control symbols - Pin enable
+pin_control:
+  - symbol: X_PINS_OFF
+    value: "$0000_0000"
+    encoding: "%0 << 23"
+    description: "Disable pin output"
+    
+  - symbol: X_PINS_ON
+    value: "$0080_0000"
+    encoding: "%1 << 23"
+    description: "Enable pin output"
+
+# Control symbols - Write enable
+write_control:
+  - symbol: X_WRITE_OFF
+    value: "$0000_0000"
+    encoding: "%0 << 23"
+    description: "Disable WRFAST"
+    
+  - symbol: X_WRITE_ON
+    value: "$0080_0000"
+    encoding: "%1 << 23"
+    description: "Enable WRFAST"
+
+# Control symbols - Bit order
+bit_order:
+  - symbol: X_ALT_OFF
+    value: "$0000_0000"
+    encoding: "%0 << 16"
+    description: "LSB first (default)"
+    
+  - symbol: X_ALT_ON
+    value: "$0001_0000"
+    encoding: "%1 << 16"
+    description: "MSB first"
+
+# DAC routing symbols
+dac_routing:
+  - symbol: X_DACS_OFF
+    value: "$0000_0000"
+    encoding: "%0000 << 24"
+    description: "No DAC override"
+    
+  - symbol: X_DACS_0_0_0_0
+    value: "$0100_0000"
+    encoding: "%0001 << 24"
+    description: "X0 on all channels"
+    
+  - symbol: X_DACS_X_X_0_0
+    value: "$0200_0000"
+    encoding: "%0010 << 24"
+    description: "X0 on channels 0,1"
+    
+  - symbol: X_DACS_0_0_X_X
+    value: "$0300_0000"
+    encoding: "%0011 << 24"
+    description: "X0 on channels 2,3"
+    
+  - symbol: X_DACS_X_X_X_0
+    value: "$0400_0000"
+    encoding: "%0100 << 24"
+    description: "X0 on channel 0"
+    
+  - symbol: X_DACS_X_X_0_X
+    value: "$0500_0000"
+    encoding: "%0101 << 24"
+    description: "X0 on channel 1"
+    
+  - symbol: X_DACS_X_0_X_X
+    value: "$0600_0000"
+    encoding: "%0110 << 24"
+    description: "X0 on channel 2"
+    
+  - symbol: X_DACS_0_X_X_X
+    value: "$0700_0000"
+    encoding: "%0111 << 24"
+    description: "X0 on channel 3"
+    
+  - symbol: X_DACS_0N0_0N0
+    value: "$0800_0000"
+    encoding: "%1000 << 24"
+    description: "Differential X0/!X0 all"
+    
+  - symbol: X_DACS_X_X_0N0
+    value: "$0900_0000"
+    encoding: "%1001 << 24"
+    description: "Differential on 0,1"
+    
+  - symbol: X_DACS_0N0_X_X
+    value: "$0A00_0000"
+    encoding: "%1010 << 24"
+    description: "Differential on 2,3"
+    
+  - symbol: X_DACS_1_0_1_0
+    value: "$0B00_0000"
+    encoding: "%1011 << 24"
+    description: "Stereo X1,X0 pairs"
+    
+  - symbol: X_DACS_X_X_1_0
+    value: "$0C00_0000"
+    encoding: "%1100 << 24"
+    description: "Stereo on 0,1"
+    
+  - symbol: X_DACS_1_0_X_X
+    value: "$0D00_0000"
+    encoding: "%1101 << 24"
+    description: "Stereo on 2,3"
+    
+  - symbol: X_DACS_1N1_0N0
+    value: "$0E00_0000"
+    encoding: "%1110 << 24"
+    description: "Differential stereo"
+    
+  - symbol: X_DACS_3_2_1_0
+    value: "$0F00_0000"
+    encoding: "%1111 << 24"
+    description: "All 4 independent"
+
+# Usage example
+usage_example: |
+  ' Compose streamer command using symbols:
+  mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + base<<17 + 640
+  
+  ' This creates:
+  ' - Mode: RGB 5:6:5 from Hub
+  ' - Pin output enabled
+  ' - All 4 DAC channels
+  ' - Pin base in position
+  ' - 640 pixel count
+
+see_also:
+  - ../../architecture/streamer/modes-reference.yaml
+  - ../../architecture/streamer/dac-routing.yaml

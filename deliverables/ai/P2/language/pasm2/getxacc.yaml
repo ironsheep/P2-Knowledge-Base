@@ -10,7 +10,10 @@ timing:
   cycles: 2
   type: fixed
 description: Get the streamer's Goertzel X accumulator into D and the Y accumulator
-  into the next instruction's S, clear accumulators.
+  into the next instruction's S, clear accumulators. Used with DDS/Goertzel modes
+  for tone detection (DTMF) or signal analysis. The X,Y values represent the
+  real/imaginary components of the Goertzel filter output. Follow with QVECTOR
+  to compute magnitude and phase from the X,Y pair.
 flags_affected:
   C: No effect
   Z: No effect
@@ -27,3 +30,35 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.478637'
 category: Streamer
 oneliner: Get streamer's Goertzel X/Y accumulators into D and next S
+examples:
+  - context: DTMF tone detection with magnitude calculation
+    code: |
+      ' Detect DTMF tone after sampling period
+      getxacc x_val             ' X into x_val, Y into next S
+      qvector y_val             ' Y from S, compute magnitude/phase
+      getqx   magnitude         ' Get magnitude (tone strength)
+      getqy   phase             ' Get phase angle
+    notes: QVECTOR computes sqrt(X^2 + Y^2) magnitude
+  - context: Simple presence detection (no QVECTOR)
+    code: |
+      ' Quick check for tone presence
+      getxacc x_val             ' Get X accumulator
+      abs     x_val             ' Absolute value
+      cmp     x_val, threshold  wc  ' Compare to threshold
+    notes: For simple detection, magnitude approximation may suffice
+goertzel_usage:
+  setup: "Configure streamer in DDS/Goertzel mode (X_DDS_GOERTZEL)"
+  target_frequency: "Set via SETXFRQ to match tone being detected"
+  sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"
+  output: "X,Y are complex Goertzel output (real/imaginary)"
+related_instructions:
+  - QVECTOR: Compute magnitude/phase from X,Y pair
+  - GETQX: Get magnitude result after QVECTOR
+  - GETQY: Get phase result after QVECTOR
+  - SETXFRQ: Set target detection frequency
+  - XINIT: Start Goertzel sampling
+notes:
+  - Accumulators are cleared after GETXACC
+  - Y value is injected into NEXT instruction's S operand
+  - Must have appropriate instruction following GETXACC
+  - Typical pattern: GETXACC + QVECTOR for magnitude extraction

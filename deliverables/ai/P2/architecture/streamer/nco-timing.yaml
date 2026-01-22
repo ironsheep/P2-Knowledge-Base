@@ -1,0 +1,141 @@
+# NCO Timing and Frequency
+# NCO operation, frequency calculation, and common values
+
+component: streamer_nco
+description: Numerically-Controlled Oscillator timing control
+
+# NCO operation
+operation:
+  description: |
+    The NCO operates on every system clock cycle:
+    1. MSB is masked (cleared) before addition
+    2. Frequency value adds to phase accumulator
+    3. If new MSB is set, "rollover" occurs
+    4. On rollover, streamer advances to next data element
+    
+  formula: "phase = (phase & $7FFF_FFFF) + frequency"
+  
+  hardware_note: |
+    The MSB mask before addition means the NCO uses 31 bits for
+    phase accumulation, with MSB serving as rollover indicator.
+
+# Frequency calculation
+frequency_calculation:
+  formula: "frequency = $8000_0000 * (desired_rate / clock_frequency)"
+  
+  note: |
+    For fractional ratios (1/3, 1/5, 1/10), add 1 to ensure
+    proper initial rollover timing.
+    
+  example: |
+    ' 25 MHz pixel rate at 250 MHz clock:
+    ' frequency = $8000_0000 * (25/250) = $0CCC_CCCC
+    ' Add 1: $0CCC_CCCD
+    setxfrq ##$0CCC_CCCD
+
+# Common frequency values
+common_values:
+  - ratio: "1:1"
+    value: "$8000_0000"
+    description: "Every clock cycle"
+    note: "Maximum rate"
+    
+  - ratio: "1:2"
+    value: "$4000_0000"
+    description: "Half clock rate"
+    note: "Exact division, no +1 needed"
+    
+  - ratio: "1:3"
+    value: "$2AAA_AAAB"
+    description: "Third clock rate"
+    note: "Fractional, +1 added"
+    
+  - ratio: "1:4"
+    value: "$2000_0000"
+    description: "Quarter clock rate"
+    note: "Exact division"
+    
+  - ratio: "1:5"
+    value: "$1999_999A"
+    description: "Fifth clock rate"
+    note: "Fractional, +1 added"
+    
+  - ratio: "1:8"
+    value: "$1000_0000"
+    description: "Eighth clock rate"
+    note: "Exact division"
+    
+  - ratio: "1:10"
+    value: "$0CCC_CCCD"
+    description: "Tenth clock rate"
+    note: "Fractional, +1 added (HDMI 10x)"
+    
+  - ratio: "1:16"
+    value: "$0800_0000"
+    description: "Sixteenth clock rate"
+    note: "Exact division"
+
+# Video pixel rates
+video_rates:
+  vga_640x480:
+    pixel_rate: "25.175 MHz"
+    at_250mhz: "$0CCC_CCCD"
+    at_300mhz: "$0AAA_AAAB"
+    at_320mhz: "$0A00_0000"
+    
+  vga_800x600:
+    pixel_rate: "40.000 MHz"
+    at_250mhz: "$1999_999A"
+    at_300mhz: "$1555_5556"
+    at_320mhz: "$1400_0000"
+    
+  vga_1024x768:
+    pixel_rate: "65.000 MHz"
+    at_250mhz: "$2947_AE15"
+    at_300mhz: "$2222_2223"
+    at_320mhz: "$2080_0000"
+    
+  hdmi_720p:
+    pixel_rate: "74.250 MHz"
+    at_300mhz: "$2777_7778"
+    note: "Requires 10x for TMDS"
+
+# Setting frequency
+methods:
+  setxfrq:
+    syntax: "SETXFRQ {#}D"
+    description: "Set NCO frequency directly"
+    example: |
+      setxfrq ##$0CCC_CCCD    ' 25 MHz at 250 MHz clock
+      
+  setq_inline:
+    syntax: "SETQ + XINIT/XCONT/XZERO"
+    description: "Set frequency atomically with command"
+    example: |
+      setq    ##$0CCC_CCCD    ' Set frequency
+      xinit   mode, data      ' Execute with new frequency
+    note: "Useful when frequency changes with each command"
+
+# Phase control
+phase_control:
+  xinit: "Zeros phase immediately"
+  xzero: "Zeros phase on command execution"
+  xcont: "Continues phase (no reset)"
+  
+  use_cases:
+    xzero: "Video line boundaries - prevents drift accumulation"
+    xcont: "Audio streaming - no pops from phase discontinuity"
+
+# Timing precision
+precision:
+  resolution: "31 bits of phase"
+  sub_hz: "Sub-Hz frequency resolution at typical clocks"
+  jitter: "Deterministic - no jitter from NCO"
+  
+  note: |
+    VGA pixel rates rarely divide evenly into P2 clock frequencies.
+    Monitors tolerate small variations. Use closest achievable rate.
+
+see_also:
+  - overview.yaml
+  - modes-reference.yaml

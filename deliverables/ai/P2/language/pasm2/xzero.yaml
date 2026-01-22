@@ -9,8 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: Bu er new streamer command to be issued on final NCO rollover of current
-  command, zeroing phase.                             2+
+description: Buffer new streamer command to be issued on final NCO rollover of current
+  command, zeroing phase. Unlike XCONT which continues phase, XZERO resets phase
+  accumulator to zero when the new command begins - essential for precise timing
+  alignment in video sync generation and audio sample boundaries.
 flags_affected:
   C: No effect
   Z: No effect
@@ -29,3 +31,25 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.352183'
 category: Streamer
 oneliner: Buffer new streamer command, zeroing phase
+examples:
+  - context: Video line timing with phase reset
+    code: |
+      ' Start new video line with precise timing
+      xzero   m_sync, sync_val    ' Queue sync pulse, reset phase
+      xcont   m_back, #0          ' Chain back porch (continues phase)
+      xcont   m_visible, #0       ' Chain visible pixels
+    notes: XZERO at line start ensures consistent timing across all lines
+  - context: Audio sample boundary alignment
+    code: |
+      ' Start new audio block with aligned phase
+      xzero   m_audio, samples    ' Reset phase for sample alignment
+    notes: Phase reset ensures samples align to expected boundaries
+related_instructions:
+  - XCONT: Buffer command continuing phase (seamless chaining)
+  - XINIT: Start streamer immediately (no buffering)
+  - XSTOP: Stop streamer after current command
+notes:
+  - XZERO vs XCONT: Both buffer commands for seamless chaining
+  - XZERO resets phase to zero - use at timing boundaries
+  - XCONT continues phase - use for seamless data flow
+  - Typical pattern: XZERO at video line start, XCONT for segments within line
