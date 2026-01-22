@@ -1,7 +1,5 @@
 # Appendix D: Special Registers Quick Reference
 
-## Register Summary
-
 | Address | Hex | Register | Access | Purpose |
 |---------|-----|----------|--------|---------|
 | 496 | $1F0 | IJMP3 | R/W | Interrupt 3 jump address |
@@ -21,24 +19,4 @@
 | 510 | $1FE | INA | R/O | Pin input 0-31 |
 | 511 | $1FF | INB | R/O | Pin input 32-63 |
 
-## Dual-Purpose Register Functions
-
-| Register | Primary | Alternate Functions |
-|----------|---------|---------------------|
-| PA ($1F6) | General | CALLD return, CALLPA param, LOC address |
-| PB ($1F7) | General | CALLD return, CALLPB param, LOC address |
-| INA ($1FE) | Pin input | Debug interrupt call address |
-| INB ($1FF) | Pin input | Debug interrupt return address |
-
-## Memory Map
-
-```{=latex}
-\SpecialRegistersMapDiagram
-```
-
-::: {.figurecaption #fig:special-registers-map}
-Special Registers Memory Map ($1F0–$1FF)
-:::
-
-*For complete documentation, see Part II: Special Registers.*
-
+*For complete documentation including memory map diagram, usage examples, and non-memory-mapped registers, see Part II: Special Registers.*

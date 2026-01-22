@@ -10,24 +10,13 @@ The P2's special register architecture provides a balance between functionality 
 
 The top 16 locations of cog RAM are reserved for special registers:
 
-| Address | Register | Type | Function |
-|---------|----------|------|----------|
-| $1F0 | IJMP3 | Dual-purpose | Interrupt 3 call address |
-| $1F1 | IRET3 | Dual-purpose | Interrupt 3 return address |
-| $1F2 | IJMP2 | Dual-purpose | Interrupt 2 call address |
-| $1F3 | IRET2 | Dual-purpose | Interrupt 2 return address |
-| $1F4 | IJMP1 | Dual-purpose | Interrupt 1 call address |
-| $1F5 | IRET1 | Dual-purpose | Interrupt 1 return address |
-| $1F6 | PA | Dual-purpose | Multi-purpose register A |
-| $1F7 | PB | Dual-purpose | Multi-purpose register B |
-| $1F8 | PTRA | Fixed special | Pointer A to Hub RAM |
-| $1F9 | PTRB | Fixed special | Pointer B to Hub RAM |
-| $1FA | DIRA | Fixed special | Direction register A (pins 0-31) |
-| $1FB | DIRB | Fixed special | Direction register B (pins 32-63) |
-| $1FC | OUTA | Fixed special | Output register A (pins 0-31) |
-| $1FD | OUTB | Fixed special | Output register B (pins 32-63) |
-| $1FE | INA | Fixed special | Input register A (pins 0-31) |
-| $1FF | INB | Fixed special | Input register B (pins 32-63) |
+```{=latex}
+\SpecialRegistersMapDiagram
+```
+
+::: {.figurecaption #fig:special-registers-map-part2}
+Special Registers Memory Map ($1F0–$1FF)
+:::
 
 ### Dual-Purpose vs. Fixed Registers
 
