@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-22T23:24:43.431339",
+    "generated": "2026-01-22T23:26:28.522866",
     "total_entries": 1010,
     "total_categories": 47,
     "total_aliases": 933,
@@ -3478,7 +3478,7 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1764449566
+      "mtime": 1769124300
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
@@ -3494,7 +3494,7 @@
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
-      "mtime": 1764449566
+      "mtime": 1769124300
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",

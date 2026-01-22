@@ -235,7 +235,7 @@ debug_features:
 related_components:
   hub: "Shared memory and resources"
   smart_pins: "I/O processing offload"
-  streamer: "DMA for each COG"
+  architecture/streamer/overview.yaml: "DMA for each COG"
   cordic: "Shared CORDIC solver in hub"
   interrupts: "Event-driven processing"
 

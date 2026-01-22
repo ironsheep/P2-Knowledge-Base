@@ -257,7 +257,7 @@ pin_pairing:
 
 related_components:
   cogs: "Configure and control smart pins"
-  streamer: "Can bypass smart pins"
+  architecture/streamer/overview.yaml: "Can bypass smart pins"
   events: "Smart pin IN flags trigger events"
   interrupts: "Can trigger COG interrupts"
 
