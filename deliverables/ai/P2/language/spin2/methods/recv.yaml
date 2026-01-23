@@ -32,6 +32,29 @@ examples:
       repeat until RECV() == "!"
       ' Got start character
     description: "Wait for start marker"
+as_method_pointer:
+  description: |
+    RECV can be assigned to a LONG variable as a method pointer,
+    enabling flexible I/O abstraction.
+  syntax: "inputMethod := RECV"
+  usage: "data := inputMethod()"
+  restrictions:
+    - "Takes no parameters"
+    - "Always returns exactly one value"
+    - "Cannot use abort syntax with RECV"
+  example: |
+    VAR
+      LONG inputMethod
+      
+    PUB SetupMailbox()
+      inputMethod := RECV         ' Use inter-cog mailbox
+      
+    PUB SetupSerial()
+      inputMethod := @serial.rx   ' Use serial port
+      
+    PUB GetInput() : data
+      data := inputMethod()       ' Works with either source
+
 notes:
   - "Input method must be configured first"
   - "Typically used with serial drivers"
@@ -39,12 +62,14 @@ notes:
   - "Returns single byte (0-255)"
   - "Works with user-defined input methods"
   - "Common for user input and data reception"
+  - "Can be assigned to LONG variable as method pointer for flexible I/O"
 timing:
   description: "Depends on input method"
   cycles: "Variable - blocks until data available"
 related:
   - SEND
   - DEBUG
+  - language/spin2/concepts/method-pointers.yaml
 see_also:
   - "Serial communication"
   - "User input"

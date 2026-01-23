@@ -14,20 +14,37 @@ memory_spaces:
   hub_ram:
     description: "512KB shared memory accessible by all cogs"
     address_range: "$00000-$7FFFF"
-    addressing: "20-bit addresses"
+    size: "512KB"
+    addressing: "20-bit BYTE addresses"
+    address_unit: "bytes"
     access: "All cogs via RDLONG/WRLONG or Spin2 BYTE[]/WORD[]/LONG[]"
     
   cog_ram:
     description: "512 longs private to each cog"
     address_range: "$000-$1FF (0-511)"
-    addressing: "9-bit register addresses"
+    size: "512 longs (2KB)"
+    addressing: "9-bit LONG addresses"
+    address_unit: "longs (not bytes)"
     access: "Direct register access within cog, or REG[] from Spin2"
     
   lut_ram:
     description: "512 longs lookup table per cog"
     address_range: "$200-$3FF (512-1023)"
-    addressing: "9-bit addresses"
+    size: "512 longs (2KB)"
+    addressing: "9-bit LONG addresses"
+    address_unit: "longs (not bytes)"
     access: "RDLUT/WRLUT instructions or via cog register window"
+
+critical_distinction_byte_vs_long:
+  description: |
+    COG and LUT addresses are in LONGS, while HUB addresses are in BYTES.
+    This is a common source of confusion.
+  cog_lut:
+    unit: "longs"
+    example: "COG address $10 means the 16th long (register), not byte $10"
+  hub:
+    unit: "bytes"
+    example: "HUB address $1000 means byte address $1000"
 
 address_operators:
   at:
@@ -173,6 +190,80 @@ addressing_mode_comparison:
     syntax: "@@pointer_table[i]"
     use: "Converting stored relative offsets"
 
+address_alignment:
+  description: |
+    For optimal performance, data should be properly aligned in memory.
+    Misaligned access works but may be slower.
+  directives:
+    ALIGNL:
+      purpose: "Align next data to long (4-byte) boundary"
+      use: "Before LONG data for optimal access"
+    ALIGNW:
+      purpose: "Align next data to word (2-byte) boundary"
+      use: "Before WORD data for optimal access"
+  example: |
+    DAT
+            ALIGNL                    ' Align to long boundary
+    myLongs LONG    0, 0, 0, 0
+    
+            ALIGNW                    ' Align to word boundary
+    myWords WORD    0, 0, 0, 0
+
+org_vs_orgh_addressing:
+  description: |
+    The origin directive affects how addresses are interpreted in PASM2.
+  ORG:
+    context: "COG execution mode"
+    addresses: "0-$1FF (cog register addresses)"
+    behavior: "Code will be loaded into cog RAM and run from there"
+    example: "JMP #label uses cog-relative address"
+  ORGH:
+    context: "HUB execution mode"
+    addresses: "$400 and above (hub byte addresses)"
+    behavior: "Code runs directly from hub RAM"
+    example: "RDLONG val, ##@data uses hub addressing"
+  example: |
+    DAT
+            ORG     0                       ' COG mode
+    cogCode
+            MOV     PA, #@hubData           ' Get hub address into PA
+            JMP     #cogCode                ' COG-relative jump
+    
+            ORGH    $400                    ' HUB mode
+    hubCode
+            RDLONG  temp, ##@hubData        ' Hub addressing
+    
+    hubData LONG    $12345678
+
+address_arithmetic:
+  description: "Once you have an address, you can perform arithmetic on it."
+  
+  basic_operations:
+    increment: "ptr += offset  ' Move pointer forward"
+    decrement: "ptr -= offset  ' Move pointer backward"
+    
+  size_calculation:
+    description: "Calculate data size using address subtraction"
+    example: |
+      DAT
+      startData   BYTE    0[100]
+      endData
+      
+      PUB GetSize() : size
+        size := @endData - @startData   ' Returns 100
+        
+  type_aware_indexing:
+    description: "Type specifiers automatically scale index by element size"
+    example: |
+      VAR
+        LONG values[10]
+        
+      PUB Example() | ptr, val
+        ptr := @values
+        val := LONG[ptr][5]       ' Accesses values[5] (ptr + 5*4 = ptr + 20)
+        val := LONG[ptr + 20]     ' Same result, manual calculation
+    note: "BYTE index scales by 1, WORD by 2, LONG by 4"
+
 troubleshooting:
   - problem: "Address from DAT table doesn't work"
     cause: "Using @ value directly without @@ conversion"
@@ -189,6 +280,14 @@ troubleshooting:
   - problem: "Cog can't find shared data"
     cause: "Address passed is relative, not absolute"
     solution: "@ in runtime code (PUB/PRI) is already absolute"
+    
+  - problem: "COG register access uses wrong offset"
+    cause: "Treating COG addresses as byte addresses instead of long addresses"
+    solution: "COG/LUT addresses are in LONGS. Address $10 is register 16, not byte 16."
+    
+  - problem: "Using @ with COG registers or bitfields"
+    cause: "@ operator not allowed for COG registers or bitfield notation"
+    solution: "Use ^@ operator instead to create field pointer"
 
 notes:
   - "@ in code (PUB/PRI) evaluates to absolute address at runtime"
@@ -200,11 +299,22 @@ notes:
 related:
   - language/spin2/special-symbols/at.yaml
   - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/special-symbols/caret_at.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/operators/FIELD.yaml
   - language/spin2/methods/byte.yaml
   - language/spin2/methods/word.yaml
   - language/spin2/methods/long.yaml
+  - language/spin2/methods/bytemove.yaml
+  - language/spin2/methods/wordmove.yaml
+  - language/spin2/methods/longmove.yaml
+  - language/spin2/methods/bytecomp.yaml
+  - language/spin2/methods/wordcomp.yaml
+  - language/spin2/methods/longcomp.yaml
+  - language/spin2/methods/setregs.yaml
+  - language/spin2/methods/getregs.yaml
+  - language/spin2/assembly-directives/org.yaml
+  - language/spin2/assembly-directives/orgh.yaml
   - architecture/hub.yaml
   - architecture/cog.yaml
 

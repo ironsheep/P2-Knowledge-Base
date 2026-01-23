@@ -20,12 +20,51 @@ syntax:
     returns: "Hub address of VAR/PUB/PRI/DAT variable"
     block_usage: "All blocks (CON, VAR, DAT, PUB, PRI)"
     
+  array_element:
+    form: "@array[index]"
+    returns: "Address of specific array element"
+    calculation: "base_address + (index * element_size)"
+    notes: "Element size is 1 for BYTE, 2 for WORD, 4 for LONG"
+    
+  structure_address:
+    form: "@structVar"
+    returns: "Address of entire structure"
+    
+  structure_member:
+    form: "@structVar.member"
+    returns: "Address of specific member within structure"
+    extended_form: "@structVar.nested.member for deeply nested access"
+    
+  inline_string:
+    form: '@"string literal"'
+    returns: "Address of inline string constant in hub memory"
+    
   method_pointer:
-    form: "@method"
-    returns: "Pointer to method"
-    extended_form: "@object{[i]}.method"
+    description: "Three forms for obtaining method addresses"
+    forms:
+      local_method:
+        syntax: "@MethodName"
+        description: "Address of method in current object"
+      child_object_method:
+        syntax: "@obj.MethodName"
+        description: "Address of method in child object"
+      indexed_object_method:
+        syntax: "@obj[i].MethodName"
+        description: "Address of method in indexed child object array"
     block_usage: "PUB/PRI only"
-    notes: "Creates a 32-bit method pointer encoding method index and VAR base"
+    storage: "Must store in LONG variable (no BYTE, WORD, or bitfields)"
+    notes: "See language/spin2/concepts/method-pointers.yaml for calling patterns"
+
+restrictions:
+  cog_registers:
+    not_allowed: "@DIRA, @INA, @OUTA, @DIRB, @INB, @OUTB, etc."
+    error_message: "@ is not allowed, use ^@ to get field pointer"
+    solution: "Use ^@ operator instead for COG register access"
+    
+  bitfields:
+    not_allowed: "@myVar.[3..0], @myVar.[highBit..lowBit]"
+    error_message: "@ is not allowed for bitfields, use ^@ to get field pointer"
+    solution: "Use ^@ operator to create field pointer for bitfield access"
 
 address_types:
   relative_address:
@@ -108,6 +147,46 @@ examples:
         method_ptr := @child.process  ' Get method in child object
         method_ptr()                   ' Call child's method
     description: "Getting method pointer from child object"
+    
+  - code: |
+      PUB example() | pStr
+        pStr := @"Hello, World!"     ' Address of inline string constant
+        debug(zstr(pStr))
+    description: "Getting address of inline string literal"
+    
+  - code: |
+      CON
+        STRUCT point(x, y)
+        STRUCT line(point a, point b)
+        
+      VAR
+        point myPoint
+        line myLine
+        
+      PUB example() | ptr
+        ptr := @myPoint              ' Address of entire structure
+        LONG[ptr][0] := 100          ' Access x member
+        LONG[ptr][1] := 200          ' Access y member
+        
+        ptr := @myLine.a             ' Address of nested point 'a'
+        ptr := @myLine.a.x           ' Address of x within point a
+    description: "Structure and nested member addressing"
+    
+  - code: |
+      CON
+        STRUCT point(x, y)
+        NUM_POINTS = 10
+        
+      VAR
+        point points[NUM_POINTS]
+        
+      PUB clearAll() | ptr, i
+        ptr := @points[0]            ' Address of first structure
+        repeat NUM_POINTS
+          ptr.x := 0
+          ptr.y := 0
+          ptr += 8                   ' Advance by structure size (2 LONGs)
+    description: "Structure array traversal with pointer arithmetic"
 
 common_patterns:
   pointer_to_buffer: |
@@ -140,10 +219,17 @@ notes:
 
 related:
   - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/special-symbols/caret_at.yaml
+  - language/spin2/concepts/method-pointers.yaml
   - language/spin2/methods/coginit.yaml
   - language/spin2/methods/cogspin.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/operators/FIELD.yaml
+  - language/spin2/methods/bytemove.yaml
+  - language/spin2/methods/wordmove.yaml
+  - language/spin2/methods/longmove.yaml
+  - language/spin2/methods/setregs.yaml
+  - language/spin2/methods/getregs.yaml
 
 source_reference: "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section"
 

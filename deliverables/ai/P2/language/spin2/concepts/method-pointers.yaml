@@ -1,0 +1,242 @@
+name: Method Pointers
+type: concept
+category: Programming Patterns
+
+description: |
+  Method pointers are 32-bit values that hold the address of a method, enabling 
+  indirect (dynamic) method calls. They provide powerful capabilities for callbacks,
+  dispatch tables, polymorphism, and decoupling callers from specific methods.
+  
+  CRITICAL: Method pointers must be stored in LONG variables without bitfields.
+
+variable_requirements:
+  valid_declarations:
+    - "LONG callback           ' Single method pointer"
+    - "LONG handlers[4]        ' Array of method pointers"
+    - "PUB Process() | handler ' Local LONG variable"
+    - "PUB Register(handler)   ' LONG parameter"
+  invalid_declarations:
+    - type: "BYTE ptr"
+      error: "Method pointers must be long variables without bitfields"
+    - type: "WORD ptr"
+      error: "Method pointers must be long variables without bitfields"
+    - type: "LONG ptr : 16"
+      error: "Method pointers must be long variables without bitfields"
+
+getting_method_addresses:
+  local_method:
+    syntax: "@MethodName"
+    description: "Address of method in current object"
+    example: "handler := @ProcessData"
+    
+  child_object_method:
+    syntax: "@obj.MethodName"
+    description: "Address of method in child object"
+    example: "outputMethod := @serial.tx"
+    
+  indexed_object_method:
+    syntax: "@obj[i].MethodName"
+    description: "Address of method in indexed child object array"
+    example: "readMethod := @sensors[index].Read"
+
+calling_through_pointers:
+  basic_call:
+    syntax: "ptr()"
+    description: "Call method with no parameters"
+    
+  with_parameters:
+    syntax: "ptr(a, b, c)"
+    description: "Call method with parameters"
+    
+  single_return:
+    syntax: "result := ptr()"
+    description: "Call and capture return value"
+    
+  multiple_returns:
+    syntax: "x, y, z := ptr() : 3"
+    description: "Call and capture N return values"
+    note: "The :N suffix specifies expected return count for pointer calls"
+    example: |
+      VAR
+        LONG coordGetter
+        
+      PUB Example() | x, y, z
+        coordGetter := @GetPosition
+        x, y, z := coordGetter() : 3    ' Expect 3 return values
+
+null_check:
+  description: "Always verify method pointer is valid before calling"
+  pattern: |
+    if callback <> 0
+      callback(data)
+
+examples:
+  - code: |
+      VAR
+        LONG handler
+        
+      PUB Setup()
+        handler := @ProcessData
+        
+      PUB Run()
+        handler()                   ' Indirect call
+        
+      PRI ProcessData()
+        ' ... implementation ...
+    description: "Basic method pointer usage"
+    
+  - code: |
+      OBJ
+        serial : "jm_serial"
+        lcd    : "lcd_driver"
+        
+      VAR
+        LONG printChar
+        
+      PUB UseSerial()
+        printChar := @serial.tx
+        
+      PUB UseDisplay()
+        printChar := @lcd.Char
+        
+      PUB Output(c)
+        printChar(c)
+    description: "Pluggable output - switch between implementations"
+    
+  - code: |
+      CON
+        STATE_IDLE    = 0
+        STATE_RUNNING = 1
+        STATE_ERROR   = 2
+        NUM_STATES    = 3
+        
+      VAR
+        LONG stateHandlers[NUM_STATES]
+        LONG currentState
+        
+      PUB Init()
+        stateHandlers[STATE_IDLE] := @HandleIdle
+        stateHandlers[STATE_RUNNING] := @HandleRunning
+        stateHandlers[STATE_ERROR] := @HandleError
+        currentState := STATE_IDLE
+        
+      PUB Update() | nextState
+        if currentState >= 0 and currentState < NUM_STATES
+          nextState := stateHandlers[currentState]()
+          currentState := nextState
+    description: "State machine with dispatch table"
+    
+  - code: |
+      VAR
+        LONG onComplete
+        
+      PUB StartOperation(completionHandler)
+        onComplete := completionHandler
+        ' ... start async work ...
+        
+      PRI OperationDone(result)
+        if onComplete
+          onComplete(result)
+    description: "Callback pattern for async completion"
+    
+  - code: |
+      PUB TransformArray(pArray, count, transformFunc) | i, value
+        repeat i from 0 to count - 1
+          value := LONG[pArray][i]
+          LONG[pArray][i] := transformFunc(value)
+          
+      ' Usage:
+      PUB Example()
+        TransformArray(@values, 10, @DoubleValue)
+        
+      PRI DoubleValue(x) : result
+        result := x * 2
+    description: "Higher-order function pattern"
+    
+  - code: |
+      PUB SortArray(pArray, count, compareFunc) | i, j, temp, cmp
+        repeat i from 0 to count - 2
+          repeat j from i + 1 to count - 1
+            cmp := compareFunc(LONG[pArray][i], LONG[pArray][j])
+            if cmp > 0
+              temp := LONG[pArray][i]
+              LONG[pArray][i] := LONG[pArray][j]
+              LONG[pArray][j] := temp
+              
+      PRI CompareAscending(a, b) : result
+        result := a - b
+    description: "Custom comparator for sorting"
+
+recv_send_as_pointers:
+  description: |
+    RECV and SEND are special built-in method pointers for inter-cog mailbox
+    communication. They can be assigned to variables for flexible I/O.
+  recv:
+    syntax: "inputMethod := RECV"
+    usage: "data := inputMethod()"
+    restrictions:
+      - "Takes no parameters"
+      - "Always returns exactly one value"
+  send:
+    syntax: "outputMethod := SEND"
+    usage: "outputMethod(data)"
+    restrictions:
+      - "Returns no value"
+  flexible_io_pattern: |
+    VAR
+      LONG inputMethod
+      LONG outputMethod
+      
+    PUB SetupMailboxIO()
+      inputMethod := RECV
+      outputMethod := SEND
+      
+    PUB SetupSerialIO()
+      inputMethod := @serial.rx
+      outputMethod := @serial.tx
+      
+    PUB ProcessIO() | char
+      char := inputMethod()
+      outputMethod(char)
+
+parameter_considerations:
+  description: |
+    Method pointer calls have no compile-time parameter validation.
+    The caller must provide the correct number of parameters.
+  wrapper_pattern: |
+    ' For dispatch tables with varying signatures, use wrappers:
+    PUB Dispatch(index, p1, p2, p3) : result
+      result := handlers[index](p1, p2, p3)
+      
+    PRI WrapNoParam(p1, p2, p3) : result
+      result := ActualNoParam()
+      
+    PRI WrapOneParam(p1, p2, p3) : result
+      result := ActualOneParam(p1)
+
+best_practices:
+  - "Initialize pointers to 0 and check before calling"
+  - "Use CON constants for dispatch table indices"
+  - "Document expected method signatures in comments"
+  - "Bounds-check array indices before dispatch"
+
+common_patterns:
+  event_handlers: "Register callbacks for button press, timeout, etc."
+  dispatch_tables: "State machines, command processors, menu systems"
+  strategy_pattern: "Switch algorithms at runtime via object method pointers"
+  higher_order: "Pass transform/filter/compare functions to generic algorithms"
+
+notes:
+  - "Method pointers are 32-bit values encoding method index and VAR base"
+  - "No compile-time type checking on parameters or returns"
+  - "Use :N suffix to specify return count when calling through pointer"
+  - "RECV and SEND can be assigned to variables for I/O abstraction"
+
+related:
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/constructs/method_definition.yaml
+  - language/spin2/methods/recv.yaml
+  - language/spin2/methods/send.yaml
+  - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
+
+oneliner: "Method pointers enable indirect calls, callbacks, dispatch tables, and runtime method selection"

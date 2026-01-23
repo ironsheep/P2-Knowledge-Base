@@ -291,6 +291,7 @@ related_constructs:
   - "p2kbSpin2KwCON"
   - "p2kbSpin2KwOBJ"
   - "p2kbSpin2InlinePasm"
+  - "language/spin2/concepts/method-pointers.yaml"
   
 related_concepts:
   - "Object-oriented design"

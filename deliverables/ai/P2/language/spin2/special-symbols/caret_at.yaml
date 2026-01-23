@@ -23,6 +23,46 @@ syntax:
     returns: "Field pointer encoding base address and bit range"
     description: "Width is (highBit - lowBit + 1) bits"
 
+why_use_caret_at:
+  cog_registers:
+    description: |
+      The @ operator is NOT allowed with COG registers (DIRA, INA, OUTA, etc.).
+      You MUST use ^@ to access COG registers.
+    example: "fieldPtr := ^@DIRA.[15..0]  ' Correct way to access DIRA bits"
+    error_if_using_at: "@ is not allowed, use ^@ to get field pointer"
+    
+  bitfields:
+    description: |
+      The @ operator is NOT allowed with bitfield notation.
+      You MUST use ^@ to create field pointers for bitfield access.
+    example: "fieldPtr := ^@myVar.[7..0]  ' Correct way to get bitfield pointer"
+    error_if_using_at: "@ is not allowed for bitfields, use ^@ to get field pointer"
+
+field_width_specification:
+  description: "The bit range notation specifies field width and value range"
+  widths:
+    - notation: ".[0] or .[0..0]"
+      width: "1 bit"
+      max_value: 1
+    - notation: ".[1..0]"
+      width: "2 bits"
+      max_value: 3
+    - notation: ".[3..0]"
+      width: "4 bits"
+      max_value: 15
+    - notation: ".[7..0]"
+      width: "8 bits"
+      max_value: 255
+    - notation: ".[11..0]"
+      width: "12 bits"
+      max_value: 4095
+    - notation: ".[15..0]"
+      width: "16 bits"
+      max_value: 65535
+    - notation: ".[31..0]"
+      width: "32 bits"
+      max_value: 4294967295
+
 field_pointer_encoding:
   description: |
     A field pointer encodes:
@@ -99,14 +139,26 @@ use_cases:
   - name: "Protocol parsing"
     description: "Extracting fields from packed protocol data"
 
+when_to_use:
+  use_at:
+    - "Get address of a variable: @myVar"
+    - "Get address of array element: @array[i]"
+    - "Get address of structure member: @struct.member"
+    - "Get address of method: @myMethod"
+  use_caret_at:
+    - "Get field pointer for COG register: ^@DIRA.[15..0]"
+    - "Get field pointer for bitfield access: ^@myVar.[7..0]"
+    - "Create indexed field access: ^@storage.[3..0] with FIELD[][i]"
+
 comparison_with_at:
   "@_operator":
     returns: "Memory address only"
     use: "General pointer operations, BYTE[]/WORD[]/LONG[] access"
+    restriction: "Cannot be used with COG registers or bitfields"
     
   "^@_operator":
     returns: "Field pointer (address + bit info)"
-    use: "FIELD[] operations, bitfield access"
+    use: "FIELD[] operations, bitfield access, COG register access"
 
 notes:
   - "^@ creates a field pointer, not just an address"

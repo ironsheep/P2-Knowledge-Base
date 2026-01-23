@@ -28,6 +28,28 @@ examples:
       ' Send array data
       SEND(BYTE[@buffer, 10])  ' Send 10 bytes from buffer
     description: "Send array contents"
+as_method_pointer:
+  description: |
+    SEND can be assigned to a LONG variable as a method pointer,
+    enabling flexible I/O abstraction.
+  syntax: "outputMethod := SEND"
+  usage: "outputMethod(data)"
+  restrictions:
+    - "Returns no value (cannot be used as a term)"
+    - "Cannot use abort syntax with SEND"
+  example: |
+    VAR
+      LONG outputMethod
+      
+    PUB SetupMailbox()
+      outputMethod := SEND        ' Use inter-cog mailbox
+      
+    PUB SetupSerial()
+      outputMethod := @serial.tx  ' Use serial port
+      
+    PUB SendData(data)
+      outputMethod(data)          ' Works with either destination
+
 notes:
   - "Output method must be configured first"
   - "Typically used with serial drivers"
@@ -35,12 +57,14 @@ notes:
   - "Blocking operation - waits for each byte"
   - "Works with user-defined output methods"
   - "Common for debug output"
+  - "Can be assigned to LONG variable as method pointer for flexible I/O"
 timing:
   description: "Depends on output method"
   cycles: "Variable based on driver"
 related:
   - RECV
   - DEBUG
+  - language/spin2/concepts/method-pointers.yaml
 see_also:
   - "Serial communication"
   - "Debug output"

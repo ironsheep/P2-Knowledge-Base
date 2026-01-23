@@ -16,10 +16,21 @@ description: |
   This is essential for data pointer tables where @ values are stored in DAT sections.
 
 syntax:
-  form: "@@x"
-  returns: "Hub address of this object + x"
-  block_usage: "PUB/PRI only"
-  typical_use: "@@dat_symbol or @@array[index]"
+  basic:
+    form: "@@x"
+    returns: "Hub address of this object + x"
+    block_usage: "PUB/PRI only"
+    
+  with_type_and_index:
+    form: "@@TYPE[@table][index]"
+    returns: "Resolved absolute address from pointer table"
+    description: "Common pattern for lookup tables storing @ addresses"
+    examples:
+      - "@@WORD[@stringTable][i]  - resolve WORD-sized pointer"
+      - "@@LONG[@pointerTable][i] - resolve LONG-sized pointer"
+    
+  equivalence:
+    note: "@@symbol is equivalent to @symbol + PBASE"
 
 how_it_works:
   explanation: |
@@ -87,6 +98,47 @@ examples:
       PUB goodExample() | addr
         addr := @@ptr_to_data      ' Must convert stored offset to absolute
     description: "When @@ is needed vs when it's not"
+    
+  - code: |
+      DAT
+      pointerTable    LONG    @buffer1, @buffer2, @buffer3
+      
+      PUB GetBuffer(index) : pBuffer
+        pBuffer := @@LONG[@pointerTable][index]
+    description: |
+      Complex @@ expression pattern:
+      1. @pointerTable - get address of the table
+      2. LONG[...][index] - read the LONG at that index
+      3. @@ - add program base to convert to hub address
+    
+  - code: |
+      DAT
+      defaults    LONG    100, 200, 300, 400
+      
+      VAR
+        LONG settings[4]
+        
+      PUB Init()
+        LONGMOVE(@settings, @@defaults, 4)  ' Copy DAT defaults to VAR
+    description: "Buffer initialization from DAT section using @@ with LONGMOVE"
+    
+  - code: |
+      DAT
+      stateHandlers   LONG    @State0, @State1, @State2
+      
+      VAR
+        LONG currentHandler
+        
+      PUB Init()
+        currentHandler := @@stateHandlers[0]  ' Resolve first handler
+        
+      PUB Run()
+        currentHandler()                       ' Call current state
+        
+      PRI State0()
+        ' ... state 0 logic ...
+        currentHandler := @@stateHandlers[1]  ' Transition to state 1
+    description: "Pointer-based state machine using @@ to resolve method addresses"
 
 spin2_vs_pasm_only:
   spin2_pasm:
