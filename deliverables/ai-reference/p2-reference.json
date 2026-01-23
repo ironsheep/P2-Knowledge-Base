@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-01-22",
-    "last_updated": "2026-01-22T23:26:28.557168",
+    "release_date": "2026-01-23",
+    "last_updated": "2026-01-23T07:08:45.805894",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-22T23:26:28.557168",
+    "extraction_date": "2026-01-23T07:08:45.805894",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18268,7 +18268,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-22T23:26:28.557168",
+    "extraction_date": "2026-01-23T07:08:45.805894",
     "categories": {
       "keywords": {
         "count": 37,
@@ -27290,7 +27290,7 @@
         }
       },
       "special_symbols": {
-        "count": 12,
+        "count": 13,
         "elements": {
           ".": {
             "symbol": ".",
@@ -27313,12 +27313,79 @@
           },
           "@@": {
             "symbol": "@@",
+            "name": "Absolute Address Operator",
             "type": "special_symbol",
-            "category": "Special",
-            "description": "Absolute address operator - get absolute hub address\n",
+            "category": "Address Operators",
+            "priority": 1,
+            "description": "The @@ operator converts an object-relative address to an absolute hub address.\n\nPURPOSE: In Spin2+PASM programs, the @ operator stores addresses RELATIVE to the\nobject's base. When you store @symbol values in data tables and need to use them\nat runtime, you must convert them to absolute addresses using @@.\n\nFORMULA: @@x = (hub address of this object) + x\n\nThis is essential for data pointer tables where @ values are stored in DAT sections.\n",
+            "syntax": {
+              "form": "@@x",
+              "returns": "Hub address of this object + x",
+              "block_usage": "PUB/PRI only",
+              "typical_use": "@@dat_symbol or @@array[index]"
+            },
+            "how_it_works": {
+              "explanation": "When the compiler encounters @symbol in a DAT section, it stores the symbol's\noffset from the object base (not an absolute address). This allows objects\nto be relocatable - they can load at any hub address.\n\nAt runtime, when you need the actual memory address:\n1. @@ reads the stored relative offset\n2. Adds the current object's base address\n3. Returns the resulting absolute hub address\n",
+              "formula": "absolute_address = object_base + stored_offset"
+            },
             "examples": [
-              "hub_addr := @@variable"
-            ]
+              {
+                "code": "DAT\n  STR0    BYTE  \"MONKEYS\", 0\n  STR1    BYTE  \"GORILLAS\", 0\n  STR2    BYTE  \"CHIMPANZEES\", 0\n  STR3    BYTE  \"HUMANZEES\", 0\n  \n  ' In Spin2, these are OFFSETS relative to start of object\n  STRLIST WORD  @STR0, @STR1, @STR2, @STR3\n  \nPUB printString(index)\n  ' @@STRLIST[index] converts offset to absolute address\n  debug(zstr(@@STRLIST[index]))\n",
+                "description": "Classic string table pattern. @STRx stores offsets, @@STRLIST[i] \nretrieves absolute addresses. From Parallax documentation.\n",
+                "source": "Spin2 v51 Documentation - DAT Data Pointers"
+              },
+              {
+                "code": "DAT\n  table1  LONG  100, 200, 300\n  table2  LONG  10, 20, 30\n  tables  LONG  @table1, @table2\n  \nPUB getTable(n) : addr\n  addr := @@tables[n]        ' Get absolute address of table\n  debug(sdec(LONG[addr]))    ' Read first element\n",
+                "description": "Table of table pointers using @@ for indirection"
+              },
+              {
+                "code": "DAT\n  handler0  LONG  @process_type_a\n  handler1  LONG  @process_type_b\n  \nPUB dispatch(type) | handler_addr\n  handler_addr := @@handler0[type]  ' Get method address\n  CALL(handler_addr)                 ' Call the handler\n",
+                "description": "Jump table / dispatch table pattern"
+              },
+              {
+                "code": "' WRONG - will not work correctly:\nPUB badExample() | addr\n  addr := @mydata        ' This works fine - direct @ in code\n  ' No need for @@ here - @ in PUB/PRI code is already resolved\n  \n' RIGHT - when reading stored @ values from DAT:\nDAT\n  ptr_to_data LONG @mydata   ' Stored as relative offset\n  \nPUB goodExample() | addr\n  addr := @@ptr_to_data      ' Must convert stored offset to absolute\n",
+                "description": "When @@ is needed vs when it's not"
+              }
+            ],
+            "spin2_vs_pasm_only": {
+              "spin2_pasm": {
+                "description": "@ stores relative offsets, @@ converts to absolute",
+                "example_comment": "'IN SPIN2, THESE ARE OFFSETS OF STRINGS RELATIVE TO START OF OBJECT"
+              },
+              "pasm_only": {
+                "description": "@ stores absolute addresses directly, @@ typically not needed",
+                "example_comment": "'IN PASM-ONLY PROGRAMS, THESE ARE ABSOLUTE ADDRESSES OF STRINGS"
+              }
+            },
+            "notes": [
+              "@@ is only needed in PUB/PRI blocks, not in DAT/CON",
+              "Use @@ when reading @ values that were stored in DAT sections",
+              "Direct @ usage in PUB/PRI code doesn't need @@ conversion",
+              "In PASM-only programs, addresses are already absolute",
+              "Common pattern: DAT stores @symbol, code uses @@symbol_table[i]",
+              "Word-sized pointers (WORD @symbol) assume addresses under 64KB"
+            ],
+            "common_mistakes": [
+              {
+                "mistake": "Using @@ on a direct variable reference",
+                "wrong": "addr := @@myvar",
+                "right": "addr := @myvar",
+                "explanation": "Direct @ in code is already absolute; @@ is for stored offsets"
+              },
+              {
+                "mistake": "Forgetting @@ when reading from pointer tables",
+                "wrong": "str := STRLIST[i]",
+                "right": "str := @@STRLIST[i]",
+                "explanation": "STRLIST contains offsets; @@ converts to usable addresses"
+              }
+            ],
+            "related": [
+              "language/spin2/special-symbols/at.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/assembly-directives/org.yaml"
+            ],
+            "source_reference": "Spin2 Documentation v51 - 'Hub address of this object + x'",
+            "oneliner": "Absolute address operator - converts object-relative @offset to absolute hub address (for DAT pointer tables)"
           },
           "..": {
             "symbol": "..",
@@ -27327,15 +27394,6 @@
             "description": "Range operator for CASE statements\n",
             "examples": [
               "CASE value\n  1..10: low_range()\n  11..20: high_range()"
-            ]
-          },
-          "^@": {
-            "symbol": "^@",
-            "type": "special_symbol",
-            "category": "Special",
-            "description": "Object address operator - address within object\n",
-            "examples": [
-              "obj_addr := ^@method"
             ]
           },
           "~": {
@@ -27347,15 +27405,187 @@
               "value := ~flag  // use flag then clear it"
             ]
           },
+          "#": {
+            "symbol": "#",
+            "name": "Register Address Operator",
+            "type": "special_symbol",
+            "category": "Address Operators",
+            "priority": 1,
+            "description": "The # operator returns the register address of a cog or LUT symbol defined\nin an ORG section. This is used to get the cog register address (0-511) or\nLUT address of symbols defined in assembly code.\n\nDISTINCTION FROM @:\n- @ returns HUB memory addresses (for VAR/DAT data)\n- # returns COG/LUT register addresses (for ORG-defined symbols)\n\nThis operator is essential when working with inline PASM code and needing\nto reference cog register locations from Spin2 code.\n",
+            "syntax": {
+              "form": "#reg_symbol",
+              "returns": "Register address of cog/LUT symbol",
+              "block_usage": "Spin2 expressions",
+              "range": {
+                "cog": "$000-$1FF (0-511)",
+                "lut": "$200-$3FF (512-1023)"
+              }
+            },
+            "predefined_registers": {
+              "description": "The # operator can be used with predefined register names to get their addresses.\nAdded in PNut v47: #register now returns the register's address in Spin2 expressions.\n",
+              "examples": [
+                "#PR0 resolves to $1D8",
+                "#PR7 resolves to $1DF",
+                "#INB resolves to $1FF",
+                "#OUTA resolves to $1FC",
+                "#DIRA resolves to $1FA"
+              ]
+            },
+            "examples": [
+              {
+                "code": "DAT\n        ORG     0\nmyvar   LONG    0           ' myvar is at cog register $000\ncounter LONG    0           ' counter is at cog register $001\n\nPUB example() | reg_addr\n  reg_addr := #myvar        ' Get cog register address ($000)\n  debug(uhex(reg_addr))     ' Shows $000\n  \n  reg_addr := #counter      ' Get cog register address ($001)\n  debug(uhex(reg_addr))     ' Shows $001\n",
+                "description": "Getting cog register addresses of ORG-defined symbols"
+              },
+              {
+                "code": "PUB example() | addr\n  addr := #PR0              ' $1D8 - first general purpose register\n  addr := #PR7              ' $1DF - last general purpose register\n  addr := #PTRA             ' $1F8 - pointer A register\n  addr := #OUTA             ' $1FC - output A register\n  addr := #INA              ' $1FE - input A register\n",
+                "description": "Getting addresses of predefined registers",
+                "source": "PNut v47 release notes"
+              },
+              {
+                "code": "DAT\n        ORG     0\ncode_start\n        MOV     DIRA, #$FF\n        ADD     OUTA, #1\n        JMP     #code_start\n        \nPUB startCog()\n  ' @code_start = hub address of the code\n  ' After loading, code runs at cog address 0\n  COGINIT(COGEXEC_NEW, @code_start, 0)\n",
+                "description": "@ vs # - hub address for COGINIT, # for cog-internal jumps"
+              },
+              {
+                "code": "DAT\n        ORG     0\nbuffer  RES     16          ' Reserve 16 longs at cog $000-$00F\nwork    RES     4           ' Reserve 4 longs at cog $010-$013\n\nPUB getBufferAddr() : addr\n  addr := #buffer           ' Returns $000\n  \nPUB getWorkAddr() : addr  \n  addr := #work             ' Returns $010\n",
+                "description": "Getting addresses of reserved cog memory regions"
+              }
+            ],
+            "spin2_vs_pasm_context": {
+              "in_spin2": {
+                "description": "# returns the numeric register address for use in calculations",
+                "example": "reg_addr := #PR0   ' Gets $1D8"
+              },
+              "in_pasm": {
+                "description": "# denotes immediate value - the value itself, not a register",
+                "example": "MOV reg, #$FF   ' Load immediate value $FF",
+                "note": "Different meaning! In PASM, # means immediate operand"
+              }
+            },
+            "memory_spaces": {
+              "cog_registers": {
+                "range": "$000-$1FF (0-511)",
+                "description": "512 long registers in each cog",
+                "sections": [
+                  "$000-$11F: General purpose / user code space",
+                  "$120-$13F: Reserved",
+                  "$140-$1CF: LUT access window",
+                  "$1D0-$1D7: Special hardware registers",
+                  "$1D8-$1DF: PR0-PR7 general purpose registers",
+                  "$1E0-$1EF: Local variable window (inline PASM)",
+                  "$1F0-$1FF: I/O and special registers"
+                ]
+              },
+              "lut_memory": {
+                "range": "$200-$3FF (512-1023)",
+                "description": "512 longs of lookup table memory per cog"
+              }
+            },
+            "notes": [
+              "# in Spin2 expressions returns register address",
+              "# in PASM instructions means immediate value (different meaning!)",
+              "Added in PNut v47 - earlier versions don't support #register in Spin2",
+              "Use @ for hub addresses, # for cog/LUT register addresses",
+              "Register symbols must be defined in ORG sections or be predefined",
+              "PR0-PR7 at $1D8-$1DF are available to both PASM and Spin2"
+            ],
+            "related": [
+              "language/spin2/special-symbols/at.yaml",
+              "language/spin2/special-symbols/double_at.yaml",
+              "language/spin2/assembly-directives/org.yaml",
+              "language/spin2/assembly-directives/res.yaml",
+              "language/pasm2/registers/pr-registers.yaml"
+            ],
+            "source_reference": "Spin2 Documentation v51 - 'Register address of cog/LUT symbol' and PNut v47 release notes",
+            "oneliner": "Register address operator - returns cog/LUT register address of ORG-defined symbol (not hub address)"
+          },
           "@": {
             "symbol": "@",
+            "name": "Address-Of Operator",
             "type": "special_symbol",
-            "category": "Special",
-            "description": "Address-of operator - get memory address\n",
+            "category": "Address Operators",
+            "priority": 1,
+            "description": "The @ operator returns the hub memory address of a variable, data label, or method.\n\nCRITICAL DISTINCTION:\n- In Spin2+PASM programs: @ returns an address RELATIVE to the start of the object\n- In PASM-only programs: @ returns an ABSOLUTE hub address\n\nThis distinction is essential when storing addresses in DAT sections for later use.\nWhen you need to convert a relative address to absolute at runtime, use the @@ operator.\n",
+            "syntax": {
+              "variable_address": {
+                "form": "@hubvar",
+                "returns": "Hub address of VAR/PUB/PRI/DAT variable",
+                "block_usage": "All blocks (CON, VAR, DAT, PUB, PRI)"
+              },
+              "method_pointer": {
+                "form": "@method",
+                "returns": "Pointer to method",
+                "extended_form": "@object{[i]}.method",
+                "block_usage": "PUB/PRI only",
+                "notes": "Creates a 32-bit method pointer encoding method index and VAR base"
+              }
+            },
+            "address_types": {
+              "relative_address": {
+                "context": "Spin2+PASM programs",
+                "description": "Addresses are relative to the start of the object. This allows objects\nto be loaded at any hub location. The actual runtime address depends\non where the object is placed in memory.\n",
+                "use_cases": [
+                  "Storing data pointers in DAT sections",
+                  "Creating tables of addresses",
+                  "Passing addresses to COGINIT/COGSPIN"
+                ]
+              },
+              "absolute_address": {
+                "context": "PASM-only programs",
+                "description": "Addresses are absolute hub addresses. The code is assembled to run\nat specific memory locations.\n",
+                "use_cases": [
+                  "Direct hardware addresses",
+                  "Fixed memory locations"
+                ]
+              }
+            },
             "examples": [
-              "ptr := @variable",
-              "COGINIT(0, @assembly_code, @params)"
-            ]
+              {
+                "code": "VAR\n  BYTE buffer[256]\n  LONG ptr\n  \nPUB example()\n  ptr := @buffer           ' Get address of buffer array\n  BYTE[ptr] := $FF         ' Write to first byte via pointer\n",
+                "description": "Getting address of a VAR variable"
+              },
+              {
+                "code": "DAT\n  mydata  LONG  $12345678, $AABBCCDD\n  \nPUB example() | addr\n  addr := @mydata          ' Get address of DAT data\n  debug(uhex_long(LONG[addr]))  ' Read: $12345678\n",
+                "description": "Getting address of DAT section data"
+              },
+              {
+                "code": "DAT\n          ORG   0\nasm_code  MOV   DIRA, #$FF\n          ADD   OUTA, #1\n          JMP   #asm_code\n          \nPUB start()\n  COGINIT(COGEXEC_NEW, @asm_code, 0)  ' Launch PASM in new cog\n",
+                "description": "Using @ with COGINIT to launch assembly code"
+              },
+              {
+                "code": "DAT\n  STR0    BYTE  \"Hello\", 0\n  STR1    BYTE  \"World\", 0\n  strings WORD  @STR0, @STR1    ' Store relative offsets\n  \nPUB example() | i, str_addr\n  repeat i from 0 to 1\n    str_addr := @@strings[i]   ' Convert to absolute address\n    debug(zstr(str_addr))\n",
+                "description": "Storing addresses in data tables (requires @@ to convert)"
+              },
+              {
+                "code": "PUB caller() | method_ptr\n  method_ptr := @worker        ' Get method pointer\n  method_ptr()                 ' Call through pointer\n  \nPRI worker()\n  debug(\"Worker called\")\n",
+                "description": "Creating and using a method pointer"
+              },
+              {
+                "code": "OBJ\n  child : \"child_object\"\n  \nPUB example() | method_ptr\n  method_ptr := @child.process  ' Get method in child object\n  method_ptr()                   ' Call child's method\n",
+                "description": "Getting method pointer from child object"
+              }
+            ],
+            "common_patterns": {
+              "pointer_to_buffer": "VAR\n  BYTE buffer[1024]\nPUB getData() : ^BYTE\n  return @buffer\n  \n",
+              "pass_data_to_cog": "VAR\n  LONG shared_data[16]\nPUB startCog()\n  COGINIT(COGEXEC_NEW, @cog_code, @shared_data)\n  \n",
+              "string_table_access": "DAT\n  str0  BYTE \"Option A\", 0\n  str1  BYTE \"Option B\", 0\n  strs  WORD @str0, @str1\nPUB getStr(n) : addr\n  addr := @@strs[n]    ' Must use @@ to convert!\n"
+            },
+            "notes": [
+              "@ returns hub addresses only - use # for cog/LUT register addresses",
+              "In Spin2+PASM, @ addresses are object-relative, not absolute",
+              "Use @@ to convert stored @ values to absolute addresses at runtime",
+              "Symbol without @ returns the DATA at that address, not the address itself",
+              "@method creates a 32-bit method pointer with index and VAR base encoded",
+              "First long of object's VAR space stores object base for method pointers"
+            ],
+            "related": [
+              "language/spin2/special-symbols/double_at.yaml",
+              "language/spin2/methods/coginit.yaml",
+              "language/spin2/methods/cogspin.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/operators/FIELD.yaml"
+            ],
+            "source_reference": "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section",
+            "oneliner": "Address-of operator - returns hub address of VAR/DAT/method (relative in Spin2+PASM, absolute in PASM-only)"
           },
           "%": {
             "symbol": "%",
@@ -27470,6 +27700,93 @@
               "value := $FF",
               "address := $1000"
             ]
+          },
+          "^@": {
+            "symbol": "^@",
+            "name": "Field Pointer Operator",
+            "type": "special_symbol",
+            "category": "Address Operators",
+            "priority": 1,
+            "description": "The ^@ operator creates a field pointer to any hub or register variable, \nincluding bitfields. Field pointers encode both the address and the bit\nrange, enabling efficient access to specific bits within variables.\n\nThis is distinct from the @ operator which returns only an address.\n^@ creates a compound value that includes address AND bit position information.\n",
+            "syntax": {
+              "basic": {
+                "form": "^@anyvar",
+                "returns": "Field pointer to hub or register variable",
+                "block_usage": "PUB/PRI only (Term priority 1)"
+              },
+              "with_bitfield": {
+                "form": "^@variable.[highBit..lowBit]",
+                "returns": "Field pointer encoding base address and bit range",
+                "description": "Width is (highBit - lowBit + 1) bits"
+              }
+            },
+            "field_pointer_encoding": {
+              "description": "A field pointer encodes:\n- The base address of the variable\n- The bit position within the variable\n- The width of the field (for bitfield access)\n\nThis allows FIELD[] operations to efficiently read/write specific \nbits without requiring separate address and bit parameters.\n"
+            },
+            "examples": [
+              {
+                "code": "VAR\n  LONG flags\n  \nPUB example() | fptr\n  fptr := ^@flags          ' Field pointer to entire long\n  FIELD[fptr] := $FFFFFFFF ' Write all 32 bits\n",
+                "description": "Basic field pointer to a variable"
+              },
+              {
+                "code": "VAR\n  LONG status\n  \nPUB example() | fptr\n  fptr := ^@status.[7..0]   ' Field pointer to bits 7..0\n  FIELD[fptr] := $AA        ' Write 8-bit value to low byte\n  \n  fptr := ^@status.[31..24] ' Field pointer to bits 31..24\n  FIELD[fptr] := $BB        ' Write 8-bit value to high byte\n",
+                "description": "Field pointer to specific bit ranges"
+              },
+              {
+                "code": "VAR\n  LONG config\n  \nPUB setBits(high, low, value) | fptr\n  ' Dynamic bit field access\n  fptr := ^@config.[high..low]\n  FIELD[fptr] := value\n  \nPUB getBits(high, low) : value | fptr\n  fptr := ^@config.[high..low]\n  value := FIELD[fptr]\n",
+                "description": "Dynamic bit field access using ^@ with variable ranges"
+              },
+              {
+                "code": "CON\n  ' Bit field definitions for a status register\n  ERROR_BIT   = 0\n  READY_BITS  = 3..1\n  MODE_BITS   = 7..4\n  \nVAR\n  LONG status_reg\n  \nPUB setMode(mode)\n  FIELD[^@status_reg.[MODE_BITS]] := mode\n  \nPUB isReady() : ready\n  ready := FIELD[^@status_reg.[READY_BITS]]\n",
+                "description": "Using constants to define bit field positions"
+              }
+            ],
+            "use_cases": [
+              {
+                "name": "Hardware register access",
+                "description": "Accessing specific bit fields in memory-mapped registers"
+              },
+              {
+                "name": "Packed data structures",
+                "description": "Reading/writing bit-packed data efficiently"
+              },
+              {
+                "name": "Flag manipulation",
+                "description": "Setting/clearing specific bits in status variables"
+              },
+              {
+                "name": "Protocol parsing",
+                "description": "Extracting fields from packed protocol data"
+              }
+            ],
+            "comparison_with_at": {
+              "@_operator": {
+                "returns": "Memory address only",
+                "use": "General pointer operations, BYTE[]/WORD[]/LONG[] access"
+              },
+              "^@_operator": {
+                "returns": "Field pointer (address + bit info)",
+                "use": "FIELD[] operations, bitfield access"
+              }
+            },
+            "notes": [
+              "^@ creates a field pointer, not just an address",
+              "Works with both hub variables and cog register variables",
+              "Bitfield syntax: ^@var.[highBit..lowBit]",
+              "Field width = highBit - lowBit + 1",
+              "Use with FIELD[] operator for reading/writing",
+              "More efficient than manual bit shifting for field access"
+            ],
+            "related": [
+              "language/spin2/special-symbols/at.yaml",
+              "language/spin2/special-symbols/double_at.yaml",
+              "language/spin2/operators/FIELD.yaml",
+              "language/spin2/methods/byte.yaml",
+              "language/spin2/methods/word.yaml",
+              "language/spin2/methods/long.yaml"
+            ],
+            "source_reference": "Spin2 Documentation v51 - 'Field pointer to any hub or register variable, including bitfield'",
+            "oneliner": "Field pointer operator - creates pointer encoding address AND bit range for FIELD[] operations"
           }
         }
       },
@@ -27510,7 +27827,7 @@
       }
     },
     "statistics": {
-      "total_elements": 270,
+      "total_elements": 271,
       "by_category": {
         "keywords": 37,
         "operators": 78,
@@ -27518,7 +27835,7 @@
         "registers": 18,
         "assembly_directives": 12,
         "debug_commands": 12,
-        "special_symbols": 12,
+        "special_symbols": 13,
         "system_variables": 3
       }
     }
