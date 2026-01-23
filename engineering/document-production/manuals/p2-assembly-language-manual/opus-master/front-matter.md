@@ -135,6 +135,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | | P1 | P2 |
 |---|---|---|
 | Clock | 80 MHz | 320 MHz |
+| Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | COG RAM | 512 longs | 512 + 512 LUT |
 | I/O | 32 pins | 64 Smart Pins |

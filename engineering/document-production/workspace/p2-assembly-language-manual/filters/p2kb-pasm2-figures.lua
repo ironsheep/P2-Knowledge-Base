@@ -14,13 +14,14 @@
 --   \begin{figure}[H]
 --   \centering
 --   \DiagramMacroName
---   \caption{Caption Text Here}
+--   \caption*{Caption Text Here}
 --   \label{fig:some-id}
 --   \end{figure}
 --
--- Version: 1.0
--- Date: 2026-01-20
+-- Version: 1.1
+-- Date: 2026-01-23
 -- Implements: Rayman review item C1 (figure numbering)
+-- v1.1: Use \caption*{} for hardcoded figure numbers (no auto-numbering)
 
 -- Process blocks to find RawBlock + figurecaption Div pairs
 function Blocks(blocks)
@@ -52,7 +53,7 @@ function Blocks(blocks)
       local figure_latex = "\\begin{figure}[H]\n" ..
                           "\\centering\n" ..
                           diagram_latex .. "\n" ..
-                          "\\caption{" .. caption_text .. "}\n"
+                          "\\caption*{" .. caption_text .. "}\n"
 
       -- Add label if present
       if label_id ~= "" then
