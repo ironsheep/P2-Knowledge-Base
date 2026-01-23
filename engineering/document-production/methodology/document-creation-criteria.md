@@ -144,4 +144,118 @@
 
 ---
 
+## Content Verification Protocol (Hallucination Prevention)
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint findings
+
+### Why This Section Exists
+
+The PASM2 manual audit discovered that **hallucinations occur at the moment of writing**, not after. Two critical fabrications (HUBSET "sync" capabilities that don't exist) passed multiple review cycles because no verification protocol existed at write-time.
+
+**Key insight**: Voicing guides tell you HOW to say things; creation guides tell you WHAT structure to follow. Neither tells you HOW TO VERIFY what you're about to write is true.
+
+### Before Writing ANY Technical Claim
+
+**Mandatory verification steps:**
+
+1. **Identify the claim type** - What kind of statement is this?
+   - Behavior/functionality claim
+   - Timing/performance claim
+   - Capability claim
+   - Configuration/parameter claim
+
+2. **Identify required source** - Where must this be verified?
+   - Primary specification (silicon doc, official manual)
+   - Implementation validation (compiler, working code)
+   - Derived knowledge base (YAML files)
+
+3. **Locate the supporting evidence** - Find it before writing
+   - Specific page/line/section in source
+   - If you can't find it, **don't write it**
+
+4. **Note the citation** - For traceability
+   - Add source reference in comment or margin note
+   - Enables future verification
+
+### Hallucination Red-Flag Phrases
+
+**Stop and verify when you're about to write:**
+
+| Phrase | Risk | Why It's Suspicious |
+|--------|------|---------------------|
+| "also provides" | HIGH | Fabricated secondary capabilities |
+| "side effect" | HIGH | Invented behaviors not in sources |
+| "eliminates" | HIGH | Optimization claim needing proof |
+| "automatically" | MEDIUM | Automatic behavior must be documented |
+| "can be used to" (vague) | MEDIUM | Use case without verification |
+| "mechanism" (no details) | MEDIUM | Hand-waving without implementation |
+| "enables/allows" | MEDIUM | Capability attribution |
+| "additionally/furthermore" | MEDIUM | Often precedes fabricated extras |
+
+**If you catch yourself writing these patterns**: Stop. Find the source. Verify. Then write.
+
+### Claim Verification Quick Check
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              BEFORE WRITING A TECHNICAL CLAIM               │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   1. What type of claim? (behavior/timing/capability)       │
+│   2. What source should verify this?                        │
+│   3. Can I cite a specific location in that source?         │
+│   4. Does the source say this EXACTLY or am I extrapolating?│
+│                                                             │
+│   If you can't answer #3: DON'T WRITE THE CLAIM             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Document-Specific Source Mapping
+
+Each creation guide should define:
+
+| Claim Type | Required Source | Example |
+|------------|-----------------|---------|
+| Instruction behavior | YAML + Silicon Doc | "ADD sets C flag on carry" |
+| Timing values | YAML `clocks:` field | "Instruction takes 2 cycles" |
+| Smart Pin modes | Silicon Doc + Spin2 constants | "Mode %00010 provides DAC" |
+| Configuration | Official documentation | "WRPIN sets mode register" |
+
+### What To Do When Source Doesn't Exist
+
+1. **Don't invent** - If it's not documented, we can't claim it
+2. **Mark as gap** - Use `:::missing` or similar marker
+3. **Document the unknown** - "Behavior not specified in available sources"
+4. **Request clarification** - Note need for authoritative source
+
+### Prevention Example: How F01/F02 Would Have Been Caught
+
+**The fabricated claim**: "HUBSET sync eliminates hub wait variation"
+
+**Applying the protocol**:
+1. Claim type: Capability claim (instruction does X)
+2. Required source: YAML `hubset.yaml` + Silicon Doc HUBSET section
+3. Can I cite? Check YAML → No "sync" in description. Check Silicon Doc → 5 functions listed, none are sync.
+4. Extrapolating? YES - "sync" word doesn't appear in any HUBSET documentation
+
+**Result**: Claim would have been blocked at step 3.
+
+### Integration with Creation Guides
+
+Each document's creation guide should include:
+
+1. **Source Authority Hierarchy** - Which sources are authoritative for this document type
+2. **Claim-to-Source Mapping** - What source verifies each claim type
+3. **Red-Flag Patterns** - Domain-specific phrases that need extra verification
+4. **Verification Examples** - Show the process for this document's content
+
+### Full Methodology Reference
+
+For comprehensive audit methodology (post-write verification), see:
+`engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`
+
+---
+
 **Decision Rule**: When in doubt, **err toward creation** with clear justification rather than **forced consolidation** that loses value.

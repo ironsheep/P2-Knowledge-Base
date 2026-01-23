@@ -264,7 +264,102 @@ When sources conflict:
 3. **Official ROM Code** - Proven implementations
 4. **Community Examples** - Validated patterns
 
-### 4.3 Key Source Files
+### 4.4 Content Verification Protocol (Hallucination Prevention)
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint findings
+
+#### Why This Section Exists
+
+The PASM2 manual audit discovered that **hallucinations occur at the moment of writing**, not after. Hardware capability claims were fabricated by inferring "reasonable" behaviors. This section ensures Streamer documentation is verified before writing.
+
+**Critical insight**: Sections 4.1-4.3 tell you WHERE sources are. This section tells you HOW TO VERIFY claims before writing them.
+
+#### Claim Types and Required Sources for Streamer
+
+| Claim Type | Required Source | Example Claim |
+|------------|-----------------|---------------|
+| **Mode encoding** | Silicon Doc mode tables | "RFBYTE uses D[31:28] = %1000" |
+| **Symbol values** | Spin2 X_* constant reference | "X_RFBYTE_1P_1DAC1 = %1000 << 28" |
+| **NCO behavior** | Silicon Doc NCO section | "NCO rolls over every N clocks" |
+| **DAC routing** | Silicon Doc DAC section | "DAC0 drives pins %xxxx00" |
+| **Pin behavior** | Silicon Doc ONLY | "Pins output in specified order" |
+| **Timing claims** | Silicon Doc + validated code | "Pixel rate of 25 MHz requires..." |
+| **Integration patterns** | Official ROM code (flash loader) | "WAITXFI synchronization pattern" |
+
+#### Red-Flag Phrases for Streamer Documentation
+
+**STOP and verify when you're about to write:**
+
+| Phrase | Risk Level | Why Suspicious | Action |
+|--------|------------|----------------|--------|
+| "automatically" | **CRITICAL** | Streamer requires explicit configuration | Verify in Silicon Doc |
+| "synchronizes" | **HIGH** | Sync claims need hardware evidence | Find specific mechanism |
+| "optimizes" | **HIGH** | Optimization claims need proof | Cite performance data |
+| "enables" (vague) | MEDIUM | Capability attribution | Find specific mode/symbol |
+| "internally buffers" | MEDIUM | Buffer behavior must be documented | Check Silicon Doc |
+| "protocol support" | MEDIUM | Streamer is raw data, not protocol-aware | Clarify what mode does |
+
+#### The Verification Protocol for Streamer
+
+**Before writing ANY Streamer claim:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           STREAMER CLAIM VERIFICATION CHECKLIST                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. What am I claiming? (mode/NCO/DAC/pin/timing)               │
+│                                                                 │
+│  2. Which source should contain this?                           │
+│     □ Silicon Doc: mode tables, NCO, DAC, timing                │
+│     □ Spin2 Docs: X_* symbol values                             │
+│     □ ROM Code: proven implementation patterns                  │
+│     □ OBEX/Community: validated usage examples                  │
+│                                                                 │
+│  3. Can I cite the EXACT location?                              │
+│     □ Silicon Doc section (Part 2 - Pixel Operations)           │
+│     □ Spin2 symbol name and hex value                           │
+│     □ Code file and line                                        │
+│                                                                 │
+│  4. Does the source say this EXACTLY?                           │
+│     □ YES → Write the claim                                     │
+│     □ NO, I'm extrapolating → DON'T WRITE IT                    │
+│     □ Source doesn't exist → Mark as unverified                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Streamer-Specific Verification Examples
+
+**Example 1: Correct Verification (Mode Symbol)**
+
+Claim to write: "X_RFBYTE_1P_1DAC1 outputs one byte per NCO rollover to 1 pin and 1 DAC"
+
+1. Claim type: Mode behavior + symbol
+2. Required source: Silicon Doc mode table + Spin2 symbol reference
+3. Check: Silicon Doc → RFBYTE mode table → "1P" = 1 pin, "1DAC1" = DAC channel 1
+4. Check: Spin2 → X_RFBYTE_1P_1DAC1 exists with documented value
+5. Source says exactly this? YES → Write the claim
+
+**Example 2: Blocked Fabrication**
+
+Attempted claim: "The streamer automatically synchronizes with Hub access timing"
+
+1. Claim type: Synchronization capability
+2. Required source: Silicon Doc streamer/hub interaction section
+3. Check: Silicon Doc describes NCO as independent timing source
+4. Does "automatic hub synchronization" appear? NO
+5. Result: **CLAIM BLOCKED** - This is an assumption about behavior
+
+#### Full Audit Methodology Reference
+
+For comprehensive post-write audit procedures, see:
+`engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`
+
+---
+
+### 4.5 Key Source Files
 
 **Silicon Documentation (Part 2 - Pixel Operations):**
 - `part2-pixel-ops.txt` - Streamer mode tables, DAC routing

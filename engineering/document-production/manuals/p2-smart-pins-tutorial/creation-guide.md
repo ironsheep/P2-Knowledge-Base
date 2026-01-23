@@ -307,6 +307,108 @@ PUB setup_dac()
 
 **Combined Result**: Complete, accurate, accessible, and practical Smart Pins reference
 
+## Content Verification Protocol (Hallucination Prevention)
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint findings
+
+### Why This Section Exists
+
+The PASM2 manual audit discovered that **hallucinations occur at the moment of writing**, not after. Technical claims about hardware capabilities were fabricated by inferring "reasonable" behaviors that didn't exist. This section ensures Smart Pin documentation is verified before writing.
+
+**Critical insight**: Sections above tell you WHERE sources are. This section tells you HOW TO VERIFY claims before writing them.
+
+### Claim Types and Required Sources for Smart Pins
+
+| Claim Type | Required Source | Example Claim |
+|------------|-----------------|---------------|
+| **Mode behavior** | Silicon Doc + Titus Manual | "Mode %00010 provides 16-bit DAC" |
+| **Register values** | Spin2 P_ constants + YAML | "Use P_DAC_124R_3V for 3.3V DAC" |
+| **Electrical specs** | Silicon Doc ONLY | "124Ω output impedance" |
+| **Timing parameters** | Silicon Doc ONLY | "DAC update rate is..." |
+| **Configuration sequence** | Titus Manual + Code Examples | "WRPIN → WXPIN → WYPIN → DIRH" |
+| **Pin behavior** | Silicon Doc ONLY | "Smart Pin drives pin high when..." |
+| **Application patterns** | Validated Code Examples | "For audio output, configure as..." |
+
+### Red-Flag Phrases for Smart Pin Documentation
+
+**STOP and verify when you're about to write:**
+
+| Phrase | Risk Level | Why Suspicious | Action |
+|--------|------------|----------------|--------|
+| "automatically handles" | **CRITICAL** | Smart Pins don't auto-anything without explicit config | Verify in Silicon Doc |
+| "synchronizes with" | **HIGH** | Synchronization claims need hardware evidence | Citation required |
+| "eliminates the need for" | **HIGH** | Capability replacement claims | Verify both capabilities |
+| "provides/enables" (vague) | MEDIUM | Capability attribution | Find specific mode/register |
+| "internally" | MEDIUM | Internal behavior must be documented | Check Silicon Doc |
+| "protocol support" | MEDIUM | Protocol claims are common hallucinations | Verify mode actually implements |
+
+### The Verification Protocol for Smart Pins
+
+**Before writing ANY Smart Pin claim:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           SMART PIN CLAIM VERIFICATION CHECKLIST                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. What am I claiming? (mode/electrical/timing/behavior)       │
+│                                                                 │
+│  2. Which source should contain this?                           │
+│     □ Silicon Doc: electrical specs, timing, hardware behavior  │
+│     □ Titus Manual: configuration sequences, applications       │
+│     □ Spin2 Docs: P_ constant values, symbol definitions        │
+│     □ Validated Code: implementation patterns                   │
+│                                                                 │
+│  3. Can I cite the EXACT location?                              │
+│     □ Silicon Doc section/page                                  │
+│     □ Titus Manual chapter/page                                 │
+│     □ Spin2 constant name and value                             │
+│                                                                 │
+│  4. Does the source say this EXACTLY?                           │
+│     □ YES → Write the claim                                     │
+│     □ NO, I'm extrapolating → DON'T WRITE IT                    │
+│     □ Source doesn't exist → Use gap marker (⚠️, 📌)            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Smart Pin-Specific Verification Examples
+
+**Example 1: Correct Verification (DAC Mode)**
+
+Claim to write: "Mode %00010 provides 16-bit DAC with 124Ω output"
+
+1. Claim type: Mode capability + electrical spec
+2. Required source: Silicon Doc (electrical), Spin2 (mode value)
+3. Check: Silicon Doc Smart Pin section → Mode table shows %00010 = "DAC 124Ω 3.3V"
+4. Source says exactly this? YES → Write the claim
+
+**Example 2: Blocked Fabrication (Auto-Protocol)**
+
+Attempted claim: "The UART Smart Pin mode automatically handles flow control"
+
+1. Claim type: Capability claim
+2. Required source: Silicon Doc UART Smart Pin section
+3. Check: Silicon Doc lists async TX/RX modes with baud rate config
+4. Does "automatic flow control" appear? NO
+5. Result: **CLAIM BLOCKED** - Flow control requires explicit programming
+
+### Gap Handling for Smart Pins
+
+When source doesn't exist:
+- Use ⚠️ for critical gaps: "⚠️ USB mode documentation preliminary"
+- Use 📌 for moderate gaps: "📌 SMPS efficiency data requires validation"
+- NEVER invent specifications for unknown parameters
+
+### Full Audit Methodology Reference
+
+For comprehensive post-write audit procedures, see:
+- `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md` (generic methodology)
+- `engineering/document-production/manuals/p2-assembly-language-manual/audit/` (detailed audit examples)
+
+---
+
 ## Source Material Usage
 
 ### Primary Sources (Mark as Consumer)

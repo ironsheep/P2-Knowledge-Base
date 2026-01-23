@@ -68,6 +68,110 @@ This manual is part of a modular documentation system:
 4. **Ensure voice consistency** throughout
 5. **Validate cross-references** to other manuals
 
+## 🔍 Content Verification Protocol (Hallucination Prevention)
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint findings
+
+### Why This Section Exists
+
+The PASM2 technical reference audit discovered that **hallucinations occur at the moment of writing**, not after. Even pedagogical content can propagate technical errors if claims aren't verified. Tutorial voice makes false claims MORE dangerous because readers trust the friendly tone.
+
+**Critical insight**: The voice tells you HOW to say things. This section tells you HOW TO VERIFY what you're about to say is true.
+
+### Claim Types and Required Sources for Pedagogical PASM
+
+| Claim Type | Required Source | Example Claim |
+|------------|-----------------|---------------|
+| **Instruction behavior** | YAML `description:` field | "ADD stores sum in Dest" |
+| **Flag effects** | YAML `flags:` field | "C flag set on carry" |
+| **Timing claims** | YAML `clocks:` field | "Takes 2 clock cycles" |
+| **Architecture claims** | Silicon Doc ONLY | "8 COGs share Hub" |
+| **COG memory model** | Silicon Doc ONLY | "512 longs of COG RAM" |
+| **Hub access patterns** | Silicon Doc ONLY | "Egg beater timing" |
+| **Code example behavior** | pnut_ts compilation | "This blinks the LED" |
+
+### Red-Flag Phrases for Pedagogical Content
+
+**STOP and verify when you're about to write:**
+
+| Phrase | Risk Level | Why Suspicious | Tutorial Danger |
+|--------|------------|----------------|-----------------|
+| "automatically" | **CRITICAL** | P2 rarely auto-anything | Learners assume it "just works" |
+| "simply" / "just" | **HIGH** | Oversimplification may hide complexity | Learners confused when "simple" fails |
+| "always" / "never" | **HIGH** | Absolute claims need verification | Creates wrong mental models |
+| "similar to" | MEDIUM | Analogy may be misleading | Wrong assumptions transfer |
+| "typically" | MEDIUM | What's the actual behavior? | Learners don't know exceptions |
+| "behind the scenes" | MEDIUM | Invented implementation details | Can't be verified by learner |
+
+### The Verification Protocol for Tutorial Content
+
+**Before writing ANY technical claim in tutorial voice:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           PEDAGOGICAL CONTENT VERIFICATION CHECKLIST            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. What am I claiming? (instruction/timing/architecture)       │
+│                                                                 │
+│  2. Can I cite a source?                                        │
+│     □ YAML instruction file (for instruction claims)            │
+│     □ Silicon Doc (for hardware/architecture claims)            │
+│     □ pnut_ts compilation (for code behavior claims)            │
+│                                                                 │
+│  3. Is my analogy accurate?                                     │
+│     □ Does the comparison hold in ALL relevant ways?            │
+│     □ Am I noting where the analogy breaks down?                │
+│                                                                 │
+│  4. Would a beginner be misled?                                 │
+│     □ Is the simplification SAFE for learning?                  │
+│     □ Will they need to UNLEARN this later?                     │
+│                                                                 │
+│  5. Does the code ACTUALLY work?                                │
+│     □ Compiled with pnut_ts → no errors                         │
+│     □ Produces the claimed result                               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Pedagogical-Specific Verification Examples
+
+**Example 1: Correct Simplification**
+
+Claim to write: "Think of COGs as 8 workers in a kitchen, each with their own cutting board"
+
+1. Claim type: Analogy for COG parallelism
+2. Verify: Does analogy hold? COGs ARE parallel AND independent → YES
+3. Check: Does analogy break? Workers can talk, COGs need explicit Hub → NOTE THIS
+4. Safe for learning? YES, captures essential concept
+5. Result: Write analogy, but add "unlike kitchen workers, COGs need explicit Hub to share data"
+
+**Example 2: Dangerous Simplification**
+
+Attempted claim: "Just add WC and the carry flag takes care of itself"
+
+1. Claim type: Flag behavior simplification
+2. Risk: "takes care of itself" implies automatic handling
+3. Verify: What ACTUALLY happens? WC causes explicit flag write
+4. Would beginner be misled? YES - they won't understand flag must be USED
+5. Result: **REWRITE** → "Add WC to save the carry, then use IF_C to act on it"
+
+### Code Example Verification
+
+**Every code example MUST:**
+1. Compile with `pnut_ts` without errors
+2. Produce the claimed observable result
+3. Be complete enough to run (no "..." snippets for working code)
+4. Have comments that match actual behavior
+
+### Full Audit Methodology Reference
+
+For comprehensive post-write audit procedures, see:
+`engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`
+
+---
+
 ## 🧗 Technical Climbing Methodology Applied
 
 This document follows the project-wide Technical Climbing Methodology, contributing to all four P2KB facets:

@@ -84,6 +84,82 @@ Before documenting ANY feature:
 
 **REMEMBER**: It's better to document a gap than to fill it with plausible fiction. Users need accurate information about what DOES exist, not speculation about what MIGHT exist.
 
+### Formal Claim Verification Protocol
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint findings
+
+This section formalizes the No Handwaving Principle into a systematic verification process.
+
+#### Claim Types and Required Sources for Debug Windows
+
+| Claim Type | Required Source | Example Claim |
+|------------|-----------------|---------------|
+| **Window type capability** | Spin2 v5.1 docs + Phase 1 studies | "LOGIC window displays 8 channels" |
+| **Command syntax** | Spin2 v5.1 docs | "DEBUG(\`window BITMAP SIZE 100 100)" |
+| **Parameter values** | Testing + documentation | "TRACE modes range 0-15" |
+| **Visual behavior** | Screenshot verification | "Grid overlay appears when..." |
+| **Performance claims** | Tested benchmarks | "Layer system provides 20× improvement" |
+| **PC integration** | Pascal source + testing | "Mouse coordinates reported via..." |
+| **Capability limits** | Testing ONLY | "Maximum simultaneous windows is..." |
+
+#### Red-Flag Phrases for Debug Documentation
+
+| Phrase | Risk Level | Why Suspicious | Debug-Specific Concern |
+|--------|------------|----------------|------------------------|
+| "like professional tools" | **CRITICAL** | Comparing to unverified capabilities | Logic analyzers have protocol decoders; DEBUG may not |
+| "automatically detects" | **CRITICAL** | Auto-detection is complex | DEBUG is display-focused, not analysis-focused |
+| "maximum of N" | **HIGH** | Limits must be tested | Resource limits vary by application |
+| "approximately" | MEDIUM | Vague numbers suggest guessing | Get exact values from testing |
+| "internally" | MEDIUM | Internal behavior needs source | Check Pascal source or Silicon Doc |
+| "supports" (vague) | MEDIUM | What exactly is supported? | List specific capabilities |
+
+#### The Verification Protocol for Debug Content
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           DEBUG WINDOW CLAIM VERIFICATION CHECKLIST             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. What am I claiming? (capability/syntax/parameter/visual)    │
+│                                                                 │
+│  2. Which source should contain this?                           │
+│     □ Spin2 v5.1 Reference: command syntax, parameters          │
+│     □ Phase 1 Studies: discovered capabilities, patterns        │
+│     □ Pascal Source: internal behavior, PC integration          │
+│     □ Direct Testing: visual behavior, limits, performance      │
+│                                                                 │
+│  3. Can I prove this claim?                                     │
+│     □ Screenshot showing the behavior                           │
+│     □ Code example that demonstrates it                         │
+│     □ Documentation citation                                    │
+│                                                                 │
+│  4. Am I speculating from similar systems?                      │
+│     □ If YES → DON'T WRITE IT                                   │
+│     □ Mark as "not found" if feature doesn't exist              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Prevention Example: Protocol Decoder Fabrication
+
+**The fabricated claim**: "LOGIC window includes protocol decoders for I2C, SPI, and UART"
+
+**Applying the protocol**:
+1. Claim type: Capability claim
+2. Required source: Spin2 v5.1 LOGIC section + Phase 1 LOGIC study
+3. Check Spin2 docs: Lists display parameters, no protocol mention
+4. Check Phase 1 study: Documents multi-signal display, no decoding found
+5. Check Pascal source: Display rendering, no protocol analysis code
+6. Result: **CLAIM BLOCKED** - Feature was assumed because "logic analyzers have this"
+
+**Correct documentation**: "LOGIC window displays digital signal transitions. Protocol analysis requires separate software tools or manual interpretation."
+
+#### Full Audit Methodology Reference
+
+For comprehensive post-write audit procedures, see:
+`engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md`
+
 ## 📚 Content Sources & Production Method
 
 ### Primary Content Sources

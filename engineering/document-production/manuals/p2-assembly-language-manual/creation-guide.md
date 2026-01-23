@@ -321,6 +321,131 @@ Each instruction entry should be traceable to sources:
 
 ---
 
+## 4A. Content Verification Protocol (Hallucination Prevention)
+
+**Added:** 2026-01-23
+**Derived from:** PASM2 Manual Content Verification Sprint - See `audit/content-verification-sprint-2026-01/`
+
+### Why This Section Exists
+
+The PASM2 manual audit discovered that **hallucinations occur at the moment of writing**, not after. Two critical fabrications (HUBSET "sync" capabilities that don't exist) passed multiple review cycles because no verification protocol existed at write-time.
+
+**Critical insight**: Sections 4.1-4.3 tell you WHERE sources are and WHICH are authoritative. This section tells you HOW TO VERIFY claims before writing them.
+
+### 4A.1 Claim Types and Required Sources
+
+For PASM2 instruction documentation, every claim falls into these categories:
+
+| Claim Type | Required Source | Example Claim |
+|------------|-----------------|---------------|
+| **Instruction behavior** | YAML `description:` + Silicon Doc | "ADD stores sum in Dest" |
+| **Flag effects** | YAML `flags:` field | "C flag set on carry" |
+| **Cycle timing** | YAML `clocks:` field | "Takes 2 clock cycles" |
+| **Encoding bits** | YAML `encoding:` + Spreadsheet | "Opcode is 0001000" |
+| **Syntax forms** | YAML `syntax:` field | "ADD Dest, {#}Src {WC}" |
+| **Hardware capability** | Silicon Doc ONLY | "CORDIC computes sin/cos" |
+| **Synchronization claims** | Silicon Doc ONLY | "Hub access every 8 clocks" |
+
+### 4A.2 Red-Flag Phrases for PASM2
+
+**STOP and verify when you're about to write:**
+
+| Phrase | Risk Level | Why Suspicious | Action |
+|--------|------------|----------------|--------|
+| "provides synchronization" | **CRITICAL** | F01/F02 fabrications used this | Find in Silicon Doc or DON'T WRITE |
+| "eliminates variation" | **CRITICAL** | Optimization claims need proof | Citation required |
+| "side effect of" | HIGH | Invented secondary behaviors | Must be in YAML or Silicon Doc |
+| "also enables" | HIGH | Capability creep | Verify the capability exists |
+| "automatically" | MEDIUM | Automatic behavior must be documented | Check source for automatic behavior |
+| "can be used to" | MEDIUM | Use case attribution | Verify the use case is valid |
+| "mechanism for" | MEDIUM | Implementation claim | Must trace to hardware doc |
+
+### 4A.3 The Verification Protocol
+
+**Before writing ANY instruction claim:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           PASM2 CLAIM VERIFICATION CHECKLIST                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. What am I claiming? (behavior/timing/capability/syntax)     │
+│                                                                 │
+│  2. Which source should contain this?                           │
+│     □ YAML file: /engineering/knowledge-base/P2/language/pasm2/ │
+│     □ Silicon Doc: specific section                             │
+│     □ Spreadsheet: encoding data                                │
+│                                                                 │
+│  3. Can I cite the EXACT location?                              │
+│     □ YAML field name and value                                 │
+│     □ Silicon Doc page/section                                  │
+│     □ Spreadsheet row/column                                    │
+│                                                                 │
+│  4. Does the source say this EXACTLY?                           │
+│     □ YES → Write the claim                                     │
+│     □ NO, I'm extrapolating → DON'T WRITE IT                    │
+│     □ Source doesn't exist → Mark as gap, don't invent          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 4A.4 PASM2-Specific Verification Examples
+
+**Example 1: Correct Verification (ADD instruction)**
+
+Claim to write: "ADD sets the C flag if carry occurs"
+
+1. Claim type: Flag effect
+2. Required source: YAML `flags:` field
+3. Check: `add.yaml` → `flags: { c: "carry", z: "result == 0" }`
+4. Source says exactly this? YES → Write the claim
+
+**Example 2: Blocked Fabrication (HUBSET "sync")**
+
+Attempted claim: "HUBSET provides a synchronization mechanism that eliminates hub access variation"
+
+1. Claim type: Hardware capability
+2. Required source: Silicon Doc HUBSET section
+3. Check: Silicon Doc lists 5 HUBSET functions: clock config, crystal control, PLL, hub sync mode, cog reset
+4. Does "eliminates variation" appear? NO
+5. Does "synchronization mechanism" appear? NO (only "sync mode" for specific crystal function)
+6. Result: **CLAIM BLOCKED** - This is extrapolation/fabrication
+
+**Example 3: Gap Handling (undocumented timing)**
+
+Claim to write: "WRPIN timing varies based on Smart Pin mode"
+
+1. Claim type: Timing behavior
+2. Required source: YAML `clocks:` field
+3. Check: YAML shows fixed clock count, no mode variation documented
+4. Silicon Doc check: No Smart Pin timing variation table found
+5. Result: **Don't write as fact** → Instead write: "Timing is [X clocks] as specified; mode-specific variations, if any, are not documented in available sources."
+
+### 4A.5 Source Location Quick Reference
+
+| Content | Primary Location |
+|---------|------------------|
+| Instruction YAML files | `/engineering/knowledge-base/P2/language/pasm2/` |
+| Silicon documentation | `/engineering/ingestion/sources/silicon/` |
+| Parallax draft manual | `/engineering/ingestion/sources/pasm2-manual/` |
+| Encoding spreadsheet | (ingested data, cross-reference via YAML) |
+| Audit findings | `./audit/` (this manual's audit folder) |
+
+### 4A.6 What To Do When Source Doesn't Exist
+
+1. **Don't invent** - If it's not documented, we can't claim it
+2. **Mark the gap** - Use comment markers: `<!-- NEEDS_VERIFICATION: [claim] -->`
+3. **Document the unknown** - "Behavior in this case is not specified in available sources"
+4. **Check audit findings** - Previous verification sprint may have addressed this
+
+### 4A.7 Full Audit Methodology Reference
+
+For comprehensive post-write audit procedures, see:
+- `engineering/operations/process/TECHNICAL-DOCUMENT-AUDIT-METHODOLOGY.md` (generic methodology)
+- `./audit/` (this manual's specific audit documentation)
+
+---
+
 ## 5. Instruction Entry Specification
 
 ### 5.1 Entry Layout (Parallax Format)
