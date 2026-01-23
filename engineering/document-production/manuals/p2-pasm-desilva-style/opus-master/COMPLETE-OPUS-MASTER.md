@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large December 2025\par}
+{\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.1.0 - Technical Review\par}
+{\large\color{blue}Version 2.0\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -72,7 +72,7 @@
 
 # Copyright and License
 
-Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
+Copyright © 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
@@ -1036,7 +1036,7 @@ Here's a complete multiply example:
 
 ' For full 32x32->64 multiply, use CORDIC:
         qmul    x, y           ' Start multiply (uses full 32 bits)
-        ' ... 54 clocks of other work ...
+        ' ... 55 clocks of other work ...
         getqx   low            ' Lower 32 bits of result
         getqy   high           ' Upper 32 bits of result
 ```
@@ -1953,7 +1953,7 @@ clear_screen
 
         ' For full 32x32->64 bit multiply, use CORDIC:
         qmul    x, y              ' Start 32x32->64 multiply
-        ' ... other work (54 clocks) ...
+        ' ... other work (55 clocks) ...
         getqx   low               ' Get lower 32 bits
         getqy   high              ' Get upper 32 bits
 ```
@@ -2003,7 +2003,7 @@ Remember doing this with shifts and adds? Those days are over!
 
 ' 64-bit multiply (uses CORDIC)
         qmul    x, y           ' Start 32x32->64 multiply
-        ' ... 54 clocks ...
+        ' ... 55 clocks ...
         getqx   low            ' Lower 32 bits
         getqy   high           ' Upper 32 bits
 ```
@@ -2016,7 +2016,7 @@ Remember doing this with shifts and adds? Those days are over!
 ' 16.16 fixed point multiply (uses CORDIC for full precision)
 fixed_mul
         qmul    a, b             ' Start 32x32->64 signed multiply
-        ' ... 54 clocks (do other work) ...
+        ' ... 55 clocks (do other work) ...
         getqx   low              ' Lower 32 bits
         getqy   high             ' Upper 32 bits
         ' Extract middle 32 bits for 16.16 result:
@@ -3199,16 +3199,16 @@ Starting code:
 ::: pasm2
 ```
         org     0
-        
-        rdfast  #0, ##input_data
-        wrfast  #0, ##output_data
+
+        rdfast  #0, ##input_data        ' FIFO for reading
+        mov     ptra, ##output_data     ' PTRA for writing
         mov     count, #100
-        
+
 filter_loop
-        rflong  value
+        rflong  value                   ' Read from FIFO
         ' Your code: Simple filter
         ' Maybe average with previous value?
-        wflong  result
+        wrlong  result, ptra++          ' Write via PTRA
         djnz    count, #filter_loop
 ```
 :::
@@ -3251,29 +3251,29 @@ Stream audio samples through processing:
 ```
 ' Audio processing pipeline
 audio_process
-        rdfast  #0, ##input_buffer      ' Input samples
-        wrfast  #0, ##output_buffer     ' Output samples
+        rdfast  #0, ##input_buffer      ' FIFO for reading input
+        mov     ptra, ##output_buffer   ' PTRA for writing output
         mov     samples, ##BUFFER_SIZE
-        
+
 process_loop
-        rflong  left_sample             ' Get left channel
-        rflong  right_sample            ' Get right channel
-        
+        rflong  left_sample             ' Read left from FIFO
+        rflong  right_sample            ' Read right from FIFO
+
         ' Apply simple low-pass filter
         add     left_filtered, left_sample
         shr     left_filtered, #1       ' Average with previous
-        
+
         add     right_filtered, right_sample
         shr     right_filtered, #1
-        
+
         ' Apply volume
         muls    left_filtered, volume
         muls    right_filtered, volume
-        
-        ' Output processed samples
-        wflong  left_filtered
-        wflong  right_filtered
-        
+
+        ' Output processed samples via PTRA
+        wrlong  left_filtered, ptra++
+        wrlong  right_filtered, ptra++
+
         djnz    samples, #process_loop
 ```
 :::
@@ -3348,7 +3348,7 @@ The beauty? You can mix both in the same program!
 
 ## How Hub Execution Works
 
-When the processor encounters a jump or call to a hub address (>$1FF), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
+When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
 
 ::: pasm2
 ```
@@ -3574,7 +3574,7 @@ loop_start
 
 1. **Speed variation** - Don't use hub execution for precise timing
 2. **FIFO conflicts** - Can't stream data while executing from hub
-3. **Address confusion** - Remember: <$200 is COG, >=$200 is hub
+3. **Address confusion** - Remember: <$200 is COG, $200-$3FF is LUT, ≥$400 is hub
 4. **Stack depth** - Still limited to 8-level hardware stack
 5. **Relative jumps** - Work differently in hub mode
 
@@ -3912,7 +3912,8 @@ Starting code:
         org     0
         
 ' COG 0: Main game logic
-        coginit #1, @button_watcher, ##button_flag
+        setq    ##button_flag           ' PTRA for new COG
+        coginit #1, @button_watcher
         
 game_loop
         ' Random delay
@@ -4164,7 +4165,7 @@ CORDIC operations can overlap with other work:
 ```
 ' CORDIC overlaps with other instructions
         qmul    x, y            ' Start 32x32->64 multiply (CORDIC)
-        ' 54 clocks to do other work!
+        ' 55 clocks to do other work!
         add     a, b            ' These execute during CORDIC
         sub     c, d
         mov     index, #0
@@ -4175,7 +4176,7 @@ CORDIC operations can overlap with other work:
 
 ' QROTATE overlap
         qrotate x_coord, angle  ' Start rotation (D=X, S=angle)
-        ' 54 clocks of other work!
+        ' 55 clocks of other work!
         getqx   new_x           ' Get rotated X
         getqy   new_y           ' Get rotated Y
 ```
@@ -5827,7 +5828,8 @@ Multi-COG systems overwhelming? Start simple:
 ::: pasm2
 ```
 ' Main + Helper pattern
-main    coginit #1, @helper, @params
+main    setq    @params                 ' PTRA for new COG
+        coginit #1, @helper
         ' Main work
 
 helper  ' Support work

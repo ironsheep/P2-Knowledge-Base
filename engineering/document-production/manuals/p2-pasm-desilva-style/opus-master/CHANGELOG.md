@@ -1,5 +1,48 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v2.0.0 (2026-01-23)
+
+**Code-Verified Release** - All code examples verified against YAML Knowledge Base instruction definitions. Address space documentation hardened through systematic claim verification.
+
+### Part II: Core Skills (Chapters 5-8)
+
+#### Chapter 5 - Mathematics
+- CORDIC timing: All code comments verified at 55 clocks (hardware-exact)
+
+### Part III: Advanced Topics (Chapters 9-12)
+
+#### Chapter 9 - Streaming
+- FIFO examples: Audio processing and filter pipeline examples demonstrate correct single-direction pattern (FIFO for read, PTRA for write)
+
+#### Chapter 10 - Hub Execution
+- Address thresholds: Hub execution boundary documented as ≥$400
+- Memory map: Complete address space summary ($000-$1FF COG, $200-$3FF LUT, ≥$400 Hub)
+
+#### Chapter 12 - Optimization
+- CORDIC overlap examples: Timing comments verified at 55 clocks throughout
+
+### Part IV: System Integration (Chapters 13-16)
+
+#### Chapter 11 - The Propeller Way
+- COGINIT: Reaction timer example uses correct SETQ + 2-operand pattern
+
+#### Chapter 16 - Multi-COG
+- COGINIT: Medicine Cabinet example uses correct SETQ + 2-operand pattern
+
+### Verification Notes
+
+**Verification Sources:**
+- YAML Knowledge Base: `deliverables/ai/P2/language/pasm2/*.yaml`
+- QROTATE, QMUL, MUL, SETQ, COGINIT, REP instruction definitions
+- Silicon Documentation v35
+
+**Methodology:**
+- Systematic claim extraction from document text
+- Cross-reference against YAML instruction definitions
+- Red-flag phrase scanning ("automatically", "eliminates") for hallucination detection
+
+---
+
 ## v1.1.0 (2025-12-12)
 
 **Audit-Verified Release** - Comprehensive audit with user feedback review (14 items) and mnemonic validation against PNut_TS compiler database and YAML Knowledge Base.

@@ -38,11 +38,11 @@ The definitive reference for P2 assembly language programming. Documents all PAS
 *January 2026 - Community Review Edition* | [Changelog](DOCs/p2-assembly-language-manual-changelog.md)
 
 ### [P2 Assembly Programming](DOCs/P2-PASM-deSilva-Style.pdf)
-**A Human-Centered Approach to Parallel Processing** — *Version 1.1.0*
+**A Human-Centered Approach to Parallel Processing** — *Version 2.0*
 
 This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
 
-*December 2025 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md)
+*January 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md)
 
 
 ## Reporting Issues
