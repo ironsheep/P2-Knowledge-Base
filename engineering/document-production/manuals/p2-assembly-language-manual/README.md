@@ -59,6 +59,16 @@ p2-assembly-language-manual/
 
 See `PASM2-MANUAL-WORKFLOW.md` for detailed process documentation.
 
+## PDF Production & Release Process
+
+For PDF generation workflow and version release procedures, see the **workspace README**:
+
+`../../workspace/p2-assembly-language-manual/README.md`
+
+Key sections:
+- **PDF Forge Workflow** - Escape, stage, deploy cycle
+- **Release Process** - Changelog updates, deliverables promotion, version tagging
+
 ## Relationship to Other Manuals
 
 | Manual | Purpose | Style |
@@ -80,4 +90,4 @@ These are complementary documents:
 
 ---
 
-*Last Updated: 2025-11-26*
+*Last Updated: 2026-01-23*
