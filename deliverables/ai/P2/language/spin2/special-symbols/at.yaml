@@ -1,8 +1,150 @@
 symbol: "@"
+name: Address-Of Operator
 type: special_symbol
-category: "Special"
+category: Address Operators
+priority: 1
+
 description: |
-  Address-of operator - get memory address
+  The @ operator returns the hub memory address of a variable, data label, or method.
+  
+  CRITICAL DISTINCTION:
+  - In Spin2+PASM programs: @ returns an address RELATIVE to the start of the object
+  - In PASM-only programs: @ returns an ABSOLUTE hub address
+  
+  This distinction is essential when storing addresses in DAT sections for later use.
+  When you need to convert a relative address to absolute at runtime, use the @@ operator.
+
+syntax:
+  variable_address:
+    form: "@hubvar"
+    returns: "Hub address of VAR/PUB/PRI/DAT variable"
+    block_usage: "All blocks (CON, VAR, DAT, PUB, PRI)"
+    
+  method_pointer:
+    form: "@method"
+    returns: "Pointer to method"
+    extended_form: "@object{[i]}.method"
+    block_usage: "PUB/PRI only"
+    notes: "Creates a 32-bit method pointer encoding method index and VAR base"
+
+address_types:
+  relative_address:
+    context: "Spin2+PASM programs"
+    description: |
+      Addresses are relative to the start of the object. This allows objects
+      to be loaded at any hub location. The actual runtime address depends
+      on where the object is placed in memory.
+    use_cases:
+      - "Storing data pointers in DAT sections"
+      - "Creating tables of addresses"
+      - "Passing addresses to COGINIT/COGSPIN"
+      
+  absolute_address:
+    context: "PASM-only programs"
+    description: |
+      Addresses are absolute hub addresses. The code is assembled to run
+      at specific memory locations.
+    use_cases:
+      - "Direct hardware addresses"
+      - "Fixed memory locations"
+
 examples:
-  - "ptr := @variable"
-  - "COGINIT(0, @assembly_code, @params)"
+  - code: |
+      VAR
+        BYTE buffer[256]
+        LONG ptr
+        
+      PUB example()
+        ptr := @buffer           ' Get address of buffer array
+        BYTE[ptr] := $FF         ' Write to first byte via pointer
+    description: "Getting address of a VAR variable"
+    
+  - code: |
+      DAT
+        mydata  LONG  $12345678, $AABBCCDD
+        
+      PUB example() | addr
+        addr := @mydata          ' Get address of DAT data
+        debug(uhex_long(LONG[addr]))  ' Read: $12345678
+    description: "Getting address of DAT section data"
+    
+  - code: |
+      DAT
+                ORG   0
+      asm_code  MOV   DIRA, #$FF
+                ADD   OUTA, #1
+                JMP   #asm_code
+                
+      PUB start()
+        COGINIT(COGEXEC_NEW, @asm_code, 0)  ' Launch PASM in new cog
+    description: "Using @ with COGINIT to launch assembly code"
+    
+  - code: |
+      DAT
+        STR0    BYTE  "Hello", 0
+        STR1    BYTE  "World", 0
+        strings WORD  @STR0, @STR1    ' Store relative offsets
+        
+      PUB example() | i, str_addr
+        repeat i from 0 to 1
+          str_addr := @@strings[i]   ' Convert to absolute address
+          debug(zstr(str_addr))
+    description: "Storing addresses in data tables (requires @@ to convert)"
+    
+  - code: |
+      PUB caller() | method_ptr
+        method_ptr := @worker        ' Get method pointer
+        method_ptr()                 ' Call through pointer
+        
+      PRI worker()
+        debug("Worker called")
+    description: "Creating and using a method pointer"
+    
+  - code: |
+      OBJ
+        child : "child_object"
+        
+      PUB example() | method_ptr
+        method_ptr := @child.process  ' Get method in child object
+        method_ptr()                   ' Call child's method
+    description: "Getting method pointer from child object"
+
+common_patterns:
+  pointer_to_buffer: |
+    VAR
+      BYTE buffer[1024]
+    PUB getData() : ^BYTE
+      return @buffer
+      
+  pass_data_to_cog: |
+    VAR
+      LONG shared_data[16]
+    PUB startCog()
+      COGINIT(COGEXEC_NEW, @cog_code, @shared_data)
+      
+  string_table_access: |
+    DAT
+      str0  BYTE "Option A", 0
+      str1  BYTE "Option B", 0
+      strs  WORD @str0, @str1
+    PUB getStr(n) : addr
+      addr := @@strs[n]    ' Must use @@ to convert!
+
+notes:
+  - "@ returns hub addresses only - use # for cog/LUT register addresses"
+  - "In Spin2+PASM, @ addresses are object-relative, not absolute"
+  - "Use @@ to convert stored @ values to absolute addresses at runtime"
+  - "Symbol without @ returns the DATA at that address, not the address itself"
+  - "@method creates a 32-bit method pointer with index and VAR base encoded"
+  - "First long of object's VAR space stores object base for method pointers"
+
+related:
+  - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/methods/coginit.yaml
+  - language/spin2/methods/cogspin.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/operators/FIELD.yaml
+
+source_reference: "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section"
+
+oneliner: "Address-of operator - returns hub address of VAR/DAT/method (relative in Spin2+PASM, absolute in PASM-only)"

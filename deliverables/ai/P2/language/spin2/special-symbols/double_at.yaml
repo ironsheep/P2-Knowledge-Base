@@ -1,7 +1,126 @@
 symbol: "@@"
+name: Absolute Address Operator
 type: special_symbol
-category: "Special"
+category: Address Operators
+priority: 1
+
 description: |
-  Absolute address operator - get absolute hub address
+  The @@ operator converts an object-relative address to an absolute hub address.
+  
+  PURPOSE: In Spin2+PASM programs, the @ operator stores addresses RELATIVE to the
+  object's base. When you store @symbol values in data tables and need to use them
+  at runtime, you must convert them to absolute addresses using @@.
+  
+  FORMULA: @@x = (hub address of this object) + x
+  
+  This is essential for data pointer tables where @ values are stored in DAT sections.
+
+syntax:
+  form: "@@x"
+  returns: "Hub address of this object + x"
+  block_usage: "PUB/PRI only"
+  typical_use: "@@dat_symbol or @@array[index]"
+
+how_it_works:
+  explanation: |
+    When the compiler encounters @symbol in a DAT section, it stores the symbol's
+    offset from the object base (not an absolute address). This allows objects
+    to be relocatable - they can load at any hub address.
+    
+    At runtime, when you need the actual memory address:
+    1. @@ reads the stored relative offset
+    2. Adds the current object's base address
+    3. Returns the resulting absolute hub address
+    
+  formula: "absolute_address = object_base + stored_offset"
+
 examples:
-  - "hub_addr := @@variable"
+  - code: |
+      DAT
+        STR0    BYTE  "MONKEYS", 0
+        STR1    BYTE  "GORILLAS", 0
+        STR2    BYTE  "CHIMPANZEES", 0
+        STR3    BYTE  "HUMANZEES", 0
+        
+        ' In Spin2, these are OFFSETS relative to start of object
+        STRLIST WORD  @STR0, @STR1, @STR2, @STR3
+        
+      PUB printString(index)
+        ' @@STRLIST[index] converts offset to absolute address
+        debug(zstr(@@STRLIST[index]))
+    description: |
+      Classic string table pattern. @STRx stores offsets, @@STRLIST[i] 
+      retrieves absolute addresses. From Parallax documentation.
+    source: "Spin2 v51 Documentation - DAT Data Pointers"
+    
+  - code: |
+      DAT
+        table1  LONG  100, 200, 300
+        table2  LONG  10, 20, 30
+        tables  LONG  @table1, @table2
+        
+      PUB getTable(n) : addr
+        addr := @@tables[n]        ' Get absolute address of table
+        debug(sdec(LONG[addr]))    ' Read first element
+    description: "Table of table pointers using @@ for indirection"
+    
+  - code: |
+      DAT
+        handler0  LONG  @process_type_a
+        handler1  LONG  @process_type_b
+        
+      PUB dispatch(type) | handler_addr
+        handler_addr := @@handler0[type]  ' Get method address
+        CALL(handler_addr)                 ' Call the handler
+    description: "Jump table / dispatch table pattern"
+    
+  - code: |
+      ' WRONG - will not work correctly:
+      PUB badExample() | addr
+        addr := @mydata        ' This works fine - direct @ in code
+        ' No need for @@ here - @ in PUB/PRI code is already resolved
+        
+      ' RIGHT - when reading stored @ values from DAT:
+      DAT
+        ptr_to_data LONG @mydata   ' Stored as relative offset
+        
+      PUB goodExample() | addr
+        addr := @@ptr_to_data      ' Must convert stored offset to absolute
+    description: "When @@ is needed vs when it's not"
+
+spin2_vs_pasm_only:
+  spin2_pasm:
+    description: "@ stores relative offsets, @@ converts to absolute"
+    example_comment: "'IN SPIN2, THESE ARE OFFSETS OF STRINGS RELATIVE TO START OF OBJECT"
+    
+  pasm_only:
+    description: "@ stores absolute addresses directly, @@ typically not needed"
+    example_comment: "'IN PASM-ONLY PROGRAMS, THESE ARE ABSOLUTE ADDRESSES OF STRINGS"
+
+notes:
+  - "@@ is only needed in PUB/PRI blocks, not in DAT/CON"
+  - "Use @@ when reading @ values that were stored in DAT sections"
+  - "Direct @ usage in PUB/PRI code doesn't need @@ conversion"
+  - "In PASM-only programs, addresses are already absolute"
+  - "Common pattern: DAT stores @symbol, code uses @@symbol_table[i]"
+  - "Word-sized pointers (WORD @symbol) assume addresses under 64KB"
+
+common_mistakes:
+  - mistake: "Using @@ on a direct variable reference"
+    wrong: "addr := @@myvar"
+    right: "addr := @myvar"
+    explanation: "Direct @ in code is already absolute; @@ is for stored offsets"
+    
+  - mistake: "Forgetting @@ when reading from pointer tables"
+    wrong: "str := STRLIST[i]"
+    right: "str := @@STRLIST[i]"
+    explanation: "STRLIST contains offsets; @@ converts to usable addresses"
+
+related:
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/assembly-directives/org.yaml
+
+source_reference: "Spin2 Documentation v51 - 'Hub address of this object + x'"
+
+oneliner: "Absolute address operator - converts object-relative @offset to absolute hub address (for DAT pointer tables)"

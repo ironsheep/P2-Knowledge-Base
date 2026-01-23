@@ -1,0 +1,213 @@
+name: P2 Addressing Model
+type: concept
+category: Memory and Addressing
+
+description: |
+  The Propeller 2 has multiple memory spaces with different addressing requirements.
+  Understanding when to use @, @@, ^@, and # is essential for correct code.
+  
+  KEY INSIGHT: In Spin2+PASM programs, @ returns RELATIVE addresses (offsets from
+  object base). In PASM-only programs, @ returns ABSOLUTE addresses. This affects
+  how you store and retrieve addresses in data tables.
+
+memory_spaces:
+  hub_ram:
+    description: "512KB shared memory accessible by all cogs"
+    address_range: "$00000-$7FFFF"
+    addressing: "20-bit addresses"
+    access: "All cogs via RDLONG/WRLONG or Spin2 BYTE[]/WORD[]/LONG[]"
+    
+  cog_ram:
+    description: "512 longs private to each cog"
+    address_range: "$000-$1FF (0-511)"
+    addressing: "9-bit register addresses"
+    access: "Direct register access within cog, or REG[] from Spin2"
+    
+  lut_ram:
+    description: "512 longs lookup table per cog"
+    address_range: "$200-$3FF (512-1023)"
+    addressing: "9-bit addresses"
+    access: "RDLUT/WRLUT instructions or via cog register window"
+
+address_operators:
+  at:
+    symbol: "@"
+    purpose: "Get hub address of variable/data/method"
+    returns: "Hub memory address"
+    context_behavior:
+      spin2_pasm: "Returns RELATIVE address (offset from object base)"
+      pasm_only: "Returns ABSOLUTE hub address"
+    examples:
+      - "@myvar - address of VAR variable"
+      - "@mydata - address of DAT data"
+      - "@mymethod - method pointer"
+      
+  double_at:
+    symbol: "@@"
+    purpose: "Convert relative offset to absolute address"
+    returns: "Absolute hub address = object_base + offset"
+    when_needed: "Reading @ values stored in DAT sections"
+    formula: "@@x = hub_address_of_object + x"
+    examples:
+      - "@@string_table[i] - get absolute address from stored offset"
+      
+  caret_at:
+    symbol: "^@"
+    purpose: "Create field pointer with address AND bit info"
+    returns: "Field pointer encoding address and bit range"
+    use_with: "FIELD[] operator"
+    examples:
+      - "^@flags - field pointer to entire variable"
+      - "^@status.[7..0] - field pointer to specific bits"
+      
+  hash:
+    symbol: "#"
+    purpose: "Get cog/LUT register address"
+    returns: "Register address (0-511 for cog, 512-1023 for LUT)"
+    context: "ORG-defined symbols and predefined registers"
+    examples:
+      - "#myvar - cog register address of ORG symbol"
+      - "#PR0 - address $1D8"
+
+program_types:
+  spin2_pasm:
+    description: |
+      Programs with PUB/PRI methods and optional DAT/ORG assembly.
+      Objects can be loaded at any hub location (relocatable).
+    address_behavior:
+      - "@ returns relative offsets in DAT sections"
+      - "@@ converts stored offsets to absolute addresses"
+      - "Hub-exec code must use relative addressing"
+    compile_command: "Standard .spin2 file with PUB block"
+    
+  pasm_only:
+    description: |
+      Programs with only DAT block, no PUB/PRI methods.
+      Assembled to specific memory locations.
+    address_behavior:
+      - "@ returns absolute addresses directly"
+      - "@@ typically not needed"
+      - "Can use absolute addressing in hub-exec code"
+    compile_command: ".spin2 file with only DAT block"
+
+common_patterns:
+  string_table:
+    description: "Store multiple strings with pointer table"
+    code: |
+      DAT
+        str0    BYTE  "First", 0
+        str1    BYTE  "Second", 0
+        str2    BYTE  "Third", 0
+        strings WORD  @str0, @str1, @str2   ' Relative offsets
+        
+      PUB getString(n) : addr
+        addr := @@strings[n]               ' Convert to absolute
+    notes:
+      - "@ in DAT stores relative offset"
+      - "@@ at runtime converts to usable address"
+      - "WORD size assumes addresses < 64KB"
+      
+  launch_cog:
+    description: "Start assembly code in new cog"
+    code: |
+      DAT
+              ORG   0
+      cogcode MOV   DIRA, #$FF
+              ADD   OUTA, #1
+              JMP   #cogcode
+              
+      PUB start()
+        COGINIT(COGEXEC_NEW, @cogcode, 0)
+    notes:
+      - "@cogcode = hub address where code is stored"
+      - "Code loads into cog at address 0"
+      - "#cogcode in PASM = cog register address after loading"
+      
+  shared_data:
+    description: "Pass data address to cog"
+    code: |
+      VAR
+        LONG shared[16]
+        
+      PUB startCog()
+        shared[0] := @shared           ' Store base address
+        COGINIT(COGEXEC_NEW, @cogcode, @shared)
+    notes:
+      - "@ works correctly for runtime address passing"
+      - "No @@ needed when @ is evaluated at runtime"
+      
+  register_access:
+    description: "Access cog registers from Spin2"
+    code: |
+      DAT
+              ORG   0
+      myregs  RES   4                  ' Reserve 4 cog longs
+      
+      PUB writeReg(index, value)
+        REG[#myregs + index] := value  ' Write to cog register
+        
+      PUB readReg(index) : value
+        value := REG[#myregs + index]  ' Read from cog register
+    notes:
+      - "# returns cog register address"
+      - "REG[] accesses cog memory from Spin2"
+
+addressing_mode_comparison:
+  hub_data_access:
+    operator: "@"
+    syntax: "LONG[@mydata]"
+    use: "Reading/writing hub memory"
+    
+  cog_register_access:
+    operator: "#"
+    syntax: "REG[#myreg]"
+    use: "Reading/writing cog registers"
+    
+  bitfield_access:
+    operator: "^@"
+    syntax: "FIELD[^@flags.[7..0]]"
+    use: "Reading/writing specific bits"
+    
+  stored_pointer_access:
+    operator: "@@"
+    syntax: "@@pointer_table[i]"
+    use: "Converting stored relative offsets"
+
+troubleshooting:
+  - problem: "Address from DAT table doesn't work"
+    cause: "Using @ value directly without @@ conversion"
+    solution: "Use @@table[i] instead of table[i]"
+    
+  - problem: "COGINIT fails to start code"
+    cause: "Using # instead of @ for hub code address"
+    solution: "Use @cog_code for hub address of code"
+    
+  - problem: "#symbol returns wrong value"
+    cause: "Symbol not defined in ORG section"
+    solution: "Ensure symbol is in DAT ORG block"
+    
+  - problem: "Cog can't find shared data"
+    cause: "Address passed is relative, not absolute"
+    solution: "@ in runtime code (PUB/PRI) is already absolute"
+
+notes:
+  - "@ in code (PUB/PRI) evaluates to absolute address at runtime"
+  - "@ in data (DAT) compiles to relative offset in Spin2+PASM"
+  - "Always use @@ when reading stored @ values from DAT"
+  - "# is for cog/LUT addresses, @ is for hub addresses"
+  - "PASM-only programs have simpler addressing (all absolute)"
+
+related:
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/operators/FIELD.yaml
+  - language/spin2/methods/byte.yaml
+  - language/spin2/methods/word.yaml
+  - language/spin2/methods/long.yaml
+  - architecture/hub.yaml
+  - architecture/cog.yaml
+
+source_reference: "Spin2 Documentation v51 - DAT section, Address Operators, and program type descriptions"
+
+oneliner: "P2 addressing model - when to use @, @@, ^@, and # operators for hub, cog, and field access"

@@ -1,0 +1,129 @@
+symbol: "^@"
+name: Field Pointer Operator
+type: special_symbol
+category: Address Operators
+priority: 1
+
+description: |
+  The ^@ operator creates a field pointer to any hub or register variable, 
+  including bitfields. Field pointers encode both the address and the bit
+  range, enabling efficient access to specific bits within variables.
+  
+  This is distinct from the @ operator which returns only an address.
+  ^@ creates a compound value that includes address AND bit position information.
+
+syntax:
+  basic:
+    form: "^@anyvar"
+    returns: "Field pointer to hub or register variable"
+    block_usage: "PUB/PRI only (Term priority 1)"
+    
+  with_bitfield:
+    form: "^@variable.[highBit..lowBit]"
+    returns: "Field pointer encoding base address and bit range"
+    description: "Width is (highBit - lowBit + 1) bits"
+
+field_pointer_encoding:
+  description: |
+    A field pointer encodes:
+    - The base address of the variable
+    - The bit position within the variable
+    - The width of the field (for bitfield access)
+    
+    This allows FIELD[] operations to efficiently read/write specific 
+    bits without requiring separate address and bit parameters.
+
+examples:
+  - code: |
+      VAR
+        LONG flags
+        
+      PUB example() | fptr
+        fptr := ^@flags          ' Field pointer to entire long
+        FIELD[fptr] := $FFFFFFFF ' Write all 32 bits
+    description: "Basic field pointer to a variable"
+    
+  - code: |
+      VAR
+        LONG status
+        
+      PUB example() | fptr
+        fptr := ^@status.[7..0]   ' Field pointer to bits 7..0
+        FIELD[fptr] := $AA        ' Write 8-bit value to low byte
+        
+        fptr := ^@status.[31..24] ' Field pointer to bits 31..24
+        FIELD[fptr] := $BB        ' Write 8-bit value to high byte
+    description: "Field pointer to specific bit ranges"
+    
+  - code: |
+      VAR
+        LONG config
+        
+      PUB setBits(high, low, value) | fptr
+        ' Dynamic bit field access
+        fptr := ^@config.[high..low]
+        FIELD[fptr] := value
+        
+      PUB getBits(high, low) : value | fptr
+        fptr := ^@config.[high..low]
+        value := FIELD[fptr]
+    description: "Dynamic bit field access using ^@ with variable ranges"
+    
+  - code: |
+      CON
+        ' Bit field definitions for a status register
+        ERROR_BIT   = 0
+        READY_BITS  = 3..1
+        MODE_BITS   = 7..4
+        
+      VAR
+        LONG status_reg
+        
+      PUB setMode(mode)
+        FIELD[^@status_reg.[MODE_BITS]] := mode
+        
+      PUB isReady() : ready
+        ready := FIELD[^@status_reg.[READY_BITS]]
+    description: "Using constants to define bit field positions"
+
+use_cases:
+  - name: "Hardware register access"
+    description: "Accessing specific bit fields in memory-mapped registers"
+    
+  - name: "Packed data structures"
+    description: "Reading/writing bit-packed data efficiently"
+    
+  - name: "Flag manipulation"
+    description: "Setting/clearing specific bits in status variables"
+    
+  - name: "Protocol parsing"
+    description: "Extracting fields from packed protocol data"
+
+comparison_with_at:
+  "@_operator":
+    returns: "Memory address only"
+    use: "General pointer operations, BYTE[]/WORD[]/LONG[] access"
+    
+  "^@_operator":
+    returns: "Field pointer (address + bit info)"
+    use: "FIELD[] operations, bitfield access"
+
+notes:
+  - "^@ creates a field pointer, not just an address"
+  - "Works with both hub variables and cog register variables"
+  - "Bitfield syntax: ^@var.[highBit..lowBit]"
+  - "Field width = highBit - lowBit + 1"
+  - "Use with FIELD[] operator for reading/writing"
+  - "More efficient than manual bit shifting for field access"
+
+related:
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/operators/FIELD.yaml
+  - language/spin2/methods/byte.yaml
+  - language/spin2/methods/word.yaml
+  - language/spin2/methods/long.yaml
+
+source_reference: "Spin2 Documentation v51 - 'Field pointer to any hub or register variable, including bitfield'"
+
+oneliner: "Field pointer operator - creates pointer encoding address AND bit range for FIELD[] operations"

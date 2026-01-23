@@ -1,0 +1,135 @@
+symbol: "#"
+name: Register Address Operator
+type: special_symbol
+category: Address Operators
+priority: 1
+
+description: |
+  The # operator returns the register address of a cog or LUT symbol defined
+  in an ORG section. This is used to get the cog register address (0-511) or
+  LUT address of symbols defined in assembly code.
+  
+  DISTINCTION FROM @:
+  - @ returns HUB memory addresses (for VAR/DAT data)
+  - # returns COG/LUT register addresses (for ORG-defined symbols)
+  
+  This operator is essential when working with inline PASM code and needing
+  to reference cog register locations from Spin2 code.
+
+syntax:
+  form: "#reg_symbol"
+  returns: "Register address of cog/LUT symbol"
+  block_usage: "Spin2 expressions"
+  range: 
+    cog: "$000-$1FF (0-511)"
+    lut: "$200-$3FF (512-1023)"
+
+predefined_registers:
+  description: |
+    The # operator can be used with predefined register names to get their addresses.
+    Added in PNut v47: #register now returns the register's address in Spin2 expressions.
+    
+  examples:
+    - "#PR0 resolves to $1D8"
+    - "#PR7 resolves to $1DF"
+    - "#INB resolves to $1FF"
+    - "#OUTA resolves to $1FC"
+    - "#DIRA resolves to $1FA"
+
+examples:
+  - code: |
+      DAT
+              ORG     0
+      myvar   LONG    0           ' myvar is at cog register $000
+      counter LONG    0           ' counter is at cog register $001
+      
+      PUB example() | reg_addr
+        reg_addr := #myvar        ' Get cog register address ($000)
+        debug(uhex(reg_addr))     ' Shows $000
+        
+        reg_addr := #counter      ' Get cog register address ($001)
+        debug(uhex(reg_addr))     ' Shows $001
+    description: "Getting cog register addresses of ORG-defined symbols"
+    
+  - code: |
+      PUB example() | addr
+        addr := #PR0              ' $1D8 - first general purpose register
+        addr := #PR7              ' $1DF - last general purpose register
+        addr := #PTRA             ' $1F8 - pointer A register
+        addr := #OUTA             ' $1FC - output A register
+        addr := #INA              ' $1FE - input A register
+    description: "Getting addresses of predefined registers"
+    source: "PNut v47 release notes"
+    
+  - code: |
+      DAT
+              ORG     0
+      code_start
+              MOV     DIRA, #$FF
+              ADD     OUTA, #1
+              JMP     #code_start
+              
+      PUB startCog()
+        ' @code_start = hub address of the code
+        ' After loading, code runs at cog address 0
+        COGINIT(COGEXEC_NEW, @code_start, 0)
+    description: "@ vs # - hub address for COGINIT, # for cog-internal jumps"
+    
+  - code: |
+      DAT
+              ORG     0
+      buffer  RES     16          ' Reserve 16 longs at cog $000-$00F
+      work    RES     4           ' Reserve 4 longs at cog $010-$013
+      
+      PUB getBufferAddr() : addr
+        addr := #buffer           ' Returns $000
+        
+      PUB getWorkAddr() : addr  
+        addr := #work             ' Returns $010
+    description: "Getting addresses of reserved cog memory regions"
+
+spin2_vs_pasm_context:
+  in_spin2:
+    description: "# returns the numeric register address for use in calculations"
+    example: "reg_addr := #PR0   ' Gets $1D8"
+    
+  in_pasm:
+    description: "# denotes immediate value - the value itself, not a register"
+    example: "MOV reg, #$FF   ' Load immediate value $FF"
+    note: "Different meaning! In PASM, # means immediate operand"
+
+memory_spaces:
+  cog_registers:
+    range: "$000-$1FF (0-511)"
+    description: "512 long registers in each cog"
+    sections:
+      - "$000-$11F: General purpose / user code space"
+      - "$120-$13F: Reserved"
+      - "$140-$1CF: LUT access window"
+      - "$1D0-$1D7: Special hardware registers"
+      - "$1D8-$1DF: PR0-PR7 general purpose registers"
+      - "$1E0-$1EF: Local variable window (inline PASM)"
+      - "$1F0-$1FF: I/O and special registers"
+      
+  lut_memory:
+    range: "$200-$3FF (512-1023)"
+    description: "512 longs of lookup table memory per cog"
+
+notes:
+  - "# in Spin2 expressions returns register address"
+  - "# in PASM instructions means immediate value (different meaning!)"
+  - "Added in PNut v47 - earlier versions don't support #register in Spin2"
+  - "Use @ for hub addresses, # for cog/LUT register addresses"
+  - "Register symbols must be defined in ORG sections or be predefined"
+  - "PR0-PR7 at $1D8-$1DF are available to both PASM and Spin2"
+
+related:
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/assembly-directives/org.yaml
+  - language/spin2/assembly-directives/res.yaml
+  - language/pasm2/registers/pr-registers.yaml
+
+source_reference: "Spin2 Documentation v51 - 'Register address of cog/LUT symbol' and PNut v47 release notes"
+
+oneliner: "Register address operator - returns cog/LUT register address of ORG-defined symbol (not hub address)"
