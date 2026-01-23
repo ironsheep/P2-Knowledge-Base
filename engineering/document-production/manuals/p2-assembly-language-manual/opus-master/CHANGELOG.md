@@ -1,5 +1,30 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v2.0.0 (2026-01-23)
+
+**P1 Migration & Technical Depth Release**
+
+### New Content
+
+- "For P1 Developers" section with P1-to-P2 specification comparison
+- CORDIC interrupt protection patterns (Chapter 5, Section 5.1.8)
+- REP instruction: extended counts (## prefix), interrupt shielding, memory constraints
+- Paletted VGA example in LUT documentation
+- Low hub address pitfall warning
+
+### Enhanced Accuracy
+
+- Timing values verified against silicon documentation
+- REP and CORDIC hardware constraints documented
+
+### Diagrams
+
+- All diagrams now numbered for cross-referencing
+- Hub Memory diagram updated
+- Special Registers diagram relocated to Part II
+
+---
+
 ## v1.4.0 (2025-12-22)
 
 **Code Example & Effect Reference** - Corrected code examples; added effect support reference.
