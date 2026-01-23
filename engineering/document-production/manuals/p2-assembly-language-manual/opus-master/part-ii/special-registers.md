@@ -15,7 +15,7 @@ The top 16 locations of cog RAM are reserved for special registers:
 ```
 
 ::: {.figurecaption #fig:special-registers-map-part2}
-Special Registers Memory Map ($1F0–$1FF)
+Figure R.1: Special Registers Memory Map ($1F0–$1FF)
 :::
 
 ### Dual-Purpose vs. Fixed Registers

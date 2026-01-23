@@ -204,3 +204,5 @@ engineering/ingestion/sources/hyperRam-n-hyperFlash/64004-ES-REVA-HyperRAM_FLASH
 deliverables/ai/P2/hardware/edge-32mb-module.yaml.backup-20250108
 *.backup-20250108
 engineering/history/CONVERSATION-ARCHIVES-INDEX.md
+engineering/document-production/manuals/p2-assembly-language-manual/v2.0-changelog-draft.md
+engineering/document-production/manuals/p2-assembly-language-manual/v2.0-commit-summary.md

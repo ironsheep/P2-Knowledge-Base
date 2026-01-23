@@ -12,7 +12,7 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 ```
 
 ::: {.figurecaption #fig:eight-cog-overview}
-Eight-COG Architecture Overview
+Figure 1.1: Eight-COG Architecture Overview
 :::
 
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
@@ -50,7 +50,7 @@ The `COGSTOP` instruction halts a running COG. A COG can stop itself or another 
 ```
 
 ::: {.figurecaption #fig:cog-memory-map}
-COG Memory Map
+Figure 1.2: COG Memory Map
 :::
 
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
@@ -81,7 +81,7 @@ PASM2 instructions use 9-bit fields to specify source (S) and destination (D) re
 ```
 
 ::: {.figurecaption #fig:lut-memory-map}
-LUT Memory Map
+Figure 1.3: LUT Memory Map
 :::
 
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
@@ -107,7 +107,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 ```
 
 ::: {.figurecaption #fig:eight-cog-lut-sharing}
-Eight-COG Architecture with LUT Write Sharing
+Figure 1.4: Eight-COG Architecture with LUT Write Sharing
 :::
 
 The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
@@ -120,7 +120,7 @@ The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent C
 ```
 
 ::: {.figurecaption #fig:hub-memory-map}
-Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
+Figure 1.5: Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
 :::
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.

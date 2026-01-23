@@ -316,9 +316,7 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*
 
 
-```{=latex}
-\manualpart{Architectural Foundation}
-```
+# Part I: Architectural Foundation
 
 # Chapter 1: The P2 Execution Model
 
@@ -334,7 +332,7 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 ```
 
 ::: {.figurecaption #fig:eight-cog-overview}
-Eight-COG Architecture Overview
+Figure 1.1: Eight-COG Architecture Overview
 :::
 
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
@@ -372,7 +370,7 @@ The `COGSTOP` instruction halts a running COG. A COG can stop itself or another 
 ```
 
 ::: {.figurecaption #fig:cog-memory-map}
-COG Memory Map
+Figure 1.2: COG Memory Map
 :::
 
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
@@ -403,7 +401,7 @@ PASM2 instructions use 9-bit fields to specify source (S) and destination (D) re
 ```
 
 ::: {.figurecaption #fig:lut-memory-map}
-LUT Memory Map
+Figure 1.3: LUT Memory Map
 :::
 
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
@@ -429,7 +427,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 ```
 
 ::: {.figurecaption #fig:eight-cog-lut-sharing}
-Eight-COG Architecture with LUT Write Sharing
+Figure 1.4: Eight-COG Architecture with LUT Write Sharing
 :::
 
 The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
@@ -442,7 +440,7 @@ The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent C
 ```
 
 ::: {.figurecaption #fig:hub-memory-map}
-Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
+Figure 1.5: Hub Memory Layout: Spin2+PASM vs PASM-Only Programs
 :::
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
@@ -2255,7 +2253,7 @@ Variable range notation like "9..35" indicates that execution time depends on th
 ```
 
 ::: {.figurecaption #fig:egg-beater}
-Hub Access Rotation ("Egg Beater")
+Figure 4.1: Hub Access Rotation ("Egg Beater")
 :::
 
 Hub memory access uses round-robin arbitration that gives each COG fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each COG's access window spinning through the sequence in turn.
@@ -4233,9 +4231,7 @@ For time-critical inner loops:
 <!-- End of Chapter 6 -->
 
 
-```{=latex}
-\manualpart{Instruction Set Reference}
-```
+# Part II: Instruction Set Reference
 
 # Instruction Categories {#instruction-categories}
 
@@ -16503,7 +16499,7 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 ```
 
 ::: {.figurecaption #fig:alignl-before}
-Memory Layout Before ALIGNL
+Figure D.1: Memory Layout Before ALIGNL
 :::
 
 Notice how each data element packs immediately after the previous one without any automatic padding or alignment. The word at T2 starts at byte offset 1 (misaligned), and the long starts at byte offset 3 (also misaligned). If the code that is meant to access Table T2 expects it to align with a long boundary (i.e. for convenient long-sized access or pointer alignment), the ALIGNL directive achieves this, as follows.
@@ -16524,7 +16520,7 @@ In comparison, this data will be emitted as follows:
 ```
 
 ::: {.figurecaption #fig:alignl-after}
-Memory Layout After ALIGNL
+Figure D.2: Memory Layout After ALIGNL
 :::
 
 In this case, the ALIGNL directive causes three zero ($00) bytes to emit after Table T1 to pad and align the start of Table T2 to the boundary of L1. After T2, the word and long pack sequentially—the long at offset 6 is still misaligned. To long-align the long as well, another ALIGNL would be needed before it.
@@ -16588,7 +16584,7 @@ This data is emitted into the Hub memory image as shown below. The actual starti
 ```
 
 ::: {.figurecaption #fig:alignw-before}
-Memory Layout Before ALIGNW
+Figure D.3: Memory Layout Before ALIGNW
 :::
 
 Notice how each data element, regardless of size, is packed right next to the data before it. If the code that is meant to access Table T2 expects it to align with a word boundary (i.e. for convenient word-sized access), the ALIGNW directive achieves this, as follows.
@@ -16609,7 +16605,7 @@ In comparison, this data will be emitted as follows:
 ```
 
 ::: {.figurecaption #fig:alignw-after}
-Memory Layout After ALIGNW
+Figure D.4: Memory Layout After ALIGNW
 :::
 
 In this case, the ALIGNW directive causes one zero ($00) byte to emit after Table T1 to pad and align the start of Table T2 to the boundary of W1. This allows T2 to be accessed as a word-aligned address. Note that the long after T2 packs sequentially at offset 4—it happens to be long-aligned here only because T2 is exactly 2 bytes; this is coincidental, not automatic.
@@ -17112,7 +17108,7 @@ The top 16 locations of cog RAM are reserved for special registers:
 ```
 
 ::: {.figurecaption #fig:special-registers-map-part2}
-Special Registers Memory Map ($1F0–$1FF)
+Figure R.1: Special Registers Memory Map ($1F0–$1FF)
 :::
 
 ### Dual-Purpose vs. Fixed Registers
@@ -17819,9 +17815,7 @@ Timeout detection:
 **Per-Cog Independence**: Each cog has its own independent copy of all special registers. Changes in one cog do not affect other cogs' registers, enabling parallel independent operation.
 
 
-```{=latex}
-\manualpart{Reference Tables}
-```
+# Part III: Reference Tables
 
 # Appendix A: Instruction Encoding Master Table
 

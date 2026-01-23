@@ -7,9 +7,10 @@ Style conventions for P2 Assembly Language Reference Manual changelog entries.
 ## Core Principles
 
 1. **Terse over verbose** - State what changed, not why it was wrong
-2. **Optimistic framing** - Use "corrected", "added", "fixed", "clarified"
+2. **Additive framing** - Focus on what the document NOW provides, not what was wrong before
 3. **User-focused** - Include only changes users care about
 4. **No implementation details** - Omit root causes, debugging info, internal processes
+5. **Aggregate corrections** - Group related fixes into themes rather than itemizing each one
 
 ---
 
@@ -31,6 +32,65 @@ Style conventions for P2 Assembly Language Reference Manual changelog entries.
 - Pipeline/tooling implementation details (Lua filters, LaTeX workarounds)
 - Trivial visual changes (symbol standardization, minor formatting)
 - Internal regressions fixed before release (if v1.2 worked, v1.3 works, no entry needed)
+
+**Editorial Refinements (new category):**
+- Terminology standardization (unless old term was technically incorrect)
+- Cosmetic diagram changes (reordering, repositioning labels)
+- Minor precision adjustments ("359" → "~360" instruction counts)
+- Content reorganization (section reordering, list restructuring)
+- Stylistic consistency fixes (wording alignment across sections)
+
+**The Exclusion Test:** Ask "Would a user have been confused, misled, or unable to find information before this change?" If no, exclude it.
+
+---
+
+## Framing Corrections
+
+Changelogs should communicate strength, not confess weakness. Users want to know what they're getting, not what was broken.
+
+### Aggregate into Themes
+Instead of listing each correction, summarize the improvement:
+
+```markdown
+# Bad - itemizes each problem
+- LUT timing corrected: "single-cycle" → "3 clock cycles"
+- CALLA/CALLB timing corrected: "14-32" → "13+ cycles"
+- Hub access timing corrected: "9-16" → "9-26 clocks"
+
+# Good - describes the result
+- Timing values verified against silicon documentation
+```
+
+### Use Additive Language
+Describe what exists now, not what changed:
+
+```markdown
+# Bad - highlights the error
+- Corrected: REP cannot nest (was incorrectly documented as nestable)
+- Removed incorrect "Hub Slot Synchronization" section
+
+# Good - states current reality
+- REP: Hardware constraints documented
+- (don't mention removed content - users never saw it)
+```
+
+### Section Structure for Mixed Releases
+When a release has both new content and accuracy improvements:
+
+```markdown
+## vX.Y.Z (YYYY-MM-DD)
+
+**Release Theme**
+
+### New Content
+- Bullet list of additions
+
+### Enhanced Accuracy
+- One or two summary lines covering all corrections
+
+### Figures (if applicable)
+- Figure numbering or diagram additions
+```
 
 ---
 

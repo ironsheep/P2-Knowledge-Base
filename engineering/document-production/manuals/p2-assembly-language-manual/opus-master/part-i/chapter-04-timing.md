@@ -147,7 +147,7 @@ Variable range notation like "9..35" indicates that execution time depends on th
 ```
 
 ::: {.figurecaption #fig:egg-beater}
-Hub Access Rotation ("Egg Beater")
+Figure 4.1: Hub Access Rotation ("Egg Beater")
 :::
 
 Hub memory access uses round-robin arbitration that gives each COG fair access to the shared hub RAM. This rotating pattern is commonly called the "egg beater" due to its visual similarity to rotating blades, with each COG's access window spinning through the sequence in turn.
