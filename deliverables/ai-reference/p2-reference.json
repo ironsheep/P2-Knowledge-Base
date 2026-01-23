@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-01-23",
-    "last_updated": "2026-01-23T07:08:45.805894",
+    "last_updated": "2026-01-23T21:25:19.930743",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-23T07:08:45.805894",
+    "extraction_date": "2026-01-23T21:25:19.930743",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18268,7 +18268,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-23T07:08:45.805894",
+    "extraction_date": "2026-01-23T21:25:19.930743",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22282,13 +22282,24 @@
                 "description": "Send array contents"
               }
             ],
+            "as_method_pointer": {
+              "description": "SEND can be assigned to a LONG variable as a method pointer,\nenabling flexible I/O abstraction.\n",
+              "syntax": "outputMethod := SEND",
+              "usage": "outputMethod(data)",
+              "restrictions": [
+                "Returns no value (cannot be used as a term)",
+                "Cannot use abort syntax with SEND"
+              ],
+              "example": "VAR\n  LONG outputMethod\n  \nPUB SetupMailbox()\n  outputMethod := SEND        ' Use inter-cog mailbox\n  \nPUB SetupSerial()\n  outputMethod := @serial.tx  ' Use serial port\n  \nPUB SendData(data)\n  outputMethod(data)          ' Works with either destination\n"
+            },
             "notes": [
               "Output method must be configured first",
               "Typically used with serial drivers",
               "Can send bytes, words, longs, strings, arrays",
               "Blocking operation - waits for each byte",
               "Works with user-defined output methods",
-              "Common for debug output"
+              "Common for debug output",
+              "Can be assigned to LONG variable as method pointer for flexible I/O"
             ],
             "timing": {
               "description": "Depends on output method",
@@ -22296,7 +22307,8 @@
             },
             "related": [
               "RECV",
-              "DEBUG"
+              "DEBUG",
+              "language/spin2/concepts/method-pointers.yaml"
             ],
             "see_also": [
               "Serial communication",
@@ -24595,13 +24607,25 @@
                 "description": "Wait for start marker"
               }
             ],
+            "as_method_pointer": {
+              "description": "RECV can be assigned to a LONG variable as a method pointer,\nenabling flexible I/O abstraction.\n",
+              "syntax": "inputMethod := RECV",
+              "usage": "data := inputMethod()",
+              "restrictions": [
+                "Takes no parameters",
+                "Always returns exactly one value",
+                "Cannot use abort syntax with RECV"
+              ],
+              "example": "VAR\n  LONG inputMethod\n  \nPUB SetupMailbox()\n  inputMethod := RECV         ' Use inter-cog mailbox\n  \nPUB SetupSerial()\n  inputMethod := @serial.rx   ' Use serial port\n  \nPUB GetInput() : data\n  data := inputMethod()       ' Works with either source\n"
+            },
             "notes": [
               "Input method must be configured first",
               "Typically used with serial drivers",
               "Blocking operation - waits for byte",
               "Returns single byte (0-255)",
               "Works with user-defined input methods",
-              "Common for user input and data reception"
+              "Common for user input and data reception",
+              "Can be assigned to LONG variable as method pointer for flexible I/O"
             ],
             "timing": {
               "description": "Depends on input method",
@@ -24609,7 +24633,8 @@
             },
             "related": [
               "SEND",
-              "DEBUG"
+              "DEBUG",
+              "language/spin2/concepts/method-pointers.yaml"
             ],
             "see_also": [
               "Serial communication",
@@ -27319,10 +27344,23 @@
             "priority": 1,
             "description": "The @@ operator converts an object-relative address to an absolute hub address.\n\nPURPOSE: In Spin2+PASM programs, the @ operator stores addresses RELATIVE to the\nobject's base. When you store @symbol values in data tables and need to use them\nat runtime, you must convert them to absolute addresses using @@.\n\nFORMULA: @@x = (hub address of this object) + x\n\nThis is essential for data pointer tables where @ values are stored in DAT sections.\n",
             "syntax": {
-              "form": "@@x",
-              "returns": "Hub address of this object + x",
-              "block_usage": "PUB/PRI only",
-              "typical_use": "@@dat_symbol or @@array[index]"
+              "basic": {
+                "form": "@@x",
+                "returns": "Hub address of this object + x",
+                "block_usage": "PUB/PRI only"
+              },
+              "with_type_and_index": {
+                "form": "@@TYPE[@table][index]",
+                "returns": "Resolved absolute address from pointer table",
+                "description": "Common pattern for lookup tables storing @ addresses",
+                "examples": [
+                  "@@WORD[@stringTable][i]  - resolve WORD-sized pointer",
+                  "@@LONG[@pointerTable][i] - resolve LONG-sized pointer"
+                ]
+              },
+              "equivalence": {
+                "note": "@@symbol is equivalent to @symbol + PBASE"
+              }
             },
             "how_it_works": {
               "explanation": "When the compiler encounters @symbol in a DAT section, it stores the symbol's\noffset from the object base (not an absolute address). This allows objects\nto be relocatable - they can load at any hub address.\n\nAt runtime, when you need the actual memory address:\n1. @@ reads the stored relative offset\n2. Adds the current object's base address\n3. Returns the resulting absolute hub address\n",
@@ -27345,6 +27383,18 @@
               {
                 "code": "' WRONG - will not work correctly:\nPUB badExample() | addr\n  addr := @mydata        ' This works fine - direct @ in code\n  ' No need for @@ here - @ in PUB/PRI code is already resolved\n  \n' RIGHT - when reading stored @ values from DAT:\nDAT\n  ptr_to_data LONG @mydata   ' Stored as relative offset\n  \nPUB goodExample() | addr\n  addr := @@ptr_to_data      ' Must convert stored offset to absolute\n",
                 "description": "When @@ is needed vs when it's not"
+              },
+              {
+                "code": "DAT\npointerTable    LONG    @buffer1, @buffer2, @buffer3\n\nPUB GetBuffer(index) : pBuffer\n  pBuffer := @@LONG[@pointerTable][index]\n",
+                "description": "Complex @@ expression pattern:\n1. @pointerTable - get address of the table\n2. LONG[...][index] - read the LONG at that index\n3. @@ - add program base to convert to hub address\n"
+              },
+              {
+                "code": "DAT\ndefaults    LONG    100, 200, 300, 400\n\nVAR\n  LONG settings[4]\n  \nPUB Init()\n  LONGMOVE(@settings, @@defaults, 4)  ' Copy DAT defaults to VAR\n",
+                "description": "Buffer initialization from DAT section using @@ with LONGMOVE"
+              },
+              {
+                "code": "DAT\nstateHandlers   LONG    @State0, @State1, @State2\n\nVAR\n  LONG currentHandler\n  \nPUB Init()\n  currentHandler := @@stateHandlers[0]  ' Resolve first handler\n  \nPUB Run()\n  currentHandler()                       ' Call current state\n  \nPRI State0()\n  ' ... state 0 logic ...\n  currentHandler := @@stateHandlers[1]  ' Transition to state 1\n",
+                "description": "Pointer-based state machine using @@ to resolve method addresses"
               }
             ],
             "spin2_vs_pasm_only": {
@@ -27511,12 +27561,56 @@
                 "returns": "Hub address of VAR/PUB/PRI/DAT variable",
                 "block_usage": "All blocks (CON, VAR, DAT, PUB, PRI)"
               },
+              "array_element": {
+                "form": "@array[index]",
+                "returns": "Address of specific array element",
+                "calculation": "base_address + (index * element_size)",
+                "notes": "Element size is 1 for BYTE, 2 for WORD, 4 for LONG"
+              },
+              "structure_address": {
+                "form": "@structVar",
+                "returns": "Address of entire structure"
+              },
+              "structure_member": {
+                "form": "@structVar.member",
+                "returns": "Address of specific member within structure",
+                "extended_form": "@structVar.nested.member for deeply nested access"
+              },
+              "inline_string": {
+                "form": "@\"string literal\"",
+                "returns": "Address of inline string constant in hub memory"
+              },
               "method_pointer": {
-                "form": "@method",
-                "returns": "Pointer to method",
-                "extended_form": "@object{[i]}.method",
+                "description": "Three forms for obtaining method addresses",
+                "forms": {
+                  "local_method": {
+                    "syntax": "@MethodName",
+                    "description": "Address of method in current object"
+                  },
+                  "child_object_method": {
+                    "syntax": "@obj.MethodName",
+                    "description": "Address of method in child object"
+                  },
+                  "indexed_object_method": {
+                    "syntax": "@obj[i].MethodName",
+                    "description": "Address of method in indexed child object array"
+                  }
+                },
                 "block_usage": "PUB/PRI only",
-                "notes": "Creates a 32-bit method pointer encoding method index and VAR base"
+                "storage": "Must store in LONG variable (no BYTE, WORD, or bitfields)",
+                "notes": "See language/spin2/concepts/method-pointers.yaml for calling patterns"
+              }
+            },
+            "restrictions": {
+              "cog_registers": {
+                "not_allowed": "@DIRA, @INA, @OUTA, @DIRB, @INB, @OUTB, etc.",
+                "error_message": "@ is not allowed, use ^@ to get field pointer",
+                "solution": "Use ^@ operator instead for COG register access"
+              },
+              "bitfields": {
+                "not_allowed": "@myVar.[3..0], @myVar.[highBit..lowBit]",
+                "error_message": "@ is not allowed for bitfields, use ^@ to get field pointer",
+                "solution": "Use ^@ operator to create field pointer for bitfield access"
               }
             },
             "address_types": {
@@ -27562,6 +27656,18 @@
               {
                 "code": "OBJ\n  child : \"child_object\"\n  \nPUB example() | method_ptr\n  method_ptr := @child.process  ' Get method in child object\n  method_ptr()                   ' Call child's method\n",
                 "description": "Getting method pointer from child object"
+              },
+              {
+                "code": "PUB example() | pStr\n  pStr := @\"Hello, World!\"     ' Address of inline string constant\n  debug(zstr(pStr))\n",
+                "description": "Getting address of inline string literal"
+              },
+              {
+                "code": "CON\n  STRUCT point(x, y)\n  STRUCT line(point a, point b)\n  \nVAR\n  point myPoint\n  line myLine\n  \nPUB example() | ptr\n  ptr := @myPoint              ' Address of entire structure\n  LONG[ptr][0] := 100          ' Access x member\n  LONG[ptr][1] := 200          ' Access y member\n  \n  ptr := @myLine.a             ' Address of nested point 'a'\n  ptr := @myLine.a.x           ' Address of x within point a\n",
+                "description": "Structure and nested member addressing"
+              },
+              {
+                "code": "CON\n  STRUCT point(x, y)\n  NUM_POINTS = 10\n  \nVAR\n  point points[NUM_POINTS]\n  \nPUB clearAll() | ptr, i\n  ptr := @points[0]            ' Address of first structure\n  repeat NUM_POINTS\n    ptr.x := 0\n    ptr.y := 0\n    ptr += 8                   ' Advance by structure size (2 LONGs)\n",
+                "description": "Structure array traversal with pointer arithmetic"
               }
             ],
             "common_patterns": {
@@ -27579,10 +27685,17 @@
             ],
             "related": [
               "language/spin2/special-symbols/double_at.yaml",
+              "language/spin2/special-symbols/caret_at.yaml",
+              "language/spin2/concepts/method-pointers.yaml",
               "language/spin2/methods/coginit.yaml",
               "language/spin2/methods/cogspin.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/operators/FIELD.yaml"
+              "language/spin2/operators/FIELD.yaml",
+              "language/spin2/methods/bytemove.yaml",
+              "language/spin2/methods/wordmove.yaml",
+              "language/spin2/methods/longmove.yaml",
+              "language/spin2/methods/setregs.yaml",
+              "language/spin2/methods/getregs.yaml"
             ],
             "source_reference": "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section",
             "oneliner": "Address-of operator - returns hub address of VAR/DAT/method (relative in Spin2+PASM, absolute in PASM-only)"
@@ -27720,6 +27833,58 @@
                 "description": "Width is (highBit - lowBit + 1) bits"
               }
             },
+            "why_use_caret_at": {
+              "cog_registers": {
+                "description": "The @ operator is NOT allowed with COG registers (DIRA, INA, OUTA, etc.).\nYou MUST use ^@ to access COG registers.\n",
+                "example": "fieldPtr := ^@DIRA.[15..0]  ' Correct way to access DIRA bits",
+                "error_if_using_at": "@ is not allowed, use ^@ to get field pointer"
+              },
+              "bitfields": {
+                "description": "The @ operator is NOT allowed with bitfield notation.\nYou MUST use ^@ to create field pointers for bitfield access.\n",
+                "example": "fieldPtr := ^@myVar.[7..0]  ' Correct way to get bitfield pointer",
+                "error_if_using_at": "@ is not allowed for bitfields, use ^@ to get field pointer"
+              }
+            },
+            "field_width_specification": {
+              "description": "The bit range notation specifies field width and value range",
+              "widths": [
+                {
+                  "notation": ".[0] or .[0..0]",
+                  "width": "1 bit",
+                  "max_value": 1
+                },
+                {
+                  "notation": ".[1..0]",
+                  "width": "2 bits",
+                  "max_value": 3
+                },
+                {
+                  "notation": ".[3..0]",
+                  "width": "4 bits",
+                  "max_value": 15
+                },
+                {
+                  "notation": ".[7..0]",
+                  "width": "8 bits",
+                  "max_value": 255
+                },
+                {
+                  "notation": ".[11..0]",
+                  "width": "12 bits",
+                  "max_value": 4095
+                },
+                {
+                  "notation": ".[15..0]",
+                  "width": "16 bits",
+                  "max_value": 65535
+                },
+                {
+                  "notation": ".[31..0]",
+                  "width": "32 bits",
+                  "max_value": 4294967295
+                }
+              ]
+            },
             "field_pointer_encoding": {
               "description": "A field pointer encodes:\n- The base address of the variable\n- The bit position within the variable\n- The width of the field (for bitfield access)\n\nThis allows FIELD[] operations to efficiently read/write specific \nbits without requiring separate address and bit parameters.\n"
             },
@@ -27759,14 +27924,28 @@
                 "description": "Extracting fields from packed protocol data"
               }
             ],
+            "when_to_use": {
+              "use_at": [
+                "Get address of a variable: @myVar",
+                "Get address of array element: @array[i]",
+                "Get address of structure member: @struct.member",
+                "Get address of method: @myMethod"
+              ],
+              "use_caret_at": [
+                "Get field pointer for COG register: ^@DIRA.[15..0]",
+                "Get field pointer for bitfield access: ^@myVar.[7..0]",
+                "Create indexed field access: ^@storage.[3..0] with FIELD[][i]"
+              ]
+            },
             "comparison_with_at": {
               "@_operator": {
                 "returns": "Memory address only",
-                "use": "General pointer operations, BYTE[]/WORD[]/LONG[] access"
+                "use": "General pointer operations, BYTE[]/WORD[]/LONG[] access",
+                "restriction": "Cannot be used with COG registers or bitfields"
               },
               "^@_operator": {
                 "returns": "Field pointer (address + bit info)",
-                "use": "FIELD[] operations, bitfield access"
+                "use": "FIELD[] operations, bitfield access, COG register access"
               }
             },
             "notes": [
