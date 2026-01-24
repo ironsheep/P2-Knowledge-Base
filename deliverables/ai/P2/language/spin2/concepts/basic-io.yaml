@@ -425,6 +425,82 @@ multi_cog_pin_coordination:
     reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"
     smart_pins: "Smart pin state (RQPIN) can be read by multiple COGs safely"
 
+anti_patterns:
+  - anti_pattern: "missing_output_enable"
+    severity: "no_output"
+    description: "Smart pin mode without P_OE produces no output"
+    wrong: |
+      ' No output - missing P_OE!
+      WRPIN(P_PWM_TRIANGLE, PWM_PIN)
+      PINSTART(PWM_PIN, P_PWM_TRIANGLE, period, duty)  ' Still no output!
+    correct: |
+      ' Include P_OE for output
+      WRPIN(P_PWM_TRIANGLE | P_OE, PWM_PIN)
+      PINSTART(PWM_PIN, P_PWM_TRIANGLE | P_OE, period, duty)
+
+  - anti_pattern: "read_without_input_mode"
+    severity: "wrong_value"
+    description: "Reading pin that's still in output mode reads output latch, not actual pin"
+    wrong: |
+      PINHIGH(INPUT_PIN)           ' Pin is output
+      value := PINREAD(INPUT_PIN)  ' Reads output latch, not external signal!
+    correct: |
+      PINFLOAT(INPUT_PIN)          ' Set to input mode first
+      value := PINREAD(INPUT_PIN)  ' Now reads actual pin state
+
+  - anti_pattern: "smart_pin_not_cleared"
+    severity: "power_waste"
+    description: "Smart pin keeps running after use, wasting power"
+    wrong: |
+      PINSTART(ADC_PIN, P_ADC, 0, 0)
+      value := RDPIN(ADC_PIN)
+      ' ADC keeps running, consuming power
+    correct: |
+      PINSTART(ADC_PIN, P_ADC, 0, 0)
+      value := RDPIN(ADC_PIN)
+      PINCLEAR(ADC_PIN)            ' Stop smart pin
+      PINFLOAT(ADC_PIN)            ' Return to input mode
+
+  - anti_pattern: "rdpin_blocking_forever"
+    severity: "hang_risk"
+    description: "RDPIN blocks until data ready - may hang if no data arrives"
+    wrong: |
+      value := RDPIN(SERIAL_RX)    ' Blocks forever if no data!
+    correct: |
+      ' Check data ready first or use timeout
+      REPEAT UNTIL PINREAD(SERIAL_RX) OR timeout_reached()
+      if PINREAD(SERIAL_RX)
+        value := RDPIN(SERIAL_RX)
+
+  - anti_pattern: "parameter_order_confusion"
+    severity: "wrong_configuration"
+    description: "WRPIN and PINSTART have different parameter orders"
+    wrong: |
+      ' WRONG: Parameter order confused
+      WRPIN(TX_PIN, P_ASYNC_TX)    ' Pin and mode swapped!
+    correct: |
+      ' WRPIN: (mode, pin)
+      WRPIN(P_ASYNC_TX | P_OE, TX_PIN)
+
+      ' PINSTART: (pin, mode, x, y) - different order!
+      PINSTART(TX_PIN, P_ASYNC_TX | P_OE, x_val, y_val)
+
+  - anti_pattern: "rqpin_without_ack"
+    severity: "data_stale"
+    description: "RQPIN reads without acknowledge - data may be stale"
+    wrong: |
+      ' Using RQPIN repeatedly without RDPIN or AKPIN
+      REPEAT
+        value := RQPIN(ADC_PIN)    ' May read same old value!
+    correct: |
+      ' Use RDPIN to read and acknowledge
+      value := RDPIN(ADC_PIN)      ' Reads and acknowledges
+
+      ' Or use AKPIN after RQPIN if you need non-blocking
+      if PINREAD(ADC_PIN)          ' Data ready?
+        value := RQPIN(ADC_PIN)    ' Read without blocking
+        AKPIN(ADC_PIN)             ' Acknowledge to get fresh data next time
+
 related_concepts:
   - "Smart pin autonomous modes (PWM, UART, etc.)"
   - "Inline PASM2 for performance-critical I/O"
