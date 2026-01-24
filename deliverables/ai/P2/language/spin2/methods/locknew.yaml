@@ -1,51 +1,115 @@
 method: LOCKNEW
 type: method
 description: |
-  Allocate a new hardware lock for inter-cog synchronization
+  Allocate a new hardware lock for inter-COG synchronization.
+  The P2 has 16 hardware locks (0-15) shared across all 8 COGs.
 category: Lock Operations
 syntax: "lock_id := LOCKNEW()"
 parameters: []
 returns:
   type: "integer"
-  description: "Lock ID (0..15) if successful, negative if no locks available"
+  description: "Lock ID (0..15) if successful, -1 if no locks available"
+
 examples:
-  - code: |
-      ' Allocate a new lock
+  - description: "Allocate lock with error checking"
+    code: |
+      VAR
+        long my_lock
+
+      PUB init() : ok
+        my_lock := LOCKNEW()
+        if my_lock < 0
+          ' No locks available - all 16 in use
+          ABORT
+        ok := TRUE
+
+  - description: "Complete lock lifecycle"
+    code: |
+      CON
+        NO_LOCK = -1
+
+      VAR
+        long counter_lock
+        long shared_counter
+
+      PUB init()
+        counter_lock := LOCKNEW()
+        shared_counter := 0
+
+      PUB cleanup()
+        if counter_lock <> NO_LOCK
+          LOCKRET(counter_lock)
+          counter_lock := NO_LOCK
+
+  - description: "Multiple locks for different resources"
+    code: |
+      VAR
+        long spi_lock
+        long uart_lock
+        long i2c_lock
+
+      PUB init_all_locks() : ok
+        spi_lock := LOCKNEW()
+        uart_lock := LOCKNEW()
+        i2c_lock := LOCKNEW()
+        ok := (spi_lock >= 0 AND uart_lock >= 0 AND i2c_lock >= 0)
+
+anti_patterns:
+  - anti_pattern: "lock_leak"
+    severity: "resource_exhaustion"
+    description: "Not returning locks when done exhausts the 16 available locks"
+    wrong: |
+      PUB start()
+        my_lock := LOCKNEW()
+        ' ... use lock ...
+
+      PUB stop()
+        ' Forgot to return lock - it's now permanently unavailable!
+    correct: |
+      PUB start()
+        my_lock := LOCKNEW()
+
+      PUB stop()
+        if my_lock >= 0
+          LOCKRET(my_lock)
+          my_lock := -1
+
+  - anti_pattern: "unchecked_allocation"
+    severity: "runtime_error"
+    description: "Not checking if lock allocation succeeded"
+    wrong: |
+      lock := LOCKNEW()
+      ' Assume lock is valid - may be -1!
+      REPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with lock=-1
+    correct: |
       lock := LOCKNEW()
       if lock < 0
-        ' No locks available
-        abort
-    description: "Allocate lock with error checking"
-  - code: |
-      ' Initialize shared resource lock
-      VAR
-        long buffer_lock
-      
-      PUB init()
-        buffer_lock := LOCKNEW()
-    description: "Create lock for shared buffer"
-  - code: |
-      ' Multiple locks for different resources
-      spi_lock := LOCKNEW()
-      uart_lock := LOCKNEW()
-      i2c_lock := LOCKNEW()
-    description: "Allocate multiple resource locks"
+        ABORT  ' Or handle error appropriately
+
+best_practices:
+  - "Always check return value for -1 (no locks available)"
+  - "Store lock ID in VAR or DAT for later LOCKRET"
+  - "Return locks in cleanup/stop methods"
+  - "Document which lock protects which resource"
+  - "Consider lock assignment: Lock 0-7 for static, 8-15 for dynamic"
+
 notes:
   - "P2 has 16 hardware locks (0-15)"
   - "Returns next available lock ID"
-  - "Returns negative value if all locks in use"
-  - "Lock is marked as allocated but not captured"
-  - "Must call LOCKRET when done to free lock"
-  - "Locks are shared across all cogs"
+  - "Returns -1 if all 16 locks in use"
+  - "Lock is allocated but NOT captured (call LOCKTRY to acquire)"
+  - "Must call LOCKRET when done to free lock for reuse"
+  - "Locks are shared across all 8 COGs"
+  - "Hardware ensures atomic operations - no race conditions"
+
 timing:
   description: "Hub operation"
   cycles: "2-9 clock cycles"
+
 related:
-  - LOCKRET
-  - LOCKTRY
-  - LOCKREL
-  - LOCKCHK
-see_also:
-  - "Hardware locks"
-  - "Inter-cog synchronization"
-  - "Resource sharing"
+  - language/spin2/methods/lockret.yaml
+  - language/spin2/methods/locktry.yaml
+  - language/spin2/methods/lockrel.yaml
+  - language/spin2/methods/lockchk.yaml
+  - architecture/locks.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml

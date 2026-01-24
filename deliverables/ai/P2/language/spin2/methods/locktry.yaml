@@ -1,7 +1,9 @@
 method: LOCKTRY
 type: method
 description: |
-  Attempt to capture a lock without blocking
+  Attempt to capture a lock without blocking.
+  Non-blocking: returns immediately whether successful or not.
+  Use in a REPEAT loop for blocking behavior.
 category: Lock Operations
 syntax: "result := LOCKTRY(LockID)"
 parameters:
@@ -10,45 +12,158 @@ parameters:
     description: "Lock ID to try capturing (0..15)"
 returns:
   type: "integer"
-  description: "TRUE (-1) if lock captured, FALSE (0) if already taken"
+  description: "Non-zero (TRUE) if lock captured, zero (FALSE) if already taken"
+
 examples:
-  - code: |
-      ' Try to get lock
+  - description: "Non-blocking lock attempt"
+    code: |
       if LOCKTRY(lock_id)
-        ' Got the lock, access resource
+        ' Got the lock - access resource
         access_shared_resource()
         LOCKREL(lock_id)
-    description: "Non-blocking lock attempt"
-  - code: |
-      ' Wait for lock with timeout
-      timeout := GETCT() + clkfreq  ' 1 second
-      repeat until LOCKTRY(lock_id) or POLLCT(timeout)
-      if not LOCKTRY(lock_id)
-        ' Timeout - couldn't get lock
-        abort
-    description: "Lock with timeout"
-  - code: |
-      ' Blocking lock acquisition
-      repeat until LOCKTRY(lock_id)
-      ' Critical section
+      else
+        ' Lock busy - do something else
+        handle_busy()
+
+  - description: "Blocking lock acquisition (spin-wait)"
+    code: |
+      REPEAT UNTIL LOCKTRY(lock_id)
+      ' Critical section - exclusive access
+      modify_shared_data()
       LOCKREL(lock_id)
-    description: "Wait until lock available"
+
+  - description: "Lock with timeout"
+    code: |
+      timeout := GETCT() + CLKFREQ  ' 1 second timeout
+      REPEAT UNTIL LOCKTRY(lock_id) OR GETCT() > timeout
+      if NOT LOCKTRY(lock_id)
+        ' Timeout - couldn't get lock
+        ABORT
+      ' Got lock - continue
+      LOCKREL(lock_id)
+
+  - description: "Complete critical section pattern"
+    code: |
+      PUB increment_counter() | acquired
+        ' Spin until lock acquired
+        REPEAT UNTIL LOCKTRY(counter_lock)
+
+        ' Critical section
+        shared_counter++
+
+        ' Release lock
+        LOCKREL(counter_lock)
+
+anti_patterns:
+  - anti_pattern: "deadlock_lock_ordering"
+    severity: "system_hang"
+    description: "Different COGs acquiring locks in different orders causes deadlock"
+    wrong: |
+      ' COG1 gets A then B
+      PRI cog1()
+        REPEAT UNTIL LOCKTRY(lock_a)
+        REPEAT UNTIL LOCKTRY(lock_b)   ' May deadlock here!
+        ' ...
+        LOCKREL(lock_b)
+        LOCKREL(lock_a)
+
+      ' COG2 gets B then A - DEADLOCK RISK!
+      PRI cog2()
+        REPEAT UNTIL LOCKTRY(lock_b)
+        REPEAT UNTIL LOCKTRY(lock_a)   ' COG1 holds A, waiting for B
+        ' ...                          ' COG2 holds B, waiting for A
+    correct: |
+      ' ALWAYS acquire locks in the SAME ORDER (e.g., ascending by lock ID)
+      PRI cog1()
+        REPEAT UNTIL LOCKTRY(lock_a)   ' A first
+        REPEAT UNTIL LOCKTRY(lock_b)   ' B second
+        ' ...
+        LOCKREL(lock_b)
+        LOCKREL(lock_a)
+
+      PRI cog2()
+        REPEAT UNTIL LOCKTRY(lock_a)   ' A first (same as cog1)
+        REPEAT UNTIL LOCKTRY(lock_b)   ' B second
+        ' ...
+
+  - anti_pattern: "missing_lockrel"
+    severity: "lock_starvation"
+    description: "Not releasing lock after acquiring it starves other COGs"
+    wrong: |
+      PUB access_resource()
+        REPEAT UNTIL LOCKTRY(lock_id)
+        do_work()
+        ' Forgot LOCKREL - other COGs blocked forever!
+
+      PUB access_with_error()
+        REPEAT UNTIL LOCKTRY(lock_id)
+        if error_condition
+          RETURN   ' Lock not released on error path!
+        do_work()
+        LOCKREL(lock_id)
+    correct: |
+      PUB access_resource()
+        REPEAT UNTIL LOCKTRY(lock_id)
+        do_work()
+        LOCKREL(lock_id)  ' Always release
+
+      PUB access_with_error()
+        REPEAT UNTIL LOCKTRY(lock_id)
+        if error_condition
+          LOCKREL(lock_id)  ' Release on ALL exit paths
+          RETURN
+        do_work()
+        LOCKREL(lock_id)
+
+  - anti_pattern: "race_condition"
+    severity: "data_corruption"
+    description: "Accessing shared data without lock protection"
+    wrong: |
+      VAR
+        long counter
+
+      PRI worker1()
+        REPEAT
+          counter++   ' No lock - race condition!
+
+      PRI worker2()
+        REPEAT
+          counter++   ' Both COGs may corrupt data
+    correct: |
+      VAR
+        long counter
+        long counter_lock
+
+      PRI worker1()
+        REPEAT
+          REPEAT UNTIL LOCKTRY(counter_lock)
+          counter++
+          LOCKREL(counter_lock)
+
+best_practices:
+  - "Always release lock on ALL code paths (including errors)"
+  - "Acquire multiple locks in consistent order to prevent deadlock"
+  - "Hold locks for minimum time (reduce contention)"
+  - "Consider timeout to detect deadlocks"
+  - "Document lock/resource relationships"
+
 notes:
-  - "Non-blocking operation"
+  - "Non-blocking operation - returns immediately"
   - "Returns immediately with success/failure"
-  - "If successful, calling cog owns the lock"
+  - "If successful, calling COG owns the lock"
   - "Must call LOCKREL to release when done"
-  - "Can be used in polling loop for blocking behavior"
+  - "Use REPEAT UNTIL LOCKTRY() for blocking behavior"
   - "Lock must be allocated with LOCKNEW first"
+  - "Hardware ensures atomic test-and-set"
+
 timing:
   description: "Hub operation"
   cycles: "2-9 clock cycles"
+
 related:
-  - LOCKREL
-  - LOCKNEW
-  - LOCKRET
-  - LOCKCHK
-see_also:
-  - "Hardware locks"
-  - "Mutual exclusion"
-  - "Critical sections"
+  - language/spin2/methods/lockrel.yaml
+  - language/spin2/methods/locknew.yaml
+  - language/spin2/methods/lockret.yaml
+  - language/spin2/methods/lockchk.yaml
+  - architecture/locks.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml

@@ -1,24 +1,380 @@
 pattern_id: "cog_management"
+category: "multi_cog_programming"
+description: "Patterns for managing COG lifecycle and inter-COG coordination"
+
 when_use:
-  - "Multi-cog coordination"
+  - "Multi-COG coordination"
   - "Parallel processing"
-implementation: |
-  VAR
-    long cog_id
-    long stack[64]
-    
-  PUB start() : success
-    stop()
-    cog_id := coginit(COGEXEC_NEW, @worker, @stack)
-    return cog_id <> -1
-    
-  PUB stop()
-    if cog_id > -1
-      cogstop(cog_id)
-      cog_id := -1
+  - "Background task execution"
+  - "Hardware driver isolation"
+  - "Real-time event handling"
+
+coginit_modes:
+  description: "COGINIT execution modes for PASM code"
+  modes:
+    - mode: "COGEXEC"
+      value: "%000000"
+      description: "Execute in current COG (replaces Spin2)"
+    - mode: "HUBEXEC"
+      value: "%100000"
+      description: "Execute from HUB in current COG"
+    - mode: "COGEXEC_NEW"
+      value: "%010000"
+      description: "Start new COG, load code to COG RAM"
+    - mode: "HUBEXEC_NEW"
+      value: "%110000"
+      description: "Start new COG, execute from HUB RAM"
+    - mode: "COGEXEC_NEW_PAIR"
+      value: "%010001"
+      description: "Start pair of adjacent COGs"
+    - mode: "HUBEXEC_NEW_PAIR"
+      value: "%110001"
+      description: "Start COG pair from HUB RAM"
+
+patterns:
+  - pattern: "basic_cog_lifecycle"
+    description: "Standard COG start/stop with ID tracking"
+    code: |
+      CON
+        NO_COG = -1
+
+      VAR
+        long cog_id
+        long stack[64]
+
+      PUB start() : success
+        stop()  ' Stop if already running
+        cog_id := COGSPIN(NEWCOG, worker(), @stack)
+        return cog_id <> NO_COG
+
+      PUB stop()
+        if cog_id <> NO_COG
+          COGSTOP(cog_id)
+          cog_id := NO_COG
+
+      PRI worker()
+        REPEAT
+          ' Do work in parallel
+
+  - pattern: "driver_object"
+    description: "Complete driver object with start/stop and buffer management"
+    code: |
+      ' serial_driver.spin2
+      CON
+        NO_COG = -1
+
+      VAR
+        long cog_id
+        long rx_head, rx_tail
+        long tx_head, tx_tail
+        byte rx_buffer[256]
+        byte tx_buffer[256]
+        long stack[100]
+
+      PUB start(rx_pin, tx_pin, baud) : ok
+        stop()  ' Stop if already running
+
+        ' Initialize state
+        rx_head := rx_tail := 0
+        tx_head := tx_tail := 0
+
+        ' Start driver COG
+        cog_id := COGSPIN(NEWCOG, driver_loop(rx_pin, tx_pin, baud), @stack)
+        ok := (cog_id >= 0)
+
+      PUB stop()
+        if cog_id >= 0
+          COGSTOP(cog_id)
+          cog_id := NO_COG
+
+      PUB tx(char)
+        ' Add to TX buffer with flow control
+        REPEAT WHILE ((tx_tail + 1) & $FF) == tx_head
+        tx_buffer[tx_tail] := char
+        tx_tail := (tx_tail + 1) & $FF
+
+      PUB rx() : char
+        REPEAT WHILE rx_head == rx_tail
+        char := rx_buffer[rx_head]
+        rx_head := (rx_head + 1) & $FF
+
+      PRI driver_loop(rxp, txp, baud)
+        ' Configure pins and run TX/RX loop
+        REPEAT
+          ' ... handle TX/RX
+
+  - pattern: "command_status_block"
+    description: "Ongoing inter-COG communication with command/status protocol"
+    code: |
+      CON
+        ' Command block offsets
+        CMD_COMMAND  = 0
+        CMD_PARAM1   = 1
+        CMD_PARAM2   = 2
+        CMD_STATUS   = 3
+        CMD_RESULT   = 4
+
+        ' Commands
+        CMD_IDLE     = 0
+        CMD_START    = 1
+        CMD_STOP     = 2
+        CMD_READ     = 3
+
+        ' Status values
+        STAT_IDLE    = 0
+        STAT_BUSY    = 1
+        STAT_DONE    = 2
+        STAT_ERROR   = 3
+
+      VAR
+        long cmd_block[5]
+        long worker_stack[200]
+        long worker_cog
+
+      PUB start()
+        cmd_block[CMD_COMMAND] := CMD_IDLE
+        cmd_block[CMD_STATUS] := STAT_IDLE
+        worker_cog := COGSPIN(NEWCOG, worker_main(@cmd_block), @worker_stack)
+
+      PUB send_command(cmd, p1, p2) : result
+        ' Wait for worker to be idle
+        REPEAT WHILE cmd_block[CMD_STATUS] == STAT_BUSY
+
+        ' Set up command
+        cmd_block[CMD_PARAM1] := p1
+        cmd_block[CMD_PARAM2] := p2
+        cmd_block[CMD_STATUS] := STAT_BUSY
+        cmd_block[CMD_COMMAND] := cmd
+
+        ' Signal worker
+        COGATN(1 << worker_cog)
+
+        ' Wait for completion
+        REPEAT WHILE cmd_block[CMD_STATUS] == STAT_BUSY
+
+        result := cmd_block[CMD_RESULT]
+
+      PRI worker_main(block_ptr) | cmd
+        REPEAT
+          WAITATN()  ' Wait for signal
+
+          cmd := long[block_ptr][CMD_COMMAND]
+          CASE cmd
+            CMD_START:
+              do_start(long[block_ptr][CMD_PARAM1])
+              long[block_ptr][CMD_STATUS] := STAT_DONE
+
+            CMD_READ:
+              long[block_ptr][CMD_RESULT] := do_read()
+              long[block_ptr][CMD_STATUS] := STAT_DONE
+
+            CMD_STOP:
+              long[block_ptr][CMD_STATUS] := STAT_IDLE
+              RETURN
+
+  - pattern: "producer_consumer"
+    description: "Producer-consumer with lock-free circular buffer"
+    code: |
+      CON
+        BUFFER_SIZE = 256
+        BUFFER_MASK = BUFFER_SIZE - 1
+
+      VAR
+        long head, tail
+        long buffer[BUFFER_SIZE]
+        long producer_cog, consumer_cog
+        long prod_stack[100], cons_stack[100]
+
+      PUB start()
+        head := tail := 0
+        producer_cog := COGSPIN(NEWCOG, producer(), @prod_stack)
+        consumer_cog := COGSPIN(NEWCOG, consumer(), @cons_stack)
+
+      PRI producer() | item
+        REPEAT
+          item := generate_item()
+
+          ' Wait for space in buffer
+          REPEAT WHILE ((head + 1) & BUFFER_MASK) == tail
+
+          buffer[head] := item
+          head := (head + 1) & BUFFER_MASK
+
+      PRI consumer() | item
+        REPEAT
+          ' Wait for item in buffer
+          REPEAT WHILE head == tail
+
+          item := buffer[tail]
+          tail := (tail + 1) & BUFFER_MASK
+
+          process_item(item)
+
+  - pattern: "lock_protected_data"
+    description: "Shared data with lock synchronization"
+    code: |
+      VAR
+        long data_lock
+        long shared_data[100]
+
+      PUB init()
+        data_lock := LOCKNEW()
+
+      PUB read_data(index) : value
+        REPEAT UNTIL LOCKTRY(data_lock)
+        value := shared_data[index]
+        LOCKREL(data_lock)
+
+      PUB write_data(index, value)
+        REPEAT UNTIL LOCKTRY(data_lock)
+        shared_data[index] := value
+        LOCKREL(data_lock)
+
+      PUB atomic_increment(index) : old_value
+        REPEAT UNTIL LOCKTRY(data_lock)
+        old_value := shared_data[index]
+        shared_data[index] := old_value + 1
+        LOCKREL(data_lock)
+
+anti_patterns:
+  - anti_pattern: "insufficient_stack"
+    severity: "crash_risk"
+    description: "Stack too small causes stack overflow - hard to debug crashes"
+    wrong: |
+      VAR
+        long tiny_stack[10]   ' TOO SMALL!
+
+      PUB start()
+        COGSPIN(NEWCOG, complex_method(), @tiny_stack)  ' Stack overflow!
+    correct: |
+      VAR
+        long adequate_stack[200]   ' Size based on method needs
+
+      PUB start()
+        COGSPIN(NEWCOG, complex_method(), @adequate_stack)
+    sizing_guidance:
+      minimum: "32 longs (simple methods)"
+      typical: "64-128 longs"
+      complex: "200+ longs (deep call chains, large locals)"
+
+  - anti_pattern: "lost_cog_id"
+    severity: "resource_leak"
+    description: "Discarding COG ID prevents stopping the COG later"
+    wrong: |
+      PUB start()
+        COGSPIN(NEWCOG, worker(), @stack)  ' COG ID discarded!
+
+      PUB stop()
+        ' Can't stop - don't know which COG!
+    correct: |
+      VAR
+        long worker_cog
+
+      PUB start()
+        worker_cog := COGSPIN(NEWCOG, worker(), @stack)
+
+      PUB stop()
+        if worker_cog >= 0
+          COGSTOP(worker_cog)
+          worker_cog := -1
+
+  - anti_pattern: "race_condition"
+    severity: "data_corruption"
+    description: "Unprotected shared variable access causes race conditions"
+    wrong: |
+      VAR
+        long counter
+
+      PRI worker1()
+        REPEAT
+          counter++   ' Race condition!
+
+      PRI worker2()
+        REPEAT
+          counter++   ' Both COGs modify simultaneously
+    correct: |
+      VAR
+        long counter
+        long counter_lock
+
+      PUB init()
+        counter_lock := LOCKNEW()
+
+      PRI worker1()
+        REPEAT
+          REPEAT UNTIL LOCKTRY(counter_lock)
+          counter++
+          LOCKREL(counter_lock)
+
+  - anti_pattern: "deadlock_wrong_order"
+    severity: "system_hang"
+    description: "Acquiring locks in different orders causes deadlock"
+    wrong: |
+      PRI cog1()
+        REPEAT UNTIL LOCKTRY(lock_a)
+        REPEAT UNTIL LOCKTRY(lock_b)   ' COG2 may hold lock_b waiting for lock_a
+        ' ...
+        LOCKREL(lock_b)
+        LOCKREL(lock_a)
+
+      PRI cog2()
+        REPEAT UNTIL LOCKTRY(lock_b)
+        REPEAT UNTIL LOCKTRY(lock_a)   ' DEADLOCK!
+        ' ...
+    correct: |
+      ' Always acquire locks in the SAME ORDER (e.g., ascending)
+      PRI cog1()
+        REPEAT UNTIL LOCKTRY(lock_a)   ' Always A first
+        REPEAT UNTIL LOCKTRY(lock_b)
+        ' ...
+        LOCKREL(lock_b)
+        LOCKREL(lock_a)
+
+      PRI cog2()
+        REPEAT UNTIL LOCKTRY(lock_a)   ' Same order as cog1
+        REPEAT UNTIL LOCKTRY(lock_b)
+        ' ...
+
+  - anti_pattern: "lock_leak"
+    severity: "resource_exhaustion"
+    description: "Not returning locks exhausts the 16 available locks"
+    wrong: |
+      PUB start()
+        my_lock := LOCKNEW()
+
+      PUB stop()
+        ' Forgot to return lock - now unavailable!
+    correct: |
+      PUB stop()
+        if my_lock >= 0
+          LOCKRET(my_lock)
+          my_lock := -1
+
+  - anti_pattern: "polling_vs_waiting"
+    severity: "power_waste"
+    description: "Busy-polling wastes power vs. using WAITATN"
+    wrong: |
+      PRI worker()
+        REPEAT
+          if POLLATN()
+            process_command()
+          ' Constantly checking - wastes power
+    correct: |
+      PRI worker()
+        REPEAT
+          WAITATN()           ' COG sleeps until signaled
+          process_command()
+
 resources:
-  cogs: "1+"
-  stack: "64+ longs per cog"
+  cogs: "1+ (max 8 total)"
+  stack: "32-200+ longs per COG depending on method complexity"
+  locks: "0-16 (shared across all COGs)"
+
 combines_with:
-  - "shared_memory"
-  - "mailbox_communication"
+  - language/spin2/methods/cogspin.yaml
+  - language/spin2/methods/coginit.yaml
+  - language/spin2/methods/cogstop.yaml
+  - language/spin2/methods/locknew.yaml
+  - language/spin2/methods/cogatn.yaml
+  - architecture/locks.yaml
+  - architecture/cog_attention.yaml

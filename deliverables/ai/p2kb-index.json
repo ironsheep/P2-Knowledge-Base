@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T00:29:15.184069",
+    "generated": "2026-01-24T00:35:31.460160",
     "total_entries": 1018,
     "total_categories": 47,
     "total_aliases": 941,
@@ -6110,7 +6110,7 @@
     },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
-      "mtime": 1769214476
+      "mtime": 1769214614
     },
     "p2kbSpin2DebugEndSession": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
@@ -6626,19 +6626,19 @@
     },
     "p2kbSpin2Lookdown": {
       "path": "deliverables/ai/P2/language/spin2/methods/lookdown.yaml",
-      "mtime": 1764449566
+      "mtime": 1769214614
     },
     "p2kbSpin2Lookdownz": {
       "path": "deliverables/ai/P2/language/spin2/methods/lookdownz.yaml",
-      "mtime": 1764449566
+      "mtime": 1769214614
     },
     "p2kbSpin2Lookup": {
       "path": "deliverables/ai/P2/language/spin2/methods/lookup.yaml",
-      "mtime": 1764449566
+      "mtime": 1769214614
     },
     "p2kbSpin2Lookupz": {
       "path": "deliverables/ai/P2/language/spin2/methods/lookupz.yaml",
-      "mtime": 1764449566
+      "mtime": 1769214614
     },
     "p2kbSpin2Lstring": {
       "path": "deliverables/ai/P2/language/spin2/methods/lstring.yaml",
