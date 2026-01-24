@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T01:05:31.193082",
-    "total_entries": 1025,
+    "generated": "2026-01-24T01:11:49.205464",
+    "total_entries": 1026,
     "total_categories": 47,
     "total_aliases": 939,
     "multi_target_aliases": 54,
@@ -6104,7 +6104,7 @@
     },
     "p2kbSpin2ObjectArchetypes": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
-      "mtime": 1769216634
+      "mtime": 1769216845
     },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
@@ -6113,6 +6113,10 @@
     "p2kbSpin2RandomGeneration": {
       "path": "deliverables/ai/P2/language/spin2/concepts/random_generation.yaml",
       "mtime": 1769216415
+    },
+    "p2kbSpin2StringConstants": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/string_constants.yaml",
+      "mtime": 1769217022
     },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
@@ -7336,7 +7340,7 @@
     },
     "p2kbSpin2PatternIndex": {
       "path": "deliverables/ai/P2/language/spin2/patterns/pattern-index.yaml",
-      "mtime": 1764449566
+      "mtime": 1769216845
     },
     "p2kbSpin2FewObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/few_objects.yaml",

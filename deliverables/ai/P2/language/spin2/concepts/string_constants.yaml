@@ -1,0 +1,393 @@
+concept: String Constants
+type: concept
+category: Data Types
+
+description: |
+  Spin2 provides several mechanisms for working with string data:
+  - @"text": Inline string constant (returns address)
+  - STRING(): Creates string constant (same as @"")
+  - LSTRING(): Length-prefixed string (first byte = length)
+  - DAT strings: Named, reusable zero-terminated byte sequences
+  - @@: Resolves relative offsets to absolute addresses (for tables)
+
+  Strings are stored as sequences of bytes, typically zero-terminated for
+  C-style string function compatibility.
+
+string_creation_methods:
+  - method: "@\"\""
+    syntax: "@\"text\""
+    description: "Inline string constant"
+    result: "Hub address of null-terminated string"
+    storage: "Object code (read-only)"
+    example: |
+      debug(@"Hello, World!")
+      ptr := @"Propeller 2"
+
+  - method: "STRING()"
+    syntax: "STRING(\"text\")"
+    description: "Create string constant (equivalent to @\"\")"
+    result: "Hub address of null-terminated string"
+    advantage: "Can span multiple lines, concatenates arguments"
+    example: |
+      debug(STRING("Line 1", 13, 10, "Line 2"))
+      ptr := STRING("Error: ", "Invalid")
+
+  - method: "LSTRING()"
+    syntax: "LSTRING(\"text\")"
+    description: "Length-prefixed string"
+    result: "Address of length byte followed by string (no null terminator)"
+    format: "First byte = length, followed by characters"
+    max_length: 255
+    advantages:
+      - "Known length without scanning"
+      - "Can contain zero bytes in content"
+      - "Faster length calculation"
+    example: |
+      PUB send_data()
+        send_lstring(LSTRING("packet data"))
+
+      PRI send_lstring(ptr) | len, i
+        len := BYTE[ptr]           ' First byte is length
+        REPEAT i FROM 1 TO len
+          tx(BYTE[ptr][i])
+
+  - method: "DAT byte"
+    syntax: |
+      DAT
+        name  BYTE  "text", 0
+    description: "Named, reusable string in DAT section"
+    result: "Address via @name"
+    advantages:
+      - "Named for readability"
+      - "Reusable (no duplication)"
+      - "Can contain any byte values"
+    example: |
+      DAT
+        app_name  BYTE  "My Application", 0
+        version   BYTE  "v1.2.3", 0
+
+      PUB show_info()
+        print_string(@app_name)
+        print_string(@version)
+
+memory_layout:
+  zero_terminated:
+    description: "Standard format - byte sequence ending with 0"
+    example: |
+      "Hello" stored as:
+      Offset:  0    1    2    3    4    5
+      Value:   'H'  'e'  'l'  'l'  'o'  0
+      Hex:     $48  $65  $6C  $6C  $6F  $00
+  length_prefixed:
+    description: "LSTRING format - length byte followed by characters"
+    example: |
+      LSTRING("Data") stored as:
+      Offset:  0    1    2    3    4
+      Value:   4    'D'  'a'  't'  'a'
+      (no null terminator)
+
+escape_sequences:
+  table:
+    - escape: "\\n"
+      character: "Newline (LF)"
+      decimal: 10
+    - escape: "\\r"
+      character: "Carriage return (CR)"
+      decimal: 13
+    - escape: "\\t"
+      character: "Tab"
+      decimal: 9
+    - escape: "\\\\"
+      character: "Backslash"
+      decimal: 92
+    - escape: "\\\""
+      character: "Double quote"
+      decimal: 34
+    - escape: "\\0"
+      character: "Null"
+      decimal: 0
+  alternative: |
+    Use numeric values directly in DAT:
+    DAT
+      newline  BYTE  "Line 1", 13, 10, "Line 2", 0
+
+string_table_pattern:
+  description: |
+    Create indexed tables of string addresses. Use WORD for memory efficiency
+    (assumes addresses < 64KB), LONG for full address range.
+
+    CRITICAL: In DAT sections, @ produces RELATIVE offsets.
+    Use @@ in code to resolve to absolute addresses.
+  example: |
+    DAT
+      ' String data
+      str_sun  BYTE  "Sunday", 0
+      str_mon  BYTE  "Monday", 0
+      str_tue  BYTE  "Tuesday", 0
+
+      ' Pointer table (WORD for space efficiency)
+      day_names  WORD  @str_sun, @str_mon, @str_tue
+
+    PUB get_day_name(day) : ptr
+      IF day >= 0 AND day <= 2
+        ptr := @@day_names[day]    ' @@ converts relative to absolute
+      ELSE
+        ptr := @"Invalid"
+
+  compact_pattern:
+    description: "Pack strings consecutively with offset table for memory efficiency"
+    code: |
+      DAT
+        error_strings
+          BYTE  "OK", 0
+          BYTE  "Timeout", 0
+          BYTE  "Overflow", 0
+        error_offsets  BYTE  0, 3, 11   ' Cumulative offsets
+
+      PUB get_error_string(code) : ptr
+        IF code >= 0 AND code < 3
+          ptr := @error_strings + error_offsets[code]
+
+common_patterns:
+  - pattern: "menu_system"
+    description: "String table for menu items"
+    code: |
+      CON
+        MENU_ITEMS = 5
+
+      DAT
+        menu_table  WORD  @menu_0, @menu_1, @menu_2, @menu_3, @menu_4
+        menu_0      BYTE  "1. Start System", 0
+        menu_1      BYTE  "2. Stop System", 0
+        menu_2      BYTE  "3. Configure", 0
+        menu_3      BYTE  "4. Status", 0
+        menu_4      BYTE  "5. Exit", 0
+
+      PUB show_menu() | i
+        print_string(@"=== Main Menu ===", 13, 10)
+        REPEAT i FROM 0 TO MENU_ITEMS - 1
+          print_string(@@menu_table[i])
+          print_char(13)
+          print_char(10)
+
+  - pattern: "debug_output"
+    description: "Label-value debug printing"
+    code: |
+      PUB debug_value(label_ptr, value)
+        debug(label_ptr, ": ", UDEC(value))
+
+      PUB show_state()
+        debug_value(@"Count", count)
+        debug_value(@"Status", status)
+
+  - pattern: "message_formatting"
+    description: "Name = value output format"
+    code: |
+      PUB print_status(name_ptr, value)
+        print_string(name_ptr)
+        print_string(@" = ")
+        print_dec(value)
+        print_string(@"\r\n")
+
+  - pattern: "string_builder"
+    description: "Dynamic string construction buffer"
+    code: |
+      VAR
+        BYTE buffer[100]
+        LONG buf_pos
+
+      PUB clear_buffer()
+        buf_pos := 0
+        buffer[0] := 0
+
+      PUB append_string(str_ptr) | char
+        REPEAT
+          char := BYTE[str_ptr++]
+          IF char == 0
+            QUIT
+          IF buf_pos < 99
+            buffer[buf_pos++] := char
+        buffer[buf_pos] := 0
+
+      PUB get_buffer() : ptr
+        ptr := @buffer
+
+  - pattern: "localization"
+    description: "Multi-language string tables"
+    code: |
+      CON
+        LANG_EN = 0
+        LANG_ES = 1
+
+      DAT
+        en_hello  BYTE  "Hello", 0
+        es_hello  BYTE  "Hola", 0
+
+        strings_en  WORD  @en_hello
+        strings_es  WORD  @es_hello
+
+        lang_tables  WORD  @strings_en, @strings_es
+
+      VAR
+        LONG current_lang
+
+      PUB get_string(string_id) : ptr | table_ptr
+        table_ptr := @@lang_tables[current_lang]
+        ptr := @@WORD[table_ptr][string_id]
+
+string_utility_functions:
+  - function: "strlen"
+    description: "Return length of zero-terminated string"
+    code: |
+      PUB strlen(str_ptr) : length
+        length := 0
+        REPEAT WHILE BYTE[str_ptr][length]
+          length++
+
+  - function: "strcpy"
+    description: "Copy source string to destination"
+    code: |
+      PUB strcpy(dest_ptr, src_ptr) | char
+        REPEAT
+          char := BYTE[src_ptr++]
+          BYTE[dest_ptr++] := char
+        UNTIL char == 0
+
+  - function: "strcmp"
+    description: "Compare two strings (0 if equal)"
+    code: |
+      PUB strcmp(str1_ptr, str2_ptr) : result
+        REPEAT
+          result := BYTE[str1_ptr] - BYTE[str2_ptr]
+          IF result OR BYTE[str1_ptr] == 0
+            RETURN
+          str1_ptr++
+          str2_ptr++
+
+anti_patterns:
+  - anti_pattern: "missing_zero_terminator"
+    severity: "critical"
+    description: "Forgetting null terminator in DAT strings"
+    wrong: |
+      DAT
+        my_string  BYTE  "Hello"    ' Not terminated!
+        other_data LONG  12345
+    correct: |
+      DAT
+        my_string  BYTE  "Hello", 0
+        other_data LONG  12345
+
+  - anti_pattern: "modifying_string_constant"
+    severity: "undefined_behavior"
+    description: "Attempting to modify read-only string constant"
+    wrong: |
+      PUB bad_idea()
+        ptr := @"Hello"
+        BYTE[ptr][0] := "J"    ' Undefined behavior!
+    correct: |
+      VAR
+        BYTE buffer[10]
+
+      PUB good_idea()
+        STRCOPY(@buffer, @"Hello", 10)
+        buffer[0] := "J"       ' OK - buffer is writable
+
+  - anti_pattern: "confusing_at_and_double_at"
+    severity: "logic_error"
+    description: "Using @ instead of @@ for DAT pointer tables"
+    wrong: |
+      DAT
+        str_table  WORD  @str1, @str2
+        str1       BYTE  "First", 0
+        str2       BYTE  "Second", 0
+
+      PUB bad_get(index) : ptr
+        ptr := @str_table[index]   ' Returns address of table, not string!
+    correct: |
+      PUB good_get(index) : ptr
+        ptr := @@str_table[index]  ' Correctly resolves to string address
+
+  - anti_pattern: "buffer_overflow"
+    severity: "memory_corruption"
+    description: "Copying string without bounds checking"
+    wrong: |
+      VAR
+        BYTE buffer[20]
+
+      PUB copy_name(src)
+        strcpy(@buffer, src)   ' Overflow if src > 19 chars!
+    correct: |
+      PUB safe_copy_name(src) | len
+        len := STRSIZE(src)
+        IF len < 20
+          STRCOPY(@buffer, src, 20)
+        ELSE
+          STRCOPY(@buffer, src, 19)
+          buffer[19] := 0
+
+  - anti_pattern: "duplicate_strings"
+    severity: "memory_waste"
+    description: "Same string literal in multiple places"
+    wrong: |
+      PUB method1()
+        debug(@"Operation completed successfully")
+
+      PUB method2()
+        debug(@"Operation completed successfully")  ' Duplicate!
+    correct: |
+      DAT
+        msg_success  BYTE  "Operation completed successfully", 0
+
+      PUB method1()
+        debug(@msg_success)
+
+      PUB method2()
+        debug(@msg_success)   ' Single storage
+
+memory_considerations:
+  string_location_table:
+    - syntax: "@\"text\""
+      location: "Object code (read-only)"
+      lifetime: "Program duration"
+    - syntax: "STRING(\"text\")"
+      location: "Object code (read-only)"
+      lifetime: "Program duration"
+    - syntax: "DAT BYTE \"text\", 0"
+      location: "DAT section (read-only)"
+      lifetime: "Program duration"
+    - syntax: "VAR BYTE str[N]"
+      location: "VAR section (writable)"
+      lifetime: "Instance duration"
+
+  alignment_tip: |
+    For frequently accessed strings, align on long boundaries:
+    DAT
+                ALIGNL
+      freq_str  BYTE  "Frequency", 0
+
+notes:
+  - "Strings are byte sequences, typically zero-terminated"
+  - "@\"\" and STRING() are equivalent and create read-only constants"
+  - "LSTRING() is useful when length is needed or zeros may appear in content"
+  - "DAT strings can be named and reused"
+  - "@ in DAT produces relative offsets; use @@ in code to resolve"
+  - "Built-in STRCOMP, STRCOPY, STRSIZE handle common operations"
+  - "Escape sequences require version directive for @\\\"string\\\" form"
+
+related:
+  - language/spin2/methods/string.yaml
+  - language/spin2/methods/lstring.yaml
+  - language/spin2/methods/strcomp.yaml
+  - language/spin2/methods/strcopy.yaml
+  - language/spin2/methods/strsize.yaml
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/special-symbols/double_at.yaml
+  - language/spin2/constructs/escape-strings.yaml
+
+see_also:
+  - "String operations"
+  - "Data tables"
+  - "Memory management"
+  - "Escape sequences"
+
+oneliner: "String constant creation methods (@\"\", STRING, LSTRING, DAT) with patterns and anti-patterns"
