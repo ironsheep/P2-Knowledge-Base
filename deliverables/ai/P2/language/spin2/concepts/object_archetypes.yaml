@@ -1,0 +1,488 @@
+concept: Object Archetypes
+type: concept
+category: Program Structure
+
+description: |
+  Canonical object archetypes for Spin2 development. Each archetype has specific
+  characteristics, use cases, and implementation patterns. Objects should have a
+  single, clear responsibility - combine simpler objects through composition rather
+  than creating monolithic objects.
+
+  Key Design Principle: Keep public interfaces minimal and stable. Use PRI methods
+  for implementation details that can change freely.
+
+archetypes:
+  - archetype: "top_level_application"
+    description: |
+      Entry point object that defines clock configuration and orchestrates other objects.
+      Never instantiated by other objects.
+    characteristics:
+      - "Contains _clkfreq for clock configuration"
+      - "Owns a main() method (entry point)"
+      - "Instantiates child objects"
+      - "Defines pin assignments"
+    required_elements:
+      - "_clkfreq constant"
+      - "main() or similar entry method"
+    template: |
+      CON { system configuration }
+        _clkfreq = 200_000_000
+
+      CON { pin assignments }
+        LED_PIN = 56
+        SERIAL_TX = 62
+        SERIAL_RX = 63
+
+      OBJ
+        serial : "serial_driver"
+
+      PUB main() | ok
+        ok := serial.start(SERIAL_TX, SERIAL_RX, 115200)
+        IF NOT ok
+          REPEAT    ' Halt on init failure
+
+        REPEAT
+          ' Main application loop
+    related_patterns:
+      - "language/spin2/patterns/structural/framework_pattern.yaml"
+
+  - archetype: "driver_object"
+    description: |
+      Hardware abstraction with lifecycle management (start/stop), resource tracking,
+      and often buffered I/O. Callers don't need hardware details.
+    characteristics:
+      - "start() / stop() lifecycle methods"
+      - "Tracks COG ID for cleanup"
+      - "Buffered I/O for non-blocking operation"
+      - "Hardware abstraction"
+    lifecycle:
+      start: "Initialize hardware, allocate resources, start COG"
+      stop: "Release resources, stop COG, reset state"
+    template: |
+      CON
+        NO_COG = -1
+        BUFFER_SIZE = 256
+
+      VAR
+        LONG cog_id
+        LONG stack[100]
+        BYTE rx_buffer[BUFFER_SIZE]
+
+      PUB start(pin, rate) : ok
+        stop()    ' Stop if already running
+        ' Initialize and start COG
+        cog_id := COGSPIN(NEWCOG, driver_loop(), @stack)
+        ok := (cog_id >= 0)
+
+      PUB stop()
+        IF cog_id >= 0
+          COGSTOP(cog_id)
+          cog_id := NO_COG
+
+      PRI driver_loop()
+        ' Background processing
+    related_patterns:
+      - "language/spin2/patterns/implementation/spin2_cog_management.yaml"
+      - "language/spin2/patterns/implementation/spin2_buffer_management.yaml"
+
+  - archetype: "library_object"
+    description: |
+      Stateless utility functions with no internal state. No initialization required.
+      Can be used immediately after instantiation.
+    characteristics:
+      - "No VAR section (no instance state)"
+      - "No initialization required"
+      - "All methods are pure functions"
+      - "Immediately usable"
+    template: |
+      PUB min(a, b) : result
+        result := a < b ? a : b
+
+      PUB max(a, b) : result
+        result := a > b ? a : b
+
+      PUB clamp(value, low, high) : result
+        result := value #> low <# high
+
+      PUB map(value, in_min, in_max, out_min, out_max) : result
+        result := (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    related_patterns:
+      - "language/spin2/patterns/structural/no_objects.yaml"
+      - "language/spin2/patterns/applications/utility_library.yaml"
+
+  - archetype: "singleton_object"
+    description: |
+      Uses DAT section for state shared across all instances. Useful for system-wide
+      resources like logging, configuration, or resource pools. Uses locks for
+      multi-COG safety.
+    characteristics:
+      - "Uses DAT for state (shared across instances)"
+      - "Lock-protected for multi-COG safety"
+      - "Single initialization, multiple users"
+      - "Useful for logging, config, resource pools"
+    template: |
+      DAT { shared state - all instances see the same data }
+        shared_lock    LONG  -1
+        shared_counter LONG  0
+
+      PUB init() : ok
+        IF shared_lock == -1
+          shared_lock := LOCKNEW()
+        ok := (shared_lock >= 0)
+
+      PUB increment() : value
+        REPEAT UNTIL LOCKTRY(shared_lock)
+        shared_counter++
+        value := shared_counter
+        LOCKREL(shared_lock)
+
+      PUB get_count() : value
+        REPEAT UNTIL LOCKTRY(shared_lock)
+        value := shared_counter
+        LOCKREL(shared_lock)
+    related_patterns:
+      - "language/spin2/patterns/implementation/spin2_shared_memory.yaml"
+
+  - archetype: "configurable_object"
+    description: |
+      Objects with overridable CON constants allow parent objects to customize
+      behavior without code changes. Enables compile-time configuration.
+    characteristics:
+      - "CON values serve as defaults"
+      - "Parent uses | CONST = value syntax to override"
+      - "Each override creates separate instance"
+      - "Compile-time configuration without preprocessor"
+    child_template: |
+      CON { defaults - can be overridden by parent }
+        DEFAULT_PERIOD_MS = 1000
+        DEFAULT_PIN = 56
+
+      VAR
+        LONG period_ms
+
+      PUB start()
+        period_ms := DEFAULT_PERIOD_MS
+        PINLOW(DEFAULT_PIN)
+    parent_usage: |
+      OBJ
+        fast_timer : "timer" | DEFAULT_PERIOD_MS = 100
+        slow_timer : "timer" | DEFAULT_PERIOD_MS = 2000
+        custom_pin : "timer" | DEFAULT_PIN = 16
+    related_patterns:
+      - "language/spin2/constructs/blocks.yaml"
+
+  - archetype: "buffered_io_object"
+    description: |
+      Circular buffer pattern for producer-consumer communication. Lock-free for
+      single producer, single consumer. Uses power-of-2 size for fast modulo.
+    characteristics:
+      - "Power-of-2 size enables fast AND modulo"
+      - "Lock-free for single producer, single consumer"
+      - "Head/tail pointers track state"
+      - "Useful for inter-COG communication"
+    template: |
+      CON
+        BUFFER_SIZE = 512      ' Must be power of 2
+        BUFFER_MASK = BUFFER_SIZE - 1
+
+      VAR
+        LONG head, tail
+        LONG buffer[BUFFER_SIZE]
+
+      PUB put(value) : ok
+        IF ((head + 1) & BUFFER_MASK) == tail
+          RETURN FALSE    ' Buffer full
+        buffer[head] := value
+        head := (head + 1) & BUFFER_MASK
+        ok := TRUE
+
+      PUB get() : value
+        REPEAT WHILE head == tail
+        value := buffer[tail]
+        tail := (tail + 1) & BUFFER_MASK
+
+      PUB available() : count
+        count := (head - tail) & BUFFER_MASK
+    related_patterns:
+      - "language/spin2/patterns/implementation/spin2_buffer_management.yaml"
+
+  - archetype: "state_machine_object"
+    description: |
+      Encapsulates a state machine with explicit states, events, and transitions.
+      Single point of state change through process_event method.
+    characteristics:
+      - "Explicit state enumeration"
+      - "Event-driven transitions"
+      - "Single point of state change"
+      - "Error state for recovery"
+    template: |
+      CON { states }
+        STATE_IDLE = 0
+        STATE_CONNECTING = 1
+        STATE_CONNECTED = 2
+        STATE_ERROR = 3
+
+      CON { events }
+        EVT_CONNECT = 0
+        EVT_CONNECTED = 1
+        EVT_CLOSE = 2
+        EVT_ERROR = 3
+
+      VAR
+        LONG current_state
+        LONG error_code
+
+      PUB init()
+        current_state := STATE_IDLE
+        error_code := 0
+
+      PUB process_event(event) : new_state
+        CASE current_state
+          STATE_IDLE:
+            new_state := handle_idle(event)
+          STATE_CONNECTING:
+            new_state := handle_connecting(event)
+          STATE_CONNECTED:
+            new_state := handle_connected(event)
+          STATE_ERROR:
+            new_state := handle_error(event)
+        current_state := new_state
+
+      PUB get_state() : state
+        state := current_state
+    related_patterns:
+      - "language/spin2/patterns/implementation/spin2_state_machine.yaml"
+      - "language/spin2/patterns/implementation/spin2_event_dispatcher.yaml"
+
+  - archetype: "dual_cog_object"
+    description: |
+      Provides Spin2 API while running PASM code in background COG for
+      performance-critical operations. Combines ease-of-use with speed.
+    characteristics:
+      - "Spin2 methods provide easy-to-use API"
+      - "PASM code handles timing-critical operations"
+      - "Parameter block for Spin2-PASM communication"
+      - "Can update parameters while running"
+    template: |
+      VAR
+        LONG cog_id
+        LONG params[4]    ' Parameter block for PASM COG
+
+      PUB start(pin, frequency) : ok
+        stop()
+        params[0] := pin
+        params[1] := CLKFREQ / frequency
+        params[2] := params[1] / 2    ' 50% duty
+        params[3] := TRUE             ' Running flag
+        cog_id := COGINIT(COGEXEC_NEW, @pasm_driver, @params)
+        ok := (cog_id >= 0)
+
+      PUB stop()
+        IF cog_id >= 0
+          params[3] := FALSE   ' Signal PASM to stop
+          WAITMS(1)
+          COGSTOP(cog_id)
+          cog_id := -1
+
+      PUB set_duty(percent)
+        percent := percent #> 0 <# 100
+        params[2] := params[1] * percent / 100
+
+      DAT { PASM driver }
+                  ORG     0
+      pasm_driver
+                  ' Get parameters from hub
+                  RDLONG  pin, PTRA[0]
+                  ' ... PASM implementation
+    related_patterns:
+      - "language/spin2/patterns/implementation/spin2_cog_management.yaml"
+      - "language/spin2/constructs/inline_pasm.yaml"
+
+  - archetype: "pasm_only_object"
+    description: |
+      Contains only DAT section with PASM code, loaded and called by parent via
+      COGINIT. Maximum performance for compute-intensive tasks.
+    characteristics:
+      - "No Spin2 methods, only DAT/PASM"
+      - "Parent must use COGINIT to launch"
+      - "Communication via parameter block"
+      - "Maximum performance"
+    object_template: |
+      DAT { PASM code - called directly by parent }
+                  ORG     0
+      ' Entry: PTRA = pointer to parameter block
+      ' param[0] = input pointer
+      ' param[1] = input length
+      ' param[2] = output pointer
+      pasm_entry
+                  RDLONG  in_ptr, PTRA[0]
+                  RDLONG  in_len, PTRA[1]
+                  RDLONG  out_ptr, PTRA[2]
+
+                  ' ... computation ...
+
+                  WRLONG  result, out_ptr
+                  COGID   temp
+                  COGSTOP temp
+
+      in_ptr    RES     1
+      in_len    RES     1
+      out_ptr   RES     1
+      result    RES     1
+      temp      RES     1
+    parent_usage: |
+      OBJ
+        pasm_calc : "fast_calculator"
+
+      VAR
+        LONG params[3]
+        LONG result
+
+      PUB calculate(data_ptr, length) : value | cog
+        params[0] := data_ptr
+        params[1] := length
+        params[2] := @result
+        cog := COGINIT(COGEXEC_NEW, @pasm_calc.pasm_entry, @params)
+        IF cog >= 0
+          REPEAT WHILE COGCHK(cog)
+          value := result
+    related_patterns:
+      - "language/spin2/constructs/inline_pasm.yaml"
+      - "language/pasm2/concepts/cog-ram-organization.yaml"
+
+data_sharing_patterns:
+  - pattern: "pointer_passing"
+    description: "Pass data by reference for large data or modification"
+    code: |
+      PUB process_buffer(buf_ptr, length) | i
+        REPEAT i FROM 0 TO length - 1
+          LONG[buf_ptr][i] *= 2
+
+  - pattern: "shared_dat_singleton"
+    description: "Use DAT for data shared across all instances"
+    code: |
+      DAT
+        shared_config  LONG  0
+
+      PUB set_config(value)
+        shared_config := value    ' All instances see change
+
+  - pattern: "parameter_block"
+    description: "COG-to-COG communication via shared memory"
+    code: |
+      VAR
+        LONG cmd_block[8]
+
+      PUB send_command(cmd, arg1, arg2)
+        cmd_block[1] := arg1
+        cmd_block[2] := arg2
+        cmd_block[0] := cmd    ' Write command last (signal)
+        COGATN(1 << worker_cog)
+
+  - pattern: "lock_protected"
+    description: "Use locks when multiple COGs access shared data"
+    code: |
+      PUB safe_write(index, value)
+        REPEAT UNTIL LOCKTRY(data_lock)
+        shared_data[index] := value
+        LOCKREL(data_lock)
+
+anti_patterns:
+  - anti_pattern: "missing_cleanup"
+    severity: "resource_leak"
+    description: "Forgetting to stop COGs and release locks"
+    wrong: |
+      PUB start()
+        cog := COGSPIN(NEWCOG, worker(), @stack)
+
+      PUB stop()
+        ' Forgot to stop COG and release lock!
+    correct: |
+      PUB stop()
+        IF cog >= 0
+          COGSTOP(cog)
+          cog := -1
+        IF lock >= 0
+          LOCKRET(lock)
+          lock := -1
+
+  - anti_pattern: "oversized_public_interface"
+    severity: "design"
+    description: "Too many PUB methods expose implementation details"
+    wrong: |
+      PUB init()
+      PUB setup_hardware()
+      PUB configure_registers()
+      PUB start_interrupts()
+    correct: |
+      PUB start() : ok
+        setup_hardware()
+        configure_registers()
+        start_interrupts()
+        ok := TRUE
+
+      PRI setup_hardware()
+      PRI configure_registers()
+      PRI start_interrupts()
+
+  - anti_pattern: "var_for_shared_data"
+    severity: "logic_error"
+    description: "Using VAR when data should be shared across instances"
+    wrong: |
+      VAR
+        LONG shared_counter    ' Each instance has own copy!
+    correct: |
+      DAT
+        shared_counter  LONG  0    ' Single copy for all
+
+  - anti_pattern: "missing_error_handling"
+    severity: "reliability"
+    description: "Ignoring COG/lock allocation failures"
+    wrong: |
+      PUB start()
+        COGSPIN(NEWCOG, worker(), @stack)    ' What if no COG?
+    correct: |
+      PUB start() : ok
+        cog := COGSPIN(NEWCOG, worker(), @stack)
+        ok := (cog >= 0)
+
+  - anti_pattern: "uncontrolled_state_access"
+    severity: "integrity"
+    description: "State modification without validation"
+    wrong: |
+      PUB set_state(s)
+        state := s    ' No validation!
+    correct: |
+      PUB set_state(new_state) : ok
+        CASE new_state
+          STATE_IDLE, STATE_RUNNING, STATE_ERROR:
+            state := new_state
+            ok := TRUE
+          OTHER:
+            ok := FALSE
+
+notes:
+  - "Objects should have single, clear responsibility"
+  - "Combine simple objects through composition"
+  - "Keep public interfaces minimal and stable"
+  - "Use PRI for implementation details"
+  - "VAR is per-instance; DAT is shared across all instances"
+  - "Always clean up resources in stop() methods"
+  - "Use locks when multiple COGs access shared data"
+
+related:
+  - language/spin2/constructs/blocks.yaml
+  - language/spin2/constructs/method_definition.yaml
+  - language/spin2/patterns/pattern-index.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml
+  - language/spin2/patterns/implementation/spin2_buffer_management.yaml
+  - language/spin2/patterns/implementation/spin2_state_machine.yaml
+  - language/spin2/keywords/VAR.yaml
+
+see_also:
+  - "Object composition"
+  - "Driver development"
+  - "Multi-COG programming"
+  - "Resource management"
+
+oneliner: "Canonical object archetypes for Spin2 development with patterns and anti-patterns"

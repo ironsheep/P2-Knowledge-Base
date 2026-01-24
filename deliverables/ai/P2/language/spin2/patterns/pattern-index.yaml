@@ -42,7 +42,23 @@ pattern_categories:
       - configuration_manager.yaml
       - utility_library.yaml
       
+  archetypes:
+    description: "Canonical object archetype reference"
+    patterns:
+      - "../concepts/object_archetypes.yaml"
+
 selection_guide: |
-  Start with structural patterns to determine object organization,
-  then select implementation patterns for specific functionality,
-  and finally choose application patterns for domain-specific needs
+  1. First, identify your object archetype from concepts/object_archetypes.yaml:
+     - Top-Level Application: Entry point with _clkfreq and main()
+     - Driver Object: Hardware abstraction with start/stop lifecycle
+     - Library Object: Stateless utility functions
+     - Singleton Object: DAT-based shared state
+     - Configurable Object: Constants overridable by parent
+     - Buffered I/O Object: Circular buffer producer-consumer
+     - State Machine Object: Explicit states and events
+     - Dual-COG Object: Spin2 API + PASM background
+     - PASM-Only Object: Maximum performance DAT code
+
+  2. Then select structural patterns for object composition
+  3. Add implementation patterns for specific functionality
+  4. Finally choose application patterns for domain-specific needs

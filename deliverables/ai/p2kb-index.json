@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T00:59:50.211298",
-    "total_entries": 1024,
+    "generated": "2026-01-24T01:05:31.193082",
+    "total_entries": 1025,
     "total_categories": 47,
     "total_aliases": 939,
     "multi_target_aliases": 54,
@@ -6016,7 +6016,7 @@
     },
     "p2kbPasm2Xoro32": {
       "path": "deliverables/ai/P2/language/pasm2/xoro32.yaml",
-      "mtime": 1764449566
+      "mtime": 1769216415
     },
     "p2kbPasm2Xstop": {
       "path": "deliverables/ai/P2/language/pasm2/xstop.yaml",
@@ -6102,13 +6102,17 @@
       "path": "deliverables/ai/P2/language/spin2/concepts/method-pointers.yaml",
       "mtime": 1769203447
     },
+    "p2kbSpin2ObjectArchetypes": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
+      "mtime": 1769216634
+    },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
       "mtime": 1769216087
     },
     "p2kbSpin2RandomGeneration": {
       "path": "deliverables/ai/P2/language/spin2/concepts/random_generation.yaml",
-      "mtime": 1769216210
+      "mtime": 1769216415
     },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
@@ -6564,7 +6568,7 @@
     },
     "p2kbSpin2Getrnd": {
       "path": "deliverables/ai/P2/language/spin2/methods/getrnd.yaml",
-      "mtime": 1764449566
+      "mtime": 1769216415
     },
     "p2kbSpin2Getsec": {
       "path": "deliverables/ai/P2/language/spin2/methods/getsec.yaml",
@@ -7136,7 +7140,7 @@
     },
     "p2kbSpin2OpOpRand": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_rand.yaml",
-      "mtime": 1764449566
+      "mtime": 1769216415
     },
     "p2kbSpin2OpOpShl": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_shl.yaml",
