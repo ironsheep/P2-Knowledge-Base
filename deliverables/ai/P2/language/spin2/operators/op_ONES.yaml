@@ -1,7 +1,43 @@
 operator: "ONES"
 type: operator
 description: |
-  Count number of 1 bits (also PASM2 instruction)
+  Count number of set bits (population count / Hamming weight).
+  Returns count of 1 bits in the 32-bit value.
+  Also available as PASM2 instruction.
 category: Unary
+syntax: "count := ONES value"
+returns: "Number of 1 bits (0-32)"
+
 examples:
-  - "count := ONES(%10110101)  // Returns 5"
+  - description: "Count set bits"
+    code: |
+      count := ONES %1010_1010      ' Returns 4
+      count := ONES $FFFF_FFFF      ' Returns 32
+      count := ONES 0               ' Returns 0
+
+  - description: "Check power of 2"
+    code: |
+      PUB is_power_of_two(n) : result
+        ' Power of 2 has exactly one bit set
+        result := n > 0 AND ONES n == 1
+
+  - description: "Count active flags"
+    code: |
+      active_count := ONES active_flags
+
+common_patterns:
+  - pattern: "parity_check"
+    description: "Check if bit count is even/odd"
+    code: |
+      is_even_parity := (ONES value // 2) == 0
+
+notes:
+  - "Also known as popcount, population count, or Hamming weight"
+  - "Single hardware instruction - very fast"
+  - "Useful for: parity, power-of-2 check, counting active items"
+
+related:
+  - language/spin2/operators/op_ENCOD.yaml
+  - language/spin2/operators/op_DECOD.yaml
+  - language/spin2/operators/op_BMASK.yaml
+  - language/spin2/concepts/operators.yaml

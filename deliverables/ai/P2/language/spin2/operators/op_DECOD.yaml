@@ -1,7 +1,53 @@
 operator: "DECOD"
 type: operator
 description: |
-  Decode bit position to mask (also PASM2 instruction)
+  Create a value with a single bit set at position N.
+  Equivalent to 1 << N or 2^N.
+  Also available as PASM2 instruction.
 category: Unary
+syntax: "mask := DECOD bit_position"
+returns: "32-bit value with only bit at position set to 1"
+
 examples:
-  - "mask := DECOD(5)  // Returns $20"
+  - description: "Create single-bit masks"
+    code: |
+      mask := DECOD 0              ' Returns $0000_0001 (bit 0)
+      mask := DECOD 5              ' Returns $0000_0020 (bit 5)
+      mask := DECOD 7              ' Returns $0000_0080 (bit 7)
+      mask := DECOD 31             ' Returns $8000_0000 (bit 31)
+
+  - description: "Pin manipulation"
+    code: |
+      ' Create mask for specific pin
+      pin_mask := DECOD pin_number
+
+common_patterns:
+  - pattern: "set_bit"
+    description: "Set bit N in flags"
+    code: "flags |= DECOD N"
+
+  - pattern: "clear_bit"
+    description: "Clear bit N in flags"
+    code: "flags &= !DECOD N"
+
+  - pattern: "toggle_bit"
+    description: "Toggle bit N in flags"
+    code: "flags ^= DECOD N"
+
+  - pattern: "test_bit"
+    description: "Test if bit N is set"
+    code: |
+      if flags & DECOD N
+        bit_is_set()
+
+notes:
+  - "DECOD n = 1 << n = 2^n"
+  - "ENCOD is the inverse operation"
+  - "Primary use: creating single-bit masks for bit manipulation"
+  - "DECOD 5 = 32 = %0010_0000"
+
+related:
+  - language/spin2/operators/op_ENCOD.yaml
+  - language/spin2/operators/op_BMASK.yaml
+  - language/spin2/operators/op_ONES.yaml
+  - language/spin2/concepts/operators.yaml

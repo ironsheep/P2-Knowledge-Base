@@ -1,0 +1,313 @@
+# Spin2 Operators - Comprehensive Guide
+# Source: pnut_ts Operators-Usage-Guide.md
+# Critical for: Correct expression evaluation, avoiding common bugs
+
+concept: "Spin2 Operators"
+category: "language_fundamentals"
+
+metadata:
+  query_tags: ["operator", "precedence", "arithmetic", "bitwise", "comparison", "logical"]
+  complexity: "intermediate"
+  use_cases: ["expression_evaluation", "bit_manipulation", "value_comparison", "range_limiting"]
+  common_questions:
+    - "What is operator precedence in Spin2?"
+    - "What's the difference between & and AND?"
+    - "How do I compare unsigned values?"
+    - "How do I clamp a value to a range?"
+
+overview: |
+  Spin2 provides a comprehensive set of operators organized into categories:
+  - Arithmetic: +, -, *, /, //, SCA, SCAS, FRAC
+  - Comparison: ==, <>, <, >, <=, >=, <=> (with +variants for unsigned)
+  - Logical: AND/&&, OR/||, XOR/^^, NOT/!!
+  - Bitwise: &, |, ^, !, >>, <<, SAR, ROR, ROL, REV
+  - Limit: #> (min), <# (max)
+  - Assignment: :=, compound forms (+=, -=, etc.), swap (:=:)
+  - Special: ??, ~, ~~, @, @@, .., ? :, ++, --
+
+operator_categories:
+  arithmetic:
+    signed:
+      - operator: "+"
+        description: "Addition"
+      - operator: "-"
+        description: "Subtraction"
+      - operator: "*"
+        description: "Multiplication"
+      - operator: "/"
+        description: "Signed division (rounds toward zero)"
+      - operator: "//"
+        description: "Signed remainder (modulo)"
+    unsigned:
+      - operator: "+/"
+        description: "Unsigned division"
+      - operator: "+//"
+        description: "Unsigned remainder"
+    scaling:
+      - operator: "SCA"
+        description: "Unsigned scale: (a * b) >> 32"
+      - operator: "SCAS"
+        description: "Signed scale: (a * b) >> 32"
+      - operator: "FRAC"
+        description: "Fractional: high 32 bits of (a << 32) / b"
+
+  comparison:
+    signed:
+      - operator: "<"
+        description: "Less than (signed)"
+      - operator: ">"
+        description: "Greater than (signed)"
+      - operator: "<="
+        description: "Less than or equal (signed)"
+      - operator: ">="
+        description: "Greater than or equal (signed)"
+      - operator: "<=>"
+        description: "Three-way compare: returns -1, 0, or +1"
+    unsigned:
+      note: "Use + prefix for unsigned comparisons"
+      - operator: "+<"
+        description: "Less than (unsigned)"
+      - operator: "+>"
+        description: "Greater than (unsigned)"
+      - operator: "+<="
+        description: "Less than or equal (unsigned)"
+      - operator: "+>="
+        description: "Greater than or equal (unsigned)"
+    equality:
+      - operator: "=="
+        description: "Equal to"
+      - operator: "<>"
+        description: "Not equal to"
+
+  bitwise_vs_logical:
+    critical_distinction: |
+      BITWISE operators work on individual bits:
+        a & b  - AND each bit pair
+        a | b  - OR each bit pair
+        a ^ b  - XOR each bit pair
+        !a     - Invert all 32 bits
+
+      LOGICAL operators work on truth values (non-zero = TRUE):
+        a AND b  - TRUE if both non-zero, returns -1 or 0
+        a OR b   - TRUE if either non-zero, returns -1 or 0
+        a XOR b  - TRUE if exactly one non-zero, returns -1 or 0
+        NOT a    - TRUE if zero, FALSE if non-zero
+
+    symbol_equivalents:
+      - symbols: ["&&", "AND"]
+        type: "Logical AND"
+      - symbols: ["||", "OR"]
+        type: "Logical OR"
+      - symbols: ["^^", "XOR"]
+        type: "Logical XOR"
+      - symbols: ["!!", "NOT"]
+        type: "Logical NOT"
+
+  limit:
+    - operator: "#>"
+      description: "Limit minimum (force >= value)"
+      example: "value #> 0  ' Clamp to at least 0"
+    - operator: "<#"
+      description: "Limit maximum (force <= value)"
+      example: "value <# 255  ' Clamp to at most 255"
+    chaining: "value #> 0 <# 255  ' Clamp to 0-255 range"
+
+  unary_bit_operations:
+    - operator: "ENCOD"
+      description: "Find highest set bit position (0-31), returns 0 if input is 0"
+      example: "ENCOD %0000_1000  ' Returns 3"
+    - operator: "DECOD"
+      description: "Create value with single bit set at position"
+      example: "DECOD 5  ' Returns %0010_0000 (32)"
+    - operator: "BMASK"
+      description: "Create mask with N+1 lowest bits set"
+      example: "BMASK 7  ' Returns $FF (8 bits set)"
+    - operator: "ONES"
+      description: "Count number of 1 bits (population count)"
+      example: "ONES %1010_1010  ' Returns 4"
+    - operator: "REV"
+      description: "Reverse bottom N bits, zero the rest"
+      example: "%1010_0011 REV 8  ' Returns %1100_0101"
+    - operator: "ZEROX"
+      description: "Zero extend from bit N"
+      example: "$FF ZEROX 7  ' Returns $0000_00FF"
+    - operator: "SIGNX"
+      description: "Sign extend from bit N"
+      example: "$FF SIGNX 7  ' Returns $FFFF_FFFF (-1)"
+
+signed_vs_unsigned:
+  when_to_use_unsigned:
+    - "Memory addresses (may exceed $7FFF_FFFF)"
+    - "Unsigned counters"
+    - "Pixel values"
+    - "Values where bit 31 is data, not sign"
+
+  division_example:
+    signed_val: -100
+    signed_division: "-100 / 7 = -14 (rounds toward zero)"
+    unsigned_division: "-100 +/ 7 = 613566751 (interprets -100 as large positive)"
+
+common_patterns:
+  - pattern: "safe_division"
+    description: "Avoid division by zero"
+    code: |
+      PUB safe_divide(a, b) : result
+        result := b ? a / b : 0  ' Ternary avoids crash
+
+  - pattern: "bit_set"
+    description: "Set bit at position N"
+    code: "flags |= DECOD N"
+
+  - pattern: "bit_clear"
+    description: "Clear bit at position N"
+    code: "flags &= !DECOD N"
+
+  - pattern: "bit_toggle"
+    description: "Toggle bit at position N"
+    code: "flags ^= DECOD N"
+
+  - pattern: "bit_test"
+    description: "Test if bit N is set"
+    code: |
+      if flags & DECOD N
+        bit_is_set()
+
+  - pattern: "extract_field"
+    description: "Extract N bits starting at position P"
+    code: "field := (value >> P) & BMASK (N-1)"
+
+  - pattern: "value_clamp"
+    description: "Clamp value to min/max range"
+    code: "clamped := value #> min_val <# max_val"
+
+  - pattern: "wrap_modulo"
+    description: "Keep value in 0 to max-1 range"
+    code: "wrapped := value // max_val"
+
+  - pattern: "is_power_of_two"
+    description: "Check if value is power of 2"
+    code: "result := n > 0 AND ONES n == 1"
+
+  - pattern: "next_power_of_two"
+    description: "Round up to next power of 2"
+    code: "result := DECOD ENCOD (n - 1)"
+
+  - pattern: "swap_values"
+    description: "Exchange two values"
+    code: "a :=: b  ' a and b are swapped"
+
+anti_patterns:
+  - anti_pattern: "precedence_mistake_bitwise_compare"
+    severity: "common_bug"
+    description: "Comparison binds tighter than bitwise AND"
+    wrong: |
+      if flags & MASK == EXPECTED    ' Compares MASK to EXPECTED first!
+    correct: |
+      if (flags & MASK) == EXPECTED  ' Parentheses fix precedence
+
+  - anti_pattern: "precedence_mistake_shift_add"
+    severity: "common_bug"
+    description: "Add binds tighter than shift"
+    wrong: |
+      result := value << 2 + 1       ' Adds 1 then shifts!
+    correct: |
+      result := (value << 2) + 1     ' Shift then add (if intended)
+      result := value << (2 + 1)     ' Add then shift (if intended)
+
+  - anti_pattern: "signed_comparison_for_addresses"
+    severity: "logic_error"
+    description: "Signed comparison fails when addresses cross $8000_0000"
+    wrong: |
+      if addr1 < addr2               ' Fails for high addresses
+    correct: |
+      if addr1 +< addr2              ' Use unsigned comparison
+
+  - anti_pattern: "bitwise_for_boolean"
+    severity: "logic_error"
+    description: "Using bitwise AND when logical AND is needed"
+    wrong: |
+      if a & b                       ' True if ANY bits overlap
+    correct: |
+      if a AND b                     ' True if both non-zero
+
+  - anti_pattern: "logical_for_bitwise"
+    severity: "logic_error"
+    description: "Using logical operators for bit manipulation"
+    wrong: |
+      flags := a AND b               ' Returns -1 or 0, not bit intersection
+    correct: |
+      flags := a & b                 ' Actual bit intersection
+
+  - anti_pattern: "integer_division_precision"
+    severity: "precision_loss"
+    description: "Integer division truncates fractional part"
+    wrong: |
+      average := (a + b) / 2         ' Truncates
+    correct: |
+      average := (a + b + 1) / 2     ' Round to nearest
+      ' Or use float if precision needed
+      average := (FLOAT(a) +. FLOAT(b)) /. 2.0
+
+floating_point:
+  note: "P2 has no hardware FPU - float operations are slow (~100x integer)"
+  operators:
+    - operator: "+."
+      description: "Float addition"
+    - operator: "-."
+      description: "Float subtraction"
+    - operator: "*."
+      description: "Float multiplication"
+    - operator: "/."
+      description: "Float division"
+    - operator: "<."
+      description: "Float less than"
+    - operator: ">."
+      description: "Float greater than"
+    - operator: "FABS"
+      description: "Float absolute value"
+    - operator: "FSQRT"
+      description: "Float square root"
+
+special_operators:
+  - operator: "??"
+    description: "Random number (XORO32 hardware)"
+    example: |
+      value := ??              ' Get random 32-bit value
+      value := ?? // 100       ' Random 0-99
+
+  - operator: "~"
+    description: "Sign extend from bit 7 (byte to long)"
+    example: "$FF~ becomes $FFFF_FFFF"
+
+  - operator: "~~"
+    description: "Sign extend from bit 15 (word to long)"
+    example: "$FFFF~~ becomes $FFFF_FFFF"
+
+  - operator: "@"
+    description: "Address of variable in hub"
+    example: "ptr := @buffer"
+
+  - operator: "@@"
+    description: "Resolve DAT pointer to hub address"
+    example: "addr := @@strings[index]"
+
+  - operator: ".."
+    description: "Range operator (in CASE and LOOKUP)"
+    example: "0..9 expands to 0, 1, 2, ..., 9"
+
+  - operator: "? :"
+    description: "Ternary conditional"
+    example: "result := condition ? true_val : false_val"
+
+  - operator: "++"
+    description: "Increment (pre: ++x or post: x++)"
+
+  - operator: "--"
+    description: "Decrement (pre: --x or post: x--)"
+
+related:
+  - language/spin2/operators/precedence.yaml
+  - language/spin2/idioms/bit-manipulation.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/constructs/case.yaml
+  - language/spin2/concepts/table_lookup.yaml

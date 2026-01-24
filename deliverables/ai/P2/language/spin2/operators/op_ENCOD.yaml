@@ -1,7 +1,45 @@
 operator: "ENCOD"
 type: operator
 description: |
-  Encode highest bit position (also PASM2 instruction)
+  Find position of highest set bit (0-31).
+  Returns 0 if input is 0 (no bits set).
+  Also available as PASM2 instruction.
 category: Unary
+syntax: "result := ENCOD value"
+returns: "Bit position (0-31) of highest set bit, or 0 if value is 0"
+
 examples:
-  - "bit_pos := ENCOD(mask)"
+  - description: "Find highest bit position"
+    code: |
+      bit_pos := ENCOD %0000_1000   ' Returns 3
+      bit_pos := ENCOD %1000_0000   ' Returns 7
+      bit_pos := ENCOD $8000_0000   ' Returns 31
+      bit_pos := ENCOD 0            ' Returns 0 (ambiguous!)
+
+  - description: "Calculate log2 (floor)"
+    code: |
+      ' For power of 2, ENCOD gives log2
+      log2_val := ENCOD 256         ' Returns 8 (2^8 = 256)
+
+  - description: "Next power of 2"
+    code: |
+      PUB next_power_of_two(n) : result
+        result := DECOD ENCOD (n - 1)
+
+common_patterns:
+  - pattern: "find_priority_bit"
+    description: "Find highest priority in bitmask"
+    code: |
+      highest := ENCOD pending_flags
+      handle_priority(highest)
+
+notes:
+  - "Returns 0 for input 0 - cannot distinguish from input 1"
+  - "DECOD is the inverse operation"
+  - "Useful for priority encoding and log2 calculations"
+
+related:
+  - language/spin2/operators/op_DECOD.yaml
+  - language/spin2/operators/op_BMASK.yaml
+  - language/spin2/operators/op_ONES.yaml
+  - language/spin2/concepts/operators.yaml
