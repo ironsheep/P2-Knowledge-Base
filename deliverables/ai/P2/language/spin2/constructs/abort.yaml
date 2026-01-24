@@ -1,47 +1,312 @@
-# Spin2 Language Construct: ABORT
+# Spin2 Language Construct: ABORT and Trap Operator
+# Source: Spin2 v51 documentation, pnut_ts Error-Handling-Usage-Guide.md
+# Critical for: Exception-like error handling mechanism
+
 construct: "ABORT"
 category: "control_flow"
 type: "exception_handling"
 
-description: "Immediate return from nested method calls with optional error values"
+metadata:
+  query_tags: ["abort", "error", "exception", "trap", "backslash", "error_handling"]
+  complexity: "intermediate"
+  use_cases: ["error_signaling", "exception_handling", "resource_cleanup", "validation"]
+  common_questions:
+    - "How do I signal an error in Spin2?"
+    - "How do I catch exceptions?"
+    - "What is the trap operator?"
 
-syntax:
-  - "ABORT"          # Returns 0
-  - "ABORT value"    # Returns value  
-  - "ABORT v1, v2"   # Multiple returns
+description: |
+  Spin2 provides an exception-like error handling mechanism using ABORT and
+  the backslash trap operator (\). Methods can signal errors using ABORT,
+  and callers can catch and handle them using the trap operator.
 
-trap_syntax: "result := \\method()"  # Backslash catches abort
+  Key concepts:
+  - ABORT unwinds the call stack, optionally returning an error value
+  - \ (backslash trap) catches ABORT and allows execution to continue
+  - Uncaught ABORTs propagate up the call chain until trapped or program terminates
 
-example: |
-  PUB validate(x) : result
-    IF x < 0
-      ABORT -1      ' Return error code
-    result := x * 2
-  
-  PUB main() | status
-    status := \validate(-5)  ' Catches abort, gets -1
-    IF status < 0
-      handle_error(status)
+abort_syntax:
+  without_value:
+    syntax: "ABORT"
+    description: "Aborts execution and returns 0 to the trapping caller"
+    example: |
+      PUB validate(data)
+        if data == 0
+          abort                  ' Return 0 to trapping caller
 
-critical_behavior:
-  - "Unwinds call stack immediately"
-  - "Trap (\\) stops propagation"
-  - "Cleanup code after trap executes on abort"
-  - "ABORT returns to caller/trap, not call origin"
+  with_value:
+    syntax: "ABORT expression"
+    description: "Aborts execution and returns expression value to trapping caller"
+    example: |
+      CON
+        ERR_TIMEOUT  = -1
+        ERR_OVERFLOW = -2
+        ERR_INVALID  = -3
 
-common_pattern: |
-  PUB method() | resource
-    resource := \acquire()
-    IF resource < 0
-      cleanup()
-      ABORT resource  ' Propagate after cleanup
-    use_resource(resource)
+      PUB process_command(cmd) : result
+        case cmd
+          CMD_READ: result := do_read()
+          CMD_WRITE: result := do_write()
+          OTHER: abort ERR_INVALID   ' Return error code
 
-critical_pitfall: "ABORT exits method, not just loop (use QUIT for loops)"
+trap_operator:
+  description: |
+    The backslash operator (\) creates a "trap point" that catches ABORT statements.
+    It can be used in two contexts.
 
-comparison:
-  abort: "Exits method/call chain with values"
-  quit: "Exits current loop only"
-  next: "Skips to next iteration"
+  instruction_context:
+    syntax: "\\method_call()"
+    description: "Calls method and catches any ABORT. Result is discarded."
+    example: |
+      PUB cleanup()
+        \close_file()            ' Don't care if it fails
+        \release_resource()
+        \stop_motor()
 
-related: ["p2kbSpin2Quit", "p2kbSpin2Next", "p2kbSpin2Repeat", "p2kbSpin2MethodDefinition"]
+  expression_context:
+    syntax: "result := \\method_call()"
+    description: |
+      Calls method and catches any ABORT. Returns either:
+      - The method's normal return value (if no ABORT)
+      - The ABORT value (if ABORT occurred)
+      - 0 (if ABORT occurred without a value)
+    example: |
+      PUB try_operation() : success, error_code
+        error_code := \risky_operation()
+        if error_code < 0
+          success := FALSE
+        else
+          success := TRUE
+
+  trapping_object_methods:
+    syntax: "result := \\object.method()"
+    example: "result := \\child_objects[i].method()"
+
+  trapping_method_pointers:
+    syntax: "result := \\method_ptr()"
+    example: |
+      VAR long method_ptr
+      PUB call_with_trap() : result
+        method_ptr := @some_method
+        result := \method_ptr()
+
+propagation_behavior:
+  description: |
+    When ABORT executes:
+    1. The runtime searches up the call stack for a trap point
+    2. Stack frames are unwound (popped) until a trap is found
+    3. If trapped, execution continues at the caller with the abort value
+    4. If no trap exists, the program terminates
+
+  example: |
+    PUB main()
+      result := \level_1()       ' Trap point here
+      debug("Result: ", sdec(result))
+
+    PRI level_1() : val
+      val := level_2()           ' No trap - propagates through
+      val += 10
+
+    PRI level_2() : val
+      val := level_3()           ' No trap - propagates through
+      val += 5
+
+    PRI level_3() : val
+      abort -99                  ' ABORT propagates up to main()
+      val := 1                   ' Never executed
+    ' Result: main() receives -99, the ABORT value
+
+  nested_traps:
+    description: "Each trap only catches ABORTs from its own call"
+    example: |
+      PUB outer() : result
+        result := \inner()       ' Catches ABORT from inner() chain
+
+      PRI inner() : val
+        val := \helper()         ' Catches ABORT from helper() only
+        if val < 0
+          abort val * 2          ' This ABORT goes to outer()
+        val := other_work()
+
+      PRI helper() : val
+        abort -1                 ' Caught by inner()'s trap
+
+return_vs_abort:
+  comparison:
+    RETURN:
+      purpose: "Normal completion"
+      stack_behavior: "Returns to immediate caller"
+      without_trap: "Returns normally"
+      return_value: "Method results"
+    ABORT:
+      purpose: "Error signaling"
+      stack_behavior: "Unwinds to trap point"
+      without_trap: "Program terminates"
+      return_value: "Error code"
+
+patterns:
+  error_code_pattern:
+    description: "Negative values for errors, positive/zero for success"
+    code: |
+      CON
+        OK           =  0
+        ERR_PARAM    = -1
+        ERR_TIMEOUT  = -2
+        ERR_BUSY     = -3
+
+      PUB operation(param) : result
+        if param < 0
+          abort ERR_PARAM
+        if NOT resource_available()
+          abort ERR_BUSY
+        result := do_work(param)
+
+      PUB safe_operation(param) : result, error
+        result := \operation(param)
+        if result < 0
+          error := result
+          result := 0
+        else
+          error := OK
+
+  try_finally_pattern:
+    description: "Ensure cleanup even if error occurs"
+    code: |
+      PUB with_resource() : result | resource, error
+        resource := acquire_resource()
+        error := \do_work_with(resource)
+        release_resource(resource)   ' Always executes
+        if error < 0
+          abort error                ' Re-throw if needed
+        result := error
+
+  retry_pattern:
+    description: "Retry operation with attempts limit"
+    code: |
+      PUB retry_operation(max_attempts) : result | attempt, err
+        repeat attempt from 1 to max_attempts
+          err := \risky_operation()
+          if err >= 0
+            return err               ' Success
+          waitms(100)                ' Delay before retry
+        abort err                    ' All retries failed
+
+  graceful_degradation:
+    description: "Fall back to alternatives on failure"
+    code: |
+      PUB read_with_fallback() : value
+        value := \read_primary_sensor()
+        if value < 0
+          value := \read_backup_sensor()
+          if value < 0
+            value := DEFAULT_VALUE   ' Use safe default
+
+  resource_cleanup:
+    description: "Always release resources even on error"
+    code: |
+      PUB process_file(filename) : result | handle, err
+        handle := open_file(filename)
+        if handle < 0
+          abort handle               ' Can't open
+        err := \process_contents(handle)
+        close_file(handle)           ' Always close
+        if err < 0
+          abort err
+        result := err
+
+  validation_chain:
+    description: "Run multiple validations, fail on any"
+    code: |
+      PUB validate_all(data) : valid
+        \validate_range(data)
+        \validate_checksum(data)
+        \validate_format(data)
+        valid := TRUE                ' All passed
+
+anti_patterns:
+  uncaught_abort:
+    description: "ABORT terminates program if not trapped at top level"
+    wrong: |
+      PUB main()
+        process()                    ' If this aborts, program dies
+
+      PRI process()
+        if error
+          abort -1                   ' Uncaught - program terminates!
+    correct: |
+      PUB main() | err
+        err := \process()
+        if err < 0
+          handle_error(err)
+
+  ignoring_error_values:
+    description: "Discarding error information without checking"
+    wrong: |
+      PUB bad_error_handling()
+        \operation()                 ' Error code lost!
+        continue_anyway()            ' May be in bad state
+    correct: |
+      PUB good_error_handling() | err
+        err := \operation()
+        if err < 0
+          handle_error(err)
+          return
+        continue_safely()
+
+  abort_for_normal_flow:
+    description: "Using ABORT for non-error conditions"
+    wrong: |
+      PUB find_item(target) : index | i
+        repeat i from 0 to size-1
+          if items[i] == target
+            abort i                  ' Misusing ABORT for "found"!
+        index := -1
+    correct: |
+      PUB find_item(target) : index | i
+        repeat i from 0 to size-1
+          if items[i] == target
+            return i
+        index := -1
+
+  resource_leak:
+    description: "Resource not released if ABORT occurs"
+    wrong: |
+      PUB leaky_operation() | handle
+        handle := acquire_resource()
+        risky_work()                 ' If this aborts, handle leaks!
+        release_resource(handle)
+    correct: |
+      PUB safe_operation() | handle, err
+        handle := acquire_resource()
+        err := \risky_work()
+        release_resource(handle)     ' Always release
+        if err < 0
+          abort err
+
+  mixing_error_codes_and_data:
+    description: "Error codes overlap with valid data range"
+    wrong: |
+      PUB read_value() : value
+        if error
+          abort -1
+        value := sensor_read()       ' What if sensor returns -1?
+    correct: |
+      PUB read_value() : value, valid
+        if error
+          abort ERR_SENSOR
+        value := sensor_read()
+        valid := TRUE
+
+error_handling_strategy:
+  must_not_fail: "Trap and provide default value"
+  can_retry: "Trap in loop with attempts counter"
+  needs_cleanup: "Trap, cleanup, re-abort if needed"
+  top_level: "Always trap, log error, continue or exit gracefully"
+  library_code: "Document ABORT conditions for callers"
+
+related:
+  - language/spin2/constructs/quit.yaml
+  - language/spin2/constructs/next.yaml
+  - language/spin2/constructs/repeat.yaml
+  - language/spin2/constructs/if_elseif_else.yaml
+  - language/spin2/keywords/ABORT.yaml

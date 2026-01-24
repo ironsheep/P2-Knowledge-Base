@@ -1,9 +1,47 @@
 keyword: "ABORT"
 type: keyword
 category: "Control Flow"
+
 description: |
-  Abort method execution with optional error value
-syntax: "ABORT [expression]"
+  Abort method execution and unwind call stack, optionally returning an error value.
+  Used for exception-like error signaling in Spin2.
+
+syntax:
+  - "ABORT"              # Returns 0 to trapping caller
+  - "ABORT expression"   # Returns expression value to trapping caller
+
+behavior:
+  - "Unwinds call stack until trap point (\\ operator) is found"
+  - "If no trap exists, program terminates"
+  - "Returns abort value to the trapping caller"
+
 examples:
-  - "ABORT"
-  - "ABORT error_code"
+  - description: "Simple abort"
+    code: "ABORT"
+
+  - description: "Abort with error code"
+    code: "ABORT -1"
+
+  - description: "Abort with named constant"
+    code: |
+      CON ERR_TIMEOUT = -1
+      ' ...
+      ABORT ERR_TIMEOUT
+
+trap_operator:
+  description: "Use backslash (\\) to catch ABORT"
+  syntax: "result := \\method_call()"
+  example: |
+    err := \risky_operation()
+    if err < 0
+      handle_error(err)
+
+notes:
+  - "Use ABORT for error signaling, not normal flow"
+  - "Always trap at top level to prevent program termination"
+  - "Negative values conventionally indicate errors"
+
+related:
+  - language/spin2/constructs/abort.yaml
+  - language/spin2/constructs/quit.yaml
+  - language/spin2/keywords/RETURN.yaml
