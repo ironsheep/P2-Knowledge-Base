@@ -1,0 +1,380 @@
+concept: Timing Operations
+type: concept
+category: Timing
+
+description: |
+  Comprehensive timing operations for the Propeller 2. The P2 provides a 32-bit
+  system counter that increments every clock cycle, plus convenient time-unit
+  functions for delays and measurements.
+
+  Timing Categories:
+  - Counter access: GETCT (raw counter), POLLCT/WAITCT (events)
+  - Time delays: WAITMS, WAITUS (Spin2), WAITX (PASM2)
+  - Time measurement: GETMS, GETSEC (elapsed since boot)
+
+  The counter rolls over approximately every 21.5 seconds at 200 MHz.
+
+system_counter:
+  description: |
+    The 32-bit system counter increments every clock cycle continuously from boot.
+    All cogs see the same counter value. Not affected by cog start/stop.
+  resolution: "Single clock cycle"
+  range: "0 to $FFFF_FFFF (2^32 - 1)"
+
+  rollover_table:
+    - clock_freq: "20 MHz"
+      rollover_period: "214.7 seconds"
+      cycle_time: "50 ns"
+    - clock_freq: "100 MHz"
+      rollover_period: "42.9 seconds"
+      cycle_time: "10 ns"
+    - clock_freq: "200 MHz"
+      rollover_period: "21.5 seconds"
+      cycle_time: "5 ns"
+    - clock_freq: "300 MHz"
+      rollover_period: "14.3 seconds"
+      cycle_time: "3.3 ns"
+    - clock_freq: "500 MHz"
+      rollover_period: "8.6 seconds"
+      cycle_time: "2 ns"
+
+  rollover_safe_subtraction: |
+    32-bit subtraction naturally handles wraparound correctly.
+    If stop < start (wrapped), the result is still correct.
+    Example: $0000_0010 - $FFFF_FFF0 = $20 (32 clocks elapsed)
+    This works as long as elapsed time < rollover period.
+
+timing_functions:
+  - function: "GETCT()"
+    returns: "32-bit counter value"
+    description: "Get current system counter"
+    use_for: "Precise timing, measurements, delay targets"
+
+  - function: "WAITCT(target)"
+    parameters: "target counter value"
+    description: "Block until counter reaches target"
+    use_for: "Precise delays, periodic execution"
+
+  - function: "POLLCT(target)"
+    returns: "Non-zero if target reached"
+    description: "Non-blocking check if counter reached target"
+    use_for: "Timeout checks, background work while waiting"
+
+  - function: "WAITMS(ms)"
+    parameters: "milliseconds"
+    description: "Block for specified milliseconds"
+    use_for: "Simple delays when cycle precision not needed"
+
+  - function: "WAITUS(us)"
+    parameters: "microseconds"
+    description: "Block for specified microseconds"
+    use_for: "Short delays, microsecond precision"
+
+  - function: "GETMS()"
+    returns: "milliseconds since boot"
+    description: "Get elapsed time in milliseconds"
+    use_for: "Timestamps, timeout deadlines"
+
+  - function: "GETSEC()"
+    returns: "seconds since boot"
+    description: "Get elapsed time in seconds"
+    use_for: "Uptime, coarse timestamps"
+
+time_conversions:
+  formulas:
+    - from: "milliseconds"
+      to: "cycles"
+      formula: "cycles := clkfreq / 1000 * ms"
+      note: "Order matters for precision"
+    - from: "microseconds"
+      to: "cycles"
+      formula: "cycles := clkfreq / 1_000_000 * us"
+      better: "cycles := clkfreq * us / 1_000_000"
+    - from: "cycles"
+      to: "milliseconds"
+      formula: "ms := cycles / (clkfreq / 1000)"
+    - from: "cycles"
+      to: "microseconds"
+      formula: "us := cycles / (clkfreq / 1_000_000)"
+
+  conversion_functions: |
+    PUB ms_to_cycles(ms) : cycles
+      cycles := clkfreq / 1000 * ms
+
+    PUB us_to_cycles(us) : cycles
+      cycles := clkfreq / 1_000_000 * us
+
+    PUB cycles_to_ms(cycles) : ms
+      ms := cycles / (clkfreq / 1000)
+
+    PUB cycles_to_us(cycles) : us
+      us := cycles / (clkfreq / 1_000_000)
+
+minimum_resolution:
+  description: |
+    Minimum delay resolution depends on clock frequency.
+    Spin2 interpreter overhead adds several microseconds to any operation.
+  table:
+    - clock_freq: "20 MHz"
+      one_cycle: "50 ns"
+      min_practical: "~1 us"
+    - clock_freq: "100 MHz"
+      one_cycle: "10 ns"
+      min_practical: "~100 ns"
+    - clock_freq: "200 MHz"
+      one_cycle: "5 ns"
+      min_practical: "~50 ns"
+    - clock_freq: "300 MHz"
+      one_cycle: "3.3 ns"
+      min_practical: "~30 ns"
+
+patterns:
+  - pattern: "periodic_execution"
+    description: "Jitter-free periodic task execution"
+    key_insight: "Add period to target, don't wait after work"
+    code: |
+      PUB run_periodic(interval_ms) | period, next_tick
+        period := clkfreq / 1000 * interval_ms
+        next_tick := getct()
+
+        REPEAT
+          next_tick += period
+          do_periodic_work()
+          waitct(next_tick)    ' Maintains precise spacing
+
+  - pattern: "timeout_polling"
+    description: "Wait for condition with timeout"
+    code: |
+      PUB wait_for_response(timeout_ms) : success | deadline
+        deadline := getms() + timeout_ms
+
+        REPEAT
+          IF response_ready()
+            RETURN TRUE
+          IF getms() >= deadline
+            RETURN FALSE
+          waitms(1)            ' Small delay to avoid busy-waiting
+
+  - pattern: "debouncing"
+    description: "Button/switch debounce with delay"
+    code: |
+      CON
+        DEBOUNCE_MS = 50
+
+      PUB read_button(pin) : pressed | sample1, sample2
+        pinfloat(pin)
+        sample1 := pinread(pin)
+        waitms(DEBOUNCE_MS)
+        sample2 := pinread(pin)
+        pressed := (sample1 == sample2) AND (sample1 == 0)
+
+  - pattern: "pulse_measurement"
+    description: "Measure pulse width with counter"
+    code: |
+      PUB measure_pulse_width(pin) : width_us | start, stop
+        ' Wait for rising edge
+        REPEAT WHILE pinread(pin) == 1
+        REPEAT WHILE pinread(pin) == 0
+
+        ' Measure high time
+        start := getct()
+        REPEAT WHILE pinread(pin) == 1
+        stop := getct()
+
+        width_us := (stop - start) / (clkfreq / 1_000_000)
+
+  - pattern: "rate_limiting"
+    description: "Throttle action frequency"
+    code: |
+      VAR
+        LONG last_action_time
+
+      PUB rate_limited_action(min_interval_ms) : allowed
+        IF getms() - last_action_time >= min_interval_ms
+          last_action_time := getms()
+          allowed := TRUE
+        ELSE
+          allowed := FALSE
+
+  - pattern: "soft_pwm"
+    description: "Software PWM with precise timing"
+    code: |
+      PUB soft_pwm(pin, duty_percent, freq_hz) | period, on_time, next_cycle
+        period := clkfreq / freq_hz
+        on_time := period * duty_percent / 100
+        next_cycle := getct()
+
+        REPEAT
+          pinhigh(pin)
+          waitct(next_cycle + on_time)
+          pinlow(pin)
+          next_cycle += period
+          waitct(next_cycle)
+
+  - pattern: "multi_timer"
+    description: "Multiple independent timers"
+    code: |
+      VAR
+        LONG timer_targets[4]
+        LONG timer_active[4]
+
+      PUB start_timer(index, ms)
+        timer_targets[index] := getms() + ms
+        timer_active[index] := TRUE
+
+      PUB check_timer(index) : expired
+        IF timer_active[index]
+          IF getms() >= timer_targets[index]
+            timer_active[index] := FALSE
+            expired := TRUE
+
+      PUB process_timers() | i
+        REPEAT i FROM 0 TO 3
+          IF check_timer(i)
+            handle_timer_expired(i)
+
+  - pattern: "overhead_compensation"
+    description: "Compensate for execution overhead"
+    code: |
+      PUB precise_interval() | period, next, overhead
+        ' Measure overhead once
+        next := getct()
+        waitct(next)
+        overhead := getct() - next
+
+        period := clkfreq / 1000       ' 1ms period
+        next := getct()
+
+        REPEAT
+          next += period - overhead
+          do_work()
+          waitct(next)
+
+  - pattern: "time_measurement"
+    description: "Measure operation duration"
+    code: |
+      PUB measure_operation() | start, elapsed_us
+        start := getct()
+        perform_operation()
+        elapsed_us := (getct() - start) / (clkfreq / 1_000_000)
+        debug("Operation took ", UDEC(elapsed_us), " us")
+
+anti_patterns:
+  - anti_pattern: "busy_waiting"
+    severity: "performance"
+    description: "Spinning in loop wastes CPU cycles"
+    wrong: |
+      PUB bad_wait(ms) | deadline
+        deadline := getms() + ms
+        REPEAT WHILE getms() < deadline
+          ' Doing nothing but consuming cycles
+    correct: |
+      PUB good_wait(ms)
+        waitms(ms)
+
+  - anti_pattern: "ignoring_rollover"
+    severity: "logic_error"
+    description: "Comparing counter values instead of subtracting"
+    wrong: |
+      PUB bad_elapsed() | start, stop
+        start := getct()
+        do_work()
+        stop := getct()
+        IF stop > start              ' May be false after rollover!
+          RETURN stop - start
+    correct: |
+      PUB good_elapsed() | start, stop
+        start := getct()
+        do_work()
+        stop := getct()
+        RETURN stop - start          ' Always correct
+
+  - anti_pattern: "periodic_drift"
+    severity: "timing_error"
+    description: "Waiting after work instead of to fixed time"
+    wrong: |
+      PUB drifty_periodic()
+        REPEAT
+          do_work()
+          waitms(100)                ' 100ms AFTER work completes (drifts)
+    correct: |
+      PUB precise_periodic() | next
+        next := getct()
+        REPEAT
+          next += clkfreq / 10       ' 100ms interval
+          do_work()
+          waitct(next)               ' Wait until next period
+
+  - anti_pattern: "integer_truncation"
+    severity: "precision_loss"
+    description: "Division order loses precision for small values"
+    wrong: |
+      PUB bad_us_delay(us) | cycles
+        cycles := clkfreq / 1_000_000 * us  ' May truncate significantly
+    correct: |
+      PUB better_us_delay(us) | cycles
+        cycles := clkfreq * us / 1_000_000  ' Less truncation for small us
+
+      ' Or use library functions
+      PUB best_us_delay(us)
+        waitus(us)                   ' Handles precision internally
+
+  - anti_pattern: "blocking_critical_code"
+    severity: "design"
+    description: "Long blocking delays in time-critical code"
+    wrong: |
+      PUB bad_sensor_read()
+        request_reading()
+        waitms(100)                  ' Blocks everything for 100ms
+        RETURN get_reading()
+    correct: |
+      VAR
+        LONG sensor_state
+        LONG sensor_deadline
+
+      CON
+        IDLE = 0
+        WAITING = 1
+        READY = 2
+
+      PUB start_sensor_read()
+        request_reading()
+        sensor_deadline := getms() + 100
+        sensor_state := WAITING
+
+      PUB check_sensor_read() : ready
+        IF sensor_state == WAITING
+          IF getms() >= sensor_deadline
+            sensor_state := READY
+            ready := TRUE
+
+notes:
+  - "GETCT resolution is single clock cycle"
+  - "32-bit subtraction handles rollover correctly"
+  - "WAITMS/WAITUS use CLKFREQ internally for accuracy"
+  - "All cogs share the same system counter"
+  - "Spin2 interpreter adds overhead to all operations"
+  - "Use WAITCT for cycle-accurate timing"
+  - "Use GETMS/GETSEC for timestamps and deadlines"
+  - "Hardware smart pins often better than software timing"
+
+related:
+  - language/spin2/methods/getct.yaml
+  - language/spin2/methods/waitct.yaml
+  - language/spin2/methods/pollct.yaml
+  - language/spin2/methods/waitms.yaml
+  - language/spin2/methods/waitus.yaml
+  - language/spin2/methods/getms.yaml
+  - language/spin2/methods/getsec.yaml
+  - language/pasm2/getct.yaml
+  - language/pasm2/waitx.yaml
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/patterns/implementation/spin2_timing_control.yaml
+
+see_also:
+  - "Clock configuration"
+  - "Smart pin timing"
+  - "Multi-COG synchronization"
+  - "PWM generation"
+
+oneliner: "Comprehensive timing operations guide with counter, delays, patterns, and anti-patterns"

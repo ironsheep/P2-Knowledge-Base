@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T01:11:49.205464",
-    "total_entries": 1026,
+    "generated": "2026-01-24T01:18:39.905978",
+    "total_entries": 1027,
     "total_categories": 47,
     "total_aliases": 939,
     "multi_target_aliases": 54,
@@ -6116,11 +6116,15 @@
     },
     "p2kbSpin2StringConstants": {
       "path": "deliverables/ai/P2/language/spin2/concepts/string_constants.yaml",
-      "mtime": 1769217022
+      "mtime": 1769217136
     },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
       "mtime": 1769214614
+    },
+    "p2kbSpin2TimingOperations": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/timing_operations.yaml",
+      "mtime": 1769217414
     },
     "p2kbSpin2DebugEndSession": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",

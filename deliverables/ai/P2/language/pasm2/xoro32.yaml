@@ -34,9 +34,9 @@ critical_warning:
     Always ensure non-zero initial value before first use.
   solution: |
     ' Ensure non-zero seed
-            GETRND  seed           ' Get true random
-            CMP     seed, #0   WZ  ' Check if zero
-    IF_Z    MOV     seed, #1       ' Force non-zero if needed
+    GETRND  seed           ' Get true random
+    CMP     seed, #0   WZ  ' Check if zero
+    IF_Z    MOV     seed, #1  ' Force non-zero (conditional)
 
 examples:
   - description: "Generate random number"
@@ -53,13 +53,13 @@ examples:
 
   - description: "Properly initialized PRNG"
     code: |
-            GETRND  seed              ' Hardware random seed
-            CMP     seed, #0    WZ
-    IF_Z    MOV     seed, #1          ' Ensure non-zero
-            ' Now safe to use XORO32
-    .loop   XORO32  seed
-            ' Process seed...
-            JMP     #.loop
+      GETRND  seed              ' Hardware random seed
+      CMP     seed, #0    WZ
+      IF_Z    MOV     seed, #1  ' Ensure non-zero (conditional)
+      ' Now safe to use XORO32
+      .loop   XORO32  seed
+      ' Process seed...
+      JMP     #.loop
 
 flags_affected:
   C: No effect

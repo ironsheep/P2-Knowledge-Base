@@ -92,8 +92,25 @@ limitations:
   - "Blocking operation"
   - "Subject to small jitter from hub timing"
 
+anti_patterns:
+  - anti_pattern: "periodic_drift"
+    description: "Using WAITMS in loops causes timing drift"
+    wrong: |
+      ' Drifts because delay is AFTER work, not TO fixed time
+      REPEAT
+        do_work()
+        waitms(100)    ' 100ms AFTER work completes
+    correct: |
+      ' Use WAITCT for jitter-free periodic execution
+      next := getct()
+      REPEAT
+        next += clkfreq / 10
+        do_work()
+        waitct(next)   ' Wait UNTIL next period
+
 see_also:
   - "language/spin2/methods/waitus.yaml"
   - "language/spin2/methods/waitct.yaml"
   - "language/spin2/methods/getct.yaml"
   - "language/pasm2/waitx.yaml"
+  - "language/spin2/concepts/timing_operations.yaml"
