@@ -1,0 +1,213 @@
+# Spin2 Floating-Point Operations
+# Source: pnut_ts Floating-Point-Usage-Guide.md
+# Critical for: Sensor data, scientific calculations, control systems
+
+name: Floating-Point Operations
+category: concepts
+type: language_feature
+
+description: |
+  Spin2 supports IEEE-754 single-precision (32-bit) floating-point numbers.
+  Float operations are performed by software (no hardware FPU), making them
+  slower than integer math but providing decimal precision for sensor data,
+  scientific calculations, and control systems.
+
+key_points:
+  - "Floats stored in 32 bits (same size as LONG)"
+  - "Software implementation - slower than integer math"
+  - "IEEE-754 single precision (~7 decimal digits precision)"
+  - "Float operators use '.' suffix to distinguish from integer operators"
+
+ieee754_format:
+  description: "Single-precision 32-bit floating-point"
+  layout: |
+    Bit:  31   30-23      22-0
+          S    EEEEEEEE   MMMMMMMMMMMMMMMMMMMMMMM
+          |    |          |
+          |    |          +-- Mantissa (23 bits, implied leading 1)
+          |    +------------- Exponent (8 bits, biased by 127)
+          +------------------ Sign (0=positive, 1=negative)
+  
+  precision:
+    range: "~1.2e-38 to ~3.4e38"
+    significant_digits: "~7 decimal digits"
+    smallest_increment_near_1: "~1.2e-7"
+  
+  special_values:
+    positive_zero: "Sign=0, Exponent=0, Mantissa=0"
+    negative_zero: "Sign=1, Exponent=0, Mantissa=0"
+    positive_infinity: "Sign=0, Exponent=255, Mantissa=0"
+    negative_infinity: "Sign=1, Exponent=255, Mantissa=0"
+    nan: "Exponent=255, Mantissa=Non-zero"
+
+literal_syntax:
+  decimal: "3.14159, 0.001, 100.0"
+  scientific: "1.0e6, 2.5E-3, 6.022e23"
+  negative: "-273.15, -1.0e-10"
+
+conversion_functions:
+  FLOAT:
+    syntax: "float(integer_value)"
+    description: "Convert integer to float"
+    example: "float_val := float(100)  ' 100.0"
+  
+  TRUNC:
+    syntax: "trunc(float_value)"
+    description: "Convert float to integer (truncate toward zero)"
+    example: "int_val := trunc(3.7)  ' 3"
+  
+  ROUND:
+    syntax: "round(float_value)"
+    description: "Convert float to nearest integer"
+    example: "int_val := round(3.7)  ' 4"
+
+operators:
+  arithmetic:
+    "+.": "Float addition"
+    "-.": "Float subtraction"
+    "*.": "Float multiplication"
+    "/.": "Float division"
+    "-. (unary)": "Float negation"
+  
+  comparison:
+    "<.": "Less than (returns TRUE/FALSE)"
+    ">.": "Greater than"
+    "<=.": "Less than or equal"
+    ">=.": "Greater than or equal"
+    "==.": "Equal"
+    "<>.": "Not equal"
+
+functions:
+  FABS:
+    syntax: "fabs(value)"
+    description: "Absolute value of float"
+    returns: "Float"
+  
+  FSQRT:
+    syntax: "fsqrt(value)"
+    description: "Square root of float"
+    returns: "Float (NaN if value < 0)"
+  
+  NAN:
+    syntax: "nan(value)"
+    description: "Check if value is Not-a-Number"
+    returns: "TRUE (-1) or FALSE (0)"
+
+special_results:
+  "0 / 0": "NaN"
+  "x / 0 (x != 0)": "+/- Infinity"
+  "sqrt(-x)": "NaN"
+  "Overflow": "+/- Infinity"
+  "Underflow": "0"
+
+performance_comparison:
+  note: "Float operations are software-implemented, significantly slower than integer"
+  cycles:
+    addition:
+      integer: "~1 cycle"
+      float: "~100+ cycles"
+    multiplication:
+      integer: "~8 cycles"
+      float: "~200+ cycles"
+    division:
+      integer: "~16 cycles"
+      float: "~300+ cycles"
+    square_root:
+      integer: "~50 cycles"
+      float: "~400+ cycles"
+
+when_to_use:
+  use_float:
+    - "Sensor data with decimal values"
+    - "Scientific calculations"
+    - "When precision matters more than speed"
+    - "Complex formulas (easier to read/write)"
+  
+  use_fixed_point:
+    - "Time-critical code"
+    - "PASM routines"
+    - "Simple scaling operations"
+    - "When you control the value range"
+
+patterns:
+  temperature_conversion:
+    code: |
+      PUB celsius_to_fahrenheit(celsius) : fahrenheit
+        fahrenheit := celsius *. 1.8 +. 32.0
+
+  sensor_scaling:
+    code: |
+      PUB read_voltage() : voltage | raw
+        raw := read_adc()
+        voltage := float(raw) *. 3.3 /. float(4095)
+
+  moving_average:
+    code: |
+      CON ALPHA = 0.1
+      PUB filter(new_sample) : result
+        filtered := ALPHA *. float(new_sample) +. (1.0 -. ALPHA) *. filtered
+        result := round(filtered)
+
+  distance_calculation:
+    code: |
+      PUB distance(x1, y1, x2, y2) : dist | dx, dy
+        dx := x2 -. x1
+        dy := y2 -. y1
+        dist := fsqrt(dx *. dx +. dy *. dy)
+
+anti_patterns:
+  float_equality:
+    wrong: "if result ==. 0.0"
+    correct: |
+      CON EPSILON = 0.00001
+      if fabs(result -. 0.0) <. EPSILON
+    reason: "Float precision limits make exact equality unreliable"
+
+  accumulating_errors:
+    wrong: |
+      sum := 0.0
+      repeat i from 0 to count - 1
+        sum := sum +. samples[i]  ' Error grows!
+    correct: "Use Kahan summation or integer accumulation"
+    reason: "Small errors compound with repeated operations"
+
+  unnecessary_conversion:
+    wrong: "result := round(float(value) *. 2.0)"
+    correct: "result := value * 2"
+    reason: "Use integer math when result is integer"
+
+  float_in_tight_loops:
+    wrong: |
+      repeat i from 0 to 999
+        sum := sum +. float(i)
+    correct: |
+      repeat i from 0 to 999
+        int_sum += i
+      sum := float(int_sum)
+    reason: "Convert once, not repeatedly"
+
+  mixing_operators:
+    wrong: "result := a +. b * c  ' Integer multiply!"
+    correct: "result := a +. b *. c"
+    reason: "Use consistent float operators"
+
+  ignoring_nan:
+    wrong: |
+      result := fsqrt(value)
+      use_result(result)
+    correct: |
+      result := fsqrt(value)
+      if nan(result)
+        handle_error()
+      else
+        use_result(result)
+    reason: "Invalid operations produce NaN"
+
+related:
+  - language/spin2/methods/float.yaml
+  - language/spin2/methods/trunc.yaml
+  - language/spin2/methods/round.yaml
+  - language/spin2/methods/nan.yaml
+  - language/spin2/operators/op_adddot.yaml
+  - language/spin2/operators/op_FABS.yaml
+  - language/spin2/operators/op_FSQRT.yaml

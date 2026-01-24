@@ -1,0 +1,62 @@
+method: FLOAT
+type: method
+category: Conversion
+# Source: pnut_ts Floating-Point-Usage-Guide.md
+
+description: |
+  Convert an integer value to IEEE-754 single-precision floating-point.
+  The result is stored in a LONG (32 bits), same as the integer, but
+  interpreted as a float by float operators.
+
+syntax: "result := FLOAT(IntegerValue)"
+
+parameters:
+  - name: "IntegerValue"
+    type: "long"
+    description: "Integer value to convert to float"
+
+returns:
+  type: "float"
+  description: "Floating-point representation of the integer"
+
+examples:
+  - description: "Basic conversion"
+    code: |
+      int_val := 100
+      float_val := float(int_val)    ' 100.0
+
+  - description: "ADC scaling"
+    code: |
+      raw := read_adc()
+      voltage := float(raw) *. 3.3 /. float(4095)
+
+  - description: "Temperature calculation"
+    code: |
+      adc_value := read_temp_sensor()
+      temp_c := float(adc_value) *. 0.0625 -. 50.0
+
+notes:
+  - "Floats and integers both occupy 32 bits (LONG)"
+  - "Float operators (+., -., etc.) expect float operands"
+  - "Mixed integer/float operations require explicit conversion"
+  - "Conversion has computational overhead - avoid in tight loops"
+
+anti_patterns:
+  unnecessary_conversion:
+    wrong: "result := round(float(value) *. 2.0)"
+    correct: "result := value * 2"
+    reason: "Use integer math when result is integer"
+
+  conversion_in_loop:
+    wrong: |
+      repeat i from 0 to 999
+        sum := sum +. float(i)    ' Slow!
+    correct: |
+      repeat i from 0 to 999
+        int_sum += i
+      sum := float(int_sum)       ' Convert once
+
+related:
+  - language/spin2/methods/trunc.yaml
+  - language/spin2/methods/round.yaml
+  - language/spin2/concepts/floating_point.yaml

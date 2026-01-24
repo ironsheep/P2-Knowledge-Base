@@ -1,0 +1,51 @@
+method: TRUNC
+type: method
+category: Conversion
+# Source: pnut_ts Floating-Point-Usage-Guide.md
+
+description: |
+  Convert a floating-point value to integer by truncating toward zero.
+  The fractional part is discarded (not rounded).
+
+syntax: "result := TRUNC(FloatValue)"
+
+parameters:
+  - name: "FloatValue"
+    type: "float"
+    description: "Floating-point value to truncate"
+
+returns:
+  type: "long"
+  description: "Integer portion of the float (toward zero)"
+
+behavior:
+  positive_values: "3.7 -> 3, 3.2 -> 3"
+  negative_values: "-3.7 -> -3, -3.2 -> -3"
+  note: "Always truncates toward zero, not toward negative infinity"
+
+examples:
+  - description: "Basic truncation"
+    code: |
+      float_val := 3.7
+      int_val := trunc(float_val)    ' 3
+
+  - description: "Negative truncation"
+    code: |
+      float_val := -3.7
+      int_val := trunc(float_val)    ' -3
+
+  - description: "Get integer part of measurement"
+    code: |
+      temperature := 25.7
+      whole_degrees := trunc(temperature)  ' 25
+
+notes:
+  - "Truncation removes fractional part without rounding"
+  - "Use ROUND() when nearest integer is desired"
+  - "For negative numbers, truncation is toward zero"
+  - "TRUNC(-3.7) = -3, not -4"
+
+related:
+  - language/spin2/methods/round.yaml
+  - language/spin2/methods/float.yaml
+  - language/spin2/concepts/floating_point.yaml

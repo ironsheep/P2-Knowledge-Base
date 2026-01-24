@@ -1,0 +1,57 @@
+method: ROUND
+type: method
+category: Conversion
+# Source: pnut_ts Floating-Point-Usage-Guide.md
+
+description: |
+  Convert a floating-point value to the nearest integer.
+  Values exactly halfway between integers round to the nearest even integer
+  (banker's rounding).
+
+syntax: "result := ROUND(FloatValue)"
+
+parameters:
+  - name: "FloatValue"
+    type: "float"
+    description: "Floating-point value to round"
+
+returns:
+  type: "long"
+  description: "Nearest integer to the float value"
+
+behavior:
+  positive_values: "3.7 -> 4, 3.4 -> 3, 3.5 -> 4"
+  negative_values: "-3.7 -> -4, -3.4 -> -3, -3.5 -> -4"
+  halfway_cases: "Rounds to nearest even (banker's rounding)"
+
+examples:
+  - description: "Basic rounding"
+    code: |
+      float_val := 3.7
+      int_val := round(float_val)    ' 4
+
+  - description: "Round down when closer to lower"
+    code: |
+      float_val := 3.4
+      int_val := round(float_val)    ' 3
+
+  - description: "Negative rounding"
+    code: |
+      float_val := -3.7
+      int_val := round(float_val)    ' -4
+
+  - description: "Convert filtered sensor value"
+    code: |
+      filtered := alpha *. float(new_sample) +. (1.0 -. alpha) *. filtered
+      result := round(filtered)
+
+notes:
+  - "Rounds to nearest integer"
+  - "Use TRUNC() when truncation toward zero is desired"
+  - "Halfway values (.5) round to nearest even"
+  - "Commonly used after floating-point filtering"
+
+related:
+  - language/spin2/methods/trunc.yaml
+  - language/spin2/methods/float.yaml
+  - language/spin2/concepts/floating_point.yaml

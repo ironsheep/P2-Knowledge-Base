@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-23T21:25:13.972912",
-    "total_entries": 1013,
+    "generated": "2026-01-24T00:22:18.895438",
+    "total_entries": 1017,
     "total_categories": 47,
-    "total_aliases": 933,
+    "total_aliases": 941,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -915,6 +915,9 @@
     "FLES": [
       "p2kbPasm2Fles"
     ],
+    "FLOAT": [
+      "p2kbSpin2Float"
+    ],
     "FLTC": [
       "p2kbPasm2Fltc"
     ],
@@ -1548,6 +1551,9 @@
     "ROTXY": [
       "p2kbSpin2Rotxy"
     ],
+    "ROUND": [
+      "p2kbSpin2Round"
+    ],
     "RQPIN": [
       "p2kbPasm2Rqpin",
       "p2kbSpin2Rqpin"
@@ -1798,6 +1804,9 @@
     "TRGINT3": [
       "p2kbPasm2Trgint3"
     ],
+    "TRUNC": [
+      "p2kbSpin2Trunc"
+    ],
     "WAITATN": [
       "p2kbPasm2Waitatn",
       "p2kbSpin2Waitatn"
@@ -1955,6 +1964,9 @@
     "_CLKMODE": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
+    "_ERRFREQ": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
     "_RCFAST": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
@@ -1971,6 +1983,9 @@
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
     "_clkmode": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "_errfreq": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
     "_rcfast": [
@@ -2344,6 +2359,9 @@
     ],
     "fles": [
       "p2kbPasm2Fles"
+    ],
+    "float": [
+      "p2kbSpin2Float"
     ],
     "fltc": [
       "p2kbPasm2Fltc"
@@ -3025,6 +3043,9 @@
     "rotxy": [
       "p2kbSpin2Rotxy"
     ],
+    "round": [
+      "p2kbSpin2Round"
+    ],
     "rqpin": [
       "p2kbPasm2Rqpin",
       "p2kbSpin2Rqpin"
@@ -3307,6 +3328,9 @@
     "trgint3": [
       "p2kbPasm2Trgint3"
     ],
+    "trunc": [
+      "p2kbSpin2Trunc"
+    ],
     "utility_library": [
       "p2kbSpin2UtilityLibrary"
     ],
@@ -3466,7 +3490,7 @@
     },
     "p2kbArchClockSystem": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbArchCog": {
       "path": "deliverables/ai/P2/architecture/cog.yaml",
@@ -4926,7 +4950,7 @@
     },
     "p2kbPasm2Hubset": {
       "path": "deliverables/ai/P2/language/pasm2/hubset.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbPasm2IdiomsConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/conditional-execution.yaml",
@@ -6072,6 +6096,10 @@
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
       "mtime": 1769036597
     },
+    "p2kbSpin2FloatingPoint": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/floating_point.yaml",
+      "mtime": 1769214039
+    },
     "p2kbSpin2InlinePasm2": {
       "path": "deliverables/ai/P2/language/spin2/concepts/inline_pasm2.yaml",
       "mtime": 1764977160
@@ -6094,7 +6122,7 @@
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213380
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
@@ -6102,7 +6130,7 @@
     },
     "p2kbSpin2Abort": {
       "path": "deliverables/ai/P2/language/spin2/constructs/abort.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213854
     },
     "p2kbSpin2Blocks": {
       "path": "deliverables/ai/P2/language/spin2/constructs/blocks.yaml",
@@ -6110,7 +6138,7 @@
     },
     "p2kbSpin2Case": {
       "path": "deliverables/ai/P2/language/spin2/constructs/case.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213678
     },
     "p2kbSpin2EscapeStrings": {
       "path": "deliverables/ai/P2/language/spin2/constructs/escape-strings.yaml",
@@ -6118,7 +6146,7 @@
     },
     "p2kbSpin2IfElseifElse": {
       "path": "deliverables/ai/P2/language/spin2/constructs/if_elseif_else.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213678
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
@@ -6130,11 +6158,11 @@
     },
     "p2kbSpin2Next": {
       "path": "deliverables/ai/P2/language/spin2/constructs/next.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213678
     },
     "p2kbSpin2Quit": {
       "path": "deliverables/ai/P2/language/spin2/constructs/quit.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213678
     },
     "p2kbSpin2RegisterConstants": {
       "path": "deliverables/ai/P2/language/spin2/constructs/register-constants.yaml",
@@ -6142,7 +6170,7 @@
     },
     "p2kbSpin2Repeat": {
       "path": "deliverables/ai/P2/language/spin2/constructs/repeat.yaml",
-      "mtime": 1768613644
+      "mtime": 1769213678
     },
     "p2kbSpin2JohnnyMacDocumentationStyle": {
       "path": "deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml",
@@ -6282,7 +6310,7 @@
     },
     "p2kbSpin2KwABORT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/ABORT.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213854
     },
     "p2kbSpin2KwBYTE": {
       "path": "deliverables/ai/P2/language/spin2/keywords/BYTE.yaml",
@@ -6462,7 +6490,7 @@
     },
     "p2kbSpin2Clkset": {
       "path": "deliverables/ai/P2/language/spin2/methods/clkset.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbSpin2Cogatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogatn.yaml",
@@ -6508,6 +6536,10 @@
       "path": "deliverables/ai/P2/language/spin2/methods/exp2.yaml",
       "mtime": 1768350169
     },
+    "p2kbSpin2Float": {
+      "path": "deliverables/ai/P2/language/spin2/methods/float.yaml",
+      "mtime": 1769213981
+    },
     "p2kbSpin2Getcrc": {
       "path": "deliverables/ai/P2/language/spin2/methods/getcrc.yaml",
       "mtime": 1764449566
@@ -6534,7 +6566,7 @@
     },
     "p2kbSpin2Hubset": {
       "path": "deliverables/ai/P2/language/spin2/methods/hubset.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbSpin2Lockchk": {
       "path": "deliverables/ai/P2/language/spin2/methods/lockchk.yaml",
@@ -6700,6 +6732,10 @@
       "path": "deliverables/ai/P2/language/spin2/methods/rotxy.yaml",
       "mtime": 1769036597
     },
+    "p2kbSpin2Round": {
+      "path": "deliverables/ai/P2/language/spin2/methods/round.yaml",
+      "mtime": 1769214003
+    },
     "p2kbSpin2Rqpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/rqpin.yaml",
       "mtime": 1764449566
@@ -6767,6 +6803,10 @@
     "p2kbSpin2Taskwait": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskwait.yaml",
       "mtime": 1764449566
+    },
+    "p2kbSpin2Trunc": {
+      "path": "deliverables/ai/P2/language/spin2/methods/trunc.yaml",
+      "mtime": 1769213991
     },
     "p2kbSpin2Waitatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitatn.yaml",
@@ -7498,11 +7538,11 @@
     },
     "p2kbSpin2VarClkfreq": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/clkfreq.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbSpin2VarClkmode": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/clkmode.yaml",
-      "mtime": 1764449566
+      "mtime": 1769213380
     },
     "p2kbSpin2VarVarbase": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/varbase.yaml",
