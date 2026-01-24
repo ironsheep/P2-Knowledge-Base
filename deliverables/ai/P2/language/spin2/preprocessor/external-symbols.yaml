@@ -1,31 +1,55 @@
-feature: External Preprocessor Symbols
+feature: Command-Line Preprocessor Options
 type: preprocessor
 category: Preprocessor Directives
 
 minimum_version: "v48"
 
 description: |
-  Preprocessor symbols can be defined externally before compilation using the 
-  command-line -D option. This allows the same source code to be compiled with 
-  different configurations without modifying the source files. External symbols 
-  behave like #DEFINE symbols but cannot be undefined with #UNDEF.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Preprocessor symbols and include paths can be configured from the command line,
+  allowing the same source code to be compiled with different configurations
+  without modifying source files. Three options are available:
+  - -D: Define a symbol (as if #DEFINE appeared at file start)
+  - -U: Prevent a symbol from being defined (overrides source #DEFINE)
+  - -I: Add directories to the #INCLUDE search path
+  Available in PNut/pnut_ts v48 and later compilers.
+
+command_line_options:
+  - option: "-D"
+    purpose: "Define preprocessor symbol"
+    syntax: "-D symbol or -D symbol=value"
+    description: "Defines symbol before source is processed, overrides source #DEFINE"
+  - option: "-U"
+    purpose: "Undefine/prevent symbol"
+    syntax: "-U symbol"
+    description: "Prevents symbol from being defined, even if #DEFINE appears in source"
+  - option: "-I"
+    purpose: "Add include directory"
+    syntax: "-I path"
+    description: "Adds directory to search path for #INCLUDE files"
 
 syntax:
   define_symbol: "-D symbol"
   define_with_value: "-D symbol=value"
+  undefine_symbol: "-U symbol"
+  include_path: "-I path"
 
 command_line:
   pnut: "pnut -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
   pnut_ts: "pnut_ts -DDEBUG_MODE -DVERSION=2 myprogram.spin2"
+  with_undefine: "pnut_ts -U DEBUG_MODE source.spin2"
+  with_include: "pnut_ts -I ./includes -I ./drivers source.spin2"
+  combined: "pnut_ts -D RELEASE -U DEBUG_MODE -I ./lib source.spin2"
 
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol to define (case-sensitive, max 31 chars)"
+    description: "Name of the symbol to define/undefine (case-sensitive, max 31 chars)"
   - name: "value"
     type: "string"
-    description: "Optional value to associate with the symbol"
+    description: "Optional value to associate with -D symbol"
+  - name: "path"
+    type: "directory"
+    description: "Directory path for -I include search"
 
 limits:
   max_symbols: 16
@@ -94,14 +118,63 @@ examples:
   - code: |
       ' External symbols cannot be undefined
       ' This is intentional - preserves build system control
-      
+
       ' Compile with: pnut_ts -DBUILD_CONFIG myprogram.spin2
-      
+
       #IFDEF BUILD_CONFIG
           ' This block is ALWAYS compiled when -DBUILD_CONFIG is used
           ' #UNDEF BUILD_CONFIG would have no effect on external symbols
       #ENDIF
     description: "External symbols persist (cannot be #UNDEF'd)"
+
+  - code: |
+      ' Using -U to override source file defaults
+      ' Source file has DEBUG_BUILD defined:
+      #DEFINE DEBUG_BUILD
+
+      PUB main()
+      #IFDEF DEBUG_BUILD
+        debug("Debug mode")
+      #ENDIF
+        run_app()
+
+      ' Compile for release (removes debug code):
+      ' pnut_ts -U DEBUG_BUILD source.spin2
+    description: "Override source #DEFINE with -U for release builds"
+
+  - code: |
+      ' Using -I for include paths
+      ' Directory structure:
+      '   project/
+      '     main.spin2
+      '     common/
+      '       utils.spin2
+      '     drivers/
+      '       serial.spin2
+
+      ' In main.spin2:
+      #INCLUDE "utils"     ' Found via -I ./common
+      #INCLUDE "serial"    ' Found via -I ./drivers
+
+      ' Compile with:
+      ' pnut_ts -I ./common -I ./drivers main.spin2
+    description: "Using -I for include directory search paths"
+
+  - code: |
+      ' Combined options for CI/CD builds
+      ' pnut_ts -D RELEASE -D VERSION=200 -U DEBUG_MODE -I ./lib source.spin2
+
+      #IFDEF RELEASE
+        ' Production code paths
+      #ENDIF
+
+      #IFDEF DEBUG_MODE
+        ' This code will NOT be compiled due to -U DEBUG_MODE
+        debug("Debug output")
+      #ENDIF
+
+      #INCLUDE "common_utils"  ' Found in ./lib directory
+    description: "Combining -D, -U, and -I for CI/CD builds"
 
 use_cases:
   - case: "CI/CD builds"
@@ -112,22 +185,42 @@ use_cases:
     description: "Enable/disable features without source modification"
   - case: "Version embedding"
     description: "Pass version numbers into compilation"
+  - case: "Release builds"
+    description: "Use -U to override source debug symbols without modifying code"
+  - case: "Library organization"
+    description: "Use -I to locate includes in library directories"
+
+include_search_order:
+  description: "When #INCLUDE is encountered, directories are searched in order:"
+  order:
+    - priority: 1
+      source: "-I directories"
+      description: "Searched in order specified on command line"
+    - priority: 2
+      source: "Source file directory"
+      description: "Directory containing the file with #INCLUDE"
 
 notes:
-  - "Available in v48+ compilers - no version directive required"
-  - "Symbol names are case-sensitive"
-  - "Maximum of 16 external symbols can be defined"
+  - "Available in v48+ compilers"
+  - "-D symbols are case-sensitive"
+  - "Maximum of 16 external symbols can be defined via -D"
   - "Maximum symbol name length is 31 characters"
-  - "External symbols CANNOT be undefined with #UNDEF in source"
-  - "External symbols have priority over source-defined symbols"
+  - "-D symbols CANNOT be undefined with #UNDEF in source"
+  - "-D symbols have priority over source-defined symbols"
+  - "-U prevents symbol definition even if #DEFINE appears in source"
+  - "-U is processed before -D, so -U SYM -D SYM results in SYM being defined"
+  - "-I directories are searched before source file directory for #INCLUDE"
+  - "Multiple -I options are searched in command-line order"
   - "The __DEBUG__ symbol is predefined when debug output is enabled"
   - "Useful for build automation and configuration management"
 
 related:
-  - define
-  - undef
-  - ifdef
-  - ifndef
+  - language/spin2/preprocessor/define.yaml
+  - language/spin2/preprocessor/undef.yaml
+  - language/spin2/preprocessor/ifdef.yaml
+  - language/spin2/preprocessor/ifndef.yaml
+  - language/spin2/preprocessor/include.yaml
+  - language/spin2/preprocessor/preprocessor-overview.yaml
 
 see_also:
   - "Preprocessor system"
@@ -135,4 +228,4 @@ see_also:
   - "Command-line compilation"
   - "CI/CD integration"
 
-oneliner: "Define preprocessor symbols from command line for build configuration (v48+)"
+oneliner: "Command-line options -D, -U, -I for preprocessor configuration (v48+)"

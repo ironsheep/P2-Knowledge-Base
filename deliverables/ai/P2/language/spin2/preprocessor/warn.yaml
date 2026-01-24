@@ -1,0 +1,111 @@
+directive: "#WARN"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Generates a compile-time warning with a custom message without stopping
+  compilation. The warning is displayed to the user, but the build continues.
+  Use this for non-fatal configuration issues, deprecation notices, or
+  informational messages.
+  Available in PNut/pnut_ts v47 and later compilers.
+
+syntax:
+  basic: '#WARN "message"'
+
+parameters:
+  - name: "message"
+    type: "string"
+    description: "Warning message text enclosed in double quotes"
+
+behavior:
+  - "Warning is displayed during compilation"
+  - "Compilation continues - object file is still generated"
+  - "Line number and file are reported with the warning"
+  - "Multiple warnings can be generated in a single compilation"
+
+examples:
+  - code: |
+      ' Flag deprecated API usage
+      #IFDEF USE_DEPRECATED_API
+      #WARN "USE_DEPRECATED_API is deprecated, migrate to new API"
+      #ENDIF
+    description: "Deprecation warning"
+
+  - code: |
+      ' Warn about non-optimal settings
+      #IFDEF DEBUG_MODE
+      #IFDEF RELEASE_TARGET
+      #WARN "DEBUG_MODE enabled for RELEASE_TARGET - performance may suffer"
+      #ENDIF
+      #ENDIF
+    description: "Warn about conflicting but allowed configurations"
+
+  - code: |
+      ' Informational message about build configuration
+      #IFNDEF USE_OPTIMIZED_MATH
+      #WARN "Using standard math library - define USE_OPTIMIZED_MATH for faster computation"
+      #ENDIF
+    description: "Suggest optimization opportunity"
+
+  - code: |
+      ' Warn about defaults being used
+      #IFNDEF STACK_SIZE
+      #DEFINE STACK_SIZE 256
+      #WARN "STACK_SIZE not defined, using default of 256 longs"
+      #ENDIF
+    description: "Notify when using default values"
+
+  - code: |
+      ' Feature availability notice
+      #IFDEF EXPERIMENTAL_FEATURE
+      #WARN "EXPERIMENTAL_FEATURE is not fully tested - use at your own risk"
+      #ENDIF
+    description: "Warn about experimental features"
+
+common_patterns:
+  - pattern: "deprecation_notice"
+    description: "Alert about deprecated but still-supported features"
+    code: |
+      #IFDEF OLD_FEATURE_NAME
+      #WARN "OLD_FEATURE_NAME deprecated, use NEW_FEATURE_NAME"
+      #DEFINE NEW_FEATURE_NAME     ' Maintain compatibility
+      #ENDIF
+
+  - pattern: "default_fallback_notice"
+    description: "Inform user when defaults are being applied"
+    code: |
+      #IFNDEF BAUD_RATE
+      #DEFINE BAUD_RATE 115200
+      #WARN "BAUD_RATE not specified, defaulting to 115200"
+      #ENDIF
+
+  - pattern: "performance_hint"
+    description: "Suggest better configurations"
+    code: |
+      #IFDEF DEBUG_LOGGING
+      #WARN "DEBUG_LOGGING adds overhead - disable for production"
+      #ENDIF
+
+notes:
+  - "Available in v47+ compilers"
+  - "Message must be enclosed in double quotes"
+  - "Compilation continues after warning"
+  - "Use for non-fatal issues - deprecation, hints, defaults"
+  - "For fatal errors that should stop compilation, use #ERROR instead"
+  - "Warnings help maintain code quality without blocking builds"
+  - "Good for gradual deprecation of features"
+
+related:
+  - language/spin2/preprocessor/error.yaml
+  - language/spin2/preprocessor/ifdef.yaml
+  - language/spin2/preprocessor/ifndef.yaml
+  - language/spin2/preprocessor/preprocessor-overview.yaml
+
+see_also:
+  - "Configuration management"
+  - "Deprecation strategy"
+  - "Build warnings"
+
+oneliner: "Generate compile-time warning without stopping compilation (v47+)"

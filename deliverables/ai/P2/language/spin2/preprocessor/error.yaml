@@ -1,0 +1,123 @@
+directive: "#ERROR"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Generates a compile-time error with a custom message, stopping compilation.
+  Use this directive to enforce required configuration, detect incompatible
+  option combinations, or provide clear guidance when configuration is incomplete.
+  Available in PNut/pnut_ts v47 and later compilers.
+
+syntax:
+  basic: '#ERROR "message"'
+
+parameters:
+  - name: "message"
+    type: "string"
+    description: "Error message text enclosed in double quotes"
+
+behavior:
+  - "Compilation stops immediately when #ERROR is encountered"
+  - "The message is displayed to the user"
+  - "No object code is generated"
+  - "Line number and file are reported with the error"
+
+examples:
+  - code: |
+      ' Require exactly one PSRAM configuration
+      #IFNDEF USE_PSRAM16
+      #IFNDEF USE_PSRAM8
+      #IFNDEF USE_PSRAM4
+      #ERROR "Must define exactly one of USE_PSRAM16, USE_PSRAM8, or USE_PSRAM4"
+      #ENDIF
+      #ENDIF
+      #ENDIF
+    description: "Enforce required configuration"
+
+  - code: |
+      ' Detect incompatible options
+      #IFDEF USE_I2C
+      #IFDEF USE_SPI_ON_SAME_PINS
+      #ERROR "Cannot use I2C and SPI on same pins - choose one protocol"
+      #ENDIF
+      #ENDIF
+    description: "Prevent incompatible configurations"
+
+  - code: |
+      ' Validate clock configuration
+      #IFNDEF CLOCK_SPEED
+      #ERROR "CLOCK_SPEED must be defined (use -D CLOCK_SPEED=200000000)"
+      #ENDIF
+    description: "Require external symbol definition"
+
+  - code: |
+      ' Multi-condition validation with clear guidance
+      #IFDEF BOARD_P2EDGE
+        LED_PIN = 56
+      #ELSEIFDEF BOARD_P2EVAL
+        LED_PIN = 0
+      #ELSEIFDEF BOARD_CUSTOM
+        LED_PIN = 16
+      #ELSE
+      #ERROR "Unknown board type - define BOARD_P2EDGE, BOARD_P2EVAL, or BOARD_CUSTOM"
+      #ENDIF
+    description: "Provide fallback error with guidance"
+
+  - code: |
+      ' Deprecation enforcement - hard stop
+      #IFDEF USE_OLD_API
+      #ERROR "USE_OLD_API has been removed - migrate to new API"
+      #ENDIF
+    description: "Block deprecated configurations"
+
+common_patterns:
+  - pattern: "require_one_of_set"
+    description: "Ensure exactly one option from a set is defined"
+    code: |
+      #IFNDEF OPTION_A
+      #IFNDEF OPTION_B
+      #IFNDEF OPTION_C
+      #ERROR "Must define one of: OPTION_A, OPTION_B, OPTION_C"
+      #ENDIF
+      #ENDIF
+      #ENDIF
+
+  - pattern: "mutex_violation"
+    description: "Detect mutually exclusive options both being set"
+    code: |
+      #IFDEF DEBUG_BUILD
+      #IFDEF RELEASE_BUILD
+      #ERROR "Cannot define both DEBUG_BUILD and RELEASE_BUILD"
+      #ENDIF
+      #ENDIF
+
+  - pattern: "minimum_version_check"
+    description: "Ensure required feature availability"
+    code: |
+      #IFNDEF COMPILER_V48_FEATURES
+      #ERROR "This code requires compiler v48+ features"
+      #ENDIF
+
+notes:
+  - "Available in v47+ compilers"
+  - "Message must be enclosed in double quotes"
+  - "Compilation halts immediately - no object file produced"
+  - "Use for required configuration and hard errors"
+  - "For non-fatal warnings, use #WARN instead"
+  - "Place validation checks early in source file"
+  - "Error message should be actionable - tell user how to fix"
+
+related:
+  - language/spin2/preprocessor/warn.yaml
+  - language/spin2/preprocessor/ifdef.yaml
+  - language/spin2/preprocessor/ifndef.yaml
+  - language/spin2/preprocessor/preprocessor-overview.yaml
+
+see_also:
+  - "Configuration validation"
+  - "Build system integration"
+  - "Error handling"
+
+oneliner: "Generate compile-time error with custom message, stopping compilation (v47+)"

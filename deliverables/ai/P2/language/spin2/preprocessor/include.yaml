@@ -1,0 +1,188 @@
+directive: "#INCLUDE"
+type: preprocessor
+category: Preprocessor Directives
+
+minimum_version: "v47"
+
+description: |
+  Inserts the contents of another Spin2 file at the directive location.
+  The included file is processed as if its contents were written directly
+  at the #INCLUDE location. This enables code reuse and modular organization.
+  Available in PNut/pnut_ts v47 and later compilers.
+
+syntax:
+  basic: '#INCLUDE "filename"'
+  with_extension: '#INCLUDE "filename.spin2"'
+  with_path: '#INCLUDE "subdir/filename"'
+
+parameters:
+  - name: "filename"
+    type: "string"
+    description: "Name of the file to include, enclosed in double quotes"
+
+file_resolution:
+  order:
+    - step: 1
+      description: "Directories specified by -I command-line option (in order)"
+    - step: 2
+      description: "Directory containing the source file"
+  extension:
+    description: "The .spin2 extension is optional and added automatically if missing"
+    example: '#INCLUDE "utils" is equivalent to #INCLUDE "utils.spin2"'
+  restriction: "Only .spin2 files can be included"
+
+examples:
+  - code: |
+      ' Main program includes utility methods
+      PUB main()
+        init_system()
+        run_application()
+
+      #INCLUDE "utility_methods"
+
+      ' Code continues after included content
+    description: "Basic file inclusion"
+
+  - code: |
+      ' Include from subdirectory
+      #INCLUDE "drivers/serial_driver"
+      #INCLUDE "inc/common_constants"
+    description: "Including files from subdirectories"
+
+  - code: |
+      ' Include guard pattern - prevents double inclusion
+      ' In utils.spin2:
+      #IFNDEF UTILS_INCLUDED
+      #DEFINE UTILS_INCLUDED
+
+      PUB helper_one() : result
+        result := 42
+
+      PUB helper_two() : result
+        result := 100
+
+      #ENDIF
+    description: "Include guard pattern to prevent duplicate definitions"
+
+  - code: |
+      ' Configuration include at start of file
+      CON
+      #INCLUDE "board_config"
+
+        _clkfreq = CLK_FREQ    ' CLK_FREQ defined in board_config.spin2
+
+      PUB main()
+        init_board()
+    description: "Including configuration constants"
+
+  - code: |
+      ' Conditional inclusion based on configuration
+      #IFDEF USE_ADVANCED_DRIVER
+        #INCLUDE "driver_advanced"
+      #ELSE
+        #INCLUDE "driver_simple"
+      #ENDIF
+    description: "Conditional file inclusion"
+
+command_line:
+  option: "-I"
+  syntax: "pnut_ts -I path source.spin2"
+  multiple: "pnut_ts -I ./common -I ./drivers source.spin2"
+  description: "Add directories to include search path"
+
+common_patterns:
+  - pattern: "include_guard"
+    description: "Prevent multiple inclusion of same file"
+    code: |
+      ' At start of includable file:
+      #IFNDEF MYFILE_INCLUDED
+      #DEFINE MYFILE_INCLUDED
+
+      ' ... file contents ...
+
+      #ENDIF
+
+  - pattern: "shared_config"
+    description: "Share constants across multiple source files"
+    code: |
+      ' config.spin2:
+      CON
+        SYSTEM_VERSION = 1
+        DEFAULT_BAUD = 115200
+
+      ' main.spin2:
+      #INCLUDE "config"
+
+  - pattern: "method_library"
+    description: "Include reusable method definitions"
+    code: |
+      ' math_utils.spin2:
+      PUB clamp(value, min_val, max_val) : result
+        result := value #> min_val <# max_val
+
+      ' app.spin2:
+      #INCLUDE "math_utils"
+
+      PUB process(x)
+        return clamp(x, 0, 255)
+
+anti_patterns:
+  - anti_pattern: "no_include_guard"
+    severity: "compile_error"
+    description: "Including same file multiple times causes duplicate definitions"
+    wrong: |
+      ' utils.spin2 (no guard):
+      PUB helper_func()
+        return 0
+
+      ' main.spin2:
+      #INCLUDE "utils"
+      #INCLUDE "other"     ' If other.spin2 also includes utils.spin2,
+                           ' helper_func is defined twice - error!
+    correct: |
+      ' utils.spin2 (with guard):
+      #IFNDEF UTILS_INCLUDED
+      #DEFINE UTILS_INCLUDED
+
+      PUB helper_func()
+        return 0
+
+      #ENDIF
+
+  - anti_pattern: "include_in_wrong_section"
+    severity: "unexpected_behavior"
+    description: "Include placement matters - content must fit syntax context"
+    wrong: |
+      CON
+        X = 10
+      #INCLUDE "methods"   ' Methods file starts with PUB - syntax error!
+        Y = 20
+    correct: |
+      CON
+        X = 10
+        Y = 20
+
+      #INCLUDE "methods"   ' Include at appropriate location
+
+notes:
+  - "Available in v47+ compilers"
+  - "Filename must be enclosed in double quotes"
+  - "The .spin2 extension is optional (added automatically)"
+  - "Only .spin2 files can be included"
+  - "Search order: -I directories first, then source file directory"
+  - "Included files can contain any valid Spin2 code"
+  - "Use include guards to prevent duplicate inclusion"
+  - "Include placement affects where code appears in the compiled result"
+
+related:
+  - language/spin2/preprocessor/preprocessor-overview.yaml
+  - language/spin2/preprocessor/ifdef.yaml
+  - language/spin2/preprocessor/define.yaml
+  - language/spin2/constructs/blocks.yaml
+
+see_also:
+  - "File organization"
+  - "Code reuse"
+  - "Modular design"
+
+oneliner: "Include contents of another Spin2 file at directive location (v47+)"

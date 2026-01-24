@@ -65,14 +65,15 @@ operator_categories:
         description: "Three-way compare: returns -1, 0, or +1"
     unsigned:
       note: "Use + prefix for unsigned comparisons"
-      - operator: "+<"
-        description: "Less than (unsigned)"
-      - operator: "+>"
-        description: "Greater than (unsigned)"
-      - operator: "+<="
-        description: "Less than or equal (unsigned)"
-      - operator: "+>="
-        description: "Greater than or equal (unsigned)"
+      operators:
+        - operator: "+<"
+          description: "Less than (unsigned)"
+        - operator: "+>"
+          description: "Greater than (unsigned)"
+        - operator: "+<="
+          description: "Less than or equal (unsigned)"
+        - operator: "+>="
+          description: "Greater than or equal (unsigned)"
     equality:
       - operator: "=="
         description: "Equal to"
@@ -104,12 +105,13 @@ operator_categories:
         type: "Logical NOT"
 
   limit:
-    - operator: "#>"
-      description: "Limit minimum (force >= value)"
-      example: "value #> 0  ' Clamp to at least 0"
-    - operator: "<#"
-      description: "Limit maximum (force <= value)"
-      example: "value <# 255  ' Clamp to at most 255"
+    operators:
+      - operator: "#>"
+        description: "Limit minimum (force >= value)"
+        example: "value #> 0  ' Clamp to at least 0"
+      - operator: "<#"
+        description: "Limit maximum (force <= value)"
+        example: "value <# 255  ' Clamp to at most 255"
     chaining: "value #> 0 <# 255  ' Clamp to 0-255 range"
 
   unary_bit_operations:
