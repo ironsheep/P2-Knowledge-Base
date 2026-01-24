@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T01:22:41.565831",
+    "generated": "2026-01-24T01:59:39.645258",
     "total_entries": 1027,
     "total_categories": 47,
     "total_aliases": 941,
@@ -6110,7 +6110,7 @@
     },
     "p2kbSpin2ObjectArchetypes": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
-      "mtime": 1769216845
+      "mtime": 1769218910
     },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
@@ -7290,7 +7290,7 @@
     },
     "p2kbSpin2Spin2BufferManagement": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_buffer_management.yaml",
-      "mtime": 1764449566
+      "mtime": 1769218910
     },
     "p2kbSpin2Spin2CogManagement": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_cog_management.yaml",
@@ -7346,7 +7346,7 @@
     },
     "p2kbSpin2Spin2TimingControl": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_timing_control.yaml",
-      "mtime": 1764449566
+      "mtime": 1769218910
     },
     "p2kbSpin2PatternIndex": {
       "path": "deliverables/ai/P2/language/spin2/patterns/pattern-index.yaml",
@@ -7354,15 +7354,15 @@
     },
     "p2kbSpin2FewObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/few_objects.yaml",
-      "mtime": 1768613644
+      "mtime": 1769218910
     },
     "p2kbSpin2FrameworkPattern": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/framework_pattern.yaml",
-      "mtime": 1764449566
+      "mtime": 1769218910
     },
     "p2kbSpin2NoObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/no_objects.yaml",
-      "mtime": 1764449566
+      "mtime": 1769218910
     },
     "p2kbSpin2NoObjectsMinimal": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/no_objects_minimal.yaml",
@@ -7370,11 +7370,11 @@
     },
     "p2kbSpin2SeveralObjects": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/several_objects.yaml",
-      "mtime": 1768613644
+      "mtime": 1769218910
     },
     "p2kbSpin2SingleObject": {
       "path": "deliverables/ai/P2/language/spin2/patterns/structural/single_object.yaml",
-      "mtime": 1768613644
+      "mtime": 1769218910
     },
     "p2kbSpin2Define": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/define.yaml",
