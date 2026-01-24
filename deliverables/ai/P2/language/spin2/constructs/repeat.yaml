@@ -1,5 +1,5 @@
 # Spin2 Language Construct: REPEAT
-# Source: Spin2 v51 documentation
+# Source: Spin2 v51 documentation, pnut_ts Control-Flow-Usage-Guide.md
 # Critical for: Loop control and iteration
 
 construct: "REPEAT"
@@ -73,6 +73,53 @@ variants:
     example: |
       REPEAT j FROM 100 TO 0 STEP -10
         pwm_value := j
+
+  - variant: "count_with_var"
+    syntax: "REPEAT count WITH variable"
+    description: "Shorthand for counting from 0 to count-1"
+    example: |
+      REPEAT 10 WITH i           ' i = 0, 1, 2, ..., 9
+        indices[i] := i
+
+      ' Equivalent to:
+      REPEAT i FROM 0 TO 9
+        indices[i] := i
+    use_cases:
+      - "Array initialization with index"
+      - "When you need both count and index variable"
+
+  - variant: "post_while"
+    syntax: |
+      REPEAT
+        statements
+      WHILE condition
+    description: "Test condition AFTER each iteration - block always executes at least once"
+    example: |
+      REPEAT
+        value := read_input()
+      WHILE value < 0 OR value > 100  ' Re-prompt if invalid
+
+  - variant: "post_until"
+    syntax: |
+      REPEAT
+        statements
+      UNTIL condition
+    description: "Test condition AFTER each iteration - block always executes at least once"
+    example: |
+      REPEAT
+        byte_val := receive()
+        store(byte_val)
+      UNTIL byte_val == END_MARKER
+
+pre_vs_post_condition:
+  pre_condition:
+    forms: ["REPEAT WHILE condition", "REPEAT UNTIL condition"]
+    behavior: "Test BEFORE each iteration"
+    note: "Block may never execute if initial condition fails"
+  post_condition:
+    forms: ["REPEAT ... WHILE condition", "REPEAT ... UNTIL condition"]
+    behavior: "Test AFTER each iteration"
+    note: "Block always executes at least once"
 
 control_keywords:
   - keyword: "NEXT"
@@ -170,13 +217,41 @@ pitfalls:
       REPEAT
         IF done
           QUIT
-    
+
   - pitfall: "wrong_step_direction"
     description: "Using positive step when going backward"
     wrong: |
       REPEAT i FROM 10 TO 0 STEP 1    ' Never executes!
     correct: |
       REPEAT i FROM 10 TO 0 STEP -1   ' Or just FROM 10 TO 0
+
+  - pitfall: "modifying_loop_variable"
+    description: "Modifying loop variable in FROM..TO loop - undefined behavior"
+    wrong: |
+      REPEAT i FROM 0 TO 10
+        i += 2                   ' Don't do this!
+        process(i)
+    correct: |
+      ' Use WHILE for complex iteration control
+      i := 0
+      REPEAT WHILE i <= 10
+        process(i)
+        i += 3
+
+  - pitfall: "post_condition_processes_invalid"
+    description: "Post-condition loop processes data before checking validity"
+    wrong: |
+      REPEAT
+        value := read_input()
+        process(value)           ' Processes even if invalid!
+      UNTIL value == VALID
+    correct: |
+      ' Check before processing
+      REPEAT
+        value := read_input()
+        IF value == VALID
+          process(value)
+      UNTIL value == VALID
 
 performance:
   overhead: "Minimal - typically 2-4 PASM2 instructions per iteration"
@@ -185,12 +260,11 @@ performance:
     - "Place most likely QUIT condition first in nested IFs"
     - "Consider unrolling small fixed loops"
 
-related_constructs:
-  - "p2kbSpin2IfElseifElse"
-  - "p2kbSpin2Case"
-  - "p2kbSpin2Abort"
-  
-related_methods:
-  - "WAITMS"
-  - "WAITUS"
-  - "WAITCT"
+related:
+  - language/spin2/constructs/if_elseif_else.yaml
+  - language/spin2/constructs/case.yaml
+  - language/spin2/constructs/next.yaml
+  - language/spin2/constructs/quit.yaml
+  - language/spin2/methods/waitms.yaml
+  - language/spin2/methods/waitus.yaml
+  - language/spin2/methods/waitct.yaml

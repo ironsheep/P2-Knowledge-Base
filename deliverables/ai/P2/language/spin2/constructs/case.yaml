@@ -1,5 +1,5 @@
 # Spin2 Language Construct: CASE
-# Source: Spin2 v51 documentation  
+# Source: Spin2 v51 documentation, pnut_ts Control-Flow-Usage-Guide.md
 # Critical for: Multi-way branching and efficient decision trees
 
 construct: "CASE"
@@ -59,8 +59,19 @@ syntax_forms:
       CASE_FAST expression
         match1: action1
         match2: action2
-    description: "Optimized for speed, requires compile-time constants"
-    note: "Generates jump table for O(1) dispatch"
+    description: "Optimized for speed, generates jump table for O(1) dispatch"
+    constraints:
+      - "All case values must be within 255 of each other"
+      - "Works best with dense integer ranges (0, 1, 2, 3...)"
+      - "Generates larger code for sparse values"
+    when_to_use:
+      - "Command dispatch with sequential integer codes"
+      - "State machine transitions"
+      - "Menu selections with numeric choices"
+    when_not_to_use:
+      - "Character matching (use regular CASE)"
+      - "Sparse value sets"
+      - "Ranges spanning more than 255"
 
   - form: "inline_case"
     syntax: "CASE x : 1: a(), 2: b(), OTHER: c()"
@@ -164,14 +175,41 @@ pitfalls:
     correct: |
       IF x >= 0 AND x <= max_value
         process()
-    
+
   - pitfall: "forgetting_other"
-    description: "Not handling unexpected values"
-    recommendation: "Always include OTHER clause for robustness"
-    
+    description: "Not handling unexpected values - silent failure if unmatched"
+    wrong: |
+      CASE state
+        0: idle()
+        1: running()
+        2: stopped()
+      ' What if state is 3? Silent failure!
+    correct: |
+      CASE state
+        0: idle()
+        1: running()
+        2: stopped()
+        OTHER:
+          log_error("Unknown state")
+          state := 0
+
+  - pitfall: "case_fast_sparse_values"
+    description: "Using CASE_FAST with sparse values - inefficient or error"
+    wrong: |
+      CASE_FAST code
+        1: handle_1()
+        100: handle_100()
+        1000: handle_1000()  ' ERROR: range > 255
+    correct: |
+      ' Use regular CASE for sparse values
+      CASE code
+        1: handle_1()
+        100: handle_100()
+        1000: handle_1000()
+
   - pitfall: "case_vs_case_fast"
     description: "Using CASE when CASE_FAST would be better"
-    guideline: "Use CASE_FAST when all matches are constants"
+    guideline: "Use CASE_FAST for dense integer constants within 255 range"
 
 performance:
   case_regular:
@@ -207,11 +245,8 @@ pasm_equivalent:
     JMP #case_1
     JMP #case_2
 
-related_constructs:
-  - "p2kbSpin2IfElseifElse"
-  - "p2kbSpin2Repeat"
-  
-related_concepts:
-  - "Jump table optimization"
-  - "State machine patterns"
-  - "Command dispatch patterns"
+related:
+  - language/spin2/constructs/if_elseif_else.yaml
+  - language/spin2/constructs/repeat.yaml
+  - language/spin2/keywords/CASE.yaml
+  - language/spin2/keywords/CASE_FAST.yaml

@@ -1,13 +1,13 @@
-# Spin2 Language Construct: IF/ELSEIF/ELSE
-# Source: Spin2 v51 documentation
+# Spin2 Language Construct: IF/IFNOT/ELSEIF/ELSEIFNOT/ELSE
+# Source: Spin2 v51 documentation, pnut_ts Control-Flow-Usage-Guide.md
 # Critical for: Conditional execution and branching
 
-construct: "IF/ELSEIF/ELSE"
+construct: "IF/IFNOT/ELSEIF/ELSEIFNOT/ELSE"
 category: "control_flow"
 type: "conditional"
 
 metadata:
-  query_tags: ["if", "conditional", "branch", "elseif", "else", "decision", "test"]
+  query_tags: ["if", "ifnot", "conditional", "branch", "elseif", "elseifnot", "else", "decision", "test"]
   complexity: "beginner"
   use_cases: ["conditional_execution", "decision_trees", "value_testing", "state_checks"]
   common_questions:
@@ -62,6 +62,35 @@ syntax_forms:
     description: "Single-line conditional execution"
     example: |
       IF button_pressed() : counter++
+
+  - form: "ifnot"
+    syntax: "IFNOT condition"
+    description: "Execute block when condition is FALSE (zero)"
+    example: |
+      ' Execute if sensor_value is zero
+      IFNOT sensor_value
+        handle_no_signal()
+
+      ' Equivalent to:
+      IF sensor_value == 0
+        handle_no_signal()
+    note: "IFNOT inverts the condition test"
+
+  - form: "elseifnot"
+    syntax: "ELSEIFNOT condition"
+    description: "Additional branch that executes when condition is FALSE"
+    example: |
+      IF a > 0
+        handle_positive_a()
+      ELSEIFNOT b              ' Execute if b is zero
+        handle_zero_b()
+      ELSE
+        handle_other()
+
+condition_evaluation:
+  TRUE: "Any non-zero value"
+  FALSE: "Zero only"
+  note: "IFNOT and ELSEIFNOT invert the condition test"
 
 block_syntax:
   indentation_rules:
@@ -180,11 +209,11 @@ pitfalls:
     correct: |
       IF x == 10   ' Comparison
       x := 10      ' Assignment
-    
+
   - pitfall: "missing_else"
     description: "Forgetting ELSE in ELSEIF chains"
     consideration: "Always consider if final ELSE is needed"
-    
+
   - pitfall: "indentation_errors"
     description: "Wrong indentation changes block membership"
     wrong: |
@@ -195,6 +224,37 @@ pitfalls:
       IF condition
         statement1
         statement2     ' Same indent - both in IF block
+
+  - pitfall: "deeply_nested_conditionals"
+    description: "Deeply nested conditionals are hard to read and maintain"
+    wrong: |
+      IF a > 0
+        IF b > 0
+          IF c > 0
+            do_something()
+          ELSE
+            do_other()
+        ELSE
+          IF c > 0
+            do_third()
+          ELSE
+            do_fourth()
+      ELSE
+        ' ... more nesting
+    correct: |
+      ' Use early returns or CASE to flatten
+      IF a <= 0
+        handle_non_positive_a()
+        RETURN
+
+      IF b <= 0
+        handle_non_positive_b()
+        RETURN
+
+      IF c > 0
+        do_something()
+      ELSE
+        do_other()
 
 performance:
   evaluation_order: "Left to right with short-circuit"
@@ -217,27 +277,11 @@ pasm_equivalent:
       IF_NC   MOV y, #30
       IF_C    MOV y, #20
 
-related_constructs:
-  - "p2kbSpin2Case"
-  - "p2kbSpin2Repeat"
-  - "p2kbSpin2Abort"
-  
-related_operators:
-  # Comparison operators
-  - "p2kbSpin2OpOpEqeq"
-  - "p2kbSpin2OpOpLtgt"
-  - "p2kbSpin2OpOpLt"
-  - "p2kbSpin2OpOpGt"
-  - "p2kbSpin2OpOpLteq"
-  - "p2kbSpin2OpOpGteq"
-  - "p2kbSpin2OpOpLteqgt"
-  # Logical operators
-  - "p2kbSpin2OpOpAnd"
-  - "p2kbSpin2OpOpAndand"
-  - "p2kbSpin2OpOpOr"
-  - "p2kbSpin2OpOpOror"
-  - "p2kbSpin2OpOpXor"
-  - "p2kbSpin2OpOpXorxor"
-  - "p2kbSpin2OpOpNot"
-  # Ternary operator
-  - "p2kbSpin2OpOpTernary"
+related:
+  - language/spin2/constructs/case.yaml
+  - language/spin2/constructs/repeat.yaml
+  - language/spin2/keywords/IF.yaml
+  - language/spin2/keywords/IFNOT.yaml
+  - language/spin2/keywords/ELSEIF.yaml
+  - language/spin2/keywords/ELSEIFNOT.yaml
+  - language/spin2/keywords/ELSE.yaml

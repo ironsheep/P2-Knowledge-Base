@@ -50,4 +50,7 @@ comparison:
   next: "Skips to next iteration"
   abort: "Exits entire method"
 
-related: ["p2kbSpin2Repeat", "p2kbSpin2Next", "p2kbSpin2Abort"]
+related:
+  - language/spin2/constructs/repeat.yaml
+  - language/spin2/constructs/next.yaml
+  - language/spin2/keywords/QUIT.yaml
