@@ -1,9 +1,10 @@
 method: LOOKDOWN
 type: method
-description: |
-  Find 1-based index of value in list
+description: Find 1-based index of value in list (value → index)
 category: Lookup Operations
+
 syntax: "index := LOOKDOWN(Value : Match1, Match2, ..., MatchN)"
+
 parameters:
   - name: "Value"
     type: "long"
@@ -11,40 +12,119 @@ parameters:
   - name: "Matches"
     type: "list"
     description: "Comma-separated list of values or ranges to match"
+
 returns:
   type: "integer"
-  description: "1-based index of match, or 0 if not found"
+  description: "1-based index of match (1 = first), or 0 if not found"
+
+index_mapping:
+  description: "1-based return value diagram"
+  example: |
+    Items:          A    B    C    D    E
+    LOOKDOWN finds: 1    2    3    4    5
+    Not found returns: 0
+
 examples:
-  - code: |
-      ' Find value position
+  - description: "Find value position"
+    code: |
       pos := LOOKDOWN(30 : 10, 20, 30, 40, 50)
       ' Returns 3 (30 is 3rd item)
-    description: "Find value in list"
-  - code: |
-      ' Character classification
-      type := LOOKDOWN(char : "A".."Z", "a".."z", "0".."9")
-      ' Returns 1 for uppercase, 2 for lowercase, 3 for digit
-    description: "Classify character type"
-  - code: |
-      ' Command parsing
-      cmd := LOOKDOWN(value : $01, $02, $04, $08, $10)
-      case cmd
-        1: handle_read()
-        2: handle_write()
-        3: handle_status()
-    description: "Map value to command index"
+
+  - description: "Check if character is vowel"
+    code: |
+      PUB is_vowel(char) : result
+        ' Returns 1-10 if vowel, 0 if not
+        result := LOOKDOWN(char : "A", "E", "I", "O", "U",
+                                  "a", "e", "i", "o", "u")
+
+  - description: "Character classification with ranges"
+    code: |
+      PUB classify_char(char) : category
+        if LOOKDOWN(char : "0".."9")
+          category := CAT_DIGIT
+        elseif LOOKDOWN(char : "A".."Z")
+          category := CAT_UPPER
+        elseif LOOKDOWN(char : "a".."z")
+          category := CAT_LOWER
+        else
+          category := CAT_OTHER
+
+  - description: "Value validation"
+    code: |
+      PUB validate_pin_group(group) : valid
+        ' Check if pin group is valid (returns non-zero if valid)
+        valid := LOOKDOWN(group : PINS_P0_P15, PINS_P16_P31, PINS_P32_P47) <> 0
+
+common_patterns:
+  - pattern: "value_exists_check"
+    description: "Check if value is in a set"
+    code: |
+      ' LOOKDOWN returns 0 if not found, non-zero if found
+      if LOOKDOWN(user_input : VALID1, VALID2, VALID3)
+        process(user_input)
+      else
+        report_error()
+
+  - pattern: "range_membership"
+    description: "Check if value is in valid range"
+    code: |
+      ' Range expands to all values between start and end
+      if LOOKDOWN(voltage : PWR_7p4V..PWR_24p0V) <> 0
+        valid := TRUE
+
+  - pattern: "whitespace_check"
+    description: "Check if character is whitespace"
+    code: |
+      PUB is_whitespace(char) : result
+        result := LOOKDOWN(char : " ", 9, 10, 13) <> 0  ' space, tab, LF, CR
+
+  - pattern: "alphanumeric_check"
+    description: "Check if character is letter or digit"
+    code: |
+      PUB is_alphanumeric(char) : result
+        result := LOOKDOWN(char : "0".."9", "A".."Z", "a".."z") <> 0
+
+anti_patterns:
+  - anti_pattern: "using_lookup_for_validation"
+    description: "LOOKUP checks index, LOOKDOWN checks value"
+    wrong: |
+      if LOOKUP(user_input : VALID1, VALID2, VALID3)  ' Checks INDEX, not value!
+        process(user_input)
+    correct: |
+      if LOOKDOWN(user_input : VALID1, VALID2, VALID3)  ' Checks if VALUE exists
+        process(user_input)
+
+  - anti_pattern: "ignoring_return_value"
+    description: "Not using LOOKDOWN result for anything"
+    wrong: |
+      LOOKDOWN(char : "A".."Z")  ' Result discarded!
+      process_uppercase()
+    correct: |
+      if LOOKDOWN(char : "A".."Z")
+        process_uppercase()
+
+when_to_use:
+  lookdown_is_best:
+    - "Checking if value exists in a set"
+    - "Value validation"
+    - "Character classification"
+    - "Finding position of value in small list"
+  use_lookdownz_instead:
+    - "Need 0-based index for array access"
+    - "Working with 0-based enums"
+
 notes:
   - "Returns 1-based index (1 = first match)"
   - "Returns 0 if value not found"
   - "Supports ranges with .. operator"
   - "Searches left to right, returns first match"
   - "Inverse operation of LOOKUP"
-  - "Useful for classification and mapping"
+  - "Primary use: value validation (non-zero = found)"
+  - "Ranges expand: 'A'..'Z' becomes 26 separate values"
+
 related:
-  - LOOKDOWNZ
-  - LOOKUP
-  - LOOKUPZ
-see_also:
-  - "Value searching"
-  - "Classification"
-  - "Reverse lookup"
+  - language/spin2/methods/lookdownz.yaml
+  - language/spin2/methods/lookup.yaml
+  - language/spin2/methods/lookupz.yaml
+  - language/spin2/concepts/table_lookup.yaml
+  - language/spin2/constructs/if_elseif_else.yaml

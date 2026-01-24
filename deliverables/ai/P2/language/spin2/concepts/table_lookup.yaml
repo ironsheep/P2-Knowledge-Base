@@ -1,0 +1,270 @@
+# Spin2 Table Lookup Functions - Comprehensive Guide
+# Source: pnut_ts Lookup-Table-Usage-Guide.md
+# Critical for: Table-driven programming, value mapping, validation
+
+concept: "Table Lookup Functions"
+category: "built_in_functions"
+
+metadata:
+  query_tags: ["lookup", "lookupz", "lookdown", "lookdownz", "table", "mapping", "validation"]
+  complexity: "intermediate"
+  use_cases: ["enum_conversion", "value_validation", "character_classification", "index_mapping"]
+  common_questions:
+    - "How do I convert an index to a value?"
+    - "How do I check if a value is in a list?"
+    - "What's the difference between LOOKUP and LOOKUPZ?"
+    - "When should I use LOOKUP vs CASE vs array?"
+
+overview: |
+  Spin2 provides four lookup functions for table-driven programming:
+
+  - LOOKUP / LOOKUPZ - Index → Value (given index, return value)
+  - LOOKDOWN / LOOKDOWNZ - Value → Index (given value, find index)
+
+  The "Z" suffix indicates zero-based indexing; without it, indexing is one-based.
+  All functions support both discrete value lists AND ranges using the ".." operator.
+
+function_family:
+  - function: "LOOKUP"
+    direction: "Index → Value"
+    base: "1-based"
+    first_item: "Index 1"
+    returns_on_failure: "0"
+    syntax: "value := LOOKUP(index : item1, item2, ..., itemN)"
+
+  - function: "LOOKUPZ"
+    direction: "Index → Value"
+    base: "0-based"
+    first_item: "Index 0"
+    returns_on_failure: "0"
+    syntax: "value := LOOKUPZ(index : item0, item1, ..., itemN)"
+
+  - function: "LOOKDOWN"
+    direction: "Value → Index"
+    base: "1-based"
+    first_item: "Returns 1"
+    returns_on_failure: "0"
+    syntax: "index := LOOKDOWN(value : item1, item2, ..., itemN)"
+
+  - function: "LOOKDOWNZ"
+    direction: "Value → Index"
+    base: "0-based"
+    first_item: "Returns 0"
+    returns_on_failure: "0 (AMBIGUOUS!)"
+    syntax: "index := LOOKDOWNZ(value : item0, item1, ..., itemN)"
+    warning: "Returns 0 for both 'found at index 0' AND 'not found'"
+
+index_relationship:
+  description: "Visual mapping of indices"
+  diagram: |
+    Items:         A    B    C    D    E
+                   |    |    |    |    |
+    LOOKUP:        1    2    3    4    5    (out of range returns 0)
+    LOOKUPZ:       0    1    2    3    4    (out of range returns 0)
+    LOOKDOWN:      1    2    3    4    5    (not found returns 0)
+    LOOKDOWNZ:     0    1    2    3    4    (not found returns 0 - AMBIGUOUS!)
+
+range_support:
+  description: "All functions support ranges with the '..' operator"
+  examples:
+    - pattern: '"A".."Z"'
+      expands_to: "26 values: A, B, C, ... Z"
+    - pattern: '"0".."9"'
+      expands_to: "10 values: 0, 1, 2, ... 9"
+    - pattern: "100..105"
+      expands_to: "6 values: 100, 101, 102, 103, 104, 105"
+  code_example: |
+    ' Character classification using ranges
+    PUB classify_char(char) : category
+      if LOOKDOWN(char : "0".."9")
+        category := CAT_DIGIT
+      elseif LOOKDOWN(char : "A".."Z")
+        category := CAT_UPPER
+      elseif LOOKDOWN(char : "a".."z")
+        category := CAT_LOWER
+      else
+        category := CAT_OTHER
+
+choosing_the_right_function:
+  lookup_vs_lookupz:
+    description: "Choose based on index base"
+    use_lookup:
+      - "User-facing indices (menu option 1, 2, 3)"
+      - "Day-of-week (1=Sunday through 7=Saturday)"
+      - "1-based enumeration"
+    use_lookupz:
+      - "Array-style 0-based access"
+      - "C-style enums starting at 0"
+      - "When index comes from LOOKDOWNZ"
+
+  lookdown_vs_lookdownz:
+    description: "Choose based on index need"
+    use_lookdown:
+      - "Value validation (non-zero = found)"
+      - "When 'not found' must be unambiguous"
+      - "Most validation use cases"
+    use_lookdownz:
+      - "Need 0-based index for array access"
+      - "First item cannot possibly be the search value"
+
+comparison_with_alternatives:
+  lookup_vs_case_vs_array:
+    lookup:
+      max_practical_size: "~20 items"
+      runtime_modifiable: "No"
+      code_execution: "No (returns value only)"
+      memory: "Inline"
+      index_type: "Sequential"
+      best_for: "Small constant tables, inline expressions"
+
+    case:
+      max_practical_size: "~20 cases"
+      runtime_modifiable: "No"
+      code_execution: "Yes (each case runs code)"
+      memory: "Inline"
+      index_type: "Any (non-sequential OK)"
+      best_for: "Complex logic per case, state machines"
+
+    array:
+      max_practical_size: "Unlimited"
+      runtime_modifiable: "Yes"
+      code_execution: "No (returns value only)"
+      memory: "DAT/VAR section"
+      index_type: "Sequential"
+      best_for: "Large tables, runtime modification"
+
+  decision_guide:
+    use_lookup_when:
+      - "Index-to-value mapping with small, fixed list"
+      - "Values are compile-time constants"
+      - "Need inline expression (no separate data structure)"
+      - "List has ~20 items or fewer"
+
+    use_case_when:
+      - "Complex logic per case (need code execution)"
+      - "Non-sequential indices"
+      - "Need to execute multiple statements per match"
+
+    use_array_when:
+      - "Large number of values (>20)"
+      - "Values change at runtime"
+      - "Need random access by computed index"
+
+common_patterns:
+  - pattern: "enum_to_string"
+    description: "Convert error code to human-readable name"
+    code: |
+      CON
+        ERR_NONE     = 0
+        ERR_TIMEOUT  = 1
+        ERR_OVERFLOW = 2
+
+      PUB error_name(code) : name_ptr
+        name_ptr := LOOKUP(code + 1 : @"None", @"Timeout", @"Overflow")
+        if name_ptr == 0
+          name_ptr := @"Unknown"
+
+  - pattern: "value_validation"
+    description: "Check if value is in valid set"
+    code: |
+      PUB validate_input(value) : valid
+        valid := LOOKDOWN(value : VALID1, VALID2, VALID3) <> 0
+
+  - pattern: "character_classification"
+    description: "Classify character type"
+    code: |
+      PUB is_alphanumeric(char) : result
+        result := LOOKDOWN(char : "0".."9", "A".."Z", "a".."z") <> 0
+
+  - pattern: "hex_conversion"
+    description: "Convert value 0-15 to hex character"
+    code: |
+      char := LOOKUPZ(value & $F : "0".."9", "A".."F")
+
+  - pattern: "thousands_separator"
+    description: "Insert commas at thousands positions"
+    code: |
+      PUB print_with_commas(value)
+        repeat
+          if flag ||= (digit := value / place // 10) or place == 1
+            send("0" + digit)
+            if LOOKDOWN(place : 1_000_000_000, 1_000_000, 1_000)
+              send(",")
+        while place /= 10
+
+anti_patterns:
+  - anti_pattern: "wrong_index_base"
+    severity: "common_bug"
+    description: "Using 0 index with LOOKUP (1-based)"
+    wrong: |
+      index := 0
+      pin := LOOKUP(index : PIN_A, PIN_B)   ' Returns 0 (out of range!)
+    correct: |
+      pin := LOOKUPZ(index : PIN_A, PIN_B)  ' Use LOOKUPZ for 0-based
+
+  - anti_pattern: "ambiguous_lookdownz_zero"
+    severity: "critical"
+    description: "Cannot distinguish 'not found' from 'found at index 0'"
+    wrong: |
+      index := LOOKDOWNZ(value : 0, 1, 2, 3)
+      if index == 0
+        ' Is this "found 0" or "not found"? AMBIGUOUS!
+    correct: |
+      ' Use LOOKDOWN for validation (returns 1-4, 0 = not found)
+      if LOOKDOWN(value : 0, 1, 2, 3)
+        found := TRUE
+
+  - anti_pattern: "missing_range_check"
+    severity: "crash_risk"
+    description: "Assuming LOOKUP always returns valid pointer"
+    wrong: |
+      day_name := LOOKUP(day_num : @"Sun", @"Mon", @"Tue")
+      print_string(day_name)  ' Crashes if day_num out of range!
+    correct: |
+      day_name := LOOKUP(day_num : @"Sun", @"Mon", @"Tue")
+      if day_name == 0
+        day_name := @"Invalid"
+      print_string(day_name)
+
+  - anti_pattern: "inefficient_large_tables"
+    severity: "performance"
+    description: "Using LOOKUP for large tables"
+    wrong: |
+      ' LOOKUP with many items is inefficient
+      value := LOOKUP(index : 0, 1, 2, ..., 99)  ' 100+ items
+    correct: |
+      ' Use array for large tables
+      DAT
+        values    long  0, 1, 2, ...
+
+      PUB get_value(index) : value
+        if index >= 0 AND index < TABLE_SIZE
+          value := values[index]
+
+  - anti_pattern: "using_lookup_for_validation"
+    severity: "logic_error"
+    description: "LOOKUP checks index, LOOKDOWN checks value"
+    wrong: |
+      if LOOKUP(user_input : VALID1, VALID2)  ' Checks INDEX!
+        process(user_input)
+    correct: |
+      if LOOKDOWN(user_input : VALID1, VALID2)  ' Checks VALUE
+        process(user_input)
+
+performance:
+  characteristics:
+    - "Compile-time evaluation when possible"
+    - "Efficient for small tables (~20 items)"
+    - "Linear search through list"
+    - "No COG RAM overhead (inline)"
+  recommendation: |
+    For tables larger than ~20 items, consider arrays in DAT section.
+    Arrays provide O(1) access vs O(n) search for LOOKDOWN.
+
+related:
+  - language/spin2/methods/lookup.yaml
+  - language/spin2/methods/lookupz.yaml
+  - language/spin2/methods/lookdown.yaml
+  - language/spin2/methods/lookdownz.yaml
+  - language/spin2/constructs/case.yaml
+  - language/spin2/constructs/repeat.yaml

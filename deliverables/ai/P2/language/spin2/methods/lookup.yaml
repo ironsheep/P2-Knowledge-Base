@@ -1,50 +1,127 @@
 method: LOOKUP
 type: method
-description: Look up value in table using 1-based indexing
+description: Look up value in table using 1-based indexing (index → value)
 category: Lookup Operations
+
 syntax: 'result := LOOKUP(Index : Value1, Value2, ..., ValueN)'
+
 parameters:
-- name: Index
-  type: integer
-  description: 1-based index into value list
-- name: Values
-  type: list
-  description: Comma-separated list of values or ranges
+  - name: Index
+    type: integer
+    description: 1-based index into value list (1 = first item)
+  - name: Values
+    type: list
+    description: Comma-separated list of values or ranges (supports .. operator)
+
 returns:
   type: long
-  description: Value at index position, or 0 if out of range
+  description: Value at index position, or 0 if index out of range
+
+index_mapping:
+  description: "1-based indexing diagram"
+  example: |
+    Items:        A    B    C    D    E
+    LOOKUP index: 1    2    3    4    5
+    Out of range: 0 and 6+ return 0
+
 examples:
-- code: ''' Get value by index
+  - description: "Basic indexed lookup"
+    code: |
+      ' Get value by index
+      value := LOOKUP(3 : 10, 20, 30, 40, 50)
+      ' Returns 30 (index 3 = 3rd item)
 
-    value := LOOKUP(3 : 10, 20, 30, 40, 50)
+  - description: "Enum to string conversion"
+    code: |
+      CON
+        ERR_NONE     = 0
+        ERR_TIMEOUT  = 1
+        ERR_OVERFLOW = 2
 
-    '' Returns 30 (3rd item)
+      PUB error_name(code) : name_ptr
+        ' Convert error code to string (codes are 0-based, add 1 for LOOKUP)
+        name_ptr := LOOKUP(code + 1 : @"None", @"Timeout", @"Overflow")
+        if name_ptr == 0
+          name_ptr := @"Unknown"
 
-    '
-  description: Basic indexed lookup
-- code: ''' Menu selection
+  - description: "Day name lookup"
+    code: |
+      PUB get_day_name(day_num) : name_ptr
+        ' 1=Sunday through 7=Saturday
+        name_ptr := LOOKUP(day_num : @"Sunday", @"Monday", @"Tuesday",
+                                     @"Wednesday", @"Thursday", @"Friday",
+                                     @"Saturday")
+        if name_ptr == 0
+          name_ptr := @"Invalid"
 
-    address := LOOKUP(choice : @option1, @option2, @option3)
+  - description: "Lookup with ranges"
+    code: |
+      ' Range expands to all values between start and end
+      char := LOOKUP(index : "A".."Z", "0".."9")
+      ' "A".."Z" expands to 26 values, "0".."9" adds 10 more
 
-    '
-  description: Select address by menu choice
-- code: ''' Use ranges
+common_patterns:
+  - pattern: "motor_timing_table"
+    description: "Configuration lookup by index"
+    code: |
+      PUB get_motor_offset(motor_type, voltage_index) : offset
+        case motor_type
+          MOTOR_6_5_INCH:
+            offset := LOOKUP(voltage_index : 33, 33, 39, 40, 36, 37, 45)
+          MOTOR_DOCO_4K:
+            offset := LOOKUP(voltage_index : 52, 53, 53, 53, 54, 54, 53)
+          OTHER:
+            offset := 0
 
-    char := LOOKUP(index : "A".."Z", "0".."9")
+anti_patterns:
+  - anti_pattern: "wrong_index_base"
+    description: "Using 0-based index with LOOKUP (returns 0 = out of range)"
+    wrong: |
+      index := 0
+      pin := LOOKUP(index : PIN_A, PIN_B, PIN_C)   ' Returns 0 (out of range!)
+    correct: |
+      index := 0
+      pin := LOOKUPZ(index : PIN_A, PIN_B, PIN_C)  ' Use LOOKUPZ for 0-based
 
-    '
-  description: Lookup with character ranges
+  - anti_pattern: "missing_range_check"
+    description: "Assuming LOOKUP always returns valid value"
+    wrong: |
+      day_name := LOOKUP(day_num : @"Sun", @"Mon", @"Tue", @"Wed",
+                                   @"Thu", @"Fri", @"Sat")
+      print_string(day_name)  ' Crashes if day_num out of range (returns 0)
+    correct: |
+      day_name := LOOKUP(day_num : @"Sun", @"Mon", @"Tue", @"Wed",
+                                   @"Thu", @"Fri", @"Sat")
+      if day_name == 0
+        day_name := @"Invalid"
+      print_string(day_name)
+
+when_to_use:
+  lookup_is_best:
+    - "Index-to-value mapping with small, fixed list"
+    - "Values are compile-time constants"
+    - "Need inline expression (no separate data structure)"
+    - "List has ~20 items or fewer"
+  use_case_instead:
+    - "Complex logic per case (need code execution)"
+    - "Non-sequential indices"
+  use_array_instead:
+    - "Large number of values (>20)"
+    - "Values change at runtime"
+    - "Need random access by computed index"
+
 notes:
-- Index is 1-based (1 = first item)
-- Returns 0 if index < 1 or > count
-- Supports ranges with .. operator
-- Values evaluated at compile time if possible
-- Efficient for small lookup tables
+  - "Index is 1-based (1 = first item)"
+  - "Returns 0 if index < 1 or > count"
+  - "Supports ranges with .. operator"
+  - "Values evaluated at compile time if possible"
+  - "Efficient for small lookup tables (~20 items max)"
+  - "For 0-based indexing, use LOOKUPZ"
+  - "Inverse operation: LOOKDOWN (find index of value)"
+
 related:
-- LOOKUPZ
-- LOOKDOWN
-- LOOKDOWNZ
-see_also:
-- Table lookups
-- Indexed access
-- Value selection
+  - language/spin2/methods/lookupz.yaml
+  - language/spin2/methods/lookdown.yaml
+  - language/spin2/methods/lookdownz.yaml
+  - language/spin2/concepts/table_lookup.yaml
+  - language/spin2/constructs/case.yaml

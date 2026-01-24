@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T00:22:18.895438",
-    "total_entries": 1017,
+    "generated": "2026-01-24T00:29:15.184069",
+    "total_entries": 1018,
     "total_categories": 47,
     "total_aliases": 941,
     "multi_target_aliases": 54,
@@ -6098,7 +6098,7 @@
     },
     "p2kbSpin2FloatingPoint": {
       "path": "deliverables/ai/P2/language/spin2/concepts/floating_point.yaml",
-      "mtime": 1769214039
+      "mtime": 1769214178
     },
     "p2kbSpin2InlinePasm2": {
       "path": "deliverables/ai/P2/language/spin2/concepts/inline_pasm2.yaml",
@@ -6107,6 +6107,10 @@
     "p2kbSpin2MethodPointers": {
       "path": "deliverables/ai/P2/language/spin2/concepts/method-pointers.yaml",
       "mtime": 1769203447
+    },
+    "p2kbSpin2TableLookup": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
+      "mtime": 1769214476
     },
     "p2kbSpin2DebugEndSession": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
@@ -6538,7 +6542,7 @@
     },
     "p2kbSpin2Float": {
       "path": "deliverables/ai/P2/language/spin2/methods/float.yaml",
-      "mtime": 1769213981
+      "mtime": 1769214178
     },
     "p2kbSpin2Getcrc": {
       "path": "deliverables/ai/P2/language/spin2/methods/getcrc.yaml",
@@ -6734,7 +6738,7 @@
     },
     "p2kbSpin2Round": {
       "path": "deliverables/ai/P2/language/spin2/methods/round.yaml",
-      "mtime": 1769214003
+      "mtime": 1769214178
     },
     "p2kbSpin2Rqpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/rqpin.yaml",
@@ -6806,7 +6810,7 @@
     },
     "p2kbSpin2Trunc": {
       "path": "deliverables/ai/P2/language/spin2/methods/trunc.yaml",
-      "mtime": 1769213991
+      "mtime": 1769214178
     },
     "p2kbSpin2Waitatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitatn.yaml",

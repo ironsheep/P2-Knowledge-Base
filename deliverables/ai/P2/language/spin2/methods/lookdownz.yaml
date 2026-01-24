@@ -1,9 +1,10 @@
 method: LOOKDOWNZ
 type: method
-description: |
-  Find 0-based index of value in list
+description: Find 0-based index of value in list (value → index)
 category: Lookup Operations
+
 syntax: "index := LOOKDOWNZ(Value : Match0, Match1, ..., MatchN)"
+
 parameters:
   - name: "Value"
     type: "long"
@@ -11,42 +12,136 @@ parameters:
   - name: "Matches"
     type: "list"
     description: "Comma-separated list of values or ranges to match"
+
 returns:
   type: "integer"
-  description: "0-based index of match, or -1 if not found"
+  description: "0-based index of match (0 = first), or 0 if not found"
+
+critical_warning:
+  issue: "Ambiguous zero return"
+  description: |
+    LOOKDOWNZ returns 0 for BOTH:
+    - "Found at index 0" (first item)
+    - "Not found"
+    This creates ambiguity when 0 is a valid index!
+  solution: "Use LOOKDOWN for validation, or verify result with LOOKUPZ"
+
+index_mapping:
+  description: "0-based return value diagram"
+  example: |
+    Items:           A    B    C    D    E
+    LOOKDOWNZ finds: 0    1    2    3    4
+    Not found returns: 0  ← SAME AS FIRST ITEM!
+
 examples:
-  - code: |
-      ' Find value position
+  - description: "Find value position"
+    code: |
       pos := LOOKDOWNZ(30 : 10, 20, 30, 40, 50)
       ' Returns 2 (30 is at index 2)
-    description: "Find value in list"
-  - code: |
-      ' Menu option mapping
+
+  - description: "Character to digit conversion"
+    code: |
+      PUB char_to_digit(char) : digit
+        ' Convert '0'-'9' to 0-9, returns -1 if invalid
+        digit := LOOKDOWNZ(char : "0".."9")
+        ' CAUTION: digit=0 means EITHER '0' found OR invalid char!
+        if digit == 0 AND char <> "0"
+          digit := -1  ' Distinguish "not found" from "found 0"
+
+  - description: "Hex character to value"
+    code: |
+      PUB hex_to_value(char) : value
+        value := LOOKDOWNZ(char : "0".."9")
+        if value > 0 OR char == "0"
+          return value
+
+        value := LOOKDOWNZ(char : "A".."F")
+        if value > 0 OR char == "A"
+          return value + 10
+
+        value := LOOKDOWNZ(char : "a".."f")
+        if value > 0 OR char == "a"
+          return value + 10
+
+        return -1  ' Invalid hex character
+
+  - description: "Menu option mapping"
+    code: |
       selection := LOOKDOWNZ(key : "Q", "S", "L", "H")
       case selection
-        0: quit_program()
+        0: quit_program()   ' Also executes if key not found!
         1: save_file()
         2: load_file()
         3: show_help()
-    description: "Map key to action"
-  - code: |
-      ' Validate input range
-      if LOOKDOWNZ(value : 0..9, 16..25, 32..47) >= 0
-        ' Value is in valid range
-        process_value(value)
-    description: "Check if value in valid ranges"
+
+common_patterns:
+  - pattern: "safe_digit_conversion"
+    description: "Distinguish 'found at 0' from 'not found'"
+    code: |
+      index := LOOKDOWNZ(value : 0, 1, 2, 3)
+      ' Verify by round-trip lookup
+      if index >= 0 AND index <= 3 AND LOOKUPZ(index : 0, 1, 2, 3) == value
+        found := TRUE
+
+  - pattern: "prefer_lookdown_for_validation"
+    description: "Use LOOKDOWN to avoid ambiguity"
+    code: |
+      ' LOOKDOWN returns 1-4 for found, 0 for not found (no ambiguity)
+      if LOOKDOWN(value : 0, 1, 2, 3)
+        found := TRUE
+
+anti_patterns:
+  - anti_pattern: "ambiguous_zero_return"
+    description: "Cannot distinguish 'not found' from 'found at index 0'"
+    wrong: |
+      index := LOOKDOWNZ(value : 0, 1, 2, 3)
+      if index == 0
+        ' Is this "found 0 at index 0" or "not found"? AMBIGUOUS!
+    correct: |
+      ' Option 1: Use LOOKDOWN (returns 1-4, 0 means not found)
+      if LOOKDOWN(value : 0, 1, 2, 3)
+        found := TRUE
+
+      ' Option 2: Verify with round-trip
+      index := LOOKDOWNZ(value : 0, 1, 2, 3)
+      if LOOKUPZ(index : 0, 1, 2, 3) == value
+        found := TRUE
+
+  - anti_pattern: "trusting_zero_as_not_found"
+    description: "Treating LOOKDOWNZ return 0 as 'not found'"
+    wrong: |
+      ' Menu with "Q" as first option
+      selection := LOOKDOWNZ(key : "Q", "S", "L", "H")
+      if selection  ' "Q" returns 0, so this fails!
+        process_selection(selection)
+    correct: |
+      ' Use LOOKDOWN for boolean validation
+      if LOOKDOWN(key : "Q", "S", "L", "H")
+        selection := LOOKDOWNZ(key : "Q", "S", "L", "H")
+        process_selection(selection)
+
+when_to_use:
+  lookdownz_is_best:
+    - "Need 0-based index for array access"
+    - "Working with 0-based enums"
+    - "When first item (index 0) is never the value being searched"
+  use_lookdown_instead:
+    - "Value validation (checking if value exists)"
+    - "When list includes the value that could be at index 0"
+    - "Any time you need unambiguous 'not found' detection"
+
 notes:
   - "Returns 0-based index (0 = first match)"
-  - "Returns -1 if value not found"
+  - "Returns 0 if value not found (SAME as first index!)"
+  - "CRITICAL: Cannot distinguish 'found at 0' from 'not found'"
   - "Supports ranges with .. operator"
   - "Searches left to right, returns first match"
   - "Inverse operation of LOOKUPZ"
-  - "More common than LOOKDOWN for array-style operations"
+  - "For validation, prefer LOOKDOWN (unambiguous 0 = not found)"
+
 related:
-  - LOOKDOWN
-  - LOOKUPZ
-  - LOOKUP
-see_also:
-  - "Value searching"
-  - "Zero-based indexing"
-  - "Input validation"
+  - language/spin2/methods/lookdown.yaml
+  - language/spin2/methods/lookupz.yaml
+  - language/spin2/methods/lookup.yaml
+  - language/spin2/concepts/table_lookup.yaml
+  - language/spin2/constructs/case.yaml
