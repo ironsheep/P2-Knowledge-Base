@@ -1,7 +1,13 @@
 pattern_id: "framework_pattern"
+description: |
+  Full application framework pattern with layered architecture.
+  See object_archetypes.yaml for detailed archetype templates.
+
 when_use:
   - "8+ objects with hierarchy"
   - "Full application framework"
+  - "All 8 COGs may be utilized"
+
 implementation: |
   OBJ
     core    : "app_core"
@@ -9,16 +15,21 @@ implementation: |
     storage : "storage_system"
     network : "network_stack"
     drivers[4] : "device_driver"
-    
+
   PUB main() | sys_config
     sys_config := core.initialize()
     ui.setup(sys_config)
     storage.mount()
     network.connect()
     core.run()
+
 resources:
   dependencies: "8+"
   cogs: "4-8 (all cogs utilized)"
+
 combines_with:
   - "layered_architecture"
   - "plugin_system"
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml

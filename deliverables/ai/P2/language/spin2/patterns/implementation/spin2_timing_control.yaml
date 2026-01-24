@@ -1,20 +1,62 @@
 pattern_id: "timing_control"
+description: |
+  Pattern for precise timing operations. See the comprehensive concept file
+  language/spin2/concepts/timing_operations.yaml for detailed patterns including:
+  - Jitter-free periodic execution
+  - Timeout with polling
+  - Debouncing
+  - Pulse width measurement
+  - Rate limiting
+  - Software PWM
+  - Multi-timer management
+
 when_use:
   - "Precise timing requirements"
   - "Real-time operations"
-implementation: |
-  PUB wait_ms(ms) | t
-    t := getct()
-    repeat ms
-      waitct(t += clkfreq/1000)
-      
-  PUB pulse_us(pin, us)
-    pinh(pin)
-    waitus(us)
-    pinl(pin)
+  - "Jitter-free periodic tasks"
+  - "Timeout handling"
+
+quick_reference:
+  periodic_execution: |
+    ' Jitter-free periodic pattern
+    next := getct()
+    REPEAT
+      next += clkfreq / 100    ' 10ms interval
+      do_work()
+      waitct(next)             ' Wait until exact time
+
+  timeout_polling: |
+    ' Wait with timeout
+    deadline := getms() + timeout_ms
+    REPEAT
+      IF condition_met()
+        RETURN TRUE
+      IF getms() >= deadline
+        RETURN FALSE
+      waitms(1)
+
+  pulse_generation: |
+    PUB pulse_us(pin, us)
+      pinh(pin)
+      waitus(us)
+      pinl(pin)
+
 resources:
   cogs: 0
-  timing_precision: "sub-microsecond"
+  timing_precision: "sub-microsecond with GETCT/WAITCT"
+
+anti_patterns:
+  - "Using WAITMS in loops (causes drift) - use WAITCT instead"
+  - "Busy-waiting instead of WAITMS/WAITUS"
+  - "Comparing counter values instead of subtracting (fails on rollover)"
+  - "Integer division truncation for small microsecond values"
+
 combines_with:
   - "state_machine"
   - "pin_control"
+
+related:
+  - language/spin2/concepts/timing_operations.yaml
+  - language/spin2/methods/getct.yaml
+  - language/spin2/methods/waitct.yaml
+  - language/spin2/methods/waitms.yaml

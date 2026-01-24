@@ -1,23 +1,34 @@
 pattern_id: "several_objects"
+description: |
+  Complex system with multiple subsystems pattern.
+  See object_archetypes.yaml for detailed archetype templates.
+
 when_use:
   - "4-7 components in system"
   - "Complex subsystem interactions"
+  - "Multiple communication interfaces"
+
 implementation: |
   OBJ
     uart[2] : "p2_serial"
     i2c     : "p2_i2c_driver"
     spi     : "p2_spi_driver"
     rtc     : "p2_rtc_driver"
-    
+
   PUB init()
     uart[0].start(RX0, TX0, BAUD)
     uart[1].start(RX1, TX1, BAUD)
     i2c.init(SDA, SCL)
     spi.start(MISO, MOSI, SCK, CS)
     rtc.configure(i2c.get_bus())
+
 resources:
   dependencies: "4-7"
   cogs: "2-5 typical"
+
 combines_with:
   - "event_dispatcher"
   - "resource_pool"
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml

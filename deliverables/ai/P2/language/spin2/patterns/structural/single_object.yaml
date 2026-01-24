@@ -1,17 +1,28 @@
 pattern_id: "single_object"
+description: |
+  Single child object pattern - simplest composition.
+  See object_archetypes.yaml for detailed archetype templates.
+
 when_use:
   - "One external component to manage"
   - "Clear delegation of responsibility"
+  - "Hardware driver with clean abstraction"
+
 implementation: |
   OBJ
     driver : "p2_led_driver"
-  
+
   PUB main() | status
     status := driver.init(LED_PIN)
     driver.set_brightness(50)
+
 resources:
   dependencies: 1
   cogs: "0-1 (driver dependent)"
+
 combines_with:
   - "no_objects"
   - "timing_control"
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml

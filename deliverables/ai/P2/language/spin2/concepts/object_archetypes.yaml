@@ -474,6 +474,11 @@ related:
   - language/spin2/constructs/blocks.yaml
   - language/spin2/constructs/method_definition.yaml
   - language/spin2/patterns/pattern-index.yaml
+  - language/spin2/patterns/structural/no_objects.yaml
+  - language/spin2/patterns/structural/single_object.yaml
+  - language/spin2/patterns/structural/few_objects.yaml
+  - language/spin2/patterns/structural/several_objects.yaml
+  - language/spin2/patterns/structural/framework_pattern.yaml
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
   - language/spin2/patterns/implementation/spin2_buffer_management.yaml
   - language/spin2/patterns/implementation/spin2_state_machine.yaml

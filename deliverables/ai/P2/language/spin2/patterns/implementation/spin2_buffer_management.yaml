@@ -1,19 +1,52 @@
 pattern_id: "buffer_management"
+description: |
+  Circular buffer pattern for producer-consumer communication.
+  See object_archetypes.yaml buffered_io_object archetype for complete examples.
+
 when_use:
   - "Data streaming between cogs"
   - "UART/SPI/I2C communication"
-implementation: |
-  VAR
-    long rx_buffer[64]
-    long rx_head, rx_tail
-    
-  PUB rx_check() : char | ptr
-    if rx_head <> rx_tail
-      char := rx_buffer[rx_tail]
-      rx_tail := (rx_tail + 1) & 63
+  - "Lock-free single producer, single consumer"
+
+quick_reference:
+  circular_buffer: |
+    CON
+      BUFFER_SIZE = 256      ' Must be power of 2
+      BUFFER_MASK = BUFFER_SIZE - 1
+
+    VAR
+      LONG head, tail
+      BYTE buffer[BUFFER_SIZE]
+
+    PUB put(value) : ok
+      IF ((head + 1) & BUFFER_MASK) == tail
+        RETURN FALSE    ' Buffer full
+      buffer[head] := value
+      head := (head + 1) & BUFFER_MASK
+      ok := TRUE
+
+    PUB get() : value
+      REPEAT WHILE head == tail  ' Wait for data
+      value := buffer[tail]
+      tail := (tail + 1) & BUFFER_MASK
+
+    PUB available() : count
+      count := (head - tail) & BUFFER_MASK
+
 resources:
   memory: "256+ bytes typical"
   cogs: 0
+
+anti_patterns:
+  - "Non-power-of-2 buffer size (breaks fast modulo)"
+  - "Multiple producers without lock protection"
+  - "Not checking buffer full before write"
+
 combines_with:
   - "protocol_implementation"
   - "timing_control"
+  - "cog_management"
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml

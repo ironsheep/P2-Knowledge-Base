@@ -78,3 +78,6 @@ statistics:
   prevalence: "372 of 730 files"
   percentage: "51.0%"
   trend: "Stable - utility code always needed"
+
+related:
+  - language/spin2/concepts/object_archetypes.yaml
