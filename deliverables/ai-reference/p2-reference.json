@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-01-24",
-    "last_updated": "2026-01-24T05:21:40.382866",
+    "last_updated": "2026-01-24T23:10:23.073467",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-01-24T05:21:40.382866",
+    "extraction_date": "2026-01-24T23:10:23.073467",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-01-24T05:21:40.382866",
+    "extraction_date": "2026-01-24T23:10:23.073467",
     "categories": {
       "keywords": {
         "count": 37,
@@ -21102,7 +21102,7 @@
             ],
             "category": "pin_control",
             "type": "method",
-            "description": "Drive specified pin(s) high (output mode, logic 1).\nSets the direction bit(s) to output (DIR=1) and drives the pin(s) high (OUT=1).\nThis is equivalent to the PASM2 DIRH instruction.\n",
+            "description": "Drive specified pin(s) high (output mode, logic 1).\nSets the direction bit(s) to output (DIR=1) and drives the pin(s) high (OUT=1).\nThis is equivalent to the PASM2 DRVH instruction.\n",
             "syntax": "PINHIGH(PinField)",
             "parameters": [
               {
@@ -21135,8 +21135,8 @@
               }
             ],
             "underlying_pasm": {
-              "instruction": "DIRH",
-              "description": "Internally uses DIRH instruction which sets DIR=1 and OUT=1"
+              "instruction": "DRVH",
+              "description": "Internally uses DRVH instruction which sets DIR=1 and OUT=1"
             },
             "common_uses": [
               "Turn on LEDs",
@@ -21157,7 +21157,7 @@
               "Multiple pins can be controlled simultaneously"
             ],
             "see_also": [
-              "language/pasm2/dirh.yaml",
+              "language/pasm2/drvh.yaml",
               "language/spin2/methods/pinlow.yaml",
               "language/spin2/methods/pintoggle.yaml"
             ]
@@ -26883,7 +26883,7 @@
             ],
             "category": "pin_control",
             "type": "method",
-            "description": "Drive specified pin(s) low (output mode, logic 0).\nSets the direction bit(s) to output (DIR=1) and drives the pin(s) low (OUT=0).\nThis is equivalent to the PASM2 DIRL instruction.\n",
+            "description": "Drive specified pin(s) low (output mode, logic 0).\nSets the direction bit(s) to output (DIR=1) and drives the pin(s) low (OUT=0).\nThis is equivalent to the PASM2 DRVL instruction.\n",
             "syntax": "PINLOW(PinField)",
             "parameters": [
               {
@@ -26916,8 +26916,8 @@
               }
             ],
             "underlying_pasm": {
-              "instruction": "DIRL",
-              "description": "Internally uses DIRL instruction which sets DIR=1 and OUT=0"
+              "instruction": "DRVL",
+              "description": "Internally uses DRVL instruction which sets DIR=1 and OUT=0"
             },
             "common_uses": [
               "Turn off LEDs",
@@ -26939,7 +26939,7 @@
               "Useful for Charlieplexing one side of LED matrix"
             ],
             "see_also": [
-              "language/pasm2/dirl.yaml",
+              "language/pasm2/drvl.yaml",
               "language/spin2/methods/pinhigh.yaml",
               "language/spin2/methods/pintoggle.yaml"
             ]

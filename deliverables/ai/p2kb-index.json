@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T05:21:36.512226",
+    "generated": "2026-01-24T23:10:17.610417",
     "total_entries": 1027,
     "total_categories": 47,
     "total_aliases": 941,
@@ -6686,11 +6686,11 @@
     },
     "p2kbSpin2Pinhigh": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinhigh.yaml",
-      "mtime": 1768613644
+      "mtime": 1769296134
     },
     "p2kbSpin2Pinlow": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinlow.yaml",
-      "mtime": 1768613644
+      "mtime": 1769296134
     },
     "p2kbSpin2Pinread": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinread.yaml",
