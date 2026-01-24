@@ -1,53 +1,149 @@
 method: GETRND
 type: method
-description: Get random number from hardware generator
+description: |
+  Get 32-bit random number from P2's hardware random number generator.
+  Uses thermal noise for true entropy - suitable for cryptographic use,
+  unique ID generation, and seeding PRNGs.
 category: Miscellaneous
 syntax: random := GETRND()
 parameters: []
 returns:
   type: long
-  description: 32-bit hardware random number
+  description: 32-bit hardware random number (true random, not pseudo-random)
+
 examples:
-- code: ''' Get random number
+  - description: "Get 32-bit random value"
+    code: |
+      value := GETRND()
 
-    value := GETRND()
+  - description: "Random number in range [0, n-1]"
+    code: |
+      dice := GETRND() +// 6     ' 0-5 (die roll minus 1)
+      percent := GETRND() +// 101  ' 0-100
 
-    '
-  description: Get 32-bit random value
-- code: ''' Random number in range 0-99
+  - description: "Random in range [min, max] inclusive"
+    code: |
+      PUB random_range(min_val, max_val) : value
+        value := (GETRND() +// (max_val - min_val + 1)) + min_val
 
-    dice := GETRND() +// 100
+  - description: "Random delay"
+    code: |
+      WAITMS(GETRND() +// 1000)  ' 0-999ms random delay
 
-    '
-  description: Random number with modulo
-- code: ''' Random delay
+  - description: "Seed PRNG with hardware random"
+    code: |
+      seed := GETRND()
+      IF seed == 0
+        seed := 1       ' XORO32 requires non-zero
 
-    WAITMS(GETRND() +// 1000)  '' 0-999ms random delay
+  - description: "Generate UUID"
+    code: |
+      PUB generate_uuid(buffer_ptr) | i
+        REPEAT i FROM 0 TO 3
+          LONG[buffer_ptr][i] := GETRND()
 
-    '
-  description: Random timing
-- code: ''' Seed other generators
+  - description: "Probability check"
+    code: |
+      PUB chance(percent) : result
+        ' Returns TRUE percent% of the time
+        result := (GETRND() +// 100) < percent
 
-    seed := GETRND()
+common_patterns:
+  - pattern: "random_boolean"
+    description: "50/50 coin flip"
+    code: "result := GETRND() & 1"
 
-    init_prng(seed)
+  - pattern: "random_element"
+    description: "Select random element from array"
+    code: |
+      value := LONG[array_ptr][GETRND() +// count]
 
-    '
-  description: Seed software PRNG
+  - pattern: "weighted_random"
+    description: "Weighted selection by cumulative probability"
+    code: |
+      roll := GETRND() +// 100
+      IF roll < 70
+        result := COMMON       ' 70% chance
+      ELSEIF roll < 90
+        result := UNCOMMON     ' 20% chance
+      ELSE
+        result := RARE         ' 10% chance
+
+  - pattern: "fisher_yates_shuffle"
+    description: "Shuffle array in place"
+    code: |
+      REPEAT i FROM count - 1 TO 1
+        j := GETRND() +// (i + 1)
+        temp := LONG[array_ptr][i]
+        LONG[array_ptr][i] := LONG[array_ptr][j]
+        LONG[array_ptr][j] := temp
+
+anti_patterns:
+  - anti_pattern: "modulo_bias"
+    severity: "moderate"
+    description: "Signed modulo creates slight bias"
+    wrong: |
+      value := GETRND() // 10    ' Slight bias toward lower values
+    correct: |
+      value := GETRND() +// 10   ' Unsigned modulo - correct distribution
+
+  - anti_pattern: "truncating_low_bits"
+    severity: "minor"
+    description: "Masking low bits only loses some randomness"
+    wrong: |
+      value := GETRND() & $FF    ' Only uses low 8 bits
+    correct: |
+      value := GETRND() +// 256  ' Full 32-bit randomness scaled
+      value := GETRND() >> 24    ' Or high 8 bits (equally random)
+
+  - anti_pattern: "reseeding_every_call"
+    severity: "performance"
+    description: "Using GETRND in tight loop when PRNG would suffice"
+    wrong: |
+      REPEAT 10000
+        value := GETRND()        ' Slow - 2-9 cycles each
+    correct: |
+      ' Use PRNG for speed when true randomness not needed
+      REPEAT 10000
+        value := ??prng_state    ' Fast - single cycle
+
+when_to_use:
+  getrnd:
+    - "Cryptographic key generation"
+    - "Unique identifiers (UUIDs, session IDs)"
+    - "Security-sensitive applications"
+    - "Initial PRNG seeding"
+    - "When reproducibility is NOT wanted"
+  prng_instead:
+    - "High-speed random loops (games, simulations)"
+    - "Reproducible test sequences"
+    - "Non-security random needs"
+
 notes:
-- Uses P2's hardware random number generator
-- True random based on thermal noise
-- Full 32-bit range
-- No seeding required
-- Each cog has independent access
-- Use +// operator for scaled ranges
+  - "Uses P2's hardware random number generator"
+  - "True random based on thermal noise"
+  - "Full 32-bit range"
+  - "No seeding required"
+  - "Each COG has independent access"
+  - "Use +// operator for scaled ranges (unsigned modulo)"
+  - "Slower than ?? operator (2-9 vs 1 cycle)"
+  - "Suitable for cryptographic use"
+
 timing:
   description: Immediate
   cycles: 2-9 clock cycles
+
 related:
-- POLLCT
-- GETCT
+  - language/spin2/operators/op_rand.yaml
+  - language/spin2/concepts/random_generation.yaml
+  - language/pasm2/getrnd.yaml
+  - language/pasm2/xoro32.yaml
+  - language/spin2/methods/getct.yaml
+
 see_also:
-- Random number generation
-- Hardware RNG
-- Cryptographic operations
+  - "Random number generation"
+  - "Hardware RNG"
+  - "Cryptographic operations"
+  - "UUID generation"
+
+oneliner: "Get 32-bit true random from hardware thermal noise generator"

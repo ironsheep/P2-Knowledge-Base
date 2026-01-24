@@ -9,11 +9,72 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next
-  instruction's S.
+description: |
+  Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next
+  instruction's S. Fast pseudo-random number generation for PASM2 code.
+
+algorithm:
+  name: "XORO32 (xoroshiro32+)"
+  operation: |
+    D ^= D >> 2
+    D ^= D << 1
+    D ^= D >> 1
+    (result available as S for next instruction)
+  period: "2^32 - 1"
+  properties:
+    - "Never produces zero from non-zero seed"
+    - "2-cycle execution"
+    - "Good statistical properties"
+    - "NOT suitable for cryptography"
+
+critical_warning:
+  issue: "Zero seed produces zero forever"
+  description: |
+    If D is zero, XORO32 will return zero on every call.
+    Always ensure non-zero initial value before first use.
+  solution: |
+    ' Ensure non-zero seed
+            GETRND  seed           ' Get true random
+            CMP     seed, #0   WZ  ' Check if zero
+    IF_Z    MOV     seed, #1       ' Force non-zero if needed
+
+examples:
+  - description: "Generate random number"
+    code: |
+            MOV     seed, rnd_init    ' Initialize seed
+            XORO32  seed              ' Generate random
+            MOV     result, seed      ' Copy result
+
+  - description: "Random number in range"
+    code: |
+            XORO32  seed              ' Generate 32-bit random
+            MOV     temp, seed
+            MODZ    temp, #100        ' temp = seed mod 100 (0-99)
+
+  - description: "Properly initialized PRNG"
+    code: |
+            GETRND  seed              ' Hardware random seed
+            CMP     seed, #0    WZ
+    IF_Z    MOV     seed, #1          ' Ensure non-zero
+            ' Now safe to use XORO32
+    .loop   XORO32  seed
+            ' Process seed...
+            JMP     #.loop
+
 flags_affected:
   C: No effect
   Z: No effect
+
+vs_getrnd:
+  xoro32_advantages:
+    - "Faster (2 cycles vs variable)"
+    - "Reproducible sequences"
+    - "No hardware dependency"
+  getrnd_advantages:
+    - "True randomness from thermal noise"
+    - "Cryptographically suitable"
+    - "No seeding required"
+
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -28,4 +89,18 @@ syntax_variants:
 - XORO32 D
 last_updated: '2025-09-19T16:04:17.566506'
 category: Math and Logic
-oneliner: Iterate D with xoroshiro32+ PRNG algorithm
+
+notes:
+  - "Result is placed in D and available as S for next instruction"
+  - "CRITICAL: D must be non-zero before first use"
+  - "Period is 2^32 - 1 (never cycles through zero)"
+  - "Equivalent to Spin2 ?? operator"
+  - "Use GETRND to seed for best initial randomness"
+  - "NOT suitable for cryptographic applications"
+
+related:
+  - language/pasm2/getrnd.yaml
+  - language/spin2/operators/op_rand.yaml
+  - language/spin2/concepts/random_generation.yaml
+
+oneliner: "Iterate D with xoroshiro32+ PRNG algorithm (requires non-zero seed)"

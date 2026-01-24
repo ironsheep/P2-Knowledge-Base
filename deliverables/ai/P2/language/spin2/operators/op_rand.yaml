@@ -1,5 +1,164 @@
 operator: "??"
 type: operator
 description: |
-  Pre/post increment/decrement/random
+  Random number operator using XORO32 pseudo-random number generator.
+  Applies the xoroshiro32+ algorithm to the variable, updates it in-place,
+  and returns the new random value. Requires non-zero initial seed.
 category: Var-modify
+syntax: "value := ??variable"
+returns: "32-bit pseudo-random number"
+
+algorithm:
+  name: "XORO32 (xoroshiro32+)"
+  description: |
+    state ^= state >> 2
+    state ^= state << 1
+    state ^= state >> 1
+    return state
+  period: "2^32 - 1 (4,294,967,295)"
+  properties:
+    - "Never produces zero from non-zero seed"
+    - "Single P2 instruction - very fast"
+    - "Good statistical properties for non-cryptographic use"
+    - "NOT suitable for cryptography"
+
+critical_requirement:
+  issue: "Zero seed produces zero forever"
+  description: |
+    XORO32 with seed=0 returns 0 on every call.
+    Always ensure seed is non-zero before first use.
+  solution: |
+    seed := GETRND()
+    IF seed == 0
+      seed := 1
+
+examples:
+  - description: "Basic PRNG usage"
+    code: |
+      VAR
+        LONG seed
+
+      PUB init()
+        seed := GETRND()
+        IF seed == 0
+          seed := 1
+
+      PUB get_random() : value
+        value := ??seed
+
+  - description: "Random in range [0, n-1]"
+    code: |
+      PUB random_n(n) : value
+        value := ??seed +// n
+
+  - description: "Reproducible test sequence"
+    code: |
+      CON
+        TEST_SEED = $DEADBEEF
+
+      PUB test_sequence() | i, value
+        seed := TEST_SEED
+        REPEAT i FROM 0 TO 9
+          value := ??seed
+          DEBUG("Random[", UDEC(i), "] = ", UHEX(value))
+
+  - description: "Noise generation"
+    code: |
+      PUB white_noise_byte() : sample
+        sample := ??noise_state >> 24   ' High 8 bits
+
+common_patterns:
+  - pattern: "seeded_prng"
+    description: "Properly initialized PRNG"
+    code: |
+      PUB init_prng()
+        prng_state := GETRND()
+        IF prng_state == 0
+          prng_state := 1
+
+  - pattern: "deterministic_sequence"
+    description: "Same sequence every run (for testing)"
+    code: |
+      prng_state := $12345678    ' Fixed seed
+      ' Sequence will be identical each run
+
+  - pattern: "fast_random_loop"
+    description: "High-speed random generation"
+    code: |
+      REPEAT 1000
+        random_value := ??state  ' Very fast in tight loops
+
+anti_patterns:
+  - anti_pattern: "zero_seed"
+    severity: "critical"
+    wrong: |
+      seed := 0
+      value := ??seed    ' Returns 0 forever!
+    correct: |
+      seed := GETRND()
+      IF seed == 0
+        seed := 1
+      value := ??seed
+
+  - anti_pattern: "uninitialized_variable"
+    severity: "critical"
+    description: "VAR variables may be zero at start"
+    wrong: |
+      VAR
+        LONG prng       ' May be 0!
+      PUB random() : value
+        value := ??prng ' May always return 0!
+    correct: |
+      VAR
+        LONG prng
+        LONG init_done
+      PUB random() : value
+        IF NOT init_done
+          prng := GETRND()
+          IF prng == 0
+            prng := 1
+          init_done := TRUE
+        value := ??prng
+
+  - anti_pattern: "security_use"
+    severity: "critical"
+    description: "PRNG is predictable - never use for security"
+    wrong: |
+      PUB generate_key() : key
+        key := ??seed    ' Attacker can predict this!
+    correct: |
+      PUB generate_key() : key
+        key := GETRND()  ' Hardware true random
+
+vs_getrnd:
+  prng_advantages:
+    - "Much faster (single instruction vs 2-9 cycles)"
+    - "Reproducible sequences with same seed"
+    - "Good for games, simulations, testing"
+  getrnd_advantages:
+    - "True randomness from thermal noise"
+    - "Cryptographically suitable"
+    - "No seeding required"
+    - "Use for unique IDs, security, seeding PRNG"
+
+notes:
+  - "?? modifies variable in-place AND returns new value"
+  - "MUST initialize with non-zero seed before first use"
+  - "Period is 2^32 - 1 (never returns to starting state via zero)"
+  - "Use GETRND() to seed for best initial randomness"
+  - "NOT suitable for cryptographic applications"
+  - "Equivalent to PASM2 XORO32 instruction"
+
+related:
+  - language/spin2/methods/getrnd.yaml
+  - language/spin2/concepts/random_generation.yaml
+  - language/pasm2/xoro32.yaml
+  - language/spin2/concepts/operators.yaml
+
+see_also:
+  - "Pseudo-random number generation"
+  - "XORO32 algorithm"
+  - "Game randomness"
+  - "Reproducible testing"
+
+oneliner: "XORO32 pseudo-random number generator operator (requires non-zero seed)"

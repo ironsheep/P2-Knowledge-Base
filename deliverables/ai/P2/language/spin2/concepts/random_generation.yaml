@@ -1,0 +1,292 @@
+concept: Random Number Generation
+type: concept
+category: Algorithms
+
+description: |
+  The Propeller 2 provides multiple mechanisms for random number generation:
+  - GETRND: Hardware random from true random number generator (thermal noise)
+  - ?? operator: XORO32 pseudo-random number generator (fast, repeatable)
+  - XORO32: PASM instruction for PRNG in assembly code
+
+  Key distinction: GETRND provides true randomness (cryptography, unique IDs),
+  while ?? provides fast pseudo-randomness (games, simulations, reproducibility).
+
+hardware_vs_prng:
+  comparison:
+    - aspect: "Source"
+      getrnd: "Thermal noise (true entropy)"
+      prng: "XORO32 algorithm"
+    - aspect: "Speed"
+      getrnd: "Slower (2-9 cycles)"
+      prng: "Very fast (single instruction)"
+    - aspect: "Repeatability"
+      getrnd: "Never repeats (true random)"
+      prng: "Reproducible with same seed"
+    - aspect: "Quality"
+      getrnd: "True random"
+      prng: "Pseudo-random (good statistics)"
+    - aspect: "Seeding"
+      getrnd: "Not required"
+      prng: "Required (must be non-zero)"
+    - aspect: "Security"
+      getrnd: "Cryptographically suitable"
+      prng: "NOT for cryptography"
+
+  when_to_use_getrnd:
+    - "Cryptographic key generation"
+    - "Unique identifiers (UUIDs, session IDs)"
+    - "Security-sensitive applications"
+    - "Initial PRNG seeding"
+
+  when_to_use_prng:
+    - "Game mechanics (dice rolls, card shuffling)"
+    - "Simulations requiring reproducibility"
+    - "High-speed random generation loops"
+    - "Testing with reproducible sequences"
+
+xoro32_algorithm:
+  description: |
+    The ?? operator implements XORO32 (xoroshiro32+):
+      state ^= state >> 2
+      state ^= state << 1
+      state ^= state >> 1
+      return state
+
+  properties:
+    - "Period: 2^32 - 1 (never produces zero from non-zero seed)"
+    - "Fast: single instruction on P2"
+    - "Good statistical properties for non-cryptographic use"
+    - "CRITICAL: Zero seed produces zero forever"
+    - "NOT suitable for cryptography"
+
+common_patterns:
+  - pattern: "random_range_0_to_n"
+    description: "Random integer in [0, n-1]"
+    code: |
+      PUB random_0_to_n(n) : value
+        value := GETRND() +// n
+
+  - pattern: "random_range_min_max"
+    description: "Random integer in [min, max] inclusive"
+    code: |
+      PUB random_range(min_val, max_val) : value
+        value := (GETRND() +// (max_val - min_val + 1)) + min_val
+
+  - pattern: "random_percent"
+    description: "Random value 0-100"
+    code: |
+      PUB random_percent() : percent
+        percent := GETRND() +// 101
+
+  - pattern: "probability_check"
+    description: "Return TRUE with given probability"
+    code: |
+      PUB chance(percent) : result
+        ' Returns TRUE percent% of the time
+        result := (GETRND() +// 100) < percent
+
+  - pattern: "random_boolean"
+    description: "50/50 random boolean"
+    code: |
+      PUB coin_flip() : result
+        result := GETRND() & 1
+
+  - pattern: "random_float"
+    description: "Random float in [0.0, 1.0)"
+    code: |
+      CON
+        SCALE_FACTOR = 4294967295.0   ' 2^32 - 1
+
+      PUB random_float() : value
+        value := FLOAT(GETRND()) /. SCALE_FACTOR
+
+  - pattern: "random_element"
+    description: "Select random element from array"
+    code: |
+      PUB random_element(array_ptr, count) : value
+        value := LONG[array_ptr][GETRND() +// count]
+
+  - pattern: "weighted_random"
+    description: "Weighted random selection"
+    code: |
+      CON
+        ' Cumulative weights (ascending)
+        WEIGHT_COMMON   = 70     ' 70% chance
+        WEIGHT_UNCOMMON = 90     ' 20% chance
+        WEIGHT_RARE     = 100    ' 10% chance
+
+      PUB weighted_random() : result | roll
+        roll := GETRND() +// 100
+        IF roll < WEIGHT_COMMON
+          result := CATEGORY_COMMON
+        ELSEIF roll < WEIGHT_UNCOMMON
+          result := CATEGORY_UNCOMMON
+        ELSE
+          result := CATEGORY_RARE
+
+  - pattern: "fisher_yates_shuffle"
+    description: "Shuffle array in place"
+    code: |
+      PUB shuffle(array_ptr, count) | i, j, temp
+        ' Fisher-Yates shuffle algorithm
+        REPEAT i FROM count - 1 TO 1
+          j := GETRND() +// (i + 1)   ' Random index 0..i
+          ' Swap elements
+          temp := LONG[array_ptr][i]
+          LONG[array_ptr][i] := LONG[array_ptr][j]
+          LONG[array_ptr][j] := temp
+
+  - pattern: "noise_generation"
+    description: "Generate noise samples for audio/signals"
+    code: |
+      VAR
+        LONG noise_state
+
+      PUB init_noise(seed)
+        noise_state := seed
+        IF noise_state == 0
+          noise_state := 1
+
+      PUB white_noise() : sample
+        ' Generate white noise sample (-128 to 127)
+        sample := (??noise_state >> 24) - 128
+
+  - pattern: "uuid_generation"
+    description: "Generate unique identifier using hardware random"
+    code: |
+      PUB generate_uuid(buffer_ptr) | i
+        ' Generate 128-bit UUID
+        REPEAT i FROM 0 TO 3
+          LONG[buffer_ptr][i] := GETRND()
+
+seeding_strategies:
+  - strategy: "hardware_seed"
+    description: "Best for production - true random seed"
+    code: |
+      VAR
+        LONG prng_state
+
+      PUB seed_prng()
+        prng_state := GETRND()
+        IF prng_state == 0    ' XORO32 requires non-zero
+          prng_state := 1
+
+  - strategy: "fixed_seed"
+    description: "For testing - reproducible sequences"
+    code: |
+      CON
+        TEST_SEED = $DEADBEEF
+
+      PUB seed_for_testing()
+        prng_state := TEST_SEED
+
+  - strategy: "time_seed"
+    description: "Quick-and-dirty - less random than GETRND"
+    code: |
+      PUB seed_from_time()
+        prng_state := GETCT()
+        IF prng_state == 0
+          prng_state := 1
+
+anti_patterns:
+  - anti_pattern: "zero_seed"
+    severity: "critical"
+    description: "Zero seed produces zero forever with XORO32"
+    wrong: |
+      VAR
+        LONG state
+
+      PUB bad_init()
+        state := 0           ' ??state always returns 0!
+
+      PUB get_random() : value
+        value := ??state     ' Returns 0 forever
+    correct: |
+      PUB good_init()
+        state := GETRND()
+        IF state == 0
+          state := 1         ' Ensure non-zero
+
+  - anti_pattern: "prng_for_security"
+    severity: "critical"
+    description: "Using PRNG for security-sensitive operations"
+    wrong: |
+      PUB generate_crypto_key() : key
+        key := ??seed        ' PREDICTABLE! Not secure!
+    correct: |
+      PUB generate_crypto_key() : key
+        key := GETRND()      ' True hardware random
+
+  - anti_pattern: "modulo_bias"
+    severity: "moderate"
+    description: "Signed modulo creates bias for ranges not dividing 2^32"
+    wrong: |
+      value := GETRND() // 10    ' Slight bias toward 0-5
+    correct: |
+      value := GETRND() +// 10   ' Unsigned modulo - much better
+
+  - anti_pattern: "uninitialized_prng"
+    severity: "critical"
+    description: "Using PRNG without initialization"
+    wrong: |
+      VAR
+        LONG prng          ' May be 0!
+
+      PUB random() : value
+        value := ??prng    ' May always return 0!
+    correct: |
+      VAR
+        LONG prng
+        LONG initialized
+
+      PUB random() : value
+        IF NOT initialized
+          prng := GETRND()
+          IF prng == 0
+            prng := 1
+          initialized := TRUE
+        value := ??prng
+
+  - anti_pattern: "reseeding_every_call"
+    severity: "performance"
+    description: "Reseeding PRNG on every call wastes GETRND"
+    wrong: |
+      PUB bad_random() : value
+        seed := GETRND()     ' Slow, wasteful
+        value := ??seed      ' PRNG adds no value
+    correct: |
+      PUB random() : value
+        value := ??state     ' Use existing PRNG state
+
+  - anti_pattern: "truncating_without_scaling"
+    severity: "moderate"
+    description: "Losing randomness by masking low bits only"
+    wrong: |
+      value := GETRND() & $FF    ' Only uses low 8 bits
+    correct: |
+      value := GETRND() +// 256  ' Full 32-bit randomness
+      value := GETRND() >> 24    ' Or use high 8 bits (equally good)
+
+notes:
+  - "Always use unsigned modulo (+//) for range limiting"
+  - "GETRND is slower but provides true randomness"
+  - "?? operator modifies the variable in-place"
+  - "XORO32 period is 2^32 - 1 (never returns to zero)"
+  - "Each COG has independent access to hardware RNG"
+  - "Use PRNG for speed when reproducibility is acceptable"
+  - "Use GETRND for security, unique IDs, and seeding"
+
+related:
+  - language/spin2/methods/getrnd.yaml
+  - language/spin2/operators/op_rand.yaml
+  - language/pasm2/xoro32.yaml
+  - language/pasm2/getrnd.yaml
+  - language/spin2/concepts/operators.yaml
+
+see_also:
+  - "Monte Carlo simulation"
+  - "Noise generation"
+  - "Cryptographic operations"
+  - "Game development"
+
+oneliner: "Random number generation using GETRND (true random) and ?? operator (PRNG)"

@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T00:53:21.460249",
-    "total_entries": 1023,
+    "generated": "2026-01-24T00:59:50.211298",
+    "total_entries": 1024,
     "total_categories": 47,
-    "total_aliases": 941,
+    "total_aliases": 939,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -1940,9 +1940,6 @@
     "XOR": [
       "p2kbPasm2Xor"
     ],
-    "XORO32": [
-      "p2kbPasm2Xoro32"
-    ],
     "XSTOP": [
       "p2kbPasm2Xstop"
     ],
@@ -3466,9 +3463,6 @@
     ],
     "xor": [
       "p2kbPasm2Xor"
-    ],
-    "xoro32": [
-      "p2kbPasm2Xoro32"
     ],
     "xstop": [
       "p2kbPasm2Xstop"
@@ -6110,7 +6104,11 @@
     },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
-      "mtime": 1769215310
+      "mtime": 1769216087
+    },
+    "p2kbSpin2RandomGeneration": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/random_generation.yaml",
+      "mtime": 1769216210
     },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
@@ -7382,11 +7380,11 @@
     },
     "p2kbSpin2Error": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/error.yaml",
-      "mtime": 1769215794
+      "mtime": 1769216087
     },
     "p2kbSpin2ExternalSymbols": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/external-symbols.yaml",
-      "mtime": 1768348299
+      "mtime": 1769216087
     },
     "p2kbSpin2Ifdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/ifdef.yaml",
@@ -7398,15 +7396,15 @@
     },
     "p2kbSpin2Include": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/include.yaml",
-      "mtime": 1769215794
+      "mtime": 1769216087
     },
     "p2kbSpin2PragmaExportdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/pragma-exportdef.yaml",
-      "mtime": 1769215795
+      "mtime": 1769216087
     },
     "p2kbSpin2PreprocessorOverview": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/preprocessor-overview.yaml",
-      "mtime": 1768350169
+      "mtime": 1769216087
     },
     "p2kbSpin2Undef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/undef.yaml",
@@ -7414,7 +7412,7 @@
     },
     "p2kbSpin2Warn": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/warn.yaml",
-      "mtime": 1769215795
+      "mtime": 1769216087
     },
     "p2kbSpin2RegDira": {
       "path": "deliverables/ai/P2/language/spin2/registers/dira.yaml",
