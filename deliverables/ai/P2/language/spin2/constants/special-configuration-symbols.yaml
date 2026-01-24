@@ -14,6 +14,8 @@ aliases:
   - _xtlfreq
   - _XINFREQ
   - _xinfreq
+  - _ERRFREQ
+  - _errfreq
   - _RCSLOW
   - _rcslow
   - _RCFAST
@@ -22,37 +24,191 @@ aliases:
   - _CLKMODE
   - _clkmode
 
-# System Configuration Symbols
+# Clock Configuration Constants
+# Source: pnut_ts Clock-Configuration-Usage-Guide.md (compiler-verified)
+clock_configuration:
+  _CLKFREQ:
+    description: |
+      Desired system clock frequency in Hz. The compiler calculates PLL settings
+      to achieve this frequency. If used alone, assumes 20 MHz crystal input.
+    range: "3,333,333 Hz to 500,000,000 Hz"
+    example: "CON _clkfreq = 200_000_000  ' 200 MHz using PLL"
+    notes:
+      - "Used by timing functions (WAITMS, WAITUS, WAITX)"
+      - "If only _clkfreq specified, compiler assumes 20 MHz crystal"
+      - "Combine with _xtlfreq or _xinfreq for non-20MHz input sources"
+    behavior:
+      alone: "PLL from assumed 20 MHz crystal"
+      with_xtlfreq: "PLL from specified crystal frequency"
+      with_xinfreq: "PLL from specified external clock"
+
+  _XTLFREQ:
+    description: |
+      External crystal oscillator frequency in Hz. Use when your crystal is not
+      the default 20 MHz. Can be used alone (direct crystal, no PLL) or with
+      _clkfreq (crystal + PLL multiplication).
+    range: "1 MHz to 60 MHz typical"
+    example: "CON _xtlfreq = 25_000_000  ' 25 MHz crystal"
+    notes:
+      - "Crystals >= 16 MHz use 15pF internal loading capacitors"
+      - "Crystals < 16 MHz use 30pF internal loading capacitors"
+      - "Alone: runs at crystal frequency (no PLL)"
+      - "With _clkfreq: enables PLL multiplication"
+
+  _XINFREQ:
+    description: |
+      External clock input frequency in Hz. Use when driving XI pin from an
+      external oscillator or clock source instead of a crystal.
+    range: "250 kHz to 500 MHz"
+    example: "CON _xinfreq = 10_000_000  ' 10 MHz external clock"
+    notes:
+      - "For external oscillator modules or shared clock sources"
+      - "Alone: runs at input frequency (no PLL)"
+      - "With _clkfreq: enables PLL multiplication"
+    use_cases:
+      - "Multiple P2 chips sharing a clock source"
+      - "Precise frequency from external oscillator module"
+      - "Synchronization with external system"
+
+  _ERRFREQ:
+    description: |
+      Allowable PLL frequency error in Hz. The compiler iterates through PLL
+      configurations to find the closest match within this error budget.
+    default: "1,000,000 Hz (1 MHz)"
+    example: "CON _errfreq = 500_000  ' Allow only 0.5 MHz error"
+    notes:
+      - "Tighter tolerance may fail if no valid PLL configuration exists"
+      - "Relax tolerance for unusual target frequencies"
+
+  _RCFAST:
+    description: |
+      Use internal RCFAST oscillator (~20 MHz). No external crystal required.
+      Frequency varies with temperature (plus/minus 10 percent).
+    value: "TRUE"
+    example: "CON _rcfast = TRUE"
+    notes:
+      - "Overrides other clock settings"
+      - "Minimal external components"
+      - "Not suitable for precise timing requirements"
+    use_cases:
+      - "Crystal accuracy not required"
+      - "Minimal BOM cost"
+      - "Power-sensitive applications"
+
+  _RCSLOW:
+    description: |
+      Use internal RCSLOW oscillator (~20 kHz). Extremely low power operation.
+      Frequency varies significantly with temperature (plus/minus 50 percent).
+    value: "TRUE"
+    example: "CON _rcslow = TRUE"
+    notes:
+      - "Overrides other clock settings"
+      - "Ultra-low power consumption"
+      - "Timing accuracy not critical"
+    use_cases:
+      - "Sleep modes"
+      - "RTC applications"
+      - "Ultra-low power standby"
+
+  _CLKMODE:
+    description: |
+      Clock mode configuration value (32-bit). Usually calculated automatically
+      by the compiler based on _clkfreq and related settings.
+    notes:
+      - "Rarely specified directly - let compiler calculate"
+      - "Contains PLL dividers, multipliers, and source selection"
+
+clock_configuration_rules:
+  rule_1:
+    description: "Only ONE clock configuration per program"
+    note: "Define clock constants in top-level object's CON block only"
+
+  rule_2:
+    description: "_clkfreq alone assumes 20 MHz crystal input"
+    example: "_clkfreq = 200_000_000  ' Assumes 20 MHz crystal"
+
+  rule_3:
+    description: "_xtlfreq or _xinfreq alone runs at that frequency (no PLL)"
+    example: "_xtlfreq = 20_000_000  ' Runs at exactly 20 MHz"
+
+  rule_4:
+    description: "Combining _clkfreq with _xtlfreq or _xinfreq enables PLL"
+    example: |
+      _xtlfreq = 25_000_000
+      _clkfreq = 250_000_000  ' PLL: 25 MHz -> 250 MHz
+
+  rule_5:
+    description: "_rcfast and _rcslow override all other clock settings"
+    note: "Internal oscillators ignore crystal/PLL configuration"
+
+clock_configuration_examples:
+  common_200mhz:
+    description: "Most common: 200 MHz with default 20 MHz crystal"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+
+  custom_crystal:
+    description: "Using a 25 MHz crystal for 250 MHz operation"
+    code: |
+      CON
+        _xtlfreq = 25_000_000
+        _clkfreq = 250_000_000
+
+  crystal_direct:
+    description: "Run at crystal frequency without PLL"
+    code: |
+      CON
+        _xtlfreq = 20_000_000  ' No _clkfreq = no PLL
+
+  low_power:
+    description: "Battery-powered without external crystal"
+    code: |
+      CON
+        _rcfast = TRUE  ' ~20 MHz internal
+
+  ultra_low_power:
+    description: "Ultra-low power sleep mode"
+    code: |
+      CON
+        _rcslow = TRUE  ' ~20 kHz internal
+
+clock_anti_patterns:
+  conflicting_sources:
+    wrong: |
+      CON
+        _rcfast = TRUE
+        _clkfreq = 200_000_000  ' ERROR: conflicting settings
+    reason: "Cannot combine internal oscillator with PLL configuration"
+
+  assumed_crystal:
+    wrong: |
+      CON
+        _clkfreq = 200_000_000  ' Assumes 20 MHz crystal!
+    note: "Only wrong if your actual crystal is not 20 MHz"
+    correct: |
+      CON
+        _xtlfreq = 25_000_000   ' Specify actual crystal
+        _clkfreq = 200_000_000
+
+  unrealistic_error:
+    wrong: |
+      CON
+        _xtlfreq = 12_000_000
+        _clkfreq = 333_333_333
+        _errfreq = 1  ' Unrealistic 1 Hz tolerance
+    correct: |
+      CON
+        _xtlfreq = 12_000_000
+        _clkfreq = 336_000_000  ' Achievable frequency
+        _errfreq = 1_000_000    ' Reasonable tolerance
+
+# System Configuration Symbols (non-clock)
 system_configuration:
   DOWNLOAD_BAUD:
     description: Sets the download baud rate for programming the P2
     default: "2_000_000"
     example: "CON DOWNLOAD_BAUD = 115200"
-    
-  _CLKFREQ:
-    description: Sets the system clock frequency in Hz
-    example: "CON _CLKFREQ = 297_000_000  ' 297 MHz"
-    notes: 
-      - "Used by timing functions like WAITUS, WAITMS"
-      - "Must match actual hardware configuration"
-      
-  _CLKMODE:
-    description: Clock mode configuration value
-    notes: "Usually calculated automatically based on _CLKFREQ"
-    
-  _XTLFREQ:
-    description: Crystal oscillator frequency when using external crystal
-    example: "CON _XTLFREQ = 20_000_000  ' 20 MHz crystal"
-    
-  _rcslow:
-    description: Selects internal RCSLOW oscillator (~20 KHz)
-    value: "$00_01"
-    usage: "CON _rcslow"
-    
-  _rcfast:
-    description: Selects internal RCFAST oscillator (~20 MHz)
-    value: "$00_00" 
-    usage: "CON _rcfast"
 
 # DEBUG Configuration Symbols
 debug_serial:
@@ -221,6 +377,9 @@ notes:
   - "DEBUG without parentheses enters debugger"
   
 related:
-  - "p2kbSpin2Debug"
-  - "p2kbSpin2DbgDebugFormattersComplete"
-  - "p2kbSpin2RegisterConstants"
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/system-variables/clkmode.yaml
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/methods/hubset.yaml
+  - language/pasm2/hubset.yaml
+  - architecture/clock_system.yaml

@@ -1,8 +1,86 @@
-variable: "CLKFREQ"
+variable: CLKFREQ
 type: system_variable
-data_type: "Unknown"
+data_type: long
+category: Clock Configuration
+
 description: |
-  System clock frequency in Hz
-access: "read_write"
+  Current system clock frequency in Hz. Maintained at fixed HUB address $00044.
+  
+  This variable is automatically initialized by the compiler based on _clkfreq
+  and related CON block constants. It reflects the actual operating frequency
+  and is used by timing functions (WAITMS, WAITUS, WAITX) to calculate delays.
+  
+  CLKFREQ must accurately reflect the actual clock frequency for timing-dependent
+  code to work correctly. When changing clock configuration at runtime via HUBSET
+  or CLKSET, update CLKFREQ to match the new frequency.
+
+hub_address: "$00044"
+access: read_write
+
+initialization:
+  description: |
+    Set automatically by compiler startup code based on _clkfreq constant.
+    If _clkfreq not specified, defaults based on clock source configuration.
+  defaults:
+    _rcfast: "~20_000_000 (approximate)"
+    _rcslow: "~20_000 (approximate)"
+    crystal_only: "Crystal frequency (from _xtlfreq)"
+    pll_mode: "Calculated PLL output frequency"
+
+usage_patterns:
+  read_frequency:
+    description: "Check current system clock"
+    code: |
+      PUB show_clock()
+        debug("Clock frequency: ", udec(clkfreq), " Hz")
+  
+  timing_calculations:
+    description: "Calculate timing values based on actual frequency"
+    code: |
+      PUB delay_microseconds(us) | ticks
+        ticks := clkfreq / 1_000_000 * us
+        waitx(ticks)
+      
+      PUB calculate_baud_divisor(baud) : divisor
+        divisor := clkfreq / baud
+  
+  frequency_verification:
+    description: "Verify clock is within expected range"
+    code: |
+      PUB verify_clock() : ok
+        ok := (clkfreq >= 180_000_000) AND (clkfreq <= 220_000_000)
+        if NOT ok
+          debug("Warning: Clock outside expected range")
+
 examples:
-  - "CLKFREQ := 80_000_000  // 80MHz"
+  - description: "Read current frequency"
+    code: "debug(udec(clkfreq))"
+  
+  - description: "Calculate cycles for 1ms delay"
+    code: "cycles := clkfreq / 1000"
+  
+  - description: "Update after manual clock change"
+    code: |
+      hubset(new_mode)
+      clkfreq := 200_000_000  ' Update to match new PLL frequency
+
+notes:
+  - "Always reflects current operating frequency in Hz"
+  - "Hub address $00044 is fixed - can be accessed from PASM via RDLONG"
+  - "Built-in WAITMS/WAITUS automatically use CLKFREQ"
+  - "Must be updated manually if clock changed via raw HUBSET"
+  - "CLKSET method updates CLKFREQ automatically"
+
+anti_patterns:
+  hardcoded_timing:
+    wrong: "waitx(200_000)  ' Assumes 200 MHz!"
+    correct: "waitx(clkfreq / 1000)  ' Works at any frequency"
+    reason: "Hardcoded values break when clock frequency changes"
+
+related:
+  - language/spin2/system-variables/clkmode.yaml
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/methods/hubset.yaml
+  - language/spin2/methods/waitms.yaml
+  - language/spin2/methods/waitus.yaml
+  - architecture/clock_system.yaml

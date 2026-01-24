@@ -9,10 +9,95 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: >-
+description: |
   Set hub configuration to D. HUBSET configures various hub parameters including
-  clock source, crystal settings, and PLL configuration. The exact operation depends
-  on the bits set in D.
+  clock source, crystal settings, and PLL configuration. The exact operation
+  depends on the bits set in D.
+
+  Primary use is clock configuration: selecting clock source (RCFAST, RCSLOW,
+  crystal, PLL), configuring PLL dividers and multipliers, and switching between
+  clock sources. Also used for chip reset (bit 31).
+
+clock_configuration:
+  bit_fields:
+    d31:
+      name: "Reset"
+      description: "Write 1 to reset the entire chip"
+    d24:
+      name: "PLL Enable"
+      description: "1 = PLL powered on, 0 = PLL off"
+    d23_18:
+      name: "Input Divider (DIVD)"
+      description: "PLL input divider - 1 (6 bits)"
+      range: "0-63 (actual divider 1-64)"
+    d17_8:
+      name: "Multiplier (MULT)"
+      description: "PLL VCO multiplier - 1 (10 bits)"
+      range: "0-1023 (actual multiplier 1-1024)"
+    d7_4:
+      name: "Post Divider (PPPP)"
+      description: "PLL output post-divider - 1 (4 bits)"
+    d3_2:
+      name: "Crystal Config (CC)"
+      values:
+        0b00: "XI/XO Hi-Z (oscillator off)"
+        0b01: "15pF caps (crystals >= 16 MHz)"
+        0b11: "30pF caps (crystals < 16 MHz)"
+    d1_0:
+      name: "Clock Source (SS)"
+      values:
+        0b00: "RCFAST (~20 MHz)"
+        0b01: "RCSLOW (~20 kHz)"
+        0b10: "XI pin (crystal/external)"
+        0b11: "PLL output"
+
+safe_clock_switching:
+  description: |
+    When switching to PLL, follow this three-step sequence to avoid glitches:
+    1. Configure PLL but stay on current source
+    2. Wait for PLL to lock (~10ms)
+    3. Switch clock source to PLL
+  sequence:
+    step_1:
+      description: "Configure PLL without switching to it"
+      code: |
+        HUBSET  ##pll_config_mode     ' PLL settings, source bits = current
+    step_2:
+      description: "Wait for PLL to stabilize"
+      code: |
+        WAITX   ##clkfreq/100         ' Wait ~10ms for PLL lock
+    step_3:
+      description: "Switch to PLL"
+      code: |
+        HUBSET  ##pll_active_mode     ' Same config, source bits = 11 (PLL)
+
+examples:
+  enable_crystal:
+    description: "Enable 20 MHz crystal oscillator"
+    code: |
+      HUBSET  ##%00_01              ' Crystal with 15pF caps, stay on RCFAST
+      WAITX   ##20_000_000/100      ' Wait 10ms for crystal startup
+      HUBSET  ##%10_01              ' Switch to crystal (XI source)
+
+  pll_200mhz:
+    description: "Configure PLL for 200 MHz from 20 MHz crystal"
+    code: |
+      ' Step 1: Enable crystal
+      HUBSET  ##%00_01              ' Crystal 15pF, RCFAST source
+      WAITX   ##20_000_000/100      ' Wait 10ms
+      HUBSET  ##%10_01              ' Switch to crystal
+
+      ' Step 2: Configure PLL (20 MHz * 10 = 200 MHz)
+      HUBSET  ##%1_000000_0000001001_0000_01_01  ' PLL on, mult=10, source=crystal
+      WAITX   ##20_000_000/100      ' Wait 10ms for PLL lock
+
+      ' Step 3: Switch to PLL
+      HUBSET  ##%1_000000_0000001001_0000_01_11  ' Same config, source=PLL
+
+  chip_reset:
+    description: "Reset the entire chip"
+    code: |
+      HUBSET  ##$80000000           ' Bit 31 = reset
 flags_affected:
   C: No effect
   Z: No effect
@@ -31,3 +116,11 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.201537'
 category: Hub Control
 oneliner: Set hub configuration
+
+related:
+  - language/spin2/methods/hubset.yaml
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/system-variables/clkmode.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - architecture/clock_system.yaml

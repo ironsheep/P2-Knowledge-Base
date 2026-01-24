@@ -1,8 +1,119 @@
-variable: "CLKMODE"
+variable: CLKMODE
 type: system_variable
-data_type: "Unknown"
+data_type: long
+category: Clock Configuration
+
 description: |
-  System clock mode configuration
-access: "read_write"
+  Current clock mode register value. Maintained at fixed HUB address $00040.
+  
+  This 32-bit value configures the P2's clock source, PLL settings, and crystal
+  parameters. It is automatically initialized by the compiler based on _clkfreq,
+  _xtlfreq, _xinfreq, and related CON block constants.
+  
+  Reading CLKMODE shows the current clock configuration. Writing requires
+  understanding the bit fields - use CLKSET for safe clock changes.
+
+hub_address: "$00040"
+access: read_write
+
+bit_fields:
+  d24:
+    name: "PLL Enable"
+    description: "1 = PLL powered on, 0 = PLL off"
+  
+  d23_18:
+    name: "Input Divider (DIVD)"
+    description: "PLL input divider - 1 (actual divider = value + 1)"
+    range: "0-63 (divider 1-64)"
+  
+  d17_8:
+    name: "Multiplier (MULT)"
+    description: "PLL VCO multiplier - 1 (actual multiplier = value + 1)"
+    range: "0-1023 (multiplier 1-1024)"
+  
+  d7_4:
+    name: "Post Divider (PPPP)"
+    description: "PLL output post-divider - 1"
+    values:
+      0: "Divide by 1"
+      1: "Divide by 2"
+      3: "Divide by 4"
+      5: "Divide by 6"
+      7: "Divide by 8"
+      9: "Divide by 10"
+      11: "Divide by 12"
+      13: "Divide by 14"
+      15: "Divide by 16"
+  
+  d3_2:
+    name: "Crystal Capacitance (CC)"
+    description: "Internal loading capacitors for crystal"
+    values:
+      0b00: "No capacitors (external clock input)"
+      0b01: "15pF capacitors (crystals >= 16 MHz)"
+      0b11: "30pF capacitors (crystals < 16 MHz)"
+  
+  d1_0:
+    name: "Clock Source (SS)"
+    description: "Active clock source selection"
+    values:
+      0b00: "RCFAST (~20 MHz internal RC)"
+      0b01: "RCSLOW (~20 kHz internal RC)"
+      0b10: "XI pin (crystal or external input)"
+      0b11: "PLL output"
+
+clock_source_modes:
+  rcfast:
+    bits: "0b00"
+    frequency: "~20 MHz"
+    description: "Internal RC oscillator, fast mode"
+    use_case: "Default boot, no external crystal needed"
+  
+  rcslow:
+    bits: "0b01"
+    frequency: "~20 kHz"
+    description: "Internal RC oscillator, slow mode"
+    use_case: "Ultra-low power, sleep modes"
+  
+  crystal_direct:
+    bits: "0b10"
+    frequency: "Crystal frequency"
+    description: "External crystal or clock input"
+    use_case: "Precise timing without PLL"
+  
+  pll:
+    bits: "0b11"
+    frequency: "Calculated from PLL settings"
+    description: "PLL output (requires PLL enable)"
+    use_case: "High-speed operation (up to 500 MHz)"
+
 examples:
-  - "CLKMODE := %0_0000_01_101_111_1_1  // 80MHz"
+  - description: "Read current clock mode"
+    code: "debug(\"Clock mode: \", uhex(clkmode))"
+  
+  - description: "Check if using PLL"
+    code: |
+      if (clkmode & %11) == %11
+        debug("Running from PLL")
+  
+  - description: "Check clock source"
+    code: |
+      case clkmode & %11
+        %00: debug("RCFAST")
+        %01: debug("RCSLOW")
+        %10: debug("Crystal/External")
+        %11: debug("PLL")
+
+notes:
+  - "Hub address $00040 is fixed - can be accessed from PASM via RDLONG"
+  - "Compiler calculates optimal PLL settings automatically"
+  - "Use CLKSET for safe clock transitions (handles PLL lock timing)"
+  - "Raw HUBSET to change mode requires proper sequencing"
+  - "PLL must lock before switching to PLL source (~10ms)"
+
+related:
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/methods/hubset.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - architecture/clock_system.yaml

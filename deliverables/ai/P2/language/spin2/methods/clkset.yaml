@@ -42,10 +42,9 @@ timing:
   description: "Clock stabilization delay"
   cycles: "~10-20ms for PLL lock"
 related:
-  - HUBSET
-  - WAITMS
-  - GETCT
-see_also:
-  - "Clock configuration"
-  - "PLL setup"
-  - "Power management"
+  - language/spin2/methods/hubset.yaml
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/system-variables/clkmode.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - language/pasm2/hubset.yaml
+  - architecture/clock_system.yaml

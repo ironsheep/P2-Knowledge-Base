@@ -13,17 +13,35 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Enable debug output
-      HUBSET($F0)  ' Enable debug pins
-    description: "Configure debug pins"
-  - code: |
-      ' Set clock mode bits
+      ' Direct clock configuration
       HUBSET(clkmode_bits)
-    description: "Direct clock configuration"
+    description: "Set clock mode directly"
+
   - code: |
-      ' Reset specific hub feature
-      HUBSET(config & !$100)  ' Clear bit 8
-    description: "Modify hub configuration"
+      ' Safe PLL switching pattern
+      PUB switch_to_pll() | mode
+        ' Step 1: Configure PLL but stay on RCFAST
+        mode := clkmode & !%11         ' Clear source bits
+        hubset(mode)                   ' Configure PLL
+
+        ' Step 2: Wait for PLL to lock
+        waitms(10)                     ' PLL settling time
+
+        ' Step 3: Switch to PLL
+        mode |= %11                    ' Set PLL source
+        hubset(mode)
+        clkfreq := 200_000_000         ' Update frequency variable
+    description: "Safe clock switching to PLL with proper lock time"
+
+  - code: |
+      ' Chip reset
+      HUBSET($8000_0000)               ' Bit 31 = reset chip
+    description: "Reset the entire chip"
+
+  - code: |
+      ' Modify hub configuration
+      HUBSET(config & !$100)           ' Clear bit 8
+    description: "Selective bit modification"
 notes:
   - "Low-level hub configuration"
   - "Directly executes HUBSET instruction"
@@ -36,10 +54,9 @@ timing:
   description: "Hub operation"
   cycles: "2-9 clock cycles"
 related:
-  - CLKSET
-  - COGSTOP
-  - COGINIT
-see_also:
-  - "Hub configuration"
-  - "Low-level control"
-  - "System configuration"
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/system-variables/clkmode.yaml
+  - language/pasm2/hubset.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - architecture/clock_system.yaml

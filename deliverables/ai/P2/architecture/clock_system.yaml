@@ -1,5 +1,5 @@
 # Clock System - Flexible Multi-Source Clock Generation
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Silicon Doc v35, P2 Datasheet, pnut_ts Clock-Configuration-Usage-Guide.md
 
 component: Clock_System
 category: timing
@@ -7,6 +7,51 @@ description: |
   Flexible clock generation system supporting multiple clock sources with PLL
   multiplication, programmable dividers, and automatic source switching. Provides
   stable timing for CPU cores and peripherals.
+
+# Compile-time configuration constants (defined in top-level CON block)
+configuration_constants:
+  _clkfreq:
+    description: "Desired system frequency in Hz"
+    range: "3,333,333 Hz to 500,000,000 Hz"
+    behavior: "Compiler calculates PLL settings; assumes 20 MHz crystal if alone"
+  _xtlfreq:
+    description: "External crystal frequency in Hz"
+    range: "1-60 MHz typical"
+    behavior: "Alone = direct crystal; with _clkfreq = PLL input"
+    capacitor_selection:
+      gte_16mhz: "15pF internal caps"
+      lt_16mhz: "30pF internal caps"
+  _xinfreq:
+    description: "External clock input frequency in Hz"
+    range: "250 kHz to 500 MHz"
+    behavior: "For external oscillator modules or shared clocks"
+  _errfreq:
+    description: "Allowable PLL frequency error in Hz"
+    default: "1,000,000 Hz (1 MHz)"
+  _rcfast:
+    description: "Use internal RCFAST oscillator (~20 MHz)"
+    note: "Overrides other clock settings"
+  _rcslow:
+    description: "Use internal RCSLOW oscillator (~20 kHz)"
+    note: "Overrides other clock settings"
+
+configuration_rules:
+  - "Only ONE clock configuration per program (in top-level object)"
+  - "_clkfreq alone assumes 20 MHz crystal input"
+  - "_xtlfreq or _xinfreq alone runs at that frequency (no PLL)"
+  - "Combining _clkfreq with _xtlfreq or _xinfreq enables PLL"
+  - "_rcfast and _rcslow override all other clock settings"
+  - "DEBUG statements with no clock specified defaults to 20 MHz"
+
+hub_variables:
+  CLKFREQ:
+    address: "$00044"
+    description: "Current clock frequency in Hz"
+    access: "Read/Write"
+  CLKMODE:
+    address: "$00040"
+    description: "Current clock mode register value"
+    access: "Read/Write"
 
 clock_sources:
   rcfast:
@@ -38,27 +83,37 @@ clock_sources:
     duty_cycle: "40-60% recommended"
 
 pll_system:
+  constraints:
+    input_frequency: "250 kHz to 500 MHz"
+    output_frequency: "3.333 MHz to 500 MHz"
+    vco_range: "99 MHz to 201 MHz (or up to requested + error)"
+    fpfd_minimum: "250 kHz (feedback frequency)"
+
   input_divider:
     range: "1-64"
-    bits: "6 bits (PPPP field)"
-    
+    bits: "6 bits (D[23:18], stored as divider-1)"
+
   vco_multiplier:
     range: "1-1024"
-    bits: "10 bits (MMMM_MMMMMM field)"
-    
+    bits: "10 bits (D[17:8], stored as multiplier-1)"
+
   vco_frequency:
-    nominal_range: "100-200 MHz"
-    overclock_max: "350 MHz"
+    nominal_range: "99-201 MHz"
     equation: "f_vco = f_input / divider * multiplier"
-    
+
   post_divider:
     values: [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
-    bits: "4 bits (DDDD field)"
-    
+    bits: "4 bits (D[7:4], stored as divider-1)"
+
   output_frequency:
     equation: "f_out = f_vco / post_divider"
     max_recommended: "180 MHz"
     max_overclock: "350 MHz"
+
+  error_budget:
+    description: "Compiler iterates through PLL configurations to find closest match"
+    default_error: "1 MHz"
+    tighter_tolerance: "May fail if no valid configuration exists"
 
 hubset_configuration:
   instruction: "HUBSET {#}D"
@@ -209,8 +264,31 @@ debugging:
   pll_lock_detection: "Check PLL stability before switching"
   fallback_mode: "System always falls back to RCFAST if clock fails"
 
-see_also:
-  - "HUBSET instruction reference"
-  - "PLL configuration calculator"
-  - "Crystal selection guide"
-  - "Power optimization techniques"
+anti_patterns:
+  conflicting_definitions:
+    wrong: "_rcfast = TRUE with _clkfreq = 200_000_000"
+    reason: "Cannot combine internal oscillator with PLL"
+
+  missing_crystal_frequency:
+    wrong: "_clkfreq = 200_000_000 with non-20MHz crystal"
+    correct: "Specify _xtlfreq to match actual crystal"
+
+  hardcoded_timing:
+    wrong: "waitx(200_000) assumes 200 MHz"
+    correct: "waitx(clkfreq / 1000) works at any frequency"
+
+  no_pll_lock_wait:
+    wrong: "HUBSET to PLL then immediate operation"
+    correct: "Wait ~10ms for PLL to stabilize before switching"
+
+  clkfreq_before_init:
+    wrong: "Using CLKFREQ before clock is configured"
+    correct: "Initialize peripherals after clock is stable"
+
+related:
+  - language/pasm2/hubset.yaml
+  - language/spin2/methods/hubset.yaml
+  - language/spin2/methods/clkset.yaml
+  - language/spin2/system-variables/clkfreq.yaml
+  - language/spin2/system-variables/clkmode.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
