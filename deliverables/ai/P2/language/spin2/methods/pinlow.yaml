@@ -9,7 +9,7 @@ type: "method"
 description: |
   Drive specified pin(s) low (output mode, logic 0).
   Sets the direction bit(s) to output (DIR=1) and drives the pin(s) low (OUT=0).
-  This is equivalent to the PASM2 DIRL instruction.
+  This is equivalent to the PASM2 DRVL instruction.
 
 syntax: "PINLOW(PinField)"
 
@@ -48,8 +48,8 @@ examples:
     description: "Use a variable for the pin number"
 
 underlying_pasm:
-  instruction: "DIRL"
-  description: "Internally uses DIRL instruction which sets DIR=1 and OUT=0"
+  instruction: "DRVL"
+  description: "Internally uses DRVL instruction which sets DIR=1 and OUT=0"
   
 common_uses:
   - "Turn off LEDs"
@@ -71,6 +71,6 @@ notes:
   - "Useful for Charlieplexing one side of LED matrix"
 
 see_also:
-  - "language/pasm2/dirl.yaml"
+  - "language/pasm2/drvl.yaml"
   - "language/spin2/methods/pinhigh.yaml"
   - "language/spin2/methods/pintoggle.yaml"

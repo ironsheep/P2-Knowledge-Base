@@ -9,7 +9,7 @@ type: "method"
 description: |
   Drive specified pin(s) high (output mode, logic 1).
   Sets the direction bit(s) to output (DIR=1) and drives the pin(s) high (OUT=1).
-  This is equivalent to the PASM2 DIRH instruction.
+  This is equivalent to the PASM2 DRVH instruction.
 
 syntax: "PINHIGH(PinField)"
 
@@ -47,8 +47,8 @@ examples:
     description: "Use a constant for the pin number"
 
 underlying_pasm:
-  instruction: "DIRH"
-  description: "Internally uses DIRH instruction which sets DIR=1 and OUT=1"
+  instruction: "DRVH"
+  description: "Internally uses DRVH instruction which sets DIR=1 and OUT=1"
   
 common_uses:
   - "Turn on LEDs"
@@ -69,6 +69,6 @@ notes:
   - "Multiple pins can be controlled simultaneously"
 
 see_also:
-  - "language/pasm2/dirh.yaml"
+  - "language/pasm2/drvh.yaml"
   - "language/spin2/methods/pinlow.yaml"
   - "language/spin2/methods/pintoggle.yaml"
