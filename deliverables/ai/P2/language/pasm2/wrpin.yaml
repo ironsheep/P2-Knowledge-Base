@@ -9,6 +9,14 @@ encoding:
 timing:
   cycles: 2
   type: fixed
+  in_flag_reset_latency: |
+    After WRPIN executes, the Smart Pin requires 2 system-clock cycles to reset
+    the IN flag to logic-0 before a program can poll the flag again.
+    Insert NOP instructions before testing the IN flag:
+      WRPIN   mode, #pin
+      NOP                   ' Clock 1 for IN flag reset
+      NOP                   ' Clock 2 for IN flag reset
+      TESTP   #pin WC       ' NOW safe to poll IN flag
 description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart\
   \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**:\
   \ Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures\

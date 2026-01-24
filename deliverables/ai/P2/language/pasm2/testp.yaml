@@ -24,6 +24,9 @@ encoding:
 timing:
   cycles: 2
   type: fixed
+  pin_sampling_latency: |
+    TESTP reads pin state from 2 system-clock cycles BEFORE the instruction starts.
+    This is "fresher" data than reading INx registers (which are 3 clocks old).
 description: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]].
 
 

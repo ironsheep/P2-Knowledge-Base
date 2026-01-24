@@ -13,6 +13,80 @@ description: |
   strengths, slew rates, and input characteristics. Understanding pin timing is crucial
   for interfacing with external devices and meeting timing requirements of various protocols.
 
+instruction_to_pin_timing:
+  description: |
+    Critical clock cycle timing between instruction execution and physical pin state.
+    Source: Smart Pins documentation (verified from silicon behavior).
+
+  output_latency:
+    description: |
+      When an instruction changes a DIRx or OUTx bit, the processor needs THREE (3)
+      additional system-clock cycles AFTER the instruction before the pin starts to
+      transition to its new state.
+    clock_cycles: 3
+    applies_to:
+      - "DRVH, DRVL, DRVC, DRVNC, DRVZ, DRVNZ"
+      - "OUTH, OUTL, OUTC, OUTNC, OUTZ, OUTNZ"
+      - "DIRH, DIRL, DIRC, DIRNC, DIRZ, DIRNZ"
+      - "Any instruction writing to OUTx or DIRx"
+    example: |
+      DRVH    #8              ' Instruction completes (2 clocks)
+      NOP                     ' Clock 1 after instruction
+      NOP                     ' Clock 2 after instruction
+      NOP                     ' Clock 3 - pin NOW starts to transition
+    total_latency: "5 clocks from instruction start to pin transition start"
+
+  input_latency_inx_register:
+    description: |
+      When an instruction reads the contents of the IN register associated with a pin,
+      the processor receives the state of the pins as they existed THREE (3) system-clock
+      cycles BEFORE the start of the instruction.
+    clock_cycles: 3
+    data_age: "3 clocks old"
+    applies_to:
+      - "TESTB INA/INB, #pin"
+      - "MOV dest, INA/INB"
+      - "Any instruction reading INx registers"
+    note: "This is OLDER data than TESTP provides"
+
+  input_latency_testp:
+    description: |
+      When a program uses a TESTP or TESTPN instruction to read the state of a pin,
+      the processor receives the state of the pins as they existed TWO (2) system-clock
+      cycles BEFORE the start of the instruction. TESTP/TESTPN gather "fresher" INx
+      data than is available via the INx registers.
+    clock_cycles: 2
+    data_age: "2 clocks old"
+    applies_to:
+      - "TESTP pin WC/WZ"
+      - "TESTPN pin WC/WZ"
+    advantage: "1 clock fresher than reading INx register directly"
+
+  smart_pin_in_flag_reset:
+    description: |
+      After a cog executes a WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN instruction, the
+      Smart Pin requires TWO (2) system-clock cycles to reset the IN flag to logic-0
+      before a program can poll the flag again.
+    clock_cycles: 2
+    applies_to:
+      - "WRPIN"
+      - "WXPIN"
+      - "WYPIN"
+      - "RDPIN"
+      - "AKPIN"
+    required_pattern: |
+      WRPIN   mode, #pin      ' Write to Smart Pin
+      NOP                     ' Clock 1 for IN flag reset
+      NOP                     ' Clock 2 for IN flag reset
+      TESTP   #pin WC         ' NOW safe to poll IN flag
+    note: "RQPIN does NOT reset the IN flag (read quiet)"
+
+  timing_summary_table:
+    output_dir_out_change: "3 clocks after instruction"
+    input_via_inx: "3 clocks before instruction (older)"
+    input_via_testp: "2 clocks before instruction (fresher)"
+    smart_pin_flag_reset: "2 clocks after WRPIN/WXPIN/WYPIN/RDPIN/AKPIN"
+
 timing_specifications:
   output_timing:
     propagation_delay:

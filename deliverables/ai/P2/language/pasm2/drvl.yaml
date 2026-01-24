@@ -1,6 +1,12 @@
 instruction: DRVL
 syntax: DRVL    {#}D           {WCZ}
 category: Pin
+timing:
+  cycles: 2
+  type: fixed
+  pin_output_latency: |
+    After instruction completes, the pin starts to transition 3 system-clock cycles later.
+    Total from instruction start: 2 (execution) + 3 (propagation) = 5 clocks to pin change.
 description: >-
   DRVL sets the I/O pin(s) designated by Dest to the output direction and to a
   low output level. All other pins are left unchanged.

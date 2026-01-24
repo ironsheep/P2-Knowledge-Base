@@ -20,6 +20,9 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
+  pin_sampling_latency: |
+    TESTPN reads pin state from 2 system-clock cycles BEFORE the instruction starts.
+    This is "fresher" data than reading INx registers (which are 3 clocks old).
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000001
   write: —

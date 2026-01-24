@@ -15,6 +15,10 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
+  in_flag_reset_latency: |
+    After AKPIN executes, the Smart Pin requires 2 system-clock cycles to reset
+    the IN flag to logic-0 before a program can poll the flag again.
+    Insert NOP instructions before testing the IN flag.
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1100000 01I 000000001 SSSSSSSSS
   write: Ack Bus

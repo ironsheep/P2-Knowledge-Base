@@ -9,6 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
+  in_flag_reset_latency: |
+    After WYPIN executes (which acknowledges the Smart Pin), the Smart Pin requires
+    2 system-clock cycles to reset the IN flag to logic-0 before a program can poll
+    the flag again. Insert NOP instructions before testing the IN flag.
 description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge
   smart pins.
 
