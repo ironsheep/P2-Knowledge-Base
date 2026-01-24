@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T01:18:39.905978",
+    "generated": "2026-01-24T01:22:41.565831",
     "total_entries": 1027,
     "total_categories": 47,
-    "total_aliases": 939,
+    "total_aliases": 941,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -1940,6 +1940,9 @@
     "XOR": [
       "p2kbPasm2Xor"
     ],
+    "XORO32": [
+      "p2kbPasm2Xoro32"
+    ],
     "XSTOP": [
       "p2kbPasm2Xstop"
     ],
@@ -3463,6 +3466,9 @@
     ],
     "xor": [
       "p2kbPasm2Xor"
+    ],
+    "xoro32": [
+      "p2kbPasm2Xoro32"
     ],
     "xstop": [
       "p2kbPasm2Xstop"
@@ -6016,7 +6022,7 @@
     },
     "p2kbPasm2Xoro32": {
       "path": "deliverables/ai/P2/language/pasm2/xoro32.yaml",
-      "mtime": 1769216415
+      "mtime": 1769217645
     },
     "p2kbPasm2Xstop": {
       "path": "deliverables/ai/P2/language/pasm2/xstop.yaml",
@@ -6124,7 +6130,7 @@
     },
     "p2kbSpin2TimingOperations": {
       "path": "deliverables/ai/P2/language/spin2/concepts/timing_operations.yaml",
-      "mtime": 1769217414
+      "mtime": 1769217645
     },
     "p2kbSpin2DebugEndSession": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
@@ -6564,7 +6570,7 @@
     },
     "p2kbSpin2Getct": {
       "path": "deliverables/ai/P2/language/spin2/methods/getct.yaml",
-      "mtime": 1768613644
+      "mtime": 1769217645
     },
     "p2kbSpin2Getms": {
       "path": "deliverables/ai/P2/language/spin2/methods/getms.yaml",
@@ -6836,7 +6842,7 @@
     },
     "p2kbSpin2Waitms": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitms.yaml",
-      "mtime": 1768613644
+      "mtime": 1769217645
     },
     "p2kbSpin2Waitus": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitus.yaml",
