@@ -1,0 +1,649 @@
+# Chapter 9: PWM Output
+
+This chapter covers the three Pulse Width Modulation (PWM) modes: **P_PWM_TRIANGLE** (%01000) for symmetric triangle-wave PWM, **P_PWM_SAWTOOTH** (%01001) for asymmetric sawtooth-wave PWM, and **P_PWM_SMPS** (%01010) for switch-mode power supply control with feedback.
+
+---
+
+## 9.1 PWM Fundamentals
+
+### What is PWM?
+
+Pulse Width Modulation controls the average power delivered to a load by varying the duty cycle of a digital signal. The duty cycle is the percentage of time the signal is high during each period.
+
+### P2 PWM Architecture
+
+All three PWM modes share a common architecture:
+
+```
+                  ┌─────────────┐
+X[15:0] ─────────►│ Base Period │───── Clock divider
+                  └─────────────┘
+                         │
+                         ▼
+                  ┌─────────────┐
+X[31:16] ────────►│ Frame Count │───── Counter range
+                  └─────────────┘
+                         │
+                         ▼
+                  ┌─────────────┐
+Y[15:0] ─────────►│  Comparator │───── Output = (Y >= counter)
+                  └─────────────┘
+                         │
+                         ▼
+                      PIN OUT
+```
+
+### Key Terminology
+
+| Term | Definition |
+|------|------------|
+| **Base period** | X[15:0] clock cycles between counter updates |
+| **Frame period** | X[31:16] base periods forming one counter cycle |
+| **PWM period** | Time for complete PWM cycle (depends on mode) |
+| **Duty value** | Y[15:0] comparison threshold |
+
+### Mode Comparison
+
+| Mode | Counter Pattern | PWM Period | Best For |
+|------|-----------------|------------|----------|
+| P_PWM_TRIANGLE | Up-down | 2 × frame period | Smooth transitions |
+| P_PWM_SAWTOOTH | Up only | 1 × frame period | Fast switching |
+| P_PWM_SMPS | Up with feedback | Variable | Power supply |
+
+---
+
+## 9.2 P_PWM_TRIANGLE Mode (%01000)
+
+### Function
+
+P_PWM_TRIANGLE generates a symmetric PWM waveform using an up-down counter. The counter counts from the frame period value down to 1, then from 1 back up to the frame period value, creating a triangle wave pattern.
+
+### Counter Behavior
+
+```
+Frame = 4
+
+Counter: 4 → 3 → 2 → 1 → 2 → 3 → 4 → 3 → 2 → 1 → ...
+         \___ down ___/\___ up ___/\______ repeat _____
+
+PWM Period = 2 × Frame Period × Base Period
+```
+
+### Output Logic
+
+At each base period:
+- If Y[15:0] >= counter → output HIGH
+- If Y[15:0] < counter → output LOW
+
+### Configuration
+
+| Register | Field | Purpose |
+|----------|-------|---------|
+| X[15:0] | Base period | Clock cycles per counter update (1-65535) |
+| X[31:16] | Frame period | Counter range (1-65535) |
+| Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
+
+### Timing Formulas
+
+```
+PWM frequency = sysclk / (2 × X[31:16] × X[15:0])
+
+PWM period = 2 × X[31:16] × X[15:0] / sysclk
+
+Duty cycle = Y[15:0] / X[31:16] × 100%
+```
+
+### Worked Example
+
+**1 kHz triangle PWM at 50% duty with 200 MHz sysclk:**
+
+```
+Target: 1 kHz PWM, 50% duty
+PWM period = 1/1000 = 1 ms = 200,000 clocks
+
+Choose: Base period = 1, Frame period = 100,000
+  → PWM period = 2 × 100,000 × 1 = 200,000 clocks ✓
+
+Duty = 50% = 50,000 / 100,000
+  → Y = 50,000
+```
+
+### Configuration Sequence
+
+**Spin2:**
+```spin2
+CON
+  _clkfreq = 200_000_000
+  PWM_PIN = 20
+
+PUB triangle_pwm(freq_hz, duty_percent) | frame, y_val
+  ' Calculate frame period for desired frequency
+  frame := _clkfreq / (2 * freq_hz)
+  y_val := frame * duty_percent / 100
+
+  PINFLOAT(PWM_PIN)
+  WRPIN(PWM_PIN, P_PWM_TRIANGLE | P_OE)
+  WXPIN(PWM_PIN, 1 | (frame << 16))       ' Base=1, frame period
+  WYPIN(PWM_PIN, y_val)
+  PINLOW(PWM_PIN)
+```
+
+**PASM2:**
+```pasm2
+              dirl      #PWM_PIN
+              wrpin     ##(P_PWM_TRIANGLE | P_OE), #PWM_PIN
+              wxpin     x_val, #PWM_PIN
+              dirh      #PWM_PIN
+              wypin     y_val, #PWM_PIN
+```
+
+### Duty Cycle Waveform
+
+For frame period = 8, duty value = 6:
+
+```
+Counter:  8  7  6  5  4  3  2  1  2  3  4  5  6  7  8
+Output:   L  L  H  H  H  H  H  H  H  H  H  H  H  L  L
+              ▲                          ▲
+              Y>=counter                 Y>=counter
+```
+
+The symmetric counting creates equal rise and fall times.
+
+---
+
+## 9.3 P_PWM_SAWTOOTH Mode (%01001)
+
+### Function
+
+P_PWM_SAWTOOTH generates an asymmetric PWM waveform using an up-only counter. The counter counts from 1 up to the frame period value, then resets to 1.
+
+### Counter Behavior
+
+```
+Frame = 4
+
+Counter: 1 → 2 → 3 → 4 → 1 → 2 → 3 → 4 → 1 → ...
+         \______ up _______/\______ up _______/
+
+PWM Period = Frame Period × Base Period
+```
+
+### Key Difference from Triangle
+
+| Aspect | P_PWM_TRIANGLE | P_PWM_SAWTOOTH |
+|--------|----------------|----------------|
+| Counter pattern | Up-down | Up only |
+| PWM period | 2 × frame × base | 1 × frame × base |
+| Frequency at same X | Half | Full |
+| Edges per cycle | 2 symmetric | 2 asymmetric |
+
+### Configuration
+
+| Register | Field | Purpose |
+|----------|-------|---------|
+| X[15:0] | Base period | Clock cycles per counter update |
+| X[31:16] | Frame period | Counter range (1-65535) |
+| Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
+
+### Timing Formulas
+
+```
+PWM frequency = sysclk / (X[31:16] × X[15:0])
+
+PWM period = X[31:16] × X[15:0] / sysclk
+
+Duty cycle = Y[15:0] / X[31:16] × 100%
+```
+
+### Worked Example
+
+**10 kHz sawtooth PWM at 25% duty with 200 MHz sysclk:**
+
+```
+Target: 10 kHz PWM, 25% duty
+PWM period = 1/10,000 = 100 µs = 20,000 clocks
+
+Choose: Base period = 1, Frame period = 20,000
+  → PWM period = 20,000 × 1 = 20,000 clocks ✓
+
+Duty = 25% = 5,000 / 20,000
+  → Y = 5,000
+```
+
+### Configuration Sequence
+
+**Spin2:**
+```spin2
+CON
+  _clkfreq = 200_000_000
+  PWM_PIN = 20
+
+PUB sawtooth_pwm(freq_hz, duty_percent) | frame, y_val
+  ' Calculate frame period for desired frequency
+  frame := _clkfreq / freq_hz
+  y_val := frame * duty_percent / 100
+
+  PINFLOAT(PWM_PIN)
+  WRPIN(PWM_PIN, P_PWM_SAWTOOTH | P_OE)
+  WXPIN(PWM_PIN, 1 | (frame << 16))
+  WYPIN(PWM_PIN, y_val)
+  PINLOW(PWM_PIN)
+```
+
+**PASM2:**
+```pasm2
+              dirl      #PWM_PIN
+              wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
+              wxpin     x_val, #PWM_PIN
+              dirh      #PWM_PIN
+              wypin     y_val, #PWM_PIN
+```
+
+### Duty Cycle Waveform
+
+For frame period = 8, duty value = 3:
+
+```
+Counter:  1  2  3  4  5  6  7  8  1  2  3  4  5  6  7  8
+Output:   H  H  H  L  L  L  L  L  H  H  H  L  L  L  L  L
+              ▲                       ▲
+              Y>=counter              Y>=counter
+```
+
+The sawtooth pattern creates a fast rising edge and slow falling edge in the output.
+
+---
+
+## 9.4 P_PWM_SMPS Mode (%01010)
+
+### Function
+
+P_PWM_SMPS generates PWM output for switch-mode power supply control with voltage and current feedback. This mode extends sawtooth PWM with two feedback inputs that control cycle initiation and output cutoff.
+
+### Feedback Inputs
+
+| Input | Function | Source |
+|-------|----------|--------|
+| A-input | Voltage feedback | Low = start new cycle |
+| B-input | Current limit | High = immediate output low |
+
+### Operation Sequence
+
+1. Counter runs sawtooth pattern (1 to frame period)
+2. At frame end, wait for A-input to go low (voltage sag)
+3. When A goes low, start new cycle, capture Y, raise IN
+4. During cycle, if B-input goes high, force output low for remainder
+
+### Block Diagram
+
+```
+                    ┌──────────────────┐
+A-input ───────────►│ Voltage Monitor  │──── Triggers new cycle
+(voltage sense)     └──────────────────┘     when low
+                              │
+                              ▼
+        ┌─────────────────────────────────────┐
+        │         PWM Sawtooth Core           │
+        │  Counter: 1 → frame → wait for A    │
+        └─────────────────────────────────────┘
+                              │
+                              ▼
+        ┌─────────────────────────────────────┐
+B-input ►│     Current Limiter Gate           │──── Forces low
+(current)└─────────────────────────────────────┘     when high
+                              │
+                              ▼
+                           PIN OUT
+```
+
+### Configuration
+
+| Register | Field | Purpose |
+|----------|-------|---------|
+| X[15:0] | Base period | Clock cycles per counter update |
+| X[31:16] | Frame period | Maximum PWM pulse width |
+| Y[15:0] | Duty value | PWM threshold (can be set once) |
+
+### Input Selection
+
+Use mode field bits to select A and B input sources:
+
+| Constant | Effect |
+|----------|--------|
+| P_PLUS1_A | A-input from pin+1 |
+| P_MINUS1_A | A-input from pin-1 |
+| P_PLUS1_B | B-input from pin+1 |
+| P_MINUS1_B | B-input from pin-1 |
+
+### Typical SMPS Circuit
+
+```
+                   ┌─────────────────────────────┐
+                   │                             │
+Pin N (PWM) ───────┤►───[FET]───┬───[L]───┬──►──┼── Vout
+                   │            │         │     │
+                   │          [D]      [C]      │
+                   │            │         │     │
+                   │            ▼         ▼     │
+                   │           GND       GND    │
+                   │                             │
+Pin N+1 ◄──────────┤── Voltage Divider ◄────────┤
+(A-input)          │                             │
+                   │                             │
+Pin N-1 ◄──────────┤── Shunt Resistor ◄─────────┤
+(B-input)          │                             │
+                   └─────────────────────────────┘
+```
+
+### Configuration Sequence
+
+**Spin2:**
+```spin2
+CON
+  _clkfreq = 200_000_000
+  SMPS_PIN = 20       ' FET gate
+  V_SENSE = 21        ' Voltage feedback (A-input)
+  I_SENSE = 19        ' Current sense (B-input)
+
+PUB smps_controller(duty_percent) | mode, frame, y_val
+  ' Configure voltage comparator
+  WRPIN(V_SENSE, P_COMPARE_AB)
+  WXPIN(V_SENSE, voltage_threshold)
+  DIRH(V_SENSE)
+
+  ' Configure current comparator
+  WRPIN(I_SENSE, P_COMPARE_AB)
+  WXPIN(I_SENSE, current_limit)
+  DIRH(I_SENSE)
+
+  ' Configure SMPS controller
+  frame := 256                              ' 256 steps
+  y_val := frame * duty_percent / 100
+  mode := P_PWM_SMPS | P_OE | P_PLUS1_A | P_MINUS1_B
+
+  PINFLOAT(SMPS_PIN)
+  WRPIN(SMPS_PIN, mode)
+  WXPIN(SMPS_PIN, 25 | (frame << 16))       ' 25 clocks base
+  WYPIN(SMPS_PIN, y_val)
+  PINLOW(SMPS_PIN)
+```
+
+**PASM2:**
+```pasm2
+              dirl      #SMPS_PIN
+              wrpin     ##(P_PWM_SMPS | P_OE | P_PLUS1_A | P_MINUS1_B), #SMPS_PIN
+              wxpin     x_val, #SMPS_PIN
+              dirh      #SMPS_PIN
+              wypin     y_val, #SMPS_PIN     ' Set once, runs autonomously
+```
+
+### Set-and-Forget Operation
+
+P_PWM_SMPS is designed for autonomous operation. After initial configuration with WYPIN, the smart pin:
+- Monitors voltage via A-input
+- Initiates pulses when voltage sags
+- Limits current via B-input
+- Requires no software intervention
+
+---
+
+## 9.5 Dynamic Duty Cycle Updates
+
+### Updating Y Register
+
+All PWM modes capture Y[15:0] at the start of each frame. To change duty cycle:
+
+**Spin2:**
+```spin2
+WYPIN(PWM_PIN, new_duty_value)
+```
+
+**PASM2:**
+```pasm2
+              wypin     new_duty, #PWM_PIN
+```
+
+The new value takes effect at the next frame boundary, preventing glitches.
+
+### Glitch-Free Updates
+
+The Y capture mechanism ensures:
+- Mid-cycle writes do not affect current cycle
+- New duty applies at next frame start
+- No partial pulses or timing artifacts
+
+### Update Timing
+
+For smooth transitions, update rate should be much slower than PWM frequency:
+
+| Application | PWM Frequency | Update Rate |
+|-------------|---------------|-------------|
+| LED dimming | 500 Hz | 50-100 Hz |
+| Motor control | 20 kHz | 1-5 kHz |
+| Audio | 100 kHz | 44.1 kHz |
+
+---
+
+## 9.6 PWM Resolution and Frequency Tradeoffs
+
+### Resolution vs Frequency
+
+PWM resolution depends on frame period (X[31:16]):
+
+| Frame Period | Resolution | Max Frequency (200 MHz) |
+|--------------|------------|------------------------|
+| 256 | 8-bit | 390.6 kHz (sawtooth) |
+| 512 | 9-bit | 195.3 kHz |
+| 1024 | 10-bit | 97.7 kHz |
+| 4096 | 12-bit | 24.4 kHz |
+| 65535 | 16-bit | 1.5 kHz |
+
+### Choosing Parameters
+
+**For motor control (20 kHz, 10-bit resolution):**
+```
+Frame period = 200_000_000 / 20_000 = 10,000
+Actual resolution = log2(10,000) ≈ 13.3 bits
+Y range: 0 to 10,000
+```
+
+**For LED dimming (500 Hz, 12-bit resolution):**
+```
+Frame period = 200_000_000 / 500 = 400,000
+Must limit to 65535 max, use base period
+Base = 7, Frame = 57,143
+Y range: 0 to 57,143
+```
+
+---
+
+## 9.7 Complete Examples
+
+### Example 1: LED Brightness Control
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  LED_PIN = 56
+  PWM_FREQ = 500                            ' 500 Hz (no flicker)
+
+PUB led_control() | frame, brightness
+  frame := _clkfreq / PWM_FREQ              ' 400,000
+  frame := frame <# 65535                   ' Limit to 16-bit
+
+  PINFLOAT(LED_PIN)
+  WRPIN(LED_PIN, P_PWM_SAWTOOTH | P_OE)
+  WXPIN(LED_PIN, 1 | (frame << 16))
+  WYPIN(LED_PIN, 0)                         ' Start at 0%
+  PINLOW(LED_PIN)
+
+  ' Fade up
+  repeat brightness from 0 to frame step frame/100
+    WYPIN(LED_PIN, brightness)
+    WAITMS(20)
+
+  ' Fade down
+  repeat brightness from frame to 0 step frame/100
+    WYPIN(LED_PIN, brightness)
+    WAITMS(20)
+```
+
+### Example 2: Servo Motor Control
+
+Standard hobby servos expect 50 Hz PWM with 1-2 ms pulse width:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  SERVO_PIN = 20
+
+  ' 50 Hz PWM = 20 ms period = 4,000,000 clocks
+  ' Use base=64 to fit in 16-bit frame
+  BASE_PERIOD = 64
+  FRAME_PERIOD = 62500                      ' 64 × 62500 = 4,000,000
+
+  ' Servo pulse: 1 ms = 200,000 clocks = 3125 frame units
+  '              2 ms = 400,000 clocks = 6250 frame units
+  SERVO_MIN = 3125                          ' 0° position
+  SERVO_MAX = 6250                          ' 180° position
+
+PUB servo_control()
+  PINFLOAT(SERVO_PIN)
+  WRPIN(SERVO_PIN, P_PWM_SAWTOOTH | P_OE)
+  WXPIN(SERVO_PIN, BASE_PERIOD | (FRAME_PERIOD << 16))
+  WYPIN(SERVO_PIN, (SERVO_MIN + SERVO_MAX) / 2)  ' Center
+  PINLOW(SERVO_PIN)
+
+PUB set_servo_angle(degrees) | pulse
+  ' Map 0-180° to SERVO_MIN-SERVO_MAX
+  pulse := SERVO_MIN + (SERVO_MAX - SERVO_MIN) * degrees / 180
+  WYPIN(SERVO_PIN, pulse)
+```
+
+### Example 3: Motor Speed Control with Acceleration
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  MOTOR_PIN = 16
+  PWM_FREQ = 20_000                         ' 20 kHz (inaudible)
+
+VAR
+  long current_speed
+  long target_speed
+  long frame_period
+
+PUB motor_init()
+  frame_period := _clkfreq / PWM_FREQ
+
+  PINFLOAT(MOTOR_PIN)
+  WRPIN(MOTOR_PIN, P_PWM_TRIANGLE | P_OE)   ' Triangle for smooth drive
+  WXPIN(MOTOR_PIN, 1 | (frame_period << 16))
+  WYPIN(MOTOR_PIN, 0)
+  PINLOW(MOTOR_PIN)
+
+  current_speed := 0
+  target_speed := 0
+
+PUB set_motor_speed(percent)
+  target_speed := frame_period * percent / 100
+
+PUB motor_update() | delta
+  ' Call periodically for acceleration control
+  if current_speed < target_speed
+    delta := (target_speed - current_speed) / 10 + 1
+    current_speed += delta
+  elseif current_speed > target_speed
+    delta := (current_speed - target_speed) / 10 + 1
+    current_speed -= delta
+
+  WYPIN(MOTOR_PIN, current_speed)
+```
+
+### Example 4: PASM2 High-Frequency PWM
+
+```pasm2
+CON
+  _clkfreq = 200_000_000
+
+DAT           org
+
+' 100 kHz PWM with 10-bit resolution
+              dirl      #PWM_PIN
+              wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
+              wxpin     ##$07D0_0001, #PWM_PIN      ' Frame=2000, Base=1
+              dirh      #PWM_PIN
+              wypin     #1000, #PWM_PIN             ' 50% duty
+
+' Update duty in real-time
+pwm_loop
+              rdlong    new_duty, duty_ptr
+              wypin     new_duty, #PWM_PIN
+              waitx     delay
+              jmp       #pwm_loop
+
+PWM_PIN       long      20
+duty_ptr      long      0                           ' Hub address for duty
+new_duty      long      0
+delay         long      20_000                      ' Update rate
+```
+
+---
+
+## 9.8 Quick Reference
+
+### P_PWM_TRIANGLE Configuration
+
+| Parameter | Register | Formula |
+|-----------|----------|---------|
+| Base period | X[15:0] | Clock cycles per update |
+| Frame period | X[31:16] | Counter range |
+| Duty value | Y[15:0] | 0 to frame period |
+| PWM frequency | - | sysclk / (2 × frame × base) |
+| Duty cycle | - | Y / frame × 100% |
+
+### P_PWM_SAWTOOTH Configuration
+
+| Parameter | Register | Formula |
+|-----------|----------|---------|
+| Base period | X[15:0] | Clock cycles per update |
+| Frame period | X[31:16] | Counter range |
+| Duty value | Y[15:0] | 0 to frame period |
+| PWM frequency | - | sysclk / (frame × base) |
+| Duty cycle | - | Y / frame × 100% |
+
+### P_PWM_SMPS Configuration
+
+| Parameter | Register | Purpose |
+|-----------|----------|---------|
+| Base period | X[15:0] | Clock cycles per update |
+| Frame period | X[31:16] | Maximum pulse width |
+| Duty value | Y[15:0] | PWM threshold |
+| A-input | Mode bits | Voltage feedback |
+| B-input | Mode bits | Current limit |
+
+### Mode Constants
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| P_PWM_TRIANGLE | %01000 | Symmetric PWM |
+| P_PWM_SAWTOOTH | %01001 | Asymmetric PWM |
+| P_PWM_SMPS | %01010 | SMPS with feedback |
+| P_OE | - | Enable output |
+| P_INVERT_OUTPUT | - | Invert PWM signal |
+| P_PLUS1_A | - | A from pin+1 |
+| P_MINUS1_A | - | A from pin-1 |
+| P_PLUS1_B | - | B from pin+1 |
+| P_MINUS1_B | - | B from pin-1 |
+
+### Reset State (DIR=0)
+
+All PWM modes:
+- IN = low
+- Output = low
+- Y[15:0] = captured (ready for DIR=1)
+
+---
+
+*This chapter covered PWM output modes. For DAC-based analog output, see Chapter 10. For serial transmission modes, see Chapter 11.*
