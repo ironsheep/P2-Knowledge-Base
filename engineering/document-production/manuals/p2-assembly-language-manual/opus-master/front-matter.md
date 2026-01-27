@@ -143,7 +143,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | Interrupts | None | 3 per COG |
 | Instructions | ~60 | ~360 |
 
-¹ Per P2 Datasheet. Higher frequencies are achievable with adequate thermal management and reduced workload.
+¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
 
 **Architecture That Transfers**
 
