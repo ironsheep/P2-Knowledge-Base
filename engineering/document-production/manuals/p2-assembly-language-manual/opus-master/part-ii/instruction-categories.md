@@ -2,6 +2,8 @@
 
 This chapter defines the instruction categories used throughout Part II. Each category groups instructions by their primary function. Click any category name in the instruction entries to return here for an overview, or click any instruction mnemonic to jump to its detailed reference.
 
+> **Reading the Encoding Tables:** For help understanding the instruction encoding tables in this section (EEEE condition codes, CZI flag effects, opcode fields), see Chapter 2: The Instruction Format.
+
 ---
 
 ## Arithmetic Operations {#arithmetic-operations}

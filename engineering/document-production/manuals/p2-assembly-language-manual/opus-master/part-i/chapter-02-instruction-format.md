@@ -136,7 +136,7 @@ The distinction that matters is the **compare instruction**, not the alias style
 - **CMP** performs unsigned subtraction (for setting flags)
 - **CMPS** performs signed subtraction (for setting flags)
 
-After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
+After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either condition code terminology (magnitude aliases like IF_A/IF_B, or arithmetic aliases like IF_GT/IF_LT—see Section 2.2.3) works correctly with either instruction:
 
 ```pasm2
 ' Unsigned comparison - either style works

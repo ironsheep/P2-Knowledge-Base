@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.0\par}
+{\large\color{blue}Version 2.1\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -134,7 +134,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 
 | | P1 | P2 |
 |---|---|---|
-| Clock | 80 MHz | 320 MHz |
+| Clock | 80 MHz | 180 MHz nominal; 320 MHz max¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | COG RAM | 512 longs | 512 + 512 LUT |
@@ -142,6 +142,8 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
 | Instructions | ~60 | ~360 |
+
+¹ Per P2 Datasheet. Higher frequencies are achievable with adequate thermal management and reduced workload.
 
 **Architecture That Transfers**
 
@@ -155,10 +157,13 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 **New in P2**
 
 - **Smart Pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
-- **Lookup RAM** — 512 additional longs per COG for tables and overflow code
+- **Lookup RAM** — 512 additional longs per COG for tables and overflow code execution
 - **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
 - **Streamer** — Background DMA between Hub, LUT, and pins
-- **Interrupts** — Three levels per COG with 16 event sources
+- **Digital Video** — Hardware HDMI/DVI output via Streamer
+- **FIFO** — Hardware FIFO for high-bandwidth hub streaming and hub execution
+- **Interrupts** — Three levels per COG (plus hidden debug interrupt) with 16 event sources
+- **Debug Interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
 - **COGATN** — Hardware inter-COG attention signaling
 - **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
 - **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
@@ -170,6 +175,19 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 - **Video**: VCFG/VSCL/WAITVID replaced by Streamer and DAC capabilities
 - **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
 - **Boot Pins**: P28-P31 changed to P58-P63
+
+**Instruction Format Comparison**
+
+The 32-bit instruction word changed between P1 and P2:
+
+| Field | P1 | P2 | Notes |
+|-------|----|----|-------|
+| Condition | Bits 21:18 (4 bits) | Bits 31:28 (4 bits) | Moved to MSBs |
+| Opcode | 6 bits | 7 bits | Expanded for more instructions |
+| CZI/ZCRI | ZCRI (4 bits) | CZI (3 bits) | R bit removed |
+| D/S | 9 bits each | 9 bits each | Unchanged |
+
+The R (result) bit from P1's ZCRI field was removed in P2. Result writing is now controlled differently depending on the instruction.
 
 Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
 

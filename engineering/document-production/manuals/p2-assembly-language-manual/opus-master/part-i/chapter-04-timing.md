@@ -37,6 +37,11 @@ The VCO operates optimally between 100-200 MHz for stability. For overclocking, 
 
 ### 4.1.3 The HUBSET Instruction
 
+**Note for Spin2 Programs:** Spin2 programs typically configure the clock using CON constants (`_clkfreq`, `_xtlfreq`, `_xinfreq`). The compiler automatically generates the appropriate HUBSET calls at program initialization. Direct HUBSET use is primarily for:
+- Pure PASM2 programs without Spin2
+- Dynamic clock changes at runtime
+- Advanced clock configurations not supported by CON constants
+
 Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
 
 ```pasm2
