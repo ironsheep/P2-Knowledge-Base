@@ -31,7 +31,7 @@ Because these documents are AI-assisted, the issues you may encounter differ fro
 The following documents are available for community technical review. We welcome feedback on accuracy, completeness, and clarity.
 
 ### [P2 Assembly Language Reference Manual](DOCs/P2-Assembly-Language-Manual.pdf)
-**Complete PASM2 Instruction Set Documentation** — *Version 2.0.0*
+**Complete PASM2 Instruction Set Documentation** — *Version 2.1.0*
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 

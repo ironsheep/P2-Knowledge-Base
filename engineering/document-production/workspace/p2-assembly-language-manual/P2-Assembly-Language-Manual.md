@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.0\par}
+{\large\color{blue}Version 2.1\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -134,7 +134,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 
 | | P1 | P2 |
 |---|---|---|
-| Clock | 80 MHz | 320 MHz |
+| Clock | 80 MHz | 180 MHz nominal; 320 MHz max¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | COG RAM | 512 longs | 512 + 512 LUT |
@@ -142,6 +142,8 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
 | Instructions | ~60 | ~360 |
+
+¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
 
 **Architecture That Transfers**
 
@@ -155,10 +157,13 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 **New in P2**
 
 - **Smart Pins** — 64 pins with autonomous ADC, DAC, PWM, serial protocols, USB
-- **Lookup RAM** — 512 additional longs per COG for tables and overflow code
+- **Lookup RAM** — 512 additional longs per COG for tables and overflow code execution
 - **CORDIC** — Hardware math: multiply, divide, square root, trig, logarithms
 - **Streamer** — Background DMA between Hub, LUT, and pins
-- **Interrupts** — Three levels per COG with 16 event sources
+- **Digital Video** — Hardware HDMI/DVI output via Streamer
+- **FIFO** — Hardware FIFO for high-bandwidth hub streaming and hub execution
+- **Interrupts** — Three levels per COG (plus hidden debug interrupt) with 16 event sources
+- **Debug Interrupt** — Hidden hardware interrupt for single-stepping and breakpoints
 - **COGATN** — Hardware inter-COG attention signaling
 - **Register Indirection** — ALTS, ALTD, ALTR for dynamic register addressing
 - **Instruction Skipping** — SKIP, SKIPF, EXECF for conditional block execution
@@ -170,6 +175,19 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 - **Video**: VCFG/VSCL/WAITVID replaced by Streamer and DAC capabilities
 - **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
 - **Boot Pins**: P28-P31 changed to P58-P63
+
+**Instruction Format Comparison**
+
+The 32-bit instruction word changed between P1 and P2:
+
+| Field | P1 | P2 | Notes |
+|-------|----|----|-------|
+| Condition | Bits 21:18 (4 bits) | Bits 31:28 (4 bits) | Moved to MSBs |
+| Opcode | 6 bits | 7 bits | Expanded for more instructions |
+| CZI/ZCRI | ZCRI (4 bits) | CZI (3 bits) | R bit removed |
+| D/S | 9 bits each | 9 bits each | Unchanged |
+
+The R (result) bit from P1's ZCRI field was removed in P2. Result writing is now controlled differently depending on the instruction.
 
 Begin with Chapter 1 to understand the P2 execution model. Part II serves as the alphabetical instruction reference—a format familiar from P1 documentation.
 
@@ -409,7 +427,7 @@ Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast m
 
 ### 1.3.1 LUT Characteristics
 
-LUT memory occupies a separate address space from COG RAM, addressed at $200-$3FF relative to COG addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions, which take 3 clock cycles—one cycle longer than COG register operations. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
+LUT memory occupies a separate address space from COG RAM, addressed at $200-$3FF relative to COG addressing. Programs access LUT through dedicated RDLUT and WRLUT instructions. RDLUT takes 3 clock cycles and WRLUT takes 2 cycles—both faster than Hub access but slower than direct COG register operations. This separation doubles the available fast memory per COG from 512 longs to 1024 longs total.
 
 LUT RAM can also execute code at the same speed as COG RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed COG RAM capacity. When the program counter is in the range $200-$3FF, the COG fetches instructions from LUT memory with the same deterministic timing as COG execution.
 
@@ -431,7 +449,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 Figure 1.4: Eight-COG Architecture with LUT Write Sharing
 :::
 
-The `SETLUTS` instruction enables write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are automatically mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS enables cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS activates cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.4 Hub Memory
@@ -450,7 +468,7 @@ The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, 
 
 Hub memory spans addresses $00000 through $7FFFF, providing 524,288 bytes of storage. All eight COGs can read and write any location in this space. Hub memory stores bytes, words (16-bit), and longs (32-bit) with appropriate address alignment.
 
-Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle the shared access timing automatically.
+Programs use Hub memory to share data between COGs, store large lookup tables, hold program code for Hub execution mode, and buffer data for I/O operations. Each COG accesses Hub memory through dedicated Hub instructions that handle shared access timing.
 
 Hub memory organization is application-defined. Programs allocate space according to their requirements—there is no fixed layout imposed by hardware. Different applications use different organizations: some reserve specific regions for communication buffers, others dedicate areas to code overlays, and boot loaders may use particular addresses for compatibility.
 
@@ -458,19 +476,25 @@ Hub memory organization is application-defined. Programs allocate space accordin
 
 ### 1.4.2 Hub Access Timing
 
-The P2 uses round-robin arbitration to share Hub memory access among the eight COGs—a rotating pattern commonly called the "egg-beater." Each COG receives a dedicated access window every eighth clock cycle. The Hub controller rotates through COGs 0-7 continuously, giving each COG one access slot per rotation.
+Hub RAM is divided into eight "slices"—one per COG. Each slice holds every eighth long in the composite Hub RAM address space. On every clock cycle, each COG can access the "next" RAM slice in sequence. This arrangement supports continuous bidirectional streaming of 32 bits per clock for sequential addresses.
 
-This pattern creates deterministic but variable timing. A Hub access completes immediately if the requesting COG's window is currently active. Otherwise, the COG waits 0-7 clock cycles for its next window. Hub RAM read/write instructions (RDLONG, WRLONG, etc.) take 9-16 clocks in COG/LUT execution mode, or 9-26 clocks in HUB execution mode where the FIFO contends for hub access. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
+When a COG accesses a specific Hub address, it must wait up to 7 clocks to reach the initial RAM slice of interest. Once aligned, subsequent sequential locations can be accessed on every clock thereafter for continuous reading or writing of 32-bit longs. This slice architecture differs fundamentally from P1's rotating hub window and provides substantially higher sustained bandwidth.
 
-Despite this variability, the timing remains deterministic. The maximum wait is always seven clocks, and timing patterns repeat every eight clocks. Programs that require precise timing use COG execution mode for critical sections and Hub memory only for data storage and inter-COG communication.
+The hardware FIFO smooths out data flow for non-sequential or variable-rate access. The FIFO can be configured for hub-RAM-read or hub-RAM-write operation, allowing sequential transfers in any combination of bytes, words, or longs at rates up to one long per clock. The FIFO maintains proper hub slice alignment without programmer intervention.
+
+Hub RAM read/write instructions (RDLONG, WRLONG, etc.) take 9-16 clocks in COG/LUT execution mode, or 9-26 clocks in Hub execution mode where the FIFO is dedicated to instruction fetch. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
+
+Despite the variable initial wait, hub timing remains deterministic. The maximum wait is always seven clocks, and once aligned, sequential access proceeds at one long per clock. Programs requiring precise timing use COG execution mode for critical sections and Hub memory for data storage and inter-COG communication.
 
 ### 1.4.3 Hub Instructions
 
 PASM2 provides six primary instructions for Hub memory access. `RDBYTE` reads a byte, `RDWORD` reads a word, and `RDLONG` reads a long from Hub memory to a COG register. `WRBYTE`, `WRWORD`, and `WRLONG` write the corresponding data sizes from a COG register to Hub memory.
 
-The `SETQ` instruction enhances Hub access efficiency by enabling burst transfers. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers.
+The `SETQ` instruction enhances Hub access efficiency by configuring burst transfers to COG RAM. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers. Similarly, `SETQ2` configures burst transfers to LUT RAM—use SETQ2 before RDLONG/WRLONG to transfer blocks directly between Hub and LUT memory.
 
-For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous Hub transfers. The FIFO prefetches data automatically, hiding Hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for seamless ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
+For high-bandwidth streaming, `RDFAST` and `WRFAST` configure the hardware FIFO for continuous Hub transfers. The FIFO prefetches data in the background, hiding Hub access latency from the program. `FBLOCK` provides dynamic control over FIFO buffer boundaries for seamless ping-pong buffering. These streaming instructions are documented in detail in Chapter 4.
+
+Other hub-related instructions include lock instructions (`LOCKNEW`, `LOCKRET`, `LOCKTRY`, `LOCKREL`) for inter-COG synchronization, `HUBSET` for clock and system configuration, and `SETLUTS` for LUT sharing configuration between adjacent COGs.
 
 The CORDIC coprocessor also interacts with Hub memory. CORDIC operations can read operands from and write results to Hub addresses, enabling efficient processing of large datasets stored in Hub RAM.
 
@@ -489,20 +513,34 @@ Branch instructions incur additional overhead when taken. A conditional branch t
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
 
+Register indirection instructions (ALTS, ALTD, ALTR, ALTB, ALTI) perform dynamic instruction modification within the pipeline. These instructions substitute computed addresses or values into the next instruction's source, destination, or result fields without modifying the actual program code in memory. The next instruction following any ALT instruction is shielded from interrupts, guaranteeing atomic execution of the ALT+target instruction pair. This pipeline-level modification supports powerful indirect addressing patterns while maintaining deterministic timing.
+
 
 ## 1.6 Execution Modes
 
-The P2 supports two distinct execution modes that offer different trade-offs between speed and capacity. Programs can use either mode exclusively or mix both modes within a single application.
+The P2 supports three execution modes based on the program counter address, each offering different trade-offs between speed and capacity. Programs can use any mode exclusively or mix all three modes within a single application.
+
+| Mode | PC Range | Characteristics |
+|------|----------|----------------|
+| COG Execution | $00000-$001FF | Fastest, 2 clocks/instruction, 512 longs |
+| LUT Execution | $00200-$003FF | Fast, 2 clocks/instruction, 512 longs overflow |
+| Hub Execution | $00400-$7FFFF | Largest capacity, variable timing, uses FIFO |
 
 ### 1.6.1 COG Execution Mode
 
-COG execution mode runs code from COG RAM. Instructions execute in the consistent two-clock pipeline with no additional delays. This mode provides the fastest possible execution and deterministic timing, making it ideal for time-critical code such as communication protocols, motor control loops, and signal generation.
+COG execution mode runs code from COG RAM (PC in range $000-$1FF). Instructions execute in the consistent two-clock pipeline with no additional delays. This mode provides the fastest possible execution and deterministic timing, making it ideal for time-critical code such as communication protocols, motor control loops, and signal generation.
 
-COG execution mode limits programs to the available COG RAM space. After accounting for special registers and data storage, typically 200-400 longs remain for code. Programs that fit in this space achieve maximum performance. Larger programs must use Hub execution mode or implement code overlays that load different code sections into COG RAM as needed.
+COG execution mode limits programs to the available COG RAM space. After accounting for special registers and data storage, typically 200-400 longs remain for code. Programs that fit in this space achieve maximum performance. Larger programs can overflow into LUT execution or use Hub execution mode.
 
-Time-critical inner loops often execute in COG mode even when the main program runs from Hub memory. The program loads the critical code section to COG RAM, executes the loop, then returns to Hub-based code. This hybrid approach combines the performance of COG execution with the capacity of Hub storage.
+### 1.6.2 LUT Execution Mode
 
-### 1.6.2 Hub Execution Mode
+LUT execution mode runs code from LUT RAM (PC in range $200-$3FF). Instructions execute at the same speed as COG execution—two clocks per instruction with deterministic timing. LUT execution effectively doubles the available fast code space from 512 to 1024 longs per COG.
+
+LUT execution is ideal for overflow code that doesn't fit in COG RAM but requires deterministic timing. The COG fetches instructions from LUT memory with no additional delays beyond the standard pipeline. There are no special considerations when branching between COG and LUT addresses.
+
+Time-critical inner loops often execute in COG or LUT mode even when the main program runs from Hub memory. The program loads critical code sections to COG/LUT RAM, executes the loop, then returns to Hub-based code. This hybrid approach combines the performance of local execution with the capacity of Hub storage.
+
+### 1.6.3 Hub Execution Mode
 
 Hub execution mode runs code directly from Hub RAM without loading it to COG memory first. The COG fetches instructions from Hub memory using the FIFO hardware to prefetch and queue instructions for continuous execution. This is distinct from the hub rotation used for random-access data transfers. The FIFO provides smoother instruction flow but adds variable delay compared to COG mode.
 
@@ -512,11 +550,11 @@ Hub execution mode provides access to the full 512KB Hub address space, enabling
 
 ⚠️ **Pitfall:** While executing from Hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during Hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and streamer modes that engage the FIFO. Code requiring these instructions must execute from COG RAM.
 
-### 1.6.3 Switching Between Modes
+### 1.6.4 Switching Between Modes
 
 Programs switch between execution modes using `CALL` or `JMP` instructions. A COG executing from COG RAM can call or jump to Hub addresses, and Hub-executing code can call or jump to COG addresses. The program counter determines current mode: addresses $000-$3FF indicate COG/LUT execution, while higher addresses indicate Hub execution.
 
-The hardware automatically handles mode transitions. The programmer simply specifies the target address, and the COG switches to the appropriate execution mode. This seamless transition enables hybrid programs that place performance-critical code in COG RAM while maintaining larger program logic in Hub RAM.
+The hardware handles mode transitions transparently. The programmer specifies the target address, and the COG switches to the appropriate execution mode based on the address range. This seamless transition supports hybrid programs that place performance-critical code in COG RAM while maintaining larger program logic in Hub RAM.
 
 
 ```{=latex}
@@ -525,7 +563,7 @@ The hardware automatically handles mode transitions. The programmer simply speci
 \item Each COG has 512 longs of private RAM plus 512 longs of private LUT
 \item Hub memory (512KB) is shared among all COGs with deterministic access timing
 \item Special registers at \$1F0-\$1FF provide hardware I/O functions
-\item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)
+\item COGs can execute from COG RAM (fast), LUT RAM (fast), or Hub RAM (larger capacity)—three distinct execution modes
 \item Hub execution uses FIFO for instruction prefetch; FIFO instructions unavailable in Hub mode
 \item The pipeline provides two-clock execution for most instructions
 \item No interrupts are required due to true parallel execution; however, complete interrupt mechanisms are provided
@@ -674,7 +712,7 @@ The distinction that matters is the **compare instruction**, not the alias style
 - **CMP** performs unsigned subtraction (for setting flags)
 - **CMPS** performs signed subtraction (for setting flags)
 
-After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either alias style works correctly with either instruction:
+After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either condition code terminology (magnitude aliases like IF_A/IF_B, or arithmetic aliases like IF_GT/IF_LT—see Section 2.2.3) works correctly with either instruction:
 
 ```pasm2
 ' Unsigned comparison - either style works
@@ -2143,6 +2181,11 @@ For example, a 20 MHz crystal with input divider 1, multiplier 16, and post divi
 The VCO operates optimally between 100-200 MHz for stability. For overclocking, the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15), though stability becomes application-dependent.
 
 ### 4.1.3 The HUBSET Instruction
+
+**Note for Spin2 Programs:** Spin2 programs typically configure the clock using CON constants (`_clkfreq`, `_xtlfreq`, `_xinfreq`). The compiler automatically generates the appropriate HUBSET calls at program initialization. Direct HUBSET use is primarily for:
+- Pure PASM2 programs without Spin2
+- Dynamic clock changes at runtime
+- Advanced clock configurations not supported by CON constants
 
 Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
 
@@ -4237,6 +4280,8 @@ For time-critical inner loops:
 # Instruction Categories {#instruction-categories}
 
 This chapter defines the instruction categories used throughout Part II. Each category groups instructions by their primary function. Click any category name in the instruction entries to return here for an overview, or click any instruction mnemonic to jump to its detailed reference.
+
+> **Reading the Encoding Tables:** For help understanding the instruction encoding tables in this section (EEEE condition codes, CZI flag effects, opcode fields), see Chapter 2: The Instruction Format.
 
 ---
 

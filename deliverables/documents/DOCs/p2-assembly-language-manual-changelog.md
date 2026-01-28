@@ -1,5 +1,31 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v2.1.0 (2026-01-27)
+
+**Community Feedback Release** - Corrections and expansions based on user review.
+
+### New Content
+
+- "For P1 Developers": P1 vs P2 instruction format comparison table
+- "New in P2" features: Digital Video (HDMI/DVI), FIFO hardware, Debug Interrupt
+- Section 1.6: Three execution modes documented (COG, LUT, Hub) with PC ranges
+- ALT instructions: Pipeline modification coverage (ALTS, ALTD, ALTR, ALTB, ALTI)
+- SETQ2: LUT burst transfer documentation added
+- HUBSET: Spin2 CON block context note
+
+### Enhanced Accuracy
+
+- Clock specification: 180 MHz nominal; 320 MHz max (per P2 Datasheet)
+- LUT timing: RDLUT 3 cycles, WRLUT 2 cycles
+- Hub access: Rewritten for P2 slice architecture
+
+### Cross-References
+
+- Part II encoding tables: Added Chapter 2 reference note
+- Condition codes: Clarified alias terminology with section reference
+
+---
+
 ## v2.0.0 (2026-01-23)
 
 **P1 Migration & Technical Depth Release**
