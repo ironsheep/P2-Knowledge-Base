@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-24T23:10:17.610417",
+    "generated": "2026-01-29T00:34:00.364596",
     "total_entries": 1027,
     "total_categories": 47,
-    "total_aliases": 941,
+    "total_aliases": 961,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -813,6 +813,63 @@
     "DEBUG": [
       "p2kbPasm2Debug"
     ],
+    "DEBUG_BAUD": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_COGINIT": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_COGS": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_DELAY": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_DISABLE": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_DISPLAY_LEFT": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_DISPLAY_TOP": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_HEIGHT": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_LEFT": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_LOG_SIZE": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_MAIN": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_MASK": [
+      "p2kbSpin2DebugMask"
+    ],
+    "DEBUG_PIN": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_PIN_RX": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_PIN_TX": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_TIMESTAMP": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_TOP": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_WIDTH": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_WINDOWS_OFF": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
     "DECMOD": [
       "p2kbPasm2Decmod"
     ],
@@ -854,6 +911,9 @@
     ],
     "DJZ": [
       "p2kbPasm2Djz"
+    ],
+    "DOWNLOAD_BAUD": [
+      "p2kbSpin2SpecialConfigurationSymbols"
     ],
     "DRVC": [
       "p2kbPasm2Drvc"
