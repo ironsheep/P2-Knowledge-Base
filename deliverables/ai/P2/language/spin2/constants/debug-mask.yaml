@@ -3,13 +3,19 @@ type: constant
 category: Debug Constants
 
 minimum_version: "v46"
+version_directive: "{Spin2_v46}"
+
+aliases:
+  - DEBUG_MASK
 
 description: |
-  User-defined constant that enables selective DEBUG output by channel. When 
+  User-defined constant that enables selective DEBUG output by channel. When
   DEBUG_MASK is defined in a CON block, DEBUG statements can use channel indices
   (DEBUG[n]). Each bit in the mask corresponds to a channel (0-31). Only channels
   with their corresponding bit set are compiled; others are completely omitted.
-  Available in PNut/pnut_ts v46 and later compilers. No version directive required.
+
+  REQUIRES: {Spin2_v46} or later version directive at the start of your source file.
+  Standard DEBUG() statements (without channel numbers) do NOT require the directive.
 
 value: "User-defined bitmask (0 to $FFFF_FFFF)"
 
@@ -115,14 +121,57 @@ compilation_behavior:
   - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK"
 
 notes:
+  - "REQUIRES {Spin2_v46} or later version directive at start of source file"
   - "Available in PNut/pnut_ts v46 and later compilers"
-  - "No version directive required - this is NOT a gated feature"
   - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
   - "Channel numbers must be 0-31"
   - "Unset channels generate NO code (complete elimination)"
   - "Use constants to name channels for readability"
   - "Plain DEBUG() without channel index ignores the mask"
   - "Useful for reducing code size in release builds"
+
+# Interaction with DEBUG_COGS
+debug_cogs_interaction:
+  concept: |
+    DEBUG_MASK and DEBUG_COGS operate at completely different levels and are independent.
+    For a debug[N]() statement to produce output, BOTH conditions must be met.
+  levels:
+    DEBUG_MASK:
+      level: "Compile-time"
+      controls: "Whether debug[N]() generates any code at all"
+      effect: "If bit N is NOT set, no code is generated - zero runtime overhead"
+    DEBUG_COGS:
+      level: "Runtime"
+      controls: "Whether a cog can trigger debug output"
+      effect: "If cog's bit is NOT set, debug statements on that cog produce no output"
+  combined_behavior: |
+    1. Compile-time: Bit N must be set in DEBUG_MASK (otherwise no code is generated)
+    2. Runtime: The cog executing the code must have its bit set in DEBUG_COGS
+    If either condition is not met, no debug output occurs.
+  example: |
+    CON
+      DEBUG_MASK = %0011          ' Compile debug[0] and debug[1]
+      DEBUG_COGS = %00000101      ' Only cogs 0 and 2 can output
+
+    PUB main()                    ' Runs on cog 0
+      debug[0]("Cog 0 channel 0") ' OUTPUT: compiled AND cog 0 enabled
+      debug[1]("Cog 0 channel 1") ' OUTPUT: compiled AND cog 0 enabled
+      debug[2]("Cog 0 channel 2") ' NO CODE: not compiled (bit 2 not in DEBUG_MASK)
+
+      cogspin(NEWCOG, worker(), @stack)  ' Starts on cog 1
+
+    PRI worker()                  ' Runs on cog 1
+      debug[0]("Cog 1 channel 0") ' NO OUTPUT: compiled but cog 1 not in DEBUG_COGS
+      debug[1]("Cog 1 channel 1") ' NO OUTPUT: compiled but cog 1 not in DEBUG_COGS
+
+# Compiler error messages
+error_messages:
+  - error: "DEBUG mask bit-number must be 0..31"
+    cause: "Channel number outside valid range (e.g., debug[32])"
+  - error: "DEBUG_MASK symbol must be defined for DEBUG[0..31] usage"
+    cause: "Using debug[N]() without defining DEBUG_MASK constant"
+  - error: "DEBUG_MASK can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_MASK (e.g., float or string)"
 
 related:
   - language/spin2/constants/debug-end-session.yaml

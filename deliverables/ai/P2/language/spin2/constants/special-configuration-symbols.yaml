@@ -6,8 +6,9 @@ category: Configuration Constants
 documentation_level: complete
 
 # Aliases for cross-reference resolution
-# These allow references like "_clkfreq" to resolve to this document
+# These allow references like "_clkfreq" or "DEBUG_DISABLE" to resolve to this document
 aliases:
+  # Clock configuration
   - _CLKFREQ
   - _clkfreq
   - _XTLFREQ
@@ -23,6 +24,30 @@ aliases:
   - _AUTOCLK
   - _CLKMODE
   - _clkmode
+  # System configuration
+  - DOWNLOAD_BAUD
+  # Debug serial configuration
+  - DEBUG_BAUD
+  - DEBUG_PIN
+  - DEBUG_PIN_TX
+  - DEBUG_PIN_RX
+  # Debug output control
+  - DEBUG_DISABLE
+  - DEBUG_TIMESTAMP
+  - DEBUG_DELAY
+  - DEBUG_LOG_SIZE
+  # Debug cog/breakpoint control
+  - DEBUG_COGS
+  - DEBUG_MAIN
+  - DEBUG_COGINIT
+  # Debug window configuration
+  - DEBUG_LEFT
+  - DEBUG_TOP
+  - DEBUG_WIDTH
+  - DEBUG_HEIGHT
+  - DEBUG_DISPLAY_LEFT
+  - DEBUG_DISPLAY_TOP
+  - DEBUG_WINDOWS_OFF
 
 # Clock Configuration Constants
 # Source: pnut_ts Clock-Configuration-Usage-Guide.md (compiler-verified)
@@ -210,7 +235,50 @@ system_configuration:
     default: "2_000_000"
     example: "CON DOWNLOAD_BAUD = 115200"
 
+# ============================================================================
 # DEBUG Configuration Symbols
+# ============================================================================
+# The P2 debug system operates at three distinct levels. Understanding this
+# distinction is critical for effective debugging.
+
+debug_architecture:
+  overview: |
+    The P2 debug system operates at three distinct levels:
+    1. Code Instrumentation (Compile-Time) - controls whether debug() generates code
+    2. Debug Output Infrastructure (Runtime) - configures how debug output is transmitted
+    3. Automatic Breakpoint Configuration - for single-step debugging
+
+  level_1_code_instrumentation:
+    name: "Code Instrumentation (Compile-Time)"
+    description: |
+      These constants control whether debug() statements are compiled into your program.
+      They are evaluated during compilation. When debug is disabled, statements produce
+      ZERO code - no runtime overhead whatsoever.
+    symbols:
+      - "DEBUG_DISABLE - Globally disable ALL debug statements"
+      - "DEBUG_MASK - 32-bit mask for selective debug[N]() channels (requires {Spin2_v46})"
+
+  level_2_output_infrastructure:
+    name: "Debug Output Infrastructure (Runtime)"
+    description: |
+      These constants configure the debug output system that handles ALL debug() output.
+      They affect how debug messages are transmitted and formatted at runtime.
+    symbols:
+      - "DEBUG_COGS - Which cogs can produce debug output"
+      - "DEBUG_DELAY - Startup delay before debug begins"
+      - "DEBUG_TIMESTAMP - Enable timestamps in output"
+      - "DEBUG_PIN_TX/RX - Serial communication pins"
+      - "DEBUG_BAUD - Serial baud rate"
+
+  level_3_breakpoint_config:
+    name: "Automatic Breakpoint Configuration"
+    description: |
+      These constants configure automatic breakpoints for single-step debugging.
+      They tell the debugger to break execution at specific points.
+    symbols:
+      - "DEBUG_MAIN - Break at program start"
+      - "DEBUG_COGINIT - Break when any cog is initialized"
+
 debug_serial:
   DEBUG_BAUD:
     description: Sets the DEBUG serial baud rate
@@ -273,9 +341,24 @@ debug_output_control:
     example: "CON DEBUG_LOG_SIZE = 10000  ' 10KB log file"
     
   DEBUG_DISABLE:
-    description: Disables all DEBUG statements when set to non-zero
-    default: "undefined"
+    description: |
+      Globally disables ALL debug statements at compile time. When defined as
+      any non-zero value, debug code is not compiled at all, resulting in smaller
+      binary size and zero runtime overhead.
+    default: "undefined (debug enabled)"
+    behavior:
+      undefined: "Debug statements compile normally (when -d flag used)"
+      zero: "Debug statements compile normally"
+      non_zero: "ALL debug statements skipped during compilation"
     usage: "CON DEBUG_DISABLE = 1  ' Turn off all DEBUG"
+    example: |
+      CON
+        RELEASE_BUILD = 1
+        DEBUG_DISABLE = RELEASE_BUILD   ' Disable debug for release builds
+    notes:
+      - "Must be defined as an integer constant (not float or string)"
+      - "Check is performed at compile time - disabled debug adds zero overhead"
+      - "Works in both Spin2 and PASM2 code"
 
 debug_debugger_control:
   DEBUG_COGINIT:
@@ -291,9 +374,34 @@ debug_debugger_control:
     usage: "CON DEBUG_MAIN = 1"
     
   DEBUG_COGS:
-    description: Bitmask selecting which cogs have debug interrupts enabled
+    description: |
+      8-bit mask specifying which cogs have debug capability enabled at runtime.
+      Each bit corresponds to a cog (bit 0 = cog 0, bit 7 = cog 7). If a cog's
+      bit is clear, debug() statements running on that cog will NOT produce output,
+      even if the code was compiled.
     default: "%11111111 (all cogs)"
+    bit_mapping:
+      bit_0: "Cog 0"
+      bit_1: "Cog 1"
+      bit_2: "Cog 2"
+      bit_3: "Cog 3"
+      bit_4: "Cog 4"
+      bit_5: "Cog 5"
+      bit_6: "Cog 6"
+      bit_7: "Cog 7"
     example: "CON DEBUG_COGS = %00001111  ' Only cogs 0-3"
+    interaction_with_debug_mask: |
+      DEBUG_COGS and DEBUG_MASK operate at different levels and are independent:
+      - DEBUG_MASK (compile-time): Controls whether debug[N]() generates code
+      - DEBUG_COGS (runtime): Controls whether a cog can produce debug output
+
+      For a debug[N]() statement to produce output, BOTH must allow it:
+      1. Bit N must be set in DEBUG_MASK (code is compiled)
+      2. The cog's bit must be set in DEBUG_COGS (cog can trigger output)
+    notes:
+      - "Useful for reducing debug overhead in multi-cog applications"
+      - "By default, all cogs are debugged if DEBUG_COGS is not defined"
+      - "Must be defined as an integer constant"
     
   DEBUG:
     description: |
@@ -369,13 +477,37 @@ usage_examples:
       DEBUG_WIDTH = 800
       DEBUG_HEIGHT = 600
 
+# Compiler error messages for debug configuration
+debug_error_messages:
+  - error: "DEBUG_DISABLE can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_DISABLE"
+  - error: "DEBUG_MASK can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_MASK"
+  - error: "DEBUG_COGS can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_COGS"
+  - error: "DEBUG_DELAY can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_DELAY"
+  - error: "DEBUG_PIN can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_PIN"
+  - error: "DEBUG_PIN_TX can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_PIN_TX"
+  - error: "DEBUG_PIN_RX can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_PIN_RX"
+  - error: "DEBUG_BAUD can only be defined as an integer constant"
+    cause: "Non-integer value used for DEBUG_BAUD"
+  - error: "DEBUG mask bit-number must be 0..31"
+    cause: "Channel number outside valid range in debug[N]()"
+  - error: "DEBUG_MASK symbol must be defined for DEBUG[0..31] usage"
+    cause: "Using debug[N]() without defining DEBUG_MASK constant"
+
 notes:
   - "These symbols must be defined in the CON block"
   - "They affect compile-time and runtime behavior"
   - "Undefined symbols use their defaults"
   - "DEBUG() with parentheses outputs data"
   - "DEBUG without parentheses enters debugger"
-  
+  - "DEBUG_MASK requires {Spin2_v46} version directive for debug[N]() syntax"
+
 related:
   - language/spin2/system-variables/clkfreq.yaml
   - language/spin2/system-variables/clkmode.yaml
@@ -383,3 +515,5 @@ related:
   - language/spin2/methods/hubset.yaml
   - language/pasm2/hubset.yaml
   - architecture/clock_system.yaml
+  - language/spin2/constants/debug-mask.yaml
+  - language/spin2/statements/debug.yaml
