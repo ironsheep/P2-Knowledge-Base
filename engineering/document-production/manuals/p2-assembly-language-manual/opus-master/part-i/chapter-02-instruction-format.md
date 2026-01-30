@@ -419,9 +419,9 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345                 ' Upper 23 bits: $12345
-        mov     dest, #$678             ' Lower 9 bits: $678
-                                        ' Combined: $12345678
+        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        mov     dest, #$078             ' Provides lower 9 bits: $078
+                                        ' Combined result: $12345678
 ```
 
 ### 2.7.3 Augmentation Behavior
@@ -574,7 +574,7 @@ PASM2 allows constant expressions anywhere a numeric value is expected. These ex
 Constant expressions can appear in:
 
 - **Immediate operands:** `MOV x, #(BUFFER_SIZE - 1)`
-- **EQU definitions:** `MAX_COUNT EQU 1000 * 60`
+- **CON block definitions:** `MAX_COUNT = 1000 * 60`
 - **Data declarations:** `LONG $FF << 24 | $80 << 16`
 - **ORG/ORGH directives:** `ORG $100 + HEADER_SIZE`
 - **Repeat counts:** `REP @loop_end, #(TABLE_SIZE / 4)`
@@ -598,7 +598,7 @@ Operators are listed from highest to lowest precedence within each category.
 | `>>` | Shift right | `$80 >> 4` → `$08` |
 | `<<` | Shift left | `1 << 8` → `$100` |
 | `&` | Bitwise AND | `$FF & $0F` → `$0F` |
-| `\|` | Bitwise OR | `$F0 \| $0F` → `$FF` |
+| `|` | Bitwise OR | `$F0 | $0F` → `$FF` |
 | `^` | Bitwise XOR | `$FF ^ $0F` → `$F0` |
 
 **Arithmetic Operators**
@@ -643,7 +643,7 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 |----------|-------------|---------|
 | `!!` | Boolean NOT (0→-1, non-zero→0) | `!!5` → `0` |
 | `&&` | Boolean AND | `(a > 0) && (b > 0)` |
-| `\|\|` | Boolean OR | `(a == 0) \|\| (b == 0)` |
+| `||` | Boolean OR | `(a == 0) || (b == 0)` |
 | `^^` | Boolean XOR | `(a > 0) ^^ (b > 0)` |
 | `<=>` | Three-way compare (returns -1, 0, or 1) | `5 <=> 3` → `1` |
 
@@ -657,7 +657,7 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 
 The `+` prefix on comparison operators indicates unsigned comparison. This matters when comparing values that may have the high bit set:
 
-```pasm2
+```spin2
 ' Signed comparison: $80000000 is negative (-2147483648)
         IF  $80000000 < 0       ' True: negative < 0
 
@@ -670,21 +670,24 @@ Use signed comparisons (`<`, `>`, etc.) for values representing signed quantitie
 ### 2.9.4 Practical Examples
 
 **Bit field construction:**
-```pasm2
-PIN_MODE    EQU  %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
-MASK_BITS   EQU  (1 << NUM_BITS) - 1              ' Create bit mask
+```spin2
+CON
+  PIN_MODE  = %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
+  MASK_BITS = (1 << NUM_BITS) - 1              ' Create bit mask
 ```
 
 **Buffer calculations:**
-```pasm2
-BUFFER_END  EQU  BUFFER_START + BUFFER_SIZE - 1
-WRAP_MASK   EQU  BUFFER_SIZE - 1                  ' For power-of-2 buffers
+```spin2
+CON
+  BUFFER_END = BUFFER_START + BUFFER_SIZE - 1
+  WRAP_MASK  = BUFFER_SIZE - 1                  ' For power-of-2 buffers
 ```
 
 **Conditional assembly values:**
-```pasm2
-DELAY_MS    EQU  (CLKFREQ / 1000) #> 1            ' At least 1 tick
-TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
+```spin2
+CON
+  DELAY_MS = (CLKFREQ / 1000) #> 1              ' At least 1 tick
+  TIMEOUT  = (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 
 

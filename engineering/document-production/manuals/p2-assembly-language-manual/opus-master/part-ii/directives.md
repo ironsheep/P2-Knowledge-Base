@@ -485,7 +485,7 @@ The filename must not contain path separator characters. The following character
 | `"` | Double quote |
 | `<` | Less than |
 | `>` | Greater than |
-| `\|` | Pipe |
+| `|` | Pipe |
 
 The compiler searches for the file in the following order:
 1. **Current directory** — The directory containing the source file
@@ -1276,7 +1276,7 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 
 #### Example: Pin Toggle
 
-```pasm2
+```spin2
 PUB FastToggle(pin) | mask
 
   mask := 1 << pin              ' Spin2 code
@@ -1290,7 +1290,7 @@ PUB FastToggle(pin) | mask
 
 #### Example: I2C Start Sequence
 
-```pasm2
+```spin2
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
@@ -1311,7 +1311,7 @@ PUB start() | scl, sda, tix
 
 Inline PASM accesses local variables by name:
 
-```pasm2
+```spin2
 PUB Example() | value, result
 
   value := 100

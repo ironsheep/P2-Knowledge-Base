@@ -125,9 +125,9 @@ The assembler implements `##` by inserting an AUGS or AUGD instruction before th
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345                 ' Upper 23 bits
-        mov     dest, #$678             ' Lower 9 bits
-                                        ' Combined: $12345678
+        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        mov     dest, #$078             ' Provides lower 9 bits: $078
+                                        ' Combined result: $12345678
 ```
 
 The AUG instruction provides bits 31-9, which combine with the 9-bit field from the next instruction to form the complete 32-bit value.
@@ -174,12 +174,12 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
 
 ```pasm2
-        augs    #$12345
+        augs    #$12345678
         nop                             ' This consumes the AUGS!
-        mov     x, #$678                ' Gets $678, NOT $12345678
+        mov     x, #$078                ' Gets only $078, NOT $12345678
 
-        augs    #$12345
-        if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
+        augs    #$12345678
+        if_z    mov     x, #$078        ' Even if Z=0, MOV skipped,
                                         '  AUGS is still consumed
 ```
 
@@ -499,13 +499,13 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
 ' BUGGY CODE - AUGS affects both instructions
         augs    #$12340000
         altd    index, #$100            ' #$100 becomes #$12340100! (bug)
-        mov     0-0, #$5678             ' #$5678 becomes #$12345678
+        mov     0-0, #$078              ' #$078 becomes #$12340078
 
 ' CORRECT CODE - Use register for ALTx operand
         mov     base, #$100             ' Put base in register
         augs    #$12340000
         altd    index, base             ' Register not affected by AUGS
-        mov     0-0, #$5678             ' Only this gets augmented
+        mov     0-0, #$078              ' Only this gets augmented to #$12340078
 ```
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
