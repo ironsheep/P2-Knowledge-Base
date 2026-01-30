@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.1\par}
+{\large\color{blue}Version 2.2\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -995,9 +995,9 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345                 ' Upper 23 bits: $12345
-        mov     dest, #$678             ' Lower 9 bits: $678
-                                        ' Combined: $12345678
+        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        mov     dest, #$078             ' Provides lower 9 bits: $078
+                                        ' Combined result: $12345678
 ```
 
 ### 2.7.3 Augmentation Behavior
@@ -1150,7 +1150,7 @@ PASM2 allows constant expressions anywhere a numeric value is expected. These ex
 Constant expressions can appear in:
 
 - **Immediate operands:** `MOV x, #(BUFFER_SIZE - 1)`
-- **EQU definitions:** `MAX_COUNT EQU 1000 * 60`
+- **CON block definitions:** `MAX_COUNT = 1000 * 60`
 - **Data declarations:** `LONG $FF << 24 | $80 << 16`
 - **ORG/ORGH directives:** `ORG $100 + HEADER_SIZE`
 - **Repeat counts:** `REP @loop_end, #(TABLE_SIZE / 4)`
@@ -1174,7 +1174,7 @@ Operators are listed from highest to lowest precedence within each category.
 | `>>` | Shift right | `$80 >> 4` → `$08` |
 | `<<` | Shift left | `1 << 8` → `$100` |
 | `&` | Bitwise AND | `$FF & $0F` → `$0F` |
-| `\|` | Bitwise OR | `$F0 \| $0F` → `$FF` |
+| `|` | Bitwise OR | `$F0 | $0F` → `$FF` |
 | `^` | Bitwise XOR | `$FF ^ $0F` → `$F0` |
 
 **Arithmetic Operators**
@@ -1219,7 +1219,7 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 |----------|-------------|---------|
 | `!!` | Boolean NOT (0→-1, non-zero→0) | `!!5` → `0` |
 | `&&` | Boolean AND | `(a > 0) && (b > 0)` |
-| `\|\|` | Boolean OR | `(a == 0) \|\| (b == 0)` |
+| `||` | Boolean OR | `(a == 0) || (b == 0)` |
 | `^^` | Boolean XOR | `(a > 0) ^^ (b > 0)` |
 | `<=>` | Three-way compare (returns -1, 0, or 1) | `5 <=> 3` → `1` |
 
@@ -1233,7 +1233,7 @@ Comparison operators return -1 (true, all bits set) or 0 (false).
 
 The `+` prefix on comparison operators indicates unsigned comparison. This matters when comparing values that may have the high bit set:
 
-```pasm2
+```spin2
 ' Signed comparison: $80000000 is negative (-2147483648)
         IF  $80000000 < 0       ' True: negative < 0
 
@@ -1246,21 +1246,24 @@ Use signed comparisons (`<`, `>`, etc.) for values representing signed quantitie
 ### 2.9.4 Practical Examples
 
 **Bit field construction:**
-```pasm2
-PIN_MODE    EQU  %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
-MASK_BITS   EQU  (1 << NUM_BITS) - 1              ' Create bit mask
+```spin2
+CON
+  PIN_MODE  = %01 << 5 | %11 << 3 | %1 << 0   ' Combine fields
+  MASK_BITS = (1 << NUM_BITS) - 1              ' Create bit mask
 ```
 
 **Buffer calculations:**
-```pasm2
-BUFFER_END  EQU  BUFFER_START + BUFFER_SIZE - 1
-WRAP_MASK   EQU  BUFFER_SIZE - 1                  ' For power-of-2 buffers
+```spin2
+CON
+  BUFFER_END = BUFFER_START + BUFFER_SIZE - 1
+  WRAP_MASK  = BUFFER_SIZE - 1                  ' For power-of-2 buffers
 ```
 
 **Conditional assembly values:**
-```pasm2
-DELAY_MS    EQU  (CLKFREQ / 1000) #> 1            ' At least 1 tick
-TIMEOUT     EQU  (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
+```spin2
+CON
+  DELAY_MS = (CLKFREQ / 1000) #> 1              ' At least 1 tick
+  TIMEOUT  = (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 
 
@@ -3799,9 +3802,9 @@ The assembler implements `##` by inserting an AUGS or AUGD instruction before th
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345                 ' Upper 23 bits
-        mov     dest, #$678             ' Lower 9 bits
-                                        ' Combined: $12345678
+        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        mov     dest, #$078             ' Provides lower 9 bits: $078
+                                        ' Combined result: $12345678
 ```
 
 The AUG instruction provides bits 31-9, which combine with the 9-bit field from the next instruction to form the complete 32-bit value.
@@ -3848,12 +3851,12 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
 
 ```pasm2
-        augs    #$12345
+        augs    #$12345678
         nop                             ' This consumes the AUGS!
-        mov     x, #$678                ' Gets $678, NOT $12345678
+        mov     x, #$078                ' Gets only $078, NOT $12345678
 
-        augs    #$12345
-        if_z    mov     x, #$678        ' Even if Z=0, MOV skipped,
+        augs    #$12345678
+        if_z    mov     x, #$078        ' Even if Z=0, MOV skipped,
                                         '  AUGS is still consumed
 ```
 
@@ -4173,13 +4176,13 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
 ' BUGGY CODE - AUGS affects both instructions
         augs    #$12340000
         altd    index, #$100            ' #$100 becomes #$12340100! (bug)
-        mov     0-0, #$5678             ' #$5678 becomes #$12345678
+        mov     0-0, #$078              ' #$078 becomes #$12340078
 
 ' CORRECT CODE - Use register for ALTx operand
         mov     base, #$100             ' Put base in register
         augs    #$12340000
         altd    index, base             ' Register not affected by AUGS
-        mov     0-0, #$5678             ' Only this gets augmented
+        mov     0-0, #$078              ' Only this gets augmented to #$12340078
 ```
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
@@ -16250,7 +16253,7 @@ The filename must not contain path separator characters. The following character
 | `"` | Double quote |
 | `<` | Less than |
 | `>` | Greater than |
-| `\|` | Pipe |
+| `|` | Pipe |
 
 The compiler searches for the file in the following order:
 1. **Current directory** — The directory containing the source file
@@ -17041,7 +17044,7 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 
 #### Example: Pin Toggle
 
-```pasm2
+```spin2
 PUB FastToggle(pin) | mask
 
   mask := 1 << pin              ' Spin2 code
@@ -17055,7 +17058,7 @@ PUB FastToggle(pin) | mask
 
 #### Example: I2C Start Sequence
 
-```pasm2
+```spin2
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
@@ -17076,7 +17079,7 @@ PUB start() | scl, sda, tix
 
 Inline PASM accesses local variables by name:
 
-```pasm2
+```spin2
 PUB Example() | value, result
 
   value := 100
