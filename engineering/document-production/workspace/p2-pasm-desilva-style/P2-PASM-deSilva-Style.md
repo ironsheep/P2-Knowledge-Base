@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.0\par}
+{\large\color{blue}Version 2.1\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -275,11 +275,11 @@ DAT
         waitx   ##50_000_000    ' Wait 0.25 seconds at 200MHz
         drvl    #56             ' Drive pin 56 low (LED off)
         waitx   ##50_000_000    ' Wait 0.25 seconds
-        jmp     #$-4            ' Jump back 4 longs (addresses)
+        jmp     #$-6            ' Jump back 6 longs (each ## adds hidden AUGS)
 ```
 :::
 
-That's it! Five instructions and you have a blinking LED. Load this into any COG and watch the magic happen.
+That's it! Five lines of code and you have a blinking LED. Load this into any COG and watch the magic happen.
 
 ## What's Really Happening
 
@@ -295,7 +295,7 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 **`drvl #56`** - Drive low. LED off. You get the pattern.
 
-**`jmp #$-4`** - Jump back 4 longs. The '$' means "current address", so '$-4' means "4 addresses back from here" (each instruction is one long). Infinite loop achieved!
+**`jmp #$-6`** - Jump back 6 longs. The '$' means "current address", so '$-6' means "6 addresses back from here". Why 6? Each `##` immediate generates a hidden AUGS instruction, so we have 6 longs total: drvh, AUGS, waitx, drvl, AUGS, waitx. Infinite loop achieved!
 
 ### But Wait, There's More!
 
@@ -319,7 +319,7 @@ blink_code
         waitx   ##50_000_000
         drvl    #56
         waitx   ##50_000_000
-        jmp     #$-4
+        jmp     #$-6
 ```
 :::
 
