@@ -1,5 +1,22 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v2.2.0 (2026-01-30)
+
+**Code Example Accuracy Release** - Compiler-verified code examples throughout.
+
+### Enhanced Accuracy
+
+- AUGS/AUGD examples: Values correctly demonstrate 9-bit S-field limits
+- Constant definitions: Valid CON block syntax throughout
+- Operator tables: Corrected character rendering
+
+### Code Verification
+
+- 348 code examples audited with pnut_ts v1.51.7
+- Inline PASM examples: Correctly tagged as Spin2
+
+---
+
 ## v2.1.0 (2026-01-27)
 
 **Community Feedback Release** - Corrections and expansions based on user review.
