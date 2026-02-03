@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-01-29T00:34:00.364596",
+    "generated": "2026-02-03T20:58:23.693344",
     "total_entries": 1027,
-    "total_categories": 47,
-    "total_aliases": 961,
+    "total_categories": 48,
+    "total_aliases": 964,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -598,6 +598,13 @@
     "spin2_registers": [
       "p2kbSpin2RegPrRegisters"
     ],
+    "spin2_constants": [
+      "p2kbSpin2DebugEndSession",
+      "p2kbSpin2DebugMask",
+      "p2kbSpin2Newtask",
+      "p2kbSpin2SpecialConfigurationSymbols",
+      "p2kbSpin2Thistask"
+    ],
     "guides_getting_started": [
       "p2kbGuidePasm2GettingStarted",
       "p2kbGuideQuickQueries",
@@ -833,6 +840,9 @@
     ],
     "DEBUG_DISPLAY_TOP": [
       "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "DEBUG_END_SESSION": [
+      "p2kbSpin2DebugEndSession"
     ],
     "DEBUG_HEIGHT": [
       "p2kbSpin2SpecialConfigurationSymbols"
@@ -1300,6 +1310,9 @@
     ],
     "NEGZ": [
       "p2kbPasm2Negz"
+    ],
+    "NEWTASK": [
+      "p2kbSpin2Newtask"
     ],
     "NIXINT1": [
       "p2kbPasm2Nixint1"
@@ -1833,6 +1846,9 @@
     ],
     "TESTPN": [
       "p2kbPasm2Testpn"
+    ],
+    "THISTASK": [
+      "p2kbSpin2Thistask"
     ],
     "TJF": [
       "p2kbPasm2Tjf"
@@ -6194,23 +6210,23 @@
     },
     "p2kbSpin2DebugEndSession": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
-      "mtime": 1768350169
+      "mtime": 1770152209
     },
     "p2kbSpin2DebugMask": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-mask.yaml",
-      "mtime": 1768350169
+      "mtime": 1769646926
     },
     "p2kbSpin2Newtask": {
       "path": "deliverables/ai/P2/language/spin2/constants/newtask.yaml",
-      "mtime": 1768348299
+      "mtime": 1770152209
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1769213380
+      "mtime": 1769646926
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
-      "mtime": 1768348299
+      "mtime": 1770152209
     },
     "p2kbSpin2Abort": {
       "path": "deliverables/ai/P2/language/spin2/constructs/abort.yaml",
