@@ -2,6 +2,9 @@ constant: NEWTASK
 type: constant
 category: Task Constants
 
+aliases:
+  - NEWTASK
+
 requires_version: "Spin2_v47"
 version_directive: "{Spin2_v47}"
 

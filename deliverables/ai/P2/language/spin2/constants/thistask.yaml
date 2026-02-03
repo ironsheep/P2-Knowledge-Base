@@ -2,6 +2,9 @@ constant: THISTASK
 type: constant
 category: Task Constants
 
+aliases:
+  - THISTASK
+
 requires_version: "Spin2_v47"
 version_directive: "{Spin2_v47}"
 

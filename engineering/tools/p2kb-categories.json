@@ -196,6 +196,10 @@
     "registers": {
       "description": "Special register definitions",
       "files": ["pr-registers"]
+    },
+    "constants": {
+      "description": "Compile-time constants and configuration symbols",
+      "files": ["debug-mask", "debug-end-session", "newtask", "thistask", "special-configuration-symbols"]
     }
   },
 

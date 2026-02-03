@@ -2,6 +2,9 @@ constant: DEBUG_END_SESSION
 type: constant
 category: Debug Constants
 
+aliases:
+  - DEBUG_END_SESSION
+
 requires_version: "Spin2_v52"
 version_directive: "{Spin2_v52}"
 
