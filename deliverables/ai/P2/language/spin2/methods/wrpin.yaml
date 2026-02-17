@@ -25,36 +25,29 @@ parameters:
   - name: "Mode"
     type: "long"
     description: |
-      32-bit mode configuration value:
-      - Bits 31-24: Filter/output options
-      - Bits 23-16: Input selector B
-      - Bits 15-8: Input selector A
-      - Bits 7-6: Low level control
-      - Bits 5-0: Smart pin mode (0-63)
+      32-bit mode configuration value: %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+      - Bits 31:28 (AAAA): A input selector (4 bits)
+      - Bits 27:24 (BBBB): B input selector (4 bits)
+      - Bits 23:21 (FFF): Input logic/filtering (3 bits)
+      - Bits 20:8 (M): Low-level pin control - drive strength, DAC, ADC (13 bits)
+      - Bits 7:6 (TT): Pin DIR/OUT control (2 bits) - see tt_field below
+      - Bits 5:1 (SSSSS): Smart pin mode selector (5 bits, 32 modes)
+      - Bit 0: Always 0
 
 returns: "none"
 
-mode_register_format:
-  bits_31_24: |
-    Filter and output options:
-    - Bit 31: Enable digital filter
-    - Bit 30-28: Filter length
-    - Bit 27-26: Output drive options
-    
-  bits_23_16: |
-    Input B selector:
-    - Relative pin selection (-3 to +3)
-    - Special input sources
-    
-  bits_15_8: |
-    Input A selector:
-    - Relative pin selection (-3 to +3)
-    - Special input sources
-    
-  bits_5_0: |
-    Smart pin mode (0-63):
-    - 00000: OFF (normal I/O)
-    - 00001-11111: Various smart modes
+tt_field:
+  bits: "7:6"
+  purpose: "Pin DIR/OUT control"
+  constants:
+    P_TT_00: {value: "$00", binary: "%00", effect: "Default - DIR controls output enable"}
+    P_TT_01: {value: "$40", binary: "%01", aliases: ["P_OE", "P_CHANNEL"], effect: "Output enabled regardless of DIR, SMART/OUT drives"}
+    P_TT_10: {value: "$80", binary: "%10", aliases: ["P_BITDAC"], effect: "Output disabled, OTHER source selected"}
+    P_TT_11: {value: "$C0", binary: "%11", effect: "Output enabled regardless of DIR, SMART/OTHER drives"}
+  when_smart_pin_on: "x0=output disabled, x1=output enabled (regardless of DIR)"
+  source_selection: "0x=SMART/OUT drives, 1x=SMART/OTHER drives"
+  p_oe_required_for: "All output modes (NCO, PWM, Pulse, Transition, Serial TX, DAC, USB)"
+  see_also: "architecture/smart_pins.yaml for full TT behavioral specification"
 
 examples:
   - code: |

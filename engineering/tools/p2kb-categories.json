@@ -114,6 +114,10 @@
   },
 
   "smart_pins": {
+    "configuration": {
+      "description": "Smart pin configuration fields, constants, and pin output hierarchy",
+      "files": ["smart_pins", "smart_pin_patterns"]
+    },
     "digital": {
       "description": "Digital I/O modes",
       "modes": ["00000", "00001", "00010", "00011"]

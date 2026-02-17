@@ -131,6 +131,83 @@ spin2_builtin_symbols:
       related_symbols: ["P_ADC_EXT", "P_ADC_SCOPE"]
       hardware_relationship: "SmartPin ADC with internal clocking"
 
+    # SmartPin TT Field (DIR/OUT Control) Constants
+    - symbol_id: "p_tt_00"
+      symbol_name: "P_TT_00"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0000"
+      bit_pattern: "%0000_0000_000_0000000000000_00_00000_0"
+      description: "Default TT - DIR controls output enable, OUT drives output"
+      hardware_relationship: "WRPIN D[7:6] = %00"
+
+    - symbol_id: "p_tt_01"
+      symbol_name: "P_TT_01"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0040"
+      bit_pattern: "%0000_0000_000_0000000000000_01_00000_0"
+      description: "Output enabled regardless of DIR, SMART/OUT drives"
+      related_symbols: ["P_OE", "P_CHANNEL"]
+      hardware_relationship: "WRPIN D[7:6] = %01"
+
+    - symbol_id: "p_oe"
+      symbol_name: "P_OE"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0040"
+      bit_pattern: "%0000_0000_000_0000000000000_01_00000_0"
+      description: "Output Enable - required for all smart pin output modes"
+      usage_context:
+        - "Enable smart pin to drive pin output"
+        - "Required for NCO, PWM, Pulse, Transition, Serial TX, DAC, USB modes"
+        - "Not needed for input-only modes (counters, timing, ADC, Serial RX)"
+      related_symbols: ["P_TT_01", "P_CHANNEL"]
+      hardware_relationship: "Alias for P_TT_01 - WRPIN D[7:6] = %01"
+
+    - symbol_id: "p_tt_10"
+      symbol_name: "P_TT_10"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0080"
+      bit_pattern: "%0000_0000_000_0000000000000_10_00000_0"
+      description: "Output disabled, OTHER source selected (BIT_DAC enable in DAC_MODE)"
+      related_symbols: ["P_BITDAC"]
+      hardware_relationship: "WRPIN D[7:6] = %10"
+
+    - symbol_id: "p_bitdac"
+      symbol_name: "P_BITDAC"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0080"
+      bit_pattern: "%0000_0000_000_0000000000000_10_00000_0"
+      description: "BIT_DAC enable - alias for P_TT_10"
+      related_symbols: ["P_TT_10"]
+      hardware_relationship: "Alias for P_TT_10 - WRPIN D[7:6] = %10"
+
+    - symbol_id: "p_tt_11"
+      symbol_name: "P_TT_11"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_00C0"
+      bit_pattern: "%0000_0000_000_0000000000000_11_00000_0"
+      description: "Output enabled, SMART/OTHER drives - used for differential pairs (USB)"
+      usage_context:
+        - "Odd pin in differential pair (auto-complement of even pin)"
+        - "Even pin: OTHER = pseudo-random noise source"
+      related_symbols: ["P_TT_01", "P_OE"]
+      hardware_relationship: "WRPIN D[7:6] = %11"
+
+    - symbol_id: "p_channel"
+      symbol_name: "P_CHANNEL"
+      category: "smartpin"
+      subcategory: "tt_output_control"
+      value: "$0000_0040"
+      bit_pattern: "%0000_0000_000_0000000000000_01_00000_0"
+      description: "DAC channel enable (non-smart pin mode) - alias for P_OE"
+      related_symbols: ["P_OE", "P_TT_01"]
+      hardware_relationship: "Alias for P_TT_01 - WRPIN D[7:6] = %01"
+
     # Streamer Configuration Symbols
     - symbol_id: "x_imm_32x1_lut"
       symbol_name: "X_IMM_32X1_LUT"

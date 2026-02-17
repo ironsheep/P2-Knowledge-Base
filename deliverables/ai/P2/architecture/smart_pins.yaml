@@ -3,8 +3,21 @@
 
 component: Smart_Pins
 category: io_system
-version: "1.1"
-last_updated: "2025-11-25"
+version: "1.2"
+last_updated: "2026-02-16"
+aliases:
+  - P_OE
+  - P_TT_00
+  - P_TT_01
+  - P_TT_10
+  - P_TT_11
+  - P_BITDAC
+  - P_CHANNEL
+  - TT_BITS
+  - WRPIN_FORMAT
+  - OUTPUT_ENABLE
+  - SMART_PIN_CONFIGURATION
+  - PIN_OUTPUT_HIERARCHY
 change_log:
   - version: "1.1"
     date: "2025-11-25"
@@ -144,12 +157,111 @@ configuration_format:
   wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
   
   fields:
-    aaaa: "A input selector (4 bits)"
-    bbbb: "B input selector (4 bits)"
-    fff: "Input logic/filtering (3 bits)"
-    m: "Low-level pin control (13 bits)"
-    tt: "Pin DIR/OUT control (2 bits)"
-    sssss: "Smart pin mode (5 bits)"
+    aaaa:
+      bits: "31:28"
+      width: 4
+      purpose: "A input selector"
+      values:
+        "0xxx": "true (default)"
+        "1xxx": "inverted"
+        "x000": "this pin's read state (default)"
+        "x001": "relative +1 pin's read state"
+        "x010": "relative +2 pin's read state"
+        "x011": "relative +3 pin's read state"
+        "x100": "this pin's OUT bit from cogs"
+        "x101": "relative -3 pin's read state"
+        "x110": "relative -2 pin's read state"
+        "x111": "relative -1 pin's read state"
+    bbbb:
+      bits: "27:24"
+      width: 4
+      purpose: "B input selector"
+      values: "Same encoding as AAAA"
+    fff:
+      bits: "23:21"
+      width: 3
+      purpose: "A and B input logic/filtering"
+      values:
+        "%000": "A, B (default)"
+        "%001": "A AND B, B"
+        "%010": "A OR B, B"
+        "%011": "A XOR B, B"
+        "%100": "A, B, both filtered using filt0"
+        "%101": "A, B, both filtered using filt1"
+        "%110": "A, B, both filtered using filt2"
+        "%111": "A, B, both filtered using filt3"
+      note: "Resultant A drives IN signal in non-smart-pin modes"
+    m:
+      bits: "20:8"
+      width: 13
+      purpose: "Low-level pin control (drive strength, DAC, ADC)"
+      dac_mode_trigger: "M[12:10] = %101 enables DAC_MODE"
+      bit_dac: "BIT_DAC outputs {2{M[7:4]}} for high or {2{M[3:0]}} for low in DAC_MODE"
+    tt:
+      bits: "7:6"
+      width: 2
+      purpose: "Pin DIR/OUT control"
+      source: "Silicon Doc v35"
+      bit_functions:
+        bit_7_high: "Output SOURCE: 0=OUT, 1=OTHER"
+        bit_6_low: "Output ENABLE (smart pin on): 0=disabled, 1=enabled"
+      other_definition:
+        odd_pins: "OTHER = even pin's NOT output state (differential source)"
+        even_pins: "OTHER = unique pseudo-random bit (noise source)"
+        all_pins: "SMART = smart pin output, overrides OUT/OTHER"
+      constants:
+        P_TT_00:
+          value: "$00"
+          binary: "%00"
+          description: "Default - output controlled by DIR/OUT"
+        P_TT_01:
+          value: "$40"
+          binary: "%01"
+          aliases: ["P_OE", "P_CHANNEL"]
+          description: "Output enabled regardless of DIR, SMART/OUT drives"
+        P_TT_10:
+          value: "$80"
+          binary: "%10"
+          aliases: ["P_BITDAC"]
+          description: "Output disabled, OTHER source selected"
+        P_TT_11:
+          value: "$C0"
+          binary: "%11"
+          description: "Output enabled regardless of DIR, SMART/OTHER drives"
+      behavior_by_context:
+        smart_pin_off:
+          condition: "%SSSSS = %00000"
+          dir_role: "DIR enables output"
+          non_dac_mode:
+            "%0x": "OUT drives output"
+            "%1x": "OTHER drives output"
+          dac_mode:
+            "%00": "OUT enables ADC, M[7:0] sets DAC level"
+            "%01": "OUT enables ADC, M[3:0] selects cog DAC channel"
+            "%10": "OUT drives BIT_DAC"
+            "%11": "OTHER drives BIT_DAC"
+        non_dac_smart_pin_modes:
+          condition: "%SSSSS = %00100..%11111"
+          enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
+          source_bit: "0x=SMART/OUT drives output, 1x=SMART/OTHER drives output"
+          dac_mode_variant: "Same but drives BIT_DAC if DAC_MODE active"
+        dac_smart_pin_modes:
+          condition: "%SSSSS = %00001..%00011"
+          enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
+          adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden)"
+      which_modes_need_p_oe:
+        required: "All output modes: NCO (%00110-%00111), PWM (%01000-%01010), Pulse/Transition (%00100-%00101), Serial TX (%11100, %11110), DAC (%00001-%00011), USB (%11011)"
+        not_needed: "Input-only modes: Timing (%10000-%10010), Counters (%01011-%01111), Period/Freq (%10011-%10111), ADC (%11000-%11010), Serial RX (%11101, %11111)"
+      differential_pair_usage:
+        description: "TT=%11 on odd pin creates hardware differential pair"
+        even_pin: "P_OE (TT=%01) - SMART drives main signal"
+        odd_pin: "TT=%11 - OTHER auto-provides complement of even pin's output"
+        use_case: "USB D+/D- differential signaling"
+    sssss:
+      bits: "5:1"
+      width: 5
+      purpose: "Smart pin mode selector (32 modes)"
+      bit_0: "Always 0"
 
 x_y_z_registers:
   x_register:
@@ -260,6 +372,92 @@ related_components:
   architecture/streamer/overview.yaml: "Can bypass smart pins"
   events: "Smart pin IN flags trigger events"
   interrupts: "Can trigger COG interrupts"
+
+pin_output_hierarchy:
+  source: "Silicon Doc v35"
+  description: "How cog OUT, streamer, and smart pin outputs combine at each pin"
+  layers:
+    1_cog_out: "Each cog has OUTA/OUTB registers controlling pin output state"
+    2_streamer: "Streamer P[31:0] data OR'd into cog's OUTA/OUTB (requires X_PINS_ON)"
+    3_multi_cog: "All 8 cogs' DIR and OUT bits OR'd together at pin level"
+    4_smart_pin: "When smart pin active with TT=%x1, SMART output overrides OUT/OTHER"
+  implication:
+    streamer_vs_smart_pin: |
+      Cannot share output on same pin. Smart pin with P_OE overrides the OUT bit path
+      that streamer writes through. They operate on different pins simultaneously.
+    cooperation_patterns:
+      - "Streamer drives one pin group, smart pins handle protocol pins separately"
+      - "Streamer captures smart pin ADC data (different function, same pin OK)"
+      - "Streamer DAC channels (X0-X3) independent of smart pin digital output"
+    initialization_order: "Smart pins MUST start (DIRH) BEFORE XINIT to prevent data corruption"
+    x_pins_on_off: "X_PINS_ON (D[23]=1) enables streamer pin output; X_PINS_OFF for DAC-only"
+
+live_update_behavior:
+  source: "Silicon Doc v35"
+  principle: |
+    WRPIN needs DIR=0 (reset). WXPIN/WYPIN work freely while smart pin is running (DIR=1).
+    "Once configured, DIR can be raised high and the smart pin will begin operating.
+    After that, you may feed it new data via WXPIN/WYPIN."
+  what_needs_reset:
+    wrpin_changes: "Mode (%SSSSS), input routing (AAAA/BBBB), filtering (FFF), TT bits, M bits"
+    procedure: "DIRL pin → WRPIN/WXPIN/WYPIN → DIRH pin"
+  what_works_while_running:
+    wypin: "Primary runtime interaction — load data, trigger operations, update parameters"
+    wxpin: "Changes timing/configuration for next cycle (mode-specific side effects)"
+  acknowledge_side_effect: |
+    ALL of WRPIN, WXPIN, WYPIN, RDPIN, AKPIN acknowledge the smart pin (clear IN flag).
+    Writing WXPIN to change timing also clears any pending IN. Coordinate with IN state.
+    After acknowledge, IN needs 2 clocks before it can be polled again.
+  per_mode_runtime_updates:
+    pulse_00100:
+      wypin: "Non-zero Y triggers new pulse sequence"
+      wxpin: "Changes base period and compare value"
+    transition_00101:
+      wypin: "Non-zero Y triggers new transition sequence"
+      wxpin: "Changes base period"
+    nco_freq_00110:
+      wypin: "Updates frequency value (Y added to Z each period)"
+      wxpin: "Updates base period; X[31:16] written to Z[31:16] (phase set)"
+    nco_duty_00111:
+      wypin: "Updates duty value"
+      wxpin: "Updates base period; X[31:16] written to Z[31:16] (phase set)"
+    pwm_triangle_01000:
+      wypin: "Updates duty (Y[15:0] captured at next frame start)"
+      wxpin: "Changes base period X[15:0] and frame period X[31:16]"
+    pwm_sawtooth_01001:
+      wypin: "Updates duty (Y[15:0] captured at next frame start)"
+      wxpin: "Changes base period and frame period"
+    pwm_smps_01010:
+      wypin: "Updates duty (may set once and let repeat)"
+      wxpin: "Changes base period and frame period"
+    quadrature_01011:
+      wypin: "Not used (zero by pulsing DIR low instead)"
+      wxpin: "Changes measurement period"
+    counters_01100_01111:
+      wypin: "Y[0] selects mode variant in %01110/%01111"
+      wxpin: "Changes measurement period"
+    timing_10000_10010:
+      wypin: "Y[1:0] sets sensitivity (high/rise/edge) in %10010"
+      wxpin: "Changes measurement window / event count"
+    period_freq_10011_10111:
+      wypin: "Y[1:0] sets A/B rise/edge sensitivity"
+      wxpin: "Changes period count or minimum clock window"
+    adc_11000_11001:
+      wypin: "Not typically used"
+      wxpin: "Changes sample mode X[5:4] and period X[3:0]"
+    sync_tx_11100:
+      wypin: "Loads next word to transmit (buffered → shifter → IN raised)"
+      wxpin: "Changes update mode X[5] and bit count X[4:0] — avoid mid-transfer"
+    sync_rx_11101:
+      wypin: "Not used"
+      wxpin: "Changes sample position X[5] and bit count X[4:0] — avoid mid-transfer"
+    async_tx_11110:
+      wypin: "Loads next word to transmit (buffered → shifter → IN raised)"
+      wxpin: "Changes baud rate X[31:16]/X[15:10] and bit count X[4:0] — avoid mid-transfer"
+    async_rx_11111:
+      wypin: "Not used"
+      wxpin: "Changes baud rate and bit count — avoid mid-transfer"
+  caution: "Changing WXPIN on serial modes mid-transfer corrupts in-progress data. Change between transactions after IN signals completion."
 
 see_also:
   - "Smart pin mode reference (modes/ directory)"

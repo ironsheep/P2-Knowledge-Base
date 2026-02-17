@@ -4,6 +4,18 @@
 concept: spi_smart_pin_implementation
 category: smart_pins
 priority: critical
+aliases:
+  - SPI
+  - SPI_MASTER
+  - MOSI
+  - MISO
+  - PIN_JOINING
+  - CLOCK_ROUTING
+  - P_SYNC_TX
+  - P_SYNC_RX
+  - P_TRANSITION
+  - P_PLUS1_B
+  - P_MINUS1_B
 
 # THE MOST IMPORTANT THING TO KNOW
 critical_requirement: |

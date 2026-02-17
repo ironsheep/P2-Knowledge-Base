@@ -307,6 +307,12 @@ def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[st
                             if key not in categories[full_cat_name]:
                                 categories[full_cat_name].append(key)
 
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    potential_key = f"p2kbArch{to_camel_case(filename)}"
+                    if potential_key in files:
+                        categories[full_cat_name].append(potential_key)
+
     # Process Spin2 categories
     if 'spin2' in cat_defs:
         for cat_name, cat_info in cat_defs['spin2'].items():

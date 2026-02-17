@@ -78,10 +78,14 @@ smart_pin_system:
       syntax: "WRPIN config, #pin"
       operation: "Configure Smart Pin mode and parameters"
       config_bits:
-        31_24: "Filter/input selector"
-        23_16: "Low-level pin control"
-        15_8: "High-level pin control"
-        7_0: "Smart Pin mode"
+        format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+        31_28_AAAA: "A input selector (4 bits)"
+        27_24_BBBB: "B input selector (4 bits)"
+        23_21_FFF: "Input logic/filtering (3 bits)"
+        20_8_M: "Low-level pin control - drive strength, DAC, ADC (13 bits)"
+        7_6_TT: "Pin DIR/OUT control (P_TT_00=$00, P_OE=$40, P_TT_10=$80, P_TT_11=$C0)"
+        5_1_SSSSS: "Smart pin mode selector (5 bits, 32 modes)"
+        0: "Always 0"
       example: |
         WRPIN ##P_ASYNC_TX, #tx_pin  ' Configure for async serial
     
@@ -332,9 +336,16 @@ common_patterns:
 
 coordination:
   streamer_smartpin:
-    critical_order: "Smart Pins MUST start before XINIT"
+    critical_order: "Smart Pins MUST start (DIRH) before XINIT"
     reason: "Prevents data corruption and timing issues"
     verified_in: "flash_loader.spin2"
+    pin_output_hierarchy: |
+      Streamer P[31:0] feeds through OUTA/OUTB (the OUT bit path).
+      Smart pin with TT=%x1 (P_OE) overrides OUT entirely via SMART output.
+      Result: streamer and smart pin CANNOT share output on the same pin.
+      Use them on different pins - e.g., smart pins for SPI protocol pins,
+      streamer for hub FIFO data transfer on separate pin groups.
+    see_also: "architecture/smart_pins.yaml pin_output_hierarchy section"
     
   multi_pin_sync:
     - "Configure all pins first"
