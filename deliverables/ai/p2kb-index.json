@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-02-03T20:58:23.693344",
+    "generated": "2026-02-17T00:01:42.908558",
     "total_entries": 1027,
-    "total_categories": 48,
-    "total_aliases": 964,
+    "total_categories": 49,
+    "total_aliases": 987,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -453,6 +453,10 @@
     "architecture_execution": [
       "p2kbArchXbyteEngine"
     ],
+    "smart_pins_configuration": [
+      "p2kbArchSmartPinPatterns",
+      "p2kbArchSmartPins"
+    ],
     "smart_pins_digital": [
       "p2kbArchSmartPin00000NormalMode",
       "p2kbArchSmartPin00001LongRepositoryOrDacNoise",
@@ -764,6 +768,9 @@
     ],
     "CLKSET": [
       "p2kbSpin2Clkset"
+    ],
+    "CLOCK_ROUTING": [
+      "p2kbArchSpiImplementationGuide"
     ],
     "CMP": [
       "p2kbPasm2Cmp"
@@ -1241,6 +1248,9 @@
     "MERGEW": [
       "p2kbPasm2Mergew"
     ],
+    "MISO": [
+      "p2kbArchSpiImplementationGuide"
+    ],
     "MIXPIX": [
       "p2kbPasm2Mixpix"
     ],
@@ -1252,6 +1262,9 @@
     ],
     "MODZ": [
       "p2kbPasm2Modz"
+    ],
+    "MOSI": [
+      "p2kbArchSpiImplementationGuide"
     ],
     "MOV": [
       "p2kbPasm2Mov"
@@ -1353,6 +1366,9 @@
     "OUTNZ": [
       "p2kbPasm2Outnz"
     ],
+    "OUTPUT_ENABLE": [
+      "p2kbArchSmartPins"
+    ],
     "OUTRND": [
       "p2kbPasm2Outrnd"
     ],
@@ -1400,6 +1416,12 @@
     ],
     "PINWRITE": [
       "p2kbSpin2Pinwrite"
+    ],
+    "PIN_JOINING": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "PIN_OUTPUT_HIERARCHY": [
+      "p2kbArchSmartPins"
     ],
     "POLLATN": [
       "p2kbPasm2Pollatn",
@@ -1473,6 +1495,42 @@
     ],
     "PUSHB": [
       "p2kbPasm2Pushb"
+    ],
+    "P_BITDAC": [
+      "p2kbArchSmartPins"
+    ],
+    "P_CHANNEL": [
+      "p2kbArchSmartPins"
+    ],
+    "P_MINUS1_B": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "P_OE": [
+      "p2kbArchSmartPins"
+    ],
+    "P_PLUS1_B": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "P_SYNC_RX": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "P_SYNC_TX": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "P_TRANSITION": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "P_TT_00": [
+      "p2kbArchSmartPins"
+    ],
+    "P_TT_01": [
+      "p2kbArchSmartPins"
+    ],
+    "P_TT_10": [
+      "p2kbArchSmartPins"
+    ],
+    "P_TT_11": [
+      "p2kbArchSmartPins"
     ],
     "QCOS": [
       "p2kbSpin2Qcos"
@@ -1754,6 +1812,15 @@
     "SKIPF": [
       "p2kbPasm2Skipf"
     ],
+    "SMART_PIN_CONFIGURATION": [
+      "p2kbArchSmartPins"
+    ],
+    "SPI": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "SPI_MASTER": [
+      "p2kbArchSpiImplementationGuide"
+    ],
     "SPLITB": [
       "p2kbPasm2Splitb"
     ],
@@ -1883,6 +1950,9 @@
     "TRUNC": [
       "p2kbSpin2Trunc"
     ],
+    "TT_BITS": [
+      "p2kbArchSmartPins"
+    ],
     "WAITATN": [
       "p2kbPasm2Waitatn",
       "p2kbSpin2Waitatn"
@@ -1992,6 +2062,9 @@
     "WRPIN": [
       "p2kbPasm2Wrpin",
       "p2kbSpin2Wrpin"
+    ],
+    "WRPIN_FORMAT": [
+      "p2kbArchSmartPins"
     ],
     "WRWORD": [
       "p2kbPasm2Wrword"
@@ -3782,7 +3855,7 @@
     },
     "p2kbArchSpiImplementationGuide": {
       "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
-      "mtime": 1769041891
+      "mtime": 1771286411
     },
     "p2kbArchSmartPinPatterns": {
       "path": "deliverables/ai/P2/architecture/smart_pin_patterns.yaml",
@@ -3790,7 +3863,7 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1769124402
+      "mtime": 1771286411
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -4770,7 +4843,7 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1764449566
+      "mtime": 1771286411
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
@@ -6946,7 +7019,7 @@
     },
     "p2kbSpin2Wrpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wrpin.yaml",
-      "mtime": 1768613644
+      "mtime": 1771286411
     },
     "p2kbSpin2Wxpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wxpin.yaml",
@@ -7646,7 +7719,7 @@
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",
-      "mtime": 1769041891
+      "mtime": 1771286411
     },
     "p2kbSpin2StreamerSymbols": {
       "path": "deliverables/ai/P2/language/spin2/symbols/streamer-symbols.yaml",

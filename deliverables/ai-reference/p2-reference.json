@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-02-03",
-    "last_updated": "2026-02-03T20:58:27.981968",
+    "release_date": "2026-02-17",
+    "last_updated": "2026-02-17T00:01:48.577227",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-02-03T20:58:27.981968",
+    "extraction_date": "2026-02-17T00:01:48.577227",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-02-03T20:58:27.981968",
+    "extraction_date": "2026-02-17T00:01:48.577227",
     "categories": {
       "keywords": {
         "count": 37,
@@ -25979,15 +25979,46 @@
               {
                 "name": "Mode",
                 "type": "long",
-                "description": "32-bit mode configuration value:\n- Bits 31-24: Filter/output options\n- Bits 23-16: Input selector B\n- Bits 15-8: Input selector A\n- Bits 7-6: Low level control\n- Bits 5-0: Smart pin mode (0-63)\n"
+                "description": "32-bit mode configuration value: %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0\n- Bits 31:28 (AAAA): A input selector (4 bits)\n- Bits 27:24 (BBBB): B input selector (4 bits)\n- Bits 23:21 (FFF): Input logic/filtering (3 bits)\n- Bits 20:8 (M): Low-level pin control - drive strength, DAC, ADC (13 bits)\n- Bits 7:6 (TT): Pin DIR/OUT control (2 bits) - see tt_field below\n- Bits 5:1 (SSSSS): Smart pin mode selector (5 bits, 32 modes)\n- Bit 0: Always 0\n"
               }
             ],
             "returns": "none",
-            "mode_register_format": {
-              "bits_31_24": "Filter and output options:\n- Bit 31: Enable digital filter\n- Bit 30-28: Filter length\n- Bit 27-26: Output drive options\n",
-              "bits_23_16": "Input B selector:\n- Relative pin selection (-3 to +3)\n- Special input sources\n",
-              "bits_15_8": "Input A selector:\n- Relative pin selection (-3 to +3)\n- Special input sources\n",
-              "bits_5_0": "Smart pin mode (0-63):\n- 00000: OFF (normal I/O)\n- 00001-11111: Various smart modes\n"
+            "tt_field": {
+              "bits": "7:6",
+              "purpose": "Pin DIR/OUT control",
+              "constants": {
+                "P_TT_00": {
+                  "value": "$00",
+                  "binary": "%00",
+                  "effect": "Default - DIR controls output enable"
+                },
+                "P_TT_01": {
+                  "value": "$40",
+                  "binary": "%01",
+                  "aliases": [
+                    "P_OE",
+                    "P_CHANNEL"
+                  ],
+                  "effect": "Output enabled regardless of DIR, SMART/OUT drives"
+                },
+                "P_TT_10": {
+                  "value": "$80",
+                  "binary": "%10",
+                  "aliases": [
+                    "P_BITDAC"
+                  ],
+                  "effect": "Output disabled, OTHER source selected"
+                },
+                "P_TT_11": {
+                  "value": "$C0",
+                  "binary": "%11",
+                  "effect": "Output enabled regardless of DIR, SMART/OTHER drives"
+                }
+              },
+              "when_smart_pin_on": "x0=output disabled, x1=output enabled (regardless of DIR)",
+              "source_selection": "0x=SMART/OUT drives, 1x=SMART/OTHER drives",
+              "p_oe_required_for": "All output modes (NCO, PWM, Pulse, Transition, Serial TX, DAC, USB)",
+              "see_also": "architecture/smart_pins.yaml for full TT behavioral specification"
             },
             "examples": [
               {
