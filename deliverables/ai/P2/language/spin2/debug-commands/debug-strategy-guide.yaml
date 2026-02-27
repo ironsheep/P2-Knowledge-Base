@@ -1,0 +1,335 @@
+title: "Debug Strategy Guide: Managing the 255-Record Limit"
+type: guide
+category: Debugging
+documentation_source: pnut_ts_facts
+documentation_level: comprehensive
+
+aliases:
+  - debug_strategy_guide
+  - debug_record_limit
+  - debug_255_limit
+
+description: |
+  Strategic guide for choosing the right debug mechanism in P2 projects.
+  Every debug() statement that compiles consumes a debug record slot. The P2
+  has hard limits on debug resources, and non-trivial projects can exceed them.
+  This guide explains which mechanisms reduce record count (compile-time) versus
+  which only suppress output (runtime), and how to choose between them.
+
+oneliner: "Strategic guide for managing P2 debug record limits across project sizes"
+
+hard_limits:
+  unique_debug_records:
+    limit: 255
+    description: "Each distinct debug() call uses one slot"
+    note: "This is the limit you hit first in non-trivial projects"
+  single_record_size:
+    limit: "255 bytes"
+    description: "One debug statement cannot exceed 255 bytes of encoded data"
+  total_debug_data:
+    limit: "16 KB"
+    description: "All debug records combined cannot exceed 16,384 bytes"
+
+deduplication:
+  description: |
+    The compiler automatically deduplicates identical debug records. Two calls
+    to the exact same debug statement share one record slot.
+  rules:
+    - "Identical debug() calls in different locations share ONE slot"
+    - "debug(\"val=\", UDEC(x)) and debug(\"val=\", UDEC(y)) are DIFFERENT records (different variable references)"
+    - "Repeated identical calls in a loop cost only one slot"
+  example:
+    code: |
+      PUB main()
+        debug("tick")                 ' Slot 1
+        waitms(100)
+        debug("tick")                 ' Reuses slot 1 (identical content)
+        waitms(100)
+        debug("tock")                 ' Slot 2 (different content)
+
+mechanisms_overview:
+  description: |
+    The P2 debug system provides tools at three levels. Only COMPILE-TIME
+    tools reduce your record count. Runtime tools still compile the debug
+    record and consume a slot — they only suppress output at execution time.
+  table:
+    - mechanism: "-d compiler flag"
+      level: compile-time
+      reduces_record_count: "Yes (all or nothing)"
+      granularity: Global
+      eliminates_code: true
+      requires_code_changes: "No (build flag)"
+      version_requirement: Base
+    - mechanism: DEBUG_DISABLE
+      level: compile-time
+      reduces_record_count: "Yes (all or nothing)"
+      granularity: "Global (per source file)"
+      eliminates_code: true
+      requires_code_changes: "CON constant"
+      version_requirement: Base
+    - mechanism: "DEBUG_MASK + debug[N]()"
+      level: compile-time
+      reduces_record_count: "Yes (selective per channel)"
+      granularity: "Per channel (32 channels)"
+      eliminates_code: "Yes (disabled channels)"
+      requires_code_changes: "CON constant + debug[N] syntax"
+      version_requirement: "{Spin2_v46}"
+    - mechanism: DEBUG_COGS
+      level: runtime
+      reduces_record_count: false
+      granularity: "Per cog (8 cogs)"
+      eliminates_code: false
+      requires_code_changes: "CON constant"
+      version_requirement: Base
+    - mechanism: "debug IF() / IFNOT()"
+      level: runtime
+      reduces_record_count: false
+      granularity: Per statement
+      eliminates_code: false
+      requires_code_changes: "Wrap each statement"
+      version_requirement: Base
+
+mechanism_details:
+  compiler_flag:
+    name: "-d compiler flag"
+    description: |
+      The -d (or --debug) flag is the master switch. Without it, ZERO debug
+      records are compiled regardless of anything else in your source.
+    when_to_use:
+      - "Always required to enable any debug output"
+      - "Omit for final production builds to guarantee zero debug overhead"
+    examples:
+      - code: |
+          # Development: debug enabled
+          pnut-ts -d myapp.spin2
+
+          # Production: no debug code at all
+          pnut-ts myapp.spin2
+
+  debug_disable:
+    name: DEBUG_DISABLE
+    description: |
+      Source-level kill switch. When set to any non-zero value, ALL debug
+      statements are excluded from compilation, even when building with -d.
+    when_to_use:
+      - "Release builds from source: toggle without changing build command"
+      - "Library/object files: disable debug so child object statements don't count against parent's 255-record budget"
+      - "Quick toggling: change one constant and recompile"
+    limitation: "All-or-nothing. Cannot keep error messages while removing verbose tracing."
+    example:
+      code: |
+        CON
+          RELEASE = 0                   ' Change to 1 for release
+          DEBUG_DISABLE = RELEASE
+
+        PUB main()
+          debug("Starting up")          ' Compiled only when RELEASE = 0
+          debug("Sensor: ", UDEC(val))  ' Compiled only when RELEASE = 0
+
+  debug_mask:
+    name: "DEBUG_MASK + debug[N]()"
+    description: |
+      32-bit constant where each bit enables a debug channel (0-31). Debug
+      statements written as debug[N](...) are only compiled if bit N is set
+      in the mask. Disabled channels consume zero records and zero code.
+    requires: "{Spin2_v46} or later version directive"
+    when_to_use:
+      - "Large projects approaching the 255-record limit"
+      - "Multi-subsystem projects where you only need to debug one area at a time"
+      - "Verbosity control: errors always visible, trace messages optional"
+      - "Team projects where different developers debug different subsystems"
+    critical_note: |
+      Regular debug() statements (without a channel number) are NOT controlled
+      by DEBUG_MASK. They compile whenever -d is used and DEBUG_DISABLE is not set.
+      Use debug[N]() for everything you want to be maskable.
+    example_subsystem:
+      code: |
+        {Spin2_v46}
+        CON
+          CH_ERROR  = 0                 ' Error reporting
+          CH_MOTOR  = 1                 ' Motor control
+          CH_SENSOR = 2                 ' Sensor readings
+          CH_COMM   = 3                 ' Communication
+
+          ' === CHANGE THIS LINE TO CONTROL WHAT COMPILES ===
+          DEBUG_MASK = (1 << CH_ERROR) | (1 << CH_SENSOR)
+
+        PUB main() | sensorVal, motorSpeed
+          debug[CH_ERROR]("System OK")                       ' COMPILED (bit 0 set)
+          debug[CH_SENSOR]("Temp: ", SDEC(sensorVal))        ' COMPILED (bit 2 set)
+          debug[CH_MOTOR]("Speed: ", UDEC(motorSpeed))       ' SKIPPED (bit 1 clear)
+          debug[CH_COMM]("Packet TX")                        ' SKIPPED (bit 3 clear)
+    example_verbosity:
+      code: |
+        {Spin2_v46}
+        CON
+          LVL_ERROR = 0
+          LVL_WARN  = 1
+          LVL_INFO  = 2
+          LVL_TRACE = 3
+
+          VERBOSITY = 1                 ' Show errors and warnings only
+          DEBUG_MASK = (1 << (VERBOSITY + 1)) - 1   ' = %11
+
+        PUB main()
+          debug[LVL_ERROR]("Fatal: null pointer")       ' COMPILED
+          debug[LVL_WARN]("Buffer 90% full")             ' COMPILED
+          debug[LVL_INFO]("Processing record 42")        ' SKIPPED
+          debug[LVL_TRACE]("Entering subroutine X")      ' SKIPPED
+
+  runtime_mechanisms:
+    description: |
+      These are useful but do NOT help you stay within the 255-record limit
+      because they still compile the debug record. They only suppress output.
+    debug_cogs:
+      description: |
+        8-bit mask controlling which cogs produce debug output at runtime.
+        Every debug statement on every cog is still compiled and consumes a slot.
+      example: |
+        CON
+          DEBUG_COGS = %00000001        ' Only cog 0 outputs debug
+    debug_if:
+      description: |
+        Evaluates a condition at runtime and suppresses debug output if false.
+        The debug record is still compiled.
+      example: |
+        PUB main() | errorCount
+          debug IF(errorCount > 0)("Errors: ", UDEC(errorCount))
+
+decision_guide:
+  description: "Choose your debug strategy based on project size and needs"
+  scenarios:
+    - condition: "Project has < 100 debug statements"
+      recommendation: "Use regular debug() everywhere. You're well within 255."
+    - condition: "Project has 100-255 debug statements"
+      recommendation: |
+        Use regular debug() but monitor your count. Consider debug[N]() for
+        new subsystems so you can disable them later if you approach the limit.
+    - condition: "Project has 255+ debug statements (or growing toward it)"
+      recommendation: |
+        USE DEBUG_MASK + debug[N](). Assign channels to subsystems. Enable
+        only the channels you're actively debugging.
+    - condition: "Shipping a release build"
+      recommendation: |
+        Either omit -d flag, or set DEBUG_DISABLE = 1. Both produce zero
+        debug overhead.
+    - condition: "Writing a reusable object/library"
+      recommendation: |
+        Use DEBUG_DISABLE in the object so its debug statements don't consume
+        the parent project's record budget. Or use debug[N]() with documented
+        channel assignments.
+    - condition: "Multi-cog project with too much debug output at runtime"
+      recommendation: |
+        Use DEBUG_COGS to silence cogs you're not investigating. Use
+        debug IF()/IFNOT() for conditional runtime filtering. (These don't
+        reduce record count, only runtime output.)
+
+recommended_setups:
+  small_project:
+    size: "< 100 debug statements"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+
+      PUB main()
+        debug("System starting")
+        debug("Sensor: ", SDEC(readSensor()))
+        ' Just use regular debug() everywhere. Simple and effective.
+
+  medium_project:
+    size: "100-200 debug statements"
+    code: |
+      {Spin2_v46}
+      CON
+        _clkfreq = 200_000_000
+
+        ' Channel assignments
+        CH_MAIN   = 0
+        CH_SENSOR = 1
+        CH_MOTOR  = 2
+        CH_COMM   = 3
+
+        ' Enable channels you're currently debugging
+        DEBUG_MASK = (1 << CH_MAIN) | (1 << CH_SENSOR)
+
+      PUB main()
+        debug[CH_MAIN]("System starting")                  ' Compiled
+        debug[CH_SENSOR]("Temp: ", SDEC(readTemp()))        ' Compiled
+        debug[CH_MOTOR]("PWM: ", UDEC(dutyCycle))           ' Skipped
+        debug("CRITICAL: watchdog timeout!")                 ' Always compiled (no channel)
+
+  large_project:
+    size: "200+ debug statements"
+    code: |
+      {Spin2_v46}
+      CON
+        _clkfreq = 200_000_000
+
+        ' --- Debug channel plan ---
+        ' Channels 0-3:  Core subsystems
+        CH_ERROR  = 0
+        CH_INIT   = 1
+        CH_STATE  = 2
+        CH_PERF   = 3
+
+        ' Channels 4-7:  Hardware subsystems
+        CH_SENSOR = 4
+        CH_MOTOR  = 5
+        CH_SERVO  = 6
+        CH_LED    = 7
+
+        ' Channels 8-11: Communication
+        CH_UART   = 8
+        CH_SPI    = 9
+        CH_I2C    = 10
+        CH_CAN    = 11
+
+        ' === ACTIVE DEBUG SELECTION ===
+        DEBUG_MASK = (1 << CH_ERROR) | (1 << CH_SENSOR) | (1 << CH_I2C)
+
+        DEBUG_COGS = %00000011        ' Only debug cogs 0 and 1 at runtime
+        DEBUG_DELAY = 500             ' Give terminal time to connect
+
+      PUB main()
+        debug[CH_INIT]("Boot complete")                     ' Skipped
+        debug[CH_ERROR]("Self-test passed")                 ' Compiled
+        debug[CH_SENSOR]("Accel X: ", SDEC(ax))             ' Compiled
+        debug[CH_MOTOR]("RPM: ", UDEC(rpm))                 ' Skipped
+        debug[CH_I2C]("ACK from $", UHEX_BYTE(addr))       ' Compiled
+
+common_mistakes:
+  - mistake: "Using debug IF() to manage record count"
+    explanation: |
+      debug IF(condition)(...) still compiles the record. It only suppresses
+      runtime output. If you're hitting the 255 limit, debug IF() won't help.
+    solution: "Use DEBUG_MASK + debug[N]() instead"
+  - mistake: "Forgetting that regular debug() ignores the mask"
+    explanation: |
+      DEBUG_MASK = 0 disables all channels, but debug("hello") still compiles.
+    solution: "Use debug[N]() syntax for statements you want to be maskable"
+  - mistake: "Not defining DEBUG_MASK before using debug[N]()"
+    explanation: |
+      Writing debug[0]("test") without defining DEBUG_MASK causes a compile error.
+    solution: "Always define the mask constant, even if set to $FFFF_FFFF"
+  - mistake: "Expecting deduplication with different variables"
+    explanation: |
+      debug("x=", UDEC(x)) and debug("x=", UDEC(y)) are different records.
+      Deduplication only works when the entire record is byte-for-byte identical.
+    solution: "Don't rely on deduplication for variable-containing debug statements"
+
+notes:
+  - "The 255-record limit is the one you'll hit first in non-trivial projects"
+  - "Only COMPILE-TIME mechanisms reduce record count"
+  - "Runtime mechanisms (DEBUG_COGS, debug IF/IFNOT) still consume record slots"
+  - "Regular debug() without channel number always compiles — use sparingly for critical messages"
+  - "Plan channel assignments early in large projects"
+  - "The compiler deduplicates byte-for-byte identical debug records automatically"
+
+related:
+  - language/spin2/constants/debug-mask.yaml
+  - language/spin2/constants/debug-end-session.yaml
+  - language/spin2/constants/special-configuration-symbols.yaml
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug-new-user-guide.yaml
+
+last_updated: '2026-02-27'

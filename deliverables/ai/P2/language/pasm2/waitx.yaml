@@ -9,16 +9,14 @@ encoding:
 timing:
   cycles: 2 + D
   type: variable
-description: 'Wait for D+1 clock cycles. Stalls the cog for precise timing delays.
-
-  Z = 0 after completion.
-
-
-  Critical for bit-banging protocols, PWM generation, and timing-sensitive
-
-  operations where precise delays are required.
-
-  '
+description: >-
+  Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified,
+  wait 2+(D AND RND) clock cycles, where RND is a random value, producing a
+  randomized delay. C and Z are always cleared to 0 after completion. The 2-cycle
+  overhead is inherent to the instruction. Stalls the cog pipeline during the wait;
+  no instructions execute and no interrupts are processed until the wait completes.
+  Critical for bit-banging protocols, PWM generation, and timing-sensitive operations
+  where precise delays are required.
 flags_affected:
   C: Set to 0 after completion
   Z: Set to 0 after completion
@@ -30,7 +28,7 @@ examples:
   code: "' HUB75 panel driver clock generation\nrgb_clock_cycle\n        setq    rgb_mask\
     \         ' Set pin mask\n        muxq    outa, rgb_data   ' Output RGB data\n\
     \        drvh    clk_pin          ' Clock high\n        waitx   #2           \
-    \    ' Hold time (3 cycles total)\n        drvl    clk_pin          ' Clock low\n\
+    \    ' Hold time (4 cycles: 2+D)\n        drvl    clk_pin          ' Clock low\n\
     \        waitx   #2               ' Hold time\n        ret\n        \n' Latch\
     \ row data\nlatch_row\n        drvh    latch_pin        ' Latch high\n       \
     \ waitx   #4               ' Latch pulse width\n        drvl    latch_pin    \
@@ -75,8 +73,9 @@ related_instructions:
 - WAITSE1-4: Wait for selectable event
 - POLLCT1-3: Poll timer without waiting
 notes:
-- Actual wait is D+1 cycles minimum
-- Blocks cog execution completely
+- Total wait is 2+D clock cycles (2-cycle instruction overhead plus D additional cycles)
+- With WC/WZ/WCZ, D is ANDed with a random value before the wait, producing a randomized delay of 2+(D AND RND) cycles
+- Blocks cog execution completely; no interrupts processed during wait
 - Use smart pins for continuous PWM
 - For long delays, consider WAITCT
 - Critical for bit-banged protocols
@@ -89,6 +88,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19T16:04:17.026292'
+last_updated: '2026-02-27'
 category: Miscellaneous
-oneliner: Wait for D+1 clock cycles
+oneliner: Wait 2+D clock cycles, or 2+(D AND RND) with WC/WZ/WCZ
