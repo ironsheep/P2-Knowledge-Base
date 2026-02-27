@@ -74,6 +74,12 @@ Work intentions and high-level goals awaiting proper sprint planning. These are 
 - **From**: Task #903
 - **Needs**: Audit criteria, validation checklist
 
+### TV-002: Audit All YAML Instruction Timing Against Silicon Doc
+- **Effort Estimate**: 2-3 hours
+- **Intent**: Verify clock cycle counts in all PASM2 instruction YAMLs match the authoritative P2 Instructions v35 CSV
+- **From**: WAITX timing error found 2026-02-27 (description said "D+1" but silicon doc says "2+D"; also missing WC/WZ/WCZ randomized delay behavior)
+- **Needs**: Systematic comparison of `encoding.clocks`, `timing.cycles`, `description`, `oneliner`, and `notes` fields against CSV source for all ~300 instructions. Check for "D+1" vs "2+D" style discrepancies where description text contradicts structured timing fields.
+
 ---
 
 ## 📚 Document Production Candidates
