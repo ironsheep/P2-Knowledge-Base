@@ -1,0 +1,7 @@
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    volumes:
+      - ..:/workspaces/P2-Knowledge-Base:cached
+      - ./bin:/tmp/devcontainer-bin:ro
+    command: sleep infinity

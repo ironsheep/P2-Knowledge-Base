@@ -1,0 +1,10 @@
+# This directory holds binaries to be copied into the dev container
+# 
+# Required files:
+# - pnut_ts (Linux x86_64 binary of the P2 Spin2/PASM2 compiler)
+#
+# The pnut_ts binary will be:
+# 1. Mounted to /tmp/devcontainer-bin/ in the container
+# 2. Copied to /opt/pnut_ts/pnut_ts
+# 3. Symlinked to /usr/local/bin/pnut_ts (in PATH)
+# 4. Made executable

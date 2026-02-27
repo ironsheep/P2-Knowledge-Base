@@ -1,0 +1,49 @@
+{
+  "name": "P2 Knowledge Base Development",
+  "dockerComposeFile": ["docker-compose.yml", "docker-compose.override.yml"],
+  "service": "dev",
+  "workspaceFolder": "/workspaces/P2-Knowledge-Base",
+  "initializeCommand": "test -f .devcontainer/docker-compose.override.yml || echo 'services: {}' > .devcontainer/docker-compose.override.yml",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts",
+      "installTools": true
+    }
+  },
+
+  "postCreateCommand": "sudo rm -f /etc/apt/sources.list.d/yarn.list && sudo apt-get update && sudo apt-get install -y libleptonica6 libtesseract5 && LIBDIR=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) && sudo ln -sf $LIBDIR/libleptonica.so.6 $LIBDIR/liblept.so.5 && sudo ldconfig; sudo mkdir -p /Users/stephen && sudo ln -sfn /opt/container-tools /Users/stephen/container-tools; pip install --user PyYAML && sudo unzip -q /tmp/devcontainer-bin/pnut-ts-linux-arm64-015107.zip -d /opt && sudo mv /opt/pnut-ts-linux-arm64-015107/pnut_ts /opt/pnut_ts && sudo rmdir /opt/pnut-ts-linux-arm64-015107 && sudo chmod +x /opt/pnut_ts/pnut-ts && sudo ln -sf /opt/pnut_ts/pnut_ts /usr/local/bin/pnut_ts",
+
+  "postStartCommand": "curl -fsSL https://claude.ai/install.sh | bash && npm install -g @openai/codex && cp /tmp/devcontainer-bin/bash_aliases ~/.bash_aliases",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        "eamodio.gitlens",
+        "anthropic.claude-code",
+        "IronSheepProductionsLLC.spin2"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "files.watcherExclude": {
+          "**/.git/**": true,
+          "**/node_modules/**": true
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "icon": "terminal-bash"
+          }
+        }
+      }
+    }
+  },
+
+  "remoteUser": "vscode"
+}
