@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-02-17",
-    "last_updated": "2026-02-17T00:01:48.577227",
+    "release_date": "2026-02-27",
+    "last_updated": "2026-02-27T21:06:08.911372",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-02-17T00:01:48.577227",
+    "extraction_date": "2026-02-27T21:06:08.911372",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -12110,7 +12110,7 @@
             "mnemonic": "WAITX",
             "syntax": "WAITX   {#}D     {WC/WZ/WCZ}",
             "brief_description": "",
-            "oneliner": "Wait for D+1 clock cycles",
+            "oneliner": "Wait 2+D clock cycles, or 2+(D AND RND) with WC/WZ/WCZ",
             "encoding": [
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 000011111",
@@ -12120,7 +12120,7 @@
                 "clocks": "2 + D"
               }
             ],
-            "description": "Wait for D+1 clock cycles. Stalls the cog for precise timing delays.\nZ = 0 after completion.\n\nCritical for bit-banging protocols, PWM generation, and timing-sensitive\noperations where precise delays are required.\n",
+            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay. C and Z are always cleared to 0 after completion. The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
             "result": "",
             "timing": {
               "cycles": "2 + D",
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-02-17T00:01:48.577227",
+    "extraction_date": "2026-02-27T21:06:08.911372",
     "categories": {
       "keywords": {
         "count": 37,
@@ -28024,7 +28024,7 @@
         }
       },
       "debug_commands": {
-        "count": 12,
+        "count": 13,
         "elements": {
           "PC_KEY": {
             "command": "PC_KEY",
@@ -28980,14 +28980,14 @@
       }
     },
     "statistics": {
-      "total_elements": 274,
+      "total_elements": 275,
       "by_category": {
         "keywords": 37,
         "operators": 78,
         "methods": 101,
         "registers": 18,
         "assembly_directives": 12,
-        "debug_commands": 12,
+        "debug_commands": 13,
         "special_symbols": 13,
         "system_variables": 3
       }
