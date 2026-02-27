@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-02-27T21:00:50.631993",
-    "total_entries": 1028,
+    "generated": "2026-02-27T23:16:57.208679",
+    "total_entries": 1027,
     "total_categories": 49,
-    "total_aliases": 993,
+    "total_aliases": 999,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -1827,6 +1827,12 @@
     "SPI": [
       "p2kbArchSpiImplementationGuide"
     ],
+    "SPIN2_DOCS_VSCODE": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
+    "SPIN2_DOCUMENTATION_STYLE": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
     "SPI_MASTER": [
       "p2kbArchSpiImplementationGuide"
     ],
@@ -1961,6 +1967,9 @@
     ],
     "TT_BITS": [
       "p2kbArchSmartPins"
+    ],
+    "VSCODE_SPIN2_COMMENTS": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
     ],
     "WAITATN": [
       "p2kbPasm2Waitatn",
@@ -3361,6 +3370,12 @@
     "smart_pin_usage": [
       "p2kbArchSmartPinUsageAnalysis"
     ],
+    "spin2_docs_vscode": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
+    "spin2_documentation_style": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
     "splitb": [
       "p2kbPasm2Splitb"
     ],
@@ -3500,6 +3515,9 @@
     ],
     "utility_library": [
       "p2kbSpin2UtilityLibrary"
+    ],
+    "vscode_spin2_comments": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
     ],
     "waitatn": [
       "p2kbPasm2Waitatn",
@@ -4405,7 +4423,7 @@
     },
     "p2kbGuideSpin2GettingStarted": {
       "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
-      "mtime": 1767481173
+      "mtime": 1772234114
     },
     "p2kbHw7SegmentDisplay7SegmentDisplay": {
       "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
@@ -6085,7 +6103,7 @@
     },
     "p2kbPasm2Waitx": {
       "path": "deliverables/ai/P2/language/pasm2/waitx.yaml",
-      "mtime": 1764449566
+      "mtime": 1772226364
     },
     "p2kbPasm2Waitxfi": {
       "path": "deliverables/ai/P2/language/pasm2/waitxfi.yaml",
@@ -6375,21 +6393,17 @@
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml",
       "mtime": 1764449566
     },
-    "p2kbSpin2Spin2DocsVscode": {
-      "path": "deliverables/ai/P2/language/spin2/conventions/spin2-docs-vscode.yaml",
-      "mtime": 1764449566
-    },
     "p2kbSpin2Spin2FormattingStandards": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml",
-      "mtime": 1764449566
+      "mtime": 1772234114
     },
     "p2kbSpin2Spin2NamingJonnymac": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-naming-jonnymac.yaml",
-      "mtime": 1764449566
+      "mtime": 1772234114
     },
     "p2kbSpin2VscodePnutDocumentationStyle": {
       "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
-      "mtime": 1764449566
+      "mtime": 1772234114
     },
     "p2kbSpin2DbgCZ": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/c-z.yaml",
@@ -6425,7 +6439,7 @@
     },
     "p2kbSpin2DbgDebugStrategyGuide": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
-      "mtime": 1772225846
+      "mtime": 1772226364
     },
     "p2kbSpin2DbgDebug": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug.yaml",
