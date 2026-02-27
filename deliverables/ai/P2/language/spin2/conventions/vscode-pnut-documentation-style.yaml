@@ -1,61 +1,289 @@
 title: VSCode/PNUT_TS Documentation Style
 id: vscode-pnut-documentation-style
 style_name: VSCode PNUT_TS Documentation Standard
-version: 1.1.0
+version: 2.0.0
 compatibility:
   - VSCode with Spin2 Extension
   - PNUT_TS Compiler
   - PNUT_TERM_TS Downloader/Debugger
-summary: Documentation comment style supported by the official P2 VSCode toolchain where documentation appears immediately after method signatures
+
+summary: >-
+  Complete documentation comment conventions for the P2 VSCode toolchain,
+  covering three tools: hover/IntelliSense, the Generate Documentation File
+  command, and the Outline panel. Describes all six comment forms, which tools
+  consume each form, and how to write code that produces correct results in all three.
 
 description: |
-  This is the standard documentation comment convention for Spin2 code when using the VSCode development environment with the PNUT_TS compiler toolchain. Unlike traditional languages that place documentation before method declarations, this style places documentation immediately after the method signature, making it part of the method body. This convention is recognized and parsed by the VSCode Spin2 extension for IntelliSense and documentation features.
-  
-  The unique Spin2 documentation placement means method documentation is part of the method body, appearing immediately after the method signature with no blank lines between them.
+  Standard documentation comment conventions for Spin2 code in the VSCode
+  development environment with the PNUT_TS compiler toolchain. Unlike traditional
+  languages that place documentation before method declarations, Spin2 places
+  documentation immediately after the method signature, making it part of the
+  method body.
+
+  The VSCode Spin2 extension processes comments across three distinct tools, each
+  with different rules for which comment forms it recognizes. Understanding these
+  rules is essential for producing clean results in hover tooltips, generated
+  interface documents, and the outline panel.
+
+aliases:
+  - spin2_docs_vscode
+  - spin2_documentation_style
+  - vscode_spin2_comments
+
+oneliner: "Spin2 comment conventions for VSCode hover, doc generator, and outline panel"
+
+comment_type_classification:
+  description: |
+    Spin2 has six distinct comment forms. Each has different visibility across
+    the three VSCode tools. This classification is the foundation for all
+    documentation decisions.
+  forms:
+    - form: "'' (double apostrophe)"
+      name: "Doc comment (single line)"
+      is_doc_comment: true
+      hover_intellisense: "Yes — PUB methods"
+      doc_generator_output: "Yes"
+      outline_label: "Never — stripped from PUB/PRI"
+    - form: "{{ ... }} (double brace, multi-line)"
+      name: "Doc comment (block)"
+      is_doc_comment: true
+      hover_intellisense: "No"
+      doc_generator_output: "Yes"
+      outline_label: "Never"
+    - form: "{{ text }} (double brace, same line)"
+      name: "Doc comment (inline block)"
+      is_doc_comment: true
+      hover_intellisense: "No"
+      doc_generator_output: "No — explicitly skipped"
+      outline_label: "Never"
+    - form: "' (single apostrophe)"
+      name: "Regular comment"
+      is_doc_comment: false
+      hover_intellisense: "Yes — PRI methods, locals, CON/VAR declarations"
+      doc_generator_output: "Never"
+      outline_label: "Only on CON/VAR/OBJ/DAT section header lines"
+    - form: "{ text } (single brace, same line)"
+      name: "Brace comment (inline)"
+      is_doc_comment: false
+      hover_intellisense: "No"
+      doc_generator_output: "Never"
+      outline_label: "Yes — on CON/VAR/OBJ/DAT section header lines"
+    - form: "{ ... } (single brace, multi-line)"
+      name: "Block comment"
+      is_doc_comment: false
+      hover_intellisense: "No"
+      doc_generator_output: "Never"
+      outline_label: "Never"
+
+  key_distinction: |
+    '' (double apostrophe) is a doc comment. ' (single apostrophe) is not.
+    They serve completely different purposes and appear in different tools.
+
+  tool_summary:
+    hover_intellisense: "Uses '' for PUB methods, ' for PRI methods and local variables"
+    doc_generator: "Uses '' and multi-line {{ }} only — never ' or { }"
+    outline_panel: "Uses { } or ' on section header lines only — never on PUB/PRI lines. Leftmost wins if both present."
 
 key_characteristics:
   - Documentation appears AFTER method signature, not before
-  - Double apostrophe ('') for public method documentation and doc-comments
-  - Single apostrophe (') for private method documentation, regular comments, and local variables of public methods
+  - "Double apostrophe ('') for public method doc-comments — appears in hover AND doc generator"
+  - "Single apostrophe (') for private method docs, regular comments, and local variables of public methods"
   - Uses @param, @returns, and @local tags
   - Requires blank line after documentation block before code
   - Local variables documented separately with single apostrophe
   - Only document elements that actually exist (no @returns None for methods without returns)
-
-comment_prefixes:
-  public_documentation: "''"
-  private_documentation: "'"
-  inline_comment: "'"
-  block_comment_start: "{{"
-  block_comment_end: "}}"
 
 documentation_tags:
   - tag: "@param"
     format: "@param {paramName} - description"
     usage: "Document each method parameter (only if parameters exist)"
     example: "@param frequency - The clock frequency in Hz"
-    
+
   - tag: "@returns"
     format: "@returns {returnName} - description"
     usage: "Document each return value (only if return values exist)"
     example: "@returns result - True if successful, false otherwise"
-    
+
   - tag: "@local"
     format: "@local {localName} - description"
     usage: "Document local variables (uses single apostrophe prefix, only if locals exist)"
     example: "@local tempValue - Temporary storage for calculation"
 
 documentation_structure:
-  - position: "After method signature"
-    order:
-      1: "Description line ending with ..."
-      2: "Blank documentation comment line (separator)"
-      3: "Parameter documentation (@param tags)"
-      4: "Return value documentation (@returns tags)"
-      5: "Optional: Local variables section with single apostrophe"
-      6: "Blank line before code begins"
+  position: "After method signature"
+  order:
+    1: "Description line ending with ..."
+    2: "Blank documentation comment line (separator)"
+    3: "Parameter documentation (@param tags)"
+    4: "Return value documentation (@returns tags)"
+    5: "Optional: Local variables section with single apostrophe"
+    6: "Blank line before code begins"
+
+section_documentation:
+  description: |
+    Every CON, VAR, OBJ, and DAT block should have a single-line comment on
+    the section header line describing what the block contains. This comment
+    appears in the Outline panel as the section's label.
+
+    Either form of non-doc comment works on the header line:
+      CON { Motor Configuration }     ← brace comment
+      VAR ' Instance Variables         ← tic comment
+    Both are picked up by the outline. If both appear on the same line, the
+    leftmost one wins regardless of type. Use one or the other, not both.
+  inside_sections: |
+    Inside the section, use single-line ' comments to describe groups of
+    related declarations. These appear in hover tooltips for items they
+    precede but do NOT appear in generated documentation or the outline.
+  prohibited_inside_sections:
+    - "'' (doc comments) before the first PUB — leaks into file-top generated documentation"
+    - "{{ }} multi-line blocks — invisible to hover and outline in this context"
+    - "{ } on lines other than the section header — invisible to the outline"
+  example: |
+    CON { Motor Configuration }
+
+      ' Speed limits
+      MAX_SPEED = 1000
+      MIN_SPEED = 100
+
+      ' Acceleration parameters
+      RAMP_RATE = 50
+      ACCEL_TIME_MS = 200
+
+doc_generator:
+  description: |
+    The Generate Documentation File command produces a .txt public interface
+    document from a .spin2 or .spin source file. It is the primary mechanism
+    for producing object documentation that other developers consume.
+  keybindings:
+    macOS: "Ctrl+Alt+Cmd+D"
+    windows_linux: "Ctrl+Alt+D"
+    command_palette: "Spin2: Generate Documentation File"
+  two_pass_process:
+    pass_1:
+      name: "File-Top Documentation + PUB Signature List"
+      description: |
+        Walks every line top to bottom. Collects '' and multi-line {{ }}
+        doc comments from the beginning of the file until the first PUB.
+        CRITICAL: Collection does NOT stop at CON, VAR, OBJ, or DAT —
+        it continues through them. Only stops at the first PUB.
+    pass_2:
+      name: "PUB Method Details"
+      description: |
+        Emits detailed documentation for each PUB method. Collects '' and
+        {{ }} doc comments after each PUB line until the next section start.
+        PRI methods are excluded — PRI documentation never appears.
+  language_version_spec: |
+    The generator searches for {Spin2_v##} in the file-top area. If found,
+    it emits (Requires Spin2 Language v##) in the header. Place the version
+    spec in a non-doc { } comment to avoid duplication in output.
+  pitfalls:
+    - "Single-line {{ text }} is explicitly skipped — use '' or multi-line {{ }} instead"
+    - "' (single apostrophe) never appears in generated output — only '' and multi-line {{ }}"
+    - "'' section separators between PUB methods get captured as the preceding method's docs — use ' instead"
+    - "'' inside CON/VAR/OBJ before first PUB leaks into file-top documentation"
+    - "Blank '' (exactly 2 chars) produces no output — use '' with trailing space for blank lines"
+    - "PRI method documentation is excluded from output"
+    - "{Spin2_v##} inside a '' doc comment appears twice — place in non-doc { } comment"
+  insert_doc_comment_command:
+    keybinding_macOS: "Ctrl+Alt+Cmd+C"
+    description: |
+      Auto-generates '' comment stubs for PUB/PRI methods. For PUB methods,
+      uses '' for description, @param, and @returns lines, and ' for local
+      variables — correctly keeping locals out of generated documents.
+
+outline_panel:
+  description: |
+    The Outline panel shows a navigable tree of section blocks and method
+    declarations. Understanding what appears here helps write organized code.
+  section_headers:
+    description: |
+      For CON, VAR, OBJ, and DAT, a comment on the same line as the section
+      keyword is included in the outline label. Either { text } (brace) or
+      ' text (tic) works. If both appear, the leftmost one wins.
+    examples:
+      - source: "CON { Motor Constants }"
+        outline: "CON { Motor Constants }"
+      - source: "VAR ' Instance Variables"
+        outline: "VAR ' Instance Variables"
+      - source: "DAT"
+        outline: "DAT (no comment)"
+    not_captured:
+      - "Comments on the line above or below the section keyword"
+      - "Multi-line { ... } where } is not on the same line"
+  method_declarations:
+    description: |
+      For PUB and PRI, comments are actively stripped. Only method name,
+      parameters, and return values survive in the outline label.
+    stripping_order:
+      - "Tic comments (splits on ', keeps before)"
+      - "Brace comments (splits on {, keeps before)"
+      - "Local variables (splits on |, keeps before)"
+    detail_field: "Spin2: PUB shows 'Public', PRI shows 'Private'"
+  dat_children: |
+    DAT sections can contain child items: global PASM labels in column 1.
+    Spin2 also supports inline PASM labels from ORG/ORGH/ORGF blocks.
+  symbol_icons:
+    CON: Method
+    VAR: Variable
+    OBJ: Class
+    DAT: EnumMember
+    PUB: Method
+    PRI: Field
+    DAT_PASM_labels: String
 
 templates:
+  well_structured_file:
+    description: "Complete file showing all conventions working together"
+    template: |
+      {Spin2_v44}
+      '' Object description for file-top documentation
+      '' Additional description lines
+
+      CON { Configuration Constants }
+
+        _clkfreq = 200_000_000
+
+      VAR { Instance Variables }
+
+        LONG  instanceData
+
+      OBJ { Child Objects }
+
+        serial : "jm_serial"
+
+      PUB start(basePin, pinCount) : ok
+      '' Start the driver with given pins
+      ''
+      '' @param basePin - first pin to use
+      '' @param pinCount - number of consecutive pins
+      '' @returns ok - true if started successfully
+
+          ' implementation here
+
+      ' ---- Sensor Methods ----
+
+      PUB readSensor(channel) : value
+      '' Read the specified sensor channel
+      ''
+      '' @param channel - sensor channel number (0-7)
+      '' @returns value - raw sensor reading
+
+          ' implementation here
+
+      PRI helper(x) : result
+      ' Internal calculation helper
+      '
+      ' @param x - input value
+      ' @returns result - computed result
+
+          result := x * 2
+
+      DAT { PASM Driver }
+
+                      org
+      entry           ' cog entry point
+                      ' PASM code here
+
   public_method_full:
     template: |
       PUB methodName(param1, param2) : returnValue | local1, local2
@@ -64,46 +292,35 @@ templates:
       '' @param param1 - Description of first parameter
       '' @param param2 - Description of second parameter
       '' @returns returnValue - Description of return value
-      
+
       ' Local Variables:
       ' @local local1 - Description of local variable
       ' @local local2 - Description of local variable
-      
-          ' Implementation begins here
+
           returnValue := param1 + param2
-          
+
   method_with_multiple_returns:
     template: |
       PUB getPosition() : x, y, z
       '' Gets the current 3D position coordinates...
       ''
       '' @returns x - X coordinate value
-      '' @returns y - Y coordinate value  
+      '' @returns y - Y coordinate value
       '' @returns z - Z coordinate value
-      
+
           x := current_x_pos
           y := current_y_pos
           z := current_z_pos
-          
+
   method_without_params_or_returns:
     template: |
       PUB initialize()
       '' Initializes the module to default operational state...
       ''
-      
+
           configure_pins()
           reset_variables()
-          start_timers()
-          
-  public_method_simple:
-    template: |
-      PUB initialize()
-      '' Initializes the module to default state...
-      ''
-      
-          configure_pins()
-          reset_variables()
-          
+
   private_method:
     template: |
       PRI internalCalc(value) : result | counter
@@ -111,50 +328,125 @@ templates:
       '
       ' @param value - Input value to process
       ' @returns result - Processed value
-      
+
       ' Local Variables:
       ' @local counter - Loop iteration counter
-      
+
           repeat counter from 0 to value
               result += counter
+
+ai_agent_rules:
+  description: |
+    When generating or modifying Spin2 code, follow these rules to produce
+    correct results across all three VSCode tools.
+  do:
+    - "Use '' for all PUB method documentation — appears in hover AND doc generator"
+    - "Use ' for PRI method documentation — appears in hover, excluded from generated docs"
+    - "Use ' for local variable docs in PUB methods (@local tags) — keeps them out of generated docs"
+    - "Place method documentation immediately after the PUB/PRI line, not before"
+    - "Put a single-line comment on every CON/VAR/OBJ/DAT section line — either { text } or ' text for the outline"
+    - "Use ' single-line comments inside sections to describe groups of constants/variables"
+    - "Use ' for organizational separators between methods (e.g., ' ---- Motor Methods ----)"
+    - "Place {Spin2_v##} in a non-doc { } comment to avoid duplication in generated docs"
+    - "Use '' with trailing space when you need blank lines in generated documentation"
+  do_not:
+    - "Don't use '' or {{ }} inside CON/VAR/OBJ/DAT sections — '' leaks into file-top docs; {{ }} is invisible"
+    - "Don't use multi-line block comments ({{ }} or { }) as section introductions — invisible to outline"
+    - "Don't put section descriptions on lines above or below the keyword — only same-line comments appear in outline"
+    - "Don't use '' for section separators between PUB methods — they get captured as the preceding method's docs"
+    - "Don't use single-line {{ text }} for documentation — explicitly skipped by doc generator"
+    - "Don't use ' expecting it in generated docs — only '' and multi-line {{ }} produce output"
+    - "Don't expect PRI method docs to appear in generated interface documents"
 
 rules:
   placement:
     - Documentation MUST appear immediately after method signature
     - No blank lines between signature and documentation
     - Always include blank line after documentation before code
-    
+
   completeness:
     - Document all parameters
     - Document all return values
     - Document significant local variables
     - Use placeholder (...) for descriptions to be filled in
-    
+
   formatting:
     - Maintain consistent indentation
     - Use appropriate comment prefix based on visibility
     - Separate sections with blank comment lines
     - Group related elements together
 
+constants_and_variables_documentation:
+  comment_placement_options:
+    preceding_comments:
+      description: "Placed on the line immediately before the declaration"
+      priority: "Higher - takes priority if both types present"
+      requirements: "No blank lines between comment and declaration"
+
+    trailing_comments:
+      description: "Placed on the same line after the declaration"
+      priority: "Lower - only used if no preceding comment"
+      requirements: "Separated from code by whitespace"
+
+  examples:
+    con_section: |
+      CON { Motor Configuration }
+
+        ' Speed limits
+        MAX_SPEED = 1000
+        MIN_SPEED = 100
+
+        TIMEOUT_MS = 5000              ' Timeout duration in milliseconds
+
+        ' System clock frequency in Hz for timing calculations
+        CLK_FREQ = 270_000_000
+
+    var_section: |
+      VAR ' Instance Variables
+
+        ' Current encoder position in counts
+        LONG currentPosition
+
+        LONG targetSpeed               ' Desired motor speed in RPM
+
+        ' Buffer for incoming serial data packets
+        BYTE serialBuffer[256]
+
+    dat_section: |
+      DAT { Driver Data }
+
+        ' Configuration table for sensor calibration
+        sensorConfig    long    0, 100, 200, 300
+
+        deviceName      byte    "P2 Controller", 0    ' Null-terminated device name
+
+  enum_documentation: |
+    ' Motor control states for drive system:
+    '  DCS_STOPPED   - Motor completely stopped, no power
+    '  DCS_SPIN_UP   - Motor ramping up to target speed
+    '  DCS_AT_SPEED  - Motor running at target speed
+    '  DCS_SPIN_DOWN - Motor ramping down to stop
+    #0, DCS_STOPPED, DCS_SPIN_UP, DCS_AT_SPEED, DCS_SPIN_DOWN
+
 migration_from_traditional:
   identify_old_comments:
     - Comments appearing above method signature
     - Comments below signature but not in proper format
     - Inline comments describing parameters/returns
-    
+
   migration_process:
     1: "Extract information from old comments"
     2: "Delete old comment blocks completely"
     3: "Create new documentation block after signature"
     4: "Format with appropriate tags and structure"
     5: "Ensure blank line before implementation code"
-    
+
   example_before: |
     '' This method calculates the area
     '' Takes width and height as parameters
     PUB calculateArea(width, height) : area
         area := width * height
-        
+
   example_after: |
     PUB calculateArea(width, height) : area
     '' Calculates the rectangular area from dimensions...
@@ -162,26 +454,8 @@ migration_from_traditional:
     '' @param width - Width of the rectangle
     '' @param height - Height of the rectangle
     '' @returns area - Calculated area value
-    
-        area := width * height
 
-automation_instructions:
-  parsing:
-    - Extract visibility modifier (PUB/PRI)
-    - Extract method name
-    - Parse parameter list (comma-separated, may be empty)
-    - Parse return values (after colon, may be empty)
-    - Parse local variables (after pipe, may be empty)
-    
-  generation:
-    - Use appropriate comment prefix for visibility
-    - Generate description with placeholder (...)
-    - Add blank separator line
-    - Generate @param for each parameter (only if parameters exist)
-    - Generate @returns for each return value (only if returns exist)
-    - Optionally add @local section for locals (only if locals exist)
-    - Ensure blank line before code
-    - Don't include tags for elements that don't exist (e.g., no @returns None)
+        area := width * height
 
 best_practices:
   - Keep descriptions clear and concise
@@ -198,59 +472,21 @@ toolchain_support:
     - Documentation preview in completion items
     - Syntax highlighting for documentation comments
     - Comment priority system (preceding comments take priority over trailing)
-    
+    - Generate Documentation File command (Ctrl+Alt+D)
+    - Insert Doc Comment command (Ctrl+Alt+Cmd+C on macOS)
+    - Outline panel with section labels and method signatures
+
   pnut_ts_features:
     - Preserves documentation in compiled output
     - No impact on binary size
     - Compatible with debug information
-    
-  pnut_term_ts_features:
-    - Documentation available during debugging
-    - Method documentation in symbol browser
 
-constants_and_variables_documentation:
-  comment_placement_options:
-    preceding_comments:
-      description: "Placed on the line immediately before the declaration"
-      priority: "Higher - takes priority if both types present"
-      requirements: "No blank lines between comment and declaration"
-      
-    trailing_comments:
-      description: "Placed on the same line after the declaration"
-      priority: "Lower - only used if no preceding comment"
-      requirements: "Separated from code by whitespace"
-      
-  examples:
-    con_section: |
-      ' Maximum number of connection retries before timeout
-      MAX_RETRIES = 10
-      
-      TIMEOUT_MS = 5000              ' Timeout duration in milliseconds
-      
-      ' System clock frequency in Hz for timing calculations
-      CLK_FREQ = 270_000_000
-      
-    var_section: |
-      VAR
-        ' Current encoder position in counts
-        LONG currentPosition
-        
-        LONG targetSpeed               ' Desired motor speed in RPM
-        
-        ' Buffer for incoming serial data packets
-        BYTE serialBuffer[256]
-        
-    dat_section: |
-      DAT
-        ' Configuration table for sensor calibration
-        sensorConfig    long    0, 100, 200, 300
-        
-        deviceName      byte    "P2 Controller", 0    ' Null-terminated device name string
-        
-  enum_documentation: |
-    ' Motor control states for drive system:
-    '  DCS_STOPPED   - Motor completely stopped, no power
-    '  DCS_SPIN_UP   - Motor ramping up to target speed
-    '  DCS_AT_SPEED  - Motor running at target speed
-    '  DCS_SPIN_DOWN - Motor ramping down to stop
-    #0, DCS_STOPPED, DCS_SPIN_UP, DCS_AT_SPEED, DCS_SPIN_DOWN
+notes:
+  - "This YAML consolidates the former vscode-pnut-documentation-style v1.1.0 and spin2-docs-vscode v1.0.0 into a single comprehensive reference"
+  - "The six comment forms behave differently across the three tools — the comment_type_classification section is the authoritative reference"
+  - "Section header comments use leftmost-wins priority, not type-based priority"
+
+related:
+  - language/spin2/conventions/spin2-formatting-standards.yaml
+
+last_updated: '2026-02-27'

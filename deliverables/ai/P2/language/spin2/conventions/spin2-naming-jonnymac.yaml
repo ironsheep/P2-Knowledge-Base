@@ -395,7 +395,7 @@ integration_notes:
     complete_standard: "Full JonnyMac programming standard (all 4 layers)"
     
   alternative_layer_3:
-    note: "Can combine with spin2-docs-vscode.yaml instead of spin2-docs-jonnymac.yaml"
+    note: "Can combine with vscode-pnut-documentation-style.yaml instead of spin2-docs-jonnymac.yaml"
     result: "JonnyMac naming + VSCode documentation style"
 
 adoption_decision:

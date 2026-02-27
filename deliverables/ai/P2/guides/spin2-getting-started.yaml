@@ -494,7 +494,7 @@ next_steps:
   
   code_style:
     - "spin2-formatting-standards.yaml - professional structure"
-    - "spin2-docs-jonnymac.yaml or spin2-docs-vscode.yaml - documentation style"
+    - "spin2-docs-jonnymac.yaml or vscode-pnut-documentation-style.yaml - documentation style"
   
   advanced_features:
     - "Smart Pin methods - hardware-assisted operations"

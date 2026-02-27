@@ -357,7 +357,7 @@ integration_with_other_layers:
     
   layer_3_options:
     jonnymac: "spin2-docs-jonnymac.yaml (plain English)"
-    vscode: "spin2-docs-vscode.yaml (tagged documentation)"
+    vscode: "vscode-pnut-documentation-style.yaml (VSCode toolchain documentation)"
     
   layer_4_optional:
     jonnymac_full: "spin2-naming-jonnymac.yaml (naming + 2-space indent)"
