@@ -1,0 +1,354 @@
+# P1 ROM Font Character Set - Complete 256-Character Reference
+# Source: Parallax P1 (P8X32A) ROM, OBEX #2028 Unicode Mapping (Alex Hajnal)
+# Purpose: Reference for P2 developers reusing P1 font glyphs in VGA/TV text displays
+# Note: The P1 font ROM is frequently used in P2 projects via direct inclusion
+
+component: P1_ROM_Font
+category: font_reference
+description: |
+  Complete 256-character font set stored in the Parallax P1 (P8X32A) ROM.
+  Each character is 16 pixels wide by 32 pixels tall (interleaved pair encoding).
+  This font is widely reused in P2 projects for VGA text output, TV terminals,
+  and debug displays. Beyond standard ASCII and Latin-1, it includes Parallax-custom
+  glyphs for electronic schematic symbols, signal waveform building blocks,
+  box/line drawing characters, and 3D compositing elements.
+
+metadata:
+  query_tags:
+    - p1 font
+    - rom font
+    - character set
+    - propeller font
+    - vga text
+    - box drawing
+    - schematic symbols
+    - waveform
+    - unicode mapping
+    - P8X32A
+  source_chip: P8X32A
+  unicode_mapping_by: Alex Hajnal
+  obex_object_id: 2028
+
+rom_location:
+  chip: P8X32A
+  address_range: "$8000-$BFFF"
+  size_bytes: 16384
+  characters: 256
+  glyph_dimensions:
+    width_pixels: 16
+    height_pixels: 32
+  encoding: |
+    Interleaved pair format - characters are stored in pairs.
+    Each pair shares a 128-byte block (64 bytes per character within the pair).
+    Even-indexed characters occupy the left column, odd-indexed the right.
+
+character_categories:
+
+  compositing_symbols:
+    char_range: "0-1, 8-13"
+    count: 8
+    purpose: |
+      Four-color 3D UI compositing elements. Used to build raised/sunken panel
+      edges and window borders in graphical text interfaces.
+    characters:
+      - { code: 0, unicode: "U+F000", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 1, unicode: "U+F001", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 8, unicode: "U+F008", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 9, unicode: "U+F009", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 10, unicode: "U+F00A", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 11, unicode: "U+F00B", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 12, unicode: "U+F00C", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+      - { code: 13, unicode: "U+F00D", name: "PRIVATE USE", description: "Compositing symbol - 3D box edge element" }
+
+  arrows:
+    char_range: "2-7"
+    count: 6
+    purpose: "Directional arrows and pointing triangles for UI navigation and indicators."
+    characters:
+      - { code: 2, unicode: "U+2190", name: "LEFTWARDS ARROW", description: "Left arrow", glyph: "\u2190" }
+      - { code: 3, unicode: "U+2192", name: "RIGHTWARDS ARROW", description: "Right arrow", glyph: "\u2192" }
+      - { code: 4, unicode: "U+2191", name: "UPWARDS ARROW", description: "Up arrow", glyph: "\u2191" }
+      - { code: 5, unicode: "U+2193", name: "DOWNWARDS ARROW", description: "Down arrow", glyph: "\u2193" }
+      - { code: 6, unicode: "U+25C0", name: "BLACK LEFT-POINTING TRIANGLE", description: "Left-pointing triangle", glyph: "\u25C0" }
+      - { code: 7, unicode: "U+25B6", name: "BLACK RIGHT-POINTING TRIANGLE", description: "Right-pointing triangle", glyph: "\u25B6" }
+
+  bullets:
+    char_range: "14-15"
+    count: 2
+    purpose: "Bullet and triangular bullet for list formatting."
+    characters:
+      - { code: 14, unicode: "U+2023", name: "TRIANGULAR BULLET", description: "Triangular bullet (rendered as vertical lozenge)", glyph: "\u2023" }
+      - { code: 15, unicode: "U+2022", name: "BULLET", description: "Standard bullet point", glyph: "\u2022" }
+
+  greek_and_math:
+    char_range: "16-21, 181, 255"
+    count: 8
+    purpose: "Greek letters and mathematical symbols commonly used in engineering formulas."
+    characters:
+      - { code: 16, unicode: "U+0394", name: "GREEK CAPITAL LETTER DELTA", description: "Delta - change/difference", glyph: "\u0394" }
+      - { code: 17, unicode: "U+03C0", name: "GREEK SMALL LETTER PI", description: "Pi - 3.14159...", glyph: "\u03C0" }
+      - { code: 18, unicode: "U+03A3", name: "GREEK CAPITAL LETTER SIGMA", description: "Sigma - summation", glyph: "\u03A3" }
+      - { code: 19, unicode: "U+03A9", name: "GREEK CAPITAL LETTER OMEGA", description: "Omega - ohms", glyph: "\u03A9" }
+      - { code: 20, unicode: "U+2248", name: "ALMOST EQUAL TO", description: "Approximately equal", glyph: "\u2248" }
+      - { code: 21, unicode: "U+221A", name: "SQUARE ROOT", description: "Square root symbol", glyph: "\u221A" }
+      - { code: 181, unicode: "U+00B5", name: "MICRO SIGN", description: "Micro prefix (mu)", glyph: "\u00B5" }
+      - { code: 255, unicode: "U+221E", name: "INFINITY", description: "Infinity symbol", glyph: "\u221E" }
+
+  electronic_schematic_symbols:
+    char_range: "22-31, 127, 160, 162, 166-175, 180, 182-184, 186-190"
+    count: 30
+    purpose: |
+      Parallax-custom glyphs for drawing electronic circuit schematics in text mode.
+      Includes transistors (FET, BJT), diodes, resistors, capacitors, inductors,
+      connectors, and power symbols. Characters combine to form complete circuit elements.
+    note: |
+      All mapped to Unicode Private Use Area (U+F000-U+F0FF) since no standard
+      Unicode equivalents exist. Multi-cell components require combining adjacent characters.
+    characters:
+      - { code: 22, unicode: "U+F016", name: "PRIVATE USE", description: "Superscript minus-one (inverse notation)" }
+      - { code: 23, unicode: "U+F017", name: "PRIVATE USE", description: "Vcc / Vdd power supply symbol" }
+      - { code: 24, unicode: "U+F018", name: "PRIVATE USE", description: "Signal ground" }
+      - { code: 25, unicode: "U+F019", name: "PRIVATE USE", description: "N-channel FET (left half); FET body (use with 186 for P-ch, 187 for N-ch, and 27)" }
+      - { code: 26, unicode: "U+F01A", name: "PRIVATE USE", description: "P-channel FET (left half)" }
+      - { code: 27, unicode: "U+F01B", name: "PRIVATE USE", description: "FET (right half)" }
+      - { code: 28, unicode: "U+F01C", name: "PRIVATE USE", description: "BJT (left half)" }
+      - { code: 29, unicode: "U+F01D", name: "PRIVATE USE", description: "Phototransistor (left half)" }
+      - { code: 30, unicode: "U+F01E", name: "PRIVATE USE", description: "NPN BJT (right half)" }
+      - { code: 31, unicode: "U+F01F", name: "PRIVATE USE", description: "PNP BJT (right half)" }
+      - { code: 127, unicode: "U+F07F", name: "PRIVATE USE", description: "Crystal / Inductor / Core" }
+      - { code: 160, unicode: "U+F0A0", name: "PRIVATE USE", description: "Vertical line with outward arrow at top; variable terminal at bottom" }
+      - { code: 162, unicode: "U+F0A2", name: "PRIVATE USE", description: "Vertical line with outward arrow at bottom; variable terminal at top" }
+      - { code: 166, unicode: "U+F0A6", name: "PRIVATE USE", description: "Diode (left half)" }
+      - { code: 167, unicode: "U+F0A7", name: "PRIVATE USE", description: "Diode (right half)" }
+      - { code: 168, unicode: "U+F0A8", name: "PRIVATE USE", description: "Light-emitting diode / LED (right half)" }
+      - { code: 169, unicode: "U+F0A9", name: "PRIVATE USE", description: "Horizontal line with inward arrow at left; horizontal socket (left)" }
+      - { code: 170, unicode: "U+F0AA", name: "PRIVATE USE", description: "Horizontal line with inward arrow at right; horizontal socket (right)" }
+      - { code: 171, unicode: "U+F0AB", name: "PRIVATE USE", description: "Horizontal capacitor" }
+      - { code: 172, unicode: "U+F0AC", name: "PRIVATE USE", description: "Vertical capacitor (left third)" }
+      - { code: 173, unicode: "U+F0AD", name: "PRIVATE USE", description: "Vertical capacitor (middle third)" }
+      - { code: 174, unicode: "U+F0AE", name: "PRIVATE USE", description: "Vertical capacitor (right third)" }
+      - { code: 175, unicode: "U+F0AF", name: "PRIVATE USE", description: "Horizontal line with vertical bar at right; battery minus (wire at left)" }
+      - { code: 180, unicode: "U+F0B4", name: "PRIVATE USE", description: "Horizontal line with vertical bar at left; battery minus (wire at right)" }
+      - { code: 182, unicode: "U+F0B6", name: "PRIVATE USE", description: "Vertical inductor / coil" }
+      - { code: 183, unicode: "U+F0B7", name: "PRIVATE USE", description: "Horizontal inductor / coil (left half)" }
+      - { code: 184, unicode: "U+F0B8", name: "PRIVATE USE", description: "Horizontal inductor / coil (right half)" }
+      - { code: 186, unicode: "U+F0BA", name: "PRIVATE USE", description: "Horizontal line with outward arrow at left; plug/variable terminal (left); P-channel FET gate (use with 25+27)" }
+      - { code: 187, unicode: "U+F0BB", name: "PRIVATE USE", description: "Horizontal line with outward arrow at right; plug/variable terminal (right); N-channel FET gate (use with 25+27)" }
+      - { code: 188, unicode: "U+F0BC", name: "PRIVATE USE", description: "Vertical resistor" }
+      - { code: 189, unicode: "U+F0BD", name: "PRIVATE USE", description: "Horizontal resistor (left half)" }
+      - { code: 190, unicode: "U+F0BE", name: "PRIVATE USE", description: "Horizontal resistor (right half)" }
+
+  waveform_building_blocks:
+    char_range: "128-143"
+    count: 16
+    purpose: |
+      Signal transition glyphs for constructing timing diagrams in text mode.
+      Cover all combinations of low, high, middle (tri-state), and combined states
+      with transitions between them. Essential for documenting digital signal behavior.
+    note: "All mapped to Unicode Private Use Area. Designed to tile horizontally."
+    characters:
+      - { code: 128, unicode: "U+F080", name: "PRIVATE USE", description: "Signal crossing (X pattern)" }
+      - { code: 129, unicode: "U+F081", name: "PRIVATE USE", description: "Signal low (steady)" }
+      - { code: 130, unicode: "U+F082", name: "PRIVATE USE", description: "Signal low-to-high transition" }
+      - { code: 131, unicode: "U+F083", name: "PRIVATE USE", description: "Signal low-to-low-and-high (fork)" }
+      - { code: 132, unicode: "U+F084", name: "PRIVATE USE", description: "Signal low-to-middle (tri-state)" }
+      - { code: 133, unicode: "U+F085", name: "PRIVATE USE", description: "Signal high-to-low transition" }
+      - { code: 134, unicode: "U+F086", name: "PRIVATE USE", description: "Signal high (steady)" }
+      - { code: 135, unicode: "U+F087", name: "PRIVATE USE", description: "Signal high-to-low-and-high (fork)" }
+      - { code: 136, unicode: "U+F088", name: "PRIVATE USE", description: "Signal high-to-middle (tri-state)" }
+      - { code: 137, unicode: "U+F089", name: "PRIVATE USE", description: "Signal low-and-high-to-low (merge)" }
+      - { code: 138, unicode: "U+F08A", name: "PRIVATE USE", description: "Signal low-and-high-to-high (merge)" }
+      - { code: 139, unicode: "U+F08B", name: "PRIVATE USE", description: "Signal low-and-high (steady, both rails)" }
+      - { code: 140, unicode: "U+F08C", name: "PRIVATE USE", description: "Signal low-and-high-to-middle (merge to tri-state)" }
+      - { code: 141, unicode: "U+F08D", name: "PRIVATE USE", description: "Signal middle-to-low (from tri-state)" }
+      - { code: 142, unicode: "U+F08E", name: "PRIVATE USE", description: "Signal middle-to-high (from tri-state)" }
+      - { code: 143, unicode: "U+F08F", name: "PRIVATE USE", description: "Signal middle-to-low-and-high (from tri-state, fork)" }
+
+  box_and_line_drawing:
+    char_range: "144-159"
+    count: 16
+    purpose: |
+      Standard box and line drawing characters with Unicode equivalents.
+      Light variants are non-joined (lines cross without connecting).
+      Heavy variants are joined (lines connect at intersections).
+      Also used as circuit diagram wire elements.
+    characters:
+      - { code: 144, unicode: "U+2500", name: "BOX DRAWINGS LIGHT HORIZONTAL", description: "Horizontal line; also signal middle level", glyph: "\u2500" }
+      - { code: 145, unicode: "U+2502", name: "BOX DRAWINGS LIGHT VERTICAL", description: "Vertical line", glyph: "\u2502" }
+      - { code: 146, unicode: "U+253C", name: "BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL", description: "Non-joined cross (lines pass through)", glyph: "\u253C" }
+      - { code: 147, unicode: "U+254B", name: "BOX DRAWINGS HEAVY VERTICAL AND HORIZONTAL", description: "Joined cross (lines connect)", glyph: "\u254B" }
+      - { code: 148, unicode: "U+2524", name: "BOX DRAWINGS LIGHT VERTICAL AND LEFT", description: "Non-joined T left; also battery plus (wire at left)", glyph: "\u2524" }
+      - { code: 149, unicode: "U+251C", name: "BOX DRAWINGS LIGHT VERTICAL AND RIGHT", description: "Non-joined T right; also battery plus (wire at right)", glyph: "\u251C" }
+      - { code: 150, unicode: "U+2534", name: "BOX DRAWINGS LIGHT UP AND HORIZONTAL", description: "Non-joined T up", glyph: "\u2534" }
+      - { code: 151, unicode: "U+252C", name: "BOX DRAWINGS LIGHT DOWN AND HORIZONTAL", description: "Non-joined T down", glyph: "\u252C" }
+      - { code: 152, unicode: "U+252B", name: "BOX DRAWINGS HEAVY VERTICAL AND LEFT", description: "Joined T left", glyph: "\u252B" }
+      - { code: 153, unicode: "U+2523", name: "BOX DRAWINGS HEAVY VERTICAL AND RIGHT", description: "Joined T right", glyph: "\u2523" }
+      - { code: 154, unicode: "U+253B", name: "BOX DRAWINGS HEAVY UP AND HORIZONTAL", description: "Joined T up", glyph: "\u253B" }
+      - { code: 155, unicode: "U+2533", name: "BOX DRAWINGS HEAVY DOWN AND HORIZONTAL", description: "Joined T down", glyph: "\u2533" }
+      - { code: 156, unicode: "U+2518", name: "BOX DRAWINGS LIGHT UP AND LEFT", description: "Corner: up and left", glyph: "\u2518" }
+      - { code: 157, unicode: "U+2514", name: "BOX DRAWINGS LIGHT UP AND RIGHT", description: "Corner: up and right", glyph: "\u2514" }
+      - { code: 158, unicode: "U+2510", name: "BOX DRAWINGS LIGHT DOWN AND LEFT", description: "Corner: down and left", glyph: "\u2510" }
+      - { code: 159, unicode: "U+250C", name: "BOX DRAWINGS LIGHT DOWN AND RIGHT", description: "Corner: down and right", glyph: "\u250C" }
+
+  standard_ascii:
+    char_range: "32-126"
+    count: 95
+    purpose: "Standard printable ASCII characters. Identical to Unicode code points 0x20-0x7E."
+    note: "Full ASCII set from SPACE (32) through TILDE (126). Not individually listed - these are standard."
+    range_summary:
+      - { range: "32", description: "SPACE" }
+      - { range: "33-47", description: "Punctuation and symbols: ! \" # $ % & ' ( ) * + , - . /" }
+      - { range: "48-57", description: "Digits: 0-9" }
+      - { range: "58-64", description: "Punctuation: : ; < = > ? @" }
+      - { range: "65-90", description: "Uppercase letters: A-Z" }
+      - { range: "91-96", description: "Brackets and symbols: [ \\ ] ^ _ `" }
+      - { range: "97-122", description: "Lowercase letters: a-z" }
+      - { range: "123-126", description: "Braces and symbols: { | } ~" }
+
+  latin1_supplement:
+    char_range: "161, 163-165, 176-179, 185, 191-254"
+    count: 72
+    purpose: |
+      Latin-1 supplement characters including accented letters, currency symbols,
+      and mathematical notation. These occupy the gaps between schematic symbols
+      in the 160-254 range.
+    characters:
+      - { code: 161, unicode: "U+00A1", name: "INVERTED EXCLAMATION MARK", glyph: "\u00A1" }
+      - { code: 163, unicode: "U+00A3", name: "POUND SIGN", description: "British pound currency", glyph: "\u00A3" }
+      - { code: 164, unicode: "U+20AC", name: "EURO SIGN", description: "Euro currency (replaces standard Latin-1 position)", glyph: "\u20AC" }
+      - { code: 165, unicode: "U+00A5", name: "YEN SIGN", description: "Japanese yen / Chinese yuan", glyph: "\u00A5" }
+      - { code: 176, unicode: "U+00B0", name: "DEGREE SIGN", glyph: "\u00B0" }
+      - { code: 177, unicode: "U+00B1", name: "PLUS-MINUS SIGN", glyph: "\u00B1" }
+      - { code: 178, unicode: "U+00B2", name: "SUPERSCRIPT TWO", description: "Squared", glyph: "\u00B2" }
+      - { code: 179, unicode: "U+00B3", name: "SUPERSCRIPT THREE", description: "Cubed", glyph: "\u00B3" }
+      - { code: 185, unicode: "U+00B9", name: "SUPERSCRIPT ONE", glyph: "\u00B9" }
+      - { code: 191, unicode: "U+00BF", name: "INVERTED QUESTION MARK", glyph: "\u00BF" }
+      - { code: 192, unicode: "U+00C0", name: "LATIN CAPITAL LETTER A WITH GRAVE", glyph: "\u00C0" }
+      - { code: 193, unicode: "U+00C1", name: "LATIN CAPITAL LETTER A WITH ACUTE", glyph: "\u00C1" }
+      - { code: 194, unicode: "U+00C2", name: "LATIN CAPITAL LETTER A WITH CIRCUMFLEX", glyph: "\u00C2" }
+      - { code: 195, unicode: "U+00C3", name: "LATIN CAPITAL LETTER A WITH TILDE", glyph: "\u00C3" }
+      - { code: 196, unicode: "U+00C4", name: "LATIN CAPITAL LETTER A WITH DIAERESIS", glyph: "\u00C4" }
+      - { code: 197, unicode: "U+00C5", name: "LATIN CAPITAL LETTER A WITH RING ABOVE", glyph: "\u00C5" }
+      - { code: 198, unicode: "U+00C6", name: "LATIN CAPITAL LETTER AE", glyph: "\u00C6" }
+      - { code: 199, unicode: "U+00C7", name: "LATIN CAPITAL LETTER C WITH CEDILLA", glyph: "\u00C7" }
+      - { code: 200, unicode: "U+00C8", name: "LATIN CAPITAL LETTER E WITH GRAVE", glyph: "\u00C8" }
+      - { code: 201, unicode: "U+00C9", name: "LATIN CAPITAL LETTER E WITH ACUTE", glyph: "\u00C9" }
+      - { code: 202, unicode: "U+00CA", name: "LATIN CAPITAL LETTER E WITH CIRCUMFLEX", glyph: "\u00CA" }
+      - { code: 203, unicode: "U+00CB", name: "LATIN CAPITAL LETTER E WITH DIAERESIS", glyph: "\u00CB" }
+      - { code: 204, unicode: "U+00CC", name: "LATIN CAPITAL LETTER I WITH GRAVE", glyph: "\u00CC" }
+      - { code: 205, unicode: "U+00CD", name: "LATIN CAPITAL LETTER I WITH ACUTE", glyph: "\u00CD" }
+      - { code: 206, unicode: "U+00CE", name: "LATIN CAPITAL LETTER I WITH CIRCUMFLEX", glyph: "\u00CE" }
+      - { code: 207, unicode: "U+00CF", name: "LATIN CAPITAL LETTER I WITH DIAERESIS", glyph: "\u00CF" }
+      - { code: 208, unicode: "U+00D0", name: "LATIN CAPITAL LETTER ETH", glyph: "\u00D0" }
+      - { code: 209, unicode: "U+00D1", name: "LATIN CAPITAL LETTER N WITH TILDE", glyph: "\u00D1" }
+      - { code: 210, unicode: "U+00D2", name: "LATIN CAPITAL LETTER O WITH GRAVE", glyph: "\u00D2" }
+      - { code: 211, unicode: "U+00D3", name: "LATIN CAPITAL LETTER O WITH ACUTE", glyph: "\u00D3" }
+      - { code: 212, unicode: "U+00D4", name: "LATIN CAPITAL LETTER O WITH CIRCUMFLEX", glyph: "\u00D4" }
+      - { code: 213, unicode: "U+00D5", name: "LATIN CAPITAL LETTER O WITH TILDE", glyph: "\u00D5" }
+      - { code: 214, unicode: "U+00D6", name: "LATIN CAPITAL LETTER O WITH DIAERESIS", glyph: "\u00D6" }
+      - { code: 215, unicode: "U+00D7", name: "MULTIPLICATION SIGN", glyph: "\u00D7" }
+      - { code: 216, unicode: "U+00D8", name: "LATIN CAPITAL LETTER O WITH STROKE", glyph: "\u00D8" }
+      - { code: 217, unicode: "U+00D9", name: "LATIN CAPITAL LETTER U WITH GRAVE", glyph: "\u00D9" }
+      - { code: 218, unicode: "U+00DA", name: "LATIN CAPITAL LETTER U WITH ACUTE", glyph: "\u00DA" }
+      - { code: 219, unicode: "U+00DB", name: "LATIN CAPITAL LETTER U WITH CIRCUMFLEX", glyph: "\u00DB" }
+      - { code: 220, unicode: "U+00DC", name: "LATIN CAPITAL LETTER U WITH DIAERESIS", glyph: "\u00DC" }
+      - { code: 221, unicode: "U+00DD", name: "LATIN CAPITAL LETTER Y WITH ACUTE", glyph: "\u00DD" }
+      - { code: 222, unicode: "U+00DE", name: "LATIN CAPITAL LETTER THORN", glyph: "\u00DE" }
+      - { code: 223, unicode: "U+00DF", name: "LATIN SMALL LETTER SHARP S", glyph: "\u00DF" }
+      - { code: 224, unicode: "U+00E0", name: "LATIN SMALL LETTER A WITH GRAVE", glyph: "\u00E0" }
+      - { code: 225, unicode: "U+00E1", name: "LATIN SMALL LETTER A WITH ACUTE", glyph: "\u00E1" }
+      - { code: 226, unicode: "U+00E2", name: "LATIN SMALL LETTER A WITH CIRCUMFLEX", glyph: "\u00E2" }
+      - { code: 227, unicode: "U+00E3", name: "LATIN SMALL LETTER A WITH TILDE", glyph: "\u00E3" }
+      - { code: 228, unicode: "U+00E4", name: "LATIN SMALL LETTER A WITH DIAERESIS", glyph: "\u00E4" }
+      - { code: 229, unicode: "U+00E5", name: "LATIN SMALL LETTER A WITH RING ABOVE", glyph: "\u00E5" }
+      - { code: 230, unicode: "U+00E6", name: "LATIN SMALL LETTER AE", glyph: "\u00E6" }
+      - { code: 231, unicode: "U+00E7", name: "LATIN SMALL LETTER C WITH CEDILLA", glyph: "\u00E7" }
+      - { code: 232, unicode: "U+00E8", name: "LATIN SMALL LETTER E WITH GRAVE", glyph: "\u00E8" }
+      - { code: 233, unicode: "U+00E9", name: "LATIN SMALL LETTER E WITH ACUTE", glyph: "\u00E9" }
+      - { code: 234, unicode: "U+00EA", name: "LATIN SMALL LETTER E WITH CIRCUMFLEX", glyph: "\u00EA" }
+      - { code: 235, unicode: "U+00EB", name: "LATIN SMALL LETTER E WITH DIAERESIS", glyph: "\u00EB" }
+      - { code: 236, unicode: "U+00EC", name: "LATIN SMALL LETTER I WITH GRAVE", glyph: "\u00EC" }
+      - { code: 237, unicode: "U+00ED", name: "LATIN SMALL LETTER I WITH ACUTE", glyph: "\u00ED" }
+      - { code: 238, unicode: "U+00EE", name: "LATIN SMALL LETTER I WITH CIRCUMFLEX", glyph: "\u00EE" }
+      - { code: 239, unicode: "U+00EF", name: "LATIN SMALL LETTER I WITH DIAERESIS", glyph: "\u00EF" }
+      - { code: 240, unicode: "U+00F0", name: "LATIN SMALL LETTER ETH", glyph: "\u00F0" }
+      - { code: 241, unicode: "U+00F1", name: "LATIN SMALL LETTER N WITH TILDE", glyph: "\u00F1" }
+      - { code: 242, unicode: "U+00F2", name: "LATIN SMALL LETTER O WITH GRAVE", glyph: "\u00F2" }
+      - { code: 243, unicode: "U+00F3", name: "LATIN SMALL LETTER O WITH ACUTE", glyph: "\u00F3" }
+      - { code: 244, unicode: "U+00F4", name: "LATIN SMALL LETTER O WITH CIRCUMFLEX", glyph: "\u00F4" }
+      - { code: 245, unicode: "U+00F5", name: "LATIN SMALL LETTER O WITH TILDE", glyph: "\u00F5" }
+      - { code: 246, unicode: "U+00F6", name: "LATIN SMALL LETTER O WITH DIAERESIS", glyph: "\u00F6" }
+      - { code: 247, unicode: "U+00F7", name: "DIVISION SIGN", glyph: "\u00F7" }
+      - { code: 248, unicode: "U+00F8", name: "LATIN SMALL LETTER O WITH STROKE", glyph: "\u00F8" }
+      - { code: 249, unicode: "U+00F9", name: "LATIN SMALL LETTER U WITH GRAVE", glyph: "\u00F9" }
+      - { code: 250, unicode: "U+00FA", name: "LATIN SMALL LETTER U WITH ACUTE", glyph: "\u00FA" }
+      - { code: 251, unicode: "U+00FB", name: "LATIN SMALL LETTER U WITH CIRCUMFLEX", glyph: "\u00FB" }
+      - { code: 252, unicode: "U+00FC", name: "LATIN SMALL LETTER U WITH DIAERESIS", glyph: "\u00FC" }
+      - { code: 253, unicode: "U+00FD", name: "LATIN SMALL LETTER Y WITH ACUTE", glyph: "\u00FD" }
+      - { code: 254, unicode: "U+00FE", name: "LATIN SMALL LETTER THORN", glyph: "\u00FE" }
+
+unicode_mapping_notes:
+  private_use_area: |
+    Characters with no standard Unicode equivalent are mapped to the Unicode
+    Private Use Area (U+F000-U+F0FF). This mapping was established by Alex Hajnal
+    (OBEX #2028) and is the de facto standard for Propeller font Unicode representation.
+  mapping_formula: "Unicode = 0xF000 + propeller_char_code (for Parallax-custom glyphs)"
+  standard_chars: |
+    Characters 32-126 map directly to their ASCII/Unicode code points.
+    Characters 161, 163-165, 176-179, 181, 185, 191-254 use standard Latin-1 mappings.
+    Character 164 is EURO SIGN (U+20AC) rather than the standard Latin-1 CURRENCY SIGN.
+  exceptions:
+    - { code: 164, note: "Maps to EURO SIGN (U+20AC) instead of Latin-1 CURRENCY SIGN (U+00A4)" }
+    - { code: 255, note: "Maps to INFINITY (U+221E) instead of Latin-1 LATIN SMALL LETTER Y WITH DIAERESIS (U+00FF)" }
+
+storage_format:
+  encoding: "Interleaved pair"
+  description: |
+    Characters are stored in pairs sharing a 128-byte block. Within each block,
+    the even character occupies one column and the odd character the other.
+    Each character glyph is 16 pixels wide by 32 pixels tall, stored as a bitmask.
+  bytes_per_character: 64
+  total_rom_size: "16,384 bytes (256 chars x 64 bytes)"
+  pixel_format: "1-bit per pixel monochrome (with 4-color compositing for chars 0-1, 8-13)"
+
+usage_patterns:
+  timing_diagrams:
+    description: "Build text-mode timing diagrams using waveform characters 128-143 plus horizontal line 144"
+    example_sequence: "129,130,134,133,129 = low, rise, high, fall, low"
+  circuit_schematics:
+    description: "Draw circuit schematics in source code comments using schematic symbols 22-31, 127, 160-190"
+    component_assembly:
+      resistor_horizontal: "chars 189 + 190 (left + right halves)"
+      resistor_vertical: "char 188"
+      capacitor_horizontal: "char 171"
+      capacitor_vertical: "chars 172 + 173 + 174 (left + middle + right)"
+      diode: "chars 166 + 167 (left + right)"
+      led: "chars 166 + 168 (diode left + LED right)"
+      nfet: "chars 187 + 25 + 27 (N-gate + body + right)"
+      pfet: "chars 186 + 25 + 27 (P-gate + body + right)"
+      npn_bjt: "chars 28 + 30 (left + NPN right)"
+      pnp_bjt: "chars 28 + 31 (left + PNP right)"
+      inductor_horizontal: "chars 183 + 184 (left + right)"
+      inductor_vertical: "char 182"
+  vga_text_display:
+    description: |
+      P2 projects commonly include the P1 ROM font data for VGA text output.
+      The font is extracted from P1 ROM and included as a DAT block or loaded from file.
+    typical_resolution: "80x25 or 80x40 text mode at 640x480 VGA"
+  box_drawing:
+    description: "Build text-mode UI panels using box drawing characters 144-159"
+    simple_box: |
+      159,144,144,158  (top: down-right, horiz, horiz, down-left)
+      145,032,032,145  (middle: vert, space, space, vert)
+      157,144,144,156  (bottom: up-right, horiz, horiz, up-left)
+
+related_components:
+  - architecture/hub.yaml
+
+see_also:
+  - description: "OBEX #2028 - Propeller Character Set Unicode Mapping by Alex Hajnal"
+    type: external_reference
+  - description: "P8X32A ROM documentation"
+    type: chip_reference
+  - description: "VGA text driver objects using this font"
+    type: usage_reference
