@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-02-27T23:16:57.208679",
-    "total_entries": 1027,
+    "generated": "2026-03-02T00:52:59.518588",
+    "total_entries": 1028,
     "total_categories": 49,
     "total_aliases": 999,
     "multi_target_aliases": 54,
@@ -4504,6 +4504,10 @@
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
       "mtime": 1766815250
+    },
+    "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet": {
+      "path": "deliverables/ai/P2/hardware/p1_rom_font_character_set.yaml",
+      "mtime": 1772412659
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
