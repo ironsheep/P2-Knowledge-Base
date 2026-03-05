@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-03-02T00:52:59.518588",
+    "generated": "2026-03-05T00:11:42.303528",
     "total_entries": 1028,
     "total_categories": 49,
     "total_aliases": 999,
@@ -4507,7 +4507,7 @@
     },
     "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet": {
       "path": "deliverables/ai/P2/hardware/p1_rom_font_character_set.yaml",
-      "mtime": 1772412659
+      "mtime": 1772412804
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
@@ -6639,7 +6639,7 @@
     },
     "p2kbSpin2KwSTRUCT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml",
-      "mtime": 1768348299
+      "mtime": 1772669399
     },
     "p2kbSpin2KwTO": {
       "path": "deliverables/ai/P2/language/spin2/keywords/TO.yaml",
@@ -7383,7 +7383,7 @@
     },
     "p2kbSpin2OpTypedPointers": {
       "path": "deliverables/ai/P2/language/spin2/operators/typed-pointers.yaml",
-      "mtime": 1767481422
+      "mtime": 1772669399
     },
     "p2kbSpin2AnimationEngine": {
       "path": "deliverables/ai/P2/language/spin2/patterns/applications/animation_engine.yaml",

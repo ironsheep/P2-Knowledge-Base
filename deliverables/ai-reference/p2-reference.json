@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-03-02",
-    "last_updated": "2026-03-02T00:52:59.596284",
+    "release_date": "2026-03-05",
+    "last_updated": "2026-03-05T00:11:45.168741",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-03-02T00:52:59.596284",
+    "extraction_date": "2026-03-05T00:11:45.168741",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-03-02T00:52:59.596284",
+    "extraction_date": "2026-03-05T00:11:45.168741",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18501,6 +18501,16 @@
                 "No additional version directive needed beyond {Spin2_v45}"
               ]
             },
+            "gotchas": {
+              "struct_pointer_obj_returns": {
+                "description": "When a method in a child object returns a struct pointer (^structName)\nand the caller receives it through an OBJ reference, the compiler may\ninterpret the return as the full structure rather than a single LONG\npointer value. For structures exceeding 15 longs, this produces a\ncompile error even though the return is only one LONG.\n",
+                "rule": "When receiving ^structName from an object method, use bracket notation on the receiver",
+                "wrong": "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs",
+                "correct": "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct",
+                "scope": "Only across OBJ boundaries; within same object file this is not needed",
+                "example": "OBJ\n    sensor : \"sensor_driver\"\nCON\n    STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])\nPUB example() | ^sensorConfig pCfg\n    [pCfg] := sensor.getConfig()        ' Bracket notation required\n    debug(\"rate = \", sdec_(pCfg.rate))   ' Then access members normally\n"
+              }
+            },
             "notes": [
               "REQUIRES {Spin2_v45} or later at start of source file",
               "Members default to LONG if no type specified",
@@ -18512,13 +18522,16 @@
               "V49+: Structures defined in CON blocks are automatically exported to parent objects",
               "V49+: Use object.struct_t syntax to reference structures from child objects",
               "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters",
-              "V49+: Structure layout (size, alignment) is preserved exactly when imported"
+              "V49+: Structure layout (size, alignment) is preserved exactly when imported",
+              "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
             ],
             "related": [
-              "SIZEOF",
-              "BYTE",
-              "WORD",
-              "LONG"
+              "language/spin2/methods/sizeof.yaml",
+              "language/spin2/methods/byte.yaml",
+              "language/spin2/methods/word.yaml",
+              "language/spin2/methods/long.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/operators/op_swap.yaml"
             ],
             "oneliner": "Define composite data types with named members (requires Spin2_v45)"
           },
@@ -19186,7 +19199,29 @@
               },
               "struct_dereference": {
                 "syntax": "[ptr]",
-                "description": "Access entire structure through pointer"
+                "description": "Read or write entire structure through pointer (temp := [ptr] or [ptr] := temp)"
+              },
+              "modify_assign_through_pointer": {
+                "syntax": "LONG[ptr] += value / BYTE[ptr] |= mask / etc.",
+                "description": "Arithmetic and bitwise modify-and-assign at pointer address",
+                "operators": [
+                  "LONG[ptr] += v    ' Add",
+                  "BYTE[ptr] -= v    ' Subtract",
+                  "WORD[ptr] *= v    ' Multiply",
+                  "BYTE[ptr] |= mask ' Bitwise OR (set bits)",
+                  "BYTE[ptr] &= mask ' Bitwise AND (clear bits)",
+                  "LONG[ptr] ^= mask ' Bitwise XOR (toggle bits)"
+                ]
+              },
+              "bracket_value_modification": {
+                "syntax": "[ptr]++ / [ptr]-- / [ptr]~ / [ptr]~~",
+                "description": "Modify the value at the pointer address (not the pointer itself)",
+                "operations": [
+                  "[ptr]++   ' Increment value at ptr",
+                  "[ptr]--   ' Decrement value at ptr",
+                  "[ptr]~    ' Clear value at ptr (set to 0)",
+                  "[ptr]~~   ' Set all bits at ptr (set to -1)"
+                ]
               }
             },
             "pointer_arithmetic": [
@@ -19209,8 +19244,27 @@
             ],
             "common_patterns": {
               "array_traversal": "PUB clearBuffer() | ^BYTE ptr\n  ptr := @buffer\n  repeat 256\n    BYTE[ptr++] := 0\n    \n",
-              "string_length": "PUB strlen(^BYTE pStr) : length\n  length := 0\n  repeat while BYTE[pStr++] <> 0\n    length++\n    \n",
-              "structure_array": "PUB scalePoints(scale) | ^point ptr\n  ptr := @points\n  repeat 100\n    ptr.x *= scale\n    ptr.y *= scale\n    ptr++\n"
+              "string_length": "PUB strlen(^BYTE pStr) : length\n  length := 0\n  repeat while BYTE[pStr++] <> 0\n    length++\n",
+              "string_copy": "PUB strcpy(^BYTE pDest, ^BYTE pSrc)\n  repeat while BYTE[pSrc] <> 0\n    BYTE[pDest++] := BYTE[pSrc++]\n  BYTE[pDest] := 0          ' Null terminator\n    \n",
+              "structure_array": "PUB scalePoints(scale) | ^point ptr\n  ptr := @points\n  repeat 100\n    ptr.x *= scale\n    ptr.y *= scale\n    ptr++\n",
+              "linked_list": "CON\n  STRUCT node(^node next, data)\nVAR\n  ^node head\nPUB traverseList() | ^node current\n  current := head\n  repeat while current <> 0\n    processNode(current)\n    current := current.next\n",
+              "pointer_table_workaround": "' Pointers cannot be arrays, but LONG arrays can store raw addresses:\nVAR\n  LONG ptrTable[10]\nPUB example() | ^BYTE ptr\n  ptrTable[0] := @buffer0\n  ptrTable[1] := @buffer1\n  ptr := ptrTable[0]        ' Assign to typed pointer for use\n"
+            },
+            "gotchas": {
+              "struct_pointer_obj_returns": {
+                "description": "When a method in a child object returns a struct pointer (^structName)\nand the caller receives it through an OBJ reference, the compiler may\ninterpret the return as the full structure rather than a single LONG\npointer value. If the structure exceeds 15 longs, this produces a\ncompile error even though the return is only a pointer (one LONG).\n",
+                "rule": "When receiving ^structName from an object method, use bracket notation on the receiver",
+                "wrong": "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs",
+                "correct": "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct",
+                "scope": "Only across OBJ boundaries; within the same object file this is not needed",
+                "example": "OBJ\n    sensor : \"sensor_driver\"\nCON\n    STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])\nPUB example() | ^sensorConfig pCfg\n    [pCfg] := sensor.getConfig()        ' Bracket notation required\n    debug(\"rate = \", sdec_(pCfg.rate))   ' Then access members normally\n"
+              },
+              "pointer_arrays_not_supported": {
+                "description": "Pointer variables cannot be declared as arrays",
+                "wrong": "^BYTE pArray[10]         ' ERROR: pointers cannot be arrays",
+                "workaround": "Use a LONG array to store raw addresses, then assign to typed pointer for use",
+                "example": "VAR\n  LONG ptrTable[10]         ' Array of raw addresses\nPUB example() | ^BYTE ptr\n  ptrTable[0] := @buffer0\n  ptr := ptrTable[0]        ' Assign to typed pointer\n"
+              }
             },
             "notes": [
               "REQUIRES {Spin2_v45} or later at start of source file",
@@ -19219,13 +19273,21 @@
               "Pointers themselves cannot be arrays: ^BYTE ptr[10] is invalid",
               "Initialize pointers before use to avoid accessing invalid memory",
               "P2 handles misaligned access but aligned is more efficient",
-              "Null pointer value is 0 - check before dereferencing"
+              "Null pointer value is 0 - check before dereferencing",
+              "[ptr]++ increments the VALUE at ptr; ptr++ advances the POINTER itself",
+              "LONG[ptr] += v modifies value in-place without separate read/write",
+              "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
             ],
             "related": [
-              "BYTE",
-              "WORD",
-              "LONG",
-              "SIZEOF"
+              "language/spin2/methods/byte.yaml",
+              "language/spin2/methods/word.yaml",
+              "language/spin2/methods/long.yaml",
+              "language/spin2/methods/sizeof.yaml",
+              "language/spin2/special-symbols/at.yaml",
+              "language/spin2/keywords/STRUCT.yaml",
+              "language/spin2/concepts/addressing.yaml",
+              "language/spin2/concepts/method-pointers.yaml",
+              "language/spin2/idioms/memory-access.yaml"
             ],
             "oneliner": "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"
           },
