@@ -183,6 +183,27 @@ export_import:
     - "Structure layout (size, alignment) is preserved exactly"
     - "No additional version directive needed beyond {Spin2_v45}"
 
+gotchas:
+  struct_pointer_obj_returns:
+    description: |
+      When a method in a child object returns a struct pointer (^structName)
+      and the caller receives it through an OBJ reference, the compiler may
+      interpret the return as the full structure rather than a single LONG
+      pointer value. For structures exceeding 15 longs, this produces a
+      compile error even though the return is only one LONG.
+    rule: "When receiving ^structName from an object method, use bracket notation on the receiver"
+    wrong: "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs"
+    correct: "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct"
+    scope: "Only across OBJ boundaries; within same object file this is not needed"
+    example: |
+      OBJ
+          sensor : "sensor_driver"
+      CON
+          STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])
+      PUB example() | ^sensorConfig pCfg
+          [pCfg] := sensor.getConfig()        ' Bracket notation required
+          debug("rate = ", sdec_(pCfg.rate))   ' Then access members normally
+
 notes:
   - "REQUIRES {Spin2_v45} or later at start of source file"
   - "Members default to LONG if no type specified"
@@ -195,11 +216,14 @@ notes:
   - "V49+: Use object.struct_t syntax to reference structures from child objects"
   - "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters"
   - "V49+: Structure layout (size, alignment) is preserved exactly when imported"
+  - "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
 
 related:
-  - SIZEOF
-  - BYTE
-  - WORD
-  - LONG
+  - language/spin2/methods/sizeof.yaml
+  - language/spin2/methods/byte.yaml
+  - language/spin2/methods/word.yaml
+  - language/spin2/methods/long.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/operators/op_swap.yaml
 
 oneliner: "Define composite data types with named members (requires Spin2_v45)"

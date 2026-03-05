@@ -132,7 +132,27 @@ operations:
     
   struct_dereference:
     syntax: "[ptr]"
-    description: "Access entire structure through pointer"
+    description: "Read or write entire structure through pointer (temp := [ptr] or [ptr] := temp)"
+
+  modify_assign_through_pointer:
+    syntax: "LONG[ptr] += value / BYTE[ptr] |= mask / etc."
+    description: "Arithmetic and bitwise modify-and-assign at pointer address"
+    operators:
+      - "LONG[ptr] += v    ' Add"
+      - "BYTE[ptr] -= v    ' Subtract"
+      - "WORD[ptr] *= v    ' Multiply"
+      - "BYTE[ptr] |= mask ' Bitwise OR (set bits)"
+      - "BYTE[ptr] &= mask ' Bitwise AND (clear bits)"
+      - "LONG[ptr] ^= mask ' Bitwise XOR (toggle bits)"
+
+  bracket_value_modification:
+    syntax: "[ptr]++ / [ptr]-- / [ptr]~ / [ptr]~~"
+    description: "Modify the value at the pointer address (not the pointer itself)"
+    operations:
+      - "[ptr]++   ' Increment value at ptr"
+      - "[ptr]--   ' Decrement value at ptr"
+      - "[ptr]~    ' Clear value at ptr (set to 0)"
+      - "[ptr]~~   ' Set all bits at ptr (set to -1)"
 
 pointer_arithmetic:
   - type: "^BYTE"
@@ -156,6 +176,12 @@ common_patterns:
       length := 0
       repeat while BYTE[pStr++] <> 0
         length++
+
+  string_copy: |
+    PUB strcpy(^BYTE pDest, ^BYTE pSrc)
+      repeat while BYTE[pSrc] <> 0
+        BYTE[pDest++] := BYTE[pSrc++]
+      BYTE[pDest] := 0          ' Null terminator
         
   structure_array: |
     PUB scalePoints(scale) | ^point ptr
@@ -165,6 +191,58 @@ common_patterns:
         ptr.y *= scale
         ptr++
 
+  linked_list: |
+    CON
+      STRUCT node(^node next, data)
+    VAR
+      ^node head
+    PUB traverseList() | ^node current
+      current := head
+      repeat while current <> 0
+        processNode(current)
+        current := current.next
+
+  pointer_table_workaround: |
+    ' Pointers cannot be arrays, but LONG arrays can store raw addresses:
+    VAR
+      LONG ptrTable[10]
+    PUB example() | ^BYTE ptr
+      ptrTable[0] := @buffer0
+      ptrTable[1] := @buffer1
+      ptr := ptrTable[0]        ' Assign to typed pointer for use
+
+gotchas:
+  struct_pointer_obj_returns:
+    description: |
+      When a method in a child object returns a struct pointer (^structName)
+      and the caller receives it through an OBJ reference, the compiler may
+      interpret the return as the full structure rather than a single LONG
+      pointer value. If the structure exceeds 15 longs, this produces a
+      compile error even though the return is only a pointer (one LONG).
+    rule: "When receiving ^structName from an object method, use bracket notation on the receiver"
+    wrong: "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs"
+    correct: "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct"
+    scope: "Only across OBJ boundaries; within the same object file this is not needed"
+    example: |
+      OBJ
+          sensor : "sensor_driver"
+      CON
+          STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])
+      PUB example() | ^sensorConfig pCfg
+          [pCfg] := sensor.getConfig()        ' Bracket notation required
+          debug("rate = ", sdec_(pCfg.rate))   ' Then access members normally
+
+  pointer_arrays_not_supported:
+    description: "Pointer variables cannot be declared as arrays"
+    wrong: "^BYTE pArray[10]         ' ERROR: pointers cannot be arrays"
+    workaround: "Use a LONG array to store raw addresses, then assign to typed pointer for use"
+    example: |
+      VAR
+        LONG ptrTable[10]         ' Array of raw addresses
+      PUB example() | ^BYTE ptr
+        ptrTable[0] := @buffer0
+        ptr := ptrTable[0]        ' Assign to typed pointer
+
 notes:
   - "REQUIRES {Spin2_v45} or later at start of source file"
   - "Basic @ and BYTE[]/WORD[]/LONG[] are base Spin2 (no version needed)"
@@ -173,11 +251,19 @@ notes:
   - "Initialize pointers before use to avoid accessing invalid memory"
   - "P2 handles misaligned access but aligned is more efficient"
   - "Null pointer value is 0 - check before dereferencing"
+  - "[ptr]++ increments the VALUE at ptr; ptr++ advances the POINTER itself"
+  - "LONG[ptr] += v modifies value in-place without separate read/write"
+  - "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
 
 related:
-  - BYTE
-  - WORD
-  - LONG
-  - SIZEOF
+  - language/spin2/methods/byte.yaml
+  - language/spin2/methods/word.yaml
+  - language/spin2/methods/long.yaml
+  - language/spin2/methods/sizeof.yaml
+  - language/spin2/special-symbols/at.yaml
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/concepts/addressing.yaml
+  - language/spin2/concepts/method-pointers.yaml
+  - language/spin2/idioms/memory-access.yaml
 
 oneliner: "Typed pointer declarations ^BYTE/^WORD/^LONG/^struct (requires Spin2_v45)"

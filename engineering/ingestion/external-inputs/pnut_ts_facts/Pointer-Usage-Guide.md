@@ -571,4 +571,63 @@ Pointers and direct memory access are related but serve different purposes:
 
 ---
 
+## Gotchas and Pitfalls
+
+### Receiving Struct Pointer Returns from Object Methods Requires Brackets
+
+When a method in a child object returns a struct pointer (`^structName`) and the caller receives it through an `OBJ` reference, the compiler may interpret the return as the full structure rather than a single LONG pointer value. If the structure exceeds 15 longs, this produces a compile error ("objects cannot exceed 15 longs") even though the return is only a pointer (one LONG).
+
+The fix is to put brackets around the receiving pointer variable. The brackets tell the compiler to treat the return as the raw pointer value rather than attempting to unpack the entire structure.
+
+**Fails — compiler tries to handle the full struct through the return:**
+
+```spin2
+OBJ
+    sensor : "sensor_driver"
+
+CON
+    STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])
+
+PUB example() | ^sensorConfig pCfg
+    pCfg := sensor.getConfig()          ' COMPILE ERROR: struct exceeds 15 longs
+```
+
+**Works — brackets receive the pointer value (one LONG):**
+
+```spin2
+PUB example() | ^sensorConfig pCfg
+    [pCfg] := sensor.getConfig()        ' OK: receives the pointer, not the struct
+    debug("rate = ", sdec_(pCfg.rate))   ' access members normally after receiving
+```
+
+This gotcha applies specifically to **struct pointer returns across OBJ boundaries**. Within the same object file, the compiler resolves the types directly and this issue does not arise. It only manifests when the caller and the method are in different objects connected via `OBJ`.
+
+**Rule:** When receiving a `^structName` return value from an object method, always use `[variable] := obj.method()` bracket notation on the receiving side.
+
+### Pointer Arrays Are Not Supported
+
+Pointers themselves cannot be declared as arrays:
+
+```spin2
+VAR
+    ^BYTE pArray              ' OK: single pointer
+    ^BYTE pArrays[10]         ' ERROR: pointers cannot be arrays
+```
+
+To maintain multiple pointers, use a LONG array and store raw addresses:
+
+```spin2
+VAR
+    LONG ptrTable[10]         ' Array of raw addresses
+
+PUB example() | ^BYTE ptr
+    ptrTable[0] := @buffer0
+    ptrTable[1] := @buffer1
+    ptr := ptrTable[0]        ' Assign to typed pointer for use
+```
+
+---
+
+*Updated: 04 Mar 2026 — added Gotchas and Pitfalls section (struct pointer OBJ returns, pointer arrays).*
+
 *This document describes pointer usage in Spin2/PASM2 as implemented in the PNut-TS compiler.*
