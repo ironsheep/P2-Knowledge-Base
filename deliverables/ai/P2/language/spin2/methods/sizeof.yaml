@@ -55,10 +55,12 @@ notes:
   - "Compile-time evaluation - no runtime cost"
   - "Works with arrays and nested structures"
   - "Useful for buffer allocation and memory management"
+  - "Companion function OFFSETOF() returns byte offset of a member within a structure (v53+)"
 timing:
   description: "Compile-time constant"
   cycles: "N/A - resolved at compile time"
 related:
+  - language/spin2/methods/offsetof.yaml
   - language/spin2/keywords/STRUCT.yaml
   - language/spin2/keywords/BYTE.yaml
   - language/spin2/keywords/WORD.yaml

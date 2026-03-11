@@ -1,9 +1,67 @@
 keyword: "BYTE"
 type: keyword
 category: "Data Types"
+
 description: |
-  8-bit unsigned integer type (0-255)
+  8-bit data type. Unsigned range: 0 to 255. Signed range: -128 to 127.
+  Used in multiple contexts: variable declarations (VAR), local variables,
+  method parameters, return types, DAT data, memory access operators,
+  type override (.BYTE[n]), typed pointers (^BYTE), and data constructors (BYTE(...)).
+
 syntax: "BYTE variable[count]"
+
+usage_contexts:
+  - context: "VAR declaration"
+    syntax: "BYTE varName[count]"
+    example: "BYTE status, BYTE buffer[256]"
+  - context: "Local variable"
+    syntax: "PUB method() | BYTE localVar"
+    example: "PUB process() | BYTE temp, BYTE flags"
+  - context: "Parameter"
+    syntax: "PUB method(BYTE param)"
+    example: "PUB setChannel(BYTE ch)"
+  - context: "Return value"
+    syntax: "PUB method() : BYTE result"
+    example: "PUB getStatus() : BYTE status"
+  - context: "DAT data"
+    syntax: "label BYTE value1, value2, ..."
+    example: 'myStr BYTE "Hello", 0'
+  - context: "Memory access"
+    syntax: "BYTE[address] or BYTE[base][index]"
+    example: "val := BYTE[$1000]"
+  - context: "Type override"
+    syntax: "variable.BYTE[n]"
+    example: "myLong.BYTE[0] := $FF"
+  - context: "Typed pointer"
+    syntax: "^BYTE ptrName"
+    example: "^BYTE pBuffer"
+  - context: "Data constructor"
+    syntax: "BYTE(val1, val2, ...)"
+    example: "BYTE($48, $65, $6C)"
+
+type_propagation: |
+  In VAR blocks, BYTE is sticky — applies to all names on the same line.
+  In PUB/PRI parameters, returns, and locals, BYTE is NOT sticky — each
+  name resets to LONG unless explicitly typed.
+  See type-propagation concept for full rules.
+
 examples:
   - "BYTE flag"
   - "BYTE buffer[128]"
+
+notes:
+  - "Size: 8 bits (1 byte)"
+  - "Unsigned range: 0 to 255"
+  - "Signed range: -128 to 127"
+  - "Default type is LONG if no type specifier given"
+
+related:
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/methods/byte.yaml
+  - language/spin2/methods/bytefill.yaml
+  - language/spin2/methods/bytemove.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/concepts/type-propagation.yaml
+
+oneliner: "8-bit data type used for declarations, memory access, pointers, and data constructors"

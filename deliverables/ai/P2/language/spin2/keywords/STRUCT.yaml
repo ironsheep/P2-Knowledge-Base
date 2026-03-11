@@ -157,6 +157,9 @@ operations:
   - operation: "Size"
     syntax: "SIZEOF(structName)"
     description: "Get size in bytes"
+  - operation: "Member offset"
+    syntax: "OFFSETOF(structName.member)"
+    description: "Get byte offset of member within structure (v53+)"
 
 pointer_syntax:
   declaration: "^structName ptr"
@@ -220,6 +223,7 @@ notes:
 
 related:
   - language/spin2/methods/sizeof.yaml
+  - language/spin2/methods/offsetof.yaml
   - language/spin2/methods/byte.yaml
   - language/spin2/methods/word.yaml
   - language/spin2/methods/long.yaml

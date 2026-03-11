@@ -1,13 +1,46 @@
 keyword: "VAR"
 type: keyword
 category: "Block Structure"
+
 description: |
-  Variables section - declares instance variables
+  Variables section — declares instance variables allocated in hub memory
+  per object instance. Supports BYTE, WORD, and LONG types, typed pointers
+  (^BYTE, ^WORD, ^LONG, ^structName), structure instances, and arrays.
+  Variables without an explicit type default to LONG.
+
+type_propagation: |
+  In VAR blocks, the type specifier is STICKY — it applies to ALL subsequent
+  names on the same line until a new type specifier is encountered.
+  This is different from PUB/PRI signatures where type resets each name.
+
 syntax: |
   VAR
     type variable[count]
+
 examples:
-  - |
-    VAR
-      LONG counter
-      BYTE buffer[256]
+  - code: |
+      VAR
+        LONG counter
+        BYTE buffer[256]
+    description: "Basic typed variable declarations"
+  - code: |
+      VAR
+        BYTE a, b, c              ' a=BYTE, b=BYTE, c=BYTE (type carries forward)
+        WORD x, y                 ' x=WORD, y=WORD (type carries forward)
+        d, e                      ' d=LONG, e=LONG (no type = default LONG)
+    description: "Type stickiness — type carries to all names on same line"
+
+notes:
+  - "Variables default to LONG if no type specified"
+  - "Type is sticky across comma-separated names on the same line"
+  - "Variables are automatically aligned to natural boundaries within the object"
+  - "Use ALIGNW/ALIGNL to force alignment between declarations"
+
+related:
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/concepts/type-propagation.yaml
+
+oneliner: "Variables section — declares instance variables with sticky type propagation"

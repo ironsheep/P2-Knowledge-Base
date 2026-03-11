@@ -1,9 +1,80 @@
 keyword: "LONG"
 type: keyword
 category: "Data Types"
+
 description: |
-  32-bit signed integer type
+  32-bit data type and the default type for all Spin2 operations.
+  Unsigned range: 0 to 4,294,967,295. Signed range: -2,147,483,648 to 2,147,483,647.
+  Used in multiple contexts: variable declarations (VAR), local variables,
+  method parameters, return types, DAT data, memory access operators,
+  type override (.LONG[n]), typed pointers (^LONG), and data constructors (LONG(...)).
+  LONG is the implicit default when no type specifier is given.
+
 syntax: "LONG variable[count]"
+
+usage_contexts:
+  - context: "VAR declaration"
+    syntax: "LONG varName[count]"
+    example: "LONG counter, LONG timestamps[100]"
+  - context: "Local variable"
+    syntax: "PUB method() | LONG localVar"
+    example: "PUB process() | LONG result  ' or just: | result"
+  - context: "Parameter"
+    syntax: "PUB method(LONG param)"
+    example: "PUB setAddress(LONG addr)  ' or just: (addr)"
+  - context: "Return value"
+    syntax: "PUB method() : LONG result"
+    example: "PUB getValue() : LONG result  ' or just: : result"
+  - context: "DAT data"
+    syntax: "label LONG value1, value2, ..."
+    example: "myLongs LONG 1_000_000, $DEADBEEF"
+  - context: "Memory access"
+    syntax: "LONG[address] or LONG[base][index]"
+    example: "val := LONG[$4000]"
+  - context: "Type override"
+    syntax: "variable.LONG[n]"
+    example: "myArray.LONG[0]"
+  - context: "Typed pointer"
+    syntax: "^LONG ptrName"
+    example: "^LONG pValues"
+  - context: "Data constructor"
+    syntax: "LONG(val1, val2, ...)"
+    example: "LONG(100_000, 200_000)"
+
+default_type_behavior: |
+  LONG is the default type when no type specifier is given:
+  - VAR: 'myVar' without a type is LONG
+  - PUB/PRI parameters: 'param' without a type is LONG
+  - PUB/PRI return values: 'result' without a type is LONG
+  - PUB/PRI local variables: 'temp' without a type is LONG
+  In PUB/PRI signatures, each comma-separated name resets to LONG
+  unless it has its own explicit type specifier.
+
+type_propagation: |
+  In VAR blocks, LONG is sticky — applies to all names on the same line.
+  In PUB/PRI parameters, returns, and locals, type is NOT sticky — each
+  name defaults to LONG independently.
+  See type-propagation concept for full rules.
+
 examples:
   - "LONG counter"
   - "LONG data_buffer[256]"
+
+notes:
+  - "Size: 32 bits (4 bytes) — native word size of the P2"
+  - "Unsigned range: 0 to 4,294,967,295"
+  - "Signed range: -2,147,483,648 to 2,147,483,647"
+  - "Long addresses should be long-aligned (divisible by 4) for optimal performance"
+  - "LONG is the implicit default type — omitting a type specifier means LONG"
+  - "All pointers are LONG-sized regardless of what they point to"
+
+related:
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/methods/long.yaml
+  - language/spin2/methods/longfill.yaml
+  - language/spin2/methods/longmove.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/concepts/type-propagation.yaml
+
+oneliner: "32-bit data type — default type for all Spin2 operations"

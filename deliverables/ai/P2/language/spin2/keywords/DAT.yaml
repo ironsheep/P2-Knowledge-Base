@@ -1,12 +1,55 @@
 keyword: "DAT"
 type: keyword
 category: "Block Structure"
+
 description: |
-  Data section - contains data and inline assembly
+  Data section — contains initialized data declarations and inline PASM2 assembly.
+  Data is stored in hub memory. Supports BYTE, WORD, LONG types, BYTEFIT/WORDFIT
+  range-checked types, string literals, array repetition with [count], and
+  inline type overrides for individual values.
+
+type_propagation: |
+  In DAT blocks, the type specifier sets the LINE'S BASE TYPE for all
+  comma-separated values. An inline type override (e.g., BYTE $56 within
+  a LONG line) applies ONLY to the single value it precedes — subsequent
+  values revert to the line's base type. This override does NOT stick.
+
 syntax: |
   DAT
-    label type value
+    label type value1, value2, ...
+
 examples:
-  - |
-    DAT
-      message BYTE "Hello World", 0
+  - code: |
+      DAT
+        message BYTE "Hello World", 0
+    description: "String data with null terminator"
+  - code: |
+      DAT
+        myData    LONG    $1234, $5678, $9ABC          ' All three are LONGs
+        mixed     LONG    $1234, BYTE $56, $9ABC       ' $1234=LONG, $56=BYTE, $9ABC=LONG (reverts!)
+        allBytes  BYTE    1, WORD 1000, 2              ' 1=BYTE, 1000=WORD, 2=BYTE (reverts!)
+    description: "Line base type with per-value inline overrides (overrides do NOT stick)"
+  - code: |
+      DAT
+        zeros     BYTE    0[100]            ' 100 zero bytes
+        pattern   WORD    $AAAA[50]         ' 50 copies of $AAAA
+    description: "Array repetition using [count] syntax"
+
+notes:
+  - "Data type must be specified for each DAT line (no default)"
+  - "Line base type persists across comma-separated values"
+  - "Inline type overrides apply to single value only — line base type reasserts after"
+  - "Supports BYTEFIT/WORDFIT for range-checked declarations"
+  - "Can contain inline PASM2 assembly after ORG/ORGH directives"
+
+related:
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/keywords/BYTEFIT.yaml
+  - language/spin2/keywords/WORDFIT.yaml
+  - language/spin2/assembly-directives/org.yaml
+  - language/spin2/assembly-directives/orgh.yaml
+  - language/spin2/concepts/type-propagation.yaml
+
+oneliner: "Data section — initialized data and inline PASM2 assembly with line-base-type propagation"

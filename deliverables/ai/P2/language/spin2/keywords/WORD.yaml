@@ -1,9 +1,68 @@
 keyword: "WORD"
 type: keyword
 category: "Data Types"
+
 description: |
-  16-bit unsigned integer type (0-65535)
+  16-bit data type. Unsigned range: 0 to 65,535. Signed range: -32,768 to 32,767.
+  Used in multiple contexts: variable declarations (VAR), local variables,
+  method parameters, return types, DAT data, memory access operators,
+  type override (.WORD[n]), typed pointers (^WORD), and data constructors (WORD(...)).
+
 syntax: "WORD variable[count]"
+
+usage_contexts:
+  - context: "VAR declaration"
+    syntax: "WORD varName[count]"
+    example: "WORD sensorValue, WORD readings[10]"
+  - context: "Local variable"
+    syntax: "PUB method() | WORD localVar"
+    example: "PUB process() | WORD index, WORD count"
+  - context: "Parameter"
+    syntax: "PUB method(WORD param)"
+    example: "PUB setValue(WORD value)"
+  - context: "Return value"
+    syntax: "PUB method() : WORD result"
+    example: "PUB readSensor() : WORD result"
+  - context: "DAT data"
+    syntax: "label WORD value1, value2, ..."
+    example: "myWords WORD 1000, 2000, 3000"
+  - context: "Memory access"
+    syntax: "WORD[address] or WORD[base][index]"
+    example: "val := WORD[$2000]"
+  - context: "Type override"
+    syntax: "variable.WORD[n]"
+    example: "myLong.WORD[0] := $1234"
+  - context: "Typed pointer"
+    syntax: "^WORD ptrName"
+    example: "^WORD pTable"
+  - context: "Data constructor"
+    syntax: "WORD(val1, val2, ...)"
+    example: "WORD($1000, $2000)"
+
+type_propagation: |
+  In VAR blocks, WORD is sticky — applies to all names on the same line.
+  In PUB/PRI parameters, returns, and locals, WORD is NOT sticky — each
+  name resets to LONG unless explicitly typed.
+  See type-propagation concept for full rules.
+
 examples:
   - "WORD address"
   - "WORD lookup_table[128]"
+
+notes:
+  - "Size: 16 bits (2 bytes)"
+  - "Unsigned range: 0 to 65,535"
+  - "Signed range: -32,768 to 32,767"
+  - "Word addresses should be word-aligned (even addresses) for optimal performance"
+  - "Default type is LONG if no type specifier given"
+
+related:
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/methods/word.yaml
+  - language/spin2/methods/wordfill.yaml
+  - language/spin2/methods/wordmove.yaml
+  - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/concepts/type-propagation.yaml
+
+oneliner: "16-bit data type used for declarations, memory access, pointers, and data constructors"

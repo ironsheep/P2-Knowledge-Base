@@ -1,0 +1,179 @@
+method: OFFSETOF
+type: method
+category: Miscellaneous
+
+requires_version: "Spin2_v53"
+version_directive: "{Spin2_v53}"
+
+description: |
+  Returns the byte offset of a member within a structure definition. Navigates
+  nested structures and supports constant array indexing at each level. Evaluated
+  entirely at compile time — generates no runtime bytecode.
+  REQUIRES: {Spin2_v53} or later version directive at start of source file.
+
+  NOTE: OFFSETOF() is restricted to DAT, VAR, PUB, and PRI blocks. Using
+  OFFSETOF() in CON or OBJ blocks will cause a compile error (same as SIZEOF).
+
+syntax: "offset := OFFSETOF(struct_name{[constant_index]}{.member{[constant_index]}{.member{[constant_index]}...}})"
+
+syntax_forms:
+  - form: "OFFSETOF(struct_name)"
+    returns: "0 (offset of start)"
+  - form: "OFFSETOF(struct_name.member)"
+    returns: "Byte offset of member"
+  - form: "OFFSETOF(struct_name[index].member)"
+    returns: "Byte offset with array indexing"
+  - form: "OFFSETOF(struct_name.substruct.member)"
+    returns: "Byte offset through nested structs"
+
+parameters:
+  - name: "struct_name"
+    type: "STRUCT name"
+    description: "A previously defined structure type"
+  - name: "member"
+    type: "identifier"
+    description: "A member name within the structure"
+  - name: "constant_index"
+    type: "integer constant"
+    description: "Optional array index at any level (0 to $FFFF)"
+
+returns:
+  type: "integer"
+  description: "Byte offset of the specified member within the structure (compile-time constant)"
+
+examples:
+  - code: |
+      {Spin2_v53}
+      CON
+        STRUCT point(LONG x, LONG y)
+
+      PUB example() | ofs
+        ofs := OFFSETOF(point.x)               ' 0
+        ofs := OFFSETOF(point.y)               ' 4
+    description: "Simple member offsets"
+
+  - code: |
+      {Spin2_v53}
+      CON
+        STRUCT point(LONG x, LONG y)
+        STRUCT line(point start, point finish)
+
+      PUB example() | ofs
+        ofs := OFFSETOF(line.start)            ' 0
+        ofs := OFFSETOF(line.finish)           ' 8
+        ofs := OFFSETOF(line.finish.x)         ' 8
+        ofs := OFFSETOF(line.finish.y)         ' 12
+    description: "Nested structure member offsets"
+
+  - code: |
+      {Spin2_v53}
+      CON
+        STRUCT point(LONG x, LONG y)
+        STRUCT line(point start, point finish)
+        STRUCT triangle(line sides[3])
+
+      PUB example() | ofs
+        ofs := OFFSETOF(triangle.sides[0])     ' 0
+        ofs := OFFSETOF(triangle.sides[1])     ' 16
+        ofs := OFFSETOF(triangle.sides[2])     ' 32
+        ofs := OFFSETOF(triangle.sides[2].finish.y)  ' 44
+    description: "Array-indexed access through nested structures"
+
+  - code: |
+      {Spin2_v53}
+      CON
+        STRUCT point(LONG x, LONG y)
+
+      PUB example() | ofs
+        ofs := OFFSETOF(point)                 ' 0 (offset of start)
+    description: "Struct without member returns 0"
+
+  - code: |
+      {Spin2_v53}
+      CON
+        STRUCT header(LONG id, WORD flags, BYTE data[16])
+
+      VAR
+        BYTE buffer[SIZEOF(header)]
+
+      PUB parseHeader() | ofs
+        ofs := OFFSETOF(header.flags)          ' 4 (after LONG id)
+        ofs := OFFSETOF(header.data)           ' 6 (after LONG + WORD)
+        WORD[@buffer + OFFSETOF(header.flags)] := $0001
+    description: "Low-level buffer manipulation using OFFSETOF"
+
+relationship_to_sizeof:
+  description: "SIZEOF returns total size; OFFSETOF returns position within structure"
+  comparison:
+    - function: "SIZEOF(point)"
+      returns: "Total size in bytes (8)"
+    - function: "OFFSETOF(point)"
+      returns: "0 (offset of start)"
+    - function: "OFFSETOF(point.x)"
+      returns: "Byte offset of member x (0)"
+    - function: "OFFSETOF(point.y)"
+      returns: "Byte offset of member y (4)"
+
+block_restrictions:
+  allowed:
+    - "DAT"
+    - "VAR"
+    - "PUB"
+    - "PRI"
+  not_allowed:
+    - "CON"
+    - "OBJ"
+  note: "Same restrictions as SIZEOF"
+
+member_sizes:
+  - type: "BYTE"
+    size_bytes: 1
+  - type: "WORD"
+    size_bytes: 2
+  - type: "LONG"
+    size_bytes: 4
+  - type: "nested STRUCT"
+    size_bytes: "SIZEOF(nested_struct)"
+
+errors:
+  - error: "OFFSETOF() is only allowed in DAT, VAR, PUB, and PRI blocks"
+    condition: "Used in CON or OBJ block"
+  - error: "Expected an existing STRUCT name"
+    condition: "First element is not a defined struct"
+  - error: "Expected a structure member name"
+    condition: "Member name after dot not recognized"
+  - error: "Structure does not contain this name"
+    condition: "Named member doesn't exist in the struct"
+  - error: "Indexed structures cannot exceed $FFFF bytes in size"
+    condition: "Struct too large for indexing"
+  - error: "Structure index must be from 0 to $FFFF"
+    condition: "Index value out of range"
+  - error: "Structure exceeds hub range of $FFFFF"
+    condition: "Computed offset exceeds address space"
+
+notes:
+  - "REQUIRES {Spin2_v53} or later at start of source file"
+  - "Compile-time only — the result is a constant integer pushed onto the stack"
+  - "No new bytecodes; emits standard constant-push bytecodes (bc_con_rflong, bc_con_rfbyte, etc.)"
+  - "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts"
+  - "Works with nested structures to any depth"
+  - "Array indexing supported at any level of nesting"
+
+timing:
+  description: "Compile-time constant"
+  cycles: "N/A - resolved at compile time"
+
+related:
+  - language/spin2/methods/sizeof.yaml
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/operators/typed-pointers.yaml
+
+see_also:
+  - "Structure definitions"
+  - "SIZEOF()"
+  - "Memory layout"
+
+oneliner: "Compile-time byte offset of a member within a structure (requires Spin2_v53)"
