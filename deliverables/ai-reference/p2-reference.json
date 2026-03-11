@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-03-05",
-    "last_updated": "2026-03-05T00:11:45.168741",
+    "release_date": "2026-03-11",
+    "last_updated": "2026-03-11T18:28:00.331239",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-03-05T00:11:45.168741",
+    "extraction_date": "2026-03-11T18:28:00.331239",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-03-05T00:11:45.168741",
+    "extraction_date": "2026-03-11T18:28:00.331239",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18474,6 +18474,11 @@
                 "operation": "Size",
                 "syntax": "SIZEOF(structName)",
                 "description": "Get size in bytes"
+              },
+              {
+                "operation": "Member offset",
+                "syntax": "OFFSETOF(structName.member)",
+                "description": "Get byte offset of member within structure (v53+)"
               }
             ],
             "pointer_syntax": {
@@ -18527,6 +18532,7 @@
             ],
             "related": [
               "language/spin2/methods/sizeof.yaml",
+              "language/spin2/methods/offsetof.yaml",
               "language/spin2/methods/byte.yaml",
               "language/spin2/methods/word.yaml",
               "language/spin2/methods/long.yaml",
@@ -18717,12 +18723,76 @@
             "keyword": "BYTE",
             "type": "keyword",
             "category": "Data Types",
-            "description": "8-bit unsigned integer type (0-255)\n",
+            "description": "8-bit data type. Unsigned range: 0 to 255. Signed range: -128 to 127.\nUsed in multiple contexts: variable declarations (VAR), local variables,\nmethod parameters, return types, DAT data, memory access operators,\ntype override (.BYTE[n]), typed pointers (^BYTE), and data constructors (BYTE(...)).\n",
             "syntax": "BYTE variable[count]",
+            "usage_contexts": [
+              {
+                "context": "VAR declaration",
+                "syntax": "BYTE varName[count]",
+                "example": "BYTE status, BYTE buffer[256]"
+              },
+              {
+                "context": "Local variable",
+                "syntax": "PUB method() | BYTE localVar",
+                "example": "PUB process() | BYTE temp, BYTE flags"
+              },
+              {
+                "context": "Parameter",
+                "syntax": "PUB method(BYTE param)",
+                "example": "PUB setChannel(BYTE ch)"
+              },
+              {
+                "context": "Return value",
+                "syntax": "PUB method() : BYTE result",
+                "example": "PUB getStatus() : BYTE status"
+              },
+              {
+                "context": "DAT data",
+                "syntax": "label BYTE value1, value2, ...",
+                "example": "myStr BYTE \"Hello\", 0"
+              },
+              {
+                "context": "Memory access",
+                "syntax": "BYTE[address] or BYTE[base][index]",
+                "example": "val := BYTE[$1000]"
+              },
+              {
+                "context": "Type override",
+                "syntax": "variable.BYTE[n]",
+                "example": "myLong.BYTE[0] := $FF"
+              },
+              {
+                "context": "Typed pointer",
+                "syntax": "^BYTE ptrName",
+                "example": "^BYTE pBuffer"
+              },
+              {
+                "context": "Data constructor",
+                "syntax": "BYTE(val1, val2, ...)",
+                "example": "BYTE($48, $65, $6C)"
+              }
+            ],
+            "type_propagation": "In VAR blocks, BYTE is sticky \u2014 applies to all names on the same line.\nIn PUB/PRI parameters, returns, and locals, BYTE is NOT sticky \u2014 each\nname resets to LONG unless explicitly typed.\nSee type-propagation concept for full rules.\n",
             "examples": [
               "BYTE flag",
               "BYTE buffer[128]"
-            ]
+            ],
+            "notes": [
+              "Size: 8 bits (1 byte)",
+              "Unsigned range: 0 to 255",
+              "Signed range: -128 to 127",
+              "Default type is LONG if no type specifier given"
+            ],
+            "related": [
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/methods/byte.yaml",
+              "language/spin2/methods/bytefill.yaml",
+              "language/spin2/methods/bytemove.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/concepts/type-propagation.yaml"
+            ],
+            "oneliner": "8-bit data type used for declarations, memory access, pointers, and data constructors"
           },
           "ABORT": {
             "keyword": "ABORT",
@@ -18804,21 +18874,73 @@
             "keyword": "DAT",
             "type": "keyword",
             "category": "Block Structure",
-            "description": "Data section - contains data and inline assembly\n",
-            "syntax": "DAT\n  label type value\n",
+            "description": "Data section \u2014 contains initialized data declarations and inline PASM2 assembly.\nData is stored in hub memory. Supports BYTE, WORD, LONG types, BYTEFIT/WORDFIT\nrange-checked types, string literals, array repetition with [count], and\ninline type overrides for individual values.\n",
+            "type_propagation": "In DAT blocks, the type specifier sets the LINE'S BASE TYPE for all\ncomma-separated values. An inline type override (e.g., BYTE $56 within\na LONG line) applies ONLY to the single value it precedes \u2014 subsequent\nvalues revert to the line's base type. This override does NOT stick.\n",
+            "syntax": "DAT\n  label type value1, value2, ...\n",
             "examples": [
-              "DAT\n  message BYTE \"Hello World\", 0"
-            ]
+              {
+                "code": "DAT\n  message BYTE \"Hello World\", 0\n",
+                "description": "String data with null terminator"
+              },
+              {
+                "code": "DAT\n  myData    LONG    $1234, $5678, $9ABC          ' All three are LONGs\n  mixed     LONG    $1234, BYTE $56, $9ABC       ' $1234=LONG, $56=BYTE, $9ABC=LONG (reverts!)\n  allBytes  BYTE    1, WORD 1000, 2              ' 1=BYTE, 1000=WORD, 2=BYTE (reverts!)\n",
+                "description": "Line base type with per-value inline overrides (overrides do NOT stick)"
+              },
+              {
+                "code": "DAT\n  zeros     BYTE    0[100]            ' 100 zero bytes\n  pattern   WORD    $AAAA[50]         ' 50 copies of $AAAA\n",
+                "description": "Array repetition using [count] syntax"
+              }
+            ],
+            "notes": [
+              "Data type must be specified for each DAT line (no default)",
+              "Line base type persists across comma-separated values",
+              "Inline type overrides apply to single value only \u2014 line base type reasserts after",
+              "Supports BYTEFIT/WORDFIT for range-checked declarations",
+              "Can contain inline PASM2 assembly after ORG/ORGH directives"
+            ],
+            "related": [
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/keywords/BYTEFIT.yaml",
+              "language/spin2/keywords/WORDFIT.yaml",
+              "language/spin2/assembly-directives/org.yaml",
+              "language/spin2/assembly-directives/orgh.yaml",
+              "language/spin2/concepts/type-propagation.yaml"
+            ],
+            "oneliner": "Data section \u2014 initialized data and inline PASM2 assembly with line-base-type propagation"
           },
           "VAR": {
             "keyword": "VAR",
             "type": "keyword",
             "category": "Block Structure",
-            "description": "Variables section - declares instance variables\n",
+            "description": "Variables section \u2014 declares instance variables allocated in hub memory\nper object instance. Supports BYTE, WORD, and LONG types, typed pointers\n(^BYTE, ^WORD, ^LONG, ^structName), structure instances, and arrays.\nVariables without an explicit type default to LONG.\n",
+            "type_propagation": "In VAR blocks, the type specifier is STICKY \u2014 it applies to ALL subsequent\nnames on the same line until a new type specifier is encountered.\nThis is different from PUB/PRI signatures where type resets each name.\n",
             "syntax": "VAR\n  type variable[count]\n",
             "examples": [
-              "VAR\n  LONG counter\n  BYTE buffer[256]"
-            ]
+              {
+                "code": "VAR\n  LONG counter\n  BYTE buffer[256]\n",
+                "description": "Basic typed variable declarations"
+              },
+              {
+                "code": "VAR\n  BYTE a, b, c              ' a=BYTE, b=BYTE, c=BYTE (type carries forward)\n  WORD x, y                 ' x=WORD, y=WORD (type carries forward)\n  d, e                      ' d=LONG, e=LONG (no type = default LONG)\n",
+                "description": "Type stickiness \u2014 type carries to all names on same line"
+              }
+            ],
+            "notes": [
+              "Variables default to LONG if no type specified",
+              "Type is sticky across comma-separated names on the same line",
+              "Variables are automatically aligned to natural boundaries within the object",
+              "Use ALIGNW/ALIGNL to force alignment between declarations"
+            ],
+            "related": [
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/concepts/type-propagation.yaml"
+            ],
+            "oneliner": "Variables section \u2014 declares instance variables with sticky type propagation"
           },
           "STRING": {
             "keyword": "STRING",
@@ -18834,12 +18956,77 @@
             "keyword": "WORD",
             "type": "keyword",
             "category": "Data Types",
-            "description": "16-bit unsigned integer type (0-65535)\n",
+            "description": "16-bit data type. Unsigned range: 0 to 65,535. Signed range: -32,768 to 32,767.\nUsed in multiple contexts: variable declarations (VAR), local variables,\nmethod parameters, return types, DAT data, memory access operators,\ntype override (.WORD[n]), typed pointers (^WORD), and data constructors (WORD(...)).\n",
             "syntax": "WORD variable[count]",
+            "usage_contexts": [
+              {
+                "context": "VAR declaration",
+                "syntax": "WORD varName[count]",
+                "example": "WORD sensorValue, WORD readings[10]"
+              },
+              {
+                "context": "Local variable",
+                "syntax": "PUB method() | WORD localVar",
+                "example": "PUB process() | WORD index, WORD count"
+              },
+              {
+                "context": "Parameter",
+                "syntax": "PUB method(WORD param)",
+                "example": "PUB setValue(WORD value)"
+              },
+              {
+                "context": "Return value",
+                "syntax": "PUB method() : WORD result",
+                "example": "PUB readSensor() : WORD result"
+              },
+              {
+                "context": "DAT data",
+                "syntax": "label WORD value1, value2, ...",
+                "example": "myWords WORD 1000, 2000, 3000"
+              },
+              {
+                "context": "Memory access",
+                "syntax": "WORD[address] or WORD[base][index]",
+                "example": "val := WORD[$2000]"
+              },
+              {
+                "context": "Type override",
+                "syntax": "variable.WORD[n]",
+                "example": "myLong.WORD[0] := $1234"
+              },
+              {
+                "context": "Typed pointer",
+                "syntax": "^WORD ptrName",
+                "example": "^WORD pTable"
+              },
+              {
+                "context": "Data constructor",
+                "syntax": "WORD(val1, val2, ...)",
+                "example": "WORD($1000, $2000)"
+              }
+            ],
+            "type_propagation": "In VAR blocks, WORD is sticky \u2014 applies to all names on the same line.\nIn PUB/PRI parameters, returns, and locals, WORD is NOT sticky \u2014 each\nname resets to LONG unless explicitly typed.\nSee type-propagation concept for full rules.\n",
             "examples": [
               "WORD address",
               "WORD lookup_table[128]"
-            ]
+            ],
+            "notes": [
+              "Size: 16 bits (2 bytes)",
+              "Unsigned range: 0 to 65,535",
+              "Signed range: -32,768 to 32,767",
+              "Word addresses should be word-aligned (even addresses) for optimal performance",
+              "Default type is LONG if no type specifier given"
+            ],
+            "related": [
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/methods/word.yaml",
+              "language/spin2/methods/wordfill.yaml",
+              "language/spin2/methods/wordmove.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/concepts/type-propagation.yaml"
+            ],
+            "oneliner": "16-bit data type used for declarations, memory access, pointers, and data constructors"
           },
           "BYTEFIT": {
             "keyword": "BYTEFIT",
@@ -18890,12 +19077,79 @@
             "keyword": "LONG",
             "type": "keyword",
             "category": "Data Types",
-            "description": "32-bit signed integer type\n",
+            "description": "32-bit data type and the default type for all Spin2 operations.\nUnsigned range: 0 to 4,294,967,295. Signed range: -2,147,483,648 to 2,147,483,647.\nUsed in multiple contexts: variable declarations (VAR), local variables,\nmethod parameters, return types, DAT data, memory access operators,\ntype override (.LONG[n]), typed pointers (^LONG), and data constructors (LONG(...)).\nLONG is the implicit default when no type specifier is given.\n",
             "syntax": "LONG variable[count]",
+            "usage_contexts": [
+              {
+                "context": "VAR declaration",
+                "syntax": "LONG varName[count]",
+                "example": "LONG counter, LONG timestamps[100]"
+              },
+              {
+                "context": "Local variable",
+                "syntax": "PUB method() | LONG localVar",
+                "example": "PUB process() | LONG result  ' or just: | result"
+              },
+              {
+                "context": "Parameter",
+                "syntax": "PUB method(LONG param)",
+                "example": "PUB setAddress(LONG addr)  ' or just: (addr)"
+              },
+              {
+                "context": "Return value",
+                "syntax": "PUB method() : LONG result",
+                "example": "PUB getValue() : LONG result  ' or just: : result"
+              },
+              {
+                "context": "DAT data",
+                "syntax": "label LONG value1, value2, ...",
+                "example": "myLongs LONG 1_000_000, $DEADBEEF"
+              },
+              {
+                "context": "Memory access",
+                "syntax": "LONG[address] or LONG[base][index]",
+                "example": "val := LONG[$4000]"
+              },
+              {
+                "context": "Type override",
+                "syntax": "variable.LONG[n]",
+                "example": "myArray.LONG[0]"
+              },
+              {
+                "context": "Typed pointer",
+                "syntax": "^LONG ptrName",
+                "example": "^LONG pValues"
+              },
+              {
+                "context": "Data constructor",
+                "syntax": "LONG(val1, val2, ...)",
+                "example": "LONG(100_000, 200_000)"
+              }
+            ],
+            "default_type_behavior": "LONG is the default type when no type specifier is given:\n- VAR: 'myVar' without a type is LONG\n- PUB/PRI parameters: 'param' without a type is LONG\n- PUB/PRI return values: 'result' without a type is LONG\n- PUB/PRI local variables: 'temp' without a type is LONG\nIn PUB/PRI signatures, each comma-separated name resets to LONG\nunless it has its own explicit type specifier.\n",
+            "type_propagation": "In VAR blocks, LONG is sticky \u2014 applies to all names on the same line.\nIn PUB/PRI parameters, returns, and locals, type is NOT sticky \u2014 each\nname defaults to LONG independently.\nSee type-propagation concept for full rules.\n",
             "examples": [
               "LONG counter",
               "LONG data_buffer[256]"
-            ]
+            ],
+            "notes": [
+              "Size: 32 bits (4 bytes) \u2014 native word size of the P2",
+              "Unsigned range: 0 to 4,294,967,295",
+              "Signed range: -2,147,483,648 to 2,147,483,647",
+              "Long addresses should be long-aligned (divisible by 4) for optimal performance",
+              "LONG is the implicit default type \u2014 omitting a type specifier means LONG",
+              "All pointers are LONG-sized regardless of what they point to"
+            ],
+            "related": [
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/methods/long.yaml",
+              "language/spin2/methods/longfill.yaml",
+              "language/spin2/methods/longmove.yaml",
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/concepts/type-propagation.yaml"
+            ],
+            "oneliner": "32-bit data type \u2014 default type for all Spin2 operations"
           },
           "LOOKDOWN": {
             "keyword": "LOOKDOWN",
@@ -20269,7 +20523,7 @@
         }
       },
       "methods": {
-        "count": 101,
+        "count": 102,
         "elements": {
           "GETCRC": {
             "method": "GETCRC",
@@ -23198,13 +23452,15 @@
               "Accounts for member sizes (BYTE=1, WORD=2, LONG=4)",
               "Compile-time evaluation - no runtime cost",
               "Works with arrays and nested structures",
-              "Useful for buffer allocation and memory management"
+              "Useful for buffer allocation and memory management",
+              "Companion function OFFSETOF() returns byte offset of a member within a structure (v53+)"
             ],
             "timing": {
               "description": "Compile-time constant",
               "cycles": "N/A - resolved at compile time"
             },
             "related": [
+              "language/spin2/methods/offsetof.yaml",
               "language/spin2/keywords/STRUCT.yaml",
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/WORD.yaml",
@@ -23821,6 +24077,184 @@
               "methods/abs.yaml",
               "methods/rotxy.yaml"
             ]
+          },
+          "OFFSETOF": {
+            "method": "OFFSETOF",
+            "type": "method",
+            "category": "Miscellaneous",
+            "requires_version": "Spin2_v53",
+            "version_directive": "{Spin2_v53}",
+            "description": "Returns the byte offset of a member within a structure definition. Navigates\nnested structures and supports constant array indexing at each level. Evaluated\nentirely at compile time \u2014 generates no runtime bytecode.\nREQUIRES: {Spin2_v53} or later version directive at start of source file.\n\nNOTE: OFFSETOF() is restricted to DAT, VAR, PUB, and PRI blocks. Using\nOFFSETOF() in CON or OBJ blocks will cause a compile error (same as SIZEOF).\n",
+            "syntax": "offset := OFFSETOF(struct_name{[constant_index]}{.member{[constant_index]}{.member{[constant_index]}...}})",
+            "syntax_forms": [
+              {
+                "form": "OFFSETOF(struct_name)",
+                "returns": "0 (offset of start)"
+              },
+              {
+                "form": "OFFSETOF(struct_name.member)",
+                "returns": "Byte offset of member"
+              },
+              {
+                "form": "OFFSETOF(struct_name[index].member)",
+                "returns": "Byte offset with array indexing"
+              },
+              {
+                "form": "OFFSETOF(struct_name.substruct.member)",
+                "returns": "Byte offset through nested structs"
+              }
+            ],
+            "parameters": [
+              {
+                "name": "struct_name",
+                "type": "STRUCT name",
+                "description": "A previously defined structure type"
+              },
+              {
+                "name": "member",
+                "type": "identifier",
+                "description": "A member name within the structure"
+              },
+              {
+                "name": "constant_index",
+                "type": "integer constant",
+                "description": "Optional array index at any level (0 to $FFFF)"
+              }
+            ],
+            "returns": {
+              "type": "integer",
+              "description": "Byte offset of the specified member within the structure (compile-time constant)"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v53}\nCON\n  STRUCT point(LONG x, LONG y)\n\nPUB example() | ofs\n  ofs := OFFSETOF(point.x)               ' 0\n  ofs := OFFSETOF(point.y)               ' 4\n",
+                "description": "Simple member offsets"
+              },
+              {
+                "code": "{Spin2_v53}\nCON\n  STRUCT point(LONG x, LONG y)\n  STRUCT line(point start, point finish)\n\nPUB example() | ofs\n  ofs := OFFSETOF(line.start)            ' 0\n  ofs := OFFSETOF(line.finish)           ' 8\n  ofs := OFFSETOF(line.finish.x)         ' 8\n  ofs := OFFSETOF(line.finish.y)         ' 12\n",
+                "description": "Nested structure member offsets"
+              },
+              {
+                "code": "{Spin2_v53}\nCON\n  STRUCT point(LONG x, LONG y)\n  STRUCT line(point start, point finish)\n  STRUCT triangle(line sides[3])\n\nPUB example() | ofs\n  ofs := OFFSETOF(triangle.sides[0])     ' 0\n  ofs := OFFSETOF(triangle.sides[1])     ' 16\n  ofs := OFFSETOF(triangle.sides[2])     ' 32\n  ofs := OFFSETOF(triangle.sides[2].finish.y)  ' 44\n",
+                "description": "Array-indexed access through nested structures"
+              },
+              {
+                "code": "{Spin2_v53}\nCON\n  STRUCT point(LONG x, LONG y)\n\nPUB example() | ofs\n  ofs := OFFSETOF(point)                 ' 0 (offset of start)\n",
+                "description": "Struct without member returns 0"
+              },
+              {
+                "code": "{Spin2_v53}\nCON\n  STRUCT header(LONG id, WORD flags, BYTE data[16])\n\nVAR\n  BYTE buffer[SIZEOF(header)]\n\nPUB parseHeader() | ofs\n  ofs := OFFSETOF(header.flags)          ' 4 (after LONG id)\n  ofs := OFFSETOF(header.data)           ' 6 (after LONG + WORD)\n  WORD[@buffer + OFFSETOF(header.flags)] := $0001\n",
+                "description": "Low-level buffer manipulation using OFFSETOF"
+              }
+            ],
+            "relationship_to_sizeof": {
+              "description": "SIZEOF returns total size; OFFSETOF returns position within structure",
+              "comparison": [
+                {
+                  "function": "SIZEOF(point)",
+                  "returns": "Total size in bytes (8)"
+                },
+                {
+                  "function": "OFFSETOF(point)",
+                  "returns": "0 (offset of start)"
+                },
+                {
+                  "function": "OFFSETOF(point.x)",
+                  "returns": "Byte offset of member x (0)"
+                },
+                {
+                  "function": "OFFSETOF(point.y)",
+                  "returns": "Byte offset of member y (4)"
+                }
+              ]
+            },
+            "block_restrictions": {
+              "allowed": [
+                "DAT",
+                "VAR",
+                "PUB",
+                "PRI"
+              ],
+              "not_allowed": [
+                "CON",
+                "OBJ"
+              ],
+              "note": "Same restrictions as SIZEOF"
+            },
+            "member_sizes": [
+              {
+                "type": "BYTE",
+                "size_bytes": 1
+              },
+              {
+                "type": "WORD",
+                "size_bytes": 2
+              },
+              {
+                "type": "LONG",
+                "size_bytes": 4
+              },
+              {
+                "type": "nested STRUCT",
+                "size_bytes": "SIZEOF(nested_struct)"
+              }
+            ],
+            "errors": [
+              {
+                "error": "OFFSETOF() is only allowed in DAT, VAR, PUB, and PRI blocks",
+                "condition": "Used in CON or OBJ block"
+              },
+              {
+                "error": "Expected an existing STRUCT name",
+                "condition": "First element is not a defined struct"
+              },
+              {
+                "error": "Expected a structure member name",
+                "condition": "Member name after dot not recognized"
+              },
+              {
+                "error": "Structure does not contain this name",
+                "condition": "Named member doesn't exist in the struct"
+              },
+              {
+                "error": "Indexed structures cannot exceed $FFFF bytes in size",
+                "condition": "Struct too large for indexing"
+              },
+              {
+                "error": "Structure index must be from 0 to $FFFF",
+                "condition": "Index value out of range"
+              },
+              {
+                "error": "Structure exceeds hub range of $FFFFF",
+                "condition": "Computed offset exceeds address space"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v53} or later at start of source file",
+              "Compile-time only \u2014 the result is a constant integer pushed onto the stack",
+              "No new bytecodes; emits standard constant-push bytecodes (bc_con_rflong, bc_con_rfbyte, etc.)",
+              "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts",
+              "Works with nested structures to any depth",
+              "Array indexing supported at any level of nesting"
+            ],
+            "timing": {
+              "description": "Compile-time constant",
+              "cycles": "N/A - resolved at compile time"
+            },
+            "related": [
+              "language/spin2/methods/sizeof.yaml",
+              "language/spin2/keywords/STRUCT.yaml",
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/operators/typed-pointers.yaml"
+            ],
+            "see_also": [
+              "Structure definitions",
+              "SIZEOF()",
+              "Memory layout"
+            ],
+            "oneliner": "Compile-time byte offset of a member within a structure (requires Spin2_v53)"
           },
           "TASKSTOP": {
             "method": "TASKSTOP",
@@ -29042,11 +29476,11 @@
       }
     },
     "statistics": {
-      "total_elements": 275,
+      "total_elements": 276,
       "by_category": {
         "keywords": 37,
         "operators": 78,
-        "methods": 101,
+        "methods": 102,
         "registers": 18,
         "assembly_directives": 12,
         "debug_commands": 13,
