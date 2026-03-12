@@ -2,6 +2,11 @@
 
 *Developer Reference v0.1.0*
 
+> **For AI Agents**: Before generating P2 code, fetch the **P2 Architecture Mental Model**
+> (`p2kbArchP2ArchitectureMentalModel`) from the knowledge base. It provides the essential
+> mental model for understanding COG independence, execution models (Spin2 vs PASM2 vs
+> inline PASM2), shared resources, and code generation guidelines.
+
 ## Core Architecture
 
 ### Multiprocessor Design

@@ -1,0 +1,273 @@
+# P2 Architecture Mental Model - Agent Orientation Guide
+# Purpose: Concise, definitive architectural overview for AI agents generating P2 code
+# Priority: PRE-READ - Fetch this BEFORE writing any P2 code
+# Source: Silicon Doc v35, P2 Datasheet, verified YAML knowledge base
+
+concept: p2_architecture_mental_model
+title: "P2 Architecture Mental Model for Code-Generating Agents"
+category: architecture_orientation
+priority: pre_read
+target_audience: "AI agents generating Spin2 or PASM2 code for the Parallax Propeller 2"
+
+summary: |
+  The Parallax Propeller 2 (P2) is not a single-threaded microcontroller. It is eight
+  independent 32-bit processors (called COGs) on a single chip, sharing memory and I/O
+  through deterministic hardware arbitration. This document provides the mental model
+  needed to make correct architectural decisions when generating P2 code.
+
+# =============================================================================
+# CORE ARCHITECTURE
+# =============================================================================
+
+cog_independence: |
+  Each COG is a complete 32-bit processor with its own 5-stage pipeline, 512 longs
+  (2 KB) of private COG RAM, 512 longs of private LUT RAM, a hardware call stack
+  (8 levels), three interrupt levels, and a dedicated streaming DMA engine (the
+  Streamer). Every COG executes at 2 clocks per instruction from its own memory with
+  zero interference from other COGs. There is no shared instruction bus, no
+  time-slicing, and no preemption between COGs. When writing code for one COG, assume
+  it runs with fully deterministic timing -- no other COG can slow it down or interrupt
+  its execution.
+
+execution_models:
+  overview: |
+    Each COG can operate in one of two fundamental modes, and this is the first
+    architectural decision when planning what a COG will do.
+
+  spin2_cog:
+    description: |
+      A Spin2 COG runs the Spin2 bytecode interpreter in its COG RAM, fetching and
+      interpreting high-level Spin2 bytecodes from hub memory. Spin2 is more expressive
+      and memory-efficient than raw PASM2 -- a Spin2 program can be very large since
+      bytecodes live in hub (512 KB) rather than COG RAM (2 KB). However, interpreted
+      execution is slower than native PASM2. Spin2 COGs are launched with COGSPIN().
+    strengths:
+      - "Access to full Spin2 language (objects, methods, expressions, DEBUG)"
+      - "Programs can be very large (bytecodes in 512 KB hub)"
+      - "Higher-level abstractions for application logic"
+      - "Easier to write and maintain"
+    typical_uses:
+      - "Application orchestration and main program logic"
+      - "Configuration, initialization, and coordination"
+      - "Non-time-critical processing and state machines"
+      - "User interface and command parsing"
+
+  pasm2_cog:
+    description: |
+      A PASM2 COG runs native 32-bit assembly instructions directly. It can execute
+      from COG RAM at a deterministic 2 clocks per instruction (cogexec), from LUT RAM
+      at the same speed, or from hub RAM (hubexec) at variable but near-native speed
+      via a 19-stage prefetch FIFO. PASM2 COGs are launched with COGINIT(). COG RAM
+      is limited to 496 usable registers, so design for register-efficient code or use
+      hub execution for larger programs.
+    strengths:
+      - "Deterministic 2-clock execution from COG/LUT RAM"
+      - "Direct hardware register access"
+      - "Precise cycle-accurate timing"
+      - "REP instruction for zero-overhead loops (cogexec only)"
+    typical_uses:
+      - "Time-critical I/O drivers (video, audio, serial protocols)"
+      - "Real-time control loops (motor, PID, sensor sampling)"
+      - "Bit-banged protocol implementations"
+      - "Signal processing and high-speed data movement"
+
+  inline_pasm2:
+    description: |
+      Inline PASM2 (ORG/END blocks within Spin2 methods) bridges the two modes. The
+      Spin2 interpreter loads a small block of assembly (up to 16 longs including
+      parameters, results, and locals) into COG RAM and executes it at full native
+      speed, with roughly 20 clocks of entry/exit overhead. This gives Spin2 code
+      access to deterministic timing and direct hardware control for short, critical
+      operations without dedicating an entire COG.
+    limit: "16 longs maximum (parameters + result + locals + code)"
+    overhead: "~20 clocks to enter and exit"
+    strengths:
+      - "Full PASM2 speed for short critical sections"
+      - "No COG allocation required"
+      - "Seamless parameter passing from Spin2"
+    typical_uses:
+      - "Fast pin manipulation (DRVH, DRVL, DRVNOT)"
+      - "Precise timing operations (WAITX, GETCT)"
+      - "Bit manipulation and fast math"
+      - "Short protocol sequences"
+    when_not_to_use:
+      - "Code exceeding 16 longs -- use a dedicated PASM2 COG"
+      - "Sustained real-time loops -- use a dedicated PASM2 COG"
+      - "Code needing subroutines (CALL/RET) -- use a dedicated PASM2 COG"
+
+  decision_heuristic: |
+    When generating code, prefer:
+    - Spin2 for application logic, coordination, and non-time-critical work
+    - Dedicated PASM2 COGs for sustained real-time tasks and I/O drivers
+    - Inline PASM2 for small performance-critical operations within Spin2 methods
+    A typical P2 application uses BOTH: Spin2 COGs for orchestration, PASM2 COGs
+    for dedicated hardware drivers.
+
+# =============================================================================
+# SHARED RESOURCES
+# =============================================================================
+
+shared_resources:
+  overview: |
+    The only point where COGs experience timing variability is accessing shared hub
+    resources. All sharing is managed by deterministic hardware arbitration -- there
+    is no software scheduler, no bus contention, and no priority inversion.
+
+  egg_beater:
+    description: |
+      Hub RAM (512 KB), the CORDIC math pipeline, and certain system functions are
+      shared through a round-robin mechanism called the "Egg Beater." Each COG gets
+      a guaranteed access slot every 8 clock cycles. A hub operation (RDLONG, WRLONG,
+      etc.) completes in 2-9 clocks depending on when the COG's slot arrives -- this
+      is deterministic and predictable, never random. For batch transfers, use
+      SETQ+RDLONG/WRLONG which transfers at 1 long per clock after initial sync.
+    timing:
+      best_case: "2 clocks (slot aligned)"
+      worst_case: "9 clocks (just missed slot)"
+      batch_transfer: "1 long per clock after sync"
+      rotation_period: "8 clocks"
+
+  cordic:
+    description: |
+      The CORDIC solver is a 54-stage pipelined math engine shared through the same
+      hub rotation. It provides hardware multiply (32x32->64), divide (64/32),
+      square root, trigonometric functions, vector rotation, and logarithm/exponential.
+      Each COG can have 7-8 operations in flight simultaneously.
+    latency: "54 clocks per operation"
+    throughput: "1 result per COG every 8 clocks"
+
+# =============================================================================
+# INTER-COG COMMUNICATION
+# =============================================================================
+
+inter_cog_communication:
+  overview: |
+    COGs coordinate through four hardware mechanisms. There is no software IPC layer,
+    no message queue, and no OS -- all coordination is explicit in the programmer's code.
+
+  hub_ram:
+    description: "512 KB shared memory for mailboxes, buffers, and data exchange"
+    note: "Single hub reads/writes are atomic. Use locks for multi-step sequences."
+
+  locks:
+    count: 16
+    description: "Hardware atomic test-and-set locks for mutual exclusion"
+    note: "LOCKTRY returns immediately with success/fail -- no deadlock risk from the lock itself"
+
+  cogatn:
+    description: |
+      Lightweight attention signaling -- any COG can signal any combination of other
+      COGs without consuming hub bandwidth. Used for event notification; pair with
+      hub mailboxes for data transfer.
+
+  lut_sharing:
+    description: |
+      Adjacent COG pairs (0-1, 2-3, 4-5, 6-7) can share LUT RAM for fast,
+      zero-hub-cost data exchange between paired COGs.
+
+  pin_io:
+    description: |
+      All COGs can access all 64 pins. Pin outputs are OR'd together by default --
+      there is no hardware mutex on pin access. Coordinate pin ownership by convention
+      or use locks if multiple COGs must share a pin.
+
+# =============================================================================
+# SMART PINS
+# =============================================================================
+
+smart_pins:
+  description: |
+    Each of the 64 I/O pins contains an autonomous processor supporting 32 operating
+    modes: serial protocols (UART, SPI, USB), PWM generation, ADC/DAC conversion,
+    counting, timing, NCO/frequency synthesis, and quadrature decoding. Smart pins
+    operate independently of COGs once configured -- they offload I/O processing from
+    software entirely. Always prefer smart pin hardware modes over bit-banging a
+    protocol in a COG.
+  count: 64
+  modes: 32
+  key_principle: |
+    Configure the smart pin, enable it, and let it run autonomously. The COG only
+    needs to write data (WYPIN) or read results (RDPIN) when needed.
+
+# =============================================================================
+# CODE GENERATION IMPLICATIONS
+# =============================================================================
+
+code_generation_guidelines:
+  - guideline: "independent_cores"
+    rule: |
+      Each COG program is a standalone execution context -- think of it as an
+      independent core, not a thread. There is no shared stack, no shared registers,
+      and no implicit communication.
+
+  - guideline: "memory_is_tiny"
+    rule: |
+      COG RAM is only 496 usable registers. Design for register-efficient code or
+      use hub execution (ORGH) for larger programs. LUT RAM adds 512 more longs.
+
+  - guideline: "batch_hub_access"
+    rule: |
+      Hub access has 0-7 clocks of jitter per access. Batch hub transfers
+      (SETQ+RDLONG/WRLONG) when possible for efficiency.
+
+  - guideline: "no_lockstep"
+    rule: |
+      Never assume COGs execute in lockstep. Use locks or COGATN for synchronization.
+      Even COGs started at the same time will drift relative to each other due to
+      hub access timing.
+
+  - guideline: "smart_pins_first"
+    rule: |
+      Smart pins should handle I/O protocols in hardware rather than bit-banging in
+      a COG. Check if a smart pin mode exists before writing a software protocol driver.
+
+  - guideline: "bare_metal"
+    rule: |
+      There is no operating system, no MMU, no cache, and no virtual memory. Code
+      runs on bare metal with direct hardware access. All memory addresses are physical.
+
+  - guideline: "spin2_plus_pasm2"
+    rule: |
+      Most real P2 applications use both languages: Spin2 for application logic and
+      PASM2 for time-critical drivers. This is the intended and optimal usage pattern,
+      not a compromise.
+
+# =============================================================================
+# RELATED KNOWLEDGE BASE ENTRIES
+# =============================================================================
+
+pre_read_sequence:
+  description: |
+    Recommended reading order for agents before generating P2 code.
+    This mental model is step 1. Follow with the appropriate getting-started guide.
+  sequence:
+    - step: 1
+      entry: "architecture/p2-architecture-mental-model.yaml"
+      description: "This document -- architectural orientation"
+    - step: 2
+      entry: "guides/spin2-getting-started.yaml OR guides/pasm2-getting-started.yaml"
+      description: "Language-specific essentials"
+    - step: 3
+      entry: "guides/quick-queries.yaml"
+      description: "Find specific topics by question"
+
+related:
+  - architecture/cog.yaml
+  - architecture/hub.yaml
+  - architecture/cordic.yaml
+  - architecture/smart_pins.yaml
+  - architecture/locks.yaml
+  - architecture/cog_attention.yaml
+  - architecture/event_system.yaml
+  - architecture/streamer/overview.yaml
+  - language/spin2/constructs/inline_pasm.yaml
+  - language/pasm2/concepts/cog_hub_execution.yaml
+
+see_also:
+  - "COG processor details: p2kbArchCog"
+  - "Hub memory and Egg Beater: p2kbArchHub"
+  - "CORDIC math engine: p2kbArchCordic"
+  - "Smart Pin system: p2kbArchSmartPins"
+  - "Multi-COG synchronization: p2kbPasm2MultiCogSynchronization"
+  - "Inline PASM2: p2kbSpin2InlinePasm2"
+  - "COG vs Hub execution: p2kbPasm2CogHubExecution"

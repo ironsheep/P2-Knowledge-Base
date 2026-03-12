@@ -19,6 +19,14 @@ description: |
 knowledge_progression:
   you_are_here: "Layer 1 - Essential Assembly Mechanics"
   
+  pre_requisite:
+    ESSENTIAL:
+      - name: "P2 Architecture Mental Model"
+        content: "architecture/p2-architecture-mental-model.yaml"
+        key: p2kbArchP2ArchitectureMentalModel
+        why: "Understand COG independence, execution models (cogexec vs hubexec), Egg Beater timing, shared resources, and smart pin offloading. Must read BEFORE writing code."
+        when: "Read first, before this guide"
+
   immediate_next_steps:
     REQUIRED:
       - name: "Basic I/O Concepts"

@@ -233,6 +233,7 @@ debug_features:
   register_inspection: "Through hub memory window"
 
 related_components:
+  architecture/p2-architecture-mental-model.yaml: "High-level architecture orientation for agents"
   hub: "Shared memory and resources"
   smart_pins: "I/O processing offload"
   architecture/streamer/overview.yaml: "DMA for each COG"
@@ -240,6 +241,7 @@ related_components:
   interrupts: "Event-driven processing"
 
 see_also:
+  - "Architecture mental model: p2kbArchP2ArchitectureMentalModel"
   - "COG memory map"
   - "Pipeline optimization"
   - "Multi-COG programming"

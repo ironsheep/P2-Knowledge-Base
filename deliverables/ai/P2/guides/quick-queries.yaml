@@ -11,6 +11,15 @@ description: |
   IMPORTANT: This is your bootstrap document. Start here to find keys.
 
 # =============================================================================
+# PRE-READ - Fetch this FIRST before any P2 code generation
+# =============================================================================
+pre_read:
+  architecture_mental_model:
+    key: p2kbArchP2ArchitectureMentalModel
+    description: "ESSENTIAL - P2 multi-COG architecture orientation. Read BEFORE coding."
+    priority: "Fetch first. Covers COG independence, execution models (Spin2 vs PASM2 vs inline), shared resources, and code generation guidelines."
+
+# =============================================================================
 # GETTING STARTED GUIDES - Fetch these for comprehensive introductions
 # =============================================================================
 getting_started_guides:
@@ -28,6 +37,9 @@ getting_started_guides:
 # ARCHITECTURE FUNDAMENTALS - Core P2 concepts
 # =============================================================================
 architecture_keys:
+  mental_model:
+    key: p2kbArchP2ArchitectureMentalModel
+    description: "PRE-READ: High-level architecture orientation for code generation"
   cog:
     key: p2kbArchCog
     description: "COG processor architecture and capabilities"

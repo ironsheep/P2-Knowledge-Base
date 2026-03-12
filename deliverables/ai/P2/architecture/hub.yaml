@@ -220,6 +220,7 @@ debugging:
   state_preservation: "All COG states saved on debug entry"
 
 related_components:
+  architecture/p2-architecture-mental-model.yaml: "High-level architecture orientation for agents"
   cogs: "Eight processors sharing hub"
   fifo: "Streaming interface to hub"
   locks: "Synchronization primitives"
@@ -227,6 +228,7 @@ related_components:
   architecture/streamer/overview.yaml: "DMA to/from hub"
 
 see_also:
+  - "Architecture mental model: p2kbArchP2ArchitectureMentalModel"
   - "Egg beater timing diagrams"
   - "FIFO programming guide"
   - "Block transfer optimization"
