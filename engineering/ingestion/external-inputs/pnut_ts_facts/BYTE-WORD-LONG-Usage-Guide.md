@@ -24,6 +24,67 @@ These keywords are used in seven distinct contexts:
 
 ---
 
+## Type Propagation Rules Across Comma-Separated Names
+
+An important and sometimes surprising aspect of Spin2 is that type specifiers behave differently depending on the context. In some contexts a type "carries forward" to subsequent comma-separated names, and in others each name reverts to the default type of `LONG`.
+
+### VAR Block: Type IS Sticky
+
+In a `VAR` block, a type specifier applies to **all subsequent names on the same line** until a new type specifier is encountered:
+
+```spin2
+VAR
+  BYTE a, b, c              ' a=BYTE, b=BYTE, c=BYTE (type carries forward)
+  WORD x, y                 ' x=WORD, y=WORD (type carries forward)
+  d, e                      ' d=LONG, e=LONG (no type = default LONG, carries forward)
+```
+
+### PUB/PRI Parameters, Return Values, and Locals: Type is NOT Sticky
+
+In method signatures, each variable name independently defaults to `LONG` unless it has its own explicit type specifier. The type does **not** carry forward across commas:
+
+```spin2
+' Parameters: type resets to LONG after each comma
+PUB foo(BYTE a, b, WORD c)           ' a=BYTE, b=LONG(!), c=WORD
+
+' Return values: type resets to LONG after each comma
+PUB bar() : BYTE status, value       ' status=BYTE, value=LONG(!)
+
+' Local variables: type resets to LONG after each comma
+PUB baz() | BYTE temp, count         ' temp=BYTE, count=LONG(!)
+```
+
+To type every name, each must have its own specifier:
+
+```spin2
+PUB foo(BYTE a, BYTE b, WORD c)      ' a=BYTE, b=BYTE, c=WORD
+PUB bar() : BYTE status, BYTE value  ' status=BYTE, value=BYTE
+PUB baz() | BYTE temp, BYTE count    ' temp=BYTE, count=BYTE
+```
+
+### DAT Block: Line Base Type with Per-Value Overrides
+
+In a `DAT` block, the type specifier sets the **line's base type** for all comma-separated values. An inline type override applies only to the single value it precedes — subsequent values revert to the line's base type:
+
+```spin2
+DAT
+  myData    LONG    $1234, $5678, $9ABC          ' All three are LONGs
+  mixed     LONG    $1234, BYTE $56, $9ABC       ' $1234=LONG, $56=BYTE, $9ABC=LONG (reverts!)
+  allBytes  BYTE    1, WORD 1000, 2              ' 1=BYTE, 1000=WORD, 2=BYTE (reverts!)
+```
+
+### Summary
+
+| Context | Type carries to next name/value? | Inline override? | Default |
+|---------|----------------------------------|-------------------|---------|
+| **VAR block** (same line) | **YES** — sticky across commas | N/A | LONG |
+| **DAT block** (same line) | **YES** — line base type persists | Per-value only, does NOT stick | Required |
+| **PUB/PRI parameters** | **NO** — resets each name | N/A | LONG |
+| **PUB/PRI return values** | **NO** — resets each name | N/A | LONG |
+| **PUB/PRI local variables** | **NO** — resets each name | N/A | LONG |
+
+---
+
 ## 1. Variable Declarations (VAR Block)
 
 In a `VAR` block, `BYTE`, `WORD`, and `LONG` declare instance variables (hub memory allocated per object instance).
