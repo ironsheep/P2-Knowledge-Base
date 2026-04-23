@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-03-12T21:10:12.495110",
-    "total_entries": 1031,
+    "generated": "2026-04-23T20:44:00.082562",
+    "total_entries": 1032,
     "total_categories": 49,
     "total_aliases": 1001,
     "multi_target_aliases": 54,
@@ -6323,6 +6323,10 @@
       "path": "deliverables/ai/P2/language/spin2/concepts/string_constants.yaml",
       "mtime": 1769217136
     },
+    "p2kbSpin2StructBitfields": {
+      "path": "deliverables/ai/P2/language/spin2/concepts/struct-bitfields.yaml",
+      "mtime": 1776976936
+    },
     "p2kbSpin2TableLookup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/table_lookup.yaml",
       "mtime": 1769214614
@@ -6541,7 +6545,7 @@
     },
     "p2kbSpin2KwBYTE": {
       "path": "deliverables/ai/P2/language/spin2/keywords/BYTE.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2KwBYTEFIT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/BYTEFIT.yaml",
@@ -6593,7 +6597,7 @@
     },
     "p2kbSpin2KwLONG": {
       "path": "deliverables/ai/P2/language/spin2/keywords/LONG.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2KwLOOKDOWN": {
       "path": "deliverables/ai/P2/language/spin2/keywords/LOOKDOWN.yaml",
@@ -6653,7 +6657,7 @@
     },
     "p2kbSpin2KwSTRUCT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2KwTO": {
       "path": "deliverables/ai/P2/language/spin2/keywords/TO.yaml",
@@ -6677,7 +6681,7 @@
     },
     "p2kbSpin2KwWORD": {
       "path": "deliverables/ai/P2/language/spin2/keywords/WORD.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2KwWORDFIT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/WORDFIT.yaml",
@@ -6881,7 +6885,7 @@
     },
     "p2kbSpin2Offsetof": {
       "path": "deliverables/ai/P2/language/spin2/methods/offsetof.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2Pinclear": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinclear.yaml",
@@ -6981,7 +6985,7 @@
     },
     "p2kbSpin2Sizeof": {
       "path": "deliverables/ai/P2/language/spin2/methods/sizeof.yaml",
-      "mtime": 1773253579
+      "mtime": 1776976936
     },
     "p2kbSpin2Sqrt": {
       "path": "deliverables/ai/P2/language/spin2/methods/sqrt.yaml",
@@ -7093,7 +7097,7 @@
     },
     "p2kbSpin2OpFIELD": {
       "path": "deliverables/ai/P2/language/spin2/operators/FIELD.yaml",
-      "mtime": 1767481422
+      "mtime": 1776976936
     },
     "p2kbSpin2OpModuloAdd": {
       "path": "deliverables/ai/P2/language/spin2/operators/modulo_add.yaml",

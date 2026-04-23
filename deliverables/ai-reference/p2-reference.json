@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-03-12",
-    "last_updated": "2026-03-12T21:10:23.037533",
+    "release_date": "2026-04-23",
+    "last_updated": "2026-04-23T20:44:02.798934",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-03-12T21:10:23.037533",
+    "extraction_date": "2026-04-23T20:44:02.798934",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18287,7 +18287,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-03-12T21:10:23.037533",
+    "extraction_date": "2026-04-23T20:44:02.798934",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18367,7 +18367,9 @@
               "array_members": "STRUCT structName(data[count])",
               "nested": "STRUCT outer(inner innerMember)",
               "alias": "STRUCT newName = existingStruct",
-              "export_import": "object.struct_t varName"
+              "export_import": "object.struct_t varName",
+              "named_bitfields": "STRUCT structName({BYTE|WORD|LONG} member{[count]}{.bitfield[bit_or_range]}...)  (v54+)",
+              "nameless_member": "STRUCT structName({BYTE|WORD|LONG}{.bitfield[bit_or_range]}...)  (v54+)"
             },
             "member_types": [
               {
@@ -18427,6 +18429,14 @@
               {
                 "code": "{Spin2_v45}\nOBJ\n  gfx : \"graphics\"\n\nVAR\n  gfx.point_t   cursor_pos\n  gfx.rect_t    window_bounds[10]      ' Array of imported structures\n\nPUB draw_at(gfx.point_t pos)           ' Imported struct as parameter type\n  gfx.move_to(pos.x, pos.y)\n",
                 "description": "V49+ imported structures in declarations, arrays, and method parameters"
+              },
+              {
+                "code": "{Spin2_v54}\nCON\n  STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])\n\nVAR\n  pin_state_t pin\n\nPUB demo()\n  pin.flags.input  := 1              ' single-bit bitfield\n  pin.flags.drive  := %10            ' 2-bit ranged bitfield\n  pin.flags.value  := $FF            ' 8-bit ranged bitfield (bits 31..24)\n  pin.flags := 0                     ' whole-member assignment still works\n",
+                "description": "V54+ named bitfields on a LONG struct member (mixed single-bit and ranged)"
+              },
+              {
+                "code": "{Spin2_v54}\nCON\n  STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])\n\nVAR\n  io_t io\n\nPUB demo()\n  io.ready   := 1                    ' direct bitfield access (nameless form)\n  io.mode    := %10\n  io.counter := 100_000\n  IF io.error\n    io := 0                          ' whole-struct assignment still works\n",
+                "description": "V54+ nameless single LONG member \u2014 bitfields accessed directly via struct name"
               }
             ],
             "operations": [
@@ -18479,6 +18489,16 @@
                 "operation": "Member offset",
                 "syntax": "OFFSETOF(structName.member)",
                 "description": "Get byte offset of member within structure (v53+)"
+              },
+              {
+                "operation": "Bitfield access (named member)",
+                "syntax": "var.member.bitfield",
+                "description": "Read/write named bitfield on a BYTE/WORD/LONG member (v54+)"
+              },
+              {
+                "operation": "Bitfield access (nameless member)",
+                "syntax": "var.bitfield",
+                "description": "Read/write named bitfield on the nameless backing member (v54+)"
               }
             ],
             "pointer_syntax": {
@@ -18487,6 +18507,92 @@
               "dereference": "[ptr]",
               "post_increment": "ptr[++].member",
               "pre_increment": "[++]ptr.member"
+            },
+            "v54_enhancements": {
+              "summary": "Named bitfields on BYTE/WORD/LONG struct members, plus nameless single-member struct form",
+              "enforcement": "Not enforced by PNut v54 \u2014 no level54_symbols table. {Spin2_v54} is recommended as declaration of intent.",
+              "minimum_compiler": "v54",
+              "named_bitfields_on_members": {
+                "description": "A STRUCT member of type BYTE, WORD, or LONG may carry one or more named\nbitfields. Each bitfield is introduced by a dot and specifies either a\nsingle bit or an inclusive bit range.\n",
+                "syntax": "STRUCT struct_name({BYTE|WORD|LONG} member_name{[count]}{.bitfield_name[bit_or_range]}...)",
+                "access": "struct_var.member.bitfield",
+                "bitfield_forms": [
+                  {
+                    "form": "[N]",
+                    "meaning": "Single-bit bitfield at bit N"
+                  },
+                  {
+                    "form": "[upper..lower]",
+                    "meaning": "Multi-bit bitfield spanning upper..lower inclusive"
+                  }
+                ],
+                "member_type_boundaries": {
+                  "BYTE": "0..7",
+                  "WORD": "0..15",
+                  "LONG": "0..31"
+                },
+                "rules": [
+                  "Multiple bitfields may chain on one member: LONG flags.a[0].b[1].c[7..4]",
+                  "A single member may mix single-bit and multi-bit bitfields",
+                  "Bitfields may overlap (no disjointness check)",
+                  "Bitfields can only be declared on BYTE/WORD/LONG members \u2014 not on STRUCT-typed members",
+                  "Whole-member assignment (pin.flags := value) still works",
+                  "Whole-struct assignment (pin := other_pin) still works"
+                ],
+                "example": "{Spin2_v54}\nCON\n  STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])\n\nVAR\n  pin_state_t pin\n\nPUB demo() | snapshot\n  pin.flags.input  := 1              ' set bit 0\n  pin.flags.output := 0              ' clear bit 1\n  pin.flags.drive  := %10            ' set bits 3..2\n  pin.flags.value  := $FF            ' set bits 31..24\n\n  IF pin.flags.input AND NOT pin.flags.output\n    snapshot := pin.flags.value     ' read bits 31..24\n\n  pin.flags := 0                    ' whole-member assignment still works\n"
+              },
+              "nameless_single_member": {
+                "description": "A STRUCT may be declared with exactly one unnamed BYTE, WORD, or LONG\nmember as its sole content. The struct name itself refers to the\nbacking value; bitfields are accessed directly via struct_var.bitfield.\n",
+                "syntax": "STRUCT struct_name({BYTE|WORD|LONG}{.bitfield_name[bit_or_range]}...)",
+                "access": "struct_var.bitfield",
+                "constraints": [
+                  "Must be the first and only member",
+                  "Type must be BYTE, WORD, or LONG \u2014 not STRUCT",
+                  "No instance-count [N] is permitted on a nameless member",
+                  "Bitfield chains are fully supported"
+                ],
+                "sizeof_behavior": "SIZEOF(io_t) returns the size of the member type (1 for BYTE, 2 for WORD, 4 for LONG)",
+                "offsetof_behavior": "OFFSETOF(io_t.ready) returns 0 (nameless member occupies offset 0)",
+                "example": "{Spin2_v54}\nCON\n  STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])\n\nVAR\n  io_t  io\n\nPUB demo()\n  io.ready   := 1             ' direct bitfield access (no intermediate member name)\n  io.mode    := %10\n  io.counter := 100_000\n\n  IF io.error\n    io := 0                   ' whole-struct assignment\n"
+              },
+              "contrast_named_vs_nameless": {
+                "named": "STRUCT named_t(LONG flags.ready[0])         ' access:  named_var.flags.ready",
+                "nameless": "STRUCT nameless_t(LONG.ready[0])            ' access:  nameless_var.ready"
+              },
+              "bitfield_access_semantics": "Bitfield access is a setup_bfield-style access \u2014 it can be read, written,\nor used as the target of :=, ++, --, and compound-assign operators. Same\nsemantics as plain variable bitfields in earlier Spin2 versions.\n",
+              "bytecode_implementation": {
+                "note": "No new bytecodes \u2014 reuses existing bitfield-setup bytecodes",
+                "mapping": [
+                  {
+                    "bytecode": "bc_setup_bfield_0_31 + N",
+                    "used_for": "Single-bit bitfield at bit N (0..31)"
+                  },
+                  {
+                    "bytecode": "bc_setup_bfield_rfvar",
+                    "used_for": "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+                  }
+                ]
+              },
+              "errors": [
+                {
+                  "error": "Bitfields are only allowed for BYTE/WORD/LONG members",
+                  "condition": ".bitfield[...] applied to a STRUCT-typed member"
+                },
+                {
+                  "error": "Bit number exceeds BYTE/WORD/LONG boundary",
+                  "condition": "Single bit >= 8/16/32, or upper bit of range >= boundary"
+                },
+                {
+                  "error": "Lower bit number cannot exceed upper bit number",
+                  "condition": "lower > upper in [upper..lower]"
+                }
+              ],
+              "use_cases": [
+                "Hardware register wrappers (memory-mapped control/status registers)",
+                "Packed status words with named bit positions",
+                "C-style bitfield types where only one backing value is needed",
+                "Protocol header fields decoded by bit-range"
+              ]
             },
             "export_import": {
               "description": "V49+ feature: Structures defined in CON blocks are automatically exported\nand can be imported by parent objects using object.struct_t notation.\n",
@@ -18528,7 +18634,11 @@
               "V49+: Use object.struct_t syntax to reference structures from child objects",
               "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters",
               "V49+: Structure layout (size, alignment) is preserved exactly when imported",
-              "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
+              "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries",
+              "V54+: Named bitfields on BYTE/WORD/LONG members \u2014 see v54_enhancements section and concepts/struct-bitfields.yaml",
+              "V54+: Nameless single BYTE/WORD/LONG member form \u2014 struct_var.bitfield without intermediate member name",
+              "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent",
+              "V54+: No new bytecodes \u2014 reuses bc_setup_bfield_0_31 and bc_setup_bfield_rfvar"
             ],
             "related": [
               "language/spin2/methods/sizeof.yaml",
@@ -18537,7 +18647,12 @@
               "language/spin2/methods/word.yaml",
               "language/spin2/methods/long.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/operators/op_swap.yaml"
+              "language/spin2/operators/op_swap.yaml",
+              "language/spin2/operators/FIELD.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml",
+              "language/spin2/keywords/BYTE.yaml",
+              "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/LONG.yaml"
             ],
             "oneliner": "Define composite data types with named members (requires Spin2_v45)"
           },
@@ -18770,6 +18885,11 @@
                 "context": "Data constructor",
                 "syntax": "BYTE(val1, val2, ...)",
                 "example": "BYTE($48, $65, $6C)"
+              },
+              {
+                "context": "STRUCT member with named bitfields (v54+)",
+                "syntax": "STRUCT s(BYTE member.bitfield[N_or_range]...)  or  STRUCT s(BYTE.bitfield[N_or_range]...)",
+                "example": "STRUCT status_t(BYTE flags.busy[0].mode[4..2].valid[7])"
               }
             ],
             "type_propagation": "In VAR blocks, BYTE is sticky \u2014 applies to all names on the same line.\nIn PUB/PRI parameters, returns, and locals, BYTE is NOT sticky \u2014 each\nname resets to LONG unless explicitly typed.\nSee type-propagation concept for full rules.\n",
@@ -18781,16 +18901,19 @@
               "Size: 8 bits (1 byte)",
               "Unsigned range: 0 to 255",
               "Signed range: -128 to 127",
-              "Default type is LONG if no type specifier given"
+              "Default type is LONG if no type specifier given",
+              "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/WORD.yaml",
               "language/spin2/keywords/LONG.yaml",
+              "language/spin2/keywords/STRUCT.yaml",
               "language/spin2/methods/byte.yaml",
               "language/spin2/methods/bytefill.yaml",
               "language/spin2/methods/bytemove.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/concepts/type-propagation.yaml"
+              "language/spin2/concepts/type-propagation.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml"
             ],
             "oneliner": "8-bit data type used for declarations, memory access, pointers, and data constructors"
           },
@@ -19003,6 +19126,11 @@
                 "context": "Data constructor",
                 "syntax": "WORD(val1, val2, ...)",
                 "example": "WORD($1000, $2000)"
+              },
+              {
+                "context": "STRUCT member with named bitfields (v54+)",
+                "syntax": "STRUCT s(WORD member.bitfield[N_or_range]...)  or  STRUCT s(WORD.bitfield[N_or_range]...)",
+                "example": "STRUCT cfg_t(WORD ctrl.enable[0].speed[7..4].prescaler[15..8])"
               }
             ],
             "type_propagation": "In VAR blocks, WORD is sticky \u2014 applies to all names on the same line.\nIn PUB/PRI parameters, returns, and locals, WORD is NOT sticky \u2014 each\nname resets to LONG unless explicitly typed.\nSee type-propagation concept for full rules.\n",
@@ -19015,16 +19143,19 @@
               "Unsigned range: 0 to 65,535",
               "Signed range: -32,768 to 32,767",
               "Word addresses should be word-aligned (even addresses) for optimal performance",
-              "Default type is LONG if no type specifier given"
+              "Default type is LONG if no type specifier given",
+              "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/LONG.yaml",
+              "language/spin2/keywords/STRUCT.yaml",
               "language/spin2/methods/word.yaml",
               "language/spin2/methods/wordfill.yaml",
               "language/spin2/methods/wordmove.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/concepts/type-propagation.yaml"
+              "language/spin2/concepts/type-propagation.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml"
             ],
             "oneliner": "16-bit data type used for declarations, memory access, pointers, and data constructors"
           },
@@ -19124,6 +19255,11 @@
                 "context": "Data constructor",
                 "syntax": "LONG(val1, val2, ...)",
                 "example": "LONG(100_000, 200_000)"
+              },
+              {
+                "context": "STRUCT member with named bitfields (v54+)",
+                "syntax": "STRUCT s(LONG member.bitfield[N_or_range]...)  or  STRUCT s(LONG.bitfield[N_or_range]...)",
+                "example": "STRUCT pin_state_t(LONG flags.input[0].drive[3..2].value[31..24])"
               }
             ],
             "default_type_behavior": "LONG is the default type when no type specifier is given:\n- VAR: 'myVar' without a type is LONG\n- PUB/PRI parameters: 'param' without a type is LONG\n- PUB/PRI return values: 'result' without a type is LONG\n- PUB/PRI local variables: 'temp' without a type is LONG\nIn PUB/PRI signatures, each comma-separated name resets to LONG\nunless it has its own explicit type specifier.\n",
@@ -19138,16 +19274,19 @@
               "Signed range: -2,147,483,648 to 2,147,483,647",
               "Long addresses should be long-aligned (divisible by 4) for optimal performance",
               "LONG is the implicit default type \u2014 omitting a type specifier means LONG",
-              "All pointers are LONG-sized regardless of what they point to"
+              "All pointers are LONG-sized regardless of what they point to",
+              "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/WORD.yaml",
+              "language/spin2/keywords/STRUCT.yaml",
               "language/spin2/methods/long.yaml",
               "language/spin2/methods/longfill.yaml",
               "language/spin2/methods/longmove.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/concepts/type-propagation.yaml"
+              "language/spin2/concepts/type-propagation.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml"
             ],
             "oneliner": "32-bit data type \u2014 default type for all Spin2 operations"
           },
@@ -23453,7 +23592,8 @@
               "Compile-time evaluation - no runtime cost",
               "Works with arrays and nested structures",
               "Useful for buffer allocation and memory management",
-              "Companion function OFFSETOF() returns byte offset of a member within a structure (v53+)"
+              "Companion function OFFSETOF() returns byte offset of a member within a structure (v53+)",
+              "V54+: For a nameless single-member STRUCT (e.g., STRUCT io_t(LONG.ready[0])), SIZEOF returns the size of the backing member type \u2014 1 for BYTE, 2 for WORD, 4 for LONG"
             ],
             "timing": {
               "description": "Compile-time constant",
@@ -23464,7 +23604,8 @@
               "language/spin2/keywords/STRUCT.yaml",
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/WORD.yaml",
-              "language/spin2/keywords/LONG.yaml"
+              "language/spin2/keywords/LONG.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml"
             ],
             "see_also": [
               "Structure definitions",
@@ -24235,7 +24376,8 @@
               "No new bytecodes; emits standard constant-push bytecodes (bc_con_rflong, bc_con_rfbyte, etc.)",
               "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts",
               "Works with nested structures to any depth",
-              "Array indexing supported at any level of nesting"
+              "Array indexing supported at any level of nesting",
+              "V54+: For a nameless single-member STRUCT (e.g., STRUCT io_t(LONG.ready[0])), the nameless member occupies offset 0 \u2014 OFFSETOF(io_t.ready) returns 0"
             ],
             "timing": {
               "description": "Compile-time constant",
@@ -24247,7 +24389,8 @@
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/WORD.yaml",
               "language/spin2/keywords/LONG.yaml",
-              "language/spin2/operators/typed-pointers.yaml"
+              "language/spin2/operators/typed-pointers.yaml",
+              "language/spin2/concepts/struct-bitfields.yaml"
             ],
             "see_also": [
               "Structure definitions",
