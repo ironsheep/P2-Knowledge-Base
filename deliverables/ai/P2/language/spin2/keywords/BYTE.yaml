@@ -38,6 +38,9 @@ usage_contexts:
   - context: "Data constructor"
     syntax: "BYTE(val1, val2, ...)"
     example: "BYTE($48, $65, $6C)"
+  - context: "STRUCT member with named bitfields (v54+)"
+    syntax: "STRUCT s(BYTE member.bitfield[N_or_range]...)  or  STRUCT s(BYTE.bitfield[N_or_range]...)"
+    example: "STRUCT status_t(BYTE flags.busy[0].mode[4..2].valid[7])"
 
 type_propagation: |
   In VAR blocks, BYTE is sticky — applies to all names on the same line.
@@ -54,14 +57,17 @@ notes:
   - "Unsigned range: 0 to 255"
   - "Signed range: -128 to 127"
   - "Default type is LONG if no type specifier given"
+  - "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/WORD.yaml
   - language/spin2/keywords/LONG.yaml
+  - language/spin2/keywords/STRUCT.yaml
   - language/spin2/methods/byte.yaml
   - language/spin2/methods/bytefill.yaml
   - language/spin2/methods/bytemove.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/concepts/type-propagation.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "8-bit data type used for declarations, memory access, pointers, and data constructors"

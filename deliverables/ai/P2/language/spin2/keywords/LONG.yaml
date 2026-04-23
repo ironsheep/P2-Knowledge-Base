@@ -40,6 +40,9 @@ usage_contexts:
   - context: "Data constructor"
     syntax: "LONG(val1, val2, ...)"
     example: "LONG(100_000, 200_000)"
+  - context: "STRUCT member with named bitfields (v54+)"
+    syntax: "STRUCT s(LONG member.bitfield[N_or_range]...)  or  STRUCT s(LONG.bitfield[N_or_range]...)"
+    example: "STRUCT pin_state_t(LONG flags.input[0].drive[3..2].value[31..24])"
 
 default_type_behavior: |
   LONG is the default type when no type specifier is given:
@@ -67,14 +70,17 @@ notes:
   - "Long addresses should be long-aligned (divisible by 4) for optimal performance"
   - "LONG is the implicit default type — omitting a type specifier means LONG"
   - "All pointers are LONG-sized regardless of what they point to"
+  - "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/BYTE.yaml
   - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/STRUCT.yaml
   - language/spin2/methods/long.yaml
   - language/spin2/methods/longfill.yaml
   - language/spin2/methods/longmove.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/concepts/type-propagation.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "32-bit data type — default type for all Spin2 operations"

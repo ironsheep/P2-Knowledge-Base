@@ -20,6 +20,8 @@ syntax:
   nested: "STRUCT outer(inner innerMember)"
   alias: "STRUCT newName = existingStruct"
   export_import: "object.struct_t varName"
+  named_bitfields: "STRUCT structName({BYTE|WORD|LONG} member{[count]}{.bitfield[bit_or_range]}...)  (v54+)"
+  nameless_member: "STRUCT structName({BYTE|WORD|LONG}{.bitfield[bit_or_range]}...)  (v54+)"
 
 member_types:
   - type: "BYTE"
@@ -120,14 +122,45 @@ examples:
       {Spin2_v45}
       OBJ
         gfx : "graphics"
-      
+
       VAR
         gfx.point_t   cursor_pos
         gfx.rect_t    window_bounds[10]      ' Array of imported structures
-      
+
       PUB draw_at(gfx.point_t pos)           ' Imported struct as parameter type
         gfx.move_to(pos.x, pos.y)
     description: "V49+ imported structures in declarations, arrays, and method parameters"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])
+
+      VAR
+        pin_state_t pin
+
+      PUB demo()
+        pin.flags.input  := 1              ' single-bit bitfield
+        pin.flags.drive  := %10            ' 2-bit ranged bitfield
+        pin.flags.value  := $FF            ' 8-bit ranged bitfield (bits 31..24)
+        pin.flags := 0                     ' whole-member assignment still works
+    description: "V54+ named bitfields on a LONG struct member (mixed single-bit and ranged)"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])
+
+      VAR
+        io_t io
+
+      PUB demo()
+        io.ready   := 1                    ' direct bitfield access (nameless form)
+        io.mode    := %10
+        io.counter := 100_000
+        IF io.error
+          io := 0                          ' whole-struct assignment still works
+    description: "V54+ nameless single LONG member — bitfields accessed directly via struct name"
 
 operations:
   - operation: "Access member"
@@ -160,6 +193,12 @@ operations:
   - operation: "Member offset"
     syntax: "OFFSETOF(structName.member)"
     description: "Get byte offset of member within structure (v53+)"
+  - operation: "Bitfield access (named member)"
+    syntax: "var.member.bitfield"
+    description: "Read/write named bitfield on a BYTE/WORD/LONG member (v54+)"
+  - operation: "Bitfield access (nameless member)"
+    syntax: "var.bitfield"
+    description: "Read/write named bitfield on the nameless backing member (v54+)"
 
 pointer_syntax:
   declaration: "^structName ptr"
@@ -167,6 +206,114 @@ pointer_syntax:
   dereference: "[ptr]"
   post_increment: "ptr[++].member"
   pre_increment: "[++]ptr.member"
+
+v54_enhancements:
+  summary: "Named bitfields on BYTE/WORD/LONG struct members, plus nameless single-member struct form"
+  enforcement: "Not enforced by PNut v54 — no level54_symbols table. {Spin2_v54} is recommended as declaration of intent."
+  minimum_compiler: "v54"
+
+  named_bitfields_on_members:
+    description: |
+      A STRUCT member of type BYTE, WORD, or LONG may carry one or more named
+      bitfields. Each bitfield is introduced by a dot and specifies either a
+      single bit or an inclusive bit range.
+    syntax: "STRUCT struct_name({BYTE|WORD|LONG} member_name{[count]}{.bitfield_name[bit_or_range]}...)"
+    access: "struct_var.member.bitfield"
+    bitfield_forms:
+      - form: "[N]"
+        meaning: "Single-bit bitfield at bit N"
+      - form: "[upper..lower]"
+        meaning: "Multi-bit bitfield spanning upper..lower inclusive"
+    member_type_boundaries:
+      BYTE: "0..7"
+      WORD: "0..15"
+      LONG: "0..31"
+    rules:
+      - "Multiple bitfields may chain on one member: LONG flags.a[0].b[1].c[7..4]"
+      - "A single member may mix single-bit and multi-bit bitfields"
+      - "Bitfields may overlap (no disjointness check)"
+      - "Bitfields can only be declared on BYTE/WORD/LONG members — not on STRUCT-typed members"
+      - "Whole-member assignment (pin.flags := value) still works"
+      - "Whole-struct assignment (pin := other_pin) still works"
+    example: |
+      {Spin2_v54}
+      CON
+        STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])
+
+      VAR
+        pin_state_t pin
+
+      PUB demo() | snapshot
+        pin.flags.input  := 1              ' set bit 0
+        pin.flags.output := 0              ' clear bit 1
+        pin.flags.drive  := %10            ' set bits 3..2
+        pin.flags.value  := $FF            ' set bits 31..24
+
+        IF pin.flags.input AND NOT pin.flags.output
+          snapshot := pin.flags.value     ' read bits 31..24
+
+        pin.flags := 0                    ' whole-member assignment still works
+
+  nameless_single_member:
+    description: |
+      A STRUCT may be declared with exactly one unnamed BYTE, WORD, or LONG
+      member as its sole content. The struct name itself refers to the
+      backing value; bitfields are accessed directly via struct_var.bitfield.
+    syntax: "STRUCT struct_name({BYTE|WORD|LONG}{.bitfield_name[bit_or_range]}...)"
+    access: "struct_var.bitfield"
+    constraints:
+      - "Must be the first and only member"
+      - "Type must be BYTE, WORD, or LONG — not STRUCT"
+      - "No instance-count [N] is permitted on a nameless member"
+      - "Bitfield chains are fully supported"
+    sizeof_behavior: "SIZEOF(io_t) returns the size of the member type (1 for BYTE, 2 for WORD, 4 for LONG)"
+    offsetof_behavior: "OFFSETOF(io_t.ready) returns 0 (nameless member occupies offset 0)"
+    example: |
+      {Spin2_v54}
+      CON
+        STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])
+
+      VAR
+        io_t  io
+
+      PUB demo()
+        io.ready   := 1             ' direct bitfield access (no intermediate member name)
+        io.mode    := %10
+        io.counter := 100_000
+
+        IF io.error
+          io := 0                   ' whole-struct assignment
+
+  contrast_named_vs_nameless:
+    named: "STRUCT named_t(LONG flags.ready[0])         ' access:  named_var.flags.ready"
+    nameless: "STRUCT nameless_t(LONG.ready[0])            ' access:  nameless_var.ready"
+
+  bitfield_access_semantics: |
+    Bitfield access is a setup_bfield-style access — it can be read, written,
+    or used as the target of :=, ++, --, and compound-assign operators. Same
+    semantics as plain variable bitfields in earlier Spin2 versions.
+
+  bytecode_implementation:
+    note: "No new bytecodes — reuses existing bitfield-setup bytecodes"
+    mapping:
+      - bytecode: "bc_setup_bfield_0_31 + N"
+        used_for: "Single-bit bitfield at bit N (0..31)"
+      - bytecode: "bc_setup_bfield_rfvar"
+        used_for: "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+
+  errors:
+    - error: "Bitfields are only allowed for BYTE/WORD/LONG members"
+      condition: ".bitfield[...] applied to a STRUCT-typed member"
+    - error: "Bit number exceeds BYTE/WORD/LONG boundary"
+      condition: "Single bit >= 8/16/32, or upper bit of range >= boundary"
+    - error: "Lower bit number cannot exceed upper bit number"
+      condition: "lower > upper in [upper..lower]"
+
+  use_cases:
+    - "Hardware register wrappers (memory-mapped control/status registers)"
+    - "Packed status words with named bit positions"
+    - "C-style bitfield types where only one backing value is needed"
+    - "Protocol header fields decoded by bit-range"
 
 export_import:
   description: |
@@ -220,6 +367,10 @@ notes:
   - "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters"
   - "V49+: Structure layout (size, alignment) is preserved exactly when imported"
   - "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
+  - "V54+: Named bitfields on BYTE/WORD/LONG members — see v54_enhancements section and concepts/struct-bitfields.yaml"
+  - "V54+: Nameless single BYTE/WORD/LONG member form — struct_var.bitfield without intermediate member name"
+  - "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent"
+  - "V54+: No new bytecodes — reuses bc_setup_bfield_0_31 and bc_setup_bfield_rfvar"
 
 related:
   - language/spin2/methods/sizeof.yaml
@@ -229,5 +380,10 @@ related:
   - language/spin2/methods/long.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/operators/op_swap.yaml
+  - language/spin2/operators/FIELD.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
 
 oneliner: "Define composite data types with named members (requires Spin2_v45)"

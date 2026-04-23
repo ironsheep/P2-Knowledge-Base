@@ -158,6 +158,11 @@ when_to_use_field:
   use_direct_bitfield:
     - "Single values with known bit positions"
     - "One-off bitfield operations"
+  use_struct_bitfields_v54:
+    - "Named single slices of one backing byte/word/long (e.g., hardware register wrappers)"
+    - "Fixed-layout status words where each bit/range has a well-known name"
+    - "C-style bitfield types where only one backing value is needed"
+    - "See concepts/struct-bitfields.yaml for syntax and semantics"
 
 notes:
   - "Part of base Spin2 language - no version directive required"
@@ -165,10 +170,13 @@ notes:
   - "Use BYTE storage for fields up to 8 bits"
   - "Use WORD storage for fields 9-16 bits"
   - "Fields are NOT aligned - they pack contiguously"
+  - "V54+: For named bitfields on a single backing byte/word/long (rather than an indexed array), prefer STRUCT named bitfields — see concepts/struct-bitfields.yaml"
 
 related:
-  - BYTE
-  - WORD
-  - LONG
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "Access packed bit-fields in memory for efficient small-value storage"

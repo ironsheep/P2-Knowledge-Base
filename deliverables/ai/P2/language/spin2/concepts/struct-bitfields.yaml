@@ -1,0 +1,222 @@
+name: Struct Bitfields
+type: concept
+category: Data Types
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+introduced_in: "v54"
+
+description: |
+  A STRUCT member of type BYTE, WORD, or LONG may carry one or more named
+  bitfields. Each bitfield is introduced by a dot, specifies either a single
+  bit or an inclusive bit range, and is referenced at use-site with the
+  syntax struct_var.member.bitfield (named form) or struct_var.bitfield
+  (nameless form).
+
+  Two declaration forms exist:
+    - Named form:     STRUCT s(LONG flags.ready[0].mode[3..2])
+    - Nameless form:  STRUCT s(LONG.ready[0].mode[3..2])
+
+  The nameless form declares the struct with exactly one unnamed
+  BYTE/WORD/LONG member as its sole content, letting the struct name itself
+  refer to the backing value. This is primarily useful as a container for
+  named bitfields when only one backing value is needed.
+
+  STRUCT itself still requires {Spin2_v45}. The v54 bitfield syntax parses
+  unconditionally in v54 — there is no level54_symbols table — but authors
+  SHOULD include {Spin2_v54} as a declaration of intent when using these
+  features.
+
+syntax_forms:
+  named_member_bitfield:
+    form: "STRUCT struct_name({BYTE|WORD|LONG} member_name{[count]}{.bitfield_name[bit_or_range]}...)"
+    access: "struct_var.member.bitfield"
+    example: "STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])"
+
+  nameless_member:
+    form: "STRUCT struct_name({BYTE|WORD|LONG}{.bitfield_name[bit_or_range]}...)"
+    access: "struct_var.bitfield"
+    example: "STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])"
+
+bitfield_specification:
+  - form: "[N]"
+    meaning: "Single-bit bitfield at bit N"
+  - form: "[upper..lower]"
+    meaning: "Multi-bit bitfield spanning bits upper down to lower, inclusive"
+
+member_type_boundaries:
+  - member_type: "BYTE"
+    valid_bit_range: "0..7"
+  - member_type: "WORD"
+    valid_bit_range: "0..15"
+  - member_type: "LONG"
+    valid_bit_range: "0..31"
+
+nameless_member_constraints:
+  - "Must be the first and only member of the struct"
+  - "Type must be BYTE, WORD, or LONG — not STRUCT"
+  - "No instance-count [N] is permitted on a nameless member"
+  - "Bitfield chains are fully supported"
+
+chaining_rules:
+  - "Multiple bitfields may chain on one member: LONG flags.a[0].b[1].c[7..4]"
+  - "A single member may mix single-bit and multi-bit bitfields"
+  - "Bitfields may overlap (no disjointness check is performed)"
+  - "Bitfields can only be declared on BYTE, WORD, or LONG members — applying .bitfield[...] to a STRUCT-typed member is an error"
+
+preserved_operations:
+  - "Whole-member assignment (pin.flags := value) continues to work unchanged"
+  - "Whole-struct assignment (pin := other_pin) continues to work unchanged"
+  - "Whole-struct zero (pin~) and set-all (pin~~) continue to work unchanged"
+
+bitfield_access_semantics: |
+  Bitfield access is a setup_bfield-style access — it can be read, written,
+  or used as the target of :=, ++, --, and compound-assign operators. Same
+  semantics as plain variable bitfields in earlier Spin2 versions.
+
+examples:
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT pin_state_t(LONG flags.input[0].output[1].drive[3..2].value[31..24])
+
+      VAR
+        pin_state_t pin
+
+      PUB demo() | snapshot
+        pin.flags.input  := 1              ' set bit 0
+        pin.flags.output := 0              ' clear bit 1
+        pin.flags.drive  := %10            ' set bits 3..2 to %10
+        pin.flags.value  := $FF            ' set bits 31..24 to $FF
+
+        IF pin.flags.input AND NOT pin.flags.output
+          snapshot := pin.flags.value      ' read bits 31..24
+
+        pin.flags := 0                     ' whole-member assignment still works
+    description: "Named bitfields on a LONG struct member — mixed single-bit and ranged"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT io_t(LONG.ready[0].error[1].mode[3..2].counter[31..8])
+
+      VAR
+        io_t  io
+
+      PUB demo()
+        io.ready   := 1                    ' direct bitfield access (no intermediate member name)
+        io.mode    := %10
+        io.counter := 100_000
+
+        IF io.error
+          io := 0                          ' whole-struct assignment
+    description: "Nameless single LONG member with named bitfields — access without intermediate member name"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT named_t(LONG flags.ready[0])        ' access:  named_var.flags.ready
+        STRUCT nameless_t(LONG.ready[0])           ' access:  nameless_var.ready
+    description: "Contrast: named vs nameless member access path"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT status_t(BYTE flags.busy[0].fault[1].mode[4..2].valid[7])
+
+      VAR
+        status_t status
+
+      PUB check() : ok
+        IF status.flags.fault
+          status.flags.busy := 0
+        ok := status.flags.valid
+    description: "BYTE member with 8-bit span of bitfields (bits 0..7)"
+
+  - code: |
+      {Spin2_v54}
+      CON
+        STRUCT cfg_t(WORD ctrl.enable[0].direction[1].speed[7..4].prescaler[15..8])
+
+      VAR
+        cfg_t cfg
+
+      PUB init()
+        cfg.ctrl.enable := 1
+        cfg.ctrl.speed  := $F
+    description: "WORD member with bits spanning full 16-bit range"
+
+errors:
+  - error: "Bitfields are only allowed for BYTE/WORD/LONG members"
+    condition: ".bitfield[...] applied to a STRUCT-typed member"
+  - error: "Bit number exceeds BYTE/WORD/LONG boundary"
+    condition: "Single bit >= 8/16/32, or upper bit of range >= boundary"
+  - error: "Lower bit number cannot exceed upper bit number"
+    condition: "lower > upper in [upper..lower]"
+
+bytecode_implementation:
+  description: "No new bytecodes — v54 reuses the existing bitfield-setup bytecodes introduced for plain variable bitfields"
+  bytecodes:
+    - bytecode: "bc_setup_bfield_0_31 + N"
+      used_for: "Single-bit bitfield at bit N (0..31)"
+    - bytecode: "bc_setup_bfield_rfvar"
+      used_for: "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+
+version_directive_guidance:
+  enforcement: "Not enforced by PNut v54"
+  rationale: |
+    spin2_version is 54, so {Spin2_v54} is a legal directive, but no
+    level54_symbols table was added — the new STRUCT syntax parses
+    unconditionally.
+  recommendation: "Authors should include {Spin2_v54} as a declaration of intent, even though compilation will succeed without it."
+  minimum_compiler: "v54"
+
+comparison_with_field_operator:
+  description: |
+    Struct bitfields (v54) and the FIELD operator both provide named/indexed
+    access to bit slices, but they serve different use cases.
+  struct_bitfields:
+    use_when:
+      - "Named single slices of one backing byte/word/long"
+      - "Hardware register wrappers (each field has a well-known name)"
+      - "Packed status words with fixed layout"
+      - "C-style bitfield types where only one backing value is needed"
+    compile_time: "Bit layout is fixed at compile time"
+    storage: "One backing byte/word/long"
+    access_syntax: "struct_var.member.bitfield or struct_var.bitfield"
+  field_operator:
+    use_when:
+      - "Arrays of many small values (flag arrays, state machine states, ID tables)"
+      - "Runtime indexing across a packed storage region"
+      - "Memory-efficient storage of hundreds/thousands of small values"
+    runtime: "Bit width is encoded in a field pointer; index selects slot"
+    storage: "Backing region of arbitrary size"
+    access_syntax: "FIELD[fieldPtr][index]"
+
+use_cases:
+  - "Hardware register wrappers — model memory-mapped control/status registers as structs with named bitfields"
+  - "Packed status words — give readable names to bits of a flags byte/word/long"
+  - "C-style bitfield types — emulate C struct { unsigned x:3; unsigned y:5; }"
+  - "Protocol header fields — decode packed protocol headers by bit-range"
+
+notes:
+  - "STRUCT itself requires {Spin2_v45} or later at start of source file"
+  - "v54 bitfield syntax is not enforced by a version directive, but {Spin2_v54} is recommended as declaration of intent"
+  - "Bitfields can chain indefinitely on one member, and may overlap"
+  - "Whole-member and whole-struct assignment are preserved"
+  - "Bitfield access reuses existing bc_setup_bfield_0_31 and bc_setup_bfield_rfvar bytecodes — zero runtime overhead vs plain variable bitfields"
+  - "SIZEOF(nameless_struct_t) returns the size of the backing member type (1 for BYTE, 2 for WORD, 4 for LONG)"
+  - "OFFSETOF(nameless_t.bitfield) returns 0 — a nameless member occupies offset 0 of its struct"
+
+related:
+  - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/keywords/BYTE.yaml
+  - language/spin2/keywords/WORD.yaml
+  - language/spin2/keywords/LONG.yaml
+  - language/spin2/methods/sizeof.yaml
+  - language/spin2/methods/offsetof.yaml
+  - language/spin2/operators/FIELD.yaml
+  - language/spin2/idioms/bit-manipulation.yaml
+
+oneliner: "Named bitfields on BYTE/WORD/LONG struct members, with optional nameless single-member form (introduced in v54)"

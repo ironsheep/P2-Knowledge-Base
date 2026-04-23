@@ -158,6 +158,7 @@ notes:
   - "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts"
   - "Works with nested structures to any depth"
   - "Array indexing supported at any level of nesting"
+  - "V54+: For a nameless single-member STRUCT (e.g., STRUCT io_t(LONG.ready[0])), the nameless member occupies offset 0 — OFFSETOF(io_t.ready) returns 0"
 
 timing:
   description: "Compile-time constant"
@@ -170,6 +171,7 @@ related:
   - language/spin2/keywords/WORD.yaml
   - language/spin2/keywords/LONG.yaml
   - language/spin2/operators/typed-pointers.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
 
 see_also:
   - "Structure definitions"

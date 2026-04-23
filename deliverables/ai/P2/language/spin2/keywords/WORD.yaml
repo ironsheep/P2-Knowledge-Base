@@ -38,6 +38,9 @@ usage_contexts:
   - context: "Data constructor"
     syntax: "WORD(val1, val2, ...)"
     example: "WORD($1000, $2000)"
+  - context: "STRUCT member with named bitfields (v54+)"
+    syntax: "STRUCT s(WORD member.bitfield[N_or_range]...)  or  STRUCT s(WORD.bitfield[N_or_range]...)"
+    example: "STRUCT cfg_t(WORD ctrl.enable[0].speed[7..4].prescaler[15..8])"
 
 type_propagation: |
   In VAR blocks, WORD is sticky — applies to all names on the same line.
@@ -55,14 +58,17 @@ notes:
   - "Signed range: -32,768 to 32,767"
   - "Word addresses should be word-aligned (even addresses) for optimal performance"
   - "Default type is LONG if no type specifier given"
+  - "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/BYTE.yaml
   - language/spin2/keywords/LONG.yaml
+  - language/spin2/keywords/STRUCT.yaml
   - language/spin2/methods/word.yaml
   - language/spin2/methods/wordfill.yaml
   - language/spin2/methods/wordmove.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/concepts/type-propagation.yaml
+  - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "16-bit data type used for declarations, memory access, pointers, and data constructors"
