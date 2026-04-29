@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-04-23T20:44:00.082562",
+    "generated": "2026-04-29T20:06:16.306565",
     "total_entries": 1032,
     "total_categories": 49,
     "total_aliases": 1001,
@@ -3705,7 +3705,7 @@
     },
     "p2kbArchFifo": {
       "path": "deliverables/ai/P2/architecture/fifo.yaml",
-      "mtime": 1764888448
+      "mtime": 1777493071
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
@@ -4833,7 +4833,7 @@
     },
     "p2kbPasm2CogHubExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml",
-      "mtime": 1768613644
+      "mtime": 1777493071
     },
     "p2kbPasm2ConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml",
@@ -4849,7 +4849,7 @@
     },
     "p2kbPasm2ExecutionModes": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/execution_modes.yaml",
-      "mtime": 1764449566
+      "mtime": 1777493071
     },
     "p2kbPasm2InstructionSkipping": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/instruction_skipping.yaml",
@@ -5145,7 +5145,7 @@
     },
     "p2kbPasm2Hubexec": {
       "path": "deliverables/ai/P2/language/pasm2/hubexec.yaml",
-      "mtime": 1764449566
+      "mtime": 1777493071
     },
     "p2kbPasm2Hubset": {
       "path": "deliverables/ai/P2/language/pasm2/hubset.yaml",
@@ -6301,7 +6301,7 @@
     },
     "p2kbSpin2InlinePasm2": {
       "path": "deliverables/ai/P2/language/spin2/concepts/inline_pasm2.yaml",
-      "mtime": 1764977160
+      "mtime": 1777493071
     },
     "p2kbSpin2MethodPointers": {
       "path": "deliverables/ai/P2/language/spin2/concepts/method-pointers.yaml",
@@ -6381,7 +6381,7 @@
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
-      "mtime": 1768613644
+      "mtime": 1777493071
     },
     "p2kbSpin2MethodDefinition": {
       "path": "deliverables/ai/P2/language/spin2/constructs/method_definition.yaml",
