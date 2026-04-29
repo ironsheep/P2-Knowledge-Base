@@ -14,8 +14,10 @@ compiler_encoding:
   operandFormat: 15
   rawValue: 32608
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "9...16 (cog) / 9...26 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit"
 description: '{WC/WZ/WCZ}                                                                                                                            9...16
   1 / 9...26'
 compiler_category: Memory and I/O

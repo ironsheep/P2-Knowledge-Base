@@ -18,13 +18,13 @@ hardware_stacks:
       PUSHA:
         syntax: "PUSHA value"
         operation: "hub[--PTRA] = value"
-        timing: "3 cycles"
+        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per pusha.yaml encoding)"
         description: "Pre-decrement push"
       
       POPA:
         syntax: "POPA dest"
         operation: "dest = hub[PTRA++]"
-        timing: "9 cycles"
+        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per popa.yaml encoding)"
         description: "Post-increment pop"
       
       manual:
@@ -41,12 +41,12 @@ hardware_stacks:
       PUSHB:
         syntax: "PUSHB value"
         operation: "hub[--PTRB] = value"
-        timing: "3 cycles"
+        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per pushb.yaml encoding)"
       
       POPB:
         syntax: "POPB dest"
         operation: "dest = hub[PTRB++]"
-        timing: "9 cycles"
+        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per popb.yaml encoding)"
 
   call_stack:
     type: "Internal hardware stack"
@@ -226,12 +226,15 @@ interrupt_considerations:
 
 performance:
   operation_cycles:
-    PUSHA: "3 cycles"
-    POPA: "9 cycles"
-    WRLONG_PTR: "3 cycles"
-    RDLONG_PTR: "9 cycles"
-    CALL: "4 cycles"
-    RET: "4 cycles"
+    PUSHA: "3 clocks (range 3...10 cog / 3...20 hub-exec)"
+    POPA: "9 clocks (range 9...16 cog / 9...26 hub-exec)"
+    PUSHB: "3 clocks (range 3...10 cog / 3...20 hub-exec)"
+    POPB: "9 clocks (range 9...16 cog / 9...26 hub-exec)"
+    WRLONG_PTR: "3 clocks (range 3...10 cog / 3...20 hub-exec)"
+    RDLONG_PTR: "9 clocks (range 9...16 cog / 9...26 hub-exec)"
+    CALL: "4 clocks cog / 13-20 clocks hub-exec"
+    RET: "4 clocks cog / 13-20 clocks hub-exec"
+  source: "Per per-instruction YAMLs (pusha/popa/pushb/popb/wrlong/rdlong/call/ret)"
 
   optimization_tips:
     - "Use CALLA/CALLB for leaf functions"

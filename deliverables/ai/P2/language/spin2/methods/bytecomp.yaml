@@ -33,8 +33,12 @@ notes:
 - Efficient block comparison operation
 - Case-sensitive byte-by-byte comparison
 timing:
-  description: Varies based on count
-  cycles: ~8 + count clock cycles typical
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
 - WORDCOMP
 - LONGCOMP

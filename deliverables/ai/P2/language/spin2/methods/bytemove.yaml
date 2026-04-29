@@ -37,8 +37,10 @@ parameters:
 returns: "none"
 
 timing:
-  small_copy: "~8 + (2 * count) clock cycles"
-  large_copy: "Optimized for larger transfers"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement.
   overlap_handling: "Automatic, no performance penalty"
 
 direction_logic:

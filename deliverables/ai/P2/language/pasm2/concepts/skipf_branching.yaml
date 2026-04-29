@@ -61,20 +61,27 @@ special_branching_modes:
 branch_timing:
   pattern_execution:
     - "Each instruction uses one pattern bit"
-    - "Skipped instructions take 0 cycles"
-    - "Executed instructions normal timing"
-    - "Branch occurs in same cycle as last pattern bit"
+    - "Skipped instructions in cog/LUT memory: 0 clocks (Silicon Doc v35: 'leaping over them in cog/LUT memory (no clock penalty)')"
+    - "Skipped instructions when in hub-exec: 2 clocks each (Silicon Doc v35: 'If SKIPF is used in hub exec, it will revert to SKIP behavior, canceling instructions in the pipeline, instead of stepping over them')"
+    - "Skipped instructions when already in the pipeline (cancel case): 2 clocks each (Silicon Doc v35: 'effectively turning them into 2-clock NOP instructions')"
+    - "Executed instructions: normal per-instruction timing"
     
   pipeline_effects:
-    - "No flush for skipped instructions"
-    - "Branch at end has normal 2-cycle penalty"
-    - "Overall faster than conditional branches"
+    - "No flush for instructions leaped over in cog/LUT"
+    - "Pipeline-cancel cases turn skipped ops into 2-clock NOPs"
+    - "Overall faster than conditional branches when leaping over multiple instructions in cog/LUT"
 
-  total_cycles:
-    formula: "executed_instructions + 2 (for branch)"
-    example: |
-      ' Pattern %10101010 (4 executed, 4 skipped)
-      ' Total: 4 + 2 = 6 cycles
+  total_clocks:
+    cog_lut_leap_case:
+      formula: "executed_instructions × 2 + 0 × skipped"
+      example: |
+        ' Pattern %10101010 (4 executed, 4 skipped) in cog/LUT
+        ' Total: 4 × 2 + 0 × 4 = 8 clocks (not counting any branch at the end)
+    cancel_case_or_hub_exec:
+      formula: "executed_instructions × 2 + skipped × 2"
+      example: |
+        ' Pattern %10101010 (4 executed, 4 skipped) in hub-exec or cancel case
+        ' Total: 4 × 2 + 4 × 2 = 16 clocks
 
 advanced_patterns:
   conditional_return:
@@ -170,9 +177,11 @@ debugging_skipf_branches:
 
 performance_comparison:
   vs_conditional_jumps:
-    skipf: "N executed + 2 cycles"
-    jumps: "N instructions + 2×branches"
-    advantage: "Fewer branch penalties"
+    skipf_cog_lut_leap: "N executed × 2 clocks + 0 for skipped (per Silicon Doc verbatim)"
+    skipf_hub_or_cancel: "N executed × 2 clocks + skipped × 2 clocks (NOP cancel)"
+    conditional_jumps_cog: "N instructions × 2 clocks + 4 clocks per cog branch instruction (+5+ clocks for first instruction after each branch per Silicon Doc pipeline-flush rule)"
+    conditional_jumps_hub: "N instructions × 2 clocks + 13-20 clocks per hub-exec branch (FIFO refill)"
+    advantage: "Fewer branch penalties when leaping over multiple instructions in cog/LUT"
     
   vs_skip_plus_jump:
     combined: "Single instruction setup"

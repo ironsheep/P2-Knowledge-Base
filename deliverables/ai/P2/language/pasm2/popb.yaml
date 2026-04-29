@@ -7,8 +7,10 @@ encoding:
   z: Result = 0
   clocks: '9...16 *'
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "9...16 (cog) / 9...26 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Reads long from hub at --PTRB; hub-window dependent"
 description: Read long from hub address --PTRB into D.
 flags_affected:
   C: Set to MSB of long (bit 31 of popped value)

@@ -103,8 +103,13 @@ notes:
   - "Hardware ensures atomic operations - no race conditions"
 
 timing:
-  description: "Hub operation"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "LOCKNEW"
+  underlying_pasm_timing: "4 clocks (range 4...11 hub-window dependent; per locknew.yaml encoding)"
+
 
 related:
   - language/spin2/methods/lockret.yaml

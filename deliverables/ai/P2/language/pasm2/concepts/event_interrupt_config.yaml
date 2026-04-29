@@ -355,13 +355,20 @@ priority_and_nesting:
     - "Flags saved per level"
     - "Debug ISR must handle full nesting"
 
-  latency:
-    response_time: "3-4 cycles from event to ISR"
+  dispatch:
+    mechanism: |
+      Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
+      by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
+      while holding the program counter at its current value, so that the
+      interrupt later returns to the address saved in IRETx."
+    entry_overhead_cogexec: "4 clocks (per calld.yaml encoding)"
+    entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
+    exit_overhead: "Same as entry (RETIx/RESIx are CALLD instructions)"
+    deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/SETQ2/REP/STALLI/WAITx/AUGS/AUGD/XBYTE/etc."
     factors:
-      - "Current instruction completion"
-      - "Pipeline state"
-      - "Higher priority interrupts"
-    debug_impact: "Debug ISR adds ~20 cycles overhead"
+      - "Current instruction completion (deferral conditions)"
+      - "Higher priority interrupts in flight"
+      - "Execution mode (cog vs hub)"
 
 best_practices:
   interrupt_design:

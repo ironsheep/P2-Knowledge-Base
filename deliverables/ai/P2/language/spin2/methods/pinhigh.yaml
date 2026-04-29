@@ -26,8 +26,13 @@ parameters:
 returns: "none"
 
 timing:
-  execution: "2 clock cycles in cog execution"
-  hub_access: "8-19 clock cycles when executed from hub"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "DRVH"
+  underlying_pasm_timing: "2 clocks (fixed; same in cogexec/lutexec/hubexec — pin instructions have no execution-mode distinction per per-instruction YAMLs)"
+  pin_propagation: "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
 
 examples:
   - code: "PINHIGH(56)"

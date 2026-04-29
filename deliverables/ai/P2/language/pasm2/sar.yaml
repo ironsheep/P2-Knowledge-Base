@@ -45,7 +45,7 @@ syntax_variants:
 - SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
   MSBs to that of the original
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS

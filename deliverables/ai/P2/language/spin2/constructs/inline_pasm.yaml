@@ -45,7 +45,7 @@ execution_model:
     - "REP and ALTI work (cog-exec)"
     - "Branches inside the block are 4 clocks (cog branch), NOT 13+ (which would be the hub-exec branch refill cost)"
     - "FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are usable here because this is cog-exec (they would be forbidden in hub-exec)"
-    - "Returning to Spin2 after END takes ~20 clocks of interpreter overhead"
+    - "Returning to Spin2 after END incurs interpreter dispatch overhead (we do not publish a clock count for this path because we do not have a verifiable measurement)"
 
 syntax_forms:
   - form: "basic_inline"
@@ -92,9 +92,18 @@ syntax_forms:
 
 why_inline_pasm_matters:
   performance: |
-    Spin2 bytecode: ~50-200 clocks per operation
-    PASM2: 2-8 clocks per operation
-    10-100x performance improvement possible
+    Inline PASM2 runs at the deterministic PASM2 timings cited in the per-
+    instruction YAMLs:
+    - Typical ALU ops: 2 clocks each (ADD/MOV/AND/OR/XOR/shifts/etc.)
+    - Cog branches (JMP/CALL/RET): 4 clocks
+    - Cog hub I/O (RDLONG/WRLONG): 9-16 / 3-10 clocks (egg-beater dependent)
+    - CORDIC ops (QMUL/QDIV/QSQRT/QROTATE): 55-clock latency, 8-clock issue interval
+    
+    Spin2 method invocations execute via the bytecode interpreter; we do not
+    publish per-method clock counts because we do not have a verifiable
+    measurement. The performance benefit of inline PASM is that you replace
+    interpreter-dispatched bytecode with directly-executed cog instructions
+    at their deterministic timings.
   
   determinism: |
     PASM2 provides cycle-accurate timing:

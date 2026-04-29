@@ -49,7 +49,7 @@ architecture:
     
     - method: "interrupt"
       description: "Trigger interrupt on ATN"
-      latency: "3-8 clock interrupt latency"
+      latency: "Silicon Doc v35 INTERRUPTS section describes the dispatch mechanism (interrupt branches realized by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline) but does not publish a specific clock-count latency. We do not publish a number here because we do not have a verifiable measurement."
 
 instructions:
   - instruction: "COGATN"
@@ -278,7 +278,7 @@ performance_characteristics:
   response_latency:
     polling: "Varies with polling frequency"
     waiting: "0 clocks after signal arrives"
-    interrupt: "3-8 clocks to enter ISR"
+    interrupt: "Silicon Doc v35 does not publish a specific clock-count latency for ATN-triggered interrupt entry. Mechanism is documented (CALLD insertion into pipeline) but timing is not."
   
   bandwidth_impact: "Zero hub bandwidth consumed"
   

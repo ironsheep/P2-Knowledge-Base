@@ -39,8 +39,12 @@ notes:
   - "If MaxCount is 0, nothing is copied"
   - "Destination buffer must be at least MaxCount bytes"
 timing:
-  description: "Varies with string length"
-  cycles: "~8 + (2 per character) clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
   - STRCOMP
   - STRSIZE

@@ -37,9 +37,12 @@ parameters:
 returns: "none"
 
 timing:
-  performance: "~8 + (count * 2) clock cycles"
-  optimization: "Uses efficient hub block operations"
-  vs_loop: "5-10x faster than manual loop"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 
 examples:
   - code: |

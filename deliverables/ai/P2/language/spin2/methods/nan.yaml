@@ -38,8 +38,12 @@ notes:
   - "IEEE 754 floating-point standard"
   - "Important for robust float handling"
 timing:
-  description: "Immediate bit check"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
   - Float math operators
 see_also:

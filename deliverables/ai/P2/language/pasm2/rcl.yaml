@@ -35,7 +35,7 @@ syntax_variants:
 - RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs
   to C.
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS

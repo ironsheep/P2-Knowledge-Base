@@ -12,8 +12,10 @@ architecture:
   address_width: 20
   pipeline_stages: 5
   pipeline_type: "In-order scalar"
-  execution_time: "2 clocks when pipeline full"
-  branch_penalty: "5-8 clocks (pipeline flush)"
+  execution_time: "2 clocks for typical ALU ops when pipeline full (Silicon Doc v35: '2-clock execution for all math and logic instructions')"
+  branch_instruction_time: "4 clocks (per JMP/CALL/RET per-instruction YAMLs)"
+  post_branch_first_instruction: "At least 5 clocks (Silicon Doc v35 verbatim: 'Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least five clock cycles'). This is a separate fact from the branch instruction time."
+  conditionally_canceled_instruction: "Still 2 clocks (Silicon Doc v35: 'Any instruction that is conditionally canceled will still move through the pipeline without stalling or executing, but taking two clock cycles')"
 
 memory:
   cog_ram:
@@ -120,10 +122,11 @@ execution_modes:
     
   hub_execution:
     pc_range: "$400-$FFFFF"
-    instruction_fetch: "32-bit from hub via FIFO"
+    instruction_fetch: "32-bit from hub via the (cogs+11)=19-stage prefetch FIFO"
     pc_increment: 4
-    timing: "2+ clocks (FIFO dependent)"
-    fifo_depth: 19
+    timing_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
+    timing_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc v35 verbatim"
+    fifo_depth: "(cogs+11) = 19 stages on 8-cog P2 (Silicon Doc verbatim)"
 
 interrupts:
   levels:
@@ -136,10 +139,34 @@ interrupts:
     events: "Any of 16 hardware events"
     software: "TRGINTx instructions"
     
-  latency:
-    best_case: "3 clocks"
-    typical: "5-10 clocks"
-    worst_case: "Depends on interruptible boundary"
+  dispatch_mechanism: |
+    Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
+    by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
+    while holding the program counter at its current value, so that the
+    interrupt later returns to the address saved in IRETx."
+  
+  entry_overhead:
+    cogexec: "4 clocks for the dispatched CALLD (per calld.yaml encoding)"
+    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch; per calld.yaml encoding)"
+    note: "This is the minimum entry overhead, assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
+  
+  exit_overhead:
+    reti_resi: "4 clocks (cog) / 13-20 clocks (hub) per reti1/2/3.yaml and resi1/2/3.yaml"
+    note: "RETI1/2/3 and RESI1/2/3 are themselves CALLD instructions (RETIx = CALLD INB,IRETx WCZ; RESIx = CALLD IJMPx,IRETx WCZ)."
+  
+  round_trip_overhead:
+    cogexec_minimum: "8 clocks (4 entry + 4 exit), excluding the ISR body"
+    hubexec_minimum: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
+  
+  deferral_conditions:
+    description: "Silicon Doc v35 verbatim list — the interrupt branch is held off while any of these are in progress"
+    conditions:
+      - "ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE must not be executing"
+      - "AUGS must not be executing or waiting for an S/# instruction"
+      - "AUGD must not be executing or waiting for a D/# instruction"
+      - "REP must not be executing or active"
+      - "STALLI must not be executing or active"
+      - "The cog must not be stalled in any WAITx instruction"
     
   nesting:
     int1_can_interrupt: ["INT2", "INT3", "main"]
@@ -206,10 +233,14 @@ performance:
   parallel: "8 COGs = 640 MIPS total"
   
   instruction_timing:
-    alu_ops: "2 clocks"
-    branches: "5-8 clocks"
-    hub_ops: "2-9 clocks"
-    cordic_ops: "2-56 clocks"
+    alu_ops: "2 clocks (typical math/logic; Silicon Doc verbatim)"
+    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 5+ clocks (Silicon Doc verbatim pipeline flush)"
+    hub_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE — hub-window dependent"
+    hub_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE — hub-window dependent"
+    hubexec_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
+    hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc verbatim"
+    cordic_result_latency: "55 clocks (Silicon Doc verbatim); 8-clock issue interval per cog"
+    cordic_getqx_getqy_when_empty: "2 clocks (Silicon Doc verbatim)"
 
 programming_model:
   registers_as_memory: "All 496 registers are general purpose"

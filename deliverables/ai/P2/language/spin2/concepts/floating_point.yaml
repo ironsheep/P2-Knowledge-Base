@@ -101,20 +101,20 @@ special_results:
   "Underflow": "0"
 
 performance_comparison:
-  note: "Float operations are software-implemented, significantly slower than integer"
-  cycles:
-    addition:
-      integer: "~1 cycle"
-      float: "~100+ cycles"
-    multiplication:
-      integer: "~8 cycles"
-      float: "~200+ cycles"
-    division:
-      integer: "~16 cycles"
-      float: "~300+ cycles"
-    square_root:
-      integer: "~50 cycles"
-      float: "~400+ cycles"
+  note: |
+    Spin2 floating-point operations are software-implemented; they execute
+    via the bytecode interpreter and call into a software float library.
+    We do not publish per-operation clock counts because we do not have
+    a verifiable measurement.
+    
+    Integer operations in Spin2 also execute via the bytecode interpreter
+    and likewise are not given a clock count here.
+    
+    For deterministic per-instruction timing, see the underlying PASM ops:
+    - Integer add/sub/mul/and/or/xor/shift: 2 clocks each (per ADD/SUB/MUL/etc. YAMLs)
+    - QMUL via CORDIC: 55-clock latency, 8-clock issue interval (per qmul.yaml + Silicon Doc v35)
+    - Hardware divide via CORDIC (QDIV): 55-clock latency (per qdiv.yaml)
+    - Hardware square root via CORDIC (QSQRT): 55-clock latency (per qsqrt.yaml)
 
 when_to_use:
   use_float:

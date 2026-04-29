@@ -67,19 +67,22 @@ memory_instructions:
   byte_access:
     rdbyte: "Read byte from hub"
     wrbyte: "Write byte to hub"
-    timing: "2-9 clocks"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdbyte.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrbyte.yaml encoding"
     
   word_access:
     rdword: "Read word (16-bit) from hub"
     wrword: "Write word to hub"
     alignment: "Must be word-aligned"
-    timing: "2-9 clocks"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdword.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrword.yaml encoding"
     
   long_access:
     rdlong: "Read long (32-bit) from hub"
     wrlong: "Write long to hub"
     alignment: "Must be long-aligned"
-    timing: "2-9 clocks"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdlong.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrlong.yaml encoding"
     
   block_transfers:
     setq_rdlong: "Block read using SETQ + RDLONG"
@@ -154,10 +157,12 @@ performance:
     sustained_write: "Clock_freq / 8 bytes/second per COG"
     burst: "4 bytes per clock during block transfer"
     
-  latency:
-    best_case: "2 clocks"
-    worst_case: "9 clocks"
-    average: "5.5 clocks"
+  hub_window_slot_wait:
+    description: "This is the wait for a cog's hub-rotation slot to come around — NOT the full hub-instruction time"
+    best_case: "0 clocks (slot is already current)"
+    worst_case: "7 clocks (just missed the slot; 8-cog rotation)"
+    average: "3.5 clocks"
+    note: "Total hub-instruction time = slot wait + hub access; see per-instruction YAMLs (rdlong/wrlong/etc.) for end-to-end ranges"
     
   optimization:
     block_transfers: "Use SETQ + RD/WRLONG for efficiency"

@@ -265,13 +265,18 @@ best_practices:
     rationale: "Prevents security vulnerabilities"
 
 performance_impact:
-  single_step_overhead:
-    per_instruction: "~10 clocks for minimal ISR"
-    with_tracing: "~20-30 clocks including hub write"
+  dispatch_overhead:
+    description: "Debug interrupt uses the same CALLD-based dispatch mechanism as INT1/INT2/INT3 (see architecture/interrupts.yaml)"
+    cogexec_entry: "4 clocks for the dispatched CALLD"
+    hubexec_entry: "13-20 clocks (FIFO refill)"
+    cogexec_exit: "4 clocks for the RETIx-equivalent return"
+    hubexec_exit: "13-20 clocks"
+    cogexec_round_trip_minimum: "8 clocks (excluding ISR body)"
+    note: "Total per-instruction single-step cost = round-trip overhead + ISR body length. We do not publish a single 'minimal ISR' clock count because the ISR body is user-defined."
   
   breakpoint_overhead:
-    on_hit: "ISR execution time only"
-    when_not_hit: "0 clocks"
+    on_hit: "ISR dispatch overhead + ISR body execution time"
+    when_not_hit: "0 additional clocks (debug interrupt only fires when its event condition is met)"
   
   memory_usage:
     trace_buffer: "Typically 4KB-16KB in hub"

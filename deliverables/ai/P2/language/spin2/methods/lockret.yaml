@@ -36,8 +36,13 @@ notes:
   - "Important to return locks to prevent exhaustion"
   - "No error if invalid lock ID"
 timing:
-  description: "Hub operation"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "LOCKRET"
+  underlying_pasm_timing: "2 clocks (range 2...9; per lockret.yaml encoding)"
+
 related:
   - LOCKNEW
   - LOCKTRY

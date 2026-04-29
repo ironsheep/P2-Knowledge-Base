@@ -430,8 +430,8 @@ integration_rules:
     hub_safety: "All hub RAM accessible, coordinate shared access"
     
   performance_considerations:
-    cog_execution: "2 clocks per instruction, fastest"
-    hub_execution: "Variable speed, 4+ clocks per instruction"
+    cog_execution: "2 clocks per typical ALU instruction; 4 clocks per branch (per per-instruction YAMLs)"
+    hub_execution: "Sequential code: 2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO). Branches: minimum 13 clocks (+1 if not long-aligned, Silicon Doc v35 verbatim)."
     variable_access: "$1E0-$1EF fastest, hub variables slower"
 
 # Validation metadata

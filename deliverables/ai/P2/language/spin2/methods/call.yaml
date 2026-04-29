@@ -48,8 +48,12 @@ notes:
   - "Useful for performance-critical code"
   - "PASM code must be in DAT section"
 timing:
-  description: "PASM execution time + call overhead"
-  cycles: "~20 + PASM cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
   - REGEXEC
   - REGLOAD

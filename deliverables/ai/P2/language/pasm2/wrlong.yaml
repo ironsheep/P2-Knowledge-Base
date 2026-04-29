@@ -14,8 +14,10 @@ compiler_encoding:
   operandFormat: 16
   rawValue: 33164
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "3...10 (cog) / 3...20 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Hub-window dependent; minimum 3 clocks when window is hit"
 description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes
   cog/LUT block transfer.              3...10 1 / 3...20
 flags_affected:

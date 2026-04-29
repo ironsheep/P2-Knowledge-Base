@@ -7,8 +7,10 @@ encoding:
   z: —
   clocks: '3...10*'
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "3...10 (cog) / 3...20 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Writes long to hub at PTRB++; hub-window dependent"
 description: 'Write long in D[31:0] to hub address PTRB++.'
 flags_affected:
   C: No effect

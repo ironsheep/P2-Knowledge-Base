@@ -337,8 +337,10 @@ method_vs_register_tradeoffs:
     use_when: "Performance critical or complex bit patterns needed"
 
 timing_considerations:
-  method_calls: "~10-20 clock cycles overhead"
-  register_access: "~2-4 clock cycles"
+  # Per-call clock counts removed: Spin2 methods execute via the bytecode
+  # interpreter; we do not publish per-call clock counts because we do not
+  # have a verifiable measurement. Underlying PASM ops (DRVH/DRVL/RDPIN/etc.)
+  # are 2 clocks each — see individual method YAMLs for citations.
   pin_propagation: "3-7ns output delay"
   when_speed_matters: "Use inline PASM2 or direct register access"
 

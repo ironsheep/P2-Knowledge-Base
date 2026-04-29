@@ -41,8 +41,13 @@ notes:
   - "Useful for cooperative multitasking"
   - "Can be used in main loop for interrupt-like behavior"
 timing:
-  description: "Immediate return"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "POLLATN"
+  underlying_pasm_timing: "2 clocks (fixed)"
+
 related:
   - WAITATN
   - COGATN

@@ -7,8 +7,10 @@ encoding:
   z: —
   clocks: '3...10*'
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "3...10 (cog) / 3...20 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Hub-window dependent; minimum 3 clocks when window is hit"
 description: Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10
   1 / 3...20
 flags_affected:

@@ -38,15 +38,18 @@ architecture:
   event_routing:
     - destination: "interrupts"
       description: "Events can trigger INT1/2/3"
-      latency: "3-8 clock cycles"
+      dispatch_mechanism: "Hardware inserts 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline (Silicon Doc v35 verbatim)"
+      entry_overhead_cogexec: "4 clocks (per calld.yaml encoding)"
+      entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
+      deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/REP/STALLI/WAITx etc."
     
     - destination: "wait_release"
       description: "Events can release WAIT instructions"
-      latency: "0 clock cycles"
+      latency: "0 additional clocks beyond the WAITx instruction's normal completion"
     
     - destination: "polling"
       description: "Events can be polled via POLL instructions"
-      latency: "2 clock cycles"
+      timing: "POLLxxx instructions are 2 clocks (per per-instruction YAMLs)"
 
 event_selectors:
   SE1:
@@ -411,12 +414,16 @@ best_practices:
     rationale: "Prevents conflicts in multi-COG systems"
 
 performance_characteristics:
-  event_detection_latency: "1 clock cycle"
+  event_detection: |
+    Event flags are set by hardware at the moment the event condition is
+    evaluated; the flag is then visible to POLLxxx/WAITxxx/JATN/etc. on
+    subsequent instructions. Silicon Doc does not publish a specific
+    detection-to-flag clock count.
   
   response_latency:
-    polling: "2 clocks to check flag"
-    waiting: "0 clocks after event"
-    interrupt: "3-8 clocks to ISR"
+    polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"
+    waiting: "WAITxxx releases on the same clock the event flag becomes set"
+    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per calld.yaml; Silicon Doc v35 dispatch mechanism)"
   
   simultaneous_events: "All 4 SE events tracked independently"
   

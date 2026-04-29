@@ -197,8 +197,9 @@ performance:
   overhead_per_bytecode: "6 clocks"
   throughput: "At 160MHz: 26.7M bytecodes/second (overhead only)"
   comparison:
-    software_dispatch: "~20-40 clocks overhead"
-    xbyte_dispatch: "6 clocks overhead"
+    software_dispatch: "9 clocks overhead per bytecode (Silicon Doc v35 verbatim: 'takes only 2+3+4, or 9, clocks to get the next bytecode, look it up, then execute that bytecode's routine')"
+    xbyte_dispatch: "6 clocks overhead per bytecode (Silicon Doc v35 verbatim: '6-clock custom-bytecode executor'; 'total overhead of only 6 clocks, excluding the bytecode routine')"
+    minimum_xbyte_loop: "8 clocks (Silicon Doc verbatim: 'The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks')"
     improvement: "3-7x faster dispatch"
 
 applications:

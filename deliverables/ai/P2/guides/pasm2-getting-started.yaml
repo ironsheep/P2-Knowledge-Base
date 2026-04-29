@@ -213,7 +213,7 @@ register_model:
   hub_memory:
     size: "512KB shared memory"
     access: "RDLONG/RDWORD/RDBYTE, WRLONG/WRWORD/WRBYTE"
-    timing: "~20 clock cycles per access"
+    timing: "Reads: 9-16 clocks (cog) / 9-26 clocks (hub-exec); Writes: 3-10 clocks (cog) / 3-20 clocks (hub-exec). Hub-window dependent (egg-beater). Per per-instruction YAMLs."
     usage: "Shared data, large buffers, communication"
 
 core_instructions:
@@ -341,13 +341,13 @@ core_instructions:
     RDLONG:
       syntax: "RDLONG  D, PTRA/PTRB/address"
       description: "Read long (32-bit) from hub memory"
-      timing: "~20 clocks"
+      timing: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdlong.yaml encoding"
       example: "RDLONG  value, PTRA++"
       
     WRLONG:
       syntax: "WRLONG  D, PTRA/PTRB/address"
       description: "Write long to hub memory"
-      timing: "~20 clocks"
+      timing: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrlong.yaml encoding"
       example: "WRLONG  result, PTRA"
       
     RDBYTE:
@@ -585,7 +585,7 @@ debugging_support:
 critical_gotchas:
   - "All instructions are 32-bit (one long per instruction)"
   - "Immediate values limited to 9 bits (0-511) unless using ##"
-  - "Hub memory access is slow (~20 clocks) compared to cog/LUT"
+  - "Hub memory access is slower than cog/LUT: RDLONG/etc. take 9-16 clocks (cog) / 9-26 (hub-exec); writes 3-10 / 3-20. Per per-instruction YAMLs."
   - "PTRA/PTRB auto-increment is AFTER the access (post-increment)"
   - "Flags (C, Z) persist until explicitly changed"
   - "Labels must start in column 1 or use local syntax (.label)"
@@ -618,9 +618,13 @@ flag_behavior:
 
 timing_considerations:
   instruction_timing:
-    most_instructions: "2 clock cycles"
-    hub_access: "~20 clock cycles"
-    multiply: "2 cycles (standard), varies for advanced modes"
+    most_instructions: "2 clock cycles (typical ALU ops, fixed)"
+    cog_branches: "4 clocks for JMP/CALL/RET; first instruction after branch takes 5+ clocks (Silicon Doc v35: pipeline flush)"
+    hub_access_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE"
+    hub_access_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE"
+    hubexec_sequential: "2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO)"
+    hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc v35 verbatim"
+    multiply: "MUL 2 clocks; QMUL via CORDIC: 55-clock latency, 8-clock issue interval"
     
   clock_frequency:
     default: "20 MHz crystal with PLL"

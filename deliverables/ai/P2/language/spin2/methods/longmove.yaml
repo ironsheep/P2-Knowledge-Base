@@ -37,9 +37,12 @@ parameters:
 returns: "none"
 
 timing:
-  aligned: "~8 + (count * 4) clock cycles"
-  misaligned: "Additional overhead for alignment"
-  optimization: "Uses 32-bit transfers when possible"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 
 examples:
   - code: |

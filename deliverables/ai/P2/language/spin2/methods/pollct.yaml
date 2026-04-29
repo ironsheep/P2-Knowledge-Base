@@ -46,8 +46,13 @@ notes:
   - "Can check multiple timers in same loop"
   - "TRUE means current counter >= target (accounting for wrap)"
 timing:
-  description: "Immediate return"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "POLLCT1/2/3"
+  underlying_pasm_timing: "2 clocks each (fixed)"
+
 related:
   - WAITCT
   - GETCT

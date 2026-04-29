@@ -36,8 +36,12 @@ operations:
   - "DIR[pin] := 0 (disable output)"
   - "WRPIN(pin, 0) (clear mode)"
 timing:
-  description: "Hub operation"
-  cycles: "4-18 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
   - PINSTART
   - WRPIN

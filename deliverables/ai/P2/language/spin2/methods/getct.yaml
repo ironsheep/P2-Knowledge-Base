@@ -24,14 +24,13 @@ returns:
     Wraps from $FFFF_FFFF to $0000_0000.
 
 timing:
-  execution: "2 clock cycles"
-  precision: "Single clock cycle resolution"
-  wrap_time: "(2^32 / CLKFREQ) seconds"
-  examples:
-    - "200MHz: ~21.47 seconds"
-    - "180MHz: ~23.86 seconds"
-    - "160MHz: ~26.84 seconds"
-    - "80MHz: ~53.69 seconds"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    the method-call path because we do not have a verifiable measurement.
+  underlying_pasm: "GETCT"
+  underlying_pasm_timing: "2 clocks (fixed)"
+
 
 examples:
   - code: |

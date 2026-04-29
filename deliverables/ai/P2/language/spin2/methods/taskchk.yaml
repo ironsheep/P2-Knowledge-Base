@@ -51,8 +51,12 @@ notes:
   - "Useful for task monitoring"
   - "Can check any task ID 0-31"
 timing:
-  description: "Immediate"
-  cycles: "2-9 clock cycles"
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
 related:
   - TASKID
   - TASKSPIN

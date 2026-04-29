@@ -23,7 +23,7 @@ flags_affected:
 syntax_variants:
 - SHR D,{#}S {WC|WZ|WCZ}
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS

@@ -117,7 +117,7 @@ common_patterns:
 
 performance_notes:
   - CORDIC methods are significantly faster than equivalent software math
-  - Operations complete in approximately 38-55 clock cycles
+  - 'Result available 55 clocks after the CORDIC instruction issues (Silicon Doc v35 verbatim: "Fifty-five clocks later, results will be available"). The 54-clock pipeline depth is a separate fact that allows multiple operations to be overlapped (issue every 8 clocks per cog with 8 cogs).'
   - Multiple CORDIC calls in sequence are handled efficiently by the interpreter
   - No need to add delays or manage timing - interpreter handles everything
 

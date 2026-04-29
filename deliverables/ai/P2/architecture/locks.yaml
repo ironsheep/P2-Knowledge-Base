@@ -56,7 +56,7 @@ instructions:
         D := owning_cog_id
         C := 0 (failure)
     flags_affected: "C"
-    timing: "2 clock cycles"
+    timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
     usage_example: |
       LOCKTRY lock_num         ' Try to get lock
       IF_C    JMP #got_lock    ' Jump if successful
@@ -74,7 +74,7 @@ instructions:
         D := current_owner_id
         C := 0 (not owner)
     flags_affected: "C"
-    timing: "2 clock cycles"
+    timing: "2 clocks (range 2...9, +2 if WC; per lockrel.yaml encoding)"
     usage_example: |
       LOCKREL lock_num         ' Release lock
       IF_NC   JMP #not_owner   ' Jump if we didn't own it
@@ -92,7 +92,7 @@ instructions:
         D := $FFFFFFFF
         C := 0 (no locks available)
     flags_affected: "C"
-    timing: "2-18 clock cycles"
+    timing: "4 clocks (range 4...11; per locknew.yaml encoding)"
     usage_example: |
       LOCKNEW my_lock          ' Get any available lock
       IF_NC   JMP #no_locks    ' Jump if none available
@@ -104,7 +104,7 @@ instructions:
     operation: |
       lock[L] := available
       D := previous_owner_id (or $FFFFFFFF if was free)
-    timing: "2 clock cycles"
+    timing: "2 clocks (range 2...9; per lockret.yaml encoding)"
     usage_example: |
       LOCKRET lock_num         ' Force release lock
       ' Previous owner (if any) is returned in lock_num
@@ -116,7 +116,7 @@ instructions:
       D := current_owner_id (or $FFFFFFFF if free)
       C := 1 if free, 0 if owned
     flags_affected: "C"
-    timing: "2 clock cycles"
+    timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
     usage_example: |
       LOCKTRY lock_num WC      ' Just check lock status
       IF_C    JMP #lock_free   ' Jump if lock is available
@@ -262,10 +262,10 @@ best_practices:
     rationale: "Prevents misuse and conflicting lock assignments"
 
 performance_considerations:
-  lock_access_time: "2 clock cycles for all lock operations"
+  lock_access_time: "LOCKNEW: 4 clocks (range 4...11). LOCKTRY/LOCKREL/LOCKRET: 2 clocks (range 2...9, +2 if WC for LOCKTRY/LOCKREL). Per per-instruction YAMLs."
   
   contention_impact:
-    low_contention: "Minimal overhead, 2 clocks per lock operation"
+    low_contention: "Minimal overhead per cited timings above"
     high_contention: "COGs spin-waiting consume hub slots"
     
   hub_bandwidth:

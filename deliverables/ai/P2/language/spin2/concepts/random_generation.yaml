@@ -17,7 +17,7 @@ hardware_vs_prng:
       getrnd: "Thermal noise (true entropy)"
       prng: "XORO32 algorithm"
     - aspect: "Speed"
-      getrnd: "Slower (2-9 cycles)"
+      getrnd: "Slower (interpreted via bytecode dispatch; underlying GETRND PASM is 2 clocks fixed). We do not publish a method-call clock count."
       prng: "Very fast (single instruction)"
     - aspect: "Repeatability"
       getrnd: "Never repeats (true random)"

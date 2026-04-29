@@ -344,15 +344,44 @@ best_practices:
     rationale: "Hub access is slower and blocks other COGs"
 
 performance_characteristics:
-  interrupt_latency:
-    best_case: "3 clock cycles"
-    worst_case: "8 clock cycles (if interrupting XBYTE)"
-    
-  context_switch_overhead: "0 clocks (hardware shadow registers)"
+  dispatch_mechanism: |
+    Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
+    by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
+    while holding the program counter at its current value, so that the
+    interrupt later returns to the address saved in IRETx."
+  
+  entry_overhead:
+    cogexec: "4 clocks for the dispatched CALLD (per calld.yaml encoding 4 / 13-20)"
+    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch)"
+    note: "Minimum overhead assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
+  
+  exit_overhead:
+    description: "RETIx / RESIx are themselves CALLD instructions and follow the same timing"
+    cogexec: "4 clocks (per reti1/2/3.yaml and resi1/2/3.yaml encoding)"
+    hubexec: "13-20 clocks"
+  
+  round_trip_minimum:
+    cogexec: "8 clocks (4 entry + 4 exit), excluding the ISR body"
+    hubexec: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
+  
+  deferral_conditions:
+    description: "Silicon Doc v35 verbatim — the interrupt branch is held off while any of these are in progress"
+    list:
+      - "ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE"
+      - "AUGS or AUGD pending"
+      - "REP active"
+      - "STALLI..ALLOWI window"
+      - "WAITx stall"
+  
+  context_switch_overhead: "0 clocks for register state — IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically (Silicon Doc v35)"
   
   interrupt_rate:
-    maximum: "System clock / 4 (one interrupt every 4 clocks)"
-    sustained: "Limited by ISR execution time"
+    note: |
+      Sustained rate is limited by entry overhead (4 clocks cog / 13-20 clocks
+      hub), exit overhead (same), and the ISR body. We do not publish a 'one
+      interrupt every N clocks' figure because the achievable rate depends on
+      ISR length and execution mode.
+    sustained: "Limited by ISR execution time + entry/exit overhead"
   
   priority_preemption:
     description: "Higher priority interrupts preempt lower"

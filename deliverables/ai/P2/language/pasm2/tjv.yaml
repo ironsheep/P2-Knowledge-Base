@@ -28,8 +28,10 @@ flags_affected:
 syntax_variants:
 - TJV D,{#}S
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "2 not-taken / 4 taken (cog); 2 not-taken / 13-20 taken (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Branch when V flag set; hub-exec branch refill is minimum 13 clocks per Silicon Doc"
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
   write: PC   1

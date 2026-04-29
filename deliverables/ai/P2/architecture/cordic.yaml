@@ -12,10 +12,11 @@ architecture:
   pipeline_stages: 54
   pipeline_type: "Fully pipelined"
   access_model: "Hub rotation (like hub RAM)"
-  cog_access_interval: "Every 8 clocks per COG"
+  cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; Silicon Doc verbatim: 'every 1/2/4/8/16 (#cogs) clocks')"
   ops_in_flight_per_cog: "7-8 maximum"
   system_throughput: "1 operation per clock (all COGs combined)"
-  latency: "54 clocks for result"
+  result_latency: "55 clocks (Silicon Doc v35 verbatim: 'Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
+  pipeline_depth: "54 clocks (separate from result latency; this is the depth that enables overlapping ops)"
   shared_resource: true
   arbitration: "Round-robin via hub rotation"
 
@@ -90,13 +91,13 @@ result_retrieval:
     instruction: "GETQX"
     operation: "Retrieve X result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "0-54 clocks depending on pipeline state"
+    timing: "2 clocks if no CORDIC operation is in progress (Silicon Doc v35: 'GETQX/GETQY will only take two clock and the QMT (CORDIC empty) event flag will be set'). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
     
   getqy:
     instruction: "GETQY"
     operation: "Retrieve Y result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "0-54 clocks depending on pipeline state"
+    timing: "2 clocks if no CORDIC operation is in progress (per Silicon Doc v35). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
     
   pollqmt:
     instruction: "POLLQMT"
@@ -195,9 +196,9 @@ applications:
     - "Error correction codes"
 
 performance:
-  throughput: "160 MOPS at 160MHz clock"
-  latency: "337.5ns at 160MHz (54 clocks)"
-  efficiency: "100% utilization possible with 54+ operations queued"
+  throughput: "160 MOPS at 160MHz clock (1 op per clock system-wide via hub rotation)"
+  latency: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"
+  efficiency: "~100% utilization possible by overlapping operations across the 54-stage pipeline"
 
 related_components:
   architecture/streamer/overview.yaml: "Can use CORDIC results for DDS"

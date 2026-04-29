@@ -7,8 +7,10 @@ encoding:
   z: L[30]
   clocks: '11...18 *'
 timing:
-  cycles: 1
-  type: fixed
+  cycles: "11...18 (cog) / 20...40 (hub-exec)"
+  type: variable
+  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  notes: "Returns by reading return address from hub at --PTRB; hub-window dependent + (in hub-exec) FIFO refill on the branch"
 description: Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC =
   L[19:0].                                             11...18 1 / 20...40
 flags_affected:
