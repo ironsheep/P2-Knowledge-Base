@@ -15,11 +15,12 @@ execution_modes:
     address_range: "$000-$1FF (0-511)"
     capacity: "512 longs (2KB)"
     performance:
-      - instruction_fetch: "1 cycle per instruction"
-      - deterministic: "Always single-cycle fetch"
+      - typical_instruction: "2 clocks (deterministic) for ALU ops (ADD, MOV, etc.)"
+      - branch_instruction: "4 clocks (JMP, CALL, RET)"
+      - deterministic: "Always 2 clocks per typical instruction; no hub-window dependency"
       - pipeline: "Full speed, no stalls"
     characteristics:
-      - "Fastest execution mode"
+      - "Fastest deterministic execution mode"
       - "Completely deterministic timing"
       - "Limited to 512 instructions"
       - "Private to each cog"
@@ -37,8 +38,9 @@ execution_modes:
     address_range: "$200-$3FF (512-1023)"
     capacity: "512 longs (2KB)"
     performance:
-      - instruction_fetch: "1 cycle per instruction"
-      - deterministic: "Always single-cycle fetch"
+      - typical_instruction: "2 clocks (deterministic) for ALU ops"
+      - branch_instruction: "4 clocks (JMP, CALL, RET)"
+      - deterministic: "Always 2 clocks per typical instruction; no hub-window dependency"
       - pipeline: "Full speed, no stalls"
     characteristics:
       - "Same speed as register execution"
@@ -57,19 +59,26 @@ execution_modes:
   hub_execution:
     name: "Hub Execution (hubexec)"
     memory: "Hub RAM"
-    address_range: "$00400-$FFFFF (1024-1048575)"
+    address_range: "$00400-$FFFFF (1024-1048575) — cannot host hubexec at $00000-$003FF"
     capacity: "512KB total hub memory"
     performance:
-      - instruction_fetch: "Variable timing"
-      - egg_beater: "8-cycle hub rotation"
-      - fifo_buffering: "16-long instruction cache"
-      - typical: "~1-2 cycles average with FIFO"
+      - sequential_instruction: "2 clocks per instruction (FIFO streaming — SAME as cogexec)"
+      - branch_instruction: "Minimum 13 clocks (+1 if target not long-aligned) per Silicon Doc HUB EXECUTION"
+      - egg_beater: "8-cycle hub rotation per slot, 8 cogs"
+      - fifo_depth: "(cogs+11) = 19 stages on 8-cog P2 (Silicon Doc verbatim)"
+      - fifo_refill_threshold: "Loads continuously when fewer than (cogs+7) = 15 stages filled"
+      - typical_for_streaming_code: "2 clocks per instruction — IDENTICAL to cogexec"
+      - typical_for_branch_heavy_code: "Body cost + 13+ clocks per branch"
     characteristics:
       - "Large code space"
       - "Shared between all cogs"
-      - "Non-deterministic timing"
-      - "FIFO reduces fetch latency"
+      - "Sequential timing matches cogexec; branch timing non-deterministic (FIFO refill window)"
+      - "19-stage prefetch FIFO ensures sequential code runs at full pipeline speed"
       - "Can execute very large programs"
+    forbidden_instructions:
+      rationale: "FIFO is dedicated to instruction prefetch in hubexec"
+      list: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "RFVAR", "RFVARS", "WFBYTE", "WFWORD", "WFLONG", "XINIT", "XZERO", "XCONT (when streamer engages FIFO)", "REP", "ALTI as instruction-stream modifier"]
+      source: "Silicon Doc v35 HUB EXECUTION section"
     typical_uses:
       - "Application logic"
       - "High-level code"
@@ -102,20 +111,23 @@ mode_transitions:
       CALL #$300        ' Call LUT routine
 
 performance_comparison:
+  # All numbers cross-checked against Silicon Doc v35 and per-instruction YAMLs.
   instruction_timing:
-    register_exec: "1 cycle guaranteed"
-    lookup_exec: "1 cycle guaranteed"
-    hub_exec: "1-17 cycles (avg ~1-2 with FIFO)"
+    register_exec: "2 clocks per typical ALU instruction (deterministic)"
+    lookup_exec: "2 clocks per typical ALU instruction (deterministic)"
+    hub_exec_sequential: "2 clocks per instruction (FIFO streaming — SAME as cog/LUT)"
+    hub_exec_branch: "Minimum 13 clocks (+1 if target not long-aligned)"
 
   branch_penalties:
-    within_cog: "2 cycles"
-    within_lut: "2 cycles"
-    within_hub: "2-19 cycles (FIFO reload)"
-    mode_crossing: "2-19 cycles"
+    within_cog: "4 clocks total for the branch instruction (per jmp/call/ret YAMLs)"
+    within_lut: "4 clocks total for the branch instruction"
+    within_hub: "Minimum 13 clocks (+1 if target not long-aligned). Range 13-20 in YAML; minimum 13 per Silicon Doc verbatim."
+    cog_to_hub: "Minimum 13 clocks (entering hub-exec triggers FIFO load)"
+    hub_to_cog: "4 clocks (cog branch timing, no FIFO concern)"
 
   determinism:
-    cog_lut: "100% deterministic"
-    hub: "Non-deterministic due to hub rotation"
+    cog_lut: "100% deterministic for ALU ops; branches always 4 clocks"
+    hub: "Sequential code is deterministic at 2 clocks/instruction; branch refill cost depends on hub-window alignment (13 minimum, +1 if not long-aligned, +up to ~6 hub-window slip)"
 
 memory_organization:
   address_space:
@@ -137,16 +149,20 @@ memory_organization:
 
 fifo_operation:
   hub_execution_fifo:
-    purpose: "Prefetch hub instructions"
-    depth: "16 longs"
+    purpose: "Prefetch hub instructions for hubexec"
+    depth: "(cogs+11) = 19 stages on 8-cog P2 (Silicon Doc v35 verbatim)"
+    refill_threshold: "Loads continuously when fewer than (cogs+7) = 15 stages filled"
+    overflow_margin: "After threshold reached, up to 5 more longs may stream in, potentially filling all (cogs+11) stages"
     operation:
-      - "Automatically fills during hub execution"
-      - "Reduces average instruction fetch time"
-      - "Reloads on branches"
-    control:
-      - "RDFAST to configure"
-      - "WRFAST for hub writes"
+      - "Automatically prefetches during hub execution at 2-clock instruction throughput"
+      - "Reloads on branches at minimum 13-clock cost (+1 if target not long-aligned)"
+      - "In hubexec, FIFO is dedicated to instruction prefetch — cannot also be used for streamer transfers"
+    control_in_cogexec_only:
+      - "RDFAST to configure for streamer reads"
+      - "WRFAST to configure for streamer writes"
       - "FBLOCK for block operations"
+      - "These FIFO control instructions are FORBIDDEN in hubexec"
+    source: "Silicon Doc v35 HUB EXECUTION + FAST SEQUENTIAL FIFO INTERFACE sections"
 
 code_organization:
   mixed_mode:

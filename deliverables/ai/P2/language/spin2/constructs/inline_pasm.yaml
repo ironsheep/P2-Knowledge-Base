@@ -1,19 +1,22 @@
 # Spin2 Language Construct: Inline PASM2
-# Source: Spin2 v51 documentation  
+# Source: Spin2 v51 documentation, production code analysis
 # Critical for: Performance optimization and hardware control
+# Canonical entry. Concept-side stub: language/spin2/concepts/inline_pasm2.yaml
 
 construct: "Inline PASM2"
 category: "program_structure"
 type: "assembly_integration"
 
 metadata:
-  query_tags: ["org", "end", "pasm", "assembly", "inline", "performance", "optimization"]
+  query_tags: ["org", "end", "pasm", "assembly", "inline", "performance", "optimization", "cogexec"]
   complexity: "advanced"
   use_cases: ["performance_critical", "hardware_control", "timing_precise", "driver_code"]
   common_questions:
     - "How do I embed assembly in Spin2?"
     - "When should I use inline PASM?"
     - "How do I share data between Spin2 and PASM?"
+    - "Does inline PASM run in hub-exec or cog-exec?"
+    - "What's the size limit on an inline PASM block?"
 
 fundamental_purpose: |
   Inline PASM2 exists because the P2 philosophy embraces mixed-level programming:
@@ -22,14 +25,36 @@ fundamental_purpose: |
   - Seamless integration between both levels
   - Access to hardware features not exposed in Spin2
 
+execution_model:
+  # CRITICAL: this is cog-exec, NOT hub-exec.
+  summary: |
+    Inline PASM2 in a Spin2 method (ORG...END inside PUB/PRI) is loaded into
+    cog RAM at runtime by the Spin2 interpreter. The interpreter spills the
+    first 16 locals to make room, then jumps to the loaded block. The block
+    runs as cog-exec at the deterministic 2 clocks/instruction.
+  
+  it_does_NOT_run_in_hubexec: true
+  
+  size_limit:
+    total_longs: 16
+    breakdown: "params + result + locals + code, all sharing the 16-long inline area"
+    workaround_if_larger: "Use a DAT-section PASM block loaded with COGINIT, or chain multiple ORG...END blocks"
+  
+  why_it_matters_for_timing:
+    - "Inline PASM gets cog-exec timing — deterministic 2 clocks/instruction for typical ALU ops"
+    - "REP and ALTI work (cog-exec)"
+    - "Branches inside the block are 4 clocks (cog branch), NOT 13+ (which would be the hub-exec branch refill cost)"
+    - "FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are usable here because this is cog-exec (they would be forbidden in hub-exec)"
+    - "Returning to Spin2 after END takes ~20 clocks of interpreter overhead"
+
 syntax_forms:
   - form: "basic_inline"
     syntax: |
       ORG
         ' PASM2 code here
       END
-    description: "Inline PASM2 that executes in-place"
-    execution: "Runs in hub-exec mode at current location"
+    description: "Inline PASM2 inside a Spin2 method"
+    execution: "Loaded into cog RAM at runtime by the Spin2 interpreter (spills first 16 locals); runs as cog-exec, NOT hub-exec. Block limited to 16 longs total (params + result + locals + code)."
     
   - form: "cog_code"
     syntax: |
@@ -39,18 +64,18 @@ syntax_forms:
         ' PASM2 code for COG
         JMP   #cog_entry
       END
-    description: "PASM2 code to be loaded into COG"
-    execution: "Loaded via COGINIT, runs in COG"
+    description: "PASM2 code in DAT to be loaded into a COG"
+    execution: "Loaded via COGINIT, runs as cog-exec in target cog"
     
   - form: "hub_exec"
     syntax: |
       DAT
-        ORGH             ' Align to hub execution
+        ORGH             ' Place in hub address space
       hub_code
         ' PASM2 code for hub execution
       END
-    description: "PASM2 code that runs from hub RAM"
-    execution: "Executes directly from hub memory"
+    description: "PASM2 code in DAT that runs as hub-exec (separate from inline PASM)"
+    execution: "Executes directly from hub memory through the (cogs+11)=19-stage prefetch FIFO. Sequential code: 2 clocks/instruction (same as cog-exec). Branches: minimum 13 clocks (+1 if not long-aligned) per Silicon Doc HUB EXECUTION. FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are FORBIDDEN in this mode. NOT the same as inline PASM in a method."
 
   - form: "mixed_method"
     syntax: |
@@ -58,12 +83,12 @@ syntax_forms:
         temp := x + y    ' Spin2 code
         
         ORG
-          SHL   temp, #2  ' PASM2 code
+          SHL   temp, #2  ' PASM2 code (cog-exec, loaded by interpreter)
           MOV   result, temp
         END
         
         result += 100    ' Back to Spin2
-    description: "Mix Spin2 and PASM2 in same method"
+    description: "Mix Spin2 and PASM2 in same method (PASM portion runs as cog-exec)"
 
 why_inline_pasm_matters:
   performance: |
@@ -86,11 +111,17 @@ why_inline_pasm_matters:
 
 register_access:
   method_interface: |
-    Method parameters and locals map to registers:
-    - First parameter → PR0
+    Method parameters, result, and locals map to PASM2 registers:
+    - First parameter  → PR0 (also addressable as '0')
     - Second parameter → PR1
-    - Return value → PR0 (or RESULT)
-    - Local variables → PR2, PR3, etc.
+    - Return value     → PR0 (overlaps first parameter)
+    - Local variables  → next available registers after parameters
+    - Maximum total    → 16 registers (params + result + locals + code share this budget)
+  
+  local_label_rule:
+    requirement: "Inline PASM labels must start with '.' (e.g. .loop) or ':' (e.g. :next)"
+    reason: "Inline PASM has no global label context; all labels are method-local"
+    reference: "language/pasm2/concepts/labels.yaml"
   
   example: |
     PUB multiply(x, y) : product
@@ -246,17 +277,13 @@ pitfalls:
     description: "Mixing COG and hub addresses"
     solution: "Use @ for hub addresses, # for immediates"
 
-related_constructs:
-  - "p2kbSpin2MethodDefinition"
-  - "p2kbSpin2Blocks"
-  
-related_pasm:
-  - "p2kbPasm2CogHubExecution"
-  - "p2kbPasm2ConditionalExecution"
-  - "p2kbPasm2SpecialRegisters"
-  
-related_concepts:
-  - "Hub execution model"
-  - "COG execution model"
-  - "Register mapping"
-  - "CORDIC operations"
+related:
+  - language/spin2/constructs/method_definition.yaml
+  - language/spin2/concepts/inline_pasm2.yaml
+  - language/pasm2/concepts/cog_hub_execution.yaml
+  - language/pasm2/concepts/execution_modes.yaml
+  - language/pasm2/concepts/labels.yaml
+  - language/pasm2/rep.yaml
+  - language/pasm2/coginit.yaml
+  - language/pasm2/hubexec.yaml
+  - language/pasm2/cogexec.yaml

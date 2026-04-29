@@ -21,14 +21,24 @@ metadata:
 
 fundamental_concept: |
   P2 supports two execution modes:
-  1. COGEXEC: Code runs from COG RAM (2 clock cycles per instruction)
-  2. HUBEXEC: Code runs from HUB RAM (variable timing, typically 4-16 clocks)
+  1. COGEXEC: Code runs from COG RAM
+     - Typical ALU instructions (ADD, MOV, etc.): 2 clocks (deterministic)
+     - Branch instructions (JMP, CALL, RET): 4 clocks
+  2. HUBEXEC: Code runs from HUB RAM
+     - Sequential straight-line code: 2 clocks/instruction (SAME as COGEXEC)
+       because the FIFO prefetches and streams instructions through the
+       19-stage ((cogs+11)) instruction prefetch buffer
+     - Branches: minimum 13 clocks (+1 if not long-aligned)
+     - FIFO/streamer instructions are FORBIDDEN in hubexec, not slow
+       (see `hubexec_forbidden_instructions:` below)
   
-  Each mode has distinct advantages. COGEXEC is deterministic and fast but
-  limited to 512 longs. HUBEXEC can access all 512KB but with variable timing
-  due to the egg-beater memory architecture.
+  COGEXEC is deterministic and limited to 512 longs. HUBEXEC can access all
+  512KB and MATCHES COGEXEC throughput on sequential straight-line code; the
+  cost shows up at branches (FIFO refill, minimum 13 clocks).
   
   Advanced systems use dynamic overlays to maximize COG RAM utilization.
+
+  See `fifo_behavior:` below for the canonical mental model.
 
 cog_execution:
   location: "COG RAM (addresses $000-$1FF)"
@@ -53,27 +63,55 @@ cog_execution:
     - "No direct hub data access during execution"
 
 hub_execution:
-  location: "HUB RAM (addresses $00000-$7FFFF)"
-  size: "512KB total"
-  speed: "Variable (4-16+ clocks per instruction)"
+  location: "HUB RAM (addresses $00400-$FFFFF for hubexec; $00000-$003FF cannot host hubexec code)"
+  size: "512KB main hub RAM (plus higher addresses where present)"
+  speed:
+    sequential: "2 clocks per instruction (FIFO streaming — SAME as COGEXEC)"
+    branches: "Minimum 13 clocks (+1 if not long-aligned), up to ~20 with hub-window misalignment"
   
   timing_factors:
-    instruction_fetch: "Depends on hub window alignment"
-    data_access: "Additional delays for RD/WR instructions"
-    branches: "Can cause additional alignment delays"
+    instruction_fetch: "Per-cog 19-stage ((cogs+11)) prefetch FIFO streams instructions at 2 clocks each — no per-instruction hub window penalty when streaming"
+    data_access: "RD/WR instructions follow normal hub-access timing (9-24 clocks typical, egg-beater dependent)"
+    branches: "Force FIFO refill from new hub address — minimum 13 clocks (Silicon Doc); +1 clock if target is not long-aligned"
   
   advantages:
-    - "Access to full 512KB"
-    - "No need to load code"
+    - "Access to full 512KB+ hub address space"
+    - "No need to load code into cog RAM first"
     - "Can mix code and data freely"
     - "Direct hub memory access"
     - "Good for large programs"
+    - "Sequential throughput EQUALS COGEXEC (2 clocks/instruction)"
   
   limitations:
-    - "Non-deterministic timing"
-    - "Slower than cogexec"
-    - "Some instructions not available"
-    - "Branch penalties possible"
+    - "Branch timing non-deterministic (minimum 13 clocks for FIFO refill)"
+    - "Branches cost much more than in COGEXEC (13+ vs 4 clocks)"
+    - "REP and (ALTI as instruction modifier) not usable in hubexec"
+    - "FIFO/streamer instructions FORBIDDEN — see hubexec_forbidden_instructions"
+    - "Sequential code is full speed — branch-heavy code is where the cost shows up"
+
+hubexec_forbidden_instructions:
+  # Silicon Doc verbatim: "While in hub execution mode, the FIFO cannot be used for anything else.
+  # So, during hub execution these instructions cannot be used:"
+  rationale: "In hubexec the FIFO is dedicated to instruction prefetch. These instructions repurpose or consume the FIFO and so are not allowed."
+  cannot_be_used:
+    - "RDFAST"
+    - "WRFAST"
+    - "FBLOCK"
+    - "RFBYTE"
+    - "RFWORD"
+    - "RFLONG"
+    - "RFVAR"
+    - "RFVARS"
+    - "WFBYTE"
+    - "WFWORD"
+    - "WFLONG"
+    - "XINIT"
+    - "XZERO"
+    - "XCONT (when streamer mode engages the FIFO)"
+  also_unavailable_in_hubexec:
+    - "REP — fast loop instruction (cogexec/lutexec only)"
+    - "ALTI used as instruction-stream modifier (a following instruction is fetched from a fixed location, which the FIFO does not support)"
+  source: "Silicon Doc v35, HUB EXECUTION section"
 
 dynamic_overlay_system:
   concept: "Load code segments on-demand to maximize COG RAM usage"
@@ -179,17 +217,34 @@ execution_control:
 
 instruction_availability:
   cogexec_only:
-    - "REP - Fast loop instruction"
-    - "ALTI - Modify next instruction"
+    - "REP — Fast loop instruction"
+    - "ALTI — Modify next instruction (as instruction-stream modifier)"
     - "Some self-modifying code patterns"
+    - "All FIFO/streamer ops (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT)"
   
   hubexec_only:
-    - "None - all instructions work"
+    - "None — hubexec is a strict subset (with the forbidden list above)"
   
   performance_differences:
-    - "DJNZ: 2 clocks (cog) vs 4-16 (hub)"
-    - "CALL: 2 clocks (cog) vs 4-16 (hub)"
-    - "Math: 2 clocks (cog) vs 4-16 (hub)"
+    # All numbers cross-checked against per-instruction YAMLs and Silicon Doc HUB EXECUTION section.
+    - "Sequential ALU ops (ADD, SUB, AND, MOV, etc.): 2 clocks in BOTH modes — no penalty in hubexec"
+    - "JMP: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
+    - "CALL: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
+    - "RET: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
+    - "DJNZ not taken: 2 clocks (cog) vs 2 clocks (hub) — sequential, no FIFO refill"
+    - "DJNZ taken: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
+    - "RDLONG / WRLONG: 9-24 / 3-12 clocks in BOTH modes (hub-access window dependent)"
+  
+  common_misconception: |
+    It is NOT true that 'all hubexec instructions take more clocks than cogexec.'
+    Sequential straight-line hubexec instructions stream through the 19-stage
+    FIFO at 2 clocks each — IDENTICAL throughput to cogexec. The cost differs
+    only at branches, which force a FIFO refill costing minimum 13 clocks
+    (vs 4 clocks for a cog branch).
+    
+    Separately, FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT
+    /XZERO/XCONT) are FORBIDDEN in hubexec because the FIFO is dedicated to
+    instruction prefetch — they don't run slowly, they don't run at all.
 
 practical_examples:
   multi_stage_loader:
@@ -236,35 +291,41 @@ performance_comparison:
   timing_critical:
     cogexec: |
       REP   #4, #100
-      ADD   a, b
-      SUB   a, b
-      XOR   c, d
-      ROL   e, #1
-      ' Total: 200 clocks for 100 iterations
+      ADD   a, b              ' 2 clocks
+      SUB   a, b              ' 2 clocks
+      XOR   c, d              ' 2 clocks
+      ROL   e, #1             ' 2 clocks
+      ' Total: 800 clocks for 100 iterations (REP has zero loop overhead)
     
     hubexec: |
-      ' REP not available, must use DJNZ
+      ' REP not available; use DJNZ
       MOV   count, #100
       .loop
-      ADD   a, b
-      SUB   a, b
-      XOR   c, d
-      ROL   e, #1
-      DJNZ  count, #.loop
-      ' Total: 2000+ clocks for 100 iterations
+      ADD   a, b              ' 2 clocks (sequential, FIFO streaming)
+      SUB   a, b              ' 2 clocks
+      XOR   c, d              ' 2 clocks
+      ROL   e, #1             ' 2 clocks
+      DJNZ  count, #.loop     ' 13-14 clocks taken (FIFO refill, +1 if misaligned)
+      ' Per iteration: 8 (body) + ~13 (DJNZ taken) = ~21 clocks
+      ' Total: ~2100 clocks for 100 iterations
+      ' Cost difference vs cogexec (~13x in this loop) comes ENTIRELY from
+      ' the DJNZ branch refill + lack of REP — NOT from per-instruction throughput.
+      ' The four ALU ops in the body run at the SAME 2 clocks each.
   
   memory_intensive:
     cogexec: |
       ' Must use hub instructions
-      RDLONG  value, ptr      ' 9-24 clocks
+      RDLONG  value, ptr      ' 9-24 clocks (hub access, egg-beater dependent)
       ADD     value, #1       ' 2 clocks
-      WRLONG  value, ptr      ' 3-12 clocks
+      WRLONG  value, ptr      ' 3-12 clocks (hub access, egg-beater dependent)
     
     hubexec: |
-      ' Direct hub access
-      RDLONG  value, ptr      ' 9-24 clocks
-      ADD     value, #1       ' 4-16 clocks
-      WRLONG  value, ptr      ' 3-12 clocks
+      ' Same hub-access ops, same timing as cogexec for these
+      RDLONG  value, ptr      ' 9-24 clocks (hub access, egg-beater dependent)
+      ADD     value, #1       ' 2 clocks (sequential, FIFO streaming)
+      WRLONG  value, ptr      ' 3-12 clocks (hub access, egg-beater dependent)
+      ' Note: in hubexec, FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/
+      ' RFx/WFx/XINIT/XZERO/XCONT) cannot be used. RDLONG/WRLONG do work.
 
 code_organization:
   hybrid_approach:
@@ -332,9 +393,67 @@ loading_strategies:
               call    #function_base
     source: complex_systems
 
-fifo_and_streaming:
-  hubexec_advantage: "Direct FIFO control without hub window delays"
-  cogexec_limitation: "FIFO operations compete with instruction fetch"
+fifo_behavior:
+  # CANONICAL MENTAL MODEL — read this first when reasoning about hubexec timing.
+  # All numbers verified against Silicon Doc v35 HUB EXECUTION section
+  # (engineering/ingestion/sources/silicon-doc/p2-documentation.txt) and
+  # per-instruction YAMLs in deliverables/ai/P2/language/pasm2/.
+  summary: |
+    Hubexec instruction timing is governed by the per-cog instruction-prefetch
+    FIFO. Per Silicon Doc verbatim, 'The FIFO contains (cogs+11) stages' —
+    19 stages on a P2 with 8 cogs. While streaming, sequential instructions
+    execute at 2 clocks each, IDENTICAL to cogexec. A branch forces FIFO refill
+    from a new hub address, which Silicon Doc states 'takes a minimum of 13
+    clock cycles. If the instruction being branched to is not long-aligned,
+    one additional clock cycle is required.' FIFO/streamer instructions are
+    not usable in hubexec at all.
+  
+  fifo_depth:
+    stages: "(cogs+11) = 19 stages on an 8-cog P2"
+    refill_threshold: "FIFO loads continuously whenever fewer than (cogs+7) = 15 stages are filled"
+    overflow_margin: "After threshold reached, up to 5 more longs may stream in, potentially filling all (cogs+11) stages"
+    source: "Silicon Doc v35 verbatim"
+  
+  streaming_mode:
+    description: "Default mode while executing straight-line hubexec code"
+    cost_per_instruction: "2 clocks (SAME as COGEXEC — the FIFO ensures no per-instruction hub-window penalty)"
+    mechanism: "FIFO continuously prefetches instructions; instruction pipeline drains at 2 clocks each as long as FIFO is fed"
+    source: "Silicon Doc v35 + Chip Gracey clarification (Silicon Doc describes the streaming mechanism qualitatively; Chip's clarification supplies the explicit '2 clocks' figure for sequential hubexec)"
+  
+  branch_refill:
+    minimum_cost: "13 clocks"
+    misalignment_cost: "+1 clock if target instruction is not long-aligned"
+    typical_range: "13-14 clocks (most cases); up to ~20 with hub-window misalignment"
+    source: "Silicon Doc v35 verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Per-instruction YAMLs (jmp/call/ret) cite range 13...20."
+    branches_that_trigger_refill:
+      - "JMP, CALL, CALLA, CALLB, CALLD, CALLPA, CALLPB — unconditional branches to a new address"
+      - "RET, RETA, RETB, RETI0/1/2/3, RESI0/1/2/3 — returns to a different address"
+      - "Conditional jumps when taken: DJZ/DJNZ/DJF/DJNF/DJZ/IJZ/IJNZ, TJZ/TJNZ/TJF/TJNF/TJV/TJS/TJNS"
+      - "REP-like patterns implemented with DJNZ pay the 13+ clock branch cost on each iteration"
+  
+  forbidden_in_hubexec:
+    # NOT a timing penalty — these simply cannot be used while in hubexec.
+    instructions: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "RFVAR", "RFVARS", "WFBYTE", "WFWORD", "WFLONG", "XINIT", "XZERO", "XCONT (when streamer engages FIFO)"]
+    rationale: "FIFO is dedicated to instruction prefetch; these instructions repurpose or consume the FIFO"
+    source: "Silicon Doc v35 HUB EXECUTION section verbatim"
+  
+  hub_io_in_hubexec:
+    # RDLONG/WRLONG and friends DO work in hubexec, with normal hub-access timing.
+    instructions: ["RDBYTE", "RDWORD", "RDLONG", "WRBYTE", "WRWORD", "WRLONG"]
+    timing: "9-24 clocks for reads, 3-12 clocks for writes (egg-beater hub-window dependent) — same in both cogexec and hubexec"
+    note: "These do not disrupt the instruction-prefetch FIFO"
+  
+  practical_implications:
+    - "Tight loops in hubexec: each iteration's branch costs minimum 13 clocks on top of the body"
+    - "Long straight-line sequences run at full 2-clock-per-instruction throughput in hubexec, identical to cogexec"
+    - "Mixing hub I/O with hubexec code is fine — RDLONG/WRLONG work the same as in cogexec"
+    - "Streamer-driven I/O is incompatible with hubexec; use cogexec when the streamer is needed"
+    - "Move tight inner loops to cogexec (REP), keep large straight-line code in hubexec"
+  
+  see_also:
+    - "deliverables/ai/P2/architecture/fifo.yaml — FIFO hardware (streamer-transfer role)"
+    - "deliverables/ai/P2/language/pasm2/concepts/execution_modes.yaml — three-mode overview"
+    - "deliverables/ai/P2/architecture/p2-architecture-mental-model.yaml — 19-stage prefetch FIFO"
 
 interrupt_considerations:
   cogexec:
@@ -400,8 +519,16 @@ common_mistakes:
       JMP  #$000      ' Now safe to jump
   
   - mistake: "Assuming deterministic timing in hubexec"
-    wrong: "Hubexec bit-banged protocol"
+    wrong: "Hubexec bit-banged protocol (branches inside the bit loop break determinism)"
     right: "Move protocol to cogexec for timing"
+  
+  - mistake: "Assuming hubexec is always slower per-instruction than cogexec"
+    wrong: "Padding cogexec timing budgets by 5x or more when porting code to hubexec"
+    right: "Sequential hubexec is 2 clocks/instruction (SAME as cogexec); only branches pay the 13+-clock FIFO refill cost. Budget per-branch, not per-instruction."
+  
+  - mistake: "Calling RDFAST/WRFAST/RFBYTE/etc. from hubexec code"
+    wrong: "Assuming FIFO/streamer instructions just run slowly in hubexec"
+    right: "They are FORBIDDEN in hubexec (Silicon Doc HUB EXECUTION section). Either move the code that uses them to cogexec, or stage the work via a separate cog"
   
   - mistake: "Overlay overwrites active code"
     wrong: |
@@ -413,9 +540,16 @@ common_mistakes:
 
 why_this_matters:
   performance: |
-    Understanding execution modes is critical for P2 performance.
-    A 10x speed difference between modes can make or break
-    real-time requirements.
+    Understanding execution modes is critical for P2 performance, but the
+    common 'hubexec is much slower than cogexec' shorthand is misleading:
+    sequential hubexec code runs at the SAME 2 clocks/instruction as cogexec
+    via the 19-stage prefetch FIFO. The real cost difference shows up at
+    branches: minimum 13 clocks for a hubexec branch (FIFO refill) vs 4 clocks
+    for a cogexec branch. Branch-heavy inner loops can run several× slower
+    in hubexec; straight-line code does not.
+    
+    A separate concern is functionality: FIFO/streamer instructions cannot
+    be used at all in hubexec — these need cogexec.
   
   architecture: |
     The dual execution model gives P2 unique flexibility:
@@ -429,16 +563,23 @@ why_this_matters:
     in limited COG RAM, supporting complex debugging operations
     without consuming precious COG space permanently.
 
-related_concepts:
-  - "JMP"
-  - "CALL"
-  - "COGINIT"
-  - "p2kbPasm2SpecialRegisters"
-  - "p2kbPasm2RepInstruction"
-  - "p2kbPasm2EventInterruptConfig"
+related:
+  - language/pasm2/jmp.yaml
+  - language/pasm2/call.yaml
+  - language/pasm2/coginit.yaml
+  - language/pasm2/rdfast.yaml
+  - language/pasm2/wrfast.yaml
+  - language/pasm2/rep.yaml
+  - language/pasm2/concepts/execution_modes.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - language/pasm2/hubexec.yaml
+  - language/pasm2/cogexec.yaml
+  - architecture/fifo.yaml
+  - language/spin2/constructs/inline_pasm.yaml
 
 references:
-  - silicon_doc: Execution modes
+  - silicon_doc_v35: "HUB EXECUTION section. Verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Verbatim FIFO depth: 'The FIFO contains (cogs+11) stages.' Verbatim forbidden list: 'While in hub execution mode, the FIFO cannot be used for anything else. So, during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO.'"
+  - chip_gracey_clarification_2026: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec). Silicon Doc describes the mechanism but doesn't print this exact figure for the sequential case; Chip's clarification fills that gap."
+  - per_instruction_yamls: "jmp.yaml: clocks 4 (cog), range 4 / 13...20. call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. ret.yaml: range 4 / 13...20. djnz.yaml: clocks '2 or 4', range 13...20. add.yaml: cycles 2 fixed. mov.yaml: cycles 2."
   - Spin2_debugger.spin2: Overlay implementation
   - flash_loader.spin2: Multi-stage loading
-  - optimization_guide: Performance tuning

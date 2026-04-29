@@ -2,32 +2,51 @@ component_name: "Hub FIFO Interface"
 component_type: "hardware_subsystem"
 
 description: |
-  The Hub FIFO (First-In-First-Out) Interface provides high-speed sequential data
-  transfer between Hub RAM and COG registers. Each COG has its own independent
-  FIFO interface that can be configured for either reading or writing.
+  The Hub FIFO (First-In-First-Out) Interface is a per-cog hardware structure with
+  TWO distinct roles:
+  
+  1. STREAMER/SOFTWARE TRANSFER ROLE: high-speed sequential data transfer between
+     Hub RAM and COG registers via RDFAST/WRFAST/RFx/WFx instructions, operating
+     on 64-byte blocks. Available only in cogexec/lutexec.
+  
+  2. HUBEXEC INSTRUCTION-PREFETCH ROLE: when the cog is in hub-execute mode,
+     the FIFO is dedicated to prefetching instructions from hub RAM, allowing
+     sequential hubexec code to stream at 2 clocks/instruction (matching cogexec).
+     In this role the Silicon Doc states the FIFO contains '(cogs+11) stages' —
+     19 stages on a P2 with 8 cogs.
+  
+  These two roles are mutually exclusive: while a cog is in hub-execute mode,
+  the FIFO is committed to instruction prefetch and the streamer/software FIFO
+  instructions are forbidden.
 
-  The FIFO operates on 64-byte blocks and uses a streaming model where data flows
-  continuously from/to Hub RAM. This is significantly faster than individual
-  RDLONG/WRLONG operations for sequential data access.
-
-  Key features:
+  Key features (streamer/software role):
   - Block-based transfers (64-byte granularity)
   - Automatic address incrementing
   - Block wrap events for circular buffer support
   - Variable-length encoding support (RFVAR/RFVARS)
+  
+  Key features (hubexec instruction-prefetch role):
+  - 19-stage ((cogs+11)) prefetch buffer
+  - Refills continuously while fewer than (cogs+7) = 15 stages are filled
+  - Sustains 2 clocks/instruction throughput on sequential code
+  - Branch refill costs minimum 13 clocks (Silicon Doc verbatim, +1 if target not long-aligned)
 
 architecture:
   per_cog: true
-  block_size: 64  # bytes
+  block_size: 64  # bytes — streamer/software-transfer block granularity
+  hubexec_prefetch_depth_stages: 19  # (cogs+11) per Silicon Doc v35
+  hubexec_refill_threshold_stages: 15  # (cogs+7); FIFO loads while fewer than this filled
   modes:
-    - read: "RDFAST initiates reading from Hub to COG"
-    - write: "WRFAST initiates writing from COG to Hub"
+    - read: "RDFAST initiates reading from Hub to COG (streamer/software role; cogexec only)"
+    - write: "WRFAST initiates writing from COG to Hub (streamer/software role; cogexec only)"
+    - hubexec_prefetch: "Engaged automatically while the cog is in hub-execute mode; cannot coexist with streamer/software FIFO use"
 
   internal_state:
     - pointer: "Current hub address (20-bit)"
-    - block_count: "Remaining 64-byte blocks"
+    - block_count: "Remaining 64-byte blocks (streamer/software role)"
     - block_start: "Block start address for wrap reload"
-    - direction: "Read or write mode"
+    - direction: "Read or write mode (streamer/software role)"
+    - role: "Streamer/software transfer vs. hubexec instruction prefetch — mutually exclusive"
 
 configuration:
   rdfast:
@@ -212,9 +231,11 @@ notes:
   - "Variable-length reads (RFVAR/RFVARS) use continuation bit encoding"
 
 limitations:
-  - "Cannot read and write simultaneously"
-  - "Minimum transfer granularity is 64-byte blocks"
-  - "Hub execution mode uses FIFO, limiting availability"
+  - "Cannot read and write simultaneously (streamer/software role)"
+  - "Minimum transfer granularity is 64-byte blocks (streamer/software role)"
+  - "Hub-execute mode dedicates the FIFO to instruction prefetch"
+  - "In hubexec, these FIFO/streamer instructions are FORBIDDEN: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)"
+  - "Source: Silicon Doc v35 HUB EXECUTION section verbatim"
 
 related:
   - streamer: "Streamer also uses hub data transfers"
@@ -226,5 +247,12 @@ cross_references:
   - wrfast_instruction: "language/pasm2/wrfast"
   - streamer_system: "architecture/streamer"
 
-documentation_source: "PASM2 Manual 2022/11/01, Silicon Doc v35"
-last_updated: "2025-12-04"
+documentation_source: "PASM2 Manual 2022/11/01, Silicon Doc v35 (HUB EXECUTION + FAST SEQUENTIAL FIFO INTERFACE sections)"
+last_updated: "2026-04-29"
+verification_notes: |
+  Hubexec instruction-prefetch role added 2026-04-29 from Silicon Doc v35 verbatim text:
+  - 'The FIFO contains (cogs+11) stages.'
+  - 'When in read mode, the FIFO loads continuously whenever less than (cogs+7) stages are filled, after which point, up to 5 more longs may stream in, potentially filling all (cogs+11) stages.'
+  - 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.'
+  - 'While in hub execution mode, the FIFO cannot be used for anything else.'
+  Sequential 2-clocks/instruction figure for hubexec corroborated by Chip Gracey clarification (Silicon Doc describes the streaming mechanism qualitatively but does not print this explicit number for the sequential case).
