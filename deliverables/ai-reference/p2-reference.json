@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-04-29",
-    "last_updated": "2026-04-29T20:06:16.342373",
+    "last_updated": "2026-04-29T20:57:05.257213",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-04-29T20:06:16.342373",
+    "extraction_date": "2026-04-29T20:57:05.257213",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -974,7 +974,7 @@
             "description": "ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated out are moved into the new MSBs. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out (effectively C = result bit \"31\") if Src is 1-31, or to Dest[0] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero. Since no bits are lost by this operation, the result will only be zero if Dest started at zero.",
             "result": "The bits of Dest are rotated right by Src bits; any departing LSBs are moved into MSBs.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -1235,7 +1235,7 @@
             "description": "SAL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to that of the original Dest[0]. SAL is the complement of SAR for bit streams but not for math operations; use SHL instead for swift 32-bit integer multiplication by a power-of-two. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C = result bit \"32\") if Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero.",
             "result": "The bits of Dest are shifted left by Src bits, extending Dest[0] into new rightmost bits.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -2033,7 +2033,7 @@
             "description": "ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated out are moved into the new LSBs. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out (effectively C = result bit \"0\") if Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero. Since no bits are lost by this operation, the result will only be zero if Dest started at zero.",
             "result": "The bits of Dest are rotated left by Src bits; any departing MSBs are moved into LSBs.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -2180,7 +2180,7 @@
             "description": "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.\n\nSAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to that of the original\n\nDest[31]; preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division--\n\nit is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.\n\nIf the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C =\n\nresult bit \"-1\") if Src is 1-31, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero.",
             "result": "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -4105,7 +4105,7 @@
             "description": "The bits of Dest are shifted left by Src bits, inserting C as new LSBs.\n\nRCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C.\n\nIf the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to\n\nDest[31] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero.",
             "result": "The bits of Dest are shifted left by Src bits, inserting C as new LSBs.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -4386,7 +4386,7 @@
             "description": "SHL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to 0. This is useful for bit-stream manipulation as well as for swift multiplication; signed or unsigned 32-bit integer multiplication by a power-of-two. Care must be taken for power-of-two multiplications since upper bits will shift through the MSB (sign bit), mangling large signed values. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C = result bit \"32\") if Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero.",
             "result": "The bits of Dest are shifted left by Src bits, inserting zeros (0) as new rightmost bits.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -4719,7 +4719,7 @@
             "description": "SHR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to 0. This is useful for bit-stream manipulation as well as for swift division; unsigned 32-bit integer division by a power-of-two. For similar division of a signed value, use SAR instead. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C = result bit \"-1\") if Src is 1-31, or to Dest[0] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero.",
             "result": "The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.",
             "timing": {
-              "cycles": 1,
+              "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
@@ -13929,8 +13929,10 @@
             "description": "Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].                                             11...18 1 / 20...40",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "11...18 (cog) / 20...40 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Returns by reading return address from hub at --PTRB; hub-window dependent + (in hub-exec) FIFO refill on the branch"
             },
             "flags_affected": {
               "C": "Set to L[31] (bit 31 of hub long value)",
@@ -14072,8 +14074,10 @@
             "description": "TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx instruction. The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJV. The signed offset value is in units of whole instructions -- it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub code not required).",
             "result": "Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a new relative (#Src) or absolute (Src) address.",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "2 not-taken / 4 taken (cog); 2 not-taken / 13-20 taken (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Branch when V flag set; hub-exec branch refill is minimum 13 clocks per Silicon Doc"
             },
             "flags_affected": {
               "C": "No effect",
@@ -14121,8 +14125,10 @@
             "description": "Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].                                             11...18 1 / 20...40",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "11...18 (cog) / 20...40 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Returns by reading return address from hub at --PTRA; hub-window dependent + (in hub-exec) FIFO refill on the branch"
             },
             "flags_affected": {
               "C": "Set to L[31] (bit 31 of hub long value)",
@@ -14962,8 +14968,10 @@
             "description": "{WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of word. *                                          9...16 1 / 9...26",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "9...16 (cog) / 9...26 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Hub-window dependent; minimum 9 clocks when window is hit"
             },
             "flags_affected": {
               "C": "Set to MSB of word",
@@ -15008,8 +15016,10 @@
             "description": "Write long in D[31:0] to hub address PTRA++.",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Writes long to hub at PTRA++; hub-window dependent"
             },
             "flags_affected": {
               "C": "No effect",
@@ -15057,8 +15067,10 @@
             "description": "{WC/WZ/WCZ}                                                                                                                            9...16 1 / 9...26",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "9...16 (cog) / 9...26 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit"
             },
             "flags_affected": {
               "C": "Set to MSB of long",
@@ -15129,8 +15141,10 @@
             "description": "Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.              3...10 1 / 3...20",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Hub-window dependent; minimum 3 clocks when window is hit"
             },
             "flags_affected": {
               "C": "No effect",
@@ -15179,8 +15193,10 @@
             "description": "Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10 1 / 3...20",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Hub-window dependent; minimum 3 clocks when window is hit"
             },
             "flags_affected": {
               "C": "No effect",
@@ -15225,8 +15241,10 @@
             "description": "Read long from hub address --PTRB into D.",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "9...16 (cog) / 9...26 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Reads long from hub at --PTRB; hub-window dependent"
             },
             "flags_affected": {
               "C": "Set to MSB of long (bit 31 of popped value)",
@@ -15358,8 +15376,10 @@
             "description": "Read long from hub address --PTRA into D.",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "9...16 (cog) / 9...26 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Reads long from hub at --PTRA; hub-window dependent"
             },
             "flags_affected": {
               "C": "Set to MSB of long (bit 31 of popped value)",
@@ -15407,8 +15427,10 @@
             "description": "Write long in D[31:0] to hub address PTRB++.",
             "result": "",
             "timing": {
-              "cycles": 1,
-              "type": "fixed"
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
+              "notes": "Writes long to hub at PTRB++; hub-window dependent"
             },
             "flags_affected": {
               "C": "No effect",
@@ -18287,7 +18309,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-04-29T20:06:16.342373",
+    "extraction_date": "2026-04-29T20:57:05.257213",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20714,8 +20736,7 @@
               "Result may need masking for < 32-bit CRCs"
             ],
             "timing": {
-              "description": "Hardware accelerated",
-              "cycles": "~8 + (count * 2) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTEMOVE",
@@ -20752,9 +20773,7 @@
             ],
             "returns": "none",
             "timing": {
-              "performance": "~8 + (count * 2) clock cycles",
-              "optimization": "Uses efficient hub block operations",
-              "vs_loop": "5-10x faster than manual loop"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -21006,15 +21025,9 @@
               "description": "Current 32-bit system counter value.\nIncrements at system clock frequency.\nWraps from $FFFF_FFFF to $0000_0000.\n"
             },
             "timing": {
-              "execution": "2 clock cycles",
-              "precision": "Single clock cycle resolution",
-              "wrap_time": "(2^32 / CLKFREQ) seconds",
-              "examples": [
-                "200MHz: ~21.47 seconds",
-                "180MHz: ~23.86 seconds",
-                "160MHz: ~26.84 seconds",
-                "80MHz: ~53.69 seconds"
-              ]
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "GETCT",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "examples": [
               {
@@ -21122,8 +21135,7 @@
               "Important for robust float handling"
             ],
             "timing": {
-              "description": "Immediate bit check",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "Float math operators"
@@ -21184,8 +21196,7 @@
               "Count must not exceed remaining registers"
             ],
             "timing": {
-              "description": "Hub transfer operation",
-              "cycles": "~8 + (count * 2) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "GETREGS",
@@ -21568,8 +21579,10 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "DRVH",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -21680,9 +21693,9 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles",
-              "signal_propagation": "Immediate to all specified cogs",
-              "latency": "Target cog sees signal on next instruction"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "COGATN",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "examples": [
               {
@@ -21787,9 +21800,7 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "Immediate",
-              "effect": "Cog stops within 1-2 clock cycles",
-              "cleanup": "Pins released immediately"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -21890,8 +21901,7 @@
             ],
             "returns": "none",
             "timing": {
-              "small_copy": "~8 + (2 * count) clock cycles",
-              "large_copy": "Optimized for larger transfers",
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement.\n",
               "overlap_handling": "Automatic, no performance penalty"
             },
             "direction_logic": {
@@ -21981,10 +21991,7 @@
             ],
             "returns": "none",
             "timing": {
-              "accuracy": "Within one system clock tick",
-              "resolution": "1 millisecond",
-              "calculation": "Uses CLKFREQ/1000 internally",
-              "overhead": "Minimal setup overhead (~10 cycles)"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -22064,8 +22071,9 @@
               "description": "Current cog's ID number (0-7).\nAlways returns valid cog number.\n"
             },
             "timing": {
-              "execution": "2 clock cycles",
-              "deterministic": "Yes - always same timing"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "COGID",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "examples": [
               {
@@ -22153,8 +22161,10 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "FLTL",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_propagation": "+3 clocks after instruction completes before pin physically transitions to high-impedance state"
             },
             "examples": [
               {
@@ -22319,8 +22329,7 @@
               "DIR[pin] := 1 (enable)"
             ],
             "timing": {
-              "description": "Multiple hub operations",
-              "cycles": "20-90 clock cycles per pin"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "PINCLEAR",
@@ -22386,8 +22395,7 @@
               "Prevents task starvation"
             ],
             "timing": {
-              "description": "Context switch time",
-              "cycles": "~20-40 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKWAIT",
@@ -22440,8 +22448,7 @@
               "Useful for buffer allocation"
             ],
             "timing": {
-              "description": "Varies with string length",
-              "cycles": "~8 + (1 per character) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "STRCOMP",
@@ -22556,8 +22563,7 @@
               "Useful for swapping PASM routines"
             ],
             "timing": {
-              "description": "Hub to cog transfer",
-              "cycles": "~8 + (size * 2) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "REGEXEC",
@@ -22614,8 +22620,7 @@
               "Each long is 4 bytes"
             ],
             "timing": {
-              "description": "Single hub operation",
-              "cycles": "~8-16 clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTESWAP",
@@ -22673,8 +22678,7 @@
               "Count of 0 copies no data"
             ],
             "timing": {
-              "description": "Varies based on count and hub timing",
-              "cycles": "~8 + (count * 2) clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTEMOVE",
@@ -22726,8 +22730,9 @@
               "Does not return lock to pool (use LOCKRET for that)"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "LOCKREL",
+              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per lockrel.yaml encoding)"
             },
             "related": [
               "LOCKTRY",
@@ -22759,8 +22764,10 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "DRVNOT",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -22853,8 +22860,7 @@
               "Different from TASKSTOP (which terminates)"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKRESUME",
@@ -22919,8 +22925,7 @@
               "Native P2 word size for fastest comparison"
             ],
             "timing": {
-              "description": "Varies based on count",
-              "cycles": "~8 + (count * 2) clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTECOMP",
@@ -22973,8 +22978,9 @@
               "Smart pin must be configured with WRPIN/WXPIN/WYPIN first"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "RDPIN",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "RQPIN",
@@ -23167,8 +23173,7 @@
               "PASM code must be in DAT section"
             ],
             "timing": {
-              "description": "PASM execution time + call overhead",
-              "cycles": "~20 + PASM cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "REGEXEC",
@@ -23222,8 +23227,9 @@
               "Smart pin must be configured with WRPIN/WXPIN/WYPIN first"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "RQPIN",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "RDPIN",
@@ -23252,11 +23258,7 @@
             ],
             "returns": "none",
             "timing": {
-              "accuracy": "Within one system clock tick",
-              "resolution": "1 microsecond (at frequencies >= 1MHz)",
-              "calculation": "Uses CLKFREQ/1_000_000 internally",
-              "overhead": "Minimal setup overhead (~10 cycles)",
-              "minimum_useful": "~2 microseconds at 200MHz"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -23478,8 +23480,7 @@
               "No length limit except available memory"
             ],
             "timing": {
-              "description": "Varies with string length",
-              "cycles": "~8 + (2 per character) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "STRCOPY",
@@ -23538,8 +23539,9 @@
               "Use with caution"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "HUBSET",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "language/spin2/methods/clkset.yaml",
@@ -23712,8 +23714,9 @@
               "No error if invalid lock ID"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "LOCKRET",
+              "underlying_pasm_timing": "2 clocks (range 2...9; per lockret.yaml encoding)"
             },
             "related": [
               "LOCKNEW",
@@ -23763,8 +23766,7 @@
               "ID remains constant for task lifetime"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKCHK",
@@ -23817,8 +23819,7 @@
               "Can check any lock without owning it"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "LOCKTRY",
@@ -23923,8 +23924,7 @@
               "Count must not exceed remaining registers"
             ],
             "timing": {
-              "description": "Hub transfer operation",
-              "cycles": "~8 + (count * 2) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "SETREGS",
@@ -24162,8 +24162,7 @@
               "Can check any task ID 0-31"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKID",
@@ -24442,8 +24441,7 @@
               "Task ID becomes available for reuse"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKSPIN",
@@ -24506,8 +24504,7 @@
               "Only lower 16 bits of Value are used"
             ],
             "timing": {
-              "description": "Varies based on count and hub timing",
-              "cycles": "~8 + count clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTEFILL",
@@ -24553,8 +24550,9 @@
               "Can be used in main loop for interrupt-like behavior"
             ],
             "timing": {
-              "description": "Immediate return",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "POLLATN",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "WAITATN",
@@ -24843,8 +24841,7 @@
               "Part of cooperative multitasking"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKHALT",
@@ -24881,8 +24878,10 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "OUTNOT or DRVH/DRVL",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -24979,8 +24978,7 @@
               "Handles clock frequency changes automatically"
             ],
             "timing": {
-              "description": "Immediate calculation",
-              "cycles": "~20-30 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "GETSEC",
@@ -25027,8 +25025,7 @@
               "Handles clock frequency changes automatically"
             ],
             "timing": {
-              "description": "Immediate calculation",
-              "cycles": "~20-30 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "GETMS",
@@ -25090,8 +25087,7 @@
               "Case-sensitive byte-by-byte comparison"
             ],
             "timing": {
-              "description": "Varies based on count",
-              "cycles": "~8 + count clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "WORDCOMP",
@@ -25255,8 +25251,9 @@
               "Smart pin must be configured and have IN flag set"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "AKPIN",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "RDPIN",
@@ -25423,8 +25420,7 @@
               "Read-only string constant"
             ],
             "timing": {
-              "description": "Immediate - compile time",
-              "cycles": "2-9 clock cycles to load address"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "LSTRING",
@@ -25460,8 +25456,10 @@
               "description": "Current state of the pin(s):\n- Single pin: 0 (low) or 1 (high)\n- Multiple pins: Each bit represents a pin\n- Bit 0 = lowest numbered pin in field\n- Bit n = nth pin in field\n"
             },
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "TESTP",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_sampling": "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per testp.yaml / io_pin_timing.yaml)"
             },
             "examples": [
               {
@@ -25561,8 +25559,7 @@
               "Efficient single-operation exchange"
             ],
             "timing": {
-              "description": "Single hub operation",
-              "cycles": "~8-16 clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "WORDSWAP",
@@ -25934,8 +25931,7 @@
               "Tasks run in round-robin fashion"
             ],
             "timing": {
-              "description": "Task switching overhead",
-              "cycles": "~20-40 clock cycles per switch"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "TASKSTOP",
@@ -26066,8 +26062,7 @@
               "Efficient block comparison operation"
             ],
             "timing": {
-              "description": "Varies based on count",
-              "cycles": "~8 + (count * 2) clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTECOMP",
@@ -26099,8 +26094,7 @@
               "description": "- -1 (TRUE): Cog is running\n- 0 (FALSE): Cog is stopped or invalid number\n"
             },
             "timing": {
-              "execution": "2-8 clock cycles",
-              "non_blocking": "Yes - doesn't wait or stall"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -26309,9 +26303,7 @@
             ],
             "returns": "none",
             "timing": {
-              "aligned": "~8 + (count * 4) clock cycles",
-              "misaligned": "Additional overhead for alignment",
-              "optimization": "Uses 32-bit transfers when possible"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "examples": [
               {
@@ -26534,8 +26526,7 @@
               "Each word is 2 bytes"
             ],
             "timing": {
-              "description": "Single hub operation",
-              "cycles": "~8-16 clock cycles typical"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "BYTESWAP",
@@ -26589,8 +26580,7 @@
               "Stored in DAT section"
             ],
             "timing": {
-              "description": "Immediate - compile time",
-              "cycles": "2-9 clock cycles to load address"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "STRING",
@@ -26945,8 +26935,7 @@
               "WRPIN(pin, 0) (clear mode)"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "4-18 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "PINSTART",
@@ -27086,8 +27075,9 @@
               "Hardware ensures atomic test-and-set"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "LOCKTRY",
+              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
             },
             "related": [
               "language/spin2/methods/lockrel.yaml",
@@ -27209,8 +27199,9 @@
               "Suitable for cryptographic use"
             ],
             "timing": {
-              "description": "Immediate",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "GETRND",
+              "underlying_pasm_timing": "2 clocks (fixed)"
             },
             "related": [
               "language/spin2/operators/op_rand.yaml",
@@ -27412,9 +27403,8 @@
             ],
             "returns": "none",
             "timing": {
-              "small_fill": "~8 + count clock cycles",
-              "large_fill": "Optimized for larger regions",
-              "performance": "Faster than loop for count > 4"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement.\n",
+              "performance": "Faster than a Spin2 loop for count > 4"
             },
             "examples": [
               {
@@ -27564,8 +27554,10 @@
             ],
             "returns": "none",
             "timing": {
-              "execution": "2 clock cycles in cog execution",
-              "hub_access": "8-19 clock cycles when executed from hub"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "DRVL",
+              "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -27668,8 +27660,7 @@
               "More precise than (a*b)/c for large values"
             ],
             "timing": {
-              "description": "Multi-cycle operation",
-              "cycles": "~50-60 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "QLOG",
@@ -27721,8 +27712,9 @@
               "TRUE means current counter >= target (accounting for wrap)"
             ],
             "timing": {
-              "description": "Immediate return",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "POLLCT1/2/3",
+              "underlying_pasm_timing": "2 clocks each (fixed)"
             },
             "related": [
               "WAITCT",
@@ -27785,8 +27777,7 @@
               "Destination buffer must be at least MaxCount bytes"
             ],
             "timing": {
-              "description": "Varies with string length",
-              "cycles": "~8 + (2 per character) clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
               "STRCOMP",
@@ -27858,8 +27849,9 @@
               "Hardware ensures atomic operations - no race conditions"
             ],
             "timing": {
-              "description": "Hub operation",
-              "cycles": "2-9 clock cycles"
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
+              "underlying_pasm": "LOCKNEW",
+              "underlying_pasm_timing": "4 clocks (range 4...11 hub-window dependent; per locknew.yaml encoding)"
             },
             "related": [
               "language/spin2/methods/lockret.yaml",
