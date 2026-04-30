@@ -29,7 +29,13 @@ fundamental_concept: |
        because the FIFO prefetches and streams instructions through the
        19-stage ((cogs+11)) instruction prefetch buffer
      - Branches: minimum 13 clocks (+1 if not long-aligned)
-     - FIFO/streamer instructions are FORBIDDEN in hubexec, not slow
+     - REP works in hubexec (Silicon Doc v35 verbatim: "REP works in hub
+       memory, as well, but executes a hidden jump to get back to the top
+       of the repeated instructions"). The hidden jump on each iteration
+       pays the 13+ clock hub-branch cost, so REP loops in hubexec are
+       slower than in cogexec but still functional.
+     - ALTI works in hubexec (no restriction in Silicon Doc).
+     - FIFO/streamer instructions ARE forbidden in hubexec
        (see `hubexec_forbidden_instructions:` below)
   
   COGEXEC is deterministic and limited to 512 longs. HUBEXEC can access all
@@ -85,7 +91,7 @@ hub_execution:
   limitations:
     - "Branch timing non-deterministic (minimum 13 clocks for FIFO refill)"
     - "Branches cost much more than in COGEXEC (13+ vs 4 clocks)"
-    - "REP and (ALTI as instruction modifier) not usable in hubexec"
+    - "REP works but pays the hub-branch cost on each iteration's hidden jump back to the top of the block (Silicon Doc verbatim) — slower than cogexec REP, not forbidden"
     - "FIFO/streamer instructions FORBIDDEN — see hubexec_forbidden_instructions"
     - "Sequential code is full speed — branch-heavy code is where the cost shows up"
 
@@ -108,9 +114,9 @@ hubexec_forbidden_instructions:
     - "XINIT"
     - "XZERO"
     - "XCONT (when streamer mode engages the FIFO)"
-  also_unavailable_in_hubexec:
-    - "REP — fast loop instruction (cogexec/lutexec only)"
-    - "ALTI used as instruction-stream modifier (a following instruction is fetched from a fixed location, which the FIFO does not support)"
+  also_works_in_hubexec_but_with_caveat:
+    REP: "Works in hubexec per Silicon Doc v35 verbatim: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions.' Each iteration's hidden jump pays the 13+-clock hub-branch cost, so REP loops are slower in hubexec than in cogexec."
+    ALTI: "Works in hubexec. ALTI is not in the Silicon Doc HUB EXECUTION forbidden list, and ALTI's mechanism (modifying the next pipelined instruction's fields or substituting a full opcode) operates on the instruction in the pipeline regardless of whether it came from cog/LUT memory or the hub-prefetch FIFO."
   source: "Silicon Doc v35, HUB EXECUTION section"
 
 dynamic_overlay_system:
@@ -217,10 +223,11 @@ execution_control:
 
 instruction_availability:
   cogexec_only:
-    - "REP — Fast loop instruction"
-    - "ALTI — Modify next instruction (as instruction-stream modifier)"
-    - "Some self-modifying code patterns"
-    - "All FIFO/streamer ops (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT)"
+    - "All FIFO/streamer ops (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) — Silicon Doc HUB EXECUTION forbidden list"
+    - "Some self-modifying code patterns (e.g., patching the just-prefetched-into-FIFO instructions has no effect, since the FIFO already holds them)"
+  works_in_both_modes_with_caveats:
+    - "REP — works in hubexec but each iteration's hidden jump back to top costs 13+ clocks (hub-branch FIFO refill)"
+    - "ALTI — works in both modes; modifies the next pipelined instruction regardless of source (cog/LUT or FIFO)"
   
   hubexec_only:
     - "None — hubexec is a strict subset (with the forbidden list above)"

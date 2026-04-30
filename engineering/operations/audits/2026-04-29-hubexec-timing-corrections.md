@@ -16,14 +16,20 @@ This audit went through three rounds:
 
 **Round 2** (deeper sweep): discovered that round-1 fixes themselves introduced new errors (used "4-16 clocks" for hub branches when correct is "minimum 13 clocks"; framed FIFO/streamer instructions as "slow" when they are FORBIDDEN in hubexec; said "16 longs deep" FIFO when it's 19 stages).
 
-**Round 3** (data-set-wide sweep, this round): found systematic problems across the entire data set:
+**Round 3** (data-set-wide sweep): found systematic problems across the entire data set:
 - `timing.cycles: 1` errors in 18 PASM2 instruction YAMLs (hub-access ops + shifts misrepresenting their actual timing)
 - Pin instruction Spin2 methods incorrectly claiming a cog-vs-hub execution-mode distinction (the underlying PASM is 2 clocks fixed in both modes)
 - ~50 Spin2 method YAMLs publishing unsourceable bytecode-interpreter clock ranges (`2-9 clock cycles`, `~20-40`, `~8 + count×N`, etc.)
 - Architecture YAMLs with: wrong CORDIC latency (54 vs verified 55), wrong cog branch_penalty framing (5-8 vs verified 4 + 5+ post-branch), wrong lock timings (2-18 vs verified 2-9/4-11), wrong xbyte software_dispatch overhead (~20-40 vs verified 9), unsourced "3-8 clock interrupt latency" claims throughout
 - Spin2 concept files with unsourced floating-point cycle ranges and `~10-20 cycle method overhead` claims
 
-All round-3 issues have been corrected against root sources.
+**Round 4** (this round, 2026-04-30): user flagged two additional errors I had introduced. Both verified wrong against root sources:
+
+1. **REP and ALTI "forbidden in hubexec" was wrong.** Silicon Doc v35 verbatim: *"REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions."* REP works in hubexec; it just pays the 13+-clock hub-branch cost on each iteration's hidden jump back to the top. ALTI is not in the Silicon Doc HUB EXECUTION forbidden list — it works in hubexec because it modifies the next pipelined instruction regardless of where the instruction was fetched from.
+
+2. **Inline PASM "16 longs total (params + result + locals + code)" was wrong.** Spin2 v51 documentation verbatim describes TWO SEPARATE copies done by the interpreter: (1) "Copy the method's first 16 long variables ... from hub RAM to cog registers $1E0..$1EF" (variables only), and (2) "Copy the in-line PASM-code longs from hub RAM into cog registers, starting at the register address specified after the ORG (default is $000)" (code, separately). The 16-long limit applies to **variables only**; **code is buffered separately** and is not constrained by the 16-long figure.
+
+All round-3 and round-4 issues have been corrected against root sources.
 
 ---
 

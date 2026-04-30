@@ -30,7 +30,8 @@ notes:
 - Branches cost minimum 13 clocks for FIFO refill (+1 if target is not long-aligned) per Silicon Doc HUB EXECUTION section
 - Instruction prefetch FIFO is (cogs+11) = 19 stages deep on a P2 with 8 cogs (Silicon Doc verbatim)
 - FIFO/streamer instructions are FORBIDDEN in hubexec (not slow): RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)
-- REP and (ALTI as instruction-stream modifier) also unavailable in hubexec
+- 'REP works in hubexec but slower per iteration (Silicon Doc v35 verbatim: "REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions" — the hidden jump pays the 13+ clock hub-branch cost on each iteration)'
+- ALTI works in hubexec (not in the Silicon Doc HUB EXECUTION forbidden list; modifies the next pipelined instruction regardless of source)
 - RDLONG/WRLONG and other hub I/O work normally in hubexec (9-24 / 3-12 clocks, egg-beater dependent)
 - Must specify target cog ID (0-7)
 - Use HUBEXEC_NEW to auto-select available cog

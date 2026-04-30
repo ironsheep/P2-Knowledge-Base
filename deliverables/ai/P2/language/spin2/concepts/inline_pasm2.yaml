@@ -20,9 +20,11 @@ status: |
 key_facts_summary:
   execution_mode: |
     Inline PASM2 (ORG...END inside a PUB/PRI method) is loaded into cog RAM
-    at runtime by the Spin2 interpreter (spilling the first 16 locals) and
-    runs as cog-exec, NOT hub-exec.
-  size_limit: "16 longs total (params + result + locals + code)"
+    at runtime by the Spin2 interpreter as two separate copies (first 16
+    long variables → $1E0..$1EF; PASM code → starting at ORG address,
+    default $000) and runs as cog-exec, NOT hub-exec.
+  variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF. Per Spin2 v51 documentation verbatim."
+  code_size: "Code is buffered separately and is NOT counted against the 16-long variable limit. Practically bounded by free cog register space (avoid $120..$1D7 which the interpreter uses)."
   label_rule: "Inline labels must start with '.' or ':' (method-local only)"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml

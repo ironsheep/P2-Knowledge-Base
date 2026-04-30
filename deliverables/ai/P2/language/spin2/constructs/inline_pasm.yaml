@@ -29,16 +29,30 @@ execution_model:
   # CRITICAL: this is cog-exec, NOT hub-exec.
   summary: |
     Inline PASM2 in a Spin2 method (ORG...END inside PUB/PRI) is loaded into
-    cog RAM at runtime by the Spin2 interpreter. The interpreter spills the
-    first 16 locals to make room, then jumps to the loaded block. The block
-    runs as cog-exec at the deterministic 2 clocks/instruction.
+    cog RAM at runtime by the Spin2 interpreter. Per Spin2 v51 documentation
+    verbatim, the interpreter performs TWO separate copies before jumping:
+    
+    1. "Copy the method's first 16 long variables, including any parameters,
+       return values, and local variables, from hub RAM to cog registers
+       $1E0..$1EF."
+    2. "Copy the in-line PASM-code longs from hub RAM into cog registers,
+       starting at the register address specified after the ORG (default
+       is $000)."
+    
+    The block then runs as cog-exec at the deterministic per-instruction
+    PASM timings.
   
   it_does_NOT_run_in_hubexec: true
   
-  size_limit:
+  variable_limit:
     total_longs: 16
-    breakdown: "params + result + locals + code, all sharing the 16-long inline area"
-    workaround_if_larger: "Use a DAT-section PASM block loaded with COGINIT, or chain multiple ORG...END blocks"
+    breakdown: "First 16 long variables (params + result + locals) are copied to cog registers $1E0..$1EF. This 16-long limit applies to VARIABLES ONLY — not to the PASM code itself."
+    source: "Spin2 v51 documentation verbatim"
+  
+  code_buffering:
+    description: "PASM code is copied separately into cog registers starting at the ORG address (default $000), so code length is NOT constrained by the 16-long variable limit."
+    code_size_limit: "Bounded by available cog registers from ORG address up to whatever ranges the interpreter does not occupy. Spin2 v51 doc warns: 'Avoid writing to $120..$1D7 and LUT RAM $010..$1FF, since the Spin2 interpreter occupies these areas.' Practically, the code can use $000..$11F (288 longs) plus LUT $000..$00F (16 longs) safely, far more than 16."
+    source: "Spin2 v51 documentation verbatim"
   
   why_it_matters_for_timing:
     - "Inline PASM gets cog-exec timing — deterministic 2 clocks/instruction for typical ALU ops"
@@ -54,7 +68,7 @@ syntax_forms:
         ' PASM2 code here
       END
     description: "Inline PASM2 inside a Spin2 method"
-    execution: "Loaded into cog RAM at runtime by the Spin2 interpreter (spills first 16 locals); runs as cog-exec, NOT hub-exec. Block limited to 16 longs total (params + result + locals + code)."
+    execution: "Loaded into cog RAM at runtime by the Spin2 interpreter as TWO separate copies: (1) first 16 long variables (params + result + locals) → cog $1E0..$1EF; (2) PASM code longs → cog registers starting at ORG address (default $000). Runs as cog-exec, NOT hub-exec. The 16-long limit applies to VARIABLES ONLY; code is buffered separately and is not bound by that figure."
     
   - form: "cog_code"
     syntax: |
@@ -125,7 +139,10 @@ register_access:
     - Second parameter → PR1
     - Return value     → PR0 (overlaps first parameter)
     - Local variables  → next available registers after parameters
-    - Maximum total    → 16 registers (params + result + locals + code share this budget)
+    - Variable budget  → first 16 long variables go to $1E0..$1EF (params + result + locals only).
+                       Code is NOT counted against this 16-long figure — PASM code is copied
+                       separately into cog registers starting at the ORG address (default $000).
+                       Source: Spin2 v51 documentation verbatim.
   
   local_label_rule:
     requirement: "Inline PASM labels must start with '.' (e.g. .loop) or ':' (e.g. :next)"
