@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-05-02",
-    "last_updated": "2026-05-02T19:00:18.731289",
+    "last_updated": "2026-05-02T19:15:01.137001",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-05-02T19:00:18.731289",
+    "extraction_date": "2026-05-02T19:15:01.137001",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18309,7 +18309,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-05-02T19:00:18.731289",
+    "extraction_date": "2026-05-02T19:15:01.137001",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18582,16 +18582,14 @@
                 "nameless": "STRUCT nameless_t(LONG.ready[0])            ' access:  nameless_var.ready"
               },
               "bitfield_access_semantics": "Bitfield access is a setup_bfield-style access \u2014 it can be read, written,\nor used as the target of :=, ++, --, and compound-assign operators. Same\nsemantics as plain variable bitfields in earlier Spin2 versions.\n",
-              "bytecode_implementation": {
-                "note": "No new bytecodes \u2014 reuses existing bitfield-setup bytecodes",
-                "mapping": [
+              "interpreter_implementation": {
+                "note": "V54 struct bitfields reuse the existing bitfield-setup code path used for plain variable bitfields \u2014 no new interpreter mechanism required.",
+                "setup_paths_reused": [
                   {
-                    "bytecode": "bc_setup_bfield_0_31 + N",
-                    "used_for": "Single-bit bitfield at bit N (0..31)"
+                    "description": "Single-bit bitfield at bit N (0..31): same path as plain `var.[N]` bitfield access"
                   },
                   {
-                    "bytecode": "bc_setup_bfield_rfvar",
-                    "used_for": "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+                    "description": "Multi-bit bitfield: same path as plain `var.[upper..lower]` bitfield access"
                   }
                 ]
               },
@@ -18660,7 +18658,7 @@
               "V54+: Named bitfields on BYTE/WORD/LONG members \u2014 see v54_enhancements section and concepts/struct-bitfields.yaml",
               "V54+: Nameless single BYTE/WORD/LONG member form \u2014 struct_var.bitfield without intermediate member name",
               "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent",
-              "V54+: No new bytecodes \u2014 reuses bc_setup_bfield_0_31 and bc_setup_bfield_rfvar"
+              "V54+: No new interpreter mechanism \u2014 reuses the existing variable-bitfield setup paths"
             ],
             "related": [
               "language/spin2/methods/sizeof.yaml",
@@ -20152,7 +20150,6 @@
               "associates": "left",
               "same_level": "+, -, +., -."
             },
-            "bytecode": "$C6 (bc_pow)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := 2.0 POW 3.0                  ' result = 8.0 (2^3)\n",
@@ -20972,7 +20969,6 @@
               "type": "float",
               "description": "10^exponent result as 32-bit float"
             },
-            "bytecode": "$D0 (bc_exp10)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP10(2.0)                   ' result = 100.0 (10^2)\n",
@@ -21314,7 +21310,6 @@
               "type": "long",
               "description": "Byte-swapped word in lower 16 bits, upper 16 bits cleared"
             },
-            "bytecode": "$E8 (bc_endianw)",
             "byte_transformation": {
               "input": "$AA_BB_12_34 (word portion: $1234)",
               "output": "$00_00_34_12 (swapped word, upper cleared)",
@@ -23634,7 +23629,6 @@
               "type": "float",
               "description": "Base-10 logarithm result as 32-bit float"
             },
-            "bytecode": "$CA (bc_log10)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | x, result\n  x := 100.0\n  result := LOG10(x)                     ' result = 2.0 (10^2 = 100)\n",
@@ -23956,7 +23950,6 @@
               "type": "float",
               "description": "Natural logarithm result as 32-bit float"
             },
-            "bytecode": "$CC (bc_log)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nCON\n  E = 2.718281828                        ' Euler's number\n\nPUB main() | result\n  result := LOG(E)                       ' result \u2248 1.0 (e^1 = e)\n",
@@ -24019,7 +24012,6 @@
               "type": "long",
               "description": "Value with bytes rearranged per pattern"
             },
-            "bytecode": "$E4 (bc_movbyts)",
             "byte_positions": [
               {
                 "position": "Byte 0",
@@ -24372,7 +24364,7 @@
             "notes": [
               "REQUIRES {Spin2_v53} or later at start of source file",
               "Compile-time only \u2014 the result is a constant integer pushed onto the stack",
-              "No new bytecodes; emits standard constant-push bytecodes (bc_con_rflong, bc_con_rfbyte, etc.)",
+              "Emits the standard compile-time integer-constant push path; no special interpreter mechanism",
               "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts",
               "Works with nested structures to any depth",
               "Array indexing supported at any level of nesting",
@@ -25720,7 +25712,6 @@
               "type": "float",
               "description": "e^exponent result as 32-bit float"
             },
-            "bytecode": "$D2 (bc_exp)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP(1.0)                     ' result \u2248 2.71828 (e^1 = e)\n",
@@ -25783,7 +25774,6 @@
               "type": "float",
               "description": "2^exponent result as 32-bit float"
             },
-            "bytecode": "$CE (bc_exp2)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | result\n  result := EXP2(3.0)                    ' result = 8.0 (2^3)\n",
@@ -26438,7 +26428,6 @@
               "type": "long",
               "description": "Value with byte order reversed"
             },
-            "bytecode": "$E6 (bc_endianl)",
             "byte_transformation": {
               "input": "$12_34_56_78 (bytes: 12, 34, 56, 78)",
               "output": "$78_56_34_12 (bytes: 78, 56, 34, 12)",
@@ -27497,7 +27486,6 @@
               "type": "float",
               "description": "Base-2 logarithm result as 32-bit float"
             },
-            "bytecode": "$C8 (bc_log2)",
             "examples": [
               {
                 "code": "{Spin2_v51}                              ' REQUIRED directive\nPUB main() | x, result\n  x := 8.0\n  result := LOG2(x)                      ' result = 3.0 (2^3 = 8)\n",
@@ -28403,7 +28391,6 @@
                   "orgh": "Slightly slower"
                 }
               ],
-              "bytecode": "$D6 (bc_orgh)",
               "error_messages": [
                 "ORGH inline block exceeds $FFFF longs (including the added RET instruction)",
                 "ORG/ORGH inline block is empty"
