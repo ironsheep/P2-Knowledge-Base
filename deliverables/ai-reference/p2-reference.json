@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-04-30",
-    "last_updated": "2026-04-30T20:51:09.079387",
+    "release_date": "2026-05-02",
+    "last_updated": "2026-05-02T19:00:18.731289",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-04-30T20:51:09.079387",
+    "extraction_date": "2026-05-02T19:00:18.731289",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18309,7 +18309,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-04-30T20:51:09.079387",
+    "extraction_date": "2026-05-02T19:00:18.731289",
     "categories": {
       "keywords": {
         "count": 37,
@@ -25930,6 +25930,7 @@
               "Stack size depends on task complexity",
               "Tasks run in round-robin fashion"
             ],
+            "taskptr_table_location": "Each task's pointer (taskptr) is stored in cog registers $100..$11F, with\nthe table building DOWNWARD from $11F (taskptr for task 31 occupies $11F,\ntask 30 at $11E, etc.). Programs using fewer than 32 tasks leave the\nLOWER portion of $100..$11F free for user code as well. This range\noverlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking\nand large inline-PASM blocks compete for the same space.\nSource: Chip Gracey clarification 2026-05-02 verbatim.\n",
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
@@ -28377,7 +28378,7 @@
                 "Code executes in hub RAM (hub-execute mode)",
                 "Maximum size: $FFFF longs including auto-added RET",
                 "RET instruction automatically added at end",
-                "First 16 local variables saved/restored around inline block",
+                "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. Source: Chip Gracey clarification 2026-05-02 verbatim: 'the first 16 params + results + locals are buffered and restored like in ORG..END.'",
                 "Access to method parameters and local variables"
               ],
               "comparison": [
