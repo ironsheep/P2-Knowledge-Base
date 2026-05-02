@@ -22,7 +22,6 @@ returns:
   type: "float"
   description: "Base-10 logarithm result as 32-bit float"
 
-bytecode: "$CA (bc_log10)"
 
 examples:
   - code: |

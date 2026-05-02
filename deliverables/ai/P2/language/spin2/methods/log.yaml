@@ -22,7 +22,6 @@ returns:
   type: "float"
   description: "Natural logarithm result as 32-bit float"
 
-bytecode: "$CC (bc_log)"
 
 examples:
   - code: |

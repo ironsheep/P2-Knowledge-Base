@@ -43,6 +43,16 @@ This audit went through three rounds:
 
 All round-3, round-4, and round-5 issues have been corrected against root sources. New ingestion source file at `engineering/ingestion/sources/chip-gracey-clarifications/chip-clarifications-2026-05-02.md` records the round-5 verbatim findings.
 
+**Round 6** (2026-05-02): user flagged that the YAMLs contained compiler bytecode references that will rev with each PNut release. Removed all such references in two tiers:
+
+1. **Tier 1 — hard-coded hex bytecode values** ($XX with bc_name). Removed from 11 method/operator/directive YAMLs (exp10, exp2, exp, log, log2, log10, movbyts, endianl, endianw, op_POW, orgh.yaml inline_assembly section). Plus removed `Bytecode: $D6 (bc_orgh).` trailing claim from inline_pasm.yaml that I had introduced in round 5 — my own violation.
+
+2. **Tier 2 — bc_-prefixed compiler symbol names**. Reframed the bitfield-bytecode claims in struct-bitfields.yaml, STRUCT.yaml, and offsetof.yaml to describe the reused code path / behavior without naming PNut-internal symbols (bc_setup_bfield_0_31, bc_setup_bfield_rfvar, bc_con_rflong, bc_con_rfbyte). Renamed `bytecode_implementation:` blocks to `interpreter_implementation:` to reflect the new framing.
+
+**Tier 3 — conceptual "bytecode" mentions left intact.** Mentions of "the Spin2 bytecode interpreter" as a concept (~132 remaining lines) describe the execution model and are stable across compiler revs. These were correct and useful and were preserved.
+
+New memory rule: `feedback_no_compiler_bytecodes.md` records that PNut bytecode values and bc_-prefixed symbols vary with compiler releases and must not be published. Future audits should grep for `bytecode:.*\$[0-9A-Fa-f]+` and `bc_[a-z]` patterns and fix any that reappear.
+
 ---
 
 ## Authoritative numbers (final, verified)

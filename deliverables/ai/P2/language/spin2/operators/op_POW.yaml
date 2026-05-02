@@ -30,7 +30,6 @@ precedence:
   associates: "left"
   same_level: "+, -, +., -."
 
-bytecode: "$C6 (bc_pow)"
 
 examples:
   - code: |

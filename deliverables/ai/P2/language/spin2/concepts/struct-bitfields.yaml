@@ -155,13 +155,11 @@ errors:
   - error: "Lower bit number cannot exceed upper bit number"
     condition: "lower > upper in [upper..lower]"
 
-bytecode_implementation:
-  description: "No new bytecodes — v54 reuses the existing bitfield-setup bytecodes introduced for plain variable bitfields"
-  bytecodes:
-    - bytecode: "bc_setup_bfield_0_31 + N"
-      used_for: "Single-bit bitfield at bit N (0..31)"
-    - bytecode: "bc_setup_bfield_rfvar"
-      used_for: "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+interpreter_implementation:
+  description: "V54 struct bitfields reuse the existing bitfield-setup code path that was introduced for plain variable bitfields. No new interpreter mechanism is required."
+  setup_paths_reused:
+    - description: "Single-bit bitfield at bit N (0..31): handled by the same setup path used for plain `var.[N]` bitfield access"
+    - description: "Multi-bit bitfield: handled by the same setup path used for plain `var.[upper..lower]` bitfield access"
 
 version_directive_guidance:
   enforcement: "Not enforced by PNut v54"
@@ -205,7 +203,7 @@ notes:
   - "v54 bitfield syntax is not enforced by a version directive, but {Spin2_v54} is recommended as declaration of intent"
   - "Bitfields can chain indefinitely on one member, and may overlap"
   - "Whole-member and whole-struct assignment are preserved"
-  - "Bitfield access reuses existing bc_setup_bfield_0_31 and bc_setup_bfield_rfvar bytecodes — zero runtime overhead vs plain variable bitfields"
+  - "Bitfield access reuses the existing variable-bitfield setup paths — zero runtime overhead vs plain variable bitfields"
   - "SIZEOF(nameless_struct_t) returns the size of the backing member type (1 for BYTE, 2 for WORD, 4 for LONG)"
   - "OFFSETOF(nameless_t.bitfield) returns 0 — a nameless member occupies offset 0 of its struct"
 

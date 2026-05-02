@@ -110,7 +110,6 @@ inline_assembly:
     - feature: "Speed"
       org: "Fastest"
       orgh: "Slightly slower"
-  bytecode: "$D6 (bc_orgh)"
   error_messages:
     - "ORGH inline block exceeds $FFFF longs (including the added RET instruction)"
     - "ORG/ORGH inline block is empty"

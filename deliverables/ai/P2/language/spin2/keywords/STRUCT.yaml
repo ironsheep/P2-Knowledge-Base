@@ -293,13 +293,11 @@ v54_enhancements:
     or used as the target of :=, ++, --, and compound-assign operators. Same
     semantics as plain variable bitfields in earlier Spin2 versions.
 
-  bytecode_implementation:
-    note: "No new bytecodes — reuses existing bitfield-setup bytecodes"
-    mapping:
-      - bytecode: "bc_setup_bfield_0_31 + N"
-        used_for: "Single-bit bitfield at bit N (0..31)"
-      - bytecode: "bc_setup_bfield_rfvar"
-        used_for: "Multi-bit bitfield (rfvar encodes the bit descriptor)"
+  interpreter_implementation:
+    note: "V54 struct bitfields reuse the existing bitfield-setup code path used for plain variable bitfields — no new interpreter mechanism required."
+    setup_paths_reused:
+      - description: "Single-bit bitfield at bit N (0..31): same path as plain `var.[N]` bitfield access"
+      - description: "Multi-bit bitfield: same path as plain `var.[upper..lower]` bitfield access"
 
   errors:
     - error: "Bitfields are only allowed for BYTE/WORD/LONG members"
@@ -370,7 +368,7 @@ notes:
   - "V54+: Named bitfields on BYTE/WORD/LONG members — see v54_enhancements section and concepts/struct-bitfields.yaml"
   - "V54+: Nameless single BYTE/WORD/LONG member form — struct_var.bitfield without intermediate member name"
   - "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent"
-  - "V54+: No new bytecodes — reuses bc_setup_bfield_0_31 and bc_setup_bfield_rfvar"
+  - "V54+: No new interpreter mechanism — reuses the existing variable-bitfield setup paths"
 
 related:
   - language/spin2/methods/sizeof.yaml

@@ -22,7 +22,6 @@ returns:
   type: "long"
   description: "Byte-swapped word in lower 16 bits, upper 16 bits cleared"
 
-bytecode: "$E8 (bc_endianw)"
 
 byte_transformation:
   input: "$AA_BB_12_34 (word portion: $1234)"

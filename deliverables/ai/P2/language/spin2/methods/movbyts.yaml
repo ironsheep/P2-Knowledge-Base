@@ -24,7 +24,6 @@ returns:
   type: "long"
   description: "Value with bytes rearranged per pattern"
 
-bytecode: "$E4 (bc_movbyts)"
 
 byte_positions:
   - position: "Byte 0"

@@ -119,7 +119,7 @@ syntax_forms:
         END
     description: "V50+ inline PASM2 that runs as hub-exec directly from hub RAM (NOT loaded into cog RAM)"
     introduced: "Spin2 v50"
-    execution: "Per Chip Gracey clarification 2026-05-02: ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still buffered into cog $1E0..$1EF at entry and restored at exit, identical to ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including auto-added RET. Bytecode: $D6 (bc_orgh)."
+    execution: "Per Chip Gracey clarification 2026-05-02: ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still buffered into cog $1E0..$1EF at entry and restored at exit, identical to ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including auto-added RET."
     contrast_with_org_inline: |
       ORG..END  : code copied into cog RAM at $000..; runs as cog-exec; size limited by cog code area ($000..$11F minus multitasking taskptr table)
       ORGH..END : code stays in hub RAM; runs as hub-exec; up to $FFFF longs; sequential 2 clocks/instruction but branches 13+ clocks

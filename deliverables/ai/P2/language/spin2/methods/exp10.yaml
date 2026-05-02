@@ -22,7 +22,6 @@ returns:
   type: "float"
   description: "10^exponent result as 32-bit float"
 
-bytecode: "$D0 (bc_exp10)"
 
 examples:
   - code: |

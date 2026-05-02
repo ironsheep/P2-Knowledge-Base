@@ -154,7 +154,7 @@ errors:
 notes:
   - "REQUIRES {Spin2_v53} or later at start of source file"
   - "Compile-time only — the result is a constant integer pushed onto the stack"
-  - "No new bytecodes; emits standard constant-push bytecodes (bc_con_rflong, bc_con_rfbyte, etc.)"
+  - "Emits the standard compile-time integer-constant push path; no special interpreter mechanism"
   - "Particularly useful for low-level buffer manipulation, binary protocol parsing, and interop with C-style data layouts"
   - "Works with nested structures to any depth"
   - "Array indexing supported at any level of nesting"

@@ -22,7 +22,6 @@ returns:
   type: "float"
   description: "2^exponent result as 32-bit float"
 
-bytecode: "$CE (bc_exp2)"
 
 examples:
   - code: |
