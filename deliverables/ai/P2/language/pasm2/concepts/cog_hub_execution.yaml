@@ -34,7 +34,11 @@ fundamental_concept: |
        of the repeated instructions"). The hidden jump on each iteration
        pays the 13+ clock hub-branch cost, so REP loops in hubexec are
        slower than in cogexec but still functional.
-     - ALTI works in hubexec (no restriction in Silicon Doc).
+     - All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/
+       ALTGN/ALTGB/ALTGW) work in hubexec (none are in the Silicon Doc HUB
+       EXECUTION forbidden list). Confirmed by Chip Gracey clarification
+       2026-05-02: "REP is allowed in hubexec and so is ALTI or any other
+       ALTx instruction."
      - FIFO/streamer instructions ARE forbidden in hubexec
        (see `hubexec_forbidden_instructions:` below)
   
@@ -116,7 +120,7 @@ hubexec_forbidden_instructions:
     - "XCONT (when streamer mode engages the FIFO)"
   also_works_in_hubexec_but_with_caveat:
     REP: "Works in hubexec per Silicon Doc v35 verbatim: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions.' Each iteration's hidden jump pays the 13+-clock hub-branch cost, so REP loops are slower in hubexec than in cogexec."
-    ALTI: "Works in hubexec. ALTI is not in the Silicon Doc HUB EXECUTION forbidden list, and ALTI's mechanism (modifying the next pipelined instruction's fields or substituting a full opcode) operates on the instruction in the pipeline regardless of whether it came from cog/LUT memory or the hub-prefetch FIFO."
+    ALTx_family: "All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) work in hubexec. None are in the Silicon Doc HUB EXECUTION forbidden list. ALTx mechanisms (modifying the next pipelined instruction's fields or substituting a full opcode) operate on the instruction in the pipeline regardless of whether it came from cog/LUT memory or the hub-prefetch FIFO. Source: Chip Gracey clarification 2026-05-02 verbatim: 'REP is allowed in hubexec and so is ALTI or any other ALTx instruction.'"
   source: "Silicon Doc v35, HUB EXECUTION section"
 
 dynamic_overlay_system:
@@ -227,7 +231,7 @@ instruction_availability:
     - "Some self-modifying code patterns (e.g., patching the just-prefetched-into-FIFO instructions has no effect, since the FIFO already holds them)"
   works_in_both_modes_with_caveats:
     - "REP — works in hubexec but each iteration's hidden jump back to top costs 13+ clocks (hub-branch FIFO refill)"
-    - "ALTI — works in both modes; modifies the next pipelined instruction regardless of source (cog/LUT or FIFO)"
+    - "All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) — work in both modes; modify the next pipelined instruction regardless of source (cog/LUT or FIFO). Source: Chip Gracey clarification 2026-05-02."
   
   hubexec_only:
     - "None — hubexec is a strict subset (with the forbidden list above)"

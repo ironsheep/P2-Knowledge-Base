@@ -95,7 +95,7 @@ inline_assembly:
     - "Code executes in hub RAM (hub-execute mode)"
     - "Maximum size: $FFFF longs including auto-added RET"
     - "RET instruction automatically added at end"
-    - "First 16 local variables saved/restored around inline block"
+    - "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. Source: Chip Gracey clarification 2026-05-02 verbatim: 'the first 16 params + results + locals are buffered and restored like in ORG..END.'"
     - "Access to method parameters and local variables"
   comparison:
     - feature: "Execution location"

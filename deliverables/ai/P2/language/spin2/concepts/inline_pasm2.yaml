@@ -23,8 +23,18 @@ key_facts_summary:
     at runtime by the Spin2 interpreter as two separate copies (first 16
     long variables → $1E0..$1EF; PASM code → starting at ORG address,
     default $000) and runs as cog-exec, NOT hub-exec.
+    
+    V50+ adds an ORGH...END inline option where code stays in hub RAM and
+    runs as hub-exec (no cog-RAM copy of code); the 16-long variable buffer
+    at $1E0..$1EF behaves identically. See language/spin2/assembly-directives/orgh.yaml.
   variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF. Per Spin2 v51 documentation verbatim."
-  code_size: "Code is buffered separately and is NOT counted against the 16-long variable limit. Practically bounded by free cog register space (avoid $120..$1D7 which the interpreter uses)."
+  code_size: "For ORG..END: inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F. For ORGH..END (V50+): up to $FFFF longs in hub RAM. Code is buffered separately from the 16-long variable area in either case."
+  multitasking_caveat: |
+    $100..$11F is the multitasking taskptr table, building DOWNWARD from $11F.
+    Programs using fewer than 32 software tasks leave the LOWER portion of
+    $100..$11F free for user code. This range overlaps the ORG..END inline
+    code area, so multitasking and large inline-PASM blocks compete for the
+    same space. Source: Chip Gracey clarification 2026-05-02 verbatim.
   label_rule: "Inline labels must start with '.' or ':' (method-local only)"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml

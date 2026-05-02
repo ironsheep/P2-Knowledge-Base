@@ -62,6 +62,15 @@ notes:
   - "NEWTASK (-1) auto-assigns next available ID"
   - "Stack size depends on task complexity"
   - "Tasks run in round-robin fashion"
+
+taskptr_table_location: |
+  Each task's pointer (taskptr) is stored in cog registers $100..$11F, with
+  the table building DOWNWARD from $11F (taskptr for task 31 occupies $11F,
+  task 30 at $11E, etc.). Programs using fewer than 32 tasks leave the
+  LOWER portion of $100..$11F free for user code as well. This range
+  overlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking
+  and large inline-PASM blocks compete for the same space.
+  Source: Chip Gracey clarification 2026-05-02 verbatim.
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

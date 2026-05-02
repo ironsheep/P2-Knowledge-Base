@@ -51,8 +51,15 @@ execution_model:
   
   code_buffering:
     description: "PASM code is copied separately into cog registers starting at the ORG address (default $000), so code length is NOT constrained by the 16-long variable limit."
-    code_size_limit: "Bounded by available cog registers from ORG address up to whatever ranges the interpreter does not occupy. Spin2 v51 doc warns: 'Avoid writing to $120..$1D7 and LUT RAM $010..$1FF, since the Spin2 interpreter occupies these areas.' Practically, the code can use $000..$11F (288 longs) plus LUT $000..$00F (16 longs) safely, far more than 16."
-    source: "Spin2 v51 documentation verbatim"
+    code_size_limit: "Inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F (16 longs). When the cog uses multitasking, $100..$11F is the multitasking taskptr table (building DOWNWARD from $11F), reducing the available inline code area; programs using fewer than 32 software tasks leave the LOWER portion of $100..$11F free for user code as well. Avoid writing to $120..$1D7 (Spin2 interpreter) and LUT $010..$1FF (interpreter)."
+    source: "Spin2 v51 documentation + Chip Gracey clarification 2026-05-02 verbatim"
+  
+  multitasking_taskptr_table:
+    location: "$100..$11F (cog registers)"
+    fill_direction: "Downward from $11F (taskptr for task 31 occupies $11F, task 30 at $11E, etc.)"
+    free_when_fewer_tasks: "Programs using fewer than 32 software tasks leave the LOWER portion of $100..$11F free for user code"
+    overlaps_inline_code_area: "This range is the upper portion of the inline-PASM code area ($000..$11F), so multitasking and large inline-PASM blocks compete for the same space"
+    source: "Chip Gracey clarification 2026-05-02 verbatim"
   
   why_it_matters_for_timing:
     - "Inline PASM gets cog-exec timing — deterministic 2 clocks/instruction for typical ALU ops"
@@ -104,6 +111,20 @@ syntax_forms:
         result += 100    ' Back to Spin2
     description: "Mix Spin2 and PASM2 in same method (PASM portion runs as cog-exec)"
 
+  - form: "orgh_inline"
+    syntax: |
+      PUB method_name(params) : result | locals
+        ORGH
+          ' PASM2 code here — executes from hub RAM, no cog-RAM copy
+        END
+    description: "V50+ inline PASM2 that runs as hub-exec directly from hub RAM (NOT loaded into cog RAM)"
+    introduced: "Spin2 v50"
+    execution: "Per Chip Gracey clarification 2026-05-02: ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still buffered into cog $1E0..$1EF at entry and restored at exit, identical to ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including auto-added RET. Bytecode: $D6 (bc_orgh)."
+    contrast_with_org_inline: |
+      ORG..END  : code copied into cog RAM at $000..; runs as cog-exec; size limited by cog code area ($000..$11F minus multitasking taskptr table)
+      ORGH..END : code stays in hub RAM; runs as hub-exec; up to $FFFF longs; sequential 2 clocks/instruction but branches 13+ clocks
+    related: "language/spin2/assembly-directives/orgh.yaml"
+
 why_inline_pasm_matters:
   performance: |
     Inline PASM2 runs at the deterministic PASM2 timings cited in the per-
@@ -140,9 +161,13 @@ register_access:
     - Return value     → PR0 (overlaps first parameter)
     - Local variables  → next available registers after parameters
     - Variable budget  → first 16 long variables go to $1E0..$1EF (params + result + locals only).
-                       Code is NOT counted against this 16-long figure — PASM code is copied
-                       separately into cog registers starting at the ORG address (default $000).
-                       Source: Spin2 v51 documentation verbatim.
+                       Code is NOT counted against this 16-long figure — for ORG..END inline, PASM
+                       code is copied separately into cog registers starting at the ORG address
+                       (default $000), with the inline code area being $000..$11F (288 longs)
+                       when no multitasking is in use. For ORGH..END inline (V50+), code stays
+                       in hub RAM and runs as hub-exec; the 16-long variable buffer at $1E0..$1EF
+                       behaves identically.
+                       Source: Spin2 v51 documentation + Chip Gracey clarification 2026-05-02.
   
   local_label_rule:
     requirement: "Inline PASM labels must start with '.' (e.g. .loop) or ':' (e.g. :next)"

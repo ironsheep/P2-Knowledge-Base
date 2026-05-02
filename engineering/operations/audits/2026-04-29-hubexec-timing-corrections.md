@@ -29,7 +29,19 @@ This audit went through three rounds:
 
 2. **Inline PASM "16 longs total (params + result + locals + code)" was wrong.** Spin2 v51 documentation verbatim describes TWO SEPARATE copies done by the interpreter: (1) "Copy the method's first 16 long variables ... from hub RAM to cog registers $1E0..$1EF" (variables only), and (2) "Copy the in-line PASM-code longs from hub RAM into cog registers, starting at the register address specified after the ORG (default is $000)" (code, separately). The 16-long limit applies to **variables only**; **code is buffered separately** and is not constrained by the 16-long figure.
 
-All round-3 and round-4 issues have been corrected against root sources.
+**Round 5** (2026-05-02): Chip Gracey clarifications on the latest Spin2 Interpreter Analysis review. Three additional corrections plus one enrichment:
+
+1. **Generalize ALTI to all ALTx.** Round-4 said "ALTI works in hubexec" — Chip explicitly broadened: "REP is allowed in hubexec and so is ALTI or any other ALTx instruction." Updated four files (cog_hub_execution.yaml in three spots, hubexec.yaml, execution_modes.yaml) to enumerate the full ALTx family (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW).
+
+2. **Inline PASM code area constraint depends on multitasking.** Round-4 said code uses "$000..$11F (288 longs)". Chip clarified: "$000..$11F, assuming no multitasking. The total inline area is $000..$11F." When multitasking is used, $100..$11F is the taskptr table (building DOWNWARD from $11F). Programs using fewer than 32 tasks leave the LOWER portion free. Added `multitasking_taskptr_table:` block to inline_pasm.yaml and the inline_pasm2.yaml stub; also added taskptr_table_location to taskspin.yaml.
+
+3. **Document phrasing rule — "lower" not "upper".** The taskptr table builds downward from $11F, so unused capacity is at the LOWER end of $100..$11F (closer to $100), NOT the upper end (closer to $11F). The wrong phrasing "unused upper portion" did not exist in our YAMLs but is now positively documented as "lower".
+
+4. **Document the V50+ ORGH..END inline option.** This was already covered in `language/spin2/assembly-directives/orgh.yaml` but missing from `language/spin2/constructs/inline_pasm.yaml`. Added a new `syntax_form: orgh_inline` entry covering: code stays in hub RAM (no cog-RAM copy), runs as hub-exec, $FFFF-long maximum, same 16-long variable buffer/restore at $1E0..$1EF as ORG..END, bytecode $D6. Aligned `orgh.yaml` terminology to match ("First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit").
+
+5. **NOT changed (forward-looking commentary, not a current-state correction):** Chip's bytecode-optimization roadmap idea about combining bitfield setups with reads/writes and moving LOOKUP/LOOKDOWN to hub. This is a hypothetical future-design idea — do not document in current-state YAMLs.
+
+All round-3, round-4, and round-5 issues have been corrected against root sources. New ingestion source file at `engineering/ingestion/sources/chip-gracey-clarifications/chip-clarifications-2026-05-02.md` records the round-5 verbatim findings.
 
 ---
 
