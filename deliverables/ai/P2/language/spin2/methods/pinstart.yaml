@@ -38,8 +38,9 @@ examples:
       PINSTART(8, P_PWM_TRIANGLE, 1000, 500)
     description: "Configure PWM with period=1000, duty=500"
   - code: |
-      ' Start serial TX on pin 62
-      PINSTART(62, P_ASYNC_TX | P_OE, clkfreq/115200, 0)
+      ' Start async serial TX on pin 62 at 115200 baud, 8 data bits
+      ' X = (clocks/bit << 16) | (data_bits - 1)
+      PINSTART(62, P_ASYNC_TX | P_OE, ((clkfreq/115200) << 16) | 7, 0)
     description: "Configure asynchronous serial transmit"
   - code: |
       ' Start quadrature encoder on pins 32-33

@@ -34,10 +34,18 @@ parameters:
 returns: "none"
 
 x_register_usage_by_mode:
-  serial_modes: |
-    Baud rate timing:
-    X = (CLKFREQ / baud_rate) - 1
-    
+  async_serial_modes: |
+    Async serial (P_ASYNC_TX %11110 / P_ASYNC_RX %11111):
+      X[31:16] = clocks per bit (integer)
+      X[15:10] = clocks per bit (base-2 fractional, optional)
+      X[4:0]   = word size minus 1 (write 7 for 8 data bits)
+    Formula:  X = ((CLKFREQ / baud_rate) << 16) | (data_bits - 1)
+
+  sync_serial_modes: |
+    Sync serial (P_SYNC_TX %11100 / P_SYNC_RX %11101):
+      X[5:0]  = word size minus 1
+      X[31:6] = clocking options (see mode pages)
+
   pwm_modes: |
     PWM period:
     X = period_in_clocks - 1
@@ -52,11 +60,11 @@ x_register_usage_by_mode:
 
 examples:
   - code: |
-      ' Set UART baud rate to 115200
+      ' Configure async UART at 115200 baud, 8 data bits
       baud := 115200
-      x_val := CLKFREQ / baud - 1
+      x_val := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1
       WXPIN(30, x_val)
-    description: "Configure UART baud rate"
+    description: "Configure async UART baud rate and word size"
     
   - code: |
       ' Set PWM period to 1000 clocks
@@ -95,9 +103,9 @@ mode_specific_x_values:
 
 calculation_examples:
   uart_baud: |
-    ' Calculate for any baud rate
+    ' Configure async UART for any baud rate, 8 data bits
     PUB set_baud(pin, baud)
-      x := CLKFREQ / baud - 1
+      x := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1
       WXPIN(pin, x)
       
   pwm_frequency: |

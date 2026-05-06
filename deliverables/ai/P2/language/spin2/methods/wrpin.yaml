@@ -90,8 +90,8 @@ common_smart_modes:
   P_NCO_DUTY: "%00111 - NCO duty"
   P_PWM_TRIANGLE: "%01000 - PWM triangle"
   P_PWM_SAWTOOTH: "%01001 - PWM sawtooth"
-  P_ASYNC_TX: "%00111 - Async serial transmit"
-  P_ASYNC_RX: "%01000 - Async serial receive"
+  P_ASYNC_TX: "%11110 - Async serial transmit"
+  P_ASYNC_RX: "%11111 - Async serial receive"
   P_QUADRATURE: "%01011 - Quadrature decode"
 
 smart_pin_workflow:

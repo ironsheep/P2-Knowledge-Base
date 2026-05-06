@@ -24,11 +24,11 @@ registers:
     bits_31_16: "System clock periods per bit period (integer part)"
     bits_15_10: "Fractional clock periods (base-2 fraction for precise timing)"
     bits_9_5: "Reserved"
-    bits_4_0: "Number of data bits to receive (1-32)"
+    bits_4_0: "Word-size field, encoded as N-1 (write 0..31 to select 1..32 data bits; e.g. write 7 for an 8-bit word)"
   y_register:
     function: "Not used in receive mode"
   z_register:
-    bits_31_0: "Received data (LSB received first)"
+    bits_31_0: "Received word, MSB-justified at Z[31:32-N]. RDPIN/RQPIN return data with the last (highest-numbered) received bit at Z[31] and the LSB at Z[32-N]; right-shift by 32-N to LSB-justify (e.g. SHR D,#24 for an 8-bit word)."
 
 flags:
   in_flag: "Raised when frame received, data ready to read"
@@ -46,9 +46,9 @@ code_examples:
       PUB main() | bit_period, received_byte
         ' Calculate bit period: clocks/bit = clkfreq / baud
         bit_period := (_clkfreq / baud) << 16
-        
-        ' Configure async RX: 8 data bits
-        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
+
+        ' Configure async RX: 8 data bits (X[4:0] = N-1 = 7)
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 7), 0)
         
         ' Receive and display characters
         repeat
@@ -61,28 +61,29 @@ code_examples:
       PUB receive_byte() : value
         ' Wait for character received
         repeat until pinread(rx_pin)
-        
-        ' Read received byte
-        value := rdpin(rx_pin)
+
+        ' Read received byte: data is MSB-justified at Z[31], shift right by 32-8 = 24
+        value := rdpin(rx_pin) >> 24
       
       DAT
       ' PASM2 example - buffered serial receive
         org
         mov     bit_period, ##(_clkfreq / baud) << 16
-        or      bit_period, #8                   ' 8 data bits
-        
+        or      bit_period, #7                   ' 8 data bits (X[4:0] = N-1)
+
         dirl    #rx_pin                          ' Reset smart pin
         wrpin   rx_mode, #rx_pin                 ' Configure mode
         wxpin   bit_period, #rx_pin              ' Set baud and bits
         dirh    #rx_pin                          ' Enable smart pin
-        
+
         ' Receive loop with buffering
         mov     ptra, ##buffer
         mov     count, #0
       .loop
         testp   #rx_pin wc                       ' Check for data
         if_nc   jmp #.loop                       ' Wait for character
-        rdpin   data, #rx_pin                    ' Read received byte
+        rdpin   data, #rx_pin                    ' Read MSB-justified word
+        shr     data, #24                        ' LSB-justify 8-bit byte (32-8)
         wrbyte  data, ptra++                     ' Store in buffer
         add     count, #1
         cmp     count, #buffer_size wz
@@ -120,22 +121,22 @@ code_examples:
       
       PUB setup_serial() | bit_period
         bit_period := (_clkfreq / baud) << 16
-        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
-      
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 7), 0)   ' 8 data bits (N-1)
+
       PUB receive_with_timeout(timeout_ms) : value | deadline
         deadline := getms() + timeout_ms
-        
+
         repeat
           if pinread(rx_pin)
-            return rdpin(rx_pin)                 ' Data received
-          
+            return rdpin(rx_pin) >> 24           ' Data received (LSB-justify 8-bit)
+
           if getms() >= deadline
             return -1                            ' Timeout
-      
+
       PUB receive_blocking() : value
         ' Simple blocking receive
         repeat until pinread(rx_pin)
-        return rdpin(rx_pin)
+        return rdpin(rx_pin) >> 24               ' LSB-justify 8-bit byte
 
   - title: "Full Duplex Serial Communication"
     description: "Simultaneous transmit and receive"
@@ -148,27 +149,27 @@ code_examples:
       
       PUB main() | bit_period
         bit_period := (_clkfreq / baud) << 16
-        
-        ' Setup TX and RX
-        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 8), 0)
-        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
-        
+
+        ' Setup TX and RX (8 data bits → X[4:0] = N-1 = 7)
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 7), 0)
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 7), 0)
+
         ' Echo received characters back (loopback test)
         repeat
           if pinread(rx_pin)
-            echo_char(rdpin(rx_pin))
-      
+            echo_char(rdpin(rx_pin) >> 24)       ' LSB-justify before resending
+
       PUB echo_char(char)
         repeat until pinread(tx_pin)             ' Wait TX ready
         wypin(tx_pin, char)                      ' Send character
-      
+
       PUB send_and_receive(tx_byte) : rx_byte
         ' Send a byte and wait for response
         repeat until pinread(tx_pin)
         wypin(tx_pin, tx_byte)
-        
+
         repeat until pinread(rx_pin)
-        rx_byte := rdpin(rx_pin)
+        rx_byte := rdpin(rx_pin) >> 24           ' LSB-justify 8-bit byte
 
 common_applications:
   - "UART serial communication"
@@ -200,16 +201,22 @@ configuration_constants:
   
   data_bits_field:
     location: "X[4:0]"
-    range: "1-32 bits"
-    typical: "7, 8, or 9 bits (7-bit ASCII, 8-bit data, 8+parity)"
+    encoding: "Field value = N - 1 (write 0..31 to select 1..32 data bits)"
+    range: "1-32 bits supported"
+    typical_values:
+      - "X[4:0] = 6 → 7-bit word (7-bit ASCII)"
+      - "X[4:0] = 7 → 8-bit word (standard 8-bit data)"
+      - "X[4:0] = 8 → 9-bit word (8 data + parity)"
 
 notes:
   - "Automatically detects start bit (high-to-low transition)"
   - "Samples data bits at mid-bit timing for noise immunity"
   - "Validates stop bit (expects logic-1)"
-  - "Data received LSB first (standard UART format)"
+  - "Data received LSB first on the wire (standard UART format)"
   - "IN flag indicates received data ready to read"
   - "Supports up to 32 data bits per frame (including optional parity)"
+  - "Word-size field X[4:0] is encoded as N-1: write 7 for an 8-bit word, 6 for 7-bit, 8 for 9-bit"
+  - "RDPIN/RQPIN return the received word MSB-justified at Z[31]: shift right by 32-N to LSB-justify (e.g. SHR D,#24 for 8-bit, >> 24 in Spin2)"
   - "Fractional timing in X[15:10] enables precise baud rate matching"
   - "Can receive very high baud rates limited only by system clock"
   - "No hardware parity checking - extract and validate in software if needed"
