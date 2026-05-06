@@ -163,6 +163,9 @@ human-todos/
 # Forum posts (draft communications, not versioned)
 engineering/obex-integration/FORUM-POST-*.md
 
+# User reports (private feedback, not versioned)
+docs/user-reports/
+
 # Test extraction directories (not versioned)
 extracted_images_enhanced_test/
 /engineering/ingestion/yaml-backups
