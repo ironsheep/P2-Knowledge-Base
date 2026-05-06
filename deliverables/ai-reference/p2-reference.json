@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-05-02",
-    "last_updated": "2026-05-02T19:15:01.137001",
+    "release_date": "2026-05-06",
+    "last_updated": "2026-05-06T19:39:33.883955",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-05-02T19:15:01.137001",
+    "extraction_date": "2026-05-06T19:39:33.883955",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18309,7 +18309,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-05-02T19:15:01.137001",
+    "extraction_date": "2026-05-06T19:39:33.883955",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22255,7 +22255,7 @@
                 "description": "Configure PWM with period=1000, duty=500"
               },
               {
-                "code": "' Start serial TX on pin 62\nPINSTART(62, P_ASYNC_TX | P_OE, clkfreq/115200, 0)\n",
+                "code": "' Start async serial TX on pin 62 at 115200 baud, 8 data bits\n' X = (clocks/bit << 16) | (data_bits - 1)\nPINSTART(62, P_ASYNC_TX | P_OE, ((clkfreq/115200) << 16) | 7, 0)\n",
                 "description": "Configure asynchronous serial transmit"
               },
               {
@@ -24705,15 +24705,16 @@
             ],
             "returns": "none",
             "x_register_usage_by_mode": {
-              "serial_modes": "Baud rate timing:\nX = (CLKFREQ / baud_rate) - 1\n",
+              "async_serial_modes": "Async serial (P_ASYNC_TX %11110 / P_ASYNC_RX %11111):\n  X[31:16] = clocks per bit (integer)\n  X[15:10] = clocks per bit (base-2 fractional, optional)\n  X[4:0]   = word size minus 1 (write 7 for 8 data bits)\nFormula:  X = ((CLKFREQ / baud_rate) << 16) | (data_bits - 1)\n",
+              "sync_serial_modes": "Sync serial (P_SYNC_TX %11100 / P_SYNC_RX %11101):\n  X[5:0]  = word size minus 1\n  X[31:6] = clocking options (see mode pages)\n",
               "pwm_modes": "PWM period:\nX = period_in_clocks - 1\n",
               "nco_modes": "Frequency value:\nX = frequency * (2^32 / CLKFREQ)\n",
               "measurement": "Measurement window:\nX = measurement_period_clocks\n"
             },
             "examples": [
               {
-                "code": "' Set UART baud rate to 115200\nbaud := 115200\nx_val := CLKFREQ / baud - 1\nWXPIN(30, x_val)\n",
-                "description": "Configure UART baud rate"
+                "code": "' Configure async UART at 115200 baud, 8 data bits\nbaud := 115200\nx_val := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1\nWXPIN(30, x_val)\n",
+                "description": "Configure async UART baud rate and word size"
               },
               {
                 "code": "' Set PWM period to 1000 clocks\nWXPIN(56, 999)  ' 1000 - 1\n",
@@ -24746,7 +24747,7 @@
               "P_COUNT_HIGHS": "Measurement period"
             },
             "calculation_examples": {
-              "uart_baud": "' Calculate for any baud rate\nPUB set_baud(pin, baud)\n  x := CLKFREQ / baud - 1\n  WXPIN(pin, x)\n  \n",
+              "uart_baud": "' Configure async UART for any baud rate, 8 data bits\nPUB set_baud(pin, baud)\n  x := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1\n  WXPIN(pin, x)\n  \n",
               "pwm_frequency": "' Set PWM by frequency\nPUB set_pwm_freq(pin, freq)\n  x := CLKFREQ / freq - 1\n  WXPIN(pin, x)\n  \n",
               "measurement_time": "' Set measurement in milliseconds\nPUB set_measure_ms(pin, ms)\n  x := CLKFREQ / 1000 * ms\n  WXPIN(pin, x)\n"
             },
@@ -26672,8 +26673,8 @@
               "P_NCO_DUTY": "%00111 - NCO duty",
               "P_PWM_TRIANGLE": "%01000 - PWM triangle",
               "P_PWM_SAWTOOTH": "%01001 - PWM sawtooth",
-              "P_ASYNC_TX": "%00111 - Async serial transmit",
-              "P_ASYNC_RX": "%01000 - Async serial receive",
+              "P_ASYNC_TX": "%11110 - Async serial transmit",
+              "P_ASYNC_RX": "%11111 - Async serial receive",
               "P_QUADRATURE": "%01011 - Quadrature decode"
             },
             "smart_pin_workflow": {

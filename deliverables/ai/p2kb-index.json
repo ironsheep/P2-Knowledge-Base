@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-02T19:15:01.101991",
+    "generated": "2026-05-06T19:39:30.880571",
     "total_entries": 1032,
     "total_categories": 49,
     "total_aliases": 1001,
@@ -3893,11 +3893,11 @@
     },
     "p2kbArchSmartPin11110AsyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
-      "mtime": 1764449566
+      "mtime": 1778096159
     },
     "p2kbArchSmartPin11111AsyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml",
-      "mtime": 1764449566
+      "mtime": 1778096159
     },
     "p2kbArchSpiImplementationGuide": {
       "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
@@ -6909,7 +6909,7 @@
     },
     "p2kbSpin2Pinstart": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinstart.yaml",
-      "mtime": 1777496128
+      "mtime": 1778096159
     },
     "p2kbSpin2Pintoggle": {
       "path": "deliverables/ai/P2/language/spin2/methods/pintoggle.yaml",
@@ -7081,11 +7081,11 @@
     },
     "p2kbSpin2Wrpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wrpin.yaml",
-      "mtime": 1771286411
+      "mtime": 1778096159
     },
     "p2kbSpin2Wxpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wxpin.yaml",
-      "mtime": 1768613644
+      "mtime": 1778096159
     },
     "p2kbSpin2Wypin": {
       "path": "deliverables/ai/P2/language/spin2/methods/wypin.yaml",
