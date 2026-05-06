@@ -48,7 +48,7 @@ Idle  Start   D0    D1    D2    D3    D4    D5    D6    D7   Stop  Idle
 |----------|-------|---------|
 | X[31:16] | Bit period | System clocks per bit (integer part) |
 | X[15:10] | Fractional | Base-2 fractional clocks (1/64 increments) |
-| X[4:0] | Bit count | Number of data bits (1-32) |
+| X[4:0] | Bit count | Word size minus 1 (write 7 for 8-bit; supports 1-32 bits) |
 | Y[31:0] | Data | Transmit data (LSB first) |
 
 ### Baud Rate Calculation
@@ -100,7 +100,7 @@ PUB uart_tx_init() | bit_period
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 8)             ' 8 data bits
+  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx_byte(value)
@@ -112,7 +112,7 @@ PUB tx_byte(value)
 **PASM2:**
 ```pasm2
               mov       bit_period, ##(200_000_000 / 115200) << 16
-              or        bit_period, #8        ' 8 data bits
+              or        bit_period, #7        ' 8 data bits (X[4:0] = N - 1)
 
               dirl      #TX_PIN
               wrpin     ##(P_ASYNC_TX | P_OE), #TX_PIN
@@ -148,8 +148,8 @@ PUB tx_byte_with_parity(value) | parity, data9
   ' Combine 8 data bits + parity
   data9 := value | (parity << 8)
 
-  ' Configure for 9 bits
-  WXPIN(TX_PIN, (bit_period & $FFFF0000) | 9)
+  ' Configure for 9 bits (X[4:0] = N - 1 = 8)
+  WXPIN(TX_PIN, (bit_period & $FFFF0000) | 8)
 
   repeat until PINREAD(TX_PIN)
   WYPIN(TX_PIN, data9)
@@ -367,7 +367,7 @@ PUB start()
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 8)
+  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx(c)
@@ -466,7 +466,7 @@ PUB fast_uart_init() | bit_period
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 8)
+  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx_buffer(ptr, count) | i
@@ -547,7 +547,7 @@ UART receivers typically tolerate ±2-3% baud rate error. At 10 bits per frame (
 |-----------|----------|-------|
 | Bit period | X[31:16] | sysclk / baud |
 | Fractional | X[15:10] | 1/64 clock precision |
-| Data bits | X[4:0] | 1-32 bits |
+| Data bits | X[4:0] | Word size minus 1 (write 7 for 8-bit; supports 1-32 bits) |
 | Data | Y | LSB first |
 | Ready flag | IN | High when ready |
 

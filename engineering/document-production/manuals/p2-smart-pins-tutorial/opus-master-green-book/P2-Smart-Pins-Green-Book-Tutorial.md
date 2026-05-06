@@ -794,8 +794,8 @@ count := rdpin(encoder_pin)
 ' Read ADC value
 voltage := rdpin(adc_pin)
 
-' Read received UART byte
-char := rdpin(serial_pin)
+' Read received UART byte (8-bit async word arrives MSB-justified at Z[31])
+char := rdpin(serial_pin) >> 24
 ```
 :::
 
@@ -811,11 +811,11 @@ When do you use which?
 ::: spin2
 ```
 ' Use RDPIN when you're consuming the data
-char := rdpin(serial_pin)      ' Read and clear flag
+char := rdpin(serial_pin) >> 24    ' Read and clear flag, LSB-justify 8-bit byte
 
 ' Use RQPIN when you're just checking
-if rqpin(serial_pin) & $100    ' Check if byte available
-  char := rdpin(serial_pin)    ' Now read and clear
+if rqpin(serial_pin) & $100        ' Check if byte available
+  char := rdpin(serial_pin) >> 24  ' Now read, clear flag, and LSB-justify
 ```
 :::
 
@@ -3937,7 +3937,7 @@ Receive 1 to 32 data bits at a preset baud rate matching the transmitter. The Sm
 1. Smart Pin waits for start bit (HIGH-to-LOW transition)
 2. Samples data bits at calculated bit centers
 3. Raises IN flag when all bits received
-4. RDPIN/RQPIN retrieves data (right-justified)
+4. RDPIN/RQPIN retrieves data **MSB-justified at Z[31]**; right-shift by 32-N to LSB-align (e.g. `>> 24` in Spin2 or `SHR D,#24` in PASM2 for an 8-bit byte)
 
 ::: spin2
 ```
@@ -3960,13 +3960,13 @@ PUB uart_tx(pin, char)
 
 PUB uart_rx(pin) : char
   repeat until testp(pin)   ' Wait for byte received
-  char := rdpin(pin) & $FF              ' Get byte, clear IN
+  char := rdpin(pin) >> 24              ' MSB-justified at Z[31]; LSB-justify 8-bit byte
 
 PUB uart_rx_check(pin) : char, valid
   ' Non-blocking receive
   valid := testp(pin)
   if valid
-    char := rdpin(pin) & $FF
+    char := rdpin(pin) >> 24            ' LSB-justify 8-bit byte
 ```
 :::
 
@@ -3987,7 +3987,8 @@ PUB uart_rx_check(pin) : char, valid
 
 .loop           testp   #57 wc                  ' Check IN flag
         if_nc   jmp     #.loop                  ' Wait for byte
-                rdpin   rx_data, #57            ' Get received byte
+                rdpin   rx_data, #57            ' Read MSB-justified word
+                shr     rx_data, #24            ' LSB-justify 8-bit byte (32-8)
                 mov     outa, rx_data           ' Display on LEDs
                 jmp     #.loop
 
@@ -4057,13 +4058,13 @@ CON
   BAUD = 115_200
 
 PUB polling_receive() | byte_received
-  ' Configure UART receive
-  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / BAUD) << 16 | 8, 0)
+  ' Configure UART receive (X[4:0] = N - 1 = 7 for 8 data bits)
+  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / BAUD) << 16 | 7, 0)
 
   ' Polling approach - check repeatedly until data arrives
   repeat
     if pinread(UART_RX)              ' Check IN flag (bit 31)
-      byte_received := rdpin(UART_RX)
+      byte_received := rdpin(UART_RX) >> 24    ' LSB-justify 8-bit byte (32-8)
       process_byte(byte_received)
 
 PRI process_byte(b)
@@ -4085,12 +4086,13 @@ In PASM2, the polling loop uses the TESTP instruction:
                 ' Polling loop - actively checks IN flag
 .poll_loop      testp   #UART_RX wc              ' Test IN flag -> C
         if_nc   jmp     #.poll_loop              ' Not ready, keep poll
-                rdpin   rx_data, #UART_RX        ' Read data (clears IN)
+                rdpin   rx_data, #UART_RX        ' Read MSB-justified word (clears IN)
+                shr     rx_data, #24             ' LSB-justify 8-bit byte (32-8)
                 call    #process_data
                 jmp     #.poll_loop              ' Continue polling
 
 rx_mode         long    P_ASYNC_RX
-bit_period      long    (200_000_000 / 115_200) << 16 | 8
+bit_period      long    (200_000_000 / 115_200) << 16 | 7   ' 8 data bits (X[4:0]=N-1)
 rx_data         long    0
 ```
 :::
@@ -4123,12 +4125,13 @@ In PASM2:
                 ' Event-driven loop - COG sleeps between events
 .event_loop     setse1  #%001<<6 + UART_RX       ' Event on IN rise
                 waitse1                           ' Sleep until ready
-                rdpin   rx_data, #UART_RX        ' Read data (clears IN)
+                rdpin   rx_data, #UART_RX        ' Read MSB-justified word (clears IN)
+                shr     rx_data, #24             ' LSB-justify 8-bit byte (32-8)
                 call    #process_data
                 jmp     #.event_loop             ' Setup next event
 
 rx_mode         long    P_ASYNC_RX
-bit_period      long    (200_000_000 / 115_200) << 16 | 8
+bit_period      long    (200_000_000 / 115_200) << 16 | 7   ' 8 data bits (X[4:0]=N-1)
 rx_data         long    0
 ```
 :::
@@ -4201,15 +4204,15 @@ CON
   ENCODER_PIN = 30
 
 PUB multi_source_monitor() | uart_data, adc_value, encoder_count
-  ' Configure multiple Smart Pins
-  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / 115_200) << 16 | 8, 0)
+  ' Configure multiple Smart Pins (UART: X[4:0] = N - 1 = 7 for 8 data bits)
+  pinstart(UART_RX, P_ASYNC_RX, (_clkfreq / 115_200) << 16 | 7, 0)
   pinstart(ADC_PIN, P_ADC | P_ADC_1X, 0, 0)
   pinstart(ENCODER_PIN, P_QUADRATURE, 0, 0)
 
   repeat
     ' Poll each Smart Pin for data ready (IN flag high)
     if testp(UART_RX)
-      uart_data := rdpin(UART_RX)
+      uart_data := rdpin(UART_RX) >> 24       ' LSB-justify 8-bit byte
       handle_uart(uart_data)
 
     if testp(ADC_PIN)
@@ -4427,7 +4430,7 @@ PUB uart_to_spi_bridge() | data
   repeat
     ' Wait for UART byte
     repeat until testp(UART_RX)
-    data := rdpin(UART_RX) & $FF
+    data := rdpin(UART_RX) >> 24      ' MSB-justified at Z[31]; LSB-justify 8-bit byte
 
     ' Send via SPI
     wypin(SPI_DATA, data)
@@ -4580,7 +4583,7 @@ CON
 
 PUB double_buffered_transmit(data_ptr, count) | ...
     bit_period, byte_val, idx
-  bit_period := (_clkfreq / BAUD) << 16 | 8
+  bit_period := (_clkfreq / BAUD) << 16 | 7      ' 8 data bits (X[4:0] = N - 1)
 
   ' Configure two TX pins (external OR or separate wires)
   pinstart(TX_A, P_ASYNC_TX | P_OE, bit_period, 0)
@@ -4907,7 +4910,7 @@ PUB sensor_handler()
 PUB uart_handler()
   repeat
     if pinread(UART_RX)
-      process_uart(rdpin(UART_RX))
+      process_uart(rdpin(UART_RX) >> 24)   ' LSB-justify 8-bit byte
     tasknext()                    ' Cooperative yielding
 ```
 :::
@@ -4923,7 +4926,7 @@ Here's a real-world example: managing four UART channels from a single COG using
 CON
   _clkfreq = 200_000_000
   BAUD = 9600
-  BIT_PERIOD = (_clkfreq / BAUD) << 16 | 8
+  BIT_PERIOD = (_clkfreq / BAUD) << 16 | 7    ' 8 data bits (X[4:0] = N - 1)
 
   ' UART pins
   UART0_RX = 0
@@ -5307,14 +5310,14 @@ PUB peek_and_consume() | byte_val
   repeat
     repeat until pinread(UART_RX)
 
-    ' Peek at data without consuming
-    byte_val := rqpin(UART_RX)
+    ' Peek at data without consuming (MSB-justified word; LSB-justify for an 8-bit byte)
+    byte_val := rqpin(UART_RX) >> 24
 
     if byte_val == $1B                ' Escape character
       akpin(UART_RX)                  ' Acknowledge but don't process
       handle_escape()
     else
-      byte_val := rdpin(UART_RX)      ' Now consume normally
+      byte_val := rdpin(UART_RX) >> 24   ' Now consume normally, LSB-justified
       process_byte(byte_val)
 ```
 :::
@@ -6586,7 +6589,7 @@ mode := P_ASYNC_TX | P_OE
 ' Binary: %0000_0000_000_0000000000000_01_11110_0
 '          AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
 
-pinstart(20, mode, (_clkfreq / 115_200) << 16 | 8, 0)
+pinstart(20, mode, (_clkfreq / 115_200) << 16 | 7, 0)   ' 8 data bits (X[4:0] = N - 1)
 ```
 :::
 
