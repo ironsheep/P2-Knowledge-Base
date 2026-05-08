@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-05-06",
-    "last_updated": "2026-05-06T19:39:33.883955",
+    "release_date": "2026-05-08",
+    "last_updated": "2026-05-08T00:32:31.521648",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-05-06T19:39:33.883955",
+    "extraction_date": "2026-05-08T00:32:31.521648",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18309,7 +18309,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-05-06T19:39:33.883955",
+    "extraction_date": "2026-05-08T00:32:31.521648",
     "categories": {
       "keywords": {
         "count": 37,
@@ -21043,8 +21043,8 @@
                 "description": "Precise periodic execution"
               },
               {
-                "code": "' Timeout pattern\ntimeout := GETCT() + (CLKFREQ / 1000) * 100  ' 100ms timeout\nREPEAT WHILE (GETCT() - timeout) < 0\n  IF PINREAD(0)\n    ' Got response\n    QUIT\n' Timed out\n",
-                "description": "Implement timeout"
+                "code": "' Short timeout pattern (100 ms is well within GETCT's ~10 s safe window at 200 MHz)\ntimeout := GETCT() + (CLKFREQ / 1000) * 100  ' 100ms timeout\nREPEAT WHILE (GETCT() - timeout) < 0\n  IF PINREAD(0)\n    ' Got response\n    QUIT\n' Timed out\n' For multi-second timeouts, use GETMS \u2014 see pitfalls section below.\n",
+                "description": "Implement short timeout (see pitfalls for the upper bound)"
               }
             ],
             "underlying_pasm": {
@@ -21082,6 +21082,18 @@
               "Hub access may add 0-7 clock variance",
               "Use WAITCT for cycle-accurate delays",
               "GETCT itself takes 2 clocks to execute"
+            ],
+            "pitfalls": [
+              {
+                "title": "Overflow in (CLKFREQ / divisor) * value timeout calculations",
+                "severity": "logic_error",
+                "description": "The common timeout idiom `target := GETCT() + (CLKFREQ / 1000) * timeout_ms`\nsilently overflows when (CLKFREQ / 1000) * timeout_ms exceeds 2^31. The\nwrap-aware compare `(GETCT() - target) < 0` is bounded by the same 2^31\nsigned-cycle window, so even a correctly stored deadline cannot be checked\nacross more than 2^31 cycles of elapsed time.\n",
+                "rule_of_thumb": "At system clock f, GETCT-based timeouts are bounded to roughly 2^31 / f\nseconds: ~10.7 s at 200 MHz, ~8.6 s at 250 MHz, ~6.7 s at 320 MHz.\nFor protocol timeouts that may exceed those limits (SPI/SD read response,\nbusy-wait, multi-second retries), use GETMS instead. GETMS gives a 49.7-day\nwindow before its own wraparound is even relevant.\n",
+                "see_also": [
+                  "language/spin2/methods/getms.yaml",
+                  "language/spin2/concepts/timing_operations.yaml"
+                ]
+              }
             ],
             "see_also": [
               "language/spin2/methods/waitct.yaml",
@@ -24749,7 +24761,7 @@
             "calculation_examples": {
               "uart_baud": "' Configure async UART for any baud rate, 8 data bits\nPUB set_baud(pin, baud)\n  x := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1\n  WXPIN(pin, x)\n  \n",
               "pwm_frequency": "' Set PWM by frequency\nPUB set_pwm_freq(pin, freq)\n  x := CLKFREQ / freq - 1\n  WXPIN(pin, x)\n  \n",
-              "measurement_time": "' Set measurement in milliseconds\nPUB set_measure_ms(pin, ms)\n  x := CLKFREQ / 1000 * ms\n  WXPIN(pin, x)\n"
+              "measurement_time": "' Set measurement in milliseconds.\n' WARNING: x overflows signed 32-bit when (CLKFREQ/1000) * ms > 2^31.\n' At 200 MHz the safe range is ms <= ~10_737 (~10.7 s). For longer\n' measurement windows, reconsider the approach \u2014 see\n' language/spin2/concepts/timing_operations.yaml (method_selection).\nPUB set_measure_ms(pin, ms)\n  x := CLKFREQ / 1000 * ms\n  WXPIN(pin, x)\n"
             },
             "common_uses": [
               "Setting baud rates",
@@ -24960,6 +24972,10 @@
               {
                 "code": "' Display uptime\nms := GETMS()\nseconds := ms / 1000\nminutes := seconds / 60\nhours := minutes / 60\ndebug(\"Uptime: \", udec(hours), \":\", udec(minutes//60), \":\", udec(seconds//60))\n",
                 "description": "Calculate and display system uptime"
+              },
+              {
+                "code": "' SD card SDSC write busy-wait \u2014 spec allows up to 24 seconds.\n' GETCT cannot express this safely: at 200 MHz, GETCT-based timeouts\n' are bounded to ~10 s by the 32-bit signed cycle window, and the\n' (CLKFREQ/1000)*24_000 deadline calculation overflows. GETMS has\n' plenty of headroom (49.7-day wrap), so multi-second protocol\n' timeouts are straightforward.\ntimeout_ms := GETMS() + 24_000        ' 24-second SDSC write deadline\nrepeat while GETMS() < timeout_ms\n  if sd_busy_released()\n    return SD_OK                      ' write completed\nreturn ERR_WRITE_TIMEOUT              ' fell through \u2014 timed out\n",
+                "description": "Multi-second protocol timeout (SD card SDSC write, 24s spec)"
               }
             ],
             "notes": [
@@ -24981,7 +24997,10 @@
             "see_also": [
               "Time measurement",
               "System uptime",
-              "Millisecond timing"
+              "Millisecond timing",
+              "language/spin2/concepts/timing_operations.yaml",
+              "language/spin2/methods/getct.yaml",
+              "language/spin2/methods/getsec.yaml"
             ]
           },
           "GETSEC": {
@@ -25028,7 +25047,10 @@
             "see_also": [
               "Time measurement",
               "System uptime",
-              "Long-duration timing"
+              "Long-duration timing",
+              "language/spin2/concepts/timing_operations.yaml",
+              "language/spin2/methods/getct.yaml",
+              "language/spin2/methods/getms.yaml"
             ]
           },
           "BYTECOMP": {
@@ -27019,7 +27041,7 @@
               },
               {
                 "description": "Lock with timeout",
-                "code": "timeout := GETCT() + CLKFREQ  ' 1 second timeout\nREPEAT UNTIL LOCKTRY(lock_id) OR GETCT() > timeout\nif NOT LOCKTRY(lock_id)\n  ' Timeout - couldn't get lock\n  ABORT\n' Got lock - continue\nLOCKREL(lock_id)\n"
+                "code": "timeout := GETCT() + CLKFREQ                              ' 1 second timeout\nREPEAT UNTIL LOCKTRY(lock_id) OR (GETCT() - timeout) > 0  ' wrap-aware compare\nif NOT LOCKTRY(lock_id)\n  ' Timeout - couldn't get lock\n  ABORT\n' Got lock - continue\nLOCKREL(lock_id)\n' For timeouts beyond GETCT's safe window (~10 s at 200 MHz), use a\n' GETMS-based deadline instead. See:\n' language/spin2/concepts/timing_operations.yaml (method_selection)\n"
               },
               {
                 "description": "Complete critical section pattern",
@@ -27076,7 +27098,8 @@
               "language/spin2/methods/lockret.yaml",
               "language/spin2/methods/lockchk.yaml",
               "architecture/locks.yaml",
-              "language/spin2/patterns/implementation/spin2_cog_management.yaml"
+              "language/spin2/patterns/implementation/spin2_cog_management.yaml",
+              "language/spin2/concepts/timing_operations.yaml"
             ]
           },
           "GETRND": {
