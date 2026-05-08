@@ -34,13 +34,16 @@ examples:
 
   - description: "Lock with timeout"
     code: |
-      timeout := GETCT() + CLKFREQ  ' 1 second timeout
-      REPEAT UNTIL LOCKTRY(lock_id) OR GETCT() > timeout
+      timeout := GETCT() + CLKFREQ                              ' 1 second timeout
+      REPEAT UNTIL LOCKTRY(lock_id) OR (GETCT() - timeout) > 0  ' wrap-aware compare
       if NOT LOCKTRY(lock_id)
         ' Timeout - couldn't get lock
         ABORT
       ' Got lock - continue
       LOCKREL(lock_id)
+      ' For timeouts beyond GETCT's safe window (~10 s at 200 MHz), use a
+      ' GETMS-based deadline instead. See:
+      ' language/spin2/concepts/timing_operations.yaml (method_selection)
 
   - description: "Complete critical section pattern"
     code: |
@@ -172,3 +175,4 @@ related:
   - language/spin2/methods/lockchk.yaml
   - architecture/locks.yaml
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
+  - language/spin2/concepts/timing_operations.yaml

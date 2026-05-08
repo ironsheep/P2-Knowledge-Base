@@ -372,6 +372,7 @@ related_components:
   architecture/streamer/overview.yaml: "Can bypass smart pins"
   events: "Smart pin IN flags trigger events"
   interrupts: "Can trigger COG interrupts"
+  language/spin2/concepts/timing_operations.yaml: "Timing-method selection for client-code protocol timeouts (use GETMS for multi-second timeouts; GETCT-based deadlines overflow past ~10 s at 200 MHz)"
 
 pin_output_hierarchy:
   source: "Silicon Doc v35"

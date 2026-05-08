@@ -80,12 +80,65 @@ timing_functions:
     description: "Get elapsed time in seconds"
     use_for: "Uptime, coarse timestamps"
 
+method_selection:
+  description: |
+    GETCT, GETMS, and GETSEC return time at three different scales. The choice
+    is not just about resolution — each has a different safe-span ceiling driven
+    by 32-bit overflow, and the wrong choice for long timeouts produces silent
+    bugs (the loop appears to "time out immediately" or behaves unpredictably).
+  decision_table:
+    - method: "GETCT()"
+      resolution: "1 system clock"
+      counter_wrap: "~21.5 s at 200 MHz (varies with CLKFREQ — see rollover_table)"
+      safe_timeout_window: "~2^31 / CLKFREQ seconds (~10.7 s at 200 MHz, ~8.6 s at 250 MHz, ~6.7 s at 320 MHz)"
+      use_when: |
+        Cycle-accurate measurement, sub-millisecond precision, short timeouts
+        well below the safe window. Pair with WAITCT for cycle-accurate delays.
+      avoid_when: |
+        Timeouts that may exceed the safe window. Both the (CLKFREQ/divisor)*value
+        deadline calculation and the wrap-aware comparison fail past 2^31 cycles.
+    - method: "GETMS()"
+      resolution: "1 millisecond"
+      counter_wrap: "49.7 days"
+      safe_timeout_window: "~2^31 ms (~24.8 days)"
+      use_when: |
+        Protocol timeouts (SPI response, SD card busy-wait, network retries),
+        human-scale timing (UI debounce, user input), any deadline where the
+        timeout might exceed GETCT's safe window.
+      avoid_when: |
+        Sub-millisecond precision is required.
+    - method: "GETSEC()"
+      resolution: "1 second"
+      counter_wrap: "~136 years"
+      safe_timeout_window: "~2^31 s (~68 years)"
+      use_when: |
+        Uptime display, day/hour/minute timing, very long retry intervals where
+        millisecond precision is wasted.
+      avoid_when: |
+        Sub-second timing is required.
+  rules_of_thumb:
+    - "Short, precise timing (well under 10 s at 200 MHz): GETCT"
+    - "Protocol-level timeouts (100 ms to many seconds): GETMS"
+    - "Coarse, long-duration intervals (≥ 1 minute): GETSEC"
+    - "When in doubt, GETMS — the 49.7-day headroom is rarely a constraint"
+  incident_note: |
+    A real bug was traced to this exact gap: an agent-authored SD card driver
+    used the GETCT timeout idiom for an SDSC write busy-wait (24-second spec).
+    At 200 MHz the (CLKFREQ/1000)*24_000 product overflows signed 32-bit,
+    and the wrap-aware compare cannot span 24 s. GETMS would have made this
+    straightforward. See anti_patterns.getct_long_timeout below.
+
 time_conversions:
   formulas:
     - from: "milliseconds"
       to: "cycles"
       formula: "cycles := clkfreq / 1000 * ms"
-      note: "Order matters for precision"
+      note: |
+        Order matters for precision. Also: this product overflows signed 32-bit
+        when (clkfreq/1000) * ms exceeds 2^31 — at 200 MHz, when ms exceeds
+        ~10_737. For multi-second deadlines, use GETMS rather than computing a
+        cycle-domain target (see method_selection above and the
+        getct_long_timeout anti-pattern below).
     - from: "microseconds"
       to: "cycles"
       formula: "cycles := clkfreq / 1_000_000 * us"
@@ -99,9 +152,14 @@ time_conversions:
 
   conversion_functions: |
     PUB ms_to_cycles(ms) : cycles
+      ' WARNING: cycles overflows signed 32-bit when (clkfreq/1000) * ms > 2^31.
+      ' At 200 MHz, the safe input range is ms <= ~10_737. For longer deadlines,
+      ' compute in milliseconds with GETMS instead. See method_selection above.
       cycles := clkfreq / 1000 * ms
 
     PUB us_to_cycles(us) : cycles
+      ' Same overflow class as ms_to_cycles; us-scale ceiling is ~2.1B us at
+      ' 200 MHz — rarely a practical concern.
       cycles := clkfreq / 1_000_000 * us
 
     PUB cycles_to_ms(cycles) : ms
@@ -132,6 +190,10 @@ patterns:
   - pattern: "periodic_execution"
     description: "Jitter-free periodic task execution"
     key_insight: "Add period to target, don't wait after work"
+    constraints: |
+      interval_ms must satisfy (clkfreq/1000) * interval_ms < 2^31. At 200 MHz
+      that caps interval_ms at ~10_737 (~10.7 s). For longer periods, drive the
+      loop with GETMS-based deadlines instead — see method_selection above.
     code: |
       PUB run_periodic(interval_ms) | period, next_tick
         period := clkfreq / 1000 * interval_ms
@@ -288,6 +350,34 @@ anti_patterns:
         do_work()
         stop := getct()
         RETURN stop - start          ' Always correct
+
+  - anti_pattern: "getct_long_timeout"
+    severity: "logic_error"
+    description: |
+      Using GETCT for a timeout that may exceed 2^31 cycles. At 200 MHz
+      that is ~10.7 s; at 250 MHz, ~8.6 s. The (clkfreq/divisor)*value
+      deadline calculation overflows signed 32-bit, and the wrap-aware
+      compare cannot span the elapsed time. The loop appears to time out
+      immediately or behave unpredictably. Discovered via real incident:
+      agent-authored SD driver used this idiom for a 24-second SDSC
+      write busy-wait. See method_selection above for the full rule.
+    wrong: |
+      PUB sd_wait_write_complete() : status | timeout
+        ' BROKEN at 200 MHz:
+        ' (clkfreq/1000) * 24_000 = 200_000 * 24_000 = 4.8e9, overflows signed 32-bit
+        timeout := getct() + (clkfreq / 1000) * 24_000   ' 24s SDSC spec
+        REPEAT WHILE (getct() - timeout) < 0
+          IF sd_busy_released()
+            RETURN SD_OK
+        RETURN ERR_TIMEOUT
+    correct: |
+      PUB sd_wait_write_complete() : status | timeout_ms
+        ' GETMS handles multi-second timeouts cleanly (49.7-day wrap)
+        timeout_ms := getms() + 24_000                    ' 24s SDSC spec
+        REPEAT WHILE getms() < timeout_ms
+          IF sd_busy_released()
+            RETURN SD_OK
+        RETURN ERR_TIMEOUT
 
   - anti_pattern: "periodic_drift"
     severity: "timing_error"

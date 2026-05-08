@@ -244,3 +244,9 @@ notes:
   - PWM dead-time critical for motor control safety
   - Repository mode enables COG-to-COG communication
   - Streamer-smartpin sync order is critical for SPI
+  - "Client code using these protocols (SPI / sync-serial / async-serial) typically needs timing/timeout idioms. For multi-second protocol timeouts (SD card busy-wait, slow peripheral response), use GETMS — GETCT-based deadlines silently overflow past ~10 s at 200 MHz. See language/spin2/concepts/timing_operations.yaml method_selection."
+
+related:
+  - language/spin2/concepts/timing_operations.yaml
+  - language/spin2/methods/getct.yaml
+  - language/spin2/methods/getms.yaml

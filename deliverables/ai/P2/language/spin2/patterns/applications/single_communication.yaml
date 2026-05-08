@@ -145,3 +145,12 @@ implementation_template: |
       if (getms() - last_message_time) > COMMUNICATION_TIMEOUT
         connection_state := DISCONNECTED
         handle_communication_loss()
+
+notes:
+  - "Uses (getms() - last_message_time) > TIMEOUT — the correct GETMS-based pattern for protocol timeouts. GETMS handles multi-second deadlines cleanly (49.7-day wrap)."
+  - "For the rationale, and why GETCT is wrong for protocol timeouts beyond ~10 s at 200 MHz, see language/spin2/concepts/timing_operations.yaml method_selection."
+
+related:
+  - language/spin2/concepts/timing_operations.yaml
+  - language/spin2/methods/getms.yaml
+  - language/spin2/methods/getct.yaml

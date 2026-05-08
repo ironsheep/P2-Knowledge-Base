@@ -115,7 +115,11 @@ calculation_examples:
       WXPIN(pin, x)
       
   measurement_time: |
-    ' Set measurement in milliseconds
+    ' Set measurement in milliseconds.
+    ' WARNING: x overflows signed 32-bit when (CLKFREQ/1000) * ms > 2^31.
+    ' At 200 MHz the safe range is ms <= ~10_737 (~10.7 s). For longer
+    ' measurement windows, reconsider the approach — see
+    ' language/spin2/concepts/timing_operations.yaml (method_selection).
     PUB set_measure_ms(pin, ms)
       x := CLKFREQ / 1000 * ms
       WXPIN(pin, x)

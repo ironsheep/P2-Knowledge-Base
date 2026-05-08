@@ -31,6 +31,19 @@ examples:
       hours := minutes / 60
       debug("Uptime: ", udec(hours), ":", udec(minutes//60), ":", udec(seconds//60))
     description: "Calculate and display system uptime"
+  - code: |
+      ' SD card SDSC write busy-wait — spec allows up to 24 seconds.
+      ' GETCT cannot express this safely: at 200 MHz, GETCT-based timeouts
+      ' are bounded to ~10 s by the 32-bit signed cycle window, and the
+      ' (CLKFREQ/1000)*24_000 deadline calculation overflows. GETMS has
+      ' plenty of headroom (49.7-day wrap), so multi-second protocol
+      ' timeouts are straightforward.
+      timeout_ms := GETMS() + 24_000        ' 24-second SDSC write deadline
+      repeat while GETMS() < timeout_ms
+        if sd_busy_released()
+          return SD_OK                      ' write completed
+      return ERR_WRITE_TIMEOUT              ' fell through — timed out
+    description: "Multi-second protocol timeout (SD card SDSC write, 24s spec)"
 notes:
   - "Based on system counter divided by clkfreq/1000"
   - "32-bit value wraps after ~49.7 days"
@@ -53,3 +66,6 @@ see_also:
   - "Time measurement"
   - "System uptime"
   - "Millisecond timing"
+  - "language/spin2/concepts/timing_operations.yaml"
+  - "language/spin2/methods/getct.yaml"
+  - "language/spin2/methods/getsec.yaml"

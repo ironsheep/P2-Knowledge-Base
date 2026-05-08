@@ -380,6 +380,10 @@ related_topics:
   - topic: "streamer"
     relationship: "Streamer provides deterministic pin timing"
 
+  - topic: "spin2_timing_method_selection"
+    relationship: "Choosing GETCT/GETMS/GETSEC for client-code protocol timeouts. SPI, I2C, and SD card protocols often need multi-second timeouts (e.g., SDSC write busy-wait, 24 s spec) — GETCT-based deadlines silently overflow past ~10 s at 200 MHz; use GETMS instead."
+    reference: "language/spin2/concepts/timing_operations.yaml"
+
 extraction_metadata:
   source_documents:
     - document: "Silicon Doc v35"

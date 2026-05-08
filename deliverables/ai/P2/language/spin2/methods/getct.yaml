@@ -63,14 +63,15 @@ examples:
     description: "Precise periodic execution"
     
   - code: |
-      ' Timeout pattern
+      ' Short timeout pattern (100 ms is well within GETCT's ~10 s safe window at 200 MHz)
       timeout := GETCT() + (CLKFREQ / 1000) * 100  ' 100ms timeout
       REPEAT WHILE (GETCT() - timeout) < 0
         IF PINREAD(0)
           ' Got response
           QUIT
       ' Timed out
-    description: "Implement timeout"
+      ' For multi-second timeouts, use GETMS — see pitfalls section below.
+    description: "Implement short timeout (see pitfalls for the upper bound)"
 
 underlying_pasm:
   instruction: "GETCT"
@@ -111,6 +112,25 @@ precision_considerations:
   - "Hub access may add 0-7 clock variance"
   - "Use WAITCT for cycle-accurate delays"
   - "GETCT itself takes 2 clocks to execute"
+
+pitfalls:
+  - title: "Overflow in (CLKFREQ / divisor) * value timeout calculations"
+    severity: "logic_error"
+    description: |
+      The common timeout idiom `target := GETCT() + (CLKFREQ / 1000) * timeout_ms`
+      silently overflows when (CLKFREQ / 1000) * timeout_ms exceeds 2^31. The
+      wrap-aware compare `(GETCT() - target) < 0` is bounded by the same 2^31
+      signed-cycle window, so even a correctly stored deadline cannot be checked
+      across more than 2^31 cycles of elapsed time.
+    rule_of_thumb: |
+      At system clock f, GETCT-based timeouts are bounded to roughly 2^31 / f
+      seconds: ~10.7 s at 200 MHz, ~8.6 s at 250 MHz, ~6.7 s at 320 MHz.
+      For protocol timeouts that may exceed those limits (SPI/SD read response,
+      busy-wait, multi-second retries), use GETMS instead. GETMS gives a 49.7-day
+      window before its own wraparound is even relevant.
+    see_also:
+      - "language/spin2/methods/getms.yaml"
+      - "language/spin2/concepts/timing_operations.yaml"
 
 see_also:
   - "language/spin2/methods/waitct.yaml"
