@@ -5759,9 +5759,11 @@ Eight independent processors, each with a specific job, all working in perfect c
 
 ## Communication Patterns
 
+Eight processors running in parallel sounds wonderful — until you realize they need to talk to each other. Let's meet the three patterns you'll use 95% of the time.
+
 ### The Mailbox Pattern
 
-The simplest and most common:
+The simplest and most common — a single hub long that one COG writes and another reads:
 
 ::: pasm2
 ```
@@ -5849,9 +5851,11 @@ process_commands
 
 ## Synchronization Techniques
 
+Sometimes communication isn't enough — you need two or more COGs to *agree* on what happens when. That's where synchronization comes in.
+
 ### Using Locks
 
-When multiple COGs need atomic access:
+When multiple COGs need atomic access to the same piece of data, P2 gives you 16 hardware locks. They're tiny and they're fast:
 
 ::: pasm2
 ```
@@ -6062,6 +6066,8 @@ Test each COG in isolation before combining!
 
 ## Design Principles for Multi-COG Systems
 
+The hardware gives you eight processors. Whether your *design* survives the journey is up to you. A few rules of thumb we've learned the hard way:
+
 1. **Single Responsibility**: Each COG does ONE thing well
 2. **Loose Coupling**: COGs communicate through hub, not direct dependencies
 3. **Clear Ownership**: Each piece of data has one writer
@@ -6069,6 +6075,8 @@ Test each COG in isolation before combining!
 5. **Graceful Degradation**: System continues if one COG fails
 
 ## Common Multi-COG Gotchas
+
+Before you pull your hair out wondering why the eight-COG dream turned into a debugging nightmare, skim these:
 
 1. **Race conditions** - Use locks for shared write access
 2. **Deadlocks** - Avoid circular dependencies
