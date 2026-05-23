@@ -1,5 +1,36 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v2.2.0 (2026-05-23)
+
+**Periodic release** — Hub-exec timing accuracy, expanded pedagogical structure across Chapters 4-6 and 13-15, and consistent Your Turn block rendering throughout.
+
+### New Content
+
+- Chapter 4 (Hub Connection): Your Turn experiments, Common Gotchas, What We've Learned, Coming Up Next, Have Fun! closer
+- Chapter 5 (Mathematics): Medicine Cabinet quick-reference plus the four closing sections
+- Chapter 6 (Flags and Decisions): Medicine Cabinet plus the four closing sections
+- Chapters 13-15 (LUT Memory, Smart Pins Orientation, Event-Driven Programming): closing trio added (What We've Learned, Coming Up Next, Have Fun!)
+- Chapter 3: ALTx hub-exec compatibility sidetrack confirming all 11 ALTx instructions work identically in cog-exec and hub-exec
+- Chapter 12: GETCT overflow Pitfall callout covering the ~21.5-second 32-bit CT wrap at 200 MHz, with 64-bit-capture and work-with-deltas strategies
+
+### Enhanced Accuracy
+
+- Chapter 10 (Hub Execution): sequential hub-exec code runs at 2 clocks/instruction; only branches pay the 13+ clock refill cost
+- Chapter 12 (Optimization): RDLONG, WRLONG, DJNZ timing tables show both cog-exec and hub-exec ranges
+- Chapter 12: REP-in-hub-exec note explains the 13+ clock per-iteration cost from the hidden return-jump
+- Chapter 7 (CORDIC) sprite rotation example uses PTRA post-increment idiom
+- Chapter 13 (LUT Memory) SETQ2 example uses correct destination operand syntax
+- Chapter 12 (Optimization) REP and loop unrolling examples use canonical hub-access patterns
+- Chapter 12: WRLUT 32-bit constant uses `##` augmented immediate
+- Code-block comments use native PASM2/Spin2 syntax throughout
+
+### Throughout
+
+- Your Turn exercise boxes render with consistent styling across all chapters
+- Tutorial voice tightened in Chapters 7-16 to match the conversational register established in Chapters 1-6
+
+---
+
 ## v2.1.0 (2026-01-30)
 
 **Code Example Accuracy** - Relative jump offsets corrected for augmented instructions.

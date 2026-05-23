@@ -5,6 +5,21 @@ All notable changes to the P2 Knowledge Base project will be documented in this 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+**Scope note:** Semver version numbers below track the knowledge base itself — YAML data, derived JSON, download-on-demand artifacts, and ingestion tooling. PDF manuals are independently versioned and tracked separately. See the **Manual Releases** index below.
+
+---
+
+## Manual Releases
+
+PDF manuals ship independently from the repo's semver. Each manual carries its own version and its own per-manual changelog. The table below is the current state; full per-manual release history lives in the linked changelogs.
+
+| Manual | Current version | Released | Per-manual changelog |
+|---|---|---|---|
+| P2 Assembly Language Reference Manual | 2.3.0 | 2026-05-22 | [Changelog](deliverables/documents/DOCs/p2-assembly-language-manual-changelog.md) |
+| P2 Assembly Programming (deSilva style) | 2.2.0 | 2026-05-23 | [Changelog](deliverables/documents/DOCs/p2-pasm-desilva-style-changelog.md) |
+
+---
+
 ## [1.3.0] - 2025-01-20 (Upcoming) 📈
 
 ### Major Documentation Quality Improvements - 68% Instructions Now Well-Documented

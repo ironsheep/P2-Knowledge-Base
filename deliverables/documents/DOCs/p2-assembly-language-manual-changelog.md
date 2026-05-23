@@ -1,5 +1,41 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v2.3.0 (2026-05-22)
+
+**Periodic release** — Hub-exec timing accuracy across timing tables and prose, ALTx cross-mode compatibility documented, inline-PASM-with-multitasking gap closed, and seven code-example fixes.
+
+### Critical Fix
+
+- END (Inline PASM) section: multitasking taskptr table ($100..$11F) overlap with the inline-PASM code area documented
+- END section: variable limits (16 longs at $1E0..$1EF) and code limits (288 longs from ORG) distinguished
+
+### Enhanced Accuracy
+
+- WRLONG, WRBYTE, WRWORD: timing rows show both cog/LUT and hub-exec ranges
+- RET, JMP, JMPREL: timing rows show both cog and hub-exec ranges
+- All conditional branches (J*, DJ*, TJ*, IJ*): timing rows show `2 or 4 / 2 or 13-20`
+- Conditional Jump Timing Convention subsection opens each instruction chapter that contains branches
+- REP: hub-exec section explains the 13+ clock per-iteration cost from the hidden return-jump
+- §6.6 ALTx Modified Addressing: Hub-Exec Compatibility note confirms all 11 ALTx variants operate identically in cog-exec and hub-exec
+
+### Code Examples
+
+- MUXQ comparison uses the canonical `mov temp, source` then `and temp, mask` two-instruction pattern
+- Special-registers PTRB example uses `wval` as the register name (avoids WORD directive collision)
+- Appendix E constants: POSX, NEGX, PI references use `##` augmented-immediate prefix
+- Appendix E constants: P2 native mnemonics `fles` and `fges` replace the P1-only `mins` and `maxs`
+
+### Cross-Reference Integrity
+
+- Per-variant anchors for seven four-variant grouped instructions (BITC, FLTC, MUXC, NEGC, OUTC, SUMC, WRC) resolve in PDF output
+
+### Documentation
+
+- Front-matter P1-vs-P2 table shows ~380 documented instructions
+- README and creation-guide reflect actual structure (6 chapters Part I, 15 directives, 10 appendices A–J)
+
+---
+
 ## v2.2.0 (2026-01-30)
 
 **Code Example Accuracy Release** - Compiler-verified code examples throughout.
