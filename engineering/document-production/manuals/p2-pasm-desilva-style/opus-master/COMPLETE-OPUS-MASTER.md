@@ -531,7 +531,6 @@ But for now, enjoy your blinking LED. You've just taken your first step into par
 **Have Fun!** And remember, every expert was once a beginner who kept their LED blinking when everyone else gave up.
 
 
-*Continue to [Chapter 2: Architecture Safari](02-architecture-safari.md) →*
 
 
 # Chapter 2: Architecture Safari
@@ -934,7 +933,6 @@ But for now, appreciate what you've learned: you understand the Propeller's para
 **Have Fun!** Remember, parallel processing isn't harder - it's different. And different can be wonderful.
 
 
-*Continue to [Chapter 3: Speaking PASM2](03-speaking-pasm2.md) →*
 
 
 # Chapter 3: Speaking PASM2
@@ -1835,7 +1833,6 @@ You now speak basic PASM2. Time to learn how COGs communicate!
 **Have Fun!** Remember, PASM2 isn't like other assembly languages - it's actually enjoyable!
 
 
-*Continue to [Chapter 4: The Hub Connection](04-hub-connection.md) →*
 
 
 # Chapter 4: The Hub Connection
@@ -1992,7 +1989,6 @@ But first, take a break. Hub access is one of those topics where letting it sit 
 
 **Have Fun!** And remember — the FIFO is doing real work even when your code looks idle. Trust it.
 
-*Continue to [Chapter 5: Mathematics Unleashed](05-mathematics-unleashed.md) →*
 
 
 # Chapter 5: Mathematics Unleashed
@@ -2143,7 +2139,6 @@ If conditional execution doesn't change how you think about flow control, nothin
 
 **Have Fun!** And remember — the CORDIC is a coprocessor with infinite patience. Use it.
 
-*Continue to [Chapter 6: Flags and Decisions](06-flags-decisions.md) →*
 
 
 # Chapter 6: Flags and Decisions
@@ -2270,7 +2265,6 @@ If you thought hardware multiply was nice, wait until you see what the CORDIC do
 
 **Have Fun!** And remember — every `jmp` you avoid is a pipeline flush you didn't pay for.
 
-*Continue to [Chapter 7: CORDIC Magic](07-cordic-magic.md) →*
 
 
 
@@ -2452,7 +2446,7 @@ next_vertex
 
 ## Your Turn: CORDIC Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Create a circular motion pattern
 
 Starting code:
@@ -2479,7 +2473,7 @@ Hint: After qrotate, use getqx/getqy to get coordinates
 Success Check: Smooth circular motion, no gaps
 :::
 
-:::yourturn  
+::: your-turn  
 **Your Turn:** Distance calculator
 
 Starting code:
@@ -2934,7 +2928,7 @@ bit_time long   100_000_000 / 115200  ' Clock cycles per bit
 
 ## Your Turn: I/O Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Create a light chaser
 
 Starting code:
@@ -2957,7 +2951,7 @@ Hint: Use SHL and check for overflow
 Success Check: Single lit LED rotating through all positions
 :::
 
-:::yourturn
+::: your-turn
 **Your Turn:** Reaction timer
 
 Starting code:
@@ -3353,7 +3347,7 @@ Note: FIFO can only read OR write at a time, not both. Use PTRA/PTRB for the oth
 
 ## Your Turn: Streaming Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Fast memory fill
 
 Starting code:
@@ -3376,7 +3370,7 @@ Hint: You'll need setq #255 (not #256)
 Success Check: Memory filled in one operation
 :::
 
-:::yourturn
+::: your-turn
 **Your Turn:** Data filter pipeline
 
 Starting code:
@@ -3642,7 +3636,7 @@ Time-critical code stays in COG RAM for deterministic timing. Complex code lives
 
 ## Your Turn: Hub Execution Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Build a simple calculator
 
 Starting code:
@@ -4089,7 +4083,7 @@ Let me share why we avoid interrupts:
 
 ## Your Turn: COG vs Interrupt Challenge
 
-:::yourturn
+::: your-turn
 **Your Turn:** Build a reaction timer without interrupts
 
 Starting code:
@@ -4449,7 +4443,7 @@ Just these three changes often double performance!
 
 ## Your Turn: Optimization Challenges
 
-:::yourturn
+::: your-turn
 **Your Turn:** Optimize a checksum calculator
 
 Starting code:
@@ -4907,7 +4901,22 @@ Use LUT sharing to create a message passing system between COG 2 and COG 3:
 ```
 :::
 
-*Continue to [Chapter 14: Smart Pins Orientation](#chapter-14-smart-pins-orientation) →*
+## What We've Learned
+
+The LUT in your toolbox:
+
+- ✅ 512 longs of fast, private memory in every COG
+- ✅ 3-clock deterministic access via **RDLUT** / **WRLUT**
+- ✅ Bulk loading via **SETQ2** + **RDLONG**
+- ✅ COG-pair LUT sharing for high-bandwidth data passing
+- ✅ Streamer source for waveform generation
+
+## Coming Up Next
+
+Chapter 14 hands you the keys to 64 autonomous I/O processors — Smart Pins. We'll cover the universal configuration pattern and the modes you'll reach for most often, then point you at the dedicated Smart Pins Manual for the deep dive.
+
+
+**Have Fun!** And remember — a 3-clock private lookup table is a luxury most chips don't give you. Use it!
 
 
 # Chapter 14: Smart Pins Orientation
@@ -5249,7 +5258,22 @@ Set up UART at 115200 baud:
 
 📚 **Going Deeper**: This chapter covered the Smart Pin essentials - the configuration pattern and common modes. For complete coverage of all 32 modes, timing diagrams, and advanced techniques, see the dedicated "P2 Smart Pins Manual."
 
-*Continue to [Chapter 15: Event-Driven Programming](#chapter-15-event-driven-programming) →*
+## What We've Learned
+
+Smart Pin essentials:
+
+- ✅ Every pin contains its own state machine (32 modes available)
+- ✅ The universal recipe: **DIRL** → **WRPIN** → **WXPIN** → **WYPIN** → **DIRH**
+- ✅ The IN flag signals "something happened" (mode-specific)
+- ✅ UART, PWM, ADC, quadrature — same configuration pattern
+- ✅ Smart Pins free the COG for other work
+
+## Coming Up Next
+
+Chapter 15 explores the event system — how to stop polling and start waiting, so your COG sleeps until something interesting happens. The companion to Smart Pins: when one tells the other a byte is ready, you want to be notified, not spinning.
+
+
+**Have Fun!** And remember — every Smart Pin you configure is a coprocessor you don't have to babysit. That's leverage!
 
 
 # Chapter 15: Event-Driven Programming
@@ -5709,7 +5733,22 @@ Create a loop that monitors both a button (pin edge event) and a timer (periodic
 ```
 :::
 
-*Continue to [Chapter 16: Multi-COG Orchestration](#chapter-16-multi-cog-orchestration) →*
+## What We've Learned
+
+The event toolkit you now command:
+
+- ✅ Four selectable event channels (SE1-SE4) per COG
+- ✅ Three timer events (CT1-CT3) for precise scheduling
+- ✅ **WAIT** (sleep) vs **POLL** (check-and-continue) tradeoffs
+- ✅ The ATN inter-COG signaling system
+- ✅ Common patterns: timeout-with-fallback, debounce, periodic sampling
+
+## Coming Up Next
+
+Chapter 16 brings the whole journey together — orchestrating eight COGs in parallel harmony to build complete systems. It's where the P2 philosophy really shines.
+
+
+**Have Fun!** And remember — every spin loop you replace with **WAITSE** is CPU cycles you've handed back to your design. Be generous with events!
 
 
 # Chapter 16: Multi-COG Orchestration
