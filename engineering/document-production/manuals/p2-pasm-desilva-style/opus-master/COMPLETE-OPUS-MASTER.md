@@ -2295,8 +2295,6 @@ Let me show you something that, on most processors, would take a coffee break of
 
 Read that again. *Four lines*, and a 2D rotation is done. No floating-point library. No lookup tables. No iterative approximation. The P2 has a dedicated trigonometric coprocessor sitting next to every COG, just waiting for you to wake it up. You're about to learn how.
 
-Three instructions. Point rotated. No lookup tables, no approximations, no floating point. Just pure mathematical precision delivered by dedicated hardware.
-
 Let me show you something even more impressive:
 
 ::: pasm2
@@ -2326,7 +2324,7 @@ All of this in exactly 55 clock cycles. Every time. No variation.
 
 ## The CORDIC Pipeline - Your Mathematical Assembly Line
 
-Here's the beautiful part: CORDIC operations are pipelined. While one calculation is running, you can start another:
+Here's the beautiful part: CORDIC operations are pipelined. While one calculation is running, you can start another. Let's see what that buys us:
 
 ::: pasm2
 ```
@@ -2350,7 +2348,7 @@ generate
 ```
 :::
 
-The pipeline means you're not really waiting 55 clocks - you're getting useful work done while CORDIC churns away in the background!
+The pipeline means you're not really waiting 55 clocks - you're getting useful work done while CORDIC churns away in the background. Uff! That's free math!
 
 ## Core CORDIC Operations
 
@@ -2672,7 +2670,7 @@ Before you pull your hair out debugging, know these:
 
 ## What About QLOG, QEXP?
 
-CORDIC can also do logarithms and exponentials:
+Don't worry, we won't leave logarithms and exponentials behind. CORDIC handles those too:
 
 ::: pasm2
 ```
@@ -2758,7 +2756,7 @@ Three lines! The **DRVC** instruction drives the pin to match the C flag. Input 
 
 ## Understanding P2 Pins
 
-Every P2 pin is bidirectional and incredibly capable. Unlike older microcontrollers where you set data direction registers, P2 pins change direction on the fly based on the instruction you use.
+Let's unpack what makes those three lines so short. Every P2 pin is bidirectional and incredibly capable. Unlike older microcontrollers where you set data direction registers (remember TRIS bits? DDRA? Yeah, we don't miss those either), P2 pins change direction on the fly based on the instruction you use.
 
 Here's the mental model:
 
@@ -2780,7 +2778,7 @@ Here's the mental model:
 ```
 :::
 
-That's it. These four instructions cover 90% of your output needs.
+That's it. Four instructions, 90% of your output needs covered. We'll meet a few specialized cousins below, but if you only remember these four, you'll get a lot done.
 
 ### Conditional Driving
 
@@ -2908,7 +2906,7 @@ button_confirmed
 
 ## Bit-Banged Serial (The Basics)
 
-Sometimes you need serial communication without Smart Pins. Here's how:
+Yes, you'll usually reach for Smart Pins for serial — but it's worth seeing how to do it the hard way once, just so you appreciate what Smart Pins are doing for you. Here's how:
 
 ::: pasm2
 ```
@@ -3051,7 +3049,7 @@ But honestly? You'll rarely need these. The individual pin instructions are clea
 
 ## Common I/O Gotchas
 
-Save yourself debugging time:
+Before you pull your hair out wondering why a pin "won't work," save yourself debugging time and skim these:
 
 1. **Pin numbers are 0-63** - Not port.bit notation like other MCUs
 
@@ -3065,7 +3063,7 @@ Save yourself debugging time:
 
 ## Timing Is Everything
 
-Here's a critical concept: P2 I/O is deterministic. When you execute:
+Now here's something we'll keep coming back to: P2 I/O is deterministic. When you execute:
 
 ::: pasm2
 ```
@@ -3074,7 +3072,7 @@ Here's a critical concept: P2 I/O is deterministic. When you execute:
 ```
 :::
 
-Pin 56 goes high and pin 57 goes low at EXACTLY the same clock cycle. No skew, no uncertainty. This determinism is what makes P2 perfect for precise timing applications.
+Pin 56 goes high and pin 57 goes low at EXACTLY the same clock cycle. No skew, no uncertainty. Uff! Try doing that on an interrupt-driven MCU. This determinism is what makes P2 perfect for precise timing applications.
 
 ## Real-World Example: Servo Control
 
