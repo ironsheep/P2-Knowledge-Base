@@ -1,6 +1,6 @@
 # Changelog Style Guide
 
-Style conventions for P2 Assembly Language Reference Manual changelog entries.
+Style conventions for all changelog entries in the P2 Knowledge Base. Applies to every manual's `CHANGELOG.md` and any other release-tracked changelog in this project.
 
 ---
 

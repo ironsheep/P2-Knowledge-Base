@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large January 2026\par}
+{\large May 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.1\par}
+{\large\color{blue}Version 2.2\par}
 
 \vfill
 \begin{tcolorbox}[

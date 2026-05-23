@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large January 2026\par}
+{\large May 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.1\par}
+{\large\color{blue}Version 2.2\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -323,7 +323,7 @@ blink_code
 ```
 :::
 
-The `coginit` instruction loads your PASM2 code from hub memory into a fresh COG and starts it running. Meanwhile, your Spin2 code keeps running in its own COG. You now have parallel processing!
+The **COGINIT** instruction loads your PASM2 code from hub memory into a fresh COG and starts it running. Meanwhile, your Spin2 code keeps running in its own COG. You now have parallel processing!
 
 ::: sidetrack
 ### The Clock Preamble
@@ -365,7 +365,7 @@ delay   long    0                      ' Storage for delay value
 ```
 :::
 
-Uff! Look at that - we're using a register now! The `mov` instruction copies our delay value into a register (which we cleverly named 'delay'). Now we can change the blink rate by modifying just one value.
+Uff! Look at that - we're using a register now! The **MOV** instruction copies our delay value into a register (which we cleverly named 'delay'). Now we can change the blink rate by modifying just one value.
 
 *A note on terminology: P2 documentation often uses "register" to refer to any long in COG RAM. Unlike ARM or x86 where registers are a small, special set (R0-R15, EAX, etc.), every COG RAM location can be used as a general-purpose register. However, the last 16 locations (496-511) have special functions: addresses 496-503 are dual-purpose (usable as RAM if interrupts aren't used), and 504-511 are special-purpose registers (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB). When you see "register" in P2 context, think "COG RAM location."*
 
@@ -472,7 +472,7 @@ Feeling overwhelmed? Here's the simplified prescription:
 ```
 :::
 
-The `drvnot` instruction toggles a pin - if it's high, make it low; if it's low, make it high. Sometimes simpler is better!
+The **DRVNOT** instruction toggles a pin - if it's high, make it low; if it's low, make it high. Sometimes simpler is better!
 :::
 
 ::: sidetrack
@@ -531,7 +531,6 @@ But for now, enjoy your blinking LED. You've just taken your first step into par
 **Have Fun!** And remember, every expert was once a beginner who kept their LED blinking when everyone else gave up.
 
 
-*Continue to [Chapter 2: Architecture Safari](02-architecture-safari.md) →*
 
 
 # Chapter 2: Architecture Safari
@@ -934,7 +933,6 @@ But for now, appreciate what you've learned: you understand the Propeller's para
 **Have Fun!** Remember, parallel processing isn't harder - it's different. And different can be wonderful.
 
 
-*Continue to [Chapter 3: Speaking PASM2](03-speaking-pasm2.md) →*
 
 
 # Chapter 3: Speaking PASM2
@@ -979,7 +977,7 @@ Let's dissect a real instruction:
 
 ### Moving Data Around
 
-The MOV family - your bread and butter:
+The **MOV** family - your bread and butter:
 
 ::: pasm2
 ```
@@ -1647,6 +1645,10 @@ This is like having conditional execution on steroids!
 
 This replaces self-modifying code from P1. Much cleaner!
 
+::: sidetrack
+**Hub-Exec Note:** All ALTx instructions — **ALTI**, **ALTS**, **ALTD**, **ALTR**, **ALTB**, **ALTSN**, **ALTSB**, **ALTSW**, **ALTGN**, **ALTGB**, **ALTGW** — work identically in cog-exec and hub-exec modes. They act on the next pipelined instruction regardless of whether it came from cog/LUT memory or the hub-prefetch FIFO. So when you graduate to hub execution in Chapter 10, every ALTx trick you learn here still works.
+:::
+
 ## Real-World Example: Fast Memory Copy
 
 Let's combine what we've learned:
@@ -1831,7 +1833,6 @@ You now speak basic PASM2. Time to learn how COGs communicate!
 **Have Fun!** Remember, PASM2 isn't like other assembly languages - it's actually enjoyable!
 
 
-*Continue to [Chapter 4: The Hub Connection](04-hub-connection.md) →*
 
 
 # Chapter 4: The Hub Connection
@@ -1937,7 +1938,57 @@ clear_screen
 :::
 :::
 
-*Continue to [Chapter 5: Mathematics Unleashed](05-mathematics-unleashed.md) →*
+## Your Turn: Experiments
+
+Now you know the moves. Try these to make them stick:
+
+1. **Round-trip:** Write a long to hub at address `$1000`, then read it back into a different register. Verify the values match using a comparison and a flag.
+
+2. **Block fill:** Use **SETQ** + **WRLONG** to fill 64 consecutive longs in hub memory with the value `$DEAD_BEEF`. Then read them back one by one and confirm.
+
+3. **FIFO race:** Use **RDFAST** to stream a sequence of longs from hub. Compare the throughput to a loop of individual **RDLONG** instructions. The difference should astonish you.
+
+4. **Pointer arithmetic:** Set **PTRA** to a hub address, then use **RDLONG** `val, ptra[3]` to read the third long ahead — without moving the pointer. Experiment with `++`, `--`, and indexed forms.
+
+## Common Gotchas
+
+Before you pull your hair out debugging hub access:
+
+1. **Forgetting the `##`** — Hub addresses are 20-bit. A bare `#address` only encodes 9 bits, so you'll hit the wrong memory. Always use `##` for hub addresses outside the 0–511 range.
+
+2. **Long-aligned access** — **RDLONG** and **WRLONG** work on long boundaries. If your address isn't a multiple of 4, the P2 silently masks the low bits. For byte-precise access, use **RDBYTE** / **WRBYTE**.
+
+3. **SETQ block size** — **SETQ** `#N-1` transfers `N` longs (not `N-1`). The `-1` is because the encoded field is "count minus one." Off-by-one bugs love this one.
+
+4. **PTRA vs. PTRB** — Both are pointer registers, but they're independent. Don't assume **PTRA** holds anything if you've been working with **PTRB**.
+
+5. **Hub-exec vs. cog-exec timing** — In cog-exec, **RDLONG** is 9–16 cycles. In hub-exec, it's 9–26 cycles. Inner loops that hammer hub should run from COG memory when possible.
+
+## What We've Learned
+
+Look at all the ground we've covered:
+
+- ✅ How to read and write hub memory from COG code
+- ✅ Why pointer registers (PTRA, PTRB) exist and when to use them
+- ✅ How the FIFO pipeline accelerates sequential hub reads
+- ✅ Block transfers with **SETQ** for moving big chunks at once
+- ✅ The pattern for clearing or filling buffer-sized regions
+
+You now have the entire COG↔Hub vocabulary at your disposal.
+
+## Coming Up Next
+
+In Chapter 5, we'll unleash the P2's mathematical muscle:
+
+- Hardware multiply and divide that don't require library calls
+- 64-bit arithmetic without sweating
+- A preview of the CORDIC coprocessor (it gets a full chapter later)
+- Fixed-point math for fast trigonometry
+
+But first, take a break. Hub access is one of those topics where letting it sit a day helps it lock in. Try one of the experiments above tomorrow.
+
+**Have Fun!** And remember — the FIFO is doing real work even when your code looks idle. Trust it.
+
 
 
 # Chapter 5: Mathematics Unleashed
@@ -2022,12 +2073,72 @@ fixed_mul
         ' Extract middle 32 bits for 16.16 result:
         shl     high, #16        ' Upper 16 bits of result
         shr     low, #16         ' Lower 16 bits of result
-        or      a, low, high     ' Combine for 16.16 format
+        or      a, low           ' Combine for 16.16 format
+        or      a, high
 ```
 :::
 
+::: medicine-cabinet
+**Quick math reference**:
 
-*Continue to [Chapter 6: Flags and Decisions](06-flags-decisions.md) →*
+- **MUL** D, S — unsigned 32×32→32 (low 32 bits only)
+- **MULS** D, S — signed 32×32→32
+- **QMUL** D, S — full 32×32→64 (read via **GETQX**/**GETQY** after 55 clocks)
+- **QDIV** D, S — full 32-bit divide (read via **GETQX** quotient / **GETQY** remainder after 30 clocks)
+- **QFRAC** D, S — fractional divide (returns 32-bit fraction in **GETQX**)
+- 64-bit add: **ADD** + **ADDX** chained with **WC**
+
+For everyday integer work, **MUL**/**MULS** are 2 clocks and you're done. For precision (full 64-bit results, fixed-point math, signed division), **QMUL**/**QDIV** route through the CORDIC and pay 30–55 clocks — but they don't block the COG, so you can interleave other work.
+:::
+
+## Your Turn: Experiments
+
+Stretch your math muscles:
+
+1. **Compute the average:** Read 8 longs from hub, sum them with **ADD**, then divide by 8 using a **SHR** (or **QDIV** if you want exact). Compare both approaches.
+
+2. **Fractional reciprocal:** Use **QFRAC** to compute `2^32 / x` for various x values. You've just built a hardware reciprocal table.
+
+3. **Pipeline overlap:** Start a **QMUL**, do 30+ clocks of other work (compute something else, update a counter), then **GETQX**/**GETQY**. Measure total cycles vs. doing the multiply blocking-style.
+
+4. **64-bit counter:** Build a 64-bit increment loop using **ADD** + **ADDX**. Add to it in a tight loop and watch the high word advance when the low one wraps.
+
+## Common Gotchas
+
+The math instructions hide a few traps:
+
+1. **MUL is unsigned, MULS is signed** — Using the wrong one on negative values gives spectacular nonsense. When in doubt, **MULS**.
+
+2. **MUL gives only low 32 bits** — For the full 64-bit result, you must use **QMUL** + **GETQX**/**GETQY**. The high word is silently discarded by **MUL**.
+
+3. **GETQX/GETQY block until ready** — They wait for the CORDIC. If you call them too early, your COG stalls. If you call them later than necessary, you've wasted cycles. The sweet spot is starting the CORDIC, doing exactly 55 clocks of other work, then reading.
+
+4. **Don't queue a new CORDIC op while one is pending** — A second **QMUL**/**QDIV**/**QFRAC** before reading results overwrites the queue. Use **GETQX**/**GETQY** first.
+
+## What We've Learned
+
+A whole arithmetic library, in your back pocket:
+
+- ✅ Hardware multiply (**MUL**, **MULS**) in just 2 clocks
+- ✅ Division and modulo via **QDIV** + **GETQX**/**GETQY**
+- ✅ Fractional division via **QFRAC** for fast reciprocals
+- ✅ 64-bit chains using **ADD**/**ADDX**, **SUB**/**SUBX** with **WC**
+- ✅ Fixed-point patterns for 16.16 math
+
+You no longer have to write multiply-by-shift-and-add. Those days really are over.
+
+## Coming Up Next
+
+In Chapter 6 we'll meet the P2's most quietly powerful feature: **conditional execution**. Every instruction can be conditional — no branches needed, deterministic timing preserved. We'll cover:
+
+- The C and Z flags and how to update them
+- Building complex conditions with **WC**, **WZ**, **WCZ** combined with **IF_x** prefixes
+- **SKIP** and **SKIPF** for skipping patterns of instructions
+
+If conditional execution doesn't change how you think about flow control, nothing will.
+
+**Have Fun!** And remember — the CORDIC is a coprocessor with infinite patience. Use it.
+
 
 
 # Chapter 6: Flags and Decisions
@@ -2088,8 +2199,72 @@ if_lt   jmp     #less           ' x < y (signed)
 ```
 :::
 
+::: medicine-cabinet
+**Conditional execution quick reference**:
 
-*Continue to [Chapter 7: CORDIC Magic](07-cordic-magic.md) →*
+- **WC** — write the C flag with the instruction's carry-out
+- **WZ** — write the Z flag based on result == 0
+- **WCZ** — write both flags
+- **IF_C**, **IF_NC** — execute next instruction only if C set / clear
+- **IF_Z**, **IF_NZ** — same for Z
+- **IF_A**, **IF_B**, **IF_AE**, **IF_BE** — unsigned comparisons after **CMP**
+- **IF_GT**, **IF_LT**, **IF_GE**, **IF_LE** — signed comparisons after **CMPS**
+- **IF_E**, **IF_NE** — equal / not equal (same as **IF_Z**/**IF_NZ** after compare)
+
+Any instruction can carry a condition prefix and still take exactly 2 clocks. No branches, no pipeline flush, no surprise.
+:::
+
+## Your Turn: Experiments
+
+Practice the conditional mindset:
+
+1. **Branchless absolute value:** Compute `result = abs(x)` using **ABS** — then prove to yourself the same thing works branchless using **CMPS** + a conditional **NEG**.
+
+2. **Saturating add:** Add two unsigned values; if the result overflows (**WC** sets C), clamp to `$FFFF_FFFF`. No jumps.
+
+3. **Min/max:** Build a min function using **CMP** + conditional **MOV**. Then build max. Three instructions each.
+
+4. **Skip-pattern selector:** Use **SKIPF** with a runtime bit pattern to selectively execute 4 different instructions based on a state byte. This is the building block for hand-coded jump tables.
+
+## Common Gotchas
+
+The conditional mindset has its own traps:
+
+1. **Forgetting the effect** — `cmp x, y` *with no flag effect* doesn't update C or Z. You need **WC**, **WZ**, or **WCZ**. The default for **CMP** is no update.
+
+2. **Signed vs. unsigned comparison** — **CMP** sets flags for unsigned semantics (**IF_A**/**IF_B**). **CMPS** sets them for signed (**IF_GT**/**IF_LT**). Mixing them produces baffling bugs near zero and at the high bit.
+
+3. **One instruction follows the prefix** — `IF_C mov x, y` conditionally runs *only* the **MOV**. The instruction after that runs unconditionally. To skip a block, use **SKIPF**.
+
+4. **C flag inversion on subtract** — **SUB** sets C on *borrow*, not carry. So after `sub a, b wc`, C=1 means `a < b` (unsigned). Many P1 programmers expect the opposite — re-check.
+
+5. **Skip patterns are LSB-first** — In **SKIPF**, bit 0 controls the next instruction, bit 1 the one after, etc. The numbering can feel backward; sketch it out.
+
+## What We've Learned
+
+You can now think like a P2 programmer:
+
+- ✅ Every instruction can carry a condition prefix
+- ✅ Flags are updated only when you ask (**WC**, **WZ**, **WCZ**)
+- ✅ Unsigned and signed comparisons use different instructions (**CMP** vs. **CMPS**)
+- ✅ Complex multi-way logic without a single jump using **IF_x** prefixes
+- ✅ **SKIP** and **SKIPF** for skipping arbitrary patterns of instructions
+
+You've learned to write branchless code that preserves deterministic timing. That's the deepest part of P2 thinking.
+
+## Coming Up Next
+
+Chapter 7 reveals the CORDIC coprocessor in full — the math beast you glimpsed in Chapter 5. Trigonometry at the speed of logic gates:
+
+- Rotate points in three instructions
+- Polar↔Cartesian conversion
+- Hardware square root and natural log
+- Pipelined operations for graphics and signal processing
+
+If you thought hardware multiply was nice, wait until you see what the CORDIC does.
+
+**Have Fun!** And remember — every `jmp` you avoid is a pipeline flush you didn't pay for.
+
 
 
 
@@ -2100,7 +2275,7 @@ if_lt   jmp     #less           ' x < y (signed)
 
 ## The Hook: Rotate a Point in 3 Lines
 
-Here's something that would take dozens of instructions on most processors:
+Let me show you something that, on most processors, would take a coffee break of instructions, a math library, and probably a tear or two:
 
 ::: pasm2
 ```
@@ -2112,7 +2287,7 @@ Here's something that would take dozens of instructions on most processors:
 ```
 :::
 
-Three instructions. Point rotated. No lookup tables, no approximations, no floating point. Just pure mathematical precision delivered by dedicated hardware.
+Read that again. *Four lines*, and a 2D rotation is done. No floating-point library. No lookup tables. No iterative approximation. The P2 has a dedicated trigonometric coprocessor sitting next to every COG, just waiting for you to wake it up. You're about to learn how.
 
 Let me show you something even more impressive:
 
@@ -2143,7 +2318,7 @@ All of this in exactly 55 clock cycles. Every time. No variation.
 
 ## The CORDIC Pipeline - Your Mathematical Assembly Line
 
-Here's the beautiful part: CORDIC operations are pipelined. While one calculation is running, you can start another:
+Here's the beautiful part: CORDIC operations are pipelined. While one calculation is running, you can start another. Let's see what that buys us:
 
 ::: pasm2
 ```
@@ -2167,7 +2342,7 @@ generate
 ```
 :::
 
-The pipeline means you're not really waiting 55 clocks - you're getting useful work done while CORDIC churns away in the background!
+The pipeline means you're not really waiting 55 clocks - you're getting useful work done while CORDIC churns away in the background. Uff! That's free math!
 
 ## Core CORDIC Operations
 
@@ -2228,38 +2403,40 @@ Let's rotate a sprite around its center:
 ::: pasm2
 ```
 ' Rotate sprite vertices around center
+' (We use PTRA for vertex iteration — only PTRA/PTRB support the ++ post-increment.)
 rotate_sprite
-        mov     vertex_ptr, ##sprite_data
+        mov     ptra, ##sprite_data
         mov     vertex_count, #4        ' 4 corners
-        
+
 next_vertex
-        rdlong  x, vertex_ptr++        ' Get X coordinate
-        rdlong  y, vertex_ptr++        ' Get Y coordinate
-        
+        rdlong  x, ptra++              ' Get X coordinate, advance pointer
+        rdlong  y, ptra++              ' Get Y coordinate, advance pointer
+
         ' Center sprite at origin
         sub     x, center_x
         sub     y, center_y
-        
+
         ' Rotate by current angle
         setq    y
         qrotate x, rotation_angle
-        
+
         ' While waiting, we can prepare
         mov     temp_x, center_x
         mov     temp_y, center_y
-        
+
         ' Get rotated coordinates
         getqx   x
         getqy   y
-        
+
         ' Translate back to position
         add     x, temp_x
         add     y, temp_y
-        
-        ' Store rotated vertex
-        wrlong  x, vertex_ptr++
-        wrlong  y, vertex_ptr++
-        
+
+        ' Store rotated vertex (back up PTRA by 8 to overwrite the source longs)
+        sub     ptra, #8
+        wrlong  x, ptra++
+        wrlong  y, ptra++
+
         djnz    vertex_count, #next_vertex
         
         ' Increment rotation for animation
@@ -2269,7 +2446,7 @@ next_vertex
 
 ## Your Turn: CORDIC Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Create a circular motion pattern
 
 Starting code:
@@ -2296,7 +2473,7 @@ Hint: After qrotate, use getqx/getqy to get coordinates
 Success Check: Smooth circular motion, no gaps
 :::
 
-:::yourturn  
+::: your-turn  
 **Your Turn:** Distance calculator
 
 Starting code:
@@ -2487,7 +2664,7 @@ Before you pull your hair out debugging, know these:
 
 ## What About QLOG, QEXP?
 
-CORDIC can also do logarithms and exponentials:
+Don't worry, we won't leave logarithms and exponentials behind. CORDIC handles those too:
 
 ::: pasm2
 ```
@@ -2569,11 +2746,11 @@ But wait, let me show you the same thing with even more elegance:
 ```
 :::
 
-Three lines! The `drvc` instruction drives the pin to match the C flag. Input becomes output. Simple becomes simpler.
+Three lines! The **DRVC** instruction drives the pin to match the C flag. Input becomes output. Simple becomes simpler.
 
 ## Understanding P2 Pins
 
-Every P2 pin is bidirectional and incredibly capable. Unlike older microcontrollers where you set data direction registers, P2 pins change direction on the fly based on the instruction you use.
+Let's unpack what makes those three lines so short. Every P2 pin is bidirectional and incredibly capable. Unlike older microcontrollers where you set data direction registers (remember TRIS bits? DDRA? Yeah, we don't miss those either), P2 pins change direction on the fly based on the instruction you use.
 
 Here's the mental model:
 
@@ -2595,7 +2772,7 @@ Here's the mental model:
 ```
 :::
 
-That's it. These four instructions cover 90% of your output needs.
+That's it. Four instructions, 90% of your output needs covered. We'll meet a few specialized cousins below, but if you only remember these four, you'll get a lot done.
 
 ### Conditional Driving
 
@@ -2723,7 +2900,7 @@ button_confirmed
 
 ## Bit-Banged Serial (The Basics)
 
-Sometimes you need serial communication without Smart Pins. Here's how:
+Yes, you'll usually reach for Smart Pins for serial — but it's worth seeing how to do it the hard way once, just so you appreciate what Smart Pins are doing for you. Here's how:
 
 ::: pasm2
 ```
@@ -2751,7 +2928,7 @@ bit_time long   100_000_000 / 115200  ' Clock cycles per bit
 
 ## Your Turn: I/O Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Create a light chaser
 
 Starting code:
@@ -2774,7 +2951,7 @@ Hint: Use SHL and check for overflow
 Success Check: Single lit LED rotating through all positions
 :::
 
-:::yourturn
+::: your-turn
 **Your Turn:** Reaction timer
 
 Starting code:
@@ -2866,7 +3043,7 @@ But honestly? You'll rarely need these. The individual pin instructions are clea
 
 ## Common I/O Gotchas
 
-Save yourself debugging time:
+Before you pull your hair out wondering why a pin "won't work," save yourself debugging time and skim these:
 
 1. **Pin numbers are 0-63** - Not port.bit notation like other MCUs
 
@@ -2880,7 +3057,7 @@ Save yourself debugging time:
 
 ## Timing Is Everything
 
-Here's a critical concept: P2 I/O is deterministic. When you execute:
+Now here's something we'll keep coming back to: P2 I/O is deterministic. When you execute:
 
 ::: pasm2
 ```
@@ -2889,7 +3066,7 @@ Here's a critical concept: P2 I/O is deterministic. When you execute:
 ```
 :::
 
-Pin 56 goes high and pin 57 goes low at EXACTLY the same clock cycle. No skew, no uncertainty. This determinism is what makes P2 perfect for precise timing applications.
+Pin 56 goes high and pin 57 goes low at EXACTLY the same clock cycle. No skew, no uncertainty. Uff! Try doing that on an interrupt-driven MCU. This determinism is what makes P2 perfect for precise timing applications.
 
 ## Real-World Example: Servo Control
 
@@ -2976,7 +3153,7 @@ Four instructions. Four kilobytes. Faster than DMA on most processors. And we're
 
 ## Block Transfers: The Power Move
 
-The SETQ instruction is your gateway to block transfers:
+The **SETQ** instruction is your gateway to block transfers:
 
 ::: pasm2
 ```
@@ -2990,7 +3167,7 @@ The SETQ instruction is your gateway to block transfers:
 ```
 :::
 
-The key insight: SETQ tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0.
+Here's the trick: SETQ tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0 (yes, we'll trip over that off-by-one at least once — everyone does).
 
 ## The FIFO: Your Streaming Pipeline
 
@@ -3015,6 +3192,8 @@ stream_loop
 The beauty? The FIFO reads ahead automatically. While you're processing one value, it's already fetching the next. No hub timing slots to worry about!
 
 ## Writing Through the FIFO
+
+Reading was nice — writing is symmetric. We'll use **WRFAST** instead of **RDFAST**, and **WFLONG** instead of **RFLONG**, and that's it:
 
 ::: pasm2
 ```
@@ -3168,7 +3347,7 @@ Note: FIFO can only read OR write at a time, not both. Use PTRA/PTRB for the oth
 
 ## Your Turn: Streaming Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Fast memory fill
 
 Starting code:
@@ -3191,7 +3370,7 @@ Hint: You'll need setq #255 (not #256)
 Success Check: Memory filled in one operation
 :::
 
-:::yourturn
+::: your-turn
 **Your Turn:** Data filter pipeline
 
 Starting code:
@@ -3220,7 +3399,7 @@ Success Check: Output is filtered version of input
 
 ## Common Streaming Gotchas
 
-Watch out for these:
+Before you pull your hair out wondering why your transfer is one long short, or why your FIFO won't cooperate, skim these:
 
 1. **SETQ uses count-1** - For 16 longs, use `setq #15`, not `setq #16`
 
@@ -3241,7 +3420,7 @@ Let's talk speed:
 - **Random hub access**: 2-9 clocks per access
 - **Streamer to pins**: Up to sysclock/1 rate
 
-This is seriously fast. Most microcontrollers need dedicated DMA controllers to achieve what P2 does with simple instructions.
+Uff! That's seriously fast. Most microcontrollers need dedicated DMA controllers, peripheral coprocessors, and a stack of config registers to achieve what P2 does with two instructions. You're not paying for that DMA controller — it's already in the silicon.
 
 ## Real-World Example: Audio Buffer
 
@@ -3339,16 +3518,16 @@ Let's be honest about the differences:
 
 **Hub Execution** (the new way):
 
-- ❌ Slower: 2-9 clocks per instruction (typically 3-4)
-- ❌ Variable timing: depends on hub alignment
+- ✅ Fast sequential: 2 clocks per instruction (same as cog-exec, thanks to the 19-stage FIFO prefetch)
+- ❌ Slower on branches: minimum 13 clocks per branch (the FIFO refill cost; +1 if target isn't long-aligned)
 - ✅ Unlimited: 512KB of code space!
 - ✅ Flexible: can call COG routines
 
-The beauty? You can mix both in the same program!
+The beauty? You can mix both in the same program! Sequential code in hub runs at full speed — only branches show the hub-execution penalty.
 
 ## How Hub Execution Works
 
-When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
+Let's peek behind the curtain. When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
 
 ::: pasm2
 ```
@@ -3412,7 +3591,7 @@ option_1_handler
 
 ## The Hub Execution FIFO
 
-The FIFO that makes hub execution possible is the same one used for streaming data. It reads ahead, keeping a buffer of upcoming instructions:
+You met the FIFO in the previous chapter as a data-streaming engine. Same hardware, different job here: it reads ahead, keeping a buffer of upcoming *instructions* ready for the COG. Think of it as a moving sidewalk for your code:
 
 ::: pasm2
 ```
@@ -3425,7 +3604,7 @@ hub_loop
 ```
 :::
 
-This read-ahead behavior means hub execution is often faster than the worst-case 9 clocks per instruction.
+This read-ahead behavior is the whole reason sequential hub code matches cog-exec speed — the FIFO is doing the waiting for you, in parallel with the COG running instructions it already prefetched.
 
 ## Mixing COG and Hub Code
 
@@ -3457,7 +3636,7 @@ Time-critical code stays in COG RAM for deterministic timing. Complex code lives
 
 ## Your Turn: Hub Execution Experiments
 
-:::yourturn
+::: your-turn
 **Your Turn:** Build a simple calculator
 
 Starting code:
@@ -3572,6 +3751,8 @@ loop_start
 
 ## Common Hub Execution Gotchas
 
+Before you cram everything into hub and call it a day, know these:
+
 1. **Speed variation** - Don't use hub execution for precise timing
 2. **FIFO conflicts** - Can't stream data while executing from hub
 3. **Address confusion** - Remember: <$200 is COG, $200-$3FF is LUT, ≥$400 is hub
@@ -3664,12 +3845,12 @@ Here's a traditional interrupt-driven button handler:
 
 ::: antipattern
 ```
-// Traditional approach (not P2!)
-ISR(BUTTON_INTERRUPT) {
-    // Interrupt service routine
-    buttonPressed = true;
-    // Return to interrupted code
-}
+' Traditional approach (not P2!) — pseudocode for the interrupt-driven style
+ISR(BUTTON_INTERRUPT)
+    ' Interrupt service routine
+    buttonPressed = true
+    ' Return to interrupted code
+END_ISR
 ```
 :::
 
@@ -3902,7 +4083,7 @@ Let me share why we avoid interrupts:
 
 ## Your Turn: COG vs Interrupt Challenge
 
-:::yourturn
+::: your-turn
 **Your Turn:** Build a reaction timer without interrupts
 
 Starting code:
@@ -4012,16 +4193,16 @@ Chapter 12 shows you "Optimization Mastery" - how to make your PASM2 code blazin
 
 ## The Hook: Double Your Speed with One Change
 
-Look at this seemingly innocent code:
+Let me show you a loop that looks fine — until you realize you're paying for the same thing twice. Watch:
 
 ::: pasm2
 ```
 ' Before optimization: 13 clocks
-.loop   rdlong  value, ptra      ' 9-16 clocks hub access
+.loop   rdlong  value, ptra      ' 9-16 (cog-exec) / 9-26 (hub-exec)
         add     value, #1        ' 2 clocks
-        wrlong  value, ptra      ' 3-10 clocks
+        wrlong  value, ptra      ' 3-10 (cog-exec) / 3-20 (hub-exec)
         add     ptra, #4         ' 2 clocks
-        djnz    count, #.loop    ' 2/4 clocks
+        djnz    count, #.loop    ' 2/4 (cog-exec) / 2/13-20 (hub-exec)
 
 ' After optimization using PTR expressions:
 .loop   rdlong  value, ptra      ' Read from current address
@@ -4035,7 +4216,7 @@ Almost twice as fast! The secret? Understanding how P2 really works.
 
 ## Understanding the Pipeline
 
-P2 has a 2-stage pipeline:
+Before we hunt for clocks to save, let's understand where they go in the first place. P2 has a 2-stage pipeline:
 
 1. **Fetch** - Get next instruction
 2. **Execute** - Do the work
@@ -4095,6 +4276,8 @@ REP creates hardware-accelerated loops with zero overhead:
 :::
 
 That's 33% faster just by using REP!
+
+⚠️ **Hub-Exec Note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in COG or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
 
 ## SKIP: Conditional Execution on Steroids
 
@@ -4244,12 +4427,14 @@ data    long    $12345678
 ```
 :::
 
-3. **Use REP** for tight loops
+3. **Use REP** for tight loops (note: hub-address expressions like `ptra++` only work with hub-access instructions, so we read first, then add)
 
 ::: pasm2
 ```
-        rep     #1, count
-        add     sum, ptra++
+        rep     @.end, count
+        rdlong  val, ptra++     ' Fetch next long from hub
+        add     sum, val        ' Accumulate
+.end
 ```
 :::
 
@@ -4258,7 +4443,7 @@ Just these three changes often double performance!
 
 ## Your Turn: Optimization Challenges
 
-:::yourturn
+::: your-turn
 **Your Turn:** Optimize a checksum calculator
 
 Starting code:
@@ -4320,23 +4505,31 @@ Avoid pipeline stalls:
 
 ### Unrolling Loops
 
-Sometimes removing the loop is faster:
+Sometimes removing the loop is faster. (Remember: `ptra++` only works with hub-access instructions like **RDLONG**, so each iteration reads then adds.)
 
 ::: pasm2
 ```
 ' Looped version
-        rep     #1, #4
-        add     sum, ptra++
-        
+        rep     @.end, #4
+        rdlong  val, ptra++
+        add     sum, val
+.end
+
 ' Unrolled version (faster for small counts)
-        add     sum, ptra++
-        add     sum, ptra++
-        add     sum, ptra++
-        add     sum, ptra++
+        rdlong  val, ptra++
+        add     sum, val
+        rdlong  val, ptra++
+        add     sum, val
+        rdlong  val, ptra++
+        add     sum, val
+        rdlong  val, ptra++
+        add     sum, val
 ```
 :::
 
 ## Common Optimization Gotchas
+
+Before you rewrite everything in REP and SKIP, a few sanity checks:
 
 1. **Premature optimization** - Get it working first, then optimize
 2. **Over-optimizing** - Sometimes clarity is worth 2 clocks
@@ -4361,6 +4554,13 @@ Always measure your optimizations:
         ' end_time now contains exact clock cycles
 ```
 :::
+
+⚠️ **Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
+
+1. **Capture the full 64-bit count.** `GETCT D WC` returns the upper 32 bits (with `WC` set); a plain `GETCT D` returns the lower 32. Read upper-then-lower-then-upper-again and retry if the upper word changed, then build a 64-bit timestamp.
+2. **Work with deltas, not absolute time.** Compare `(now - start)` rather than `now > deadline`. The subtraction wraps correctly even when the counter does.
+
+The 21.5-second wrap is *fast* — long enough that you won't see it in a basic example, short enough that real applications hit it constantly.
 
 ## What We've Learned
 
@@ -4420,7 +4620,7 @@ The LUT fills a sweet spot: faster than hub memory, doesn't compete with your in
 ::: pasm2
 ```
 ' Write to LUT
-        wrlut   #$12345678, #100  ' Write constant to LUT[100]
+        wrlut   ##$12345678, #100 ' Write 32-bit constant to LUT[100]
         wrlut   value, index      ' Write variable to LUT[index]
 
 ' Read from LUT
@@ -4459,16 +4659,16 @@ get_sine
 ::: sidetrack
 **Bulk LUT Loading with SETQ2**
 
-For loading entire tables, **SETQ2** + **RDLONG** can transfer hub data directly to LUT addresses $200+:
+For loading entire tables, **SETQ2** + **RDLONG** transfers hub data into LUT memory. The trick: when **SETQ2** is active, the **RDLONG** destination field (still 9-bit, 0–$1FF) is interpreted as a LUT offset that maps physically to $200–$3FF:
 
 ::: pasm2
 ```
-        setq2   #256-1              ' 256 longs
-        rdlong  $200, hub_table_ptr ' Load into LUT from $200
+        setq2   #256-1              ' 256 longs to LUT
+        rdlong  $000, hub_table_ptr ' Dest field 0 = physical LUT $200
 ```
 :::
 
-This works because the assembler maps LUT addresses $200-$3FF. Just remember the -1 in **SETQ2** (same rule as **SETQ** for hub block transfers).
+The destination operand is the LUT offset, not the absolute address — so you write `$000` (LUT base), not `$200` (which would overflow the 9-bit field). Remember the `-1` in **SETQ2** (same rule as **SETQ** for hub block transfers).
 :::
 
 ## LUT Sharing Between COGs
@@ -4516,6 +4716,8 @@ An even-numbered COG reads its odd neighbor's LUT, and vice versa. You cannot re
 :::
 
 ## Practical Examples
+
+Enough theory — let's see what people actually use the LUT for in real code:
 
 ### Fast Data Transformation
 
@@ -4699,7 +4901,22 @@ Use LUT sharing to create a message passing system between COG 2 and COG 3:
 ```
 :::
 
-*Continue to [Chapter 14: Smart Pins Orientation](#chapter-14-smart-pins-orientation) →*
+## What We've Learned
+
+The LUT in your toolbox:
+
+- ✅ 512 longs of fast, private memory in every COG
+- ✅ 3-clock deterministic access via **RDLUT** / **WRLUT**
+- ✅ Bulk loading via **SETQ2** + **RDLONG**
+- ✅ COG-pair LUT sharing for high-bandwidth data passing
+- ✅ Streamer source for waveform generation
+
+## Coming Up Next
+
+Chapter 14 hands you the keys to 64 autonomous I/O processors — Smart Pins. We'll cover the universal configuration pattern and the modes you'll reach for most often, then point you at the dedicated Smart Pins Manual for the deep dive.
+
+
+**Have Fun!** And remember — a 3-clock private lookup table is a luxury most chips don't give you. Use it!
 
 
 # Chapter 14: Smart Pins Orientation
@@ -4916,7 +5133,7 @@ read_adc
 
 ## Configuration Values Demystified
 
-The mode values like `P_ASYNC_TX` are constants defined by the assembler. Here's what's happening behind the scenes:
+Don't worry, you don't have to memorize all 32 mode bit-patterns. The mode values like `P_ASYNC_TX` are constants defined by the assembler. But here's what's happening behind the scenes, in case you're curious:
 
 The **WRPIN** D value is a 32-bit configuration:
 
@@ -5041,7 +5258,22 @@ Set up UART at 115200 baud:
 
 📚 **Going Deeper**: This chapter covered the Smart Pin essentials - the configuration pattern and common modes. For complete coverage of all 32 modes, timing diagrams, and advanced techniques, see the dedicated "P2 Smart Pins Manual."
 
-*Continue to [Chapter 15: Event-Driven Programming](#chapter-15-event-driven-programming) →*
+## What We've Learned
+
+Smart Pin essentials:
+
+- ✅ Every pin contains its own state machine (32 modes available)
+- ✅ The universal recipe: **DIRL** → **WRPIN** → **WXPIN** → **WYPIN** → **DIRH**
+- ✅ The IN flag signals "something happened" (mode-specific)
+- ✅ UART, PWM, ADC, quadrature — same configuration pattern
+- ✅ Smart Pins free the COG for other work
+
+## Coming Up Next
+
+Chapter 15 explores the event system — how to stop polling and start waiting, so your COG sleeps until something interesting happens. The companion to Smart Pins: when one tells the other a byte is ready, you want to be notified, not spinning.
+
+
+**Have Fun!** And remember — every Smart Pin you configure is a coprocessor you don't have to babysit. That's leverage!
 
 
 # Chapter 15: Event-Driven Programming
@@ -5079,7 +5311,7 @@ The event system solves both. Your COG *sleeps* and *wakes the instant* somethin
 
 ## The Four Selectable Events
 
-Every COG has four configurable event channels: SE1, SE2, SE3, and SE4. Each can be configured to trigger on different conditions:
+Let's meet the cast. Every COG has four configurable event channels: SE1, SE2, SE3, and SE4. Each can be configured to trigger on different conditions:
 
 | Event | Configuration | Wait | Poll |
 |-------|--------------|------|------|
@@ -5271,6 +5503,8 @@ event_loop
 :::
 
 ## Practical Examples
+
+Time to put events to work. Three patterns you'll reach for again and again:
 
 ### Timeout with Fallback
 
@@ -5499,7 +5733,22 @@ Create a loop that monitors both a button (pin edge event) and a timer (periodic
 ```
 :::
 
-*Continue to [Chapter 16: Multi-COG Orchestration](#chapter-16-multi-cog-orchestration) →*
+## What We've Learned
+
+The event toolkit you now command:
+
+- ✅ Four selectable event channels (SE1-SE4) per COG
+- ✅ Three timer events (CT1-CT3) for precise scheduling
+- ✅ **WAIT** (sleep) vs **POLL** (check-and-continue) tradeoffs
+- ✅ The ATN inter-COG signaling system
+- ✅ Common patterns: timeout-with-fallback, debounce, periodic sampling
+
+## Coming Up Next
+
+Chapter 16 brings the whole journey together — orchestrating eight COGs in parallel harmony to build complete systems. It's where the P2 philosophy really shines.
+
+
+**Have Fun!** And remember — every spin loop you replace with **WAITSE** is CPU cycles you've handed back to your design. Be generous with events!
 
 
 # Chapter 16: Multi-COG Orchestration
@@ -5549,9 +5798,11 @@ Eight independent processors, each with a specific job, all working in perfect c
 
 ## Communication Patterns
 
+Eight processors running in parallel sounds wonderful — until you realize they need to talk to each other. Let's meet the three patterns you'll use 95% of the time.
+
 ### The Mailbox Pattern
 
-The simplest and most common:
+The simplest and most common — a single hub long that one COG writes and another reads:
 
 ::: pasm2
 ```
@@ -5639,9 +5890,11 @@ process_commands
 
 ## Synchronization Techniques
 
+Sometimes communication isn't enough — you need two or more COGs to *agree* on what happens when. That's where synchronization comes in.
+
 ### Using Locks
 
-When multiple COGs need atomic access:
+When multiple COGs need atomic access to the same piece of data, P2 gives you 16 hardware locks. They're tiny and they're fast:
 
 ::: pasm2
 ```
@@ -5852,6 +6105,8 @@ Test each COG in isolation before combining!
 
 ## Design Principles for Multi-COG Systems
 
+The hardware gives you eight processors. Whether your *design* survives the journey is up to you. A few rules of thumb we've learned the hard way:
+
 1. **Single Responsibility**: Each COG does ONE thing well
 2. **Loose Coupling**: COGs communicate through hub, not direct dependencies
 3. **Clear Ownership**: Each piece of data has one writer
@@ -5859,6 +6114,8 @@ Test each COG in isolation before combining!
 5. **Graceful Degradation**: System continues if one COG fails
 
 ## Common Multi-COG Gotchas
+
+Before you pull your hair out wondering why the eight-COG dream turned into a debugging nightmare, skim these:
 
 1. **Race conditions** - Use locks for shared write access
 2. **Deadlocks** - Avoid circular dependencies

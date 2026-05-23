@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete PASM2 Instruction Set Documentation\par}
 \vspace{0.6cm}
-{\large January 2026\par}
+{\large May 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.2\par}
+{\large\color{blue}Version 2.3\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -141,7 +141,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
-| Instructions | ~60 | ~360 |
+| Instructions | ~60 | ~380 |
 
 ¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
 
@@ -511,7 +511,7 @@ When executing from Hub RAM (Hub execution mode), the COG uses its FIFO hardware
 
 Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch causes the pipeline to be flushed, so the first instruction following the branch takes at least five clock cycles as the pipeline refills from the branch target address.
 
-The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
+The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding removes a major class of pipeline hazards present in simpler architectures (see Chapter 4 for timing detail).
 
 Register indirection instructions (ALTS, ALTD, ALTR, ALTB, ALTI) perform dynamic instruction modification within the pipeline. These instructions substitute computed addresses or values into the next instruction's source, destination, or result fields without modifying the actual program code in memory. The next instruction following any ALT instruction is shielded from interrupts, guaranteeing atomic execution of the ALT+target instruction pair. This pipeline-level modification supports powerful indirect addressing patterns while maintaining deterministic timing.
 
@@ -3667,7 +3667,7 @@ For a debug statement to produce output, both conditions must be met: the statem
 \item The P2 boots from RCFAST (\textasciitilde20 MHz) and detects boot source via pin pull-ups
 \item User code must configure the desired clock source after boot
 \item DEBUG provides serial output with formatters; can be disabled for production
-\item The 8-COG architecture often eliminates the need for interrupts
+\item The 8-COG architecture often removes the need for interrupts (see Chapter 4: each COG runs deterministically; dedicate a COG to a task instead of interrupting one)
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
 ```
@@ -4136,6 +4136,8 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 ## 6.6 ALTx Modified Addressing
 
 The ALT instructions modify how the following instruction interprets its operands, enabling computed addresses and self-modifying code patterns.
+
+**Hub-Exec Compatibility:** All ALTx instructions (ALTI, ALTS, ALTD, ALTR, ALTB, ALTSN, ALTSB, ALTSW, ALTGN, ALTGB, ALTGW) operate identically in cog-exec and hub-exec modes. The ALTx mechanism acts on the next pipelined instruction regardless of its source (cog/LUT memory or the hub-prefetch FIFO), enabling dynamic register-substitution patterns in hub-resident code blocks.
 
 ### 6.6.1 ALTD (Alter Destination)
 
@@ -5536,6 +5538,8 @@ Set Bit to Flag State
 [Arithmetic Operations](#arithmetic-operations) - Sets bits to match flag state.
 :::
 
+\hypertarget{bitnc}{}\hypertarget{bitz}{}\hypertarget{bitnz}{}
+
 **BITC**  *Dest, {#}Src*  **{WCZ}**\
 **BITNC**  *Dest, {#}Src*  **{WCZ}**\
 **BITZ**  *Dest, {#}Src*  **{WCZ}**\
@@ -6745,6 +6749,15 @@ CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providi
 
 This section contains all PASM2 instructions beginning with the letter D.
 
+**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+
+| Context | Clocks when taken |
+|:--------|:----------------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
+
+So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+
 <!-- DEBUG instruction removed - will be covered in a dedicated narrative chapter with examples -->
 
 
@@ -7093,7 +7106,7 @@ Decrement and Jump If Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
+| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
@@ -7127,7 +7140,7 @@ Decrement and Jump If Not Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
+| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
@@ -7164,8 +7177,8 @@ Decrement and Jump If Zero {#djnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
-| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -7743,6 +7756,8 @@ Float with Output Preset by Flag
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
+
+\hypertarget{fltnc}{}\hypertarget{fltz}{}\hypertarget{fltnz}{}
 
 **FLTC**  *{#}Dest*  **{WCZ}**\
 **FLTNC**  *{#}Dest*  **{WCZ}**\
@@ -8466,6 +8481,15 @@ HUBSET takes 2-9 clock cycles to execute depending on Hub window alignment. Swit
 
 This section contains all PASM2 instructions beginning with the letter I.
 
+**Conditional Jump Timing Convention:** Conditional jumps in this section (IJZ, IJNZ) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+
+| Context | Clocks when taken |
+|:--------|:----------------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
+
+So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+
 
 
 ::: instrheader
@@ -8488,8 +8512,8 @@ Increment and Jump If Zero {#ijnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
-| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011100 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011100 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -8584,6 +8608,15 @@ INCMOD is also ideal for round-robin scheduling across a fixed number of resourc
 
 This section contains all PASM2 instructions beginning with the letter J.
 
+**Conditional Jump Timing Convention:** Conditional jumps (including event-jumps and counter-jumps) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+
+| Context | Clocks when taken |
+|:--------|:----------------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
+
+So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken (either context), 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+
 
 
 ::: instrheader
@@ -8605,8 +8638,8 @@ Jump If Attention Set / Clear {#jnatn}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001110 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011110 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 PC is written only when the condition is met (flag set for JATN, flag clear for JNATN).
 
@@ -8651,12 +8684,12 @@ Jump If Counter Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000001 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000000010 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000000011 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010001 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010010 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010011 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 PC is written only when the condition is met (flag set for JCTn, flag clear for JNCTn).
 
@@ -8694,8 +8727,8 @@ Jump If FIFO Block Wrap Set / Clear {#jnfbw}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001001 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011001 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 PC is written only when the condition is met.
 
@@ -8733,8 +8766,8 @@ Jump If Interrupt Set / Clear {#jnint}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000000 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010000 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 PC is written only when the condition is met.
 
@@ -8775,8 +8808,15 @@ Jump
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | D[31] | D[30] | PC | 4 |
-| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PC | 4 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101100 | D[31] | D[30] | PC | 4 / 13-20 † |
+| EEEE | 1101100 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PC | 4 / 13-20 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
 
 
 **Related:** [CALL](#call), [RET](#ret), [JMPREL](#jmprel), [CALLD](#calld)
@@ -8813,7 +8853,14 @@ Jump Relative
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | --- | --- | PC | 4 |
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110000 | --- | --- | PC | 4 / 13-20 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
 
 
 **Related:** [JMP](#jmp), [CALL](#call), [DJNZ](#djnz), [IJMP1/2/3](#ijmp1)
@@ -8863,14 +8910,14 @@ Jump If Selectable Event Set / Clear
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000000100 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000000101 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000000110 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000000111 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010100 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010101 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010110 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000010111 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 PC is written only when the condition is met (flag set for JSEn, flag clear for JNSEn).
 
@@ -8908,8 +8955,8 @@ Jump If Pattern Match Event Set / Clear {#jnpat}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001000 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011000 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [SETPAT](#setpat), [POLLPAT](#pollpat)
@@ -8945,8 +8992,8 @@ Jump If CORDIC Empty Event Set / Clear {#jnqmt}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001111 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011111 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [QMUL](#qmul), [QROTATE](#qrotate), [GETQX](#getqx), [GETQY](#getqy)
@@ -8983,8 +9030,8 @@ Jump If Streamer Finished Event Set / Clear {#jnxfi}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001011 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011011 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXFI](#pollxfi)
@@ -9020,8 +9067,8 @@ Jump If Streamer Empty Event Set / Clear {#jnxmt}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001010 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011010 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXMT](#pollxmt)
@@ -9057,8 +9104,8 @@ Jump If Streamer LUT Rollover Event Set / Clear {#jnxrl}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001101 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011101 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRL](#pollxrl)
@@ -9094,8 +9141,8 @@ Jump If Streamer NCO Rollover Event Set / Clear {#jnxro}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
-| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC | 2 or 4 |
+| EEEE | 1011110 | 01I | 000001100 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011110 | 01I | 000011100 | SSSSSSSSS | --- | --- | PC | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [XINIT](#xinit), [XCONT](#xcont), [POLLXRO](#pollxro)
@@ -9820,6 +9867,8 @@ Multiplex Flag To Bits
 [Arithmetic Operations](#arithmetic-operations) - Sets selected bits to a flag value based on mask.
 :::
 
+\hypertarget{muxnc}{}\hypertarget{muxz}{}\hypertarget{muxnz}{}
+
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**\
@@ -9999,9 +10048,10 @@ MUXQ must be preceded by SETQ to load the mask into Q:
 This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
 
 ```pasm2
-        ' Traditional approach (3 instructions):
-        andn    dest, mask              ' Clear masked bits
-        and     temp, source, mask      ' Extract source bits
+        ' Traditional approach (4 instructions):
+        mov     temp, source            ' Copy source
+        and     temp, mask              ' Extract source bits
+        andn    dest, mask              ' Clear masked bits in dest
         or      dest, temp              ' Merge into dest
 
         ' MUXQ approach (2 instructions):
@@ -10084,6 +10134,8 @@ Conditional Negate
 
 [Arithmetic Operations](#arithmetic-operations) - Conditionally negates a value based on flag state.
 :::
+
+\hypertarget{negnc}{}\hypertarget{negz}{}\hypertarget{negnz}{}
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
@@ -10349,6 +10401,8 @@ Output By Flag State
 
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
+
+\hypertarget{outnc}{}\hypertarget{outz}{}\hypertarget{outnz}{}
 
 **OUTC**  *{#}Dest*  **{WCZ}**\
 **OUTNC**  *{#}Dest*  **{WCZ}**\
@@ -11927,7 +11981,7 @@ REP blocks cannot be nested. The P2 hardware uses a single internal counter for 
 
 - **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
 
-- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
+- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost (13+ clocks). For zero-overhead inner loops, execute REP from COG or LUT memory; for non-time-critical loops, hub-exec REP works correctly with the documented per-iteration penalty.
 
 **Forbidden instructions in REP blocks:**
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
@@ -12131,7 +12185,14 @@ Return From Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 / 13-20 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
@@ -12144,7 +12205,7 @@ If the WC or WCZ effect is specified, the C flag is restored from K[31].
 
 If the WZ or WCZ effect is specified, the Z flag is restored from K[30].
 
-The operation takes 4 cycles minimum, with variable timing depending on Hub access if the return location is in Hub memory (13-20 cycles).
+The operation takes 4 cycles in cog/LUT execution, or 13–20 cycles in hub execution (the hub-branch refill cost when the return target resides in hub memory).
 
 The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions.
 
@@ -14111,6 +14172,8 @@ Conditional Sum
 [Arithmetic Operations](#arithmetic-operations) - Conditionally adds or subtracts based on flag state.
 :::
 
+\hypertarget{sumnc}{}\hypertarget{sumz}{}\hypertarget{sumnz}{}
+
 **SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
@@ -14153,6 +14216,15 @@ SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when
 # Instructions: T
 
 This section contains all PASM2 instructions beginning with the letter T.
+
+**Conditional Jump Timing Convention:** Conditional jumps in this section (TJZ, TJNZ, TJF, TJNF, TJV, TJS, TJNS) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+
+| Context | Clocks when taken |
+|:--------|:----------------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
+
+So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
 
 
 
@@ -14404,8 +14476,8 @@ Test And Jump If Full / Not Full {#tjnf}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
-| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv)
@@ -14445,8 +14517,8 @@ Test And Jump If Signed / Not Signed {#tjns}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
-| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [TJZ](#tjz), [TJNZ](#tjnz), [TJF](#tjf), [TJNF](#tjnf), [TJV](#tjv)
@@ -14486,8 +14558,8 @@ Test And Jump If Zero / Not Zero {#tjnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
-| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.
@@ -14535,7 +14607,7 @@ Test And Jump If Overflow
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 |
+| EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
@@ -15116,7 +15188,14 @@ Write Byte
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+| EEEE | 1100010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 3...10 |
+| Hub execution | 3...20 |
 
 
 **Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
@@ -15125,7 +15204,7 @@ Write Byte
 
 WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the lower 8 bits of Dest are written.
 
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 ```pasm2
         WRBYTE  value, ptra++  ' Write byte, increment pointer
@@ -15139,6 +15218,8 @@ Write Flag To Register
 
 [Arithmetic Operations](#arithmetic-operations) - Writes 0 or 1 to register based on flag state.
 :::
+
+\hypertarget{wrnc}{}\hypertarget{wrz}{}\hypertarget{wrnz}{}
 
 **WRC**  *Dest*\
 **WRNC**  *Dest*\
@@ -15233,7 +15314,14 @@ Write Long
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+| EEEE | 1100011 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 3...10 |
+| Hub execution | 3...20 |
 
 
 **Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
@@ -15242,7 +15330,7 @@ Write Long
 
 WRLONG writes the 32-bit value in Dest to Hub RAM at address Src/PTRx. All 32 bits of Dest are written.
 
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment (minimum 3 cycles when the window is hit). When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
 
@@ -15360,7 +15448,14 @@ Write Word
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 |
+| EEEE | 1100010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | --- | 3...10 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 3...10 |
+| Hub execution | 3...20 |
 
 
 **Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
@@ -15369,7 +15464,7 @@ Write Word
 
 WRWORD writes the word (16-bit value) in Dest[15:0] to Hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 
 
@@ -16025,7 +16120,7 @@ A DAT block can switch between COG and Hub modes multiple times:
 ```pasm2
 DAT
         ORGH                    ' Hub mode: bytecode tables
-bc_vectors
+dispatch_table
         WORD    @routine1
         WORD    @routine2
         ALIGNL
@@ -17117,6 +17212,23 @@ PUB Example() | value, result
 - Local variables declared in the method are accessible by name within inline PASM
 - END does not apply to DAT blocks—DAT assembly has no explicit terminator
 
+#### Variable vs Code Limits in Inline PASM
+
+The Spin2 interpreter handles inline PASM in two separate copy operations:
+
+1. The first 16 long variables (method parameters, result, and locals) are copied to cog registers `$1E0..$1EF`. **The 16-long limit applies to variables only — not to the PASM code itself.**
+2. The PASM code is copied separately into cog registers starting at the ORG address (default `$000`).
+
+With no multitasking in use, the inline code area is `$000..$11F` — 288 longs of code space, which is far more than the variable limit suggests.
+
+#### Multitasking and Inline Code Space Overlap
+
+When a cog uses Spin2 multitasking, the interpreter maintains a taskptr table in cog registers `$100..$11F`. The taskptr for task 31 occupies `$11F`, task 30 occupies `$11E`, and so on, filling downward. **This range is the upper portion of the inline-PASM code area** (`$000..$11F`) — multitasking and large inline-PASM blocks compete for the same space.
+
+Programs using fewer than 32 software tasks leave the *lower* portion of `$100..$11F` free for inline code. Programs using all 32 tasks consume the full table. Plan inline-PASM size accordingly, or place large inline blocks in `ORGH` (hub-exec mode) to avoid this conflict entirely.
+
+⚠️ **Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
+
 💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
 
 #### Related Directives
@@ -17430,7 +17542,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 ```pasm2
         mov     ptrb, ##hub_source      ' Set PTRB to source address
         rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
-        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
+        rdword  wval, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
         wrlong  data, ptrb[8]           ' Address: PTRB + (8 × 4) = PTRB+32
 
         ' COGINIT sets PTRB in launched cog
@@ -19253,12 +19365,12 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for negative underflow
-                cmps    value, NEGX     wc      ' Check if below min negative
+                cmps    value, ##NEGX   wc      ' Check if below min negative
         if_c    jmp     #underflow              ' Jump if underflow
 
 ' Using NEGX as lower limit
-                mov     limit, NEGX             ' Set limit to max negative
-                maxs    value, limit            ' Clamp to not go below NEGX
+                mov     limit, ##NEGX           ' Set limit to max negative
+                fges    value, limit            ' Clamp to not go below NEGX
 ```
 
 #### Notes
@@ -19294,12 +19406,12 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for positive overflow
-                cmp     value, POSX     wc      ' Check if exceeds max positive
+                cmp     value, ##POSX   wc      ' Check if exceeds max positive
         if_nc   jmp     #overflow               ' Jump if overflow
 
 ' Using POSX as upper limit
-                mov     limit, POSX             ' Set limit to max positive
-                mins    value, limit            ' Clamp to not exceed POSX
+                mov     limit, ##POSX           ' Set limit to max positive
+                fles    value, limit            ' Clamp to not exceed POSX
 ```
 
 #### Notes
@@ -19337,12 +19449,12 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
 #### Usage
 ```pasm2
 ' Using PI with CORDIC rotation
-        mov     angle, PI           ' Load PI constant
+        mov     angle, ##PI         ' Load PI constant
         shr     angle, #1           ' Divide by 2 for PI/2 (90 degrees)
         qrotate angle, radius       ' Rotate by PI/2 radians
 
 ' Converting radians to degrees using PI
-        mov     x, PI               ' Start with PI
+        mov     x, ##PI             ' Start with PI
         qmul    x, ##180            ' Multiply PI by 180
         qdiv    x, ##$80000000      ' Divide by 2³¹ for scaling
         getqx   degrees             ' Get degrees conversion factor
