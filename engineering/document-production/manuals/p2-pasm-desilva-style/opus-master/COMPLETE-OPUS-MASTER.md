@@ -4723,6 +4723,8 @@ An even-numbered COG reads its odd neighbor's LUT, and vice versa. You cannot re
 
 ## Practical Examples
 
+Enough theory — let's see what people actually use the LUT for in real code:
+
 ### Fast Data Transformation
 
 ::: pasm2
@@ -5122,7 +5124,7 @@ read_adc
 
 ## Configuration Values Demystified
 
-The mode values like `P_ASYNC_TX` are constants defined by the assembler. Here's what's happening behind the scenes:
+Don't worry, you don't have to memorize all 32 mode bit-patterns. The mode values like `P_ASYNC_TX` are constants defined by the assembler. But here's what's happening behind the scenes, in case you're curious:
 
 The **WRPIN** D value is a 32-bit configuration:
 
@@ -5285,7 +5287,7 @@ The event system solves both. Your COG *sleeps* and *wakes the instant* somethin
 
 ## The Four Selectable Events
 
-Every COG has four configurable event channels: SE1, SE2, SE3, and SE4. Each can be configured to trigger on different conditions:
+Let's meet the cast. Every COG has four configurable event channels: SE1, SE2, SE3, and SE4. Each can be configured to trigger on different conditions:
 
 | Event | Configuration | Wait | Poll |
 |-------|--------------|------|------|
@@ -5477,6 +5479,8 @@ event_loop
 :::
 
 ## Practical Examples
+
+Time to put events to work. Three patterns you'll reach for again and again:
 
 ### Timeout with Fallback
 
