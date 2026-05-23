@@ -435,7 +435,7 @@ loop    testp   #BUTTON_PIN wc  ' Read button
         jmp     #loop
 ```
 
-Three lines! The `drvc` instruction drives the pin to match the C flag. Input becomes output. Simple becomes simpler.
+Three lines! The **DRVC** instruction drives the pin to match the C flag. Input becomes output. Simple becomes simpler.
 
 ## Understanding P2 Pins
 
@@ -805,7 +805,7 @@ Four instructions. Four kilobytes. Faster than DMA on most processors. And we're
 
 ## Block Transfers: The Power Move
 
-The SETQ instruction is your gateway to block transfers:
+The **SETQ** instruction is your gateway to block transfers:
 
 ```pasm2
 ' Basic block read
@@ -1136,12 +1136,12 @@ Let's be honest about the differences:
 - ✅ Self-contained: runs independently
 
 **Hub Execution** (the new way):
-- ❌ Slower: 2-9 clocks per instruction (typically 3-4)
-- ❌ Variable timing: depends on hub alignment
+- ✅ Fast sequential: 2 clocks per instruction (same as cog-exec, thanks to the 19-stage FIFO prefetch)
+- ❌ Slower on branches: minimum 13 clocks per branch (the FIFO refill cost; +1 if target isn't long-aligned)
 - ✅ Unlimited: 512KB of code space!
 - ✅ Flexible: can call COG routines
 
-The beauty? You can mix both in the same program!
+The beauty? You can mix both in the same program! Sequential code in hub runs at full speed — only branches show the hub-execution penalty.
 
 ## How Hub Execution Works
 
@@ -1773,18 +1773,18 @@ Chapter 12 shows you "Optimization Mastery" - how to make your PASM2 code blazin
 Look at this seemingly innocent code:
 
 ```pasm2
-' Before optimization: 11 clocks
-loop    rdlong  value, ptra      ' 3-9 clocks (avg 6)
+' Before optimization
+loop    rdlong  value, ptra      ' 9-16 (cog-exec) / 9-26 (hub-exec)
         add     value, #1        ' 2 clocks
-        wrlong  value, ptra      ' 3 clocks
+        wrlong  value, ptra      ' 3-10 (cog-exec) / 3-20 (hub-exec)
         add     ptra, #4         ' 2 clocks
-        djnz    count, #loop     ' 2 clocks
+        djnz    count, #loop     ' 2/4 (cog-exec) / 2/13-20 (hub-exec)
 
-' After optimization: 6 clocks!
-loop    rdlong  value, ptra++    ' 3-9 clocks, pointer incremented for free!
-        add     value, #1        ' 2 clocks  
-        wrlong  value, --ptra++  ' 3 clocks, clever pointer work
-        djnz    count, #loop     ' 2 clocks
+' After optimization: pointer increments built into the access
+loop    rdlong  value, ptra++    ' Read and post-increment in one
+        add     value, #1        ' Process
+        wrlong  value, ptra++    ' Write and post-increment
+        djnz    count, #loop     ' Saved the explicit ADD ptra, #4
 ```
 
 Almost twice as fast! The secret? Understanding how P2 really works.
@@ -1844,6 +1844,8 @@ loop    add     sum, value      ' 2 clocks
 ```
 
 That's 33% faster just by using REP!
+
+⚠️ **Hub-Exec Note:** **REP** works in hub-exec too, but each iteration executes a hidden jump to loop back — and that hidden jump pays the 13+ clock hub-branch cost per iteration. So a 2-instruction REP loop that takes 4 clocks in cog-exec balloons to ~17+ clocks per iteration in hub-exec. For time-critical inner loops, keep REP in COG or LUT memory. Hub-exec REP works correctly; it just isn't zero-overhead there.
 
 ## SKIP: Conditional Execution on Steroids
 

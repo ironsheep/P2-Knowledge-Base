@@ -1,5 +1,104 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v2.2.0 (2026-05-23)
+
+**Periodic Audit Release** — Style-guide conformance, hub-exec timing corrections, structural completeness for Chapters 4-6, and code-example validation infrastructure.
+
+### Style-Guide Conformance (CRITICAL)
+
+Fixed 8 prose-mnemonic formatting violations against the manual's own "ABSOLUTE RULE" (per `desilva-style-guide.md`) that all PASM2 mnemonics appear UPPERCASE BOLD in prose. Replaced backtick-lowercase forms (`` `mov` instruction ``) and bare-uppercase forms ("The MOV family") with proper **MOV** / **COGINIT** / **DRVNOT** / **DRVC** / **SETQ** formatting across both master files.
+
+### Hub-Exec Timing Corrections (HIGH)
+
+Brought the manual in line with April 2026 YAML corrections (commits `fbbd9ee`, `96cf4e8`) for the hub-exec timing model:
+
+- **Chapter 10 — Hub Execution speed claim**: Replaced "2-9 clocks per instruction (typically 3-4)" misframing with the corrected model: sequential code is 2 clocks/instruction (same as cog-exec via the 19-stage FIFO prefetch); only branches pay the 13+ clock refill cost. Applied to both `COMPLETE-OPUS-MASTER.md` and `CHAPTERS-7-16-ENHANCED.md`.
+- **Chapter 12 — RDLONG/WRLONG comments**: Updated to show both `cog-exec` and `hub-exec` ranges (`9-16 / 9-26` for RDLONG, `3-10 / 3-20` for WRLONG, `2/4 / 2/13-20` for DJNZ).
+- **Chapter 12 — REP-in-hub-exec caveat**: Added a Hub-Exec Note after "REP: The Speed Loop" warning that REP loops in hub-exec pay 13+ clocks per iteration for the hidden return-jump.
+
+### Pedagogical Structure Restoration (HIGH)
+
+Added the missing DeSilva-pattern closing sections to Chapters 4, 5, and 6 (each previously stub-ended at the worked-example):
+
+- **Chapter 4 — The Hub Connection**: Added "Your Turn: Experiments", "Common Gotchas", "What We've Learned", "Coming Up Next", "Have Fun!" closer.
+- **Chapter 5 — Mathematics Unleashed**: Added "Medicine Cabinet" with quick math reference, plus all four required closing sections.
+- **Chapter 6 — Flags and Decisions**: Added "Medicine Cabinet" with conditional execution quick reference, plus all four required closing sections.
+
+### Voice Strengthening (HIGH)
+
+Strengthened the two weakest Hook sections identified by the voice-conformance audit:
+
+- **Chapter 7 (CORDIC Magic)**: Hook now adds personal framing ("Let me show you something that, on most processors, would take a coffee break of instructions…").
+- **Chapter 12 (Optimization Mastery)**: Hook now opens with "Let me show you a loop that looks fine — until you realize you're paying for the same thing twice."
+
+### Code-Example Bug Fixes (HIGH)
+
+Found and fixed by code-validation pass with `pnut_ts` v1.51.7:
+
+- **Chapter 7 (CORDIC Magic) sprite rotation example**: Replaced invalid `vertex_ptr++` general-register post-increment (only **PTRA**/**PTRB** support `++`) with the idiomatic **PTRA**-based pattern plus explicit `sub ptra, #8` before the writeback.
+- **Chapter 13 (LUT Memory) SETQ2 example**: Corrected `rdlong $200, hub_table_ptr` (which exceeds the 9-bit destination field) to `rdlong $000, hub_table_ptr` with an explanation that the destination operand is the LUT offset, not the absolute address $200.
+
+### Code-Example Validation Infrastructure (MEDIUM)
+
+- Imported the improved `extract-and-validate.py` validator from the PASM2-manual sibling (uses `:error:` token detection instead of exit-code scanning — pnut_ts always exits 0 even on errors).
+- Extended the extractor to handle both ` ```pasm2 ` standard fences AND `::: pasm2`/`:::` Pandoc fenced-div wrappers (used heavily in this manual).
+- Extended the backup-file skip pattern to also match `-backup-` infix (catches `COMPLETE-OPUS-MASTER-backup-2025-12-06-pre-backport.md`).
+
+Result: 333 code blocks extracted, 266 pass (80%). The 67 remaining failures are dominated by pedagogical templates (placeholder mnemonics like `INSTR D, S`), Spin2 expressions needing PUB context, and 24 fragments in `CHAPTERS-7-16-ENHANCED.md` that contain regressions (see Dual-Master Analysis below).
+
+### Single-Source-of-Truth Consolidation (MEDIUM)
+
+Resolved the E.x.a dual-master drift finding after confirming via the production workspace that `COMPLETE-OPUS-MASTER.md` is the only file the PDF pipeline reads. Five orphaned legacy files moved to `opus-master/archived-2025/`:
+
+- `CHAPTERS-7-16-ENHANCED.md` (January 2025 staging file; content was merged into the canonical master but the standalone copy never received subsequent audit fixes — carried known regressions)
+- `README-CHAPTERS-7-16-ENHANCED.md` (companion README)
+- `COMBINED-COMPLETE-MASTER.md` (219-line never-completed stub)
+- `README-COMBINED-MASTER.md` (companion README)
+- `LABELS-SECTION-FOR-INSERT.md` (December 2025 staging snippet; content already integrated)
+
+Renamed `opus-master/README-SACRED.md` → `opus-master/README.md` for standard discoverability. Added `archived-2025/README.md` explaining each archived file's history.
+
+Validator updated to skip `archived-*` / `archive` / `legacy` / `deprecated` directories.
+
+### Additional Code-Example Fixes (HIGH)
+
+Two more bugs surfaced after the post-archive validation pass:
+
+- **Chapter 12 — REP optimization example** (~line 4434): `add sum, ptra++` is invalid PASM2 — ADD does not accept hub-address expressions (only **RDxxxx** / **WRxxxx** / a few other hub-access instructions do). Rewrote to use the canonical 2-instruction pattern: `rdlong val, ptra++` then `add sum, val`.
+- **Chapter 12 — Loop unrolling example** (~line 4508): Same `add sum, ptra++` bug. Same fix applied to both the looped and unrolled halves.
+
+Result: validation pass rate **184/222 = 83%** on canonical master, with all remaining failures classifiable as pedagogical templates, placeholder syntax, or wrapper artifacts.
+
+### Audit Artifacts
+
+- New: `AUDIT-PROCESS.md` at the manual folder root — reusable periodic-audit process document, copied from sibling manual.
+- New: `audit/periodic-audit-2026-05-22.md` — full periodic-audit findings report.
+- New: `audit/dual-master-analysis-2026-05-23.md` — drift evidence and archival recommendation.
+- New: `audit/dual-master-resolution-2026-05-23.md` — production-pipeline evidence confirming `COMPLETE-OPUS-MASTER.md` is canonical, with concrete archive plan.
+- New: `code-validation/extract-and-validate.py` + `code-validation/.gitignore` — pnut_ts validation infrastructure with `::: pasm2` Pandoc-div support and archived-directory skip.
+- New: `opus-master/archived-2025/` — historical legacy files preserved out of the production path.
+
+### Tier 4 — Advisory Notes (LOW)
+
+- **Chapter 3 — ALTx hub-exec compatibility note**: Added a sidetrack box at the end of the ALTD/ALTS section confirming that all 11 ALTx instructions (ALTI, ALTS, ALTD, ALTR, ALTB, ALTSN, ALTSB, ALTSW, ALTGN, ALTGB, ALTGW) work identically in cog-exec and hub-exec modes, so ALTx techniques learned here remain valid when readers reach Chapter 10.
+- **Chapter 12 — GETCT overflow Pitfall callout**: Added a ⚠️ Pitfall box after the "Profiling and Measurement" example explaining the ~21.5-second 32-bit CT wrap at 200 MHz, with the two correct strategies — 64-bit capture via `GETCT D WC` for upper word, or work-with-deltas using two's-complement subtraction.
+
+### Prior-Audit Minor Items Closed
+
+Verified and applied the three remaining minor items from the prior audit cycle that `FIX-TRACKING.md` marked `[x]` but had not been independently re-verified:
+
+- **UF-011 (WRLUT 32-bit constant)**: Found a real un-fixed bug at line 4614 — `wrlut #$12345678, #100` uses single `#` for a 32-bit value, which doesn't fit the 9-bit immediate field. Corrected to `wrlut ##$12345678, #100` (augmented 32-bit immediate). The `[x]` tracker mark was inaccurate.
+- **UF-012 (SETQ2 bulk LUT load syntax)**: Already resolved earlier in this audit by the Tier 3 SETQ2 example fix (changed `rdlong $200, ...` → `rdlong $000, ...` with an explanatory paragraph about the destination operand being the LUT offset, not the absolute address).
+- **Comment-style standardization**: Found three `//` C-style comments in the `::: antipattern` interrupt-demonstration block at line 3848-3852. Per project policy (now codified in `AUDIT-PROCESS.md` Dimension #14), PASM2/Spin2 manuals must use only native PASM2/Spin2 comment syntax even inside pseudocode and antipattern blocks. Converted all three `//` markers to `'` line comments.
+
+### Audit Process Document Enhancement
+
+Added **Dimension #14: Non-native comment-style leakage** to `AUDIT-PROCESS.md` (this manual *and* the sibling p2-assembly-language-manual copy). This dimension catches `//`, `/* */`, `;`, and `#`-as-comment markers in any code block — including pseudocode and antipattern blocks. PASM2 manual swept clean (its only `//` hits are legitimate Spin2 modulo-operator documentation, not comments).
+
+The dimension's rationale: a reader sees `// foo` and `' foo` interchangeably and learns that either is "comment-shaped"; when they later write real PASM2 code with `// my note`, they get a syntax error they can't explain. Mixed comment styles in a single-language manual are an anti-pattern.
+
+---
+
 ## v2.1.0 (2026-01-30)
 
 **Code Example Accuracy** - Relative jump offsets corrected for augmented instructions.
