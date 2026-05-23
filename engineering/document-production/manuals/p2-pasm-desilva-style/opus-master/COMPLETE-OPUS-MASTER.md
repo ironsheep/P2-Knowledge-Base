@@ -3173,7 +3173,7 @@ The **SETQ** instruction is your gateway to block transfers:
 ```
 :::
 
-The key insight: SETQ tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0.
+Here's the trick: SETQ tells the next hub instruction how many longs to transfer. The "-1" is because it's a count from 0 (yes, we'll trip over that off-by-one at least once — everyone does).
 
 ## The FIFO: Your Streaming Pipeline
 
@@ -3198,6 +3198,8 @@ stream_loop
 The beauty? The FIFO reads ahead automatically. While you're processing one value, it's already fetching the next. No hub timing slots to worry about!
 
 ## Writing Through the FIFO
+
+Reading was nice — writing is symmetric. We'll use **WRFAST** instead of **RDFAST**, and **WFLONG** instead of **RFLONG**, and that's it:
 
 ::: pasm2
 ```
@@ -3403,7 +3405,7 @@ Success Check: Output is filtered version of input
 
 ## Common Streaming Gotchas
 
-Watch out for these:
+Before you pull your hair out wondering why your transfer is one long short, or why your FIFO won't cooperate, skim these:
 
 1. **SETQ uses count-1** - For 16 longs, use `setq #15`, not `setq #16`
 
@@ -3424,7 +3426,7 @@ Let's talk speed:
 - **Random hub access**: 2-9 clocks per access
 - **Streamer to pins**: Up to sysclock/1 rate
 
-This is seriously fast. Most microcontrollers need dedicated DMA controllers to achieve what P2 does with simple instructions.
+Uff! That's seriously fast. Most microcontrollers need dedicated DMA controllers, peripheral coprocessors, and a stack of config registers to achieve what P2 does with two instructions. You're not paying for that DMA controller — it's already in the silicon.
 
 ## Real-World Example: Audio Buffer
 
@@ -3531,7 +3533,7 @@ The beauty? You can mix both in the same program! Sequential code in hub runs at
 
 ## How Hub Execution Works
 
-When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
+Let's peek behind the curtain. When the processor encounters a jump or call to a hub address (≥$400), it automatically switches to hub execution mode. The FIFO starts streaming instructions from hub memory:
 
 ::: pasm2
 ```
@@ -3595,7 +3597,7 @@ option_1_handler
 
 ## The Hub Execution FIFO
 
-The FIFO that makes hub execution possible is the same one used for streaming data. It reads ahead, keeping a buffer of upcoming instructions:
+You met the FIFO in the previous chapter as a data-streaming engine. Same hardware, different job here: it reads ahead, keeping a buffer of upcoming *instructions* ready for the COG. Think of it as a moving sidewalk for your code:
 
 ::: pasm2
 ```
@@ -3608,7 +3610,7 @@ hub_loop
 ```
 :::
 
-This read-ahead behavior means hub execution is often faster than the worst-case 9 clocks per instruction.
+This read-ahead behavior is the whole reason sequential hub code matches cog-exec speed — the FIFO is doing the waiting for you, in parallel with the COG running instructions it already prefetched.
 
 ## Mixing COG and Hub Code
 
@@ -3754,6 +3756,8 @@ loop_start
 :::
 
 ## Common Hub Execution Gotchas
+
+Before you cram everything into hub and call it a day, know these:
 
 1. **Speed variation** - Don't use hub execution for precise timing
 2. **FIFO conflicts** - Can't stream data while executing from hub
