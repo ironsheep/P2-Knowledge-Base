@@ -1,5 +1,49 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v2.3.0 (2026-05-23)
+
+**Voice Refresh Release** — Closes the F.2.a audit finding from v2.2.0 (Ch 7-16 voice drift) and a pair of cross-chapter structural inconsistencies surfaced while doing the voice work.
+
+### Voice Refresh, Chapters 7-16 (HIGH)
+
+The v2.2.0 audit's F.2.a finding noted that Ch 7-16 read more like a technical reference than the conversational DeSilva voice established in Ch 1-6. Re-measuring voice-marker density on the canonical master (rather than the cross-file comparison the original audit used) confirmed the gap was localized to *conversational micro-markers between section headers* — structural sections (Your Turn, What We've Learned, etc.) were comparable or higher in Ch 7-16, but prose connective tissue ("let's", "we'll", "Uff!", "Don't worry") was 73–100% lower.
+
+Per-chapter surgical voice touches added (no content rewriting):
+
+- **Ch 7 (CORDIC Magic)** — Removed a redundant restated-hook paragraph leftover from the v2.2.0 hook-strengthening pass, added three light voice touches.
+- **Ch 8 (Basic I/O)** — Five voice touches: TRIS-bits aside in the pin-direction explanation, "we'll meet a few specialized cousins" follow-up to the fundamental four, "yes, you'll usually reach for Smart Pins" framing for the bit-bang section, a determinism celebration, and a "Before you pull your hair out" lead-in for Common I/O Gotchas.
+- **Ch 9 (Streaming Data)** — Four voice touches: an off-by-one aside on the SETQ count semantics, a connective opener for the previously code-only "Writing Through the FIFO" section, a "Before you pull your hair out" lead-in for Common Streaming Gotchas, and an "Uff!" celebration on the performance-numbers conclusion.
+- **Ch 10 (Hub Execution)** — Four voice touches: "Let's peek behind the curtain" opener for How Hub Execution Works, a callback-to-Ch-9 framing for the Hub Execution FIFO section with a "moving sidewalk" metaphor, a clearer follow-up on what the FIFO read-ahead actually buys, and a voice lead-in for Common Hub Execution Gotchas.
+- **Ch 11 (Why No Interrupts?)** — Reviewed; no edits needed. The story-based opener, "Try that with interrupts. I'll wait. Actually, I won't," "Uff! Even writing interrupt code feels wrong on a Propeller!", and the 15-years-never-needed-interrupts personal note already establish this chapter as the voice-density high-water mark.
+- **Ch 12 (Optimization Mastery)** — Two light touches: "Before we hunt for clocks to save" lead-in for Understanding the Pipeline, "Before you rewrite everything in REP and SKIP" lead-in for Common Optimization Gotchas.
+- **Ch 13 (LUT Memory)** — Light touch (taste chapter): "Enough theory — let's see what people actually use the LUT for" opener for Practical Examples.
+- **Ch 14 (Smart Pins Orientation)** — Light touch (taste chapter): "Don't worry, you don't have to memorize all 32 mode bit-patterns" reassurance for Configuration Values Demystified.
+- **Ch 15 (Event-Driven Programming)** — Light touch (taste chapter): "Let's meet the cast" opener for The Four Selectable Events, "Time to put events to work" opener for Practical Examples.
+- **Ch 16 (Multi-COG Orchestration)** — Four voice touches: framing for the three Communication Patterns ("Eight processors running in parallel sounds wonderful — until you realize they need to talk to each other"), a communication-vs-synchronization connector for Synchronization Techniques with "16 hardware locks. They're tiny and they're fast" framing for Using Locks, a "Before you pull your hair out wondering why the eight-COG dream turned into a debugging nightmare" lead-in for Common Multi-COG Gotchas, and a "The hardware gives you eight processors. Whether your design survives the journey is up to you" lead-in for Design Principles.
+
+Post-refresh voice-marker density (Ch 7-16, per 1000 lines):
+
+| Marker          | Before  | After   | Ch 1-6 baseline |
+|-----------------|---------|---------|------------------|
+| "Uff!"          | 0.26    | 1.01    | 0.98 ✓ matched   |
+| "Let's"         | 1.83    | 3.03    | 5.90             |
+| "we'll"         | 0.00    | 0.50    | 3.93             |
+| "Don't worry"   | 0.00    | 0.50    | 0.98             |
+
+### Document-Wide Structural Consistency (HIGH)
+
+**Your Turn fence-syntax normalization** — Ch 1-12 used `:::yourturn` (no hyphen, 9 occurrences) while Ch 13-16 used `::: your-turn` (hyphenated, 7 occurrences). The active Lua filter (`p2kb-desilva-semantic.lua`, per the production `workspace/p2-pasm-desilva-style/request.json`) only maps `your-turn` → `dsyourturn` LaTeX environment — the 9 Ch 1-12 blocks were falling through as unstyled `<div class="yourturn">`. All 16 Your Turn blocks now use the canonical hyphenated form and render through the tcolorbox styling.
+
+**Chapter close-out trio added to Ch 13, 14, 15** — These three taste/appetizer chapters were missing the standard `## What We've Learned` / `## Coming Up Next` / `**Have Fun!**` sign-off pattern present in Ch 1-12 and Ch 16. Added brief, taste-chapter-appropriate versions of all three sections to each. Counts now uniform: 16 chapters / 16 WWL / 15 CUN (Ch 16 has "Your Journey Continues" instead, intentional) / 17 Have Fun! (1 per chapter + Epilogue).
+
+**Broken relative-file links removed** — Six `*Continue to [Chapter N: Title](NN-slug.md) →*` links in Ch 1-6 pointed to chapter files that no longer exist (legacy artifacts from the pre-consolidation era when each chapter lived in its own `.md` file). Removed — the `# Chapter N: Title` heading provides navigation, and Ch 7-12 never had these links anyway.
+
+### Method Note
+
+Re-measurement on the canonical master before editing confirmed the audit's qualitative finding while also showing that the original cross-file metric overstated the gap (it compared Ch 1-6 in one file vs Ch 7-16 in an archived legacy file with regressions). The actual gap was real but more localized than the original metric suggested, which is why the refresh leans on light targeted touches rather than wholesale rewrites.
+
+---
+
 ## v2.2.0 (2026-05-23)
 
 **Periodic Audit Release** — Style-guide conformance, hub-exec timing corrections, structural completeness for Chapters 4-6, and code-example validation infrastructure.
