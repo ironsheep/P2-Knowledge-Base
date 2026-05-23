@@ -4222,7 +4222,7 @@ Almost twice as fast! The secret? Understanding how P2 really works.
 
 ## Understanding the Pipeline
 
-P2 has a 2-stage pipeline:
+Before we hunt for clocks to save, let's understand where they go in the first place. P2 has a 2-stage pipeline:
 
 1. **Fetch** - Get next instruction
 2. **Execute** - Do the work
@@ -4534,6 +4534,8 @@ Sometimes removing the loop is faster. (Remember: `ptra++` only works with hub-a
 :::
 
 ## Common Optimization Gotchas
+
+Before you rewrite everything in REP and SKIP, a few sanity checks:
 
 1. **Premature optimization** - Get it working first, then optimize
 2. **Over-optimizing** - Sometimes clarity is worth 2 clocks
