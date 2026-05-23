@@ -1,5 +1,62 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v2.3.0 (2026-05-22)
+
+**Periodic Audit Release** — Absorbs ~4 months of PASM2 YAML corrections and closes a silent multitasking gap.
+
+### Critical Fix
+
+- **Inline PASM × Multitasking taskptr overlap** (directives.md, END section): Documented the previously-undocumented overlap between the multitasking taskptr table ($100..$11F) and the inline-PASM code area ($000..$11F). Programs using both inline PASM and multitasking could silently lose code space without compile-time warning.
+
+### Hub-Exec Timing Corrections
+
+Brought timing tables and prose in line with April 2026 YAML corrections (commits fbbd9ee, 96cf4e8 "Data-set-wide timing-claim corrections"):
+
+- **WRLONG, WRBYTE, WRWORD**: Timing now shows `3...10 / 3...20 †` (cog/LUT vs hub execution); Explanation prose updated accordingly.
+- **RET**: Timing now shows `4 / 13-20 †` with context-table footnote.
+- **JMP, JMPREL**: Timing now shows `4 / 13-20 †` with context-table footnote.
+- **Conditional branches** (J* event-jumps, JCT*, JATN, JFBW, JINT, JPAT, JQMT, JSE*, JX*, DJ*, TJ*, IJ*): Updated `2 or 4` rows to `2 or 4 / 2 or 13-20`. Each affected instructions-*.md file now opens with a "Conditional Jump Timing Convention" subsection explaining the notation.
+- **REP** (instructions-r.md): Rewrote the hub-exec paragraph from "NOT truly zero-overhead" framing to the corrected model: REP works in hub-exec, paying 13+ clocks per iteration for the hidden return-jump.
+
+### ALTx Family Hub-Exec Documentation
+
+- **chapter-06**: Added a "Hub-Exec Compatibility" note at the top of §6.6 ALTx Modified Addressing, documenting that all 11 ALTx instructions (ALTI, ALTS, ALTD, ALTR, ALTB, ALTSN, ALTSB, ALTSW, ALTGN, ALTGB, ALTGW) operate identically in cog-exec and hub-exec modes (per Chip Gracey clarification 2026-05-02).
+
+### Inline-PASM Variable vs Code Limit Clarification
+
+- **directives.md** (END section): Added a "Variable vs Code Limits in Inline PASM" subsection clarifying that the 16-long limit applies to variables only ($1E0..$1EF), while PASM code is buffered separately into cog registers starting at the ORG address (default $000), with up to 288 longs of code space.
+
+### Cross-Reference Integrity
+
+- Added `\hypertarget` anchors for 7 four-variant grouped instruction headings (BITC, FLTC, MUXC, NEGC, OUTC, SUMC, WRC), making per-variant anchor references (e.g. `[BITNZ](#bitnz)`) resolve correctly in PDF output.
+
+### Documentation Polish
+
+- **front-matter.md** P1-vs-P2 table: Updated instruction count from "~360" to "~380" to align with actual documented entry count.
+- **README.md** directory listing: Updated to reflect actual structure (6 chapters in Part I, 15 directives in directives.md, 10 appendices A–J in Part III).
+- **../creation-guide.md** §1.1: Corrected directive count from "10" to "15" to match current manual scope.
+- **directives.md** code example: Renamed user label `bc_vectors` to `dispatch_table` to avoid visual collision with the `bc_`-prefixed compiler-bytecode naming convention.
+- **chapter-01, chapter-05**: Replaced two unsourced "eliminates" capability claims with sourced/cross-referenced wording.
+
+### Code Example Validation (pnut_ts v1.51.7)
+
+Compiled every `pasm2` / `spin2` code block in the manual (348 total). Found and fixed **7 real bugs** in code examples:
+
+- `instructions-m.md` MUXQ comparison: replaced invalid 3-operand `and temp, source, mask` with the correct `mov temp, source` + `and temp, mask` sequence; updated "Traditional approach (3 instructions)" comment to "(4 instructions)".
+- `special-registers.md` PTRB example: renamed register `word` to `wval` to avoid collision with the WORD directive keyword.
+- `appendix-e-constants.md`: corrected six bare-immediate uses of 32-bit Spin2 constants by adding the `##` augmented-immediate prefix — `POSX`, `NEGX`, and `PI` references in `cmp`/`cmps`/`mov` instructions.
+- `appendix-e-constants.md`: replaced two P1 mnemonics that don't exist in P2 PASM2 — `mins` → `fles` (Force Less or Equal, Signed), `maxs` → `fges` (Force Greater or Equal, Signed).
+
+After fixes, 296 of 348 blocks (85%) compile clean. The remaining 52 are pedagogical fragments and syntax templates that cannot compile in isolation by design (placeholder mnemonics like `INSTR D, S`, FILE directive with placeholder filenames, "wrong example" demos in the Reserved Words appendix, etc.). Full breakdown and methodology in `code-validation/VALIDATION-REPORT.md`.
+
+### Audit Artifacts
+
+- New: `audit/periodic-audit-2026-05-22.md` — full periodic-audit findings report driving this release.
+- New: `AUDIT-PROCESS.md` at the manual folder root — reusable periodic-audit process document.
+- New: `code-validation/` folder — extractor script (`extract-and-validate.py`), per-example wrapped sources, results JSON, and the validation report.
+
+---
+
 ## v2.2.0 (2026-01-30)
 
 **Code Example Accuracy Release** - Compiler-verified code examples throughout.

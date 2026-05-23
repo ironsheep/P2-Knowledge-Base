@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large January 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.2\par}
+{\large\color{blue}Version 2.3\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -141,7 +141,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
 | Interrupts | None | 3 per COG |
-| Instructions | ~60 | ~360 |
+| Instructions | ~60 | ~380 |
 
 ¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
 

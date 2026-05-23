@@ -288,7 +288,7 @@ PTRB supports the same addressing modes as PTRA, with SCALE determined by instru
 ```pasm2
         mov     ptrb, ##hub_source      ' Set PTRB to source address
         rdlong  data, ptrb++            ' Read long, PTRB += 4 (SCALE=4)
-        rdword  word, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
+        rdword  wval, ptrb++            ' Read word, PTRB += 2 (SCALE=2)
         wrlong  data, ptrb[8]           ' Address: PTRB + (8 × 4) = PTRB+32
 
         ' COGINIT sets PTRB in launched cog

@@ -826,7 +826,7 @@ For a debug statement to produce output, both conditions must be met: the statem
 \item The P2 boots from RCFAST (\textasciitilde20 MHz) and detects boot source via pin pull-ups
 \item User code must configure the desired clock source after boot
 \item DEBUG provides serial output with formatters; can be disabled for production
-\item The 8-COG architecture often eliminates the need for interrupts
+\item The 8-COG architecture often removes the need for interrupts (see Chapter 4: each COG runs deterministically; dedicate a COG to a task instead of interrupting one)
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
 ```

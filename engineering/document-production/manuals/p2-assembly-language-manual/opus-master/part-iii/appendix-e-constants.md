@@ -103,12 +103,12 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for negative underflow
-                cmps    value, NEGX     wc      ' Check if below min negative
+                cmps    value, ##NEGX   wc      ' Check if below min negative
         if_c    jmp     #underflow              ' Jump if underflow
 
 ' Using NEGX as lower limit
-                mov     limit, NEGX             ' Set limit to max negative
-                maxs    value, limit            ' Clamp to not go below NEGX
+                mov     limit, ##NEGX           ' Set limit to max negative
+                fges    value, limit            ' Clamp to not go below NEGX
 ```
 
 #### Notes
@@ -144,12 +144,12 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for positive overflow
-                cmp     value, POSX     wc      ' Check if exceeds max positive
+                cmp     value, ##POSX   wc      ' Check if exceeds max positive
         if_nc   jmp     #overflow               ' Jump if overflow
 
 ' Using POSX as upper limit
-                mov     limit, POSX             ' Set limit to max positive
-                mins    value, limit            ' Clamp to not exceed POSX
+                mov     limit, ##POSX           ' Set limit to max positive
+                fles    value, limit            ' Clamp to not exceed POSX
 ```
 
 #### Notes
@@ -187,12 +187,12 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
 #### Usage
 ```pasm2
 ' Using PI with CORDIC rotation
-        mov     angle, PI           ' Load PI constant
+        mov     angle, ##PI         ' Load PI constant
         shr     angle, #1           ' Divide by 2 for PI/2 (90 degrees)
         qrotate angle, radius       ' Rotate by PI/2 radians
 
 ' Converting radians to degrees using PI
-        mov     x, PI               ' Start with PI
+        mov     x, ##PI             ' Start with PI
         qmul    x, ##180            ' Multiply PI by 180
         qdiv    x, ##$80000000      ' Divide by 2³¹ for scaling
         getqx   degrees             ' Get degrees conversion factor

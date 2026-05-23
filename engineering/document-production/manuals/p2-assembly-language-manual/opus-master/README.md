@@ -14,27 +14,32 @@
 opus-master/
 ├── README.md                           # This file
 ├── front-matter.md                     # Title, credits, how to use this manual
-├── part-i/                             # Architectural Foundation (5 chapters)
+├── part-i/                             # Architectural Foundation (6 chapters)
 │   ├── chapter-01-execution-model.md   # The P2 Execution Model
 │   ├── chapter-02-instruction-format.md # The Instruction Format
 │   ├── chapter-03-flags.md             # Flags and Conditional Execution
 │   ├── chapter-04-timing.md            # Timing and Determinism
-│   └── chapter-05-hardware.md          # Special Hardware Overview
+│   ├── chapter-05-hardware.md          # Special Hardware Overview
+│   └── chapter-06-address-modes.md     # Address Modes
 ├── part-ii/                            # Language Reference (380 entries)
 │   ├── instructions-a.md               # Instructions starting with A
 │   ├── instructions-b.md               # Instructions starting with B
 │   ├── ... (alphabetical files)        # Continue through alphabet
 │   ├── instructions-z.md               # Instructions starting with Z
-│   ├── directives.md                   # Assembly directives (13 entries)
-│   ├── constants.md                    # Predefined constants (7 entries)
-│   └── special-registers.md            # Special registers (16 entries)
-└── part-iii/                           # Appendices (6 appendices)
+│   ├── directives.md                   # Assembly directives (15 entries)
+│   ├── instruction-categories.md       # Instruction category overview
+│   └── special-registers.md            # Special registers
+└── part-iii/                           # Appendices (10 appendices)
     ├── appendix-a-encoding-table.md    # Instruction Encoding Master Table
-    ├── appendix-b-categorical-index.md # Categorical Instruction Index
-    ├── appendix-c-special-registers.md # Special Registers Reference
-    ├── appendix-d-constants.md         # Predefined Constants
-    ├── appendix-e-reserved-words.md    # Reserved Words
-    └── appendix-f-opcodes.md           # Opcode Bit Patterns
+    ├── appendix-b-condition-codes.md   # Condition Codes
+    ├── appendix-c-categorical-index.md # Categorical Instruction Index
+    ├── appendix-d-special-registers.md # Special Registers Reference
+    ├── appendix-e-constants.md         # Predefined Constants
+    ├── appendix-f-smartpin-constants.md # Smart Pin Constants
+    ├── appendix-g-streamer-constants.md # Streamer Constants
+    ├── appendix-h-reserved-words.md    # Reserved Words
+    ├── appendix-i-glossary.md          # Glossary
+    └── appendix-j-known-bugs.md        # Known Bugs
 ```
 
 ---

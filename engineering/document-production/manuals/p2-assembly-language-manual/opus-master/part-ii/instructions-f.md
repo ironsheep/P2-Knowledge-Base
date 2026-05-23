@@ -199,6 +199,8 @@ Float with Output Preset by Flag
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
+\hypertarget{fltnc}{}\hypertarget{fltz}{}\hypertarget{fltnz}{}
+
 **FLTC**  *{#}Dest*  **{WCZ}**\
 **FLTNC**  *{#}Dest*  **{WCZ}**\
 **FLTZ**  *{#}Dest*  **{WCZ}**\

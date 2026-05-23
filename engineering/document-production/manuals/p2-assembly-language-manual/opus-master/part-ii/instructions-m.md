@@ -517,6 +517,8 @@ Multiplex Flag To Bits
 [Arithmetic Operations](#arithmetic-operations) - Sets selected bits to a flag value based on mask.
 :::
 
+\hypertarget{muxnc}{}\hypertarget{muxz}{}\hypertarget{muxnz}{}
+
 **MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**\
 **MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**\
@@ -696,9 +698,10 @@ MUXQ must be preceded by SETQ to load the mask into Q:
 This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
 
 ```pasm2
-        ' Traditional approach (3 instructions):
-        andn    dest, mask              ' Clear masked bits
-        and     temp, source, mask      ' Extract source bits
+        ' Traditional approach (4 instructions):
+        mov     temp, source            ' Copy source
+        and     temp, mask              ' Extract source bits
+        andn    dest, mask              ' Clear masked bits in dest
         or      dest, temp              ' Merge into dest
 
         ' MUXQ approach (2 instructions):

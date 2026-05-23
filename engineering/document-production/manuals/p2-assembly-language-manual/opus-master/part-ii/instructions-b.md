@@ -11,6 +11,8 @@ Set Bit to Flag State
 [Arithmetic Operations](#arithmetic-operations) - Sets bits to match flag state.
 :::
 
+\hypertarget{bitnc}{}\hypertarget{bitz}{}\hypertarget{bitnz}{}
+
 **BITC**  *Dest, {#}Src*  **{WCZ}**\
 **BITNC**  *Dest, {#}Src*  **{WCZ}**\
 **BITZ**  *Dest, {#}Src*  **{WCZ}**\

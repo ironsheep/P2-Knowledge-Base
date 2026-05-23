@@ -98,6 +98,8 @@ Output By Flag State
 [Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
+\hypertarget{outnc}{}\hypertarget{outz}{}\hypertarget{outnz}{}
+
 **OUTC**  *{#}Dest*  **{WCZ}**\
 **OUTNC**  *{#}Dest*  **{WCZ}**\
 **OUTZ**  *{#}Dest*  **{WCZ}**\

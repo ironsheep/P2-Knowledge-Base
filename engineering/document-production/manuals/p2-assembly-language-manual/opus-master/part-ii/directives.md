@@ -257,7 +257,7 @@ A DAT block can switch between COG and Hub modes multiple times:
 ```pasm2
 DAT
         ORGH                    ' Hub mode: bytecode tables
-bc_vectors
+dispatch_table
         WORD    @routine1
         WORD    @routine2
         ALIGNL
@@ -1348,6 +1348,23 @@ PUB Example() | value, result
 - Inline assembly is limited in scope—complex PASM routines belong in DAT blocks
 - Local variables declared in the method are accessible by name within inline PASM
 - END does not apply to DAT blocks—DAT assembly has no explicit terminator
+
+#### Variable vs Code Limits in Inline PASM
+
+The Spin2 interpreter handles inline PASM in two separate copy operations:
+
+1. The first 16 long variables (method parameters, result, and locals) are copied to cog registers `$1E0..$1EF`. **The 16-long limit applies to variables only — not to the PASM code itself.**
+2. The PASM code is copied separately into cog registers starting at the ORG address (default `$000`).
+
+With no multitasking in use, the inline code area is `$000..$11F` — 288 longs of code space, which is far more than the variable limit suggests.
+
+#### Multitasking and Inline Code Space Overlap
+
+When a cog uses Spin2 multitasking, the interpreter maintains a taskptr table in cog registers `$100..$11F`. The taskptr for task 31 occupies `$11F`, task 30 occupies `$11E`, and so on, filling downward. **This range is the upper portion of the inline-PASM code area** (`$000..$11F`) — multitasking and large inline-PASM blocks compete for the same space.
+
+Programs using fewer than 32 software tasks leave the *lower* portion of `$100..$11F` free for inline code. Programs using all 32 tasks consume the full table. Plan inline-PASM size accordingly, or place large inline blocks in `ORGH` (hub-exec mode) to avoid this conflict entirely.
+
+⚠️ **Pitfall:** Programs using both inline PASM and multitasking can silently lose code space without compile-time warning. If an inline block compiles but behaves unexpectedly with multitasking enabled, suspect taskptr-table overlap and move the block to `ORGH`.
 
 💡 **Tip:** Keep inline assembly short and focused. For complex PASM routines, define them in a DAT block and launch with COGINIT or CALL from hub-exec code.
 

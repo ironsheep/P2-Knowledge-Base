@@ -452,7 +452,7 @@ REP blocks cannot be nested. The P2 hardware uses a single internal counter for 
 
 - **Branches cancel REP:** Any branch instruction (JMP, CALL, DJNZ, TJZ, etc.) executed within the repeated block immediately cancels REP activity. The branch executes normally, but repetition stops. This includes conditional branches that are taken.
 
-- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it is NOT truly zero-overhead. The hardware executes a hidden jump to return to the top of the repeated instructions. For true zero-overhead looping, execute REP from COG or LUT memory.
+- **Hub memory overhead:** When REP executes from Hub memory (ORGH section), it remains functional but is no longer zero-overhead: each iteration's hidden return-jump pays the hub-branch refill cost (13+ clocks). For zero-overhead inner loops, execute REP from COG or LUT memory; for non-time-critical loops, hub-exec REP works correctly with the documented per-iteration penalty.
 
 **Forbidden instructions in REP blocks:**
 - Branch instructions: JMP, CALL, CALLA, CALLB, CALLD
@@ -656,7 +656,14 @@ Return From Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 |
+| EEEE | 1101011 | CZ1 | 000000000 | 000101101 | K[31] | K[30] | --- | 4 / 13-20 † |
+
+† **Timing varies by execution context:**
+
+| Context | Clocks |
+|:--------|:------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
@@ -669,7 +676,7 @@ If the WC or WCZ effect is specified, the C flag is restored from K[31].
 
 If the WZ or WCZ effect is specified, the Z flag is restored from K[30].
 
-The operation takes 4 cycles minimum, with variable timing depending on Hub access if the return location is in Hub memory (13-20 cycles).
+The operation takes 4 cycles in cog/LUT execution, or 13–20 cycles in hub execution (the hub-branch refill cost when the return target resides in hub memory).
 
 The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions.
 

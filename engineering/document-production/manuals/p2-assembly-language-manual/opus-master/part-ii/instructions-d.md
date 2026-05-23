@@ -2,6 +2,15 @@
 
 This section contains all PASM2 instructions beginning with the letter D.
 
+**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+
+| Context | Clocks when taken |
+|:--------|:----------------:|
+| COG / LUT execution | 4 |
+| Hub execution | 13...20 |
+
+So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+
 <!-- DEBUG instruction removed - will be covered in a dedicated narrative chapter with examples -->
 
 
@@ -350,7 +359,7 @@ Decrement and Jump If Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
+| EEEE | 1011011 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [DJNF](#djnf), [DJZ](#djz), [DJNZ](#djnz)
@@ -384,7 +393,7 @@ Decrement and Jump If Not Full
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 |
+| EEEE | 1011011 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 or 4 / 2 or 13-20 |
 
 
 **Related:** [DJF](#djf), [DJZ](#djz), [DJNZ](#djnz)
@@ -421,8 +430,8 @@ Decrement and Jump If Zero {#djnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
-| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 |
+| EEEE | 1011011 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
+| EEEE | 1011011 | 01I | DDDDDDDDD | SSSSSSSSS | --- | --- | D + PC* | 2 or 4 / 2 or 13-20 |
 
 ```{=latex}
 *PC is written only when the jump condition is met.

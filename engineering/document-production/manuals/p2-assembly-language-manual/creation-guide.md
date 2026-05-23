@@ -14,7 +14,7 @@ This manual serves as the **definitive source of truth** for the Propeller 2 ass
 **This document IS:**
 - A complete technical reference for the PASM2 language:
   - **359 instructions** (actual executable opcodes)
-  - **10 directives** (ORG, BYTE, WORD, LONG, RES, FIT, etc.)
+  - **15 directives** (ORG, ORGF, ORGH, BYTE, WORD, LONG, FILE, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES, END)
   - **6 constants** (TRUE, FALSE, PI, etc.)
   - **Special registers** (DIRA, DIRB, INA, INB, OUTA, OUTB, etc.)
 - The authoritative source when conflicts exist between older documents
@@ -71,7 +71,7 @@ This manual replaces and enhances the partial Parallax draft:
 - **Location:** `/engineering/knowledge-base/P2/language/pasm2/`
 - **Count:** 376 YAML files total:
   - 359 instructions
-  - 10 directives (ORG, ORGH, BYTE, WORD, LONG, RES, FIT, ALIGNL, ALIGNW, HUBEXEC)
+  - 15 directives (ORG, ORGF, ORGH, BYTE, WORD, LONG, FILE, BYTEFIT, WORDFIT, ALIGNL, ALIGNW, DITTO, FIT, RES, END)
   - 6 constants (TRUE, FALSE, PI, NEGX, POSX, COGEXEC)
   - 1 special registers reference file
 - **Status:** Complete language element inventory with structured data

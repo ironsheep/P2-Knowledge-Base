@@ -50,6 +50,8 @@ Conditional Negate
 [Arithmetic Operations](#arithmetic-operations) - Conditionally negates a value based on flag state.
 :::
 
+\hypertarget{negnc}{}\hypertarget{negz}{}\hypertarget{negnz}{}
+
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**\
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
 

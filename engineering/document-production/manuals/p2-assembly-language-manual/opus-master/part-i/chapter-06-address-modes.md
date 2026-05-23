@@ -460,6 +460,8 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 
 The ALT instructions modify how the following instruction interprets its operands, enabling computed addresses and self-modifying code patterns.
 
+**Hub-Exec Compatibility:** All ALTx instructions (ALTI, ALTS, ALTD, ALTR, ALTB, ALTSN, ALTSB, ALTSW, ALTGN, ALTGB, ALTGW) operate identically in cog-exec and hub-exec modes. The ALTx mechanism acts on the next pipelined instruction regardless of its source (cog/LUT memory or the hub-prefetch FIFO), enabling dynamic register-substitution patterns in hub-resident code blocks.
+
 ### 6.6.1 ALTD (Alter Destination)
 
 ALTD modifies the destination field of the next instruction:
