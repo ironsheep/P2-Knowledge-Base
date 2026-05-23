@@ -29,11 +29,15 @@ _build/
 *.tmp
 *.bak
 *.backup
+*.backup.*
 .~*
 
 # Backup directories
 **/backups/
 backups/
+
+# Roving central-skills staging area (carried between repos; not project-versioned)
+central-skills-staging/
 
 # Log files
 *.log
@@ -55,7 +59,8 @@ import/
 /engineering/ingestion/external-inputs/source-code/obex-projects/
 
 # Claude's private reference materials (not versioned)
-.claude/
+.claude/*
+!.claude/skills
 CLAUDE.md
 .ai-manifest.json
 
