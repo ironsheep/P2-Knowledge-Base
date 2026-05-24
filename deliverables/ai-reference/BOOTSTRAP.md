@@ -1,7 +1,8 @@
 # P2 Knowledge Base - AI Bootstrap
 
 **Repository:** https://github.com/ironsheep/P2-Knowledge-Base
-**Version:** 3.2
+
+> **MCP-capable agents:** Consider the [P2 Knowledge Base MCP](https://github.com/ironsheep/P2-Knowledge-Base-MCP/blob/main/INSTALL.md) instead — native tool calls to query the KB directly, no file downloads, less context overhead.
 
 ---
 

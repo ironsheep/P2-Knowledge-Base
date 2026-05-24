@@ -1,0 +1,72 @@
+name: Halt and Fault Response Idioms
+description: PASM2 patterns for halting the chip or responding to detected fault conditions
+category: fault_response
+frequency: medium
+
+idioms:
+  - name: hubset_halt_via_dead_xi
+    pattern: "hubset #%0010"
+    description: |
+      Switch the system clock source to XI (external crystal/oscillator pin).
+      On boards where no external clock signal is present on XI, this halts
+      the chip immediately — no further instructions execute until the next
+      hardware reset. Used as a fail-safe response to corruption or integrity-
+      check failure.
+    examples:
+      - "hubset #%0010    ' switch to XI source; if XI is dead, chip halts"
+    context: |
+      Used by the production flash loader on application checksum failure
+      to ensure errant code cannot execute. Pair with FLTL on outputs (see
+      pin_float_on_fault below) to also tri-state pins before halting.
+    caveats:
+      - "Requires a hardware reset to recover — no software-issued recovery path exists"
+      - "If a working external clock IS present on XI, the chip keeps running on it — NOT a halt"
+      - "This is not a HUBSET feature; it is creative exploitation of clock-source switching to a known-dead source"
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 276 (the stop label)
+    related_instruction: language/pasm2/hubset.yaml
+
+  - name: pin_float_on_fault
+    pattern: "fltl #{base_pin} addpins {count}"
+    description: |
+      Float a range of output pins as part of a fault response, releasing
+      drive on a multi-pin interface (e.g., SPI bus) in a single instruction.
+      ADDPINS N affects N+1 contiguous pins; FLTL transitions DIR low for
+      the whole range, leaving the pins in high-impedance.
+    examples:
+      - "fltl #spi_di addpins 2    ' float spi_di, spi_ck, spi_cs together (3 pins)"
+    context: |
+      Used as the first step in fault response — release drive on
+      external interfaces before halting the chip. The single-instruction
+      multi-pin float ensures simultaneous release with no inter-pin
+      timing window.
+    related_instruction: language/spin2/operators/op_ADDPINS.yaml
+    related_idiom: language/pasm2/idioms/pin-control.yaml
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+
+  - name: float_then_halt_sequence
+    pattern: |
+      fltl #{interface_base} addpins {pin_count}
+      hubset #%0010
+    description: |
+      Canonical two-instruction fault response: release drive on an
+      external interface, then halt the chip. Order matters — float
+      pins BEFORE killing the clock so the smart pin / streamer state
+      is allowed to settle into the floated state before sysclk stops.
+    examples:
+      - |
+        ' On checksum failure in flash loader:
+        fltl   #spi_di addpins 2    ' float all 3 SPI output pins
+        hubset #%0010               ' halt
+    context: |
+      The full fail-safe halt as implemented in the production flash
+      loader. Use this pattern when a detected integrity failure means
+      no further code should execute and no external interface should
+      remain driven.
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 275-276
+
+related:
+  - language/pasm2/hubset.yaml
+  - language/spin2/operators/op_ADDPINS.yaml
+  - language/pasm2/idioms/pin-control.yaml
+  - language/pasm2/fltl.yaml
+  - code-examples/flash-loader-case-study.yaml

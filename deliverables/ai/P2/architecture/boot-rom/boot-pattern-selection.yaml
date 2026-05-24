@@ -1,0 +1,99 @@
+# Boot Pattern Selection — P59-P61 Pin Pattern to Boot Source Mapping
+# Sources:
+#   - Hardware Manual 2022-11-01 (boot pattern table — primary, authoritative)
+#     via engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md
+#   - engineering/ingestion/sources/edge-standard-module/ (Edge DIP-switch wiring)
+#   - engineering/ingestion/sources/edge-32mb-module/ (Edge 32MB DIP-switch wiring)
+
+component: boot_pattern_selection
+category: boot_rom
+description: |
+  On every reset/power-up, the P2 boot ROM reads P59, P60, and P61 as a
+  3-state pattern (each pin can be float / pull-up / pull-down). The
+  combined pattern selects one of six documented boot procedures. After
+  the bootloader chooses a source, these pins take on their second roles
+  (serial RX/TX or SPI flash interface), and after the user application
+  starts they become general-purpose I/O.
+
+# State notation
+pin_state_legend:
+  hardware_manual_symbols: "ƒ = float, ⇧ = pull-up, ⇩ = pull-down, ⨯ = don't care"
+  plain_text_used_below: "float / up / down / any"
+
+# THE AUTHORITATIVE TABLE — Hardware Manual 2022-11-01
+boot_pattern_table:
+  source: "Hardware Manual 2022-11-01"
+  patterns:
+    - p61: float
+      p60: float
+      p59: float
+      boot_procedure: "Program from serial within 60 s window"
+      fallback: "(this IS the default)"
+
+    - p61: any
+      p60: any
+      p59: up
+      boot_procedure: "Program from serial within 60 s window; no flash or microSD card boot"
+      fallback: "Serial only"
+
+    - p61: up
+      p60: any
+      p59: float
+      boot_procedure: "Program from serial within 100 ms, OR boot from flash"
+      fallback: "If flash fails: serial 60 s"
+
+    - p61: up
+      p60: any
+      p59: down
+      boot_procedure: "Fast boot from flash; no serial window"
+      fallback: "If flash fails: shutdown"
+
+    - p61: float_or_down
+      p60: up
+      p59: float
+      boot_procedure: "Boot from microSD card"
+      fallback: "If SD fails: serial 60 s"
+
+    - p61: float_or_down
+      p60: up
+      p59: down
+      boot_procedure: "Boot from microSD card"
+      fallback: "If SD fails: shutdown"
+
+# Pins serve multiple roles in sequence
+pin_triple_duty:
+  description: "P59-P61 serve up to three roles in sequence during each reset cycle"
+  roles:
+    - role_1: "Boot pattern selector (read once during ~5ms boot window)"
+    - role_2: "SPI flash interface (only if flash boot is selected): P61=CS, P60=CK, P59=DI, P58=DO"
+    - role_3: "General-purpose I/O (after user code starts)"
+  custom_board_implication: "Custom boards needing flash boot must wire P58-P61 to SPI flash AND provide the boot-time pull-ups; no conflict because the boot pattern is sampled before the flash interface activates"
+
+# Parallax Edge module switch implementation
+edge_module_switch_mapping:
+  source: "edge-standard-module and edge-32mb-module narratives"
+  switchable:
+    p61:
+      switch_label: "FLASH"
+      on: "P61 pulled up (enables flash-priority patterns)"
+      off: "P61 floating"
+    p59:
+      switch_pair: "△ (up) and ▽ (down)"
+      both_off: "P59 floating"
+      up_on: "P59 pulled up"
+      down_on: "P59 pulled down"
+      warning: "Switching BOTH △ and ▽ ON creates a contradiction — only ONE should be ON"
+  not_directly_switchable:
+    p60:
+      verification_pending: |
+        How the Edge module asserts the P60 pull-up needed for SD boot
+        is not cleanly extractable from PDF-derived narratives we have.
+        Likely tied to SD card socket presence-detect or one of the SD
+        signal lines. Verify via the Edge schematic PDF or on hardware.
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/boot-rom/sd-card-boot.yaml
+  - architecture/serial_loader.yaml

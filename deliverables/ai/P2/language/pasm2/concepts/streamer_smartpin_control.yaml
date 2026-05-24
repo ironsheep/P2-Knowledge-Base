@@ -346,7 +346,65 @@ coordination:
       Use them on different pins - e.g., smart pins for SPI protocol pins,
       streamer for hub FIFO data transfer on separate pin groups.
     see_also: "architecture/smart_pins.yaml pin_output_hierarchy section"
-    
+
+  bit_edge_lockstep:
+    rule: |
+      When pairing a P_TRANSITION smart pin (clock) with a streamer
+      (data) for SPI-style synchronous I/O, the bit rate and edge rate
+      must satisfy:
+        bits_per_streamer_clk = 2^32 / SETXFRQ_value
+        sysclks_per_SCK_edge  = WXPIN_value
+      For lockstep at sysclk/2 SPI:
+        SETXFRQ = $4000_0000 (= sysclk/2 bit rate)
+        WXPIN   = 1          (= 1 sysclk between SCK edges)
+        → 1 streamer bit = 2 sysclks = 1 full SCK cycle (2 edges). Lockstep.
+      Halving the SCK rate (WXPIN = 2) MUST be matched by halving the
+      streamer NCO (SETXFRQ = $2000_0000), or bits will be silently
+      dropped or duplicated.
+    worked_examples: |
+      ' sysclk/2 SPI (max-rate single-bit SPI)
+      setxfrq ##$4000_0000     ' streamer: 1 bit per 2 sysclks
+      wxpin   #1, #SCK_PIN     ' smart pin: 1 sysclk between SCK edges
+
+      ' sysclk/4 SPI (half-rate)
+      setxfrq ##$2000_0000     ' streamer: 1 bit per 4 sysclks
+      wxpin   #2, #SCK_PIN     ' smart pin: 2 sysclks between SCK edges
+    authority: "GOLDEN — these specific values are what the production flash loader uses on every shipping P2; lockstep is silicon-validated"
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 100-107, 246
+
+  alignment_pad:
+    rule: |
+      When the streamer SAMPLES an input pin (e.g., MISO/spi_do) that is
+      driven by a remote device clocked by our P_TRANSITION smart pin,
+      a 3-clock WAITX between starting the SCK clock and starting the
+      streamer aligns the streamer's first sample with the middle of
+      the first valid bit on the input.
+    code: |
+      wypin   bit_count_doubled, #SCK_PIN  ' start SCK transitions
+      waitx   #3                           ' pipeline alignment pad
+      xinit   input_streamer_mode, #0      ' streamer begins sampling
+      waitxfi
+    timing_theory: |
+      WYPIN takes 2 sysclks to take effect on the smart pin; XINIT also
+      takes 2 sysclks to engage the streamer. A WAITX of 3 sysclks
+      empirically pads the pipeline so the streamer's first read happens
+      AFTER the flash has presented a fresh bit on the SCK edge.
+    authority: |
+      The PATTERN (waitx between wypin and xinit) is GOLDEN — production-
+      validated by the flash loader on every shipping P2.
+      The specific value of 3 is GOLDEN at the SCK/streamer rates in
+      bit_edge_lockstep above; this value would change at different rates.
+      The TIMING THEORY (why exactly 3) is INTERPRETIVE — our cycle-accounting
+      explanation is plausible given that XINIT and WYPIN are both
+      documented as 2-cycle instructions, but the empirical correctness of
+      "3" is the load-bearing fact.
+    rate_dependence: |
+      The 3-clock pad is correct for the SCK rate and NCO setup in
+      bit_edge_lockstep above. Different SCK rates may need different
+      pad values — verify with a logic analyzer if you change either
+      WXPIN or SETXFRQ.
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 259
+
   multi_pin_sync:
     - "Configure all pins first"
     - "Use DIRH in sequence to start"
@@ -401,6 +459,15 @@ related:
   - language/spin2/concepts/timing_operations.yaml
   - language/spin2/methods/getct.yaml
   - language/spin2/methods/getms.yaml
+  - language/pasm2/xinit.yaml
+  - language/pasm2/setxfrq.yaml
+  - language/pasm2/rdfast.yaml
+  - language/pasm2/wrfast.yaml
+  - architecture/streamer/_index.yaml
+  - architecture/smart-pins/smart-pin-00101-transition-output.yaml
+  - architecture/smart-pins/spi-implementation-guide.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - code-examples/flash-loader-case-study.yaml
 
 protocol_client_code_note: |
   This page covers the smart-pin / streamer side of protocol implementation.

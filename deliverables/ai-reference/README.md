@@ -4,7 +4,15 @@ This directory contains the P2 Knowledge Base packaged for AI consumption.
 
 ## Quick Start
 
-**[→ BOOTSTRAP.md](BOOTSTRAP.md)** - Single-command setup for AI assistants
+### ⭐ Best experience: P2 Knowledge Base MCP
+
+For Claude Code, Claude Desktop, and other agents that support the Model Context Protocol, install the **[P2 Knowledge Base MCP](https://github.com/ironsheep/P2-Knowledge-Base-MCP)** — native tool calls to query the KB directly, no file downloads, always current.
+
+**[→ Install instructions](https://github.com/ironsheep/P2-Knowledge-Base-MCP/blob/main/INSTALL.md)**
+
+### Without MCP support
+
+**[→ BOOTSTRAP.md](BOOTSTRAP.md)** - Single-command fetch-script setup for AI assistants
 
 ## Structure
 
@@ -20,7 +28,7 @@ ai-reference/
 
 ## For AI Assistants
 
-### Setup (v3.2)
+### Setup
 
 Fetch and follow: `deliverables/ai-reference/BOOTSTRAP.md`
 
@@ -71,6 +79,3 @@ git checkout v2.0.0  # Access specific release
 Official release packages are available on GitHub:
 https://github.com/ironsheep/P2-Knowledge-Base/releases
 
----
-
-*Version 3.2 - Key-based access system*

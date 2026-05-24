@@ -1,7 +1,75 @@
 operator: "ADDPINS"
 type: operator
-description: |
-  Add pin count to pin number
 category: Pin
+description: |
+  Encodes a pin-range count into a pin operand for use with pin
+  instructions that accept ranges (FLTL, FLTH, DRVH, DRVL, DIRH, DIRL,
+  OUTH, OUTL, etc.). The result is an operand value where bits [5:0]
+  are the base pin number and bits [10:6] are the additional-pin count.
+  Pin instructions that decode this operand apply to (count + 1)
+  contiguous pins starting at the base pin.
+
+encoding:
+  formula: "base_pin + (count << 6)"
+  base_pin_bits: "[5:0] — pin number 0..63"
+  count_bits: "[10:6] (5 bits) — additional-pin count; value N means N+1 total pins affected"
+  pins_affected: "count + 1 contiguous pins, starting at base_pin"
+
 examples:
-  - "pin_range := start_pin ADDPINS pin_count"
+  - syntax: "FLTL #spi_di ADDPINS 2"
+    pasm2_form: "fltl #spi_di addpins 2"
+    spin2_form: "PINFLOAT(spi_di ADDPINS 2)"
+    description: |
+      Floats three contiguous pins in one instruction. If spi_di is pin 59,
+      then ADDPINS 2 means "base + 0", "base + 1", "base + 2" → pins 59,
+      60, 61. The single instruction floats the entire 3-pin SPI bus
+      simultaneously.
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+
+  - syntax: "DRVH #LED_BASE ADDPINS 7"
+    pasm2_form: "drvh #LED_BASE addpins 7"
+    spin2_form: "PINHIGH(LED_BASE ADDPINS 7)"
+    description: |
+      Drive 8 contiguous pins high in one instruction. ADDPINS 7 means
+      "base + 0" through "base + 7", total 8 pins.
+
+  - syntax: "DIRH #data_bus ADDPINS 7"
+    description: |
+      Set 8 contiguous pins as outputs in one instruction. Useful for
+      bus-style I/O.
+
+constraints:
+  - "Range cannot cross a 32-pin port boundary (wraps within the same group of 32)"
+  - "9-bit immediate operand encoding limits ADDPINS to 7 with #base syntax; for ranges 8-31, use ##base ADDPINS N (compiler emits AUGD)"
+  - "Counting is INCLUSIVE: ADDPINS N affects N+1 pins (not N pins)"
+  - "The base pin must be specified as the LOWEST pin in the range; ADDPINS extends upward"
+
+usage_pattern:
+  when_to_use:
+    - "Operations on a contiguous pin group (parallel bus, multi-bit signal)"
+    - "Simultaneous state changes across multiple pins (no inter-pin timing skew)"
+    - "Fault response that needs to release a multi-pin interface atomically"
+  when_not_to_use:
+    - "Non-contiguous pin sets — ADDPINS cannot skip pins; use separate instructions or pin masks"
+    - "Single-pin operations — ADDPINS 0 affects 1 pin but adds no value over a plain pin operand"
+
+related:
+  - language/pasm2/fltl.yaml
+  - language/pasm2/flth.yaml
+  - language/pasm2/drvh.yaml
+  - language/pasm2/drvl.yaml
+  - language/pasm2/dirh.yaml
+  - language/pasm2/dirl.yaml
+  - language/pasm2/outh.yaml
+  - language/pasm2/outl.yaml
+  - language/pasm2/idioms/pin-control.yaml
+  - language/pasm2/idioms/halt-and-fault-response.yaml
+  - code-examples/flash-loader-case-study.yaml
+
+search_keywords:
+  - addpins
+  - pin range
+  - multi-pin
+  - pin group
+  - float pins
+  - drive pins

@@ -27,3 +27,11 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.884693'
 category: Miscellaneous
 oneliner: Set Q to D
+
+related:
+  - language/pasm2/setq2.yaml
+  - language/pasm2/rdlong.yaml
+  - language/pasm2/wrlong.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
+  - language/pasm2/idioms/hub-memory.yaml
+  - code-examples/flash-loader-case-study.yaml

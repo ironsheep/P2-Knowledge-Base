@@ -1,0 +1,97 @@
+# TAQOZ Forth — Boot ROM Interactive Forth Interpreter
+# Sources (primary, cross-verified):
+#   - Silicon Doc v35 (entry sequence)
+#   - P2 Datasheet (entry sequence + dedicated section reference)
+#   - rom-booter ingestion (ROM residence)
+# Preliminary web research available at:
+#   engineering/ingestion/sources/taqoz/taqoz-web-research-preliminary.md
+#   (NOT used as a source for facts in this entry — see narrative for rationale)
+
+component: TAQOZ_Forth
+category: boot_rom_interface
+description: |
+  TAQOZ is a Forth interpreter built into the P2's 16KB mask ROM by Peter
+  Jakacki (also author of Tachyon Forth, on which TAQOZ is based). It is
+  one of three interactive terminal interfaces resident in the boot ROM
+  (alongside the Bootloader and the P2 Monitor) and provides the only
+  built-in interactive programming environment on every shipping P2.
+  Because it lives in mask ROM, the ROM TAQOZ is identical and unchanging
+  on every P2 ever produced.
+
+entry_sequence:
+  prerequisite: "Reset the P2 (Reset button, power cycle, or RESn pin low-to-high)"
+  keystrokes:
+    - 'Type "> " (greater-than character + space)'
+    - 'Then press ESC (0x1B)'
+  timing: "Must occur during the early boot window, before any autorun of flash/SD-resident code"
+  source: "Silicon Doc v35, P2 Datasheet"
+
+relationship_to_p2_monitor:
+  shared_prompt: '"> " (greater-than + space) is shared with the P2 Monitor'
+  selector_keystroke:
+    monitor: "Ctrl+D (0x04) → enters P2 Monitor"
+    taqoz: "ESC (0x1B) → enters TAQOZ Forth"
+  functional_distinction:
+    monitor: "Memory inspector / manipulator"
+    taqoz: "Interactive Forth programming environment"
+
+rom_residence:
+  location: "P2 boot ROM (mask ROM)"
+  identical_across_units: true
+  immutable: "Cannot be updated post-fabrication"
+
+author:
+  name: "Peter Jakacki"
+  forum_handle: '@"Peter Jakacki" on forums.parallax.com'
+  related_project: "Tachyon Forth (the broader Forth project from which TAQOZ was derived)"
+  also_maintains: |
+    A separate, expanded "TAQOZ Reloaded" loaded from SD card rather than
+    ROM. ROM TAQOZ is the finite, fixed version; TAQOZ Reloaded is the
+    actively-developed environment. The two have different word sets;
+    documentation found in the wild often does not distinguish them.
+
+# Honest gaps — what we do NOT have authoritative sources for
+knowledge_gaps:
+  word_dictionary:
+    status: "Not documented in primary sources we have ingested"
+    chase: "Mine engineering/ingestion/sources/rom-booter/ROM_Booter.lst for the actual ROM dictionary; verify against Peter Jakacki's TAQOZ.spin2 source"
+
+  runtime_capabilities:
+    status: "Specific operations beyond 'interactive Forth REPL' are not documented in primary sources"
+    chase: "forums.parallax.com — Peter Jakacki's TAQOZ threads; Peter's SourceForge wiki for TAQOZ/Tachyon"
+
+  invocation_from_user_code:
+    status: "Unknown whether TAQOZ can be invoked from a running user program (vs. boot-window only)"
+    chase: "Ask Peter Jakacki on the forums; inspect TAQOZ.spin2 source"
+
+  memory_footprint:
+    status: "Hub RAM consumed when TAQOZ is active is not documented"
+    chase: "Inspect TAQOZ.spin2; measure on hardware"
+
+  extension_mechanism:
+    status: "Whether/how user-defined words can be added persistently to ROM TAQOZ is not documented"
+    chase: "Peter Jakacki's TAQOZ documentation; BACKUP/RESTORE word semantics in TAQOZ.spin2"
+
+  rom_vs_reloaded_word_diff:
+    status: "Which specific words are in ROM TAQOZ vs. only in TAQOZ Reloaded is not documented"
+    chase: "Extract ROM dictionary from ROM_Booter.lst; compare with TAQOZ Reloaded glossary"
+
+# Where to find documentation
+external_documentation:
+  primary_sme: "Peter Jakacki — @\"Peter Jakacki\" on forums.parallax.com"
+  named_forum_threads:
+    - '"TAQOZ – Tachyon Forth for the P2 BOOT ROM" (design discussion, source links)'
+    - '"Try these TAQOZ code snippets" (concrete usage examples)'
+  taqoz_spin2_source: "Linked from the forum threads (originally on SourceForge and/or GitHub); closest available representation of the ROM build; not yet ingested into P2KB"
+  community_glossary: "TAQOZ Reloaded 2.8 'Glossary of Words' — comprehensive but contains Reloaded-only words; needs filtering for the ROM subset"
+
+  local_sources_for_future_mining:
+    rom_booter_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst (411KB; contains the assembled ROM image)"
+    preliminary_web_research: "engineering/ingestion/sources/taqoz/taqoz-web-research-preliminary.md (treat as direction-finding, not as a source)"
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/p2-monitor.yaml
+  - architecture/boot-rom/boot-rom-contents.yaml
+  - architecture/serial_loader.yaml

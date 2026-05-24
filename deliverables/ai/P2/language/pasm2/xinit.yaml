@@ -102,6 +102,29 @@ notes:
 - Streamer and smart pins can work in parallel for maximum efficiency
 - Mode word in D configures transfer direction, pin count, and data format
 - Source in S typically contains data or hub address
+- "Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's bit-count field is 16 bits, so transfers in bit-granularity modes must satisfy `longs * 32 < 65536`. For larger payloads, chunk by looping with successive XINIT calls — the hub FIFO is configured once via RDFAST/WRFAST and does not need to be reissued per chunk. See pattern `large_transfer_chunking` below. (Note: byte/word/long-granularity modes may have different effective limits; verify against the Silicon Doc streamer modes-reference for the specific mode.)"
+
+large_transfer_chunking:
+  name: Large-transfer chunking
+  description: |
+    For streamer transfers larger than 2047 longs in bit-counted modes,
+    divide and conquer by reissuing XINIT in a loop. The hub FIFO is
+    already configured from a single RDFAST/WRFAST; only the streamer
+    count needs to be reissued each iteration.
+  implementation: |
+    ' Drain `count` longs from FIFO to a streamer-paced output pin
+    .block      bmask   x, #10              ' x = $7FF = 2047 longs cap
+                fle     x, count            ' clamp x to min(x, remaining)
+                sub     count, x
+                shl     x, #5               ' convert longs to bit count
+                setword mode, x, #0         ' patch into streamer mode word
+                shl     x, #1               ' edges = 2 * bits for SCK pin
+                wypin   x, #clk_pin         ' kick the SCK smart pin
+                waitx   #3                  ' alignment pad — see streamer_smartpin_control.yaml
+                xinit   mode, #0            ' start streamer with patched count
+                waitxfi                     ' wait for chunk to complete
+                tjnz    count, #.block      ' loop until all chunks done
+  source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 250-261
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -113,3 +136,16 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.945659'
 category: Streamer
 oneliner: Issue streamer command immediately, zeroing phase
+
+related:
+  - language/pasm2/xstop.yaml
+  - language/pasm2/xcont.yaml
+  - language/pasm2/xzero.yaml
+  - language/pasm2/setxfrq.yaml
+  - language/pasm2/rdfast.yaml
+  - language/pasm2/wrfast.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - architecture/streamer/_index.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - code-examples/flash-loader-case-study.yaml

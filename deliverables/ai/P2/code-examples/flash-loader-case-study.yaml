@@ -1,0 +1,105 @@
+# Code Example: Flash Loader (flash_loader.spin2) — Annotated Reference
+
+example_id: "flash-loader-case-study"
+title: "Flash Loader (flash_loader.spin2) — Annotated Reference Case Study"
+description: |
+  Reference entry pointing at flash_loader.spin2 — the compiler-embedded
+  boot loader authored by Chip Gracey that ships compiled into every
+  PNut/PNut-TS binary built for SPI flash boot. This is NOT a tutorial;
+  it catalogs the techniques the loader exercises with one-line summaries
+  and cross-references into the canonical KB entry for each technique.
+
+source_metadata:
+  primary_source: engineering/ingestion/sources/flash-loader/flash_loader.spin2
+  companion_doc: engineering/ingestion/sources/flash-loader/Flash-Loader-Theory-of-Operations.md
+  authority: "GOLDEN — compiled into every flash-boot binary; behaviors silicon-validated by production use"
+  author: "Chip Gracey (Parallax)"
+  size: "298 lines"
+
+what_the_loader_is:
+  role: |
+    The loader is the code at the head of every flash-bootable binary.
+    The silicon ROM Booter loads its first 1KB and JMP #0's into it;
+    the loader then loads the rest of the app from flash to hub and
+    starts user code via COGINIT #0,#$00000. See
+    architecture/boot-rom/spi-flash-boot.yaml for the full handoff.
+  two_halves: "A one-shot programmer (initial flash write) and a per-boot loader, sharing the SPI setup and a 256-long cog image; self-modifying code reconfigures shared instructions for each role"
+
+# 15 techniques the loader demonstrates — each is a one-line summary + cross-ref.
+# Don't restate the technique here; the linked entry is the canonical place.
+techniques_demonstrated:
+  - technique: "ROM-handoff exploitation — continue flash READ mid-stream"
+    lines: "209-225 (contract documented in comments); entry implements it"
+    canonical: architecture/boot-rom/spi-flash-boot.yaml
+
+  - technique: "Streamer + smart-pin two-channel DMA (P_TRANSITION clock + streamer data)"
+    lines: "100-107, 246, 258-261"
+    canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
+
+  - technique: "Hub FIFO direction pairing (RDFAST for output, WRFAST for input)"
+    lines: "109 (RDFAST→output); 248 (WRFAST→input)"
+    canonical: language/pasm2/rdfast.yaml
+
+  - technique: "Bit-counted streamer chunking (>2047 longs requires looped XINIT)"
+    lines: "250-261"
+    canonical: language/pasm2/xinit.yaml
+
+  - technique: "SETQ + RDLONG block transfers (memcpy substitute)"
+    lines: "148-151"
+    canonical: language/pasm2/idioms/hub-memory.yaml
+
+  - technique: "Self-modifying inner loops via SETD/SETS field patching"
+    lines: "114-116 (erase opcode and boundary mask)"
+    canonical: language/pasm2/idioms/self-modifying-code.yaml
+
+  - technique: "Dead-on-arrival scratch long pattern (data words as accumulators)"
+    lines: "60, 78, 84, 286-291"
+    canonical: language/pasm2/idioms/scratch-storage.yaml
+
+  - technique: "DJNF for at-least-once-then-while-not-full loops"
+    lines: "152"
+    canonical: language/pasm2/idioms/loop-control.yaml
+
+  - technique: "REP for zero-overhead inner loops"
+    lines: "58-59, 76-77, 82-83"
+    canonical: language/pasm2/idioms/loop-control.yaml
+
+  - technique: "FLTL with ADDPINS pin-range float (atomic multi-pin release)"
+    lines: "275"
+    canonical: language/pasm2/idioms/pin-control.yaml
+
+  - technique: "HUBSET halt-on-fault via dead external clock"
+    lines: "275-276 (the stop label)"
+    canonical: language/pasm2/idioms/halt-and-fault-response.yaml
+
+  - technique: "Bit-edge lockstep between SETXFRQ NCO and SCK smart pin"
+    lines: "100-107, 246"
+    canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
+
+  - technique: "WAITX alignment pad between WYPIN and XINIT (3-clock pipeline align)"
+    lines: "258-261"
+    canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
+
+  - technique: '"Prop" checksum correction long (loader_sum = "Prop" - sum_of_first_256_longs)'
+    lines: "throughout programmer phase"
+    canonical: architecture/boot-rom/spi-flash-boot.yaml
+
+  - technique: "GETPTR for serial-download size detection (loader-specific idiom)"
+    lines: "50"
+    canonical: language/pasm2/getptr.yaml
+
+technical_analysis:
+  difficulty: "advanced"
+  audience: "Developers writing custom loaders that interoperate with the ROM contract; learners studying master-class PASM2 density"
+
+how_to_use_this_entry:
+  - "Skim techniques_demonstrated for orientation"
+  - "Follow canonical links for depth on each technique"
+  - "Read Flash-Loader-Theory-of-Operations.md (companion narrative) for the full walkthrough"
+  - "Read flash_loader.spin2 itself for source-of-truth"
+
+# Cross-references — one block, no duplication with technique canonicals above
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/smart-pins/spi-implementation-guide.yaml

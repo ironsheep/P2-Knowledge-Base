@@ -2,11 +2,18 @@
 
 > Comprehensive documentation and resources for the Parallax Propeller 2 (P2) multicore microcontroller
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
-[![Coverage](https://img.shields.io/badge/P2%20Coverage-80%25-green.svg)](deliverables/reference/)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](https://github.com/ironsheep/P2-Knowledge-Base/releases)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
 ## 🤖 Using with AI Assistants (Claude, GPT, etc.)
+
+### ⭐ Best experience: P2 Knowledge Base MCP
+
+For Claude Code, Claude Desktop, and other agents that support the Model Context Protocol (the standard interface that lets AI agents call external services as native tools), install the **[P2 Knowledge Base MCP](https://github.com/ironsheep/P2-Knowledge-Base-MCP)**. The MCP gives your agent native tool calls to query the knowledge base directly — search by topic, fetch instructions by name, browse OBEX community objects — without downloading files or burning context on retrieval.
+
+**[→ Install instructions](https://github.com/ironsheep/P2-Knowledge-Base-MCP/blob/main/INSTALL.md)**
+
+### Without MCP support
 
 **[→ BOOTSTRAP (Quick Setup)](deliverables/ai-reference/BOOTSTRAP.md)**
 **One-command setup for AI assistants.** Single entry point for both Unix/macOS and Windows. Downloads everything automatically.
@@ -26,20 +33,6 @@ P2 Assembly Language Reference Manual and P2 Assembly Programming tutorial avail
 ### For AI Systems & Code Generation
 **→ AI Reference Documentation**
 (Work in progress) Complete P2 instruction set, architecture details, and code patterns optimized for LLM consumption. Structured for accurate code generation with comprehensive examples and constraints.
-
-## The following sections are planned for future updates, but currently contain NO content!
-
-### For Developers
-**→ Developer Documentation**  
-Intended to be Quick-start guides, programming patterns, and practical examples. Everything needed to begin P2 development, from basic concepts to advanced multicore techniques.
-
-### For Learners
-**→ Learning Paths**  
-Intended to be Structured tutorials progressing from fundamentals to expertise. Includes migration guides for P1 developers and hands-on exercises for mastering P2 capabilities.
-
-### For Reference
-**→ Technical Reference**  
-Intended to be QAuthoritative instruction set documentation, hardware specifications, and architectural details. The definitive source for P2 technical information.
 
 ## About the Propeller 2
 

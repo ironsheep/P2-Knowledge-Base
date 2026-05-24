@@ -9,22 +9,30 @@ description: |
   configuring the P2 chip via serial connection.
 
 boot_sequence:
-  priority:
-    1: "Check P61 for pull-up (serial boot enable)"
-    2: "If P61 high: Enter serial loader"
-    3: "Otherwise check P60 (SPI flash)"
-    4: "Then check P59 (SD card)"
-    5: "Execute from hub $00000 when loaded"
-    
+  # CORRECTION 2026-05-23: Boot source selection on P2 is a 3-bit PATTERN
+  # (P59/P60/P61), NOT a simple priority ladder. The authoritative pattern
+  # table is in architecture/boot-rom/boot-pattern-selection.yaml. The
+  # serial loader is reached on patterns where serial is either the
+  # primary source or the documented fallback.
+  see_pattern_table: architecture/boot-rom/boot-pattern-selection.yaml
+
+  serial_triggered_when:
+    - "All boot pins float (P59-P61 all floating) — default pattern, serial 60s window"
+    - "P59=pull-up (force-serial; no flash or SD attempted)"
+    - "P61=up with P59=float — serial 100ms window THEN flash boot attempt"
+    - "Fallback path when flash or SD boot fails on patterns that allow recovery"
+
   serial_pins:
     p63: "Serial RX (input)"
     p62: "Serial TX (output)"
-    p61: "Pull-up enables serial boot"
-    
+
   timing:
-    initial_wait: "100ms for serial detection"
-    timeout: "60 seconds for first command"
+    short_window: "100 ms — serial-then-flash patterns (for quick reprogramming during development)"
+    long_window: "60 seconds — serial-primary patterns (for first-time programming)"
     activity_timeout: "None after first command"
+
+  execution:
+    target: "Execute from hub $00000 when loaded"
 
 auto_baud_detection:
   mechanism: "Measures bit timing from CR character"
@@ -215,3 +223,12 @@ see_also:
   - "loadp2 utility documentation"
   - "Intel hex format specification"
   - "Base64 encoding RFC 4648"
+
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/boot-pattern-selection.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/boot-rom/sd-card-boot.yaml
+  - architecture/boot-rom/boot-rom-contents.yaml
+  - architecture/boot-rom/p2-monitor.yaml
+  - architecture/boot-rom/taqoz-forth.yaml

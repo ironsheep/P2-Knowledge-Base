@@ -27,3 +27,32 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.110590'
 category: Hub FIFO
 oneliner: Begin new fast hub write via FIFO
+
+streamer_pairing:
+  rule: |
+    Use WRFAST before any streamer command that CAPTURES pin data INTO
+    hub memory (e.g., X_*_WFBYTE, X_*_WFLONG modes). The FIFO sinks
+    streamer output into hub.
+  direction_from_cogs_perspective: "WRFAST = 'I, the cog, am about to write to hub' — and yes, the streamer/FIFO is the agent doing that writing"
+  paired_with: language/pasm2/rdfast.yaml
+  verb_confusion_warning: |
+    The verb "WRFAST" sounds like it should be paired with hub-WRITE
+    operations issued by the cog, and "RDFAST" with hub-READ operations.
+    From the STREAMER's perspective that mapping is the opposite of
+    what intuition suggests:
+      - RDFAST configures the FIFO so the streamer can READ from hub
+        (and WRITE to pins) → use for OUTPUT streaming
+      - WRFAST configures the FIFO so the streamer can WRITE to hub
+        (after READING from pins) → use for INPUT streaming
+    Remember: the verb describes what HUB I/O direction the FIFO is
+    configured for, not what the streamer's payload direction is.
+  example_source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 248 (WRFAST → input capture from spi_do)
+
+related:
+  - language/pasm2/rdfast.yaml
+  - language/pasm2/getptr.yaml
+  - language/pasm2/xinit.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - architecture/streamer/_index.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - code-examples/flash-loader-case-study.yaml

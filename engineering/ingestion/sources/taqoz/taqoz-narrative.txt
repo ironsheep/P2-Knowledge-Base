@@ -1,0 +1,70 @@
+P2 TAQOZ Forth - Boot ROM Interactive Forth Interpreter
+
+This source covers TAQOZ, the Forth interpreter built into the Propeller 2 mask ROM by Peter Jakacki. TAQOZ is one of three interactive interfaces resident in the P2's 16KB boot ROM (alongside the Bootloader and the P2 Monitor) and is accessible from any serial terminal after reset.
+
+Authority Disclaimer:
+Current ingested material in this folder is PRELIMINARY web research, NOT primary documentation. Specific claims (word counts, addresses, capability lists) should be verified against primary sources before being published as authoritative in the deliverable YAML knowledge base. The primary sources (forum threads, TAQOZ.spin2 source, Peter Jakacki's wiki) have not yet been formally ingested.
+
+Files Present:
+- taqoz-web-research-preliminary.md: Captured output from a web-research agent against forums.parallax.com. Contains both "what is ROM TAQOZ?" and "how to boot external code from ROM TAQOZ?" tracks. Marked PRELIMINARY throughout.
+
+What We Know With HIGH Confidence (cross-verified against primary sources we already have):
+- TAQOZ lives in the P2's 16KB boot ROM, alongside the Bootloader and Monitor (confirmed by Silicon Doc, Datasheet, rom-booter narrative)
+- Entry sequence from serial terminal after reset: type "> " (greater-than + space) then ESC (confirmed by Silicon Doc + Datasheet)
+- TAQOZ is a Forth interpreter (Tachyon-derived) authored and maintained by Peter Jakacki (confirmed by central-analysis/who-to-ask)
+- Entry is only possible during the early boot window, before flash/SD autorun engages (confirmed by Silicon Doc usage description)
+
+What This Preliminary Research Adds (MEDIUM confidence — needs primary-source verification before publishing):
+- ROM build identifier: V1.1, build v33h, dated 2019-02-19 (banner string was quoted from forum)
+- ROM word dictionary contains roughly 100-200 active words (pruned subset of Peter's ~500-word dev build)
+- TAQOZ ROM is functionally distinct from "TAQOZ Reloaded" — the SD-card-loadable expanded environment
+- BACKUP/RESTORE word pair persists user definitions to SPI flash at $F0000
+- ROM TAQOZ is copied from ROM into hub RAM to execute (does not run in-place)
+- SD card support targets FAT32 only (not exFAT)
+- Boot-loader use: TAQOZ can read SD/flash and jump to hub address 0, making it usable as a multi-stage boot mechanism
+- Concrete word examples cited: PIN, HZ, ms, MUTE, BACKUP, RESTORE, AUTO, DUMP, @, !, C@, C!, W@, W!, CMOVE, FILL, WYPIN, WRPIN
+
+Primary Sources Identified for Future Ingestion:
+1. Forum thread "TAQOZ – Tachyon Forth for the P2 BOOT ROM" (forums.parallax.com)
+   - Central design discussion; word references; loader examples
+2. Forum thread "Try these TAQOZ code snippets" (forums.parallax.com)
+   - Concrete usage examples; banner string source
+3. TAQOZ.spin2 source (linked from forum, may be GitHub or SourceForge — URL not yet captured)
+   - Closest available representation of the ROM build
+4. Peter Jakacki's SourceForge wiki for TAQOZ/Tachyon
+   - Word glossaries and implementation notes
+5. TAQOZ Reloaded 2.8 "Glossary of Words" (community-maintained)
+   - Useful but contains Reloaded-only words; needs filtering for the ROM subset
+6. ROM_Booter.lst (already in engineering/ingestion/sources/rom-booter/)
+   - Contains the assembled ROM image; word dictionary could be extracted by mechanical parsing
+
+Distinction From Sibling Tools:
+- Bootloader: handles serial/flash/SD boot protocols; not interactive once boot completes
+- P2 Monitor: interactive memory inspector/manipulator; entered via "> " + Ctrl+D; example commands like "000-010L" list register RAM in long format
+- TAQOZ: interactive Forth environment; entered via "> " + ESC; full programming environment with hardware access
+
+Critical for Understanding:
+- TAQOZ provides an interactive "console" for the P2 with no compilation step required
+- It's the only built-in interactive PROGRAMMING environment (Monitor inspects/manipulates; TAQOZ programs)
+- ROM version is finite and unchangeable — every shipping P2 has identical TAQOZ ROM
+- TAQOZ Reloaded (separate SD-loadable system) is the expanded environment Peter actively maintains
+- For "what's in ROM" questions, ROM TAQOZ is the answer; for "best TAQOZ experience" questions, Reloaded is the answer
+
+Usage Notes:
+This source is preliminary direction-finding material. Use it to:
+- Know what to chase in primary sources
+- Frame the TAQOZ YAML entry's structure
+- Distinguish ROM TAQOZ from TAQOZ Reloaded for users
+- Identify Peter Jakacki and the named forum threads as the SME and primary documentation venues
+
+Do NOT use it as the sole basis for:
+- A definitive ROM word list (mine from ROM_Booter.lst or verify against TAQOZ.spin2)
+- Specific memory addresses (BACKUP target $F0000, etc. — confirm in TAQOZ.spin2 or by experiment)
+- Capability claims beyond what the Silicon Doc and Datasheet already establish
+
+Out of Scope (this ingestion folder):
+- TAQOZ Reloaded (separate SD-loaded environment) — would warrant its own ingestion folder if covered
+- Tachyon Forth on P1 — related but distinct project
+- The mask ROM image as a separate artifact — that lives in the ../rom-booter/ folder via the .lst files
+
+When primary sources are ingested into this folder, this narrative should be updated to elevate the confidence level of the relevant facts and the deliverable taqoz-forth.yaml should be enriched accordingly.

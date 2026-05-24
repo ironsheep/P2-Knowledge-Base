@@ -1,0 +1,79 @@
+name: Pin Control Idioms
+description: PASM2 patterns for multi-pin operations and pin-range manipulation
+category: pin_io
+frequency: high
+
+idioms:
+  - name: addpins_range_drive
+    pattern: "{pin_op} #{base_pin} addpins {count}"
+    description: |
+      Apply a pin operation (FLTL, FLTH, DRVH, DRVL, DIRH, DIRL, OUTH,
+      OUTL, etc.) to a contiguous range of count+1 pins in a single
+      instruction. ADDPINS packs the count into bits [10:6] of the
+      destination operand; bits [5:0] are the base pin number.
+    examples:
+      - "drvh #LED_BASE addpins 7    ' drive 8 LEDs high (pins LED_BASE..LED_BASE+7)"
+      - "fltl #spi_di addpins 2      ' float 3 contiguous pins (spi_di, spi_ck, spi_cs)"
+      - "dirh #data_bus addpins 7    ' set 8 contiguous pins as outputs"
+    context: |
+      ADDPINS lets a single instruction operate on a contiguous pin
+      group. This is the canonical pattern for bus-style I/O where
+      multiple pins should change together (no inter-pin timing gap).
+    encoding:
+      formula: "base_pin + count<<6"
+      base_pin_bits: "[5:0]"
+      count_bits: "[10:6] (range 0-31, meaning '0 extra pins' to '31 extra pins')"
+      pins_affected: "count + 1 contiguous pins starting at base_pin"
+    constraints:
+      - "Range cannot cross a 32-pin port boundary (wraps within the same group of 32)"
+      - "9-bit immediate operand limits ADDPINS to 7; use ##base ADDPINS N for ranges 8-31 (compiler emits AUGD)"
+      - "Counting is INCLUSIVE: ADDPINS N affects N+1 pins"
+    related_instruction: language/spin2/operators/op_ADDPINS.yaml
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+
+  - name: simultaneous_multi_pin_float
+    pattern: "fltl #{interface_base_pin} addpins {pin_count}"
+    description: |
+      Release drive on a multi-pin interface in a single instruction.
+      Critical for safe fault response on external buses — ensures no
+      inter-pin timing window during which some pins are still driven
+      and others are floated.
+    examples:
+      - "fltl #spi_di addpins 2     ' release drive on all 3 SPI output pins simultaneously"
+      - "fltl #parallel_data addpins 7   ' float entire 8-bit parallel bus"
+    context: |
+      Use as part of fault response sequence — see
+      language/pasm2/idioms/halt-and-fault-response.yaml for the full
+      float-then-halt pattern.
+    related_idiom: language/pasm2/idioms/halt-and-fault-response.yaml
+
+  - name: bus_state_change_single_instruction
+    pattern: "{drv_op} #{bus_base_pin} addpins {bus_width - 1}"
+    description: |
+      Change the state of an entire pin-mapped bus in a single instruction.
+      Eliminates the per-pin loop or sequential drives that would otherwise
+      create inter-pin skew.
+    examples:
+      - "drvl #addr_bus addpins 15    ' drive 16-pin address bus all low"
+      - "outh #ctrl_bus addpins 3     ' set 4 control pins high simultaneously"
+    context: |
+      Especially valuable when the receiving device samples the bus on
+      a clock edge — all pins reach their new state in the same cycle.
+
+caveats:
+  - "ADDPINS affects pins by ADDING to the base; pin ranges cannot wrap around port-32 boundary"
+  - "The companion ADDBITS operator (different mnemonic, similar encoding) works on bit fields rather than pin ranges"
+  - "For non-contiguous pin sets, ADDPINS does not apply — use separate instructions or compute pin masks"
+
+related:
+  - language/spin2/operators/op_ADDPINS.yaml
+  - language/pasm2/fltl.yaml
+  - language/pasm2/flth.yaml
+  - language/pasm2/drvh.yaml
+  - language/pasm2/drvl.yaml
+  - language/pasm2/dirh.yaml
+  - language/pasm2/dirl.yaml
+  - language/pasm2/outh.yaml
+  - language/pasm2/outl.yaml
+  - language/pasm2/idioms/halt-and-fault-response.yaml
+  - code-examples/flash-loader-case-study.yaml

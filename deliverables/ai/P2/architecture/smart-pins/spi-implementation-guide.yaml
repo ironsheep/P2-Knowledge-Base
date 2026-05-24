@@ -192,3 +192,12 @@ search_keywords:
   - P_MINUS1_B
   - clock routing
   - smart pin serial
+
+# Cross-references to the flash boot path and case study, which exercise SPI
+# via smart pins + streamer at the production-validated level.
+related_full_paths:
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/boot-rom/_index.yaml
+  - code-examples/flash-loader-case-study.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - architecture/smart-pins/smart-pin-00101-transition-output.yaml

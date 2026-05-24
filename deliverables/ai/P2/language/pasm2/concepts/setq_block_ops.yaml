@@ -360,3 +360,12 @@ references:
   - Spin2_debugger.spin2: State preservation
   - isp_bldc_motor.spin2: LUT table usage
   - optimization_guide: Fast memory transfers
+
+related:
+  - language/pasm2/setq.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/rdlong.yaml
+  - language/pasm2/wrlong.yaml
+  - language/pasm2/idioms/hub-memory.yaml
+  - code-examples/flash-loader-case-study.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml

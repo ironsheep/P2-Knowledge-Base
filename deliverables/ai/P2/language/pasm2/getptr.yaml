@@ -12,6 +12,21 @@ timing:
 description: >-
   Get current FIFO hub pointer into D. Returns the current position of the hub FIFO
   pointer, which advances as data is read from or written to the hub FIFO.
+
+loader_size_idiom: |
+  NARROW APPLICATION — applies ONLY at the entry point of a serial-downloaded
+  program, BEFORE any RDFAST or WRFAST has been issued in that cog: GETPTR
+  returns the byte count of the just-downloaded image, because the FIFO write
+  pointer was left at the post-download position by the PNut serial downloader.
+
+  Example:
+    getptr  size_in_bytes        ' bytes downloaded by the serial loader
+    shr     size_in_bytes, #2    ' convert to longs
+
+  This idiom does NOT apply in general code — once any RDFAST/WRFAST runs,
+  the FIFO pointer reflects that operation, not the download. The pattern is
+  loader-specific (e.g., used in flash_loader.spin2 line 50 at the top of
+  the programmer phase).
 flags_affected:
   C: No effect
   Z: No effect
@@ -30,3 +45,8 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.242860'
 category: Hub FIFO
 oneliner: Get current FIFO hub pointer into D
+
+related:
+  - language/pasm2/rdfast.yaml
+  - language/pasm2/wrfast.yaml
+  - code-examples/flash-loader-case-study.yaml

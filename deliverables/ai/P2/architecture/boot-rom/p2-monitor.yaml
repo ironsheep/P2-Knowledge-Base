@@ -1,0 +1,86 @@
+# P2 Monitor — Boot ROM Interactive Debug Interface
+# Sources (primary, cross-verified):
+#   - P2 Datasheet (entry sequence, capability description, command examples)
+#   - Silicon Doc v35 (entry sequence)
+#   - rom-booter ingestion (ROM residence)
+
+component: P2_Monitor
+category: boot_rom_interface
+description: |
+  Interactive debug / memory-inspection interface built into the P2's 16KB
+  boot ROM. Allows viewing and manipulating memory (register RAM, hub RAM)
+  and loading code from microSD. Accessible from any serial terminal during
+  the early boot window, before flash/SD autorun engages.
+
+entry_sequence:
+  prerequisite: "Reset the P2 (Reset button, power cycle, or RESn pin low-to-high)"
+  keystrokes:
+    - 'Type "> " (greater-than character + space)'
+    - 'Then press Ctrl+D (0x04)'
+  timing: "Must occur during the early boot window, before autorun"
+  prompt: '"*" — the Monitor prompt after entry'
+
+relationship_to_taqoz:
+  shared_prompt: '"> " (greater-than + space)'
+  selector:
+    monitor: "Ctrl+D → P2 Monitor"
+    taqoz: "ESC → TAQOZ Forth"
+  functional_distinction:
+    monitor: "Memory inspector / manipulator"
+    taqoz: "Interactive Forth programming environment"
+
+capabilities:
+  source: "P2 Datasheet"
+  documented:
+    - "View memory contents (register RAM, hub RAM)"
+    - "Manipulate (change) RAM contents"
+    - "Load and run code from microSD memory"
+
+# Verbatim from Datasheet — these are the only command examples in primary sources
+datasheet_examples:
+  list_register_ram:
+    input: "000-010L"
+    purpose: "List first 16 longs of Register RAM in long format"
+    sample_output: |
+      *000-010L
+      000: FF800800 FC0C003F F606C832 FCDC041F '.......?...2....'
+      004: FD747E40 F0A6CA01 F426CA1F FD62CA00 '.t~@.....&...b..'
+      008: FB6EC9FA FC0C003F FD64C428 FF0007E0 '.n.....?.d.(....'
+      00C: FB06012C FD655229 FF0007E1 FB0420B8 '...,.eR)...... .'
+
+  list_hub_ram:
+    input: "0000-0010L"
+    purpose: "List first 16 longs of Hub RAM in long format"
+    sample_output: |
+      *0000-0010L
+      00000: FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF ...
+
+# Honest gaps — what we do NOT have authoritative sources for
+knowledge_gaps:
+  full_command_grammar:
+    status: "Beyond the 2 Datasheet examples, the complete Monitor command syntax is not documented in primary sources we have ingested"
+    chase: "Mine engineering/ingestion/sources/rom-booter/ROM_Booter.lst for the Monitor's command parser; search Parallax forums for community-documented usage"
+
+  modify_commands:
+    status: "Datasheet states 'manipulate memory' capability but does not show modify-command syntax"
+    chase: "Same as above"
+
+  microsd_load_run:
+    status: "Datasheet states microSD load/run capability but does not show command syntax"
+    chase: "Same as above"
+
+  exit_mechanism:
+    status: "How to leave Monitor without resetting is not documented"
+
+  invalid_input_behavior:
+    status: "Not documented"
+
+  invocation_from_user_code:
+    status: "Unknown whether Monitor can be invoked from a running user program (vs. boot-window only)"
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/taqoz-forth.yaml
+  - architecture/boot-rom/boot-rom-contents.yaml
+  - architecture/serial_loader.yaml

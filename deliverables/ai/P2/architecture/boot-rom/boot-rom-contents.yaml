@@ -1,0 +1,105 @@
+# Boot ROM Contents — What Lives in the P2's 16KB Mask ROM
+# Sources:
+#   - Hardware Manual 2022-11-01 (boot ROM size and content list)
+#     via engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md
+#   - engineering/ingestion/sources/rom-booter/ (assembly listing of the ROM)
+#   - engineering/ingestion/sources/p2-datasheet/ (cross-reference)
+#   - engineering/ingestion/sources/silicon-doc/ (cross-reference)
+
+component: boot_rom_contents
+category: boot_rom
+description: |
+  The P2 has 16KB of mask-programmed ROM that contains the boot subsystem
+  plus several utility resources. The ROM is programmed during chip
+  fabrication and is identical on every shipping P2 unit. This entry
+  inventories what lives in that ROM and how each component is used.
+
+# Top-level summary
+rom_facts:
+  total_size: "16 KB (16,384 bytes)"
+  location: "Mask ROM in the P2 silicon"
+  modification: "Cannot be modified post-fabrication"
+  identical_across_units: true
+  hub_write_protection: "Hub also has a write-protectable upper 16KB used for debug state — see architecture/hub.yaml. NOTE: that 16KB is HUB space, distinct from the ROM 16KB documented here."
+
+# ROM residents (per Hardware Manual + ROM booter narrative)
+residents:
+  bootloader:
+    role: "Power-on / reset boot logic"
+    description: |
+      First code that executes on power-up or reset. Handles initial chip
+      configuration, clock setup, memory initialization, and boot source
+      detection. Reads the P59-P61 pattern (see boot-pattern-selection.yaml),
+      selects a boot path (serial / SPI flash / SD card), and either loads
+      and jumps to user code or hands off to one of the interactive
+      interfaces (Monitor or TAQOZ) on the appropriate keystroke trigger.
+    source_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst (also rom_booter_v33_01j.lst)"
+    canonical_entries:
+      - architecture/boot-rom/_index.yaml
+      - architecture/boot-rom/boot-pattern-selection.yaml
+      - architecture/boot-rom/spi-flash-boot.yaml
+      - architecture/boot-rom/sd-card-boot.yaml
+      - architecture/serial_loader.yaml
+
+  p2_monitor:
+    role: "Interactive debug / memory inspection interface"
+    description: |
+      Built-in terminal interface for viewing and manipulating memory
+      (register RAM, hub RAM) and loading code from microSD. Accessible
+      only during the early boot window via the serial-escape sequence.
+    entry_keystroke: '"> " (greater-than + space) then Ctrl+D'
+    canonical_entry: architecture/boot-rom/p2-monitor.yaml
+
+  taqoz_forth:
+    role: "Interactive Forth programming environment"
+    description: |
+      Forth interpreter authored by Peter Jakacki. Provides a full
+      interactive programming environment with hardware access words,
+      smart-pin helpers, and SD/flash utilities. Accessible only during
+      the early boot window via the serial-escape sequence.
+    entry_keystroke: '"> " (greater-than + space) then ESC'
+    canonical_entry: architecture/boot-rom/taqoz-forth.yaml
+
+  utility_routines:
+    role: "Low-level helper routines used by ROM components"
+    description: |
+      The ROM listing references "utility routines" used by the
+      Bootloader, Monitor, and TAQOZ — likely string handling, byte
+      I/O, and similar shared helpers. Not directly callable from user
+      code; documented here for completeness.
+    source_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst"
+    canonical_entry: "(no dedicated entry — internal to ROM components)"
+
+  character_font_data:
+    role: "Bitmap font data for terminal output / debug displays"
+    description: |
+      Font data used by ROM components when rendering text. The full
+      coverage (which characters, which sizes) is not documented in
+      ingested primary sources but is mentioned by name in the ROM
+      booter narrative.
+    canonical_entry: "(no dedicated entry — internal data)"
+    verification_status: "Existence confirmed; specifics not yet documented"
+
+  math_tables:
+    role: "Lookup tables for trigonometric and logarithmic functions"
+    description: |
+      Sin/cos/log tables referenced by ROM components. Not directly
+      callable from user code (use SETQ + TABLE or CORDIC for runtime
+      math access in user programs).
+    canonical_entry: "(no dedicated entry — internal data)"
+    verification_status: "Existence confirmed; specifics not yet documented"
+
+# What's NOT in the boot ROM (common misconceptions)
+not_in_rom:
+  user_code: "User application code lives in hub RAM (loaded by the bootloader from serial/flash/SD); not in ROM"
+  spin2_runtime: "The Spin2 bytecode interpreter is part of the compiled binary, not the ROM"
+  cordic_solver: "CORDIC is a silicon engine, not ROM code — see architecture/cordic.yaml"
+  smart_pin_logic: "Smart pin behavior is silicon-implemented, not ROM-resident"
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/p2-monitor.yaml
+  - architecture/boot-rom/taqoz-forth.yaml
+  - architecture/hub.yaml
+  - architecture/cordic.yaml

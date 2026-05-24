@@ -84,6 +84,22 @@ notes:
 - Block size 0 means maximum (16384 longs)
 - FIFO automatically wraps at block boundary
 - Critical for high-throughput data processing
+
+streamer_pairing:
+  rule: |
+    Use RDFAST before any streamer command that moves data from hub
+    memory OUT to pins (e.g., X_RFBYTE_*, X_RFLONG_* modes). The FIFO
+    pre-fetches hub data for the streamer to consume.
+  direction_from_cogs_perspective: "RDFAST = 'I, the cog, am about to read from hub' — and yes, the streamer/FIFO is the agent doing that reading"
+  paired_with: language/pasm2/wrfast.yaml
+  verb_clarification: |
+    The verb names can mislead. From the COG's perspective, RDFAST means
+    "set up the FIFO so reads-from-hub will be fast" — which serves any
+    streaming OUTPUT operation (hub → FIFO → streamer → pin). WRFAST
+    similarly sets up writes-to-hub, which serves streaming INPUT
+    (pin → streamer → FIFO → hub). The streamer's direction is the
+    INVERSE of the verb's apparent direction.
+  example_source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 109 (RDFAST → output stream to spi_di)
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -95,3 +111,13 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.018932'
 category: Hub FIFO
 oneliner: Begin new fast hub read via FIFO
+
+related:
+  - language/pasm2/wrfast.yaml
+  - language/pasm2/getptr.yaml
+  - language/pasm2/xinit.yaml
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - architecture/streamer/_index.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - code-examples/flash-loader-case-study.yaml
+  - language/pasm2/idioms/hub-memory.yaml

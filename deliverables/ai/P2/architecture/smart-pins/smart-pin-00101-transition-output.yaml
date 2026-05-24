@@ -174,4 +174,15 @@ common_uses:
   - "Pulse train output"
   - "Bit-banged protocol clocking"
 
-related: ["00100 (Pulse)", "11100-11101 (Sync Serial)", "00110-00111 (NCO)"]
+related:
+  - "00100 (Pulse)"
+  - "11100-11101 (Sync Serial)"
+  - "00110-00111 (NCO)"
+  # Full-path cross-references (Sacred Rule #7)
+  - language/pasm2/concepts/streamer_smartpin_control.yaml
+  - language/pasm2/wxpin.yaml
+  - language/pasm2/wypin.yaml
+  - language/pasm2/wrpin.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - code-examples/flash-loader-case-study.yaml
+  - architecture/smart-pins/spi-implementation-guide.yaml

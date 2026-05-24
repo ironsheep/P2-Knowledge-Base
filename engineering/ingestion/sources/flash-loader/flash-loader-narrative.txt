@@ -1,0 +1,70 @@
+P2 Flash Loader - Compiler-Embedded Boot Loader Documentation
+
+This source contains the flash boot loader for the Propeller 2 microcontroller, authored by Chip Gracey (Parallax). Unlike static example code, this file is LIVE PRODUCTION CODE: PNut and PNut-TS embed its compiled output into every binary that is built for SPI flash boot. It is therefore treated as a golden source on par with the ROM Booter and the Silicon Documentation.
+
+Files Present:
+- flash_loader.spin2: The authoritative loader source (298 lines, authored by Chip Gracey)
+- Flash-Loader-Theory-of-Operations.md: Companion theory-of-operations write-up that explains every technique the loader exercises, with source-line citations throughout
+
+Authority Level:
+This source is GOLDEN. The flash loader's behavior is not "one author's example" — it is what literally runs on every flash-booting P2 unit. Any binary built by PNut/PNut-TS for flash boot contains a compiled copy of this loader at the head of the image. The ROM Booter loads the loader into Cog 0; the loader then loads the rest of the application from flash to hub. If the loader's behavioral contracts changed (e.g., the post-load SPI state it assumes), every shipping flash-boot binary would break. The compiler's continued use of these contracts IS the verification that they hold in silicon.
+
+Two-Phase Boot Architecture:
+The P2 flash boot path has two cooperating components:
+1. ROM Booter (in silicon ROM) — autoprobes for SPI flash, loads first 1KB of flash to Cog 0 RAM $000..$0FF, verifies "Prop" checksum, JMP #0
+2. Flash Loader (this file, compiled into the binary at flash address $0) — receives control from the ROM Booter, completes the load of the application from flash to hub, verifies the application checksum, and starts the application via COGINIT #0,#$00000
+
+What this Loader Demonstrates:
+The flash loader is the densest single piece of P2 PASM2 in existence, exercising seven distinct subsystems simultaneously:
+- The streamer (NCO-paced data movement)
+- Smart pins in P_TRANSITION mode (SCK clock generation)
+- The hub FIFO (RDFAST for output streaming, WRFAST for input capture)
+- Self-modifying code (SETD/SETS field patching for runtime opcode selection)
+- Block memory transfers (SETQ + RDLONG for hub-LUT-hub copy)
+- The "Prop" checksum and an application-level checksum
+- The HUBSET-to-dead-XI halt as a fail-safe response to corruption
+
+Two-Halves Design:
+The same 256-long Cog 0 image contains both a one-shot programmer (writes a new application to flash) and a per-boot loader (reads the application from flash). They share constants and the SPI smart-pin/streamer setup, then diverge for their respective tasks. Self-modifying code reconfigures the same instructions to serve both purposes.
+
+Mid-Stream Flash Hand-Off:
+The most subtle and authoritative behavioral spec in this source is the post-ROM state of the SPI bus: spi_cs is low (asserted), spi_ck is low (parked), and the flash is mid-stream — currently presenting bit 7 of the byte at flash address $400 on spi_do. The loader exploits this by NOT re-issuing a flash READ command when it needs additional application data; it simply starts toggling spi_ck and captures bits via the streamer. This saves both code space and boot latency, and it works on every P2 unit because the ROM Booter's exit state is a hard behavioral contract.
+
+Fail-Safe Halt:
+On checksum failure, the loader floats the SPI pins (FLTL #spi_di ADDPINS 2 floats spi_di/spi_ck/spi_cs in one instruction) and issues HUBSET #%0010 to switch the system clock source to XI. On boards where no external clock is wired to XI, this halts the chip until the next reset — preventing errant code from running.
+
+Idiom Reference:
+This source is the canonical reference for several P2 PASM2 idioms documented elsewhere in the knowledge base:
+- The FLTL ADDPINS N pin-range float pattern
+- The SETD/SETS self-modifying inner loop
+- The DJNF "at-least-once-then-while-not-full" loop control
+- The REP zero-overhead inner loop body
+- The SETQ block-transfer memcpy substitute
+- The dead-on-arrival scratch long pattern (data words used as accumulators before their real consumption)
+- The streamer/SCK bit-edge lockstep rule (SETXFRQ and WXPIN must match)
+- The waitx #3 streamer/smart-pin alignment pad
+
+Companion Documentation:
+Flash-Loader-Theory-of-Operations.md provides the narrative walkthrough of every technique above, with source-line citations. It was authored as the basis for a P2 Knowledge Base update request and should be read alongside the .spin2 source for full context.
+
+Critical for Understanding:
+- How P2 flash boot works end-to-end (silicon ROM + loader handoff)
+- The exact behavioral contracts the ROM exposes to user code
+- Production-validated streamer + smart-pin coordination patterns
+- Density-optimized PASM2 idioms for cog-resident code
+- How a 256-long cog image can do real work
+
+Usage Notes:
+This is reference material — developers typically do not modify the flash loader. They need to understand it for:
+- Writing custom boot logic that interoperates with the ROM contract
+- Debugging flash boot failures
+- Learning idiomatic P2 PASM2 from a master-level example
+- Understanding why certain "magic numbers" appear in similar code
+- Implementing alternative loaders for non-Parallax flash devices
+
+The author (Chip Gracey) revises this file as the compiler evolves. Updates should be re-ingested here when they occur; line-number citations in the knowledge base may need refresh.
+
+Out of Scope:
+This file does not cover serial boot, SD card boot, or USB-serial boot paths. Those are handled by the ROM Booter directly (see ../rom-booter/).
+
+This source is authoritative for SPI flash boot behavior as it represents the actual loader code embedded in every flash-bootable P2 binary.

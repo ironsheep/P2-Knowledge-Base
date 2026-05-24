@@ -1,0 +1,172 @@
+# Boot ROM Documentation Index
+# Download-on-demand manifest for P2 Boot ROM subsystem
+# Use this file to identify which file contains the information you need
+# Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Silicon Doc v35, P2 Datasheet,
+#          ../../engineering/ingestion/sources/rom-booter/ (ROM listing),
+#          ../../engineering/ingestion/sources/flash-loader/ (golden flash loader),
+#          ../../engineering/ingestion/sources/edge-standard-module/ (Edge DIP-switch mapping),
+#          ../../engineering/ingestion/sources/edge-32mb-module/ (Edge 32MB DIP-switch mapping),
+#          ../../engineering/ingestion/sources/taqoz/ (TAQOZ preliminary research)
+
+component: boot_rom
+description: |
+  The P2's boot subsystem — a 16KB mask ROM containing the Bootloader, the
+  P2 Monitor debug interface, the TAQOZ Forth interpreter, utility routines,
+  character font data, and math tables. On power-up or reset, the Bootloader
+  reads three boot pattern pins (P59-P61) and selects one of three boot
+  paths: serial (P63/P62), SPI flash (P58-P61), or microSD card. Each path
+  has documented fallback behavior. The Monitor and TAQOZ are interactive
+  terminal interfaces accessible only during the early boot window before
+  the autorun handoff.
+version: "1.0"
+last_updated: "2026-05-23"
+
+# Boot timing (from Hardware Manual)
+boot_timing:
+  reset_to_clock: "3 ms delay after power-up/reset trigger before fast clock engages"
+  bootloader_load: "2 ms for Cog 0 to load ROM-resident Bootloader"
+  total_to_user_decision: "~5 ms from reset to boot-pattern-selection logic"
+
+# Boot pin overview (full details: boot-pattern-selection.yaml)
+boot_pins:
+  range: "P58-P63 serve boot functions; become general-purpose after boot completes"
+  pattern_pins: "P59-P61 read as a 3-bit pattern (each pin: float / pull-up / pull-down) to select boot source"
+  serial_pins: "P63 = RX, P62 = TX during serial boot"
+  flash_pins: "P58-P61 form the SPI flash interface when flash boot is selected (P61=CS, P60=CK, P59=DI, P58=DO)"
+  reset_pin: "RESn — active low, triggers boot sequence on low-to-high transition"
+
+# File manifest - download only what you need
+files:
+  pattern_selection:
+    path: boot-pattern-selection.yaml
+    size: ~140 lines
+    use_when:
+      - "Configuring boot source on a custom board"
+      - "Understanding why a P2 boots to a particular source"
+      - "Mapping Edge module DIP switches to P2 boot pins"
+      - "Diagnosing boot mode selection problems"
+    contains:
+      - Complete Hardware Manual boot pattern table (P59-P61 states → boot procedure)
+      - Edge module DIP switch → pin mapping (FLASH switch → P61; △/▽ → P59)
+      - Triple-duty pin explanation (pattern selector → flash interface → general I/O)
+      - Fallback behavior per pattern
+
+  rom_contents:
+    path: boot-rom-contents.yaml
+    size: ~80 lines
+    use_when:
+      - "Understanding what's in the 16KB boot ROM"
+      - "Identifying which ROM-resident component handles a given function"
+      - "Researching ROM features beyond the bootloader"
+    contains:
+      - The six ROM residents (Bootloader, Monitor, TAQOZ, utility routines, character font, math tables)
+      - Size and purpose of each
+      - Cross-references to the per-component entries (Monitor, TAQOZ)
+      - ROM listing source pointer (rom-booter ingestion)
+
+  spi_flash_boot:
+    path: spi-flash-boot.yaml
+    size: ~160 lines
+    use_when:
+      - "Understanding the SPI flash boot path end-to-end"
+      - "Designing custom boards that boot from flash"
+      - "Debugging flash boot failures"
+      - "Understanding the ROM→flash-loader handoff contract"
+    contains:
+      - "Fixed pin assignment (P61=CS, P60=CK, P59=DI, P58=DO)"
+      - 'ROM contract (read first 1KB from flash, verify "Prop" checksum, JMP #0)'
+      - "Post-load SPI bus state (the behavioral contract the flash_loader exploits)"
+      - 'Prop checksum mechanism'
+      - "Flash loader handoff (cited to flash_loader.spin2 as golden source)"
+
+  sd_card_boot:
+    path: sd-card-boot.yaml
+    size: ~80 lines
+    use_when:
+      - "Designing SD-card-bootable P2 systems"
+      - "Understanding SD card boot requirements"
+      - "Diagnosing SD boot failures"
+    contains:
+      - SD card boot pin pattern requirement (P60 = pull-up)
+      - File system constraints (FAT32 — see verification note)
+      - Fallback behavior (serial 60s window vs shutdown)
+      - Edge module SD wiring note (verification_pending for P60 generation)
+
+  p2_monitor:
+    path: p2-monitor.yaml
+    size: ~70 lines
+    use_when:
+      - "Inspecting or modifying P2 memory interactively"
+      - "Debugging boot or early-runtime issues"
+      - "Looking up the entry sequence from a serial terminal"
+    contains:
+      - Entry sequence (`> ` + Ctrl+D after reset)
+      - Sourced command example (`000-010L` lists 16 longs of register RAM)
+      - Distinction from TAQOZ (Monitor inspects/manipulates; TAQOZ programs)
+      - Known capability surface; explicit gap markers for full command reference
+
+  taqoz_forth:
+    path: taqoz-forth.yaml
+    size: ~120 lines
+    use_when:
+      - "Looking up how to enter the ROM Forth interpreter"
+      - "Distinguishing ROM TAQOZ from TAQOZ Reloaded"
+      - "Finding authoritative TAQOZ documentation"
+      - "Understanding TAQOZ's role as a soft boot loader"
+    contains:
+      - Entry sequence (`> ` + ESC after reset)
+      - High-confidence facts (entry mechanism, ROM residence, Peter Jakacki as author)
+      - Preliminary-research facts with confidence tiers (banner string, word categories, BACKUP/RESTORE)
+      - Distinction from TAQOZ Reloaded
+      - Pointers to primary documentation (Parallax forums, TAQOZ.spin2 source)
+      - Explicit gap markers for unverified claims
+
+# Quick decision tree
+decision_tree:
+  "How does the P2 boot?": _index.yaml
+  "How do I configure which source my P2 boots from?": boot-pattern-selection.yaml
+  "What's actually in the 16KB boot ROM?": boot-rom-contents.yaml
+  "How does flash boot work step-by-step?": spi-flash-boot.yaml
+  "What does the ROM do before handing off to user code?": spi-flash-boot.yaml
+  "How does SD card boot work?": sd-card-boot.yaml
+  "How do I use the serial loader protocol?": ../serial_loader.yaml
+  "How do I enter the debug monitor?": p2-monitor.yaml
+  "How do I enter the Forth interpreter?": taqoz-forth.yaml
+  "What's the difference between ROM TAQOZ and TAQOZ Reloaded?": taqoz-forth.yaml
+  "Where is the flash loader source?": ../../code-examples/flash-loader-case-study.yaml
+
+# Related resources outside this directory
+related:
+  # Serial loader protocol (existing comprehensive entry)
+  - architecture/serial_loader.yaml
+  # Flash loader case study (annotated reference)
+  - code-examples/flash-loader-case-study.yaml
+  # Boot-relevant instructions
+  - language/pasm2/coginit.yaml
+  - language/pasm2/hubset.yaml
+  # SPI implementation (smart-pin based, distinct from flash boot)
+  - architecture/smart-pins/spi-implementation-guide.yaml
+  # Clock system (boot sequence engages fast clock; see HUBSET clock config)
+  - architecture/clock_system.yaml
+  # Hub memory (boot ROM area, loaded code destination)
+  - architecture/hub.yaml
+
+# Boot path summary (orientation for new readers)
+boot_paths_summary:
+  serial:
+    pins: "P63 (RX), P62 (TX)"
+    triggered_when: "Pattern P61=float and P59 not pulled down (covers serial-only and serial-with-fallback patterns)"
+    timeout_options: "100 ms (if flash also enabled) or 60 s (serial-priority patterns)"
+    canonical_entry: ../serial_loader.yaml
+
+  spi_flash:
+    pins: "P61 (CS), P60 (CK), P59 (DI), P58 (DO)"
+    triggered_when: "Pattern P61=pull-up, P60=any, P59=float or pull-down"
+    fallback: "Serial 60s if pattern allows it; otherwise shutdown on flash failure"
+    canonical_entry: spi-flash-boot.yaml
+
+  sd_card:
+    pins: "Routed via the SD card interface on capable boards"
+    triggered_when: "Pattern P60=pull-up"
+    fallback: "Serial 60s if pattern allows it; otherwise shutdown on SD failure"
+    canonical_entry: sd-card-boot.yaml

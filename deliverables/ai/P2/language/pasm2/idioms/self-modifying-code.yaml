@@ -1,0 +1,89 @@
+name: Self-Modifying Code Idioms
+description: PASM2 patterns for modifying instruction fields at runtime
+category: code_generation
+frequency: medium
+
+idioms:
+  - name: setd_field_patch
+    pattern: "setd #{instruction_label}, {new_d_value}"
+    description: |
+      Patch the D (destination) field of a target instruction at runtime.
+      Used when a tight inner loop needs to switch between operating on
+      different registers without branching, or when the destination
+      depends on data computed at runtime.
+    examples:
+      - "setd .target, dest_reg     ' .target instruction's D field now = dest_reg"
+    context: |
+      Avoids the branch overhead of dispatching to different code paths.
+      Most useful inside hot loops where the destination changes per
+      outer iteration but is constant per inner iteration.
+    related_instruction: language/pasm2/setd.yaml
+
+  - name: sets_field_patch
+    pattern: "sets #{instruction_label}, {new_s_value}"
+    description: |
+      Patch the S (source) field of a target instruction at runtime.
+      Common use case: walking through registers/data by repeatedly
+      executing the same instruction with a changing source operand.
+    examples:
+      - "sets .read_op, current_addr   ' .read_op now reads from current_addr"
+    context: |
+      Mirrors setd_field_patch but for the source operand. Often used
+      together with setd to fully parameterize a single template
+      instruction.
+    related_instruction: language/pasm2/sets.yaml
+
+  - name: opcode_variant_switch
+    pattern: |
+      setd #{instruction_label}, {variant_a_opcode}
+      ...
+      setd #{instruction_label}, {variant_b_opcode}
+    description: |
+      Patch the entire upper half of an instruction (which includes the
+      opcode bits) to switch between two opcode variants without branching.
+      Useful when the same algorithm structure applies but the actual
+      operation differs based on a condition decided in an outer loop.
+    examples:
+      - |
+        ' Switch between 4 KB and 64 KB flash erase opcodes:
+        if_z   mov .cmd_template, #op_erase_64k
+        if_nz  mov .cmd_template, #op_erase_4k
+        ' (subsequent inner-loop iterations use whichever was selected)
+    context: |
+      The production flash loader uses this to switch between 4 KB and
+      64 KB flash erase strategies based on alignment, without paying
+      branch cost in the per-block loop.
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 114-116
+
+  - name: alttrampolines
+    pattern: "altd / alts / altr"
+    description: |
+      The ALT* family modifies the NEXT instruction's D/S/R field at
+      execution time without persisting the change. Lower-overhead than
+      SETD/SETS for one-shot modifications; doesn't require a separate
+      patch instruction.
+    examples:
+      - |
+        altd index, #base_reg       ' next instr's D = base_reg + index
+        mov 0-0, value              ' executes as: mov base_reg+index, value
+    context: |
+      Prefer ALT* when the modification is per-instruction and one-shot.
+      Prefer SETD/SETS when the same instruction will execute many times
+      with the modified field (so the patch cost amortizes).
+    related_instructions:
+      - language/pasm2/altd.yaml
+      - language/pasm2/alts.yaml
+      - language/pasm2/altr.yaml
+
+caveats:
+  - "Self-modifying code is hard to debug — comments naming each patched field are essential"
+  - "Cog code may execute from cog RAM, hub RAM, or LUT — self-modification only works on the active executing copy"
+  - "When the patched instruction is in a tight loop, the patch must complete before the loop body re-executes"
+
+related:
+  - language/pasm2/setd.yaml
+  - language/pasm2/sets.yaml
+  - language/pasm2/altd.yaml
+  - language/pasm2/alts.yaml
+  - language/pasm2/altr.yaml
+  - code-examples/flash-loader-case-study.yaml

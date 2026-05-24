@@ -1,0 +1,91 @@
+name: Scratch Storage Idioms
+description: PASM2 patterns for using data words as temporary working storage before their real consumption
+category: register_economy
+frequency: medium
+
+idioms:
+  - name: dead_on_arrival_scratch_long
+    pattern: |
+      ' Reserve a data word that is zero on entry and overwritten before real use
+      zeroa  long 0
+      ...
+      ' Between entry and "real use," zeroa serves as a checksum accumulator,
+      ' loop counter, temporary, or similar.
+    description: |
+      A data long that is guaranteed zero on entry AND will be overwritten
+      with its "real" value before it's actually consumed serves as FREE
+      accumulator storage in the meantime. This is dense register economy:
+      no allocation of a separate scratch register is needed, and no save/
+      restore boilerplate is required.
+    examples:
+      - |
+        ' From the flash loader: zeroa starts at 0, is used as a checksum
+        ' accumulator during the validation phase, then is overwritten
+        ' with its real "post-validation" value before the loader proceeds.
+        zeroa  long 0
+        zerob  long 0
+        zeroc  long 0
+        ...
+        ' checksum loop uses zeroa as accumulator:
+        rep    #2, count
+        rdlong x, ptr++
+        add    zeroa, x        ' zeroa accumulates checksum
+        ...
+        ' validation passes; zeroa is now overwritten with its real meaning:
+        mov    zeroa, computed_value
+    context: |
+      Useful in cog-resident code where the 512-long cog RAM budget is
+      tight. Requires careful reasoning about the lifetime of the data:
+      the slot must NOT be consumed in its scratch role after its real
+      value has been written.
+    caveats:
+      - "Names should make the dual purpose evident (or comments must)"
+      - "Order of operations is load-bearing — a maintainer changing the code must understand the scratch-vs-real boundary"
+      - "Best used in self-contained tight code (cog images, ISR-like sequences) where the full lifetime is visible at once"
+      - "AVOID in large or evolving code where reasoning about the scratch boundary becomes brittle"
+    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 60, 78, 84, 286-291
+
+  - name: aliased_register_through_org
+    pattern: |
+      ORG  base
+      x    long 0      ' x is at address base+0
+      y    long 0      ' y is at address base+1
+      ' Code can refer to these by name or by computed offset
+    description: |
+      Use ORG and named long allocations to give multiple symbolic names
+      to overlapping or sequential cog locations. Often combined with
+      dead-on-arrival scratch: the same long can be named "x" in one
+      context and "scratch_counter" in another.
+    examples:
+      - |
+        ORG 0
+        loader_entry long 0    ' first instruction slot
+        loader_state long 0    ' or treat as data once loader_entry executes
+    context: |
+      Combines well with self-modifying code (see
+      language/pasm2/idioms/self-modifying-code.yaml) where instruction
+      slots become data slots after the instruction executes once.
+    related_idiom: language/pasm2/idioms/self-modifying-code.yaml
+
+  - name: scratch_via_unused_argument_slot
+    pattern: |
+      ' Inside a routine that doesn't use one of its argument-passing slots,
+      ' that slot is free scratch for the routine's duration.
+    description: |
+      If a calling convention provides argument-passing slots (e.g., PA,
+      PB, the IJ pair) and the current routine doesn't use one, that
+      slot is free working storage with no allocation cost.
+    examples:
+      - "' PB unused by this routine — repurpose as temporary"
+      - "mov pb, accumulator   ' PB now holds my running total"
+    context: |
+      Particularly useful for short helpers called from a single caller
+      whose convention is known. Document the deviation from normal use.
+    caveats:
+      - "Documents an implicit contract with the caller — fragile if the convention changes"
+
+related:
+  - language/pasm2/idioms/register-operations.yaml
+  - language/pasm2/idioms/self-modifying-code.yaml
+  - language/pasm2/concepts/cog_hub_execution.yaml
+  - code-examples/flash-loader-case-study.yaml

@@ -1,0 +1,113 @@
+# SPI Flash Boot — Two-Phase Path from Power-Up to Running Application
+# Sources (primary, golden):
+#   - Hardware Manual 2022-11-01 (boot pattern, pin functions)
+#   - engineering/ingestion/sources/flash-loader/flash_loader.spin2
+#     GOLDEN — compiled into every flash-bootable P2 binary; the ROM contract
+#     it depends on is silicon-validated by every shipping unit
+#   - engineering/ingestion/sources/rom-booter/ (ROM listing)
+
+component: spi_flash_boot
+category: boot_rom
+description: |
+  P2 SPI flash boot is a TWO-PHASE process. The silicon ROM Booter
+  autoprobes for flash, loads the first 1KB into Cog 0, verifies the
+  "Prop" checksum, and JMP #0's into the loaded code. The loaded code
+  (the "flash loader") then reads the remainder of the application
+  from flash into hub RAM, verifies it, and starts the user code via
+  COGINIT #0,#$00000.
+
+# Authority — why facts here are reliable
+authority:
+  rom_behavior: "Described in Hardware Manual; assembly in ../../engineering/ingestion/sources/rom-booter/"
+  flash_loader_behavior: |
+    flash_loader.spin2 is GOLDEN source — compiled into every binary
+    PNut/PNut-TS build for flash boot. Behavioral contracts it depends
+    on (such as the post-load SPI state) are silicon-validated by every
+    shipping flash-boot binary.
+
+# When this path is taken
+boot_pattern_trigger:
+  see: architecture/boot-rom/boot-pattern-selection.yaml
+  flash_priority_patterns:
+    - "P61=up, P60=any, P59=float → serial 100ms then flash (fallback on serial)"
+    - "P61=up, P60=any, P59=down → fast flash boot, shutdown on failure"
+
+# Fixed pin assignment (silicon)
+pin_assignment:
+  spi_cs: "P61 — chip select (P2 → flash, active low)"
+  spi_ck: "P60 — serial clock (P2 → flash)"
+  spi_di: "P59 — data IN to flash (P2 → flash, the flash's SI/MOSI)"
+  spi_do: "P58 — data OUT of flash (P2 ← flash, the flash's SO/MISO)"
+  note: "Custom boards intending to boot from flash MUST wire SPI flash to these pins; the Parallax Edge modules follow this assignment"
+
+# Phase 1: ROM Booter (silicon behavior)
+phase_1_rom_booter:
+  autoprobe: "ROM autoprobes for a recognized SPI flash on the fixed pin assignment (W25Q128JV-series and pin-compatible)"
+  read_operation:
+    flash_address_range: "$000000..$0003FF (first 1KB = 256 longs)"
+    destination: "Cog 0 register space $000..$0FF"
+  prop_checksum:
+    algorithm: "Sum all 256 loaded longs as 32-bit values"
+    required_sum: '$706F7250 (ASCII "Prop")'
+    on_success: "ROM does JMP #0 → execution starts at the loaded code"
+    on_failure: "Chip stalls; no code executes"
+    flash_writer_responsibility: |
+      The program that writes flash must insert a correction long so
+      the 256-long sum equals exactly $706F7250. Canonical formula:
+      loader_sum = "Prop" - sum_of_first_256_longs
+
+# Phase 2: Post-load SPI state — the behavioral contract
+phase_2_post_load_state:
+  description: |
+    When the ROM does JMP #0, the SPI bus is left in a specific state
+    that the loader exploits. This is a hard behavioral contract:
+    every shipping P2 leaves the bus this way after a successful
+    flash boot, and the production loader's continued production
+    use silicon-validates the contract.
+  bus_state:
+    spi_cs: "Low output (asserted — flash still selected)"
+    spi_ck: "Low output (parked between edges)"
+    spi_do: |
+      Flash is MID-STREAM, currently presenting bit 7 of the byte at
+      flash address $400. The READ command the ROM issued at $0 has
+      continued through $1, $2, ... and is now at $400. To continue
+      reading, the loader simply toggles spi_ck and captures bits on
+      spi_do — NO new READ command needed.
+  benefit: "Saves code space and boot latency; the production loader does exactly this"
+
+# Phase 3: Flash loader handoff
+phase_3_flash_loader:
+  source_of_truth: engineering/ingestion/sources/flash-loader/flash_loader.spin2
+  case_study: code-examples/flash-loader-case-study.yaml
+  cog_image_layout:
+    total: "256 longs (the 1KB the ROM loaded)"
+    partitions:
+      - "One-shot programmer code (runs only when initially writing flash)"
+      - "Per-boot loader code (runs on every flash boot)"
+      - "Shared data words and constants"
+      - "First slice of user application (whatever fits in remaining cog space)"
+  loader_flow:
+    - "Continue reading from flash $400 via the mid-stream SPI state (no new READ)"
+    - "Stream application bytes from flash to hub RAM starting at $00000"
+    - "Verify application-level checksum"
+    - "Success: COGINIT #0,#$00000 to run the user app"
+    - "Failure: float SPI pins (FLTL #spi_di ADDPINS 2) and HUBSET #%0010 to halt"
+  techniques_used: "See code-examples/flash-loader-case-study.yaml for the full annotated catalog"
+
+# Failure modes (terse)
+failure_modes:
+  flash_unresponsive: "ROM autoprobe fails → falls through to next configured boot path (per pattern), or shuts down"
+  prop_checksum_fail: "Chip stalls; no code executes. Recovery: hardware reset to attempt a different boot pattern (e.g., serial recovery)"
+  application_checksum_fail: "Loader floats SPI pins and halts via HUBSET. Recovery: hardware reset; reflash from serial"
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/boot-pattern-selection.yaml
+  - architecture/boot-rom/sd-card-boot.yaml
+  - architecture/serial_loader.yaml
+  - architecture/smart-pins/spi-implementation-guide.yaml
+  - code-examples/flash-loader-case-study.yaml
+  - language/pasm2/coginit.yaml
+  - language/pasm2/hubset.yaml
+  - language/pasm2/idioms/halt-and-fault-response.yaml

@@ -1,0 +1,125 @@
+# SD Card Boot — Boot Path from microSD Storage
+# Sources:
+#   - Hardware Manual 2022-11-01 (boot pattern table, fallback behavior)
+#     via engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md
+#   - engineering/ingestion/sources/rom-booter/ (FAT32 + SD card SPI mode references)
+
+component: sd_card_boot
+category: boot_rom
+description: |
+  Boot path that loads the user application from a microSD card. Triggered
+  by the P60=pull-up boot pattern. Supports FAT32-formatted SD cards
+  accessed via SPI-mode protocol. Has documented fallback behavior on
+  failure (serial 60s window or shutdown, depending on the P59 state).
+
+# When this path is taken
+boot_pattern_trigger:
+  see: architecture/boot-rom/boot-pattern-selection.yaml
+  sd_priority_patterns:
+    - "P61=float-or-down, P60=up, P59=float → SD boot, fallback serial 60s on failure"
+    - "P61=float-or-down, P60=up, P59=down → SD boot, shutdown on failure"
+  key_requirement: "P60 MUST be pulled up for SD boot to be attempted"
+
+# Hardware requirements
+hardware:
+  storage: "microSD card (standard SD or SDHC; per rom-booter narrative the layer is FAT32, see verification note below)"
+  filesystem:
+    primary_support: "FAT32"
+    exfat_support:
+      claim: "Not supported (per preliminary research)"
+      verification_pending: "Confirm exFAT exclusion in primary sources or by experiment"
+  sd_interface_mode: "SPI mode (the ROM uses SD's SPI-mode protocol, not the higher-speed SD bus mode)"
+  sd_pins:
+    note: |
+      Specific P2 pin assignments for the SD card interface are board-
+      dependent. The Parallax Edge modules with SD sockets define the
+      mapping; custom boards must follow the same mapping if they want
+      to use ROM SD boot.
+    verification_pending: "Pin-by-pin assignments for the SD interface (CLK, CMD/DI, DO, CS) — not yet documented in ingested primary sources at the level we have for the SPI flash interface"
+
+# Boot sequence (per ROM booter narrative + Hardware Manual)
+sequence:
+  step_1: "ROM Booter sees P60=up boot pattern, selects SD path"
+  step_2: "Initializes SD card via SPI mode"
+  step_3: "Mounts FAT32 filesystem"
+  step_4: "Locates and reads the boot file (filename convention not yet documented in ingested sources — verification_pending)"
+  step_5: "Loads file contents into hub RAM"
+  step_6: "Verifies application checksum"
+  step_7: "Starts user application via COGINIT"
+
+# Fallback behavior
+fallback:
+  with_serial_fallback:
+    pattern: "P59=float"
+    on_failure: "Programs from serial within 60 s window (allows recovery via host download)"
+
+  no_fallback:
+    pattern: "P59=down"
+    on_failure: "Shutdown — chip halts until reset"
+    use_case: "Production-only SD boot where any failure should stop the system"
+
+  failure_causes:
+    - "No SD card present"
+    - "SD card not FAT32 formatted"
+    - "Boot file missing from filesystem"
+    - "Boot file content checksum failure"
+    - "SD card hardware error"
+
+# What we DON'T yet have documented (gaps)
+knowledge_gaps:
+  - "Specific boot file name convention (e.g., is it BOOT.BIN, AUTO.BIN, or something else?)"
+  - "Maximum boot file size limit"
+  - "Whether boot file can be in a subdirectory or only root"
+  - "SD card capacity limits (does it support SDHC, SDXC?)"
+  - "Pin assignments for the SD card interface at the silicon level"
+  - "What happens with multiple bootable files present"
+
+# Where to chase the missing content
+chase_targets:
+  rom_booter_listing:
+    path: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst"
+    description: "Contains the SD card boot code; could be inspected for filename matching, size limits, etc."
+    status: "Deferred to a follow-up session"
+
+  edge_module_guides:
+    description: "May document boot file conventions used with the Parallax Edge modules"
+    paths_to_check:
+      - "engineering/ingestion/sources/edge-standard-module/"
+      - "engineering/ingestion/sources/edge-32mb-module/"
+      - "engineering/ingestion/sources/edge-mini-breakout/"
+
+  parallax_forums:
+    url_pattern: "forums.parallax.com"
+    description: "Community usage threads likely document the boot file conventions"
+
+# Edge module P60 pull-up wrinkle
+edge_module_note:
+  context: "The Edge modules' DIP switch bank does NOT directly control P60"
+  see: architecture/boot-rom/boot-pattern-selection.yaml
+  implication: |
+    On the Edge modules, the mechanism for asserting P60=up (required for
+    SD boot) is not cleanly extractable from the PDF-derived narratives
+    we have. It is likely tied to SD card socket presence-detect or one
+    of the SD signal lines. Verification pending — see
+    boot-pattern-selection.yaml for the full note.
+
+# Comparison to other boot paths
+boot_path_comparison:
+  vs_flash_boot:
+    advantage_sd: "SD cards are removable — easy field updates, can carry multiple boot images"
+    advantage_flash: "Faster boot (no filesystem mount); no removable-media wear concerns; integrated on Edge modules"
+
+  vs_serial_boot:
+    advantage_sd: "No host computer required at boot time; runs standalone"
+    advantage_serial: "Easy iterative development; no media handling"
+
+  hybrid_pattern:
+    note: "P61=float-or-down with P60=up, P59=float gives SD boot WITH serial 60s fallback — common development setup"
+
+# Cross-references
+related:
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/boot-pattern-selection.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/boot-rom/boot-rom-contents.yaml
+  - architecture/serial_loader.yaml

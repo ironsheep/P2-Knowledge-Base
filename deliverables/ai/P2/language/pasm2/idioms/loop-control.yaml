@@ -41,3 +41,63 @@ idioms:
       - "jmp #main_loop"
       - "jmp #start"
     context: Create infinite or conditional loops
+
+  - name: djnf_loop
+    pattern: "djnf {counter}, #{label}"
+    description: |
+      Decrement and jump if NOT full (post-decrement, exits on underflow
+      from 0 to $FFFFFFFF). Use INSTEAD of DJNZ when the loop must execute
+      AT LEAST ONCE even if the counter starts at zero.
+    examples:
+      - "djnf t, #.move"
+      - "djnf count, #process_loop"
+    context: |
+      Critical distinction from DJNZ: DJNZ pre-decrements and exits when
+      the counter REACHES zero, which means a loop with zero starting count
+      executes 4,294,967,296 times (it decrements from 0 to $FFFFFFFF and
+      keeps going until it wraps back to 0). DJNF post-decrements and
+      exits when the counter underflows, so a zero-start count exits
+      cleanly after exactly one iteration.
+
+      Rule of thumb:
+        - DJNZ: "while not zero" — loop body runs count times; UNSAFE for count=0
+        - DJNF: "at least once, then while not underflowed" — loop body runs
+          max(1, count) times; SAFE for count=0
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 152
+    related_instructions:
+      - language/pasm2/djnf.yaml
+      - language/pasm2/djnz.yaml
+
+  - name: tight_inner_loop_with_rep
+    pattern: |
+      rep #{body_instruction_count}, {iteration_count}
+      ' body_instruction_count instructions go here
+    description: |
+      Zero-overhead inner loop using REP. The N instructions following REP
+      form the loop body, executed iteration_count times with NO branch
+      overhead per iteration. Most common is 2-instruction body for
+      checksum/copy loops.
+    examples:
+      - |
+        ' Checksum loop — 2-instruction body, runs 'count' times:
+        rep     #2, count
+        rdlong  x, ptr++
+        add     sum, x
+      - |
+        ' Copy loop — also 2 instructions, runs 'count' times:
+        rep     #2, count
+        rdlong  x, src++
+        wrlong  x, dst++
+    context: |
+      The canonical "tight inner loop" pattern in PASM2. Zero per-
+      iteration branch cost makes this the fastest option for short
+      bodies (1-8 instructions). The body cannot contain certain
+      instructions (branches, REP itself) — see REP instruction docs.
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 58-59
+    related_instruction: language/pasm2/rep.yaml
+
+related:
+  - language/pasm2/rep.yaml        # LOOP end marker is documented within rep.yaml
+  - language/pasm2/djnz.yaml
+  - language/pasm2/djnf.yaml
+  - code-examples/flash-loader-case-study.yaml

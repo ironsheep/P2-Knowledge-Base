@@ -42,6 +42,10 @@ oneliner: Start an available cog, or restart a cog by ID
 related:
 - COGID
 - COGSTOP
+# Full-path cross-references (Sacred Rule #7)
+- architecture/boot-rom/_index.yaml
+- architecture/boot-rom/spi-flash-boot.yaml
+- code-examples/flash-loader-case-study.yaml
 examples:
 - code: 'COGINIT #1,#$100                                  ''load and start Cog 1
     from Hub RAM $100

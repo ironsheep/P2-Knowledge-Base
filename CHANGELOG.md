@@ -20,120 +20,32 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
-## [1.3.0] - 2025-01-20 (Upcoming) 📈
+## [1.4.1] - 2026-05-24
 
-### Major Documentation Quality Improvements - 68% Instructions Now Well-Documented
-
-This release delivers comprehensive documentation extraction from the PASM2 manual, significantly improving the knowledge base quality from 34% to 68% well-documented instructions.
+**Boot ROM coverage + flash loader case study**
 
 ### Added
+- Boot ROM subsystem (`architecture/boot-rom/`): three boot paths, P59-P61 pattern table with Edge module DIP-switch mapping, ROM contents inventory
+- P2 Monitor and TAQOZ Forth: entry sequences and documented capabilities
+- Flash loader case study: annotated reference to compiler-embedded `flash_loader.spin2`, cataloging 15 PASM2 techniques
+- PASM2 idiom files: halt-and-fault-response, self-modifying-code, pin-control, scratch-storage
+- Instruction enhancements: XINIT chunking, RDFAST/WRFAST pairing rules, ADDPINS encoding, streamer/SCK lockstep math
+- P2 Knowledge Base MCP: recommended integration documented across all AI-facing guides (README, CLAUDE-QUICKSTART, AI-PROMPT-PATTERNS, ai-reference guides)
 
-#### 📚 Manual Documentation Extraction
-- **Extracted documentation from PASM2 manual pages 31-147** covering 146 instructions
-- **Comprehensive content capture** including:
-  - Detailed explanations and descriptions
-  - Parameter documentation with types and constraints
-  - Encoding tables with binary formats
-  - Timing information (119 instructions)
-  - Flag effects documentation (37 instructions)
-  - Usage notes and special cases
-- **Grouped instruction handling** for shared documentation (AND/ANDN, BITC/BITNC, etc.)
-- **Assembly directive documentation** for ALIGNL, ALIGNW, and data declarations
+---
 
-#### 🔧 Quality Assessment Tools
-- **YAML quality assessment script** (`yaml-quality-assessment.py`) measuring documentation completeness
-- **Heat map generator** with visual documentation coverage analysis
-- **Grouped instruction analyzer** identifying shared documentation patterns
-- **Field consistency auditor** ensuring uniform YAML structure
+## [1.4.0] - 2025-09-26
 
-#### 📊 Documentation Analysis Reports
-- **Heat map visualization** showing documentation coverage by color (green/yellow/red)
-- **Quality metrics** tracking scores from 0-100 for each instruction
-- **Coverage statistics** by instruction groups and categories
-- **Improvement tracking** comparing before/after extraction metrics
+**Debug formatter coverage + PASM2 constants + manifest expansion**
 
-### Changed
+### Added
+- Debug formatters: 52+ underscore-protocol formatters documented
+- PASM2 constants: TRUE, FALSE, POSX, NEGX, PI
+- Configuration symbols: 25+ entries (DEBUG_BAUD, _CLKFREQ, etc.)
+- SDEC() and SDEC_() lookup paths documented
+- Manifest coverage: 249 entries
 
-#### 🎯 Documentation Quality Improvements
-- **248 instructions** (68.3%) now well-documented, up from ~127 (34%)
-- **Average quality score** improved to 74.9% from ~50%
-- **197 instructions** meet high quality threshold (80%+)
-- **143 instructions** enriched with manual extraction content
-- **AND/ANDN** and other grouped instructions synchronized
-
-#### 🧹 Cleanup and Corrections
-- **Removed incorrect instructions**:
-  - Generic PUSH/POP (don't exist - only PUSHA/PUSHB/POPA/POPB)
-  - Block markers (DAT/CON/VAR/PUB/PRI/OBJ) mistakenly treated as instructions
-- **Fixed PUSHA/PUSHB/POPA/POPB** descriptions preserving compiler data
-- **Standardized field names** across all YAML files
-- **Fixed data types** (timing.cycles as integer, not string)
-- **Removed obsolete fields** like 'needs_documentation'
-
-#### 📁 Repository Organization
-- **Scripts organized** into proper directories:
-  - `engineering/scripts/analysis/` - Coverage and quality analysis tools
-  - `engineering/scripts/extraction/` - Manual extraction scripts
-  - `engineering/scripts/cleanup/` - YAML cleanup and fix utilities
-  - `engineering/reports/` - Analysis reports and heat maps
-- **Top level cleaned** - Only versioned documentation remains
-
-### Fixed
-
-#### 🐛 Data Quality Issues
-- **Grouped instruction inconsistencies** - 26 instruction pairs synchronized
-- **Data type errors** - 90 timing.cycles fields converted to integers
-- **Missing brief descriptions** - Added to 205 instructions
-- **Parameter documentation** - Enhanced for 161 instructions
-- **Flag documentation** - Added for 171 instructions
-- **Encoding format cleanup** - Standardized across all instructions
-
-### Metrics
-
-#### 📈 Before/After Comparison
-- **Well-documented instructions**: 127 → 248 (+95% improvement)
-- **Average quality score**: ~50% → 74.9% (+50% improvement)
-- **High quality (80%+)**: Unknown → 197 instructions
-- **Poor documentation (<40%)**: Many → 8 instructions
-- **Manual extraction coverage**: 0% → 39.7%
-
-#### 📊 Current State
-- **Total instructions**: 358 valid P2 instructions
-- **Assembly directives**: 12 documented
-- **Comprehensive (90-100 score)**: 23 instructions
-- **Well documented (70-89)**: 195 instructions
-- **Good (60-69)**: 30 instructions
-- **Fair (40-59)**: 118 instructions
-- **Poor (<40)**: 8 instructions
-
-### Technical Details
-
-#### Extraction Pipeline
-1. **Pattern matching** for instruction sections in manual
-2. **Content parsing** for descriptions, parameters, encoding
-3. **YAML merging** preserving compiler-provided data
-4. **Quality validation** ensuring completeness
-5. **Backup creation** before any modifications
-
-#### Quality Scoring System
-- **Required fields** (40 points): instruction, syntax, description, etc.
-- **Description quality** (20 points): Length and comprehensiveness
-- **Brief description** (10 points): Summary for quick reference
-- **Parameters** (10 points): Documented operands
-- **Examples** (10 points): Code samples (still needed)
-- **Technical fields** (10 points): Encoding, timing, flags
-
-### Known Issues
-- **327 files still lack examples** - Critical for AI code generation
-- **PUSHA/PUSHB incorrectly scored** as poor (35) despite improvements
-- **10 directives** need documentation improvement
-- **217 instructions** not yet extracted from manual
-
-### Next Steps for v1.4.0
-- Add code examples to all instructions
-- Extract remaining manual sections
-- Complete directive documentation
-- Achieve 90%+ quality score average
+---
 
 ## [1.0.0] - 2025-08-15 🎉
 

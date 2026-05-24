@@ -124,3 +124,9 @@ related:
   - language/spin2/system-variables/clkmode.yaml
   - language/spin2/constants/special-configuration-symbols.yaml
   - architecture/clock_system.yaml
+  - architecture/boot-rom/_index.yaml
+  - architecture/boot-rom/spi-flash-boot.yaml
+  # HUBSET #%0010 is used as a fail-safe halt idiom by selecting a dead clock source.
+  # This is creative exploitation of clock-source switching, not a HUBSET feature.
+  # See the idiom entry for the pattern and caveats.
+  - language/pasm2/idioms/halt-and-fault-response.yaml

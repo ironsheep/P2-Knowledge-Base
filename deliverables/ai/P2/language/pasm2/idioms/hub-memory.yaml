@@ -53,3 +53,75 @@ idioms:
     examples:
       - "wrword value, ptra"
     context: Store 16-bit data
+
+  - name: setq_block_read
+    pattern: |
+      setq #{count - 1}
+      rdlong {first_cog_reg}, {hub_ptr}
+    description: |
+      Block-transfer up to 16 longs from hub to cog registers in a single
+      RDLONG, using SETQ to set the count. Equivalent to memcpy from hub
+      to cog. SETQ2 variant targets LUT registers instead.
+    examples:
+      - |
+        setq    #16-1               ' transfer 16 longs
+        rdlong  buf, ptra           ' buf..buf+15 filled from hub
+      - |
+        setq2   #128-1              ' transfer 128 longs to LUT
+        rdlong  $200, hub_ptr       ' LUT registers 0..127 filled
+    context: |
+      The canonical fast memcpy substitute for cog code. Up to 16 longs
+      per single setq+rdlong pair (or up to 512 longs per single
+      setq2+rdlong pair when staging through LUT). Used heavily in
+      cog-resident loaders and DSP routines.
+    constraints:
+      - "SETQ count = N-1 (zero-based) — count of 0 transfers 1 long"
+      - "Destination cog registers must be contiguous"
+      - "Transfer is atomic from the hub's perspective once started"
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 148-151
+    related_instructions:
+      - language/pasm2/setq.yaml
+      - language/pasm2/setq2.yaml
+      - language/pasm2/rdlong.yaml
+      - language/pasm2/wrlong.yaml
+
+  - name: setq_block_write
+    pattern: |
+      setq #{count - 1}
+      wrlong {first_cog_reg}, {hub_ptr}
+    description: |
+      Block-transfer up to 16 longs from cog registers to hub in a single
+      WRLONG. SETQ2 variant transfers from LUT instead.
+    examples:
+      - |
+        setq    #16-1
+        wrlong  buf, ptra           ' buf..buf+15 written to hub
+    context: |
+      Mirror of setq_block_read; used to flush cog state or computed
+      results to hub in one operation.
+
+  - name: setq_block_chained_for_large_transfers
+    pattern: |
+      ' Loop: per iteration, transfer 512 longs hub→LUT then LUT→hub
+      setq2   #512-1
+      rdlong  0, src_ptr           ' fill LUT 0..511 from hub
+      setq2   #512-1
+      wrlong  0, dst_ptr           ' write LUT 0..511 to hub
+      ' update pointers, decrement count, repeat
+    description: |
+      Combine SETQ2 block read + SETQ2 block write to perform a
+      hub-to-hub memcpy via the LUT, 512 longs per outer iteration.
+      Used when both source and destination are in hub but a fast
+      block copy is needed.
+    context: |
+      The production flash loader uses this exact pattern for the
+      application copy phase. See flash-loader-case-study.yaml for
+      the full sequence.
+    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 148-151
+    related: code-examples/flash-loader-case-study.yaml
+
+related:
+  - language/pasm2/setq.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
+  - code-examples/flash-loader-case-study.yaml
