@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-08T00:32:28.845901",
-    "total_entries": 1032,
+    "generated": "2026-05-24T00:48:36.693469",
+    "total_entries": 1044,
     "total_categories": 49,
     "total_aliases": 1001,
     "multi_target_aliases": 54,
@@ -3675,6 +3675,34 @@
     ]
   },
   "files": {
+    "p2kbArchIndex": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchBootPatternSelection": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchBootRomContents": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchP2Monitor": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/p2-monitor.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchSdCardBoot": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/sd-card-boot.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchSpiFlashBoot": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/spi-flash-boot.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbArchTaqozForth": {
+      "path": "deliverables/ai/P2/architecture/boot-rom/taqoz-forth.yaml",
+      "mtime": 1779583590
+    },
     "p2kbArchClickModuleIntegration": {
       "path": "deliverables/ai/P2/architecture/click_module_integration.yaml",
       "mtime": 1764449566
@@ -3769,7 +3797,7 @@
     },
     "p2kbArchSerialLoader": {
       "path": "deliverables/ai/P2/architecture/serial_loader.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbArchSmartPin00000NormalMode": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00000-normal-mode.yaml",
@@ -3793,7 +3821,7 @@
     },
     "p2kbArchSmartPin00101TransitionOutput": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00101-transition-output.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbArchSmartPin00110NcoFrequency": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00110-nco-frequency.yaml",
@@ -3901,7 +3929,7 @@
     },
     "p2kbArchSpiImplementationGuide": {
       "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
-      "mtime": 1771286411
+      "mtime": 1779583590
     },
     "p2kbArchSmartPinPatterns": {
       "path": "deliverables/ai/P2/architecture/smart_pin_patterns.yaml",
@@ -3911,7 +3939,7 @@
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
       "mtime": 1778200244
     },
-    "p2kbArchIndex": {
+    "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
       "mtime": 1769124063
     },
@@ -3958,6 +3986,10 @@
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
       "mtime": 1764449566
+    },
+    "p2kbExampleFlashLoaderCaseStudy": {
+      "path": "deliverables/ai/P2/code-examples/flash-loader-case-study.yaml",
+      "mtime": 1779583590
     },
     "p2kbExampleSmartPins001BasicIo": {
       "path": "deliverables/ai/P2/code-examples/smart-pins-001-basic-io.yaml",
@@ -4809,7 +4841,7 @@
     },
     "p2kbPasm2Coginit": {
       "path": "deliverables/ai/P2/language/pasm2/coginit.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Cogstop": {
       "path": "deliverables/ai/P2/language/pasm2/cogstop.yaml",
@@ -4877,7 +4909,7 @@
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2SkipfBranching": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/skipf_branching.yaml",
@@ -4893,7 +4925,7 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1778200244
+      "mtime": 1779583590
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
@@ -5089,7 +5121,7 @@
     },
     "p2kbPasm2Getptr": {
       "path": "deliverables/ai/P2/language/pasm2/getptr.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Getqx": {
       "path": "deliverables/ai/P2/language/pasm2/getqx.yaml",
@@ -5149,23 +5181,39 @@
     },
     "p2kbPasm2Hubset": {
       "path": "deliverables/ai/P2/language/pasm2/hubset.yaml",
-      "mtime": 1769213380
+      "mtime": 1779583590
     },
     "p2kbPasm2IdiomsConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/conditional-execution.yaml",
       "mtime": 1764449566
     },
+    "p2kbPasm2HaltAndFaultResponse": {
+      "path": "deliverables/ai/P2/language/pasm2/idioms/halt-and-fault-response.yaml",
+      "mtime": 1779583590
+    },
     "p2kbPasm2HubMemory": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/hub-memory.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2LoopControl": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/loop-control.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
+    },
+    "p2kbPasm2PinControl": {
+      "path": "deliverables/ai/P2/language/pasm2/idioms/pin-control.yaml",
+      "mtime": 1779583590
     },
     "p2kbPasm2RegisterOperations": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/register-operations.yaml",
       "mtime": 1764449566
+    },
+    "p2kbPasm2ScratchStorage": {
+      "path": "deliverables/ai/P2/language/pasm2/idioms/scratch-storage.yaml",
+      "mtime": 1779583590
+    },
+    "p2kbPasm2SelfModifyingCode": {
+      "path": "deliverables/ai/P2/language/pasm2/idioms/self-modifying-code.yaml",
+      "mtime": 1779583590
     },
     "p2kbPasm2TimingControl": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/timing-control.yaml",
@@ -5669,7 +5717,7 @@
     },
     "p2kbPasm2Rdfast": {
       "path": "deliverables/ai/P2/language/pasm2/rdfast.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
@@ -5693,7 +5741,7 @@
     },
     "p2kbPasm2Rep": {
       "path": "deliverables/ai/P2/language/pasm2/rep.yaml",
-      "mtime": 1769036597
+      "mtime": 1779583590
     },
     "p2kbPasm2Res": {
       "path": "deliverables/ai/P2/language/pasm2/res.yaml",
@@ -5881,7 +5929,7 @@
     },
     "p2kbPasm2Setq": {
       "path": "deliverables/ai/P2/language/pasm2/setq.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Setq2": {
       "path": "deliverables/ai/P2/language/pasm2/setq2.yaml",
@@ -6169,7 +6217,7 @@
     },
     "p2kbPasm2Wrfast": {
       "path": "deliverables/ai/P2/language/pasm2/wrfast.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Wrlong": {
       "path": "deliverables/ai/P2/language/pasm2/wrlong.yaml",
@@ -6213,7 +6261,7 @@
     },
     "p2kbPasm2Xinit": {
       "path": "deliverables/ai/P2/language/pasm2/xinit.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbPasm2Xor": {
       "path": "deliverables/ai/P2/language/pasm2/xor.yaml",
@@ -7113,7 +7161,7 @@
     },
     "p2kbSpin2OpOpADDPINS": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ADDPINS.yaml",
-      "mtime": 1764449566
+      "mtime": 1779583590
     },
     "p2kbSpin2OpOpBMASK": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_BMASK.yaml",
