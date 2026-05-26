@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-24T00:48:36.693469",
+    "generated": "2026-05-26T01:40:59.904661",
     "total_entries": 1044,
     "total_categories": 49,
-    "total_aliases": 1001,
+    "total_aliases": 1008,
     "multi_target_aliases": 54,
     "source": "deliverables/ai/P2/"
   },
@@ -488,10 +488,10 @@
       "p2kbArchSmartPin10001TimeAHighs",
       "p2kbArchSmartPin10010TimeXAEvents",
       "p2kbArchSmartPin10011CountTimeXPeriods",
-      "p2kbArchSmartPin10100CountStatesXPeriods",
-      "p2kbArchSmartPin10101CountPeriodsInXClocks",
-      "p2kbArchSmartPin10110CountStatesInXClocks",
-      "p2kbArchSmartPin10111CountTimeInXClocks"
+      "p2kbArchSmartPin10100CountHighsXPeriods",
+      "p2kbArchSmartPin10101CountTicksInXClocks",
+      "p2kbArchSmartPin10110CountHighsInXClocks",
+      "p2kbArchSmartPin10111CountPeriodsInXClocks"
     ],
     "smart_pins_frequency": [
       "p2kbArchSmartPin00110NcoFrequency",
@@ -765,6 +765,12 @@
     ],
     "CALLPB": [
       "p2kbPasm2Callpb"
+    ],
+    "CLKFREQ": [
+      "p2kbArchClockSystem"
+    ],
+    "CLKMODE": [
+      "p2kbArchClockSystem"
     ],
     "CLKSET": [
       "p2kbSpin2Clkset"
@@ -1076,6 +1082,7 @@
       "p2kbPasm2Getxacc"
     ],
     "HUBSET": [
+      "p2kbArchClockSystem",
       "p2kbPasm2Hubset",
       "p2kbSpin2Hubset"
     ],
@@ -1435,6 +1442,9 @@
     "PIN_OUTPUT_HIERARCHY": [
       "p2kbArchSmartPins"
     ],
+    "PLL": [
+      "p2kbArchClockSystem"
+    ],
     "POLLATN": [
       "p2kbPasm2Pollatn",
       "p2kbSpin2Pollatn"
@@ -1576,11 +1586,17 @@
     "QVECTOR": [
       "p2kbPasm2Qvector"
     ],
+    "RCFAST": [
+      "p2kbArchClockSystem"
+    ],
     "RCL": [
       "p2kbPasm2Rcl"
     ],
     "RCR": [
       "p2kbPasm2Rcr"
+    ],
+    "RCSLOW": [
+      "p2kbArchClockSystem"
     ],
     "RCZL": [
       "p2kbPasm2Rczl"
@@ -2104,8 +2120,14 @@
     "XCONT": [
       "p2kbPasm2Xcont"
     ],
+    "XI": [
+      "p2kbArchClockSystem"
+    ],
     "XINIT": [
       "p2kbPasm2Xinit"
+    ],
+    "XO": [
+      "p2kbArchClockSystem"
     ],
     "XOR": [
       "p2kbPasm2Xor"
@@ -3681,7 +3703,7 @@
     },
     "p2kbArchBootPatternSelection": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml",
-      "mtime": 1779583590
+      "mtime": 1779759548
     },
     "p2kbArchBootRomContents": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml",
@@ -3697,7 +3719,7 @@
     },
     "p2kbArchSpiFlashBoot": {
       "path": "deliverables/ai/P2/architecture/boot-rom/spi-flash-boot.yaml",
-      "mtime": 1779583590
+      "mtime": 1779759548
     },
     "p2kbArchTaqozForth": {
       "path": "deliverables/ai/P2/architecture/boot-rom/taqoz-forth.yaml",
@@ -3709,7 +3731,7 @@
     },
     "p2kbArchClockSystem": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1769213380
+      "mtime": 1779759548
     },
     "p2kbArchCog": {
       "path": "deliverables/ai/P2/architecture/cog.yaml",
@@ -3879,21 +3901,21 @@
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10011-count-time-x-periods.yaml",
       "mtime": 1764449566
     },
-    "p2kbArchSmartPin10100CountStatesXPeriods": {
-      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10100-count-states-x-periods.yaml",
-      "mtime": 1764449566
+    "p2kbArchSmartPin10100CountHighsXPeriods": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10100-count-highs-x-periods.yaml",
+      "mtime": 1779759548
     },
-    "p2kbArchSmartPin10101CountPeriodsInXClocks": {
-      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10101-count-periods-in-x-clocks.yaml",
-      "mtime": 1764449566
+    "p2kbArchSmartPin10101CountTicksInXClocks": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml",
+      "mtime": 1779759548
     },
-    "p2kbArchSmartPin10110CountStatesInXClocks": {
-      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10110-count-states-in-x-clocks.yaml",
-      "mtime": 1764449566
+    "p2kbArchSmartPin10110CountHighsInXClocks": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml",
+      "mtime": 1779759548
     },
-    "p2kbArchSmartPin10111CountTimeInXClocks": {
-      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10111-count-time-in-x-clocks.yaml",
-      "mtime": 1764449566
+    "p2kbArchSmartPin10111CountPeriodsInXClocks": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml",
+      "mtime": 1779759548
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
@@ -3989,7 +4011,7 @@
     },
     "p2kbExampleFlashLoaderCaseStudy": {
       "path": "deliverables/ai/P2/code-examples/flash-loader-case-study.yaml",
-      "mtime": 1779583590
+      "mtime": 1779759548
     },
     "p2kbExampleSmartPins001BasicIo": {
       "path": "deliverables/ai/P2/code-examples/smart-pins-001-basic-io.yaml",
