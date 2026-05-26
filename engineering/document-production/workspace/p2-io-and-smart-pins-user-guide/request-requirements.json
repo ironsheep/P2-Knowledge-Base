@@ -1,0 +1,14 @@
+{
+  "description": "Mandatory pandoc arguments for P2 I/O & Smart Pins User Guide",
+  "required_args": [
+    "--pdf-engine=xelatex",
+    "--top-level-division=chapter",
+    "--toc"
+  ],
+  "notes": [
+    "XeLaTeX required for fontspec (Latin Modern font family) and tcolorbox advanced features used by the cover page",
+    "--top-level-division=chapter — opus-master uses # for chapters; pagination filter promotes # Part lines to \\manualpart{}",
+    "TOC required for navigation in a ~400-page reference",
+    "Template stack: p2kb-iosp-reference.latex loads foundation + content + diagrams (stub) .sty files"
+  ]
+}

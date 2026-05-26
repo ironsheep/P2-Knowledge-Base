@@ -1,0 +1,30 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-IO-and-Smart-Pins-User-Guide.md",
+      "output": "P2-IO-and-Smart-Pins-User-Guide.pdf",
+      "template": "p2kb-iosp-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-iosp-figures",
+        "p2kb-iosp-tables",
+        "p2kb-iosp-mnemonic-bold",
+        "p2kb-iosp-code-coloring",
+        "p2kb-iosp-pagination"
+      ],
+      "metadata": {
+        "title": "P2 I/O & Smart Pins User Guide",
+        "subtitle": "Complete P2 Pin I/O and Smart Pin Reference",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v1.0",
+        "date": "May 2026"
+      }
+    }
+  ]
+}

@@ -22,7 +22,7 @@ frequency = (Y × sysclk) / 2^32
 - `frequency`: Output frequency in Hz
 - `Y`: NCO frequency control word (32-bit)
 - `sysclk`: System clock frequency in Hz
-- `X[15:0]`: Base period (typically 1)
+- `X[15:0]`: Base period (1 for maximum resolution)
 
 **Worked Example (1 kHz at 200 MHz):**
 ```
@@ -45,7 +45,7 @@ Y = (frequency × 2^32) / sysclk
 
 In Spin2:
 ```spin2
-y_value := (frequency * $1_0000_0000) / _clkfreq
+y_value := frequency FRAC _clkfreq
 ```
 
 **Worked Example (10 kHz at 200 MHz):**

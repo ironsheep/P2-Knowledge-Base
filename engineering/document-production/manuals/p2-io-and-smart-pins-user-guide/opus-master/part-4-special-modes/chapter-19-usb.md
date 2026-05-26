@@ -56,8 +56,8 @@ CON
 PUB configure_usb_pins()
   ' Configure as USB pair with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  PINH(USB_DM)
+  PINH(USB_DP)
 ```
 
 ### Output Control
@@ -129,7 +129,7 @@ As a USB device, the P2:
 - Waits for host to initiate communication
 - Responds to USB requests
 - Provides endpoints for data transfer
-- Typically simpler to implement
+- Simpler to implement than host mode
 
 **Common device classes:**
 - CDC (Virtual COM Port)
@@ -198,15 +198,15 @@ CON
 
 PUB configure_usb()
   ' Reset both pins
-  DIRL(USB_DM)
-  DIRL(USB_DP)
+  PINL(USB_DM)
+  PINL(USB_DP)
 
   ' Configure USB mode with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
 
   ' Enable the USB pair
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  PINH(USB_DM)
+  PINH(USB_DP)
 ```
 
 ### PASM2 Configuration
@@ -247,12 +247,12 @@ usb_data      res       1
 
 ### External Components
 
-USB host mode typically requires:
+USB host mode requires:
 - 5V power supply for VBUS
 - Current limiting for protection
 - Pull-up/pull-down resistors for speed identification
 
-USB device mode typically requires:
+USB device mode requires:
 - Pull-up resistor on D+ (Full Speed) or D- (Low Speed)
 - May need level shifting if P2 runs at 3.3V
 
@@ -304,8 +304,8 @@ Implementing USB requires:
 
 ```spin2
 WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-DIRH(even_pin)                                  ' Enable DM
-DIRH(even_pin+1)                                ' Enable DP
+PINH(even_pin)                                  ' Enable DM
+PINH(even_pin+1)                                ' Enable DP
 ```
 
 ### Key Points

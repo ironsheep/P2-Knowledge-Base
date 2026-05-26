@@ -57,7 +57,7 @@ X is written via the **WXPIN** instruction. Some modes use only X[15:0]; others 
 
 ### Y Register - Input Data or Secondary Configuration
 
-The Y register typically holds:
+The Y register holds:
 
 - **Output data** for transmit modes (serial data to send)
 - **Target values** for output modes (PWM duty cycle, DAC level)
@@ -161,7 +161,7 @@ Every Smart Pin follows a consistent state progression:
 When DIR=0, the Smart Pin is held in reset:
 - The Smart Pin state machine is stopped
 - IN is forced low
-- Registers may be initialized to mode-specific values
+- Registers are initialized to mode-specific values
 - Configuration instructions (WRPIN/WXPIN/WYPIN) are accepted
 
 **Important:** Always configure a Smart Pin while DIR=0. Configuring while DIR=1 can cause unpredictable behavior.
@@ -243,10 +243,10 @@ Spin2 and PASM2 provide named constants for each mode (P_NCO_FREQ, P_PWM_TRIANGL
 **Output Modes (Chapters 6-11):**
 Generate signals on the pin—pulses, waveforms, serial data.
 
-**Input Modes (Chapters 12-18):**
+**Input Modes (Chapters 12-17):**
 Measure signals on the pin—timing, counting, frequency, analog levels.
 
-**Special Modes (Chapters 19-20):**
+**Special Modes (Chapters 18-19):**
 Inter-COG data sharing (Repository) and USB.
 
 ---
@@ -282,7 +282,7 @@ The TT bits control output behavior:
 - P_OE (%01): Output enabled regardless of DIR
 - Without P_OE: DIR controls output enable
 
-For Smart Pin output modes, P_OE is typically required.
+For Smart Pin output modes, P_OE is required.
 
 ### Combining Layers
 

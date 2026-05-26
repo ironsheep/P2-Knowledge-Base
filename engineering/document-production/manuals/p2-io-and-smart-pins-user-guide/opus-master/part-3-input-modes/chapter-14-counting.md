@@ -1,6 +1,6 @@
 # Chapter 14: Counting Modes
 
-This chapter covers Smart Pin counting modes: **P_COUNT_HIGHS** (%01100) for gated edge counting, **P_COUNT_RISES** (%01101) for accumulator up/down, **P_COUNT_EDGES** (%01110) for edge counting with direction, **P_HIGH_CLOCKS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
+This chapter covers Smart Pin counting modes: **P_COUNT_HIGHS** (%01100) for gated edge counting, **P_COUNT_RISES** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_HIGH_TICKS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
 ---
 
@@ -13,8 +13,8 @@ This chapter covers Smart Pin counting modes: **P_COUNT_HIGHS** (%01100) for gat
 | %01011 | P_QUADRATURE | Quadrature encoder decoding |
 | %01100 | P_COUNT_HIGHS | Count A edges when B high (gated) |
 | %01101 | P_COUNT_RISES | Accumulate A edges, B controls direction |
-| %01110 | P_COUNT_EDGES | Count edges with optional up/down |
-| %01111 | P_HIGH_CLOCKS | Count clocks while input high |
+| %01110 | P_COUNT_RISES | Count edges with optional up/down |
+| %01111 | P_HIGH_TICKS | Count clocks while input high |
 
 ### Common Features
 
@@ -132,6 +132,7 @@ Use two smart pins for position and velocity simultaneously:
 
 ```spin2
 CON
+  _clkfreq = 200_000_000
   POS_PIN = 20                             ' Position tracking
   VEL_PIN = 22                             ' Velocity measurement
 
@@ -279,11 +280,11 @@ PUB count_down()
 
 ---
 
-## 14.5 P_COUNT_EDGES Mode (%01110)
+## 14.5 P_COUNT_RISES Mode (%01110)
 
 ### Function
 
-P_COUNT_EDGES has two sub-modes controlled by Y[0]:
+P_COUNT_RISES has two sub-modes controlled by Y[0]:
 - Y[0]=0: Count A-input positive edges only
 - Y[0]=1: Increment on A-input edge, decrement on B-input edge
 
@@ -297,7 +298,7 @@ CON
 
 PUB edge_counter_init()
   PINFLOAT(PULSE_PIN)
-  WRPIN(PULSE_PIN, P_COUNT_EDGES)
+  WRPIN(PULSE_PIN, P_COUNT_RISES)
   WXPIN(PULSE_PIN, 0)                      ' Continuous
   WYPIN(PULSE_PIN, 0)                      ' Y[0]=0: A edges only
   PINLOW(PULSE_PIN)
@@ -317,7 +318,7 @@ CON
 
 PUB dual_counter_init()
   PINFLOAT(UP_PIN)
-  WRPIN(UP_PIN, P_COUNT_EDGES | P_PLUS1_B)
+  WRPIN(UP_PIN, P_COUNT_RISES | P_PLUS1_B)
   WXPIN(UP_PIN, 0)                         ' Continuous
   WYPIN(UP_PIN, 1)                         ' Y[0]=1: A up, B down
   PINLOW(UP_PIN)
@@ -338,7 +339,7 @@ PUB event_rate() : events_per_period | period
   period := (_clkfreq / 1000) * PERIOD_MS
 
   PINFLOAT(EVENT_PIN)
-  WRPIN(EVENT_PIN, P_COUNT_EDGES)
+  WRPIN(EVENT_PIN, P_COUNT_RISES)
   WXPIN(EVENT_PIN, period)
   WYPIN(EVENT_PIN, 0)
   PINLOW(EVENT_PIN)
@@ -349,11 +350,11 @@ PUB event_rate() : events_per_period | period
 
 ---
 
-## 14.6 P_HIGH_CLOCKS Mode (%01111)
+## 14.6 P_HIGH_TICKS Mode (%01111)
 
 ### Function
 
-P_HIGH_CLOCKS counts system clock cycles while input is in a particular state. Two sub-modes controlled by Y[0]:
+P_HIGH_TICKS counts system clock cycles while input is in a particular state. Two sub-modes controlled by Y[0]:
 - Y[0]=0: Count clocks while A-input high
 - Y[0]=1: Increment clocks while A high, decrement while B high
 
@@ -369,7 +370,7 @@ PUB measure_duty_cycle() : duty_percent | high_clocks, period_clocks
   period_clocks := (_clkfreq / 1000) * PERIOD_MS
 
   PINFLOAT(PWM_PIN)
-  WRPIN(PWM_PIN, P_HIGH_CLOCKS)
+  WRPIN(PWM_PIN, P_HIGH_TICKS)
   WXPIN(PWM_PIN, period_clocks)
   WYPIN(PWM_PIN, 0)                        ' Count A-high clocks
   PINLOW(PWM_PIN)
@@ -386,6 +387,7 @@ Using Y[0]=1 for differential measurement:
 
 ```spin2
 CON
+  _clkfreq = 200_000_000
   SIGNAL_A = 20
   SIGNAL_B = 21
 
@@ -393,7 +395,7 @@ PUB differential_high_time() : net_clocks | period
   period := _clkfreq / 10                  ' 100ms
 
   PINFLOAT(SIGNAL_A)
-  WRPIN(SIGNAL_A, P_HIGH_CLOCKS | P_PLUS1_B)
+  WRPIN(SIGNAL_A, P_HIGH_TICKS | P_PLUS1_B)
   WXPIN(SIGNAL_A, period)
   WYPIN(SIGNAL_A, 1)                       ' A increments, B decrements
   PINLOW(SIGNAL_A)
@@ -426,7 +428,7 @@ Add conditioning for reliable counting:
 
 ```spin2
 ' Schmitt trigger for noisy signals
-WRPIN(pin, P_COUNT_EDGES | P_SCHMITT_A)
+WRPIN(pin, P_COUNT_RISES | P_SCHMITT_A)
 
 ' Filter to reduce glitches
 WRPIN(pin, P_QUADRATURE | P_FILT1_AB | P_PLUS1_B)
@@ -479,11 +481,11 @@ PUB update_extended_count() | current, delta
 |-------------|------|---------------|
 | Rotary encoder | P_QUADRATURE | X=0 for position |
 | Frequency counter | P_COUNT_HIGHS | X=gate_period |
-| Event counter | P_COUNT_EDGES | X=0, Y=0 |
-| Up/down buttons | P_COUNT_EDGES | X=0, Y=1 |
+| Event counter | P_COUNT_RISES | X=0, Y=0 |
+| Up/down buttons | P_COUNT_RISES | X=0, Y=1 |
 | Step/direction motor | P_COUNT_RISES | X=0 |
-| PWM duty cycle | P_HIGH_CLOCKS | X=period, Y=0 |
-| Differential time | P_HIGH_CLOCKS | X=period, Y=1 |
+| PWM duty cycle | P_HIGH_TICKS | X=period, Y=0 |
+| Differential time | P_HIGH_TICKS | X=period, Y=1 |
 
 ---
 
@@ -501,7 +503,7 @@ PUB frequency_counter() : freq | period, count
   period := (_clkfreq / 1000) * GATE_MS
 
   PINFLOAT(FREQ_PIN)
-  WRPIN(FREQ_PIN, P_COUNT_EDGES | P_SCHMITT_A)
+  WRPIN(FREQ_PIN, P_COUNT_RISES | P_SCHMITT_A)
   WXPIN(FREQ_PIN, period)
   WYPIN(FREQ_PIN, 0)
   PINLOW(FREQ_PIN)
@@ -551,6 +553,18 @@ PRI adjust_motor(error)
     motor_reverse()
   else
     motor_stop()
+
+PRI motor_forward()
+  ' Application-specific: drive PWM/H-bridge high for forward direction
+  PINH(MOTOR_PWM)
+
+PRI motor_reverse()
+  ' Application-specific: drive PWM/H-bridge for reverse direction
+  PINL(MOTOR_PWM)
+
+PRI motor_stop()
+  ' Application-specific: stop motor (PWM=0 or coast)
+  PINL(MOTOR_PWM)
 ```
 
 ### Example 3: PASM2 Event Counter
@@ -563,7 +577,7 @@ DAT           org
 
 ' Initialize edge counter
               dirl      #EVENT_PIN
-              wrpin     ##P_COUNT_EDGES, #EVENT_PIN
+              wrpin     ##P_COUNT_RISES, #EVENT_PIN
               wxpin     #0, #EVENT_PIN      ' Continuous
               wypin     #0, #EVENT_PIN      ' A edges only
               dirh      #EVENT_PIN
@@ -594,7 +608,7 @@ PUB measure_rpm() : rpm | period, pulses
   period := (_clkfreq / 1000) * SAMPLE_MS
 
   PINFLOAT(TACH_PIN)
-  WRPIN(TACH_PIN, P_COUNT_EDGES | P_SCHMITT_A)
+  WRPIN(TACH_PIN, P_COUNT_RISES | P_SCHMITT_A)
   WXPIN(TACH_PIN, period)
   WYPIN(TACH_PIN, 0)
   PINLOW(TACH_PIN)
@@ -620,8 +634,8 @@ PUB measure_rpm() : rpm | period, pulses
 | P_QUADRATURE | %01011 | Phase A | Phase B | Position |
 | P_COUNT_HIGHS | %01100 | Events | Gate | Gated count |
 | P_COUNT_RISES | %01101 | Events | Direction | Up/down count |
-| P_COUNT_EDGES | %01110 | Up events | Down events* | Net count |
-| P_HIGH_CLOCKS | %01111 | Time high | Time high* | Clock count |
+| P_COUNT_RISES | %01110 | Up events | Down events* | Net count |
+| P_HIGH_TICKS | %01111 | Time high | Time high* | Clock count |
 
 *When Y[0]=1
 

@@ -107,13 +107,13 @@ For time-critical input sampling, prefer TESTP.
 
 ## 12.3 Input Conditioning Options
 
-### P_LOGIC_A and P_LOGIC_B
+### P_LOGIC_A and P_LOGIC_B_FB
 
 Standard CMOS logic input with ~1.65V threshold:
 
 ```spin2
 WRPIN(pin, P_LOGIC_A)                      ' Default logic input
-WRPIN(pin, P_LOGIC_B)                      ' Same, different internal routing
+WRPIN(pin, P_LOGIC_B_FB)                      ' Same, different internal routing
 ```
 
 ### P_SCHMITT_A
@@ -134,15 +134,14 @@ WRPIN(pin, P_SCHMITT_A)
 - Signal travels through noisy environment
 - Preventing oscillation on threshold crossing
 
-### P_TTL
+### TTL Threshold (via P_LEVEL_A)
 
-TTL-compatible input threshold:
+There is no dedicated TTL-threshold constant. To detect a ~1.4V TTL crossing, use the programmable level comparator with a level value of 108 (1.4V ÷ 3.3V × 256 ≈ 108):
 
 ```spin2
-WRPIN(pin, P_TTL)
+WRPIN(pin, P_LEVEL_A | (108 << 8))         ' ~1.4V threshold (TTL)
+PINFLOAT(pin)
 ```
-
-**Threshold:** ~1.4V (standard TTL high/low transition point)
 
 **Use when:**
 - Interfacing with TTL logic
@@ -444,9 +443,9 @@ CON
   _clkfreq = 200_000_000
   BUTTON_BASE = 20                         ' Buttons on pins 20-23
 
-PUB main() | buttons, last_buttons
+PUB main() | buttons, last_buttons, i
   ' Configure 4 buttons with pull-ups
-  repeat 4 with i
+  repeat i from 0 to 3
     WRPIN(BUTTON_BASE + i, P_SCHMITT_A | P_HIGH_15K)
     PINFLOAT(BUTTON_BASE + i)
 
@@ -586,8 +585,7 @@ Theoretical maximum depends on sampling method:
 | P_NORMAL | Default CMOS input |
 | P_LOGIC_A | Logic input, OUT feedback |
 | P_SCHMITT_A | Schmitt trigger (~0.4V hysteresis) |
-| P_TTL | TTL threshold (~1.4V) |
-| P_LEVEL_A | Programmable level comparator |
+| P_LEVEL_A | Programmable level comparator (use level=108 for ~1.4V TTL threshold) |
 
 ### Pull Resistors
 

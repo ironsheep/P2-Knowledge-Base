@@ -291,7 +291,7 @@ The 8-bit DAC value is encoded in bits [19:12] of the WRPIN configuration:
 ' dac_value: 0-255 (0V to peak voltage)
 dac_config := P_DAC_990R_3V | (dac_value << 12)
 WRPIN(pin, dac_config)
-DIRH(pin)                                 ' Enable output
+PINH(pin)                                 ' Enable output
 ```
 
 **Selecting DAC Mode:**
@@ -312,7 +312,7 @@ CON
 PUB main()
   ' Output ~1.65V (half of 3.3V)
   WRPIN(DAC_PIN, P_DAC_990R_3V | (DAC_MIDPOINT << 12))
-  DIRH(DAC_PIN)                           ' Enable DAC output
+  PINH(DAC_PIN)                           ' Enable DAC output
 ```
 
 **Note:** For dynamic DAC output with waveform generation, use Smart Pin DAC modes (Chapter 10).
@@ -445,7 +445,7 @@ CON
   SCL_PIN = 1
 
 PUB setup_i2c()
-  ' Open-drain with 15kΩ pull-up (external pull-ups usually used)
+  ' Open-drain (most I²C setups use external pull-ups instead)
   WRPIN(SDA_PIN, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
   WRPIN(SCL_PIN, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
   
@@ -492,7 +492,7 @@ PUB set_voltage(level) | config
   ' Output analog voltage proportional to level (0-255)
   config := P_DAC_990R_3V | (level << 12)
   WRPIN(DAC_PIN, config)
-  DIRH(DAC_PIN)                           ' Enable output
+  PINH(DAC_PIN)                           ' Enable output
 ```
 
 ### PASM2 Configuration Examples
@@ -563,4 +563,4 @@ This clears all enhanced configuration and Smart Pin modes, returning the pin to
 
 ---
 
-*This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-20. For the Smart Pin configuration process, see Chapter 4.*
+*This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the Smart Pin configuration process, see Chapter 4.*

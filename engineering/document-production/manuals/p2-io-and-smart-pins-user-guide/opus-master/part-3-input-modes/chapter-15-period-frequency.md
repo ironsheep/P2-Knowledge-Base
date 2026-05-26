@@ -40,7 +40,7 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 | %10 | A-edge to B-rise | Any A transition to B rising |
 | %11 | A-edge to B-edge | Any transition to any transition (maximum sensitivity) |
 
-**Note:** B-input can be set to the same pin as A-input for single-pin cycle measurement using `P_B_A_INPUT`.
+**Note:** B-input can be set to the same pin as A-input for single-pin cycle measurement using ``.
 
 ---
 
@@ -66,7 +66,7 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 **Configuration:**
 ```spin2
 ' Measure time for 100 periods
-PINSTART(pin, P_PERIODS_TICKS | P_B_A_INPUT, 100, %00)
+PINSTART(pin, P_PERIODS_TICKS, 100, %00)
 ```
 
 **Period Calculation:**
@@ -96,7 +96,7 @@ frequency = sysclk / single_period            ' In Hz
 **Configuration:**
 ```spin2
 ' Measure high time across 100 periods
-PINSTART(pin, P_PERIODS_HIGHS | P_B_A_INPUT, 100, %00)
+PINSTART(pin, P_PERIODS_HIGHS, 100, %00)
 ```
 
 **Duty Cycle with Both Modes:**
@@ -108,8 +108,8 @@ CON
 
 PUB measure_duty() | total_time, high_time, duty_percent
   ' Start both measurements
-  PINSTART(SIG_PIN, P_PERIODS_TICKS | P_B_A_INPUT, PERIODS, %00)
-  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS | P_B_A_INPUT, PERIODS, %00)
+  PINSTART(SIG_PIN, P_PERIODS_TICKS, PERIODS, %00)
+  PINSTART(SIG_PIN+1, P_PERIODS_HIGHS, PERIODS, %00)
 
   ' Wait for completion
   REPEAT UNTIL PINREAD(SIG_PIN)
@@ -150,7 +150,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
 ```spin2
 ' Measure periods within 100ms window
 window_clocks := _clkfreq / 10                ' 100ms
-PINSTART(pin, P_COUNTER_TICKS | P_B_A_INPUT, window_clocks, %00)
+PINSTART(pin, P_COUNTER_TICKS, window_clocks, %00)
 ```
 
 ### Mode %10110: P_COUNTER_HIGHS
@@ -173,7 +173,7 @@ PINSTART(pin, P_COUNTER_TICKS | P_B_A_INPUT, window_clocks, %00)
 **Configuration:**
 ```spin2
 ' Measure high time within 1-second window
-PINSTART(pin, P_COUNTER_HIGHS | P_B_A_INPUT, _clkfreq, %00)
+PINSTART(pin, P_COUNTER_HIGHS, _clkfreq, %00)
 ```
 
 ### Mode %10111: P_COUNTER_PERIODS
@@ -196,7 +196,7 @@ PINSTART(pin, P_COUNTER_HIGHS | P_B_A_INPUT, _clkfreq, %00)
 **Configuration:**
 ```spin2
 ' Count periods in 1-second window
-PINSTART(pin, P_COUNTER_PERIODS | P_B_A_INPUT, _clkfreq, %00)
+PINSTART(pin, P_COUNTER_PERIODS, _clkfreq, %00)
 ```
 
 **Frequency Calculation:**
@@ -227,9 +227,9 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
   window := (_clkfreq / 1000) * WINDOW_MS
 
   ' Configure all three measurements
-  PINSTART(PIN_TIME, P_COUNTER_TICKS | P_B_A_INPUT, window, %00)
-  PINSTART(PIN_HIGH, P_COUNTER_HIGHS | P_B_A_INPUT, window, %00)
-  PINSTART(PIN_PERIODS, P_COUNTER_PERIODS | P_B_A_INPUT, window, %00)
+  PINSTART(PIN_TIME, P_COUNTER_TICKS, window, %00)
+  PINSTART(PIN_HIGH, P_COUNTER_HIGHS, window, %00)
+  PINSTART(PIN_PERIODS, P_COUNTER_PERIODS, window, %00)
 
   REPEAT
     ' Wait for all measurements to complete
@@ -278,7 +278,7 @@ DAT           org
 
               ' Configure period measurement
               dirl      #SIG_PIN                ' Reset smart pin
-              wrpin     ##P_PERIODS_TICKS | P_B_A_INPUT, #SIG_PIN
+              wrpin     ##P_PERIODS_TICKS, #SIG_PIN
               wxpin     ##PERIODS_TO_MEASURE, #SIG_PIN
               wypin     #%00, #SIG_PIN          ' Rise to rise
               dirh      #SIG_PIN                ' Start measurement
@@ -317,7 +317,7 @@ DAT           org
 
               ' Configure 1-second window period counter
               dirl      #SIG_PIN
-              wrpin     ##P_COUNTER_PERIODS | P_B_A_INPUT, #SIG_PIN
+              wrpin     ##P_COUNTER_PERIODS, #SIG_PIN
               wxpin     ##_clkfreq, #SIG_PIN    ' 1-second window
               wypin     #%00, #SIG_PIN
               dirh      #SIG_PIN
@@ -350,7 +350,7 @@ CON
 
 PUB frequency_counter() | freq
   ' Count periods in 1-second window
-  PINSTART(INPUT_PIN, P_COUNTER_PERIODS | P_B_A_INPUT, _clkfreq, %00)
+  PINSTART(INPUT_PIN, P_COUNTER_PERIODS, _clkfreq, %00)
 
   DEBUG("Frequency Counter - 1 second gate")
 
@@ -371,7 +371,7 @@ CON
 PUB measure_rpm() | periods, rpm, window
   ' 100ms measurement window
   window := _clkfreq / 10
-  PINSTART(TACH_PIN, P_COUNTER_PERIODS | P_B_A_INPUT, window, %00)
+  PINSTART(TACH_PIN, P_COUNTER_PERIODS, window, %00)
 
   REPEAT
     REPEAT UNTIL PINREAD(TACH_PIN)
@@ -395,8 +395,8 @@ CON
 
 PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
   ' Use period-based measurement for PWM analysis
-  PINSTART(PWM_PIN, P_PERIODS_TICKS | P_B_A_INPUT, NUM_PERIODS, %00)
-  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS | P_B_A_INPUT, NUM_PERIODS, %00)
+  PINSTART(PWM_PIN, P_PERIODS_TICKS, NUM_PERIODS, %00)
+  PINSTART(PWM_PIN+1, P_PERIODS_HIGHS, NUM_PERIODS, %00)
 
   DEBUG("PWM Analyzer - averaging ", UDEC(NUM_PERIODS), " periods")
 
@@ -432,7 +432,7 @@ CON
 PUB oscillator_calibration() | measured, error_ppm, periods
   ' Use many periods for high precision
   periods := 10000
-  PINSTART(REF_PIN, P_PERIODS_TICKS | P_B_A_INPUT, periods, %00)
+  PINSTART(REF_PIN, P_PERIODS_TICKS, periods, %00)
 
   DEBUG("Oscillator Calibration")
   DEBUG("Target: ", UDEC(TARGET_FREQ), " Hz")
@@ -548,8 +548,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 ### Common Modifiers
 
 | Modifier | Function |
-|----------|----------|
-| P_B_A_INPUT | Use A-input for both A and B (single pin) |
+|----------|----------| | Use A-input for both A and B (single pin) |
 | P_PLUS1_B | Use next pin as B-input |
 | P_MINUS1_B | Use previous pin as B-input |
 | P_FILT1_AB | Add input filtering |

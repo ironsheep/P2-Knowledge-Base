@@ -19,9 +19,9 @@
 \vspace{0.6cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 I/O \& Smart Pins User Guide\par}
 \vspace{0.3cm}
-{\Large\itshape Complete Smart Pin Mode Documentation\par}
+{\Large\itshape Complete P2 Pin I/O and Smart Pin Reference\par}
 \vspace{0.6cm}
-{\large January 2026\par}
+{\large May 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
@@ -211,7 +211,7 @@ All code examples appear in both Spin2 and PASM2:
 ' Example description
 WRPIN(PIN, mode_value)    ' Configuration step
 WXPIN(PIN, x_value)       ' Parameter setting
-DRVL(PIN)                 ' Enable Smart Pin
+PINL(PIN)                 ' Enable Smart Pin
 ```
 
 **PASM2 Example:**
@@ -252,7 +252,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
 | Normal | `P_NORMAL` | %00000 | 2 | Direct I/O, no Smart Pin (Enhanced Direct I/O) |
-| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | 19, 10 | Long repository or DAC noise output |
+| Repository/DAC Noise | `P_REPOSITORY` / `P_DAC_NOISE` | %00001 | 18, 10 | Long repository or DAC noise output |
 | DAC Dither RND | `P_DAC_DITHER_RND` | %00010 | 10 | DAC 16-bit random dither |
 | DAC Dither PWM | `P_DAC_DITHER_PWM` | %00011 | 10 | DAC 16-bit PWM dither |
 | Pulse/Cycle | `P_PULSE` | %00100 | 7 | Pulse or cycle output |
@@ -269,7 +269,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| Quadrature | `P_QUADRATURE` | %01011 | 15 | A-B quadrature encoder input |
+| Quadrature | `P_QUADRATURE` | %01011 | 14 | A-B quadrature encoder input (within Counting chapter) |
 | Reg Up | `P_REG_UP` | %01100 | 14 | Increment on A-rise when B-high |
 | Reg Up/Down | `P_REG_UP_DOWN` | %01101 | 14 | Increment/decrement accumulator |
 | Count Rises | `P_COUNT_RISES` | %01110 | 14 | Count A-rises, optionally subtract B-rises |
@@ -277,22 +277,22 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | State Ticks | `P_STATE_TICKS` | %10000 | 13 | Measure A-low and A-high durations |
 | High Ticks | `P_HIGH_TICKS` | %10001 | 13 | Measure A-high duration |
 | Events/Timeout | `P_EVENTS_TICKS` | %10010 | 13 | Count events or timeout detection |
-| Periods Ticks | `P_PERIODS_TICKS` | %10011 | 16 | For X periods, count ticks |
-| Periods Highs | `P_PERIODS_HIGHS` | %10100 | 16 | For X periods, count highs |
-| Counter Ticks | `P_COUNTER_TICKS` | %10101 | 16 | For periods in X+ ticks, count ticks |
-| Counter Highs | `P_COUNTER_HIGHS` | %10110 | 16 | For periods in X+ ticks, count highs |
-| Counter Periods | `P_COUNTER_PERIODS` | %10111 | 16 | For periods in X+ ticks, count periods |
-| ADC Internal | `P_ADC` | %11000 | 17 | ADC sample/filter, internal clock |
-| ADC External | `P_ADC_EXT` | %11001 | 17 | ADC sample/filter, external clock |
-| ADC Scope | `P_ADC_SCOPE` | %11010 | 17 | ADC oscilloscope with trigger |
-| Sync Serial RX | `P_SYNC_RX` | %11101 | 18 | Synchronous serial receive |
-| Async Serial RX | `P_ASYNC_RX` | %11111 | 18 | Asynchronous serial receive |
+| Periods Ticks | `P_PERIODS_TICKS` | %10011 | 15 | For X periods, count ticks |
+| Periods Highs | `P_PERIODS_HIGHS` | %10100 | 15 | For X periods, count highs |
+| Counter Ticks | `P_COUNTER_TICKS` | %10101 | 15 | For periods in X+ ticks, count ticks |
+| Counter Highs | `P_COUNTER_HIGHS` | %10110 | 15 | For periods in X+ ticks, count highs |
+| Counter Periods | `P_COUNTER_PERIODS` | %10111 | 15 | For periods in X+ ticks, count periods |
+| ADC Internal | `P_ADC` | %11000 | 16 | ADC sample/filter, internal clock |
+| ADC External | `P_ADC_EXT` | %11001 | 16 | ADC sample/filter, external clock |
+| ADC Scope | `P_ADC_SCOPE` | %11010 | 16 | ADC oscilloscope with trigger |
+| Sync Serial RX | `P_SYNC_RX` | %11101 | 17 | Synchronous serial receive |
+| Async Serial RX | `P_ASYNC_RX` | %11111 | 17 | Asynchronous serial receive |
 
 ### Special Modes
 
 | Mode | P_ Constant | Mode Bits | Chapter | Description |
 |------|-------------|-----------|---------|-------------|
-| USB Pair | `P_USB_PAIR` | %11011 | 20 | USB host/device pin pair |
+| USB Pair | `P_USB_PAIR` | %11011 | 19 | USB host/device pin pair |
 
 ### Mode Categories Quick Reference
 
@@ -305,12 +305,12 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | **Serial Transmit** | Sync TX, Async TX | 11 |
 | **Timing Measurement** | State Ticks, High Ticks, Events/Timeout | 13 |
 | **Counting** | Reg Up, Reg Up/Down, Count Rises, Count Highs | 14 |
-| **Quadrature Encoder** | Quadrature | 15 |
-| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 16 |
-| **ADC Input** | ADC, ADC Ext, ADC Scope | 17 |
-| **Serial Receive** | Sync RX, Async RX | 18 |
-| **Inter-COG Sharing** | Repository | 19 |
-| **USB** | USB Pair | 20 |
+| **Quadrature Encoder** | Quadrature | 14 |
+| **Period/Frequency Measurement** | Periods Ticks/Highs, Counter Ticks/Highs/Periods | 15 |
+| **ADC Input** | ADC, ADC Ext, ADC Scope | 16 |
+| **Serial Receive** | Sync RX, Async RX | 17 |
+| **Inter-COG Sharing** | Repository | 18 |
+| **USB** | USB Pair | 19 |
 
 ---
 

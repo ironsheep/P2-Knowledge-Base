@@ -62,7 +62,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 
 ## E
 
-- **Edge counting** - P_COUNT_RISES, P_COUNT_EDGES, Ch. 14
+- **Edge counting** - P_COUNT_RISES, P_COUNT_RISES, Ch. 14
 - **Encoder** - see Quadrature encoder
 - **ENOB** - Effective number of bits (ADC), Ch. 16
 - **Event timing** - P_EVENTS_TICKS, Ch. 13

@@ -346,16 +346,16 @@ CON
   V_SENSE = 21        ' Voltage feedback (A-input)
   I_SENSE = 19        ' Current sense (B-input)
 
-PUB smps_controller(duty_percent) | mode, frame, y_val
+PUB smps_controller(duty_percent, voltage_threshold, current_limit) | mode, frame, y_val
   ' Configure voltage comparator
   WRPIN(V_SENSE, P_COMPARE_AB)
   WXPIN(V_SENSE, voltage_threshold)
-  DIRH(V_SENSE)
+  PINH(V_SENSE)
 
   ' Configure current comparator
   WRPIN(I_SENSE, P_COMPARE_AB)
   WXPIN(I_SENSE, current_limit)
-  DIRH(I_SENSE)
+  PINH(I_SENSE)
 
   ' Configure SMPS controller
   frame := 256                              ' 256 steps
@@ -574,7 +574,7 @@ DAT           org
               wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
               wxpin     ##$07D0_0001, #PWM_PIN      ' Frame=2000, Base=1
               dirh      #PWM_PIN
-              wypin     #1000, #PWM_PIN             ' 50% duty
+              wypin     ##1000, #PWM_PIN            ' 50% duty (##imm32 for 9-bit overflow)
 
 ' Update duty in real-time
 pwm_loop

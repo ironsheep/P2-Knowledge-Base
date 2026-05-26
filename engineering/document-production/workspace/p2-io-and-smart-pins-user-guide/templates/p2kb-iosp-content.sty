@@ -1,0 +1,186 @@
+% P2KB IOSP (I/O and Smart Pins) User Guide Content Layer
+% User guide specific environments and styling
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% This package defines environments specific to the I/O & Smart Pins User Guide:
+% - Part divider command (\manualpart) — keeps first chapter on same page as Part header
+% - Color palette for code-block backgrounds
+% - Spin2 / PASM2 listings language definitions
+% - Shaded environment styled for the user guide
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-iosp-content}[2026/05/25 P2KB IOSP Content Layer v1.0]
+
+% ==================== COLOR PALETTE ====================
+% User guide color scheme — professional and readable
+
+% Code block colors (single style for the user guide)
+\definecolor{iosp-code-bg}{HTML}{FAFAFA}           % Very light gray
+\definecolor{iosp-code-border}{HTML}{BDBDBD}       % Gray border
+
+% ==================== PART HANDLING ====================
+% Custom part command that:
+% 1. Adds entry to TOC at part level
+% 2. Creates visual part page
+% 3. Does NOT force page break after (first chapter stays on same page)
+%
+% CRITICAL: The \chapter command has \clearpage built into its definition.
+% Even if the Lua filter doesn't add a \clearpage before the chapter header,
+% Pandoc still generates \chapter{...} which internally calls \clearpage.
+%
+% Solution: Use etoolbox to patch \chapter with a conditional clearpage.
+% When \manualpart is called, it sets a flag. The patched \chapter checks
+% this flag and skips its internal clearpage if the flag is set.
+
+% Boolean flag: set by \manualpart, checked by patched \chapter
+\newbool{aftermanualpart}
+\boolfalse{aftermanualpart}
+
+% Conditional clearpage that respects the aftermanualpart flag
+\newcommand{\conditionalclearpage}{%
+  \ifbool{aftermanualpart}{%
+    \global\boolfalse{aftermanualpart}%
+    % Skip clearpage - chapter stays on same page as part
+  }{%
+    \clearpage%
+  }%
+}
+
+% Patch \chapter to use conditional clearpage instead of unconditional
+\makeatletter
+\patchcmd{\chapter}{\clearpage}{\conditionalclearpage}{}{}
+\patchcmd{\chapter}{\cleardoublepage}{\conditionalclearpage}{}{}
+\makeatother
+
+% Custom \manualpart command
+% Renders part title on its own page; chapter follows on same page
+\newcommand{\manualpart}[1]{%
+  \clearpage%
+  \thispagestyle{empty}%
+  \refstepcounter{part}%
+  \addcontentsline{toc}{part}{#1}%
+  \vspace*{0.25in}%
+  {\centering\Huge\bfseries #1\par}%
+  \vspace{0.5in}%
+  \nobreak%
+  \global\booltrue{aftermanualpart}%
+}
+
+% Legacy alias for backward compatibility
+\newcommand{\partdivider}[1]{\manualpart{#1}}
+
+% ==================== PART/CHAPTER STYLING ====================
+
+% Part styling — centered, large
+\titleformat{\part}[block]
+  {\centering\normalfont\Huge\bfseries}
+  {\partname\ \thepart:}
+  {10pt}
+  {\Huge}
+\titlespacing*{\part}{0pt}{40pt}{20pt}
+
+% Prevent automatic page break after part (book class default)
+\makeatletter
+\renewcommand\part{%
+  \if@openright
+    \cleardoublepage
+  \else
+    \clearpage
+  \fi
+  \thispagestyle{plain}%
+  \if@twocolumn
+    \onecolumn
+    \@tempswatrue
+  \else
+    \@tempswafalse
+  \fi
+  \secdef\@part\@spart}
+\renewcommand\@endpart{}
+\makeatother
+
+% ==================== CODE BLOCK STYLING ====================
+% Override default Shaded to use user guide style
+
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}%
+  \vspace{0.5\baselineskip}%
+  \begin{tcolorbox}[
+    boxrule=0.5pt,
+    colback=iosp-code-bg,
+    colframe=iosp-code-border,
+    rounded corners,
+    arc=2pt,
+    left=8pt,
+    right=8pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=8pt,
+    after skip=8pt
+  ]
+}{%
+  \end{tcolorbox}%
+  \par\vspace{0.5\baselineskip}%
+}
+
+% ==================== SPIN2 / PASM2 LANGUAGE DEFINITIONS ====================
+% For the listings package (used by some code-formatting filters)
+
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin,
+            dirh, dirl, testp, waitx, rep, nop, if_z, if_nz, if_c, if_nc,
+            if_c_and_z, if_c_or_z, if_nc_and_nz, if_nc_or_nz,
+            wc, wz, wcz, qrotate, qvector, getqx, getqy,
+            setq, setq2, rdlong, wrlong, rdword, wrword, rdbyte, wrbyte,
+            coginit, cogid, cogstop, hubset, waitcnt, locknew, lockret,
+            locktry, lockrel, augs, augd, ptra, ptrb},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case,
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit,
+            PINHIGH, PINLOW, PINFLOAT, PINTOGGLE, PINREAD, PINSTART, PINCLEAR,
+            PINWRITE, PINH, PINL, PINF, PINT, PINR, PINW,
+            WRPIN, WXPIN, WYPIN, RDPIN, RQPIN, AKPIN,
+            GETCT, WAITCT, WAITMS, WAITUS, GETMS, GETSEC,
+            QSIN, QCOS, QMUL, QDIV, ROTXY, POLXY, GETQX, GETQY,
+            ADDPINS, FRAC, REV, COGSPIN, COGINIT, COGSTOP, COGID, NEWCOG},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% ==================== CROSS-REFERENCE HELPERS ====================
+
+% Cross-reference to chapter
+\newcommand{\chapref}[1]{Chapter~\ref{chap:#1}}
+
+% Cross-reference to appendix
+\newcommand{\appref}[1]{Appendix~\ref{app:#1}}
+
+% ==================== FULL-WIDTH TABLE CONFIGURATION ====================
+% Make all longtables full page width with better column ratios
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt plus 1fill}
+
+% For 2-column tables: 30% left, 70% right
+\newcolumntype{N}{>{\raggedright\arraybackslash}p{0.28\textwidth}}
+\newcolumntype{W}{>{\raggedright\arraybackslash}p{0.68\textwidth}}
+
+% For 3-column reference tables (appendices)
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash}p{0.15\textwidth}}
+\newcolumntype{M}{>{\raggedright\arraybackslash}p{0.35\textwidth}}
+\newcolumntype{L}{>{\raggedright\arraybackslash}p{0.45\textwidth}}
+
+\endinput

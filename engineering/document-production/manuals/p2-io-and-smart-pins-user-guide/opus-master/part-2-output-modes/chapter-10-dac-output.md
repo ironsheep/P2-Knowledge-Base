@@ -72,7 +72,7 @@ High impedance, full voltage range.
 **Spin2:**
 ```spin2
 WRPIN(pin, P_DAC_990R_3V | P_OE)
-DIRH(pin)
+PINH(pin)
 ```
 
 ### P_DAC_600R_2V
@@ -149,7 +149,7 @@ PUB set_voltage_8bit(value) | mode
   ' Value in M[7:0] of WRPIN D operand
   mode := (value << 8) | P_DAC_124R_3V
   WRPIN(DAC_PIN, mode)
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 
 PUB voltage_to_dac(millivolts) : dac_value
   ' Convert millivolts to 8-bit DAC value (3.3V range)
@@ -330,7 +330,7 @@ CON
 PUB nco_dac_wave(freq_hz) | mode, y_val
   ' NCO square wave through DAC for filtered sine output
   mode := P_NCO_FREQ | P_DAC_990R_3V | P_OE
-  y_val := (freq_hz * $1_0000_0000) / _clkfreq
+  y_val := freq_hz FRAC _clkfreq
 
   PINFLOAT(WAVE_PIN)
   WRPIN(WAVE_PIN, mode)
@@ -476,14 +476,14 @@ PUB audio_init()
 
 PUB set_frequency(hz)
   ' Set sine wave frequency
-  phase_inc := (hz * $1_0000_0000) / SAMPLE_RATE
+  phase_inc := hz FRAC SAMPLE_RATE
 
 PUB audio_sample() : sample | sine_val
   ' Generate next audio sample
   phase += phase_inc
 
-  ' Get sine value (-32768 to +32767)
-  sine_val := sin(phase >> 16)
+  ' Get sine value (-32767 to +32767) using CORDIC (length, angle, twist)
+  sine_val := QSIN(32767, phase, 0)
 
   ' Convert to 16-bit unsigned (0 to 65535)
   sample := sine_val + $8000

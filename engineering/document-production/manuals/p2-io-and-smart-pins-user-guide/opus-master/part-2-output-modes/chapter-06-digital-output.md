@@ -43,7 +43,7 @@ The default configuration: both high and low are actively driven.
 WRPIN(pin, P_HIGH_FAST | P_LOW_FAST)      ' Default drive strength
 ```
 
-Or simply use Direct I/O without WRPIN (defaults apply):
+Or use Direct I/O without WRPIN (defaults apply):
 ```spin2
 PINHIGH(pin)                              ' Drives high
 PINLOW(pin)                               ' Drives low
@@ -249,7 +249,7 @@ CON
 PUB send_byte(data) | i
   ' Start bit (low)
   PINLOW(TX_PIN)
-  WAITX(BIT_TIME)
+  WAITCT(GETCT() + BIT_TIME)
   
   ' Data bits (LSB first)
   repeat i from 0 to 7
@@ -258,11 +258,11 @@ PUB send_byte(data) | i
     else
       PINLOW(TX_PIN)
     data >>= 1
-    WAITX(BIT_TIME)
+    WAITCT(GETCT() + BIT_TIME)  ' wait one bit time
   
   ' Stop bit (high)
   PINHIGH(TX_PIN)
-  WAITX(BIT_TIME)
+  WAITCT(GETCT() + BIT_TIME)
 ```
 
 ### Pulse Generation

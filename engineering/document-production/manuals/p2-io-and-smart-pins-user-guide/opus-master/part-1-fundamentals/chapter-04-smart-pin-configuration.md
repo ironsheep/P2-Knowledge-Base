@@ -165,7 +165,7 @@ WXPIN(pin, base_period)                  ' X = base_period
 
 ### Function
 
-WYPIN writes the Y register, which typically holds input data or secondary parameters.
+WYPIN writes the Y register, which holds input data or secondary parameters.
 
 ### PASM2 Syntax
 
@@ -341,9 +341,9 @@ AKPIN   {#}S
 
 ### Spin2 Equivalent
 
-There is no direct Spin2 equivalent. Use:
+There is no direct Spin2 equivalent. Use RDPIN with a discard variable:
 ```spin2
-RDPIN(pin)                               ' Read (and ignore result) to acknowledge
+ack := RDPIN(pin)                        ' Read (discard result) to acknowledge
 ```
 
 Or configure in PASM2 if needed.
@@ -371,7 +371,7 @@ All Smart Pin modes follow a common configuration pattern:
 ```spin2
 PINFLOAT(pin)                            ' DIR=0, hold in reset
 ' or
-DIRL(pin)                                ' Same effect
+PINL(pin)                                ' Same effect
 ```
 
 ```pasm2
@@ -437,7 +437,7 @@ PUB setup_nco() | y_value
   ' Calculate Y for target frequency
   ' frequency = (Y × sysclk) / 2^32
   ' Y = (frequency × 2^32) / sysclk
-  y_value := (TARGET_FREQ * $1_0000_0000) / _clkfreq
+  y_value := TARGET_FREQ FRAC _clkfreq
   
   ' Configuration sequence
   PINFLOAT(OUT_PIN)                       ' Step 1: Reset

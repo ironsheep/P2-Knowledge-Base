@@ -317,6 +317,9 @@ PUB comm_watchdog() | timeout_clocks, elapsed
       handle_timeout()
 
     WAITMS(10)                             ' Check periodically
+
+PUB handle_timeout()
+  ' Application-specific timeout response — flash an LED, reset peripheral, etc.
 ```
 
 **PASM2:**

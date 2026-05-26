@@ -87,8 +87,8 @@ Y = 21,475
 **Example 2: 44.1 kHz (audio sample rate) at 200 MHz**
 ```
 Y = (44100 × 4,294,967,296) / 200,000,000
-Y = 189,459,667,065.6 / 200,000,000
-Y = 947,298
+Y = 189,408,057,753,600 / 200,000,000
+Y = 947,040
 ```
 
 **Example 3: 1 MHz at 200 MHz**
@@ -107,7 +107,7 @@ CON
 
 PUB nco_frequency(freq_hz) | y_value
   ' Calculate Y for desired frequency
-  y_value := (freq_hz * $1_0000_0000) / _clkfreq
+  y_value := freq_hz FRAC _clkfreq
   
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_FREQ | P_OE)
@@ -176,12 +176,13 @@ Y = $C000_0000 → 75% duty cycle
 **Spin2:**
 ```spin2
 CON
+  _clkfreq = 200_000_000
   NCO_PIN = 10
 
 PUB nco_duty(freq_hz, duty_percent) | y_value
   ' Y controls both frequency and duty
   ' For specific duty at specific frequency, adjust Y
-  y_value := ((freq_hz * $1_0000_0000) / _clkfreq) * duty_percent / 50
+  y_value := (freq_hz FRAC _clkfreq) * duty_percent / 50
   
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_DUTY | P_OE)
@@ -217,7 +218,7 @@ CON
   FREQ_HZ = 1000
 
 PUB three_phase_nco() | y_val, phase_120, phase_240
-  y_val := (FREQ_HZ * $1_0000_0000) / _clkfreq
+  y_val := FREQ_HZ FRAC _clkfreq
   
   ' Phase offsets: 0°, 120°, 240°
   phase_120 := 65536 / 3                  ' 21845
@@ -329,7 +330,7 @@ CON
   SPEAKER_PIN = 56
 
 PUB play_tone(frequency, duration_ms) | y_val
-  y_val := (frequency * $1_0000_0000) / _clkfreq
+  y_val := frequency FRAC _clkfreq
   
   PINFLOAT(SPEAKER_PIN)
   WRPIN(SPEAKER_PIN, P_NCO_FREQ | P_OE)
@@ -363,7 +364,7 @@ VAR
   long current_y
 
 PUB setup_clock(initial_freq)
-  current_y := (initial_freq * $1_0000_0000) / _clkfreq
+  current_y := initial_freq FRAC _clkfreq
   
   PINFLOAT(CLK_PIN)
   WRPIN(CLK_PIN, P_NCO_FREQ | P_OE)
@@ -372,7 +373,7 @@ PUB setup_clock(initial_freq)
   PINLOW(CLK_PIN)
 
 PUB set_frequency(new_freq)
-  current_y := (new_freq * $1_0000_0000) / _clkfreq
+  current_y := new_freq FRAC _clkfreq
   WYPIN(CLK_PIN, current_y)               ' Update on the fly
 ```
 

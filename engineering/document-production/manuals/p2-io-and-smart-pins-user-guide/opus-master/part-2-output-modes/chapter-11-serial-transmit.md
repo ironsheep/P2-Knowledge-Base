@@ -588,4 +588,4 @@ X = ((sysclk * 65536 / baud) & $FFFFFC00) | data_bits
 
 ---
 
-*This chapter covered serial transmission modes. For serial reception modes, see Chapter 12. For other input modes, see Part III.*
+*This chapter covered serial transmission modes. For serial reception modes, see Chapter 17. For other input modes, see Part III.*

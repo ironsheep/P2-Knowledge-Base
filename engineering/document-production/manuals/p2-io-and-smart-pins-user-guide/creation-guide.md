@@ -86,15 +86,14 @@ PART II: OUTPUT MODES (simple → complex)
 PART III: INPUT MODES (simple → complex)
 ├── Chapter 12: Digital Input
 ├── Chapter 13: Timing Measurement
-├── Chapter 14: Counting
-├── Chapter 15: Quadrature Encoder
-├── Chapter 16: Period and Frequency Measurement
-├── Chapter 17: ADC (Analog Input)
-└── Chapter 18: Serial Receive
+├── Chapter 14: Counting (includes Quadrature Encoder mode)
+├── Chapter 15: Period and Frequency Measurement
+├── Chapter 16: ADC (Analog Input)
+└── Chapter 17: Serial Receive
 
 PART IV: SPECIAL MODES
-├── Chapter 19: Inter-COG Data Sharing (Repository)
-└── Chapter 20: USB Host/Device
+├── Chapter 18: Inter-COG Data Sharing (Repository)
+└── Chapter 19: USB Host/Device
 
 PART V: APPENDICES
 ├── Appendix A: Intent Index ("I want to...")

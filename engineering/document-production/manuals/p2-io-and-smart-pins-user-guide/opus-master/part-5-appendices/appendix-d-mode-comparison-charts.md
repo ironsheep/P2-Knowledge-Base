@@ -38,8 +38,8 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Quadrature | P_QUADRATURE | Position/velocity | 4x encoder | Every edge | Yes | Low | Encoder |
 | Count Highs | P_COUNT_HIGHS | Gated edges | 32-bit | Configurable | Yes | Low | Freq counter |
 | Count Rises | P_COUNT_RISES | Up/down edges | 32-bit | Configurable | Yes | Low | Step/direction |
-| Count Edges | P_COUNT_EDGES | Edge count | 32-bit | Configurable | Yes | Low | Event counter |
-| High Clocks | P_HIGH_CLOCKS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
+| Count Edges | P_COUNT_RISES | Edge count | 32-bit | Configurable | Yes | Low | Event counter |
+| High Clocks | P_HIGH_TICKS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
 | Periods Ticks | P_PERIODS_TICKS | N period time | 1 clock | N periods | Yes | Medium | Precision freq |
 | Periods Highs | P_PERIODS_HIGHS | N period high | 1 clock | N periods | Yes | Medium | Duty cycle |
 | Counter Ticks | P_COUNTER_TICKS | Time in window | 1 clock | Time window | Yes | Medium | Freq measurement |
@@ -95,23 +95,23 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 
 | Scenario | Best Mode | Configuration |
 |----------|-----------|---------------|
-| Simple event count | P_COUNT_EDGES | X=0, Y=0 |
+| Simple event count | P_COUNT_RISES | X=0, Y=0 |
 | Gated frequency counter | P_COUNT_HIGHS | X=gate_period |
 | Step/direction motor | P_COUNT_RISES | X=0 |
-| Up/down buttons | P_COUNT_EDGES | X=0, Y=1 |
+| Up/down buttons | P_COUNT_RISES | X=0, Y=1 |
 | Rotary encoder | P_QUADRATURE | X=0 (position) |
 | Encoder velocity | P_QUADRATURE | X=period |
-| PWM duty integration | P_HIGH_CLOCKS | X=period |
-| Differential timing | P_HIGH_CLOCKS | X=period, Y=1 |
+| PWM duty integration | P_HIGH_TICKS | X=period |
+| Differential timing | P_HIGH_TICKS | X=period, Y=1 |
 
 ### Counter Features Matrix
 
 | Mode | A-Input | B-Input | Direction | Gating | Signed |
 |------|---------|---------|-----------|--------|--------|
-| P_COUNT_EDGES | Count | Down (Y=1) | Y[0] | No | Yes |
+| P_COUNT_RISES | Count | Down (Y=1) | Y[0] | No | Yes |
 | P_COUNT_HIGHS | Count | Gate | No | Yes | No |
 | P_COUNT_RISES | Count | Direction | B level | No | Yes |
-| P_HIGH_CLOCKS | Time | Time (Y=1) | Y[0] | Level | Yes |
+| P_HIGH_TICKS | Time | Time (Y=1) | Y[0] | Level | Yes |
 | P_QUADRATURE | Phase A | Phase B | Automatic | No | Yes |
 
 ---
@@ -283,7 +283,7 @@ Need pulse width? ─── Yes ──► P_HIGH_TICKS or P_STATE_TICKS
          │
          No
          │
-Need event count? ─── Yes ──► P_COUNT_EDGES
+Need event count? ─── Yes ──► P_COUNT_RISES
          │
          No ──► Simple PINREAD
 ```

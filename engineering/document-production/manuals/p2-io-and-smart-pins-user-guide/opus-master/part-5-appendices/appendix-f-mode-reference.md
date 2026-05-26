@@ -97,17 +97,17 @@ P_DAC_990R_3V | P_OE                     ' For DAC noise output
 ```spin2
 ' Repository mode
 WRPIN(pin, P_REPOSITORY)
-DIRH(pin)
+PINH(pin)
 WXPIN(pin, value)                        ' Write value
 data := RQPIN(pin)                       ' Read value
 
 ' DAC noise mode
 WRPIN(pin, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
-Chapter 18: Repository and Inter-COG Data Sharing
+Chapter 18: Repository and Inter-COG Data Sharing, Chapter 10: DAC Output
 
 ---
 
@@ -136,11 +136,11 @@ P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
 WRPIN(pin, P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE)
 WXPIN(pin, 1)                            ' Immediate updates
 WYPIN(pin, $8000)                        ' Mid-scale output
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
-Chapter 18: Repository and Inter-COG Data Sharing
+Chapter 10: DAC Output
 
 ---
 
@@ -169,11 +169,11 @@ P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE
 WRPIN(pin, P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE)
 WXPIN(pin, 256)                          ' Period must be 256×N
 WYPIN(pin, $8000)
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
-Chapter 18: Repository and Inter-COG Data Sharing
+Chapter 10: DAC Output
 
 ---
 
@@ -203,7 +203,7 @@ P_PULSE | P_OE
 WRPIN(pin, P_PULSE | P_OE)
 WXPIN(pin, 1 | (100 << 16))              ' Base=1, pre-delay=100
 WYPIN(pin, 5 | (50 << 16))               ' 5 pulses, 50 clocks each
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
@@ -236,7 +236,7 @@ P_TRANSITION | P_OE
 WRPIN(pin, P_TRANSITION | P_OE)
 WXPIN(pin, 100)                          ' 100 clocks per transition
 WYPIN(pin, 20)                           ' 20 transitions (10 cycles)
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
@@ -254,7 +254,7 @@ Numerically Controlled Oscillator for precise frequency synthesis. Output is Z[3
 ### Register Usage
 | Register | Function |
 |----------|----------|
-| X[15:0] | Base period (typically 1) |
+| X[15:0] | Base period (1 for maximum resolution) |
 | X[31:16] | Initial phase |
 | Y[31:0] | Frequency control word |
 | Z[31:0] | Phase accumulator |
@@ -268,7 +268,7 @@ P_NCO_FREQ | P_OE
 ### Quick Example
 ```spin2
 ' 1 kHz at 200 MHz sysclk
-y_val := (1000 * $1_0000_0000) / 200_000_000
+y_val := 1000 FRAC 200_000_000
 WRPIN(pin, P_NCO_FREQ | P_OE)
 WXPIN(pin, 1)
 WYPIN(pin, y_val)
@@ -290,7 +290,7 @@ NCO frequency generator with duty cycle control. Output reflects Z overflow stat
 ### Register Usage
 | Register | Function |
 |----------|----------|
-| X[15:0] | Base period (typically 1) |
+| X[15:0] | Base period (1 for maximum resolution) |
 | X[31:16] | Initial phase |
 | Y[31:0] | Frequency × duty control |
 | Z[31:0] | Phase accumulator |
@@ -480,7 +480,7 @@ P_REG_UP | P_PLUS1_B
 ```spin2
 WRPIN(pin, P_REG_UP | P_PLUS1_B)
 WXPIN(pin, 0)                            ' Continuous
-DIRH(pin)
+PINH(pin)
 count := RDPIN(pin)
 ```
 
@@ -515,7 +515,7 @@ P_REG_UP_DOWN | P_PLUS1_B
 ```spin2
 WRPIN(pin, P_REG_UP_DOWN | P_PLUS1_B)
 WXPIN(pin, 0)
-DIRH(pin)
+PINH(pin)
 count := RDPIN(pin)                      ' Signed result
 ```
 
@@ -549,7 +549,7 @@ P_COUNT_RISES | P_SCHMITT_A
 WRPIN(pin, P_COUNT_RISES | P_SCHMITT_A)
 WXPIN(pin, 0)                            ' Continuous
 WYPIN(pin, 0)                            ' A edges only
-DIRH(pin)
+PINH(pin)
 count := RDPIN(pin)
 ```
 
@@ -583,7 +583,7 @@ P_COUNT_HIGHS
 WRPIN(pin, P_COUNT_HIGHS)
 WXPIN(pin, _clkfreq)                     ' 1 second period
 WYPIN(pin, 0)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 high_clocks := RDPIN(pin)
 ```
@@ -617,7 +617,7 @@ P_STATE_TICKS | P_SCHMITT_A
 ### Quick Example
 ```spin2
 WRPIN(pin, P_STATE_TICKS | P_SCHMITT_A)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 duration := RDPIN(pin) wc                ' C=1 if was high
 ```
@@ -651,7 +651,7 @@ P_HIGH_TICKS | P_INVERT_A               ' To measure low pulses
 ### Quick Example
 ```spin2
 WRPIN(pin, P_HIGH_TICKS | P_SCHMITT_A)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 pulse_width := RDPIN(pin) & $7FFF_FFFF
 ```
@@ -688,7 +688,7 @@ P_EVENTS_TICKS
 WRPIN(pin, P_EVENTS_TICKS)
 WXPIN(pin, 100)
 WYPIN(pin, %01)                          ' Rising edges, event mode
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 clocks := RDPIN(pin)
 ```
@@ -715,15 +715,15 @@ Measures total clock cycles for X signal periods.
 
 ### Key Constants
 ```spin2
-P_PERIODS_TICKS | P_B_A_INPUT
+P_PERIODS_TICKS
 ```
 
 ### Quick Example
 ```spin2
-WRPIN(pin, P_PERIODS_TICKS | P_B_A_INPUT)
+WRPIN(pin, P_PERIODS_TICKS)
 WXPIN(pin, 100)                          ' Measure 100 periods
 WYPIN(pin, %00)                          ' Rise to rise
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 total_clocks := RDPIN(pin)
 freq := (100 * _clkfreq) / total_clocks
@@ -751,15 +751,15 @@ Accumulates high-state time across X periods for duty cycle measurement.
 
 ### Key Constants
 ```spin2
-P_PERIODS_HIGHS | P_B_A_INPUT
+P_PERIODS_HIGHS
 ```
 
 ### Quick Example
 ```spin2
-WRPIN(pin, P_PERIODS_HIGHS | P_B_A_INPUT)
+WRPIN(pin, P_PERIODS_HIGHS)
 WXPIN(pin, 100)
 WYPIN(pin, %00)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 high_clocks := RDPIN(pin)
 ```
@@ -786,15 +786,15 @@ Measures total period time within a minimum X-clock window.
 
 ### Key Constants
 ```spin2
-P_COUNTER_TICKS | P_B_A_INPUT
+P_COUNTER_TICKS
 ```
 
 ### Quick Example
 ```spin2
-WRPIN(pin, P_COUNTER_TICKS | P_B_A_INPUT)
+WRPIN(pin, P_COUNTER_TICKS)
 WXPIN(pin, _clkfreq)                     ' 1 second window
 WYPIN(pin, %00)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 actual_time := RDPIN(pin)
 ```
@@ -821,15 +821,15 @@ Accumulates high-state time within a minimum X-clock window.
 
 ### Key Constants
 ```spin2
-P_COUNTER_HIGHS | P_B_A_INPUT
+P_COUNTER_HIGHS
 ```
 
 ### Quick Example
 ```spin2
-WRPIN(pin, P_COUNTER_HIGHS | P_B_A_INPUT)
+WRPIN(pin, P_COUNTER_HIGHS)
 WXPIN(pin, _clkfreq / 10)                ' 100ms window
 WYPIN(pin, %00)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 high_time := RDPIN(pin)
 ```
@@ -856,16 +856,16 @@ Counts complete periods within a minimum X-clock window. Simple frequency counte
 
 ### Key Constants
 ```spin2
-P_COUNTER_PERIODS | P_B_A_INPUT
+P_COUNTER_PERIODS
 ```
 
 ### Quick Example
 ```spin2
 ' Direct Hz reading with 1-second gate
-WRPIN(pin, P_COUNTER_PERIODS | P_B_A_INPUT)
+WRPIN(pin, P_COUNTER_PERIODS)
 WXPIN(pin, _clkfreq)                     ' 1 second
 WYPIN(pin, %00)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 frequency_hz := RDPIN(pin)
 ```
@@ -901,7 +901,7 @@ P_ADC_10X | P_ADC                        ' 10x gain
 ```spin2
 WRPIN(pin, P_ADC_GIO | P_ADC)
 WXPIN(pin, %00_0111)                     ' SINC2 sampling, 128 clocks
-DIRH(pin)
+PINH(pin)
 sample := RDPIN(pin)
 ```
 
@@ -937,7 +937,7 @@ P_ADC_EXT | P_PLUS1_B
 ```spin2
 WRPIN(pin, P_ADC_EXT | P_PLUS1_B)
 WXPIN(pin, %00_0111)
-DIRH(pin)
+PINH(pin)
 ```
 
 ### Reference
@@ -970,7 +970,7 @@ P_ADC_GIO | P_ADC_SCOPE
 ' Pin must be multiple of 4
 WRPIN(52, P_ADC_GIO | P_ADC_SCOPE)
 WXPIN(52, (128 << 8) | 64)               ' Trigger=128, Arm=64
-DIRH(52)
+PINH(52)
 ```
 
 ### Reference
@@ -1004,8 +1004,8 @@ P_USB_PAIR | P_OE
 ```spin2
 ' Pins must be consecutive even/odd pair
 WRPIN(56, P_USB_PAIR | P_OE)             ' 56=D-, 57=D+
-DIRH(56)
-DIRH(57)
+PINH(56)
+PINH(57)
 ```
 
 ### Reference
@@ -1040,7 +1040,7 @@ P_SYNC_TX | P_OE | P_MINUS1_B            ' Clock from prev pin
 ' Data on pin 41, clock on pin 40
 WRPIN(41, P_SYNC_TX | P_OE | P_MINUS1_B)
 WXPIN(41, %1_00111)                      ' Start-stop, 8 bits
-DIRH(41)
+PINH(41)
 WYPIN(41, data)
 ```
 
@@ -1075,7 +1075,7 @@ P_SYNC_RX | P_PLUS1_B                    ' Clock from next pin
 ```spin2
 WRPIN(pin, P_SYNC_RX | P_PLUS1_B)
 WXPIN(pin, %1_00111)                     ' Start-stop, 8 bits
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 data := RDPIN(pin) >> 24                 ' Left-justified, shift down
 ```
@@ -1149,7 +1149,7 @@ P_ASYNC_RX | P_INVERT_IN                 ' RS-232
 bit_period := (_clkfreq / 115200) << 16
 WRPIN(pin, P_ASYNC_RX)
 WXPIN(pin, bit_period | 8)
-DIRH(pin)
+PINH(pin)
 REPEAT UNTIL PINREAD(pin)
 data := RDPIN(pin) & $FF
 ```

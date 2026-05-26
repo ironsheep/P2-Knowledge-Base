@@ -97,7 +97,7 @@ Instruction:  |         |         | TESTP #0|         |
 
 ## 1.3 Drive Instructions (DRVx)
 
-Drive instructions set both the direction bit (DIR=1) and the output state bit in a single atomic operation. These are the most common pin control instructions.
+Drive instructions set both the DIR bit (set to 1) and the OUT bit in a single atomic operation. These are the most common pin control instructions.
 
 ### Common Properties
 
@@ -586,7 +586,7 @@ DIRH    {#}D
 
 **Timing:** 2 clock cycles
 
-**Spin2 Equivalent:** None directly; PINHIGH/PINLOW set direction as side effect
+**Spin2 Equivalent:** None directly. PINHIGH / PINLOW set DIR=1 and OUT in a single call (direction control is part of the operation, not a side effect).
 
 **Example - PASM2:**
 ```pasm2
@@ -1049,7 +1049,7 @@ Drives pin(s) high.
 ```spin2
 PINHIGH(56)                       ' Drive pin 56 high
 PINHIGH(0..7)                     ' Drive pins 0-7 all high
-PINHIGH(ADDPINS(16, 3))           ' Drive pins 16-19 high
+PINHIGH(16 ADDPINS 3)           ' Drive pins 16-19 high
 ```
 
 ---
@@ -1298,4 +1298,4 @@ DAT           org
 
 ---
 
-*This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-20) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
+*This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*

@@ -1,0 +1,49 @@
+% P2KB IOSP (I/O and Smart Pins) User Guide LaTeX Template
+% Main template for the P2 I/O & Smart Pins User Guide
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% LAYOUT: One-sided for PDF screen viewing
+% For physical print with binding, change to: twoside,openany
+%
+% Template Stack:
+%   1. p2kb-iosp-foundation.sty - Pandoc compatibility, core setup
+%   2. p2kb-iosp-content.sty    - User guide environments
+%   3. p2kb-iosp-diagrams.sty   - TikZ stub (no built-in diagrams)
+
+\documentclass[11pt,letterpaper,oneside]{book}
+
+% ==================== LOAD FOUNDATION LAYER ====================
+\usepackage{p2kb-iosp-foundation}
+
+% ==================== LOAD CONTENT LAYER ====================
+\usepackage{p2kb-iosp-content}
+
+% ==================== LOAD DIAGRAMS ====================
+\usepackage{p2kb-iosp-diagrams}
+
+% ==================== DOCUMENT METADATA ====================
+% These can be overridden by pandoc metadata
+\title{P2 I/O \& Smart Pins User Guide}
+\author{Iron Sheep Productions, LLC}
+\date{May 2026}
+
+% ==================== ADDITIONAL USER GUIDE SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% Load multicol (used by potential two-column appendices)
+\usepackage{multicol}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page - no headers/footers
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (includes title page at beginning)
+$body$
+
+\end{document}

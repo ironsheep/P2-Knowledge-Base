@@ -75,7 +75,7 @@ After acknowledging, wait 2 clocks before polling IN again:
               testp     #pin wc           ' Safe to poll
 ```
 
-In practice, processing between reads usually provides sufficient delay.
+Processing between reads provides sufficient delay.
 
 ---
 
@@ -210,7 +210,7 @@ WYPIN(phase_a, freq_value)
 WYPIN(phase_b, freq_value)
 WYPIN(phase_c, freq_value)
 
-' Enable simultaneously for synchronization
+' Drive all pins low simultaneously for coordinated startup
 PINLOW(phase_a..phase_c)
 ```
 
@@ -264,7 +264,7 @@ PINSTART(pin, P_NCO_FREQ | P_OE, 1, freq)
 ### When to Use Raw Configuration
 
 - Mode doesn't need all three registers
-- Partial reconfiguration (just WYPIN, for example)
+- Partial reconfiguration (WYPIN alone, for example)
 - Precise control over enable timing
 - PASM2 code (PINSTART is Spin2 only)
 
@@ -372,7 +372,7 @@ RDPIN every event: 2 cycles + polling overhead.
 For high-frequency events:
 - Use larger measurement windows (X register)
 - Read less frequently
-- Accept that some events may be missed (results overwritten)
+- Some events are lost when results are overwritten before they are read
 
 ### When Overhead Matters
 

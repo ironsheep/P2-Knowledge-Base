@@ -27,9 +27,9 @@ DEBUG("OUT: ", UDEC((INA >> pin) & 1))
 2. Verify mode was written:
 ```spin2
 ' Reset and reconfigure
-DIRL(pin)
+PINL(pin)
 WRPIN(pin, your_mode)
-DIRH(pin)
+PINH(pin)
 DEBUG("Mode applied")
 ```
 
@@ -39,14 +39,14 @@ DEBUG("Mode applied")
 ```spin2
 ' After WRPIN, you MUST set DIR
 WRPIN(pin, P_NCO_FREQ | P_OE)
-DIRH(pin)                                ' THIS IS REQUIRED
+PINH(pin)                                ' THIS IS REQUIRED
 ```
 
 **For output modes, also set output:**
 ```spin2
 PINLOW(pin)                              ' Sets DIR=1, starts smart pin
 ' or
-DIRH(pin)                                ' Alternative
+PINH(pin)                                ' Alternative
 ```
 
 **Check for typos in pin number:**
@@ -54,9 +54,10 @@ DIRH(pin)                                ' Alternative
 CON
   MY_PIN = 20                            ' Define constant
 
-' Use constant, not magic numbers
-WRPIN(MY_PIN, mode)                      ' Correct
-DIRH(MY_PIN)
+PUB setup(mode)
+  ' Use constant, not magic numbers
+  WRPIN(MY_PIN, mode)                    ' Correct
+  PINH(MY_PIN)
 ```
 
 ---
@@ -141,7 +142,7 @@ DEBUG("sysclk: ", UDEC(_clkfreq))
 
 2. Check calculated values:
 ```spin2
-y_val := (frequency * $1_0000_0000) / _clkfreq
+y_val := frequency FRAC _clkfreq
 DEBUG("Y value: ", UHEX(y_val))
 ```
 
@@ -159,18 +160,20 @@ CON
   _clkfreq = 200_000_000                 ' Verify this matches actual clock
 
 PUB calc_frequency(hz) : y_val
-  y_val := (hz * $1_0000_0000) / _clkfreq
+  y_val := hz FRAC _clkfreq
 ```
 
-**Avoid integer overflow:**
+**Use the FRAC operator for NCO Y calculation:**
 ```spin2
-' WRONG - may overflow for large frequencies
-y_val := frequency * $1_0000_0000 / _clkfreq
-
-' CORRECT - use QMUL for large values
-QMUL(frequency, $1_0000_0000)
-y_val := GETQX() / _clkfreq
+' CORRECT - FRAC computes (frequency * 2^32) / _clkfreq as a 32-bit result
+' without manual 33-bit constant arithmetic.
+y_val := frequency FRAC _clkfreq
 ```
+
+The `FRAC` operator performs `(operand1 * 2^32) / operand2` using P2's 64-bit
+intermediate path, so it never overflows even when `frequency` × 2^32 would not
+fit in 32 bits. Avoid hand-rolled `frequency * $1_0000_0000 / _clkfreq` — the
+`$1_0000_0000` literal exceeds the 32-bit constant range.
 
 **For NCO, remember X[15:0] affects frequency:**
 ```spin2
@@ -206,10 +209,10 @@ Input measurements fluctuate, outputs have jitter, counts are erratic.
 **Add Schmitt trigger:**
 ```spin2
 ' WRONG - raw input
-mode := P_COUNT_EDGES
+mode := P_COUNT_RISES
 
 ' CORRECT - Schmitt trigger for clean edges
-mode := P_COUNT_EDGES | P_SCHMITT_A
+mode := P_COUNT_RISES | P_SCHMITT_A
 ```
 
 **Add input filtering:**
@@ -451,8 +454,8 @@ WXPIN(pin, period)                       ' Periodic - must read to restart
 
 **Pulse DIR to reset if stuck:**
 ```spin2
-DIRL(pin)                                ' Disable
-DIRH(pin)                                ' Re-enable from fresh state
+PINL(pin)                                ' Disable
+PINH(pin)                                ' Re-enable from fresh state
 ```
 
 ---
@@ -489,11 +492,11 @@ Configuring one pin affects behavior of another.
 ```spin2
 ' Configure pins one at a time, test each
 WRPIN(pin1, mode1)
-DIRH(pin1)
+PINH(pin1)
 ' Test pin1 works
 
 WRPIN(pin2, mode2)
-DIRH(pin2)
+PINH(pin2)
 ' Test pin2 works AND pin1 still works
 ```
 
@@ -533,11 +536,11 @@ PINLOW(pin)
 ' Confirm on scope
 
 ' Step 2: Add smart pin mode
-DIRL(pin)
+PINL(pin)
 WRPIN(pin, P_NCO_FREQ | P_OE)
 WXPIN(pin, 1)
 WYPIN(pin, 21475)                        ' 1 kHz
-DIRH(pin)
+PINH(pin)
 ' Check for 1 kHz
 
 ' Step 3: Add full configuration

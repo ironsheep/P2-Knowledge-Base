@@ -92,7 +92,7 @@ CON
   HIGH_TIME = 500                         ' 500 clocks high (50% duty)
   CYCLE_COUNT = 10                        ' Generate 10 pulses
 
-PUB generate_pulses()
+PUB generate_pulses() | ack
   PINFLOAT(PULSE_PIN)                     ' Reset
   WRPIN(PULSE_PIN, P_PULSE | P_OE)        ' Configure mode
   WXPIN(PULSE_PIN, BASE_PERIOD | (HIGH_TIME << 16))  ' Set timing
@@ -102,7 +102,7 @@ PUB generate_pulses()
   
   ' Wait for completion
   repeat until PINREAD(PULSE_PIN) == 1
-  RDPIN(PULSE_PIN)                        ' Acknowledge completion
+  ack := RDPIN(PULSE_PIN)                 ' Acknowledge completion (discard value)
 ```
 
 **PASM2:**
@@ -171,7 +171,7 @@ CON
   EDGE_PERIOD = 200                       ' 200 clocks between edges
   EDGE_COUNT = 8                          ' Generate 8 edges (4 cycles)
 
-PUB generate_transitions()
+PUB generate_transitions() | ack
   PINFLOAT(TRANS_PIN)
   WRPIN(TRANS_PIN, P_TRANSITION | P_OE)
   WXPIN(TRANS_PIN, EDGE_PERIOD)
@@ -180,7 +180,7 @@ PUB generate_transitions()
   WYPIN(TRANS_PIN, EDGE_COUNT)            ' Trigger
   
   repeat until PINREAD(TRANS_PIN) == 1
-  RDPIN(TRANS_PIN)                        ' Acknowledge
+  ack := RDPIN(TRANS_PIN)                 ' Acknowledge (discard value)
 ```
 
 **PASM2:**
@@ -307,7 +307,7 @@ CON
   STEP_PERIOD = 400                       ' 2 µs period
   STEP_HIGH = 200                         ' 1 µs high time
 
-PUB step_motor(steps)
+PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)
   WRPIN(STEP_PIN, P_PULSE | P_OE)
   WXPIN(STEP_PIN, STEP_PERIOD | (STEP_HIGH << 16))
@@ -317,7 +317,7 @@ PUB step_motor(steps)
   
   ' Wait for completion
   repeat until PINREAD(STEP_PIN) == 1
-  RDPIN(STEP_PIN)
+  ack := RDPIN(STEP_PIN)                  ' Acknowledge (discard value)
 ```
 
 ### Example 2: RS-485 Transmit Disable Delay
@@ -351,7 +351,7 @@ CON
   PULSE_WIDTH = 100                       ' 500 ns at 200 MHz
   PULSE_COUNT = 5
 
-PUB trigger_burst()
+PUB trigger_burst() | ack
   PINFLOAT(TRIG_PIN)
   WRPIN(TRIG_PIN, P_PULSE | P_OE)
   WXPIN(TRIG_PIN, (PULSE_WIDTH * 2) | (PULSE_WIDTH << 16))  ' 50% duty
@@ -360,7 +360,7 @@ PUB trigger_burst()
   WYPIN(TRIG_PIN, PULSE_COUNT)
   
   repeat until PINREAD(TRIG_PIN) == 1
-  RDPIN(TRIG_PIN)
+  ack := RDPIN(TRIG_PIN)                  ' Acknowledge (discard value)
 ```
 
 ### Example 4: PASM2 Continuous Step Generation

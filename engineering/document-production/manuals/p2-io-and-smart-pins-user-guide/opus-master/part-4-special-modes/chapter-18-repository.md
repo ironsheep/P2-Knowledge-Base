@@ -59,7 +59,7 @@ CON
 
 PUB setup_repository()
   WRPIN(REPO_PIN, P_REPOSITORY)                 ' Mode %00001
-  DIRH(REPO_PIN)                                ' Enable
+  PINH(REPO_PIN)                                ' Enable
 
 PUB write_value(value)
   WXPIN(REPO_PIN, value)                        ' Store 32-bit value
@@ -132,7 +132,7 @@ PUB setup_noise_dac()
   ' P[12:10] = %101 enables DAC output
   WRPIN(NOISE_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
   WXPIN(NOISE_PIN, 0)                           ' No sample period
-  DIRH(NOISE_PIN)
+  PINH(NOISE_PIN)
 ```
 
 ### X Register: Sample Period
@@ -166,7 +166,7 @@ PUB white_noise()
   ' Configure for 3.3V peak noise output
   WRPIN(AUDIO_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
   WXPIN(AUDIO_PIN, 0)                           ' Max period (low power)
-  DIRH(AUDIO_PIN)
+  PINH(AUDIO_PIN)
 
   ' Noise runs continuously - just wait
   REPEAT
@@ -197,7 +197,7 @@ PUB setup_dither_dac() | mode
   mode := P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
   WRPIN(DAC_PIN, mode)
   WXPIN(DAC_PIN, 1)                             ' Update immediately
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 
 PUB set_voltage(value_16bit)
   WYPIN(DAC_PIN, value_16bit)                   ' 16-bit value
@@ -241,12 +241,16 @@ PUB audio_dac() | sample_period
   ' Configure 16-bit dithered DAC
   WRPIN(DAC_PIN, P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE)
   WXPIN(DAC_PIN, sample_period)
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 
   ' Output audio samples
   REPEAT
     REPEAT UNTIL PINREAD(DAC_PIN)               ' Wait for sample period
     WYPIN(DAC_PIN, get_next_sample())
+
+PRI get_next_sample() : sample
+  ' Application-specific: return next 16-bit audio sample
+  sample := $8000
 ```
 
 ### ADC Readback
@@ -296,7 +300,7 @@ PUB setup_pwm_dither_dac() | mode, period
 
   WRPIN(DAC_PIN, mode)
   WXPIN(DAC_PIN, period)
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 ```
 
 ### Sample Period Constraint
@@ -326,7 +330,7 @@ PUB hq_audio_dac() | period, samples_per_period
 
   WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE)
   WXPIN(DAC_PIN, period)
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 
   ' Actual sample rate: 200 MHz / 4096 = 48,828 Hz
   ' Close enough for most applications
@@ -334,6 +338,10 @@ PUB hq_audio_dac() | period, samples_per_period
   REPEAT
     REPEAT UNTIL PINREAD(DAC_PIN)
     WYPIN(DAC_PIN, get_next_sample())
+
+PRI get_next_sample() : sample
+  ' Application-specific: return next 16-bit audio sample
+  sample := $8000
 ```
 
 ---
@@ -406,12 +414,19 @@ PRI setup_repository_reader()
 PRI sensor_cog() | temp
   ' Configure repository
   WRPIN(REPO_PIN, P_REPOSITORY)
-  DIRH(REPO_PIN)
+  PINH(REPO_PIN)
 
   REPEAT
     temp := read_temperature_sensor()
     WXPIN(REPO_PIN, temp)                       ' Share reading
     WAITMS(100)
+
+PRI display_temperature(t)
+  ' Application-specific: render temperature value t
+
+PRI read_temperature_sensor() : t
+  ' Application-specific: return current temperature reading
+  t := 25
 ```
 
 ### Example 2: Multi-COG Status Flags
@@ -450,13 +465,21 @@ PUB stereo_audio() | period
   WRPIN(RIGHT_PIN, P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE)
   WXPIN(LEFT_PIN, period)
   WXPIN(RIGHT_PIN, period)
-  DIRH(LEFT_PIN)
-  DIRH(RIGHT_PIN)
+  PINH(LEFT_PIN)
+  PINH(RIGHT_PIN)
 
   REPEAT
     REPEAT UNTIL PINREAD(LEFT_PIN)              ' Wait for sample time
     WYPIN(LEFT_PIN, get_left_sample())
     WYPIN(RIGHT_PIN, get_right_sample())
+
+PRI get_left_sample() : sample
+  ' Application-specific: return next 16-bit left-channel sample
+  sample := $8000
+
+PRI get_right_sample() : sample
+  ' Application-specific: return next 16-bit right-channel sample
+  sample := $8000
 ```
 
 ### Example 4: Function Generator with PWM DAC
@@ -480,13 +503,18 @@ PUB function_generator(frequency) | period, phase, increment
 
   WRPIN(DAC_PIN, P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE)
   WXPIN(DAC_PIN, period)
-  DIRH(DAC_PIN)
+  PINH(DAC_PIN)
 
   phase := 0
   REPEAT
     REPEAT UNTIL PINREAD(DAC_PIN)
     WYPIN(DAC_PIN, sine_table[phase >> 8])      ' Output current phase
     phase += increment                          ' Advance phase
+
+PRI build_sine_table() | i
+  ' Application-specific: fill sine_table[0..255] with sine values 0..65535
+  REPEAT i FROM 0 TO 255
+    sine_table[i] := $8000 + QSIN(32767, i << 24, 0)
 ```
 
 ---

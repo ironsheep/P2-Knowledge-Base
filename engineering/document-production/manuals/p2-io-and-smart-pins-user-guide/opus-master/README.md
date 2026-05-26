@@ -10,8 +10,8 @@ opus-master/
 ├── front-matter.md              (how to use, conventions, quick matrix)
 ├── part-1-fundamentals/         (chapters 1-5)
 ├── part-2-output-modes/         (chapters 6-11)
-├── part-3-input-modes/          (chapters 12-18)
-├── part-4-special-modes/        (chapters 19-20)
+├── part-3-input-modes/          (chapters 12-17)
+├── part-4-special-modes/        (chapters 18-19)
 └── part-5-appendices/           (appendices A-F)
 ```
 

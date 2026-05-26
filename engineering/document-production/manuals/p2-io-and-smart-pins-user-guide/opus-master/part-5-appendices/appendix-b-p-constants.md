@@ -33,9 +33,9 @@ WRPIN(pin, mode)
 |----------|-------|------|-------------|---------|
 | P_NORMAL | %00000 | Default | Normal mode (not smart pin) | 3 |
 | P_REPOSITORY | %00001 | Non-DAC | Long repository | 18 |
-| P_DAC_NOISE | %00001 | DAC | DAC noise output | 18 |
-| P_DAC_DITHER_RND | %00010 | DAC | 16-bit random dither DAC | 18 |
-| P_DAC_DITHER_PWM | %00011 | DAC | 16-bit PWM dither DAC | 18 |
+| P_DAC_NOISE | %00001 | DAC | DAC noise output | 10 |
+| P_DAC_DITHER_RND | %00010 | DAC | 16-bit random dither DAC | 10 |
+| P_DAC_DITHER_PWM | %00011 | DAC | 16-bit PWM dither DAC | 10 |
 | P_PULSE | %00100 | - | Pulse/cycle output | 7 |
 | P_TRANSITION | %00101 | - | Transition output | 7 |
 | P_NCO_FREQ | %00110 | - | NCO frequency output | 8 |

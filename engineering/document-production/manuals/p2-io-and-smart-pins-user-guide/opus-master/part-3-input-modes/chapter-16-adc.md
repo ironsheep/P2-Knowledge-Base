@@ -135,7 +135,7 @@ PUB adc_init()
   ' Configure ADC with 8-bit SINC2 sampling
   WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
   WXPIN(ADC_PIN, %00_0111)                    ' SINC2 sampling, 128 clocks
-  DIRH(ADC_PIN)                               ' Enable smart pin
+  PINH(ADC_PIN)                               ' Enable smart pin
 
 PUB read_adc() : value
   value := RDPIN(ADC_PIN)                     ' Get latest sample
@@ -150,7 +150,7 @@ Requires software post-processing to compute the difference between consecutive 
 PUB sinc2_init()
   WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
   WXPIN(ADC_PIN, %01_0111)                    ' SINC2 filtering, 128 clocks
-  DIRH(ADC_PIN)
+  PINH(ADC_PIN)
 
 PUB sinc2_read() : sample | acc
   REPEAT UNTIL PINREAD(ADC_PIN)               ' Wait for new sample
@@ -193,7 +193,7 @@ Captures raw ADC bitstream for custom processing algorithms.
 PUB bitstream_init()
   WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
   WXPIN(ADC_PIN, %11_0101)                    ' Bitstream, 32 bits
-  DIRH(ADC_PIN)
+  PINH(ADC_PIN)
 
 PUB read_bitstream() : bits
   REPEAT UNTIL PINREAD(ADC_PIN)
@@ -219,7 +219,7 @@ PUB external_adc_init()
   ' External ADC with SINC2 sampling
   WRPIN(DATA_PIN, P_ADC_EXT | P_PLUS1_B)      ' Use next pin as clock
   WXPIN(DATA_PIN, %00_0111)                   ' SINC2, 8-bit
-  DIRH(DATA_PIN)
+  PINH(DATA_PIN)
 ```
 
 ### Custom Sample Periods
@@ -230,7 +230,7 @@ Use WYPIN to override the power-of-2 period from X[3:0]:
 WRPIN(ADC_PIN, P_ADC_EXT | P_PLUS1_B)
 WXPIN(ADC_PIN, %10_0111)                      ' SINC3 base
 WYPIN(ADC_PIN, 320)                           ' Override: 320 clock period
-DIRH(ADC_PIN)
+PINH(ADC_PIN)
 ```
 
 ### Accumulator Limits
@@ -266,11 +266,11 @@ Pin group starting at 52:
 CON
   SCOPE_BASE = 52                             ' Must be multiple of 4
 
-PUB scope_init()
+PUB scope_init(trigger_config)
   ' Configure 4 consecutive pins for scope mode
   WRPIN(SCOPE_BASE, P_ADC_GIO | P_ADC_SCOPE)
   WXPIN(SCOPE_BASE, trigger_config)
-  DIRH(SCOPE_BASE)
+  PINH(SCOPE_BASE)
 ```
 
 ### X Register: Trigger Configuration
@@ -315,7 +315,7 @@ PUB multi_adc_init() | ch
   REPEAT ch FROM 0 TO NUM_CHANNELS-1
     WRPIN(ADC_BASE + ch, P_ADC_GIO | P_ADC)
     WXPIN(ADC_BASE + ch, %00_0111)            ' 8-bit SINC2
-    DIRH(ADC_BASE + ch)
+    PINH(ADC_BASE + ch)
 
 PUB read_all_channels(ptr) | ch
   REPEAT ch FROM 0 TO NUM_CHANNELS-1
@@ -348,21 +348,21 @@ CON
   POT_PIN = 46
   LED_BASE = 56
 
-PUB main() | adc_value, led_bits
+PUB main() | adc_value, led_bits, i
   ' Initialize ADC - 8-bit, ~1.5 MHz sample rate
   WRPIN(POT_PIN, P_ADC_GIO | P_ADC)
   WXPIN(POT_PIN, %00_0111)
-  DIRH(POT_PIN)
+  PINH(POT_PIN)
 
   ' Initialize LED outputs
-  REPEAT 8 WITH i
+  REPEAT i FROM 0 TO 7
     PINLOW(LED_BASE + i)
 
   REPEAT
     adc_value := RDPIN(POT_PIN)
 
     ' Display value on 8 LEDs
-    REPEAT 8 WITH i
+    REPEAT i FROM 0 TO 7
       IF adc_value.[i]
         PINHIGH(LED_BASE + i)
       ELSE
@@ -393,7 +393,7 @@ PUB main() | sample_period
   WRPIN(AUDIO_PIN, P_ADC_GIO | P_ADC)
   WXPIN(AUDIO_PIN, %01_1100)                  ' SINC2 filter, base period
   WYPIN(AUDIO_PIN, sample_period)             ' Override period
-  DIRH(AUDIO_PIN)
+  PINH(AUDIO_PIN)
 
   REPEAT
     capture_buffer()
@@ -407,6 +407,9 @@ PRI capture_buffer() | i, last_acc, acc
     acc := RDPIN(AUDIO_PIN)
     audio_buffer[i] := acc - last_acc         ' SINC2 difference
     last_acc := acc
+
+PRI process_audio()
+  ' Application-specific audio processing of audio_buffer[]
 ```
 
 ### Example 3: High-Resolution DC Measurement
@@ -416,16 +419,16 @@ CON
   _clkfreq = 200_000_000
   SENSOR_PIN = 46
 
-PUB measure_voltage() : millivolts | sample, last_acc, acc
+PUB measure_voltage() : millivolts | sample, last_acc, acc, ack
   ' 14-bit resolution with SINC2 (8192 clocks)
   WRPIN(SENSOR_PIN, P_ADC_1X | P_ADC)
   WXPIN(SENSOR_PIN, %01_1101)                 ' SINC2 filter, 14-bit
-  DIRH(SENSOR_PIN)
+  PINH(SENSOR_PIN)
 
   ' Wait for filter to stabilize (2 periods)
   REPEAT 2
     REPEAT UNTIL PINREAD(SENSOR_PIN)
-    RDPIN(SENSOR_PIN)
+    ack := RDPIN(SENSOR_PIN)                  ' Discard stabilization sample
 
   ' Get actual measurement
   REPEAT UNTIL PINREAD(SENSOR_PIN)
@@ -444,13 +447,13 @@ PUB measure_voltage() : millivolts | sample, last_acc, acc
 ```spin2
 CON
   _clkfreq = 200_000_000
-  THERMOCOUPLE_PIN = 46                       ' Typically ~0-50mV
+  THERMOCOUPLE_PIN = 46                       ' Range ~0-50mV depending on type
 
 PUB read_thermocouple() : microvolts | sample
   ' Use 100x gain: 33mV max input → full ADC range
   WRPIN(THERMOCOUPLE_PIN, P_ADC_100X | P_ADC)
   WXPIN(THERMOCOUPLE_PIN, %00_1001)           ' SINC2 sampling, 10-bit
-  DIRH(THERMOCOUPLE_PIN)
+  PINH(THERMOCOUPLE_PIN)
 
   WAITMS(1)                                   ' Let filter stabilize
 

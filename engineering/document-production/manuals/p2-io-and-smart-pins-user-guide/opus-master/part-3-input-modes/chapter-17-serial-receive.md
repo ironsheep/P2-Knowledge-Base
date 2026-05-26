@@ -78,6 +78,19 @@ X_value := (bit_period_frac & $FFFFFC00) | (data_bits - 1)
 | 460800 | 434 | $01B2 |
 | 921600 | 217 | $00D9 |
 
+### Data Justification
+
+RDPIN and RQPIN return the received word **MSB-justified** at Z[31]. For an N-bit word, the data occupies Z[31:32-N]; right-shift by **32 - N** to LSB-justify. Failing to shift produces incorrect values (a received 8-bit byte appears as a 32-bit value with the byte in the upper 8 bits and the low byte always zero).
+
+| Data bits (N) | Z occupancy | Right shift |
+|---------------|-------------|-------------|
+| 8 | Z[31:24] | `>> 24` (Spin2) / `SHR D,#24` (PASM2) |
+| 9 | Z[31:23] | `>> 23` |
+| 16 | Z[31:16] | `>> 16` |
+| 32 | Z[31:0] | none |
+
+This applies equally to async and sync RX modes.
+
 ### Basic UART Reception
 
 ```spin2
@@ -92,7 +105,7 @@ PUB uart_init() | bit_period
 
 PUB receive_byte() : value
   REPEAT UNTIL PINREAD(RX_PIN)                  ' Wait for data
-  value := RDPIN(RX_PIN)                        ' Read received byte
+  value := RDPIN(RX_PIN) >> 24                  ' LSB-justify 8-bit byte (32-8)
 ```
 
 ### Reception with Timeout
@@ -103,7 +116,7 @@ PUB receive_with_timeout(timeout_ms) : value | deadline
 
   REPEAT
     IF PINREAD(RX_PIN)
-      RETURN RDPIN(RX_PIN)                      ' Data received
+      RETURN RDPIN(RX_PIN) >> 24                ' Data received (LSB-justify 8-bit)
 
     IF GETMS() >= deadline
       RETURN -1                                 ' Timeout
@@ -137,7 +150,8 @@ DAT           org
               testp     #RX_PIN wc                ' Check IN flag
         if_nc jmp       #.receive_loop            ' Wait for data
 
-              rdpin     rx_data, #RX_PIN          ' Read byte
+              rdpin     rx_data, #RX_PIN          ' Read MSB-justified word
+              shr       rx_data, #24              ' LSB-justify 8-bit byte (32-8)
               ' Process rx_data...
 
               jmp       #.receive_loop
@@ -223,7 +237,7 @@ Standard sync receive is LSB-first. For MSB-first protocols, reverse the bits:
 PUB receive_msb_first() : value
   REPEAT UNTIL PINREAD(MISO_PIN)
   value := RDPIN(MISO_PIN)
-  value := REV value                            ' Reverse bit order
+  value := value REV 32                         ' Reverse all 32 bits
   value := value & $FF                          ' Mask to 8 bits
 ```
 
@@ -303,13 +317,13 @@ PUB send_byte(value)
 
 PUB receive_byte() : value
   REPEAT UNTIL PINREAD(RX_PIN)
-  value := RDPIN(RX_PIN)
+  value := RDPIN(RX_PIN) >> 24                  ' LSB-justify 8-bit byte
 
 PUB echo_test()
   ' Echo received bytes back to sender
   REPEAT
     IF PINREAD(RX_PIN)
-      send_byte(RDPIN(RX_PIN))
+      send_byte(RDPIN(RX_PIN) >> 24)            ' LSB-justify before resending
 ```
 
 ### Half-Duplex Coordination
@@ -320,6 +334,8 @@ For half-duplex protocols (RS-485, single-wire):
 CON
   DATA_PIN = 20
   DIR_PIN = 21                                  ' Direction control
+  TX_PIN = DATA_PIN                             ' Single-wire: TX and RX share DATA_PIN
+  RX_PIN = DATA_PIN
 
 PUB send_message(ptr, len) | i
   PINHIGH(DIR_PIN)                              ' Enable transmitter
@@ -332,16 +348,20 @@ PUB send_message(ptr, len) | i
   WAITUS(100)                                   ' Bit time + margin
   PINLOW(DIR_PIN)                               ' Enable receiver
 
-PUB receive_message(ptr, max_len, timeout_ms) : count | deadline, byte
+PUB receive_message(ptr, max_len, timeout_ms) : count | deadline, b
   count := 0
   deadline := GETMS() + timeout_ms
 
   REPEAT WHILE count < max_len
     IF PINREAD(RX_PIN)
-      BYTE[ptr][count++] := RDPIN(RX_PIN)
+      b := RDPIN(RX_PIN) >> 24                  ' LSB-justify 8-bit byte
+      BYTE[ptr][count++] := b
       deadline := GETMS() + timeout_ms          ' Reset timeout
     ELSEIF GETMS() >= deadline
       QUIT                                      ' Timeout - end of message
+
+PRI send_byte(b)
+  ' Application-specific: TX byte b via DATA_PIN (configured for TX)
 ```
 
 ---
@@ -352,6 +372,7 @@ PUB receive_message(ptr, max_len, timeout_ms) : count | deadline, byte
 
 ```spin2
 CON
+  RX_PIN = 63
   BUFFER_SIZE = 256                             ' Must be power of 2
   BUFFER_MASK = BUFFER_SIZE - 1
 
@@ -366,7 +387,7 @@ PUB buffer_init()
 PUB poll_rx()
   ' Call frequently to move data from pin to buffer
   IF PINREAD(RX_PIN)
-    rx_buffer[head] := RDPIN(RX_PIN)
+    rx_buffer[head] := RDPIN(RX_PIN) >> 24      ' LSB-justify 8-bit byte
     head := (head + 1) & BUFFER_MASK
     ' Note: overwrites old data if buffer full
 
@@ -401,7 +422,7 @@ PRI receiver_loop()
 
   REPEAT
     IF PINREAD(RX_PIN)
-      rx_buffer[rx_head++] := RDPIN(RX_PIN)
+      rx_buffer[rx_head++] := RDPIN(RX_PIN) >> 24  ' LSB-justify 8-bit byte
       IF rx_head >= 1024
         rx_head := 0                            ' Wrap around
 
@@ -415,15 +436,16 @@ PUB get_rx_head() : pos
 
 ### Framing Error
 
-A framing error occurs when the stop bit is not high. The P2 doesn't automatically flag this, but you can detect it by examining received data:
+A framing error occurs when the stop bit is not high. The P2 does not automatically flag this; framing errors are detected by examining received data:
 
 ```spin2
 PUB receive_with_check() : value, error | raw
+  ' Requires PINSTART configured for 9 data bits (X[4:0] = 8) to capture stop bit.
   REPEAT UNTIL PINREAD(RX_PIN)
-  raw := RDPIN(RX_PIN)
+  raw := RDPIN(RX_PIN) >> 23                    ' 9 bits, shift by 32-9
 
-  ' For 8N1, check stop bit (bit 8 should be 1)
-  ' Requires receiving 9 bits to capture stop bit
+  ' After the shift: bits 7:0 are the data byte, bit 8 is the captured stop bit
+  value := raw & $FF
   IF (raw & $100) == 0
     error := TRUE                               ' Missing stop bit
   ELSE
@@ -443,7 +465,7 @@ VAR
 
 PUB check_overrun() : overrun
   ' Track time between reads
-  ' If too long, data may be lost
+  ' If the interval is too long, data is lost
   overrun := FALSE
   ' Application-specific logic based on baud rate
 ```
@@ -500,7 +522,7 @@ PUB rs485_init() | bp
 PUB listen_for_address() : addressed | addr
   REPEAT
     IF PINREAD(RX_PIN)
-      addr := RDPIN(RX_PIN)
+      addr := RDPIN(RX_PIN) >> 24               ' LSB-justify 8-bit byte
       IF addr == MY_ADDRESS
         RETURN TRUE
       IF addr == $FF                            ' Broadcast
@@ -532,7 +554,7 @@ PUB gps_receiver() | ch
 
   REPEAT
     IF PINREAD(GPS_PIN)
-      ch := RDPIN(GPS_PIN)
+      ch := RDPIN(GPS_PIN) >> 24                ' LSB-justify 8-bit byte
 
       IF ch == "$"                              ' Start of sentence
         buffer_idx := 0
@@ -546,6 +568,9 @@ PUB gps_receiver() | ch
 
       IF buffer_idx >= 99
         buffer_idx := 0                         ' Overflow protection
+
+PRI process_nmea(ptr)
+  ' Application-specific: parse NMEA sentence starting at ptr
 ```
 
 ### Example 2: SPI Sensor Read
@@ -558,20 +583,23 @@ CON
   SCK_PIN = 32
   CS_PIN = 33
 
-PUB read_sensor_register(reg) : value
+PUB read_sensor_register(reg_addr) : value
   ' Configure SPI
   PINSTART(MISO_PIN, P_SYNC_RX | P_PLUS1_B, %0_00111, 0)  ' 8 bits
 
   PINLOW(CS_PIN)                                ' Select device
 
   ' Send register address (would use TX pin)
-  send_spi_byte(reg | $80)                      ' Read flag
+  send_spi_byte(reg_addr | $80)                 ' Read flag
 
   ' Receive data
   REPEAT UNTIL PINREAD(MISO_PIN)
   value := RDPIN(MISO_PIN) >> 24
 
   PINHIGH(CS_PIN)                               ' Deselect
+
+PRI send_spi_byte(b)
+  ' Application-specific: clock byte b out via SPI TX pin
 ```
 
 ### Example 3: Command Parser
@@ -592,7 +620,7 @@ PUB command_loop() | ch
 
   REPEAT
     IF PINREAD(RX_PIN)
-      ch := RDPIN(RX_PIN)
+      ch := RDPIN(RX_PIN) >> 24                 ' LSB-justify 8-bit byte
 
       CASE ch
         13:                                     ' Enter
@@ -614,6 +642,9 @@ PRI execute_command(ptr)
   ELSEIF STRCOMP(ptr, STRING("status"))
     send_string(STRING("System OK"))
   ' ... more commands
+
+PRI send_string(ptr)
+  ' Application-specific: TX null-terminated string at ptr
 ```
 
 ---
@@ -664,16 +695,16 @@ X[4:0]: Data bits - 1
 
 ### Common Patterns
 
-**Blocking receive:**
+**Blocking receive (8-bit example; shift by 32 - N for other widths):**
 ```spin2
 REPEAT UNTIL PINREAD(pin)
-value := RDPIN(pin)
+value := RDPIN(pin) >> 24                       ' LSB-justify 8-bit byte
 ```
 
 **Polled receive:**
 ```spin2
 IF PINREAD(pin)
-  value := RDPIN(pin)
+  value := RDPIN(pin) >> 24                     ' LSB-justify 8-bit byte
 ```
 
 **With timeout:**
@@ -684,4 +715,4 @@ REPEAT UNTIL PINREAD(pin) OR (GETMS() >= deadline)
 
 ---
 
-*This chapter covered serial reception. For special modes like USB, see Chapter 18. For inter-cog data sharing, see Chapter 19.*
+*This chapter covered serial reception. For special modes like USB, see Chapter 19. For inter-cog data sharing, see Chapter 18.*
