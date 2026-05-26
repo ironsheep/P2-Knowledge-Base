@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-26T01:40:59.904661",
-    "total_entries": 1044,
+    "generated": "2026-05-26T03:27:17.359991",
+    "total_entries": 1164,
     "total_categories": 49,
     "total_aliases": 1008,
     "multi_target_aliases": 54,
@@ -7872,6 +7872,606 @@
     "p2kbToolsPnutTsCompiler": {
       "path": "deliverables/ai/P2/tools/pnut-ts-compiler.yaml",
       "mtime": 1764465146
+    },
+    "RCFAST": {
+      "path": "deliverables/ai/P2/architecture/clock_system.yaml",
+      "mtime": 1779759548,
+      "alias_of": "p2kbArchClockSystem"
+    },
+    "RCSLOW": {
+      "path": "deliverables/ai/P2/architecture/clock_system.yaml",
+      "mtime": 1779759548,
+      "alias_of": "p2kbArchClockSystem"
+    },
+    "PLL": {
+      "path": "deliverables/ai/P2/architecture/clock_system.yaml",
+      "mtime": 1779759548,
+      "alias_of": "p2kbArchClockSystem"
+    },
+    "asm_integration": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/asm_integration_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchAsmIntegrationAnalysis"
+    },
+    "buffer_management": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/buffer_management_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchBufferManagementAnalysis"
+    },
+    "cog_management": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/cog_management_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchCogManagementAnalysis"
+    },
+    "memory_management": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/memory_management_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchMemoryManagementAnalysis"
+    },
+    "protocol_implementation": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/protocol_implementation_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchProtocolImplementationAnalysis"
+    },
+    "smart_pin_usage": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/smart_pin_usage_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchSmartPinUsageAnalysis"
+    },
+    "state_machine": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/state_machine_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchStateMachineAnalysis"
+    },
+    "timing_control": {
+      "path": "deliverables/ai/P2/architecture/patterns-analysis/timing_control_analysis.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbArchTimingControlAnalysis"
+    },
+    "SPI_MASTER": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "MOSI": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "MISO": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "PIN_JOINING": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "CLOCK_ROUTING": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_SYNC_TX": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_SYNC_RX": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_TRANSITION": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_PLUS1_B": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_MINUS1_B": {
+      "path": "deliverables/ai/P2/architecture/smart-pins/spi-implementation-guide.yaml",
+      "mtime": 1779583590,
+      "alias_of": "p2kbArchSpiImplementationGuide"
+    },
+    "P_OE": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_TT_00": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_TT_01": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_TT_10": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_TT_11": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_BITDAC": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "P_CHANNEL": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "TT_BITS": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "WRPIN_FORMAT": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "OUTPUT_ENABLE": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "SMART_PIN_CONFIGURATION": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "PIN_OUTPUT_HIERARCHY": {
+      "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbArchSmartPins"
+    },
+    "pasm2_hub_synchronization": {
+      "path": "deliverables/ai/P2/language/pasm2/patterns/implementation/pasm2_hub_synchronization.yaml",
+      "mtime": 1768615852,
+      "alias_of": "p2kbPasm2Pasm2HubSynchronization"
+    },
+    "pasm2_initialization": {
+      "path": "deliverables/ai/P2/language/pasm2/patterns/implementation/pasm2_initialization.yaml",
+      "mtime": 1768615852,
+      "alias_of": "p2kbPasm2Pasm2Initialization"
+    },
+    "DEBUG_END_SESSION": {
+      "path": "deliverables/ai/P2/language/spin2/constants/debug-end-session.yaml",
+      "mtime": 1770152209,
+      "alias_of": "p2kbSpin2DebugEndSession"
+    },
+    "DEBUG_MASK": {
+      "path": "deliverables/ai/P2/language/spin2/constants/debug-mask.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2DebugMask"
+    },
+    "_CLKFREQ": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_clkfreq": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_XTLFREQ": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_xtlfreq": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_XINFREQ": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_xinfreq": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_ERRFREQ": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_errfreq": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_RCSLOW": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_rcslow": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_RCFAST": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_rcfast": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_AUTOCLK": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_CLKMODE": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "_clkmode": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DOWNLOAD_BAUD": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_BAUD": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_PIN": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_PIN_TX": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_PIN_RX": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_DISABLE": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_TIMESTAMP": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_DELAY": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_LOG_SIZE": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_COGS": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_MAIN": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_COGINIT": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_LEFT": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_TOP": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_WIDTH": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_HEIGHT": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_DISPLAY_LEFT": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_DISPLAY_TOP": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "DEBUG_WINDOWS_OFF": {
+      "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
+      "mtime": 1769646926,
+      "alias_of": "p2kbSpin2SpecialConfigurationSymbols"
+    },
+    "spin2_docs_vscode": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "SPIN2_DOCS_VSCODE": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "spin2_documentation_style": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "SPIN2_DOCUMENTATION_STYLE": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "vscode_spin2_comments": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "VSCODE_SPIN2_COMMENTS": {
+      "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+      "mtime": 1772234114,
+      "alias_of": "p2kbSpin2VscodePnutDocumentationStyle"
+    },
+    "debug_strategy_guide": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "DEBUG_STRATEGY_GUIDE": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "debug_record_limit": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "DEBUG_RECORD_LIMIT": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "debug_255_limit": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "DEBUG_255_LIMIT": {
+      "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
+      "mtime": 1772226364,
+      "alias_of": "p2kbSpin2DbgDebugStrategyGuide"
+    },
+    "animation_engine": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/animation_engine.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2AnimationEngine"
+    },
+    "array_architecture": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/array_architecture.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2ArrayArchitecture"
+    },
+    "audio_processor": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/audio_processor.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2AudioProcessor"
+    },
+    "communication_handler": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/communication_handler.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2CommunicationHandler"
+    },
+    "configuration_manager": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/configuration_manager.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2ConfigurationManager"
+    },
+    "data_logger": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/data_logger.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2DataLogger"
+    },
+    "debug_enabled": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/debug_enabled.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2DebugEnabled"
+    },
+    "display_driver": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/display_driver.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2DisplayDriver"
+    },
+    "dual_communication": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/dual_communication.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2DualCommunication"
+    },
+    "hardware_specific_app": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/hardware_specific_app.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2HardwareSpecificApp"
+    },
+    "iot_device": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/iot_device.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2IotDevice"
+    },
+    "monitoring_device": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/monitoring_device.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MonitoringDevice"
+    },
+    "motor_controller": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/motor_controller.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MotorController"
+    },
+    "multi_display_system": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/multi_display_system.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MultiDisplaySystem"
+    },
+    "multi_instance_coordination": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/multi_instance_coordination.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MultiInstanceCoordination"
+    },
+    "multi_motor_system": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/multi_motor_system.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MultiMotorSystem"
+    },
+    "multimedia_device": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/multimedia_device.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2MultimediaDevice"
+    },
+    "sensor_fusion": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/sensor_fusion.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2SensorFusion"
+    },
+    "sensor_reader": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/sensor_reader.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2SensorReader"
+    },
+    "single_communication": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/single_communication.yaml",
+      "mtime": 1778200244,
+      "alias_of": "p2kbSpin2SingleCommunication"
+    },
+    "test_harness": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/test_harness.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2TestHarness"
+    },
+    "utility_library": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/applications/utility_library.yaml",
+      "mtime": 1768613644,
+      "alias_of": "p2kbSpin2UtilityLibrary"
+    },
+    "diagnostic_output": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_diagnostic_output.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2DiagnosticOutput"
+    },
+    "error_handling": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_error_handling.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2ErrorHandling"
+    },
+    "event_dispatcher": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_event_dispatcher.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2EventDispatcher"
+    },
+    "layered_architecture": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_layered_architecture.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2LayeredArchitecture"
+    },
+    "mailbox_communication": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_mailbox_communication.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2MailboxCommunication"
+    },
+    "memory_allocation": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_memory_allocation.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2MemoryAllocation"
+    },
+    "pin_control": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_pin_control.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2PinControl"
+    },
+    "plugin_system": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_plugin_system.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2PluginSystem"
+    },
+    "resource_pool": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_resource_pool.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2ResourcePool"
+    },
+    "shared_memory": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_shared_memory.yaml",
+      "mtime": 1764449566,
+      "alias_of": "p2kbSpin2Spin2SharedMemory"
+    },
+    "few_objects": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/structural/few_objects.yaml",
+      "mtime": 1769218910,
+      "alias_of": "p2kbSpin2FewObjects"
+    },
+    "framework_pattern": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/structural/framework_pattern.yaml",
+      "mtime": 1769218910,
+      "alias_of": "p2kbSpin2FrameworkPattern"
+    },
+    "no_objects": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/structural/no_objects.yaml",
+      "mtime": 1769218910,
+      "alias_of": "p2kbSpin2NoObjects"
+    },
+    "several_objects": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/structural/several_objects.yaml",
+      "mtime": 1769218910,
+      "alias_of": "p2kbSpin2SeveralObjects"
+    },
+    "single_object": {
+      "path": "deliverables/ai/P2/language/spin2/patterns/structural/single_object.yaml",
+      "mtime": 1769218910,
+      "alias_of": "p2kbSpin2SingleObject"
     }
   }
 }
