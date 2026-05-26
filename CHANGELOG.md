@@ -20,6 +20,21 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.4.2] - 2026-05-26
+
+**RCFAST architectural contract + smart pin counter modes**
+
+### Added
+- RCFAST boot-time clock contract: documented on SPI Flash Boot (cog_clock state), Boot Pattern Selection (cross-cutting note for all ROM paths), and Flash Loader Case Study (RCFAST-locked, clock-mode-agnostic SPI rate technique)
+- Clock System search aliases: RCFAST, RCSLOW, PLL, CLKFREQ, CLKMODE, XI, XO, HUBSET
+
+### Changed
+- RCFAST frequency: 20-30 MHz across process/voltage/temperature
+- Smart Pin modes %10100, %10101, %10110, %10111: canonical Spin2 constant names (P_PERIODS_HIGHS, P_COUNTER_TICKS, P_COUNTER_HIGHS, P_COUNTER_PERIODS) and aligned semantic descriptions
+- Smart Pin mode %10111 example: 3-pin canonical idiom for exact frequency and duty-cycle calculation
+
+---
+
 ## [1.4.1] - 2026-05-24
 
 **Boot ROM coverage + flash loader case study**

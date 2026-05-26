@@ -73,6 +73,28 @@ phase_2_post_load_state:
       continued through $1, $2, ... and is now at $400. To continue
       reading, the loader simply toggles spi_ck and captures bits on
       spi_do — NO new READ command needed.
+  cog_clock:
+    source: |
+      RCFAST is active. The ROM does not switch clocks before JMP #0;
+      the cog runs at the RCFAST rate (20-30 MHz; see architecture/clock_system.yaml).
+    significance: |
+      The flash loader executes its entire SPI dance under RCFAST. The
+      user's _clkfreq only takes effect AFTER the loader's final COGINIT
+      to the user application — so the loader is clock-mode-agnostic:
+      identical code and timing regardless of what crystal/PLL config
+      the user program ultimately selects.
+    spi_rate_consequence: |
+      SCK = sysclk/2 under RCFAST gives SCK ~10-15 MHz, well below the
+      W25Q128's 100+ MHz tolerance. The flash is always faster than the
+      loader can talk; the loader is always slow enough to never overrun
+      the flash. No retiming, PLL-stable wait, or upper-bound check on
+      sysclk is required.
+    custom_loader_caveat: |
+      Custom flash loaders wishing to use a faster sysclk must HUBSET to
+      switch clocks AND rebalance the streamer NCO / WXPIN pair to
+      maintain bit-edge lockstep (see language/pasm2/concepts/streamer_smartpin_control.yaml).
+      They must also reconsider the WAITX #3 alignment pad between
+      WYPIN and XINIT, calibrated for the RCFAST sysclk/2 regime.
   benefit: "Saves code space and boot latency; the production loader does exactly this"
 
 # Phase 3: Flash loader handoff
@@ -105,6 +127,7 @@ related:
   - architecture/boot-rom/_index.yaml
   - architecture/boot-rom/boot-pattern-selection.yaml
   - architecture/boot-rom/sd-card-boot.yaml
+  - architecture/clock_system.yaml
   - architecture/serial_loader.yaml
   - architecture/smart-pins/spi-implementation-guide.yaml
   - code-examples/flash-loader-case-study.yaml

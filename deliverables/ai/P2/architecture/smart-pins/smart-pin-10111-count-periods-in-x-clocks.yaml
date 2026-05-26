@@ -1,5 +1,5 @@
 title: "Count Periods Within X Clock Cycles"
-subtitle: "Smart Pin Mode %10111 (P_PERIODS_CLOCKS_PERIODS)"
+subtitle: "Smart Pin Mode %10111 (P_COUNTER_PERIODS)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
@@ -52,7 +52,7 @@ code_examples:
         window_clks := (_clkfreq / 1000) * window_ms
         
         ' Count periods in ~100ms windows
-        pinstart(signal_pin, P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, window_clks, %00)
+        pinstart(signal_pin, P_COUNTER_PERIODS | P_B_A_INPUT, window_clks, %00)
         
         repeat
           repeat until pinread(signal_pin)       ' Wait for measurement complete
@@ -68,7 +68,7 @@ code_examples:
       ' PASM2 example - precise frequency measurement
         org
         dirl    #signal_pin                      ' Reset smart pin
-        wrpin   ##P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, #signal_pin
+        wrpin   ##P_COUNTER_PERIODS | P_B_A_INPUT, #signal_pin
         wxpin   ##clkfreq, #signal_pin           ' 1-second minimum window
         wypin   #%00, #signal_pin                ' Rise to rise
         dirh    #signal_pin                      ' Start measurement
@@ -79,34 +79,36 @@ code_examples:
         ' periods now contains Hz (cycles per second)
         jmp     #.loop                           ' Next measurement starts auto
 
-  - title: "Combined Frequency and Duty Measurement"
-    description: "Use three pins to measure frequency and duty cycle"
+  - title: "Exact Frequency and Duty Measurement (3-pin canonical idiom)"
+    description: "Concurrent %10111 + %10101 + %10110 measurement for exact frequency and duty cycle"
     code: |
       CON
         _clkfreq = 200_000_000
-        pin_base = 20                            ' Use pins 20, 21, 22
+        pin_base = 20                            ' All three pins observe the same signal
         window_ms = 100
       
-      PUB main() | periods, high_time, total_time, freq, duty, window_clks
+      PUB main() | periods, ticks, highs, freq, duty, window_clks
         window_clks := (_clkfreq / 1000) * window_ms
         
-        ' Pin 20: Count periods
-        pinstart(pin_base+0, P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, window_clks, %00)
-        ' Pin 21: Measure high time (duty)
-        pinstart(pin_base+1, P_PERIODS_CLOCKS_TIME | P_B_A_INPUT, window_clks, %00)
-        ' Pin 22: Measure total time (actual elapsed)
-        pinstart(pin_base+2, P_TIME_HIGHS_A | P_A_HIGH_TO_TOGGLE, window_clks, 0)
+        ' Three pins, same period-aligned window, started together for matched timing
+        ' Pin 20: count complete A-periods within the window
+        pinstart(pin_base+0, P_COUNTER_PERIODS | P_B_A_INPUT, window_clks, %00)
+        ' Pin 21: measure actual elapsed ticks (>= window_clks, period-extended)
+        pinstart(pin_base+1, P_COUNTER_TICKS   | P_B_A_INPUT, window_clks, %00)
+        ' Pin 22: measure total clocks A was high during the same window
+        pinstart(pin_base+2, P_COUNTER_HIGHS   | P_B_A_INPUT, window_clks, %00)
         
         repeat
-          ' Wait for all measurements complete
-          repeat until (pinread(pin_base+0) and pinread(pin_base+1))
+          ' Wait for all three measurements to complete
+          repeat until pinread(pin_base+0) and pinread(pin_base+1) and pinread(pin_base+2)
           
-          periods := rdpin(pin_base+0)           ' Period count
-          high_time := rdpin(pin_base+1)         ' Clocks spent high
+          periods := rdpin(pin_base+0)           ' Complete A-periods in window
+          ticks   := rdpin(pin_base+1)           ' Actual elapsed clocks (>= window_clks)
+          highs   := rdpin(pin_base+2)           ' Clocks A was high during window
           
-          ' Calculate precise results
-          freq := (periods * 1000) / window_ms   ' Frequency in Hz
-          duty := (high_time * 100) / window_clks ' Duty cycle %
+          ' Exact results - all three measurements span the SAME period-aligned window
+          freq := (periods * _clkfreq) / ticks   ' freq = periods / (ticks/clkfreq)
+          duty := (highs * 100) / ticks          ' duty = high-time / elapsed-time
           
           debug("Freq: ", udec(freq), "Hz, Duty: ", udec(duty), "%")
 
@@ -117,13 +119,13 @@ common_applications:
   - "Event rate counting in time windows"
 
 related_modes:
-  - "Mode %10101: Periods/clocks/time - measure time (duty) in same window"
-  - "Mode %10110: Periods/clocks/states - count transitions in same window"
-  - "Mode %10100: Periods/count/states - fixed period count instead of time"
-  - "Mode %10011: Periods/count/time - measures period duration not count"
+  - "Mode %10101 (P_COUNTER_TICKS): same period-aligned window; Z = elapsed ticks (pair to compute exact frequency)"
+  - "Mode %10110 (P_COUNTER_HIGHS): same period-aligned window; Z = high-time (pair to compute exact duty cycle)"
+  - "Mode %10100 (P_PERIODS_HIGHS): X complete A-periods window; Z = high-time"
+  - "Mode %10011 (P_PERIODS_TICKS): X complete A-periods window; Z = elapsed ticks"
 
 configuration_constants:
-  mode_constant: "P_PERIODS_CLOCKS_PERIODS"
+  mode_constant: "P_COUNTER_PERIODS"
   binary_value: "%10111"
   common_modifiers:
     - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"

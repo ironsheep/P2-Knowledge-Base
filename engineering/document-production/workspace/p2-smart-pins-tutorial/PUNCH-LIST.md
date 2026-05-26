@@ -132,10 +132,10 @@
 - [ ] **Missing mode narratives** - Ensure all 32 Smart Pin modes have full tutorial content
   - Mode %10000 (P_TIME_STATES) - Currently stub, needs full narrative
   - Mode %10001 (P_TIME_HIGHS) - Currently stub, needs full narrative
-  - Mode %10100 (P_PERIODS_STATES) - Currently stub, needs full narrative
+  - Mode %10100 (P_PERIODS_HIGHS) - Currently stub, needs full narrative
   - Mode %10101 (P_COUNTER_TICKS) - Currently stub, needs full narrative
-  - Mode %10110 (P_COUNTER_STATES) - Currently stub, needs full narrative
-  - Mode %10111 (P_TIME_COUNT) - Currently stub, needs full narrative
+  - Mode %10110 (P_COUNTER_HIGHS) - Currently stub, needs full narrative
+  - Mode %10111 (P_COUNTER_PERIODS) - Currently stub, needs full narrative
   - Audit all modes for completeness (Quick Reference, explanation, use cases, code examples)
   - Use P2 Knowledge Base YAMLs as source for accurate technical details
 

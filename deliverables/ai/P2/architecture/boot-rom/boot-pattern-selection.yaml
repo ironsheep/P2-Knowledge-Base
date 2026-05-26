@@ -60,6 +60,24 @@ boot_pattern_table:
       boot_procedure: "Boot from microSD card"
       fallback: "If SD fails: shutdown"
 
+# Boot-time clock state — applies to ALL ROM boot paths
+boot_time_clock_state:
+  description: |
+    All ROM boot paths execute under RCFAST. The ROM Booter does not
+    issue any HUBSET to change clock source before JMP'ing into loaded
+    code. User _clkfreq only takes effect once user code itself issues
+    HUBSET (typically as the first action in the Spin2 runtime startup
+    or in PASM2 user code).
+  implication: |
+    Boot-time code (flash loaders, serial download stubs, SD loaders)
+    can rely on RCFAST timing without configuration. Timing-sensitive
+    boot-time activity (SPI flash reads, serial baud detection) must
+    be calibrated for the RCFAST range (20-30 MHz), not for the user's
+    eventual operating frequency.
+  see_also:
+    - architecture/clock_system.yaml
+    - architecture/boot-rom/spi-flash-boot.yaml
+
 # Pins serve multiple roles in sequence
 pin_triple_duty:
   description: "P59-P61 serve up to three roles in sequence during each reset cycle"
@@ -96,4 +114,5 @@ related:
   - architecture/boot-rom/_index.yaml
   - architecture/boot-rom/spi-flash-boot.yaml
   - architecture/boot-rom/sd-card-boot.yaml
+  - architecture/clock_system.yaml
   - architecture/serial_loader.yaml

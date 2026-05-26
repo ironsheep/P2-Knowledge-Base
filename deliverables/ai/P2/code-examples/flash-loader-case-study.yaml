@@ -88,6 +88,10 @@ techniques_demonstrated:
     lines: "50"
     canonical: language/pasm2/getptr.yaml
 
+  - technique: "RCFAST-locked, clock-mode-agnostic SPI rate selection (fixed timing constants work regardless of user's _clkfreq)"
+    lines: "all SPI setup paths (lines 100-107 programmer, 241-244 loader)"
+    canonical: architecture/boot-rom/spi-flash-boot.yaml
+
 technical_analysis:
   difficulty: "advanced"
   audience: "Developers writing custom loaders that interoperate with the ROM contract; learners studying master-class PASM2 density"

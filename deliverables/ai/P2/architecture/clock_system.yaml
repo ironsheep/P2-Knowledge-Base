@@ -1,8 +1,18 @@
 # Clock System - Flexible Multi-Source Clock Generation
-# Source: Silicon Doc v35, P2 Datasheet, pnut_ts Clock-Configuration-Usage-Guide.md
+# Source: Silicon Doc v35, P2 Datasheet, pnut_ts Clock-Configuration-Usage-Guide.md,
+#         P2 silicon designer review notes (RCFAST practical range)
 
 component: Clock_System
 category: timing
+aliases:
+  - RCFAST
+  - RCSLOW
+  - PLL
+  - CLKFREQ
+  - CLKMODE
+  - XI
+  - XO
+  - HUBSET
 description: |
   Flexible clock generation system supporting multiple clock sources with PLL
   multiplication, programmable dividers, and automatic source switching. Provides
@@ -56,9 +66,10 @@ hub_variables:
 clock_sources:
   rcfast:
     description: "Internal RC oscillator - fast mode"
-    frequency: "~20-25 MHz (process/temperature dependent)"
-    guaranteed_min: "20 MHz"
-    stability: "±10% over temperature"
+    frequency: "20-30 MHz, varies with process/voltage/temperature"
+    guaranteed_min: "20 MHz (per Silicon Doc v35: 'RCFAST: 20 MHz+')"
+    practical_max: "~30 MHz (per P2 silicon designer)"
+    stability: "Wide variation across PVT (~50% min-to-max spread); not for precision timing"
     power: "Normal power consumption"
     boot_default: true
     
@@ -143,7 +154,7 @@ clock_modes:
   source_select:
     ss_field: "D[3:2]"
     modes:
-      0b00: "RCFAST (~20-25 MHz)"
+      0b00: "RCFAST (20-30 MHz)"
       0b01: "RCSLOW (~20 kHz)"
       0b10: "Crystal/External on XI"
       0b11: "PLL output"

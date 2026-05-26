@@ -1,5 +1,5 @@
 title: "Sum Pulse Duration Over X Periods"
-subtitle: "Smart Pin Mode %10100 (P_PERIODS_STATES)"
+subtitle: "Smart Pin Mode %10100 (P_PERIODS_HIGHS)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
@@ -48,7 +48,7 @@ code_examples:
       PUB main() | total_high, periods, duty_percent
         ' Measure duty cycle over 100 periods
         ' Use A-rise to A-rise (single pin, %00 mode)
-        pinstart(pwm_pin, P_PERIODS_STATES | P_B_A_INPUT, 100, %00)
+        pinstart(pwm_pin, P_PERIODS_HIGHS | P_B_A_INPUT, 100, %00)
         
         repeat
           ' Wait for measurement complete
@@ -64,7 +64,7 @@ code_examples:
       ' PASM2 example - measure duty over 10 cycles
         org
         dirl    #pwm_pin                         ' Reset smart pin
-        wrpin   ##P_PERIODS_STATES | P_B_A_INPUT, #pwm_pin
+        wrpin   ##P_PERIODS_HIGHS | P_B_A_INPUT, #pwm_pin
         wxpin   #10, #pwm_pin                    ' 10 periods
         wypin   #%00, #pwm_pin                   ' A-rise to A-rise (B=A)
         dirh    #pwm_pin                         ' Start measurement
@@ -86,7 +86,7 @@ code_examples:
       PUB main() | overlap_time
         ' Measure how long A is high between B edges
         ' A-edge to B-edge mode captures overlap
-        pinstart(sig_a_pin, P_PERIODS_STATES | P_PLUS1_B, 50, %11)
+        pinstart(sig_a_pin, P_PERIODS_HIGHS | P_PLUS1_B, 50, %11)
         
         repeat
           repeat until pinread(sig_a_pin)        ' Wait for measurement
@@ -101,13 +101,13 @@ common_applications:
   - "Signal quality analysis (cumulative on-time)"
 
 related_modes:
-  - "Mode %10011: Periods/count/time - measures period duration"
-  - "Mode %10101: Periods/clocks/time - time-limited measurement"
-  - "Mode %10110: Periods/clocks/states - combines clock and state counting"
-  - "Mode %01111: Count highs - continuous high-state counting"
+  - "Mode %10011 (P_PERIODS_TICKS): X complete A-periods window; Z = elapsed ticks"
+  - "Mode %10101 (P_COUNTER_TICKS): >=X-tick period-aligned window; Z = elapsed ticks"
+  - "Mode %10110 (P_COUNTER_HIGHS): >=X-tick period-aligned window; Z = high-time (time-windowed variant of this mode)"
+  - "Mode %01111 (P_COUNT_HIGHS): continuous high-state tick accumulator (no measurement window)"
 
 configuration_constants:
-  mode_constant: "P_PERIODS_STATES"
+  mode_constant: "P_PERIODS_HIGHS"
   binary_value: "%10100"
   common_modifiers:
     - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"

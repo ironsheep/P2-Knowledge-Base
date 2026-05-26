@@ -1,0 +1,115 @@
+title: "Count Highs Over Periods Within X Clocks"
+subtitle: "Smart Pin Mode %10110 (P_COUNTER_HIGHS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
+
+brief_description: "Accumulates total clocks A-input was high over a window of at least X clocks, extended to complete the in-progress A-period"
+
+detailed_description:
+  operation: |
+    Time-windowed equivalent of mode %10100. Establishes a measurement window of AT LEAST X
+    clock cycles that extends to complete the in-progress A-period (set by Y[1:0] trigger).
+    Z returns the total clock count A spent high during that period-aligned window.
+    
+    Designed to be run CONCURRENTLY with mode %10101 (P_COUNTER_TICKS) on the same signal,
+    with the same X window. Because both measurements span the same period-aligned window,
+    duty-cycle math is exact:
+      duty cycle = highs / ticks
+  
+  timing: |
+    Window length is AT LEAST X clock cycles, extending to complete the in-progress A-period
+    Period boundaries defined by Y[1:0] trigger combination
+    Z records total clocks A was high during the window
+    IN flag raised when measurement completes
+    New measurement begins automatically
+
+registers:
+  x_register:
+    bits_31_0: "Minimum window duration in clock cycles (window extends to complete current period; actual elapsed >= X)"
+  y_register:
+    bits_1_0: |
+      Event trigger sensitivity:
+      %00 = A-input rise to B-input rise
+      %01 = A-input rise to B-input edge
+      %10 = A-input edge to B-input rise
+      %11 = A-input edge to B-input edge
+  z_register:
+    function: "Total clock cycles A-input was high during the period-aligned window"
+
+flags:
+  in_flag: "Raised when measurement completes (>= X clocks AND current A-period completed)"
+  a_input: "Signal to measure (high-time is accumulated)"
+  b_input: "Period boundary marker (can be same as A-input via P_B_A_INPUT)"
+
+code_examples:
+  - title: "Exact Duty Cycle (paired with %10101 P_COUNTER_TICKS)"
+    description: "Two pins, same period-aligned window: this mode gives high-time, %10101 gives elapsed ticks; duty = highs / ticks"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        base_pin = 20                            ' Both pins observe the same signal
+        window_ms = 50
+      
+      PUB main() | ticks, highs, duty_pct, window_clks
+        window_clks := (_clkfreq / 1000) * window_ms
+      
+        ' Start both pins on the same window; matched timing is essential
+        pinstart(base_pin+0, P_COUNTER_HIGHS | P_B_A_INPUT, window_clks, %00)
+        pinstart(base_pin+1, P_COUNTER_TICKS | P_B_A_INPUT, window_clks, %00)
+      
+        repeat
+          repeat until pinread(base_pin+0) and pinread(base_pin+1)
+          highs    := rdpin(base_pin+0)          ' Clocks A was high during window
+          ticks    := rdpin(base_pin+1)          ' Actual elapsed clocks (>= window_clks)
+          duty_pct := (highs * 100) / ticks      ' Exact duty cycle
+          debug("Duty: ", udec(duty_pct), "%")
+      
+      DAT
+      ' PASM2 example - start a single P_COUNTER_HIGHS pin
+        org
+        dirl    #signal_pin                      ' Reset smart pin
+        wrpin   ##P_COUNTER_HIGHS | P_B_A_INPUT, #signal_pin
+        wxpin   ##clkfreq/10, #signal_pin        ' 100ms minimum window
+        wypin   #%00, #signal_pin                ' A-rise to A-rise
+        dirh    #signal_pin                      ' Start measurement
+      .loop
+        testp   #signal_pin wc                   ' Check IN flag
+        if_nc   jmp #.loop                       ' Wait for completion
+        rdpin   high_clocks, #signal_pin         ' Clocks A was high during window
+        ' Pair with P_COUNTER_TICKS on adjacent pin for exact duty calc
+        jmp     #.loop                           ' Next window starts auto
+
+common_applications:
+  - "Exact duty-cycle measurement (concurrent with %10101)"
+  - "Time-windowed high-state accumulation (vs %10100 which is period-count-windowed)"
+  - "PWM analysis with consistent update intervals"
+  - "Average on-time measurement over a period-aligned window"
+
+related_modes:
+  - "Mode %10101 (P_COUNTER_TICKS): same period-aligned window; Z = elapsed ticks (pair to compute exact duty cycle)"
+  - "Mode %10111 (P_COUNTER_PERIODS): same period-aligned window; Z = period count (use alongside for full characterization)"
+  - "Mode %10100 (P_PERIODS_HIGHS): equivalent high-time measurement but windowed by X complete periods"
+  - "Mode %01111 (P_COUNT_HIGHS): continuous high-state tick accumulator (no measurement window)"
+
+configuration_constants:
+  mode_constant: "P_COUNTER_HIGHS"
+  binary_value: "%10110"
+  common_modifiers:
+    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "P_PLUS1_B - Use next pin as B-input"
+    - "P_MINUS1_B - Use previous pin as B-input"
+    - "P_FILT1_AB - Add filtering for noise immunity"
+  
+  y_register_values:
+    - "%00 - A-rise to B-rise (typical for periodic signals)"
+    - "%01 - A-rise to B-edge"
+    - "%10 - A-edge to B-rise"
+    - "%11 - A-edge to B-edge (maximum sensitivity to period boundaries)"
+
+notes:
+  - "Z register contains total clocks A was high during the window (NOT a transition count)"
+  - "Window length is at least X ticks AND extends to complete the in-progress A-period (Z high-time <= elapsed ticks)"
+  - "Time-windowed variant of mode %10100; pair with %10101 for exact duty cycle: duty = highs / ticks"
+  - "All concurrent measurements must be started together with the same X window for matched timing"
+  - "B-input can be same as A-input (P_B_A_INPUT) for single-pin period detection"
+  - "Measurement restarts automatically after each window completes"
