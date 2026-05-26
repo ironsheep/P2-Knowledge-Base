@@ -20,6 +20,15 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.4.4] - 2026-05-26
+
+**RCFAST clock specification sourced to P2 Datasheet**
+
+### Changed
+- RCFAST clock entry: min/typical/max specification (20/24/30 MHz) sourced from P2 Datasheet electrical characteristics
+
+---
+
 ## [1.4.3] - 2026-05-26
 
 **Alias terms discoverable via `p2kb_find`**

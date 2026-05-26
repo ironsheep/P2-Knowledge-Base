@@ -1,6 +1,6 @@
 # Clock System - Flexible Multi-Source Clock Generation
-# Source: Silicon Doc v35, P2 Datasheet, pnut_ts Clock-Configuration-Usage-Guide.md,
-#         P2 silicon designer review notes (RCFAST practical range)
+# Source: Silicon Doc v35, P2 Datasheet (electrical characteristics table),
+#         pnut_ts Clock-Configuration-Usage-Guide.md
 
 component: Clock_System
 category: timing
@@ -66,9 +66,10 @@ hub_variables:
 clock_sources:
   rcfast:
     description: "Internal RC oscillator - fast mode"
-    frequency: "20-30 MHz, varies with process/voltage/temperature"
-    guaranteed_min: "20 MHz (per Silicon Doc v35: 'RCFAST: 20 MHz+')"
-    practical_max: "~30 MHz (per P2 silicon designer)"
+    frequency: "20-30 MHz across process/voltage/temperature"
+    spec_min: "20 MHz"
+    spec_typical: "~24 MHz"
+    spec_max: "30 MHz"
     stability: "Wide variation across PVT (~50% min-to-max spread); not for precision timing"
     power: "Normal power consumption"
     boot_default: true
