@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-26T03:27:17.359991",
+    "generated": "2026-05-26T04:42:53.688116",
     "total_entries": 1164,
     "total_categories": 49,
     "total_aliases": 1008,
@@ -3731,7 +3731,7 @@
     },
     "p2kbArchClockSystem": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1779759548
+      "mtime": 1779770316
     },
     "p2kbArchCog": {
       "path": "deliverables/ai/P2/architecture/cog.yaml",
@@ -7875,17 +7875,17 @@
     },
     "RCFAST": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1779759548,
+      "mtime": 1779770316,
       "alias_of": "p2kbArchClockSystem"
     },
     "RCSLOW": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1779759548,
+      "mtime": 1779770316,
       "alias_of": "p2kbArchClockSystem"
     },
     "PLL": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1779759548,
+      "mtime": 1779770316,
       "alias_of": "p2kbArchClockSystem"
     },
     "asm_integration": {
