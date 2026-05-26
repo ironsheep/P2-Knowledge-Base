@@ -20,6 +20,15 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.4.3] - 2026-05-26
+
+**Alias terms discoverable via `p2kb_find`**
+
+### Changed
+- Alias terms (RCFAST, RCSLOW, PLL, and ~120 others) are discoverable via `p2kb_find` — the index includes synthetic entries that map alias names to their canonical targets
+
+---
+
 ## [1.4.2] - 2026-05-26
 
 **RCFAST architectural contract + smart pin counter modes**

@@ -292,7 +292,12 @@ def validate_key_naming(verbose: bool = False) -> ValidationResult:
     issues = []
     special_char_keys = []
 
-    for key in idx['files'].keys():
+    for key, entry in idx['files'].items():
+        # Skip synthetic alias entries promoted from the aliases section by
+        # generate-p2kb-index.py's promote_aliases_to_files (see that function's
+        # docstring). When that workaround is removed, this skip can go too.
+        if isinstance(entry, dict) and 'alias_of' in entry:
+            continue
         if not key.startswith('p2kb'):
             issues.append(f"Missing p2kb prefix: {key}")
         else:
