@@ -2,7 +2,6 @@
 
 This chapter covers the P2's analog-to-digital conversion capabilities using smart pin modes P_ADC (%11000), P_ADC_EXT (%11001), and P_ADC_SCOPE (%11010). Topics include internal/external clocking, SINC filtering, gain settings, and triggered acquisition.
 
----
 
 ## 16.1 ADC Architecture
 
@@ -10,9 +9,8 @@ This chapter covers the P2's analog-to-digital conversion capabilities using sma
 
 The P2 includes a sigma-delta ADC on every I/O pin. Unlike traditional SAR or flash ADCs, sigma-delta ADCs oversample a single bit and use digital filtering to achieve multi-bit resolution. The smart pin modes provide hardware filtering with optional software post-processing.
 
-```
-Analog    → Comparator → 1-bit      → SINC      → Multi-bit
-Input        (ΣΔ)        Stream       Filter      Sample
+```{=latex}
+\DiagAdcChain
 ```
 
 ### ADC Modes
@@ -27,13 +25,10 @@ Input        (ΣΔ)        Stream       Filter      Sample
 
 ADC operation requires specific pin mode bits. Set P[12:10] = %100 in the WRPIN value:
 
-```
-WRPIN value: %0000_0000_000_100xxx_0000000_00_11000_0
-                          └─┬─┘
-                       ADC enable
+```{=latex}
+\DiagAdcEnableField
 ```
 
----
 
 ## 16.2 ADC Input Modes
 
@@ -53,11 +48,13 @@ WRPIN value: %0000_0000_000_100xxx_0000000_00_11000_0
 ### Choosing an Input Mode
 
 **P_ADC_GIO (Ground-referenced):**
+
 - Most common mode for general-purpose ADC
 - Full 0V to 3.3V range
 - Best for sensors and potentiometers
 
 **P_ADC_1X through P_ADC_100X (Gain modes):**
+
 - Amplify small signals before conversion
 - Reduce noise by using more of the ADC range
 - Higher gain = smaller input range
@@ -69,7 +66,6 @@ WRPIN value: %0000_0000_000_100xxx_0000000_00_11000_0
 WRPIN(pin, P_ADC_30X | P_ADC)
 ```
 
----
 
 ## 16.3 Mode %11000: P_ADC (Internal Clock)
 
@@ -79,7 +75,7 @@ Samples the analog input at the system clock rate and applies SINC filtering to 
 
 ### X Register Configuration
 
-```
+```layout
 X[5:4]: Filter mode
 X[3:0]: Sample period = 2^(X[3:0]) clocks
 ```
@@ -109,18 +105,19 @@ X[3:0]: Sample period = 2^(X[3:0]) clocks
 
 ### Sample Rate Calculation
 
-```
+```formula
 sample_rate = sysclk / 2^(X[3:0])
 ```
 
 At 200 MHz with X[3:0] = %0111 (128 clocks):
-```
+```formula
 sample_rate = 200_000_000 / 128 = 1,562,500 samples/sec
 ```
 
 ### SINC2 Sampling Mode (%00)
 
 **Advantages:**
+
 - Complete conversion in hardware
 - Just read RDPIN for latest sample
 - Power-of-2 sample periods only
@@ -134,7 +131,7 @@ CON
 PUB adc_init()
   ' Configure ADC with 8-bit SINC2 sampling
   WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
-  WXPIN(ADC_PIN, %00_0111)                    ' SINC2 sampling, 128 clocks
+  WXPIN(ADC_PIN, %00_0111)                   ' SINC2 sampling, 128 clocks
   PINH(ADC_PIN)                               ' Enable smart pin
 
 PUB read_adc() : value
@@ -149,7 +146,7 @@ Requires software post-processing to compute the difference between consecutive 
 ```spin2
 PUB sinc2_init()
   WRPIN(ADC_PIN, P_ADC_GIO | P_ADC)
-  WXPIN(ADC_PIN, %01_0111)                    ' SINC2 filtering, 128 clocks
+  WXPIN(ADC_PIN, %01_0111)                  ' SINC2 filtering, 128 clocks
   PINH(ADC_PIN)
 
 PUB sinc2_read() : sample | acc
@@ -200,7 +197,6 @@ PUB read_bitstream() : bits
   bits := RDPIN(ADC_PIN)                      ' 32 bits, LSB = oldest
 ```
 
----
 
 ## 16.4 Mode %11001: P_ADC_EXT (External Clock)
 
@@ -229,7 +225,7 @@ Use WYPIN to override the power-of-2 period from X[3:0]:
 ```spin2
 WRPIN(ADC_PIN, P_ADC_EXT | P_PLUS1_B)
 WXPIN(ADC_PIN, %10_0111)                      ' SINC3 base
-WYPIN(ADC_PIN, 320)                           ' Override: 320 clock period
+WYPIN(ADC_PIN, 320)                          ' Override: 320 clock period
 PINH(ADC_PIN)
 ```
 
@@ -240,7 +236,6 @@ PINH(ADC_PIN)
 | SINC2 | 11,585 clocks | 27-bit accumulator: 2^(27/2) |
 | SINC3 | 512 clocks | 27-bit accumulator: 2^(27/3) |
 
----
 
 ## 16.5 Mode %11010: P_ADC_SCOPE (Triggered Capture)
 
@@ -275,12 +270,13 @@ PUB scope_init(trigger_config)
 
 ### X Register: Trigger Configuration
 
-```
+```layout
 X[15:8]: Trigger level (0-252, multiples of 4)
 X[7:0]: Arm level (0-252, multiples of 4)
 ```
 
 The hysteretic trigger works as follows:
+
 1. Signal must cross arm level to arm the trigger
 2. Signal must then cross trigger level to fire
 3. Data capture begins after trigger fires
@@ -288,7 +284,7 @@ The hysteretic trigger works as follows:
 ### Reading Scope Data
 
 ```pasm2
-              getscp    combined              ' Read all 4 channels (32-bit)
+              getscp    combined           ' Read all 4 channels (32-bit)
               ' combined = [ch3][ch2][ch1][ch0], 8 bits each
 
               ' Or read individual pins:
@@ -298,7 +294,6 @@ The hysteretic trigger works as follows:
               rdpin     ch3, #SCOPE_BASE+3
 ```
 
----
 
 ## 16.6 Multi-Channel ADC
 
@@ -330,13 +325,12 @@ Configure multiple pins with a single WRPIN using pin group encoding:
               ' Configure pins 16-23 simultaneously
               ' Pin group: bits [10:6] = additional pins (7)
               ' Base pin: bits [5:0] = starting pin (16)
-              mov       pinaddr, #%00111_010000    ' 8 pins starting at 16
+              mov       pinaddr, #%00111_010000   ' 8 pins starting at 16
               wrpin     adc_mode, pinaddr
               wxpin     #%00_0111, pinaddr
               dirh      pinaddr
 ```
 
----
 
 ## 16.7 Practical Examples
 
@@ -428,7 +422,7 @@ PUB measure_voltage() : millivolts | sample, last_acc, acc, ack
   ' Wait for filter to stabilize (2 periods)
   REPEAT 2
     REPEAT UNTIL PINREAD(SENSOR_PIN)
-    ack := RDPIN(SENSOR_PIN)                  ' Discard stabilization sample
+    ack := RDPIN(SENSOR_PIN)               ' Discard stabilization sample
 
   ' Get actual measurement
   REPEAT UNTIL PINREAD(SENSOR_PIN)
@@ -447,7 +441,7 @@ PUB measure_voltage() : millivolts | sample, last_acc, acc, ack
 ```spin2
 CON
   _clkfreq = 200_000_000
-  THERMOCOUPLE_PIN = 46                       ' Range ~0-50mV depending on type
+  THERMOCOUPLE_PIN = 46                 ' Range ~0-50mV depending on type
 
 PUB read_thermocouple() : microvolts | sample
   ' Use 100x gain: 33mV max input → full ADC range
@@ -496,7 +490,6 @@ sample        res       1
 threshold     long      128                   ' Mid-scale threshold
 ```
 
----
 
 ## 16.8 Accuracy Considerations
 
@@ -552,7 +545,6 @@ PUB calibrated_read() : value
 | 12 bits | 2048 clocks | 97.6 kHz |
 | 14 bits | 8192 clocks | 24.4 kHz |
 
----
 
 ## 16.9 Quick Reference
 
@@ -588,24 +580,23 @@ PUB calibrated_read() : value
 
 ### Sample Rate Formula
 
-```
+```formula
 sample_rate = sysclk / 2^(X[3:0])
 ```
 
 Or with WYPIN override:
-```
+```formula
 sample_rate = sysclk / WYPIN_value
 ```
 
 ### Voltage Conversion
 
 For P_ADC_1X (0-3.3V range):
-```
+```formula
 voltage_mv = (sample × 3300) / full_scale
 ```
 
 Where full_scale depends on resolution (255 for 8-bit, 16383 for 14-bit).
 
----
 
 *This chapter covered analog-to-digital conversion. For serial reception, see Chapter 17. For USB, see Chapter 19.*

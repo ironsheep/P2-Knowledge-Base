@@ -2,7 +2,6 @@
 
 Quick reference for all 32 Smart Pin modes, organized by mode number.
 
----
 
 ## Mode Number Cross-Reference
 
@@ -41,7 +40,6 @@ Quick reference for all 32 Smart Pin modes, organized by mode number.
 | %11110 | P_ASYNC_TX | Asynchronous serial TX |
 | %11111 | P_ASYNC_RX | Asynchronous serial RX |
 
----
 
 ## Mode %00000: P_NORMAL
 
@@ -51,6 +49,7 @@ Quick reference for all 32 Smart Pin modes, organized by mode number.
 Default mode. Pin operates as standard digital I/O without smart pin functionality.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | DIR | Output enable |
@@ -70,7 +69,6 @@ state := PINREAD(pin)                    ' Read input
 ### Reference
 Chapter 6: Digital Output, Chapter 12: Digital Input
 
----
 
 ## Mode %00001: P_REPOSITORY / P_DAC_NOISE
 
@@ -80,6 +78,7 @@ Chapter 6: Digital Output, Chapter 12: Digital Input
 Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between COGs. With DAC enable: pseudo-random noise output.
 
 ### Register Usage
+
 | Register | Repository | DAC Noise |
 |----------|-----------|-----------|
 | X[15:0] | Not used | Sample period |
@@ -109,7 +108,6 @@ PINH(pin)
 ### Reference
 Chapter 18: Repository and Inter-COG Data Sharing, Chapter 10: DAC Output
 
----
 
 ## Mode %00010: P_DAC_DITHER_RND
 
@@ -119,6 +117,7 @@ Chapter 18: Repository and Inter-COG Data Sharing, Chapter 10: DAC Output
 Provides 16-bit DAC resolution using pseudo-random dithering between adjacent 8-bit levels.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Sample period (1 = immediate) |
@@ -142,7 +141,6 @@ PINH(pin)
 ### Reference
 Chapter 10: DAC Output
 
----
 
 ## Mode %00011: P_DAC_DITHER_PWM
 
@@ -152,6 +150,7 @@ Chapter 10: DAC Output
 Provides 16-bit DAC resolution using PWM dithering. Better dynamic range than PRNG dithering.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Sample period (must be multiple of 256) |
@@ -175,7 +174,6 @@ PINH(pin)
 ### Reference
 Chapter 10: DAC Output
 
----
 
 ## Mode %00100: P_PULSE
 
@@ -185,6 +183,7 @@ Chapter 10: DAC Output
 Generates precise timed pulses. Output a specified number of transitions with configurable timing.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period (clocks per unit) |
@@ -209,7 +208,6 @@ PINH(pin)
 ### Reference
 Chapter 7: Transition and Pulse Output
 
----
 
 ## Mode %00101: P_TRANSITION
 
@@ -219,6 +217,7 @@ Chapter 7: Transition and Pulse Output
 Generates a specified number of output transitions with precise timing. Creates square waves or counted pulses.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Period (clocks per transition) |
@@ -242,7 +241,6 @@ PINH(pin)
 ### Reference
 Chapter 7: Transition and Pulse Output
 
----
 
 ## Mode %00110: P_NCO_FREQ
 
@@ -252,6 +250,7 @@ Chapter 7: Transition and Pulse Output
 Numerically Controlled Oscillator for precise frequency synthesis. Output is Z[31], creating 50% duty cycle square wave.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period (1 for maximum resolution) |
@@ -278,7 +277,6 @@ PINLOW(pin)
 ### Reference
 Chapter 8: Frequency Generation (NCO)
 
----
 
 ## Mode %00111: P_NCO_DUTY
 
@@ -288,6 +286,7 @@ Chapter 8: Frequency Generation (NCO)
 NCO frequency generator with duty cycle control. Output reflects Z overflow state.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period (1 for maximum resolution) |
@@ -312,7 +311,6 @@ PINLOW(pin)
 ### Reference
 Chapter 8: Frequency Generation (NCO)
 
----
 
 ## Mode %01000: P_PWM_TRIANGLE
 
@@ -322,6 +320,7 @@ Chapter 8: Frequency Generation (NCO)
 PWM with up-down counter for symmetric output. Creates smooth PWM transitions.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period (clocks per count) |
@@ -346,7 +345,6 @@ PINLOW(pin)
 ### Reference
 Chapter 9: PWM Output
 
----
 
 ## Mode %01001: P_PWM_SAWTOOTH
 
@@ -356,6 +354,7 @@ Chapter 9: PWM Output
 PWM with up-only counter. Twice the frequency of triangle mode for same X values.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period (clocks per count) |
@@ -380,7 +379,6 @@ PINLOW(pin)
 ### Reference
 Chapter 9: PWM Output
 
----
 
 ## Mode %01010: P_PWM_SMPS
 
@@ -390,6 +388,7 @@ Chapter 9: PWM Output
 Switch-mode power supply controller with voltage and current feedback inputs.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Base period |
@@ -416,7 +415,6 @@ PINLOW(pin)
 ### Reference
 Chapter 9: PWM Output
 
----
 
 ## Mode %01011: P_QUADRATURE
 
@@ -426,6 +424,7 @@ Chapter 9: PWM Output
 Decodes A/B quadrature signals for position tracking with 4× resolution.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Period (0=continuous, >0=periodic) |
@@ -452,7 +451,6 @@ position := RDPIN(20)                    ' Read position
 ### Reference
 Chapter 14: Counting Modes
 
----
 
 ## Mode %01100: P_REG_UP
 
@@ -462,6 +460,7 @@ Chapter 14: Counting Modes
 Counts A-input rising edges, but only when B-input is high.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Period (0=continuous, >0=periodic) |
@@ -487,7 +486,6 @@ count := RDPIN(pin)
 ### Reference
 Chapter 14: Counting Modes
 
----
 
 ## Mode %01101: P_REG_UP_DOWN
 
@@ -497,6 +495,7 @@ Chapter 14: Counting Modes
 Counts A-input edges. B-input controls direction: high=increment, low=decrement.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Period (0=continuous, >0=periodic) |
@@ -522,7 +521,6 @@ count := RDPIN(pin)                      ' Signed result
 ### Reference
 Chapter 14: Counting Modes
 
----
 
 ## Mode %01110: P_COUNT_RISES
 
@@ -532,6 +530,7 @@ Chapter 14: Counting Modes
 Simple edge counter. Y[0] controls mode: 0=A edges only, 1=A up/B down.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Period (0=continuous, >0=periodic) |
@@ -556,7 +555,6 @@ count := RDPIN(pin)
 ### Reference
 Chapter 14: Counting Modes
 
----
 
 ## Mode %01111: P_COUNT_HIGHS
 
@@ -566,6 +564,7 @@ Chapter 14: Counting Modes
 Counts system clocks while A-input is high. Y[0] controls mode.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Period (0=continuous, >0=periodic) |
@@ -591,7 +590,6 @@ high_clocks := RDPIN(pin)
 ### Reference
 Chapter 14: Counting Modes
 
----
 
 ## Mode %10000: P_STATE_TICKS
 
@@ -601,6 +599,7 @@ Chapter 14: Counting Modes
 Measures duration of each state. IN raised on every transition with previous state duration.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Not used |
@@ -625,7 +624,6 @@ duration := RDPIN(pin) wc                ' C=1 if was high
 ### Reference
 Chapter 13: Timing Measurement
 
----
 
 ## Mode %10001: P_HIGH_TICKS
 
@@ -635,6 +633,7 @@ Chapter 13: Timing Measurement
 Measures duration of high pulses. IN raised on high-to-low transition.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Not used |
@@ -659,7 +658,6 @@ pulse_width := RDPIN(pin) & $7FFF_FFFF
 ### Reference
 Chapter 13: Timing Measurement
 
----
 
 ## Mode %10010: P_EVENTS_TICKS
 
@@ -669,6 +667,7 @@ Chapter 13: Timing Measurement
 Two modes: measure time for X events (Y[2]=0), or detect timeout without events (Y[2]=1).
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Event count (Y[2]=0) or timeout clocks (Y[2]=1) |
@@ -696,7 +695,6 @@ clocks := RDPIN(pin)
 ### Reference
 Chapter 13: Timing Measurement
 
----
 
 ## Mode %10011: P_PERIODS_TICKS
 
@@ -706,6 +704,7 @@ Chapter 13: Timing Measurement
 Measures total clock cycles for X signal periods.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Number of periods to measure |
@@ -732,7 +731,6 @@ freq := (100 * _clkfreq) / total_clocks
 ### Reference
 Chapter 15: Period and Frequency Measurement
 
----
 
 ## Mode %10100: P_PERIODS_HIGHS
 
@@ -742,6 +740,7 @@ Chapter 15: Period and Frequency Measurement
 Accumulates high-state time across X periods for duty cycle measurement.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Number of periods |
@@ -767,7 +766,6 @@ high_clocks := RDPIN(pin)
 ### Reference
 Chapter 15: Period and Frequency Measurement
 
----
 
 ## Mode %10101: P_COUNTER_TICKS
 
@@ -777,6 +775,7 @@ Chapter 15: Period and Frequency Measurement
 Measures total period time within a minimum X-clock window.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Minimum window (clocks) |
@@ -802,7 +801,6 @@ actual_time := RDPIN(pin)
 ### Reference
 Chapter 15: Period and Frequency Measurement
 
----
 
 ## Mode %10110: P_COUNTER_HIGHS
 
@@ -812,6 +810,7 @@ Chapter 15: Period and Frequency Measurement
 Accumulates high-state time within a minimum X-clock window.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Minimum window (clocks) |
@@ -837,7 +836,6 @@ high_time := RDPIN(pin)
 ### Reference
 Chapter 15: Period and Frequency Measurement
 
----
 
 ## Mode %10111: P_COUNTER_PERIODS
 
@@ -847,6 +845,7 @@ Chapter 15: Period and Frequency Measurement
 Counts complete periods within a minimum X-clock window. Simple frequency counter.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Minimum window (clocks) |
@@ -873,7 +872,6 @@ frequency_hz := RDPIN(pin)
 ### Reference
 Chapter 15: Period and Frequency Measurement
 
----
 
 ## Mode %11000: P_ADC
 
@@ -883,6 +881,7 @@ Chapter 15: Period and Frequency Measurement
 Sigma-delta ADC with SINC filtering. 8-14 bit resolution depending on sample period.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[5:4] | Filter mode |
@@ -908,7 +907,6 @@ sample := RDPIN(pin)
 ### Reference
 Chapter 16: ADC (Analog Input)
 
----
 
 ## Mode %11001: P_ADC_EXT
 
@@ -918,6 +916,7 @@ Chapter 16: ADC (Analog Input)
 Samples A-input data on B-input clock edges. For external delta-sigma ADCs.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[5:4] | Filter mode |
@@ -943,7 +942,6 @@ PINH(pin)
 ### Reference
 Chapter 16: ADC (Analog Input)
 
----
 
 ## Mode %11010: P_ADC_SCOPE
 
@@ -953,6 +951,7 @@ Chapter 16: ADC (Analog Input)
 Four-channel oscilloscope-style ADC with hysteretic triggering.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[15:8] | Trigger level |
@@ -976,7 +975,6 @@ PINH(52)
 ### Reference
 Chapter 16: ADC (Analog Input)
 
----
 
 ## Mode %11011: P_USB_PAIR
 
@@ -986,6 +984,7 @@ Chapter 16: ADC (Analog Input)
 USB 1.1 physical layer for even/odd pin pair. Handles differential signaling.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X | Configuration |
@@ -1011,7 +1010,6 @@ PINH(57)
 ### Reference
 Chapter 19: USB Host/Device
 
----
 
 ## Mode %11100: P_SYNC_TX
 
@@ -1021,6 +1019,7 @@ Chapter 19: USB Host/Device
 Clocked serial transmission for SPI master and similar protocols.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[5] | Mode: 0=continuous, 1=start-stop |
@@ -1047,7 +1046,6 @@ WYPIN(41, data)
 ### Reference
 Chapter 11: Serial Transmission
 
----
 
 ## Mode %11101: P_SYNC_RX
 
@@ -1057,6 +1055,7 @@ Chapter 11: Serial Transmission
 Clocked serial reception for SPI slave and similar protocols.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[5] | Mode: 0=continuous, 1=start-stop |
@@ -1083,7 +1082,6 @@ data := RDPIN(pin) >> 24                 ' Left-justified, shift down
 ### Reference
 Chapter 17: Serial Receive
 
----
 
 ## Mode %11110: P_ASYNC_TX
 
@@ -1093,6 +1091,7 @@ Chapter 17: Serial Receive
 UART-style transmission with automatic start/stop bit generation.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[31:16] | Bit period (clocks) |
@@ -1120,7 +1119,6 @@ WYPIN(pin, byte_value)
 ### Reference
 Chapter 11: Serial Transmission
 
----
 
 ## Mode %11111: P_ASYNC_RX
 
@@ -1130,6 +1128,7 @@ Chapter 11: Serial Transmission
 UART-style reception with automatic start bit detection and framing.
 
 ### Register Usage
+
 | Register | Function |
 |----------|----------|
 | X[31:16] | Bit period (clocks) |
@@ -1157,6 +1156,5 @@ data := RDPIN(pin) & $FF
 ### Reference
 Chapter 17: Serial Receive
 
----
 
 *For full mode details, see the referenced chapters. For P_ constant values, see Appendix B.*

@@ -2,7 +2,6 @@
 
 This chapter covers the two Numerically Controlled Oscillator (NCO) modes: **P_NCO_FREQ** (%00110) for precise frequency generation with 50% duty cycle, and **P_NCO_DUTY** (%00111) for frequency generation with variable duty cycle.
 
----
 
 ## 8.1 NCO Concept
 
@@ -12,19 +11,8 @@ A Numerically Controlled Oscillator generates precise frequencies by accumulatin
 
 ### P2 NCO Architecture
 
-```
-                    ┌─────────────┐
-Y (frequency) ──────►│   Adder     │
-                    │             │──────► Z[31:0] (phase accumulator)
-           ┌────────►│             │         │
-           │        └─────────────┘         │
-           │              ▲                 │
-           │              │                 │
-           └──────────────┴─────────────────┘
-                                            │
-                                            ▼
-                                        Z[31] ──► Output (NCO_FREQ)
-                                        Z overflow ──► Output (NCO_DUTY)
+```{=latex}
+\DiagNcoArch
 ```
 
 ### Key Properties
@@ -33,7 +21,6 @@ Y (frequency) ──────►│   Adder     │
 - **Phase coherence**: Multiple NCOs can be phase-locked via initial phase setting
 - **Deterministic timing**: Hardware-based, independent of software execution
 
----
 
 ## 8.2 P_NCO_FREQ Mode (%00110)
 
@@ -53,6 +40,7 @@ P_NCO_FREQ generates a square wave at a precise frequency. The output reflects t
 ### Output Behavior
 
 On each base period (every X[15:0] clocks):
+
 1. Y is added to Z
 2. Output = Z[31]
 3. If Z overflows, IN is raised
@@ -61,38 +49,38 @@ The output toggles when Z[31] changes, creating a square wave.
 
 ### Frequency Formula
 
-```
+```formula
 frequency = (Y × sysclk) / (X[15:0] × 2³²)
 ```
 
 For X[15:0] = 1 (maximum update rate):
-```
+```formula
 frequency = (Y × sysclk) / 2³²
 ```
 
 Solving for Y:
-```
+```formula
 Y = (frequency × 2³²) / sysclk
 ```
 
 ### Worked Examples
 
 **Example 1: 1 kHz at 200 MHz sysclk**
-```
+```formula
 Y = (1000 × 4,294,967,296) / 200,000,000
 Y = 4,294,967,296,000 / 200,000,000
 Y = 21,475
 ```
 
 **Example 2: 44.1 kHz (audio sample rate) at 200 MHz**
-```
+```formula
 Y = (44100 × 4,294,967,296) / 200,000,000
 Y = 189,408,057,753,600 / 200,000,000
 Y = 947,040
 ```
 
 **Example 3: 1 MHz at 200 MHz**
-```
+```formula
 Y = (1,000,000 × 4,294,967,296) / 200,000,000
 Y = 21,474,836
 ```
@@ -137,7 +125,6 @@ Using X[15:0] > 1 reduces update rate but can smooth jitter:
 
 For most applications, X[15:0] = 1 provides best frequency resolution.
 
----
 
 ## 8.3 P_NCO_DUTY Mode (%00111)
 
@@ -160,12 +147,12 @@ In P_NCO_DUTY, the duty cycle is controlled by the relationship between Y and th
 - Smaller Y values → Lower duty cycle
 
 The duty cycle is approximately:
-```
+```formula
 duty_cycle ≈ Y / 2³²
 ```
 
 **Example:**
-```
+```formula
 Y = $8000_0000 → 50% duty cycle
 Y = $4000_0000 → 25% duty cycle
 Y = $C000_0000 → 75% duty cycle
@@ -191,7 +178,6 @@ PUB nco_duty(freq_hz, duty_percent) | y_value
   PINLOW(NCO_PIN)
 ```
 
----
 
 ## 8.4 Phase Synchronization
 
@@ -249,11 +235,11 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
 ### Phase Coherence
 
 When multiple NCOs use the same Y value and are enabled simultaneously:
+
 - They maintain constant phase relationship
 - Phase offset is set by X[31:16] at configuration
 - No drift between channels
 
----
 
 ## 8.5 Analog Output with DAC
 
@@ -272,14 +258,13 @@ The square wave NCO output, when filtered by the resistor DAC and external RC fi
 
 For true analog waveform generation, use the DAC modes with software updates (see Chapter 10) rather than NCO modes.
 
----
 
 ## 8.6 Frequency Accuracy Analysis
 
 ### Maximum Frequency
 
 Maximum output frequency is sysclk / 2 (Nyquist limit):
-```
+```formula
 At 200 MHz: max frequency = 100 MHz
 Achieved with Y = $8000_0000
 ```
@@ -287,7 +272,7 @@ Achieved with Y = $8000_0000
 ### Minimum Frequency
 
 Minimum frequency with X[15:0] = 1:
-```
+```formula
 min_freq = sysclk / 2³²
 At 200 MHz: min_freq ≈ 0.047 Hz
 ```
@@ -296,13 +281,13 @@ At 200 MHz: min_freq ≈ 0.047 Hz
 
 Frequency error depends on the fractional part of Y:
 
-```
+```formula
 Actual frequency = round(Y) × sysclk / 2³²
 Error = |target - actual| / target × 100%
 ```
 
 **Example: 1 kHz target at 200 MHz**
-```
+```formula
 Y_exact = 21474.83648
 Y_rounded = 21475
 Actual freq = 21475 × 200,000,000 / 4,294,967,296 = 1000.0076 Hz
@@ -313,12 +298,11 @@ Error = 0.00076%
 
 | sysclk | Resolution (X=1) |
 |--------|------------------|
-| 200 MHz | 0.0466 Hz |
-| 180 MHz | 0.0419 Hz |
-| 160 MHz | 0.0373 Hz |
 | 100 MHz | 0.0233 Hz |
+| 180 MHz | 0.0419 Hz |
+| 250 MHz | 0.0582 Hz |
+| 350 MHz | 0.0815 Hz |
 
----
 
 ## 8.7 Complete Examples
 
@@ -410,7 +394,6 @@ y_current     long      0
 sweep_delay   long      2_000_000         ' 10 ms between steps
 ```
 
----
 
 ## 8.8 Quick Reference
 
@@ -444,10 +427,10 @@ sweep_delay   long      2_000_000         ' 10 ms between steps
 ### Reset State
 
 Both modes when DIR=0:
+
 - IN = low
 - Output = low
 - Z = 0
 
----
 
 *This chapter covered NCO-based frequency generation. For PWM output with variable duty cycle, see Chapter 9. For DAC analog output, see Chapter 10.*

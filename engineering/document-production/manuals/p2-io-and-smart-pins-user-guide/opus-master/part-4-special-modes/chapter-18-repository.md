@@ -2,7 +2,6 @@
 
 This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-COG data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 
----
 
 ## 18.1 Repository Concept
 
@@ -18,6 +17,7 @@ Modes %00001-%00011 behave differently based on pin configuration:
 ### Repository Function
 
 When not configured for DAC output, these modes create a shared data register:
+
 - **WXPIN** writes a 32-bit long to the repository
 - **RDPIN/RQPIN** reads the stored long
 - **IN flag** indicates when new data has been written
@@ -32,7 +32,6 @@ This enables lock-free data sharing between COGs through dedicated pin hardware.
 | %00010 | P_DAC_DITHER_RND | Yes | PRNG-dithered 16-bit |
 | %00011 | P_DAC_DITHER_PWM | Yes | PWM-dithered 16-bit |
 
----
 
 ## 18.2 Long Repository (Non-DAC Mode)
 
@@ -42,13 +41,8 @@ The repository provides a hardware-arbitrated communication channel between COGs
 
 ### Operation
 
-```
-COG 1 (Writer)              Pin Repository              COG 2 (Reader)
-     │                           │                           │
-     │──── WXPIN value ─────────►│                           │
-     │                      IN raised                        │
-     │                           │◄────── RDPIN/RQPIN ───────│
-     │                           │                           │
+```{=latex}
+\DiagRepository
 ```
 
 ### Configuration
@@ -65,7 +59,7 @@ PUB write_value(value)
   WXPIN(REPO_PIN, value)                        ' Store 32-bit value
 
 PUB read_value() : value
-  value := RQPIN(REPO_PIN)                      ' Read without clearing IN
+  value := RQPIN(REPO_PIN)                     ' Read without clearing IN
 ```
 
 ### PASM2 Repository Access
@@ -114,7 +108,6 @@ PUB logger_cog()
     WAITMS(1000)
 ```
 
----
 
 ## 18.3 Mode %00001: DAC Noise
 
@@ -173,7 +166,6 @@ PUB white_noise()
     WAITMS(1000)
 ```
 
----
 
 ## 18.4 Mode %00010: DAC PRNG Dither
 
@@ -218,12 +210,12 @@ WXPIN(DAC_PIN, sample_period)
 
 ### Voltage Calculation
 
-```
+```formula
 voltage = (Y[15:0] / 65536) × DAC_max_voltage
 ```
 
 For P_DAC_124R_3V:
-```
+```formula
 voltage = (Y[15:0] / 65536) × 3.3V
 ```
 
@@ -263,7 +255,6 @@ PUB check_loading() : adc_value
   adc_value := RDPIN(DAC_PIN)                   ' Read ADC value
 ```
 
----
 
 ## 18.5 Mode %00011: DAC PWM Dither
 
@@ -344,7 +335,6 @@ PRI get_next_sample() : sample
   sample := $8000
 ```
 
----
 
 ## 18.6 Comparison with Other Inter-COG Mechanisms
 
@@ -381,7 +371,6 @@ PRI get_next_sample() : sample
 - Real-time data where latest value is sufficient
 - Simple producer-consumer patterns
 
----
 
 ## 18.7 Application Examples
 
@@ -512,12 +501,11 @@ PUB function_generator(frequency) | period, phase, increment
     phase += increment                          ' Advance phase
 
 PRI build_sine_table() | i
-  ' Application-specific: fill sine_table[0..255] with sine values 0..65535
+  ' Fill sine_table[0..255] with sine values 0..65535
   REPEAT i FROM 0 TO 255
     sine_table[i] := $8000 + QSIN(32767, i << 24, 0)
 ```
 
----
 
 ## 18.8 Quick Reference
 
@@ -532,12 +520,14 @@ PRI build_sine_table() | i
 ### DAC Mode Enable
 
 Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
+
 - P[12:10] = %101 for DAC output
 - P[11] = output enable
 
 ### Register Usage
 
 **Repository Mode:**
+
 | Register | Write | Read |
 |----------|-------|------|
 | X | Not used | - |
@@ -545,6 +535,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 | Z via RDPIN | - | Retrieve value |
 
 **DAC Dither Modes:**
+
 | Register | Function |
 |----------|----------|
 | X[15:0] | Sample period (PWM must be ×256) |
@@ -559,6 +550,5 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 - **PWM Dither**: Deterministic dither, period must be ×256
 - **All modes**: IN raised when sample period completes
 
----
 
 *This chapter covered repository and dithered DAC modes. For USB host/device, see Chapter 19. For a complete mode reference, see Appendix A.*

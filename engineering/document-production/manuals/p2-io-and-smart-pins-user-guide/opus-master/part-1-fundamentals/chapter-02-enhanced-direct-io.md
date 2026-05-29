@@ -2,8 +2,6 @@
 
 Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [4:0] = %00000 (`P_NORMAL`).
 
----
-
 ## 2.1 Overview
 
 ### What Enhanced Direct I/O Provides
@@ -44,8 +42,6 @@ P_ constants are 32-bit values where specific bit fields control different aspec
 | 9:5 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
 
 When mode bits [9:5] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
-
----
 
 ## 2.2 Drive Strength
 
@@ -90,12 +86,12 @@ WRPIN(pin, P_HIGH_FAST | P_LOW_FAST)     ' Maximum drive both directions
 
 **Open-Drain (I²C style):**
 ```spin2
-WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST)    ' Float when OUT=1, drive low when OUT=0
+WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST)  ' OUT=1 floats, OUT=0 drives low
 ```
 
 **Open-Source:**
 ```spin2
-WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)    ' Drive high when OUT=1, float when OUT=0
+WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)  ' OUT=1 drives high, OUT=0 floats
 ```
 
 **Pull-Up Resistor:**
@@ -111,12 +107,14 @@ WRPIN(pin, P_HIGH_1K5 | P_LOW_1K5)       ' ~2mA max in either direction
 ### Resistive vs Current Source
 
 **Resistive modes** (1K5, 15K, 150K):
+
 - Voltage-dependent current
 - Current decreases as pin approaches target voltage
 - Suitable for bus pull-ups/pull-downs
 - Rise/fall time depends on load capacitance
 
 **Current source modes** (1MA, 100UA, 10UA):
+
 - Constant current regardless of voltage
 - Useful for driving LEDs without external resistor
 - Linear charging of capacitive loads
@@ -128,8 +126,6 @@ WRPIN(pin, P_HIGH_1K5 | P_LOW_1K5)       ' ~2mA max in either direction
 WRPIN(led_pin, P_HIGH_1MA | P_LOW_FAST)
 PINHIGH(led_pin)                          ' LED on at 1mA
 ```
-
----
 
 ## 2.3 Input Conditioning
 
@@ -158,6 +154,7 @@ Schmitt trigger input provides hysteresis, making the input more resistant to no
 | `P_SCHMITT_B_FB` | Schmitt trigger B → IN, output from feedback |
 
 **When to use Schmitt trigger:**
+
 - Slow edge rates on input signals
 - Noisy environments
 - Mechanical switch debouncing (combined with software)
@@ -186,8 +183,6 @@ Pin-to-pin comparison for analog signal detection.
 ' IN=1 when pin 10 > pin 11
 WRPIN(10, P_COMPARE_AB | P_PLUS1_B)       ' A=local (10), B=pin+1 (11)
 ```
-
----
 
 ## 2.4 Input Source Selection
 
@@ -243,8 +238,6 @@ Combine A and B inputs logically before use.
 | `P_FILT2_AB` | FILT2 filter settings |
 | `P_FILT3_AB` | FILT3 filter settings |
 
----
-
 ## 2.5 ADC Input Modes (Basic)
 
 Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. The result appears in the IN bit based on comparison.
@@ -268,8 +261,6 @@ Basic ADC modes provide analog-to-digital conversion without Smart Pin modes. Th
 WRPIN(adc_pin, P_ADC_1X)
 PINFLOAT(adc_pin)
 ```
-
----
 
 ## 2.6 DAC Output Modes (Basic)
 
@@ -317,8 +308,6 @@ PUB main()
 
 **Note:** For dynamic DAC output with waveform generation, use Smart Pin DAC modes (Chapter 10).
 
----
-
 ## 2.7 Level Comparison Modes
 
 Level comparison modes compare the input voltage to a programmable 8-bit threshold level.
@@ -348,8 +337,6 @@ WRPIN(pin, level_config)
 - **FBN (Negative Feedback):** Output opposes input (stabilizing)
 - **FBP (Positive Feedback):** Output reinforces input (hysteresis/latching)
 
----
-
 ## 2.8 Synchronous I/O Mode
 
 | Constant | Effect |
@@ -358,8 +345,6 @@ WRPIN(pin, level_config)
 | `P_SYNC_IO` | Synchronous I/O (inputs sampled on clock edge) |
 
 Synchronous mode is used for clocked interfaces where input sampling must be synchronized to a clock signal.
-
----
 
 ## 2.9 Polarity Control
 
@@ -384,8 +369,6 @@ WRPIN(led_pin, P_INVERT_OUT)
 PINHIGH(led_pin)                          ' Actually drives low, LED on
 ```
 
----
-
 ## 2.10 DIR/OUT Control
 
 | Constant | TT Bits | Effect |
@@ -397,8 +380,6 @@ PINHIGH(led_pin)                          ' Actually drives low, LED on
 | `P_CHANNEL` | %01 | DAC channel enable (alias for P_OE) |
 
 **P_OE** is required when using Smart Pin modes that produce output. For P_NORMAL mode, it is not needed as DIR controls output directly.
-
----
 
 ## 2.11 Combining Constants
 
@@ -432,8 +413,6 @@ WRPIN(pin, P_HIGH_1K5 | P_LOW_1K5 | P_INVERT_OUT)
 ```spin2
 WRPIN(pin, P_COMPARE_AB | P_PLUS1_B)
 ```
-
----
 
 ## 2.12 Complete Configuration Examples
 
@@ -499,11 +478,13 @@ PUB set_voltage(level) | config
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     sda_pin, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
-              drvh      sda_pin                ' Release line (floats high)
+              wrpin     sda_pin, ...
+                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              drvh      sda_pin              ' Release line (floats high)
 
 ' Internal pull-up button
-              wrpin     btn_pin, ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+              wrpin     btn_pin, ...
+                        ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
               drvh      btn_pin                ' Enable pull-up
 
 ' Current-source LED
@@ -514,8 +495,6 @@ PUB set_voltage(level) | config
               wrpin     dac_pin, ##(P_DAC_990R_3V | (128 << 12))
               dirh      dac_pin                ' Enable DAC
 ```
-
----
 
 ## 2.13 Resetting to Default
 
@@ -534,8 +513,6 @@ WRPIN(pin, 0)                             ' Same effect
 ```
 
 This clears all enhanced configuration and Smart Pin modes, returning the pin to basic Direct I/O operation.
-
----
 
 ## 2.14 Quick Reference
 
@@ -561,6 +538,5 @@ This clears all enhanced configuration and Smart Pin modes, returning the pin to
 | P_ADC_* | None | Analog threshold detection |
 | P_LEVEL_* | Optional | Programmable threshold |
 
----
 
 *This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the Smart Pin configuration process, see Chapter 4.*

@@ -2,13 +2,13 @@
 
 This chapter covers the USB Smart Pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through Smart Pins, handling the differential signaling and timing while software manages the USB protocol stack.
 
----
 
 ## 19.1 USB Overview
 
 ### What the Smart Pin Provides
 
 The USB mode handles the physical layer:
+
 - Differential signaling (D+/D-)
 - USB line state detection (J, K, SE0, SE1)
 - Bit-level timing for USB 1.1 speeds
@@ -17,6 +17,7 @@ The USB mode handles the physical layer:
 ### What Software Must Provide
 
 The USB protocol stack:
+
 - Packet formatting and parsing
 - Endpoint management
 - Device enumeration
@@ -25,13 +26,13 @@ The USB protocol stack:
 ### Complexity Warning
 
 USB is a complex protocol. Building a complete USB stack from scratch requires:
+
 - Deep understanding of USB specification
 - Significant development time
 - Extensive testing with various devices
 
 **Recommendation:** Use existing USB libraries from Parallax or the P2 community rather than implementing from scratch.
 
----
 
 ## 19.2 Pin Configuration
 
@@ -56,8 +57,8 @@ CON
 PUB configure_usb_pins()
   ' Configure as USB pair with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
-  PINH(USB_DM)
-  PINH(USB_DP)
+  DIRH(USB_DM)
+  DIRH(USB_DP)
 ```
 
 ### Output Control
@@ -69,7 +70,6 @@ PUB configure_usb_pins()
 
 **Sniffer Mode:** Disables output drive to passively monitor USB traffic without affecting the bus.
 
----
 
 ## 19.3 USB Signaling
 
@@ -96,7 +96,6 @@ USB uses differential signaling with specific line states:
 
 The P2 USB mode supports USB 1.1 speeds only.
 
----
 
 ## 19.4 Register Usage
 
@@ -115,23 +114,25 @@ The USB mode uses the smart pin registers for configuration and data:
 ### IN Flag
 
 The IN flag signals USB events that require software attention:
+
 - Packet received
 - Transmission complete
 - Line state change
 
----
 
 ## 19.5 Host vs Device Mode
 
 ### Device Mode
 
 As a USB device, the P2:
+
 - Waits for host to initiate communication
 - Responds to USB requests
 - Provides endpoints for data transfer
 - Simpler to implement than host mode
 
 **Common device classes:**
+
 - CDC (Virtual COM Port)
 - HID (Keyboard, Mouse, Gamepad)
 - Mass Storage
@@ -139,6 +140,7 @@ As a USB device, the P2:
 ### Host Mode
 
 As a USB host, the P2:
+
 - Provides bus power (5V)
 - Initiates all communication
 - Enumerates and configures devices
@@ -146,7 +148,6 @@ As a USB host, the P2:
 
 **Host implementation is significantly more complex than device mode.**
 
----
 
 ## 19.6 Using USB Libraries
 
@@ -155,11 +156,13 @@ As a USB host, the P2:
 Rather than implementing USB from scratch, use existing libraries:
 
 **Parallax OBEX (Object Exchange):**
+
 - Search for USB objects
 - CDC (serial port) implementations
 - HID implementations
 
 **P2 Forums:**
+
 - Community-developed USB stacks
 - Example implementations
 - Troubleshooting support
@@ -184,7 +187,6 @@ PUB main()
       usb.tx(output_data)                       ' Send data
 ```
 
----
 
 ## 19.7 Basic USB Configuration Example
 
@@ -198,15 +200,15 @@ CON
 
 PUB configure_usb()
   ' Reset both pins
-  PINL(USB_DM)
-  PINL(USB_DP)
+  DIRL(USB_DM)
+  DIRL(USB_DP)
 
   ' Configure USB mode with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
 
   ' Enable the USB pair
-  PINH(USB_DM)
-  PINH(USB_DP)
+  DIRH(USB_DM)
+  DIRH(USB_DP)
 ```
 
 ### PASM2 Configuration
@@ -241,29 +243,30 @@ usb_mode      long      P_USB_PAIR | P_OE
 usb_data      res       1
 ```
 
----
 
 ## 19.8 Hardware Considerations
 
 ### External Components
 
 USB host mode requires:
+
 - 5V power supply for VBUS
 - Current limiting for protection
 - Pull-up/pull-down resistors for speed identification
 
 USB device mode requires:
+
 - Pull-up resistor on D+ (Full Speed) or D- (Low Speed)
 - May need level shifting if P2 runs at 3.3V
 
 ### Pin Selection
 
 Choose USB pins based on:
+
 - Physical proximity to USB connector
 - Trace length matching for differential pair
 - Isolation from noisy digital signals
 
----
 
 ## 19.9 Limitations
 
@@ -276,6 +279,7 @@ Choose USB pins based on:
 ### Software Requirements
 
 Implementing USB requires:
+
 - Precise timing for packet handling
 - State machine for USB protocol
 - Buffer management for endpoints
@@ -283,7 +287,6 @@ Implementing USB requires:
 
 **Development time:** Expect weeks to months for a robust USB implementation.
 
----
 
 ## 19.10 Quick Reference
 
@@ -304,8 +307,8 @@ Implementing USB requires:
 
 ```spin2
 WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-PINH(even_pin)                                  ' Enable DM
-PINH(even_pin+1)                                ' Enable DP
+DIRH(even_pin)                                  ' Enable DM
+DIRH(even_pin+1)                                ' Enable DP
 ```
 
 ### Key Points
@@ -324,6 +327,5 @@ PINH(even_pin+1)                                ' Enable DP
 - USB Specification: usb.org
 - P2 USB implementation examples from community members
 
----
 
 *This chapter covered the USB Smart Pin mode. For a complete mode reference, see Appendix A. For application examples combining multiple modes, see Appendix C.*

@@ -48,21 +48,35 @@ function Header(header)
 
     -- Chapter-level headings
     if is_chapter_heading(title) then
-      -- Skip clearpage for the very first chapter (right after TOC)
+      local blocks = {}
+
+      -- Page break before the chapter (except the very first, and the first
+      -- chapter right after a Part divider)
       if first_chapter then
         first_chapter = false
-        return header
-      end
-
-      -- Skip clearpage for chapter immediately after a Part
-      if just_emitted_part then
+      elseif just_emitted_part then
         just_emitted_part = false
-        return header
+      else
+        table.insert(blocks, pandoc.RawBlock('latex', '\\clearpage'))
       end
 
-      -- All other chapters get page breaks before
-      local pagebreak = pandoc.RawBlock('latex', '\\clearpage')
-      return {pagebreak, header}
+      -- Set the chapter counter from the heading's REAL number/letter so per-chapter
+      -- figure numbering is correct (Figure 7.1, 11.2, D.1, ...). Pandoc emits
+      -- \chapter* (unnumbered), which does not step the counter, so figures would
+      -- otherwise all read 0.x. Also reset the figure counter at each chapter.
+      local cnum = title:match("^Chapter%s+(%d+)")
+      local anum = title:match("^Appendix%s+([A-Z])")
+      if cnum then
+        table.insert(blocks, pandoc.RawBlock('latex',
+          '\\setcounter{chapter}{' .. cnum .. '}\\setcounter{figure}{0}'))
+      elseif anum then
+        local idx = string.byte(anum) - string.byte('A') + 1
+        table.insert(blocks, pandoc.RawBlock('latex',
+          '\\renewcommand{\\thechapter}{\\Alph{chapter}}\\setcounter{chapter}{' .. idx .. '}\\setcounter{figure}{0}'))
+      end
+
+      table.insert(blocks, header)
+      return blocks
     end
   end
 

@@ -2,8 +2,6 @@
 
 This appendix provides problem/solution guidance for common Smart Pin issues organized by symptom.
 
----
-
 ## Pin Not Responding
 
 ### Symptom
@@ -59,8 +57,6 @@ PUB setup(mode)
   WRPIN(MY_PIN, mode)                    ' Correct
   PINH(MY_PIN)
 ```
-
----
 
 ## No Output Visible
 
@@ -119,8 +115,6 @@ mode := P_NCO_FREQ | P_OE | P_INVERT_OUTPUT
 ' For capacitive loads, ensure adequate drive
 ```
 
----
-
 ## Wrong Frequency or Timing
 
 ### Symptom
@@ -157,7 +151,7 @@ DEBUG("X written: ", UHEX(x_value))
 **Use correct sysclk:**
 ```spin2
 CON
-  _clkfreq = 200_000_000                 ' Verify this matches actual clock
+  _clkfreq = 200_000_000               ' Verify this matches actual clock
 
 PUB calc_frequency(hz) : y_val
   y_val := hz FRAC _clkfreq
@@ -165,7 +159,7 @@ PUB calc_frequency(hz) : y_val
 
 **Use the FRAC operator for NCO Y calculation:**
 ```spin2
-' CORRECT - FRAC computes (frequency * 2^32) / _clkfreq as a 32-bit result
+  ' CORRECT - FRAC = (frequency * 2^32) / _clkfreq (32-bit)
 ' without manual 33-bit constant arithmetic.
 y_val := frequency FRAC _clkfreq
 ```
@@ -183,8 +177,6 @@ frequency = Y * sysclk / 2^32
 ' With X[15:0] = 10
 frequency = Y * sysclk / (10 * 2^32)
 ```
-
----
 
 ## Noisy or Unstable Signal
 
@@ -232,8 +224,6 @@ WXPIN(pin, 1000)                         ' 1000 periods instead of 10
 ' More samples = more filtering
 WXPIN(adc_pin, %00_1001)                 ' 512 clocks instead of 128
 ```
-
----
 
 ## Serial Not Working
 
@@ -293,8 +283,6 @@ mode := P_SYNC_TX | P_OE
 mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
 ```
 
----
-
 ## ADC Readings Wrong
 
 ### Symptom
@@ -353,8 +341,6 @@ WXPIN(adc_pin, %00_0111)                 ' 128 clocks
 WXPIN(adc_pin, %00_1011)                 ' 2048 clocks
 ```
 
----
-
 ## Encoder Counts Incorrect
 
 ### Symptom
@@ -409,8 +395,6 @@ mode := P_QUADRATURE | P_PLUS1_B | P_INVERT_A
 ' Period = 1.5 µs - well within capability
 ```
 
----
-
 ## Mode Stops Working
 
 ### Symptom
@@ -449,7 +433,7 @@ REPEAT
 WXPIN(pin, 0)                            ' Continuous - read anytime
 
 ' X>0 means periodic, IN raised each period
-WXPIN(pin, period)                       ' Periodic - must read to restart
+WXPIN(pin, period)                      ' Periodic - must read to restart
 ```
 
 **Pulse DIR to reset if stuck:**
@@ -457,8 +441,6 @@ WXPIN(pin, period)                       ' Periodic - must read to restart
 PINL(pin)                                ' Disable
 PINH(pin)                                ' Re-enable from fresh state
 ```
-
----
 
 ## Interference Between Pins
 
@@ -506,8 +488,6 @@ PINH(pin2)
 ' Use slower drive if timing permits
 ```
 
----
-
 ## Debugging Techniques
 
 ### Using RDPIN to Inspect State
@@ -550,6 +530,7 @@ PINH(pin)
 ### Logic Analyzer Protocol Decoding
 
 For serial protocols:
+
 1. Capture raw waveform
 2. Verify timing matches expected baud/clock
 3. Decode data and compare to expected
@@ -558,16 +539,19 @@ For serial protocols:
 ### Oscilloscope Measurements
 
 **For PWM:**
+
 - Measure frequency
 - Measure duty cycle
 - Check for glitches at transitions
 
 **For ADC:**
+
 - Measure input voltage
 - Verify within expected range
 - Check for noise on input
 
 **For Serial:**
+
 - Measure bit period
 - Verify logic levels
 - Check start/stop bits (async)
@@ -602,11 +586,10 @@ received := RDPIN(RX_PIN)
 DEBUG("Sent: $55, Received: ", UHEX(received))
 ```
 
----
-
 ## Quick Diagnostic Checklist
 
 ### Output Not Working
+
 - [ ] WRPIN executed with correct mode?
 - [ ] Mode includes P_OE?
 - [ ] DIRH or PINLOW called?
@@ -614,6 +597,7 @@ DEBUG("Sent: $55, Received: ", UHEX(received))
 - [ ] Pin number correct?
 
 ### Input Not Working
+
 - [ ] WRPIN executed?
 - [ ] DIRH called?
 - [ ] Waiting for IN flag when required?
@@ -621,6 +605,7 @@ DEBUG("Sent: $55, Received: ", UHEX(received))
 - [ ] Input conditioning appropriate?
 
 ### Serial Not Working
+
 - [ ] Baud rate calculation correct?
 - [ ] TX and RX configured identically?
 - [ ] Polarity matches (P_INVERT_*)?
@@ -628,12 +613,12 @@ DEBUG("Sent: $55, Received: ", UHEX(received))
 - [ ] For sync, clock routing added?
 
 ### ADC Not Working
+
 - [ ] Input mode (P_ADC_GIO, etc.) appropriate?
 - [ ] Gain matches input level?
 - [ ] Filter mode understood?
 - [ ] Sample period set?
 - [ ] For SINC2/3, difference computed?
 
----
 
 *For mode details, see relevant chapter. For P_ constants, see Appendix B. For formulas, see Appendix C.*

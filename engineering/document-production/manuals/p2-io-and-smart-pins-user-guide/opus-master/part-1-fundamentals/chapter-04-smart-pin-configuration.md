@@ -2,7 +2,6 @@
 
 This chapter documents the instructions and methods for configuring and interacting with Smart Pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish Smart Pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the Smart Pin without reading.
 
----
 
 ## 4.1 Configuration Instructions Overview
 
@@ -17,30 +16,26 @@ This chapter documents the instructions and methods for configuring and interact
 
 All configuration and acknowledge instructions execute in 2 clock cycles.
 
----
 
 ## 4.2 WRPIN - Write Pin Configuration
 
 ### Function
 
 WRPIN establishes the complete pin configuration including:
+
 - Smart Pin mode selection
 - Low-level pin configuration (drive strength, input mode)
 - Input routing and polarity
 - DIR/OUT control options
 
-### PASM2 Syntax
-
-```
-WRPIN   {#}D, {#}S
+```pasm-syntax
+        WRPIN   {#}D,{#}S
 ```
 
 - **D**: 32-bit configuration value
 - **S**: Pin number (0-63) or pin field with span
 
-### Spin2 Syntax
-
-```spin2
+```spin-syntax
 WRPIN(PinField, Mode)
 ```
 
@@ -51,17 +46,19 @@ WRPIN(PinField, Mode)
 
 The D operand is a 32-bit value with the following fields:
 
-```
+```layout
 D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
-
-Bits 31:28  AAAA  - A input selection and polarity
-Bits 27:24  BBBB  - B input selection and polarity
-Bits 23:21  FFF   - A,B input logic/filtering
-Bits 20:8   MMMMMMMMMMMMM - Low-level pin mode (13 bits)
-Bits 7:6    TT    - DIR/OUT control
-Bits 5:1    SSSSS - Smart Pin mode (0-31)
-Bit 0       0     - Reserved (always 0)
 ```
+
+| Field | Bits | Purpose |
+|-------|------|---------|
+| AAAA | 31:28 | A input selection and polarity |
+| BBBB | 27:24 | B input selection and polarity |
+| FFF | 23:21 | A,B input logic/filtering |
+| MMMMMMMMMMMMM | 20:8 | Low-level pin mode (13 bits) |
+| TT | 7:6 | DIR/OUT control |
+| SSSSS | 5:1 | Smart Pin mode (0-31) |
+| 0 | 0 | Reserved (always 0) |
 
 ### Timing
 
@@ -78,6 +75,7 @@ Bit 0       0     - Reserved (always 0)
 ### Critical Requirements
 
 **Configure while DIR=0:** Smart Pins must be configured while held in reset (DIR=0). The proper sequence is:
+
 1. DIRL to reset Smart Pin
 2. WRPIN to configure
 3. WXPIN/WYPIN as needed
@@ -105,7 +103,6 @@ WRPIN(pin, P_NCO_FREQ | P_OE)           ' NCO mode with output enable
 WRPIN(pin, P_PWM_TRIANGLE | P_OE | P_HIGH_FAST | P_LOW_FAST)
 ```
 
----
 
 ## 4.3 WXPIN - Write X Register
 
@@ -113,18 +110,14 @@ WRPIN(pin, P_PWM_TRIANGLE | P_OE | P_HIGH_FAST | P_LOW_FAST)
 
 WXPIN writes the X register, which holds configuration parameters. The meaning of X varies by mode.
 
-### PASM2 Syntax
-
-```
-WXPIN   {#}D, {#}S
+```pasm-syntax
+        WXPIN   {#}D,{#}S
 ```
 
 - **D**: Value to write to X register
 - **S**: Pin number (0-63) or pin field with span
 
-### Spin2 Syntax
-
-```spin2
+```spin-syntax
 WXPIN(PinField, Xvalue)
 ```
 
@@ -156,10 +149,9 @@ WXPIN(pin, base_period)                  ' X = base_period
 
 **PASM2 - Set base period with frame count:**
 ```pasm2
-              wxpin     pin, x_value      ' X[15:0] = base, X[31:16] = frame
+              wxpin     pin, x_value   ' X[15:0] = base, X[31:16] = frame
 ```
 
----
 
 ## 4.4 WYPIN - Write Y Register
 
@@ -167,18 +159,14 @@ WXPIN(pin, base_period)                  ' X = base_period
 
 WYPIN writes the Y register, which holds input data or secondary parameters.
 
-### PASM2 Syntax
-
-```
-WYPIN   {#}D, {#}S
+```pasm-syntax
+        WYPIN   {#}D,{#}S
 ```
 
 - **D**: Value to write to Y register
 - **S**: Pin number (0-63) or pin field with span
 
-### Spin2 Syntax
-
-```spin2
+```spin-syntax
 WYPIN(PinField, Yvalue)
 ```
 
@@ -214,7 +202,6 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
               wypin     tx_pin, data      ' Y = data to transmit
 ```
 
----
 
 ## 4.5 RDPIN - Read Z Register with Acknowledge
 
@@ -222,18 +209,14 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
 
 RDPIN reads the Z register and acknowledges the Smart Pin (lowers IN).
 
-### PASM2 Syntax
-
-```
-RDPIN   D, {#}S
+```pasm-syntax
+        RDPIN   D,{#}S          {WC}
 ```
 
 - **D**: Destination register for Z value
 - **S**: Pin number (0-63)
 
-### Spin2 Syntax
-
-```spin2
+```spin-syntax
 result := RDPIN(Pin)
 ```
 
@@ -261,6 +244,7 @@ result := RDPIN(Pin)
 ### When to Use RDPIN
 
 Use RDPIN when:
+
 - The COG needs the result AND
 - The Smart Pin should be signaled that the result was consumed
 
@@ -279,7 +263,6 @@ measurement := RDPIN(pin)                ' Read Z, acknowledge
         if_c  jmp       #handle_event    ' Act on flag
 ```
 
----
 
 ## 4.6 RQPIN - Read Z Register Quietly
 
@@ -287,15 +270,11 @@ measurement := RDPIN(pin)                ' Read Z, acknowledge
 
 RQPIN reads the Z register WITHOUT acknowledging the Smart Pin. IN remains in its current state.
 
-### PASM2 Syntax
-
-```
-RQPIN   D, {#}S
+```pasm-syntax
+        RQPIN   D,{#}S          {WC}
 ```
 
-### Spin2 Syntax
-
-```spin2
+```spin-syntax
 result := RQPIN(Pin)
 ```
 
@@ -323,7 +302,6 @@ result := RQPIN(Pin)
               rqpin     result, #sensor  ' Read without acknowledge
 ```
 
----
 
 ## 4.7 AKPIN - Acknowledge Only
 
@@ -331,10 +309,8 @@ result := RQPIN(Pin)
 
 AKPIN acknowledges the Smart Pin without reading the Z register.
 
-### PASM2 Syntax
-
-```
-AKPIN   {#}S
+```pasm-syntax
+        AKPIN   {#}Src
 ```
 
 - **S**: Pin number (0-63) or pin field
@@ -343,7 +319,7 @@ AKPIN   {#}S
 
 There is no direct Spin2 equivalent. Use RDPIN with a discard variable:
 ```spin2
-ack := RDPIN(pin)                        ' Read (discard result) to acknowledge
+ack := RDPIN(pin)                  ' Read (discard result) to acknowledge
 ```
 
 Or configure in PASM2 if needed.
@@ -360,7 +336,6 @@ Or configure in PASM2 if needed.
               akpin     #pin              ' Acknowledge without reading
 ```
 
----
 
 ## 4.8 The Standard Configuration Sequence
 
@@ -381,11 +356,11 @@ PINL(pin)                                ' Same effect
 ### Step 2: Configure Mode (WRPIN)
 
 ```spin2
-WRPIN(pin, P_MODE | P_OE | ...)          ' Set mode and options
+WRPIN(pin, mode | P_OE | ...)          ' Set mode and options
 ```
 
 ```pasm2
-              wrpin     #pin, ##(P_MODE | P_OE)
+              wrpin     #pin, ##(mode | P_OE)
 ```
 
 ### Step 3: Set Parameters (WXPIN)
@@ -456,7 +431,6 @@ PUB setup_nco() | y_value
               drvl      #OUT_PIN          ' Step 5: Enable
 ```
 
----
 
 ## 4.9 P_OE - Output Enable
 
@@ -467,6 +441,7 @@ The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the D
 ### When P_OE is Required
 
 **Output modes:** All Smart Pin modes that produce output require P_OE:
+
 - NCO frequency/duty (%00110, %00111)
 - PWM modes (%01000, %01001, %01010)
 - Pulse/Transition (%00100, %00101)
@@ -475,12 +450,14 @@ The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the D
 - USB (%11011)
 
 **Without P_OE:** The Smart Pin calculates output but doesn't drive the pin. This can be useful for:
+
 - Preparing output before enabling
 - Running the mode for internal timing without external output
 
 ### When P_OE is Not Needed
 
 **Input-only modes:** Modes that only measure input don't need P_OE:
+
 - All timing measurement modes (%10000-%10010)
 - Counter modes (%01011-%01111) unless driving output
 - Period/frequency modes (%10011-%10111)
@@ -491,10 +468,9 @@ The `P_OE` constant (TT bits = %01) enables Smart Pin output regardless of the D
 
 ```spin2
 WRPIN(pin, P_NCO_FREQ | P_OE)             ' Output enabled
-WRPIN(pin, P_NCO_FREQ)                    ' Output NOT enabled (internal only)
+WRPIN(pin, P_NCO_FREQ)               ' Output NOT enabled (internal only)
 ```
 
----
 
 ## 4.10 Input Routing
 
@@ -581,7 +557,6 @@ WXPIN(20, bit_config)                     ' Configure bit format
 PINLOW(20)                                ' Enable
 ```
 
----
 
 ## 4.11 Span Operations
 
@@ -590,6 +565,7 @@ All Smart Pin instructions support operating on multiple pins simultaneously.
 ### Span Encoding
 
 The S operand (pin number) can include a span:
+
 - S[5:0]: Base pin (0-63)
 - S[10:6]: Additional pins (0-31)
 
@@ -611,7 +587,6 @@ WRPIN(0..7, P_NCO_FREQ | P_OE)            ' Configure pins 0-7
 WXPIN(0..7, period)                       ' Set X for pins 0-7
 ```
 
----
 
 ## 4.12 Reading the C Flag
 
@@ -637,7 +612,6 @@ if result & $8000_0000                    ' Check bit 31 (mode-dependent)
   ' Handle condition
 ```
 
----
 
 ## 4.13 The 2-Clock Acknowledge Delay
 
@@ -652,7 +626,6 @@ After any instruction that acknowledges the Smart Pin (WRPIN, WXPIN, WYPIN, RDPI
 
 In practice, other instructions between the acknowledge and the poll often provide sufficient delay.
 
----
 
 ## 4.14 Configuration Quick Reference
 
@@ -660,7 +633,7 @@ In practice, other instructions between the acknowledge and the poll often provi
 
 ```spin2
 PINFLOAT(pin)
-WRPIN(pin, P_MODE | P_OE)
+WRPIN(pin, mode | P_OE)
 PINLOW(pin)
 ```
 
@@ -668,7 +641,7 @@ PINLOW(pin)
 
 ```spin2
 PINFLOAT(pin)
-WRPIN(pin, P_MODE | P_OE)
+WRPIN(pin, mode | P_OE)
 WXPIN(pin, x_value)
 PINLOW(pin)
 ```
@@ -677,7 +650,7 @@ PINLOW(pin)
 
 ```spin2
 PINFLOAT(pin)
-WRPIN(pin, P_MODE | P_OE)
+WRPIN(pin, mode | P_OE)
 WXPIN(pin, x_value)
 WYPIN(pin, y_value)
 PINLOW(pin)
@@ -709,6 +682,5 @@ PINFLOAT(pin)
 WRPIN(pin, 0)
 ```
 
----
 
 *This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*

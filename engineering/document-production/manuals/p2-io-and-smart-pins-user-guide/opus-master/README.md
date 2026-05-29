@@ -24,6 +24,7 @@ opus-master/
 ## Writing Guidelines
 
 See sibling files:
+
 - `../voice-guide.md` - Voice and tone conventions
 - `../creation-guide.md` - Entry formats and verification protocol
 

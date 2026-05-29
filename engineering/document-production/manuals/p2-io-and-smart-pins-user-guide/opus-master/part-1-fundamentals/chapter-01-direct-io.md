@@ -2,7 +2,6 @@
 
 Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex Smart Pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
----
 
 ## 1.1 The Hardware Model
 
@@ -37,6 +36,7 @@ Multiple cogs can control the same pin. The P2 uses OR logic to combine control 
 - **OUT**: The output state is the OR of all cogs' OUT bits
 
 This means:
+
 - Any cog can "claim" a pin by setting its DIR bit
 - When multiple cogs drive the same pin, the output is high if any cog drives high
 
@@ -44,7 +44,6 @@ This means:
 
 When DIR=1, the pin's output driver connects to the pad. The driver strength is configurable via WRPIN (see Chapter 2). The default is "fast" drive providing approximately 30mA source/sink capability.
 
----
 
 ## 1.2 Timing
 
@@ -52,11 +51,8 @@ When DIR=1, the pin's output driver connects to the pad. The driver strength is 
 
 When a DIR or OUT bit is changed by any instruction, **three additional clock cycles pass** after the instruction completes before the pin begins transitioning to the new state.
 
-```
-Clock:        0         1         2         3         4         5
-              ↓         ↓         ↓         ↓         ↓         ↓
-Instruction:  | DRVH #0 |         |         |         |         |
-DIR/OUT bits: |         | Changed |   →     |   →     |   →     | Pin starts driving
+```{=latex}
+\DiagOutputTiming
 ```
 
 **Total latency from instruction start to pin transition:** 5 clock cycles (2 for instruction execution + 3 pipeline delay).
@@ -65,22 +61,16 @@ DIR/OUT bits: |         | Changed |   →     |   →     |   →     | Pin star
 
 When an INx register is read by an instruction, it reflects the state of the pins registered **three clocks before** the start of the instruction.
 
-```
-Clock:        0         1         2         3         4         5
-              ↓         ↓         ↓         ↓         ↓         ↓
-Pin state:    | Sampled |   →     |   →     |   →     | Read by instruction
-Instruction:  |         |         |         | TESTB INA,#0       |
+```{=latex}
+\DiagInputTimingINA
 ```
 
 ### Input Timing via TESTP/TESTPN: 2 Clocks Old
 
 The TESTP and TESTPN instructions provide "fresher" input data—the value read reflects the state of the pin registered **two clocks before** the start of the instruction.
 
-```
-Clock:        0         1         2         3         4
-              ↓         ↓         ↓         ↓         ↓
-Pin state:    | Sampled |   →     |   →     | Read by TESTP
-Instruction:  |         |         | TESTP #0|         |
+```{=latex}
+\DiagInputTimingTESTP
 ```
 
 **Recommendation:** Use TESTP/TESTPN for time-critical input sensing. The one-clock fresher data can matter in tight timing loops.
@@ -93,7 +83,6 @@ Instruction:  |         |         | TESTP #0|         |
 | Input via INx register (MOV, TESTB, etc.) | 3 clocks before instruction | Older data |
 | Input via TESTP/TESTPN | 2 clocks before instruction | Fresher data |
 
----
 
 ## 1.3 Drive Instructions (DRVx)
 
@@ -106,18 +95,17 @@ Drive instructions set both the DIR bit (set to 1) and the OUT bit in a single a
 - **Flags:** Z is set to the new OUT bit state; C is unaffected
 - **Pin range:** D[5:0] specifies base pin (0-63); D[10:6] specifies span (0-31 additional pins when preceded by SETQ)
 
----
 
 ### DRVH - Drive High
 
 Drives pin high by setting DIR=1 and OUT=1.
 
-**Syntax:**
-```
-DRVH    {#}D
+```pasm-syntax
+        DRVH    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to 1 (high state)
 3. Set Z flag to 1
@@ -142,18 +130,17 @@ PUB main()
 
 **Related:** DRVL, DRVNOT, OUTH, DIRH
 
----
 
 ### DRVL - Drive Low
 
 Drives pin low by setting DIR=1 and OUT=0.
 
-**Syntax:**
-```
-DRVL    {#}D
+```pasm-syntax
+        DRVL    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to 0 (low state)
 3. Set Z flag to 0
@@ -178,18 +165,17 @@ PUB main()
 
 **Related:** DRVH, DRVNOT, OUTL, DIRL
 
----
 
 ### DRVNOT - Drive Toggle
 
 Toggles the output state while keeping the pin as an output.
 
-**Syntax:**
-```
-DRVNOT  {#}D
+```pasm-syntax
+        DRVNOT  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Toggle OUT bit for pin D (0→1 or 1→0)
 3. Set Z flag to the new OUT bit state
@@ -222,18 +208,17 @@ delay         long      100_000_000  ' 0.5 sec at 200 MHz
 
 **Related:** DRVH, DRVL, OUTNOT
 
----
 
 ### DRVC - Drive to C
 
 Drives pin to the current state of the C flag.
 
-**Syntax:**
-```
-DRVC    {#}D
+```pasm-syntax
+        DRVC    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to C flag value
 3. Set Z flag to the new OUT bit state
@@ -250,18 +235,17 @@ DRVC    {#}D
 
 **Related:** DRVNC, OUTC
 
----
 
 ### DRVNC - Drive to Not C
 
 Drives pin to the inverse of the C flag.
 
-**Syntax:**
-```
-DRVNC   {#}D
+```pasm-syntax
+        DRVNC   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !C (inverted C flag)
 3. Set Z flag to the new OUT bit state
@@ -278,18 +262,17 @@ DRVNC   {#}D
 
 **Related:** DRVC, OUTNC
 
----
 
 ### DRVZ - Drive to Z
 
 Drives pin to the current state of the Z flag.
 
-**Syntax:**
-```
-DRVZ    {#}D
+```pasm-syntax
+        DRVZ    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to Z flag value
 3. Set Z flag to the new OUT bit state
@@ -306,18 +289,17 @@ DRVZ    {#}D
 
 **Related:** DRVNZ, OUTZ
 
----
 
 ### DRVNZ - Drive to Not Z
 
 Drives pin to the inverse of the Z flag.
 
-**Syntax:**
-```
-DRVNZ   {#}D
+```pasm-syntax
+        DRVNZ   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !Z (inverted Z flag)
 3. Set Z flag to the new OUT bit state
@@ -334,18 +316,17 @@ DRVNZ   {#}D
 
 **Related:** DRVZ, OUTNZ
 
----
 
 ### DRVRND - Drive Random
 
 Drives pin to a random state.
 
-**Syntax:**
-```
-DRVRND  {#}D
+```pasm-syntax
+        DRVRND  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to a random value (0 or 1)
 3. Set Z flag to the new OUT bit state
@@ -361,7 +342,6 @@ DRVRND  {#}D
 
 **Related:** OUTRND, DIRRND
 
----
 
 ## 1.4 Output Instructions (OUTx)
 
@@ -373,18 +353,17 @@ Output instructions modify only the output state register bit. The direction reg
 - **Flags:** Z is set to the new OUT bit state; C is unaffected
 - **Note:** If DIR=0, the instruction changes the OUT register but has no immediate effect on the pin
 
----
 
 ### OUTH - Output High
 
 Sets the output state to high without changing direction.
 
-**Syntax:**
-```
-OUTH    {#}D
+```pasm-syntax
+        OUTH    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to 1
 2. Set Z flag to 1
 3. DIR is unchanged
@@ -403,18 +382,17 @@ OUTH    {#}D
 
 **Related:** OUTL, OUTNOT, DRVH
 
----
 
 ### OUTL - Output Low
 
 Sets the output state to low without changing direction.
 
-**Syntax:**
-```
-OUTL    {#}D
+```pasm-syntax
+        OUTL    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to 0
 2. Set Z flag to 0
 3. DIR is unchanged
@@ -430,18 +408,17 @@ OUTL    {#}D
 
 **Related:** OUTH, OUTNOT, DRVL
 
----
 
 ### OUTNOT - Output Toggle
 
 Toggles the output state without changing direction.
 
-**Syntax:**
-```
-OUTNOT  {#}D
+```pasm-syntax
+        OUTNOT  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Toggle OUT bit for pin D
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -457,18 +434,17 @@ OUTNOT  {#}D
 
 **Related:** OUTH, OUTL, DRVNOT
 
----
 
 ### OUTC - Output to C
 
 Sets output state to the C flag value without changing direction.
 
-**Syntax:**
-```
-OUTC    {#}D
+```pasm-syntax
+        OUTC    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to C flag value
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -477,18 +453,17 @@ OUTC    {#}D
 
 **Related:** OUTNC, DRVC
 
----
 
 ### OUTNC - Output to Not C
 
 Sets output state to the inverse of C flag without changing direction.
 
-**Syntax:**
-```
-OUTNC   {#}D
+```pasm-syntax
+        OUTNC   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to !C
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -497,18 +472,17 @@ OUTNC   {#}D
 
 **Related:** OUTC, DRVNC
 
----
 
 ### OUTZ - Output to Z
 
 Sets output state to the Z flag value without changing direction.
 
-**Syntax:**
-```
-OUTZ    {#}D
+```pasm-syntax
+        OUTZ    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to Z flag value
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -517,18 +491,17 @@ OUTZ    {#}D
 
 **Related:** OUTNZ, DRVZ
 
----
 
 ### OUTNZ - Output to Not Z
 
 Sets output state to the inverse of Z flag without changing direction.
 
-**Syntax:**
-```
-OUTNZ   {#}D
+```pasm-syntax
+        OUTNZ   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to !Z
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -537,18 +510,17 @@ OUTNZ   {#}D
 
 **Related:** OUTZ, DRVNZ
 
----
 
 ### OUTRND - Output Random
 
 Sets output state to a random value without changing direction.
 
-**Syntax:**
-```
-OUTRND  {#}D
+```pasm-syntax
+        OUTRND  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set OUT bit for pin D to a random value
 2. Set Z flag to the new OUT bit state
 3. DIR is unchanged
@@ -557,7 +529,6 @@ OUTRND  {#}D
 
 **Related:** DRVRND
 
----
 
 ## 1.5 Direction Instructions (DIRx)
 
@@ -568,18 +539,17 @@ Direction instructions modify only the direction register bit. The output state 
 - **Execution time:** 2 clock cycles
 - **Flags:** Z is set to the new DIR bit state; C is unaffected
 
----
 
 ### DIRH - Direction High (Output)
 
 Sets the pin to output mode.
 
-**Syntax:**
-```
-DIRH    {#}D
+```pasm-syntax
+        DIRH    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set Z flag to 1
 3. OUT is unchanged; pin drives current OUT value
@@ -596,18 +566,17 @@ DIRH    {#}D
 
 **Related:** DIRL, DIRNOT, DRVH
 
----
 
 ### DIRL - Direction Low (Input/Float)
 
 Sets the pin to input mode (floating).
 
-**Syntax:**
-```
-DIRL    {#}D
+```pasm-syntax
+        DIRL    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (input mode, pin floats)
 2. Set Z flag to 0
 3. OUT is unchanged
@@ -629,18 +598,17 @@ PUB main()
 
 **Related:** DIRH, DIRNOT, FLTL
 
----
 
 ### DIRNOT - Direction Toggle
 
 Toggles the direction between input and output.
 
-**Syntax:**
-```
-DIRNOT  {#}D
+```pasm-syntax
+        DIRNOT  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Toggle DIR bit for pin D
 2. Set Z flag to the new DIR bit state
 
@@ -653,18 +621,17 @@ DIRNOT  {#}D
 
 **Related:** DIRH, DIRL
 
----
 
 ### DIRC - Direction to C
 
 Sets direction based on C flag.
 
-**Syntax:**
-```
-DIRC    {#}D
+```pasm-syntax
+        DIRC    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to C flag value
 2. Set Z flag to the new DIR bit state
 
@@ -672,18 +639,17 @@ DIRC    {#}D
 
 **Related:** DIRNC, DRVC
 
----
 
 ### DIRNC - Direction to Not C
 
 Sets direction based on inverse of C flag.
 
-**Syntax:**
-```
-DIRNC   {#}D
+```pasm-syntax
+        DIRNC   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to !C
 2. Set Z flag to the new DIR bit state
 
@@ -691,18 +657,17 @@ DIRNC   {#}D
 
 **Related:** DIRC, DRVNC
 
----
 
 ### DIRZ - Direction to Z
 
 Sets direction based on Z flag.
 
-**Syntax:**
-```
-DIRZ    {#}D
+```pasm-syntax
+        DIRZ    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to Z flag value
 2. Set Z flag to the new DIR bit state
 
@@ -710,18 +675,17 @@ DIRZ    {#}D
 
 **Related:** DIRNZ, DRVZ
 
----
 
 ### DIRNZ - Direction to Not Z
 
 Sets direction based on inverse of Z flag.
 
-**Syntax:**
-```
-DIRNZ   {#}D
+```pasm-syntax
+        DIRNZ   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to !Z
 2. Set Z flag to the new DIR bit state
 
@@ -729,18 +693,17 @@ DIRNZ   {#}D
 
 **Related:** DIRZ, DRVNZ
 
----
 
 ### DIRRND - Direction Random
 
 Sets direction to a random value.
 
-**Syntax:**
-```
-DIRRND  {#}D
+```pasm-syntax
+        DIRRND  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to a random value
 2. Set Z flag to the new DIR bit state
 
@@ -748,7 +711,6 @@ DIRRND  {#}D
 
 **Related:** DRVRND, OUTRND
 
----
 
 ## 1.6 Float Instructions (FLTx)
 
@@ -760,18 +722,17 @@ Float instructions set the pin to input mode (DIR=0) AND pre-set the output stat
 - **Flags:** Z is set to the new OUT bit state; C is unaffected
 - **Effect:** DIR=0 (floating) AND OUT=specified value
 
----
 
 ### FLTH - Float with Output High
 
 Floats pin and pre-sets output register high.
 
-**Syntax:**
-```
-FLTH    {#}D
+```pasm-syntax
+        FLTH    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to 1 (high)
 3. Set Z flag to 1
@@ -789,18 +750,17 @@ FLTH    {#}D
 
 **Related:** FLTL, DRVH
 
----
 
 ### FLTL - Float with Output Low
 
 Floats pin and pre-sets output register low.
 
-**Syntax:**
-```
-FLTL    {#}D
+```pasm-syntax
+        FLTL    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to 0 (low)
 3. Set Z flag to 0
@@ -816,18 +776,17 @@ FLTL    {#}D
 
 **Related:** FLTH, DRVL, DIRL
 
----
 
 ### FLTNOT - Float with Output Toggle
 
 Floats pin and toggles the output register.
 
-**Syntax:**
-```
-FLTNOT  {#}D
+```pasm-syntax
+        FLTNOT  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Toggle OUT bit for pin D
 3. Set Z flag to the new OUT bit state
@@ -836,18 +795,17 @@ FLTNOT  {#}D
 
 **Related:** FLTH, FLTL
 
----
 
 ### FLTC - Float with Output to C
 
 Floats pin and sets output register to C flag.
 
-**Syntax:**
-```
-FLTC    {#}D
+```pasm-syntax
+        FLTC    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to C flag value
 3. Set Z flag to the new OUT bit state
@@ -856,18 +814,17 @@ FLTC    {#}D
 
 **Related:** FLTNC
 
----
 
 ### FLTNC - Float with Output to Not C
 
 Floats pin and sets output register to inverse of C flag.
 
-**Syntax:**
-```
-FLTNC   {#}D
+```pasm-syntax
+        FLTNC   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !C
 3. Set Z flag to the new OUT bit state
@@ -876,18 +833,17 @@ FLTNC   {#}D
 
 **Related:** FLTC
 
----
 
 ### FLTZ - Float with Output to Z
 
 Floats pin and sets output register to Z flag.
 
-**Syntax:**
-```
-FLTZ    {#}D
+```pasm-syntax
+        FLTZ    {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to Z flag value
 3. Set Z flag to the new OUT bit state
@@ -896,18 +852,17 @@ FLTZ    {#}D
 
 **Related:** FLTNZ
 
----
 
 ### FLTNZ - Float with Output to Not Z
 
 Floats pin and sets output register to inverse of Z flag.
 
-**Syntax:**
-```
-FLTNZ   {#}D
+```pasm-syntax
+        FLTNZ   {#}D           {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !Z
 3. Set Z flag to the new OUT bit state
@@ -916,18 +871,17 @@ FLTNZ   {#}D
 
 **Related:** FLTZ
 
----
 
 ### FLTRND - Float with Output Random
 
 Floats pin and sets output register to random value.
 
-**Syntax:**
-```
-FLTRND  {#}D
+```pasm-syntax
+        FLTRND  {#}Dest        {WCZ}
 ```
 
 **Operation:**
+
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to random value
 3. Set Z flag to the new OUT bit state
@@ -936,24 +890,22 @@ FLTRND  {#}D
 
 **Related:** DRVRND, OUTRND
 
----
 
 ## 1.7 Test Pin Instructions
 
 Test instructions read the physical pin state and affect the C and/or Z flags. These instructions do NOT change pin direction or output state.
 
----
 
 ### TESTP - Test Pin
 
 Reads the physical pin state and affects C or Z flags.
 
-**Syntax:**
-```
-TESTP   {#}D    WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ
+```pasm-syntax
+        TESTP   {#}D           WC/WZ
 ```
 
 **Operation:**
+
 1. Read the physical state of pin D
 2. Apply the specified operation to C or Z flag
 
@@ -999,18 +951,17 @@ PUB main() | state
 
 **Related:** TESTPN
 
----
 
 ### TESTPN - Test Pin Negated
 
 Reads the physical pin state inverted and affects C or Z flags.
 
-**Syntax:**
-```
-TESTPN  {#}D    WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ
+```pasm-syntax
+        TESTPN  {#}D           WC/WZ
 ```
 
 **Operation:**
+
 1. Read the physical state of pin D
 2. Invert the value
 3. Apply the specified operation to C or Z flag
@@ -1021,19 +972,17 @@ TESTPN  {#}D    WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ
 
 **Example - PASM2:**
 ```pasm2
-              testpn    #button wc  ' C=1 when button pressed (active low)
+              testpn    #button wc  ' C=1 if button pressed (active-low)
         if_c  call      #handle_button
 ```
 
 **Related:** TESTP
 
----
 
 ## 1.8 Spin2 Pin Methods
 
 Spin2 provides high-level methods for common pin operations. These methods execute from hub RAM and have additional overhead compared to inline PASM2.
 
----
 
 ### PINHIGH(PinField)
 
@@ -1052,7 +1001,6 @@ PINHIGH(0..7)                     ' Drive pins 0-7 all high
 PINHIGH(16 ADDPINS 3)           ' Drive pins 16-19 high
 ```
 
----
 
 ### PINLOW(PinField)
 
@@ -1067,7 +1015,6 @@ Drives pin(s) low.
 PINLOW(56)                        ' Drive pin 56 low
 ```
 
----
 
 ### PINTOGGLE(PinField)
 
@@ -1082,7 +1029,6 @@ Toggles pin output state.
 PINTOGGLE(56)                     ' Toggle pin 56
 ```
 
----
 
 ### PINFLOAT(PinField)
 
@@ -1097,7 +1043,6 @@ Floats pin(s) (sets to input mode).
 PINFLOAT(10)                      ' Float pin 10 (high impedance)
 ```
 
----
 
 ### PINWRITE(PinField, Value)
 
@@ -1106,6 +1051,7 @@ Writes value to pin(s).
 **Function:** Sets OUT to Value and DIR=1
 
 **Parameters:**
+
 - PinField: Pin specification
 - Value: 0 or 1 (or multi-bit value for pin ranges)
 
@@ -1118,7 +1064,6 @@ PINWRITE(56, 0)                   ' Same as PINLOW(56)
 PINWRITE(0..7, %10101010)         ' Write pattern to pins 0-7
 ```
 
----
 
 ### PINREAD(PinField)
 
@@ -1142,7 +1087,6 @@ PUB main()
   byte_val := PINREAD(0..7)       ' Read 8 pins as byte
 ```
 
----
 
 ### PINCLEAR(PinField)
 
@@ -1159,7 +1103,6 @@ PINCLEAR(10)                      ' Reset pin 10 to normal mode
 
 **Note:** Use this to disable Smart Pin modes and return to basic Direct I/O.
 
----
 
 ## 1.9 Pin Span Operations
 
@@ -1181,7 +1124,6 @@ All DRV/OUT/DIR/FLT instructions support operating on multiple pins simultaneous
 
 Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (Port B) are independent. A span starting at pin 28 with span 7 affects pins 28-31, then wraps to 0-3.
 
----
 
 ## 1.10 Instruction Quick Reference
 
@@ -1224,7 +1166,6 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 
 **Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random
 
----
 
 ## 1.11 Common Patterns
 
@@ -1293,9 +1234,8 @@ DAT           org
 ```pasm2
               flth      #motor          ' Prepare output high, but float
               ' ... other setup ...
-              dirh      #motor          ' Enable output - immediately high
+              dirh      #motor         ' Enable output - immediately high
 ```
 
----
 
 *This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*

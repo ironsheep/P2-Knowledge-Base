@@ -76,3 +76,64 @@ function Blocks(blocks)
 
   return result
 end
+
+-- Keep a diagram together with the heading + intro that introduce it.
+-- Each diagram is a [H] figure (placed exactly here). When it doesn't fit on the
+-- current page it jumps to the next, orphaning its section heading and intro
+-- sentence at the bottom of the previous page. Reserving vertical space just
+-- before that nearby heading forces the whole unit (heading + intro + figure) to
+-- break to the next page together. We only reach back a few blocks so this
+-- applies to the "heading -> short intro -> diagram" pattern, not to a diagram
+-- that happens to sit far below an unrelated heading.
+local function count_table_rows(t)
+  local n = 0
+  for _, body in ipairs(t.bodies) do
+    if body.body then n = n + #body.body end
+  end
+  return n
+end
+
+function Pandoc(doc)
+  local blocks = doc.blocks
+  local needs_reserve = {}   -- header index -> reserve fraction of \textheight
+
+  -- Record the larger reserve when a header qualifies for more than one reason.
+  local function mark(j, frac)
+    if not needs_reserve[j] or frac > needs_reserve[j] then
+      needs_reserve[j] = frac
+    end
+  end
+
+  -- Walk back from block i to the nearest preceding Header within `lookback`.
+  local function reserve_before_heading(i, lookback, frac)
+    local back = 0
+    for j = i - 1, 1, -1 do
+      back = back + 1
+      if blocks[j].t == "Header" then mark(j, frac); return end
+      if back >= lookback then return end
+    end
+  end
+
+  for i, b in ipairs(blocks) do
+    -- Diagrams: keep heading + intro + figure together.
+    if b.t == "RawBlock" and b.format == "latex"
+       and b.text:find("\\Diag", 1, true) then
+      reserve_before_heading(i, 4, 0.30)
+    -- Tall reference tables (e.g. Table 1.10): keep heading + table + legend
+    -- together so the legend is not orphaned onto the next page.
+    elseif b.t == "Table" and count_table_rows(b) > 24 then
+      reserve_before_heading(i, 3, 0.72)
+    end
+  end
+
+  local out = {}
+  for i, b in ipairs(blocks) do
+    if needs_reserve[i] then
+      table.insert(out, pandoc.RawBlock("latex",
+        string.format("\\needspace{%.2f\\textheight}", needs_reserve[i])))
+    end
+    table.insert(out, b)
+  end
+  doc.blocks = out
+  return doc
+end

@@ -2,7 +2,6 @@
 
 This chapter covers smart pin modes for measuring signal periods and calculating frequency. Two approaches are available: measuring over a fixed number of periods, or measuring over a fixed time window. Used together, these modes enable precise frequency and duty cycle determination.
 
----
 
 ## 15.1 Measurement Philosophy
 
@@ -18,12 +17,12 @@ This chapter covers smart pin modes for measuring signal periods and calculating
 The silicon documentation states: "At least two of these measurements must be made concurrently to get useful results."
 
 For frequency calculation:
-```
+```formula
 frequency = periods / time
 ```
 
 For duty cycle calculation:
-```
+```formula
 duty_cycle = high_time / total_time
 ```
 
@@ -42,7 +41,6 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 
 **Note:** B-input can be set to the same pin as A-input for single-pin cycle measurement using ``.
 
----
 
 ## 15.2 Period-Based Modes (Measure X Periods)
 
@@ -51,12 +49,14 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 **Purpose:** Measure total time for X complete signal periods.
 
 **Operation:**
+
 1. Configure X register with number of periods to measure
 2. Smart pin counts clock cycles from first trigger to completion of X periods
 3. IN flag raised when measurement complete
 4. RDPIN returns total clock cycles
 
 **Registers:**
+
 | Register | Function |
 |----------|----------|
 | X | Number of periods to measure |
@@ -70,7 +70,7 @@ PINSTART(pin, P_PERIODS_TICKS, 100, %00)
 ```
 
 **Period Calculation:**
-```
+```formula
 period_clocks = RDPIN(pin)                    ' Total for X periods
 single_period = period_clocks / X             ' Average period
 frequency = sysclk / single_period            ' In Hz
@@ -81,12 +81,14 @@ frequency = sysclk / single_period            ' In Hz
 **Purpose:** Measure total high-state time across X periods.
 
 **Operation:**
+
 1. Configure X register with number of periods to measure
 2. Smart pin accumulates clock cycles when A-input is HIGH
 3. IN flag raised when X periods complete
 4. RDPIN returns total high-time clock cycles
 
 **Registers:**
+
 | Register | Function |
 |----------|----------|
 | X | Number of periods to measure |
@@ -121,7 +123,6 @@ PUB measure_duty() | total_time, high_time, duty_percent
   DEBUG("Duty cycle: ", UDEC(duty_percent), "%")
 ```
 
----
 
 ## 15.3 Time-Based Modes (Measure in X Clocks)
 
@@ -130,12 +131,14 @@ PUB measure_duty() | total_time, high_time, duty_percent
 **Purpose:** Measure total period time within a minimum X-clock window.
 
 **Operation:**
+
 1. Configure X register with minimum measurement window (clock cycles)
 2. Smart pin measures until X clocks elapse AND current period completes
 3. Accumulates total period time (clock cycles)
 4. IN flag raised when measurement complete
 
 **Registers:**
+
 | Register | Function |
 |----------|----------|
 | X | Minimum measurement window (clock cycles) |
@@ -143,6 +146,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
 | Z | Total clock cycles for all periods within window |
 
 **Key Difference from %10011:**
+
 - %10011: "Measure time for exactly X periods"
 - %10101: "Measure time for all periods within X clocks"
 
@@ -158,12 +162,14 @@ PINSTART(pin, P_COUNTER_TICKS, window_clocks, %00)
 **Purpose:** Measure total high-state time within a minimum X-clock window.
 
 **Operation:**
+
 1. Configure X register with minimum measurement window
 2. Smart pin accumulates clock cycles when A-input is HIGH
 3. Measurement continues until X clocks AND period completion
 4. IN flag raised, RDPIN returns accumulated high time
 
 **Registers:**
+
 | Register | Function |
 |----------|----------|
 | X | Minimum measurement window (clock cycles) |
@@ -181,12 +187,14 @@ PINSTART(pin, P_COUNTER_HIGHS, _clkfreq, %00)
 **Purpose:** Count complete periods within a minimum X-clock window.
 
 **Operation:**
+
 1. Configure X register with minimum measurement window
 2. Smart pin counts complete periods
 3. Measurement continues until X clocks AND period completion
 4. IN flag raised, RDPIN returns period count
 
 **Registers:**
+
 | Register | Function |
 |----------|----------|
 | X | Minimum measurement window (clock cycles) |
@@ -207,7 +215,6 @@ period_count := RDPIN(pin)
 frequency := period_count
 ```
 
----
 
 ## 15.4 Combined Measurements
 
@@ -233,7 +240,8 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
 
   REPEAT
     ' Wait for all measurements to complete
-    REPEAT UNTIL PINREAD(PIN_TIME) AND PINREAD(PIN_HIGH) AND PINREAD(PIN_PERIODS)
+    REPEAT UNTIL PINREAD(PIN_TIME) AND PINREAD(PIN_HIGH) ...
+                 AND PINREAD(PIN_PERIODS)
 
     time_clks := RDPIN(PIN_TIME)              ' Actual measurement time
     high_clks := RDPIN(PIN_HIGH)              ' Total high time
@@ -255,14 +263,13 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
 
 The actual measurement time extends beyond X clocks to complete the final period. Using P_COUNTER_TICKS provides the **actual** measurement duration, enabling precise calculations:
 
-```
+```formula
 actual_frequency = periods / (time_clks / sysclk)
 actual_duty = high_clks / time_clks
 ```
 
 Without knowing the actual elapsed time, calculations would have error due to the period completion extension.
 
----
 
 ## 15.5 PASM2 Implementation
 
@@ -292,7 +299,7 @@ DAT           org
               ' Calculate single period time
               mov       period_time, total_time
               qdiv      period_time, ##PERIODS_TO_MEASURE
-              getqx     period_time             ' Average period in clocks
+              getqx     period_time            ' Average period in clocks
 
               ' Calculate frequency: sysclk / period
               mov       freq, ##_clkfreq
@@ -336,7 +343,6 @@ DAT           org
 frequency     res       1
 ```
 
----
 
 ## 15.6 Application Examples
 
@@ -413,7 +419,8 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
     duty := (high_time * 1000) / total_time   ' 0.1% resolution
 
     ' Calculate period in nanoseconds
-    period_ns := (total_time * 1000) / (NUM_PERIODS * (_clkfreq / 1_000_000))
+    period_ns := (total_time * 1000) / ...
+                 (NUM_PERIODS * (_clkfreq / 1_000_000))
 
     DEBUG("Frequency: ", UDEC(freq), " Hz")
     DEBUG("Duty cycle: ", UDEC(duty/10), ".", UDEC(duty//10), "%")
@@ -452,13 +459,14 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
       error_ppm := ((measured - TARGET_FREQ) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), " Hz (+", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC(measured), ...
+            " Hz (+", UDEC(error_ppm), " ppm)")
     else
       error_ppm := ((TARGET_FREQ - measured) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), " Hz (-", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC(measured), ...
+            " Hz (-", UDEC(error_ppm), " ppm)")
 ```
 
----
 
 ## 15.7 Precision Considerations
 
@@ -470,6 +478,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 | P_COUNTER_PERIODS | 1 period | ±1 period per window |
 
 **Improving Precision:**
+
 - Increase measurement periods (X) for period-based modes
 - Increase time window for time-based modes
 - Use higher sysclk frequency
@@ -491,38 +500,41 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 | 100 ms | 1 Hz (0.1%) | 1 kHz (0.1%) |
 | 1 second | 0.1 Hz (0.01%) | 100 Hz (0.01%) |
 
----
 
 ## 15.8 Mode Selection Guide
 
 ### Choose P_PERIODS_TICKS (%10011) When:
+
 - Signal frequency is approximately known
 - Precise period measurement needed
 - Consistent number of samples required
 - Measuring periodic signals (clocks, PWM)
 
 ### Choose P_PERIODS_HIGHS (%10100) When:
+
 - Duty cycle measurement needed
 - Averaging duty over multiple periods
 - Signal quality analysis required
 
 ### Choose P_COUNTER_PERIODS (%10111) When:
+
 - Frequency is unknown or variable
 - Need consistent update rate
 - Simple frequency counting application
 - RPM or event rate measurement
 
 ### Choose P_COUNTER_TICKS (%10101) When:
+
 - Need actual measurement duration
 - Combining with P_COUNTER_PERIODS for precision
 - Time-windowed period analysis
 
 ### Choose P_COUNTER_HIGHS (%10110) When:
+
 - Duty cycle in time window needed
 - Combining with other time-window modes
 - Variable frequency duty analysis
 
----
 
 ## 15.9 Quick Reference
 
@@ -548,7 +560,8 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 ### Common Modifiers
 
 | Modifier | Function |
-|----------|----------| | Use A-input for both A and B (single pin) |
+|----------|----------|
+|  | Use A-input for both A and B (single pin) |
 | P_PLUS1_B | Use next pin as B-input |
 | P_MINUS1_B | Use previous pin as B-input |
 | P_FILT1_AB | Add input filtering |
@@ -556,12 +569,12 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 ### Frequency Formulas
 
 **From period measurement (P_PERIODS_TICKS):**
-```
+```formula
 frequency = (num_periods × sysclk) / rdpin_value
 ```
 
 **From period count (P_COUNTER_PERIODS):**
-```
+```formula
 frequency = (rdpin_value × sysclk) / window_clocks
 ' Or for 1-second window:
 frequency = rdpin_value  ' Direct Hz reading
@@ -570,13 +583,13 @@ frequency = rdpin_value  ' Direct Hz reading
 ### Duty Cycle Formulas
 
 **From period-based modes:**
-```
+```formula
 duty_percent = (high_time × 100) / total_time
 ```
 Where:
+
 - high_time = RDPIN from P_PERIODS_HIGHS
 - total_time = RDPIN from P_PERIODS_TICKS
 
----
 
 *This chapter covered period and frequency measurement modes. For ADC input, see Chapter 16. For serial reception, see Chapter 17.*

@@ -2,7 +2,6 @@
 
 This appendix provides a complete reference for all P_ constants used in Smart Pin configuration.
 
----
 
 ## How to Use P_ Constants
 
@@ -14,18 +13,11 @@ WRPIN(pin, mode)
 ```
 
 **Structure of a P_ constant value:**
-```
-%AAAA_BBBB_CCC_DDDDDDDDDDDDD_EE_FFFFF_0
-  │     │    │       │        │    │
-  │     │    │       │        │    └── Smart pin mode (5 bits)
-  │     │    │       │        └─────── TT bits (DIR/OUT control)
-  │     │    │       └───────────────── Low-level pin config
-  │     │    └────────────────────────── A/B logic
-  │     └──────────────────────────────── B input selection
-  └─────────────────────────────────────── A input selection/polarity
+
+```{=latex}
+\DiagPConstFields
 ```
 
----
 
 ## Smart Pin Modes (pick one)
 
@@ -65,7 +57,6 @@ WRPIN(pin, mode)
 | P_ASYNC_TX | %11110 | - | Asynchronous serial TX | 11 |
 | P_ASYNC_RX | %11111 | - | Asynchronous serial RX | 17 |
 
----
 
 ## A Input Selection (pick one)
 
@@ -82,7 +73,6 @@ WRPIN(pin, mode)
 | P_MINUS2_A | %0110 | Select pin-2 for A |
 | P_MINUS1_A | %0111 | Select pin-1 for A |
 
----
 
 ## B Input Selection (pick one)
 
@@ -99,7 +89,6 @@ WRPIN(pin, mode)
 | P_MINUS2_B | %0110 | Select pin-2 for B |
 | P_MINUS1_B | %0111 | Select pin-1 for B |
 
----
 
 ## A/B Input Logic (pick one)
 
@@ -114,7 +103,6 @@ WRPIN(pin, mode)
 | P_FILT2_AB | %110 | FILT2 settings for A, B |
 | P_FILT3_AB | %111 | FILT3 settings for A, B |
 
----
 
 ## Input Conditioning Modes (pick one)
 
@@ -140,7 +128,6 @@ WRPIN(pin, mode)
 | P_LEVEL_B_FBP | B > Level to IN, positive feedback | 12 |
 | P_LEVEL_B_FBN | B > Level to IN, negative feedback | 12 |
 
----
 
 ## ADC Input Modes (pick one)
 
@@ -155,7 +142,6 @@ WRPIN(pin, mode)
 | P_ADC_30X | 31.6x | 0-104mV | 31.6x gain |
 | P_ADC_100X | 100x | 0-33mV | 100x gain |
 
----
 
 ## DAC Output Modes (pick one)
 
@@ -166,7 +152,6 @@ WRPIN(pin, mode)
 | P_DAC_124R_3V | 124 ohm | 3.3V peak | Low impedance |
 | P_DAC_75R_2V | 75 ohm | 2.0V peak | Lowest impedance |
 
----
 
 ## Sync/Async I/O (pick one)
 
@@ -175,7 +160,6 @@ WRPIN(pin, mode)
 | P_ASYNC_IO | Asynchronous I/O (default) |
 | P_SYNC_IO | Synchronous I/O |
 
----
 
 ## IN/OUT Polarity (pick one each)
 
@@ -195,7 +179,6 @@ WRPIN(pin, mode)
 | P_INVERT_OUTPUT | Inverted output |
 | P_INVERT_OUT | Alias for P_INVERT_OUTPUT |
 
----
 
 ## Drive Strength - High (pick one)
 
@@ -210,7 +193,6 @@ WRPIN(pin, mode)
 | P_HIGH_10UA | 10uA | Very weak current source |
 | P_HIGH_FLOAT | - | Float high (tri-state) |
 
----
 
 ## Drive Strength - Low (pick one)
 
@@ -225,7 +207,6 @@ WRPIN(pin, mode)
 | P_LOW_10UA | 10uA | Very weak current sink |
 | P_LOW_FLOAT | - | Float low (tri-state) |
 
----
 
 ## TT Bits / DIR-OUT Control (pick one)
 
@@ -239,7 +220,6 @@ WRPIN(pin, mode)
 | P_CHANNEL | %01 | Enable DAC channel (non-smart pin) |
 | P_BITDAC | %10 | Enable BITDAC (non-smart pin) |
 
----
 
 ## Common Combinations
 
@@ -262,7 +242,7 @@ P_SYNC_TX | P_OE                               ' SPI data out
 
 ### SPI Slave RX
 ```spin2
-P_SYNC_RX | P_PLUS1_B                          ' SPI data in, clock from next pin
+P_SYNC_RX | P_PLUS1_B                  ' SPI data in, clock from next pin
 ```
 
 ### PWM Output
@@ -285,14 +265,13 @@ P_ADC_10X | P_ADC                              ' 10x gain ADC
 
 ### Button Input with Pull-up
 ```spin2
-P_SCHMITT_A | P_HIGH_15K                       ' Schmitt trigger + 15k pull-up
+P_SCHMITT_A | P_HIGH_15K                  ' Schmitt trigger + 15k pull-up
 ```
 
 ### Open-Drain Output
 ```spin2
-P_HIGH_FLOAT | P_LOW_FAST                      ' Open-drain (for I2C, etc.)
+P_HIGH_FLOAT | P_LOW_FAST                    ' Open-drain (for I2C, etc.)
 ```
 
----
 
 *For mode-specific usage, see the relevant chapter. For task-based lookup, see Appendix A.*

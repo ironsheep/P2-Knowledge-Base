@@ -2,7 +2,6 @@
 
 Smart Pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a Smart Pin operates independently of the COG—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming COG cycles. This chapter establishes the mental model for understanding all Smart Pin modes documented in Parts II through IV.
 
----
 
 ## 3.1 The Autonomous Operation Concept
 
@@ -36,7 +35,6 @@ Each Smart Pin operates as an independent state machine. The COG's role is:
 
 Between these interactions, the Smart Pin runs autonomously.
 
----
 
 ## 3.2 The Three-Register Model
 
@@ -79,7 +77,6 @@ Z is read via **RDPIN** or **RQPIN**. Software cannot write Z directly—it is m
 
 When a Smart Pin is reset (DIR transitions from 1 to 0), the registers are initialized according to the mode. Specific initialization behavior is documented in each mode's chapter.
 
----
 
 ## 3.3 The IN Bit - Event Signaling
 
@@ -88,9 +85,11 @@ When a Smart Pin is reset (DIR transitions from 1 to 0), the registers are initi
 Each Smart Pin has an **IN bit** that signals events to COGs. This is the same IN bit readable via TESTP/TESTPN, but its meaning changes when a Smart Pin mode is active.
 
 In P_NORMAL mode (no Smart Pin):
+
 - IN reflects the physical pin state
 
 In Smart Pin modes:
+
 - IN signals mode-specific events (data ready, measurement complete, overflow, etc.)
 
 ### When IN is Raised
@@ -110,6 +109,7 @@ Each mode defines when it raises IN:
 When a COG interacts with a Smart Pin, the IN bit is **acknowledged** (lowered). This prepares the Smart Pin to signal the next event.
 
 **Instructions that acknowledge:**
+
 - WRPIN - Configure (also acknowledges)
 - WXPIN - Write X (also acknowledges)
 - WYPIN - Write Y (also acknowledges)
@@ -117,6 +117,7 @@ When a COG interacts with a Smart Pin, the IN bit is **acknowledged** (lowered).
 - AKPIN - Acknowledge without reading
 
 **Instructions that do NOT acknowledge:**
+
 - RQPIN - Read Z quietly (no acknowledge)
 
 ### Polling and the 2-Clock Delay
@@ -134,31 +135,19 @@ This timing matters in tight polling loops.
 
 The **RQPIN** (read quiet) instruction reads the Z register without acknowledging. This allows multiple COGs to read the same Smart Pin's result without interfering with each other. Only one COG should acknowledge; others can use RQPIN to observe.
 
----
 
 ## 3.4 The Smart Pin State Machine
 
 Every Smart Pin follows a consistent state progression:
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│   DISABLED ──────► CONFIGURED ──────► ENABLED ──────► RUNNING   │
-│   (DIR=0)           (WRPIN,           (DIR=1)         (autonomous│
-│                      WXPIN,                            operation)│
-│                      WYPIN)                                      │
-│                                                                  │
-│        ▲                                         │               │
-│        │                                         ▼               │
-│        └──────────────────────── RESET ◄─────────┘               │
-│                                (DIR: 1→0)                        │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+```{=latex}
+\DiagPinStates
 ```
 
 ### State 1: Disabled (DIR=0)
 
 When DIR=0, the Smart Pin is held in reset:
+
 - The Smart Pin state machine is stopped
 - IN is forced low
 - Registers are initialized to mode-specific values
@@ -169,6 +158,7 @@ When DIR=0, the Smart Pin is held in reset:
 ### State 2: Configured
 
 Configuration consists of up to three instructions:
+
 1. **WRPIN** - Sets the mode and low-level pin configuration
 2. **WXPIN** - Sets X register parameters
 3. **WYPIN** - Sets Y register parameters (if mode uses Y)
@@ -178,11 +168,13 @@ Not all modes require all three. Some modes only need WRPIN; others need WRPIN +
 ### State 3: Enabled (DIR=1)
 
 When DIR transitions from 0 to 1:
+
 - The Smart Pin begins autonomous operation
 - The state machine starts running
 - Mode-specific behavior commences
 
 The direction can be set via:
+
 - DIRH - Set direction high (output mode)
 - DRVH/DRVL - Set direction high with specific output state
 - Note: For Smart Pins with P_OE set, output is enabled regardless of DIR
@@ -190,12 +182,14 @@ The direction can be set via:
 ### State 4: Running
 
 The Smart Pin operates autonomously:
+
 - Generates outputs according to mode
 - Measures inputs according to mode
 - Updates Z register with results
 - Raises IN when events occur
 
 COG interaction during running:
+
 - Read results via RDPIN/RQPIN
 - Update parameters via WXPIN/WYPIN
 - Monitor events via TESTP
@@ -203,15 +197,16 @@ COG interaction during running:
 ### Reset
 
 To reset a Smart Pin without reconfiguring:
+
 1. Clear DIR (DIRL or FLTL)
 2. Set DIR (DIRH or DRVH/DRVL)
 
 This restarts the Smart Pin with current configuration. No need to repeat WRPIN/WXPIN/WYPIN.
 
 To completely disable and return to normal mode:
+
 - Execute WRPIN with value 0 (or use PINCLEAR in Spin2)
 
----
 
 ## 3.5 Mode Bits and the 32 Modes
 
@@ -249,7 +244,6 @@ Measure signals on the pin—timing, counting, frequency, analog levels.
 **Special Modes (Chapters 18-19):**
 Inter-COG data sharing (Repository) and USB.
 
----
 
 ## 3.6 The Layered Configuration Model
 
@@ -262,6 +256,7 @@ Selects which of the 32 modes is active. Each mode defines fundamental behavior 
 ### Layer 2: Low-Level Pin Configuration (bits [20:8])
 
 Controls the analog characteristics of the pin:
+
 - Input mode (logic, Schmitt, comparator, ADC)
 - Drive strength (resistive or current source options)
 - DAC configuration (when applicable)
@@ -271,6 +266,7 @@ These are the same settings documented in Chapter 2 (Enhanced Direct I/O).
 ### Layer 3: Input Routing (bits [31:24])
 
 Selects input sources:
+
 - A input source: local pin, adjacent pins (-3 to +3), or OUT bit
 - B input source: local pin, adjacent pins (-3 to +3), or OUT bit
 - Input polarity: true or inverted
@@ -279,6 +275,7 @@ Selects input sources:
 ### Layer 4: DIR/OUT Control (bits [11:10])
 
 The TT bits control output behavior:
+
 - P_OE (%01): Output enabled regardless of DIR
 - Without P_OE: DIR controls output enable
 
@@ -288,71 +285,80 @@ For Smart Pin output modes, P_OE is required.
 
 Configuration constants from different layers are combined with OR:
 
-```
+```spin2
 mode := P_NCO_FREQ | P_OE | P_HIGH_FAST | P_LOW_FAST
 ```
 
 This combines:
+
 - Smart Pin mode (P_NCO_FREQ)
 - Output enable (P_OE)
 - Drive strength (P_HIGH_FAST, P_LOW_FAST)
 
----
 
 ## 3.7 When to Use Smart Pins
 
 ### Smart Pins Excel At
 
 **Precise timing requirements:**
+
 - Clock generation with exact frequencies
 - PWM with consistent timing unaffected by software
 - Pulse measurement with clock-cycle accuracy
 
 **Continuous autonomous operation:**
+
 - Free-running oscillators
 - Ongoing signal measurement
 - Serial communication without polling
 
 **High-frequency signals:**
+
 - MHz-range waveforms (limited only by sysclk)
 - High baud-rate serial
 - Fast ADC sampling
 
 **Multi-channel parallel operation:**
+
 - Every pin can run independently
 - 64 simultaneous Smart Pin operations possible
 
 ### Direct I/O May Be Better For
 
 **Simple on/off control:**
+
 - LEDs, relays, simple outputs
 - Occasional pin reads
 
 **One-time or irregular operations:**
+
 - Configuration signals
 - Status reads
 
 **Complex conditional logic:**
+
 - Where software decision-making determines output
 - Irregular patterns that don't fit Smart Pin modes
 
 **Low pin count applications:**
+
 - When COG cycles are abundant
 - When flexibility outweighs hardware efficiency
 
 ### Hybrid Approaches
 
 Many applications combine Smart Pins with Direct I/O:
+
 - Smart Pin for timing-critical signals (PWM, serial)
 - Direct I/O for control signals (enable, reset, status)
 
----
 
 ## 3.8 Architectural Constraints
 
 ### One Mode Per Pin
 
 Each pin can run exactly one Smart Pin mode at a time. To change modes:
+
 1. Disable the Smart Pin (DIR=0)
 2. Reconfigure with WRPIN
 3. Re-enable (DIR=1)
@@ -368,6 +374,7 @@ The 2-clock delay after acknowledge means polling loops must account for this la
 ### Mode-Specific Behaviors
 
 Each mode has unique characteristics:
+
 - Which registers are used
 - When IN is raised
 - What Z contains
@@ -375,7 +382,6 @@ Each mode has unique characteristics:
 
 These details are documented in each mode's chapter.
 
----
 
 ## 3.9 Chapter Summary
 
@@ -389,6 +395,5 @@ Smart Pins provide autonomous I/O operations through:
 
 The key insight: once configured and enabled, Smart Pins operate independently. The COG is free to perform other work, interacting with the Smart Pin only to read results or update parameters.
 
----
 
 *This conceptual foundation applies to all Smart Pin modes. Proceed to Chapter 4 for the practical configuration process, or to Part II (Chapters 6-11) for specific output modes.*

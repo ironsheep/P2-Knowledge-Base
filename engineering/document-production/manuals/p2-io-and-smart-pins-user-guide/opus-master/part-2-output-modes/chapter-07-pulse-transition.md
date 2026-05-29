@@ -2,19 +2,20 @@
 
 This chapter covers hardware-generated pulses and transitions using two Smart Pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
 
----
 
 ## 7.1 Overview
 
 ### Pulse vs Transition
 
 **P_PULSE (Pulse/Cycle Output):**
+
 - Generates a programmable number of pulse cycles
 - Each cycle has configurable high-time and low-time
 - Output returns to low when complete
 - Y register controls the number of cycles
 
 **P_TRANSITION (Transition Output):**
+
 - Generates a programmable number of signal transitions (edges)
 - Each transition occurs at a fixed base period
 - Output remains at final state when complete
@@ -23,18 +24,19 @@ This chapter covers hardware-generated pulses and transitions using two Smart Pi
 ### When to Use These Modes
 
 **Use P_PULSE for:**
+
 - Stepper motor step pulses
 - Trigger pulses with specific counts
 - Timed burst generation
 - PWM with controlled duration
 
 **Use P_TRANSITION for:**
+
 - Precise edge generation
 - RS-485 direction control timing
 - Delayed signal assertion
 - Clock bursts with known edge count
 
----
 
 ## 7.2 P_PULSE Mode (%00100)
 
@@ -53,6 +55,7 @@ P_PULSE generates a specified number of pulse cycles. Each cycle consists of a p
 ### Output Behavior
 
 On each clock, the base period counter counts from X[15:0] down to 1, then restarts. The output is:
+
 - **HIGH** when counter > X[31:16] AND Y > 0
 - **LOW** otherwise
 
@@ -62,23 +65,22 @@ After each complete base period (counter reaches 1), Y is decremented. When Y re
 
 For X[15:0] = 4, X[31:16] = 2, Y = 3:
 
-```
-Counter:  4  3  2  1 | 4  3  2  1 | 4  3  2  1 | (Y=0)
-Output:   L  L  H  H | L  L  H  H | L  L  H  H | L
-          ╰──cycle 1──╯ ╰──cycle 2──╯ ╰──cycle 3──╯ IN raised
+```{=latex}
+\DiagPulseOutput
 ```
 
 ### Duty Cycle Calculation
 
 The duty cycle is determined by the compare value relative to the base period:
 
-```
+```formula
 High time = X[31:16] clocks
 Low time  = X[15:0] - X[31:16] clocks
 Duty cycle = X[31:16] / X[15:0]
 ```
 
 **Special cases:**
+
 - X[31:16] = 0: Output stays high for entire period (100% duty)
 - X[31:16] = X[15:0]: Output stays low (0% duty)
 
@@ -102,7 +104,7 @@ PUB generate_pulses() | ack
   
   ' Wait for completion
   repeat until PINREAD(PULSE_PIN) == 1
-  ack := RDPIN(PULSE_PIN)                 ' Acknowledge completion (discard value)
+  ack := RDPIN(PULSE_PIN)        ' Acknowledge completion (discard value)
 ```
 
 **PASM2:**
@@ -122,12 +124,12 @@ PUB generate_pulses() | ack
 ### Retriggering
 
 Writing a new Y value while pulses are in progress:
+
 - If Y > 0: New value is loaded at next base period boundary
 - If Y = 0: New value triggers a new pulse sequence immediately
 
 This allows continuous pulse generation or mid-stream adjustment.
 
----
 
 ## 7.3 P_TRANSITION Mode (%00101)
 
@@ -145,6 +147,7 @@ P_TRANSITION generates a specified number of signal transitions (edges). Each tr
 ### Output Behavior
 
 When Y is written with a non-zero value:
+
 1. At each base period, the output toggles
 2. Y is decremented after each toggle
 3. When Y reaches 0, toggling stops
@@ -155,11 +158,8 @@ When Y is written with a non-zero value:
 
 For X[15:0] = 100, Y = 4, starting from low:
 
-```
-Time:   0     100    200    300    400    500+
-Output: L ────┐     ┌─────┐     ┌─────── (stays high)
-              └─────┘     └─────┘
-             edge1 edge2 edge3 edge4   IN raised
+```{=latex}
+\DiagTransitionOutput
 ```
 
 ### Configuration Sequence
@@ -200,6 +200,7 @@ PUB generate_transitions() | ack
 ### Transition Count and Final State
 
 The final output state depends on:
+
 - Initial state (low after reset)
 - Number of transitions (odd = opposite state, even = same state)
 
@@ -210,7 +211,6 @@ The final output state depends on:
 | Low | 3 | High |
 | Low | 4 | Low |
 
----
 
 ## 7.4 Applicable P_ Constants
 
@@ -229,20 +229,19 @@ Both modes support these configuration options:
 WRPIN(pin, P_PULSE | P_OE | P_INVERT_OUT)
 ```
 
----
 
 ## 7.5 Timing Calculations
 
 ### Pulse Width Calculation
 
 For P_PULSE:
-```
+```formula
 Pulse period = X[15:0] × (1 / sysclk)
 High time = X[31:16] × (1 / sysclk)
 ```
 
 **Example at 200 MHz:**
-```
+```formula
 X[15:0] = 2000, X[31:16] = 500
 Period = 2000 / 200MHz = 10 µs
 High time = 500 / 200MHz = 2.5 µs
@@ -252,12 +251,12 @@ Duty cycle = 25%
 ### Transition Period Calculation
 
 For P_TRANSITION:
-```
+```formula
 Time between edges = X[15:0] × (1 / sysclk)
 ```
 
 **Example at 200 MHz:**
-```
+```formula
 X[15:0] = 1000
 Edge period = 1000 / 200MHz = 5 µs
 ```
@@ -266,12 +265,13 @@ Edge period = 1000 / 200MHz = 5 µs
 
 | sysclk | X value for 1 µs | X value for 10 µs |
 |--------|------------------|-------------------|
-| 200 MHz | 200 | 2000 |
-| 180 MHz | 180 | 1800 |
-| 160 MHz | 160 | 1600 |
 | 100 MHz | 100 | 1000 |
+| 180 MHz | 180 | 1800 |
+| 250 MHz | 250 | 2500 |
+| 350 MHz | 350 | 3500 |
 
----
+*P2 is rated to 180 MHz; 250 MHz is a common overclock and 350 MHz is the practical ceiling. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (P2 Datasheet / Silicon Doc v35)*
+
 
 ## 7.6 Comparison: When to Use Each Mode
 
@@ -294,7 +294,6 @@ Edge period = 1000 / 200MHz = 5 µs
 | P_TRANSITION | Edge counting, clock bursts |
 | Software (DRVH/DRVL) | Irregular patterns, conditional logic |
 
----
 
 ## 7.7 Complete Examples
 
@@ -399,7 +398,6 @@ more_steps    long      0
 result        long      0
 ```
 
----
 
 ## 7.8 Quick Reference
 
@@ -421,10 +419,10 @@ result        long      0
 ### Reset State
 
 Both modes when DIR=0:
+
 - IN = low
 - Output = low
 - Y = 0
 
----
 
 *This chapter covered hardware-timed pulse and transition generation. For continuous waveform generation, see Chapter 8 (NCO) and Chapter 9 (PWM).*

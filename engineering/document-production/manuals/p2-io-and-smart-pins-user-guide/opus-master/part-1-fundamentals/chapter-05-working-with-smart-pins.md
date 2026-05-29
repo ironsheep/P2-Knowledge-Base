@@ -2,7 +2,6 @@
 
 This chapter covers practical patterns for Smart Pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all Smart Pin modes documented in Parts II through IV.
 
----
 
 ## 5.1 The Read/Acknowledge Cycle
 
@@ -53,7 +52,7 @@ else
 
 To inspect the IN state without affecting it:
 ```spin2
-state := PINREAD(pin)                     ' Just checks, doesn't acknowledge
+state := PINREAD(pin)                  ' Just checks, doesn't acknowledge
 ```
 
 ```pasm2
@@ -77,7 +76,6 @@ After acknowledging, wait 2 clocks before polling IN again:
 
 Processing between reads provides sufficient delay.
 
----
 
 ## 5.2 Continuous vs One-Shot Modes
 
@@ -94,6 +92,7 @@ These modes run indefinitely once enabled, producing periodic output or ongoing 
 | ADC modes | Samples continuously at configured rate |
 
 **Using continuous modes:**
+
 - Configure once
 - Read results as needed (RDPIN/RQPIN)
 - Update parameters anytime (WYPIN for new values)
@@ -110,6 +109,7 @@ These modes repeat automatically but generate periodic events:
 | Serial TX/RX | Operates per data word |
 
 **Using periodic modes:**
+
 - Each period, IN is raised
 - RDPIN retrieves period result and starts next period
 - Missing reads can cause data loss (results overwritten)
@@ -124,6 +124,7 @@ These modes complete a defined action then stop:
 | Transition Output | Outputs Y transitions, then stops |
 
 **Using one-shot modes:**
+
 - Configure and enable
 - Wait for IN (operation complete)
 - Write new Y value to restart
@@ -139,7 +140,6 @@ result := RDPIN(pin)                      ' Acknowledge
 WYPIN(pin, new_count)                     ' New Y value triggers restart
 ```
 
----
 
 ## 5.3 Multi-Pin Patterns
 
@@ -230,7 +230,6 @@ When multiple COGs need the same Smart Pin data:
 
 The owner controls the timing; observers passively read.
 
----
 
 ## 5.4 PINSTART and PINCLEAR
 
@@ -238,7 +237,7 @@ The owner controls the timing; observers passively read.
 
 PINSTART combines WRPIN, WXPIN, WYPIN, and enable into one call:
 
-```spin2
+```spin-syntax
 PINSTART(Pin, Mode, Xval, Yval)
 ```
 
@@ -282,7 +281,6 @@ PINFLOAT(pin)
 WRPIN(pin, 0)
 ```
 
----
 
 ## 5.5 Debugging Smart Pins
 
@@ -308,21 +306,25 @@ DEBUG("Z register: ", HEX(value))
 ### Common Configuration Errors
 
 **No output (output modes):**
+
 - Missing P_OE in WRPIN
 - DIR still low (not enabled)
 - WRPIN value has wrong mode bits
 
 **No events (IN never goes high):**
+
 - Mode not enabled (DIR=0)
 - X register has invalid period (0 when period required)
 - Mode waiting for input that isn't present
 
 **Wrong timing:**
+
 - X register calculation error
 - Using wrong clock frequency assumption
 - Frame period vs base period confusion
 
 **Erratic behavior:**
+
 - Configured while DIR=1 (should configure while DIR=0)
 - Multiple COGs acknowledging same pin
 - X or Y values out of valid range
@@ -339,12 +341,12 @@ DEBUG("Z register: ", HEX(value))
 ### Using Scope/Logic Analyzer
 
 For timing issues:
+
 1. Capture the pin output
 2. Verify frequency/period matches expectations
 3. Check for glitches during configuration
 4. Verify phase relationships in multi-pin setups
 
----
 
 ## 5.6 Performance Considerations
 
@@ -362,6 +364,7 @@ For timing issues:
 Full configuration (DIRL + WRPIN + WXPIN + WYPIN + DRVL) = 10 cycles.
 
 For frequently-reconfigured modes, consider:
+
 - Just updating Y (WYPIN) when only output value changes
 - Using reset (DIRL + DRVL = 4 cycles) instead of full reconfig
 
@@ -370,6 +373,7 @@ For frequently-reconfigured modes, consider:
 RDPIN every event: 2 cycles + polling overhead.
 
 For high-frequency events:
+
 - Use larger measurement windows (X register)
 - Read less frequently
 - Some events are lost when results are overwritten before they are read
@@ -386,7 +390,6 @@ For high-frequency events:
 - Occasional configuration changes
 - Asynchronous operation (Smart Pin runs independently)
 
----
 
 ## 5.7 Troubleshooting Quick Reference
 
@@ -451,7 +454,6 @@ For high-frequency events:
 | Y exhausted | Pulse/Transition modes count down Y |
 | Buffer overflow | Reading too slowly loses data |
 
----
 
 ## 5.8 Best Practices Summary
 
@@ -483,6 +485,5 @@ For high-frequency events:
 3. Use RQPIN to inspect without disturbing
 4. Verify calculations independently
 
----
 
 *This chapter completes Part I: Fundamentals. For specific Smart Pin mode documentation, proceed to Part II (Output Modes), Part III (Input Modes), or Part IV (Special Modes).*

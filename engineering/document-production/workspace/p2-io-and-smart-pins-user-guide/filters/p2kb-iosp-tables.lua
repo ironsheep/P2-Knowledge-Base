@@ -504,22 +504,75 @@ local function handle_auto_shrink_table(el)
     end
   end
 
-  -- Build tabularray LaTeX WITHOUT width=\linewidth (auto-shrink)
+  -- Estimate content width (in characters) per column to decide wrap vs shrink.
+  -- Wide tables would overflow the right margin with plain "l" columns, so they
+  -- switch to width=\linewidth with proportional wrapping X columns + smaller font.
+  local maxlen = {}
+  for i = 1, num_cols do maxlen[i] = 1 end
+  local function measure(cells)
+    if not cells then return end
+    for i, cell in ipairs(cells) do
+      if i <= num_cols then
+        local n = #pandoc.utils.stringify(cell.contents)
+        if n > maxlen[i] then maxlen[i] = n end
+      end
+    end
+  end
+  if el.head and el.head.rows then
+    for _, r in ipairs(el.head.rows) do measure(r.cells) end
+  end
+  for _, body in ipairs(el.bodies) do
+    if body.body then for _, r in ipairs(body.body) do measure(r.cells) end end
+  end
+  local total = 0
+  for i = 1, num_cols do total = total + maxlen[i] end
+  -- ~72 chars fits a line at \small; 4+ column tables crowd sooner
+  local wide = (total > 72) or (num_cols >= 4 and total > 52)
+
+  -- Tall narrow tables (e.g. the 34-row instruction quick-reference, Table 1.10)
+  -- render as a single non-breaking tblr. At default size they overrun the page
+  -- bottom and orphan the following legend. Compress row spacing + font so the
+  -- whole table (and its legend paragraph) fits on one page.
+  local tall = count_data_rows(el) > 24
+
   local latex = {}
   table.insert(latex, "\\begin{tblr}{")
-  -- No width specification - table shrinks to content
-  table.insert(latex, "  rowsep=3pt,")
-  table.insert(latex, "  colsep=6pt,")
-
-  -- All columns use auto-width left-aligned
-  local colspec_parts = {}
-  for i = 1, num_cols do
-    table.insert(colspec_parts, "l")
+  if wide then
+    -- Constrain to text width and wrap; columns share width in proportion to content
+    table.insert(latex, "  width=\\linewidth,")
+    table.insert(latex, "  rowsep=2pt,")
+    table.insert(latex, "  colsep=5pt,")
+    local colspec_parts = {}
+    for i = 1, num_cols do
+      table.insert(colspec_parts, "X[" .. maxlen[i] .. ",l]")
+    end
+    table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
+    table.insert(latex, "  cells={font=\\small},")
+    table.insert(latex, "  row{1}={font=\\small\\bfseries},")
+  elseif tall then
+    -- Tall narrow table: compress so all rows + legend fit on one page.
+    -- (Companion fix in p2kb-iosp-figures.lua reserves vertical space before the
+    -- heading so the whole heading+table+legend unit stays together on one page.)
+    table.insert(latex, "  rowsep=0.5pt,")
+    table.insert(latex, "  colsep=6pt,")
+    local colspec_parts = {}
+    for i = 1, num_cols do
+      table.insert(colspec_parts, "l")
+    end
+    table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
+    table.insert(latex, "  cells={font=\\footnotesize},")
+    table.insert(latex, "  row{1}={font=\\footnotesize\\bfseries},")
+  else
+    -- Narrow table: auto-shrink to content (no width constraint)
+    table.insert(latex, "  rowsep=3pt,")
+    table.insert(latex, "  colsep=6pt,")
+    local colspec_parts = {}
+    for i = 1, num_cols do
+      table.insert(colspec_parts, "l")
+    end
+    table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
+    table.insert(latex, "  row{1}={font=\\bfseries},")
   end
-  table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
-
-  -- Styling: bold header row
-  table.insert(latex, "  row{1}={font=\\bfseries},")
   table.insert(latex, "  hline{1,2}={solid},")
   table.insert(latex, "  hline{Z}={solid},")
   table.insert(latex, "}")

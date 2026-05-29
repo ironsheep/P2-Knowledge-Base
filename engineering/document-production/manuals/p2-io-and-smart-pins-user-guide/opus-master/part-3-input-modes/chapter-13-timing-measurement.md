@@ -2,7 +2,6 @@
 
 This chapter covers Smart Pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
 
----
 
 ## 13.1 Timing Measurement Overview
 
@@ -19,6 +18,7 @@ The P2 Smart Pin timing modes provide hardware-based time measurement with clock
 ### Resolution and Range
 
 At 200 MHz sysclk:
+
 - Resolution: 5 ns (1 clock cycle)
 - Maximum measurement: $80000000 clocks = 10.74 seconds
 - Overflow behavior: Z saturates at $80000000
@@ -31,7 +31,6 @@ At 200 MHz sysclk:
 - Protocol timing verification
 - Timeout/watchdog monitoring
 
----
 
 ## 13.2 P_STATE_TICKS Mode (%10000)
 
@@ -41,15 +40,8 @@ P_STATE_TICKS continuously measures the duration of each logic state (both high 
 
 ### Operation
 
-```
-Input:    ──────┐          ┌───────────────┐      ┌───────
-               │          │               │      │
-               └──────────┘               └──────┘
-
-          ◄────────────────►◄──────────────────────►
-            High: 1500 clks   Low: 3000 clks
-
-          [IN raised, C=1]  [IN raised, C=0]
+```{=latex}
+\DiagPulseWidthMeas
 ```
 
 ### Configuration
@@ -133,7 +125,6 @@ PUB analyze_pwm() : frequency, duty_percent
   duty_percent := (high_time * 100) / (high_time + low_time)
 ```
 
----
 
 ## 13.3 P_HIGH_TICKS Mode (%10001)
 
@@ -143,15 +134,8 @@ P_HIGH_TICKS measures only the duration of high states. On each high-to-low tran
 
 ### Operation
 
-```
-Input:    ──────┐          ┌───────────────┐      ┌───────
-               │          │               │      │
-               └──────────┘               └──────┘
-
-          ◄────────────────►               ◄──────►
-            High: 1500 clks                 High: 800 clks
-
-            [IN raised]                     [IN raised]
+```{=latex}
+\DiagHighTicksMeas
 ```
 
 ### Configuration
@@ -228,13 +212,13 @@ Use P_INVERT_A to measure low periods instead:
 WRPIN(pin, P_HIGH_TICKS | P_INVERT_A)
 ```
 
----
 
 ## 13.4 P_EVENTS_TICKS Mode (%10010)
 
 ### Function
 
 P_EVENTS_TICKS operates in two modes controlled by Y[2]:
+
 - **Event timing (Y[2]=0)**: Measures time for X events to occur
 - **Timeout detection (Y[2]=1)**: Detects when no event occurs within X clocks
 
@@ -307,7 +291,7 @@ PUB comm_watchdog() | timeout_clocks, elapsed
   PINFLOAT(COMM_PIN)
   WRPIN(COMM_PIN, P_EVENTS_TICKS)
   WXPIN(COMM_PIN, timeout_clocks)          ' X = timeout clocks
-  WYPIN(COMM_PIN, %101)                    ' Y[2]=1 (timeout), Y[1:0]=01 (rise)
+  WYPIN(COMM_PIN, %101)              ' Y[2]=1 (timeout), Y[1:0]=01 (rise)
   PINLOW(COMM_PIN)
 
   repeat
@@ -319,7 +303,8 @@ PUB comm_watchdog() | timeout_clocks, elapsed
     WAITMS(10)                             ' Check periodically
 
 PUB handle_timeout()
-  ' Application-specific timeout response — flash an LED, reset peripheral, etc.
+  ' Application-specific timeout response —
+  ' flash an LED, reset peripheral, etc.
 ```
 
 **PASM2:**
@@ -342,11 +327,11 @@ timeout_handler
 ### Continuous vs Retriggering
 
 In timeout mode:
+
 - Event resets timer and Z to 1
 - Timeout raises IN and restarts timer
 - Z always contains clocks since last event
 
----
 
 ## 13.5 Input Signal Routing
 
@@ -381,7 +366,6 @@ WRPIN(pin, P_STATE_TICKS | P_SCHMITT_A)
 WRPIN(pin, P_HIGH_TICKS | P_FILT1_AB)
 ```
 
----
 
 ## 13.6 Accuracy Analysis
 
@@ -389,19 +373,20 @@ WRPIN(pin, P_HIGH_TICKS | P_FILT1_AB)
 
 | sysclk | Resolution | Max Measurable |
 |--------|------------|----------------|
-| 200 MHz | 5 ns | 10.74 s |
-| 180 MHz | 5.56 ns | 11.93 s |
-| 160 MHz | 6.25 ns | 13.42 s |
 | 100 MHz | 10 ns | 21.47 s |
+| 180 MHz | 5.56 ns | 11.93 s |
+| 250 MHz | 4 ns | 8.59 s |
+| 350 MHz | 2.86 ns | 6.14 s |
 
 ### Error Sources
 
 **Quantization error:**
+
 - ±1 clock cycle inherent uncertainty
 - Relative error decreases with longer measurements
 
 **For frequency measurement:**
-```
+```formula
 error = 1 / (events × measured_period)
 
 Example: 100 edges, 10 kHz signal
@@ -423,7 +408,6 @@ PUB measure_frequency_averaged(events, samples) : freq | total, i
   freq := (_clkfreq * events * samples) / total
 ```
 
----
 
 ## 13.7 Complete Examples
 
@@ -569,7 +553,6 @@ PUB comm_monitor() | timeout_clocks
     WAITMS(50)
 ```
 
----
 
 ## 13.8 Quick Reference
 
@@ -594,7 +577,7 @@ PUB comm_monitor() | timeout_clocks
 
 ### Time Calculations
 
-```
+```formula
 frequency = sysclk / period_clocks
 period_us = clocks / (sysclk / 1,000,000)
 period_ms = clocks / (sysclk / 1,000)
@@ -616,6 +599,5 @@ duty_percent = high_clocks * 100 / (high_clocks + low_clocks)
 - At 200 MHz: 10.74 seconds
 - Overflow behavior: Saturates at max value
 
----
 
 *This chapter covered timing measurement modes. For counting modes, see Chapter 14. For period measurement with more options, see Chapter 15.*

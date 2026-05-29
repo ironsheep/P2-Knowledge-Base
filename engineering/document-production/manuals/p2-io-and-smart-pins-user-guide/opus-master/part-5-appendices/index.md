@@ -2,9 +2,8 @@
 
 Alphabetical index of terms, constants, and concepts in this guide.
 
----
 
-## A
+### A
 
 - **A-input** - Smart pin primary input, Ch. 3, 5
 - **A-input routing** - P_PLUS1_A, P_MINUS1_A, etc., Ch. 3, App. B
@@ -20,7 +19,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Asynchronous serial** - UART modes, Ch. 11, 17
 - **Audio** - NCO tones Ch. 8, DAC waveforms Ch. 10, 18
 
-## B
+### B
 
 - **B-input** - Smart pin secondary input, Ch. 3, 5
 - **B-input routing** - P_PLUS1_B, P_MINUS1_B, etc., Ch. 3, App. B
@@ -32,7 +31,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Bitstream** - Raw ADC output (X[5:4]=%11), Ch. 16
 - **Buffer, double** - Serial TX modes, Ch. 11
 
-## C
+### C
 
 - **C flag** - State indicator in timing modes, Ch. 13
 - **Clock generation** - P_TRANSITION, P_NCO_FREQ, Ch. 7, 8
@@ -44,7 +43,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Counting** - Event and period counting, Ch. 14
 - **CPOL/CPHA** - SPI clock polarity/phase, Ch. 11
 
-## D
+### D
 
 - **DAC** - see Digital-to-Analog Conversion
 - **DAC dithering** - 16-bit resolution modes, Ch. 10, 18
@@ -60,14 +59,14 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **DRVL** - Drive pin low (PASM2), Ch. 4, 6
 - **Duty cycle** - PWM ratio, Ch. 9; measurement Ch. 13, 15
 
-## E
+### E
 
 - **Edge counting** - P_COUNT_RISES, P_COUNT_RISES, Ch. 14
 - **Encoder** - see Quadrature encoder
 - **ENOB** - Effective number of bits (ADC), Ch. 16
 - **Event timing** - P_EVENTS_TICKS, Ch. 13
 
-## F
+### F
 
 - **Filtering, input** - P_FILT0_AB through P_FILT3_AB, Ch. 12
 - **Float** - see PINFLOAT
@@ -78,19 +77,19 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Frequency measurement** - Period modes, Ch. 15
 - **Full Speed USB** - 12 Mbps, Ch. 19
 
-## G
+### G
 
 - **Gain, ADC** - P_ADC_1X through P_ADC_100X, Ch. 16
 - **Gate time** - Frequency counter window, Ch. 15
 - **Gated counting** - P_REG_UP, Ch. 14
 
-## H
+### H
 
 - **High-state counting** - P_COUNT_HIGHS, Ch. 14
 - **High-state timing** - P_HIGH_TICKS, Ch. 13
 - **Hub RAM** - vs. Repository, Ch. 18
 
-## I
+### I
 
 - **I2C** - Implementation notes, App. A
 - **IN flag** - Smart pin status, Ch. 3, 4
@@ -100,7 +99,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Inter-COG** - Data sharing via Repository, Ch. 18
 - **Inversion** - P_INVERT_A, P_INVERT_B, P_INVERT_OUTPUT, App. B
 
-## L
+### L
 
 - **Latency** - Pin I/O timing, Ch. 5
 - **LED dimming** - PWM application, Ch. 9
@@ -110,27 +109,27 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Low Speed USB** - 1.5 Mbps, Ch. 19
 - **LSB first** - Serial bit order, Ch. 11, 17
 
-## M
+### M
 
 - **Mode number** - Smart pin mode (%XXXXX), Ch. 3, App. F
 - **Motor control** - PWM application, Ch. 9
 - **MSB first** - Bit reversal for SPI, Ch. 11
 
-## N
+### N
 
 - **NCO** - Numerically Controlled Oscillator, Ch. 8
 - **NCO duty** - P_NCO_DUTY (%00111), Ch. 8
 - **NCO frequency** - P_NCO_FREQ (%00110), Ch. 8
 - **Noise, DAC** - P_DAC_NOISE, Ch. 18
 
-## O
+### O
 
 - **Open-drain** - P_HIGH_FLOAT configuration, Ch. 6
 - **OUT** - Pin output state, Ch. 3, 6
 - **OUTA/OUTB** - Output registers, Ch. 6
 - **Output enable** - P_OE (TT bits), Ch. 3, App. B
 
-## P
+### P
 
 - **P_ADC** - ADC internal clock (%11000), Ch. 16, App. F
 - **P_ADC_100X** - 100x gain ADC, Ch. 16
@@ -224,12 +223,12 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **PWM** - Pulse Width Modulation, Ch. 9
 - **PWM dithering** - Deterministic DAC dither, Ch. 18
 
-## Q
+### Q
 
 - **Quadrature encoder** - P_QUADRATURE (%01011), Ch. 14
 - **Quantization error** - Measurement accuracy, Ch. 13
 
-## R
+### R
 
 - **RDPIN** - Read Z, clear IN (PASM2), Ch. 4
 - **Repository** - P_REPOSITORY (%00001), Ch. 18
@@ -238,7 +237,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **RQPIN** - Read Z, keep IN (PASM2), Ch. 4
 - **RS-232** - Inverted serial, Ch. 11, 17
 
-## S
+### S
 
 - **Sample period** - ADC X register, Ch. 16
 - **Sample rate** - ADC calculation, Ch. 16, App. C
@@ -257,7 +256,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Synchronous serial** - SPI modes, Ch. 11, 17
 - **sysclk** - System clock frequency, Ch. 2
 
-## T
+### T
 
 - **TESTP** - Test IN flag (PASM2), Ch. 4
 - **Three-phase** - NCO phase synchronization, Ch. 8
@@ -268,37 +267,36 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Trigger, hysteretic** - ADC scope, Ch. 16
 - **TT bits** - DIR/OUT control, Ch. 3, App. B
 
-## U
+### U
 
 - **UART** - Async serial, Ch. 11, 17
 - **Up/down counter** - P_REG_UP_DOWN, Ch. 14
 - **USB** - P_USB_PAIR (%11011), Ch. 19
 
-## V
+### V
 
 - **Velocity measurement** - Quadrature periodic mode, Ch. 14
 - **Voltage, DAC** - Output calculation, Ch. 10, App. C
 
-## W
+### W
 
 - **Watchdog** - Timeout detection, Ch. 13
 - **WRPIN** - Write mode (PASM2), Ch. 4
 - **WXPIN** - Write X (PASM2), Ch. 4
 - **WYPIN** - Write Y (PASM2), Ch. 4
 
-## X
+### X
 
 - **X register** - Smart pin configuration, Ch. 3, 4
 
-## Y
+### Y
 
 - **Y register** - Smart pin parameter, Ch. 3, 4
 
-## Z
+### Z
 
 - **Z register** - Smart pin accumulator/result, Ch. 3, 4
 
----
 
 ## Appendix Cross-Reference
 
@@ -311,6 +309,5 @@ Alphabetical index of terms, constants, and concepts in this guide.
 | E | Troubleshooting | Problem/solution guide |
 | F | Mode Reference | Quick reference per mode |
 
----
 
 *Page numbers refer to chapter numbers in this digital document.*

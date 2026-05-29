@@ -1,8 +1,7 @@
 # Chapter 14: Counting Modes
 
-This chapter covers Smart Pin counting modes: **P_COUNT_HIGHS** (%01100) for gated edge counting, **P_COUNT_RISES** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_HIGH_TICKS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
+This chapter covers Smart Pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
----
 
 ## 14.1 Counting Mode Overview
 
@@ -11,14 +10,15 @@ This chapter covers Smart Pin counting modes: **P_COUNT_HIGHS** (%01100) for gat
 | Mode | Constant | Function |
 |------|----------|----------|
 | %01011 | P_QUADRATURE | Quadrature encoder decoding |
-| %01100 | P_COUNT_HIGHS | Count A edges when B high (gated) |
-| %01101 | P_COUNT_RISES | Accumulate A edges, B controls direction |
+| %01100 | P_REG_UP | Count A edges when B high (gated) |
+| %01101 | P_REG_UP_DOWN | Accumulate A edges, B controls direction |
 | %01110 | P_COUNT_RISES | Count edges with optional up/down |
-| %01111 | P_HIGH_TICKS | Count clocks while input high |
+| %01111 | P_COUNT_HIGHS | Count clocks while input high |
 
 ### Common Features
 
 All counting modes share these characteristics:
+
 - 32-bit counter range
 - Continuous or periodic measurement
 - X register controls measurement period
@@ -28,19 +28,20 @@ All counting modes share these characteristics:
 ### Continuous vs Periodic Mode
 
 **Continuous (X=0):**
+
 - Counter runs indefinitely
 - Read current value anytime with RDPIN/RQPIN
 - No IN flag generation
 - Suitable for position tracking
 
 **Periodic (X>0):**
+
 - Counts for X clock cycles
 - Result placed in Z at period end
 - IN flag raised at each period
 - Counter continues with residual value
 - Suitable for rate/velocity measurement
 
----
 
 ## 14.2 P_QUADRATURE Mode (%01011)
 
@@ -50,17 +51,8 @@ P_QUADRATURE decodes standard quadrature encoder signals (A/B phase with 90° of
 
 ### Quadrature Signal Pattern
 
-```
-CW Rotation:
-A: ─────┐     ┌─────┐     ┌─────
-        │     │     │     │
-        └─────┘     └─────┘
-
-B: ───┐     ┌─────┐     ┌─────┐
-      │     │     │     │     │
-      └─────┘     └─────┘     └───
-
-Count:  +1   +1   +1   +1   +1   +1
+```{=latex}
+\DiagQuadrature
 ```
 
 ### Configuration
@@ -78,7 +70,7 @@ Count:  +1   +1   +1   +1   +1   +1
 CON
   _clkfreq = 200_000_000
   ENC_A = 20                               ' Encoder A signal
-  ENC_B = 21                               ' Encoder B signal (must be A+1)
+  ENC_B = 21                             ' Encoder B signal (must be A+1)
 
 PUB encoder_init()
   ' Configure quadrature decoder (uses A and B inputs)
@@ -148,27 +140,17 @@ PUB dual_encoder_init()
   PINLOW(VEL_PIN)
 ```
 
----
 
-## 14.3 P_COUNT_HIGHS Mode (%01100)
+## 14.3 P_REG_UP Mode (%01100)
 
 ### Function
 
-P_COUNT_HIGHS counts positive edges on A-input, but only when B-input is high. This provides gated counting for frequency measurement and event counting with enable control.
+P_REG_UP counts positive edges on A-input, but only when B-input is high. This provides gated counting for frequency measurement and event counting with enable control.
 
 ### Operation
 
-```
-A-input: ──┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌──
-           │ │ │ │ │ │ │ │ │ │ │ │
-           └─┘ └─┘ └─┘ └─┘ └─┘ └─┘
-
-B-input: ─────────┐       ┌─────────
-         (gate)   │       │
-                  └───────┘
-
-Count:     +1 +1  0   0   +1 +1 +1
-                 (gated off)
+```{=latex}
+\DiagGatedCount
 ```
 
 ### Configuration
@@ -193,7 +175,7 @@ PUB frequency_counter() : freq_hz | period_clocks
 
   ' Configure gated counter
   PINFLOAT(SIGNAL_PIN)
-  WRPIN(SIGNAL_PIN, P_COUNT_HIGHS | P_PLUS1_B)
+  WRPIN(SIGNAL_PIN, P_REG_UP | P_PLUS1_B)
   WXPIN(SIGNAL_PIN, period_clocks)
   PINLOW(SIGNAL_PIN)
 
@@ -213,7 +195,7 @@ PUB frequency_counter() : freq_hz | period_clocks
 PUB gated_count_between(enable_pin, signal_pin) : count
   ' Count events while enable_pin is high
   PINFLOAT(signal_pin)
-  WRPIN(signal_pin, P_COUNT_HIGHS | P_PLUS1_B)
+  WRPIN(signal_pin, P_REG_UP | P_PLUS1_B)
   WXPIN(signal_pin, 0)                     ' Continuous
   PINLOW(signal_pin)
 
@@ -224,27 +206,17 @@ PUB gated_count_between(enable_pin, signal_pin) : count
   count := RDPIN(signal_pin)
 ```
 
----
 
-## 14.4 P_COUNT_RISES Mode (%01101)
+## 14.4 P_REG_UP_DOWN Mode (%01101)
 
 ### Function
 
-P_COUNT_RISES accumulates A-input positive edges with direction controlled by B-input. When B is high, edges increment the counter. When B is low, edges decrement the counter.
+P_REG_UP_DOWN accumulates A-input positive edges with direction controlled by B-input. When B is high, edges increment the counter. When B is low, edges decrement the counter.
 
 ### Operation
 
-```
-A-input: ──┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌──
-           │ │ │ │ │ │ │ │ │ │ │ │
-           └─┘ └─┘ └─┘ └─┘ └─┘ └─┘
-
-B-input: ─────────────┐           ┌────
-         (direction)  │           │
-                      └───────────┘
-
-Count:     +1 +1 +1 +1 -1 -1 -1 +1 +1
-           (increment)  (decrement)
+```{=latex}
+\DiagUpDownCount
 ```
 
 ### Configuration
@@ -264,7 +236,7 @@ CON
 
 PUB updown_counter_init()
   PINFLOAT(COUNT_PIN)
-  WRPIN(COUNT_PIN, P_COUNT_RISES | P_PLUS1_B)
+  WRPIN(COUNT_PIN, P_REG_UP_DOWN | P_PLUS1_B)
   WXPIN(COUNT_PIN, 0)                      ' Continuous
   PINLOW(COUNT_PIN)
 
@@ -278,13 +250,13 @@ PUB count_down()
   PINLOW(DIR_PIN)                          ' Next edges decrement
 ```
 
----
 
 ## 14.5 P_COUNT_RISES Mode (%01110)
 
 ### Function
 
 P_COUNT_RISES has two sub-modes controlled by Y[0]:
+
 - Y[0]=0: Count A-input positive edges only
 - Y[0]=1: Increment on A-input edge, decrement on B-input edge
 
@@ -348,13 +320,13 @@ PUB event_rate() : events_per_period | period
   events_per_period := RDPIN(EVENT_PIN)
 ```
 
----
 
-## 14.6 P_HIGH_TICKS Mode (%01111)
+## 14.6 P_COUNT_HIGHS Mode (%01111)
 
 ### Function
 
-P_HIGH_TICKS counts system clock cycles while input is in a particular state. Two sub-modes controlled by Y[0]:
+P_COUNT_HIGHS counts system clock cycles while input is in a particular state. Two sub-modes controlled by Y[0]:
+
 - Y[0]=0: Count clocks while A-input high
 - Y[0]=1: Increment clocks while A high, decrement while B high
 
@@ -370,7 +342,7 @@ PUB measure_duty_cycle() : duty_percent | high_clocks, period_clocks
   period_clocks := (_clkfreq / 1000) * PERIOD_MS
 
   PINFLOAT(PWM_PIN)
-  WRPIN(PWM_PIN, P_HIGH_TICKS)
+  WRPIN(PWM_PIN, P_COUNT_HIGHS)
   WXPIN(PWM_PIN, period_clocks)
   WYPIN(PWM_PIN, 0)                        ' Count A-high clocks
   PINLOW(PWM_PIN)
@@ -395,7 +367,7 @@ PUB differential_high_time() : net_clocks | period
   period := _clkfreq / 10                  ' 100ms
 
   PINFLOAT(SIGNAL_A)
-  WRPIN(SIGNAL_A, P_HIGH_TICKS | P_PLUS1_B)
+  WRPIN(SIGNAL_A, P_COUNT_HIGHS | P_PLUS1_B)
   WXPIN(SIGNAL_A, period)
   WYPIN(SIGNAL_A, 1)                       ' A increments, B decrements
   PINLOW(SIGNAL_A)
@@ -404,7 +376,6 @@ PUB differential_high_time() : net_clocks | period
   net_clocks := RDPIN(SIGNAL_A)            ' Signed difference
 ```
 
----
 
 ## 14.7 Input Signal Routing
 
@@ -434,23 +405,24 @@ WRPIN(pin, P_COUNT_RISES | P_SCHMITT_A)
 WRPIN(pin, P_QUADRATURE | P_FILT1_AB | P_PLUS1_B)
 
 ' Invert input polarity
-WRPIN(pin, P_COUNT_HIGHS | P_INVERT_A)
+WRPIN(pin, P_REG_UP | P_INVERT_A)
 ```
 
----
 
 ## 14.8 Counter Overflow and Range
 
 ### 32-Bit Counter Range
 
 All counting modes use 32-bit counters:
+
 - Unsigned modes: 0 to 4,294,967,295
 - Signed modes: -2,147,483,648 to +2,147,483,647
 
 ### Overflow Behavior
 
 Counters wrap on overflow:
-```
+
+```formula
 Unsigned: $FFFFFFFF + 1 → $00000000
 Signed:   $7FFFFFFF + 1 → $80000000
 ```
@@ -471,7 +443,6 @@ PUB update_extended_count() | current, delta
   last_reading := current
 ```
 
----
 
 ## 14.9 Mode Selection Guide
 
@@ -480,14 +451,13 @@ PUB update_extended_count() | current, delta
 | Application | Mode | Configuration |
 |-------------|------|---------------|
 | Rotary encoder | P_QUADRATURE | X=0 for position |
-| Frequency counter | P_COUNT_HIGHS | X=gate_period |
+| Frequency counter | P_REG_UP | X=gate_period |
 | Event counter | P_COUNT_RISES | X=0, Y=0 |
 | Up/down buttons | P_COUNT_RISES | X=0, Y=1 |
-| Step/direction motor | P_COUNT_RISES | X=0 |
-| PWM duty cycle | P_HIGH_TICKS | X=period, Y=0 |
-| Differential time | P_HIGH_TICKS | X=period, Y=1 |
+| Step/direction motor | P_REG_UP_DOWN | X=0 |
+| PWM duty cycle | P_COUNT_HIGHS | X=period, Y=0 |
+| Differential time | P_COUNT_HIGHS | X=period, Y=1 |
 
----
 
 ## 14.10 Complete Examples
 
@@ -623,7 +593,6 @@ PUB measure_rpm() : rpm | period, pulses
     DEBUG("RPM: ", UDEC(rpm))
 ```
 
----
 
 ## 14.11 Quick Reference
 
@@ -632,10 +601,10 @@ PUB measure_rpm() : rpm | period, pulses
 | Mode | Binary | A-Input | B-Input | Output |
 |------|--------|---------|---------|--------|
 | P_QUADRATURE | %01011 | Phase A | Phase B | Position |
-| P_COUNT_HIGHS | %01100 | Events | Gate | Gated count |
-| P_COUNT_RISES | %01101 | Events | Direction | Up/down count |
+| P_REG_UP | %01100 | Events | Gate | Gated count |
+| P_REG_UP_DOWN | %01101 | Events | Direction | Up/down count |
 | P_COUNT_RISES | %01110 | Up events | Down events* | Net count |
-| P_HIGH_TICKS | %01111 | Time high | Time high* | Clock count |
+| P_COUNT_HIGHS | %01111 | Time high | Time high* | Clock count |
 
 *When Y[0]=1
 
@@ -656,17 +625,17 @@ WXPIN(pin, 200_000_000)                    ' X = sysclk
 
 | Need | Configuration |
 |------|---------------|
-| B on pin+1 | `mode \| P_PLUS1_B` |
-| B on pin-1 | `mode \| P_MINUS1_B` |
-| Invert B | `mode \| P_INVERT_B` |
+| B on pin+1 | `mode` \| `P_PLUS1_B` |
+| B on pin-1 | `mode` \| `P_MINUS1_B` |
+| Invert B | `mode` \| `P_INVERT_B` |
 
 ### Reset Behavior
 
 All counting modes when DIR=0:
+
 - IN = low
 - Z = initial adder value (0, 1, or -1 depending on input state)
 - Counter ready to start on DIR=1
 
----
 
 *This chapter covered counting modes. For period measurement modes, see Chapter 15. For quadrature encoder details, see the P_QUADRATURE section above.*

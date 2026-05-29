@@ -93,6 +93,8 @@
 
 \tableofcontents
 \clearpage
+\listoffigures
+\clearpage
 ```
 
 # Copyright and License
@@ -128,7 +130,7 @@ This guide would not exist without the contributions of many individuals and org
 
 **The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the Smart Pin modes and identified critical details worth documenting.
 
-**John Titus** for YouTube tutorials demonstrating Smart Pin modes with practical applications that informed many examples in this guide.
+**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* (Parallax Inc., 2020), whose detailed Smart Pin mode descriptions informed many examples in this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
 
 This guide is a community-developed resource, created to make the P2's Smart Pin system more accessible to developers at all skill levels.
 
@@ -159,6 +161,7 @@ Readers who know what they want to accomplish but not which mode to use should s
 > → Also consider: [alternatives]
 
 The Intent Index covers common tasks including:
+
 - Generating signals (clocks, PWM, analog, serial)
 - Measuring signals (timing, counting, analog, serial)
 - Controlling outputs (digital, DAC)
@@ -175,7 +178,6 @@ Readers who know which mode or feature they need can navigate directly:
 
 Each mode chapter stands alone with complete configuration details, all applicable P_ constants, working examples in both Spin2 and PASM2, and decision guidance.
 
----
 
 ## Document Conventions
 
@@ -237,11 +239,11 @@ PINL(PIN)                 ' Enable Smart Pin
 ### Cross-References
 
 Cross-references use the format:
+
 - "See Chapter N: Title" for chapter references
 - "See Appendix X" for appendix references
 - "See MODE_NAME (%XXXXX)" for mode references
 
----
 
 ## Quick Mode Selection Matrix
 
@@ -312,6 +314,5 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 | **Inter-COG Sharing** | Repository | 18 |
 | **USB** | USB Pair | 19 |
 
----
 
 *This front matter provides navigation tools for all readers. Proceed to Part I for foundational knowledge, or use the Intent Index (Appendix A) for task-oriented guidance.*

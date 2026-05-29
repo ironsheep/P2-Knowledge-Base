@@ -2,8 +2,6 @@
 
 This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "Smart Pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
 
----
-
 ## 6.1 Overview
 
 ### P_NORMAL Mode
@@ -17,6 +15,7 @@ When WRPIN bits [5:1] = %00000, the pin operates in P_NORMAL mode—basic Direct
 ### When to Use P_NORMAL Output
 
 **Use P_NORMAL output for:**
+
 - Simple on/off control (LEDs, relays, enables)
 - Software-timed signals (bit-banging)
 - Irregular patterns not suited to Smart Pin automation
@@ -24,13 +23,12 @@ When WRPIN bits [5:1] = %00000, the pin operates in P_NORMAL mode—basic Direct
 - When COG control is preferred over autonomy
 
 **Consider Smart Pin modes (Chapters 7-11) for:**
+
 - Precise timing requirements
 - Free-running oscillators
 - PWM at high frequencies
 - Serial communication
 - Autonomous operation
-
----
 
 ## 6.2 Output Configurations
 
@@ -80,8 +78,6 @@ PUB led_off()
               drvl      #LED_PIN          ' LED off
 ```
 
----
-
 ### Open-Drain Output
 
 Drives low actively; floats when logically high. Requires external pull-up resistor. Used for I²C, 1-Wire, and multi-master buses.
@@ -92,6 +88,7 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST)
 ```
 
 **Behavior:**
+
 - PINHIGH/DRVH → Pin floats (external pull-up pulls high)
 - PINLOW/DRVL → Pin drives low
 
@@ -123,7 +120,8 @@ PUB sda_read() : state
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     #SDA_PIN, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin     #SDA_PIN, ...
+                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
               
 ' Drive low
               drvl      #SDA_PIN
@@ -144,8 +142,6 @@ WRPIN(pin, P_HIGH_15K | P_LOW_FAST)       ' 15kΩ pull-up when high
 
 Note: Internal pull-ups are weaker than typical external pull-ups and may not meet bus specifications for higher speeds.
 
----
-
 ### Open-Source Output
 
 Drives high actively; floats when logically low. Less common than open-drain.
@@ -156,10 +152,9 @@ WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)
 ```
 
 **Behavior:**
+
 - PINHIGH/DRVH → Pin drives high
 - PINLOW/DRVL → Pin floats (external pull-down pulls low)
-
----
 
 ### Inverted Output
 
@@ -171,6 +166,7 @@ WRPIN(pin, P_INVERT_OUT)
 ```
 
 **Behavior:**
+
 - PINHIGH/DRVH (OUT=1) → Pin drives LOW
 - PINLOW/DRVL (OUT=0) → Pin drives HIGH
 
@@ -180,7 +176,7 @@ WRPIN(pin, P_INVERT_OUT)
 
 ```spin2
 CON
-  LED_PIN = 56                            ' LED connected to VCC, active low
+  LED_PIN = 56                         ' LED connected to VCC, active low
 
 PUB setup()
   WRPIN(LED_PIN, P_INVERT_OUT)
@@ -191,8 +187,6 @@ PUB led_on()
 PUB led_off()
   PINLOW(LED_PIN)                         ' Drives HIGH, LED off
 ```
-
----
 
 ### Tri-State Output
 
@@ -232,8 +226,6 @@ PINHIGH(pin)                              ' Enable and drive high
 ' Later, enable output (immediately high, no glitch)
               dirh      #pin              ' DIR=1, drives high
 ```
-
----
 
 ## 6.3 Software-Timed Output Patterns
 
@@ -292,22 +284,23 @@ Maximum software toggle rate:
               jmp       #.fast_toggle     ' 4 cycles
               
 ' Total: 8 cycles per complete cycle = 25 MHz at 200 MHz sysclk
-' (Plus 3-clock output latency per transition)
+  ' (The 3-clock output latency is a one-time pipeline offset,
+  ' not a per-edge cost)
 ```
 
-With output latency considered, the effective toggle frequency is limited by the 3-clock pipeline delay after each instruction.
-
----
+The 3-clock output latency is a fixed pipeline delay — it sets *when* each edge reaches the pad (3 clocks after the instruction completes), not *how often* edges can be produced. It does not lower the toggle frequency; throughput is set by the instruction count in the loop.
 
 ## 6.4 Timing Analysis
 
 ### Instruction Timing
 
-| Operation | Cycles | At 200 MHz |
-|-----------|--------|------------|
-| DRVH/DRVL | 2 | 10 ns |
-| Output pipeline | 3 | 15 ns |
-| Total per transition | 5 | 25 ns |
+| Quantity | Cycles | At 200 MHz |
+|----------|--------|------------|
+| DRVH/DRVL execution — cost **per transition** (throughput) | 2 | 10 ns |
+| Output pipeline delay — fixed **latency** (instruction completes → pin edge) | 3 | 15 ns |
+| Latency, instruction *start* → pin edge (2 + 3) | 5 | 25 ns |
+
+**How to read this table:** the per-transition *cost* is the **2-clock** instruction time — that is what limits how fast edges can be emitted, and because back-to-back instructions pipeline, edges follow at the instruction rate. The **3-clock pipeline delay is latency, not throughput**: it shifts *when* an edge reaches the pad (5 clocks total from instruction start) but is a one-time offset, *not* added to every transition. Do **not** sum 2 + 3 to compute a per-edge rate.
 
 ### Maximum Toggle Rate
 
@@ -318,16 +311,18 @@ With output latency considered, the effective toggle frequency is limited by the
 ```
 Period: 6 cycles = 30 ns → ~33 MHz maximum at 200 MHz sysclk.
 
-However, the 3-clock output latency means transitions are delayed, so actual edge rate depends on the loop structure.
+The 3-clock output latency shifts *when* edges reach the pad but does not reduce the edge rate; the actual rate is set by the loop's instruction count (the per-transition cost), not by the latency.
 
 ### When Direct I/O is Faster
 
 Direct I/O is faster than Smart Pins for:
+
 - Infrequent, irregular pulses
 - One-shot signals
 - Quick on/off without setup overhead
 
 Smart Pins are faster when:
+
 - Continuous waveforms are needed
 - COG should be free for other work
 - Precise timing independent of software
@@ -335,8 +330,6 @@ Smart Pins are faster when:
 ### Smart Pin Overhead
 
 Smart Pin configuration takes ~10 cycles (DIRL + WRPIN + WXPIN + WYPIN + DRVL). For a single pulse, Direct I/O is more efficient. For continuous operation, Smart Pin overhead is negligible.
-
----
 
 ## 6.5 Complete Examples
 
@@ -429,20 +422,17 @@ PUB step_reverse(steps) | i
     WAITUS(1000)
 ```
 
----
-
 ## 6.6 Configuration Quick Reference
 
 | Topology | WRPIN Value |
 |----------|-------------|
-| Push-pull (standard) | `P_HIGH_FAST \| P_LOW_FAST` |
-| Push-pull (current limit) | `P_HIGH_1K5 \| P_LOW_1K5` |
-| Open-drain | `P_HIGH_FLOAT \| P_LOW_FAST` |
-| Open-drain + internal pull-up | `P_HIGH_15K \| P_LOW_FAST` |
-| Open-source | `P_HIGH_FAST \| P_LOW_FLOAT` |
+| Push-pull (standard) | `P_HIGH_FAST` \| `P_LOW_FAST` |
+| Push-pull (current limit) | `P_HIGH_1K5` \| `P_LOW_1K5` |
+| Open-drain | `P_HIGH_FLOAT` \| `P_LOW_FAST` |
+| Open-drain + internal pull-up | `P_HIGH_15K` \| `P_LOW_FAST` |
+| Open-source | `P_HIGH_FAST` \| `P_LOW_FLOAT` |
 | Inverted | `P_INVERT_OUT` |
-| LED current source | `P_HIGH_1MA \| P_LOW_FAST` |
+| LED current source | `P_HIGH_1MA` \| `P_LOW_FAST` |
 
----
 
 *This chapter covered software-controlled digital output. For hardware-automated pulse and transition output, see Chapter 7. For continuous waveform generation, see Chapters 8 (NCO) and 9 (PWM).*

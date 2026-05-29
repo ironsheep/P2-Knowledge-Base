@@ -2,7 +2,6 @@
 
 This chapter covers the three Pulse Width Modulation (PWM) modes: **P_PWM_TRIANGLE** (%01000) for symmetric triangle-wave PWM, **P_PWM_SAWTOOTH** (%01001) for asymmetric sawtooth-wave PWM, and **P_PWM_SMPS** (%01010) for switch-mode power supply control with feedback.
 
----
 
 ## 9.1 PWM Fundamentals
 
@@ -14,23 +13,8 @@ Pulse Width Modulation controls the average power delivered to a load by varying
 
 All three PWM modes share a common architecture:
 
-```
-                  ┌─────────────┐
-X[15:0] ─────────►│ Base Period │───── Clock divider
-                  └─────────────┘
-                         │
-                         ▼
-                  ┌─────────────┐
-X[31:16] ────────►│ Frame Count │───── Counter range
-                  └─────────────┘
-                         │
-                         ▼
-                  ┌─────────────┐
-Y[15:0] ─────────►│  Comparator │───── Output = (Y >= counter)
-                  └─────────────┘
-                         │
-                         ▼
-                      PIN OUT
+```{=latex}
+\DiagPwmArch
 ```
 
 ### Key Terminology
@@ -50,7 +34,6 @@ Y[15:0] ─────────►│  Comparator │───── Output 
 | P_PWM_SAWTOOTH | Up only | 1 × frame period | Fast switching |
 | P_PWM_SMPS | Up with feedback | Variable | Power supply |
 
----
 
 ## 9.2 P_PWM_TRIANGLE Mode (%01000)
 
@@ -60,11 +43,12 @@ P_PWM_TRIANGLE generates a symmetric PWM waveform using an up-down counter. The 
 
 ### Counter Behavior
 
-```
+```layout
 Frame = 4
 
-Counter: 4 → 3 → 2 → 1 → 2 → 3 → 4 → 3 → 2 → 1 → ...
-         \___ down ___/\___ up ___/\______ repeat _____
+Counter:  4 → 3 → 2 → 1     (count down)
+          1 → 2 → 3 → 4     (count up)
+          → repeat
 
 PWM Period = 2 × Frame Period × Base Period
 ```
@@ -72,6 +56,7 @@ PWM Period = 2 × Frame Period × Base Period
 ### Output Logic
 
 At each base period:
+
 - If Y[15:0] >= counter → output HIGH
 - If Y[15:0] < counter → output LOW
 
@@ -85,7 +70,7 @@ At each base period:
 
 ### Timing Formulas
 
-```
+```formula
 PWM frequency = sysclk / (2 × X[31:16] × X[15:0])
 
 PWM period = 2 × X[31:16] × X[15:0] / sysclk
@@ -97,7 +82,7 @@ Duty cycle = Y[15:0] / X[31:16] × 100%
 
 **1 kHz triangle PWM at 50% duty with 200 MHz sysclk:**
 
-```
+```formula
 Target: 1 kHz PWM, 50% duty
 PWM period = 1/1000 = 1 ms = 200,000 clocks
 
@@ -141,16 +126,12 @@ PUB triangle_pwm(freq_hz, duty_percent) | frame, y_val
 
 For frame period = 8, duty value = 6:
 
-```
-Counter:  8  7  6  5  4  3  2  1  2  3  4  5  6  7  8
-Output:   L  L  H  H  H  H  H  H  H  H  H  H  H  L  L
-              ▲                          ▲
-              Y>=counter                 Y>=counter
+```{=latex}
+\DiagPwmTriangle
 ```
 
 The symmetric counting creates equal rise and fall times.
 
----
 
 ## 9.3 P_PWM_SAWTOOTH Mode (%01001)
 
@@ -160,11 +141,11 @@ P_PWM_SAWTOOTH generates an asymmetric PWM waveform using an up-only counter. Th
 
 ### Counter Behavior
 
-```
+```layout
 Frame = 4
 
-Counter: 1 → 2 → 3 → 4 → 1 → 2 → 3 → 4 → 1 → ...
-         \______ up _______/\______ up _______/
+Counter:  1 → 2 → 3 → 4     (count up)
+          1 → 2 → 3 → 4     (count up, repeat)
 
 PWM Period = Frame Period × Base Period
 ```
@@ -188,7 +169,7 @@ PWM Period = Frame Period × Base Period
 
 ### Timing Formulas
 
-```
+```formula
 PWM frequency = sysclk / (X[31:16] × X[15:0])
 
 PWM period = X[31:16] × X[15:0] / sysclk
@@ -200,7 +181,7 @@ Duty cycle = Y[15:0] / X[31:16] × 100%
 
 **10 kHz sawtooth PWM at 25% duty with 200 MHz sysclk:**
 
-```
+```formula
 Target: 10 kHz PWM, 25% duty
 PWM period = 1/10,000 = 100 µs = 20,000 clocks
 
@@ -244,16 +225,12 @@ PUB sawtooth_pwm(freq_hz, duty_percent) | frame, y_val
 
 For frame period = 8, duty value = 3:
 
-```
-Counter:  1  2  3  4  5  6  7  8  1  2  3  4  5  6  7  8
-Output:   H  H  H  L  L  L  L  L  H  H  H  L  L  L  L  L
-              ▲                       ▲
-              Y>=counter              Y>=counter
+```{=latex}
+\DiagPwmSawtooth
 ```
 
 The sawtooth pattern creates a fast rising edge and slow falling edge in the output.
 
----
 
 ## 9.4 P_PWM_SMPS Mode (%01010)
 
@@ -277,24 +254,8 @@ P_PWM_SMPS generates PWM output for switch-mode power supply control with voltag
 
 ### Block Diagram
 
-```
-                    ┌──────────────────┐
-A-input ───────────►│ Voltage Monitor  │──── Triggers new cycle
-(voltage sense)     └──────────────────┘     when low
-                              │
-                              ▼
-        ┌─────────────────────────────────────┐
-        │         PWM Sawtooth Core           │
-        │  Counter: 1 → frame → wait for A    │
-        └─────────────────────────────────────┘
-                              │
-                              ▼
-        ┌─────────────────────────────────────┐
-B-input ►│     Current Limiter Gate           │──── Forces low
-(current)└─────────────────────────────────────┘     when high
-                              │
-                              ▼
-                           PIN OUT
+```{=latex}
+\DiagSmpsBlock
 ```
 
 ### Configuration
@@ -318,22 +279,8 @@ Use mode field bits to select A and B input sources:
 
 ### Typical SMPS Circuit
 
-```
-                   ┌─────────────────────────────┐
-                   │                             │
-Pin N (PWM) ───────┤►───[FET]───┬───[L]───┬──►──┼── Vout
-                   │            │         │     │
-                   │          [D]      [C]      │
-                   │            │         │     │
-                   │            ▼         ▼     │
-                   │           GND       GND    │
-                   │                             │
-Pin N+1 ◄──────────┤── Voltage Divider ◄────────┤
-(A-input)          │                             │
-                   │                             │
-Pin N-1 ◄──────────┤── Shunt Resistor ◄─────────┤
-(B-input)          │                             │
-                   └─────────────────────────────┘
+```{=latex}
+\DiagSmpsCircuit
 ```
 
 ### Configuration Sequence
@@ -346,7 +293,8 @@ CON
   V_SENSE = 21        ' Voltage feedback (A-input)
   I_SENSE = 19        ' Current sense (B-input)
 
-PUB smps_controller(duty_percent, voltage_threshold, current_limit) | mode, frame, y_val
+PUB smps_controller(duty_percent, voltage_threshold, current_limit) ...
+    | mode, frame, y_val
   ' Configure voltage comparator
   WRPIN(V_SENSE, P_COMPARE_AB)
   WXPIN(V_SENSE, voltage_threshold)
@@ -372,21 +320,22 @@ PUB smps_controller(duty_percent, voltage_threshold, current_limit) | mode, fram
 **PASM2:**
 ```pasm2
               dirl      #SMPS_PIN
-              wrpin     ##(P_PWM_SMPS | P_OE | P_PLUS1_A | P_MINUS1_B), #SMPS_PIN
+              wrpin     ##(P_PWM_SMPS | P_OE | ...
+                         P_PLUS1_A | P_MINUS1_B), #SMPS_PIN
               wxpin     x_val, #SMPS_PIN
               dirh      #SMPS_PIN
-              wypin     y_val, #SMPS_PIN     ' Set once, runs autonomously
+              wypin     y_val, #SMPS_PIN    ' Set once, runs autonomously
 ```
 
 ### Set-and-Forget Operation
 
 P_PWM_SMPS is designed for autonomous operation. After initial configuration with WYPIN, the smart pin:
+
 - Monitors voltage via A-input
 - Initiates pulses when voltage sags
 - Limits current via B-input
 - Requires no software intervention
 
----
 
 ## 9.5 Dynamic Duty Cycle Updates
 
@@ -409,6 +358,7 @@ The new value takes effect at the next frame boundary, preventing glitches.
 ### Glitch-Free Updates
 
 The Y capture mechanism ensures:
+
 - Mid-cycle writes do not affect current cycle
 - New duty applies at next frame start
 - No partial pulses or timing artifacts
@@ -423,7 +373,6 @@ For smooth transitions, update rate should be much slower than PWM frequency:
 | Motor control | 20 kHz | 1-5 kHz |
 | Audio | 100 kHz | 44.1 kHz |
 
----
 
 ## 9.6 PWM Resolution and Frequency Tradeoffs
 
@@ -442,21 +391,20 @@ PWM resolution depends on frame period (X[31:16]):
 ### Choosing Parameters
 
 **For motor control (20 kHz, 10-bit resolution):**
-```
+```formula
 Frame period = 200_000_000 / 20_000 = 10,000
 Actual resolution = log2(10,000) ≈ 13.3 bits
 Y range: 0 to 10,000
 ```
 
 **For LED dimming (500 Hz, 12-bit resolution):**
-```
+```formula
 Frame period = 200_000_000 / 500 = 400,000
 Must limit to 65535 max, use base period
 Base = 7, Frame = 57,143
 Y range: 0 to 57,143
 ```
 
----
 
 ## 9.7 Complete Examples
 
@@ -574,7 +522,7 @@ DAT           org
               wrpin     ##(P_PWM_SAWTOOTH | P_OE), #PWM_PIN
               wxpin     ##$07D0_0001, #PWM_PIN      ' Frame=2000, Base=1
               dirh      #PWM_PIN
-              wypin     ##1000, #PWM_PIN            ' 50% duty (##imm32 for 9-bit overflow)
+              wypin     ##1000, #PWM_PIN  ' 50% duty (imm32, 9-bit)
 
 ' Update duty in real-time
 pwm_loop
@@ -584,12 +532,11 @@ pwm_loop
               jmp       #pwm_loop
 
 PWM_PIN       long      20
-duty_ptr      long      0                           ' Hub address for duty
+duty_ptr      long      0                          ' Hub address for duty
 new_duty      long      0
 delay         long      20_000                      ' Update rate
 ```
 
----
 
 ## 9.8 Quick Reference
 
@@ -640,10 +587,10 @@ delay         long      20_000                      ' Update rate
 ### Reset State (DIR=0)
 
 All PWM modes:
+
 - IN = low
 - Output = low
 - Y[15:0] = captured (ready for DIR=1)
 
----
 
 *This chapter covered PWM output modes. For DAC-based analog output, see Chapter 10. For serial transmission modes, see Chapter 11.*

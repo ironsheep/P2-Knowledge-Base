@@ -1,15 +1,15 @@
--- P2KB DeSilva - Code Coloring Filter (ADAPTED FROM PROVEN SMART PINS)
+-- P2KB IOSP - Code Coloring Filter (ADAPTED FROM PROVEN SMART PINS)
 -- Purpose: ONLY handles code block coloring for div-wrapped blocks
 -- No pagination - single responsibility
 --
--- Supported div block types (5-color DeSilva pedagogical system):
+-- Supported div block types (5-color code system):
 --   Spin2 blocks (green):         ::: spin2 (includes configuration)
 --   IOSP blocks (yellow):        ::: iosp
 --   CORDIC blocks (purple):       ::: cordic (hardware math operations)
 --   Multi-COG blocks (blue):      ::: multicog (parallel processing)
 --   Antipattern blocks (red):     ::: antipattern
 --
--- Also handles DeSilva pedagogical elements:
+-- Also handles pedagogical elements (legacy; unused in this reference guide):
 --   Medicine Cabinet, Your Turn, Sidetrack, etc.
 --
 -- Version: 1.1 - Integrated mnemonic uppercasing (was separate filter)
@@ -138,9 +138,9 @@ end
 function Div(div)
   local classes = div.classes
   
-  -- ===== CODE BLOCK DIVS (5-color DeSilva system) =====
+  -- ===== CODE BLOCK DIVS (5-color code system) =====
   
-  -- Antipattern blocks: ::: antipattern -> DeSilvaAntipatternBlock environment (RED)
+  -- Antipattern blocks: ::: antipattern -> AntipatternBlock environment (RED)
   if classes:includes("antipattern") then
     -- Find the CodeBlock inside this div
     local code_block = nil
@@ -155,15 +155,15 @@ function Div(div)
       -- Uppercase mnemonics in the code text
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for antipattern styling
-      local latex_block = '\\begin{DeSilvaAntipatternBlock}\n' ..
+      local latex_block = '\\begin{AntipatternBlock}\n' ..
                          '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
-                         '\\end{DeSilvaAntipatternBlock}'
+                         '\\end{AntipatternBlock}'
       return pandoc.RawBlock('latex', latex_block)
     end
   
-  -- Spin2 blocks: ::: spin2 -> DeSilvaSpin2Block environment (GREEN)
+  -- Spin2 blocks: ::: spin2 -> Spin2Block environment (GREEN)
   -- Note: This includes configuration blocks (WRPIN:/WXPIN:/WYPIN:) per pedagogical decision
   elseif classes:includes("spin2") then
     -- Find the CodeBlock inside this div
@@ -177,15 +177,15 @@ function Div(div)
     
     if code_block then
       -- Return complete LaTeX block for Spin2 styling
-      local latex_block = '\\begin{DeSilvaSpin2Block}\n' ..
+      local latex_block = '\\begin{Spin2Block}\n' ..
                          '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          code_block.text .. '\n' ..
                          '\\end{Verbatim}\n' ..
-                         '\\end{DeSilvaSpin2Block}'
+                         '\\end{Spin2Block}'
       return pandoc.RawBlock('latex', latex_block)
     end
     
-  -- IOSP blocks: ::: iosp -> DeSilvaIOSPBlock environment (YELLOW)
+  -- IOSP blocks: ::: iosp -> IOSPBlock environment (YELLOW)
   elseif classes:includes("iosp") then
     -- Find the CodeBlock inside this div
     local code_block = nil
@@ -200,15 +200,15 @@ function Div(div)
       -- Uppercase mnemonics in the code text
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block using Verbatim
-      local latex_block = '\\begin{DeSilvaIOSPBlock}\n' ..
+      local latex_block = '\\begin{IOSPBlock}\n' ..
                          '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
-                         '\\end{DeSilvaIOSPBlock}'
+                         '\\end{IOSPBlock}'
       return pandoc.RawBlock('latex', latex_block)
     end
     
-  -- CORDIC blocks: ::: cordic -> DeSilvaCORDICBlock environment (PURPLE)
+  -- CORDIC blocks: ::: cordic -> CORDICBlock environment (PURPLE)
   elseif classes:includes("cordic") then
     -- Find the CodeBlock inside this div
     local code_block = nil
@@ -223,15 +223,15 @@ function Div(div)
       -- Uppercase mnemonics in the code text
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for CORDIC styling
-      local latex_block = '\\begin{DeSilvaCORDICBlock}\n' ..
+      local latex_block = '\\begin{CORDICBlock}\n' ..
                          '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
-                         '\\end{DeSilvaCORDICBlock}'
+                         '\\end{CORDICBlock}'
       return pandoc.RawBlock('latex', latex_block)
     end
 
-  -- Multi-COG blocks: ::: multicog -> DeSilvaMultiCOGBlock environment (BLUE)
+  -- Multi-COG blocks: ::: multicog -> MultiCOGBlock environment (BLUE)
   elseif classes:includes("multicog") then
     -- Find the CodeBlock inside this div
     local code_block = nil
@@ -246,11 +246,11 @@ function Div(div)
       -- Uppercase mnemonics in the code text
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for Multi-COG styling
-      local latex_block = '\\begin{DeSilvaMultiCOGBlock}\n' ..
+      local latex_block = '\\begin{MultiCOGBlock}\n' ..
                          '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
-                         '\\end{DeSilvaMultiCOGBlock}'
+                         '\\end{MultiCOGBlock}'
       return pandoc.RawBlock('latex', latex_block)
     end
   
@@ -319,11 +319,11 @@ function Div(div)
     return result
 
   elseif classes:includes("interlude") then
-    local result = {pandoc.RawBlock('latex', '\\begin{DeSilvaInterlude}')}
+    local result = {pandoc.RawBlock('latex', '\\begin{InterludeBlock}')}
     for _, block in ipairs(div.content) do
       table.insert(result, block)
     end
-    table.insert(result, pandoc.RawBlock('latex', '\\end{DeSilvaInterlude}'))
+    table.insert(result, pandoc.RawBlock('latex', '\\end{InterludeBlock}'))
     return result
   end
 
@@ -339,42 +339,86 @@ function CodeBlock(cb)
   local classes = cb.classes
 
   -- Check for iosp or pasm language tag
-  if classes:includes("iosp") or classes:includes("pasm") then
+  if classes:includes("iosp") or classes:includes("pasm") or classes:includes("pasm2") then
     local processed_text = uppercase_mnemonics(cb.text)
-    local latex_block = '\\begin{DeSilvaIOSPBlock}\n' ..
+    local latex_block = '\\begin{IOSPBlock}\n' ..
                        '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
-                       '\\end{DeSilvaIOSPBlock}'
+                       '\\end{IOSPBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Check for spin2 language tag
   elseif classes:includes("spin2") then
-    local latex_block = '\\begin{DeSilvaSpin2Block}\n' ..
+    local latex_block = '\\begin{Spin2Block}\n' ..
                        '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        cb.text .. '\n' ..
                        '\\end{Verbatim}\n' ..
-                       '\\end{DeSilvaSpin2Block}'
+                       '\\end{Spin2Block}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Check for cordic language tag
   elseif classes:includes("cordic") then
     local processed_text = uppercase_mnemonics(cb.text)
-    local latex_block = '\\begin{DeSilvaCORDICBlock}\n' ..
+    local latex_block = '\\begin{CORDICBlock}\n' ..
                        '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
-                       '\\end{DeSilvaCORDICBlock}'
+                       '\\end{CORDICBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Check for multicog language tag
   elseif classes:includes("multicog") then
     local processed_text = uppercase_mnemonics(cb.text)
-    local latex_block = '\\begin{DeSilvaMultiCOGBlock}\n' ..
+    local latex_block = '\\begin{MultiCOGBlock}\n' ..
                        '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
-                       '\\end{DeSilvaMultiCOGBlock}'
+                       '\\end{MultiCOGBlock}'
+    return pandoc.RawBlock('latex', latex_block)
+
+  -- Instruction syntax forms: ```syntax -> SyntaxBlock (slate, reference tier).
+  -- Line numbers ONLY when multi-line (single-line forms read cleaner without
+  -- a "1" gutter). Content is shown verbatim (KB-sourced, already uppercased).
+  elseif classes:includes("spin-syntax") or classes:includes("syntax")
+         or classes:includes("pasm-syntax") then
+    local txt = cb.text:gsub("%s+$", "")
+    -- Bar color + enclosed title encode language: Spin2 = blue, PASM2 = green.
+    -- The title is a small bold label inside the bar (relocates the section
+    -- heading into the block), making the bar self-documenting.
+    local is_spin = classes:includes("spin-syntax")
+    local barcolor = is_spin and 'iosp-spin2-border' or 'iosp-pasm2-border'
+    local title = is_spin and 'Spin2 Syntax' or 'PASM2 Syntax'
+    local multiline = txt:find("\n") ~= nil
+    local verb = multiline
+      and '\\begin{Verbatim}[numbers=left,numbersep=6pt]\n'
+      or  '\\begin{Verbatim}\n'
+    local latex_block = '\\begin{SyntaxBlock}{' .. barcolor .. '}\n' ..
+                       '{\\small\\bfseries\\color{' .. barcolor .. '}' .. title .. '}\\par\\vspace{2pt}\n' ..
+                       verb ..
+                       txt .. '\n' ..
+                       '\\end{Verbatim}\n' ..
+                       '\\end{SyntaxBlock}'
+    return pandoc.RawBlock('latex', latex_block)
+
+  -- Bit-field / register-layout diagrams: ```layout -> LayoutBlock (bronze). No numbers.
+  elseif classes:includes("layout") then
+    local txt = cb.text:gsub("%s+$", "")
+    local latex_block = '\\begin{LayoutBlock}\n' ..
+                       '\\begin{Verbatim}[xleftmargin=0pt]\n' ..
+                       txt .. '\n' ..
+                       '\\end{Verbatim}\n' ..
+                       '\\end{LayoutBlock}'
+    return pandoc.RawBlock('latex', latex_block)
+
+  -- Formulas / worked calculations: ```formula -> FormulaBlock (indigo). No numbers.
+  elseif classes:includes("formula") then
+    local txt = cb.text:gsub("%s+$", "")
+    local latex_block = '\\begin{FormulaBlock}\n' ..
+                       '\\begin{Verbatim}[xleftmargin=0pt]\n' ..
+                       txt .. '\n' ..
+                       '\\end{Verbatim}\n' ..
+                       '\\end{FormulaBlock}'
     return pandoc.RawBlock('latex', latex_block)
   end
 

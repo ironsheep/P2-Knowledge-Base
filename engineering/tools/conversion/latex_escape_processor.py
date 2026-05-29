@@ -307,6 +307,13 @@ def process_latex_escaping(input_file, output_file):
         # Must be protected BEFORE escaping { } and #
         line = line.replace('{#}', 'XPROTECT_OPTIONAL_IMM_X')
 
+        # Protect markdown escaped pipe "\|" (a literal pipe inside a pipe-table cell,
+        # e.g. `P_HIGH_FAST` \| `P_LOW_FAST`). Without this, the backslash escaping
+        # below turns "\|" into "\textbackslash{}|", which renders a stray backslash
+        # AND un-escapes the pipe so it breaks the table column. Restored verbatim
+        # as "\|" so Pandoc still treats it as an escaped (literal) pipe.
+        line = line.replace('\\|', 'XPROTECTESCPIPEX')
+
         # Protect PASM2 absolute address syntax #\Label and \Label
         # In PASM2, backslash prefix means absolute address (vs relative)
         # Pattern: #\ followed by identifier OR just \ followed by identifier at word boundary
@@ -363,6 +370,9 @@ def process_latex_escaping(input_file, output_file):
         for i, code in enumerate(protected_inline_code):
             placeholder = f'XPROTECTINLINECODE{i}X'
             line = line.replace(placeholder, code)
+
+        # 6a. Restore markdown escaped pipe verbatim (kept as "\|" for Pandoc)
+        line = line.replace('XPROTECTESCPIPEX', '\\|')
 
         # 6b. Restore protected Pandoc superscript syntax (UNCHANGED - Pandoc converts to \textsuperscript)
         for i, sup in enumerate(protected_superscripts):

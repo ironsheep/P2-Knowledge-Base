@@ -2,7 +2,6 @@
 
 This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-up/pull-down resistors.
 
----
 
 ## 12.1 Input Architecture
 
@@ -10,13 +9,8 @@ This chapter covers reading digital signals, from basic direct I/O through enhan
 
 Every P2 I/O pin includes a complete input path with multiple conditioning options:
 
-```
-External ──► Pad ──► Input ──► Schmitt/ ──► Synchronizer ──► INA/INB
-Signal              Buffer    Logic/Level    (optional)       Register
-                                  │
-                                  ▼
-                              TESTP/TESTPN
-                              (2 clocks fresher)
+```{=latex}
+\DiagInputPath
 ```
 
 ### Input Timing
@@ -30,7 +24,6 @@ Signal              Buffer    Logic/Level    (optional)       Register
 
 With no configuration (WRPIN = 0 or P_NORMAL), pins operate as standard CMOS inputs with approximately 1.65V threshold.
 
----
 
 ## 12.2 Reading Input State
 
@@ -90,20 +83,12 @@ bit := (INA >> pin) & 1                    ' Single bit extraction
 
 TESTP reads pin state 2 clocks before the instruction starts, while INA reflects state 3 clocks before the read instruction.
 
-```
-Clock:        ____0     ____1     ____2     ____3     ____4
-                  /\____/\____/\____/\____/\____/
-
-INA Read:     | P0 IN→| REG→ | REG→ | REG→ | Read  |
-              │ 3 clocks before instruction ────────│
-
-TESTP:        | P0 IN→| REG→ | REG→ | C/Z→ |
-              │ 2 clocks before ────────────│
+```{=latex}
+\DiagTestpVsIna
 ```
 
 For time-critical input sampling, prefer TESTP.
 
----
 
 ## 12.3 Input Conditioning Options
 
@@ -113,7 +98,7 @@ Standard CMOS logic input with ~1.65V threshold:
 
 ```spin2
 WRPIN(pin, P_LOGIC_A)                      ' Default logic input
-WRPIN(pin, P_LOGIC_B_FB)                      ' Same, different internal routing
+WRPIN(pin, P_LOGIC_B_FB)               ' Same, different internal routing
 ```
 
 ### P_SCHMITT_A
@@ -125,11 +110,13 @@ WRPIN(pin, P_SCHMITT_A)
 ```
 
 **Hysteresis behavior:**
+
 - Rising edge threshold: ~1.8V
 - Falling edge threshold: ~1.4V
 - Hysteresis: ~0.4V
 
 **Use when:**
+
 - Input signal has slow edges
 - Signal travels through noisy environment
 - Preventing oscillation on threshold crossing
@@ -144,6 +131,7 @@ PINFLOAT(pin)
 ```
 
 **Use when:**
+
 - Interfacing with TTL logic
 - Legacy 5V logic with reduced swing
 - Signals that don't reach full CMOS levels
@@ -160,7 +148,7 @@ WRPIN(pin, P_LEVEL_A | (level << 8))
 ```
 
 **Level calculation:**
-```
+```formula
 threshold_voltage = (level / 256) × 3.3V
 ```
 
@@ -173,11 +161,11 @@ threshold_voltage = (level / 256) × 3.3V
 | 255 | 3.28V |
 
 **Use when:**
+
 - Custom threshold required
 - Detecting specific voltage levels
 - Analog signal digitization
 
----
 
 ## 12.4 Pull-Up and Pull-Down Resistors
 
@@ -221,22 +209,24 @@ PINFLOAT(pin)
 | 150kΩ | Lower power | Slower rise, more noise susceptible |
 
 **15kΩ recommended for:**
+
 - Mechanical switches and buttons
 - Long wire runs
 - Noisy environments
 
 **150kΩ suitable for:**
+
 - Battery-powered systems
 - Short PCB traces
 - Low-speed signals
 
----
 
 ## 12.5 Floating Input Behavior
 
 ### Why Inputs Float
 
 When an input pin has no connection and no pull resistor:
+
 - Input buffer amplifies internal noise
 - State oscillates unpredictably
 - High-speed transitions increase power consumption
@@ -273,7 +263,6 @@ WRPIN(unused_pin, P_HIGH_150K)
 PINFLOAT(unused_pin)
 ```
 
----
 
 ## 12.6 Multi-Pin Input Patterns
 
@@ -321,7 +310,6 @@ value := PINREAD(8 ADDPINS 3)
 value := INA.[11..8]
 ```
 
----
 
 ## 12.7 Software Debouncing
 
@@ -375,13 +363,13 @@ PUB debounced_read(pin) : stable_state
   stable_state := last_state
 ```
 
----
 
 ## 12.8 Active-Low Signals
 
 ### Understanding Active-Low
 
 Many buttons and sensors use active-low signaling:
+
 - Idle/released: Logic high (VDD through pull-up)
 - Active/pressed: Logic low (grounded)
 
@@ -408,7 +396,6 @@ PASM2 TESTPN provides inverted read:
         if_c  jmp       #button_pressed
 ```
 
----
 
 ## 12.9 Complete Examples
 
@@ -537,36 +524,37 @@ PUB detect_voltage_ranges() : range | level, threshold
   return 0                                 ' Below 0.83V
 ```
 
----
 
 ## 12.10 Input Timing Analysis
 
 ### Propagation Delay
 
 From external signal to INA/INB register:
+
 - Input buffer: ~2ns
 - Synchronizer: ~1-2 clock cycles
 - Register: 1 clock cycle
 - Total: 3 clock cycles typical
 
 At 200 MHz (5ns clock):
+
 - 3 clocks = 15ns minimum
 - Add external filter/conditioning time
 
 ### Sampling Considerations
 
 For high-speed sampling:
-- Use TESTP for 2-clock path (10ns at 200 MHz)
-- Consider synchronization bypass (P_SYNC in mode word)
+
+- Use TESTP for 2-clock path (10ns at 200 MHz) — the fastest input path; the input synchronizer latency is inherent and cannot be bypassed
 - Account for metastability in async signals
 
 ### Maximum Input Frequency
 
 Theoretical maximum depends on sampling method:
+
 - With 2-clock TESTP path: Up to sysclk/4 (50 MHz at 200 MHz)
 - Practical limit with noise margin: sysclk/8 to sysclk/10
 
----
 
 ## 12.11 Quick Reference
 
@@ -604,6 +592,5 @@ Theoretical maximum depends on sampling method:
 | Pin change to INA/INB | 3 clocks |
 | Pin change to TESTP | 2 clocks |
 
----
 
 *This chapter covered basic digital input. For signal measurement modes (timing, counting), see Chapter 13. For serial reception, see Chapter 17.*

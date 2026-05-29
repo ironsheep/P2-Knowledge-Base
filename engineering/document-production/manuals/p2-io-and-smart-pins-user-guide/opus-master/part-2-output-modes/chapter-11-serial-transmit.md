@@ -2,7 +2,6 @@
 
 This chapter covers the serial transmission modes: **P_ASYNC_TX** (%11110) for asynchronous UART-style transmission and **P_SYNC_TX** (%11100) for synchronous SPI-style transmission.
 
----
 
 ## 11.1 Serial Transmission Overview
 
@@ -24,7 +23,6 @@ This chapter covers the serial transmission modes: **P_ASYNC_TX** (%11110) for a
 - Double-buffered transmission
 - IN flag indicates ready for next data
 
----
 
 ## 11.2 P_ASYNC_TX Mode (%11110)
 
@@ -34,12 +32,8 @@ P_ASYNC_TX transmits asynchronous serial data with automatic start and stop bit 
 
 ### Frame Format
 
-```
-Idle  Start   D0    D1    D2    D3    D4    D5    D6    D7   Stop  Idle
-─────┐     ┌────┬────┬────┬────┬────┬────┬────┬────┬────┐     ┌─────
-     │     │    │    │    │    │    │    │    │    │    │     │
-     └─────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴─────┘
-      │ Start bit                  Data bits (LSB first)   │ Stop bit
+```{=latex}
+\DiagUartTxFrame
 ```
 
 ### Configuration
@@ -54,7 +48,7 @@ Idle  Start   D0    D1    D2    D3    D4    D5    D6    D7   Stop  Idle
 ### Baud Rate Calculation
 
 **Basic formula (integer only):**
-```
+```formula
 X[31:16] = sysclk / baud_rate
 
 Example: 200 MHz, 115200 baud
@@ -62,27 +56,27 @@ X[31:16] = 200,000,000 / 115,200 = 1736
 ```
 
 **With fractional precision:**
-```
+```formula
 bit_period = (sysclk / baud_rate) × 65536
 X[31:10] = bit_period & $FFFFFC00
 
 Example: 200 MHz, 115200 baud
 bit_period = (200,000,000 / 115,200) × 65536 = 113,777,778
-X[31:10] = 113,777,778 & $FFFFFC00 = $06C9_0400
+X[31:10] = 113,777,778 & $FFFFFC00 = $06C8_1C00
 ```
 
 ### Common Baud Rates at 200 MHz
 
 | Baud Rate | X[31:16] (integer) | X (with fractional) | Error |
 |-----------|-------------------|---------------------|-------|
-| 9600 | 20833 | $5161_0000 | 0.00% |
-| 19200 | 10417 | $28B1_0000 | 0.02% |
-| 38400 | 5208 | $1458_8000 | 0.02% |
-| 57600 | 3472 | $0D90_5400 | 0.02% |
-| 115200 | 1736 | $06C8_2C00 | 0.02% |
-| 230400 | 868 | $0364_1400 | 0.02% |
-| 460800 | 434 | $01B2_0C00 | 0.02% |
-| 921600 | 217 | $00D9_0400 | 0.02% |
+| 9600 | 20833 | $5161_5400 | 0.00% |
+| 19200 | 10417 | $28B0_A800 | 0.00% |
+| 38400 | 5208 | $1458_5400 | 0.01% |
+| 57600 | 3472 | $0D90_3800 | 0.01% |
+| 115200 | 1736 | $06C8_1C00 | 0.01% |
+| 230400 | 868 | $0364_0C00 | 0.01% |
+| 460800 | 434 | $01B2_0400 | 0.01% |
+| 921600 | 217 | $00D9_0000 | 0.01% |
 | 1000000 | 200 | $00C8_0000 | 0.00% |
 
 ### Configuration Sequence
@@ -100,7 +94,7 @@ PUB uart_tx_init() | bit_period
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
+  WXPIN(TX_PIN, bit_period | 7)            ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx_byte(value)
@@ -112,7 +106,7 @@ PUB tx_byte(value)
 **PASM2:**
 ```pasm2
               mov       bit_period, ##(200_000_000 / 115200) << 16
-              or        bit_period, #7        ' 8 data bits (X[4:0] = N - 1)
+              or        bit_period, #7     ' 8 data bits (X[4:0] = N - 1)
 
               dirl      #TX_PIN
               wrpin     ##(P_ASYNC_TX | P_OE), #TX_PIN
@@ -155,7 +149,6 @@ PUB tx_byte_with_parity(value) | parity, data9
   WYPIN(TX_PIN, data9)
 ```
 
----
 
 ## 11.3 P_SYNC_TX Mode (%11100)
 
@@ -199,12 +192,14 @@ mode := P_SYNC_TX | P_OE | P_PLUS1_B        ' Clock from pin+1
 ### Transmission Modes
 
 **Continuous Mode (X[5] = 0):**
+
 - Double-buffered for gapless transmission
 - Prime shifter with first data before enabling
 - Buffer automatically loads to shifter after transmission
 - IN flag indicates buffer empty
 
 **Start-Stop Mode (X[5] = 1):**
+
 - Data can be modified before clock starts
 - Suitable for non-continuous transmissions
 - More control over timing
@@ -309,7 +304,6 @@ PUB continuous_stream()
       WYPIN(TX_PIN, get_next_byte())        ' Load next
 ```
 
----
 
 ## 11.4 Clock Generation
 
@@ -347,7 +341,6 @@ PUB send_clocks(count)
 
 For CPHA=1, use P_INVERT_A on the data pin.
 
----
 
 ## 11.5 Complete Examples
 
@@ -367,7 +360,7 @@ PUB start()
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
+  WXPIN(TX_PIN, bit_period | 7)            ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx(c)
@@ -466,7 +459,7 @@ PUB fast_uart_init() | bit_period
 
   PINFLOAT(TX_PIN)
   WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-  WXPIN(TX_PIN, bit_period | 7)             ' 8 data bits (X[4:0] = N - 1)
+  WXPIN(TX_PIN, bit_period | 7)            ' 8 data bits (X[4:0] = N - 1)
   PINLOW(TX_PIN)
 
 PUB tx_buffer(ptr, count) | i
@@ -515,13 +508,12 @@ message       byte      "Hello, PASM2!", 13, 10, 0
               alignl
 ```
 
----
 
 ## 11.6 Baud Rate Error Analysis
 
 ### Error Calculation
 
-```
+```formula
 actual_baud = sysclk / round(sysclk / target_baud)
 error = abs(actual_baud - target_baud) / target_baud × 100%
 ```
@@ -537,7 +529,6 @@ UART receivers typically tolerate ±2-3% baud rate error. At 10 bits per frame (
 | Integer only | 1 clock | 0.02% |
 | With X[15:10] | 1/64 clock | <0.001% |
 
----
 
 ## 11.7 Quick Reference
 
@@ -574,7 +565,7 @@ UART receivers typically tolerate ±2-3% baud rate error. At 10 bits per frame (
 
 ### Baud Rate Formula
 
-```
+```formula
 X = (sysclk / baud) << 16 | data_bits
 
 With fractional:
@@ -586,6 +577,5 @@ X = ((sysclk * 65536 / baud) & $FFFFFC00) | data_bits
 - P_ASYNC_TX: Output high (idle state)
 - P_SYNC_TX: Output low, data can be primed
 
----
 
 *This chapter covered serial transmission modes. For serial reception modes, see Chapter 17. For other input modes, see Part III.*

@@ -2,28 +2,14 @@
 
 This chapter covers digital-to-analog conversion using the P2's built-in DAC capabilities. Topics include the resistor DAC output options, 8-bit direct DAC control, and 16-bit dithered DAC modes: **P_DAC_DITHER_RND** (%00010) and **P_DAC_DITHER_PWM** (%00011).
 
----
-
 ## 10.1 DAC Architecture Overview
 
 ### P2 DAC Structure
 
 Each P2 I/O pin includes analog output capability through a resistive DAC network. The DAC operates at 8-bit resolution natively, with dithering modes available to achieve effective 16-bit resolution.
 
-```
-                    ┌─────────────────────────────────────┐
-M[7:0] ────────────►│        8-bit DAC                   │
-(from Smart Pin     │     (per-pin resistor network)     │
- or WRPIN)          └─────────────────────────────────────┘
-                                    │
-                                    ▼
-                    ┌─────────────────────────────────────┐
-M[12:10] ──────────►│    Output Mode Selection           │
-(%101 = DAC)        │  990Ω / 600Ω / 124Ω / 75Ω         │
-                    └─────────────────────────────────────┘
-                                    │
-                                    ▼
-                                 PIN OUT
+```{=latex}
+\DiagDacStructure
 ```
 
 ### DAC Mode Enable
@@ -45,8 +31,6 @@ The DAC output requires M[12:10] = %101 in the pin configuration. This is automa
 | Dithered PRNG | 16-bit | Sample period | Control signals |
 | Dithered PWM | 16-bit | Sample period | Audio |
 
----
-
 ## 10.2 Resistor DAC Options
 
 ### Understanding the DAC Network
@@ -58,12 +42,14 @@ The P2 uses a resistor-weighted DAC that switches between voltage rails. The res
 High impedance, full voltage range.
 
 **Specifications:**
+
 - Output impedance: 990Ω
 - Voltage range: 0V to 3.3V
 - Bit weight: 3.3V / 256 = 12.9 mV/LSB
 - Drive current: Limited (~3.3 mA at full scale)
 
 **Best for:**
+
 - High-impedance loads
 - Voltage references
 - Signals to op-amp inputs
@@ -80,12 +66,14 @@ PINH(pin)
 Lower impedance, reduced voltage range.
 
 **Specifications:**
+
 - Output impedance: 600Ω
 - Voltage range: 0V to 2.0V
 - Bit weight: 2.0V / 256 = 7.8 mV/LSB
 - Drive current: Moderate (~3.3 mA at full scale)
 
 **Best for:**
+
 - Interface to 2V systems
 - Better load driving than 990Ω
 - Moderate current requirements
@@ -95,12 +83,14 @@ Lower impedance, reduced voltage range.
 Low impedance, full voltage range.
 
 **Specifications:**
+
 - Output impedance: 124Ω
 - Voltage range: 0V to 3.3V
 - Bit weight: 3.3V / 256 = 12.9 mV/LSB
 - Drive current: High (~27 mA at full scale)
 
 **Best for:**
+
 - Driving cables
 - Direct speaker drive
 - LED brightness control
@@ -111,12 +101,14 @@ Low impedance, full voltage range.
 Lowest impedance, reduced voltage range.
 
 **Specifications:**
+
 - Output impedance: 75Ω
 - Voltage range: 0V to 2.0V
 - Bit weight: 2.0V / 256 = 7.8 mV/LSB
 - Drive current: Highest (~27 mA at full scale)
 
 **Best for:**
+
 - 75Ω cable termination
 - Video signals (though limited to 2V)
 - Maximum current drive
@@ -130,8 +122,6 @@ Lowest impedance, reduced voltage range.
 | Direct speaker | P_DAC_124R_3V | Current drive needed |
 | LED control | P_DAC_124R_3V | Current source capability |
 | Coax cable | P_DAC_75R_2V | Impedance matching |
-
----
 
 ## 10.3 Direct 8-bit DAC Control
 
@@ -180,12 +170,11 @@ PUB update_dac(pin, value) | current_mode
 ### BIT_DAC Mode
 
 When OUT controls the pin (not a smart pin mode), M[7:4] and M[3:0] define two DAC levels:
+
 - OUT=1: M[7:4] duplicated as {M[7:4], M[7:4]}
 - OUT=0: M[3:0] duplicated as {M[3:0], M[3:0]}
 
 This creates a simple 2-level DAC controlled by the OUT bit.
-
----
 
 ## 10.4 16-bit Dithered DAC Modes
 
@@ -207,6 +196,7 @@ Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 Uses pseudo-random dithering for smooth 16-bit output.
 
 **Characteristics:**
+
 - Random switching between adjacent levels
 - Uniform spectral distribution of dither noise
 - No periodic artifacts
@@ -243,7 +233,8 @@ PUB update_value(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE), #DAC_PIN
+              wrpin     ##(P_DAC_DITHER_RND | ...
+                         P_DAC_124R_3V | P_OE), #DAC_PIN
               wxpin     #1, #DAC_PIN       ' Immediate mode
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -254,6 +245,7 @@ PUB update_value(value16)
 Uses PWM dithering for better dynamic range.
 
 **Characteristics:**
+
 - Maximum 2 transitions per 256 clocks
 - Lower switching noise than PRNG
 - Fclock/256 component at -48 dB
@@ -293,7 +285,8 @@ PUB update_value_sync(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE), #DAC_PIN
+              wrpin     ##(P_DAC_DITHER_PWM | ...
+                         P_DAC_600R_2V | P_OE), #DAC_PIN
               wxpin     ##256, #DAC_PIN    ' Sample period
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -312,8 +305,6 @@ PUB update_value_sync(value16)
 | Dynamic range | Good | Better |
 | Best for | Control signals | Audio |
 | Sample period | Any value ≥1 | Multiple of 256 |
-
----
 
 ## 10.5 DAC with Other Modes
 
@@ -350,8 +341,6 @@ PWM modes can combine with DAC for analog PWM output:
 mode := P_PWM_TRIANGLE | P_DAC_600R_2V | P_OE
 ```
 
----
-
 ## 10.6 ADC Feedback
 
 ### Monitoring DAC Loading
@@ -380,13 +369,11 @@ The ADC accumulates samples during the sample period. The result indicates how t
 - Implement current limiting
 - Calibrate DAC output
 
----
-
 ## 10.7 Voltage Calculation
 
 ### 8-bit DAC Voltage
 
-```
+```formula
 Voltage = (DAC_value / 256) × Full_Scale_Voltage
 
 For P_DAC_990R_3V or P_DAC_124R_3V:
@@ -398,7 +385,7 @@ For P_DAC_600R_2V or P_DAC_75R_2V:
 
 ### 16-bit DAC Voltage
 
-```
+```formula
 Voltage = (DAC_value / 65536) × Full_Scale_Voltage
 
 For 3.3V range:
@@ -423,8 +410,6 @@ PUB set_voltage_mv(pin, mv)
   ' Set DAC to specific voltage (3.3V full scale)
   wypin(pin, millivolts_to_dac16(mv, 3300))
 ```
-
----
 
 ## 10.8 Complete Examples
 
@@ -540,7 +525,8 @@ DAT           org
 
 ' Initialize 16-bit dithered DAC
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | P_DAC_990R_3V | P_OE), #DAC_PIN
+              wrpin     ##(P_DAC_DITHER_PWM | ...
+                         P_DAC_990R_3V | P_OE), #DAC_PIN
               wxpin     ##512, #DAC_PIN    ' 512 clock sample period
               dirh      #DAC_PIN
 
@@ -569,8 +555,6 @@ direction     long      256
 delay         long      2000               ' Sample interval
 ```
 
----
-
 ## 10.9 Design Considerations
 
 ### Output Impedance and Loading
@@ -588,23 +572,16 @@ The DAC output impedance determines load driving capability:
 
 For driving low-impedance loads or cables, add an external buffer:
 
-```
-          ┌────────────┐
-DAC OUT ──┤    Op-Amp  ├─── Buffered Out
-          │  (unity)   │
-          └────────────┘
+```{=latex}
+\DiagDacBuffer
 ```
 
 ### Filtering Dither Noise
 
 For clean analog output, add an RC low-pass filter:
 
-```
-DAC OUT ───[R]───┬─── Filtered Out
-                 │
-                [C]
-                 │
-                GND
+```{=latex}
+\DiagDacFilter
 ```
 
 Cutoff frequency: fc = 1 / (2π × R × C)
@@ -615,8 +592,6 @@ Cutoff frequency: fc = 1 / (2π × R × C)
 - Ensure clean power supply for best performance
 - Consider decoupling near the pin
 - Load current affects power dissipation
-
----
 
 ## 10.10 Quick Reference
 
@@ -638,7 +613,7 @@ Cutoff frequency: fc = 1 / (2π × R × C)
 
 ### Voltage Formulas
 
-```
+```formula
 8-bit:  V = (DAC_value / 256) × V_full_scale
 16-bit: V = (DAC_value / 65536) × V_full_scale
 
@@ -648,10 +623,10 @@ DAC_value = (V_target / V_full_scale) × resolution
 ### Reset State (DIR=0)
 
 All DAC modes:
+
 - IN = low
 - Y[15:0] = captured (ready for DIR=1)
 - Output = low (0V)
 
----
 
 *This chapter covered DAC analog output. For serial transmission modes, see Chapter 11. For input modes, see Part III.*

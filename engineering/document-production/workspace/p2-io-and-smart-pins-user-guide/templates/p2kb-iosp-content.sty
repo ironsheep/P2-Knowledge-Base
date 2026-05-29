@@ -12,6 +12,13 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{p2kb-iosp-content}[2026/05/25 P2KB IOSP Content Layer v1.0]
 
+% ==================== FIGURE CAPTIONS ====================
+% Terse, small, centered captions with a bold "Figure N.M." label, set in a
+% narrower block (indented both sides) so the caption binds to the figure rather
+% than running the full text width like body prose. (caption pkg from foundation.)
+\captionsetup{font=small, labelfont=bf, labelsep=period, justification=centering,
+              singlelinecheck=true, skip=4pt, width=0.82\linewidth}
+
 % ==================== COLOR PALETTE ====================
 % User guide color scheme — professional and readable
 
@@ -121,6 +128,118 @@
 }{%
   \end{tcolorbox}%
   \par\vspace{0.5\baselineskip}%
+}
+
+% ==================== CODE-BLOCK ENVIRONMENTS ====================
+% Colored code-block environments emitted by p2kb-iosp-code-coloring.lua.
+%
+% CROSS-PUBLICATION CONSISTENCY (the live set):
+%   This User Guide, the Assembly Language Reference, and the DeSilva tutorial
+%   are the three LIVE publications. They MUST share one color = one language
+%   so a reader moving between them never has to relearn the palette. The
+%   colors/geometry below are copied verbatim from the Assembly Language
+%   Reference (p2kb-pasm2-content.sty), which in turn matches the DeSilva
+%   tutorial. IDE-aligned: Spin2 = blue, PASM2 = green (Propeller Tool/FlexProp).
+%   DO NOT diverge these without updating all three live publications together.
+%   See engineering/document-production/PUBLICATION-ROSTER.md.
+%
+% Note: IOSPBlock holds PASM2/assembly examples, so it is GREEN (the PASM2
+% color), NOT yellow. The filter routes ::: pasm/iosp and ```pasm2 fences here.
+
+% IDE-aligned palette (shared with the other live publications)
+\definecolor{iosp-spin2-bg}{HTML}{E3F2FD}          % Light blue (Spin2)
+\definecolor{iosp-spin2-border}{HTML}{1976D2}      % Blue border (Spin2)
+\definecolor{iosp-pasm2-bg}{HTML}{EBFCEB}          % Light green (PASM2)
+\definecolor{iosp-pasm2-border}{HTML}{4CB04C}      % Green border (PASM2)
+\definecolor{iosp-cordic-bg}{HTML}{F8F5FF}         % Very soft purple (CORDIC)
+\definecolor{iosp-cordic-border}{HTML}{A785C2}     % Muted purple border (CORDIC)
+\definecolor{iosp-multicog-bg}{HTML}{F5F9FC}       % Very soft blue-gray (Multi-COG)
+\definecolor{iosp-multicog-border}{HTML}{7FA8C9}   % Muted blue border (Multi-COG)
+\definecolor{iosp-antipattern-bg}{HTML}{FFF5F5}    % Very soft pink (Antipattern)
+\definecolor{iosp-antipattern-border}{HTML}{C08080} % Muted rose border (Antipattern)
+
+% Shared geometry for all five code blocks (matches the live publications):
+%   thick left rule for accessibility, left=30pt to clear inset line numbers.
+\newtcolorbox{Spin2Block}{%
+  colback=iosp-spin2-bg, colframe=iosp-spin2-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+\newtcolorbox{IOSPBlock}{%
+  colback=iosp-pasm2-bg, colframe=iosp-pasm2-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+\newtcolorbox{CORDICBlock}{%
+  colback=iosp-cordic-bg, colframe=iosp-cordic-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+\newtcolorbox{MultiCOGBlock}{%
+  colback=iosp-multicog-bg, colframe=iosp-multicog-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+\newtcolorbox{AntipatternBlock}{%
+  colback=iosp-antipattern-bg, colframe=iosp-antipattern-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+% ==================== REFERENCE BLOCKS (non-language notation) ====================
+% Two-tier pedagogy: the LANGUAGE blocks above (Spin2 blue, PASM2 green) are
+% saturated/IDE-aligned = "code you would type". The REFERENCE blocks below are a
+% deliberately MUTED, cohesive family = "notation/spec, not runnable" so a reader
+% parses the page as two groups, not many competing colors. Keep this family muted
+% if more reference types are ever added — guard against color overload.
+%   Syntax  = slate   (instruction syntax forms)
+%   Layout  = bronze  (bit-field / register-layout diagrams)
+%   Formula = indigo  (timing/math formulas and worked calculations)
+
+\definecolor{iosp-syntax-bg}{HTML}{ECEFF1}         % Light slate
+\definecolor{iosp-syntax-border}{HTML}{546E7A}     % Deep blue-grey (slate)
+\definecolor{iosp-layout-bg}{HTML}{FBF7F2}         % Warm off-white (blueprint)
+\definecolor{iosp-layout-border}{HTML}{8D6E63}     % Bronze/brown
+\definecolor{iosp-formula-bg}{HTML}{E8EAF6}        % Very light indigo
+\definecolor{iosp-formula-border}{HTML}{5C6BC0}    % Muted indigo (softened from 3949AB)
+
+% Instruction syntax forms = LEFT-BAR treatment (no fill), matching the PASM
+% Reference Manual's per-instruction bar. The bar COLOR encodes the language:
+% #1 = green (PASM2) or blue (Spin2) -- so PASM2/Spin2 syntax share the bar
+% treatment but stay distinguishable, with NO title line. Fill-vs-bar is the
+% primary cue: filled box = runnable code; left bar = reference/notation.
+\newtcolorbox{SyntaxBlock}[1]{%
+  enhanced, breakable, colback=white, frame hidden, sharp corners, boxrule=0pt,
+  borderline west={4pt}{0pt}{#1},
+  left=12pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=12pt, after skip=12pt
+}
+
+% Bit-field / register-layout diagrams. No line numbers (it is a diagram, not
+% code), so a tighter left pad. Bronze = "blueprint".
+\newtcolorbox{LayoutBlock}{%
+  colback=iosp-layout-bg, colframe=iosp-layout-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=12pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable
+}
+
+% Math/timing formulas and worked calculations = LEFT-BAR treatment (no fill),
+% indigo bar. Reference/notation, not runnable code -> bar, not filled box.
+\newtcolorbox{FormulaBlock}{%
+  enhanced, breakable, colback=white, frame hidden, sharp corners, boxrule=0pt,
+  borderline west={4pt}{0pt}{iosp-formula-border},
+  left=12pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=12pt, after skip=12pt
 }
 
 % ==================== SPIN2 / PASM2 LANGUAGE DEFINITIONS ====================

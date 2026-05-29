@@ -2,7 +2,6 @@
 
 This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%11101) for synchronous (SPI-style) reception and P_ASYNC_RX (%11111) for asynchronous (UART-style) reception. Topics include baud rate configuration, clock routing, data formatting, and error handling.
 
----
 
 ## 17.1 Serial Receive Modes Overview
 
@@ -16,16 +15,17 @@ This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%1110
 ### Mode Selection
 
 **Choose P_SYNC_RX when:**
+
 - External clock signal available (SPI slave, shift register)
 - Clock provided by transmitting device
 - Precise bit timing controlled externally
 
 **Choose P_ASYNC_RX when:**
+
 - No external clock (UART, RS-232)
 - Both ends agree on baud rate
 - Standard serial communication
 
----
 
 ## 17.2 Mode %11111: P_ASYNC_RX (Asynchronous Receive)
 
@@ -33,18 +33,13 @@ This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%1110
 
 Receives serial data asynchronously with automatic start bit detection. The smart pin monitors for a high-to-low transition (start bit), samples data bits at mid-bit timing, and validates the stop bit.
 
-```
-Idle ─┐   ┌───┬───┬───┬───┬───┬───┬───┬───┬───┐
-      │   │ D0│ D1│ D2│ D3│ D4│ D5│ D6│ D7│   │
-      └───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴── Idle
-      START                                  STOP
-            ▲   ▲   ▲   ▲   ▲   ▲   ▲   ▲
-          Sample points (mid-bit)
+```{=latex}
+\DiagUartRxFrame
 ```
 
 ### X Register Configuration
 
-```
+```layout
 X[31:16]: System clock periods per bit (integer part)
 X[15:10]: Fractional clock periods (1/64th increments)
 X[9:5]:   Reserved
@@ -54,7 +49,7 @@ X[4:0]:   Number of data bits minus 1 (0-31 for 1-32 bits)
 ### Baud Rate Calculation
 
 **Basic formula:**
-```
+```formula
 bit_period = sysclk / baud
 X_value = (bit_period << 16) | (data_bits - 1)
 ```
@@ -105,7 +100,7 @@ PUB uart_init() | bit_period
 
 PUB receive_byte() : value
   REPEAT UNTIL PINREAD(RX_PIN)                  ' Wait for data
-  value := RDPIN(RX_PIN) >> 24                  ' LSB-justify 8-bit byte (32-8)
+  value := RDPIN(RX_PIN) >> 24            ' LSB-justify 8-bit byte (32-8)
 ```
 
 ### Reception with Timeout
@@ -116,7 +111,7 @@ PUB receive_with_timeout(timeout_ms) : value | deadline
 
   REPEAT
     IF PINREAD(RX_PIN)
-      RETURN RDPIN(RX_PIN) >> 24                ' Data received (LSB-justify 8-bit)
+      RETURN RDPIN(RX_PIN) >> 24      ' Data received (LSB-justify 8-bit)
 
     IF GETMS() >= deadline
       RETURN -1                                 ' Timeout
@@ -150,8 +145,8 @@ DAT           org
               testp     #RX_PIN wc                ' Check IN flag
         if_nc jmp       #.receive_loop            ' Wait for data
 
-              rdpin     rx_data, #RX_PIN          ' Read MSB-justified word
-              shr       rx_data, #24              ' LSB-justify 8-bit byte (32-8)
+              rdpin     rx_data, #RX_PIN        ' Read MSB-justified word
+              shr       rx_data, #24      ' LSB-justify 8-bit byte (32-8)
               ' Process rx_data...
 
               jmp       #.receive_loop
@@ -160,7 +155,6 @@ bit_period    res       1
 rx_data       res       1
 ```
 
----
 
 ## 17.3 Mode %11101: P_SYNC_RX (Synchronous Receive)
 
@@ -199,6 +193,7 @@ X[4:0]: Number of bits minus 1
 ```
 
 **Sample Timing:**
+
 - X[5]=0 (before edge): More tolerant, works with any transmitter
 - X[5]=1 (on edge): Fast P2-to-P2 transfers, requires 2-clock hold time
 
@@ -218,7 +213,7 @@ Received data is **left-justified** in the Z register. For less than 32 bits, ri
 CON
   _clkfreq = 200_000_000
   MISO_PIN = 30                                 ' Data input
-  SCK_PIN = 31                                  ' Clock input (MISO_PIN + 1)
+  SCK_PIN = 31                               ' Clock input (MISO_PIN + 1)
 
 PUB spi_slave_init()
   ' 8-bit receive, clock on next pin, sample before edge
@@ -285,7 +280,6 @@ DAT           org
 rx_byte       res       1
 ```
 
----
 
 ## 17.4 Full-Duplex UART
 
@@ -323,7 +317,7 @@ PUB echo_test()
   ' Echo received bytes back to sender
   REPEAT
     IF PINREAD(RX_PIN)
-      send_byte(RDPIN(RX_PIN) >> 24)            ' LSB-justify before resending
+      send_byte(RDPIN(RX_PIN) >> 24)       ' LSB-justify before resending
 ```
 
 ### Half-Duplex Coordination
@@ -334,7 +328,7 @@ For half-duplex protocols (RS-485, single-wire):
 CON
   DATA_PIN = 20
   DIR_PIN = 21                                  ' Direction control
-  TX_PIN = DATA_PIN                             ' Single-wire: TX and RX share DATA_PIN
+  TX_PIN = DATA_PIN               ' Single-wire: TX and RX share DATA_PIN
   RX_PIN = DATA_PIN
 
 PUB send_message(ptr, len) | i
@@ -358,13 +352,12 @@ PUB receive_message(ptr, max_len, timeout_ms) : count | deadline, b
       BYTE[ptr][count++] := b
       deadline := GETMS() + timeout_ms          ' Reset timeout
     ELSEIF GETMS() >= deadline
-      QUIT                                      ' Timeout - end of message
+      QUIT                                     ' Timeout - end of message
 
 PRI send_byte(b)
   ' Application-specific: TX byte b via DATA_PIN (configured for TX)
 ```
 
----
 
 ## 17.5 Buffered Reception
 
@@ -422,7 +415,7 @@ PRI receiver_loop()
 
   REPEAT
     IF PINREAD(RX_PIN)
-      rx_buffer[rx_head++] := RDPIN(RX_PIN) >> 24  ' LSB-justify 8-bit byte
+      rx_buffer[rx_head++] := RDPIN(RX_PIN) >> 24  ' LSB-justify byte
       IF rx_head >= 1024
         rx_head := 0                            ' Wrap around
 
@@ -430,7 +423,6 @@ PUB get_rx_head() : pos
   pos := rx_head
 ```
 
----
 
 ## 17.6 Error Detection
 
@@ -440,11 +432,13 @@ A framing error occurs when the stop bit is not high. The P2 does not automatica
 
 ```spin2
 PUB receive_with_check() : value, error | raw
-  ' Requires PINSTART configured for 9 data bits (X[4:0] = 8) to capture stop bit.
+  ' Requires PINSTART configured for 9 data bits
+  ' (X[4:0] = 8) to capture stop bit.
   REPEAT UNTIL PINREAD(RX_PIN)
   raw := RDPIN(RX_PIN) >> 23                    ' 9 bits, shift by 32-9
 
-  ' After the shift: bits 7:0 are the data byte, bit 8 is the captured stop bit
+  ' After the shift: bits 7:0 are the data byte,
+  ' bit 8 is the captured stop bit
   value := raw & $FF
   IF (raw & $100) == 0
     error := TRUE                               ' Missing stop bit
@@ -485,7 +479,6 @@ PUB detect_break(pin) : is_break | start_time
   is_break := FALSE
 ```
 
----
 
 ## 17.7 RS-232 Signal Inversion
 
@@ -498,7 +491,6 @@ RS-232 uses inverted logic (mark=-3V to -15V, space=+3V to +15V). After level co
 PINSTART(RX_PIN, P_ASYNC_RX | P_INVERT_IN, (bit_period << 16) | 7, 0)
 ```
 
----
 
 ## 17.8 Multi-Drop Networks
 
@@ -530,7 +522,6 @@ PUB listen_for_address() : addressed | addr
   RETURN FALSE
 ```
 
----
 
 ## 17.9 Application Examples
 
@@ -647,7 +638,6 @@ PRI send_string(ptr)
   ' Application-specific: TX null-terminated string at ptr
 ```
 
----
 
 ## 17.10 Quick Reference
 
@@ -661,7 +651,8 @@ PRI send_string(ptr)
 ### P_ASYNC_RX Configuration
 
 **X Register:**
-```
+
+```layout
 X[31:16]: Clocks per bit (sysclk / baud)
 X[15:10]: Fractional clocks (precision)
 X[4:0]:   Data bits - 1 (7 for 8-bit)
@@ -713,6 +704,5 @@ deadline := GETMS() + timeout_ms
 REPEAT UNTIL PINREAD(pin) OR (GETMS() >= deadline)
 ```
 
----
 
 *This chapter covered serial reception. For special modes like USB, see Chapter 19. For inter-cog data sharing, see Chapter 18.*

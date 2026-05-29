@@ -2,8 +2,6 @@
 
 This appendix provides comparison matrices to help select the appropriate Smart Pin mode for your application.
 
----
-
 ## Output Mode Comparison
 
 ### All Output Modes at a Glance
@@ -22,8 +20,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | DAC 16-bit | P_DAC_DITHER_* | DC to audio | 16-bit | N/A | Yes | Medium | Audio, precision |
 | Sync TX | P_SYNC_TX | Clock rate | 1-32 bits | N/A | Clocked | Medium | SPI master |
 | Async TX | P_ASYNC_TX | 300 to 1M+ baud | 1-32 bits | N/A | Per-byte | Low | UART |
-
----
 
 ## Input Mode Comparison
 
@@ -48,8 +44,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | ADC Scope | P_ADC_SCOPE | 4-ch capture | 8 bits | Triggered | Triggered | High | Oscilloscope |
 | Sync RX | P_SYNC_RX | Serial data | 1-32 bits | Clock rate | Yes | Medium | SPI slave |
 | Async RX | P_ASYNC_RX | Serial data | 1-32 bits | Baud rate | Yes | Low | UART |
-
----
 
 ## Frequency Generation Comparison
 
@@ -87,8 +81,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | P_TRANSITION | 50% fixed | None |
 | P_PULSE | Pulse width | Explicit clocks |
 
----
-
 ## Counting Mode Comparison
 
 ### Choosing the Right Counter
@@ -114,8 +106,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | P_HIGH_TICKS | Time | Time (Y=1) | Y[0] | Level | Yes |
 | P_QUADRATURE | Phase A | Phase B | Automatic | No | Yes |
 
----
-
 ## Period/Frequency Measurement Comparison
 
 ### Mode Selection Guide
@@ -138,8 +128,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | P_COUNTER_TICKS | Period time in window | ±1 clock | Longer window |
 | P_COUNTER_HIGHS | High time in window | ±1 clock | Longer window |
 | P_COUNTER_PERIODS | Periods in window | ±1 period | Longer window |
-
----
 
 ## Serial Mode Comparison
 
@@ -177,8 +165,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | SPI 10 MHz | 10 Mbps | Flash, display |
 | SPI 25 MHz | 25 Mbps | High-speed ADC |
 
----
-
 ## ADC Mode Comparison
 
 ### ADC Modes
@@ -208,8 +194,6 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | 0-100mV | P_ADC_30X | 0-104mV | Strain gauge |
 | 0-30mV | P_ADC_100X | 0-33mV | Microphone |
 
----
-
 ## DAC Mode Comparison
 
 ### Resistor Options
@@ -232,62 +216,19 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Sample period | Any >= 1 | Multiple of 256 |
 | Best for | Control signals | Audio |
 
----
-
 ## Quick Selection Trees
 
 ### "I need to generate a signal"
 
-```
-Is it analog voltage? ─── Yes ──► DAC modes
-         │
-         No
-         │
-Is it serial data? ─── Yes ──► P_ASYNC_TX or P_SYNC_TX
-         │
-         No
-         │
-Need variable duty? ─── Yes ──► PWM modes
-         │
-         No
-         │
-Need sub-Hz resolution? ─── Yes ──► P_NCO_FREQ
-         │
-         No
-         │
-Need counted pulses? ─── Yes ──► P_TRANSITION or P_PULSE
-         │
-         No ──► Simple PINHIGH/PINLOW
+```{=latex}
+\DiagSelectOutput
 ```
 
 ### "I need to measure a signal"
 
-```
-Is it analog? ─── Yes ──► P_ADC modes
-         │
-         No
-         │
-Is it serial data? ─── Yes ──► P_ASYNC_RX or P_SYNC_RX
-         │
-         No
-         │
-Is it a rotary encoder? ─── Yes ──► P_QUADRATURE
-         │
-         No
-         │
-Need frequency? ─── Yes ──► P_COUNTER_PERIODS or P_PERIODS_TICKS
-         │
-         No
-         │
-Need pulse width? ─── Yes ──► P_HIGH_TICKS or P_STATE_TICKS
-         │
-         No
-         │
-Need event count? ─── Yes ──► P_COUNT_RISES
-         │
-         No ──► Simple PINREAD
+```{=latex}
+\DiagSelectInput
 ```
 
----
 
 *For P_ constant values, see Appendix B. For formulas, see Appendix C. For troubleshooting, see Appendix E.*
