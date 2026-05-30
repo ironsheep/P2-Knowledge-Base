@@ -254,8 +254,50 @@ function Div(div)
       return pandoc.RawBlock('latex', latex_block)
     end
   
+  -- ===== MODE REFERENCE CARDS (Appendix F) =====
+  -- ::: modecard wraps a mode's title (a Header), one-line brief, and short
+  -- description in a red left-bar ModeBlock. The Header is rendered as a bold
+  -- title line INSIDE the bar (not as a section), with a manual TOC entry so the
+  -- mode still appears in the table of contents and PDF bookmarks (same
+  -- addcontentsline technique as the sidetrack handler below). Special LaTeX
+  -- characters in the title (%, _, & ...) are re-escaped because the title text,
+  -- once parsed by Pandoc, is emitted into a raw-LaTeX block.
+  elseif classes:includes("modecard") then
+    local function esc(s)
+      s = s:gsub("\\", "\\textbackslash{}")
+      s = s:gsub("([%%%$#&_{}])", "\\%1")
+      return s
+    end
+    local title = nil
+    local body = {}
+    for _, block in ipairs(div.content) do
+      if not title and block.t == "Header" then
+        title = pandoc.utils.stringify(block.content)
+      else
+        table.insert(body, block)
+      end
+    end
+    local result = {}
+    -- Each mode starts on its own page (confirmed preference). \clearpage gives
+    -- every mode a full page for its card + register usage + example + reference,
+    -- which is what naturally happened for the longer late modes and is now
+    -- applied uniformly to all of them.
+    table.insert(result, pandoc.RawBlock('latex', '\\clearpage'))
+    table.insert(result, pandoc.RawBlock('latex', '\\begin{ModeBlock}'))
+    if title then
+      table.insert(result, pandoc.RawBlock('latex',
+        '\\phantomsection\\addcontentsline{toc}{section}{' .. esc(title) .. '}'))
+      table.insert(result, pandoc.RawBlock('latex',
+        '{\\large\\bfseries ' .. esc(title) .. '}\\par\\vspace{3pt}'))
+    end
+    for _, block in ipairs(body) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{ModeBlock}'))
+    return result
+
   -- ===== DESILVA PEDAGOGICAL ELEMENTS =====
-  
+
   elseif classes:includes("medicine-cabinet") then
     local result = {pandoc.RawBlock('latex', '\\begin{dsmedicinecabinet}')}
     for _, block in ipairs(div.content) do

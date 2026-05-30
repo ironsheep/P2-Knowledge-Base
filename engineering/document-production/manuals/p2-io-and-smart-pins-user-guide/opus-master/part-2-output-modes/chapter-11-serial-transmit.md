@@ -1,4 +1,4 @@
-# Chapter 11: Serial Transmission
+# Chapter 11: Serial Transmission {#ch11}
 
 This chapter covers the serial transmission modes: **P_ASYNC_TX** (%11110) for asynchronous UART-style transmission and **P_SYNC_TX** (%11100) for synchronous SPI-style transmission.
 

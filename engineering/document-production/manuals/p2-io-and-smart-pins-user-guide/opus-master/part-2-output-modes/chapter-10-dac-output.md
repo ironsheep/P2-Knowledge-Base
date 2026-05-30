@@ -1,4 +1,4 @@
-# Chapter 10: DAC Output
+# Chapter 10: DAC Output {#ch10}
 
 This chapter covers digital-to-analog conversion using the P2's built-in DAC capabilities. Topics include the resistor DAC output options, 8-bit direct DAC control, and 16-bit dithered DAC modes: **P_DAC_DITHER_RND** (%00010) and **P_DAC_DITHER_PWM** (%00011).
 
@@ -182,7 +182,7 @@ This creates a simple 2-level DAC controlled by the OUT bit.
 
 The P2 achieves 16-bit DAC resolution using 8-bit hardware plus temporal dithering. By rapidly switching between adjacent 8-bit values in a precise pattern, the time-averaged output achieves 16-bit resolution.
 
-```
+```formula
 Target: $8040 (16-bit)
 Upper byte: $80 (128)
 Lower byte: $40 (64 of 256)
@@ -233,8 +233,7 @@ PUB update_value(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_RND | ...
-                         P_DAC_124R_3V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE), #DAC_PIN
               wxpin     #1, #DAC_PIN       ' Immediate mode
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -285,8 +284,7 @@ PUB update_value_sync(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | ...
-                         P_DAC_600R_2V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE), #DAC_PIN
               wxpin     ##256, #DAC_PIN    ' Sample period
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -525,8 +523,7 @@ DAT           org
 
 ' Initialize 16-bit dithered DAC
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | ...
-                         P_DAC_990R_3V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_PWM | P_DAC_990R_3V | P_OE), #DAC_PIN
               wxpin     ##512, #DAC_PIN    ' 512 clock sample period
               dirh      #DAC_PIN
 

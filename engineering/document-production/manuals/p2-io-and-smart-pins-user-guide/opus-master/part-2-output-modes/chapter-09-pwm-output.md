@@ -1,4 +1,4 @@
-# Chapter 9: PWM Output
+# Chapter 9: PWM Output {#ch9}
 
 This chapter covers the three Pulse Width Modulation (PWM) modes: **P_PWM_TRIANGLE** (%01000) for symmetric triangle-wave PWM, **P_PWM_SAWTOOTH** (%01001) for asymmetric sawtooth-wave PWM, and **P_PWM_SMPS** (%01010) for switch-mode power supply control with feedback.
 
@@ -320,8 +320,9 @@ PUB smps_controller(duty_percent, voltage_threshold, current_limit) ...
 **PASM2:**
 ```pasm2
               dirl      #SMPS_PIN
-              wrpin     ##(P_PWM_SMPS | P_OE | ...
-                         P_PLUS1_A | P_MINUS1_B), #SMPS_PIN
+              mov       smps_cfg, ##(P_PWM_SMPS | P_OE)
+              or        smps_cfg, ##(P_PLUS1_A | P_MINUS1_B)
+              wrpin     smps_cfg, #SMPS_PIN
               wxpin     x_val, #SMPS_PIN
               dirh      #SMPS_PIN
               wypin     y_val, #SMPS_PIN    ' Set once, runs autonomously

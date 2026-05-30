@@ -67,9 +67,13 @@
   \thispagestyle{empty}%
   \refstepcounter{part}%
   \addcontentsline{toc}{part}{#1}%
-  \vspace*{0.25in}%
+  % Center the part title in the opening whitespace: equal vertical bands above
+  % and below, so the title sits midway in the gap rather than riding at the top
+  % with all the space beneath it. The first chapter still follows on this page
+  % (aftermanualpart suppresses its clearpage), just pushed down by the lower band.
+  \vspace*{0.9in}%
   {\centering\Huge\bfseries #1\par}%
-  \vspace{0.5in}%
+  \vspace{0.9in}%
   \nobreak%
   \global\booltrue{aftermanualpart}%
 }
@@ -240,6 +244,24 @@
   borderline west={4pt}{0pt}{iosp-formula-border},
   left=12pt, right=10pt, top=6pt, bottom=6pt,
   before skip=12pt, after skip=12pt
+}
+
+% Mode reference cards (Appendix F) = LEFT-BAR treatment, red bar. Each card holds
+% the mode title + one-line brief + short description, so a reader scanning the
+% appendix can spot mode boundaries at a glance. Same proven left-bar mechanism as
+% FormulaBlock (frame hidden, breakable), only the bar color differs.
+\definecolor{iosp-mode-border}{HTML}{C62828}      % Red (mode card)
+% L-shaped "page-corner" frame: a horizontal rule across the top PLUS the
+% vertical bar down the left edge. The corner bracket reads as "everything below
+% this belongs to this mode", which matters because cards are not page-isolated.
+% not breakable: a mode card is short (title+brief+description) and is kept whole
+% by \needspace, so the top rule never duplicates onto a continuation page.
+\newtcolorbox{ModeBlock}{%
+  enhanced, colback=white, frame hidden, sharp corners, boxrule=0pt,
+  borderline west={4pt}{0pt}{iosp-mode-border},
+  borderline north={4pt}{0pt}{iosp-mode-border},
+  left=12pt, right=10pt, top=8pt, bottom=6pt,
+  before skip=14pt, after skip=10pt
 }
 
 % ==================== SPIN2 / PASM2 LANGUAGE DEFINITIONS ====================

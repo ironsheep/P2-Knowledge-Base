@@ -1,4 +1,4 @@
-# Chapter 14: Counting Modes
+# Chapter 14: Counting Modes {#ch14}
 
 This chapter covers Smart Pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
@@ -483,7 +483,7 @@ PUB frequency_counter() : freq | period, count
     count := RDPIN(FREQ_PIN)
     freq := count * (1000 / GATE_MS)       ' Scale to Hz
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
 ```
 
 ### Example 2: Motor Position Control
@@ -590,7 +590,7 @@ PUB measure_rpm() : rpm | period, pulses
     ' RPM = (pulses / pulses_per_rev) * (60000 / sample_ms)
     rpm := (pulses * 60000) / (PULSES_PER_REV * SAMPLE_MS)
 
-    DEBUG("RPM: ", UDEC(rpm))
+    DEBUG("RPM: ", UDEC_(rpm))
 ```
 
 

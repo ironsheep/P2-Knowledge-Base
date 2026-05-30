@@ -1,4 +1,4 @@
-# Chapter 17: Serial Receive
+# Chapter 17: Serial Receive {#ch17}
 
 This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%11101) for synchronous (SPI-style) reception and P_ASYNC_RX (%11111) for asynchronous (UART-style) reception. Topics include baud rate configuration, clock routing, data formatting, and error handling.
 
@@ -187,7 +187,7 @@ mode := P_SYNC_RX | P_PLUS1_B                   ' Clock on pin+1
 
 ### X Register Configuration
 
-```
+```layout
 X[5]:   Sample timing (0=before edge, 1=on edge)
 X[4:0]: Number of bits minus 1
 ```
@@ -666,7 +666,7 @@ X_value := ((sysclk / baud) << 16) | (bits - 1)
 ### P_SYNC_RX Configuration
 
 **X Register:**
-```
+```layout
 X[5]:   0=sample before edge, 1=sample on edge
 X[4:0]: Data bits - 1
 ```

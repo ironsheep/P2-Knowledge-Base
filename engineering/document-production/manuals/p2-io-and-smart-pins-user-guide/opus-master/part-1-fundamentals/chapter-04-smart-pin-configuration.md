@@ -1,4 +1,4 @@
-# Chapter 4: Smart Pin Configuration
+# Chapter 4: Smart Pin Configuration {#ch4}
 
 This chapter documents the instructions and methods for configuring and interacting with Smart Pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish Smart Pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the Smart Pin without reading.
 

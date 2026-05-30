@@ -389,7 +389,8 @@
 \begin{tikzpicture}[font=\footnotesize,
   fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
               align=center, font=\ttfamily\small, inner sep=2pt},
-  lbl/.style={font=\scriptsize, text=diagram-text, align=center}]
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center},
+  flbl/.style={font=\tiny, text=diagram-text, align=center}]
   \node[fld, minimum width=14mm] (a) {AAAA};
   \node[fld, minimum width=14mm, right=0pt of a] (b) {BBBB};
   \node[fld, minimum width=11mm, right=0pt of b] (c) {CCC};
@@ -401,12 +402,12 @@
   \node[lbl, above=1mm of c] {23:21}; \node[lbl, above=1mm of d] {20:8};
   \node[lbl, above=1mm of e] {7:6};   \node[lbl, above=1mm of f] {5:1};
   \node[lbl, above=1mm of z] {0};
-  \node[lbl, below=1mm of a, text width=16mm] {A input\\sel / polarity};
-  \node[lbl, below=1mm of b, text width=16mm] {B input\\selection};
-  \node[lbl, below=1mm of c, text width=12mm] {A/B logic};
-  \node[lbl, below=1mm of d, text width=34mm] {Low-level pin config};
-  \node[lbl, below=1mm of e, text width=12mm] {TT\\(DIR/OUT)};
-  \node[lbl, below=1mm of f, text width=16mm] {Smart pin mode};
+  \node[flbl, below=1mm of a, text width=14mm] {A input\\sel / polarity};
+  \node[flbl, below=1mm of b, text width=14mm] {B input\\selection};
+  \node[flbl, below=1mm of c, text width=11mm] {A/B logic};
+  \node[flbl, below=1mm of d, text width=34mm] {Low-level pin config};
+  \node[flbl, below=1mm of e, text width=9mm] {TT\\(DIR/OUT)};
+  \node[flbl, below=1mm of f, text width=16mm] {Smart pin mode};
 \end{tikzpicture}}
 \caption{Structure of a P\_ constant value}
 \end{figure}}

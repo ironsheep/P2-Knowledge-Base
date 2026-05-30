@@ -1,4 +1,4 @@
-# Chapter 1: Direct I/O - The Foundation
+# Chapter 1: Direct I/O - The Foundation {#ch1}
 
 Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex Smart Pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
@@ -1164,7 +1164,7 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. The Flags column shows the Z result when WCZ is specified: DRV/OUT/FLT set Z to the pin's prior OUT-bit state, DIR sets Z to the prior DIR-bit state, and TESTP/TESTPN set both C and Z to the pin's input state. The C flag is not affected by DRV/OUT/DIR/FLT (only TESTP/TESTPN write C). (Source: P2 Silicon Doc / KB `flags_affected`.)
 
 
 ## 1.11 Common Patterns

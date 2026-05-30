@@ -85,14 +85,6 @@ end
 -- break to the next page together. We only reach back a few blocks so this
 -- applies to the "heading -> short intro -> diagram" pattern, not to a diagram
 -- that happens to sit far below an unrelated heading.
-local function count_table_rows(t)
-  local n = 0
-  for _, body in ipairs(t.bodies) do
-    if body.body then n = n + #body.body end
-  end
-  return n
-end
-
 function Pandoc(doc)
   local blocks = doc.blocks
   local needs_reserve = {}   -- header index -> reserve fraction of \textheight
@@ -114,14 +106,45 @@ function Pandoc(doc)
     end
   end
 
+  -- True if a Level-1 (chapter/appendix) header sits within `window` blocks
+  -- before block i. Such a diagram/table is in the opening section of a chapter,
+  -- which already starts on a fresh page (\clearpage), so it can never be
+  -- orphaned -- reserving space there only pushes content down and leaves a
+  -- blank gap after the section heading (the Ch 12.1 / 16.1 / Appendix B bug).
+  local function near_chapter_start(i, window)
+    for j = i - 1, math.max(1, i - window), -1 do
+      if blocks[j].t == "Header" and blocks[j].level == 1 then
+        return true
+      end
+    end
+    return false
+  end
+
+  -- Table 1.10 (the tall instruction quick-reference) is the one wide table
+  -- whose legend was orphaning. Match it by its header signature rather than a
+  -- blanket row-count rule, so other long tables (e.g. the Appendix B mode
+  -- list) do not get an unwanted near-full-page reserve.
+  local function is_instruction_quickref(t)
+    if not (t.head and t.head.rows and #t.head.rows > 0) then return false end
+    local cells = t.head.rows[1].cells
+    if not cells or #cells < 5 then return false end
+    local h = {}
+    for k = 1, #cells do h[k] = pandoc.utils.stringify(cells[k].contents):lower() end
+    return h[1]:match("instruction") and h[3]:match("dir")
+       and h[4]:match("out") and h[5]:match("flag")
+  end
+
   for i, b in ipairs(blocks) do
-    -- Diagrams: keep heading + intro + figure together.
+    -- Diagrams: keep heading + intro + figure together, EXCEPT a diagram in a
+    -- chapter's opening section (cannot be orphaned; reserve would gap the page).
     if b.t == "RawBlock" and b.format == "latex"
        and b.text:find("\\Diag", 1, true) then
-      reserve_before_heading(i, 4, 0.30)
-    -- Tall reference tables (e.g. Table 1.10): keep heading + table + legend
-    -- together so the legend is not orphaned onto the next page.
-    elseif b.t == "Table" and count_table_rows(b) > 24 then
+      if not near_chapter_start(i, 10) then
+        reserve_before_heading(i, 4, 0.30)
+      end
+    -- Table 1.10 only: keep heading + table + legend together.
+    elseif b.t == "Table" and is_instruction_quickref(b)
+           and not near_chapter_start(i, 10) then
       reserve_before_heading(i, 3, 0.72)
     end
   end

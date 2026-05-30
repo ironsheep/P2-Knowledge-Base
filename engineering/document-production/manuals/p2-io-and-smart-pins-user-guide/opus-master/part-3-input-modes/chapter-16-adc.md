@@ -1,4 +1,4 @@
-# Chapter 16: ADC (Analog Input)
+# Chapter 16: ADC (Analog Input) {#ch16}
 
 This chapter covers the P2's analog-to-digital conversion capabilities using smart pin modes P_ADC (%11000), P_ADC_EXT (%11001), and P_ADC_SCOPE (%11010). Topics include internal/external clocking, SINC filtering, gain settings, and triggered acquisition.
 
@@ -247,7 +247,7 @@ Oscilloscope-style triggered acquisition for capturing signal events. Supports f
 
 The scope mode captures from four consecutive pins simultaneously. Pin numbers must be multiples of 4 (0, 4, 8, 12, ..., 52).
 
-```
+```layout
 Pin group starting at 52:
   Pin 52: Channel 0 (and trigger source)
   Pin 53: Channel 1

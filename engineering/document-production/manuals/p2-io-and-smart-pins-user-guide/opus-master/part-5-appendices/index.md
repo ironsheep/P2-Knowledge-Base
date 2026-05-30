@@ -298,16 +298,4 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **Z register** - Smart pin accumulator/result, Ch. 3, 4
 
 
-## Appendix Cross-Reference
-
-| Appendix | Title | Content |
-|----------|-------|---------|
-| A | Intent Index | Task-based navigation |
-| B | P_ Constants | Complete constant reference |
-| C | Formulas | Mathematical formulas |
-| D | Mode Comparison | Selection charts |
-| E | Troubleshooting | Problem/solution guide |
-| F | Mode Reference | Quick reference per mode |
-
-
 *Page numbers refer to chapter numbers in this digital document.*

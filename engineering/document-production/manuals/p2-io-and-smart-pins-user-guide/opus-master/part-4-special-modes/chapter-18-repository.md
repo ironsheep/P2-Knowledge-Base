@@ -1,4 +1,4 @@
-# Chapter 18: Repository and Inter-COG Data Sharing
+# Chapter 18: Repository and Inter-COG Data Sharing {#ch18}
 
 This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-COG data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 

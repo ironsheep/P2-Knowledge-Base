@@ -1,4 +1,4 @@
-# Chapter 12: Digital Input
+# Chapter 12: Digital Input {#ch12}
 
 This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-up/pull-down resistors.
 

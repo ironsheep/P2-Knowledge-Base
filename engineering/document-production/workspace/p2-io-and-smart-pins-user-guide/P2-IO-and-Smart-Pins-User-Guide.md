@@ -320,7 +320,7 @@ The following matrix provides a one-page overview of all 32 Smart Pin modes orga
 
 # Part I: P2 Pin System Fundamentals
 
-# Chapter 1: Direct I/O - The Foundation
+# Chapter 1: Direct I/O - The Foundation {#ch1}
 
 Direct I/O is the fundamental layer of P2 pin control. Every pin operation—from simple LED blinking to complex Smart Pin configurations—ultimately depends on three core concepts: **direction**, **output state**, and **input sensing**. This chapter documents the hardware model and all Direct I/O instructions.
 
@@ -1486,7 +1486,7 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. The Flags column shows the Z result when WCZ is specified: DRV/OUT/FLT set Z to the pin's prior OUT-bit state, DIR sets Z to the prior DIR-bit state, and TESTP/TESTPN set both C and Z to the pin's input state. The C flag is not affected by DRV/OUT/DIR/FLT (only TESTP/TESTPN write C). (Source: P2 Silicon Doc / KB `flags_affected`.)
 
 
 ## 1.11 Common Patterns
@@ -1562,7 +1562,7 @@ DAT           org
 
 *This chapter establishes the foundational concepts of P2 pin control. All Smart Pin modes (Chapters 6-19) build upon these Direct I/O principles. See Chapter 2 for enhanced pin configuration via P_ constants.*
 
-# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes
+# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
 Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [4:0] = %00000 (`P_NORMAL`).
 
@@ -2042,13 +2042,11 @@ PUB set_voltage(level) | config
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     sda_pin, ...
-                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin sda_pin, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
               drvh      sda_pin              ' Release line (floats high)
 
 ' Internal pull-up button
-              wrpin     btn_pin, ...
-                        ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+              wrpin btn_pin, ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
               drvh      btn_pin                ' Enable pull-up
 
 ' Current-source LED
@@ -2105,7 +2103,7 @@ This clears all enhanced configuration and Smart Pin modes, returning the pin to
 
 *This chapter covers pin configuration without Smart Pin modes. For autonomous pin operations (PWM, serial, ADC, etc.), see Chapters 6-19. For the Smart Pin configuration process, see Chapter 4.*
 
-# Chapter 3: Smart Pin Architecture - Autonomous I/O
+# Chapter 3: Smart Pin Architecture - Autonomous I/O {#ch3}
 
 Smart Pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a Smart Pin operates independently of the COG—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming COG cycles. This chapter establishes the mental model for understanding all Smart Pin modes documented in Parts II through IV.
 
@@ -2505,7 +2503,7 @@ The key insight: once configured and enabled, Smart Pins operate independently. 
 
 *This conceptual foundation applies to all Smart Pin modes. Proceed to Chapter 4 for the practical configuration process, or to Part II (Chapters 6-11) for specific output modes.*
 
-# Chapter 4: Smart Pin Configuration
+# Chapter 4: Smart Pin Configuration {#ch4}
 
 This chapter documents the instructions and methods for configuring and interacting with Smart Pins. The configuration instructions—WRPIN, WXPIN, WYPIN—establish Smart Pin behavior. The read instructions—RDPIN, RQPIN—retrieve results. The acknowledge instruction—AKPIN—signals the Smart Pin without reading.
 
@@ -3192,7 +3190,7 @@ WRPIN(pin, 0)
 
 *This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*
 
-# Chapter 5: Working with Smart Pins
+# Chapter 5: Working with Smart Pins {#ch5}
 
 This chapter covers practical patterns for Smart Pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all Smart Pin modes documented in Parts II through IV.
 
@@ -3486,7 +3484,7 @@ WRPIN(pin, 0)
 repeat 1000                               ' Timeout after many loops
   if PINREAD(pin) == 1
     result := RDPIN(pin)
-    DEBUG("Smart Pin active, first result: ", UDEC(result))
+    DEBUG("Smart Pin active, first result: ", UDEC_(result))
     quit
 DEBUG("Smart Pin not responding")
 ```
@@ -3494,7 +3492,7 @@ DEBUG("Smart Pin not responding")
 **Inspect Z register:**
 ```spin2
 value := RQPIN(pin)                       ' Read without disturbing
-DEBUG("Z register: ", HEX(value))
+DEBUG("Z register: ", UHEX_(value))
 ```
 
 ### Common Configuration Errors
@@ -3685,7 +3683,7 @@ For high-frequency events:
 
 # Part II: Output Modes
 
-# Chapter 6: Digital Output
+# Chapter 6: Digital Output {#ch6}
 
 This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "Smart Pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
 
@@ -3807,8 +3805,7 @@ PUB sda_read() : state
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     #SDA_PIN, ...
-                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin #SDA_PIN, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
               
 ' Drive low
               drvl      #SDA_PIN
@@ -4124,7 +4121,7 @@ PUB step_reverse(steps) | i
 
 *This chapter covered software-controlled digital output. For hardware-automated pulse and transition output, see Chapter 7. For continuous waveform generation, see Chapters 8 (NCO) and 9 (PWM).*
 
-# Chapter 7: Pulse and Transition Generation
+# Chapter 7: Pulse and Transition Generation {#ch7}
 
 This chapter covers hardware-generated pulses and transitions using two Smart Pin modes: **P_PULSE** (%00100) for generating counted pulse cycles, and **P_TRANSITION** (%00101) for generating counted signal transitions.
 
@@ -4553,7 +4550,7 @@ Both modes when DIR=0:
 
 *This chapter covered hardware-timed pulse and transition generation. For continuous waveform generation, see Chapter 8 (NCO) and Chapter 9 (PWM).*
 
-# Chapter 8: Frequency Generation (NCO)
+# Chapter 8: Frequency Generation (NCO) {#ch8}
 
 This chapter covers the two Numerically Controlled Oscillator (NCO) modes: **P_NCO_FREQ** (%00110) for precise frequency generation with 50% duty cycle, and **P_NCO_DUTY** (%00111) for frequency generation with variable duty cycle.
 
@@ -4990,7 +4987,7 @@ Both modes when DIR=0:
 
 *This chapter covered NCO-based frequency generation. For PWM output with variable duty cycle, see Chapter 9. For DAC analog output, see Chapter 10.*
 
-# Chapter 9: PWM Output
+# Chapter 9: PWM Output {#ch9}
 
 This chapter covers the three Pulse Width Modulation (PWM) modes: **P_PWM_TRIANGLE** (%01000) for symmetric triangle-wave PWM, **P_PWM_SAWTOOTH** (%01001) for asymmetric sawtooth-wave PWM, and **P_PWM_SMPS** (%01010) for switch-mode power supply control with feedback.
 
@@ -5312,8 +5309,9 @@ PUB smps_controller(duty_percent, voltage_threshold, current_limit) ...
 **PASM2:**
 ```pasm2
               dirl      #SMPS_PIN
-              wrpin     ##(P_PWM_SMPS | P_OE | ...
-                         P_PLUS1_A | P_MINUS1_B), #SMPS_PIN
+              mov       smps_cfg, ##(P_PWM_SMPS | P_OE)
+              or        smps_cfg, ##(P_PLUS1_A | P_MINUS1_B)
+              wrpin     smps_cfg, #SMPS_PIN
               wxpin     x_val, #SMPS_PIN
               dirh      #SMPS_PIN
               wypin     y_val, #SMPS_PIN    ' Set once, runs autonomously
@@ -5587,7 +5585,7 @@ All PWM modes:
 
 *This chapter covered PWM output modes. For DAC-based analog output, see Chapter 10. For serial transmission modes, see Chapter 11.*
 
-# Chapter 10: DAC Output
+# Chapter 10: DAC Output {#ch10}
 
 This chapter covers digital-to-analog conversion using the P2's built-in DAC capabilities. Topics include the resistor DAC output options, 8-bit direct DAC control, and 16-bit dithered DAC modes: **P_DAC_DITHER_RND** (%00010) and **P_DAC_DITHER_PWM** (%00011).
 
@@ -5771,7 +5769,7 @@ This creates a simple 2-level DAC controlled by the OUT bit.
 
 The P2 achieves 16-bit DAC resolution using 8-bit hardware plus temporal dithering. By rapidly switching between adjacent 8-bit values in a precise pattern, the time-averaged output achieves 16-bit resolution.
 
-```
+```formula
 Target: $8040 (16-bit)
 Upper byte: $80 (128)
 Lower byte: $40 (64 of 256)
@@ -5822,8 +5820,7 @@ PUB update_value(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_RND | ...
-                         P_DAC_124R_3V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE), #DAC_PIN
               wxpin     #1, #DAC_PIN       ' Immediate mode
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -5874,8 +5871,7 @@ PUB update_value_sync(value16)
 **PASM2:**
 ```pasm2
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | ...
-                         P_DAC_600R_2V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE), #DAC_PIN
               wxpin     ##256, #DAC_PIN    ' Sample period
               dirh      #DAC_PIN
               wypin     value16, #DAC_PIN
@@ -6114,8 +6110,7 @@ DAT           org
 
 ' Initialize 16-bit dithered DAC
               dirl      #DAC_PIN
-              wrpin     ##(P_DAC_DITHER_PWM | ...
-                         P_DAC_990R_3V | P_OE), #DAC_PIN
+              wrpin ##(P_DAC_DITHER_PWM | P_DAC_990R_3V | P_OE), #DAC_PIN
               wxpin     ##512, #DAC_PIN    ' 512 clock sample period
               dirh      #DAC_PIN
 
@@ -6220,7 +6215,7 @@ All DAC modes:
 
 *This chapter covered DAC analog output. For serial transmission modes, see Chapter 11. For input modes, see Part III.*
 
-# Chapter 11: Serial Transmission
+# Chapter 11: Serial Transmission {#ch11}
 
 This chapter covers the serial transmission modes: **P_ASYNC_TX** (%11110) for asynchronous UART-style transmission and **P_SYNC_TX** (%11100) for synchronous SPI-style transmission.
 
@@ -6805,7 +6800,7 @@ X = ((sysclk * 65536 / baud) & $FFFFFC00) | data_bits
 
 # Part III: Input Modes
 
-# Chapter 12: Digital Input
+# Chapter 12: Digital Input {#ch12}
 
 This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-up/pull-down resistors.
 
@@ -7402,7 +7397,7 @@ Theoretical maximum depends on sampling method:
 
 *This chapter covered basic digital input. For signal measurement modes (timing, counting), see Chapter 13. For serial reception, see Chapter 17.*
 
-# Chapter 13: Timing Measurement
+# Chapter 13: Timing Measurement {#ch13}
 
 This chapter covers Smart Pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
 
@@ -7480,9 +7475,9 @@ PUB measure_states() | duration, was_high
     duration &= $7FFFFFFF                  ' Mask off C flag
 
     if was_high
-      DEBUG("High time: ", UDEC(duration), " clocks")
+      DEBUG("High time: ", UDEC_(duration), " clocks")
     else
-      DEBUG("Low time: ", UDEC(duration), " clocks")
+      DEBUG("Low time: ", UDEC_(duration), " clocks")
 ```
 
 **PASM2:**
@@ -7701,7 +7696,7 @@ PUB comm_watchdog() | timeout_clocks, elapsed
   repeat
     if PINREAD(COMM_PIN)                   ' IN flag = timeout occurred
       elapsed := RDPIN(COMM_PIN) & $7FFF_FFFF
-      DEBUG("Comm timeout! ", UDEC(elapsed), " clocks since last")
+      DEBUG("Comm timeout! ", UDEC_(elapsed), " clocks since last")
       handle_timeout()
 
     WAITMS(10)                             ' Check periodically
@@ -7853,10 +7848,10 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
   high_us := h_clocks / (_clkfreq / 1_000_000)
   low_us := l_clocks / (_clkfreq / 1_000_000)
 
-  DEBUG("Frequency: ", UDEC(frequency), " Hz")
-  DEBUG("Duty: ", UDEC(duty_percent), "%")
-  DEBUG("High: ", UDEC(high_us), " µs")
-  DEBUG("Low: ", UDEC(low_us), " µs")
+  DEBUG("Frequency: ", UDEC_(frequency), " Hz")
+  DEBUG("Duty: ", UDEC_(duty_percent), "%")
+  DEBUG("High: ", UDEC_(high_us), " µs")
+  DEBUG("Low: ", UDEC_(low_us), " µs")
 ```
 
 ### Example 2: Ultrasonic Distance Measurement
@@ -8006,7 +8001,7 @@ duty_percent = high_clocks * 100 / (high_clocks + low_clocks)
 
 *This chapter covered timing measurement modes. For counting modes, see Chapter 14. For period measurement with more options, see Chapter 15.*
 
-# Chapter 14: Counting Modes
+# Chapter 14: Counting Modes {#ch14}
 
 This chapter covers Smart Pin counting modes: **P_REG_UP** (%01100) for gated edge counting, **P_REG_UP_DOWN** (%01101) for accumulator up/down, **P_COUNT_RISES** (%01110) for edge counting with direction, **P_COUNT_HIGHS** (%01111) for high-time counting, and **P_QUADRATURE** (%01011) for quadrature encoder decoding.
 
@@ -8491,7 +8486,7 @@ PUB frequency_counter() : freq | period, count
     count := RDPIN(FREQ_PIN)
     freq := count * (1000 / GATE_MS)       ' Scale to Hz
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
 ```
 
 ### Example 2: Motor Position Control
@@ -8598,7 +8593,7 @@ PUB measure_rpm() : rpm | period, pulses
     ' RPM = (pulses / pulses_per_rev) * (60000 / sample_ms)
     rpm := (pulses * 60000) / (PULSES_PER_REV * SAMPLE_MS)
 
-    DEBUG("RPM: ", UDEC(rpm))
+    DEBUG("RPM: ", UDEC_(rpm))
 ```
 
 
@@ -8648,7 +8643,7 @@ All counting modes when DIR=0:
 
 *This chapter covered counting modes. For period measurement modes, see Chapter 15. For quadrature encoder details, see the P_QUADRATURE section above.*
 
-# Chapter 15: Period and Frequency Measurement
+# Chapter 15: Period and Frequency Measurement {#ch15}
 
 This chapter covers smart pin modes for measuring signal periods and calculating frequency. Two approaches are available: measuring over a fixed number of periods, or measuring over a fixed time window. Used together, these modes enable precise frequency and duty cycle determination.
 
@@ -8770,7 +8765,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
   high_time := RDPIN(SIG_PIN+1)               ' Total high time
 
   duty_percent := (high_time * 100) / total_time
-  DEBUG("Duty cycle: ", UDEC(duty_percent), "%")
+  DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
 
 
@@ -8903,9 +8898,9 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     ' Calculate duty: high_time / total_time
     duty := (high_clks * 100) / time_clks
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
-    DEBUG("Duty cycle: ", UDEC(duty), "%")
-    DEBUG("Periods: ", UDEC(periods))
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
+    DEBUG("Duty cycle: ", UDEC_(duty), "%")
+    DEBUG("Periods: ", UDEC_(periods))
     DEBUG("---")
 ```
 
@@ -9013,7 +9008,7 @@ PUB frequency_counter() | freq
   REPEAT
     REPEAT UNTIL PINREAD(INPUT_PIN)
     freq := RDPIN(INPUT_PIN)
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
 ```
 
 ### Example 2: RPM Measurement
@@ -9038,7 +9033,7 @@ PUB measure_rpm() | periods, rpm, window
     ' RPM = (periods * 10 * 60) / PULSES_PER_REV
     rpm := (periods * 600) / PULSES_PER_REV
 
-    DEBUG("RPM: ", UDEC(rpm))
+    DEBUG("RPM: ", UDEC_(rpm))
 ```
 
 ### Example 3: PWM Analyzer
@@ -9054,7 +9049,7 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
   PINSTART(PWM_PIN, P_PERIODS_TICKS, NUM_PERIODS, %00)
   PINSTART(PWM_PIN+1, P_PERIODS_HIGHS, NUM_PERIODS, %00)
 
-  DEBUG("PWM Analyzer - averaging ", UDEC(NUM_PERIODS), " periods")
+  DEBUG("PWM Analyzer - averaging ", UDEC_(NUM_PERIODS), " periods")
 
   REPEAT
     REPEAT UNTIL PINREAD(PWM_PIN)
@@ -9072,9 +9067,9 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
     period_ns := (total_time * 1000) / ...
                  (NUM_PERIODS * (_clkfreq / 1_000_000))
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
-    DEBUG("Duty cycle: ", UDEC(duty/10), ".", UDEC(duty//10), "%")
-    DEBUG("Period: ", UDEC(period_ns), " ns")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
+    DEBUG("Duty cycle: ", UDEC_(duty/10), ".", UDEC_(duty//10), "%")
+    DEBUG("Period: ", UDEC_(period_ns), " ns")
     DEBUG("---")
 ```
 
@@ -9092,7 +9087,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
   PINSTART(REF_PIN, P_PERIODS_TICKS, periods, %00)
 
   DEBUG("Oscillator Calibration")
-  DEBUG("Target: ", UDEC(TARGET_FREQ), " Hz")
+  DEBUG("Target: ", UDEC_(TARGET_FREQ), " Hz")
 
   REPEAT
     REPEAT UNTIL PINREAD(REF_PIN)
@@ -9109,12 +9104,12 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
       error_ppm := ((measured - TARGET_FREQ) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), ...
-            " Hz (+", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (+", UDEC_(error_ppm), " ppm)")
     else
       error_ppm := ((TARGET_FREQ - measured) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), ...
-            " Hz (-", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (-", UDEC_(error_ppm), " ppm)")
 ```
 
 
@@ -9244,7 +9239,7 @@ Where:
 
 *This chapter covered period and frequency measurement modes. For ADC input, see Chapter 16. For serial reception, see Chapter 17.*
 
-# Chapter 16: ADC (Analog Input)
+# Chapter 16: ADC (Analog Input) {#ch16}
 
 This chapter covers the P2's analog-to-digital conversion capabilities using smart pin modes P_ADC (%11000), P_ADC_EXT (%11001), and P_ADC_SCOPE (%11010). Topics include internal/external clocking, SINC filtering, gain settings, and triggered acquisition.
 
@@ -9493,7 +9488,7 @@ Oscilloscope-style triggered acquisition for capturing signal events. Supports f
 
 The scope mode captures from four consecutive pins simultaneously. Pin numbers must be multiples of 4 (0, 4, 8, 12, ..., 52).
 
-```
+```layout
 Pin group starting at 52:
   Pin 52: Channel 0 (and trigger source)
   Pin 53: Channel 1
@@ -9847,7 +9842,7 @@ Where full_scale depends on resolution (255 for 8-bit, 16383 for 14-bit).
 
 *This chapter covered analog-to-digital conversion. For serial reception, see Chapter 17. For USB, see Chapter 19.*
 
-# Chapter 17: Serial Receive
+# Chapter 17: Serial Receive {#ch17}
 
 This chapter covers receiving serial data using smart pin modes P_SYNC_RX (%11101) for synchronous (SPI-style) reception and P_ASYNC_RX (%11111) for asynchronous (UART-style) reception. Topics include baud rate configuration, clock routing, data formatting, and error handling.
 
@@ -10036,7 +10031,7 @@ mode := P_SYNC_RX | P_PLUS1_B                   ' Clock on pin+1
 
 ### X Register Configuration
 
-```
+```layout
 X[5]:   Sample timing (0=before edge, 1=on edge)
 X[4:0]: Number of bits minus 1
 ```
@@ -10515,7 +10510,7 @@ X_value := ((sysclk / baud) << 16) | (bits - 1)
 ### P_SYNC_RX Configuration
 
 **X Register:**
-```
+```layout
 X[5]:   0=sample before edge, 1=sample on edge
 X[4:0]: Data bits - 1
 ```
@@ -10559,7 +10554,7 @@ REPEAT UNTIL PINREAD(pin) OR (GETMS() >= deadline)
 
 # Part IV: Special Modes
 
-# Chapter 18: Repository and Inter-COG Data Sharing
+# Chapter 18: Repository and Inter-COG Data Sharing {#ch18}
 
 This chapter covers the repository modes (%00001-%00011) that serve dual purposes: inter-COG data sharing via the long repository function, and high-resolution DAC output with dithering. These modes provide hardware-arbitrated data transfer without lock contention.
 
@@ -11114,7 +11109,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
 *This chapter covered repository and dithered DAC modes. For USB host/device, see Chapter 19. For a complete mode reference, see Appendix A.*
 
-# Chapter 19: USB Host/Device
+# Chapter 19: USB Host/Device {#ch19}
 
 This chapter covers the USB Smart Pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through Smart Pins, handling the differential signaling and timing while software manages the USB protocol stack.
 
@@ -12636,8 +12631,8 @@ Pin appears completely inactive. No output changes, no IN flag, no measurements.
 
 1. Read pin state:
 ```spin2
-DEBUG("DIR: ", UDEC(PINREAD(pin) >> 31))
-DEBUG("OUT: ", UDEC((INA >> pin) & 1))
+DEBUG("DIR: ", UDEC_(PINREAD(pin) >> 31))
+DEBUG("OUT: ", UDEC_((INA >> pin) & 1))
 ```
 
 2. Verify mode was written:
@@ -12749,19 +12744,19 @@ Output frequency or timing does not match expected value.
 
 1. Verify sysclk:
 ```spin2
-DEBUG("sysclk: ", UDEC(_clkfreq))
+DEBUG("sysclk: ", UDEC_(_clkfreq))
 ```
 
 2. Check calculated values:
 ```spin2
 y_val := frequency FRAC _clkfreq
-DEBUG("Y value: ", UHEX(y_val))
+DEBUG("Y value: ", UHEX_(y_val))
 ```
 
 3. Verify X register was written:
 ```spin2
 WXPIN(pin, x_value)
-DEBUG("X written: ", UHEX(x_value))
+DEBUG("X written: ", UHEX_(x_value))
 ```
 
 ### Solutions
@@ -12860,7 +12855,7 @@ UART or SPI communication fails. No data received or garbled data.
 1. Verify baud calculation:
 ```spin2
 bit_period := _clkfreq / BAUD
-DEBUG("Bit period: ", UDEC(bit_period))
+DEBUG("Bit period: ", UDEC_(bit_period))
 ```
 
 2. Check with loopback:
@@ -12918,7 +12913,7 @@ ADC returns unexpected values, zero, or maximum.
 1. Read raw ADC value:
 ```spin2
 raw := RDPIN(adc_pin)
-DEBUG("Raw ADC: ", UHEX(raw))
+DEBUG("Raw ADC: ", UHEX_(raw))
 ```
 
 2. Verify input is within range
@@ -12977,7 +12972,7 @@ Quadrature encoder reports wrong position or skips counts.
 ```spin2
 ' Rotate slowly, check count increases/decreases correctly
 pos := RDPIN(enc_pin)
-DEBUG("Position: ", SDEC(pos))
+DEBUG("Position: ", SDEC_(pos))
 ```
 
 2. Check for noise by holding still:
@@ -13113,15 +13108,15 @@ PINH(pin2)
 ```spin2
 ' Read Z register contents
 z_value := RDPIN(pin)
-DEBUG("Z: ", UHEX(z_value))
+DEBUG("Z: ", UHEX_(z_value))
 
 ' Read without clearing IN
 z_value := RQPIN(pin)
-DEBUG("Z (no clear): ", UHEX(z_value))
+DEBUG("Z (no clear): ", UHEX_(z_value))
 
 ' Check IN flag
 in_flag := PINREAD(pin)
-DEBUG("IN: ", UDEC(in_flag))
+DEBUG("IN: ", UDEC_(in_flag))
 ```
 
 ### Incremental Configuration Testing
@@ -13188,7 +13183,7 @@ REPEAT
 ```spin2
 ' Verify counter is incrementing
 REPEAT 10
-  DEBUG("Count: ", UDEC(RDPIN(pin)))
+  DEBUG("Count: ", UDEC_(RDPIN(pin)))
   WAITMS(100)
 ```
 
@@ -13201,7 +13196,7 @@ WRPIN(RX_PIN, P_ASYNC_RX)
 WYPIN(TX_PIN, $55)
 WAITMS(1)
 received := RDPIN(RX_PIN)
-DEBUG("Sent: $55, Received: ", UHEX(received))
+DEBUG("Sent: $55, Received: ", UHEX_(received))
 ```
 
 ## Quick Diagnostic Checklist
@@ -13284,12 +13279,13 @@ Quick reference for all 32 Smart Pin modes, organized by mode number.
 | %11111 | P_ASYNC_RX | Asynchronous serial RX |
 
 
+::: modecard
 ## Mode %00000: P_NORMAL
 
 **Normal I/O (not a smart pin mode)**
 
-### Description
 Default mode. Pin operates as standard digital I/O without smart pin functionality.
+:::
 
 ### Register Usage
 
@@ -13310,15 +13306,16 @@ state := PINREAD(pin)                    ' Read input
 ```
 
 ### Reference
-Chapter 6: Digital Output, Chapter 12: Digital Input
+[Chapter 6: Digital Output](#ch6), [Chapter 12: Digital Input](#ch12)
 
 
+::: modecard
 ## Mode %00001: P_REPOSITORY / P_DAC_NOISE
 
 **Inter-COG data sharing or DAC noise generator**
 
-### Description
 Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between COGs. With DAC enable: pseudo-random noise output.
+:::
 
 ### Register Usage
 
@@ -13349,15 +13346,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 18: Repository and Inter-COG Data Sharing, Chapter 10: DAC Output
+[Chapter 18: Repository and Inter-COG Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00010: P_DAC_DITHER_RND
 
 **16-bit PRNG dithered DAC**
 
-### Description
 Provides 16-bit DAC resolution using pseudo-random dithering between adjacent 8-bit levels.
+:::
 
 ### Register Usage
 
@@ -13382,15 +13380,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 10: DAC Output
+[Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00011: P_DAC_DITHER_PWM
 
 **16-bit PWM dithered DAC**
 
-### Description
 Provides 16-bit DAC resolution using PWM dithering. Better dynamic range than PRNG dithering.
+:::
 
 ### Register Usage
 
@@ -13415,15 +13414,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 10: DAC Output
+[Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00100: P_PULSE
 
 **Pulse/cycle output**
 
-### Description
 Generates precise timed pulses. Output a specified number of transitions with configurable timing.
+:::
 
 ### Register Usage
 
@@ -13449,15 +13449,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 7: Transition and Pulse Output
+[Chapter 7: Transition and Pulse Output](#ch7)
 
 
+::: modecard
 ## Mode %00101: P_TRANSITION
 
 **Transition output**
 
-### Description
 Generates a specified number of output transitions with precise timing. Creates square waves or counted pulses.
+:::
 
 ### Register Usage
 
@@ -13482,15 +13483,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 7: Transition and Pulse Output
+[Chapter 7: Transition and Pulse Output](#ch7)
 
 
+::: modecard
 ## Mode %00110: P_NCO_FREQ
 
 **NCO frequency generator (50% duty)**
 
-### Description
 Numerically Controlled Oscillator for precise frequency synthesis. Output is Z[31], creating 50% duty cycle square wave.
+:::
 
 ### Register Usage
 
@@ -13518,15 +13520,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 8: Frequency Generation (NCO)
+[Chapter 8: Frequency Generation (NCO)](#ch8)
 
 
+::: modecard
 ## Mode %00111: P_NCO_DUTY
 
 **NCO with variable duty cycle**
 
-### Description
 NCO frequency generator with duty cycle control. Output reflects Z overflow state.
+:::
 
 ### Register Usage
 
@@ -13552,15 +13555,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 8: Frequency Generation (NCO)
+[Chapter 8: Frequency Generation (NCO)](#ch8)
 
 
+::: modecard
 ## Mode %01000: P_PWM_TRIANGLE
 
 **Triangle-wave PWM**
 
-### Description
 PWM with up-down counter for symmetric output. Creates smooth PWM transitions.
+:::
 
 ### Register Usage
 
@@ -13586,15 +13590,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01001: P_PWM_SAWTOOTH
 
 **Sawtooth-wave PWM**
 
-### Description
 PWM with up-only counter. Twice the frequency of triangle mode for same X values.
+:::
 
 ### Register Usage
 
@@ -13620,15 +13625,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01010: P_PWM_SMPS
 
 **SMPS PWM with feedback**
 
-### Description
 Switch-mode power supply controller with voltage and current feedback inputs.
+:::
 
 ### Register Usage
 
@@ -13656,15 +13662,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01011: P_QUADRATURE
 
 **Quadrature encoder decoder**
 
-### Description
 Decodes A/B quadrature signals for position tracking with 4× resolution.
+:::
 
 ### Register Usage
 
@@ -13692,15 +13699,16 @@ position := RDPIN(20)                    ' Read position
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01100: P_REG_UP
 
 **Gated increment counter**
 
-### Description
 Counts A-input rising edges, but only when B-input is high.
+:::
 
 ### Register Usage
 
@@ -13727,15 +13735,16 @@ count := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01101: P_REG_UP_DOWN
 
 **Up/down gated counter**
 
-### Description
 Counts A-input edges. B-input controls direction: high=increment, low=decrement.
+:::
 
 ### Register Usage
 
@@ -13762,15 +13771,16 @@ count := RDPIN(pin)                      ' Signed result
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01110: P_COUNT_RISES
 
 **Count A-input rising edges**
 
-### Description
 Simple edge counter. Y[0] controls mode: 0=A edges only, 1=A up/B down.
+:::
 
 ### Register Usage
 
@@ -13796,15 +13806,16 @@ count := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01111: P_COUNT_HIGHS
 
 **Count A-input high clocks**
 
-### Description
 Counts system clocks while A-input is high. Y[0] controls mode.
+:::
 
 ### Register Usage
 
@@ -13831,15 +13842,16 @@ high_clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %10000: P_STATE_TICKS
 
 **Time high and low states**
 
-### Description
 Measures duration of each state. IN raised on every transition with previous state duration.
+:::
 
 ### Register Usage
 
@@ -13865,15 +13877,16 @@ duration := RDPIN(pin) wc                ' C=1 if was high
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10001: P_HIGH_TICKS
 
 **Time high states only**
 
-### Description
 Measures duration of high pulses. IN raised on high-to-low transition.
+:::
 
 ### Register Usage
 
@@ -13899,15 +13912,16 @@ pulse_width := RDPIN(pin) & $7FFF_FFFF
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10010: P_EVENTS_TICKS
 
 **Time N events or detect timeout**
 
-### Description
 Two modes: measure time for X events (Y[2]=0), or detect timeout without events (Y[2]=1).
+:::
 
 ### Register Usage
 
@@ -13936,15 +13950,16 @@ clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10011: P_PERIODS_TICKS
 
 **Time X complete periods**
 
-### Description
 Measures total clock cycles for X signal periods.
+:::
 
 ### Register Usage
 
@@ -13972,15 +13987,16 @@ freq := (100 * _clkfreq) / total_clocks
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10100: P_PERIODS_HIGHS
 
 **High time for X periods**
 
-### Description
 Accumulates high-state time across X periods for duty cycle measurement.
+:::
 
 ### Register Usage
 
@@ -14007,15 +14023,16 @@ high_clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10101: P_COUNTER_TICKS
 
 **Period time in X clock window**
 
-### Description
 Measures total period time within a minimum X-clock window.
+:::
 
 ### Register Usage
 
@@ -14042,15 +14059,16 @@ actual_time := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10110: P_COUNTER_HIGHS
 
 **High time in X clock window**
 
-### Description
 Accumulates high-state time within a minimum X-clock window.
+:::
 
 ### Register Usage
 
@@ -14077,15 +14095,16 @@ high_time := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10111: P_COUNTER_PERIODS
 
 **Count periods in X clock window**
 
-### Description
 Counts complete periods within a minimum X-clock window. Simple frequency counter.
+:::
 
 ### Register Usage
 
@@ -14113,15 +14132,16 @@ frequency_hz := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %11000: P_ADC
 
 **ADC with internal clock**
 
-### Description
 Sigma-delta ADC with SINC filtering. 8-14 bit resolution depending on sample period.
+:::
 
 ### Register Usage
 
@@ -14148,15 +14168,16 @@ sample := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11001: P_ADC_EXT
 
 **ADC with external clock**
 
-### Description
 Samples A-input data on B-input clock edges. For external delta-sigma ADCs.
+:::
 
 ### Register Usage
 
@@ -14183,15 +14204,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11010: P_ADC_SCOPE
 
 **ADC triggered scope capture**
 
-### Description
 Four-channel oscilloscope-style ADC with hysteretic triggering.
+:::
 
 ### Register Usage
 
@@ -14216,15 +14238,16 @@ PINH(52)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11011: P_USB_PAIR
 
 **USB differential pair**
 
-### Description
 USB 1.1 physical layer for even/odd pin pair. Handles differential signaling.
+:::
 
 ### Register Usage
 
@@ -14251,15 +14274,16 @@ PINH(57)
 ```
 
 ### Reference
-Chapter 19: USB Host/Device
+[Chapter 19: USB Host/Device](#ch19)
 
 
+::: modecard
 ## Mode %11100: P_SYNC_TX
 
 **Synchronous serial transmit**
 
-### Description
 Clocked serial transmission for SPI master and similar protocols.
+:::
 
 ### Register Usage
 
@@ -14287,15 +14311,16 @@ WYPIN(41, data)
 ```
 
 ### Reference
-Chapter 11: Serial Transmission
+[Chapter 11: Serial Transmission](#ch11)
 
 
+::: modecard
 ## Mode %11101: P_SYNC_RX
 
 **Synchronous serial receive**
 
-### Description
 Clocked serial reception for SPI slave and similar protocols.
+:::
 
 ### Register Usage
 
@@ -14323,15 +14348,16 @@ data := RDPIN(pin) >> 24                 ' Left-justified, shift down
 ```
 
 ### Reference
-Chapter 17: Serial Receive
+[Chapter 17: Serial Receive](#ch17)
 
 
+::: modecard
 ## Mode %11110: P_ASYNC_TX
 
 **Asynchronous serial transmit**
 
-### Description
 UART-style transmission with automatic start/stop bit generation.
+:::
 
 ### Register Usage
 
@@ -14360,15 +14386,16 @@ WYPIN(pin, byte_value)
 ```
 
 ### Reference
-Chapter 11: Serial Transmission
+[Chapter 11: Serial Transmission](#ch11)
 
 
+::: modecard
 ## Mode %11111: P_ASYNC_RX
 
 **Asynchronous serial receive**
 
-### Description
 UART-style reception with automatic start bit detection and framing.
+:::
 
 ### Register Usage
 
@@ -14397,7 +14424,7 @@ data := RDPIN(pin) & $FF
 ```
 
 ### Reference
-Chapter 17: Serial Receive
+[Chapter 17: Serial Receive](#ch17)
 
 
 *For full mode details, see the referenced chapters. For P_ constant values, see Appendix B.*
@@ -14700,18 +14727,6 @@ Alphabetical index of terms, constants, and concepts in this guide.
 ### Z
 
 - **Z register** - Smart pin accumulator/result, Ch. 3, 4
-
-
-## Appendix Cross-Reference
-
-| Appendix | Title | Content |
-|----------|-------|---------|
-| A | Intent Index | Task-based navigation |
-| B | P_ Constants | Complete constant reference |
-| C | Formulas | Mathematical formulas |
-| D | Mode Comparison | Selection charts |
-| E | Troubleshooting | Problem/solution guide |
-| F | Mode Reference | Quick reference per mode |
 
 
 *Page numbers refer to chapter numbers in this digital document.*

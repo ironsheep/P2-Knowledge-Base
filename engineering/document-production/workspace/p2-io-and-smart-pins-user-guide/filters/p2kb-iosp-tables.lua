@@ -538,17 +538,29 @@ local function handle_auto_shrink_table(el)
   local latex = {}
   table.insert(latex, "\\begin{tblr}{")
   if wide then
-    -- Constrain to text width and wrap; columns share width in proportion to content
+    -- Constrain to text width and wrap; columns share width in proportion to content.
+    -- Many-column comparison tables (e.g. Appendix D's 8-column mode charts) pack
+    -- long unbreakable constant tokens (P_PWM_TRIANGLE, P_COUNTER_PERIODS) into
+    -- narrow proportional columns; at \small those tokens overrun their cell and
+    -- visually collide with the next column. Shrink the font as the column count
+    -- climbs so every column keeps usable width, and tighten colsep to match.
+    local body_font = "\\small"
+    local cs = "5pt"
+    if num_cols >= 8 then
+      body_font = "\\scriptsize"; cs = "3pt"
+    elseif num_cols >= 6 then
+      body_font = "\\footnotesize"; cs = "4pt"
+    end
     table.insert(latex, "  width=\\linewidth,")
     table.insert(latex, "  rowsep=2pt,")
-    table.insert(latex, "  colsep=5pt,")
+    table.insert(latex, "  colsep=" .. cs .. ",")
     local colspec_parts = {}
     for i = 1, num_cols do
       table.insert(colspec_parts, "X[" .. maxlen[i] .. ",l]")
     end
     table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
-    table.insert(latex, "  cells={font=\\small},")
-    table.insert(latex, "  row{1}={font=\\small\\bfseries},")
+    table.insert(latex, "  cells={font=" .. body_font .. "},")
+    table.insert(latex, "  row{1}={font=" .. body_font .. "\\bfseries},")
   elseif tall then
     -- Tall narrow table: compress so all rows + legend fit on one page.
     -- (Companion fix in p2kb-iosp-figures.lua reserves vertical space before the

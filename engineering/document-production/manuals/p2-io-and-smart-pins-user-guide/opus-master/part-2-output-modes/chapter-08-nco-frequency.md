@@ -1,4 +1,4 @@
-# Chapter 8: Frequency Generation (NCO)
+# Chapter 8: Frequency Generation (NCO) {#ch8}
 
 This chapter covers the two Numerically Controlled Oscillator (NCO) modes: **P_NCO_FREQ** (%00110) for precise frequency generation with 50% duty cycle, and **P_NCO_DUTY** (%00111) for frequency generation with variable duty cycle.
 

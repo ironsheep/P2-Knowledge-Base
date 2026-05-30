@@ -18,8 +18,8 @@ Pin appears completely inactive. No output changes, no IN flag, no measurements.
 
 1. Read pin state:
 ```spin2
-DEBUG("DIR: ", UDEC(PINREAD(pin) >> 31))
-DEBUG("OUT: ", UDEC((INA >> pin) & 1))
+DEBUG("DIR: ", UDEC_(PINREAD(pin) >> 31))
+DEBUG("OUT: ", UDEC_((INA >> pin) & 1))
 ```
 
 2. Verify mode was written:
@@ -131,19 +131,19 @@ Output frequency or timing does not match expected value.
 
 1. Verify sysclk:
 ```spin2
-DEBUG("sysclk: ", UDEC(_clkfreq))
+DEBUG("sysclk: ", UDEC_(_clkfreq))
 ```
 
 2. Check calculated values:
 ```spin2
 y_val := frequency FRAC _clkfreq
-DEBUG("Y value: ", UHEX(y_val))
+DEBUG("Y value: ", UHEX_(y_val))
 ```
 
 3. Verify X register was written:
 ```spin2
 WXPIN(pin, x_value)
-DEBUG("X written: ", UHEX(x_value))
+DEBUG("X written: ", UHEX_(x_value))
 ```
 
 ### Solutions
@@ -242,7 +242,7 @@ UART or SPI communication fails. No data received or garbled data.
 1. Verify baud calculation:
 ```spin2
 bit_period := _clkfreq / BAUD
-DEBUG("Bit period: ", UDEC(bit_period))
+DEBUG("Bit period: ", UDEC_(bit_period))
 ```
 
 2. Check with loopback:
@@ -300,7 +300,7 @@ ADC returns unexpected values, zero, or maximum.
 1. Read raw ADC value:
 ```spin2
 raw := RDPIN(adc_pin)
-DEBUG("Raw ADC: ", UHEX(raw))
+DEBUG("Raw ADC: ", UHEX_(raw))
 ```
 
 2. Verify input is within range
@@ -359,7 +359,7 @@ Quadrature encoder reports wrong position or skips counts.
 ```spin2
 ' Rotate slowly, check count increases/decreases correctly
 pos := RDPIN(enc_pin)
-DEBUG("Position: ", SDEC(pos))
+DEBUG("Position: ", SDEC_(pos))
 ```
 
 2. Check for noise by holding still:
@@ -495,15 +495,15 @@ PINH(pin2)
 ```spin2
 ' Read Z register contents
 z_value := RDPIN(pin)
-DEBUG("Z: ", UHEX(z_value))
+DEBUG("Z: ", UHEX_(z_value))
 
 ' Read without clearing IN
 z_value := RQPIN(pin)
-DEBUG("Z (no clear): ", UHEX(z_value))
+DEBUG("Z (no clear): ", UHEX_(z_value))
 
 ' Check IN flag
 in_flag := PINREAD(pin)
-DEBUG("IN: ", UDEC(in_flag))
+DEBUG("IN: ", UDEC_(in_flag))
 ```
 
 ### Incremental Configuration Testing
@@ -570,7 +570,7 @@ REPEAT
 ```spin2
 ' Verify counter is incrementing
 REPEAT 10
-  DEBUG("Count: ", UDEC(RDPIN(pin)))
+  DEBUG("Count: ", UDEC_(RDPIN(pin)))
   WAITMS(100)
 ```
 
@@ -583,7 +583,7 @@ WRPIN(RX_PIN, P_ASYNC_RX)
 WYPIN(TX_PIN, $55)
 WAITMS(1)
 received := RDPIN(RX_PIN)
-DEBUG("Sent: $55, Received: ", UHEX(received))
+DEBUG("Sent: $55, Received: ", UHEX_(received))
 ```
 
 ## Quick Diagnostic Checklist

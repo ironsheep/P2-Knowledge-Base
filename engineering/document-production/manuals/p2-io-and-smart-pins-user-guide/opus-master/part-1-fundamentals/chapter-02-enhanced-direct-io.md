@@ -1,4 +1,4 @@
-# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes
+# Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
 Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [4:0] = %00000 (`P_NORMAL`).
 
@@ -478,13 +478,11 @@ PUB set_voltage(level) | config
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     sda_pin, ...
-                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin sda_pin, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
               drvh      sda_pin              ' Release line (floats high)
 
 ' Internal pull-up button
-              wrpin     btn_pin, ...
-                        ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+              wrpin btn_pin, ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
               drvh      btn_pin                ' Enable pull-up
 
 ' Current-source LED

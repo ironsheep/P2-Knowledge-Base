@@ -1,4 +1,4 @@
-# Chapter 6: Digital Output
+# Chapter 6: Digital Output {#ch6}
 
 This chapter covers digital output configurations using P_NORMAL mode (%00000) with enhanced pin settings. While not technically a "Smart Pin mode," these configurations use WRPIN to set drive characteristics, polarity, and output topology—extending basic Direct I/O with hardware-configurable behavior.
 
@@ -120,8 +120,7 @@ PUB sda_read() : state
 
 ```pasm2
 ' Open-drain configuration
-              wrpin     #SDA_PIN, ...
-                        ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin #SDA_PIN, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
               
 ' Drive low
               drvl      #SDA_PIN

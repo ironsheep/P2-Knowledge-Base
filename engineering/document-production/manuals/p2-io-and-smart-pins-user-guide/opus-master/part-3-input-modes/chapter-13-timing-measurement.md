@@ -1,4 +1,4 @@
-# Chapter 13: Timing Measurement
+# Chapter 13: Timing Measurement {#ch13}
 
 This chapter covers Smart Pin modes for measuring time intervals: **P_STATE_TICKS** (%10000) for timing both high and low states, **P_HIGH_TICKS** (%10001) for timing high states only, and **P_EVENTS_TICKS** (%10010) for event timing and timeout detection.
 
@@ -76,9 +76,9 @@ PUB measure_states() | duration, was_high
     duration &= $7FFFFFFF                  ' Mask off C flag
 
     if was_high
-      DEBUG("High time: ", UDEC(duration), " clocks")
+      DEBUG("High time: ", UDEC_(duration), " clocks")
     else
-      DEBUG("Low time: ", UDEC(duration), " clocks")
+      DEBUG("Low time: ", UDEC_(duration), " clocks")
 ```
 
 **PASM2:**
@@ -297,7 +297,7 @@ PUB comm_watchdog() | timeout_clocks, elapsed
   repeat
     if PINREAD(COMM_PIN)                   ' IN flag = timeout occurred
       elapsed := RDPIN(COMM_PIN) & $7FFF_FFFF
-      DEBUG("Comm timeout! ", UDEC(elapsed), " clocks since last")
+      DEBUG("Comm timeout! ", UDEC_(elapsed), " clocks since last")
       handle_timeout()
 
     WAITMS(10)                             ' Check periodically
@@ -449,10 +449,10 @@ PUB pwm_analyzer() | h_clocks, l_clocks, got_high, got_low
   high_us := h_clocks / (_clkfreq / 1_000_000)
   low_us := l_clocks / (_clkfreq / 1_000_000)
 
-  DEBUG("Frequency: ", UDEC(frequency), " Hz")
-  DEBUG("Duty: ", UDEC(duty_percent), "%")
-  DEBUG("High: ", UDEC(high_us), " µs")
-  DEBUG("Low: ", UDEC(low_us), " µs")
+  DEBUG("Frequency: ", UDEC_(frequency), " Hz")
+  DEBUG("Duty: ", UDEC_(duty_percent), "%")
+  DEBUG("High: ", UDEC_(high_us), " µs")
+  DEBUG("Low: ", UDEC_(low_us), " µs")
 ```
 
 ### Example 2: Ultrasonic Distance Measurement

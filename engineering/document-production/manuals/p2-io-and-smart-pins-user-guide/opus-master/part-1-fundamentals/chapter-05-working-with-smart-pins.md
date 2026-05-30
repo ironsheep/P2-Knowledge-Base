@@ -1,4 +1,4 @@
-# Chapter 5: Working with Smart Pins
+# Chapter 5: Working with Smart Pins {#ch5}
 
 This chapter covers practical patterns for Smart Pin operation, debugging techniques, and common troubleshooting scenarios. The concepts here apply across all Smart Pin modes documented in Parts II through IV.
 
@@ -292,7 +292,7 @@ WRPIN(pin, 0)
 repeat 1000                               ' Timeout after many loops
   if PINREAD(pin) == 1
     result := RDPIN(pin)
-    DEBUG("Smart Pin active, first result: ", UDEC(result))
+    DEBUG("Smart Pin active, first result: ", UDEC_(result))
     quit
 DEBUG("Smart Pin not responding")
 ```
@@ -300,7 +300,7 @@ DEBUG("Smart Pin not responding")
 **Inspect Z register:**
 ```spin2
 value := RQPIN(pin)                       ' Read without disturbing
-DEBUG("Z register: ", HEX(value))
+DEBUG("Z register: ", UHEX_(value))
 ```
 
 ### Common Configuration Errors

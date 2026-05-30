@@ -1,4 +1,4 @@
-# Chapter 19: USB Host/Device
+# Chapter 19: USB Host/Device {#ch19}
 
 This chapter covers the USB Smart Pin mode P_USB_PAIR (%11011). The P2 provides hardware-assisted USB through Smart Pins, handling the differential signaling and timing while software manages the USB protocol stack.
 

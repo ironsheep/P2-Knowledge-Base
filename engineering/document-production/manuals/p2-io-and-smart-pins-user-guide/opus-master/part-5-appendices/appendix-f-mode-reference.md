@@ -41,12 +41,13 @@ Quick reference for all 32 Smart Pin modes, organized by mode number.
 | %11111 | P_ASYNC_RX | Asynchronous serial RX |
 
 
+::: modecard
 ## Mode %00000: P_NORMAL
 
 **Normal I/O (not a smart pin mode)**
 
-### Description
 Default mode. Pin operates as standard digital I/O without smart pin functionality.
+:::
 
 ### Register Usage
 
@@ -67,15 +68,16 @@ state := PINREAD(pin)                    ' Read input
 ```
 
 ### Reference
-Chapter 6: Digital Output, Chapter 12: Digital Input
+[Chapter 6: Digital Output](#ch6), [Chapter 12: Digital Input](#ch12)
 
 
+::: modecard
 ## Mode %00001: P_REPOSITORY / P_DAC_NOISE
 
 **Inter-COG data sharing or DAC noise generator**
 
-### Description
 Dual-purpose mode. Without DAC enable: 32-bit repository for data sharing between COGs. With DAC enable: pseudo-random noise output.
+:::
 
 ### Register Usage
 
@@ -106,15 +108,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 18: Repository and Inter-COG Data Sharing, Chapter 10: DAC Output
+[Chapter 18: Repository and Inter-COG Data Sharing](#ch18), [Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00010: P_DAC_DITHER_RND
 
 **16-bit PRNG dithered DAC**
 
-### Description
 Provides 16-bit DAC resolution using pseudo-random dithering between adjacent 8-bit levels.
+:::
 
 ### Register Usage
 
@@ -139,15 +142,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 10: DAC Output
+[Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00011: P_DAC_DITHER_PWM
 
 **16-bit PWM dithered DAC**
 
-### Description
 Provides 16-bit DAC resolution using PWM dithering. Better dynamic range than PRNG dithering.
+:::
 
 ### Register Usage
 
@@ -172,15 +176,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 10: DAC Output
+[Chapter 10: DAC Output](#ch10)
 
 
+::: modecard
 ## Mode %00100: P_PULSE
 
 **Pulse/cycle output**
 
-### Description
 Generates precise timed pulses. Output a specified number of transitions with configurable timing.
+:::
 
 ### Register Usage
 
@@ -206,15 +211,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 7: Transition and Pulse Output
+[Chapter 7: Transition and Pulse Output](#ch7)
 
 
+::: modecard
 ## Mode %00101: P_TRANSITION
 
 **Transition output**
 
-### Description
 Generates a specified number of output transitions with precise timing. Creates square waves or counted pulses.
+:::
 
 ### Register Usage
 
@@ -239,15 +245,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 7: Transition and Pulse Output
+[Chapter 7: Transition and Pulse Output](#ch7)
 
 
+::: modecard
 ## Mode %00110: P_NCO_FREQ
 
 **NCO frequency generator (50% duty)**
 
-### Description
 Numerically Controlled Oscillator for precise frequency synthesis. Output is Z[31], creating 50% duty cycle square wave.
+:::
 
 ### Register Usage
 
@@ -275,15 +282,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 8: Frequency Generation (NCO)
+[Chapter 8: Frequency Generation (NCO)](#ch8)
 
 
+::: modecard
 ## Mode %00111: P_NCO_DUTY
 
 **NCO with variable duty cycle**
 
-### Description
 NCO frequency generator with duty cycle control. Output reflects Z overflow state.
+:::
 
 ### Register Usage
 
@@ -309,15 +317,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 8: Frequency Generation (NCO)
+[Chapter 8: Frequency Generation (NCO)](#ch8)
 
 
+::: modecard
 ## Mode %01000: P_PWM_TRIANGLE
 
 **Triangle-wave PWM**
 
-### Description
 PWM with up-down counter for symmetric output. Creates smooth PWM transitions.
+:::
 
 ### Register Usage
 
@@ -343,15 +352,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01001: P_PWM_SAWTOOTH
 
 **Sawtooth-wave PWM**
 
-### Description
 PWM with up-only counter. Twice the frequency of triangle mode for same X values.
+:::
 
 ### Register Usage
 
@@ -377,15 +387,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01010: P_PWM_SMPS
 
 **SMPS PWM with feedback**
 
-### Description
 Switch-mode power supply controller with voltage and current feedback inputs.
+:::
 
 ### Register Usage
 
@@ -413,15 +424,16 @@ PINLOW(pin)
 ```
 
 ### Reference
-Chapter 9: PWM Output
+[Chapter 9: PWM Output](#ch9)
 
 
+::: modecard
 ## Mode %01011: P_QUADRATURE
 
 **Quadrature encoder decoder**
 
-### Description
 Decodes A/B quadrature signals for position tracking with 4× resolution.
+:::
 
 ### Register Usage
 
@@ -449,15 +461,16 @@ position := RDPIN(20)                    ' Read position
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01100: P_REG_UP
 
 **Gated increment counter**
 
-### Description
 Counts A-input rising edges, but only when B-input is high.
+:::
 
 ### Register Usage
 
@@ -484,15 +497,16 @@ count := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01101: P_REG_UP_DOWN
 
 **Up/down gated counter**
 
-### Description
 Counts A-input edges. B-input controls direction: high=increment, low=decrement.
+:::
 
 ### Register Usage
 
@@ -519,15 +533,16 @@ count := RDPIN(pin)                      ' Signed result
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01110: P_COUNT_RISES
 
 **Count A-input rising edges**
 
-### Description
 Simple edge counter. Y[0] controls mode: 0=A edges only, 1=A up/B down.
+:::
 
 ### Register Usage
 
@@ -553,15 +568,16 @@ count := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %01111: P_COUNT_HIGHS
 
 **Count A-input high clocks**
 
-### Description
 Counts system clocks while A-input is high. Y[0] controls mode.
+:::
 
 ### Register Usage
 
@@ -588,15 +604,16 @@ high_clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 14: Counting Modes
+[Chapter 14: Counting Modes](#ch14)
 
 
+::: modecard
 ## Mode %10000: P_STATE_TICKS
 
 **Time high and low states**
 
-### Description
 Measures duration of each state. IN raised on every transition with previous state duration.
+:::
 
 ### Register Usage
 
@@ -622,15 +639,16 @@ duration := RDPIN(pin) wc                ' C=1 if was high
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10001: P_HIGH_TICKS
 
 **Time high states only**
 
-### Description
 Measures duration of high pulses. IN raised on high-to-low transition.
+:::
 
 ### Register Usage
 
@@ -656,15 +674,16 @@ pulse_width := RDPIN(pin) & $7FFF_FFFF
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10010: P_EVENTS_TICKS
 
 **Time N events or detect timeout**
 
-### Description
 Two modes: measure time for X events (Y[2]=0), or detect timeout without events (Y[2]=1).
+:::
 
 ### Register Usage
 
@@ -693,15 +712,16 @@ clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 13: Timing Measurement
+[Chapter 13: Timing Measurement](#ch13)
 
 
+::: modecard
 ## Mode %10011: P_PERIODS_TICKS
 
 **Time X complete periods**
 
-### Description
 Measures total clock cycles for X signal periods.
+:::
 
 ### Register Usage
 
@@ -729,15 +749,16 @@ freq := (100 * _clkfreq) / total_clocks
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10100: P_PERIODS_HIGHS
 
 **High time for X periods**
 
-### Description
 Accumulates high-state time across X periods for duty cycle measurement.
+:::
 
 ### Register Usage
 
@@ -764,15 +785,16 @@ high_clocks := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10101: P_COUNTER_TICKS
 
 **Period time in X clock window**
 
-### Description
 Measures total period time within a minimum X-clock window.
+:::
 
 ### Register Usage
 
@@ -799,15 +821,16 @@ actual_time := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10110: P_COUNTER_HIGHS
 
 **High time in X clock window**
 
-### Description
 Accumulates high-state time within a minimum X-clock window.
+:::
 
 ### Register Usage
 
@@ -834,15 +857,16 @@ high_time := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %10111: P_COUNTER_PERIODS
 
 **Count periods in X clock window**
 
-### Description
 Counts complete periods within a minimum X-clock window. Simple frequency counter.
+:::
 
 ### Register Usage
 
@@ -870,15 +894,16 @@ frequency_hz := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 15: Period and Frequency Measurement
+[Chapter 15: Period and Frequency Measurement](#ch15)
 
 
+::: modecard
 ## Mode %11000: P_ADC
 
 **ADC with internal clock**
 
-### Description
 Sigma-delta ADC with SINC filtering. 8-14 bit resolution depending on sample period.
+:::
 
 ### Register Usage
 
@@ -905,15 +930,16 @@ sample := RDPIN(pin)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11001: P_ADC_EXT
 
 **ADC with external clock**
 
-### Description
 Samples A-input data on B-input clock edges. For external delta-sigma ADCs.
+:::
 
 ### Register Usage
 
@@ -940,15 +966,16 @@ PINH(pin)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11010: P_ADC_SCOPE
 
 **ADC triggered scope capture**
 
-### Description
 Four-channel oscilloscope-style ADC with hysteretic triggering.
+:::
 
 ### Register Usage
 
@@ -973,15 +1000,16 @@ PINH(52)
 ```
 
 ### Reference
-Chapter 16: ADC (Analog Input)
+[Chapter 16: ADC (Analog Input)](#ch16)
 
 
+::: modecard
 ## Mode %11011: P_USB_PAIR
 
 **USB differential pair**
 
-### Description
 USB 1.1 physical layer for even/odd pin pair. Handles differential signaling.
+:::
 
 ### Register Usage
 
@@ -1008,15 +1036,16 @@ PINH(57)
 ```
 
 ### Reference
-Chapter 19: USB Host/Device
+[Chapter 19: USB Host/Device](#ch19)
 
 
+::: modecard
 ## Mode %11100: P_SYNC_TX
 
 **Synchronous serial transmit**
 
-### Description
 Clocked serial transmission for SPI master and similar protocols.
+:::
 
 ### Register Usage
 
@@ -1044,15 +1073,16 @@ WYPIN(41, data)
 ```
 
 ### Reference
-Chapter 11: Serial Transmission
+[Chapter 11: Serial Transmission](#ch11)
 
 
+::: modecard
 ## Mode %11101: P_SYNC_RX
 
 **Synchronous serial receive**
 
-### Description
 Clocked serial reception for SPI slave and similar protocols.
+:::
 
 ### Register Usage
 
@@ -1080,15 +1110,16 @@ data := RDPIN(pin) >> 24                 ' Left-justified, shift down
 ```
 
 ### Reference
-Chapter 17: Serial Receive
+[Chapter 17: Serial Receive](#ch17)
 
 
+::: modecard
 ## Mode %11110: P_ASYNC_TX
 
 **Asynchronous serial transmit**
 
-### Description
 UART-style transmission with automatic start/stop bit generation.
+:::
 
 ### Register Usage
 
@@ -1117,15 +1148,16 @@ WYPIN(pin, byte_value)
 ```
 
 ### Reference
-Chapter 11: Serial Transmission
+[Chapter 11: Serial Transmission](#ch11)
 
 
+::: modecard
 ## Mode %11111: P_ASYNC_RX
 
 **Asynchronous serial receive**
 
-### Description
 UART-style reception with automatic start bit detection and framing.
+:::
 
 ### Register Usage
 
@@ -1154,7 +1186,7 @@ data := RDPIN(pin) & $FF
 ```
 
 ### Reference
-Chapter 17: Serial Receive
+[Chapter 17: Serial Receive](#ch17)
 
 
 *For full mode details, see the referenced chapters. For P_ constant values, see Appendix B.*

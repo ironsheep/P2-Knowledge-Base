@@ -1,4 +1,4 @@
-# Chapter 15: Period and Frequency Measurement
+# Chapter 15: Period and Frequency Measurement {#ch15}
 
 This chapter covers smart pin modes for measuring signal periods and calculating frequency. Two approaches are available: measuring over a fixed number of periods, or measuring over a fixed time window. Used together, these modes enable precise frequency and duty cycle determination.
 
@@ -120,7 +120,7 @@ PUB measure_duty() | total_time, high_time, duty_percent
   high_time := RDPIN(SIG_PIN+1)               ' Total high time
 
   duty_percent := (high_time * 100) / total_time
-  DEBUG("Duty cycle: ", UDEC(duty_percent), "%")
+  DEBUG("Duty cycle: ", UDEC_(duty_percent), "%")
 ```
 
 
@@ -253,9 +253,9 @@ PUB measure_signal() | window, time_clks, high_clks, periods, freq, duty
     ' Calculate duty: high_time / total_time
     duty := (high_clks * 100) / time_clks
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
-    DEBUG("Duty cycle: ", UDEC(duty), "%")
-    DEBUG("Periods: ", UDEC(periods))
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
+    DEBUG("Duty cycle: ", UDEC_(duty), "%")
+    DEBUG("Periods: ", UDEC_(periods))
     DEBUG("---")
 ```
 
@@ -363,7 +363,7 @@ PUB frequency_counter() | freq
   REPEAT
     REPEAT UNTIL PINREAD(INPUT_PIN)
     freq := RDPIN(INPUT_PIN)
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
 ```
 
 ### Example 2: RPM Measurement
@@ -388,7 +388,7 @@ PUB measure_rpm() | periods, rpm, window
     ' RPM = (periods * 10 * 60) / PULSES_PER_REV
     rpm := (periods * 600) / PULSES_PER_REV
 
-    DEBUG("RPM: ", UDEC(rpm))
+    DEBUG("RPM: ", UDEC_(rpm))
 ```
 
 ### Example 3: PWM Analyzer
@@ -404,7 +404,7 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
   PINSTART(PWM_PIN, P_PERIODS_TICKS, NUM_PERIODS, %00)
   PINSTART(PWM_PIN+1, P_PERIODS_HIGHS, NUM_PERIODS, %00)
 
-  DEBUG("PWM Analyzer - averaging ", UDEC(NUM_PERIODS), " periods")
+  DEBUG("PWM Analyzer - averaging ", UDEC_(NUM_PERIODS), " periods")
 
   REPEAT
     REPEAT UNTIL PINREAD(PWM_PIN)
@@ -422,9 +422,9 @@ PUB pwm_analyzer() | total_time, high_time, freq, duty, period_ns
     period_ns := (total_time * 1000) / ...
                  (NUM_PERIODS * (_clkfreq / 1_000_000))
 
-    DEBUG("Frequency: ", UDEC(freq), " Hz")
-    DEBUG("Duty cycle: ", UDEC(duty/10), ".", UDEC(duty//10), "%")
-    DEBUG("Period: ", UDEC(period_ns), " ns")
+    DEBUG("Frequency: ", UDEC_(freq), " Hz")
+    DEBUG("Duty cycle: ", UDEC_(duty/10), ".", UDEC_(duty//10), "%")
+    DEBUG("Period: ", UDEC_(period_ns), " ns")
     DEBUG("---")
 ```
 
@@ -442,7 +442,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
   PINSTART(REF_PIN, P_PERIODS_TICKS, periods, %00)
 
   DEBUG("Oscillator Calibration")
-  DEBUG("Target: ", UDEC(TARGET_FREQ), " Hz")
+  DEBUG("Target: ", UDEC_(TARGET_FREQ), " Hz")
 
   REPEAT
     REPEAT UNTIL PINREAD(REF_PIN)
@@ -459,12 +459,12 @@ PUB oscillator_calibration() | measured, error_ppm, periods
     ' Calculate error in ppm
     if measured >= TARGET_FREQ
       error_ppm := ((measured - TARGET_FREQ) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), ...
-            " Hz (+", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (+", UDEC_(error_ppm), " ppm)")
     else
       error_ppm := ((TARGET_FREQ - measured) * 1_000_000) / TARGET_FREQ
-      DEBUG("Measured: ", UDEC(measured), ...
-            " Hz (-", UDEC(error_ppm), " ppm)")
+      DEBUG("Measured: ", UDEC_(measured), ...
+            " Hz (-", UDEC_(error_ppm), " ppm)")
 ```
 
 

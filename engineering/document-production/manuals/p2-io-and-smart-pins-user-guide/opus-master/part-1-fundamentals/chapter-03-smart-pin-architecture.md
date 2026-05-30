@@ -1,4 +1,4 @@
-# Chapter 3: Smart Pin Architecture - Autonomous I/O
+# Chapter 3: Smart Pin Architecture - Autonomous I/O {#ch3}
 
 Smart Pins transform P2 I/O pins from simple input/output points into autonomous peripheral engines. Once configured, a Smart Pin operates independently of the COG—generating waveforms, measuring signals, counting events, or performing analog conversions without consuming COG cycles. This chapter establishes the mental model for understanding all Smart Pin modes documented in Parts II through IV.
 
