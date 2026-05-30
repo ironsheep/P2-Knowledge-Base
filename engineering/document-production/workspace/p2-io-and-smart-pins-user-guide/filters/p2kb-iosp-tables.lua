@@ -507,14 +507,22 @@ local function handle_auto_shrink_table(el)
   -- Estimate content width (in characters) per column to decide wrap vs shrink.
   -- Wide tables would overflow the right margin with plain "l" columns, so they
   -- switch to width=\linewidth with proportional wrapping X columns + smaller font.
-  local maxlen = {}
-  for i = 1, num_cols do maxlen[i] = 1 end
+  local maxlen = {}   -- longest full cell (chars) per column
+  local maxtok = {}   -- longest UNBREAKABLE token (chars) per column
+  for i = 1, num_cols do maxlen[i] = 1; maxtok[i] = 1 end
   local function measure(cells)
     if not cells then return end
     for i, cell in ipairs(cells) do
       if i <= num_cols then
-        local n = #pandoc.utils.stringify(cell.contents)
+        local s = pandoc.utils.stringify(cell.contents)
+        local n = #s
         if n > maxlen[i] then maxlen[i] = n end
+        -- longest whitespace-delimited token: this is the minimum width the
+        -- column must have, because identifiers like P_COUNTER_PERIODS cannot
+        -- be hyphenated/wrapped and would otherwise overflow into the next column
+        for tok in s:gmatch("%S+") do
+          if #tok > maxtok[i] then maxtok[i] = #tok end
+        end
       end
     end
   end
@@ -526,8 +534,13 @@ local function handle_auto_shrink_table(el)
   end
   local total = 0
   for i = 1, num_cols do total = total + maxlen[i] end
-  -- ~72 chars fits a line at \small; 4+ column tables crowd sooner
-  local wide = (total > 72) or (num_cols >= 4 and total > 52)
+  -- The narrow branch renders unconstrained "l" columns at \normalsize, which
+  -- fits only ~60 chars across \linewidth. If natural content approaches that,
+  -- the table overflows the right margin (or, with long unbreakable identifiers,
+  -- collides into the next column) -- so route it to the width-managed wide
+  -- branch instead. (Previous 72 threshold was calibrated for \small and let
+  -- ~60-72-char tables like Ch12.11 / Appendix D overflow at \normalsize.)
+  local wide = (total > 60) or (num_cols >= 4 and total > 44)
 
   -- Tall narrow tables (e.g. the 34-row instruction quick-reference, Table 1.10)
   -- render as a single non-breaking tblr. At default size they overrun the page
@@ -538,29 +551,61 @@ local function handle_auto_shrink_table(el)
   local latex = {}
   table.insert(latex, "\\begin{tblr}{")
   if wide then
-    -- Constrain to text width and wrap; columns share width in proportion to content.
-    -- Many-column comparison tables (e.g. Appendix D's 8-column mode charts) pack
-    -- long unbreakable constant tokens (P_PWM_TRIANGLE, P_COUNTER_PERIODS) into
-    -- narrow proportional columns; at \small those tokens overrun their cell and
-    -- visually collide with the next column. Shrink the font as the column count
-    -- climbs so every column keeps usable width, and tighten colsep to match.
-    local body_font = "\\small"
-    local cs = "5pt"
-    if num_cols >= 8 then
-      body_font = "\\scriptsize"; cs = "3pt"
-    elseif num_cols >= 6 then
-      body_font = "\\footnotesize"; cs = "4pt"
+    -- Width allocation that never overflows AND never splits a name.
+    -- Every column is given a FIXED width (Q[wd=...]) of at least its longest
+    -- unbreakable token, so identifiers like P_COUNTER_PERIODS always fit inside
+    -- their cell (no spill into the next column, no hyphenation at underscores).
+    -- Any leftover width is then handed to the columns that have wrappable prose
+    -- (cell length beyond their longest token), which wrap at spaces. Font is
+    -- shrunk only if the minimum (token-fit) widths don't fit at the larger size.
+    -- chars_per_line = how many characters span \linewidth at a given font
+    -- (calibrated: ~72 at \small, scaling roughly with font size).
+    local fonts = {
+      {name="\\small",      cpl=72, cs="5pt"},
+      {name="\\footnotesize", cpl=84, cs="4pt"},
+      {name="\\scriptsize", cpl=100, cs="3pt"},
+    }
+    local pad = 1.0          -- breathing room (chars) added to each token width
+    local usable = 0.97      -- fraction of \linewidth available to columns
+    local chosen, minfrac
+    for _, f in ipairs(fonts) do
+      local frac = {}
+      local summ = 0
+      for i = 1, num_cols do
+        frac[i] = (maxtok[i] + pad) / f.cpl
+        summ = summ + frac[i]
+      end
+      if summ <= usable then chosen = f; minfrac = frac; break end
+      chosen = f; minfrac = frac   -- keep smallest font as fallback
+    end
+    -- Distribute leftover width to columns with wrappable excess (prose).
+    local summ = 0
+    for i = 1, num_cols do summ = summ + minfrac[i] end
+    local leftover = usable - summ
+    local excess_total = 0
+    local excess = {}
+    for i = 1, num_cols do
+      excess[i] = math.max(0, (maxlen[i] - maxtok[i]))
+      excess_total = excess_total + excess[i]
+    end
+    local width = {}
+    for i = 1, num_cols do
+      if leftover > 0 and excess_total > 0 then
+        width[i] = minfrac[i] + leftover * (excess[i] / excess_total)
+      else
+        width[i] = minfrac[i]
+      end
     end
     table.insert(latex, "  width=\\linewidth,")
     table.insert(latex, "  rowsep=2pt,")
-    table.insert(latex, "  colsep=" .. cs .. ",")
+    table.insert(latex, "  colsep=" .. chosen.cs .. ",")
     local colspec_parts = {}
     for i = 1, num_cols do
-      table.insert(colspec_parts, "X[" .. maxlen[i] .. ",l]")
+      colspec_parts[i] = string.format("Q[wd=%.3f\\linewidth,l]", width[i])
     end
     table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
-    table.insert(latex, "  cells={font=" .. body_font .. "},")
-    table.insert(latex, "  row{1}={font=" .. body_font .. "\\bfseries},")
+    table.insert(latex, "  cells={font=" .. chosen.name .. "},")
+    table.insert(latex, "  row{1}={font=" .. chosen.name .. "\\bfseries},")
   elseif tall then
     -- Tall narrow table: compress so all rows + legend fit on one page.
     -- (Companion fix in p2kb-iosp-figures.lua reserves vertical space before the

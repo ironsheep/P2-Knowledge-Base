@@ -503,13 +503,21 @@ local function uppercase_mnemonics_in_line(line)
   return table.concat(result) .. comment_part
 end
 
--- Uppercase mnemonics in a code block
+-- Uppercase mnemonics in a code block.
+-- IMPORTANT: blank lines MUST be preserved. The previous implementation dropped
+-- every blank line (its guard skipped empty lines unless the whole block ended
+-- in a newline, which pandoc CodeBlock text never does), which collapsed the
+-- visual separation between PUB/PRI methods in rendered code. We now split on
+-- each newline exactly, keeping empties, and only trim the single phantom empty
+-- that appears when the original text did not end in a newline.
 local function uppercase_mnemonics_in_code(text)
+  local had_trailing_nl = text:sub(-1) == "\n"
   local lines = {}
-  for line in text:gmatch("([^\n]*)\n?") do
-    if line ~= "" or text:sub(-1) == "\n" then
-      table.insert(lines, uppercase_mnemonics_in_line(line))
-    end
+  for line in (text .. "\n"):gmatch("(.-)\n") do
+    table.insert(lines, uppercase_mnemonics_in_line(line))
+  end
+  if not had_trailing_nl and #lines > 0 and lines[#lines] == "" then
+    table.remove(lines)
   end
   return table.concat(lines, "\n")
 end

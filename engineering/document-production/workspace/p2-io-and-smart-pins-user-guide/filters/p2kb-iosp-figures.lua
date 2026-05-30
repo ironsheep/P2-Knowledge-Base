@@ -154,6 +154,14 @@ function Pandoc(doc)
     if needs_reserve[i] then
       table.insert(out, pandoc.RawBlock("latex",
         string.format("\\needspace{%.2f\\textheight}", needs_reserve[i])))
+    elseif b.t == "Header" and b.level and b.level >= 2 and b.level <= 4 then
+      -- Orphan-heading guard: reserve a few lines before every section /
+      -- subsection / subsubsection heading so a heading near the page bottom
+      -- moves to the next page WITH its first lines of content, instead of
+      -- being stranded alone at the foot of the page. Small fixed reserve (not
+      -- a \textheight fraction) so it never gaps the page like the larger
+      -- diagram/table reserves above; those take precedence via the if-branch.
+      table.insert(out, pandoc.RawBlock("latex", "\\needspace{3\\baselineskip}"))
     end
     table.insert(out, b)
   end

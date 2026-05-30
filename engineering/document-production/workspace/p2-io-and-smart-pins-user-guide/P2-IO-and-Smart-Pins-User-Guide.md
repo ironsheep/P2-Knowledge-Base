@@ -414,7 +414,7 @@ Drive instructions set both the DIR bit (set to 1) and the OUT bit in a single a
 
 - **Execution time:** 2 clock cycles
 - **Output latency:** 3 additional clock cycles after instruction
-- **Flags:** Z is set to the new OUT bit state; C is unaffected
+- **Flags:** With the optional WCZ effect, C and Z are **both** set to the pin's prior OUT-bit state (its output level before the instruction executes); without WCZ, neither flag changes
 - **Pin range:** D[5:0] specifies base pin (0-63); D[10:6] specifies span (0-31 additional pins when preceded by SETQ)
 
 
@@ -430,7 +430,7 @@ Drives pin high by setting DIR=1 and OUT=1.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to 1 (high state)
-3. Set Z flag to 1
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles; pin begins driving 3 clocks after instruction completes
 
@@ -465,7 +465,7 @@ Drives pin low by setting DIR=1 and OUT=0.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to 0 (low state)
-3. Set Z flag to 0
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles; pin begins driving 3 clocks after instruction completes
 
@@ -500,7 +500,7 @@ Toggles the output state while keeping the pin as an output.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Toggle OUT bit for pin D (0→1 or 1→0)
-3. Set Z flag to the new OUT bit state
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -651,7 +651,7 @@ Drives pin to a random state.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to a random value (0 or 1)
-3. Set Z flag to the new OUT bit state
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -672,7 +672,7 @@ Output instructions modify only the output state register bit. The direction reg
 ### Common Properties
 
 - **Execution time:** 2 clock cycles
-- **Flags:** Z is set to the new OUT bit state; C is unaffected
+- **Flags:** With the optional WCZ effect, C and Z are **both** set to the pin's prior OUT-bit state (its output level before the instruction executes); without WCZ, neither flag changes
 - **Note:** If DIR=0, the instruction changes the OUT register but has no immediate effect on the pin
 
 
@@ -687,7 +687,7 @@ Sets the output state to high without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to 1
-2. Set Z flag to 1
+2. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -716,7 +716,7 @@ Sets the output state to low without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to 0
-2. Set Z flag to 0
+2. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -742,7 +742,7 @@ Toggles the output state without changing direction.
 **Operation:**
 
 1. Toggle OUT bit for pin D
-2. Set Z flag to the new OUT bit state
+2. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -844,7 +844,7 @@ Sets output state to a random value without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to a random value
-2. Set Z flag to the new OUT bit state
+2. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -859,7 +859,7 @@ Direction instructions modify only the direction register bit. The output state 
 ### Common Properties
 
 - **Execution time:** 2 clock cycles
-- **Flags:** Z is set to the new DIR bit state; C is unaffected
+- **Flags:** With the optional WCZ effect, C and Z are **both** set to the pin's prior DIR-bit state (its direction before the instruction executes); without WCZ, neither flag changes
 
 
 ### DIRH - Direction High (Output)
@@ -873,7 +873,7 @@ Sets the pin to output mode.
 **Operation:**
 
 1. Set DIR bit for pin D to 1 (output mode)
-2. Set Z flag to 1
+2. If WC/WZ is specified, set C and Z to the pin's prior DIR bit (otherwise leave flags unchanged)
 3. OUT is unchanged; pin drives current OUT value
 
 **Timing:** 2 clock cycles
@@ -900,7 +900,7 @@ Sets the pin to input mode (floating).
 **Operation:**
 
 1. Set DIR bit for pin D to 0 (input mode, pin floats)
-2. Set Z flag to 0
+2. If WC/WZ is specified, set C and Z to the pin's prior DIR bit (otherwise leave flags unchanged)
 3. OUT is unchanged
 
 **Timing:** 2 clock cycles
@@ -932,7 +932,7 @@ Toggles the direction between input and output.
 **Operation:**
 
 1. Toggle DIR bit for pin D
-2. Set Z flag to the new DIR bit state
+2. If WC/WZ is specified, set C and Z to the pin's prior DIR bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1027,7 +1027,7 @@ Sets direction to a random value.
 **Operation:**
 
 1. Set DIR bit for pin D to a random value
-2. Set Z flag to the new DIR bit state
+2. If WC/WZ is specified, set C and Z to the pin's prior DIR bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1041,7 +1041,7 @@ Float instructions set the pin to input mode (DIR=0) AND pre-set the output stat
 ### Common Properties
 
 - **Execution time:** 2 clock cycles
-- **Flags:** Z is set to the new OUT bit state; C is unaffected
+- **Flags:** With the optional WCZ effect, C and Z are **both** set to the pin's prior OUT-bit state (its output level before the instruction executes); without WCZ, neither flag changes
 - **Effect:** DIR=0 (floating) AND OUT=specified value
 
 
@@ -1057,7 +1057,7 @@ Floats pin and pre-sets output register high.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to 1 (high)
-3. Set Z flag to 1
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1085,7 +1085,7 @@ Floats pin and pre-sets output register low.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to 0 (low)
-3. Set Z flag to 0
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1111,7 +1111,7 @@ Floats pin and toggles the output register.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Toggle OUT bit for pin D
-3. Set Z flag to the new OUT bit state
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1206,7 +1206,7 @@ Floats pin and sets output register to random value.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to random value
-3. Set Z flag to the new OUT bit state
+3. If WC/WZ is specified, set C and Z to the pin's prior OUT bit (otherwise leave flags unchanged)
 
 **Timing:** 2 clock cycles
 
@@ -1451,42 +1451,42 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 
 | Instruction | Effect | DIR | OUT | Flags |
 |-------------|--------|-----|-----|-------|
-| **DRVH** | Drive high | 1 | 1 | Z=1 |
-| **DRVL** | Drive low | 1 | 0 | Z=0 |
-| **DRVNOT** | Drive toggle | 1 | toggle | Z=OUT |
+| **DRVH** | Drive high | 1 | 1 | C/Z=OUT |
+| **DRVL** | Drive low | 1 | 0 | C/Z=OUT |
+| **DRVNOT** | Drive toggle | 1 | toggle | C/Z=OUT |
 | **DRVC** | Drive to C | 1 | C | Z=OUT |
 | **DRVNC** | Drive to !C | 1 | !C | Z=OUT |
 | **DRVZ** | Drive to Z | 1 | Z | Z=OUT |
 | **DRVNZ** | Drive to !Z | 1 | !Z | Z=OUT |
-| **DRVRND** | Drive random | 1 | rnd | Z=OUT |
-| **OUTH** | Output high | - | 1 | Z=1 |
-| **OUTL** | Output low | - | 0 | Z=0 |
-| **OUTNOT** | Output toggle | - | toggle | Z=OUT |
+| **DRVRND** | Drive random | 1 | rnd | C/Z=OUT |
+| **OUTH** | Output high | - | 1 | C/Z=OUT |
+| **OUTL** | Output low | - | 0 | C/Z=OUT |
+| **OUTNOT** | Output toggle | - | toggle | C/Z=OUT |
 | **OUTC** | Output to C | - | C | Z=OUT |
 | **OUTNC** | Output to !C | - | !C | Z=OUT |
 | **OUTZ** | Output to Z | - | Z | Z=OUT |
 | **OUTNZ** | Output to !Z | - | !Z | Z=OUT |
-| **OUTRND** | Output random | - | rnd | Z=OUT |
-| **DIRH** | Direction output | 1 | - | Z=1 |
-| **DIRL** | Direction input | 0 | - | Z=0 |
-| **DIRNOT** | Direction toggle | toggle | - | Z=DIR |
+| **OUTRND** | Output random | - | rnd | C/Z=OUT |
+| **DIRH** | Direction output | 1 | - | C/Z=DIR |
+| **DIRL** | Direction input | 0 | - | C/Z=DIR |
+| **DIRNOT** | Direction toggle | toggle | - | C/Z=DIR |
 | **DIRC** | Direction to C | C | - | Z=DIR |
 | **DIRNC** | Direction to !C | !C | - | Z=DIR |
 | **DIRZ** | Direction to Z | Z | - | Z=DIR |
 | **DIRNZ** | Direction to !Z | !Z | - | Z=DIR |
-| **DIRRND** | Direction random | rnd | - | Z=DIR |
-| **FLTH** | Float, out high | 0 | 1 | Z=1 |
-| **FLTL** | Float, out low | 0 | 0 | Z=0 |
-| **FLTNOT** | Float, toggle out | 0 | toggle | Z=OUT |
+| **DIRRND** | Direction random | rnd | - | C/Z=DIR |
+| **FLTH** | Float, out high | 0 | 1 | C/Z=OUT |
+| **FLTL** | Float, out low | 0 | 0 | C/Z=OUT |
+| **FLTNOT** | Float, toggle out | 0 | toggle | C/Z=OUT |
 | **FLTC** | Float, out to C | 0 | C | Z=OUT |
 | **FLTNC** | Float, out to !C | 0 | !C | Z=OUT |
 | **FLTZ** | Float, out to Z | 0 | Z | Z=OUT |
 | **FLTNZ** | Float, out to !Z | 0 | !Z | Z=OUT |
-| **FLTRND** | Float, out random | 0 | rnd | Z=OUT |
+| **FLTRND** | Float, out random | 0 | rnd | C/Z=OUT |
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
 
-**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. The Flags column shows the Z result when WCZ is specified: DRV/OUT/FLT set Z to the pin's prior OUT-bit state, DIR sets Z to the prior DIR-bit state, and TESTP/TESTPN set both C and Z to the pin's input state. The C flag is not affected by DRV/OUT/DIR/FLT (only TESTP/TESTPN write C). (Source: P2 Silicon Doc / KB `flags_affected`.)
+**Legend:** "-" = unchanged, "toggle" = inverts current value, "rnd" = random. **Flag effects (with the optional WCZ effect):** DRV/OUT/FLT set **both C and Z** to the pin's prior OUT-bit state, and DIR sets **both C and Z** to the pin's prior DIR-bit state — i.e. the output/direction level *before* the instruction executes. TESTP/TESTPN set both C and Z to the pin's input state. Without WC/WZ, no flag is written. The single value shown in the Flags column above is the value delivered to both flags. (Source: P2 Assembly Language Manual.)
 
 
 ## 1.11 Common Patterns
