@@ -40,28 +40,38 @@
 
 \vspace{0.3cm}
 \begin{minipage}[t]{0.45\textwidth}
-\textbf{Foundation \& Windows}
+\textbf{Part I --- Foundation}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item The DEBUG Display Windows
 \item Getting Started
+\end{itemize}
+\vspace{0.25cm}
+\textbf{Part II --- The Windows}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item TERM --- Text Output
 \item BITMAP --- Pixel Raster
 \item PLOT --- Vector Drawing
 \item LOGIC --- Digital Waveforms
 \item SCOPE --- Oscilloscope
-\end{itemize}
-\end{minipage}%
-\begin{minipage}[t]{0.45\textwidth}
-\textbf{Windows \& Integration}
-\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item SCOPE\_XY --- XY \& Phase
 \item FFT --- Frequency Spectrum
 \item SPECTRO --- Spectrogram
 \item MIDI --- Keyboard Display
+\end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Part III --- Integration}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Bidirectional Control
 \item Packed Data
 \item Multiple Windows \& PASM
-\item Appendices A--C
+\end{itemize}
+\vspace{0.25cm}
+\textbf{Appendices}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Command Reference
+\item Packed-Data Formats
+\item Color \& Coordinate
 \end{itemize}
 \end{minipage}
 
@@ -97,6 +107,11 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ```{=latex}
 \clearpage
+```
+
+
+```{=latex}
+\part{Foundation}
 ```
 
 
@@ -461,6 +476,11 @@ You now have the loop that every chapter relies on: compile with `-d`, run from
 - The graphical windows each have their own chapter — **BITMAP** (4), **PLOT** (5),
   **LOGIC** (6), **SCOPE** (7), **SCOPE_XY** (8), **FFT** (9), **SPECTRO** (10), and
   **MIDI** (11). Each follows the same create-then-feed pattern shown here.
+
+
+```{=latex}
+\part{The Windows}
+```
 
 
 # Chapter 3: The TERM Window — Text Output
@@ -3425,6 +3445,11 @@ up.
 > covered in Chapter 12.
 
 
+```{=latex}
+\part{Integration}
+```
+
+
 # Chapter 12: Bidirectional Control — Keyboard and Mouse
 
 Every chapter so far has sent data one way: your P2 produces output, a DEBUG
@@ -4130,6 +4155,11 @@ Then move the work into a cog: start a PASM program with `COGINIT` that generate
 ramp and feeds the SCOPE itself, and leave the Spin2 cog to print status to the TERM.
 You will be driving two windows from two cogs over the one shared link — and the only
 "coordination" anywhere is that both cogs are feeding windows you named.
+
+
+```{=latex}
+\part{Appendices}
+```
 
 
 # Appendix A: Command Reference

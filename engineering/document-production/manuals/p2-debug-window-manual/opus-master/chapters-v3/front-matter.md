@@ -40,28 +40,38 @@
 
 \vspace{0.3cm}
 \begin{minipage}[t]{0.45\textwidth}
-\textbf{Foundation \& Windows}
+\textbf{Part I --- Foundation}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item The DEBUG Display Windows
 \item Getting Started
+\end{itemize}
+\vspace{0.25cm}
+\textbf{Part II --- The Windows}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item TERM --- Text Output
 \item BITMAP --- Pixel Raster
 \item PLOT --- Vector Drawing
 \item LOGIC --- Digital Waveforms
 \item SCOPE --- Oscilloscope
-\end{itemize}
-\end{minipage}%
-\begin{minipage}[t]{0.45\textwidth}
-\textbf{Windows \& Integration}
-\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item SCOPE\_XY --- XY \& Phase
 \item FFT --- Frequency Spectrum
 \item SPECTRO --- Spectrogram
 \item MIDI --- Keyboard Display
+\end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Part III --- Integration}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Bidirectional Control
 \item Packed Data
 \item Multiple Windows \& PASM
-\item Appendices A--C
+\end{itemize}
+\vspace{0.25cm}
+\textbf{Appendices}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Command Reference
+\item Packed-Data Formats
+\item Color \& Coordinate
 \end{itemize}
 \end{minipage}
 
