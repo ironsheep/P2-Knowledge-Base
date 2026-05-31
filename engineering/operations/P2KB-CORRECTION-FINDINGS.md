@@ -80,6 +80,86 @@ XZERO:
 
 ---
 
+### F-005 — Debug-display KB YAMLs carry the same fabrications as the scrapped Debug Window v2 manual  ·  `CONFIRMED`
+
+**Files:** `deliverables/ai/P2/language/spin2/debug-displays/{plot,logic,midi}.yaml`; `…/debug-commands/{pc_key,pc_mouse}.yaml`
+
+**What's wrong:** Generated from the same pre-theory-of-operations understanding that produced the scrapped Debug Window Manual v2:
+- `plot.yaml` — describes a non-existent line-charting/data-series API (`plot_types`, `axis_configuration`, `statistical_features`, `data_export`). Real PLOT is a vector canvas (DOT/LINE/CIRCLE/BOX/OVAL/OBOX/TEXT/SET/ORIGIN/COLOR/OPACITY/POLAR/CARTESIAN/PRECISE/SPRITEDEF/SPRITE/LAYER/CROP).
+- `logic.yaml` — fabricated `protocol_decoders:` (I2C/SPI/UART/CAN/auto-baud) that do not exist; LOGIC is raw sample capture.
+- `midi.yaml` — fabricated display-formats/analysis/MIDI-file import-export; real window is a piano keyboard only ($9n/$8n bytes).
+- `pc_key.yaml`, `pc_mouse.yaml` — stubs (8 lines) missing the key-code table / 7-long mouse struct.
+
+**Evidence:** `engineering/ingestion/sources/spin2-v51/debug-section.txt` + the per-window Bibles in `…/p2-debug-window-manual/REF/theory-of-operations/`. The identical fabrications were found and fixed in **Debug Window Manual v3** (2026-05-31).
+
+**Proposed correction:** Re-ground these YAMLs in the theory-of-operations Bibles. The corrected v3 chapters (`p2-debug-window-manual/opus-master/chapters-v3/`) are a ready, verified source of the real command sets; expand `pc_key`/`pc_mouse` per v3 Chapter 12.
+
+---
+
+### F-006 — Silicon errata undocumented: SETQ/SETQ2 block transfer + intervening ALTx/AUGS/AUGD cancels the PTRx block delta  ·  `CONFIRMED` (safety-critical)
+
+**Files:** `deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml`, `setq.yaml`, `rdlong.yaml` (+ WRLONG/WMLONG)
+
+**What's wrong:** None warn that an ALTx/AUGS/AUGD placed between SETQ/SETQ2 and a block RDLONG/WRLONG/WMLONG (PTRx expression) cancels the block-size PTRx delta — PTRx then advances only +4 instead of N×4. Active in Rev-C silicon (current).
+
+**Evidence:** Silicon Doc v35 known-bugs (`engineering/ingestion/sources/silicon-doc/`).
+
+**Proposed correction:** Add a `silicon_errata` note (don't interleave ALTx/AUGS/AUGD between SETQ and the block transfer; workaround = keep adjacent).
+
+---
+
+### F-007 — Silicon errata undocumented: AUGS/AUGD value applied to an intervening ALTx with immediate #S  ·  `CONFIRMED` (safety-critical)
+
+**Files:** `deliverables/ai/P2/language/pasm2/augs.yaml`, `augd.yaml` (+ `altd.yaml`/`alts.yaml` notes)
+
+**What's wrong:** No warning that an ALTx with an immediate `#S` between AUGS/AUGD and the intended target uses the augment without cancelling it — both instructions get augmented. Rev-C silicon. Workaround: use a register (not `#S`) for the ALTx S operand.
+
+**Evidence:** Silicon Doc v35 known-bugs.
+
+**Proposed correction:** Add `silicon_errata` block to `augs.yaml`/`augd.yaml`.
+
+---
+
+### F-008 — `conditional_execution.yaml` missing 14 condition-code bit-pattern aliases  ·  `CONFIRMED`
+
+**File:** `deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml`
+
+**What's wrong:** 14 of 15 condition codes omit valid aliases pnut_ts accepts (e.g. code 1 `IF_NC_AND_NZ` ← `IF_00`; code 6 ← `IF_Z_NE_C`; code 14 `IF_C_OR_Z` ← `IF_LE`, `IF_NOT_00`; etc.).
+
+**Evidence:** `engineering/ingestion/sources/pnut-ts-pasm-ref/PASM2-Condition-Codes.json`. Full per-code list in the PASM2-audit harvest output.
+
+**Proposed correction:** Add the missing `IF_##` / `IF_NOT_##` / `IF_Z_*_C` / `IF_LE` aliases to each code's `aliases:`.
+
+---
+
+### F-009 — BIT*/DIR*/DRV*/OUT*/FLT* instruction YAMLs wrongly say C = "No effect"  ·  `CONFIRMED`
+
+**Files (~28–35):** non-RND variants of `bit*.yaml`, `dir*.yaml`, `drv*.yaml`, `out*.yaml`, `flt*.yaml` (e.g. `bith`, `dirc`, `drvh`, `outc`, `fltl`).
+
+**What's wrong:** Each has `flags_affected: C: No effect`. Authoritative CSV (`P2 Instructions v35 - Rev B_C Silicon`) specifies `C,Z = [original target bit state]` with `{WCZ}`. The RND variants were already fixed; the rest were missed.
+
+**Proposed correction:** Set C to the original bit state per family (BIT: `D[S[4:0]]`; DIR: DIR bit; DRV/OUT/FLT: OUT bit) when WC/WCZ specified — mirror the already-correct RND variant in each family.
+
+---
+
+### F-010 — `cog_hub_execution.yaml` `common_mistakes` contradicts the file's own corrected content  ·  `CONFIRMED`
+
+**File:** `deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml` (lines ~517–523)
+
+**What's wrong:** The `common_mistakes` entry says "Using REP in hubexec … Won't work!" — contradicting lines 32–40/98/122 of the same file, which correctly state REP works in hubexec (Silicon Doc v35) at ~13+ clocks/iteration. Stale entry never updated.
+
+**Proposed correction:** Replace with: REP works in hubexec but each iteration pays the hub-branch refill (~13+ clocks); use cogexec only when zero-overhead looping is needed.
+
+---
+
+### F-011 — Flash-Loader update-request leftovers  ·  `CONFIRMED` (low priority)
+
+The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied). Two small items remain:
+- `language/pasm2/hubset.yaml` — request asked for an inline `halt_technique:` block; content exists in `idioms/halt-and-fault-response.yaml` and hubset.yaml only cross-links (house style prefers inline).
+- `language/pasm2/idioms/_index.yaml` — missing the top-level idioms compendium/discovery index (the six idiom files exist; only the index is absent; "optional but high-value").
+
+---
+
 ## Verified resolved (recorded so we don't re-chase)
 
 The **Jan-2026 streamer KB audit** (`manuals/p2-streamer-programming-guide/yaml-knowledge-base-audit.md`) listed 7 issues. Re-verified against the current (restructured) P2KB on **2026-05-31** — all but one are FIXED:
@@ -101,20 +181,24 @@ The streamer audit's *enhancement* suggestions (setxfrq common-value table, extr
 
 ## To investigate
 
-### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile in some examples  ·  `NEEDS-VERIFICATION`
+### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile  ·  `WONTFIX` (agent usage error; KB is correct)
 
-During Debug Window Manual generation, agents reported that a bare `?` random-operator form and a `||` absolute-value prefix did not compile in `pnut_ts` v1.55.0 (they substituted `GETRND()` and the `abs` keyword). This may be an **agent usage error** (wrong operator syntax) rather than a KB defect. Before recording as a correction: confirm the exact valid Spin2 syntax for the random operator and absolute value against the v51 spec + compiler, then either close as WONTFIX or, if the KB documents an incorrect form, open a CONFIRMED finding citing the YAML.
+**Resolved 2026-05-31** against pnut_ts v1.55.0 + Spin2 v51 — the failures were an **agent usage error, not a KB defect**:
+- **Abs:** `ABS x` / `ABS(value)` compiles; the symbolic `||x` does **not** compile in pnut_ts. The KB documents it correctly (`methods/abs.yaml`: `result := ABS(value)`).
+- **Random:** `??variable` (XORO32) compiles and is documented correctly (`operators/op_rand.yaml`); v51 line 3700 confirms. The agents' `?x` fails because `?` is the **ternary** operator (`operators/op_question.yaml`), not a unary random.
+
+No KB change required.
 
 ---
 
-## Sources to harvest into this register
+## Sources harvested — 2026-05-31 (re-verified against the current KB)
 
-These pre-existing, scattered findings/gaps docs should be reviewed and any still-valid **P2KB-actionable** items folded in here (then the originals can point back to this register):
+All four legacy sources were re-verified against the current `deliverables/ai/P2/` (the KB has moved on — most legacy items were already applied). Still-valid items are folded in above:
 
-- `engineering/document-production/manuals/p2-debug-window-manual/studies/yaml-database-gaps-discovered.md` — debug-window "YAML gaps" (missing window/command YAML). Note: written in the now-retired Discovery voice; the per-window theory-of-operations docs in that manual's `REF/theory-of-operations/` are the authoritative basis for any new debug YAML.
-- `engineering/ingestion/external-inputs/pnut_ts_facts/Flash-Loader-P2KB-Update-Request.md` and `…-RCFAST.md` — existing P2KB update requests.
-- `engineering/document-production/manuals/p2-assembly-language-manual/audit/` — the PASM2 audit's consolidated findings (e.g. `PART-I-AUDIT-CONSOLIDATED-FINDINGS.md`, the `consistency/findings-task-*.md` set, `HALLUCINATION-PATTERN-FINDINGS.md`) — extract any that indicate the *KB YAML* (not just the manual) is wrong.
-- `engineering/ingestion/sources/silicon-doc/silicon-doc-v35-critical-findings.md` — silicon-doc-level findings.
+- `…/p2-debug-window-manual/studies/yaml-database-gaps-discovered.md` → **F-005** (6 still-missing, 4 resolved). Fix source = the manual's `REF/theory-of-operations/`.
+- `…/pnut_ts_facts/Flash-Loader-P2KB-Update-Request.md` → **F-011** (2 minor pending, 21 applied); `…-RCFAST.md` → fully applied (0 pending).
+- `…/p2-assembly-language-manual/audit/` (PART-I / HALLUCINATION / yaml-audit set) → **F-008, F-009, F-010** (3 KB-actionable, 12 resolved, ~30 manual-only and excluded).
+- `…/silicon-doc/silicon-doc-v35-critical-findings.md` → **F-006, F-007** (2 safety-critical errata, 10 resolved).
 
 ---
 
