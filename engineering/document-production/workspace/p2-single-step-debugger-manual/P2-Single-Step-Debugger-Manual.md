@@ -150,8 +150,9 @@ You are not just watching — you are driving:
   interrupt, or an event.
 
 > A *breakpoint* is a marked spot where execution should pause so you can look
-> around. A *watch* is a register or memory location you have asked the debugger
-> to keep showing you as you step.
+> around. The *watch list* is the debugger's running tally of the registers that
+> changed most recently — it surfaces them for you automatically as you step,
+> rather than you choosing them in advance.
 
 ## When to reach for it
 
@@ -297,8 +298,7 @@ Chapter 6.)
 
 Debugging adds a small amount of code and RAM per COG so the chip can talk to
 the host. For a finished release you simply compile without `-d` and the
-overhead is gone. You can also keep debug code in only some builds by guarding it
-with the `__DEBUG__` symbol.
+overhead is gone.
 
 
 # Chapter 3: Orientation — The Debugger Window
@@ -365,9 +365,9 @@ depth show here too.
 \end{figure}
 ```
 
-**Watch windows (middle-right).** The values you have chosen to keep an eye on:
-a **Register Watch** for specific registers, the **SFR** group for the special
-function registers, and an **Events** view for event flags.
+**Watch windows (middle-right).** A **Register Watch** that automatically lists
+the registers changing as you step, the **SFR** group for the special function
+registers, and an **Events** view for event flags.
 
 **Stack display (bottom-middle).** The eight-level hardware call stack and the
 PTRA / PTRB pointer values.
@@ -405,7 +405,7 @@ clickable with the mouse.
 ## The one habit worth forming
 
 Before you step, glance at three things: the **PC** (where am I), the **flags**
-(C/Z), and whatever is in your **watch** list (the values you care about). After
+(C/Z), and the **watch** list (the registers that just changed). After
 you step, glance again and see what changed. That rhythm — look, step, look — is
 the whole craft.
 
@@ -449,12 +449,13 @@ debugger stops again. Watch the highlighted line in the disassembly move, and
 watch the PC change in the control registers. You just executed a single
 instruction by hand.
 
-**4. Watch a value.** As you step toward `add_two`, add the result to your watch
-list (press **W** on the register, or click it). Step through the addition and
-watch the value appear — you are seeing the computation happen one instruction at
-a time.
+**4. Watch the values change.** As you step toward `add_two`, keep an eye on the
+**Register Watch** pane: the debugger lists registers automatically as they
+change, so the result register shows up there on the step that writes it. Step
+through the addition and watch the value land — you are seeing the computation
+happen one instruction at a time.
 
-**5. Resume.** Press **Enter** (or **G**) to let the program run again. It
+**5. Resume.** Press **Enter** to let the program run again. It
 continues to the second `DEBUG`, prints `sum = 42`, and finishes.
 
 That is a complete debug session: **stop, look, step, look, resume.** Everything
@@ -494,9 +495,10 @@ reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a COG start.
 
 - **Left-click a button** — activate that function.
 - **Right-click a mode button** — toggle its state.
-- **Left-click a register** — add it to the watch list.
-- **Double-click a value** — edit it.
-- **Scroll wheel** — move through memory or disassembly.
+- **Left-click a value** (register, SFR, stack entry, or pointer) — jump the
+  disassembly or hub viewer to the address it holds.
+- **Right-click a disassembly line** — set or clear an address breakpoint there.
+- **Scroll wheel** — move through the hub viewer or the disassembly.
 
 
 # Chapter 6: Breakpoints
@@ -519,16 +521,18 @@ A break-condition register controls which conditions are armed:
 | **ADDR** | execution reaches a chosen address |
 | **COGBRK** | another COG requests an asynchronous break |
 
-You arm and disarm most of these with the single-key toggles from Chapter 5
-(**D**, **I**, **M**, **1/2/3**), and clear them all with **C**.
+You arm and disarm these with the condition buttons. **Left-click** a button to
+set that condition exclusively; **right-click** to toggle it without disturbing
+the others. Three of them also have keyboard toggles from Chapter 5 — **D**
+(DEBUG), **I** (INIT), and **M** (MAIN).
 
 ## Setting an address breakpoint
 
-To stop at a specific instruction:
-
-1. Press **A** (or click the **ADDR** button).
-2. Enter the address in hex, e.g. `$1234`.
-3. Press Enter. Execution will pause when the PC reaches that address.
+To stop when execution reaches a specific instruction, **right-click that line in
+the disassembly pane**. A marker appears on the line, and the program pauses when
+the PC reaches that address; right-click the line again to clear it. If the line
+you want is not on screen, scroll the disassembly to it first (mouse wheel, or
+click a pointer/stack value that lands there).
 
 ## Conditional breakpoints in code
 
@@ -548,9 +552,11 @@ would send output to the display windows instead of breaking.
 ## Asynchronous break between COGs (COGBRK)
 
 One COG can break another. Enable **BREAK** mode (press **B**) in the COG you
-want to be interruptible; a COG running in DEBUG can then trigger its break. This
-is how you stop a misbehaving worker COG from a controlling COG — essential for
-multi-COG debugging (Chapter 8).
+want to be interruptible; the break can then be fired across to it while you are
+stopped in another COG's debugger. This is how you stop a misbehaving worker COG
+— essential for multi-COG debugging (Chapter 8). One limitation to remember: an
+asynchronous break only lands while some COG is already sitting in its own
+debugger.
 
 
 # Chapter 7: Observing State
@@ -560,17 +566,17 @@ The reason to pause is to look. This chapter covers what you can inspect and how
 ## Memory
 
 **COG memory ($000 – $1FF).** 512 longs of COG RAM — your registers and code.
-Click a location to add it to the watch list; the heat map shows access activity.
+The heat map shows read/write activity, and the **Register Watch** pane lists
+locations automatically as they change.
 
 **LUT memory ($200 – $3FF).** 512 longs of lookup-table RAM, shared between COG
 pairs (0–1, 2–3, 4–5, 6–7) and often used for fast data.
 
 **Hub memory.** The shared RAM, shown as hex with an ASCII column. Navigate with
-the arrow keys (byte by byte), PgUp/PgDn (by page), the mini-map (jump to a
-region), or by entering an address directly.
-
-**Editing memory.** Double-click a value, type the new value in hex, and press
-Enter (Escape cancels). Useful for trying a fix without recompiling.
+the arrow keys (up/down one row, $10 bytes), PgUp/PgDn (by page), the scroll
+wheel, or by clicking the hub heat-map or a pointer value to jump straight to a
+location. You can also dial an address in by scrolling the wheel over its hex
+digits.
 
 ## Registers and the special-function registers
 
@@ -604,14 +610,13 @@ of 1 makes the pin an output and 0 makes it an input. So when you are watching a
 pin, pick the register for its bank and read the bit at the pin's position within
 that bank (pin 40, for example, is DIRB/OUTB/INB bit 8).
 
-To change a register, click its value in the watch window, type a new value, and
-press Enter. (INA and INB are inputs — you can watch them but not write them.)
-
 ## The watch list
 
-Add registers with **W** or by clicking; remove with a right-click. The watch
-list updates live as you step, so it is the best place to keep the few values
-that matter to the problem you are chasing.
+The watch list builds itself: as you step, the debugger lists the registers
+whose values just changed (up to 16 at once), brightening the freshest and
+fading them as they go quiet. You do not curate it — it surfaces exactly the
+activity you are stepping through. Press **R** (or click the watch pane) to clear
+it and start fresh; a parallel list does the same for smart pins.
 
 ## The call stack
 
@@ -691,16 +696,21 @@ opens the single-step debugger. The blink COG opens in **its own window**
 
 ## Finding memory corruption
 
-When a value is being clobbered and you do not know by whom:
+When a value is being clobbered and you do not know by whom, lean on the heat
+maps. The debugger has no data watchpoint, but it *colors* every read and write:
 
-1. Watch the affected location (click it, or use an address breakpoint).
-2. Turn on the heat map and look for unexpected write activity.
-3. Watch the surrounding locations too — corruption often spills across
+1. Keep the COG/LUT heat-map columns (or the hub heat-map) in view and step or
+   run between breakpoints, watching for write activity on the affected location.
+2. Watch the surrounding locations too — corruption often spills across
    neighbors.
+3. Once you suspect *which* instruction is doing the writing, set an address
+   breakpoint on it (right-click it in the disassembly) to stop there and catch
+   the culprit in the act.
 
 ## Debugging interrupts
 
-1. Arm the relevant interrupt breakpoint (**1**, **2**, or **3**).
+1. Arm the relevant interrupt breakpoint by clicking the **INT1**, **INT2**, or
+   **INT3** button.
 2. When it fires, check the interrupt vectors in the SFR group (IJMPx / IRETx).
 3. Watch the event flags to confirm which event drove the interrupt.
 
@@ -741,8 +751,9 @@ DEBUG(UDEC(count))                  ' prints: count = 42  (auto label)
 
 - **Start small.** A single breakpoint and the step key will solve most problems
   before you need anything fancier.
-- **Keep the watch list short.** Two or three values that matter beat a screen
-  full of noise.
+- **Let the watch list work for you.** It auto-surfaces the registers that just
+  changed — read it as a running summary of what your stepping is touching, and
+  press **R** to clear it when you want a fresh slate.
 - **Let the heat map point you.** Unexpected activity is a fast way to localize a
   bug you cannot otherwise see.
 - **Use COGBRK for parallel bugs.** Coordinated stopping is the key to making
@@ -754,8 +765,7 @@ DEBUG(UDEC(count))                  ' prints: count = 42  (auto label)
 |---------|--------------------|
 | Debugger never appears | Did you compile with `pnut_ts -d`? Without `-d`, DEBUG is stripped. |
 | A COG will not respond | It may be stalled; check whether it is waiting (e.g. on an event or `waitct`). |
-| Cannot change a register | Some are read-only — INA and INB are inputs. |
-| Lost in hub memory | Use the mini-map to jump, or enter an address directly. |
+| Lost in hub memory | Click the hub heat-map to jump, or dial the address in with the scroll wheel. |
 | A breakpoint never hits | Re-check the address and that the matching condition (ADDR/DEBUG/INT…) is armed. |
 
 
