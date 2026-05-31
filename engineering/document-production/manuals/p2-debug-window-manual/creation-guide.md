@@ -164,8 +164,22 @@ For comprehensive post-write audit procedures, see:
 
 ### Primary Content Sources
 
+#### 0. Per-Window Theory of Operations — authoritative grounding source ("the Bible")
+**Location**: `./REF/theory-of-operations/` (this manual's folder)
+- Nine source-derived theory-of-operations documents, one per window type: TERM,
+  BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI. **Current as of PNut v51a.**
+- Cover data structures, configuration, update/rendering, command protocols, color
+  systems, and performance — derived from the PNut implementation.
+- **This is the primary grounding source for the periodic audit** (Dimensions A, B,
+  #1, #5, C). Where a manual claim conflicts with the relevant window's theory-of-
+  operations, the theory-of-operations wins.
+
 #### 1. SPIN-2 Language Reference Manual v5.1 (Primary Technical Foundation)
-**Location**: `/sources/extractions/spin2-v51-complete-extraction-audit/`
+**Location**: `engineering/ingestion/sources/spin2-v51/` (relocated 2025-09; the former
+`/sources/extractions/spin2-v51-complete-extraction-audit/` path is dead). Key DEBUG
+files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
+`debug-comprehensive-guide.md`, `spin2-terminal-windows.md`, and the source PDF
+`P2 Spin2 Documentation v51-250425.pdf`.
 - Complete DEBUG instruction specifications
 - Debug formatting options and syntax
 - Built-in debug methods and functions
