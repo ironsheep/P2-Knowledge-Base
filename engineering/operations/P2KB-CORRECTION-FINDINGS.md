@@ -42,6 +42,63 @@
 
 ---
 
+### F-003 — `streamer_smartpin_control.yaml` still describes XZERO as "stream zeros"  ·  `CONFIRMED`
+
+**File:** `deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml` (lines ~51–53)
+
+**What's wrong:** It still says:
+```yaml
+XZERO:
+  syntax: "XZERO mode, count"
+  operation: "Stream zeros (no hub read)"
+  use: "Generate timing/clocks"
+```
+XZERO does **not** stream zeros. It buffers a streamer command to execute on the next NCO rollover, **zeroing the NCO phase accumulator**. The KB now **contradicts itself** — the instruction YAML `pasm2/xzero.yaml` was corrected to "zeroing phase," but this *concepts* file was missed.
+
+**Correct:**
+```yaml
+XZERO:
+  syntax: "XZERO {#}D,{#}S"
+  operation: "Buffer streamer command to execute on final NCO rollover, zeroing NCO phase"
+  use: "Video line timing reset, phase alignment"
+  note: "Does NOT stream zeros — zeros the NCO phase accumulator"
+```
+
+**Evidence:** Silicon Doc / Spin2 v51 streamer description; the already-corrected sibling `pasm2/xzero.yaml` ("Buffer new streamer command… zeroing phase. Unlike XCONT which continues phase…"). Surfaced 2026-05-31 while re-verifying the Jan-2026 streamer KB audit against the current (restructured) P2KB.
+
+**Proposed correction:** Replace the XZERO block with the correct description; align it with `pasm2/xzero.yaml`.
+
+---
+
+### F-004 — Seven deliverables YAMLs carry stale cross-refs to a non-existent `engineering/knowledge-base/P2/` path  ·  `CONFIRMED`
+
+**Files (7):** under `deliverables/ai/P2/` — locate with `grep -rl "engineering/knowledge-base/P2/" deliverables/ai/P2/`. Examples: `language/spin2/concepts/basic-io.yaml` (`related:` list), `guides/spin2-getting-started.yaml` (`content_base:`), `language/spin2/spin2-language-complete-map.yaml` (`language_root:` / `fundamentals_root:`).
+
+**What's wrong:** These `related:`, `content_base:`, and `*_root:` values point into `engineering/knowledge-base/P2/…` — a path that **does not exist** (the transient tree has only `P1/` and `P2-support/`, never `P2/`). The referenced content now lives under `deliverables/ai/P2/…`. Pre-existing dangling references (Sacred Rule #7: never break a cross-ref — redirect it).
+
+**Proposed correction:** Redirect each `engineering/knowledge-base/P2/<x>` reference to its current home under `deliverables/ai/P2/<x>` (or the correct relative path), then run the cross-ref validator. Independent of — but surfaced by — the `engineering/knowledge-base` wipe.
+
+---
+
+## Verified resolved (recorded so we don't re-chase)
+
+The **Jan-2026 streamer KB audit** (`manuals/p2-streamer-programming-guide/yaml-knowledge-base-audit.md`) listed 7 issues. Re-verified against the current (restructured) P2KB on **2026-05-31** — all but one are FIXED:
+
+| Audit finding | Current state | Verdict |
+|---|---|---|
+| DAC mapping wrong (old `architecture/streamer.yaml`) | now `architecture/streamer/dac-routing.yaml` — full 16-entry `X_DACS_*` table | ✅ RESOLVED |
+| Pin groups 8-pin | `streamer/pin-selection.yaml` — 32-pin blocks (`%000`=31..0 …) | ✅ RESOLVED |
+| Mode encoding | `streamer/modes-reference.yaml` — `mode_field: D[31:28]` | ✅ RESOLVED |
+| `pasm2/xcont.yaml` typo/sparse | "continuing phase" + examples | ✅ RESOLVED |
+| `pasm2/xzero.yaml` typo/sparse | "zeroing phase" + examples | ✅ RESOLVED |
+| `pasm2/setxfrq.yaml` no formula | "freq = (D × clkfreq) / 2³²" + SETQ + examples | ✅ RESOLVED |
+| symbols "85 claimed, ~8 defined" | new `symbols/streamer-symbols.yaml`, 60+ symbols | ✅ RESOLVED |
+| concepts XZERO "stream zeros" | **still wrong** → see **F-003** | ❌ OPEN |
+
+The streamer audit's *enhancement* suggestions (setxfrq common-value table, extra examples, the symbol-value reference) remain in that audit doc — worth a later pass for residual gaps, but they are gaps, not correctness errors.
+
+---
+
 ## To investigate
 
 ### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile in some examples  ·  `NEEDS-VERIFICATION`
