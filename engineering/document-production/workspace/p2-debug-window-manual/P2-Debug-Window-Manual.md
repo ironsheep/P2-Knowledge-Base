@@ -398,7 +398,7 @@ console does. It is the window you reach for first, because most debugging start
 as text: a status line, a variable dump, a running log of what your program is
 doing.
 
-You create one TERM window per `` DEBUG(`TERM …) `` declaration, give it a name,
+You create one TERM window per `` DEBUG(`TERM ...) `` declaration, give it a name,
 and from then on you address it by that name. This chapter covers everything the
 window does — creating it, sending text, positioning the cursor, using color, and
 controlling when the display updates.
@@ -974,7 +974,7 @@ reach for when you need a custom instrument face, a graph, a geometric figure,
 or any picture that is not a text grid (Chapter 3, TERM) or a raw pixel buffer
 (Chapter 4, BITMAP).
 
-You create one PLOT window per `` DEBUG(`PLOT …) `` declaration, give it a name,
+You create one PLOT window per `` DEBUG(`PLOT ...) `` declaration, give it a name,
 and from then on address it by that name. This chapter covers everything the
 window does: creating it, the coordinate system, the drawing primitives, color
 and opacity, the layer/CROP/sprite system, and the update model that controls
@@ -1376,7 +1376,7 @@ SPRITEDEF id xsize ysize pixels... colors...
 
 - `id` — sprite identifier, **`0`–`255`**.
 - `xsize`, `ysize` — sprite dimensions, each **`1`–`32`**.
-- `pixels` — `xsize × ysize` palette indices, one per pixel, in row order.
+- `pixels` — `xsize x ysize` palette indices, one per pixel, in row order.
 - `colors` — 256 palette entries in `$AARRGGBB` form (alpha, red, green, blue),
   where alpha `$00` is transparent and `$FF` is opaque.
 
@@ -1390,7 +1390,7 @@ SPRITE id {orientation {scale {opacity}}}
 - `orientation` — **`0`–`7`**, selecting one of eight flips/rotations (0 = normal,
   1 = flip-X, 2 = flip-Y, 3 = 180°, 4–7 = the 90° rotations and their flips).
 - `scale` — pixel magnification, **`1`–`64`**; each sprite pixel becomes a
-  `scale × scale` block.
+  `scale x scale` block.
 - `opacity` — an overall alpha multiplier, `0`–`255`, applied on top of each
   pixel's own alpha.
 
@@ -1510,7 +1510,7 @@ PRI rnd() : r
 ```
 
 The `sine` helper drives the CORDIC solver directly: **QROTATE** rotates the
-point (`length`, 0) by `angle`, and **GETQY** returns `length × sin(angle)` — a
+point (`length`, 0) by `angle`, and **GETQY** returns `length x sin(angle)` — a
 software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
@@ -1565,7 +1565,7 @@ Spin2/PASM2 code computes it; the LOGIC window only displays the lines. This is 
 single most important thing to keep in mind about the window, and this chapter
 returns to it in the worked example and the considerations.
 
-You create one LOGIC window per `` DEBUG(`LOGIC …) `` declaration, naming it and
+You create one LOGIC window per `` DEBUG(`LOGIC ...) `` declaration, naming it and
 declaring its channels in that one statement, then feed it sample values by name.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the LOGIC window, but they
@@ -1609,7 +1609,7 @@ The configuration keywords you can add to the creation line:
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
 
 `SAMPLES` and `SPACING` together set the window width: width in pixels is
-`SAMPLES × SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
+`SAMPLES x SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
 trace. Increasing `SAMPLES` shows more history; increasing `SPACING` stretches each
 sample wider.
 
@@ -2058,7 +2058,7 @@ TRIGGER channel {AUTO | arm fire} {offset}
 | `channel` | Which channel to watch: `-1` disables the trigger (free-run), `0`–`7` selects a channel |
 | `AUTO` | Auto-trigger — the window computes the arm and fire levels from the signal's range |
 | `arm fire` | Manual arm and fire levels (use these *instead of* `AUTO`) |
-| `offset` | Where the trigger point sits in the display, `0`..`SAMPLES−1` (default: `SAMPLES/2`) |
+| `offset` | Where the trigger point sits in the display, `0`..`SAMPLES-1` (default: `SAMPLES/2`) |
 
 ```spin2
 debug(`Capture TRIGGER 0 -500 500 256)   ' channel 0, arm -500, fire 500, centered
@@ -2089,10 +2089,10 @@ middle of the signal.
 ### Trigger position with offset
 
 The `offset` argument places the trigger point within the displayed window, measured
-in samples from `0` to `SAMPLES−1`:
+in samples from `0` to `SAMPLES-1`:
 
 - `0` puts the trigger at the **right** edge — you see only what happens after the event.
-- `SAMPLES−1` puts it at the **left** edge — you see the lead-up *to* the event (pre-trigger).
+- `SAMPLES-1` puts it at the **left** edge — you see the lead-up *to* the event (pre-trigger).
 - `SAMPLES/2` (the default) centers it, showing equal time before and after.
 
 The trigger is evaluated only once the buffer holds a full `SAMPLES` worth of data,
@@ -2210,7 +2210,7 @@ Start from the three-channel example. First switch the `Sine` channel from its f
 amplitude argument to `qsin`. Then add a trigger on the sine channel
 (`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
-`SAMPLES−1` to move the trigger point from the right edge to the center to the left
+`SAMPLES-1` to move the trigger point from the right edge to the center to the left
 edge, and see the pre-trigger region grow.
 
 
@@ -2382,7 +2382,7 @@ external hardware. The X coordinate is a sine of the phase; the Y coordinate is 
 sine of three times the phase. Two sines at a 3:1 frequency ratio draw a stable
 Lissajous figure. Both come from the P2's CORDIC engine via the **QSIN** method,
 whose signature is `QSIN(length, step, stepsInCircle)` — it returns
-`length × sin(step / stepsInCircle × 2π)`. Passing `360` for `stepsInCircle` lets
+`length x sin(step / stepsInCircle x 2pi)`. Passing `360` for `stepsInCircle` lets
 you treat `step` as degrees.
 
 ```spin2
@@ -2421,7 +2421,7 @@ a comet sweeping around a circle:
 - **`SIZE` is a radius; `RANGE` is a symmetric extent.** A `SIZE 256 RANGE 1000`
   plot is 512×512 pixels and maps data from `-1000` to `+1000` on each axis. Match
   your data's amplitude to `RANGE` so the figure fills the plot without clipping;
-  values beyond `±RANGE` fall outside the visible area.
+  values beyond `+/-RANGE` fall outside the visible area.
 - **Choose persistence to the job.** `SAMPLES 0` builds a complete, permanent
   figure — right for Lissajous curves and phase portraits you want to read whole.
   A positive `SAMPLES` value draws a fading trail — right for a moving point whose
@@ -2470,7 +2470,7 @@ resulting **magnitude spectrum** — one point per frequency bin, drawn as a lin
 dot, or filled-bar trace. It supports up to **8 channels**, each transformed and
 drawn independently.
 
-You create one FFT window per `` DEBUG(`FFT …) `` declaration, name it, and feed
+You create one FFT window per `` DEBUG(`FFT ...) `` declaration, name it, and feed
 it samples by that name. This chapter covers creating the window, setting the FFT
 size, feeding samples across one or more channels, the two amplitude controls
 (magnitude shift and log scale), reading the spectrum, and the runtime commands.
@@ -2497,7 +2497,7 @@ Hanning-windowed.
 The transform produces `N/2` bins because a real-valued input signal has a
 spectrum that is symmetric about the Nyquist frequency; only the lower half
 carries unique information. Bin 0 is the DC (zero-frequency) component and bin
-`N/2 − 1` is the highest frequency the transform resolves.
+`N/2 - 1` is the highest frequency the transform resolves.
 
 ## Creating an FFT window
 
@@ -2541,7 +2541,7 @@ the value you give is clamped to that range and rounded down to the nearest powe
 of 2, so `SAMPLES 1000` becomes 512 and `SAMPLES 1024` stays 1024. The default,
 if you omit `SAMPLES` entirely, is 512.
 
-The window displays bins `0` through `N/2 − 1` by default — the full spectrum.
+The window displays bins `0` through `N/2 - 1` by default — the full spectrum.
 You can restrict the display to a contiguous **range of bins** by adding two more
 numbers:
 
@@ -2551,7 +2551,7 @@ debug(`FFT Zoom SIZE 512 256 SAMPLES 1024 100 400)
 
 This still runs a 1024-point transform but draws only bins 100 through 400,
 stretched across the full plot width — a zoom into one frequency region. The
-first bin must be in `0 … N/2 − 2` and the last in `first+1 … N/2 − 1`.
+first bin must be in `0 ... N/2 - 2` and the last in `first+1 ... N/2 - 1`.
 
 ## Feeding samples and declaring channels
 
@@ -2572,7 +2572,7 @@ label:
 |----------|---------|-------|
 | label | Channel name (string) | — |
 | `MAG` shift | Magnitude bit-shift | **0–11** |
-| high | Full-scale value for the Y axis | `1 … $7FFF_FFFF` |
+| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
 | grid | Grid flags: bit 0 = baseline line, bit 1 = top line | — |
@@ -2644,12 +2644,12 @@ If you feed the window samples at a known rate, each bin corresponds to a fixed
 frequency:
 
 ```
-frequency of bin k  =  k × (sample_rate / N)
+frequency of bin k  =  k x (sample_rate / N)
 ```
 
 So with a 1024-point transform fed at 10 kHz, the bins are spaced
-`10000 / 1024 ≈ 9.77 Hz` apart, and bin 100 sits at about 977 Hz. The highest
-bin, `N/2 − 1`, sits just below the Nyquist frequency `sample_rate / 2`; signal
+`10000 / 1024 ~ 9.77 Hz` apart, and bin 100 sits at about 977 Hz. The highest
+bin, `N/2 - 1`, sits just below the Nyquist frequency `sample_rate / 2`; signal
 content above Nyquist aliases down into the displayed range. Choosing the bin
 range with `SAMPLES N first last` lets you zoom into the band you care about, but
 the bin-to-Hz arithmetic — and any Hz labeling you want — is yours to add in your
@@ -2752,7 +2752,7 @@ Change an increment and watch the corresponding spike slide along the axis.
 - **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log2 compression with
   power-of-2 markers, and `MAG` is a power-of-2 gain. Neither produces decibels.
 - **The frequency axis is yours to compute.** The window plots bins, not Hertz.
-  Bin `k` is at `k × sample_rate / N`; if you want Hz labels, you add them.
+  Bin `k` is at `k x sample_rate / N`; if you want Hz labels, you add them.
 - **One FFT per channel per redraw.** Each channel runs its own transform, so
   spectra for several channels cost proportionally more work per frame; use
   `RATE` to redraw less often when feeding many channels or large `N`.
@@ -2811,7 +2811,7 @@ draws a straight line; a transient flashes as a short band. SPECTRO is **single
 channel** — it analyzes one stream of samples, unlike the FFT window's up-to-eight
 overlaid channels.
 
-You create one SPECTRO window per `` DEBUG(`SPECTRO …) `` declaration, name it, and
+You create one SPECTRO window per `` DEBUG(`SPECTRO ...) `` declaration, name it, and
 feed it samples by that name. This chapter covers creating the window, feeding it,
 choosing scroll direction and update rate, mapping magnitude to color, and the
 runtime commands.
@@ -3049,7 +3049,7 @@ PRI sine(amp, angle) : y
 ```
 
 `sine()` uses **QROTATE** to rotate the point (amp, 0) by `angle`; **GETQY** returns
-the Y component, which is `amp × sin(angle)`. Stepping `phase` by `ainc` each sample
+the Y component, which is `amp x sin(angle)`. Stepping `phase` by `ainc` each sample
 produces a tone whose frequency is set by `ainc`; raising `ainc` after every 512-
 sample block steps the tone up, and the waterfall records the climb as a diagonal.
 The Hanning window is applied inside the FFT automatically; you supply only the
@@ -3150,7 +3150,7 @@ The configuration keywords you can add to the creation line:
 A few things to know about these:
 
 - **`SIZE`** is a multiplier, not a pixel count. The white-key width is
-  `8 + SIZE × 4` pixels, so `SIZE 4` gives 24-pixel keys and `SIZE 50` gives
+  `8 + SIZE x 4` pixels, so `SIZE 4` gives 24-pixel keys and `SIZE 50` gives
   208-pixel keys. The whole window sizes itself from this and from the note
   range; you do not set a width and height directly.
 - **`RANGE`** selects which slice of the 128 MIDI notes is drawn. The default
@@ -3395,7 +3395,7 @@ writes **0 when no key was pressed**. It is not a function that returns the key 
 this is wrong:
 
 ```spin2
-' WRONG — PC_KEY does not return a value
+' WRONG - PC_KEY does not return a value
 key := debug(`Console PC_KEY)
 ```
 
@@ -3498,7 +3498,7 @@ window hover-coordinate behavior in each window's chapter.)
 button is down. Do not mask it:
 
 ```spin2
-' WRONG — buttons are 0 / -1, not packed bits
+' WRONG - buttons are 0 / -1, not packed bits
 if mouse[3] & 1
 ```
 
@@ -4083,9 +4083,9 @@ every window are listed once at the end.
 
 **Create:** `` DEBUG(`PLOT Name <config>) ``
 **Config:** `TITLE` · `POS` · `SIZE w h` (32–2048, default 512) · `DOTSIZE x {y}` (1–64) · `CARTESIAN {flipy {flipx}}` · `POLAR {twopi {theta}}` · `TEXTSIZE` · `BACKCOLOR` · `UPDATE` · `HIDEXY`
-**Position/state:** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0–255` · `LINESIZE`
-**Primitives (cursor-relative):** `DOT {linesize {opacity}}` · `LINE x y {linesize {opacity}}` · `CIRCLE diameter {…}` · `OVAL w h {…}` · `BOX w h {…}` · `OBOX w h xr yr {…}` · `TEXT {size {style {angle}}} 'string'`
-**Layers/sprites:** `LAYER n 'file.bmp'` (n = 1–8) · `CROP n` / `CROP n AUTO x y` / `CROP n left top w h {x y}` · `SPRITEDEF id xsize ysize …` (id 0–255, size 1–32) · `SPRITE id orient …` (orient 0–7)
+**Position/state:** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0-255` · `LINESIZE`
+**Primitives (cursor-relative):** `DOT {linesize {opacity}}` · `LINE x y {linesize {opacity}}` · `CIRCLE diameter {...}` · `OVAL w h {...}` · `BOX w h {...}` · `OBOX w h xr yr {...}` · `TEXT {size {style {angle}}} 'string'`
+**Layers/sprites:** `LAYER n 'file.bmp'` (n = 1–8) · `CROP n` / `CROP n AUTO x y` / `CROP n left top w h {x y}` · `SPRITEDEF id xsize ysize ...` (id 0–255, size 1–32) · `SPRITE id orient ...` (orient 0–7)
 **Runtime:** `CLEAR` · `SHOW` (buffered repaint trigger) · `SAVE`
 
 ## LOGIC — logic analyzer (Chapter 6)
@@ -4114,7 +4114,7 @@ every window are listed once at the end.
 
 **Create:** `` DEBUG(`FFT Name <config> <channels>) ``
 **Config:** `TITLE` · `POS` · `SIZE w h` (32–2048 px) · `SAMPLES N {first last}` (N = FFT size, power of 2, 4–2048; optional bin range) · `RATE` (1–2048) · `DOTSIZE` · `LINESIZE` (−32…32; negative = filled bars) · `TEXTSIZE` · `COLOR back grid` · `LOGSCALE` (log2 amplitude) · `HIDEXY`
-**Channels:** `'label' MAG-shift(0–11) high tall base grid color`. A Hanning window is always applied; it is not selectable.
+**Channels:** `'label' MAG-shift(0-11) high tall base grid color`. A Hanning window is always applied; it is not selectable.
 **Runtime:** `CLEAR` · `SAVE`
 
 ## SPECTRO — spectrogram / waterfall (Chapter 10)

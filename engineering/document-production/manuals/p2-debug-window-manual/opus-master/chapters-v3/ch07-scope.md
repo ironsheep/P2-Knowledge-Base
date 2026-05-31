@@ -151,7 +151,7 @@ TRIGGER channel {AUTO | arm fire} {offset}
 | `channel` | Which channel to watch: `-1` disables the trigger (free-run), `0`–`7` selects a channel |
 | `AUTO` | Auto-trigger — the window computes the arm and fire levels from the signal's range |
 | `arm fire` | Manual arm and fire levels (use these *instead of* `AUTO`) |
-| `offset` | Where the trigger point sits in the display, `0`..`SAMPLES−1` (default: `SAMPLES/2`) |
+| `offset` | Where the trigger point sits in the display, `0`..`SAMPLES-1` (default: `SAMPLES/2`) |
 
 ```spin2
 debug(`Capture TRIGGER 0 -500 500 256)   ' channel 0, arm -500, fire 500, centered
@@ -182,10 +182,10 @@ middle of the signal.
 ### Trigger position with offset
 
 The `offset` argument places the trigger point within the displayed window, measured
-in samples from `0` to `SAMPLES−1`:
+in samples from `0` to `SAMPLES-1`:
 
 - `0` puts the trigger at the **right** edge — you see only what happens after the event.
-- `SAMPLES−1` puts it at the **left** edge — you see the lead-up *to* the event (pre-trigger).
+- `SAMPLES-1` puts it at the **left** edge — you see the lead-up *to* the event (pre-trigger).
 - `SAMPLES/2` (the default) centers it, showing equal time before and after.
 
 The trigger is evaluated only once the buffer holds a full `SAMPLES` worth of data,
@@ -303,5 +303,5 @@ Start from the three-channel example. First switch the `Sine` channel from its f
 amplitude argument to `qsin`. Then add a trigger on the sine channel
 (`debug(`Waves TRIGGER 0 -500 500 256)`) and observe the waveform stand still instead
 of scrolling. Finally, vary the trigger `offset` between `0`, `SAMPLES/2`, and
-`SAMPLES−1` to move the trigger point from the right edge to the center to the left
+`SAMPLES-1` to move the trigger point from the right edge to the center to the left
 edge, and see the pre-trigger region grow.

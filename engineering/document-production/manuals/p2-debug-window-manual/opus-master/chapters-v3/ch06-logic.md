@@ -13,7 +13,7 @@ Spin2/PASM2 code computes it; the LOGIC window only displays the lines. This is 
 single most important thing to keep in mind about the window, and this chapter
 returns to it in the worked example and the considerations.
 
-You create one LOGIC window per `` DEBUG(`LOGIC …) `` declaration, naming it and
+You create one LOGIC window per `` DEBUG(`LOGIC ...) `` declaration, naming it and
 declaring its channels in that one statement, then feed it sample values by name.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the LOGIC window, but they
@@ -57,7 +57,7 @@ The configuration keywords you can add to the creation line:
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
 
 `SAMPLES` and `SPACING` together set the window width: width in pixels is
-`SAMPLES × SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
+`SAMPLES x SPACING`. The default `SAMPLES 32 SPACING 8` gives a 256-pixel-wide
 trace. Increasing `SAMPLES` shows more history; increasing `SPACING` stretches each
 sample wider.
 

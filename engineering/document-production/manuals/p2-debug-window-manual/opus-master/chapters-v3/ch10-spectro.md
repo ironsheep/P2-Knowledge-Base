@@ -15,7 +15,7 @@ draws a straight line; a transient flashes as a short band. SPECTRO is **single
 channel** — it analyzes one stream of samples, unlike the FFT window's up-to-eight
 overlaid channels.
 
-You create one SPECTRO window per `` DEBUG(`SPECTRO …) `` declaration, name it, and
+You create one SPECTRO window per `` DEBUG(`SPECTRO ...) `` declaration, name it, and
 feed it samples by that name. This chapter covers creating the window, feeding it,
 choosing scroll direction and update rate, mapping magnitude to color, and the
 runtime commands.
@@ -253,7 +253,7 @@ PRI sine(amp, angle) : y
 ```
 
 `sine()` uses **QROTATE** to rotate the point (amp, 0) by `angle`; **GETQY** returns
-the Y component, which is `amp × sin(angle)`. Stepping `phase` by `ainc` each sample
+the Y component, which is `amp x sin(angle)`. Stepping `phase` by `ainc` each sample
 produces a tone whose frequency is set by `ainc`; raising `ainc` after every 512-
 sample block steps the tone up, and the waterfall records the climb as a diagonal.
 The Hanning window is applied inside the FFT automatically; you supply only the

@@ -41,7 +41,7 @@ writes **0 when no key was pressed**. It is not a function that returns the key 
 this is wrong:
 
 ```spin2
-' WRONG — PC_KEY does not return a value
+' WRONG - PC_KEY does not return a value
 key := debug(`Console PC_KEY)
 ```
 
@@ -144,7 +144,7 @@ window hover-coordinate behavior in each window's chapter.)
 button is down. Do not mask it:
 
 ```spin2
-' WRONG — buttons are 0 / -1, not packed bits
+' WRONG - buttons are 0 / -1, not packed bits
 if mouse[3] & 1
 ```
 

@@ -166,7 +166,7 @@ external hardware. The X coordinate is a sine of the phase; the Y coordinate is 
 sine of three times the phase. Two sines at a 3:1 frequency ratio draw a stable
 Lissajous figure. Both come from the P2's CORDIC engine via the **QSIN** method,
 whose signature is `QSIN(length, step, stepsInCircle)` — it returns
-`length × sin(step / stepsInCircle × 2π)`. Passing `360` for `stepsInCircle` lets
+`length x sin(step / stepsInCircle x 2pi)`. Passing `360` for `stepsInCircle` lets
 you treat `step` as degrees.
 
 ```spin2
@@ -205,7 +205,7 @@ a comet sweeping around a circle:
 - **`SIZE` is a radius; `RANGE` is a symmetric extent.** A `SIZE 256 RANGE 1000`
   plot is 512×512 pixels and maps data from `-1000` to `+1000` on each axis. Match
   your data's amplitude to `RANGE` so the figure fills the plot without clipping;
-  values beyond `±RANGE` fall outside the visible area.
+  values beyond `+/-RANGE` fall outside the visible area.
 - **Choose persistence to the job.** `SAMPLES 0` builds a complete, permanent
   figure — right for Lissajous curves and phase portraits you want to read whole.
   A positive `SAMPLES` value draws a fading trail — right for a moving point whose

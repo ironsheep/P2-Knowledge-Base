@@ -10,7 +10,7 @@ reach for when you need a custom instrument face, a graph, a geometric figure,
 or any picture that is not a text grid (Chapter 3, TERM) or a raw pixel buffer
 (Chapter 4, BITMAP).
 
-You create one PLOT window per `` DEBUG(`PLOT …) `` declaration, give it a name,
+You create one PLOT window per `` DEBUG(`PLOT ...) `` declaration, give it a name,
 and from then on address it by that name. This chapter covers everything the
 window does: creating it, the coordinate system, the drawing primitives, color
 and opacity, the layer/CROP/sprite system, and the update model that controls
@@ -412,7 +412,7 @@ SPRITEDEF id xsize ysize pixels... colors...
 
 - `id` — sprite identifier, **`0`–`255`**.
 - `xsize`, `ysize` — sprite dimensions, each **`1`–`32`**.
-- `pixels` — `xsize × ysize` palette indices, one per pixel, in row order.
+- `pixels` — `xsize x ysize` palette indices, one per pixel, in row order.
 - `colors` — 256 palette entries in `$AARRGGBB` form (alpha, red, green, blue),
   where alpha `$00` is transparent and `$FF` is opaque.
 
@@ -426,7 +426,7 @@ SPRITE id {orientation {scale {opacity}}}
 - `orientation` — **`0`–`7`**, selecting one of eight flips/rotations (0 = normal,
   1 = flip-X, 2 = flip-Y, 3 = 180°, 4–7 = the 90° rotations and their flips).
 - `scale` — pixel magnification, **`1`–`64`**; each sprite pixel becomes a
-  `scale × scale` block.
+  `scale x scale` block.
 - `opacity` — an overall alpha multiplier, `0`–`255`, applied on top of each
   pixel's own alpha.
 
@@ -546,7 +546,7 @@ PRI rnd() : r
 ```
 
 The `sine` helper drives the CORDIC solver directly: **QROTATE** rotates the
-point (`length`, 0) by `angle`, and **GETQY** returns `length × sin(angle)` — a
+point (`length`, 0) by `angle`, and **GETQY** returns `length x sin(angle)` — a
 software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.

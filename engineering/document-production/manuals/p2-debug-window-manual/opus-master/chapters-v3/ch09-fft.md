@@ -12,7 +12,7 @@ resulting **magnitude spectrum** — one point per frequency bin, drawn as a lin
 dot, or filled-bar trace. It supports up to **8 channels**, each transformed and
 drawn independently.
 
-You create one FFT window per `` DEBUG(`FFT …) `` declaration, name it, and feed
+You create one FFT window per `` DEBUG(`FFT ...) `` declaration, name it, and feed
 it samples by that name. This chapter covers creating the window, setting the FFT
 size, feeding samples across one or more channels, the two amplitude controls
 (magnitude shift and log scale), reading the spectrum, and the runtime commands.
@@ -39,7 +39,7 @@ Hanning-windowed.
 The transform produces `N/2` bins because a real-valued input signal has a
 spectrum that is symmetric about the Nyquist frequency; only the lower half
 carries unique information. Bin 0 is the DC (zero-frequency) component and bin
-`N/2 − 1` is the highest frequency the transform resolves.
+`N/2 - 1` is the highest frequency the transform resolves.
 
 ## Creating an FFT window
 
@@ -83,7 +83,7 @@ the value you give is clamped to that range and rounded down to the nearest powe
 of 2, so `SAMPLES 1000` becomes 512 and `SAMPLES 1024` stays 1024. The default,
 if you omit `SAMPLES` entirely, is 512.
 
-The window displays bins `0` through `N/2 − 1` by default — the full spectrum.
+The window displays bins `0` through `N/2 - 1` by default — the full spectrum.
 You can restrict the display to a contiguous **range of bins** by adding two more
 numbers:
 
@@ -93,7 +93,7 @@ debug(`FFT Zoom SIZE 512 256 SAMPLES 1024 100 400)
 
 This still runs a 1024-point transform but draws only bins 100 through 400,
 stretched across the full plot width — a zoom into one frequency region. The
-first bin must be in `0 … N/2 − 2` and the last in `first+1 … N/2 − 1`.
+first bin must be in `0 ... N/2 - 2` and the last in `first+1 ... N/2 - 1`.
 
 ## Feeding samples and declaring channels
 
@@ -114,7 +114,7 @@ label:
 |----------|---------|-------|
 | label | Channel name (string) | — |
 | `MAG` shift | Magnitude bit-shift | **0–11** |
-| high | Full-scale value for the Y axis | `1 … $7FFF_FFFF` |
+| high | Full-scale value for the Y axis | `1 ... $7FFF_FFFF` |
 | tall | Channel height in pixels | — |
 | base | Baseline offset from the bottom, in pixels | — |
 | grid | Grid flags: bit 0 = baseline line, bit 1 = top line | — |
@@ -186,12 +186,12 @@ If you feed the window samples at a known rate, each bin corresponds to a fixed
 frequency:
 
 ```
-frequency of bin k  =  k × (sample_rate / N)
+frequency of bin k  =  k x (sample_rate / N)
 ```
 
 So with a 1024-point transform fed at 10 kHz, the bins are spaced
-`10000 / 1024 ≈ 9.77 Hz` apart, and bin 100 sits at about 977 Hz. The highest
-bin, `N/2 − 1`, sits just below the Nyquist frequency `sample_rate / 2`; signal
+`10000 / 1024 ~ 9.77 Hz` apart, and bin 100 sits at about 977 Hz. The highest
+bin, `N/2 - 1`, sits just below the Nyquist frequency `sample_rate / 2`; signal
 content above Nyquist aliases down into the displayed range. Choosing the bin
 range with `SAMPLES N first last` lets you zoom into the band you care about, but
 the bin-to-Hz arithmetic — and any Hz labeling you want — is yours to add in your
@@ -294,7 +294,7 @@ Change an increment and watch the corresponding spike slide along the axis.
 - **Amplitude is arbitrary units, not dB.** `LOGSCALE` is a log2 compression with
   power-of-2 markers, and `MAG` is a power-of-2 gain. Neither produces decibels.
 - **The frequency axis is yours to compute.** The window plots bins, not Hertz.
-  Bin `k` is at `k × sample_rate / N`; if you want Hz labels, you add them.
+  Bin `k` is at `k x sample_rate / N`; if you want Hz labels, you add them.
 - **One FFT per channel per redraw.** Each channel runs its own transform, so
   spectra for several channels cost proportionally more work per frame; use
   `RATE` to redraw less often when feeding many channels or large `N`.

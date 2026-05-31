@@ -6,7 +6,7 @@ console does. It is the window you reach for first, because most debugging start
 as text: a status line, a variable dump, a running log of what your program is
 doing.
 
-You create one TERM window per `` DEBUG(`TERM …) `` declaration, give it a name,
+You create one TERM window per `` DEBUG(`TERM ...) `` declaration, give it a name,
 and from then on you address it by that name. This chapter covers everything the
 window does — creating it, sending text, positioning the cursor, using color, and
 controlling when the display updates.

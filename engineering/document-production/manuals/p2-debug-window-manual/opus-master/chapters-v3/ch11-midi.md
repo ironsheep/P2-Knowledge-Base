@@ -43,7 +43,7 @@ The configuration keywords you can add to the creation line:
 A few things to know about these:
 
 - **`SIZE`** is a multiplier, not a pixel count. The white-key width is
-  `8 + SIZE × 4` pixels, so `SIZE 4` gives 24-pixel keys and `SIZE 50` gives
+  `8 + SIZE x 4` pixels, so `SIZE 4` gives 24-pixel keys and `SIZE 50` gives
   208-pixel keys. The whole window sizes itself from this and from the note
   range; you do not set a width and height directly.
 - **`RANGE`** selects which slice of the 128 MIDI notes is drawn. The default
