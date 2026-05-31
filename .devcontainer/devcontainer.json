@@ -3,6 +3,10 @@
   "dockerComposeFile": ["docker-compose.yml", "docker-compose.override.yml"],
   "service": "dev",
   "workspaceFolder": "/workspaces/P2-Knowledge-Base",
+  "containerEnv": {
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
+  },
   "initializeCommand": "test -f .devcontainer/docker-compose.override.yml || echo 'services: {}' > .devcontainer/docker-compose.override.yml",
 
   "features": {
@@ -12,9 +16,7 @@
     }
   },
 
-  "postCreateCommand": "sudo rm -f /etc/apt/sources.list.d/yarn.list && sudo apt-get update && sudo apt-get install -y libleptonica6 libtesseract5 && LIBDIR=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) && sudo ln -sf $LIBDIR/libleptonica.so.6 $LIBDIR/liblept.so.5 && sudo ldconfig; sudo mkdir -p /Users/stephen && sudo ln -sfn /opt/container-tools /Users/stephen/container-tools; pip install --user PyYAML && sudo unzip -q /tmp/devcontainer-bin/pnut-ts-linux-arm64-015107.zip -d /opt && sudo mv /opt/pnut-ts-linux-arm64-015107/pnut_ts /opt/pnut_ts && sudo rmdir /opt/pnut-ts-linux-arm64-015107 && sudo chmod +x /opt/pnut_ts/pnut-ts && sudo ln -sf /opt/pnut_ts/pnut_ts /usr/local/bin/pnut_ts",
-
-  "postStartCommand": "curl -fsSL https://claude.ai/install.sh | bash && npm install -g @openai/codex && cp /tmp/devcontainer-bin/bash_aliases ~/.bash_aliases",
+  "postCreateCommand": "sudo rm -f /etc/apt/sources.list.d/yarn.list && sudo apt-get update && sudo apt-get install -y libleptonica6 libtesseract5 && LIBDIR=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) && sudo ln -sf $LIBDIR/libleptonica.so.6 $LIBDIR/liblept.so.5 && sudo ldconfig || true; sudo mkdir -p /Users/stephen && sudo ln -sfn /opt/container-tools /Users/stephen/container-tools; pip install --user PyYAML || true; cd /tmp && unzip -o /workspaces/P2-Knowledge-Base/.devcontainer/pnut-ts-linux-arm64-015500.zip && sudo cp /tmp/pnut-ts-linux-arm64-015500/pnut_ts/pnut-ts /usr/local/bin/pnut-ts && sudo chmod +x /usr/local/bin/pnut-ts && rm -rf /tmp/pnut-ts-linux-arm64-015500 || true; npm install -g @openai/codex || true; test -f /tmp/devcontainer-bin/bash_aliases && cp /tmp/devcontainer-bin/bash_aliases ~/.bash_aliases || true; curl -fsSL https://claude.ai/install.sh | bash || true; grep -q '$HOME/.local/bin' ~/.bashrc 2>/dev/null || echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.bashrc; export PATH=\"$HOME/.local/bin:$PATH\"; claude --update || true;",
 
   "customizations": {
     "vscode": {
