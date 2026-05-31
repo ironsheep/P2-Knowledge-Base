@@ -1,8 +1,8 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-26T04:42:53.688116",
-    "total_entries": 1164,
+    "generated": "2026-05-31T23:20:07.490061",
+    "total_entries": 1165,
     "total_categories": 49,
     "total_aliases": 1008,
     "multi_target_aliases": 54,
@@ -3767,7 +3767,7 @@
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
-      "mtime": 1778200244
+      "mtime": 1780269492
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
@@ -3959,7 +3959,7 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244
+      "mtime": 1780269492
     },
     "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -4479,7 +4479,7 @@
     },
     "p2kbGuidePasm2GettingStarted": {
       "path": "deliverables/ai/P2/guides/pasm2-getting-started.yaml",
-      "mtime": 1777496128
+      "mtime": 1780269492
     },
     "p2kbGuideQuickQueries": {
       "path": "deliverables/ai/P2/guides/quick-queries.yaml",
@@ -4487,7 +4487,7 @@
     },
     "p2kbGuideSpin2GettingStarted": {
       "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
-      "mtime": 1773349702
+      "mtime": 1780269492
     },
     "p2kbHw7SegmentDisplay7SegmentDisplay": {
       "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
@@ -4739,31 +4739,31 @@
     },
     "p2kbPasm2Augs": {
       "path": "deliverables/ai/P2/language/pasm2/augs.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitc": {
       "path": "deliverables/ai/P2/language/pasm2/bitc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bith": {
       "path": "deliverables/ai/P2/language/pasm2/bith.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitl": {
       "path": "deliverables/ai/P2/language/pasm2/bitl.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitnc": {
       "path": "deliverables/ai/P2/language/pasm2/bitnc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitnot": {
       "path": "deliverables/ai/P2/language/pasm2/bitnot.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitnz": {
       "path": "deliverables/ai/P2/language/pasm2/bitnz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Bitrnd": {
       "path": "deliverables/ai/P2/language/pasm2/bitrnd.yaml",
@@ -4771,7 +4771,7 @@
     },
     "p2kbPasm2Bitz": {
       "path": "deliverables/ai/P2/language/pasm2/bitz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Blnpix": {
       "path": "deliverables/ai/P2/language/pasm2/blnpix.yaml",
@@ -4879,7 +4879,7 @@
     },
     "p2kbPasm2BasicIo": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2BranchAddressing": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/branch_addressing.yaml",
@@ -4887,11 +4887,11 @@
     },
     "p2kbPasm2CogHubExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml",
-      "mtime": 1777748310
+      "mtime": 1780269492
     },
     "p2kbPasm2ConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml",
-      "mtime": 1768613644
+      "mtime": 1780269492
     },
     "p2kbPasm2CordicSolver": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cordic_solver.yaml",
@@ -4931,7 +4931,7 @@
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
-      "mtime": 1779583590
+      "mtime": 1780269492
     },
     "p2kbPasm2SkipfBranching": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/skipf_branching.yaml",
@@ -4947,7 +4947,7 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1779583590
+      "mtime": 1780269492
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
@@ -4975,27 +4975,27 @@
     },
     "p2kbPasm2Dirc": {
       "path": "deliverables/ai/P2/language/pasm2/dirc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirh": {
       "path": "deliverables/ai/P2/language/pasm2/dirh.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirl": {
       "path": "deliverables/ai/P2/language/pasm2/dirl.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirnc": {
       "path": "deliverables/ai/P2/language/pasm2/dirnc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirnot": {
       "path": "deliverables/ai/P2/language/pasm2/dirnot.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirnz": {
       "path": "deliverables/ai/P2/language/pasm2/dirnz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Dirrnd": {
       "path": "deliverables/ai/P2/language/pasm2/dirrnd.yaml",
@@ -5003,7 +5003,7 @@
     },
     "p2kbPasm2Dirz": {
       "path": "deliverables/ai/P2/language/pasm2/dirz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Ditto": {
       "path": "deliverables/ai/P2/language/pasm2/ditto.yaml",
@@ -5027,27 +5027,27 @@
     },
     "p2kbPasm2Drvc": {
       "path": "deliverables/ai/P2/language/pasm2/drvc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvh": {
       "path": "deliverables/ai/P2/language/pasm2/drvh.yaml",
-      "mtime": 1769232012
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvl": {
       "path": "deliverables/ai/P2/language/pasm2/drvl.yaml",
-      "mtime": 1769232012
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvnc": {
       "path": "deliverables/ai/P2/language/pasm2/drvnc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvnot": {
       "path": "deliverables/ai/P2/language/pasm2/drvnot.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvnz": {
       "path": "deliverables/ai/P2/language/pasm2/drvnz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Drvrnd": {
       "path": "deliverables/ai/P2/language/pasm2/drvrnd.yaml",
@@ -5055,7 +5055,7 @@
     },
     "p2kbPasm2Drvz": {
       "path": "deliverables/ai/P2/language/pasm2/drvz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Encod": {
       "path": "deliverables/ai/P2/language/pasm2/encod.yaml",
@@ -5095,27 +5095,27 @@
     },
     "p2kbPasm2Fltc": {
       "path": "deliverables/ai/P2/language/pasm2/fltc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Flth": {
       "path": "deliverables/ai/P2/language/pasm2/flth.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Fltl": {
       "path": "deliverables/ai/P2/language/pasm2/fltl.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Fltnc": {
       "path": "deliverables/ai/P2/language/pasm2/fltnc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Fltnot": {
       "path": "deliverables/ai/P2/language/pasm2/fltnot.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Fltnz": {
       "path": "deliverables/ai/P2/language/pasm2/fltnz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Fltrnd": {
       "path": "deliverables/ai/P2/language/pasm2/fltrnd.yaml",
@@ -5123,7 +5123,7 @@
     },
     "p2kbPasm2Fltz": {
       "path": "deliverables/ai/P2/language/pasm2/fltz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Getbrk": {
       "path": "deliverables/ai/P2/language/pasm2/getbrk.yaml",
@@ -5204,6 +5204,10 @@
     "p2kbPasm2Hubset": {
       "path": "deliverables/ai/P2/language/pasm2/hubset.yaml",
       "mtime": 1779583590
+    },
+    "p2kbPasm2Index": {
+      "path": "deliverables/ai/P2/language/pasm2/idioms/_index.yaml",
+      "mtime": 1780269492
     },
     "p2kbPasm2IdiomsConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/conditional-execution.yaml",
@@ -5551,27 +5555,27 @@
     },
     "p2kbPasm2Outc": {
       "path": "deliverables/ai/P2/language/pasm2/outc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outh": {
       "path": "deliverables/ai/P2/language/pasm2/outh.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outl": {
       "path": "deliverables/ai/P2/language/pasm2/outl.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outnc": {
       "path": "deliverables/ai/P2/language/pasm2/outnc.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outnot": {
       "path": "deliverables/ai/P2/language/pasm2/outnot.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outnz": {
       "path": "deliverables/ai/P2/language/pasm2/outnz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Outrnd": {
       "path": "deliverables/ai/P2/language/pasm2/outrnd.yaml",
@@ -5579,7 +5583,7 @@
     },
     "p2kbPasm2Outz": {
       "path": "deliverables/ai/P2/language/pasm2/outz.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Pasm2HubSynchronization": {
       "path": "deliverables/ai/P2/language/pasm2/patterns/implementation/pasm2_hub_synchronization.yaml",
@@ -5743,7 +5747,7 @@
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
-      "mtime": 1777496128
+      "mtime": 1780269492
     },
     "p2kbPasm2Rdlut": {
       "path": "deliverables/ai/P2/language/pasm2/rdlut.yaml",
@@ -5951,7 +5955,7 @@
     },
     "p2kbPasm2Setq": {
       "path": "deliverables/ai/P2/language/pasm2/setq.yaml",
-      "mtime": 1779583590
+      "mtime": 1780269492
     },
     "p2kbPasm2Setq2": {
       "path": "deliverables/ai/P2/language/pasm2/setq2.yaml",
@@ -6219,7 +6223,7 @@
     },
     "p2kbPasm2Wmlong": {
       "path": "deliverables/ai/P2/language/pasm2/wmlong.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbPasm2Word": {
       "path": "deliverables/ai/P2/language/pasm2/word.yaml",
@@ -6243,7 +6247,7 @@
     },
     "p2kbPasm2Wrlong": {
       "path": "deliverables/ai/P2/language/pasm2/wrlong.yaml",
-      "mtime": 1777496128
+      "mtime": 1780269492
     },
     "p2kbPasm2Wrlut": {
       "path": "deliverables/ai/P2/language/pasm2/wrlut.yaml",
@@ -6359,7 +6363,7 @@
     },
     "p2kbSpin2BasicIo": {
       "path": "deliverables/ai/P2/language/spin2/concepts/basic-io.yaml",
-      "mtime": 1777496128
+      "mtime": 1780269492
     },
     "p2kbSpin2CordicSolver": {
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
@@ -6483,7 +6487,7 @@
     },
     "p2kbSpin2Spin2DocsJonnymac": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Spin2FormattingStandards": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml",
@@ -6491,7 +6495,7 @@
     },
     "p2kbSpin2Spin2NamingJonnymac": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-naming-jonnymac.yaml",
-      "mtime": 1772234114
+      "mtime": 1780269492
     },
     "p2kbSpin2VscodePnutDocumentationStyle": {
       "path": "deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml",
@@ -6543,11 +6547,11 @@
     },
     "p2kbSpin2DbgPcKey": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_key.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2DbgPcMouse": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_mouse.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
@@ -6559,15 +6563,15 @@
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1768348299
+      "mtime": 1780269492
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
@@ -6999,23 +7003,23 @@
     },
     "p2kbSpin2Polxy": {
       "path": "deliverables/ai/P2/language/spin2/methods/polxy.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Qcos": {
       "path": "deliverables/ai/P2/language/spin2/methods/qcos.yaml",
-      "mtime": 1769036597
+      "mtime": 1780269492
     },
     "p2kbSpin2Qexp": {
       "path": "deliverables/ai/P2/language/spin2/methods/qexp.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Qlog": {
       "path": "deliverables/ai/P2/language/spin2/methods/qlog.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Qsin": {
       "path": "deliverables/ai/P2/language/spin2/methods/qsin.yaml",
-      "mtime": 1769036597
+      "mtime": 1780269492
     },
     "p2kbSpin2Rdpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/rdpin.yaml",
@@ -7035,7 +7039,7 @@
     },
     "p2kbSpin2Rotxy": {
       "path": "deliverables/ai/P2/language/spin2/methods/rotxy.yaml",
-      "mtime": 1769036597
+      "mtime": 1780269492
     },
     "p2kbSpin2Round": {
       "path": "deliverables/ai/P2/language/spin2/methods/round.yaml",
@@ -7163,7 +7167,7 @@
     },
     "p2kbSpin2Xypol": {
       "path": "deliverables/ai/P2/language/spin2/methods/xypol.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2OpFIELD": {
       "path": "deliverables/ai/P2/language/spin2/operators/FIELD.yaml",
@@ -7839,7 +7843,7 @@
     },
     "p2kbSpin2Spin2LanguageCompleteMap": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-complete-map.yaml",
-      "mtime": 1764449566
+      "mtime": 1780269492
     },
     "p2kbSpin2Spin2LanguageSchema": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-schema.yaml",
@@ -7980,62 +7984,62 @@
     },
     "P_OE": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_TT_00": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_TT_01": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_TT_10": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_TT_11": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_BITDAC": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "P_CHANNEL": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "TT_BITS": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "WRPIN_FORMAT": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "OUTPUT_ENABLE": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "SMART_PIN_CONFIGURATION": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "PIN_OUTPUT_HIERARCHY": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1778200244,
+      "mtime": 1780269492,
       "alias_of": "p2kbArchSmartPins"
     },
     "pasm2_hub_synchronization": {
