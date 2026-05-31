@@ -40,7 +40,7 @@ notes:
   - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°, $C000_0000 = 270°"
   - "Full 32-bit precision maintained"
   - "Rho (radius) is unsigned magnitude"
-  - "Result is scaled by CORDIC K factor (≈1.647)"
+  - "Results are NOT scaled by the CORDIC gain: the P2 32-bit CORDIC solver applies scale-factor correction (Silicon Doc line 425: '32-bit, pipelined CORDIC solver with scale-factor correction'). The ~1.646 CORDIC gain applies only to the streamer's separate 5-stage modulator CORDIC, not to QROTATE-based solver operations like this one."
 timing:
   description: "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
   see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."

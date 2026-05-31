@@ -223,17 +223,17 @@ special_operations:
         operation: "Initialize cog with PTRA/PTRB values"
         encoding: "PTRA[19:0] in bits 19:0, PTRB[19:0] in bits 39:20"
 
-  augmented_operations:
-    with_AUGS:
-      description: "AUGS + SETQ for 32-bit counts"
-      example: |
-        AUGS #>>1000      ' Upper bits
-        SETQ #1000 & $1FF ' Lower 9 bits
-        RDLONG 0, hub_ptr ' Read 1001 longs
-    
-    with_AUGD:
-      description: "AUGD + SETQ for special modes"
-      operation: "Enables alternate block modes"
+  full_width_q_value:
+    description: |
+      SETQ sets Q = D. With a register operand (or a ## immediate, which the
+      assembler implements via AUGS), Q can hold a full 32-bit value. This matters
+      for Q uses that need all 32 bits -- e.g. a MUXQ mask, or the packed PTRA/PTRB
+      for SETQ+COGINIT.
+    block_count_limit: |
+      It does NOT extend a block-move COUNT beyond 512. SETQ/SETQ2 block transfers
+      target cog register RAM or cog lookup RAM, each of which is 512 longs, so the
+      maximum block transfer is 512 longs (count field = number of longs minus 1).
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:394-395, 854, 966 (cog and LUT are each 512 x 32-bit), 7169-7185 (FAST BLOCK MOVES: 'x = number of longs, minus 1')"
 
 block_fill:
   cog_fill:

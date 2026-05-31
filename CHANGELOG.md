@@ -20,6 +20,16 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.5.1] - 2026-05-31
+
+**CORDIC scale-factor and SETQ block-size accuracy**
+
+### Changed
+- CORDIC solver methods (ROTXY, POLXY, XYPOL): scale-factor correction documented — results are not scaled by the CORDIC gain
+- SETQ/SETQ2 block moves: 512-long cog/LUT transfer limit and full-width 32-bit Q value documented
+
+---
+
 ## [1.5.0] - 2026-05-31
 
 **Source-grounded accuracy pass: pin protection, silicon errata, and DEBUG display windows**

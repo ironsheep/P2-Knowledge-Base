@@ -184,7 +184,10 @@ The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied
 
 ---
 
-### F-013 — `setq_block_ops.yaml` `augmented_operations` block is internally contradictory / likely fabricated  ·  `NEEDS-VERIFICATION`
+### F-013 — `setq_block_ops.yaml` `augmented_operations` block is internally contradictory / likely fabricated  ·  `DONE` (2026-05-31)
+
+> **Resolved (2026-05-31).** Verified against Silicon Doc: cog and LUT are each **512 longs** (`p2-documentation.txt:394-395, 854, 966`) and FAST BLOCK MOVES (`:7169-7185`) targets cog/LUT RAM, so a block transfer cannot exceed 512 longs — the "1001 longs" claim is physically impossible, and no "AUGD alternate block modes" feature exists in any source. Replaced the fabricated `augmented_operations` block with `full_width_q_value`: SETQ Q can be a full 32-bit value (via register or ## for MUXQ mask / SETQ+COGINIT PTRA/PTRB), but the block-move COUNT is capped at 512. Cited.
+
 
 **File:** `deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml` (the `special_operations.augmented_operations` block, ~lines 209–219 pre-F-006; shifted by the F-006 insert)
 
@@ -208,7 +211,10 @@ The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied
 
 ---
 
-### F-015 — `rotxy.yaml` CORDIC K-factor note contradicts its own example  ·  `NEEDS-VERIFICATION`
+### F-015 — `rotxy.yaml` CORDIC K-factor note contradicts its own example  ·  `DONE` (2026-05-31)
+
+> **Resolved (2026-05-31).** Verified against Silicon Doc: the P2's 32-bit CORDIC solver is "pipelined CORDIC solver **with scale-factor correction**" (`p2-documentation.txt:425`), so QROTATE-based results (ROTXY/POLXY/XYPOL/QSIN/QCOS) are NOT scaled by the CORDIC gain — the example (45°: 100→71,71, no gain) was correct. The "~1.646" scaling (`:4779`) belongs to the streamer's **separate 5-stage modulator CORDIC**, not the solver. Replaced the false "scaled by CORDIC K factor (~1.647)" note in `rotxy.yaml`, `xypol.yaml`, `polxy.yaml` with the correct scale-factor-correction statement. Cited.
+
 
 **File:** `deliverables/ai/P2/language/spin2/methods/rotxy.yaml` (note ~line 44 "Result is scaled by CORDIC K factor (≈1.647)")
 
