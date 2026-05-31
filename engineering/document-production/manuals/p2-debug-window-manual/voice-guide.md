@@ -153,6 +153,7 @@ These are correctness rules specific to the DEBUG subsystem (carried from the Si
 3. **Every code example compiles** with `pnut_ts`. Stub any helper methods so examples build without external hardware (this manual's example corpus already uses this pattern).
 4. **P2, never P1.** P2 syntax exclusively: `COGSPIN` / `COGINIT` (never `cognew`), `GETCT` (never `CNT`).
 5. **Native comment syntax only** in code blocks: `'` line comments, `{ }` / `{{ }}` blocks. No `//`, `/* */`, `;`, or `#`-prefixed comments — even in pseudocode.
+6. **Software-only, no external hardware** (creation-guide "Minimal Hardware Design Philosophy" — Level 0 is preferred). Every example must run on a bare P2 board + PC with no wiring, generating its own data in software: CORDIC (`QSIN`/`QROTATE`), the RNG (`GETRND` / `?` operator), counters, `GETCT` timing, and software simulation of sensors/signals/protocols. Never require an external sensor, probe, or wiring to see a window work. If a real-hardware application is worth showing, add it as a short optional "extension" note *after* the software-only version.
 
 ---
 
