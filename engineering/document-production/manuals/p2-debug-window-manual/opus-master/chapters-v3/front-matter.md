@@ -1,14 +1,4 @@
-# P2 Debug Window Manual
-
-*See What Your Program Is Doing — Nine Display Windows for the Propeller 2*
-
-**Author:** Iron Sheep Productions, LLC
-**Compiler:** `pnut_ts`  **Debug host:** `pnut_term_ts`
-**Version:** Version 1.0 (draft)  **Date:** May 2026
-
----
-
-## How this manual is organized
+# How This Manual Is Organized {.unnumbered}
 
 The P2's `DEBUG` system can do far more than print text. It drives nine graphical
 display windows — terminals, bitmaps, plots, logic and waveform views, spectrum

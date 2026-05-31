@@ -6,7 +6,7 @@
       "output": "P2-Debug-Window-Manual.pdf",
       "template": "p2kb-debugwin",
       "pandoc_args": [
-        "--top-level-division=part",
+        "--top-level-division=chapter",
         "--pdf-engine=xelatex",
         "--toc",
         "--toc-depth=3",
@@ -19,10 +19,10 @@
       ],
       "metadata": {
         "title": "P2 Debug Window Manual",
-        "subtitle": "Visual Discovery Through Systematic Exploration",
-        "author": "Propeller 2 Development Team",
+        "subtitle": "See What Your Program Is Doing — Nine Display Windows for the Propeller 2",
+        "author": "Iron Sheep Productions, LLC",
         "version": "Version 1.0",
-        "date": "September 2025",
+        "date": "May 2026",
         "documentclass": "book",
         "fontsize": "11pt",
         "papersize": "a4",
