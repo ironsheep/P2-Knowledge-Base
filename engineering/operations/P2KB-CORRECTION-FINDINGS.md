@@ -15,7 +15,7 @@
 
 ## P2KB YAML corrections
 
-### F-001 — `QSIN` / `QCOS` have the wrong signature  ·  `CONFIRMED`
+### F-001 — `QSIN` / `QCOS` have the wrong signature  ·  `DONE` (2026-05-31)
 
 **Files:**
 - `deliverables/ai/P2/language/spin2/methods/qsin.yaml`
@@ -42,7 +42,7 @@
 
 ---
 
-### F-003 — `streamer_smartpin_control.yaml` still describes XZERO as "stream zeros"  ·  `CONFIRMED`
+### F-003 — `streamer_smartpin_control.yaml` still describes XZERO as "stream zeros"  ·  `DONE` (2026-05-31)
 
 **File:** `deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml` (lines ~51–53)
 
@@ -70,7 +70,7 @@ XZERO:
 
 ---
 
-### F-004 — Seven deliverables YAMLs carry stale cross-refs to a non-existent `engineering/knowledge-base/P2/` path  ·  `CONFIRMED`
+### F-004 — Seven deliverables YAMLs carry stale cross-refs to a non-existent `engineering/knowledge-base/P2/` path  ·  `DONE` (2026-05-31)
 
 **Files (7):** under `deliverables/ai/P2/` — locate with `grep -rl "engineering/knowledge-base/P2/" deliverables/ai/P2/`. Examples: `language/spin2/concepts/basic-io.yaml` (`related:` list), `guides/spin2-getting-started.yaml` (`content_base:`), `language/spin2/spin2-language-complete-map.yaml` (`language_root:` / `fundamentals_root:`).
 
@@ -80,7 +80,9 @@ XZERO:
 
 ---
 
-### F-005 — Debug-display KB YAMLs carry the same fabrications as the scrapped Debug Window v2 manual  ·  `CONFIRMED`
+### F-005 — Debug-display KB YAMLs carry the same fabrications as the scrapped Debug Window v2 manual  ·  `DONE` (2026-05-31)
+
+> **Hold lifted & fixed (2026-05-31).** The hold (pending a current-compiler debug source) was lifted when the user provided `…/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md` — a unified directive matrix **re-verified directly against PNut v55 `DebugDisplayUnit.pas`** with line references. All five YAMLs were fully re-grounded against it (+ `debug-section.txt` for the PC_KEY/PC_MOUSE P2-side API). PLOT = vector/raster canvas (no chart/series/stats/export); LOGIC = sample capture + mask/match TRIGGER (no protocol decoders); MIDI = piano keyboard, note-on/off velocity (no analysis/file I/O); `pc_key` = `PC_KEY(pointer_to_long)` + full key-code table; `pc_mouse` = `PC_MOUSE(pointer_to_7_longs)` + 7-long struct. DEBUG examples compile-verified with pnut_ts v1.55.0. Cross-refs 100%.
 
 **Files:** `deliverables/ai/P2/language/spin2/debug-displays/{plot,logic,midi}.yaml`; `…/debug-commands/{pc_key,pc_mouse}.yaml`
 
@@ -96,7 +98,7 @@ XZERO:
 
 ---
 
-### F-006 — Silicon errata undocumented: SETQ/SETQ2 block transfer + intervening ALTx/AUGS/AUGD cancels the PTRx block delta  ·  `CONFIRMED` (safety-critical)
+### F-006 — Silicon errata undocumented: SETQ/SETQ2 block transfer + intervening ALTx/AUGS/AUGD cancels the PTRx block delta  ·  `DONE` (2026-05-31)
 
 **Files:** `deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml`, `setq.yaml`, `rdlong.yaml` (+ WRLONG/WMLONG)
 
@@ -108,7 +110,7 @@ XZERO:
 
 ---
 
-### F-007 — Silicon errata undocumented: AUGS/AUGD value applied to an intervening ALTx with immediate #S  ·  `CONFIRMED` (safety-critical)
+### F-007 — Silicon errata undocumented: AUGS/AUGD value applied to an intervening ALTx with immediate #S  ·  `DONE` (2026-05-31)
 
 **Files:** `deliverables/ai/P2/language/pasm2/augs.yaml`, `augd.yaml` (+ `altd.yaml`/`alts.yaml` notes)
 
@@ -120,7 +122,7 @@ XZERO:
 
 ---
 
-### F-008 — `conditional_execution.yaml` missing 14 condition-code bit-pattern aliases  ·  `CONFIRMED`
+### F-008 — `conditional_execution.yaml` missing 14 condition-code bit-pattern aliases  ·  `DONE` (2026-05-31)
 
 **File:** `deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml`
 
@@ -132,7 +134,7 @@ XZERO:
 
 ---
 
-### F-009 — BIT*/DIR*/DRV*/OUT*/FLT* instruction YAMLs wrongly say C = "No effect"  ·  `CONFIRMED`
+### F-009 — BIT*/DIR*/DRV*/OUT*/FLT* instruction YAMLs wrongly say C = "No effect"  ·  `DONE` (2026-05-31)
 
 **Files (~28–35):** non-RND variants of `bit*.yaml`, `dir*.yaml`, `drv*.yaml`, `out*.yaml`, `flt*.yaml` (e.g. `bith`, `dirc`, `drvh`, `outc`, `fltl`).
 
@@ -142,7 +144,7 @@ XZERO:
 
 ---
 
-### F-010 — `cog_hub_execution.yaml` `common_mistakes` contradicts the file's own corrected content  ·  `CONFIRMED`
+### F-010 — `cog_hub_execution.yaml` `common_mistakes` contradicts the file's own corrected content  ·  `DONE` (2026-05-31)
 
 **File:** `deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml` (lines ~517–523)
 
@@ -152,11 +154,69 @@ XZERO:
 
 ---
 
-### F-011 — Flash-Loader update-request leftovers  ·  `CONFIRMED` (low priority)
+### F-011 — Flash-Loader update-request leftovers  ·  `DONE` (2026-05-31; item B done, item A closed-by-crossref)
 
-The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied). Two small items remain:
-- `language/pasm2/hubset.yaml` — request asked for an inline `halt_technique:` block; content exists in `idioms/halt-and-fault-response.yaml` and hubset.yaml only cross-links (house style prefers inline).
-- `language/pasm2/idioms/_index.yaml` — missing the top-level idioms compendium/discovery index (the six idiom files exist; only the index is absent; "optional but high-value").
+The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied). Two small items remained — **both now resolved (2026-05-31, decisions locked):**
+- **Item A — `language/pasm2/hubset.yaml` inline `halt_technique:` block → CLOSED, resolved-by-cross-ref (will NOT inline).** The halt-by-dead-clock technique is already fully documented in `idioms/halt-and-fault-response.yaml` and `hubset.yaml` already cross-links it (`related:` + explanatory comment, lines ~129–132). Inlining would duplicate a fact across two files and invite drift — counter to the single-source-of-truth/hard-facts discipline. The original "prefer inline" request is superseded by the now-mature idiom file. **Do not revisit.**
+- **Item B — `language/pasm2/idioms/_index.yaml` → DO (this pass).** The `idioms/` folder has 9 idiom files but no index; an established `_index.yaml` pattern exists (`architecture/streamer/_index.yaml`, `boot-rom/_index.yaml`). Add a discovery/compendium index mirroring that pattern. Purely additive, aids discovery + the index generator.
+
+---
+
+### F-012 — KB does not document I/O pin input-voltage limits / protection (e.g. reading a 5 V signal)  ·  `DONE` (2026-05-31)
+
+**Files:** no current home documents it. Natural home: `deliverables/ai/P2/architecture/io_pin_timing.yaml` (already holds the VIO electricals — input thresholds, VIO range) — add an `absolute_maximum_ratings` / `input_voltage_tolerance` section. Cross-ref from `architecture/smart_pins.yaml` and a hardware guide.
+
+**What's wrong (gap, not error):** Nothing in the KB tells a consumer what voltage a P2 pin may safely see, how the on-chip pin protection works, or whether/how a 5 V signal can be read. `io_pin_timing.yaml` gives input thresholds (1.65 V typ at 3.3 V VIO) and a 1.8–3.3 V VIO operating range, but no absolute-max voltage, no protection-diode behavior, no current limit. This is safety-relevant and frequently asked.
+
+**Root-verified facts (P2 datasheet — a golden ingestion source):**
+- **Voltage on any I/O pin (abs-max):** `-0.3 V to (Vxxyy + 0.3 V)` — i.e. ≈ **3.6 V** at the nominal 3.3 V I/O supply. Direct 5 V exceeds this.
+- **Each I/O pin has an internal protection diode** to the I/O supply rail (the "+0.3 V" is its forward drop).
+- **Datasheet note (verbatim):** *"I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."* → Over-voltage is tolerated **only** while the clamp current stays within limit.
+- **Max DC current into an input pin with the internal protection diode forward-biased: ±10 mA.**
+- Max allowable current per I/O pin: ±30 mA. ESD: 4 kV HBM (JS-001), 1 kV CDM (JS-002).
+- Silicon Doc corroborates the rails (I/O = Vxxyy/VIO = 3.3 V; pins 0–3.3 V) and notes VIO-triggered latch-up onset ~4.3 V — reinforcing that the part is a 3.3 V I/O device, **not** natively 5 V-tolerant.
+
+**Answer to "can the P2 read a 5 V signal?":** Not by direct connection — 5 V exceeds the 3.6 V pin abs-max and forward-biases the upper protection diode. It **is** permissible *if* a series resistor limits the protection-diode forward current to ≤ ±10 mA (the datasheet explicitly blesses exceeding pin voltage under that condition). Minimum series resistance is a **deterministic derivation** from stated facts (Ohm's law): R ≥ (5 V − ~3.6 V) / 10 mA ≈ 140 Ω (use a larger, standard value, e.g. ≥ 1 kΩ, for margin). The hard facts are the abs-max, the diode, and the ±10 mA limit; present the resistor value as derived, not as a datasheet number.
+
+**Evidence:** `engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt:6185–6241` (Absolute Maximum Ratings table + footnote 1) and `:6204` (`-0.3 V to (Vxxyy + 0.3 V)`), `:6222–6224` (±10 mA protection-diode limit), `:6240–6241` (footnote). Cross: `p2-datasheet/p2-datasheet-cross-source-analysis.md:103` (`Input voltage: -0.3 to VIO+0.3V`); `silicon-doc/silicon-doc-v35-facts-only.md:22,29` (VIO=3.3 V, pins 0–3.3 V); `silicon-doc/p2-documentation.txt:155–175` (latch-up/ESD context).
+
+**Proposed correction:** Add an `absolute_maximum_ratings` + `input_voltage_and_protection` section to `io_pin_timing.yaml` carrying the abs-max voltage, the protection-diode + ±10 mA fact, the verbatim datasheet footnote, and a short "reading >3.6 V (e.g. 5 V) requires a series resistor sized to keep diode current ≤ ±10 mA" note (with the derivation shown). Cite the datasheet. Not debug-related → eligible for this fix pass.
+
+---
+
+### F-013 — `setq_block_ops.yaml` `augmented_operations` block is internally contradictory / likely fabricated  ·  `NEEDS-VERIFICATION`
+
+**File:** `deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml` (the `special_operations.augmented_operations` block, ~lines 209–219 pre-F-006; shifted by the F-006 insert)
+
+**What's suspect:**
+- `with_AUGS: "AUGS + SETQ for 32-bit counts"` with example `RDLONG 0, hub_ptr ' Read 1001 longs` — **contradicts the same file's `limitations: "Maximum 512 longs per operation"`.** SETQ is a 9-bit value (0–511 → 1–512 longs). Whether AUGS extends the SETQ count beyond 512 is unverified and looks wrong.
+- `with_AUGD: description "AUGD + SETQ for special modes" / operation "Enables alternate block modes"` — vague capability claim ("enables", "alternate modes"), a red-flag fabrication pattern, no cited source.
+
+**Why not fixed now:** No golden source was consulted for what AUGS/AUGD-before-SETQ actually does. Per the hard-facts rule, do not edit (or delete) without root verification. Surfaced 2026-05-31 during the F-006 edit.
+
+**Proposed action:** Verify against the Silicon Doc SETQ/AUGS/AUGD descriptions + `pnut_ts`. If unsupported, correct the count claim to respect the 512-long max and remove/repair the `with_AUGD` "special modes" claim. Note the SETQ/SETQ2 block + intervening-AUGS/AUGD interaction is now governed by the F-006 `silicon_errata` block in the same file — reconcile the two.
+
+---
+
+### F-014 — Unverifiable Spin2-method "38 clock cycles" timing on CORDIC methods  ·  `DONE` (2026-05-31)
+
+**Files (7):** `language/spin2/methods/{qsin,qcos,rotxy,polxy,xypol,qlog,qexp}.yaml`
+
+**What was wrong:** Each asserted `timing: cycles: "38 clock cycles"` (plus a notes bullet "38-clock cycle operation") for a **Spin2 method**. Per the project rule we do not publish bytecode-interpreter clock timings for Spin2 methods — we have no verifiable measurement; cite the underlying PASM/CORDIC or remove the field. (Surfaced 2026-05-31 during the F-001 QSIN/QCOS rewrite.)
+
+**Fix applied:** Removed the unverifiable cycle count and the notes bullet; replaced the `timing:` block with a CORDIC-engine reference (latency is a hardware property; total method time includes interpreter overhead, not separately specified) pointing to `concepts/cordic_solver.yaml`. All 7 files re-validated (parse OK).
+
+---
+
+### F-015 — `rotxy.yaml` CORDIC K-factor note contradicts its own example  ·  `NEEDS-VERIFICATION`
+
+**File:** `deliverables/ai/P2/language/spin2/methods/rotxy.yaml` (note ~line 44 "Result is scaled by CORDIC K factor (≈1.647)")
+
+**What's suspect:** The note claims ROTXY results are "scaled by CORDIC K factor (≈1.647)", but the file's own example rotates (100,0) by 45° and gives x2,y2 ≈ 71,71 — the *ideal* (100·cos45 ≈ 70.7) with **no** visible 1.647 gain. The two cannot both be true as written. POLXY/QSIN/QCOS may carry the same K-factor claim.
+
+**Why not fixed now:** Resolving whether the P2 CORDIC applies (or pre-compensates) the K gain for QROTATE-based ops requires a golden source (Silicon Doc CORDIC section / hardware). Per the hard-facts rule, do not edit blind. Surfaced 2026-05-31.
+
+**Proposed action:** Verify CORDIC rotation gain behavior in the Silicon Doc. Then either correct the example or the K-factor note (whichever the source contradicts), and sweep the same claim across the CORDIC method YAMLs.
 
 ---
 

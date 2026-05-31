@@ -1,200 +1,74 @@
 display_type: LOGIC
 category: DEBUG Display Types
 description: |
-  Logic analyzer display for visualizing digital signals and timing relationships.
-  Provides multi-channel digital signal visualization with protocol decoding,
-  timing measurements, and triggering capabilities similar to a logic analyzer.
-documentation_source: Spin2 v51
+  LOGIC is the P2 DEBUG digital-waveform window. It captures and displays a stream
+  of sample longs as multi-channel digital waveforms, with a mask/match trigger and
+  holdoff. It is raw sample capture: it has NO protocol decoders (I2C/SPI/UART/CAN),
+  NO automatic baud detection, and NO timing-measurement/analysis tools.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.1) -- verified against DebugDisplayUnit.pas v55: LOGIC_Configure 926, LOGIC_Update 1034, channel def 971-1005, TRIGGER 1043-1049"
 
-syntax: "DEBUG(`LOGIC title, signal1, signal2, ...`)"
+syntax:
+  create: "DEBUG(`LOGIC MyLog <config directives>)"
+  update: "DEBUG(`MyLog <sample longs / directives>)   ' reference the window by name"
 
-capabilities:
-  - "Multi-channel digital display (up to 32 channels)"
-  - "Timing measurements between edges"
-  - "Protocol decoding (I2C, SPI, UART, etc.)"
-  - "Complex triggering patterns"
-  - "Bus grouping and decoding"
-  - "State list view"
-  - "Timing diagram view"
-  - "Search for patterns"
+configuration_directives:
+  note: "Accepted in LOGIC_Configure (window creation)."
+  TITLE: "TITLE 'string'"
+  POS: "POS left top"
+  SAMPLES: "SAMPLES n {first last} -- number of samples across the window (range 4..2047)"
+  SPACING: "SPACING n -- vertical spacing between channels (LOGIC-only)"
+  RATE: "RATE n -- sample rate"
+  DOTSIZE: "DOTSIZE x {y}"
+  LINESIZE: "LINESIZE n"
+  TEXTSIZE: "TEXTSIZE n"
+  COLOR: "COLOR back grid -- background then grid color"
+  HIDEXY: "HIDEXY -- suppress on-screen cursor readout (PC_MOUSE still reports)"
+  packed: "Packed-data declaration LONGS_1BIT..BYTES_4BIT (optionally ALT and/or SIGNED) -- how many sub-samples are packed per transmitted long/word/byte"
+  channel_definition_string: "A string defines a channel: 'name' {count} {RANGE} {color}. 'count' groups bits into a multi-bit bus; RANGE/color set its display."
 
-channel_configuration:
-  max_channels: 32
-  signal_types:
-    - "Single bit (0/1)"
-    - "Multi-bit buses (up to 32 bits)"
-    - "Decoded protocol data"
-  sample_modes:
-    - "State - sample on clock edge"
-    - "Timing - sample at fixed rate"
+display_directives:
+  note: "Accepted in LOGIC_Update."
+  numeric_data: "Sample longs -- the digital sample stream displayed as waveforms."
+  TRIGGER: "TRIGGER mask match {offset} -- capture triggers when (sample AND mask) == match; optional pre/post offset. This is a bit mask/match trigger only -- not a protocol/edge-sequence engine."
+  HOLDOFF: "HOLDOFF n -- minimum samples between triggers"
+  CLEAR: "CLEAR -- clear the display"
+  SAVE: "SAVE ... -- write the window bitmap to <name>.bmp"
 
-display_formats:
-  timing_diagram:
-    description: "Traditional logic analyzer view"
-    features:
-      - "Signal transitions"
-      - "Bus values"
-      - "Timing markers"
-      
-  state_list:
-    description: "Tabular view of signal states"
-    features:
-      - "Sample number"
-      - "Timestamp"
-      - "Signal values"
-      
-  protocol_view:
-    description: "Decoded protocol transactions"
-    features:
-      - "Packet decoding"
-      - "Error detection"
-      - "Transaction timing"
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "Universal -- see language/spin2/debug-commands/pc_mouse.yaml"
+  cursor_coordinate: "sample index x channel row (origin bottom-right)"
 
 examples:
   - code: |
-      ' Monitor SPI signals
-      PUB monitor_spi() | clk, mosi, miso, cs
-        REPEAT
-          clk := INA[SPI_CLK]
-          mosi := INA[SPI_MOSI]
-          miso := INA[SPI_MISO]
-          cs := INA[SPI_CS]
-          DEBUG(`LOGIC SPI_Bus, cs, clk, mosi, miso`)
-    description: "Display SPI bus signals"
-    
+      ' Create a 100-sample logic window, then stream samples by window name
+      DEBUG(`LOGIC MyLog SAMPLES 100)
+      REPEAT
+        DEBUG(`MyLog `(INA))            ' stream the pin-input long as samples
+    description: "Capture and display INA as digital waveforms"
   - code: |
-      ' I2C bus monitoring
-      PUB i2c_monitor() | sda, scl
-        REPEAT
-          sda := INA[I2C_SDA]
-          scl := INA[I2C_SCL]
-          DEBUG(`LOGIC I2C_Bus, scl, sda`)
-    description: "Monitor I2C communications"
-    
+      ' Define named channels (a single bit and a 4-bit bus) at creation
+      DEBUG(`LOGIC Bus SAMPLES 200 'CS' 1 'DATA' 4)
+      REPEAT
+        DEBUG(`Bus `(sample_value))
+    description: "Single-bit and multi-bit-bus channels"
   - code: |
-      ' 8-bit parallel bus
-      PUB bus_monitor() | data_bus, control
-        REPEAT
-          data_bus := INA[7..0]
-          control := INA[10..8]
-          DEBUG(`LOGIC Data_Bus, data_bus, control`)
-    description: "Monitor 8-bit data bus with control"
-    
-  - code: |
-      ' State machine debugging
-      PUB debug_fsm() | state, inputs, outputs
-        REPEAT
-          inputs := INA[15..12]
-          outputs := OUTA[11..8]
-          state := current_state
-          DEBUG(`LOGIC FSM_Debug, state, inputs, outputs`)
-    description: "Debug state machine operation"
-    
-  - code: |
-      ' UART signal decode
-      PUB uart_monitor() | rx, tx, rts, cts
-        REPEAT
-          rx := INA[UART_RX]
-          tx := INA[UART_TX]
-          rts := INA[UART_RTS]
-          cts := INA[UART_CTS]
-          DEBUG(`LOGIC UART_Signals, rx, tx, rts, cts`)
-    description: "Monitor UART with flow control"
-    
-  - code: |
-      ' Quadrature encoder signals
-      PUB encoder_debug() | a, b, index
-        REPEAT
-          a := INA[ENC_A]
-          b := INA[ENC_B]
-          index := INA[ENC_INDEX]
-          DEBUG(`LOGIC Encoder, a, b, index`)
-    description: "Debug quadrature encoder"
+      ' Trigger when the low byte equals $A5, with holdoff
+      DEBUG(`LOGIC Trig SAMPLES 256)
+      DEBUG(`Trig TRIGGER $FF $A5 HOLDOFF 64)
+      REPEAT
+        DEBUG(`Trig `(bus_value))
+    description: "Mask/match trigger with holdoff"
 
-trigger_configuration:
-  simple_triggers:
-    - "Rising edge on channel"
-    - "Falling edge on channel"
-    - "Either edge on channel"
-    - "High level"
-    - "Low level"
-    
-  complex_triggers:
-    - "Pattern match across channels"
-    - "Sequence of events"
-    - "Pulse width conditions"
-    - "Setup/hold time violations"
-    - "Glitch detection"
-
-protocol_decoders:
-  supported:
-    - "I2C - Address, data, ACK/NAK"
-    - "SPI - MOSI/MISO data bytes"
-    - "UART - Async serial with baud rate"
-    - "1-Wire - Commands and data"
-    - "CAN - Message ID and data"
-    - "Custom - User-defined protocols"
-    
-  features:
-    - "Automatic baud rate detection"
-    - "Error highlighting"
-    - "Packet boundaries"
-    - "Address filtering"
-
-measurement_tools:
-  timing:
-    - "Period measurement"
-    - "Pulse width"
-    - "Duty cycle"
-    - "Setup/hold time"
-    - "Propagation delay"
-    
-  counting:
-    - "Edge counting"
-    - "Pulse counting"
-    - "State duration"
-    
-  analysis:
-    - "Pattern search"
-    - "Glitch detection"
-    - "Bus utilization"
-
-window_controls:
-  - "Play/Pause capture"
-  - "Zoom in/out"
-  - "Channel labels"
-  - "Channel reordering"
-  - "Bus grouping"
-  - "Trigger setup"
-  - "Protocol decoder selection"
-  - "Export to file"
-  - "Search controls"
-
-usage_notes:
-  - "Samples taken each DEBUG call"
-  - "Buffer depth limited by memory"
-  - "Can combine with trigger for specific events"
-  - "Protocol decoding happens post-capture"
-  - "Good for debugging digital interfaces"
-  - "Can export for offline analysis"
-
-best_practices:
-  - "Group related signals together"
-  - "Use meaningful signal names"
-  - "Set appropriate sample rate"
-  - "Configure triggers for events of interest"
-  - "Use protocol decoders when available"
-  - "Limit channels to those being debugged"
-
-performance:
-  - "More channels require more memory"
-  - "High sample rates need frequent DEBUG calls"
-  - "Protocol decoding adds processing overhead"
-  - "Pause capture when not needed"
+notes:
+  - "LOGIC is raw sample capture displayed as waveforms; multi-bit buses are shown as bus values, but there is NO protocol decoding."
+  - "TRIGGER is a single mask/match comparison plus optional offset -- not an I2C/SPI/UART decoder or an edge-sequence/glitch engine."
+  - "Packed-data modes let you pack multiple sub-samples per transmitted long/word/byte."
 
 related:
-  - "DEBUG statement"
-  - "Digital I/O operations"
-  - "Protocol implementations"
-  - "State machines"
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

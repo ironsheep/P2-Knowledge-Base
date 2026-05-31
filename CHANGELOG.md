@@ -20,6 +20,24 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.5.0] - 2026-05-31
+
+**Source-grounded accuracy pass: pin protection, silicon errata, and DEBUG display windows**
+
+### Added
+- I/O pin electricals: absolute-maximum input voltage, internal protection diode, and series-resistor handling for reading 5 V signals (`architecture/io_pin_timing.yaml`)
+- Silicon errata: SETQ/SETQ2 block-transfer and AUGS augmentation interactions with intervening ALTx/AUGS/AUGD instructions
+- PASM2 idioms discovery index
+
+### Changed
+- DEBUG display windows documented: PLOT (vector/raster drawing), LOGIC (sample capture with mask/match trigger), MIDI (piano keyboard), and the PC_KEY/PC_MOUSE host-input commands
+- QSIN/QCOS: three-argument `(length, step, stepsInCircle)` form, examples compile-verified
+- Condition codes: complete `IF_` alias roster
+- BIT/DIR/DRV/OUT/FLT: C and Z flag effects
+- Streamer XZERO and REP-in-hub-execution behavior
+
+---
+
 ## [1.4.4] - 2026-05-26
 
 **RCFAST clock specification sourced to P2 Datasheet**

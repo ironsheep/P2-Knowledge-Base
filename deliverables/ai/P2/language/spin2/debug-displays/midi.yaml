@@ -1,151 +1,59 @@
 display_type: MIDI
 category: DEBUG Display Types
 description: |
-  MIDI event display for monitoring and debugging MIDI communications.
-  Shows note events, control changes, system messages, and timing in
-  both list and piano roll formats for music and MIDI applications.
-documentation_source: Spin2 v51
+  MIDI is the P2 DEBUG piano-keyboard window. It draws a piano keyboard and lights
+  keys from a MIDI note-on/note-off byte stream, coloring each by velocity. It is a
+  live keyboard display only: it has NO event list, piano-roll/timeline, analysis,
+  filtering, or MIDI-file import/export.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.9) -- verified against DebugDisplayUnit.pas v55: MIDI_Configure 2492, MIDI_Update 2590; usage example debug-section.txt:3929-3933"
 
-syntax: "DEBUG(`MIDI title, midi_event`)"
+syntax:
+  create: "DEBUG(`MIDI MyMidi <config directives>)"
+  update: "DEBUG(`MyMidi <MIDI status byte> `(data...))   ' reference the window by name"
 
-capabilities:
-  - "Note on/off events"
-  - "Control change messages"
-  - "Program changes"
-  - "System exclusive data"
-  - "Timing clock"
-  - "Piano roll view"
-  - "Event list view"
-  - "Channel filtering"
+configuration_directives:
+  note: "Accepted in MIDI_Configure (window creation)."
+  TITLE: "TITLE 'string'"
+  POS: "POS left top"
+  SIZE: "SIZE n -- key-size scalar 1..50 (NOT pixels)"
+  RANGE: "RANGE firstKey lastKey -- displayed MIDI note range (0..127)"
+  CHANNEL: "CHANNEL n -- MIDI channel to display (0..15)"
+  COLOR: "COLOR onWhite onBlack -- two velocity colors (for lit white vs black keys)"
 
-midi_messages:
-  channel_messages:
-    - "Note On (0x9n)"
-    - "Note Off (0x8n)"
-    - "Polyphonic Aftertouch (0xAn)"
-    - "Control Change (0xBn)"
-    - "Program Change (0xCn)"
-    - "Channel Aftertouch (0xDn)"
-    - "Pitch Bend (0xEn)"
-    
-  system_messages:
-    - "System Exclusive (0xF0)"
-    - "Time Code (0xF1)"
-    - "Song Position (0xF2)"
-    - "Song Select (0xF3)"
-    - "Tune Request (0xF6)"
-    - "End of SysEx (0xF7)"
-    - "Timing Clock (0xF8)"
-    - "Start/Stop/Continue (0xFA/FC/FB)"
+display_directives:
+  note: "Accepted in MIDI_Update."
+  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. (n = channel nibble.)"
+  CLEAR: "CLEAR -- clear the keyboard"
+  SAVE: "SAVE ... -- write the window bitmap to <name>.bmp"
 
-display_formats:
-  event_list:
-    columns:
-      - "Timestamp"
-      - "Channel"
-      - "Message type"
-      - "Data bytes"
-      - "Decoded meaning"
-      
-  piano_roll:
-    features:
-      - "Note visualization"
-      - "Velocity coloring"
-      - "Time grid"
-      - "Multi-channel"
-      
-  monitor:
-    features:
-      - "Raw byte display"
-      - "Running status"
-      - "Timing analysis"
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "Universal -- see language/spin2/debug-commands/pc_mouse.yaml"
+  cursor_coordinate: "none -- MIDI has no coordinate readout / no special mouse mapping"
 
 examples:
   - code: |
-      ' MIDI input monitor
-      PUB midi_monitor() | byte1, byte2, byte3
-        REPEAT
-          IF midi_available()
-            byte1 := midi_read()
-            byte2 := midi_read()
-            byte3 := midi_read()
-            DEBUG(`MIDI Input_Monitor, byte1, byte2, byte3`)
-    description: "Monitor MIDI input stream"
-    
+      ' Create a MIDI keyboard, then play notes by window name
+      DEBUG(`MIDI MyMidi)
+      REPEAT i FROM 60 TO 72                 ' a one-octave run
+        DEBUG(`MyMidi $90 `(i, 100))        ' Note-On  ch0, note i, velocity 100
+        WAITMS(150)
+        DEBUG(`MyMidi $80 `(i, 0))          ' Note-Off ch0, note i
+    description: "Light piano keys from note-on/off events"
   - code: |
-      ' Note event generator
-      PUB play_note(channel, note, velocity)
-        DEBUG(`MIDI Note_Event, $90 + channel, note, velocity`)
-        WAITMS(500)
-        DEBUG(`MIDI Note_Event, $80 + channel, note, 0`)
-    description: "Generate note on/off events"
-    
-  - code: |
-      ' Control change sweep
-      PUB cc_sweep(channel, controller) | value
-        REPEAT value FROM 0 TO 127
-          DEBUG(`MIDI Control, $B0 + channel, controller, value`)
-          WAITMS(10)
-    description: "Sweep control change value"
-    
-  - code: |
-      ' System exclusive dump
-      PUB sysex_dump(manufacturer, data_ptr, length) | i
-        DEBUG(`MIDI SysEx, $F0, manufacturer`)
-        REPEAT i FROM 0 TO length-1
-          DEBUG(`MIDI SysEx, BYTE[data_ptr][i]`)
-        DEBUG(`MIDI SysEx, $F7`)
-    description: "Send system exclusive data"
-    
-  - code: |
-      ' MIDI clock generator
-      PUB midi_clock(bpm) | period
-        period := 60_000 / (bpm * 24)  ' 24 clocks per quarter note
-        REPEAT
-          DEBUG(`MIDI Clock, $F8`)
-          WAITMS(period)
-    description: "Generate MIDI timing clock"
+      ' Limit displayed range and channel at creation
+      DEBUG(`MIDI Kbd SIZE 20 RANGE 36 96 CHANNEL 0 COLOR GREEN RED)
+      DEBUG(`Kbd $90 `(64, 127))            ' full-velocity note
+    description: "Range/channel/velocity-color configuration"
 
-analysis_features:
-  - "Note frequency histogram"
-  - "Velocity distribution"
-  - "Channel activity"
-  - "Message rate"
-  - "Timing accuracy"
-  - "Running status efficiency"
-
-filtering_options:
-  - "Channel selection"
-  - "Message type filter"
-  - "Note range filter"
-  - "Velocity threshold"
-  - "Controller filter"
-
-window_controls:
-  - "View mode selection"
-  - "Channel visibility"
-  - "Time scale"
-  - "Event filtering"
-  - "Clear events"
-  - "Export MIDI file"
-  - "Import MIDI file"
-
-usage_notes:
-  - "Timestamps events automatically"
-  - "Decodes standard MIDI messages"
-  - "Can handle high message rates"
-  - "Useful for MIDI debugging"
-  - "Supports both input and output monitoring"
-
-best_practices:
-  - "Filter unnecessary channels"
-  - "Use appropriate view for task"
-  - "Monitor timing for sync issues"
-  - "Check for stuck notes"
-  - "Verify control mappings"
+notes:
+  - "MIDI is a live piano-keyboard display driven by note-on ($9n) / note-off ($8n) bytes; velocity sets the key color."
+  - "SIZE is a key-size scalar (1..50), not pixels."
+  - "There is NO event-list, piano-roll, analysis, filtering, or MIDI-file import/export -- those were never part of the window."
 
 related:
-  - "Serial communication"
-  - "Music applications"
-  - "Timing and synchronization"
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

@@ -30,7 +30,7 @@ parameters:
   the I/O pin(s) to set to output direction and output levels of high or low.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: No effect
+  C: Set to OUT bit state
   Z: Set to OUT bit state
 timing:
   cycles: 2
@@ -38,7 +38,7 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011000
   write: DIRx* + OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 encoding_notes:

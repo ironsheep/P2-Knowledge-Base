@@ -432,7 +432,7 @@ related_concepts:
   - "SETQ instruction for pin span override"
 
 see_also:
-  - "engineering/knowledge-base/P2/language/pasm2/concepts/pasm2-getting-started.yaml"
-  - "engineering/knowledge-base/P2/architecture/smart_pins.yaml"
-  - "engineering/knowledge-base/P2/architecture/io_pin_timing.yaml"
-  - "engineering/knowledge-base/P2/architecture/system-registers/dira-dirb-registers.yaml"
+  - "deliverables/ai/P2/guides/pasm2-getting-started.yaml"
+  - "deliverables/ai/P2/architecture/smart_pins.yaml"
+  - "deliverables/ai/P2/architecture/io_pin_timing.yaml"
+  - "deliverables/ai/P2/architecture/system-registers/dira-dirb-registers.yaml"

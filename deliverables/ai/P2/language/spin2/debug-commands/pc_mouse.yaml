@@ -2,7 +2,72 @@ command: "PC_MOUSE"
 type: debug_command
 category: "Debug Control"
 description: |
-  PC mouse input
-syntax: "['PC_MOUSE']"
+  PC_MOUSE reads the host PC's mouse into the P2 from within a graphical DEBUG()
+  display. It returns the current mouse status as a 7-LONG structure written through
+  a caller-supplied pointer. The mechanism is identical for all nine DEBUG display
+  windows; only the reported coordinate basis differs per window.
+documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
+documentation_level: comprehensive
+source: "engineering/ingestion/sources/spin2-v51/debug-section.txt:815-852 (PC_MOUSE P2-side API + 7-long struct); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md sections 4.3-4.4 (host side: SendMousePos 3537-3577, per-window coordinate mapping)"
+
+syntax: "PC_MOUSE(pointer_to_7_longs)"
+
+usage_rules:
+  - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only."
+  - "Must be the LAST command in the DEBUG() statement."
+  - "The DEBUG() display must have focus for the scroll-wheel delta to be reported."
+  - "Universal: accepted in every DEBUG display window's update phase."
+
+pointer:
+  spin2: "The seven longs must be in hub RAM -- pass @xpos (the first of seven consecutive longs)."
+  pasm2: "The seven longs must be cog registers -- pass #xpos (the first of seven consecutive registers)."
+
+returns:
+  structure: "7 consecutive LONGs, in order:"
+  longs:
+    - name: xpos
+      description: "X position within the DEBUG display (xpos<0 AND ypos<0 if the mouse is outside the display)"
+    - name: ypos
+      description: "Y position within the DEBUG display"
+    - name: wheeldelta
+      description: "Scroll-wheel delta: 0, or +/-1 if changed (display must have focus)"
+    - name: lbutton
+      description: "Left-button state: 0, or -1 if pressed"
+    - name: mbutton
+      description: "Middle-button state: 0, or -1 if pressed"
+    - name: rbutton
+      description: "Right-button state: 0, or -1 if pressed"
+    - name: pixel
+      description: "Pixel color at the mouse position: $00_RR_GG_BB, or -1 if outside the display"
+
+coordinate_basis_per_window:
+  note: "The reported xpos/ypos basis is transformed per display type (matrix section 4.4)."
+  LOGIC: "sample index x channel row (origin bottom-right)"
+  SCOPE_FFT: "pixel offset from plot origin, Y inverted"
+  SCOPE_XY: "scaled data value; Cartesian or polar (rho,theta) per POLAR/LOGSCALE"
+  PLOT_SPECTRO_BITMAP: "pixel / DOTSIZE, honoring direction/flip flags"
+  TERM: "character column,row; off-text-area returns the off-window sentinel"
+  MIDI: "no coordinate readout"
+
 examples:
-  - "DEBUG(PC_MOUSE)"
+  - code: |
+      ' Spin2: read the mouse in a PLOT window (7 longs in hub)
+      VAR
+        long xpos, ypos, wheel, lb, mb, rb, pixel
+      PUB main()
+        DEBUG(`PLOT MyPlot SIZE 256 256)
+        REPEAT
+          DEBUG(`MyPlot PC_MOUSE(@xpos))     ' PC_MOUSE must be last; fills 7 longs
+          IF lb                               ' left button pressed (-1)
+            DEBUG(`MyPlot SET `(xpos) `(ypos) DOT)
+    description: "Track mouse position and draw on left-click"
+
+notes:
+  - "PC_MOUSE returns 7 LONGs (xpos, ypos, wheeldelta, lbutton, mbutton, rbutton, pixel)."
+  - "Mouse-outside-display is signaled by xpos<0 and ypos<0, and pixel = -1."
+  - "Button states are 0 (up) or -1 (pressed); the wheel delta is momentary (0 or +/-1)."
+  - "HIDEXY hides the on-screen measurement cursor but does NOT disable PC_MOUSE reporting back to the P2."
+
+related:
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-displays/plot.yaml

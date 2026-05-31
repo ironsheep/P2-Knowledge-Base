@@ -23,6 +23,8 @@ description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 in
 flags_affected:
   C: No effect
   Z: No effect
+silicon_errata:
+  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WRLONG -- the intervening instruction cancels the block-size PTRx delta (PTRx advances by +4, NOT N*4). Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C)."
 compiler_category: Memory and I/O
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

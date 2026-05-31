@@ -3,7 +3,7 @@ syntax: BITZ    D,{#}S         {WCZ}
 encoding:
 - bits: EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: —
+  c: original D[S[4:0]]
   z: original D[S[4:0]]
   clocks: '2'
 timing:
@@ -11,7 +11,7 @@ timing:
   type: fixed
 description: BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target bit.
 flags_affected:
-  C: No effect
+  C: Set to original D[S[4:0]] (original state of target bit)
   Z: Set to original D[S[4:0]] (original state of target bit)
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

@@ -31,10 +31,9 @@ notes:
   - "Input range: -2.77 to 0.69 (in 5.27 format)"
   - "Result is e^exponent"
   - "Output range: 0.0625 to 2.0"
-  - "38-clock cycle operation"
 timing:
-  description: "CORDIC operation"
-  cycles: "38 clock cycles"
+  description: "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
+  see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
 related:
   - QLOG
   - MULDIV64

@@ -510,10 +510,10 @@ related_concepts:
   - "Multi-cog pin coordination with locks"
 
 see_also:
-  - "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
-  - "engineering/knowledge-base/P2/language/spin2/methods/pinhigh.yaml"
-  - "engineering/knowledge-base/P2/language/spin2/methods/pinlow.yaml"
-  - "engineering/knowledge-base/P2/language/spin2/methods/pinread.yaml"
-  - "engineering/knowledge-base/P2/language/spin2/methods/pinfloat.yaml"
-  - "engineering/knowledge-base/P2/architecture/smart_pins.yaml"
-  - "engineering/knowledge-base/P2/architecture/io_pin_timing.yaml"
+  - "deliverables/ai/P2/guides/spin2-getting-started.yaml"
+  - "deliverables/ai/P2/language/spin2/methods/pinhigh.yaml"
+  - "deliverables/ai/P2/language/spin2/methods/pinlow.yaml"
+  - "deliverables/ai/P2/language/spin2/methods/pinread.yaml"
+  - "deliverables/ai/P2/language/spin2/methods/pinfloat.yaml"
+  - "deliverables/ai/P2/architecture/smart_pins.yaml"
+  - "deliverables/ai/P2/architecture/io_pin_timing.yaml"

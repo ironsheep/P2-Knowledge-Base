@@ -24,6 +24,8 @@ compiler_category: Memory and I/O
 flags_affected:
   C: Set to MSB of long
   Z: No effect
+silicon_errata:
+  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this RDLONG -- the intervening instruction cancels the block-size PTRx delta (PTRx advances by +4, NOT N*4). Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C)."
 compiler_effects:
 - name: wc
   symbol: WC

@@ -45,6 +45,22 @@ encoding:
 flags_affected:
   C: No effect
   Z: No effect
+silicon_errata:
+  intervening_altx_immediate_s_consumes_augs:
+    severity: critical
+    description: |
+      An ALTx instruction with an immediate #S operand, placed BETWEEN AUGS and the AUGS'
+      intended target instruction (which also has an immediate #S operand), will use the
+      AUGS value WITHOUT cancelling it. The intended target still uses and cancels the AUGS
+      value as expected -- but the intervening ALTx has also (incorrectly) been augmented.
+    example: |
+      AUGS  #$FFFFF123        ' This AUGS is intended for the ADD instruction
+      ALTD  index,#base       ' Look out! AUGS augments this #base too. Use a register instead.
+      ADD   0-0,#$123         ' #$123 is augmented by the AUGS and cancels the AUGS
+    workaround: "Use a register (not an immediate #S) for the S operand of any ALTx placed between AUGS and its target."
+    status: "Active in Rev C silicon (current production)."
+    scope_note: "The Silicon Doc documents this errata for AUGS only. The same mechanism may apply to AUGD, but that is NOT stated in any golden source -- it is a known-unknown and is deliberately not asserted here."
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:212-227 (KNOWN BUGS, Rev C) -- verbatim"
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

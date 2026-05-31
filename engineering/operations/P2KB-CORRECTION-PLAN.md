@@ -33,6 +33,7 @@ We removed a manual's worth of inference-presented-as-fact this session; we do n
 |---|-------|------|---------------|
 | **F-006** | `pasm2/concepts/setq_block_ops.yaml` (+ hazard note in `setq.yaml`, `rdlong.yaml`; mirror for `wrlong.yaml`/`wmlong.yaml`) | Add `silicon_errata`: an intervening ALTx/AUGS/AUGD between SETQ/SETQ2 and a PTRx block transfer cancels the block-size PTRx delta (PTRx += 4, not N×4). Include the doc's code example + workaround (keep them adjacent). | `silicon-doc/p2-documentation.txt:197–211` (KNOWN BUGS, Rev C) — verbatim |
 | **F-007** | `pasm2/augs.yaml` | Add `silicon_errata`: an ALTx with immediate `#S` between AUGS and its target is also augmented; workaround = use a register for the ALTx S operand. **AUGS only.** | `…p2-documentation.txt:212–227` (Rev C) — verbatim |
+| **F-012** | `architecture/io_pin_timing.yaml` (+ cross-ref from `smart_pins.yaml`, a hardware guide) | Add `absolute_maximum_ratings` + `input_voltage_and_protection`: pin abs-max `-0.3 V to (Vxxyy+0.3 V)` ≈ 3.6 V; internal protection diode to the I/O rail; ±10 mA forward-bias limit; verbatim datasheet footnote; "reading >3.6 V (e.g. 5 V) needs a series resistor sized to keep diode current ≤ ±10 mA" with the Ohm's-law derivation shown. | `p2-datasheet/p2-datasheet-narrative.txt:6185–6241` (abs-max table + footnote 1) |
 
 > **F-007 / AUGD (hard-facts rule):** the Silicon Doc names only **AUGS**. We do **not** add an AUGD errata claim. Logged as a known-unknown in the findings register; verify against hardware / a future silicon-doc rev before ever asserting it.
 
@@ -50,25 +51,25 @@ We removed a manual's worth of inference-presented-as-fact this session; we do n
 
 | F | Files | Edit | Golden source |
 |---|-------|------|---------------|
-| **F-005** | `spin2/debug-displays/{plot,logic,midi}.yaml`; `spin2/debug-commands/{pc_key,pc_mouse}.yaml` | Re-ground from the official doc: PLOT = vector canvas (no chart/series API); LOGIC = mask/match trigger only (no protocol decoders); MIDI = piano keyboard ($9n/$8n only); expand `pc_key` (33-code table + pointer/"must be last"/focus) and `pc_mouse` (7-long struct). | `spin2-v51/debug-section.txt` (PLOT 2626–3002, LOGIC 1660–1820, MIDI 3915–4012, PC_KEY 784–813, PC_MOUSE 815–852); v3 manual chapters corroborate |
+| **F-005** | *(HELD — see below)* `spin2/debug-displays/{plot,logic,midi}.yaml`; `spin2/debug-commands/{pc_key,pc_mouse}.yaml` | **Deferred.** Re-ground from the official doc once the theory-of-operations are refreshed. | `spin2-v51/debug-section.txt`; v3 manual chapters corroborate |
+
+> **F-005 HELD (2026-05-31, user direction).** Do not fix debug-related KB facts in this pass. The re-grounding source (the per-window theory-of-operations Bibles) was reverse-engineered from PNut v51a; the compiler/DEBUG feature set may have changed since. **Refresh the theory-of-operations against the current compiler first**, then lift the hold. This also gates the Debug Window Manual.
 | **F-004** | 7 `deliverables/ai/P2/` files | Redirect stale `engineering/knowledge-base/P2/<x>` refs → `deliverables/ai/P2/<x>` (the content's current home). Run cross-ref validator after. | actual current file locations |
 
 ### Batch 4 — Low priority
 
 | F | Files | Edit | Golden source |
 |---|-------|------|---------------|
-| **F-011** | `pasm2/hubset.yaml`; new `pasm2/idioms/_index.yaml` | Add the inline `halt_technique` block; add the idioms discovery index. | `flash_loader.spin2` (ROM source) |
+| **F-011** | new `pasm2/idioms/_index.yaml` only | Add the idioms discovery/compendium index (mirror `architecture/streamer/_index.yaml`, `boot-rom/_index.yaml`). **Item A (inline `halt_technique` into `hubset.yaml`) is NOT done** — already documented in `idioms/halt-and-fault-response.yaml` and cross-linked from `hubset.yaml`; inlining would duplicate a fact and invite drift. | existing idiom files + `streamer/_index.yaml` pattern |
 
 ---
 
-## Flagged decisions (need your call before editing)
+## Flagged decisions — RESOLVED (2026-05-31)
 
-1. **F-005 depth.** The plot/logic/midi YAMLs are heavily fabricated. Two options:
-   - **(a) Full re-ground** — rewrite them into complete, correct command references from `debug-section.txt` (higher quality; larger effort; the v3 manual chapters give us most of the material).
-   - **(b) Strip-and-point** — remove the fabricated sections and add a short accurate summary + a cross-ref to the Debug Window Manual. Faster; less complete.
-2. **F-008 aliases.** Include the compiler-internal underscore forms (`_GT`, `_NC`, …) too, or only the assembler-facing `IF_` aliases?
-3. **F-011.** Include the two low-priority Flash-Loader leftovers in this pass, or defer to a later one?
-4. **AUGD (F-007).** Confirm we hold to the hard-facts rule: document AUGS only, log AUGD as a known-unknown, do not assert it.
+1. **F-005 — HELD.** Deferred until the debug theory-of-operations are refreshed against the current compiler. No depth decision needed now.
+2. **F-008 aliases — assembler-facing only.** Add only the `IF_` aliases. Do **not** add compiler-internal underscore forms (`_GT`, `_NC`, …) — the user (consumer) writes assembler, not compiler internals; that's the gate.
+3. **F-011 — index only.** Do **Item B** (`idioms/_index.yaml`). **Item A is closed as resolved-by-cross-ref** (no inline; do not revisit).
+4. **AUGD (F-007) — HELD.** Document AUGS only; log AUGD as a known-unknown; do not assert it.
 
 ## Definition of done
 - Every edit cites a golden source; zero un-cited additions.

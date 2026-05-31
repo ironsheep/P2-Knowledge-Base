@@ -42,10 +42,9 @@ notes:
   - "Full 32-bit precision maintained"
   - "Handles all quadrants correctly"
   - "Result is scaled by CORDIC K factor (≈1.647)"
-  - "38-clock cycle operation"
 timing:
-  description: "CORDIC operation"
-  cycles: "38 clock cycles"
+  description: "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
+  see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
 related:
   - POLXY
   - XYPOL

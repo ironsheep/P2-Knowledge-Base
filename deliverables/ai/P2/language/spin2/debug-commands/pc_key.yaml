@@ -2,7 +2,65 @@ command: "PC_KEY"
 type: debug_command
 category: "Debug Control"
 description: |
-  PC keyboard input
-syntax: "['PC_KEY']"
+  PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()
+  display. It returns any new keypress that occurred within the last ~100 ms as a
+  single LONG written through a caller-supplied pointer. The keyboard model is
+  identical for all nine DEBUG display windows.
+documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
+documentation_level: comprehensive
+source: "engineering/ingestion/sources/spin2-v51/debug-section.txt:784-814 (PC_KEY P2-side API + key-code table); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md section 4.2 (host side: SendKeyPress 3579-3583, FormKeyDown 833-851)"
+
+syntax: "PC_KEY(pointer_to_long)"
+
+usage_rules:
+  - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only."
+  - "Must be the LAST command in the DEBUG() statement."
+  - "The DEBUG() display must have focus for keypresses to be noticed."
+  - "Reports a keypress only if it occurred within the last ~100 ms of the poll (the host latch auto-clears after 100 ms); otherwise 0."
+  - "Universal: accepted in every DEBUG display window's update phase, with identical behavior."
+
+pointer:
+  spin2: "The long must be in hub RAM -- pass @key."
+  pasm2: "The long must be a cog register -- pass #key."
+
+returns:
+  long: "key -- the keypress code (0 if no keypress)"
+
+key_codes:
+  0: "no keypress"
+  1: "Left Arrow"
+  2: "Right Arrow"
+  3: "Up Arrow"
+  4: "Down Arrow"
+  5: "Home"
+  6: "End"
+  7: "Delete"
+  8: "Backspace"
+  9: "Tab"
+  10: "Insert"
+  11: "Page Up"
+  12: "Page Down"
+  13: "Enter"
+  27: "Esc"
+  "32..126": "Space to \"~\" -- all printable ASCII (symbols, digits, letters)"
+
 examples:
-  - "DEBUG(PC_KEY)"
+  - code: |
+      ' Spin2: read keypresses from a TERM window (long in hub)
+      VAR
+        long key
+      PUB main()
+        DEBUG(`TERM MyTerm)
+        REPEAT
+          DEBUG(`MyTerm PC_KEY(@key))        ' PC_KEY must be last in the statement
+          IF key
+            handle_key(key)
+    description: "Read host keypresses into a Spin2 hub long"
+
+notes:
+  - "PC_KEY returns one LONG; the keyboard mapping is the same in all nine windows (no per-window keyboard differences)."
+  - "Non-printable keys map to the small control codes above (1..13); printable keys map to their ASCII value (32..126); Esc = 27."
+
+related:
+  - language/spin2/debug-commands/pc_mouse.yaml
+  - language/spin2/debug-displays/plot.yaml

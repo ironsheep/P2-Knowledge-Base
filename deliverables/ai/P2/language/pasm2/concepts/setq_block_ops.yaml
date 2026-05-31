@@ -12,6 +12,23 @@ overview: |
   
   Critical for waveform tables, debug state preservation, and high-speed data processing.
 
+silicon_errata:
+  intervening_altx_augs_augd_cancels_ptrx_block_delta:
+    severity: critical
+    applies_to: "SETQ/SETQ2 immediately followed by a block RDLONG/WRLONG/WMLONG that uses a PTRx expression (e.g. ptra++)"
+    description: |
+      An ALTx, AUGS, or AUGD instruction placed BETWEEN SETQ/SETQ2 and the block
+      RDLONG/WRLONG/WMLONG cancels the special-case block-size PTRx delta. The expected
+      number of longs still transfers, but PTRx is then modified only by the normal PTRx
+      expression amount (+4 for one long), NOT by N*4.
+    example: |
+      SETQ   #16-1            ' ready to load 16 longs
+      ALTD   start_reg        ' alter start register -- this intervening ALTD CANCELS the block-size PTRx delta
+      RDLONG 0, ptra++        ' ptra is incremented by 4 (1 long), NOT 16*4 as anticipated
+    workaround: "Keep SETQ/SETQ2 immediately adjacent to the block transfer -- place no ALTx/AUGS/AUGD between them."
+    status: "Active in Rev C silicon (current production)."
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C, 2020_06_01) -- verbatim"
+
 setq_instructions:
   SETQ:
     function: "Set block count for cog RAM operations"

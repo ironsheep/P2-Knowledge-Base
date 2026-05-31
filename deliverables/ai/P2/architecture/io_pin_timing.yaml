@@ -260,6 +260,41 @@ input_characteristics:
     VIH_min: "2.0V (minimum high input)"
     switching_threshold: "~1.5V typical"
 
+absolute_maximum_ratings:
+  description: |
+    Stress ratings from the P2 datasheet. Stresses beyond these can cause permanent
+    damage; they are absolute stress limits, NOT operating conditions.
+  source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt:6185-6241 (Absolute Maximum Electrical Ratings table + footnote 1)"
+  voltage_on_VDD_vs_GND: "-0.3 V to +2.2 V"
+  voltage_on_VIO_Vxxyy_vs_GND: "-0.3 V to +4.0 V"
+  voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V) -- about 3.6 V at the nominal 3.3 V I/O supply"
+  max_DC_current_into_input_pin_protection_diode_forward_biased: "+/-10 mA"
+  max_current_per_IO_pin: "+/-30 mA"
+  esd_HBM: "4 kV (JS-001)"
+  esd_CDM: "1 kV (JS-002)"
+
+input_voltage_and_protection:
+  description: |
+    The P2 is a 3.3 V I/O device and is NOT natively 5 V-tolerant. Each I/O pin has an
+    internal protection (clamp) diode to the I/O supply rail (Vxxyy / VIO, nominally 3.3 V);
+    the "+0.3 V" in the pin absolute-max is that diode's forward drop.
+  io_supply: "Vxxyy (VIO) = 3.3 V nominal (3.15-3.45 V); pins operate 0-3.3 V"
+  datasheet_note_verbatim: "I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
+  reading_a_5V_signal:
+    direct_connection: "Not safe. 5 V exceeds the ~3.6 V pin absolute-max and forward-biases the upper protection diode."
+    with_series_resistor: |
+      Permitted IF a series resistor limits the protection-diode forward current to the
+      datasheet limit of +/-10 mA. The pin clamps the input near Vxxyy + ~0.3 V (about 3.6 V);
+      the series resistor drops the remainder.
+    minimum_series_resistor_DERIVED: |
+      DERIVED value (Ohm's law applied to the stated abs-max facts -- NOT a datasheet-stated
+      number): R >= (5 V - ~3.6 V) / 10 mA ~= 140 ohm. Use a larger standard value
+      (e.g. >= 1 kohm) for margin so diode current stays well within the +/-10 mA limit.
+    caveat: "A series resistor protects the pin electrically; it does not make the pin truly '5 V tolerant.' For sustained 5 V interfacing prefer a proper level shifter or resistor divider."
+  latchup_context:
+    note: "The Silicon Doc reports VIO-triggered latch-up onset as early as ~4.3 V on VIO -- reinforcing that this is a 3.3 V part; do not over-drive the rails."
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:155-175"
+
 special_timing_modes:
   synchronous_serial:
     description: "Timing for synchronous serial modes"

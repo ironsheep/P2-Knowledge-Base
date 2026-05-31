@@ -44,12 +44,12 @@ flag_system:
       logical: "All bits are zero"
 
 condition_codes:
-  # All 32 condition codes with binary values and common aliases
+  # All 16 condition codes (4-bit EEEE field) with binary values and common aliases
   # These are the LEGAL names that can be used in PASM2
   
   - value: "%0000"
     primary: "_RET_"
-    aliases: []
+    aliases: ["IF_RET"]
     condition: "Always + Return"
     c_required: "X"
     z_required: "X"
@@ -57,7 +57,7 @@ condition_codes:
     
   - value: "%0001"
     primary: "IF_NC_AND_NZ"
-    aliases: ["IF_NZ_AND_NC", "IF_A", "IF_GT"]
+    aliases: ["IF_NZ_AND_NC", "IF_A", "IF_GT", "IF_00"]
     condition: "C=0 AND Z=0"
     c_required: "0"
     z_required: "0"
@@ -65,7 +65,7 @@ condition_codes:
     
   - value: "%0010"
     primary: "IF_NC_AND_Z"
-    aliases: ["IF_Z_AND_NC"]
+    aliases: ["IF_Z_AND_NC", "IF_01"]
     condition: "C=0 AND Z=1"
     c_required: "0"
     z_required: "1"
@@ -73,7 +73,7 @@ condition_codes:
     
   - value: "%0011"
     primary: "IF_NC"
-    aliases: ["IF_AE", "IF_GE"]
+    aliases: ["IF_AE", "IF_GE", "IF_0X"]
     condition: "C=0"
     c_required: "0"
     z_required: "X"
@@ -81,7 +81,7 @@ condition_codes:
     
   - value: "%0100"
     primary: "IF_C_AND_NZ"
-    aliases: ["IF_NZ_AND_C"]
+    aliases: ["IF_NZ_AND_C", "IF_10"]
     condition: "C=1 AND Z=0"
     c_required: "1"
     z_required: "0"
@@ -89,7 +89,7 @@ condition_codes:
     
   - value: "%0101"
     primary: "IF_NZ"
-    aliases: ["IF_NE"]
+    aliases: ["IF_NE", "IF_X0"]
     condition: "Z=0"
     c_required: "X"
     z_required: "0"
@@ -97,7 +97,7 @@ condition_codes:
     
   - value: "%0110"
     primary: "IF_C_NE_Z"
-    aliases: ["IF_DIFF"]
+    aliases: ["IF_DIFF", "IF_Z_NE_C"]
     condition: "C≠Z"
     c_required: "≠Z"
     z_required: "≠C"
@@ -105,7 +105,7 @@ condition_codes:
     
   - value: "%0111"
     primary: "IF_NC_OR_NZ"
-    aliases: ["IF_NZ_OR_NC"]
+    aliases: ["IF_NZ_OR_NC", "IF_NOT_11"]
     condition: "C=0 OR Z=0"
     c_required: "0 OR"
     z_required: "0 OR"
@@ -113,7 +113,7 @@ condition_codes:
     
   - value: "%1000"
     primary: "IF_C_AND_Z"
-    aliases: ["IF_Z_AND_C"]
+    aliases: ["IF_Z_AND_C", "IF_11"]
     condition: "C=1 AND Z=1"
     c_required: "1"
     z_required: "1"
@@ -121,7 +121,7 @@ condition_codes:
     
   - value: "%1001"
     primary: "IF_C_EQ_Z"
-    aliases: ["IF_SAME"]
+    aliases: ["IF_SAME", "IF_Z_EQ_C"]
     condition: "C=Z"
     c_required: "=Z"
     z_required: "=C"
@@ -129,7 +129,7 @@ condition_codes:
     
   - value: "%1010"
     primary: "IF_Z"
-    aliases: ["IF_E"]
+    aliases: ["IF_E", "IF_X1"]
     condition: "Z=1"
     c_required: "X"
     z_required: "1"
@@ -137,7 +137,7 @@ condition_codes:
     
   - value: "%1011"
     primary: "IF_NC_OR_Z"
-    aliases: ["IF_Z_OR_NC", "IF_BE", "IF_LE"]
+    aliases: ["IF_Z_OR_NC", "IF_NOT_10"]
     condition: "C=0 OR Z=1"
     c_required: "0 OR"
     z_required: "1 OR"
@@ -145,7 +145,7 @@ condition_codes:
     
   - value: "%1100"
     primary: "IF_C"
-    aliases: ["IF_B", "IF_LT"]
+    aliases: ["IF_B", "IF_LT", "IF_1X"]
     condition: "C=1"
     c_required: "1"
     z_required: "X"
@@ -153,7 +153,7 @@ condition_codes:
     
   - value: "%1101"
     primary: "IF_C_OR_NZ"
-    aliases: ["IF_NZ_OR_C"]
+    aliases: ["IF_NZ_OR_C", "IF_NOT_01"]
     condition: "C=1 OR Z=0"
     c_required: "1 OR"
     z_required: "0 OR"
@@ -161,7 +161,7 @@ condition_codes:
     
   - value: "%1110"
     primary: "IF_C_OR_Z"
-    aliases: ["IF_Z_OR_C", "IF_BE"]
+    aliases: ["IF_Z_OR_C", "IF_BE", "IF_LE", "IF_NOT_00"]
     condition: "C=1 OR Z=1"
     c_required: "1 OR"
     z_required: "1 OR"
@@ -285,10 +285,14 @@ performance_benefits:
   universal: "Works on ALL instructions, not just a subset"
 
 common_mistakes:
-  - mistake: "Using invalid condition names"
-    wrong: "IF_LT  ADD x, y    ' IF_LT not valid alone"
-    right: "IF_C   ADD x, y    ' Use IF_C for less than"
-    explanation: "IF_LT is an alias for IF_C in context"
+  - mistake: "Assuming IF_LT/IF_LE perform signed comparisons"
+    wrong: |
+      CMP  x, y WCZ      ' UNSIGNED compare
+      IF_LT ...          ' IF_LT is valid (alias of IF_C) but this tests UNSIGNED below
+    right: |
+      CMPS x, y WCZ      ' SIGNED compare
+      IF_C ...           ' Now correct for signed less-than
+    explanation: "IF_LT is a valid alias of IF_C (%1100, unsigned below) and IF_LE aliases IF_C_OR_Z (%1110, unsigned below-or-equal). They are NOT invalid names -- but they test the unsigned condition. For signed comparisons, generate the flags with CMPS/CMPSX first."
   
   - mistake: "Forgetting WC/WZ on compare"
     wrong: "CMP x, y          ' Doesn't update flags!"

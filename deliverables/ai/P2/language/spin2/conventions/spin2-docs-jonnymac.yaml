@@ -319,5 +319,5 @@ integration_notes:
     - "Compatible with team preferences on indentation"
 
 see_also:
-  full_standard: engineering/knowledge-base/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
-  organization_standard: engineering/knowledge-base/P2/language/spin2/conventions/p2-source-file-organization-standard.yaml
+  full_standard: deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
+  organization_standard: deliverables/ai/P2/language/spin2/conventions/p2-source-file-organization-standard.yaml

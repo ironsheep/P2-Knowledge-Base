@@ -3,7 +3,7 @@ syntax: OUTC    {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001001010
   write: OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 timing:
@@ -16,7 +16,7 @@ result: >-
   The I/O pin output level bit(s), described by Dest, are set to low/high according
   to C; the rest are left as-is. Z = original OUT bit state.
 flags_affected:
-  C: No effect
+  C: Set to original OUT bit state
   Z: Set to original OUT bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

@@ -3,7 +3,7 @@ syntax: DIRH    {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000001
   write: DIRx
-  c: —
+  c: DIR bit
   z: DIR bit
   clocks: '2'
 timing:
@@ -14,7 +14,7 @@ description: >-
   the pin(s) outputs. All other direction bits are left unchanged. Z is set to the
   state of the direction bit.
 flags_affected:
-  C: No effect
+  C: Set to DIR bit state
   Z: Set to DIR bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

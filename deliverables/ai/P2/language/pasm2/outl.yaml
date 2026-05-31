@@ -12,7 +12,7 @@ parameters:
   the I/O pin(s) to set high or low.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: No effect
+  C: Set to original OUT bit state
   Z: Set to original OUT bit state
 timing:
   cycles: 2
@@ -20,7 +20,7 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001001000
   write: OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01

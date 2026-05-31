@@ -36,7 +36,7 @@ parameters:
   the I/O pin(s) to set to the input direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: No effect
+  C: Set to OUT bit state
   Z: Set to OUT bit state
 syntax_variants:
 - FLTNOT {#}Dest {WCZ}
@@ -46,7 +46,7 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001010111
   write: DIRx* + OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 encoding_notes:

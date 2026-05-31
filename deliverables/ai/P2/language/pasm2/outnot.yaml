@@ -18,7 +18,7 @@ parameters:
   the I/O pin(s) to toggle to the opposite output level.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: No effect
+  C: Set to original OUT bit state
   Z: Set to original OUT bit state
 syntax_variants:
 - OUTNOT {#}Dest {WCZ}
@@ -28,7 +28,7 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001001111
   write: OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

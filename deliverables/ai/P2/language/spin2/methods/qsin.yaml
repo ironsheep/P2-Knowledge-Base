@@ -1,45 +1,48 @@
 method: QSIN
 type: method
 description: |
-  Calculate sine of angle using hardware CORDIC
+  Return the Y (sine) component of rotating the vector (length, 0) by a caller-defined
+  angle, using the P2 hardware CORDIC engine.
 category: Math/CORDIC Operations
-syntax: "sine := QSIN(Angle, Length)"
+syntax: "y := QSIN(length, step, stepsInCircle)"
 parameters:
-  - name: "Angle"
+  - name: "length"
     type: "long"
-    description: "Angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
-  - name: "Length"
+    description: "Vector length / amplitude. The result is scaled by this (acts as the radius)."
+  - name: "step"
     type: "long"
-    description: "Hypotenuse/radius length (scaling factor)"
+    description: "Angle expressed as a step count. The actual angle is (step / stepsInCircle) * 2Pi."
+  - name: "stepsInCircle"
+    type: "long (unsigned)"
+    description: "Number of steps in a full circle -- i.e. the caller-chosen angle unit (360 for degrees, 65536 for 16-bit brads, etc.). Use 0 to mean a full circle of $1_0000_0000 (2^32) steps. stepsInCircle is unsigned."
 returns:
   type: "long"
-  description: "Sine value scaled by Length"
+  description: "y = length * sin( (step / stepsInCircle) * 2Pi )"
 examples:
   - code: |
-      ' Calculate sine of 30 degrees
-      sine := QSIN($1555_5555, 1000)  ' 30° with scale 1000
-      ' Result: sine ≈ 500
-    description: "Basic sine calculation"
+      ' Sine at 90 degrees using a 360-step circle
+      y := QSIN(1000, 90, 360)        ' sin(90 deg) -> ~1000
+    description: "Sine in degrees (stepsInCircle = 360)"
   - code: |
-      ' Generate sine wave
-      repeat angle from 0 to $FFFF_FFFF step $0100_0000
-        y := QSIN(angle, amplitude)
+      ' Quarter turn using the default 2^32-step circle (stepsInCircle = 0)
+      y := QSIN(1000, $4000_0000, 0)  ' $4000_0000 is 1/4 of 2^32 -> 90 deg -> ~1000
+    description: "Default full-circle units ($1_0000_0000 steps)"
+  - code: |
+      ' Generate one cycle of a sine wave, 360 points
+      repeat ang from 0 to 359
+        y := QSIN(amplitude, ang, 360)
         plot(x++, center_y + y)
-    description: "Generate sine wave plot"
-  - code: |
-      ' Vertical position for circular motion
-      y_pos := center_y + QSIN(angle, radius)
-    description: "Calculate Y position on circle"
+    description: "Generate a sine wave (degrees)"
 notes:
-  - "Uses P2's hardware CORDIC engine"
-  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°"
-  - "Result = Length × sin(Angle)"
-  - "Full 32-bit precision"
-  - "38-clock cycle operation"
-  - "Handles all quadrants correctly"
+  - "Uses the P2 hardware CORDIC engine (QROTATE)."
+  - "Angle is caller-defined: actual angle = (step / stepsInCircle) * 2Pi. The unit is whatever you pass as stepsInCircle -- 360 for degrees, 65536 for 16-bit brads, etc."
+  - "stepsInCircle = 0 selects a full circle of $1_0000_0000 (2^32) steps; stepsInCircle is unsigned."
+  - "Result = length * sin(angle)."
+  - "Returns the Y (sine) component; QCOS returns the X (cosine) component of the same rotation."
+source: "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5141-5143 (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts v1.55.0"
 timing:
-  description: "CORDIC operation"
-  cycles: "38 clock cycles"
+  description: "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
+  see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
 related:
   - QCOS
   - ROTXY

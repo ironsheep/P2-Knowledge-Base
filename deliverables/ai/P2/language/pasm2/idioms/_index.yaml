@@ -1,0 +1,118 @@
+# PASM2 Idioms Index
+# Download-on-demand manifest for the PASM2 idiom/pattern compendium
+# Use this file to identify which idiom file contains the pattern you need
+
+component: pasm2_idioms
+description: Common PASM2 coding patterns and idioms, grouped by purpose
+version: "1.0"
+last_updated: "2026-05-31"
+
+# File manifest - download only what you need
+files:
+  conditional_execution:
+    path: conditional-execution.yaml
+    size: ~44 lines
+    category: conditionals
+    use_when:
+      - "Building branchless code with IF_ condition prefixes"
+      - "Combining conditional execution with WC/WZ flag updates"
+    contains:
+      - Conditional instruction execution patterns
+
+  halt_and_fault_response:
+    path: halt-and-fault-response.yaml
+    size: ~72 lines
+    category: fault_response
+    use_when:
+      - "Halting the chip (e.g. dead-clock HUBSET idiom)"
+      - "Responding to a detected fault condition"
+    contains:
+      - Patterns for halting and fault handling
+
+  hub_memory:
+    path: hub-memory.yaml
+    size: ~126 lines
+    category: hub_memory
+    use_when:
+      - "Accessing hub memory from PASM2"
+      - "Setting up block transfers and pointer access"
+    contains:
+      - Common hub-memory access patterns
+
+  loop_control:
+    path: loop-control.yaml
+    size: ~102 lines
+    category: loops
+    use_when:
+      - "Writing efficient PASM2 loops (REP, DJNZ, etc.)"
+      - "Choosing a looping construct for a hot path"
+    contains:
+      - Common PASM2 loop patterns
+
+  pin_control:
+    path: pin-control.yaml
+    size: ~79 lines
+    category: pin_io
+    use_when:
+      - "Operating on multiple pins or pin ranges"
+      - "Manipulating DIR/OUT across a pin group"
+    contains:
+      - Multi-pin operation and pin-range patterns
+
+  register_operations:
+    path: register-operations.yaml
+    size: ~62 lines
+    category: register_ops
+    use_when:
+      - "Manipulating cog registers efficiently"
+    contains:
+      - Common register-manipulation patterns
+
+  scratch_storage:
+    path: scratch-storage.yaml
+    size: ~91 lines
+    category: register_economy
+    use_when:
+      - "Reusing data words as temporary working storage before their real consumption"
+      - "Economizing on cog register usage"
+    contains:
+      - Scratch-storage / register-economy patterns
+
+  self_modifying_code:
+    path: self-modifying-code.yaml
+    size: ~89 lines
+    category: code_generation
+    use_when:
+      - "Modifying instruction fields at runtime"
+      - "Choosing between SMC and ALTx alternatives"
+    contains:
+      - Self-modifying-code patterns
+
+  timing_control:
+    path: timing-control.yaml
+    size: ~48 lines
+    category: timing
+    use_when:
+      - "Adding precise delays or synchronizing to the system counter"
+    contains:
+      - Timing and synchronization patterns
+
+# Quick decision tree
+decision_tree:
+  "How do I make code conditional/branchless?": conditional-execution.yaml
+  "How do I halt the chip or handle a fault?": halt-and-fault-response.yaml
+  "How do I access hub memory?": hub-memory.yaml
+  "How do I write an efficient loop?": loop-control.yaml
+  "How do I operate on a range of pins?": pin-control.yaml
+  "How do I manipulate registers efficiently?": register-operations.yaml
+  "How do I reuse storage to save registers?": scratch-storage.yaml
+  "How do I modify instructions at runtime?": self-modifying-code.yaml
+  "How do I add precise timing/delays?": timing-control.yaml
+
+# Related resources outside this directory
+related:
+  - language/pasm2/concepts/conditional_execution.yaml
+  - language/pasm2/concepts/cog_hub_execution.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
+  - language/pasm2/hubset.yaml
+  - language/pasm2/rep.yaml

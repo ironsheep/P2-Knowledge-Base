@@ -178,8 +178,8 @@ spin2_language_complete_map:
     
   # File Organization
   directory_structure:
-    language_root: "/engineering/knowledge-base/P2/language/spin2/"
-    fundamentals_root: "/engineering/knowledge-base/P2/language/fundamentals/"
+    language_root: "/deliverables/ai/P2/language/spin2/"
+    fundamentals_root: "/deliverables/ai/P2/language/fundamentals/"
     new_directories:
       - "keywords/ - All SPIN2 keywords"
       - "assembly-directives/ - PASM2 directives"

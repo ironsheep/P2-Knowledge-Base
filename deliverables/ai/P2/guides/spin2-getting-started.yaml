@@ -1,7 +1,7 @@
 title: Spin2 Getting Started - Core Language Essentials
 id: spin2-getting-started
 version: 1.2.0
-content_base: "/engineering/knowledge-base/P2/language/spin2"
+content_base: "/deliverables/ai/P2/language/spin2"
 layer: "Foundation - Language Mechanics"
 purpose: Minimal viable knowledge for writing functional Spin2 code
 target_audience: AI code generators and developers new to Spin2
@@ -510,6 +510,6 @@ next_steps:
 
 see_also:
   - manifests/P2/language/spin2-manifest.yaml
-  - engineering/knowledge-base/P2/language/spin2/operators/
-  - engineering/knowledge-base/P2/language/spin2/keywords/
-  - engineering/knowledge-base/P2/language/spin2/methods/
+  - deliverables/ai/P2/language/spin2/operators/
+  - deliverables/ai/P2/language/spin2/keywords/
+  - deliverables/ai/P2/language/spin2/methods/

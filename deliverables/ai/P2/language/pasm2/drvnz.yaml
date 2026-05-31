@@ -3,7 +3,7 @@ syntax: DRVNZ   {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011101
   write: DIRx* + OUTx
-  c: —
+  c: OUT bit
   z: OUT bit
   clocks: '2'
 timing:
@@ -29,7 +29,7 @@ result: >-
   The I/O pins described by Dest are set to the output direction and to an output
   level of low/high according to !Z; the rest are left as-is.
 flags_affected:
-  C: No effect
+  C: Set to OUT bit state
   Z: Set to OUT bit state
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies

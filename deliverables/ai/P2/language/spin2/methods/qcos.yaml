@@ -1,45 +1,46 @@
 method: QCOS
 type: method
 description: |
-  Calculate cosine of angle using hardware CORDIC
+  Return the X (cosine) component of rotating the vector (length, 0) by a caller-defined
+  angle, using the P2 hardware CORDIC engine.
 category: Math/CORDIC Operations
-syntax: "cosine := QCOS(Angle, Length)"
+syntax: "x := QCOS(length, step, stepsInCircle)"
 parameters:
-  - name: "Angle"
+  - name: "length"
     type: "long"
-    description: "Angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
-  - name: "Length"
+    description: "Vector length / amplitude. The result is scaled by this (acts as the radius)."
+  - name: "step"
     type: "long"
-    description: "Hypotenuse/radius length (scaling factor)"
+    description: "Angle expressed as a step count. The actual angle is (step / stepsInCircle) * 2Pi."
+  - name: "stepsInCircle"
+    type: "long (unsigned)"
+    description: "Number of steps in a full circle -- i.e. the caller-chosen angle unit (360 for degrees, 65536 for 16-bit brads, etc.). Use 0 to mean a full circle of $1_0000_0000 (2^32) steps. stepsInCircle is unsigned."
 returns:
   type: "long"
-  description: "Cosine value scaled by Length"
+  description: "x = length * cos( (step / stepsInCircle) * 2Pi )"
 examples:
   - code: |
-      ' Calculate cosine of 60 degrees
-      cosine := QCOS($2AAA_AAAA, 1000)  ' 60° with scale 1000
-      ' Result: cosine ≈ 500
-    description: "Basic cosine calculation"
+      ' Cosine at 0 degrees using a 360-step circle
+      x := QCOS(1000, 0, 360)         ' cos(0 deg) -> ~1000
+    description: "Cosine in degrees (stepsInCircle = 360)"
   - code: |
-      ' Generate cosine wave
-      repeat angle from 0 to $FFFF_FFFF step $0100_0000
-        y := QCOS(angle, amplitude)
-        plot(x++, center_y + y)
-    description: "Generate cosine wave plot"
+      ' Cosine at 60 degrees
+      x := QCOS(1000, 60, 360)        ' cos(60 deg) -> ~500
+    description: "Cosine of 60 degrees"
   - code: |
-      ' Horizontal position for circular motion
-      x_pos := center_x + QCOS(angle, radius)
-    description: "Calculate X position on circle"
+      ' Horizontal position for circular motion (X = cos)
+      x_pos := center_x + QCOS(radius, ang, 360)
+    description: "Calculate X position on a circle"
 notes:
-  - "Uses P2's hardware CORDIC engine"
-  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°"
-  - "Result = Length × cos(Angle)"
-  - "Full 32-bit precision"
-  - "38-clock cycle operation"
-  - "Handles all quadrants correctly"
+  - "Uses the P2 hardware CORDIC engine (QROTATE)."
+  - "Angle is caller-defined: actual angle = (step / stepsInCircle) * 2Pi. The unit is whatever you pass as stepsInCircle -- 360 for degrees, 65536 for 16-bit brads, etc."
+  - "stepsInCircle = 0 selects a full circle of $1_0000_0000 (2^32) steps; stepsInCircle is unsigned."
+  - "Result = length * cos(angle)."
+  - "Returns the X (cosine) component; QSIN returns the Y (sine) component of the same rotation."
+source: "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5147-5149 (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0"
 timing:
-  description: "CORDIC operation"
-  cycles: "38 clock cycles"
+  description: "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
+  see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
 related:
   - QSIN
   - ROTXY

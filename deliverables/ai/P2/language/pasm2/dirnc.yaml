@@ -32,7 +32,7 @@ parameters:
   the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: No effect
+  C: Set to DIR bit state
   Z: Set to DIR bit state
 timing:
   cycles: 2
@@ -40,7 +40,7 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000011
   write: DIRx
-  c: —
+  c: DIR bit
   z: DIR bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01

@@ -14,6 +14,8 @@ description: Set Q to D. Use before RDLONG/WRLONG/WMLONG to set block transfer. 
 flags_affected:
   C: No effect
   Z: No effect
+silicon_errata:
+  block_transfer_ptrx_delta: "Do NOT place an ALTx/AUGS/AUGD between SETQ/SETQ2 and the block RDLONG/WRLONG/WMLONG that uses a PTRx expression -- the intervening instruction cancels the block-size PTRx delta (PTRx advances by +4 for one long, NOT by N*4). Keep SETQ adjacent to the transfer. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C)."
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:

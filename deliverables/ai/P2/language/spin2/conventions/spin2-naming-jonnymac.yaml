@@ -412,7 +412,7 @@ adoption_decision:
     - "You have existing codebase with different conventions"
 
 see_also:
-  full_standard: engineering/knowledge-base/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
-  layer_1: engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml
-  layer_2: engineering/knowledge-base/P2/language/spin2/conventions/spin2-formatting-standards.yaml
-  layer_3: engineering/knowledge-base/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml
+  full_standard: deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
+  layer_1: deliverables/ai/P2/guides/spin2-getting-started.yaml
+  layer_2: deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml
+  layer_3: deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml

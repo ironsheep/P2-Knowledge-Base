@@ -1,279 +1,102 @@
 display_type: PLOT
 category: DEBUG Display Types
 description: |
-  Real-time plotting display for data visualization and trending.
-  Provides line graphs, scatter plots, and bar charts for numeric data
-  with auto-scaling, multiple series, and statistical analysis.
-documentation_source: Spin2 v51
+  PLOT is the P2 DEBUG vector/raster drawing canvas. It is NOT a chart/series
+  plotter -- it has no line/scatter/bar-chart, auto-scaling, statistical-overlay,
+  or data-export features. Instead, its update phase is a full 2-D drawing command
+  set (points, lines, shapes, text, sprites, layered bitmaps), making it the most
+  capable of the nine DEBUG display windows.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.6) -- verified against DebugDisplayUnit.pas v55: PLOT_Configure 1864, PLOT_Update 1918-2155"
 
-syntax: "DEBUG(`PLOT title, series1, series2, ...`)"
+syntax:
+  create: "DEBUG(`PLOT MyPlot <config directives>)"
+  update: "DEBUG(`MyPlot <drawing directives>)   ' subsequent messages reference the window by name"
 
-capabilities:
-  - "Multiple data series (up to 8)"
-  - "Line, scatter, and bar chart modes"
-  - "Auto-scaling or fixed scales"
-  - "Rolling or accumulating display"
-  - "Statistical overlays"
-  - "Data point markers"
-  - "Legend display"
-  - "Grid and axis labels"
+configuration_directives:
+  note: "Accepted in PLOT_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window title"
+  POS: "POS left top -- screen position"
+  SIZE: "SIZE width height -- canvas size in pixels"
+  DOTSIZE: "DOTSIZE x {y} -- pixel scale; also the divisor for reported cursor coordinates"
+  color_mode: "One of LUT1 LUT2 LUT4 LUT8 LUMA8/8W/8X HSV8/8W/8X RGBI8/8W/8X RGB8 HSV16/16W/16X RGB16 RGB24 -- how packed numeric data maps to pixels"
+  LUTCOLORS: "LUTCOLORS rgb24... -- palette for LUT color modes"
+  BACKCOLOR: "BACKCOLOR color -- background color"
+  UPDATE: "UPDATE -- enable buffered/manual-refresh mode (drawing accumulates, shown only on an explicit UPDATE directive)"
+  HIDEXY: "HIDEXY -- suppress the on-screen measurement-cursor readout (does NOT disable PC_MOUSE reporting)"
 
-plot_types:
-  line_plot:
-    description: "Connected data points"
-    usage: "Continuous data, trends"
-    
-  scatter_plot:
-    description: "Individual data points"
-    usage: "Discrete samples, correlations"
-    
-  bar_chart:
-    description: "Vertical or horizontal bars"
-    usage: "Categorical data, comparisons"
-    
-  area_plot:
-    description: "Filled area under line"
-    usage: "Cumulative values, ranges"
+display_directives:
+  note: "Accepted in PLOT_Update. PLOT consumes essentially no bare numeric stream -- all geometry comes from these directives."
+  color:
+    color_mode: "Switch color mode mid-stream (LUT1..RGB24)"
+    LUTCOLORS: "Update the LUT palette"
+    BACKCOLOR: "Set background color"
+    COLOR: "Named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble), or a color value"
+    OPACITY: "OPACITY n -- alpha for subsequent drawing"
+    PRECISE: "PRECISE -- enable sub-pixel precise coordinates"
+    LINESIZE: "LINESIZE n -- stroke width"
+  geometry:
+    ORIGIN: "ORIGIN {x y} -- set drawing origin"
+    SET: "SET x y -- set the current pen position"
+    DOT: "DOT {size {opacity}} -- plot a dot at the current position"
+    LINE: "LINE x y {size {opacity}} -- line from current position to x,y"
+    CIRCLE: "CIRCLE ... -- circle"
+    OVAL: "OVAL ... -- ellipse"
+    BOX: "BOX ... -- filled/edged rectangle"
+    OBOX: "OBOX ... -- outlined rectangle"
+    POLAR: "POLAR -- interpret subsequent coordinates as polar"
+    CARTESIAN: "CARTESIAN -- interpret coordinates as Cartesian (with optional axis-flip flags)"
+  text:
+    TEXT: "TEXT 'string' -- draw text at the current position"
+    TEXTSIZE: "TEXTSIZE n"
+    TEXTSTYLE: "TEXTSTYLE n"
+    TEXTANGLE: "TEXTANGLE n"
+  bitmap_layers:
+    LAYER: "LAYER n 'file.bmp' -- load a BMP into layer buffer n"
+    CROP: "CROP layer (AUTO x y | left top width height {x y}) -- copy a region of a layer to the canvas"
+    SPRITEDEF: "SPRITEDEF ... -- define a sprite"
+    SPRITE: "SPRITE ... -- draw a defined sprite"
+  window:
+    CLEAR: "CLEAR -- clear the canvas"
+    UPDATE: "UPDATE -- copy the accumulated buffer to screen (when in UPDATE mode)"
+    SAVE: "SAVE ... -- write the window bitmap to <name>.bmp (or a desktop region)"
 
-data_modes:
-  rolling:
-    description: "Fixed window, old data scrolls off"
-    buffer_size: "Configurable (default 1000 points)"
-    
-  accumulating:
-    description: "All data points retained"
-    limitation: "Memory limited"
-    
-  triggered:
-    description: "Start/stop on condition"
-    usage: "Event-based capture"
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "Universal -- see language/spin2/debug-commands/pc_mouse.yaml"
+  cursor_coordinate: "pixel / DOTSIZE, honoring CARTESIAN flip flags (vDirX/vDirY)"
 
 examples:
   - code: |
-      ' Temperature monitoring
-      PUB temp_logger() | temp
-        REPEAT
-          temp := read_temperature()
-          DEBUG(`PLOT Temperature, temp`)
-          WAITMS(1000)
-    description: "Plot temperature over time"
-    
+      ' Create a 256x256 plot canvas, then draw into it by name
+      DEBUG(`PLOT MyPlot SIZE 256 256)
+      DEBUG(`MyPlot SET 10 10 LINE 200 200)      ' line from (10,10) to (200,200)
+      DEBUG(`MyPlot COLOR RED CIRCLE 128 128 40)  ' red circle
+    description: "Create a canvas and draw a line and a circle"
   - code: |
-      ' Multiple sensor comparison
-      PUB compare_sensors() | s1, s2, s3
-        REPEAT
-          s1 := read_sensor(0)
-          s2 := read_sensor(1)
-          s3 := read_sensor(2)
-          DEBUG(`PLOT Sensors, s1, s2, s3`)
-          WAITMS(100)
-    description: "Compare three sensors"
-    
+      ' Layered bitmap + sprite-sheet animation (LAYER/CROP are real PLOT directives)
+      DEBUG(`PLOT Game SIZE 320 240)
+      DEBUG(`Game LAYER 1 'spritesheet.bmp')
+      REPEAT frame FROM 0 TO 7
+        DEBUG(`Game CROP 1 `(frame*32) 0 32 32 100 100)   ' blit 32x32 frame (expr needs `(...) to evaluate)
+        WAITMS(100)
+    description: "Bitmap layers and sprite-sheet animation"
   - code: |
-      ' PID controller visualization
-      PUB pid_debug() | setpoint, actual, error, output
-        REPEAT
-          setpoint := target_value
-          actual := read_process()
-          error := setpoint - actual
-          output := calculate_pid(error)
-          DEBUG(`PLOT PID_Control, setpoint, actual, output`)
-          WAITMS(10)
-    description: "Visualize PID control loop"
-    
-  - code: |
-      ' Performance metrics
-      PUB performance() | cpu_load, memory, latency
-        REPEAT
-          cpu_load := get_cpu_usage()
-          memory := get_memory_usage()
-          latency := measure_latency()
-          DEBUG(`PLOT Performance, cpu_load, memory, latency`)
-          WAITMS(100)
-    description: "System performance monitoring"
-    
-  - code: |
-      ' Statistical distribution
-      PUB histogram() | value, count[10], i
-        REPEAT 1000
-          value := random_value() / 10
-          count[value]++
-        REPEAT i FROM 0 TO 9
-          DEBUG(`PLOT Distribution, count[i]`)
-          WAITMS(50)
-    description: "Display value distribution"
-    
-  - code: |
-      ' Frequency response
-      PUB freq_sweep() | freq, response
-        REPEAT freq FROM 10 TO 10000 STEP 10
-          set_frequency(freq)
-          response := measure_response()
-          DEBUG(`PLOT Frequency_Response, response`)
-          WAITMS(10)
-    description: "Plot frequency response"
+      ' Buffered (manual-refresh) drawing: accumulate, then show on UPDATE
+      DEBUG(`PLOT Buf SIZE 128 128 UPDATE)
+      DEBUG(`Buf CLEAR BOX 0 0 128 128 LINE 0 0 128 128)
+      DEBUG(`Buf UPDATE)                              ' now copy buffer to screen
+    description: "Buffered drawing with explicit UPDATE"
 
-v50_layer_commands:
-  minimum_version: "v50"
-  description: |
-    V50 added layer and crop commands for bitmap display within PLOT windows.
-    Allows loading BMP files into layer buffers and copying regions to the display.
-    
-  plot_layer:
-    syntax: "DEBUG(`PLOT LAYER layer 'filename.bmp')"
-    parameters:
-      - name: "layer"
-        type: "integer"
-        range: "1-8"
-        description: "Layer buffer number for bitmap storage"
-      - name: "filename"
-        type: "string"
-        description: "Path to BMP image file"
-    description: "Loads a bitmap file into one of 8 layer buffers"
-    example: |
-      DEBUG(`PLOT LAYER 1 'background.bmp')
-      DEBUG(`PLOT LAYER 2 'sprites.bmp')
-    notes:
-      - "Up to 8 layers can be loaded simultaneously"
-      - "Layers persist until window is closed or layer is replaced"
-      - "BMP format only"
-      
-  plot_crop:
-    syntax:
-      - "DEBUG(`PLOT CROP layer AUTO x y)"
-      - "DEBUG(`PLOT CROP layer left top width height)"
-      - "DEBUG(`PLOT CROP layer left top width height x y)"
-    parameters:
-      - name: "layer"
-        type: "integer"
-        range: "1-8"
-        description: "Source layer buffer"
-      - name: "AUTO"
-        type: "keyword"
-        description: "Use full layer size"
-      - name: "left, top"
-        type: "integer"
-        description: "Source coordinates in layer"
-      - name: "width, height"
-        type: "integer"
-        description: "Size of region to copy"
-      - name: "x, y"
-        type: "integer"
-        description: "Destination coordinates in plot"
-    description: "Copies a rectangular region from a layer to the plot display"
-    examples:
-      - code: |
-          ' Load background and copy entire layer to position (0,0)
-          DEBUG(`PLOT LAYER 1 'bg.bmp')
-          DEBUG(`PLOT CROP 1 AUTO 0 0)
-        description: "Copy entire layer to display"
-      - code: |
-          ' Copy 32x32 sprite from layer 2 to position (100,50)
-          DEBUG(`PLOT CROP 2 0 0 32 32 100 50)
-        description: "Copy specific region with offset"
-      - code: |
-          ' Animated sprite using layer crops
-          DEBUG(`PLOT LAYER 1 'spritesheet.bmp')
-          REPEAT frame FROM 0 TO 7
-            DEBUG(`PLOT CROP 1 frame*32 0 32 32 100 100)
-            WAITMS(100)
-        description: "Animation using sprite sheet regions"
-    notes:
-      - "Useful for game graphics and animated displays"
-      - "Layer must be loaded before crop can reference it"
-      - "Coordinates are in pixels"
-
-axis_configuration:
-  x_axis:
-    - "Time-based (auto-incrementing)"
-    - "Sample number"
-    - "Custom values"
-    - "Logarithmic scale"
-    
-  y_axis:
-    - "Auto-scale to data"
-    - "Fixed range"
-    - "Logarithmic scale"
-    - "Multiple Y axes"
-
-display_options:
-  line_styles:
-    - "Solid"
-    - "Dashed"
-    - "Dotted"
-    - "None (points only)"
-    
-  point_markers:
-    - "Circle"
-    - "Square"
-    - "Triangle"
-    - "Cross"
-    - "None"
-    
-  colors:
-    - "Automatic assignment"
-    - "User selectable"
-    - "Series-specific"
-
-statistical_features:
-  overlays:
-    - "Moving average"
-    - "Min/max envelope"
-    - "Standard deviation"
-    - "Trend line"
-    
-  measurements:
-    - "Mean value"
-    - "Peak values"
-    - "RMS"
-    - "Rate of change"
-
-window_controls:
-  - "Play/Pause update"
-  - "Clear data"
-  - "Zoom controls"
-  - "Pan controls"
-  - "Series visibility toggle"
-  - "Scale mode selection"
-  - "Export data"
-  - "Snapshot image"
-  - "Statistics panel"
-
-data_export:
-  formats:
-    - "CSV file"
-    - "Text file"
-    - "Clipboard"
-  options:
-    - "All data points"
-    - "Visible range only"
-    - "Decimated data"
-
-usage_notes:
-  - "Updates with each DEBUG call"
-  - "Memory usage grows with data points"
-  - "Can pause to examine data"
-  - "Good for trend analysis"
-  - "Automatic legend from series order"
-  - "Export for further analysis"
-
-best_practices:
-  - "Use consistent sample intervals"
-  - "Label series meaningfully"
-  - "Choose appropriate plot type"
-  - "Set reasonable buffer sizes"
-  - "Use colors for clarity"
-  - "Include units in title"
-
-performance:
-  - "Large datasets impact rendering"
-  - "Multiple series increase overhead"
-  - "Consider decimation for long runs"
-  - "Pause when not viewing"
+notes:
+  - "PLOT is the only DEBUG window whose update phase is a full vector/raster drawing command set."
+  - "There is NO chart/series API, auto-scaling, statistical overlay, legend, zoom/pan, or data-export -- those were never part of PLOT."
+  - "UPDATE in the config turns the window into buffered mode; drawing accumulates in Bitmap[0] and is copied to screen only on an explicit UPDATE directive."
+  - "Named colors other than BLACK/WHITE accept an optional 0-15 brightness nibble."
 
 related:
-  - "DEBUG statement"
-  - "Data logging"
-  - "SCOPE display type"
-  - "Statistical functions"
+  - language/spin2/debug-displays/bitmap.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

@@ -3,7 +3,7 @@ syntax: DIRZ    {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000100
   write: DIRx
-  c: —
+  c: DIR bit
   z: DIR bit
   clocks: '2'
 timing:
@@ -36,7 +36,7 @@ result: >-
   The I/O pin direction bit(s), described by Dest, are set to output/input according
   to Z or !Z; the rest are left as-is.
 flags_affected:
-  C: No effect
+  C: Set to DIR bit state
   Z: Set to DIR bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

@@ -465,3 +465,8 @@ see_also:
   - "Serial protocol implementations"
   - "PWM generation guide"
   - "ADC/DAC applications"
+
+electrical_limits:
+  note: "Pin input-voltage limits, the internal protection diode, and 5 V-signal handling (series-resistor technique) are documented in architecture/io_pin_timing.yaml under absolute_maximum_ratings / input_voltage_and_protection. The P2 is a 3.3 V I/O device, NOT natively 5 V-tolerant."
+  related:
+    - architecture/io_pin_timing.yaml

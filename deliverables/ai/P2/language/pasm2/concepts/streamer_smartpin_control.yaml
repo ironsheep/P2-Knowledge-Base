@@ -49,9 +49,10 @@ streamer_system:
       use: "Chain streaming operations"
     
     XZERO:
-      syntax: "XZERO mode, count"
-      operation: "Stream zeros (no hub read)"
-      use: "Generate timing/clocks"
+      syntax: "XZERO {#}D,{#}S"
+      operation: "Buffer a new streamer command to be issued on the final NCO rollover of the current command, zeroing the NCO phase accumulator."
+      use: "Video line timing reset, phase alignment (e.g. start of a new line/audio block)"
+      note: "Does NOT stream zeros. Unlike XCONT (which continues phase), XZERO resets the NCO phase. See language/pasm2/xzero.yaml."
 
   streamer_modes:
     immediate_modes:

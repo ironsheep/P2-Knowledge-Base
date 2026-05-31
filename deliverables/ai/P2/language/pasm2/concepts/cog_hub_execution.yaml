@@ -514,13 +514,17 @@ best_practices:
     - "Implement overlay system for complex COG code"
 
 common_mistakes:
-  - mistake: "Using REP in hubexec"
+  - mistake: "Assuming REP gives zero-overhead loops in hubexec"
     wrong: |
       ORGH
-      REP #4, #100    ' Won't work!
+      REP #4, #100    ' REP DOES work in hubexec, but each iteration's
+                      ' hidden jump back to the top pays the 13+ clock
+                      ' hub-branch (FIFO-refill) cost -- not zero-overhead
     right: |
       ORG
-      REP #4, #100    ' Works in cogexec
+      REP #4, #100    ' Zero-overhead REP loop (cogexec) -- use cogexec
+                      ' for tight inner loops that need free looping
+    explanation: "REP works in hubexec (Silicon Doc v35: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions'). It is not forbidden -- but the hidden jump costs 13+ clocks per iteration, so move tight loops to cogexec when you need REP's zero loop overhead."
   
   - mistake: "Not loading COG code before jumping"
     wrong: |
