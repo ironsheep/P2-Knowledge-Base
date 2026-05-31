@@ -11,7 +11,7 @@
 local function wrap(text, env)
   return pandoc.RawBlock('latex',
     '\\begin{' .. env .. '}\n' ..
-    '\\begin{Verbatim}\n' ..
+    '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
     text .. '\n' ..
     '\\end{Verbatim}\n' ..
     '\\end{' .. env .. '}')

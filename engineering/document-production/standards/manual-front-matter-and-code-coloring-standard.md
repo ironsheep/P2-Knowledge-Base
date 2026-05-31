@@ -61,12 +61,14 @@ Two interchangeable wirings exist; **use the one that matches the manual's code 
 - **Fenced code blocks** (```` ```spin2 ````, ```` ```pasm2 ````) — a `CodeBlock` Lua filter maps the language class to a colored `tcolorbox` wrapping a `fancyvrb` `Verbatim` (preserves blank lines and special characters; bypasses `--listings`). This is the Single-Step Debugger / Debug Window model.
 - **Fenced divs** (`::: spin2`, `::: pasm2`, `::: antipattern`) — a `Div` filter does the same for div-wrapped blocks. This is the Smart Pins model.
 
-Both produce the **same** `Spin2Block` / `Pasm2Block` (`PASM2Block`) `tcolorbox` environments defined in the manual's content `.sty`:
+Both produce the **same** `Spin2Block` / `Pasm2Block` (`PASM2Block`) `tcolorbox` environments — a **thick 4pt left rule** (the left-edge accent), thin `0.5pt` other sides, rounded corners, and `left=30pt` to clear the inset line numbers:
 ```latex
 \newtcolorbox{Spin2Block}{colback=<spin2-bg>, colframe=<spin2-border>,
-  boxrule=0.5pt, left=8pt,right=8pt,top=6pt,bottom=6pt,
-  before skip=10pt, after skip=10pt, breakable, fontupper=\footnotesize\ttfamily}
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable}
 ```
+**Line numbering is required** (it is part of the house look): the filter must emit the code inside `\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]` (fenced-block model) or the equivalent `lstlisting[numbers=left,numbersep=8pt,xleftmargin=-10pt,...]` (div model). The `left=30pt` box inset plus the `xleftmargin=-10pt` pulls the numbers into the left gutter. Omit these and the blocks have no left-edge accent and no line numbers, and will not match the other manuals.
 
 ### Wiring checklist
 

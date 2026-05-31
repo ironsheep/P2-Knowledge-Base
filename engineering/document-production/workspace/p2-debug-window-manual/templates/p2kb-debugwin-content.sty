@@ -27,16 +27,20 @@
 \definecolor{debugwin-spin2-border}{HTML}{1976D2}  % Blue border (Spin2)
 \definecolor{debugwin-pasm2-bg}{HTML}{EBFCEB}      % Light green (PASM2)
 \definecolor{debugwin-pasm2-border}{HTML}{4CB04C}  % Green border (PASM2)
+% Shared geometry matches the live publications (SmartPins / IOSP / PASM2):
+% boxrule=2pt with a THICK 4pt left rule (the left-edge accent), thin 0.5pt other
+% sides, rounded corners, left=30pt to clear the inset line numbers emitted by the
+% filter's Verbatim[numbers=left].
 \newtcolorbox{Spin2Block}{%
   colback=debugwin-spin2-bg, colframe=debugwin-spin2-border,
-  boxrule=0.5pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
-  before skip=10pt, after skip=10pt, breakable,
-  fontupper=\footnotesize\ttfamily}
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable}
 \newtcolorbox{Pasm2Block}{%
   colback=debugwin-pasm2-bg, colframe=debugwin-pasm2-border,
-  boxrule=0.5pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
-  before skip=10pt, after skip=10pt, breakable,
-  fontupper=\footnotesize\ttfamily}
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt, breakable}
 
 % ==================== DEBUG WINDOW 5-COLOR CODE BLOCK SYSTEM ====================
 % Based on Debug Window functional areas with 5 distinct code block types:
