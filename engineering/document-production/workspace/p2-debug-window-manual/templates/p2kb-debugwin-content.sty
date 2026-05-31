@@ -19,6 +19,25 @@
 % Configure tcolorbox library
 \tcbuselibrary{breakable,skins}
 
+% ==================== HOUSE CODE-BLOCK SCHEME (shared P2 publication standard) ====================
+% Spin2 = blue, PASM2/assembly = green (IDE-aligned; matches Smart Pins / IOSP /
+% PASM2 Reference / Single-Step Debugger). Targeted by p2kb-debugwin-code-coloring.lua
+% which wraps ```spin2 / ```pasm2 fenced blocks in these boxes.
+\definecolor{debugwin-spin2-bg}{HTML}{E3F2FD}      % Light blue (Spin2)
+\definecolor{debugwin-spin2-border}{HTML}{1976D2}  % Blue border (Spin2)
+\definecolor{debugwin-pasm2-bg}{HTML}{EBFCEB}      % Light green (PASM2)
+\definecolor{debugwin-pasm2-border}{HTML}{4CB04C}  % Green border (PASM2)
+\newtcolorbox{Spin2Block}{%
+  colback=debugwin-spin2-bg, colframe=debugwin-spin2-border,
+  boxrule=0.5pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  before skip=10pt, after skip=10pt, breakable,
+  fontupper=\footnotesize\ttfamily}
+\newtcolorbox{Pasm2Block}{%
+  colback=debugwin-pasm2-bg, colframe=debugwin-pasm2-border,
+  boxrule=0.5pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  before skip=10pt, after skip=10pt, breakable,
+  fontupper=\footnotesize\ttfamily}
+
 % ==================== DEBUG WINDOW 5-COLOR CODE BLOCK SYSTEM ====================
 % Based on Debug Window functional areas with 5 distinct code block types:
 % 1. Spin2 (green) - Main program structure and control

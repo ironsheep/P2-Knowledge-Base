@@ -1,30 +1,103 @@
-# How This Manual Is Organized {.unnumbered}
+```{=latex}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
 
-The P2's `DEBUG` system can do far more than print text. It drives nine graphical
-display windows — terminals, bitmaps, plots, logic and waveform views, spectrum
-and spectrogram displays, and a MIDI keyboard — all from `DEBUG()` statements in
-your own program, with no external hardware.
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Debug Window Manual\par}
+\vspace{0.3cm}
+{\Large\itshape See What Your Program Is Doing\par}
+\vspace{0.6cm}
+{\large May 2026\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0\par}
 
-- **Part I — Foundation (Chapters 1–2)** establishes the shared model: how you
-  create a window, feed it by name, and read its output, and how to get a first
-  window on screen.
-- **Part II — The Windows (Chapters 3–11)** is one chapter per window type:
-  TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, and MIDI. Each chapter
-  covers creating the window, feeding it data, its full command set, and a complete
-  worked example you can run with no wiring.
-- **Part III — Integration (Chapters 12–14)** covers the features that span
-  windows: reading the host keyboard and mouse, sending data compactly with packed
-  formats, using several windows at once, and debugging from PASM.
-- **Appendices** give a per-window command reference, the packed-data formats, and
-  a color and coordinate reference.
+\vfill
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Manual Organization},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{The nine DEBUG display windows of the Propeller 2}
 
-Every example in this manual compiles with `pnut_ts` and runs on a bare P2 board
-plus a PC — the data is generated in software, so you can see each window work
-before you connect anything to the chip.
+\vspace{0.3cm}
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Foundation \& Windows}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item The DEBUG Display Windows
+\item Getting Started
+\item TERM --- Text Output
+\item BITMAP --- Pixel Raster
+\item PLOT --- Vector Drawing
+\item LOGIC --- Digital Waveforms
+\item SCOPE --- Oscilloscope
+\end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Windows \& Integration}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item SCOPE\_XY --- XY \& Phase
+\item FFT --- Frequency Spectrum
+\item SPECTRO --- Spectrogram
+\item MIDI --- Keyboard Display
+\item Bidirectional Control
+\item Packed Data
+\item Multiple Windows \& PASM
+\item Appendices A--C
+\end{itemize}
+\end{minipage}
 
-> The *single-step debugger* — which halts and steps your code — is a different
-> tool with its own manual. This manual is about the *display* windows, which
-> visualize data while your program runs.
+\end{tcolorbox}
+\vspace{0.5cm}
+
+{\small Iron Sheep Productions, LLC\par}
+{\small P2 Knowledge Base Project\par}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+```
+
+# Copyright and License
+
+Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+
+You are free to **share** and **adapt** this material for any purpose, even commercially, under the following terms: **Attribution** — give appropriate credit and indicate if changes were made; **ShareAlike** — distribute your contributions under the same license. Full license: https://creativecommons.org/licenses/by-sa/4.0/
+
+### Trademarks
+
+Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
+
+### Acknowledgments
+
+**Parallax Inc.** and **Chip Gracey** for the Propeller 2 and its DEBUG display system. The reverse-engineered per-window theory-of-operations references that ground this manual were derived from the PNut v51a implementation.
+
+```{=latex}
+\clearpage
+```
 
 
 # Chapter 1: The DEBUG Display Windows

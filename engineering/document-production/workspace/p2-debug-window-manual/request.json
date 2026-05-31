@@ -14,8 +14,7 @@
         "--highlight-style=tango"
       ],
       "lua_filters": [
-        "p2kb-debugwin-div-blocks",
-        "p2kb-debugwin-semantic"
+        "p2kb-debugwin-code-coloring"
       ],
       "metadata": {
         "title": "P2 Debug Window Manual",
