@@ -160,6 +160,30 @@ The May-2026 Flash-Loader requests are ~95% applied (RCFAST request 100% applied
 
 ---
 
+## Root-source verification (2026-05-31)
+
+Every confirmed finding was audited against the **golden ingestion sources** (`engineering/ingestion/sources/` — our source of trust), with exact citations, so each correction is justified at root before any YAML is edited.
+
+| Finding | Golden source — exact citation | Root-verified true value |
+|---|---|---|
+| **F-001** | `spin2-v51/spin2-text.txt:5141–5148` + `pnut_ts` compiler | `QSIN(length, step, stepsInCircle)` (3-arg) |
+| **F-003** | `silicon-doc/p2-documentation.txt:2743` (summary "…zeroing phase") + `:3508–3519` ("XZERO clears out the phase accumulator when it executes") | XZERO buffers a command on final NCO rollover, **zeroing the NCO phase** — it does NOT "stream zeros" |
+| **F-005** | `spin2-v51/debug-section.txt` — PLOT `:2626–3002`, LOGIC `:1660–1820`, MIDI `:3915–4012`, PC_KEY `:784–813`, PC_MOUSE `:815–852` | PLOT = vector canvas (DOT/LINE/CIRCLE/…/SPRITE/LAYER/CROP), no chart/series API; LOGIC = mask/match trigger only, **no protocol decoders**; MIDI = piano keyboard, $9n/$8n only; PC_KEY = 33-code table + pointer/"must be last"/focus; PC_MOUSE = 7-long struct (xpos,ypos,wheel,l,m,r,pixel) |
+| **F-006** | `silicon-doc/p2-documentation.txt:197–211` (KNOWN BUGS, Rev C, 2020_06_01) — verbatim | ALTx/AUGS/AUGD between SETQ/SETQ2 and a PTRx block transfer cancels the block-size PTRx delta (PTRx += 4, not N×4) |
+| **F-007** | `silicon-doc/p2-documentation.txt:212–227` (KNOWN BUGS, Rev C) — verbatim | ALTx with immediate `#S` between AUGS and its target is also augmented. **Doc names AUGS only** (see refinement) |
+| **F-008** | `pnut-ts-pasm-ref/PASM2-Condition-Codes.json` (compiler-extracted) + CSV rows 411–460 | full per-code alias roster (IF_##, IF_NOT_##, IF_Z_*_C, IF_LE, …) |
+| **F-009** | `p2-instructions-csv/…Rev B_C Silicon - Sheet1.csv` — BITx rows 43–50 `C,Z = original D[S[4:0]]`; DIRx 350–357 `C,Z = DIR bit`; OUT/FLT/DRV 358–381 `C,Z = OUT bit` | `C,Z = original target bit` (BOTH flags) |
+| **F-010** | `silicon-doc/p2-documentation.txt:1733` ("REP works in hub memory, as well, but executes a hidden jump…") | REP works in hubexec (pays the hidden-jump / FIFO-refill cost per iteration) |
+
+F-001 (compiler + v51), F-004 (mechanical path-redirect), and F-011 (`flash_loader.spin2` ROM source) were already root-grounded.
+
+**Refinements surfaced by the audit (apply during the fix):**
+- **F-007 scope:** the Silicon Doc names only **AUGS** in this errata — AUGD is a same-mechanism *inference*, not verbatim-stated. Document AUGS as confirmed; mark AUGD as inferred (or verify separately) — do not over-claim.
+- **F-008 also a misplacement, not only a gap:** the KB lists `IF_BE`/`IF_LE` under `%1011` (`IF_NC_OR_Z`); the golden source places them under `%1110` (`IF_C_OR_Z`). Move them, in addition to adding the missing aliases.
+- **F-009 is C *and* Z:** the CSV gives `C,Z = <bit>` (both flags), and the `encoding[].c`/`.z` fields are currently `—`. Fix Z and the encoding fields too, not just `flags_affected.C`.
+
+---
+
 ## Verified resolved (recorded so we don't re-chase)
 
 The **Jan-2026 streamer KB audit** (`manuals/p2-streamer-programming-guide/yaml-knowledge-base-audit.md`) listed 7 issues. Re-verified against the current (restructured) P2KB on **2026-05-31** — all but one are FIXED:
