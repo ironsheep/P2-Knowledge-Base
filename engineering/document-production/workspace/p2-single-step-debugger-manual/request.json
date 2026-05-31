@@ -1,0 +1,26 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Single-Step-Debugger-Manual.md",
+      "output": "P2-Single-Step-Debugger-Manual.pdf",
+      "template": "p2kb-ssdbg",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-ssdbg-code-coloring"
+      ],
+      "metadata": {
+        "title": "P2 Single-Step Debugger Manual",
+        "subtitle": "Observe and Control Your Running P2 Code",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "Version 1.0",
+        "date": "May 2026"
+      }
+    }
+  ]
+}
