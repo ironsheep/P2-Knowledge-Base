@@ -1,0 +1,208 @@
+# Chapter 13: Packed Data — Compact High-Rate Transfers
+
+Every element you send to a window travels over the `DEBUG()` serial link. That
+link is finite — by default the P2 transmits debug output on pin P62 at 2 Mbaud in
+8-N-1 format. When your data is *small* — single bits from a logic capture, 8-bit
+samples from a scope trace — sending one value per element wastes the link: a
+1-bit sample carried as a full long spends 32 bits of wire to convey one bit of
+information.
+
+Packed-data modes fix that. You pack many small values into a byte, word, or long
+on the P2 side, send the container as a single element, and the host **unpacks** it
+back into the individual values. A single `DEBUG` element can then carry as many
+as 32 samples instead of one. The instrument windows — LOGIC, SCOPE, SCOPE_XY,
+FFT, SPECTRO, and BITMAP — all read the same packed formats, so the same technique
+raises the effective sample rate of every one of them.
+
+This chapter documents the complete set of packed-data modes, how to feed them, and
+how to choose one for your data.
+
+## Why packing helps
+
+The `DEBUG()` link carries every element you send one after another over the serial
+connection, so the rate at which you can feed a window is bounded by that link. A
+high-rate capture — a logic-analyzer trace, a fast scope sweep — generates samples
+faster than one-element-per-sample transmission can keep up with.
+
+Packing trades a little P2-side work for a large reduction in element count. If you
+have 32 one-bit logic samples, you can shift them into a single long and send that
+long as one element. The host unpacks it into 32 separate samples. One element of
+link traffic now carries what would otherwise have been 32 — a 32× reduction in the
+number of elements crossing the link for that data.
+
+The savings scale with how much smaller your data is than its container. The denser
+the packing, the fewer elements you send for the same number of samples.
+
+## The packed-data modes
+
+A packed-data mode is named by a **container** (the unit you send — `LONGS_`,
+`WORDS_`, or `BYTES_`) and a **bit width** (how many bits each unpacked value
+occupies inside that container). The host divides the container by the bit width to
+get the count of values it unpacks from each element.
+
+There are **12 modes**. The maximum compression is **32×**, with `LONGS_1BIT`.
+
+| Mode | Container bits | Bits per value | Values per element | Compression |
+|------|---------------|----------------|--------------------|-------------|
+| `LONGS_1BIT`  | 32 | 1  | 32 | 32× |
+| `LONGS_2BIT`  | 32 | 2  | 16 | 16× |
+| `LONGS_4BIT`  | 32 | 4  | 8  | 8×  |
+| `LONGS_8BIT`  | 32 | 8  | 4  | 4×  |
+| `LONGS_16BIT` | 32 | 16 | 2  | 2×  |
+| `WORDS_1BIT`  | 16 | 1  | 16 | 16× |
+| `WORDS_2BIT`  | 16 | 2  | 8  | 8×  |
+| `WORDS_4BIT`  | 16 | 4  | 4  | 4×  |
+| `WORDS_8BIT`  | 16 | 8  | 2  | 2×  |
+| `BYTES_1BIT`  | 8  | 1  | 8  | 8×  |
+| `BYTES_2BIT`  | 8  | 2  | 4  | 4×  |
+| `BYTES_4BIT`  | 8  | 4  | 2  | 2×  |
+
+Each value is extracted **starting from the LSB** of the element. For
+`LONGS_1BIT`, bit 0 is the first unpacked value, bit 1 the second, and so on up to
+bit 31. For `LONGS_8BIT`, the low byte is the first value, the next byte the
+second, and so on. The unpacked ranges are:
+
+| Bits per value | Unpacked range | Range if `SIGNED` |
+|----------------|----------------|-------------------|
+| 1  | 0..1      | -1..0            |
+| 2  | 0..3      | -2..1            |
+| 4  | 0..15     | -8..7            |
+| 8  | 0..255    | -128..127        |
+| 16 | 0..65,535 | -32,768..32,767  |
+
+### The ALT and SIGNED modifiers
+
+A mode keyword may be followed by either or both of two optional keywords:
+
+- **`SIGNED`** — the host sign-extends each unpacked value. Without it, values are
+  unsigned (the left column above); with it, they take the right column's signed
+  range. Use it when your packed fields represent signed quantities.
+- **`ALT`** — the host reverses the order of the bits, double-bits, or nibbles
+  **within each byte** of the element, end-to-end. This helps when your source data
+  has its sub-byte fields in the opposite order from what the display expects — most
+  often bitmap data composed in a standard pixel format.
+
+```spin2
+debug(`SCOPE Sig SIZE 256 128 'val' LONGS_16BIT SIGNED)   ' two signed 16-bit values per long
+```
+
+## How to send packed data
+
+Packing is set on the window's creation line — you add the mode keyword to the same
+`DEBUG` statement that declares the window. From then on, every element you feed
+that window is treated as a packed container and unpacked according to the mode.
+You do the packing on the P2 side; the host does the unpacking.
+
+This example feeds a two-channel LOGIC window with `LONGS_1BIT`. Each long carries
+32 one-bit samples; with two channels declared, the host unpacks the first long as
+32 samples of channel 0 and the next long as 32 samples of channel 1. The data is
+generated in software with the random-number generator, so it runs on a bare board
+with no wiring:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | packed, i
+  debug(`LOGIC Stream SAMPLES 256 'D0' 'D1' LONGS_1BIT)
+  repeat
+    packed := 0
+    repeat i from 0 to 31
+      packed := (packed << 1) | (getrnd() & 1)   ' pack 32 one-bit samples into a long
+    debug(`Stream `(packed))                      ' send one long = 32 samples
+    waitms(50)
+```
+
+The packing loop builds the long bit by bit. You can build it any way you like —
+from a streamer capture in hub RAM, from CORDIC results, from a shift register —
+as long as the bits you want unpacked first land in the low end of the element.
+
+A scope works the same way. Here four 8-bit samples ride in each long under
+`LONGS_8BIT`, packed low byte first:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | packed, i, ch
+  debug(`SCOPE Sig SIZE 256 128 'A' 'B' LONGS_8BIT)
+  ch := 0
+  repeat
+    packed := 0
+    repeat i from 0 to 3
+      packed := packed | ((ch++ & $FF) << (i * 8))   ' four 8-bit values, low byte first
+    debug(`Sig `(packed))                              ' one long = 4 samples
+    waitms(20)
+```
+
+A BITMAP window unpacks the same formats into pixels. With a `LUT2` (two-bit) color
+mode you would pack with `LONGS_2BIT`; with a one-bit source you can drive a
+two-color image using `LONGS_1BIT`, sending one long per 32-pixel row segment:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | row, x, packed, bit
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT2 LONGS_1BIT)
+  repeat
+    repeat row from 0 to 15
+      packed := 0
+      repeat x from 0 to 31
+        bit := ((x + row) & 3) == 0                  ' a diagonal stripe pattern
+        packed := packed | (bit << x)
+      debug(`Frame `(packed))                         ' one long = 32 pixels of one row
+    waitms(200)
+```
+
+## Choosing a format
+
+Match the bit width to the size of your values, then pick the container that holds
+the most of them.
+
+1. **Match the bit width to your data.** One-bit logic channels → a `_1BIT` mode.
+   Values that fit in a nibble (0–15, or −8..7 signed) → a `_4BIT` mode. Byte-sized
+   samples → an `_8BIT` mode. Don't pad small values into a wider field; that
+   throws away the compression.
+2. **Pick the widest container you can fill.** For a given bit width, `LONGS_`
+   packs the most values per element, then `WORDS_`, then `BYTES_`. Use `LONGS_`
+   unless your data naturally arrives as words or bytes and repacking into longs
+   would cost more than it saves.
+3. **Add `SIGNED` if the values are signed**, and `ALT` only if your sub-byte field
+   order is reversed relative to the display.
+
+So a single-bit logic capture at the highest rate uses `LONGS_1BIT` (32×). A scope
+sampling a signed 16-bit ADC-style value uses `LONGS_16BIT SIGNED` (2×). A
+four-level (2-bit) bitmap uses `LONGS_2BIT` (16×).
+
+## Considerations
+
+- **Maximum compression is 32×.** `LONGS_1BIT` is the densest mode. There is no
+  format denser than one bit per value, and no run-length, delta, or general
+  compression scheme — packing is fixed-width bit-field extraction, nothing more.
+- **You pack; the host unpacks.** The mode keyword only tells the host how to take
+  the element apart. Building the packed container correctly — right bit width, LSB
+  first — is your code's responsibility.
+- **LSB-first ordering is fixed.** The first unpacked value always comes from the
+  low end of the element. Shift your first sample into the low bits. Use `ALT` only
+  to flip sub-byte ordering within each byte, not to reverse whole elements.
+- **Packing is per window, set at creation.** All elements fed to that window are
+  unpacked the same way for its lifetime; there is no per-element mode switch.
+- **Send whole multiples of the values-per-element count.** A `LONGS_1BIT` LOGIC
+  feed advances 32 samples per element; size your buffers and `SAMPLES` count in
+  multiples of the values-per-element so sets land on element boundaries.
+- **The link is still the limit.** Packing reduces *element count*, not the link's
+  raw rate. It is the lever you reach for when a window can't keep up — but the
+  ceiling is still the 2 Mbaud debug link.
+
+The windows that read packed data are LOGIC (Chapter 6), SCOPE (Chapter 7),
+SCOPE_XY (Chapter 8), FFT (Chapter 9), SPECTRO (Chapter 10), and BITMAP
+(Chapter 4). Each chapter shows the mode keyword in its creation-line table; this
+chapter is the shared reference for what those keywords mean.
+
+## Try it
+
+Start with the LOGIC example above. Change `LONGS_1BIT` to `LONGS_2BIT` and pack two
+bits per value instead of one — now each long carries 16 two-bit samples (16×), and
+the unpacked values range 0..3. Then declare the window with `SIGNED` and watch the
+same bit patterns reinterpret as −2..1. Finally, switch the container from `LONGS_`
+to `WORDS_` and `BYTES_` for the same bit width and observe how the values-per-element
+count — and therefore the number of elements you send per screen — changes with the
+container size.
