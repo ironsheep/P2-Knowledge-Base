@@ -383,26 +383,20 @@ reached the debugger from a Spin2 `DEBUG`, a PASM `debug`, or a COG start.
 
 | Key | Action | What it does |
 |-----|--------|--------------|
-| **Space** | Step | Execute one instruction |
-| **Enter** | GO / STOP | Toggle between running and paused |
-| **G** | GO | Start continuous execution |
-| **S** | STOP | Break execution |
-| **B** | BREAK mode | Enable asynchronous break |
-| **D** | DEBUG toggle | Toggle the DEBUG breakpoint |
-| **I** | INIT toggle | Toggle the COG-init breakpoint |
-| **M** | MAIN toggle | Toggle the MAIN-mode breakpoint |
-| **1** | INT1 toggle | Toggle the INT1 interrupt breakpoint |
-| **2** | INT2 toggle | Toggle the INT2 interrupt breakpoint |
-| **3** | INT3 toggle | Toggle the INT3 interrupt breakpoint |
-| **A** | Address mode | Enter an address breakpoint |
-| **W** | Watch | Add a register to the watch list |
-| **C** | Clear | Clear all breakpoints |
-| **R** | Reset | Reset the current COG |
-| **Q** | Quit | Exit the debugger |
-| **Tab** | Switch COG | Cycle through COGs 0–7 |
-| **↑ / ↓** | Navigate | Move through the disassembly |
-| **PgUp / PgDn** | Page | Page through memory |
-| **F1** | Help | Show the help overlay |
+| **Space** | Single-step | Execute one instruction (same as left-clicking **Go**) |
+| **Enter** | Run / stop | Toggle continuous execution (same as right-clicking **Go**) |
+| **B** | BREAK mode | Click the **BREAK** button — async-break mode; clears the other conditions |
+| **D** | DEBUG toggle | Toggle break-on-`DEBUG` |
+| **I** | INIT toggle | Toggle break-on-COGINIT |
+| **M** | MAIN toggle | Toggle break-on-MAIN (single-step main code) |
+| **R** | Reset watch | Clear the register watch list |
+| **↑ / ↓** | Hub scroll | Scroll the hub data viewer one row (±$10) |
+| **PgUp / PgDn** | Hub page | Page the hub data viewer ($80 per press; $1000 with Ctrl, $10000 with Shift) |
+
+> **No key switches between COGs.** Each COG that hits a breakpoint opens its
+> **own window**, titled *Debugger - Cog N*; the windows cascade on screen as
+> they open. To work on a different COG, switch to its window. (The Tab key is
+> intentionally inert inside the debugger window.)
 
 ## Mouse controls
 
@@ -572,9 +566,11 @@ piece of PASM really does to the machine.
 
 ## Multi-COG debugging
 
-Each COG is debugged independently — you switch which COG you are looking at with
-**Tab**. Because the COGs run in parallel, you typically arm breakpoints in each
-COG of interest and use COGBRK (Chapter 6) to coordinate stopping them.
+Each COG is debugged independently, and **each COG that breaks gets its own
+window** — titled *Debugger - Cog N*. To look at a different COG, switch to its
+window (the windows cascade on screen as they open). Because the COGs run in
+parallel, you typically arm breakpoints in each COG of interest and use COGBRK
+(Chapter 6) to coordinate stopping them.
 
 ```spin2
 VAR
@@ -589,7 +585,7 @@ PUB main()
 PRI blink(pin, half) | t
   t := GETCT()
   repeat
-    DEBUG                              ' break in the blink COG; Tab here to step it
+    DEBUG                              ' break in the blink COG (opens its own window)
     PINTOGGLE(pin)
     t += half
     waitct(t)
@@ -597,8 +593,9 @@ PRI blink(pin, half) | t
 
 Note the P2 idioms: **`COGSPIN`** to start the COG and **`GETCT`** / `waitct` for
 timing. Both breakpoints are *argument-less* `DEBUG` statements — only that form
-opens the single-step debugger. Switch to the blink COG with **Tab** to step
-through it on its own while `main` keeps running.
+opens the single-step debugger. The blink COG opens in **its own window**
+(*Debugger - Cog N*); switch to that window to step through it on its own while
+`main` keeps running.
 
 ## Finding memory corruption
 
