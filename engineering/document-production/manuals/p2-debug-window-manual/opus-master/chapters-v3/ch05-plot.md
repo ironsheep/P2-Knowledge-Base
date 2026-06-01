@@ -39,17 +39,14 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `Plot` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | `512 512` | Canvas size in pixels; each is **32–2048** |
-| `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–64** |
-| `CARTESIAN` | `{flipy {flipx}}` | on | Cartesian mode, with optional axis flips |
-| `POLAR` | `{twopi {theta}}` | — | Switches the window into polar coordinates |
-| `TEXTSIZE` | `points` | `9` | Default font size for `TEXT` |
+| `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
+| `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
 | `BACKCOLOR` | `rgb` | black | Background fill color (`$RRGGBB`) |
 | `UPDATE` | — | off | Enables buffered mode (see "The update model") |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
 
 `SIZE` is measured in pixels, and both dimensions are clamped to the range
-**32–2048**. The default is `512 512`. The canvas is drawn into an off-screen
+**32–2048**. The default is `256 256`. The canvas is drawn into an off-screen
 bitmap and stretched to fill the window, so resizing the window scales the
 picture rather than revealing more canvas.
 
@@ -57,9 +54,11 @@ picture rather than revealing more canvas.
 a 2×2 block, which is useful when you want a small drawing shown large. The two
 axes can differ.
 
-The remaining creation keywords — `CARTESIAN`, `POLAR`, `TEXTSIZE` — also work as
-runtime commands, so you can set them on the creation line or change them later.
-They are described in the sections that follow.
+`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **runtime commands, not creation-line
+keywords** — issue them after the window exists, not in the `DEBUG(\`PLOT …)`
+creation call. `CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE`
+sets the default font size for `TEXT` (default `10`, range 6–200). They are
+described in the sections that follow.
 
 ## The coordinate system
 
@@ -438,7 +437,7 @@ PUB main()
   debug(`Scene CROP 1)                            ' composite full background
   debug(`Scene SPRITEDEF 0 2 2 0 1 1 0 $00000000 $FFFFFFFF)   ' tiny 2x2 sprite
   debug(`Scene SET 256 256 SPRITE 0 0 8 255)      ' stamp it, 8x scale
-  debug(`Scene SHOW)
+  debug(`Scene UPDATE)                            ' present the buffered frame
 ```
 
 > **Layers are indexed 1–8.** A common error is using layer 0; the lowest valid
@@ -456,9 +455,9 @@ for a handful of primitives or a static figure.
 
 **Buffered mode** is enabled by the `UPDATE` keyword on the creation line. In
 this mode your primitives accumulate on the off-screen canvas and **nothing is
-shown until you send the `` `SHOW `` command**. Buffered mode is the right choice
-for a scene built from many primitives, and it is essential for flicker-free
-animation: clear, redraw the whole frame, then `SHOW` once.
+shown until you send a runtime `` `UPDATE `` command**. Buffered mode is the right
+choice for a scene built from many primitives, and it is essential for
+flicker-free animation: clear, redraw the whole frame, then `UPDATE` once.
 
 ```spin2
 PUB main() | f, ballx
@@ -467,7 +466,7 @@ PUB main() | f, ballx
   repeat f from 0 to 200
     debug(`Anim CLEAR)                                       ' erase (off-screen)
     debug(`Anim COLOR $FFFF00 SET `(ballx) 128 CIRCLE 30 0 255)
-    debug(`Anim SHOW)                                        ' present one frame
+    debug(`Anim UPDATE)                                      ' present one frame
     ballx := (ballx + 4) +// 512
     waitms(20)
 ```
@@ -476,14 +475,14 @@ Two more commands round out display control:
 
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
-  becomes visible at the next `SHOW`.
+  becomes visible at the next `UPDATE`.
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
   `SAVE` for a default filename, or `SAVE 'name.bmp'` to choose one.
 
-> Note the two distinct keywords. `UPDATE` is the **creation-line flag** that
-> turns buffered mode on. `` `SHOW `` is the **runtime command** that presents the
-> accumulated drawing. You enable buffering once with `UPDATE`, then trigger each
-> repaint with `SHOW`.
+> `UPDATE` plays two roles. On the creation line it is the **flag** that turns
+> buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
+> accumulated drawing. You enable buffering once with the creation-line `UPDATE`,
+> then trigger each repaint with a runtime `` `UPDATE ``.
 
 ## A complete worked example
 
@@ -566,8 +565,8 @@ PASM so the example builds and runs on a bare P2 board.
   draw a path; use `SET` before a `DOT`, `CIRCLE`, or `TEXT` to position it.
 - **Use buffered mode for whole-scene redraws.** A static figure or a few
   primitives can run in automatic mode. For animation or a many-primitive scene,
-  add `UPDATE` and present each frame with one `` `SHOW ``, which removes the
-  flicker of per-primitive repainting.
+  add `UPDATE` and present each frame with one runtime `` `UPDATE ``, which
+  removes the flicker of per-primitive repainting.
 - **Composite prebuilt layers and sprites instead of redrawing geometry.** When a
   background or a repeated element is fixed, load it once with `LAYER` (or define
   a sprite once with `SPRITEDEF`) and place it each frame with `CROP` or
@@ -581,6 +580,6 @@ PASM so the example builds and runs on a bare P2 board.
 Start from the worked example. Then: switch the window to buffered mode by adding
 `UPDATE` to the creation line, wrap the whole drawing in a `repeat`, animate the
 phase by adding a growing offset to `angle`, and end each frame with `CLEAR` …
-draw … `` `SHOW ``. You will have a scrolling sine wave with a fresh scatter each
+draw … `` `UPDATE ``. You will have a scrolling sine wave with a fresh scatter each
 frame, built entirely from CORDIC and the RNG, using the coordinate system,
 primitives, color, and the buffered update model together.

@@ -67,7 +67,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
 | `LINESIZE` | `width` | `3` | Line width (**−32–32**; negative draws filled bars) |
-| `TEXTSIZE` | `points` | host default | Label font size |
+| `TEXTSIZE` | `points` | `10` | Label font size |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |
@@ -136,7 +136,7 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF8000)
+  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)

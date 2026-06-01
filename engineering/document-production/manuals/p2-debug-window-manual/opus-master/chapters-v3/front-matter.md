@@ -103,7 +103,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ### Acknowledgments
 
-**Parallax Inc.** and **Chip Gracey** for the Propeller 2 and its DEBUG display system. The reverse-engineered per-window theory-of-operations references that ground this manual were derived from the PNut v51a implementation.
+**Parallax Inc.** and **Chip Gracey** for the Propeller 2 and its DEBUG display system. The reverse-engineered per-window theory-of-operations references that ground this manual were verified against the PNut v55 implementation.
 
 ```{=latex}
 \clearpage

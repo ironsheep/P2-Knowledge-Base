@@ -38,7 +38,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `width height` | — | Canvas size in pixels; each is **1–2048** |
 | `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
 | `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
-| *color mode* | (varies) | `LUT8` | One of the 19 color-mode keywords (see below) |
+| *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | grayscale | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
 | `RATE` | `count` | full canvas | Pixels written between display refreshes |
@@ -72,8 +72,9 @@ The modes fall into four families:
 | `LUT4` | 4 | 16 | bits 0–3 → entry 0–15 |
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
-`LUT8` is the default color mode. If you select a LUT mode without defining a
-palette, the default palette is grayscale (entry 0 black, entry 255 white).
+`RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
+mode without defining a palette, the default palette is grayscale (entry 0 black,
+entry 255 white).
 
 **Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
 color you pick with a color-tune keyword:
@@ -142,7 +143,7 @@ visible digits:
 
 ```spin2
 debug(`Img `(color))      ' write one pixel = the value of `color`
-debug(`Img `($FF8000))    ' write one orange pixel (RGB24)
+debug(`Img `($FF7F00))    ' write one orange pixel (RGB24)
 ```
 
 Each pixel is plotted at the current position, and then the position advances to the

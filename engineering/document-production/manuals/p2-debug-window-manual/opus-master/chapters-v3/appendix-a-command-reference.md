@@ -21,11 +21,11 @@ every window are listed once at the end.
 ## PLOT — vector drawing canvas (Chapter 5)
 
 **Create:** `` DEBUG(`PLOT Name <config>) ``
-**Config:** `TITLE` · `POS` · `SIZE w h` (32–2048, default 512) · `DOTSIZE x {y}` (1–64) · `CARTESIAN {flipy {flipx}}` · `POLAR {twopi {theta}}` · `TEXTSIZE` · `BACKCOLOR` · `UPDATE` · `HIDEXY`
-**Position/state:** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0-255` · `LINESIZE`
+**Config:** `TITLE` · `POS` · `SIZE w h` (32–2048, default 256×256) · `DOTSIZE x {y}` (1–256) · color mode (see Appendix C) · `LUTCOLORS` · `BACKCOLOR` · `UPDATE` · `HIDEXY`
+**Position/state (runtime):** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0-255` · `LINESIZE` · `CARTESIAN {flipy {flipx}}` · `POLAR {twopi {theta}}` · `TEXTSIZE`
 **Primitives (cursor-relative):** `DOT {linesize {opacity}}` · `LINE x y {linesize {opacity}}` · `CIRCLE diameter {...}` · `OVAL w h {...}` · `BOX w h {...}` · `OBOX w h xr yr {...}` · `TEXT {size {style {angle}}} 'string'`
 **Layers/sprites:** `LAYER n 'file.bmp'` (n = 1–8) · `CROP n` / `CROP n AUTO x y` / `CROP n left top w h {x y}` · `SPRITEDEF id xsize ysize ...` (id 0–255, size 1–32) · `SPRITE id orient ...` (orient 0–7)
-**Runtime:** `CLEAR` · `SHOW` (buffered repaint trigger) · `SAVE`
+**Runtime:** `CLEAR` · `UPDATE` (buffered repaint trigger) · `SAVE`
 
 ## LOGIC — logic analyzer (Chapter 6)
 

@@ -51,7 +51,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
 | `DOTSIZE` | `pixels` | `0` | 0–32 | Dot diameter at each sample (`0` = no dots) |
 | `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
-| `TEXTSIZE` | `points` | font default | 6–200 | Channel-label font size |
+| `TEXTSIZE` | `points` | `10` | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
@@ -213,8 +213,8 @@ debug(`Bus TRIGGER $3 $1 16)       ' fire when ch0=1 and ch1=0, event 16 samples
 debug(`Bus TRIGGER 0 0)            ' disable trigger (free-running)
 ```
 
-You issue `TRIGGER` as a runtime command after the window exists, or you can place it
-on the creation line. The trigger only evaluates once the 2048-sample buffer has
+You issue `TRIGGER` as a runtime command after the window exists; it is not a
+creation-line keyword. The trigger only evaluates once the 2048-sample buffer has
 filled.
 
 ### Holdoff

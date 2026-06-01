@@ -37,14 +37,14 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | none | The window's title-bar caption |
-| `POS` | `left top` | `0 0` | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `Scope_XY` | The window's title-bar caption |
+| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
 | `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
 | `DOTSIZE` | `pixels` | `6` | Dot diameter, `2`–`20` |
-| `TEXTSIZE` | `points` | editor size | Legend text size, `6`–`200` |
+| `TEXTSIZE` | `points` | `10` | Legend text size, `6`–`200` |
 | `COLOR` | `back {grid}` | black, gray | Background color and, optionally, grid color |
 | `POLAR` | `{twopi {offset}}` | — | Interpret pairs as `(radius, angle)` instead of `(x, y)` — see below |
 | `LOGSCALE` | — | linear | Logarithmic radial scale, to magnify points near the center |

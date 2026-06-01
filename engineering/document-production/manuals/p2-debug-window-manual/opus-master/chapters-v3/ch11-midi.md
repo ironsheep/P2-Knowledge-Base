@@ -59,7 +59,7 @@ A few things to know about these:
 
 ```spin2
 ' One octave, large keys, green/orange lit colors, channel 0
-debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF8000)
+debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF7F00)
 ```
 
 Each key is labelled with its MIDI **note number** (0–127), drawn rotated along
@@ -193,7 +193,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | vel
-  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF8000)
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
 
   vel := 24
   repeat 5

@@ -34,7 +34,7 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `TERM` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
-| `TEXTSIZE` | `points` | host default | Font size; the window sizes itself to fit |
+| `TEXTSIZE` | `points` | `10` | Font size; the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
 | `BACKCOLOR` | `rgb` | black | The window background color |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
@@ -120,12 +120,12 @@ To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-debug(`TERM Log SIZE 60 20 COLOR $FF8000 $000000 $000000 $FF8000 $00FF00 $000000 $FF0000 $000000)
+debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 '                                    pair0 fg/bg     pair1 fg/bg     pair2 fg/bg     pair3 fg/bg
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
-green-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
+lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
 
 ## Cursor, tabs, and scrolling

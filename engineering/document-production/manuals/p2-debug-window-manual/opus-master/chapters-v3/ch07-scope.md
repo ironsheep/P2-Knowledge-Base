@@ -41,12 +41,12 @@ The configuration keywords you can place on the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `Scope` | The window's title-bar text |
 | `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `width height` | `512 256` | Display size in pixels; each is **32–2048** |
-| `SAMPLES` | `count` | `512` | Horizontal resolution — sets displayed at once; **16–2048** |
+| `SIZE` | `width height` | `256 256` | Display size in pixels; each is **32–2048** |
+| `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
 | `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
 | `LINESIZE` | `pixels` | `3` | Line thickness; **0–32** (`0` = no lines) |
-| `TEXTSIZE` | `points` | `9` | Label font size; **6–200** |
+| `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
 | Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see Chapter 13) |

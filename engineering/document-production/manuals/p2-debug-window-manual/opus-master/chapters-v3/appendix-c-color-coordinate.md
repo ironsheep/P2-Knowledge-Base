@@ -2,7 +2,7 @@
 
 ## Color values
 
-Colors are 24-bit RGB written `$RRGGBB` (for example `$FF8000` is orange). You can
+Colors are 24-bit RGB written `$RRGGBB` (for example `$FF7F00` is orange). You can
 also use the Spin2 named color constants where a color is expected.
 
 ### TERM color pairs
@@ -21,9 +21,9 @@ Set your own with `COLOR` on the creation line (eight values: fg0 bg0 fg1 bg1 fg
 
 ### BITMAP color modes
 
-BITMAP selects a pixel format with one of these mode keywords (default `LUT8`):
+BITMAP selects a pixel format with one of these mode keywords (default `RGB24`):
 `LUT1` `LUT2` `LUT4` `LUT8` · `LUMA8` `LUMA8W` `LUMA8X` · `RGBI8` `RGBI8W` `RGBI8X` ·
-`HSV8` `HSV8W` `HSV8X` · `HSV16` `HSV16W` `HSV16X` · `RGB8` · `RGB16` (5:6:5) · `RGB24`.
+`HSV8` `HSV8W` `HSV8X` · `HSV16` `HSV16W` `HSV16X` · `RGB8` (3:3:2) · `RGB16` (5:6:5) · `RGB24` (8:8:8).
 `LUT`-mode palettes are loaded with `LUTCOLORS`.
 
 ### SPECTRO color modes
