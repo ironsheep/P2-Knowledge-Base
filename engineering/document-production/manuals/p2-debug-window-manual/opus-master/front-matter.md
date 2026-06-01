@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape See What Your Program Is Doing\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large June 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
