@@ -444,6 +444,35 @@ PUB main()
 > layer is 1, and `LAYER`/`CROP` ignore an index outside 1–8. Sprite *ids*, by
 > contrast, start at 0 and run to 255.
 
+### Animating with a sprite
+
+Re-stamping a sprite is cheaper than re-drawing the geometry that produced it. Define
+the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command at the
+new position — you re-send one command, not the primitives. In buffered mode the motion
+is flicker-free:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | x
+  debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
+  ' Define a 3x3 "blip" sprite once: index 1 = lit, index 0 = transparent.
+  ' Palette: entry 0 = transparent ($00......), entry 1 = opaque cyan ($FF00FFFF).
+  debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
+
+  x := 0
+  repeat
+    debug(`Field CLEAR)                           ' clear the buffered canvas
+    debug(`Field SET `(x) 128 SPRITE 0 0 8 255)   ' stamp the sprite at (x,128), 8x
+    debug(`Field UPDATE)                          ' present the frame
+    x := (x + 4) +// 256                          ' move right, wrap
+    waitms(20)
+```
+
+The sprite is defined once; the loop re-stamps it with one `SPRITE` per frame. For a
+shape built from many primitives the saving is larger still — the geometry is rasterized
+into the sprite once, and every later frame costs a single stamp.
+
 ## The update model
 
 The PLOT window has two update modes, chosen by whether you put `UPDATE` on the
@@ -549,6 +578,59 @@ point (`length`, 0) by `angle`, and **GETQY** returns `length x sin(angle)` — 
 software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
+
+## A worked instrument: an analog gauge
+
+Polar mode turns an instrument needle into a single `LINE`. Center the origin,
+switch to polar so the cursor's coordinates are (radius, angle), and the needle for
+any reading is one line from the center out to that reading's angle. The dial — tick
+marks and a ring — is drawn the same way, so a complete analog gauge needs only
+`LINE` and `CIRCLE`. This program sweeps a software-generated reading across a 240°
+scale, redrawing in buffered mode so it never flickers:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, value, needle, i, tick
+  ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
+  debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
+  debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
+  debug(`Gauge POLAR 360)                 ' angles in degrees; theta 0 points up
+
+  ang := 0
+  repeat
+    value  := 50 + qsin(50, ang, 360)     ' software-generated 0..100 reading
+    needle := (value * 240 / 100) - 120   ' map 0..100 -> -120..+120 degrees
+
+    debug(`Gauge CLEAR)
+
+    ' Scale: eleven radial ticks across the 240-degree sweep.
+    debug(`Gauge COLOR $404040)
+    repeat i from 0 to 10
+      tick := (i * 24) - 120
+      debug(`Gauge SET 90 `(tick) LINE 100 `(tick) 2 255)
+
+    ' Dial ring and center hub.
+    debug(`Gauge SET 0 0 CIRCLE 210 2 255)
+    debug(`Gauge COLOR $00FFFF SET 0 0 CIRCLE 12 0 255)
+
+    ' Needle: one polar line from center out to the reading's angle.
+    debug(`Gauge COLOR $FF7F00 SET 0 0 LINE 95 `(needle) 4 255)
+
+    debug(`Gauge UPDATE)                   ' present the frame
+
+    ang += 3
+    waitms(30)
+```
+
+Each frame clears the buffered canvas, draws the scale ticks and ring as polar lines
+and a centered circle, places the needle with one `LINE` at the reading's angle, and
+presents the frame with `UPDATE`. The reading here comes from `QSIN`; wire it to any
+value your program computes and the needle follows.
+
+> Buffered mode (`UPDATE` on the creation line) keeps the gauge smooth: the whole
+> dial is redrawn off-screen each frame, then shown at once. Without it you would see
+> the needle erase-and-redraw flicker.
 
 ## Considerations
 

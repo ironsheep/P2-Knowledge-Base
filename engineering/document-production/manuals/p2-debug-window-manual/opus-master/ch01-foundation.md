@@ -42,6 +42,23 @@ These nine are the complete set the tool implements. Up to 32 display windows ca
 run at the same time, so a single program can drive a terminal, a scope, and a
 plot together.
 
+### Which window for which problem
+
+When you know the *kind* of data — or the question you are trying to answer — this
+maps it to the window to reach for:
+
+| You want to see… | Reach for | Chapter |
+|------------------|-----------|---------|
+| Text — status lines, logs, variable dumps | TERM | 3 |
+| A raw pixel image or framebuffer | BITMAP | 4 |
+| A custom instrument, gauge, or drawn UI | PLOT | 5 |
+| Several digital signals and their timing | LOGIC | 6 |
+| A value changing over time (a waveform) | SCOPE | 7 |
+| The relationship between two values (phase, Lissajous) | SCOPE_XY | 8 |
+| The frequency content of a signal | FFT | 9 |
+| How frequency content evolves over time | SPECTRO | 10 |
+| MIDI note activity on a keyboard | MIDI | 11 |
+
 ## Create by name, feed by name
 
 You work with a window in two steps. **First you create it; then you feed it.**

@@ -167,7 +167,7 @@ For comprehensive post-write audit procedures, see:
 #### 0. Per-Window Theory of Operations — authoritative grounding source ("the Bible")
 **Location**: `./REF/theory-of-operations/` (this manual's folder)
 - Nine source-derived theory-of-operations documents, one per window type: TERM,
-  BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI. **Current as of PNut v51a.**
+  BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI. **Current as of PNut v55.**
 - Cover data structures, configuration, update/rendering, command protocols, color
   systems, and performance — derived from the PNut implementation.
 - **This is the primary grounding source for the periodic audit** (Dimensions A, B,
@@ -256,36 +256,18 @@ This document follows the project-wide Technical Climbing Methodology, contribut
 
 ## 📝 Content Philosophy
 
-### The "Discovery Guide" Voice
+### Voice
 
-**Voice Identity**: Professional Explorer - Systematic discovery with visual excitement
+**The authoritative voice for this manual is defined in `voice-guide.md`** (adopted
+2026-05-31): **Authoritative + Comprehensive + Practical**, second person, with **no
+marketing or celebration**. It is modeled on the P2 I/O & Smart Pins User Guide voice.
+Author all content per that guide; its §3 (rules), §4 (debug-domain content rules), and
+§5 (terminology) govern.
 
-**Core Characteristics:**
-- **Exploratory Excitement**: "Let's see what this parameter combination does..."
-- **Visual Revelation**: "Watch what happens when we change this setting..."
-- **Professional Discovery**: "This technique reveals..." / "The output shows us..."
-- **Systematic Exploration**: "Now let's try the next parameter..."
-- **Immediate Gratification**: "Look at that - instant visualization!"
-- **Visual Confidence**: "This screenshot shows exactly what your debug window should display"
-
-**Why This Voice Works:**
-- **Matches Discovery Content**: Exploration-focused manual needs exploration-focused voice
-- **Celebrates Visual Learning**: Voice reinforces "aha!" moments screenshots provide
-- **Professional yet Engaging**: Reference-quality but maintains discovery excitement
-- **Problem-Solving Oriented**: Each technique solves real debugging challenges
-
-**Voice Pattern Examples:**
-- ✅ "Here's a technique most developers haven't discovered..."
-- ✅ "The visual difference is immediately apparent - no guessing needed"
-- ✅ "When we set the plot style to 2, watch how the dual axes transform our data view..."
-- ✅ "This parameter combination creates something remarkable..."
-- ✅ "The screenshot reveals exactly what's happening in your program"
-
-**Voice DON'Ts:**
-- ❌ Overly tutorial language ("Let's learn about debug windows together")
-- ❌ Dry reference style ("Parameter 2 accepts values 0-7")
-- ❌ Uncertainty hedging ("This might help with debugging")
-- ❌ Academic formality ("One observes that the visualization demonstrates...")
+> **Superseded:** the earlier "Discovery Guide" voice — exploratory excitement,
+> "Look at that!", superlatives, and the "Debug Iceberg" framing — is **out of the house
+> standard** and must not be used. Every house voice guide forbids marketing/celebration.
+> Where older drafts use it, bring them into conformance with `voice-guide.md`.
 
 ### Progressive Debug Learning Structure
 
@@ -600,37 +582,33 @@ Medicine: Follow the "Half-Split" method - eliminate half the code as source
 
 # PART 3: DOCUMENT STRUCTURE
 
-## 📖 Finalized Chapter Outline (Based on Phase 1 Discoveries)
+## 📖 Chapter Outline (current — window-reference structure)
 
-### PART I: FOUNDATION - From Basic DEBUG to Visual Discovery
-1. **Beyond Basic DEBUG - The Vision Gap** - The Debug Iceberg Effect and capability discovery
-2. **Terminal Mastery - Interactive Text Debugging** - PC Input Integration and bidirectional communication
-3. **Graphics Breakthrough - From Text to Visuals** - When text isn't enough, BITMAP and display emulation
+The manual is a per-window reference in four parts. Each window chapter follows the
+template in `voice-guide.md` §2.2 (what it shows → config command + all parameters →
+data commands → control commands → one compilable example → when-to-use/considerations).
 
-### PART II: INTERACTIVE APPLICATIONS - Revolutionary Debug GUIs
-4. **Layer Composition System - Sprite-Based Debugging** - JonnyMac's 20× performance revolution
-5. **PC Input Integration - Bidirectional Debug Control** - Mouse and keyboard interactive debugging
-6. **Professional Debug Instruments** - Analog meters, LED panels, interactive switches
+### Part I — Foundation
+1. **The DEBUG Display Windows** — the shared create-by-name/feed-by-name model, the nine
+   windows, the values-vs-command-codes rule, the boundary with the single-step debugger.
+2. **Getting Started** — tooling (`pnut_ts -d`, `pnut_term_ts`), your first window, the
+   no-hardware philosophy, optional DEBUG configuration symbols.
 
-### PART III: DATA EFFICIENCY - High-Performance Debugging
-7. **Packed Data Revolution - 16x Compression** - Performance transformation scenarios
-8. **Data Visualization Mastery - PLOT Window** - Beyond simple plotting, multi-series relationships
+### Part II — The Windows (one chapter each, simplest to richest)
+3. **TERM** · 4. **BITMAP** · 5. **PLOT** · 6. **LOGIC** · 7. **SCOPE** · 8. **SCOPE_XY** ·
+9. **FFT** · 10. **SPECTRO** · 11. **MIDI**.
 
-### PART IV: ADVANCED ANALYSIS - Professional Development Tools
-9. **Digital Signal Analysis - LOGIC Window Applications** - Multi-signal analysis and protocol debugging
-10. **Waveform Analysis - SCOPE and SCOPE_XY Windows** - Analog signal debugging and phase relationships
-11. **Frequency Domain Analysis - FFT and SPECTRO Windows** - Beyond time domain debugging
+### Part III — Integration
+12. **Bidirectional Control** (`PC_KEY` / `PC_MOUSE`) · 13. **Packed Data** (compact
+high-rate transfers) · 14. **Multiple Windows and PASM Debugging**.
 
-### PART V: INTEGRATION MASTERY - Professional Workflows
-12. **Multi-Window Coordination** - Synchronized debugging displays and workflow automation
-13. **PASM Assembly Integration** - Assembly debug patterns and multi-COG coordination
-14. **Production Integration Workflows** - Screenshot-driven documentation and automated testing
+### Part IV — Appendices
+A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordinate Reference.
 
-### Appendices (Updated Based on Phase 1)
-- A: Complete Command Reference - All discovered commands from Phase 1 studies
-- B: Packed Data Format Reference - Compression specifications and performance gains
-- C: Performance Optimization Guide - Efficiency patterns across all window types
-- D: Professional Examples Library - 50+ validated working examples
+> Source of truth for each window is its `REF/theory-of-operations/<WINDOW>_Theory_of_Operations.md`
+> (**PNut v55**). The legacy narrative outline (vision-gap / layer-composition / professional-
+> instruments / production-workflows) is **superseded**; valuable patterns from it are tracked
+> in `SALVAGE-CANDIDATES.md` for clean-room re-authoring into the window chapters above.
 
 ## 📏 Size Guidelines
 - **Target length**: 200-250 pages

@@ -224,6 +224,12 @@ PUB main() | x
   that window's `` `SAVE `` command, which writes a `.bmp` on the host; capturing the
   whole screen is an action you take on the PC, outside the DEBUG system.
 
+- **Use `` `SAVE `` to capture a window for documentation or a bug report.** Send
+  `` `SAVE 'name.bmp' `` at the moment the display shows what you want to keep — for
+  example after a trigger fires or an anomaly appears — and the host writes that frame
+  to a file you can attach to notes or a report. It is the supported way to turn a live
+  window into a static artifact.
+
 - **Keep PASM `DEBUG` out of tight interrupt service routines.** A `DEBUG` taken
   inside an ISR can skew the cog's timing enough to disturb retriggering. Prefer
   doing `DEBUG` from cogs that are not running background ISRs (see the Spin2 v5.1

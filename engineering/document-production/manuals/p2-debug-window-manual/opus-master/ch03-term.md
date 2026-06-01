@@ -191,6 +191,51 @@ Two more runtime keyword commands round out the set:
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
 - `` `SAVE `` — saves the current window image to a file on the host.
 
+## A positioned dashboard
+
+The scrolling log and the buffered Panel both rewrite the whole display each pass.
+When a panel's *layout* is fixed — the labels never move, only the values change —
+draw the labels once, then overprint just the value fields in place with the `3`
+(set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, signal, count
+  debug(`TERM Panel SIZE 40 8)
+
+  ' Draw the static layout once: a title and three fixed labels.
+  debug(`Panel 0 4 "SIGNAL MONITOR")     ' clear, pair 0, title at (0,0)
+  debug(`Panel 3 2 2 0 "Sample:")        ' row 2, col 0
+  debug(`Panel 3 3 2 0 "Value :")        ' row 3, col 0
+  debug(`Panel 3 4 2 0 "State :")        ' row 4, col 0
+
+  ang := 0
+  count := 0
+  repeat
+    signal := qsin(1000, ang, 256)       ' software-generated waveform
+
+    ' Overprint only the value fields, each at a fixed (row, col). Trailing
+    ' spaces pad to a fixed width so a shorter value erases a longer old one.
+    debug(`Panel 3 2 2 8 `udec_(count) "    ")
+    debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
+    if abs signal > 800
+      debug(`Panel 3 4 2 8 7 "HIGH " 4)  ' pair 3 (red), then back to pair 0
+    else
+      debug(`Panel 3 4 2 8 6 "ok   " 4)  ' pair 2 (lime), then back to pair 0
+
+    ang   += 4
+    count += 1
+    waitms(50)
+```
+
+The labels are written once; the loop touches only the three value cells, so the
+fields never scroll or interfere — the panel reads like a fixed instrument face.
+
+> Pad every in-place field to a constant width (the trailing spaces above).
+> Overprinting replaces only the characters you send, so without padding, printing
+> `9` over `123` leaves `923`.
+
 ## Considerations
 
 - **Pick the grid to the job.** A status panel might be `40 10`; a scrolling log

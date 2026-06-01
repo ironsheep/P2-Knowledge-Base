@@ -39,13 +39,13 @@ For each candidate below, **one at a time**, for review:
 
 | # | Legacy source (`270289f:…/chapters/`) | Pattern to re-author | Target location in current manual | Status |
 |---|----------------------------------------|----------------------|-----------------------------------|--------|
-| 1 | `chapter-01-vision-gap.md` | "Debug Iceberg" motivation + concrete failure scenarios (why visual debugging) | `ch01-foundation.md` / front matter | TODO |
-| 2 | `chapter-02-terminal-mastery.md` | GOTOXY terminal dashboards, menus, bar-graphs, multi-field updates (the *patterns*, not the bare control codes) | `ch03-term.md` | TODO |
-| 3 | `chapter-04-layer-composition.md` | LAYER/sprite *techniques* for low-flicker updates (no "20×" claim) | `ch05-plot.md` | TODO |
-| 4 | `chapter-06-professional-instruments.md` | Built examples: analog gauge, LED panel, VU meter, toggle switches, knob/slider | `ch05-plot.md` (+ relevant window chapters) | TODO |
-| 5 | `chapter-12-multi-window.md` | Multi-window orchestration: synchronized capture, dashboard layouts, bandwidth pacing | `ch14-multiwindow-pasm.md` | TODO |
-| 6 | `chapter-13-pasm-integration.md` | PASM debug patterns: cycle-aware DEBUG placement, FIFO/cog-coordination, profiling | `ch14-multiwindow-pasm.md` | TODO |
-| 7 | `chapter-14-production-workflows.md` | Screenshot-driven docs, automated/CI test reporting, field-diagnostic workflows | New section in `ch14` (or its own chapter) | TODO |
+| 1 | `chapter-01-vision-gap.md` | "Debug Iceberg" motivation + concrete failure scenarios (why visual debugging) | `ch01-foundation.md` / front matter | **DROPPED** — value already served by `ch01-foundation` in-voice; "Debug Iceberg" framing forbidden by voice guide. Added a "Which window for which problem" task-index to `ch01-foundation` instead. |
+| 2 | `chapter-02-terminal-mastery.md` | GOTOXY terminal dashboards, menus, bar-graphs, multi-field updates (the *patterns*, not the bare control codes) | `ch03-term.md` | **DONE** — "A positioned dashboard" example added, `pnut-ts -d` clean (legacy `GOTOXY` was not a v55 keyword; re-authored with codes 2/3) |
+| 3 | `chapter-04-layer-composition.md` | LAYER/sprite *techniques* for low-flicker updates (no "20×" claim) | `ch05-plot.md` | **DONE** — "Animating with a sprite" example added, `pnut-ts -d` clean |
+| 4 | `chapter-06-professional-instruments.md` | Built examples: analog gauge, LED panel, VU meter, toggle switches, knob/slider | `ch05-plot.md` (+ relevant window chapters) | **DONE** — "A worked instrument: an analog gauge" added (polar needle), `pnut-ts -d` clean. LED/VU/switches skipped by decision (gauge demonstrates the build pattern; legacy used non-v55 `FILLCIRCLE`/`cos`/`<<8`). |
+| 5 | `chapter-12-multi-window.md` | Multi-window orchestration: synchronized capture, dashboard layouts, bandwidth pacing | `ch14-multiwindow-pasm.md` | **DROPPED** — the cross-window coordination (SYNC_GROUP/TIMESTAMP/OVERLAY/broadcast) is the fabrication `ch14` already debunks; real value (POS layout, loop feeding, link pacing) already covered in `ch14`. |
+| 6 | `chapter-13-pasm-integration.md` | PASM debug patterns: cycle-aware DEBUG placement, FIFO/cog-coordination, profiling | `ch14-multiwindow-pasm.md` | **DROPPED** — PASM `DEBUG` (DAT, inline, pointer differences, ISR caution) already covered in `ch14`; FIFO/profiling depth unverified against v55. |
+| 7 | `chapter-14-production-workflows.md` | Screenshot-driven docs, automated/CI test reporting, field-diagnostic workflows | New section in `ch14` (or its own chapter) | **DROPPED (partial)** — CI/test framing is aspirational, not window behavior; the supported piece (capture a window with `` `SAVE ``) added as a `ch14` considerations note. |
 
 ## Optional extras (flagged by the audit, not in the approved scope — confirm before doing)
 

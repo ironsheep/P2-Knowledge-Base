@@ -177,7 +177,7 @@ These are correctness rules specific to the DEBUG subsystem (carried from the Si
 
 Every factual claim grounds in this manual's authoritative sources, in priority order (see `creation-guide.md` §Content Sources):
 
-1. **`REF/theory-of-operations/<WINDOW>_Theory_of_Operations.md`** — the per-window Bible (PNut v51a-derived). On any conflict, the theory-of-operations wins.
+1. **`REF/theory-of-operations/<WINDOW>_Theory_of_Operations.md`** — the per-window Bible (PNut v55-derived). On any conflict, the theory-of-operations wins.
 2. The Spin2 v5.1 source corpus at `engineering/ingestion/sources/spin2-v51/`.
 3. This manual's `studies/` and Pascal-source extraction docs.
 
