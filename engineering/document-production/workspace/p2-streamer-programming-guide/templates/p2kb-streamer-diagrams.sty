@@ -1,0 +1,558 @@
+% P2KB Streamer Programming Guide Diagrams Package
+% TikZ diagram stubs carried over from the IOSP stack for cross-publication
+% consistency. The Streamer Guide currently uses no \Diag* macros (its one
+% block diagram is ASCII art), so these definitions are inert but kept so the
+% template stack matches the live family and future TikZ diagrams can be added.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-streamer-diagrams}[2026/06/01 P2KB Streamer Diagrams Package v1.1]
+
+\RequirePackage{tikz}
+\RequirePackage{float}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit}
+
+% ---- Shared diagram palette (matches PASM2 Reference Manual) ----
+\definecolor{diagram-box}{HTML}{E8E8E8}
+\definecolor{diagram-border}{HTML}{666666}
+\definecolor{diagram-highlight}{HTML}{D4E8D4}
+\definecolor{diagram-text}{HTML}{333333}
+\definecolor{diagram-accent}{HTML}{CC6600}
+
+% ---- Shared node/edge styles for flow & block diagrams ----
+\tikzset{
+  iospbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                  align=center, font=\small, text=diagram-text, minimum height=11mm,
+                  text width=20mm, inner sep=3pt},
+  iospkey/.style={iospbox, fill=diagram-highlight},
+  iospflow/.style={-{Stealth[length=2.6mm]}, draw=diagram-border, line width=0.9pt}
+}
+
+% ==================== Batch 1: flow / block diagrams ====================
+
+% Chapter 12 -- input signal path
+\newcommand{\DiagInputPath}{%
+\begin{figure}[H]\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=7mm]
+  \node[iospbox] (ext) {External\\Signal};
+  \node[iospbox, right=of ext] (pad) {Pad};
+  \node[iospbox, right=of pad] (buf) {Input\\Buffer};
+  \node[iospbox, right=of buf] (sch) {Schmitt /\\Logic Level};
+  \node[iospbox, right=of sch] (syn) {Synchronizer\\\textit{(optional)}};
+  \node[iospkey, right=of syn] (reg) {INA / INB\\Register};
+  \foreach \a/\b in {ext/pad,pad/buf,buf/sch,sch/syn,syn/reg} \draw[iospflow] (\a)--(\b);
+  \node[iospkey, below=12mm of syn, text width=26mm] (testp) {TESTP / TESTPN\\\textit{(2 clocks fresher)}};
+  \draw[iospflow] (syn)--(testp);
+\end{tikzpicture}}
+\caption{Input signal path}
+\end{figure}}
+
+% Chapter 16 -- ADC sigma-delta conversion chain
+\newcommand{\DiagAdcChain}{%
+\begin{figure}[H]\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=8mm]
+  \node[iospbox] (a) {Analog\\Input};
+  \node[iospbox, right=of a] (b) {Comparator\\($\Sigma\Delta$)};
+  \node[iospbox, right=of b] (c) {1-bit\\Stream};
+  \node[iospbox, right=of c] (d) {SINC\\Filter};
+  \node[iospkey, right=of d] (e) {Multi-bit\\Sample};
+  \foreach \x/\y in {a/b,b/c,c/d,d/e} \draw[iospflow] (\x)--(\y);
+\end{tikzpicture}}
+\caption{Sigma-delta ADC chain}
+\end{figure}}
+
+% Chapter 18 -- pin repository writer/reader handoff
+\newcommand{\DiagRepository}{%
+\begin{figure}[H]\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[node distance=24mm]
+  \node[iospkey] (w) {COG 1\\(Writer)};
+  \node[iospbox, right=of w] (r) {Pin\\Repository};
+  \node[iospkey, right=of r] (rd) {COG 2\\(Reader)};
+  \draw[iospflow] (w) -- node[above, font=\scriptsize, text=diagram-text] {WXPIN value} (r);
+  \draw[iospflow] (r) -- node[above, font=\scriptsize, text=diagram-text] {RDPIN / RQPIN} (rd);
+  \node[font=\scriptsize\itshape, text=diagram-text, below=2mm of r] {IN raised};
+\end{tikzpicture}}
+\caption{Pin repository handoff}
+\end{figure}}
+
+% ==================== Batch 2: state machine + decision flowcharts ====================
+
+% Chapter 3 -- smart pin state machine (natural size; smaller font so text fits)
+\newcommand{\DiagPinStates}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=8mm,
+    sbox/.style={iospbox, text width=25mm, font=\footnotesize}]
+  \node[sbox] (dis) {DISABLED\\{\scriptsize DIR=0}};
+  \node[sbox, right=of dis] (cfg) {CONFIGURED\\{\scriptsize WRPIN / WXPIN / WYPIN}};
+  \node[sbox, right=of cfg] (en) {ENABLED\\{\scriptsize DIR=1}};
+  \node[sbox, right=of en, fill=diagram-highlight] (run) {RUNNING\\{\scriptsize autonomous}};
+  \foreach \a/\b in {dis/cfg,cfg/en,en/run} \draw[iospflow] (\a)--(\b);
+  \draw[iospflow] (run.south) -- ++(0,-8mm) -| (dis.south);
+  \node[font=\scriptsize, text=diagram-text] at ($(dis.south)!0.5!(run.south) + (0,-10mm)$) {RESET (DIR: 1$\to$0)};
+\end{tikzpicture}
+\caption{Smart pin lifecycle}
+\end{figure}}
+
+% Appendix D -- output mode selection flowchart
+\newcommand{\DiagSelectOutput}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=5mm and 16mm,
+    dec/.style={iospbox, text width=34mm, minimum height=9mm},
+    res/.style={iospkey, text width=50mm, minimum height=9mm}]
+  \node[dec] (d1) {Analog voltage?};        \node[res, right=of d1] (r1) {DAC modes};
+  \node[dec, below=of d1] (d2) {Serial data?};   \node[res, right=of d2] (r2) {P\_ASYNC\_TX or P\_SYNC\_TX};
+  \node[dec, below=of d2] (d3) {Variable duty?}; \node[res, right=of d3] (r3) {PWM modes};
+  \node[dec, below=of d3] (d4) {Sub-Hz resolution?}; \node[res, right=of d4] (r4) {P\_NCO\_FREQ};
+  \node[dec, below=of d4] (d5) {Counted pulses?};    \node[res, right=of d5] (r5) {P\_TRANSITION or P\_PULSE};
+  \node[res, below=of d5] (r6) {Simple PINHIGH / PINLOW};
+  \foreach \d/\r in {d1/r1,d2/r2,d3/r3,d4/r4,d5/r5}
+     \draw[iospflow] (\d) -- node[above, font=\scriptsize, text=diagram-text] {Yes} (\r);
+  \foreach \a/\b in {d1/d2,d2/d3,d3/d4,d4/d5,d5/r6}
+     \draw[iospflow] (\a) -- node[left, font=\scriptsize, text=diagram-text] {No} (\b);
+\end{tikzpicture}
+\caption{Output mode selection}
+\end{figure}}
+
+% Appendix D -- input mode selection flowchart
+\newcommand{\DiagSelectInput}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=5mm and 16mm,
+    dec/.style={iospbox, text width=34mm, minimum height=9mm},
+    res/.style={iospkey, text width=52mm, minimum height=9mm}]
+  \node[dec] (d1) {Analog?};                 \node[res, right=of d1] (r1) {P\_ADC modes};
+  \node[dec, below=of d1] (d2) {Serial data?};   \node[res, right=of d2] (r2) {P\_ASYNC\_RX or P\_SYNC\_RX};
+  \node[dec, below=of d2] (d3) {Rotary encoder?}; \node[res, right=of d3] (r3) {P\_QUADRATURE};
+  \node[dec, below=of d3] (d4) {Frequency?};     \node[res, right=of d4] (r4) {P\_COUNTER\_PERIODS or P\_PERIODS\_TICKS};
+  \node[dec, below=of d4] (d5) {Pulse width?};   \node[res, right=of d5] (r5) {P\_HIGH\_TICKS or P\_STATE\_TICKS};
+  \node[dec, below=of d5] (d6) {Event count?};   \node[res, right=of d6] (r6) {P\_COUNT\_RISES};
+  \node[res, below=of d6] (r7) {Simple PINREAD};
+  \foreach \d/\r in {d1/r1,d2/r2,d3/r3,d4/r4,d5/r5,d6/r6}
+     \draw[iospflow] (\d) -- node[above, font=\scriptsize, text=diagram-text] {Yes} (\r);
+  \foreach \a/\b in {d1/d2,d2/d3,d3/d4,d4/d5,d5/d6,d6/r7}
+     \draw[iospflow] (\a) -- node[left, font=\scriptsize, text=diagram-text] {No} (\b);
+\end{tikzpicture}
+\caption{Input mode selection}
+\end{figure}}
+
+% ==================== Batch 3: clock-grid timing diagrams ====================
+% Numbers label clock EDGES (cycle boundaries); a clock cycle is the span between
+% edge N and N+1. Solid darker gridlines, instruction shown as a 2-cycle span,
+% point-events as accent ticks at the relevant edge, latency brace always BELOW.
+\tikzset{
+  tlane/.style={font=\scriptsize, text=diagram-text, anchor=east},
+  tspan/.style={draw=diagram-border, fill=diagram-box, rounded corners=1pt, minimum height=6mm,
+                inner sep=2pt, font=\ttfamily\scriptsize, text=diagram-text},
+  tkey/.style={tspan, fill=diagram-highlight},
+  tedge/.style={diagram-border!55, line width=0.5pt},          % darker gridlines
+  ttick/.style={draw=diagram-accent, line width=1.1pt},        % point-event marker
+  tbrace/.style={decorate, decoration={brace, amplitude=4pt, mirror}, draw=diagram-border}
+}
+
+% Chapter 1 -- output 3-clock pipeline delay
+\newcommand{\DiagOutputTiming}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=16mm, font=\footnotesize]
+  \foreach \c in {0,1,2,3,4,5}{\draw[tedge] (\c,1.0) -- (\c,-2.35);
+    \node[font=\scriptsize, text=diagram-text] at (\c,1.25) {\c};}
+  \node[font=\scriptsize\itshape, text=diagram-text, anchor=west] at (0,1.7) {clock edge};
+  % Instruction executes during cycles 0-1 (edge 0 to edge 2)
+  \node[tlane] at (-0.15,0) {Instruction};
+  \node[tspan, minimum width=32mm] at (1,0) {DRVH \#0 \textrm{(2 clk)}};
+  % DIR/OUT bit updates at edge 2 (end of execution)
+  \node[tlane] at (-0.15,-1) {DIR/OUT};
+  \draw[ttick] (2,-0.65) -- (2,-1.35);
+  \node[font=\scriptsize, text=diagram-accent, anchor=west] at (2.1,-1) {set at edge 2};
+  % Pin transitions at edge 5
+  \node[tlane] at (-0.15,-2) {Pin};
+  \draw[ttick] (5,-1.65) -- (5,-2.35);
+  \node[tkey, minimum width=15mm, anchor=east] at (4.9,-2) {drives};
+  % latency brace BELOW: edge 2 -> edge 5
+  \draw[tbrace] (2,-2.55) -- (5,-2.55);
+  \node[font=\scriptsize, text=diagram-text] at (3.5,-3.0) {3-clock pipeline delay};
+\end{tikzpicture}
+\caption{Output timing: 3-clock pipeline delay}
+\end{figure}}
+
+% Chapter 1 -- INA/INB read is 3 clocks old
+\newcommand{\DiagInputTimingINA}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=16mm, font=\footnotesize]
+  \foreach \c in {0,1,2,3,4,5}{\draw[tedge] (\c,1.0) -- (\c,-2.05);
+    \node[font=\scriptsize, text=diagram-text] at (\c,1.25) {\c};}
+  \node[font=\scriptsize\itshape, text=diagram-text, anchor=west] at (0,1.7) {clock edge};
+  % pin sampled at edge 0
+  \node[tlane] at (-0.15,0) {Pin state};
+  \draw[ttick] (0,-0.35) -- (0,0.35);
+  \node[tkey, minimum width=15mm, anchor=west] at (0.1,0) {sampled};
+  % TESTB reads INA starting at edge 3 (value is the edge-0 sample)
+  \node[tlane] at (-0.15,-1) {Instruction};
+  \draw[ttick] (3,-0.65) -- (3,-1.35);
+  \node[tspan, minimum width=30mm, anchor=west] at (3.1,-1) {TESTB INA \textrm{(reads here)}};
+  % brace BELOW: edge 0 -> edge 3
+  \draw[tbrace] (0,-2.25) -- (3,-2.25);
+  \node[font=\scriptsize, text=diagram-text] at (1.5,-2.7) {INA is 3 clocks old};
+\end{tikzpicture}
+\caption{INA/INB read latency (3 clocks)}
+\end{figure}}
+
+% Chapter 1 -- TESTP read is 2 clocks old (fresher)
+\newcommand{\DiagInputTimingTESTP}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=16mm, font=\footnotesize]
+  \foreach \c in {0,1,2,3,4}{\draw[tedge] (\c,1.0) -- (\c,-2.05);
+    \node[font=\scriptsize, text=diagram-text] at (\c,1.25) {\c};}
+  \node[font=\scriptsize\itshape, text=diagram-text, anchor=west] at (0,1.7) {clock edge};
+  \node[tlane] at (-0.15,0) {Pin state};
+  \draw[ttick] (0,-0.35) -- (0,0.35);
+  \node[tkey, minimum width=15mm, anchor=west] at (0.1,0) {sampled};
+  \node[tlane] at (-0.15,-1) {Instruction};
+  \draw[ttick] (2,-0.65) -- (2,-1.35);
+  \node[tspan, minimum width=28mm, anchor=west] at (2.1,-1) {TESTP \#0 \textrm{(reads here)}};
+  \draw[tbrace] (0,-2.25) -- (2,-2.25);
+  \node[font=\scriptsize, text=diagram-text] at (1.0,-2.7) {2 clocks old --- one clock fresher than INA};
+\end{tikzpicture}
+\caption{TESTP/TESTPN read latency (2 clocks)}
+\end{figure}}
+
+% ==================== Batch 4: digital waveforms ====================
+% Stepped signal lines on a time axis. wsig = the signal trace; dotted cell
+% dividers separate bit/cycle cells.
+\tikzset{
+  wsig/.style={draw=diagram-border, line width=1pt},
+  wcell/.style={diagram-border!30, densely dotted},
+  wlbl/.style={font=\scriptsize, text=diagram-text}
+}
+
+% Chapter 11 -- UART transmit frame (idle, start, 8 data bits LSB-first, stop)
+\newcommand{\DiagUartTxFrame}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=8mm, y=6mm, font=\scriptsize]
+  \foreach \i in {1,...,10}{\draw[wcell] (\i,-0.3) -- (\i,1.6);}
+  % representative byte; high=1.2, low=0
+  \draw[wsig] (0,1.2)--(1,1.2)--(1,0)--(2,0)--(2,1.2)--(3,1.2)--(3,0)--(4,0)--(4,1.2)--(6,1.2)--(6,0)--(8,0)--(8,1.2)--(9,1.2)--(9,0)--(10,0)--(10,1.2)--(11,1.2);
+  \foreach \i/\t in {0/Idle,1/Start,2/D0,3/D1,4/D2,5/D3,6/D4,7/D5,8/D6,9/D7,10/Stop}{
+    \node[wlbl] at (\i+0.5,-0.7) {\t};}
+  \node[wlbl, font=\scriptsize\itshape, anchor=west] at (1.6,2.0) {data bits, LSB first};
+\end{tikzpicture}
+\caption{UART transmit frame}
+\end{figure}}
+
+% Chapter 14 -- quadrature A/B signals (90 degrees out of phase)
+\newcommand{\DiagQuadrature}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=7mm, y=6mm, font=\scriptsize]
+  \node[wlbl, anchor=east] at (-0.2,2.6) {A};
+  \draw[wsig] (0,3.2)--(2,3.2)--(2,2)--(4,2)--(4,3.2)--(6,3.2)--(6,2)--(8,2)--(8,3.2)--(10,3.2);
+  \node[wlbl, anchor=east] at (-0.2,0.6) {B};
+  \draw[wsig] (0,0)--(1,0)--(1,1.2)--(3,1.2)--(3,0)--(5,0)--(5,1.2)--(7,1.2)--(7,0)--(9,0)--(9,1.2)--(10,1.2);
+  \node[wlbl, font=\scriptsize\itshape, anchor=west] at (0,-0.8) {B lags A by 90$^\circ$ (clockwise) --- counter increments};
+\end{tikzpicture}
+\caption{Quadrature A/B signals}
+\end{figure}}
+
+% Chapter 7 -- pulse output: counter counts down, output high in second half of each cycle
+\newcommand{\DiagPulseOutput}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=7mm, y=6mm, font=\scriptsize]
+  \node[wlbl, anchor=east] at (-0.2,0.6) {Output};
+  \draw[wsig] (0,0)--(2,0)--(2,1.2)--(4,1.2)--(4,0)--(6,0)--(6,1.2)--(8,1.2)--(8,0)--(10,0)--(10,1.2)--(12,1.2)--(12,0)--(13,0);
+  \foreach \c/\x in {1/2,2/6,3/10}{\draw[wcell] (\c*4-4,-0.3)--(\c*4-4,1.5); \node[wlbl] at (\x,-0.8) {cycle \c};}
+  \draw[wcell] (12,-0.3)--(12,1.5);
+  \node[wlbl, font=\scriptsize\itshape, anchor=west] at (12.3,0.6) {IN raised};
+\end{tikzpicture}
+\caption{Pulse output (counted cycles)}
+\end{figure}}
+
+% ==================== Batch 5: remaining diagrams ====================
+
+% --- Block / architecture diagrams (iospbox/iospflow) ---
+
+% Chapter 8 -- NCO architecture
+\newcommand{\DiagNcoArch}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=14mm]
+  \node[iospbox, text width=16mm] (add) {Adder};
+  \node[iospbox, right=of add, text width=28mm] (acc) {Z[31:0]\\phase accumulator};
+  \node[iospkey, right=of acc, text width=32mm] (out) {Z[31] $\to$ NCO\_FREQ\\overflow $\to$ NCO\_DUTY};
+  \node[wlbl, left=12mm of add] (y) {Y (frequency)};
+  \draw[iospflow] (y)--(add);
+  \draw[iospflow] (add)--(acc);
+  \draw[iospflow] (acc)--(out);
+  \draw[iospflow] (acc.south) -- ++(0,-9mm) -| (add.south);
+  \node[wlbl] at ($(add.south)!0.5!(acc.south)+(0,-14mm)$) {phase feedback};
+\end{tikzpicture}
+\caption{NCO architecture}
+\end{figure}}
+
+% Chapter 9 -- PWM architecture
+\newcommand{\DiagPwmArch}{%
+\begin{figure}[H]\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=9mm]
+  \node[iospbox, text width=26mm] (bp) {Base Period {\scriptsize(X[15:0])}};
+  \node[iospbox, right=of bp, text width=26mm] (fc) {Frame Count {\scriptsize(X[31:16])}};
+  \node[iospbox, right=of fc, text width=30mm] (cmp) {Comparator {\scriptsize(Y $\geq$ counter)}};
+  \node[iospkey, right=of cmp, text width=18mm] (pin) {PIN OUT};
+  \foreach \a/\b in {bp/fc,fc/cmp,cmp/pin} \draw[iospflow] (\a)--(\b);
+\end{tikzpicture}}
+\caption{PWM architecture}
+\end{figure}}
+
+% Chapter 9 -- SMPS mode block diagram
+\newcommand{\DiagSmpsBlock}{%
+\begin{figure}[H]\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=9mm]
+  \node[iospbox, text width=28mm] (vm) {Voltage Monitor {\scriptsize(A-input)}};
+  \node[iospbox, right=of vm, text width=26mm] (core) {PWM Sawtooth Core};
+  \node[iospbox, right=of core, text width=30mm] (cl) {Current Limiter Gate {\scriptsize(B-input)}};
+  \node[iospkey, right=of cl, text width=18mm] (pin) {PIN OUT};
+  \foreach \a/\b in {vm/core,core/cl,cl/pin} \draw[iospflow] (\a)--(\b);
+\end{tikzpicture}}
+\caption{SMPS mode block diagram}
+\end{figure}}
+
+% Chapter 10 -- DAC structure
+\newcommand{\DiagDacStructure}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=8mm]
+  \node[iospbox, text width=44mm] (dac) {8-bit DAC {\scriptsize(per-pin resistor network, M[7:0])}};
+  \node[iospbox, below=of dac, text width=44mm] (mode) {Output Mode Select {\scriptsize(M[12:10]=\%101; 990/600/124/75\,$\Omega$)}};
+  \node[iospkey, below=of mode, text width=22mm] (pin) {PIN OUT};
+  \foreach \a/\b in {dac/mode,mode/pin} \draw[iospflow] (\a)--(\b);
+\end{tikzpicture}
+\caption{DAC structure}
+\end{figure}}
+
+% --- Waveforms (wsig) ---
+
+% Chapter 7 -- transition output (counted edges)
+\newcommand{\DiagTransitionOutput}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=7mm,y=6mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.2,0.6){Output};
+  \draw[wsig] (0,0)--(1,0)--(1,1.2)--(3,1.2)--(3,0)--(5,0)--(5,1.2)--(7,1.2)--(7,0)--(8.5,0);
+  \foreach \e/\x in {1/1,2/3,3/5,4/7}{\node[wlbl] at (\x,-0.7){edge \e};}
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (7.3,0.6){IN raised};
+\end{tikzpicture}
+\caption{Transition output (counted edges)}
+\end{figure}}
+
+% Chapter 9 -- PWM triangle duty
+\newcommand{\DiagPwmTriangle}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=6mm,y=5mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.3,3.6){Counter};
+  \draw[diagram-border!60,line width=0.8pt] (0,5.2)--(7,2.0)--(14,5.2);
+  \node[wlbl,anchor=east] at (-0.3,0.5){Output};
+  \draw[wsig] (0,0)--(2,0)--(2,1.2)--(12,1.2)--(12,0)--(14,0);
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (2,-0.8){output high while Y $\geq$ counter (symmetric)};
+\end{tikzpicture}
+\caption{PWM triangle duty}
+\end{figure}}
+
+% Chapter 9 -- PWM sawtooth duty
+\newcommand{\DiagPwmSawtooth}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=6mm,y=5mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.3,3.8){Counter};
+  \draw[diagram-border!60,line width=0.8pt] (0,2.2)--(8,5.4)--(8,2.2)--(16,5.4);
+  \node[wlbl,anchor=east] at (-0.3,0.5){Output};
+  \draw[wsig] (0,1.2)--(3,1.2)--(3,0)--(8,0)--(8,1.2)--(11,1.2)--(11,0)--(16,0);
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (2,-0.8){output high while Y $\geq$ counter (each ramp)};
+\end{tikzpicture}
+\caption{PWM sawtooth duty}
+\end{figure}}
+
+% Chapter 13 -- pulse-width measurement
+\newcommand{\DiagPulseWidthMeas}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=7mm,y=6mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.2,0.6){Input};
+  \draw[wsig] (0,1.2)--(2,1.2)--(2,0)--(5,0)--(5,1.2)--(9,1.2)--(9,0)--(11,0);
+  \draw[decorate,decoration={brace,amplitude=4pt},draw=diagram-border] (2,1.55)--(5,1.55); \node[wlbl] at (3.5,2.1){High: 1500 clks};
+  \draw[tbrace] (5,-0.4)--(9,-0.4); \node[wlbl] at (7,-0.9){Low: 3000 clks};
+  \node[wlbl,font=\scriptsize\itshape] at (5,-1.6){IN raised at each edge (C = state)};
+\end{tikzpicture}
+\caption{Pulse-width / state-time measurement}
+\end{figure}}
+
+% --- Register bit-field diagrams (replace ASCII bit-layout art) ---
+
+% Appendix B -- structure of a P_ constant value (32-bit WRPIN config field map)
+\newcommand{\DiagPConstFields}{%
+\begin{figure}[H]\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
+              align=center, font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center},
+  flbl/.style={font=\tiny, text=diagram-text, align=center}]
+  \node[fld, minimum width=14mm] (a) {AAAA};
+  \node[fld, minimum width=14mm, right=0pt of a] (b) {BBBB};
+  \node[fld, minimum width=11mm, right=0pt of b] (c) {CCC};
+  \node[fld, minimum width=34mm, right=0pt of c, fill=diagram-highlight] (d) {DDDDDDDDDDDDD};
+  \node[fld, minimum width=9mm,  right=0pt of d] (e) {EE};
+  \node[fld, minimum width=16mm, right=0pt of e] (f) {FFFFF};
+  \node[fld, minimum width=6mm,  right=0pt of f] (z) {0};
+  \node[lbl, above=1mm of a] {31:28}; \node[lbl, above=1mm of b] {27:24};
+  \node[lbl, above=1mm of c] {23:21}; \node[lbl, above=1mm of d] {20:8};
+  \node[lbl, above=1mm of e] {7:6};   \node[lbl, above=1mm of f] {5:1};
+  \node[lbl, above=1mm of z] {0};
+  \node[flbl, below=1mm of a, text width=14mm] {A input\\sel / polarity};
+  \node[flbl, below=1mm of b, text width=14mm] {B input\\selection};
+  \node[flbl, below=1mm of c, text width=11mm] {A/B logic};
+  \node[flbl, below=1mm of d, text width=34mm] {Low-level pin config};
+  \node[flbl, below=1mm of e, text width=9mm] {TT\\(DIR/OUT)};
+  \node[flbl, below=1mm of f, text width=16mm] {Smart pin mode};
+\end{tikzpicture}}
+\caption{Structure of a P\_ constant value}
+\end{figure}}
+
+% Chapter 16 -- ADC pin-configuration fields (P[12:10]=\%100 + mode \%11000)
+\newcommand{\DiagAdcEnableField}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=8mm,
+              align=center, font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center}]
+  \node[fld, minimum width=22mm] (hi) {P[31:13]};
+  \node[fld, minimum width=14mm, right=0pt of hi, fill=diagram-highlight] (en) {100};
+  \node[fld, minimum width=18mm, right=0pt of en] (lo) {P[9:6] \ldots};
+  \node[fld, minimum width=16mm, right=0pt of lo, fill=diagram-highlight] (mode) {11000};
+  \node[lbl, above=1mm of en] {P[12:10]}; \node[lbl, above=1mm of mode] {mode (4:0)};
+  \node[lbl, below=2mm of en, text width=24mm] {\%100 = ADC enable};
+  \node[lbl, below=2mm of mode, text width=22mm] {\%11000 = P\_ADC};
+\end{tikzpicture}
+\caption{ADC pin-configuration fields}
+\end{figure}}
+
+% Chapter 13 -- P_HIGH_TICKS measures only HIGH durations (IN raised on each fall)
+\newcommand{\DiagHighTicksMeas}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=7mm,y=6mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.2,0.6){Input};
+  \draw[wsig] (0,0)--(1,0)--(1,1.2)--(6,1.2)--(6,0)--(8,0)--(8,1.2)--(11,1.2)--(11,0)--(12,0);
+  \draw[decorate,decoration={brace,amplitude=4pt},draw=diagram-border] (1,1.55)--(6,1.55);
+  \node[wlbl] at (3.5,2.1){High: 1500 clks};
+  \draw[decorate,decoration={brace,amplitude=4pt},draw=diagram-border] (8,1.55)--(11,1.55);
+  \node[wlbl] at (9.5,2.1){High: 800 clks};
+  \draw[ttick] (6,-0.35)--(6,0.35); \draw[ttick] (11,-0.35)--(11,0.35);
+  \node[wlbl,font=\scriptsize\itshape] at (6,-0.9){IN raised};
+  \node[wlbl,font=\scriptsize\itshape] at (11,-0.9){IN raised};
+  \node[wlbl,font=\scriptsize\itshape] at (7,-1.7){low periods ignored};
+\end{tikzpicture}
+\caption{P\_HIGH\_TICKS high-time measurement}
+\end{figure}}
+
+% Chapter 14 -- gated edge counter (B gates A)
+\newcommand{\DiagGatedCount}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=6mm,y=5mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.3,3.0){A};
+  \draw[wsig] (0,3.6)--(0.6,3.6)--(0.6,2.4)--(1.2,2.4)--(1.2,3.6)--(2.0,3.6)--(2.0,2.4)--(2.6,2.4)--(2.6,3.6)--(3.4,3.6)--(3.4,2.4)--(4.0,2.4)--(4.0,3.6)--(4.8,3.6)--(4.8,2.4)--(5.4,2.4)--(5.4,3.6)--(6.2,3.6)--(6.2,2.4)--(6.8,2.4)--(6.8,3.6)--(8,3.6);
+  \node[wlbl,anchor=east] at (-0.3,0.6){B (gate)};
+  \draw[wsig] (0,0)--(2.5,0)--(2.5,1.2)--(5.5,1.2)--(5.5,0)--(8,0);
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (0,-0.9){A edges counted only while B is high};
+\end{tikzpicture}
+\caption{Gated edge counter}
+\end{figure}}
+
+% Chapter 14 -- up/down counter (B sets direction)
+\newcommand{\DiagUpDownCount}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=6mm,y=5mm,font=\scriptsize]
+  \node[wlbl,anchor=east] at (-0.3,3.0){A};
+  \draw[wsig] (0,3.6)--(0.6,3.6)--(0.6,2.4)--(1.2,2.4)--(1.2,3.6)--(2.0,3.6)--(2.0,2.4)--(2.6,2.4)--(2.6,3.6)--(3.4,3.6)--(3.4,2.4)--(4.0,2.4)--(4.0,3.6)--(4.8,3.6)--(4.8,2.4)--(5.4,2.4)--(5.4,3.6)--(6.2,3.6)--(6.2,2.4)--(6.8,2.4)--(6.8,3.6)--(8,3.6);
+  \node[wlbl,anchor=east] at (-0.3,0.6){B (dir)};
+  \draw[wsig] (0,1.2)--(4,1.2)--(4,0)--(8,0);
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (0,-0.9){B high $\Rightarrow$ count up; B low $\Rightarrow$ count down};
+\end{tikzpicture}
+\caption{Up/down counter}
+\end{figure}}
+
+% Chapter 17 -- UART receive frame with sample points
+\newcommand{\DiagUartRxFrame}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=8mm,y=6mm,font=\scriptsize]
+  \foreach \i in {1,...,10}{\draw[wcell] (\i,-0.3)--(\i,1.6);}
+  \draw[wsig] (0,1.2)--(1,1.2)--(1,0)--(2,0)--(2,1.2)--(3,1.2)--(3,0)--(4,0)--(4,1.2)--(6,1.2)--(6,0)--(8,0)--(8,1.2)--(9,1.2)--(9,0)--(10,0)--(10,1.2)--(11,1.2);
+  \foreach \i/\t in {0/Idle,1/Start,2/D0,3/D1,4/D2,5/D3,6/D4,7/D5,8/D6,9/D7,10/Stop}{\node[wlbl] at (\i+0.5,-0.7){\t};}
+  \foreach \i in {2,...,9}{\node[font=\scriptsize,text=diagram-accent] at (\i+0.5,1.9){$\blacktriangledown$};}
+  \node[wlbl,font=\scriptsize\itshape,anchor=west] at (1.6,2.4){sample points (mid-bit)};
+\end{tikzpicture}
+\caption{UART receive frame}
+\end{figure}}
+
+% --- Combined timing comparison (timing-grid) ---
+
+% Chapter 12 -- TESTP vs INA read latency
+\newcommand{\DiagTestpVsIna}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[x=16mm,font=\footnotesize]
+  \foreach \c in {0,1,2,3,4}{\draw[tedge] (\c,1.1)--(\c,-2.3);
+    \node[font=\scriptsize,text=diagram-text] at (\c,1.35){\c};}
+  \node[font=\scriptsize\itshape,text=diagram-text,anchor=west] at (0,1.8){clock edge};
+  \node[tlane] at (-0.15,0.4){Pin sampled};  \draw[ttick] (0,0.1)--(0,0.7);
+  \node[tlane] at (-0.15,-0.6){INA read};    \draw[ttick] (3,-0.9)--(3,-0.3);
+  \node[tspan,minimum width=18mm,anchor=west] at (3.1,-0.6){at edge 3};
+  \node[tlane] at (-0.15,-1.6){TESTP read};  \draw[ttick] (2,-1.9)--(2,-1.3);
+  \node[tkey,minimum width=18mm,anchor=west] at (2.1,-1.6){at edge 2};
+  \draw[tbrace] (0,-2.5)--(3,-2.5); \node[font=\scriptsize,text=diagram-text] at (1.5,-2.95){INA: 3 clocks old \quad TESTP: 2 (fresher)};
+\end{tikzpicture}
+\caption{TESTP vs INA read latency}
+\end{figure}}
+
+% --- External-circuit schematics (simple labeled blocks) ---
+
+% Chapter 9 -- typical SMPS circuit (schematic)
+\newcommand{\DiagSmpsCircuit}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=8mm, font=\scriptsize,
+   comp/.style={draw=diagram-border, fill=diagram-box, minimum height=6mm, minimum width=12mm, font=\scriptsize, text=diagram-text}]
+  \node[wlbl] (pin) {Pin (PWM)};
+  \node[comp, right=8mm of pin] (fet) {FET};
+  \node[comp, right=6mm of fet] (l) {L};
+  \node[wlbl, right=8mm of l] (vout) {Vout};
+  \draw[iospflow] (pin)--(fet); \draw[iospflow] (fet)--(l); \draw[iospflow] (l)--(vout);
+  \node[comp, below=8mm of fet] (d) {D}; \draw[diagram-border] (fet)--(d);
+  \node[comp, below=8mm of l] (c) {C}; \draw[diagram-border] (l)--(c);
+  \node[wlbl, below=4mm of d] {GND}; \node[wlbl, below=4mm of c] {GND};
+  \node[wlbl, font=\scriptsize\itshape, below=24mm of l, text width=70mm, align=center] {feedback: voltage divider $\to$ A-input, shunt $\to$ B-input};
+\end{tikzpicture}
+\caption{Typical SMPS circuit}
+\end{figure}}
+
+% Chapter 10 -- op-amp output buffer
+\newcommand{\DiagDacBuffer}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\scriptsize, node distance=8mm,
+   comp/.style={draw=diagram-border, fill=diagram-box, minimum height=8mm, minimum width=18mm, text=diagram-text, align=center}]
+  \node[wlbl] (in) {DAC OUT};
+  \node[comp, right=8mm of in] (amp) {Op-Amp\\(unity)};
+  \node[wlbl, right=8mm of amp] (out) {Buffered Out};
+  \draw[iospflow] (in)--(amp); \draw[iospflow] (amp)--(out);
+\end{tikzpicture}
+\caption{Op-amp output buffer}
+\end{figure}}
+
+% Chapter 10 -- RC dither filter
+\newcommand{\DiagDacFilter}{%
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\scriptsize,
+   comp/.style={draw=diagram-border, fill=diagram-box, minimum height=6mm, minimum width=10mm, text=diagram-text}]
+  \node[wlbl] (in) at (0,0) {DAC OUT};
+  \node[comp] (r) at (2.4,0) {R};
+  \coordinate (n) at (4.2,0);
+  \node[wlbl] (out) at (6.0,0) {Filtered Out};
+  \draw[diagram-border, line width=0.9pt] (in)--(r) (r)--(n) (n)--(out);
+  \node[comp] (c) at (4.2,-1.4) {C};
+  \node[wlbl] (gnd) at (4.2,-2.6) {GND};
+  \draw[diagram-border, line width=0.9pt] (n)--(c) (c)--(gnd);
+\end{tikzpicture}
+\caption{RC dither filter}
+\end{figure}}
+
+\endinput

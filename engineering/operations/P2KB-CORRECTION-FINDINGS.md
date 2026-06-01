@@ -269,6 +269,92 @@ The streamer audit's *enhancement* suggestions (setxfrq common-value table, extr
 
 ---
 
+## Streamer audit — 2026-06-01 (Streamer Programming Guide production pass)
+
+These six findings were surfaced while auditing the **P2 Streamer Programming Guide** for production. The *manual* was corrected in the same pass (`manuals/p2-streamer-programming-guide/opus-master/streamer-body.md`); the **KB YAML** items below are staged here for a separate `yaml-knowledge-base-maintenance` pass, per the standing instruction to finish the PDF first. Full audit: `manuals/p2-streamer-programming-guide/audit/streamer-content-audit-2026-06-01.md`.
+
+### F-016 — `setxfrq.yaml` streamer-frequency formula is off by a factor of 2  ·  `CONFIRMED` (reopens a previously "RESOLVED" item)
+
+**File:** `deliverables/ai/P2/language/pasm2/setxfrq.yaml`
+
+**What's wrong:** The formula recorded as resolved (see line ~264 of this register) is `frequency = (D × clkfreq) / 2³²`. The streamer NCO masks its MSB before each add (`phase = (phase & $7FFF_FFFF) + frequency`), so it accumulates **modulo 2³¹**, not 2³². The correct relation is:
+
+```
+D = target_rate × 2³¹ / clkfreq      (i.e. D = $8000_0000 × rate/clk)
+```
+
+The `/2³²` form yields **double** the correct word for every rate.
+
+**Evidence:**
+- Silicon Doc v35 facts (`engineering/ingestion/sources/silicon-doc/silicon-doc-v35-facts-only.md:339`): `Phase = (phase & $7FFF_FFFF) + frequency` → mod-2³¹ accumulator; `$8000_0000` (=2³¹) rolls over every clock (1:1), exactly as the mode tables show.
+- Silicon Doc HDMI/TMDS example (same file, ~line 436): the 1:10 ratio uses `$0CCCCCCC+1 = $0CCCCCCD`. `round(2³¹/10) = $0CCCCCCD` ✓; `round(2³²/10) = $1999999A` ✗ (that is the 1:5 value).
+- The streamer guide's NCO common-values table (independently verified): `$8000_0000`=1:1, `$4000_0000`=1:2, `$0CCC_CCCD`=1:10 — all consistent with 2³¹, none with 2³².
+
+**Proposed correction:** Change the `setxfrq.yaml` formula to the 2³¹ form above and re-check any worked example values it carries. Reconcile with `nco-timing.yaml` (which already uses the `$8000_0000 × rate/clk` convention).
+
+### F-017 — `nco-timing.yaml` video pixel-rate table values are arithmetically wrong  ·  `CONFIRMED`
+
+**File:** `deliverables/ai/P2/architecture/streamer/nco-timing.yaml` (`video_rates` section)
+
+**What's wrong:** The hex NCO words do not equal `round(2³¹ × rate/clk)` for the stated rates; several cells are off by a whole ratio step (e.g. 800×600 @250 MHz is listed as the 50 MHz value `$1999_999A` instead of the 40 MHz value `$147A_E148`). The manual had copied these verbatim and they are now corrected in the manual; the KB still carries the errors.
+
+**Correct values (`round($8000_0000 × rate/clk)`):**
+
+| Rate | @250 MHz | @300 MHz | @320 MHz |
+|------|----------|----------|----------|
+| 640×480 (25.175) | `$0CE3_BCD3` | `$0ABD_C805` | `$0A11_EB85` |
+| 800×600 (40.0)   | `$147A_E148` | `$1111_1111` | `$1000_0000` |
+| 1024×768 (65.0)  | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
+| 1280×720 (74.25) | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
+
+**Evidence:** Direct computation (Python), cross-checked against the corrected manual Appendix C. Same root cause as F-016 (2³¹ scaling).
+
+**Proposed correction:** Replace `nco-timing.yaml video_rates` with the values above.
+
+### F-018 — `modes-reference.yaml` mislabels the SINC2 select bit  ·  `CONFIRMED`
+
+**File:** `deliverables/ai/P2/architecture/streamer/modes-reference.yaml` (X_DDS_GOERTZEL_SINC2 entry)
+
+**What's wrong:** SINC2 is given `d_19_16: "%1000_0111"` — an 8-bit value in a 4-bit (D[19:16]) field. SINC1 vs SINC2 is actually selected by **D[23]**, not a D[19:16] bit. The authoritative symbol value `X_DDS_GOERTZEL_SINC2 = $F087_0000` has D[23]=1 and D[19:16]=`%0111` (same `%0111` as SINC1 `$F007_0000`); the two differ only in bit 23.
+
+**Evidence:** Silicon Doc v35 facts (`silicon-doc-v35-facts-only.md:416`): "### SINC Modes (D[23])". The streamer-symbols values ($F007 vs $F087) agree with D[23].
+
+**Proposed correction:** In `modes-reference.yaml`, change SINC2's `d_19_16` to indicate `%0111 with D[23]=1 (SINC2 select)`. (The manual's Appendix A was corrected the same way.)
+
+### F-019 — `dds-goertzel.yaml` carries two unsourced specifics  ·  `NEEDS-VERIFICATION`
+
+**File:** `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml`
+
+**What's wrong (suspected):** Two values appear in the KB (and were inherited by the manual draft) but are **not** in the Silicon Doc v35 facts extract:
+1. "DDS/Goertzel uses a **33-bit** frequency calculation internally" — inconsistent with the `$1_0000_0000` (2³²) multiplier in the very same frequency formula.
+2. "SINC2 max amplitude **±10**" — no source found for the specific figure.
+
+The manual was softened (dropped "33-bit", replaced "±10" with "well below ±127") pending verification.
+
+**Evidence/needed:** Check the full Silicon Doc v35 (PDF parts, not just the facts extract) for the DDS/Goertzel section. If unsupported, drop "33-bit" (the formula is 2³²) and the "±10" figure from `dds-goertzel.yaml`.
+
+### F-020 — `nco-timing.yaml` "31-bit phase" gloss is misleading  ·  `CONFIRMED` (minor)
+
+**File:** `deliverables/ai/P2/architecture/streamer/nco-timing.yaml` (hardware note)
+
+**What's wrong:** A note characterizes the NCO as using "31 bits for phase accumulation," which reads as a 31-bit accumulator. The register is **32-bit**; its MSB is masked before each add and serves as the rollover flag, so 31 bits hold the accumulating phase and resolution is `clkfreq/2³¹`. Stating "31-bit accumulator" bare contradicts the Silicon Doc's "32-bit phase accumulator."
+
+**Evidence:** Silicon Doc v35 facts `:338` ("32-bit phase accumulator") and `:339` (the MSB-mask formula).
+
+**Proposed correction:** Reword to "32-bit accumulator; MSB masked each add as the rollover flag; resolution `clkfreq/2³¹`." (Manual §3.1 corrected this way.)
+
+### F-021 — `modes-reference.yaml` is missing several valid mode rows  ·  `NEEDS-VERIFICATION` (completeness)
+
+**File:** `deliverables/ai/P2/architecture/streamer/modes-reference.yaml`
+
+**What's wrong (suspected):** The complete mode table omits rows that exist in `streamer-symbols.yaml` and that the manual lists, e.g. `X_RFWORD_16P_4DAC4`, `X_RFWORD_16P_2DAC8`, `X_RFLONG_32P_4DAC8`, `X_16P_4DAC4_WFWORD`, `X_16P_2DAC8_WFWORD`, `X_32P_4DAC8_WFLONG`, and the `X_IMM_4X8_*`/`X_IMM_2X16_*` immediate variants. The manual is *more complete* than this KB file.
+
+**Evidence:** Cross-check `modes-reference.yaml` against `streamer-symbols.yaml` (authoritative values) and the corrected manual Appendix A.
+
+**Proposed correction:** Backfill the missing rows in `modes-reference.yaml` from the symbol values.
+
+---
+
 ## To investigate
 
 ### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile  ·  `WONTFIX` (agent usage error; KB is correct)

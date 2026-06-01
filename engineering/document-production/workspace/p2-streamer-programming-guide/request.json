@@ -1,0 +1,30 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Streamer-Programming-Guide.md",
+      "output": "P2-Streamer-Programming-Guide.pdf",
+      "template": "p2kb-streamer-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-streamer-figures",
+        "p2kb-streamer-tables",
+        "p2kb-streamer-mnemonic-bold",
+        "p2kb-streamer-code-coloring",
+        "p2kb-streamer-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Streamer Programming Guide",
+        "subtitle": "Comprehensive Reference for the Propeller 2 Streamer",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v1.0",
+        "date": "June 2026"
+      }
+    }
+  ]
+}
