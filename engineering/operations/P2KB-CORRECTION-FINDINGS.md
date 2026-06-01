@@ -94,7 +94,7 @@ XZERO:
 
 **Evidence:** `engineering/ingestion/sources/spin2-v51/debug-section.txt` + the per-window Bibles in `…/p2-debug-window-manual/REF/theory-of-operations/`. The identical fabrications were found and fixed in **Debug Window Manual v3** (2026-05-31).
 
-**Proposed correction:** Re-ground these YAMLs in the theory-of-operations Bibles. The corrected v3 chapters (`p2-debug-window-manual/opus-master/chapters-v3/`) are a ready, verified source of the real command sets; expand `pc_key`/`pc_mouse` per v3 Chapter 12.
+**Proposed correction:** Re-ground these YAMLs in the theory-of-operations Bibles. The corrected chapters (`p2-debug-window-manual/opus-master/`) are a ready, verified source of the real command sets; expand `pc_key`/`pc_mouse` per Chapter 12 (`ch12-bidirectional.md`).
 
 ---
 
