@@ -309,6 +309,18 @@
 % Cross-reference to appendix
 \newcommand{\appref}[1]{Appendix~\ref{app:#1}}
 
+% ==================== INDEX LETTER HEADINGS ====================
+% Category heading for each alphabetical group in the Index. Rendered as a bold
+% letter with a thin rule. Deliberately NOT a \section/\chapter, so it never
+% appears in the table of contents or PDF bookmarks. Invoked from the Index via
+% a raw-LaTeX block: ```{=latex} \indexletter{A} ```
+\newcommand{\indexletter}[1]{%
+  \par\addvspace{9pt}%
+  \noindent{\large\bfseries #1}\par
+  \vspace{1pt}{\color{black!25}\rule{\linewidth}{0.4pt}}\par
+  \addvspace{2pt}%
+}
+
 % ==================== FULL-WIDTH TABLE CONFIGURATION ====================
 % Make all longtables full page width with better column ratios
 

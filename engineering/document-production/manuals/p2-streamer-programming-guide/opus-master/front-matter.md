@@ -42,7 +42,7 @@
 \begin{minipage}[t]{0.45\textwidth}
 \textbf{Part I: Streamer Fundamentals}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Introduction and Overview
+\item Understanding the Streamer
 \item Architecture
 \item NCO and Timing
 \item Command Structure
@@ -96,6 +96,8 @@
 \pagestyle{fancy}
 
 \tableofcontents
+\clearpage
+\listoffigures
 \clearpage
 ```
 

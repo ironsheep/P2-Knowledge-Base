@@ -1,83 +1,116 @@
 # Part I: Streamer Fundamentals
 
-# Chapter 1: Introduction and Overview
+# Chapter 1: Understanding the Streamer
 
-## 1.1 What the Streamer Does
+Before the mode tables and bit fields, it helps to know what the streamer *is*, why the P2 has one, and how to think about it when you sit down to build something. This chapter builds that picture. The rest of the guide is the detailed reference; this chapter is the map.
 
-The streamer is a hardware peripheral in each COG that provides high-speed, automatic data transfer between Hub memory, pins, and DAC channels. It operates independently of the CPU, enabling real-time I/O without software intervention.
+## 1.1 What the streamer is
 
-**Core Capabilities:**
+Every COG on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the CPU's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
 
-- Stream data from Hub memory to pins and DACs at rates up to the system clock
-- Capture pin states and ADC readings to Hub memory
-- Generate video signals (VGA, DVI/HDMI, composite)
-- Output multi-channel audio via DAC
-- Perform Goertzel frequency analysis in hardware
-- Synthesize waveforms via DDS
+The detail that makes the streamer special is that it carries **its own clock**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) acts as a metronome: you set the beat, and the streamer moves one piece of data on every beat. That beat can run tens of millions of times per second and — crucially — it is *exact*. This is what lets a single COG produce a clean video picture or a steady audio stream: not raw speed, but precise, unwavering timing that the CPU never has to babysit.
 
-## 1.2 Why the Streamer Exists
+> **If you've used DMA before:** the streamer is a close cousin of a DMA channel, with two important additions. First, it has that built-in metronome, so it does *paced* transfers at an exact sample rate rather than "as fast as the bus allows." Second, it reshapes data as it moves — packing bits, expanding through a palette, converting color formats — instead of copying bytes verbatim. If you have never met DMA, don't worry: everything below stands on its own.
 
-Without the streamer, generating precise timing for video or high-speed I/O consumes all CPU cycles. The streamer handles timing automatically through its NCO (Numerically-Controlled Oscillator), freeing the CPU for computation. A single COG generates complex video signals while simultaneously processing game logic or other tasks.
+## 1.2 Why the streamer exists
 
-## 1.3 Streamer Resources Per COG
+Generating precise, fast, repetitive signals in software is brutally expensive. Imagine driving a video display by hand: your code would have to write a new color to the pins every forty nanoseconds, forever, without ever slipping. A single loop like that would consume an entire COG and still stutter the moment anything interrupted it. The streamer exists so that this relentless, timed, repetitive work happens in hardware, leaving the COG free for the *interesting* part — drawing the next frame, decoding the next packet, running the game.
 
-Each COG contains one streamer with:
+So why is it so complicated? Because one engine has to serve very different jobs: pushing video to a screen, playing audio through a DAC, capturing pins like a logic analyzer, sampling an analog input like an oscilloscope, generating tones, even detecting a specific frequency in an incoming signal. Rather than give each COG six narrow peripherals, the P2 gives it **one highly configurable engine**. The configurability is the complexity — and it is also the payoff. Learn the handful of knobs once, and the same engine does all of those jobs.
 
-- One 32-bit NCO (phase accumulator)
-- One command buffer (single-level)
-- Four 8-bit DAC channels (X0, X1, X2, X3)
-- One Goertzel analyzer
-- Access to the COG's LUT RAM
+## 1.3 A mental model: a paced, configurable pipe
 
-## 1.4 Related Hardware
+Picture a pipe running from hub memory to the pins, with an adjustable shaper in the middle and a metronome setting the pace. Every streamer command you issue is just a way of answering four questions about that pipe:
 
-The streamer coordinates with several P2 subsystems:
+1. **Where does the data come from?** An immediate value you supply, or a stream pulled from hub memory through the FIFO.
+2. **Where does it go?** Out to the pins, out to the DAC channels — or, when capturing, back into hub memory.
+3. **How is it shaped along the way?** Sliced into 1-, 2-, 4-, 8-, 16-, or 32-bit pieces; expanded through a lookup table (a palette); or converted into a video color format.
+4. **How fast?** The NCO's beat.
 
-| Subsystem | Relationship |
-|-----------|--------------|
-| Hub FIFO | RDFAST/WRFAST provide data source/sink |
-| LUT RAM | Palette lookup, sine/cosine tables |
-| DAC channels | Analog output for video/audio |
-| Colorspace converter | HDMI encoding, composite video |
-| Smart pins | Clock generation, timing synchronization |
+That is the whole idea. The long list of modes in Part II is nothing more than the *useful combinations* of those four answers. Once you read a mode as "hub data, to the pins, one byte at a time, at the pixel rate," the names stop looking like alphabet soup.
+
+## 1.4 Two directions: output and input
+
+The streamer works in two directions, and they are different enough that it helps to think about them separately.
+
+**Output modes drive the world** — pixels to a screen, samples to a speaker, bits down a serial line. Here the interesting questions are *where the data comes from* (a buffer in memory, or a small repeating table) and *how it is shaped* (raw bytes, palette lookup, RGB color) before it reaches the pins.
+
+**Input modes capture the world** — pin states recorded into memory (a logic analyzer); ADC readings recorded into memory (an oscilloscope). Here the interesting question is *how the captured data is packed* as it is written back to hub.
+
+Knowing which direction you are working in immediately cuts the mode list roughly in half — you only ever care about one side at a time.
+
+## 1.5 Why there are so many modes — and why they differ
+
+It is tempting to see the mode tables as a random pile of similar-looking options. They are not. They vary along just a few axes, and each combination earns its place by doing a *distinct* job. Two quick contrasts make the point:
+
+- **Playing a recording vs. synthesizing a tone.** Both end at the DAC. But playing a recorded sound streams a long buffer out of hub memory, while synthesizing a tone loops a *tiny* table — one cycle of a sine wave — over and over, with the NCO setting the pitch. Same destination, completely different source strategy. That difference is exactly what separates the two modes.
+- **One channel vs. multichannel audio.** These are not different engines at all — they are one routing knob (the DAC-routing field) deciding how many of the four DAC channels get fed. "Stereo" is a setting, not a separate mode.
+
+So when two mode names sound alike, the question to ask is: *which of the four pipe-questions do they answer differently?* That is always where the real distinction lives.
+
+## 1.6 The special capabilities, in plain words
+
+A few streamer features have intimidating names. Here is what they actually mean.
+
+**Video (RGB and colorspace conversion).** The streamer can pull pixels from a framebuffer in memory and push them out as an analog VGA signal or a digital HDMI signal, translating color formats as it goes. You provide the picture; the streamer handles the relentless pixel timing. *(Chapters 7 and 15.)*
+
+**DDS — Direct Digital Synthesis.** A grand name for a simple trick: generate a repeating waveform — a sine, a tone, any shape you like — by stepping through a small table at a precise rate. The NCO sets the frequency, so the same table produces any pitch. This is how you build a function generator, an audio tone, or a modulated carrier. *(Chapters 10 and 17.)*
+
+**Goertzel frequency analysis.** This one is never obvious from its name, so plainly: it is a way to ask, in hardware, *"how much of one specific frequency is present in this incoming signal?"* You tell it the frequency you care about, and it reports how strongly that tone is there. The textbook use is decoding telephone touch-tones — the beeps of a phone keypad, known as DTMF — but the same trick detects whistles and alarm tones, measures distance with ultrasound (send a ping, listen for its echo), and builds simple receivers. It is cheap precisely because it checks only the *one* frequency you ask about, instead of computing a whole spectrum. *(Chapters 10 and 17.)*
+
+## 1.7 If you're building...
+
+You usually arrive at the streamer with an application already in mind. Find it below; the chapters on the right are the ones worth reading closely first. The rest of the reference is there for when you need the exact bits.
+
+| If you're thinking about... | The streamer gives you... | Start at |
+|------------------------------|----------------------------|----------|
+| Video (VGA, HDMI, composite) | color pixels from a framebuffer | Ch. 7, Ch. 15 |
+| Audio / sound output | DAC samples from a buffer | Ch. 5–6, Ch. 11 |
+| Generating tones or waveforms | DDS from a small table | Ch. 10, Ch. 17 |
+| A logic analyzer (capturing pins) | pin states written to memory | Ch. 8 |
+| Sampling an analog signal | ADC readings written to memory | Ch. 9 |
+| Detecting a specific tone or frequency | Goertzel analysis | Ch. 10, Ch. 17 |
+| High-speed serial (fast SPI) | timed bit output, clocked by a smart pin | Ch. 16 |
+
+## 1.8 What each COG actually has
+
+For all that capability, the hardware budget is modest. Each COG contains exactly one streamer, with:
+
+- one 32-bit NCO (the metronome / phase accumulator);
+- one command buffer (it holds one queued command, so commands can hand off without a gap);
+- four 8-bit DAC channels (X0, X1, X2, X3);
+- one Goertzel analyzer;
+- access to the COG's LUT RAM (used as a palette or a waveform table).
+
+And it leans on a few neighboring P2 subsystems:
+
+| Subsystem | What it provides |
+|-----------|------------------|
+| Hub FIFO | the data source / sink, via RDFAST / WRFAST |
+| LUT RAM | palette lookups, sine/cosine tables |
+| DAC channels | analog output for video and audio |
+| Colorspace converter | HDMI encoding and composite video |
+| Smart pins | clock generation and timing synchronization |
+
+With that picture in place, Chapter 2 opens up the engine itself — the data paths inside the streamer and how the pieces connect.
 
 # Chapter 2: Architecture
 
+Chapter 1 described the streamer as a paced pipe from memory to the pins. This chapter opens that pipe up — the pieces inside, how data flows through them, and how the NCO drives the whole thing. You do not need this depth to *use* the streamer, but it makes the mode choices in Part II feel inevitable rather than arbitrary.
+
 ## 2.1 Block Diagram
 
-```
-                    +-------------------------------------+
-                    |               STREAMER              |
-                    |                                     |
-   Hub Memory ----->|  +---------+    +---------------+   |
-        (via RDFAST)|  |  FIFO   |--->| Data Shifter  |   |
-                    |  |Interface|    |  & Formatter  |   |
-                    |  +---------+    +-------+-------+   |
-                    |                         |           |
-                    |  +---------+            |           |
-  XINIT/XCONT ----->|  | Command |            |           |
-         XZERO/XSTOP|  | Buffer  |            v           |
-                    |  +----+----+    +---------------+   |
-                    |       |         |  LUT Lookup   |   |
-                    |       v         |  (optional)   |   |
-                    |  +---------+    +-------+-------+   |
-                    |  |   NCO   |            |           |
-      SETXFRQ ----->|  |(32-bit) |            v           | ---> Pins (32)
-                    |  +----+----+    +---------------+   |
-                    |       |         | DAC Channels  |   | ---> DAC0-DAC3
-                    |       |         |  X0 X1 X2 X3  |   |
-                    |       v         +---------------+   |
-                    |  +---------+                        |
-     ADC Pins ----->|  |Goertzel |                        |
-                    |  |Analyzer |                        |
-      GETXACC <-----|  +---------+                        |
-                    |                                     |
-                    +-------------------------------------+
+```{=latex}
+\DiagStreamerArch
 ```
 
 ## 2.2 Data Flow Paths
 
 The streamer supports multiple data flow configurations:
+
+```{=latex}
+\DiagDataFlow
+```
 
 **Output Paths (Hub → Pins/DACs):**
 
@@ -118,6 +151,8 @@ Hardware frequency detection using Goertzel algorithm. Accumulates sine and cosi
 
 # Chapter 3: NCO and Timing
 
+The NCO is the streamer's metronome, and it is the single most important thing to understand about the streamer's timing. Everything the streamer does happens on the NCO's beat, so setting its rate correctly is the difference between a steady picture and a rolling one. This chapter shows how the NCO produces that beat and how to compute the value you need for a given rate.
+
 ## 3.1 NCO Operation
 
 The NCO operates on every system clock:
@@ -132,6 +167,10 @@ phase = (phase & $7FFF_FFFF) + frequency
 4. On rollover, the streamer advances to the next data element
 
 🔧 **Hardware:** The phase accumulator is a 32-bit register. Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2³¹`.
+
+```{=latex}
+\DiagNcoRollover
+```
 
 ## 3.2 Frequency Calculation
 
@@ -185,17 +224,14 @@ Each value is `round($8000_0000 × pixel_rate / clock_frequency)` — the closes
 
 # Chapter 4: Command Structure
 
+A streamer command is a single value — the D operand — that packs together every choice from Chapter 1's four questions: what mode, where the data goes, which pins, and how long to run. This chapter lays that packed word out field by field, then introduces the small set of instructions (XINIT, XCONT, XZERO) that start and chain commands.
+
 ## 4.1 Command Word Format
 
 The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 
-```layout
-D[31:28] = Mode (4 bits)           - Selects data path
-D[27:24] = DAC routing (4 bits)    - %dddd field
-D[23]    = Enable/Write (1 bit)    - %e or %w field
-D[22:20] = Pin group (3 bits)      - %ppp field
-D[19:16] = Mode config (4 bits)    - Mode-specific
-D[15:0]  = Count (16 bits)         - NCO rollovers
+```{=latex}
+\DiagCommandWord
 ```
 
 ## 4.2 Mode Field D[31:28]
@@ -266,9 +302,11 @@ Specifies the number of NCO rollovers before the command completes.
 
 # Part II: Mode Reference
 
+The streamer's modes are the heart of this reference. This Part documents each family in turn — immediate, hub-streamed, video, pin-capture, ADC, and the special DDS/Goertzel mode. Each chapter opens with what its modes are *for* before giving the exact encodings.
+
 # Chapter 5: Immediate Modes
 
-Immediate modes use the S operand as the data source. Data transfers directly to pins/DACs or through the LUT.
+Immediate modes are the simplest place to start. Instead of streaming from memory, the data you want to output is a value you hand the streamer directly, in the S operand. Reach for them when you have a small, fixed pattern to emit — a handful of pixels, a test pattern, a short bit sequence — and do not want to set up a hub buffer. The data can go straight to the pins and DACs, or pass through the LUT for palette expansion.
 
 ## 5.1 Immediate → LUT → Pins/DACs
 
@@ -326,7 +364,7 @@ The S operand drives pins and DACs directly without LUT lookup.
 
 # Chapter 6: RDFAST Modes
 
-RDFAST modes read data from Hub memory via the FIFO. The FIFO must be initialized with **RDFAST** before issuing these commands.
+RDFAST modes are the workhorse of the streamer. Where immediate modes carry a single fixed value, these stream a continuous flow of data out of hub memory — a framebuffer, an audio clip, a bitmap — onto the pins or DACs. This is what you use for anything longer than a few elements. The data arrives through the FIFO, which must be primed with **RDFAST** before the streamer command runs.
 
 ⚠️ **Pitfall:** RDFAST modes require FIFO setup before the streamer command. Without **RDFAST** initialization, the FIFO contains undefined data.
 
@@ -384,7 +422,7 @@ Hub data drives pins and DACs directly.
 
 # Chapter 7: RGB Video Modes
 
-RGB modes convert Hub pixel data through the colorspace converter for video output.
+Video is the streamer's headline act, and it earns its own family of modes because pixels are not just bytes. A color pixel must be unpacked into red, green, and blue and pushed out in a form a monitor understands. These RGB modes pull pixel data from a framebuffer and run it through the P2's colorspace converter on the way to the pins — so your code stores a picture and the streamer turns it into a signal. The modes differ mainly in how many bits each pixel uses, trading color depth against memory.
 
 ## 7.1 RGB Format Modes
 
@@ -397,6 +435,10 @@ RGB modes convert Hub pixel data through the colorspace converter for video outp
 | `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB | 8:8:8 |
 
 ## 7.2 Color Format Details
+
+```{=latex}
+\DiagRgbFormats
+```
 
 **LUMA8:** 8-bit luminance. The `S[2:0]` field selects the output color; the byte sets its intensity.
 
@@ -422,7 +464,7 @@ RGB modes convert Hub pixel data through the colorspace converter for video outp
 
 # Chapter 8: WRFAST Input Modes
 
-WRFAST modes capture pin states to Hub memory via the write FIFO.
+Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a COG into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
 ⚠️ **Pitfall:** Initialize the write FIFO with **WRFAST** before issuing capture commands.
 
@@ -458,7 +500,7 @@ WRFAST modes capture pin states to Hub memory via the write FIFO.
 
 # Chapter 9: ADC Sampling Modes
 
-ADC modes capture analog-to-digital converter readings to Hub memory.
+ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a COG into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
 
 ## 9.1 ADC Capture Modes
 
@@ -489,7 +531,7 @@ ADC modes capture analog-to-digital converter readings to Hub memory.
 
 # Chapter 10: DDS/Goertzel Mode
 
-DDS/Goertzel mode combines Direct Digital Synthesis output with Goertzel frequency analysis. This mode operates on **every clock cycle**, not just NCO rollovers.
+This is the streamer's cleverest mode, and it does two things at once (Chapter 1 introduced both in plain terms). **DDS** *generates* a signal — it steps through a waveform table to synthesize a precise tone or arbitrary shape. **Goertzel** *measures* one — it reports how much of a single chosen frequency is present in an incoming signal, the trick behind touch-tone decoding and ultrasonic ranging. Uniquely, this mode advances on **every clock cycle**, not just on NCO rollovers, which is what gives it the resolution to do real signal processing.
 
 ## 10.1 Mode Variants
 
@@ -520,6 +562,10 @@ m := ADC_bit ? +1 : -1
 
 sin_acc += sin × m
 cos_acc += cos × m
+```
+
+```{=latex}
+\DiagDdsGoertzel
 ```
 
 ## 10.3 LUT Setup
@@ -571,9 +617,11 @@ frequency = $1_0000_0000 × F / CLK
 
 # Part III: Configuration Reference
 
+These chapters cover the choices that apply across modes — where data goes among the DAC channels, which pins are driven, how commands are named, and how your code stays in step with the streamer.
+
 # Chapter 11: DAC Channel Configuration
 
-The %dddd field in D[27:24] controls how streamer data maps to the four COG DAC channels.
+Many modes send data to the DAC channels, but none of them say *which* channels, or *how*. That is this chapter's job. The %dddd routing field is the knob from Chapter 1's stereo example: it decides how the streamer's data spreads across the four 8-bit DAC channels — one channel, a stereo pair, a differential pair, or all four independently. The same data becomes mono, stereo, or four-channel purely by changing this field.
 
 ## 11.1 DAC Routing Table
 
@@ -637,6 +685,8 @@ mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
 # Chapter 12: Pin Selection and Control
+
+A streamer command also has to say *which* pins it drives or samples, and that is less obvious than it sounds: the P2 has 64 pins, but a command addresses them 32 at a time, through a window you choose. This chapter covers how to aim the streamer at the right pins, how to enable output, and a few smaller controls such as bit ordering.
 
 ## 12.1 Pin Group Selection
 
@@ -703,7 +753,7 @@ The %a bit in D[16] controls bit ordering for 1/2/4-bit modes:
 
 # Chapter 13: Programming Constants
 
-These symbols are built into the Spin2/PASM2 compiler.
+You rarely build a command word bit by bit. Instead you OR together named constants — `X_RFWORD_RGB16`, `X_PINS_ON`, `X_DACS_3_2_1_0` — and the compiler assembles the value for you. This chapter is the catalog of those built-in symbols and shows how they compose. Skim it once to learn the naming pattern; after that the names read almost like sentences.
 
 ## 13.1 Mode Symbols
 
@@ -805,6 +855,8 @@ mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_pin<<17 + cycles
 
 # Chapter 14: Events and Synchronization
 
+Because the streamer runs on its own, your code needs a way to ask *where it is up to* — is it ready for another command, has it finished, did the NCO just roll over? The streamer raises events for exactly these moments, and this chapter shows how to poll them, wait on them, or branch on them. Getting this right is how you chain commands seamlessly and keep video and audio free of glitches.
+
 ## 14.1 Streamer Events
 
 | Event # | Symbol | Trigger Condition |
@@ -882,7 +934,11 @@ line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 
 # Part IV: Applications
 
+Here the modes come together into the things people actually build: video, high-speed serial, signal processing, and the patterns that combine them.
+
 # Chapter 15: Video Output
+
+Part IV puts the pieces together into real applications, beginning with the streamer's signature use: video. This chapter walks through generating VGA, HDMI, and composite signals — combining the RGB modes of Chapter 7, the NCO timing of Chapter 3, and the sync discipline that keeps a picture stable. The encoding differs by standard, but the shape is always the same: stream a framebuffer, on the beat, line after line.
 
 ## 15.1 VGA Output
 
@@ -902,6 +958,10 @@ VGA uses analog RGB via DAC channels with composite sync.
 | Sync pulse | 96 | 3.81 µs |
 | Back porch | 48 | 1.91 µs |
 | **Total line** | **800** | **31.78 µs** |
+
+```{=latex}
+\DiagVgaTiming
+```
 
 **Example:**
 
@@ -1006,6 +1066,8 @@ Composite video uses the colorspace converter to generate NTSC or PAL signals.
 
 # Chapter 16: High-Speed Serial (SPI)
 
+Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and the two stay locked together for transfers far faster than a software bit-bang.
+
 ## 16.1 SPI Output with Streamer
 
 The streamer outputs SPI data while a smart pin generates the clock.
@@ -1057,6 +1119,8 @@ The **WAITXFI** instruction synchronizes streamer completion with clock generati
 ⚠️ **Pitfall:** The smart pin clock and streamer operate independently. Verify both complete before starting the next transfer.
 
 # Chapter 17: Signal Processing
+
+This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts them to work — generating waveforms with a function generator's precision, and detecting specific frequencies for tone decoding, distance sensing, and measurement. Where Chapter 10 explained the mechanism, this chapter shows the applications.
 
 ## 17.1 Goertzel Frequency Detection
 
@@ -1134,6 +1198,8 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
 💡 **Tip:** The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the 512 entries at the programmed rate.
 
 # Chapter 18: Integration Patterns
+
+The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple COGs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
 
 ## 18.1 Double Buffering
 
@@ -1354,37 +1420,111 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 
 # Index
 
+```{=latex}
+\indexletter{A}
+```
+
 - ADC sampling modes: Chapter 9
 - Alternate bit order: 12.4
 - Architecture: Chapter 2
+
+```{=latex}
+\indexletter{B}
+```
+
 - Block diagram: 2.1
+
+```{=latex}
+\indexletter{C}
+```
+
 - Colorspace converter: 15.2, 15.3
 - Command structure: Chapter 4
 - Count field: 4.6
+
+```{=latex}
+\indexletter{D}
+```
+
 - DAC channels: Chapter 11
 - DAC pin mapping: 11.2
 - DAC routing table: 11.1
 - DAC symbols: 13.3
 - DDS mode: Chapter 10
 - Double buffering: 18.1
+
+```{=latex}
+\indexletter{E}
+```
+
 - Enable control: 12.3
 - Events: Chapter 14
+
+```{=latex}
+\indexletter{F}
+```
+
 - Frequency calculation: 3.2, Appendix C
+
+```{=latex}
+\indexletter{G}
+```
+
 - GETXACC: 4.7, 10.5
 - Goertzel mode: Chapter 10
+
+```{=latex}
+\indexletter{H}
+```
+
 - HDMI output: 15.2
 - Hub FIFO: 6.1
+
+```{=latex}
+\indexletter{I}
+```
+
 - Immediate modes: Chapter 5
+
+```{=latex}
+\indexletter{L}
+```
+
 - LUT setup: 5.1, 10.3
+
+```{=latex}
+\indexletter{M}
+```
+
 - Mode encoding table: Appendix A
 - Mode field: 4.2
 - Mode symbols: 13.1
 - Multi-COG: 18.2
+
+```{=latex}
+\indexletter{N}
+```
+
 - NCO: Chapter 3
+
+```{=latex}
+\indexletter{P}
+```
+
 - Pin group selection: 12.1
 - Pin selection: Chapter 12
+
+```{=latex}
+\indexletter{R}
+```
+
 - RDFAST modes: Chapter 6
 - RGB modes: Chapter 7
+
+```{=latex}
+\indexletter{S}
+```
+
 - SETXFRQ: 3.3, 4.7
 - Signal processing: Chapter 17
 - SINC1/SINC2: 10.4
@@ -1393,11 +1533,31 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 - Sub-pin selection: 12.2
 - Symbol composition: 13.4
 - Symbols quick reference: Appendix B
+
+```{=latex}
+\indexletter{T}
+```
+
 - Troubleshooting: Appendix D
+
+```{=latex}
+\indexletter{V}
+```
+
 - VGA output: 15.1
 - Video output: Chapter 15
+
+```{=latex}
+\indexletter{W}
+```
+
 - WAITXFI: 14.2
 - WRFAST modes: Chapter 8
+
+```{=latex}
+\indexletter{X}
+```
+
 - XCONT: 4.7
 - XINIT: 4.7
 - XSTOP: 4.7

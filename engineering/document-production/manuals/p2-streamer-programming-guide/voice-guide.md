@@ -1,7 +1,7 @@
 # P2 Streamer Programming Guide - Voice Guide
 
 **Document:** P2 Streamer Programming Guide  
-**Purpose:** Define writing voice and tone for consistent, authoritative technical reference  
+**Purpose:** Define writing voice and tone — a guide that teaches the streamer conceptually, then serves as a precise reference  
 **Created:** 2026-01-22
 
 ---
@@ -10,13 +10,18 @@
 
 ### 1.1 The Guiding Principle
 
-> **This manual tells you exactly how the streamer works, what every mode does, and precisely how to configure it - when you already understand P2 basics and need to implement high-speed I/O.**
+> **This guide first helps you understand what the streamer is and why you would use it, then tells you exactly how every mode works and how to configure it.**
 
-This is a **technical reference** for an advanced hardware feature. The voice must be:
-- **Authoritative** - This is the source of truth for streamer operation
-- **Precise** - No ambiguity about modes, bit fields, or timing
-- **Efficient** - Dense information for developers who know what they need
-- **Practical** - Real examples showing actual usage patterns
+The document does two jobs, so it speaks in **two registers** (defined in Section 1.4):
+
+- A **teaching register** — the conceptual chapter and each chapter's opening orientation — warm, plain-spoken, and motivated, for a reader meeting the streamer for the first time.
+- A **reference register** — the mode tables, bit fields, symbol tables, and per-instruction detail — for a reader who already knows what they need and wants it fast. The reference register must be:
+  - **Authoritative** - the source of truth for streamer operation
+  - **Precise** - no ambiguity about modes, bit fields, or timing
+  - **Efficient** - dense information for developers who know what they need
+  - **Practical** - real examples showing actual usage patterns
+
+Sections 2–6 of this guide codify the **reference** register; Section 1.4 defines the **teaching** register and when each applies.
 
 ### 1.2 Pedagogical Grounding
 
@@ -31,17 +36,31 @@ Unlike tutorial manuals, reference documents serve learning through **repeated r
 
 ### 1.3 Target Audience
 
-The Streamer Programming Guide serves developers who:
-- Already understand P2 COG/Hub architecture
-- Need to implement video output, high-speed I/O, or signal processing
-- Want quick lookup of modes, constants, and configurations
-- May be porting code or debugging streamer-based systems
+The Streamer Programming Guide serves a **spectrum** of readers, and the two registers exist to serve both ends of it:
 
-**This is NOT a tutorial.** Readers should already understand:
-- Basic P2 instruction set
-- Hub memory and FIFO operations (RDFAST/WRFAST)
-- Pin configuration concepts
-- DAC fundamentals
+- **Newcomers** — developers (including hobbyist and DIY engineers) coming to the P2 who have heard of the streamer but do not yet know what it is, why it exists, or when to reach for it. The **teaching register** is for them: the conceptual chapter and chapter openers assume no prior streamer knowledge and define unfamiliar terms as they appear.
+- **Experienced developers** — readers who understand P2 COG/Hub architecture and want to implement video, high-speed I/O, or signal processing, or who are porting or debugging streamer code. The **reference register** is for them: quick lookup of modes, constants, configurations, and exact bit fields.
+
+The teaching layer builds the background a newcomer needs (hub memory and the FIFO, pins, DACs) rather than assuming it; the reference layer assumes it. A single reader typically starts in the teaching register and graduates into the reference register as they build.
+
+### 1.4 The Two Registers — Teaching and Reference
+
+The guide deliberately switches voice depending on what the reader needs at that moment.
+
+**Use the teaching register for:** the conceptual chapter (Chapter 1, "Understanding the Streamer"), the opening orientation of each Part and each mode chapter, and the first explanation of any unfamiliar concept (DDS, Goertzel, colorspace conversion).
+
+Teaching-register rules:
+
+- **Plain language first.** Define every unfamiliar term on first use, in one or two sentences, with a concrete use — e.g., Goertzel as "asking how much of one specific frequency is present in a signal; used to decode phone touch-tones." Never let a named feature appear unexplained.
+- **Motivate before detail.** Say *why* something matters before *how* it works.
+- **"You" and light analogy are allowed and encouraged.** The metronome, the paced pipe, the player-piano roll — imagery is how a newcomer forms a mental model. Use it.
+- **Differentiate by contrast.** When several options sound alike, show what makes them *different* rather than describing each in isolation.
+- **Comparative grounding is a soft bridge, never a crutch.** When a real-world parallel (DMA is the obvious one) would help an experienced reader, offer it as a clearly skippable aside — a `> If you've used X before:` note. The explanation must always stand on its own for a reader who has never met that parallel. Do not make understanding depend on outside knowledge.
+- **Applications are pointers, not pitches.** Frame applications as "if you're building X, these are the modes to understand," directing the reader rather than selling the hardware.
+
+**Use the reference register for:** mode tables, bit-field specifications, symbol tables, per-instruction syntax and effects, frequency tables, and worked code examples. Its rules are in Sections 2–6 (third person, no hedging, dense, exact). Those rules govern the reference layer only; the teaching register relaxes the no-"you" and no-analogy constraints as described above.
+
+**The handoff.** A chapter typically opens in the teaching register (a short orientation — what these modes are for, how they differ) and then shifts into the reference register for the tables and specifications. The two coexist on the page: guidance up front, precision underneath.
 
 ---
 

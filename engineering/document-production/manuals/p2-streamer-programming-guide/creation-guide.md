@@ -10,18 +10,18 @@
 
 ### 1.1 Purpose and Scope
 
-This guide serves as the **comprehensive technical reference** for the Propeller 2 Streamer hardware. It consolidates information from silicon documentation, Spin2 documentation, and real-world code examples into a single authoritative source.
+This guide does two complementary jobs. It **teaches** what the streamer is, why the P2 has one, and how to think about it — the conceptual understanding a reader needs before the details mean anything — and it serves as the **comprehensive reference** for every streamer mode, constant, and configuration. It consolidates silicon documentation, Spin2 documentation, and real-world code into a single authoritative source, written in two registers (see `voice-guide.md`, Section 1.4): a warm teaching register for the conceptual chapter and chapter openers, and a precise reference register for the tables and specifications.
 
 **This document IS:**
+- A conceptual introduction to the streamer — what it is, why it exists, and when to use it
 - A complete reference for streamer modes, constants, and configurations
 - The authoritative source for NCO frequency calculations
-- A practical guide with working code examples
-- A reference for integration with related hardware (DAC, colorspace converter, FIFO)
+- A practical guide with working code examples and integration notes (DAC, colorspace converter, FIFO)
 
 **This document is NOT:**
-- A P2 tutorial (assumes P2 basics are known)
-- A complete video system design guide (covers streamer, not full video architecture)
-- A DeSilva-style pedagogical manual (this is reference, not tutorial)
+- A *tutorial* — it teaches the hardware and how to think about it, but it does not walk you through building a project step by step with progressive exercises (that is the DeSilva style; this guide teaches understanding, not a guided build)
+- A complete video system design guide (it covers the streamer, not full video architecture)
+- A substitute for the P2 basics — it builds the streamer-specific background a newcomer needs, but assumes general familiarity with PASM2 and the P2's COG/Hub model
 
 ### 1.2 Target Audience
 
@@ -44,7 +44,7 @@ This guide serves developers who:
 | **P2 Assembly Language Manual** | Covers XINIT/XCONT/XZERO instructions; this guide covers streamer *usage* |
 | **P2 Smart Pins Tutorial** | Smart pins often coordinate with streamer (SPI clocks, etc.) |
 | **P2 Debug Window Manual** | DEBUG can observe streamer output |
-| **DeSilva PASM Style** | Tutorial counterpart; this is reference |
+| **DeSilva PASM Style** | A true step-by-step tutorial; this guide teaches concepts and explains the hardware, but is not a guided build |
 
 ---
 
@@ -107,11 +107,15 @@ INDEX
 
 ## 3. Pedagogical Framework
 
-### 3.1 Learning Theory for Reference Manuals
+### 3.1 Learning Theory for a Two-Register Guide
 
-While tutorial guides (like the DeSilva style) employ pedagogical techniques that guide readers through progressive learning, **technical reference manuals serve learning differently**. This section identifies which learning principles apply and which don't.
+This guide teaches in two ways at once, and the pedagogy differs by layer.
 
-**Core Insight:** Reference manuals don't teach through narrative progression - they teach through **pattern recognition**, **consistent structure**, and **reliable findability**. A developer who uses this reference 50 times learns more than someone who reads a tutorial once.
+The **teaching layer** (the conceptual chapter and each chapter's opener) works the way good explanatory writing always has: an advance organizer first (the big picture before the parts), motivation before mechanism, concrete imagery and analogy to build a mental model, and differentiation by contrast so similar-looking options become distinct. This is how a newcomer goes from "what even is a streamer?" to knowing which modes to read.
+
+The **reference layer** (the mode tables, bit fields, and per-instruction detail) serves learning differently — not through narrative but through **pattern recognition**, **consistent structure**, and **reliable findability**. A developer who uses this layer 50 times learns more than someone who reads a tutorial once.
+
+**Core Insight:** the two layers reinforce each other. The teaching layer gives the reference layer somewhere to attach; the reference layer gives the teaching layer the precision to cash in. The sections below identify which classic learning principles apply to each.
 
 ### 3.2 Principles That Apply (Adapted for Reference)
 
