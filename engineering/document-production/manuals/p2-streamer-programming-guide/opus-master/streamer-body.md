@@ -6,9 +6,11 @@ Before the mode tables and bit fields, it helps to know what the streamer *is*, 
 
 ## 1.1 What the streamer is
 
-Every COG on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the CPU's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
+Every COG on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the COG's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
 
-The detail that makes the streamer special is that it carries **its own clock**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) acts as a metronome: you set the beat, and the streamer moves one piece of data on every beat. That beat can run tens of millions of times per second and — crucially — it is *exact*. This is what lets a single COG produce a clean video picture or a steady audio stream: not raw speed, but precise, unwavering timing that the CPU never has to babysit.
+The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single COG produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
+
+And because the streamer lives *inside* the COG, **each COG has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One COG can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
 
 > **If you've used DMA before:** the streamer is a close cousin of a DMA channel, with two important additions. First, it has that built-in metronome, so it does *paced* transfers at an exact sample rate rather than "as fast as the bus allows." Second, it reshapes data as it moves — packing bits, expanding through a palette, converting color formats — instead of copying bytes verbatim. If you have never met DMA, don't worry: everything below stands on its own.
 
@@ -104,6 +106,8 @@ Chapter 1 described the streamer as a paced pipe from memory to the pins. This c
 \DiagStreamerArch
 ```
 
+What the diagram does not show is *which physical pins* DAC0–DAC3 — and the 32 output pins — actually land on, and you will care about that the moment you wire something up. The mapping is not arbitrary: each DAC channel can only drive pins whose number ends in its own two bits — DAC0 drives pins ending in `%00` (pins 0, 4, 8, …), DAC1 those ending in `%01`, and so on. The complete channel-to-pin mapping is in Chapter 11, and choosing which 32-pin group a command targets is Chapter 12. (Setting a pin up to *act* as an analog/DAC output is a pin-configuration topic in its own right — see the *P2 I/O & Smart Pins User Guide*.) For now, just note that the diagram's "DAC0–DAC3" and "Pins" become specific pin numbers once you choose them.
+
 ## 2.2 Data Flow Paths
 
 The streamer supports multiple data flow configurations:
@@ -191,20 +195,22 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 | 1:5 | `$1999_999A` | 50 MHz | 60 MHz |
 | 1:10 | `$0CCC_CCCD` | 25 MHz | 30 MHz |
 
-💡 **Tip:** For fractional ratios (1/3, 1/5, 1/10), add 1 to the calculated value to ensure proper initial rollover timing.
+⚠️ **Pitfall — round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 
 ## 3.3 Setting NCO Frequency
 
 **Method 1: SETXFRQ instruction**
 
 ```pasm2
-        setxfrq ##$0CCC_CCCD        ' 25 MHz at 250 MHz clock
+        setxfrq ##$0CCC_CCCC+1        ' 1/10 clock = 25 MHz; the +1 forces the first rollover
 ```
+
+The `+1` is the rounding-up habit from the pitfall above: `$0CCC_CCCC` is the truncated 1/10 value, and adding 1 makes the streamer roll over on the 10th clock instead of the 11th (and keeps the word off zero). You will see this `+1` throughout the examples.
 
 **Method 2: SETQ before streamer command**
 
 ```pasm2
-        setq    ##$0CCC_CCCD        ' Frequency in Q
+        setq    ##$0CCC_CCCC+1        ' Frequency in Q
         xinit   mode, data          ' Uses Q as frequency
 ```
 
@@ -301,8 +307,6 @@ Specifies the number of NCO rollovers before the command completes.
 ⚠️ **Pitfall:** Issuing **XCONT** or **XZERO** when no command is active causes unpredictable behavior. Use **XINIT** to start the streamer initially.
 
 # Part II: Mode Reference
-
-The streamer's modes are the heart of this reference. This Part documents each family in turn — immediate, hub-streamed, video, pin-capture, ADC, and the special DDS/Goertzel mode. Each chapter opens with what its modes are *for* before giving the exact encodings.
 
 # Chapter 5: Immediate Modes
 
@@ -455,7 +459,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 ```pasm2
 ' VGA 640×480 RGB16 output
         rdfast  ##640*480*2/64, ##framebuffer
-        setxfrq ##$0CCC_CCCD                    ' 25 MHz pixel rate
+        setxfrq ##$0CCC_CCCC+1                    ' 25 MHz pixel rate
 
         xcont   ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + base<<17 + 640, #0
 ```
@@ -492,7 +496,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 ```pasm2
 ' Capture 32 pins to Hub at 10 MHz
         wrfast  #0, ##capture_buffer
-        setxfrq ##$0CCC_CCCD
+        setxfrq ##$0CCC_CCCC+1
 
         xinit   ##X_32P_4DAC8_WFLONG | X_WRITE_ON + base<<17 + 1000, #0
         waitxfi
@@ -616,8 +620,6 @@ frequency = $1_0000_0000 × F / CLK
 🔧 **Hardware:** The 32-bit frequency word gives sub-Hz resolution at typical system clocks (`clock_frequency / 2³²`, about 0.06 Hz at 250 MHz).
 
 # Part III: Configuration Reference
-
-These chapters cover the choices that apply across modes — where data goes among the DAC channels, which pins are driven, how commands are named, and how your code stays in step with the streamer.
 
 # Chapter 11: DAC Channel Configuration
 
@@ -934,8 +936,6 @@ line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 
 # Part IV: Applications
 
-Here the modes come together into the things people actually build: video, high-speed serial, signal processing, and the patterns that combine them.
-
 # Chapter 15: Video Output
 
 Part IV puts the pieces together into real applications, beginning with the streamer's signature use: video. This chapter walks through generating VGA, HDMI, and composite signals — combining the RGB modes of Chapter 7, the NCO timing of Chapter 3, and the sync discipline that keeps a picture stable. The encoding differs by standard, but the shape is always the same: stream a framebuffer, on the beat, line after line.
@@ -974,7 +974,7 @@ DAT             org
                 hubset  ##%1_000001_0000011000_1111_10_11
 
                 rdfast  ##640*480*2/64, ##framebuffer
-                setxfrq ##$0CCC_CCCD            ' 25 MHz pixel rate
+                setxfrq ##$0CCC_CCCC+1            ' 25 MHz pixel rate
 
 field:          mov     line_count, #480
 
@@ -1039,7 +1039,7 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
                 wrpin   ##%100100_00_00000_0, #7<<6 + hdmi_base
 
                 ' NCO for 1/10 rate (TMDS serialization)
-                setxfrq ##$0CCC_CCCD
+                setxfrq ##$0CCC_CCCC+1
 ```
 
 🔧 **Hardware:** HDMI requires the colorspace converter in DVI mode. The converter generates TMDS encoding automatically from RGB data.

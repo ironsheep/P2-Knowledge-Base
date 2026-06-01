@@ -288,6 +288,7 @@ The `/2³²` form yields **double** the correct word for every rate.
 **Evidence:**
 - Silicon Doc v35 facts (`engineering/ingestion/sources/silicon-doc/silicon-doc-v35-facts-only.md:339`): `Phase = (phase & $7FFF_FFFF) + frequency` → mod-2³¹ accumulator; `$8000_0000` (=2³¹) rolls over every clock (1:1), exactly as the mode tables show.
 - Silicon Doc HDMI/TMDS example (same file, ~line 436): the 1:10 ratio uses `$0CCCCCCC+1 = $0CCCCCCD`. `round(2³¹/10) = $0CCCCCCD` ✓; `round(2³²/10) = $1999999A` ✗ (that is the 1:5 value).
+- **Primary-source confirmation (decisive):** Silicon Doc v35 SETXFRQ description (`engineering/ingestion/sources/silicon-doc/p2-documentation.txt:2753`): "D/# expresses a fractional 0-to-1 multiplier for the system clock, **which value must be multiplied by `$8000_0000`**." That is 2³¹, explicitly — the `setxfrq.yaml` `/2³²` form is wrong beyond doubt.
 - The streamer guide's NCO common-values table (independently verified): `$8000_0000`=1:1, `$4000_0000`=1:2, `$0CCC_CCCD`=1:10 — all consistent with 2³¹, none with 2³².
 
 **Proposed correction:** Change the `setxfrq.yaml` formula to the 2³¹ form above and re-check any worked example values it carries. Reconcile with `nco-timing.yaml` (which already uses the `$8000_0000 × rate/clk` convention).

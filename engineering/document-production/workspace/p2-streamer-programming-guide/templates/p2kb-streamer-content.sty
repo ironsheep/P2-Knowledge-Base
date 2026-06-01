@@ -61,7 +61,10 @@
 \makeatother
 
 % Custom \manualpart command
-% Renders part title on its own page; chapter follows on same page
+% Renders part title on its own page; the first chapter is PINNED below it
+% (intentional: no lonely part page -- the chapter comes up under the title).
+% This requires that NO body text sit between \manualpart and the first chapter
+% heading, or that text pushes the chapter title down. Keep part dividers bare.
 \newcommand{\manualpart}[1]{%
   \clearpage%
   \thispagestyle{empty}%
@@ -310,15 +313,16 @@
 \newcommand{\appref}[1]{Appendix~\ref{app:#1}}
 
 % ==================== INDEX LETTER HEADINGS ====================
-% Category heading for each alphabetical group in the Index. Rendered as a bold
-% letter with a thin rule. Deliberately NOT a \section/\chapter, so it never
-% appears in the table of contents or PDF bookmarks. Invoked from the Index via
-% a raw-LaTeX block: ```{=latex} \indexletter{A} ```
+% Category heading for each alphabetical group in the Index. A bold letter with
+% generous space ABOVE (separating it from the previous group) and tight space
+% below (binding it to its own entries). NO rule -- a separator under the letter
+% made the letter read as part of the group above. Deliberately NOT a
+% \section/\chapter, so it never appears in the table of contents or PDF
+% bookmarks. Invoked from the Index via: ```{=latex} \indexletter{A} ```
 \newcommand{\indexletter}[1]{%
-  \par\addvspace{9pt}%
+  \par\addvspace{12pt}%
   \noindent{\large\bfseries #1}\par
-  \vspace{1pt}{\color{black!25}\rule{\linewidth}{0.4pt}}\par
-  \addvspace{2pt}%
+  \addvspace{1pt}%
 }
 
 % ==================== FULL-WIDTH TABLE CONFIGURATION ====================
