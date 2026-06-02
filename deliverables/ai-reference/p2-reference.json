@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-05-08",
-    "last_updated": "2026-05-08T00:32:31.521648",
+    "release_date": "2026-06-02",
+    "last_updated": "2026-06-02T10:31:06.294813",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-05-08T00:32:31.521648",
+    "extraction_date": "2026-06-02T10:31:06.294813",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -1614,7 +1614,7 @@
               {
                 "bits": "EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -1626,7 +1626,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]] (original state of target bit)",
               "Z": "Set to original D[S[4:0]] (original state of target bit)"
             },
             "parameters": [
@@ -1764,7 +1764,7 @@
               {
                 "bits": "EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -1776,7 +1776,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]]",
               "Z": "Set to original D[S[4:0]]"
             },
             "parameters": [
@@ -2226,7 +2226,7 @@
               {
                 "bits": "EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -2238,7 +2238,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]] (original state of target bit)",
               "Z": "Set to original D[S[4:0]] (original state of target bit)"
             },
             "parameters": [
@@ -3944,7 +3944,7 @@
               {
                 "bits": "EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -3956,7 +3956,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]] (original state of target bit)",
               "Z": "Set to original D[S[4:0]] (original state of target bit)"
             },
             "parameters": [
@@ -4205,7 +4205,7 @@
               {
                 "bits": "EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -4217,7 +4217,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]] (original state of target bit)",
               "Z": "Set to original D[S[4:0]] (original state of target bit)"
             },
             "parameters": [
@@ -5008,7 +5008,7 @@
               {
                 "bits": "EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -5020,7 +5020,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]]",
               "Z": "Set to original D[S[4:0]]"
             },
             "parameters": [
@@ -5486,7 +5486,7 @@
               {
                 "bits": "EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "\u2014",
+                "c": "original D[S[4:0]]",
                 "z": "original D[S[4:0]]",
                 "clocks": "2"
               }
@@ -5498,7 +5498,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original D[S[4:0]]",
               "Z": "Set to original D[S[4:0]]"
             },
             "parameters": [
@@ -10231,7 +10231,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001100",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10243,7 +10243,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -10338,7 +10338,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001010",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10350,7 +10350,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -10387,7 +10387,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001011",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10399,7 +10399,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -10434,7 +10434,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000010",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -10446,7 +10446,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -10555,7 +10555,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000100",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -10567,7 +10567,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -10604,7 +10604,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001101",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10616,7 +10616,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -10651,7 +10651,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011111",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10663,7 +10663,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -10700,7 +10700,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000001",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -10712,7 +10712,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -10749,7 +10749,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011000",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10761,7 +10761,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -10796,7 +10796,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000101",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -10808,7 +10808,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -10850,7 +10850,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001001",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10862,7 +10862,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -10899,7 +10899,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010011",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -10911,7 +10911,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -10946,7 +10946,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000111",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -10958,7 +10958,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -11003,7 +11003,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010101",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11015,7 +11015,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11050,7 +11050,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001111",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11062,7 +11062,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -11099,7 +11099,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010000",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11111,7 +11111,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11146,7 +11146,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000011",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -11158,7 +11158,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to DIR bit state",
               "Z": "Set to DIR bit state"
             },
             "parameters": [
@@ -11200,7 +11200,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010100",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11212,7 +11212,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11249,7 +11249,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011101",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11261,7 +11261,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11295,7 +11295,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011011",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11307,7 +11307,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11342,7 +11342,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010010",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11354,7 +11354,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11391,7 +11391,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010111",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11403,7 +11403,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11440,7 +11440,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011100",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11452,7 +11452,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11488,7 +11488,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011010",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11500,7 +11500,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11537,7 +11537,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011001",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11550,7 +11550,7 @@
               "pin_output_latency": "After instruction completes, the pin starts to transition 3 system-clock cycles later.\nTotal from instruction start: 2 (execution) + 3 (propagation) = 5 clocks to pin change.\n"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11587,7 +11587,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000000",
                 "write": "DIRx",
-                "c": "\u2014",
+                "c": "DIR bit",
                 "z": "DIR bit",
                 "clocks": "2"
               }
@@ -11599,7 +11599,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original DIR bit state (if WCZ specified)",
               "Z": "Set to original DIR bit state (if WCZ specified)"
             },
             "parameters": [
@@ -11699,7 +11699,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010001",
                 "write": "DIRx* + OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11711,7 +11711,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to OUT bit state",
               "Z": "Set to OUT bit state"
             },
             "parameters": [
@@ -11862,7 +11862,7 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001000",
                 "write": "OUTx",
-                "c": "\u2014",
+                "c": "OUT bit",
                 "z": "OUT bit",
                 "clocks": "2"
               }
@@ -11874,7 +11874,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "Set to original OUT bit state",
               "Z": "Set to original OUT bit state"
             },
             "parameters": [
@@ -11998,7 +11998,15 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "language/pasm2/setq2.yaml",
+              "language/pasm2/rdlong.yaml",
+              "language/pasm2/wrlong.yaml",
+              "language/pasm2/concepts/setq_block_ops.yaml",
+              "language/pasm2/idioms/hub-memory.yaml",
+              "code-examples/flash-loader-case-study.yaml",
+              "architecture/xbyte_engine.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -12088,7 +12096,15 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "language/pasm2/setq.yaml",
+              "language/pasm2/rdlong.yaml",
+              "language/pasm2/wrlong.yaml",
+              "language/pasm2/rdlut.yaml",
+              "language/pasm2/wrlut.yaml",
+              "language/pasm2/concepts/setq_block_ops.yaml",
+              "architecture/xbyte_engine.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -13477,7 +13493,12 @@
             "syntax_variants": [
               "REP {#}D,{#}S"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/djnz.yaml",
+              "language/pasm2/djnf.yaml",
+              "language/pasm2/idioms/loop-control.yaml",
+              "code-examples/flash-loader-case-study.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15771,7 +15792,16 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "language/pasm2/wrfast.yaml",
+              "language/pasm2/getptr.yaml",
+              "language/pasm2/xinit.yaml",
+              "language/pasm2/concepts/streamer_smartpin_control.yaml",
+              "architecture/streamer/_index.yaml",
+              "architecture/boot-rom/spi-flash-boot.yaml",
+              "code-examples/flash-loader-case-study.yaml",
+              "language/pasm2/idioms/hub-memory.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15907,7 +15937,15 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/getptr.yaml",
+              "language/pasm2/xinit.yaml",
+              "language/pasm2/concepts/streamer_smartpin_control.yaml",
+              "architecture/streamer/_index.yaml",
+              "architecture/boot-rom/spi-flash-boot.yaml",
+              "code-examples/flash-loader-case-study.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16045,7 +16083,11 @@
             "syntax_variants": [
               "GETPTR D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/wrfast.yaml",
+              "code-examples/flash-loader-case-study.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16285,7 +16327,10 @@
             ],
             "related": [
               "COGID",
-              "COGSTOP"
+              "COGSTOP",
+              "architecture/boot-rom/_index.yaml",
+              "architecture/boot-rom/spi-flash-boot.yaml",
+              "code-examples/flash-loader-case-study.yaml"
             ],
             "compiler_info": {
               "syntax": "",
@@ -16485,7 +16530,10 @@
               "language/spin2/system-variables/clkfreq.yaml",
               "language/spin2/system-variables/clkmode.yaml",
               "language/spin2/constants/special-configuration-symbols.yaml",
-              "architecture/clock_system.yaml"
+              "architecture/clock_system.yaml",
+              "architecture/boot-rom/_index.yaml",
+              "architecture/boot-rom/spi-flash-boot.yaml",
+              "language/pasm2/idioms/halt-and-fault-response.yaml"
             ],
             "compiler_info": {
               "syntax": "",
@@ -16714,7 +16762,19 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "language/pasm2/xstop.yaml",
+              "language/pasm2/xcont.yaml",
+              "language/pasm2/xzero.yaml",
+              "language/pasm2/setxfrq.yaml",
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/wrfast.yaml",
+              "language/pasm2/concepts/streamer_smartpin_control.yaml",
+              "architecture/streamer/_index.yaml",
+              "architecture/streamer/modes-reference.yaml",
+              "architecture/boot-rom/spi-flash-boot.yaml",
+              "code-examples/flash-loader-case-study.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -18309,7 +18369,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-05-08T00:32:31.521648",
+    "extraction_date": "2026-06-02T10:31:06.294813",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20657,10 +20717,70 @@
           "ADDPINS": {
             "operator": "ADDPINS",
             "type": "operator",
-            "description": "Add pin count to pin number\n",
             "category": "Pin",
+            "description": "Encodes a pin-range count into a pin operand for use with pin\ninstructions that accept ranges (FLTL, FLTH, DRVH, DRVL, DIRH, DIRL,\nOUTH, OUTL, etc.). The result is an operand value where bits [5:0]\nare the base pin number and bits [10:6] are the additional-pin count.\nPin instructions that decode this operand apply to (count + 1)\ncontiguous pins starting at the base pin.\n",
+            "encoding": {
+              "formula": "base_pin + (count << 6)",
+              "base_pin_bits": "[5:0] \u2014 pin number 0..63",
+              "count_bits": "[10:6] (5 bits) \u2014 additional-pin count; value N means N+1 total pins affected",
+              "pins_affected": "count + 1 contiguous pins, starting at base_pin"
+            },
             "examples": [
-              "pin_range := start_pin ADDPINS pin_count"
+              {
+                "syntax": "FLTL #spi_di ADDPINS 2",
+                "pasm2_form": "fltl #spi_di addpins 2",
+                "spin2_form": "PINFLOAT(spi_di ADDPINS 2)",
+                "description": "Floats three contiguous pins in one instruction. If spi_di is pin 59,\nthen ADDPINS 2 means \"base + 0\", \"base + 1\", \"base + 2\" \u2192 pins 59,\n60, 61. The single instruction floats the entire 3-pin SPI bus\nsimultaneously.\n",
+                "source_example": "engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275"
+              },
+              {
+                "syntax": "DRVH #LED_BASE ADDPINS 7",
+                "pasm2_form": "drvh #LED_BASE addpins 7",
+                "spin2_form": "PINHIGH(LED_BASE ADDPINS 7)",
+                "description": "Drive 8 contiguous pins high in one instruction. ADDPINS 7 means\n\"base + 0\" through \"base + 7\", total 8 pins.\n"
+              },
+              {
+                "syntax": "DIRH #data_bus ADDPINS 7",
+                "description": "Set 8 contiguous pins as outputs in one instruction. Useful for\nbus-style I/O.\n"
+              }
+            ],
+            "constraints": [
+              "Range cannot cross a 32-pin port boundary (wraps within the same group of 32)",
+              "9-bit immediate operand encoding limits ADDPINS to 7 with #base syntax; for ranges 8-31, use ##base ADDPINS N (compiler emits AUGD)",
+              "Counting is INCLUSIVE: ADDPINS N affects N+1 pins (not N pins)",
+              "The base pin must be specified as the LOWEST pin in the range; ADDPINS extends upward"
+            ],
+            "usage_pattern": {
+              "when_to_use": [
+                "Operations on a contiguous pin group (parallel bus, multi-bit signal)",
+                "Simultaneous state changes across multiple pins (no inter-pin timing skew)",
+                "Fault response that needs to release a multi-pin interface atomically"
+              ],
+              "when_not_to_use": [
+                "Non-contiguous pin sets \u2014 ADDPINS cannot skip pins; use separate instructions or pin masks",
+                "Single-pin operations \u2014 ADDPINS 0 affects 1 pin but adds no value over a plain pin operand"
+              ]
+            },
+            "related": [
+              "language/pasm2/fltl.yaml",
+              "language/pasm2/flth.yaml",
+              "language/pasm2/drvh.yaml",
+              "language/pasm2/drvl.yaml",
+              "language/pasm2/dirh.yaml",
+              "language/pasm2/dirl.yaml",
+              "language/pasm2/outh.yaml",
+              "language/pasm2/outl.yaml",
+              "language/pasm2/idioms/pin-control.yaml",
+              "language/pasm2/idioms/halt-and-fault-response.yaml",
+              "code-examples/flash-loader-case-study.yaml"
+            ],
+            "search_keywords": [
+              "addpins",
+              "pin range",
+              "multi-pin",
+              "pin group",
+              "float pins",
+              "drive pins"
             ]
           },
           ">>": {
@@ -22471,50 +22591,55 @@
           "QSIN": {
             "method": "QSIN",
             "type": "method",
-            "description": "Calculate sine of angle using hardware CORDIC\n",
+            "description": "Return the Y (sine) component of rotating the vector (length, 0) by a caller-defined\nangle, using the P2 hardware CORDIC engine.\n",
             "category": "Math/CORDIC Operations",
-            "syntax": "sine := QSIN(Angle, Length)",
+            "syntax": "y := QSIN(length, step, stepsInCircle)",
             "parameters": [
               {
-                "name": "Angle",
+                "name": "length",
                 "type": "long",
-                "description": "Angle in P2 angle units (0..$FFFFFFFF = 0..360\u00b0)"
+                "description": "Vector length / amplitude. The result is scaled by this (acts as the radius)."
               },
               {
-                "name": "Length",
+                "name": "step",
                 "type": "long",
-                "description": "Hypotenuse/radius length (scaling factor)"
+                "description": "Angle expressed as a step count. The actual angle is (step / stepsInCircle) * 2Pi."
+              },
+              {
+                "name": "stepsInCircle",
+                "type": "long (unsigned)",
+                "description": "Number of steps in a full circle -- i.e. the caller-chosen angle unit (360 for degrees, 65536 for 16-bit brads, etc.). Use 0 to mean a full circle of $1_0000_0000 (2^32) steps. stepsInCircle is unsigned."
               }
             ],
             "returns": {
               "type": "long",
-              "description": "Sine value scaled by Length"
+              "description": "y = length * sin( (step / stepsInCircle) * 2Pi )"
             },
             "examples": [
               {
-                "code": "' Calculate sine of 30 degrees\nsine := QSIN($1555_5555, 1000)  ' 30\u00b0 with scale 1000\n' Result: sine \u2248 500\n",
-                "description": "Basic sine calculation"
+                "code": "' Sine at 90 degrees using a 360-step circle\ny := QSIN(1000, 90, 360)        ' sin(90 deg) -> ~1000\n",
+                "description": "Sine in degrees (stepsInCircle = 360)"
               },
               {
-                "code": "' Generate sine wave\nrepeat angle from 0 to $FFFF_FFFF step $0100_0000\n  y := QSIN(angle, amplitude)\n  plot(x++, center_y + y)\n",
-                "description": "Generate sine wave plot"
+                "code": "' Quarter turn using the default 2^32-step circle (stepsInCircle = 0)\ny := QSIN(1000, $4000_0000, 0)  ' $4000_0000 is 1/4 of 2^32 -> 90 deg -> ~1000\n",
+                "description": "Default full-circle units ($1_0000_0000 steps)"
               },
               {
-                "code": "' Vertical position for circular motion\ny_pos := center_y + QSIN(angle, radius)\n",
-                "description": "Calculate Y position on circle"
+                "code": "' Generate one cycle of a sine wave, 360 points\nrepeat ang from 0 to 359\n  y := QSIN(amplitude, ang, 360)\n  plot(x++, center_y + y)\n",
+                "description": "Generate a sine wave (degrees)"
               }
             ],
             "notes": [
-              "Uses P2's hardware CORDIC engine",
-              "Angle units: $0000_0000 = 0\u00b0, $4000_0000 = 90\u00b0, $8000_0000 = 180\u00b0",
-              "Result = Length \u00d7 sin(Angle)",
-              "Full 32-bit precision",
-              "38-clock cycle operation",
-              "Handles all quadrants correctly"
+              "Uses the P2 hardware CORDIC engine (QROTATE).",
+              "Angle is caller-defined: actual angle = (step / stepsInCircle) * 2Pi. The unit is whatever you pass as stepsInCircle -- 360 for degrees, 65536 for 16-bit brads, etc.",
+              "stepsInCircle = 0 selects a full circle of $1_0000_0000 (2^32) steps; stepsInCircle is unsigned.",
+              "Result = length * sin(angle).",
+              "Returns the Y (sine) component; QCOS returns the X (cosine) component of the same rotation."
             ],
+            "source": "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5141-5143 (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts v1.55.0",
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "QCOS",
@@ -23048,12 +23173,11 @@
               "Angle units: $0000_0000 = 0\u00b0, $4000_0000 = 90\u00b0, $8000_0000 = 180\u00b0, $C000_0000 = 270\u00b0",
               "Full 32-bit precision maintained",
               "Handles all quadrants correctly",
-              "Result is scaled by CORDIC K factor (\u22481.647)",
-              "38-clock cycle operation"
+              "Results are NOT scaled by the CORDIC gain: the P2 32-bit CORDIC solver applies scale-factor correction (Silicon Doc line 425: '32-bit, pipelined CORDIC solver with scale-factor correction'). The ~1.646 CORDIC gain applies only to the streamer's separate 5-stage modulator CORDIC, not to QROTATE-based solver operations like this one."
             ],
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "POLXY",
@@ -23425,12 +23549,11 @@
               "Input range: 0.0625 to 2.0 (in unsigned 32-bit format)",
               "Result is natural logarithm (base e)",
               "Output in 5.27 fixed-point format",
-              "38-clock cycle operation",
               "For values outside range, scale appropriately"
             ],
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "QEXP",
@@ -24611,12 +24734,11 @@
               "Rho (radius) is always positive",
               "Theta covers full 360\u00b0 range based on quadrant",
               "Handles all four quadrants correctly",
-              "Result is scaled by CORDIC K factor (\u22481.647)",
-              "38-clock cycle operation"
+              "Results are NOT scaled by the CORDIC gain: the P2 32-bit CORDIC solver applies scale-factor correction (Silicon Doc line 425: '32-bit, pipelined CORDIC solver with scale-factor correction'). The ~1.646 CORDIC gain applies only to the streamer's separate 5-stage modulator CORDIC, not to QROTATE-based solver operations like this one."
             ],
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "POLXY",
@@ -25373,12 +25495,11 @@
               "Input in 5.27 fixed-point format",
               "Input range: -2.77 to 0.69 (in 5.27 format)",
               "Result is e^exponent",
-              "Output range: 0.0625 to 2.0",
-              "38-clock cycle operation"
+              "Output range: 0.0625 to 2.0"
             ],
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "QLOG",
@@ -27373,12 +27494,11 @@
               "Angle units: $0000_0000 = 0\u00b0, $4000_0000 = 90\u00b0, $8000_0000 = 180\u00b0, $C000_0000 = 270\u00b0",
               "Full 32-bit precision maintained",
               "Rho (radius) is unsigned magnitude",
-              "Result is scaled by CORDIC K factor (\u22481.647)",
-              "38-clock cycle operation"
+              "Results are NOT scaled by the CORDIC gain: the P2 32-bit CORDIC solver applies scale-factor correction (Silicon Doc line 425: '32-bit, pipelined CORDIC solver with scale-factor correction'). The ~1.646 CORDIC gain applies only to the streamer's separate 5-stage modulator CORDIC, not to QROTATE-based solver operations like this one."
             ],
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "XYPOL",
@@ -27878,50 +27998,55 @@
           "QCOS": {
             "method": "QCOS",
             "type": "method",
-            "description": "Calculate cosine of angle using hardware CORDIC\n",
+            "description": "Return the X (cosine) component of rotating the vector (length, 0) by a caller-defined\nangle, using the P2 hardware CORDIC engine.\n",
             "category": "Math/CORDIC Operations",
-            "syntax": "cosine := QCOS(Angle, Length)",
+            "syntax": "x := QCOS(length, step, stepsInCircle)",
             "parameters": [
               {
-                "name": "Angle",
+                "name": "length",
                 "type": "long",
-                "description": "Angle in P2 angle units (0..$FFFFFFFF = 0..360\u00b0)"
+                "description": "Vector length / amplitude. The result is scaled by this (acts as the radius)."
               },
               {
-                "name": "Length",
+                "name": "step",
                 "type": "long",
-                "description": "Hypotenuse/radius length (scaling factor)"
+                "description": "Angle expressed as a step count. The actual angle is (step / stepsInCircle) * 2Pi."
+              },
+              {
+                "name": "stepsInCircle",
+                "type": "long (unsigned)",
+                "description": "Number of steps in a full circle -- i.e. the caller-chosen angle unit (360 for degrees, 65536 for 16-bit brads, etc.). Use 0 to mean a full circle of $1_0000_0000 (2^32) steps. stepsInCircle is unsigned."
               }
             ],
             "returns": {
               "type": "long",
-              "description": "Cosine value scaled by Length"
+              "description": "x = length * cos( (step / stepsInCircle) * 2Pi )"
             },
             "examples": [
               {
-                "code": "' Calculate cosine of 60 degrees\ncosine := QCOS($2AAA_AAAA, 1000)  ' 60\u00b0 with scale 1000\n' Result: cosine \u2248 500\n",
-                "description": "Basic cosine calculation"
+                "code": "' Cosine at 0 degrees using a 360-step circle\nx := QCOS(1000, 0, 360)         ' cos(0 deg) -> ~1000\n",
+                "description": "Cosine in degrees (stepsInCircle = 360)"
               },
               {
-                "code": "' Generate cosine wave\nrepeat angle from 0 to $FFFF_FFFF step $0100_0000\n  y := QCOS(angle, amplitude)\n  plot(x++, center_y + y)\n",
-                "description": "Generate cosine wave plot"
+                "code": "' Cosine at 60 degrees\nx := QCOS(1000, 60, 360)        ' cos(60 deg) -> ~500\n",
+                "description": "Cosine of 60 degrees"
               },
               {
-                "code": "' Horizontal position for circular motion\nx_pos := center_x + QCOS(angle, radius)\n",
-                "description": "Calculate X position on circle"
+                "code": "' Horizontal position for circular motion (X = cos)\nx_pos := center_x + QCOS(radius, ang, 360)\n",
+                "description": "Calculate X position on a circle"
               }
             ],
             "notes": [
-              "Uses P2's hardware CORDIC engine",
-              "Angle units: $0000_0000 = 0\u00b0, $4000_0000 = 90\u00b0, $8000_0000 = 180\u00b0",
-              "Result = Length \u00d7 cos(Angle)",
-              "Full 32-bit precision",
-              "38-clock cycle operation",
-              "Handles all quadrants correctly"
+              "Uses the P2 hardware CORDIC engine (QROTATE).",
+              "Angle is caller-defined: actual angle = (step / stepsInCircle) * 2Pi. The unit is whatever you pass as stepsInCircle -- 360 for degrees, 65536 for 16-bit brads, etc.",
+              "stepsInCircle = 0 selects a full circle of $1_0000_0000 (2^32) steps; stepsInCircle is unsigned.",
+              "Result = length * cos(angle).",
+              "Returns the X (cosine) component; QSIN returns the Y (sine) component of the same rotation."
             ],
+            "source": "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5147-5149 (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0",
             "timing": {
-              "description": "CORDIC operation",
-              "cycles": "38 clock cycles"
+              "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
+              "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
             },
             "related": [
               "QSIN",
@@ -28673,10 +28798,56 @@
             "command": "PC_KEY",
             "type": "debug_command",
             "category": "Debug Control",
-            "description": "PC keyboard input\n",
-            "syntax": "['PC_KEY']",
+            "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. It returns any new keypress that occurred within the last ~100 ms as a\nsingle LONG written through a caller-supplied pointer. The keyboard model is\nidentical for all nine DEBUG display windows.\n",
+            "documentation_source": "Spin2 v51 (debug-section.txt) + PNut v55 directive matrix",
+            "documentation_level": "comprehensive",
+            "source": "engineering/ingestion/sources/spin2-v51/debug-section.txt:784-814 (PC_KEY P2-side API + key-code table); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md section 4.2 (host side: SendKeyPress 3579-3583, FormKeyDown 833-851)",
+            "syntax": "PC_KEY(pointer_to_long)",
+            "usage_rules": [
+              "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",
+              "Must be the LAST command in the DEBUG() statement.",
+              "The DEBUG() display must have focus for keypresses to be noticed.",
+              "Reports a keypress only if it occurred within the last ~100 ms of the poll (the host latch auto-clears after 100 ms); otherwise 0.",
+              "Universal: accepted in every DEBUG display window's update phase, with identical behavior."
+            ],
+            "pointer": {
+              "spin2": "The long must be in hub RAM -- pass @key.",
+              "pasm2": "The long must be a cog register -- pass #key."
+            },
+            "returns": {
+              "long": "key -- the keypress code (0 if no keypress)"
+            },
+            "key_codes": {
+              "0": "no keypress",
+              "1": "Left Arrow",
+              "2": "Right Arrow",
+              "3": "Up Arrow",
+              "4": "Down Arrow",
+              "5": "Home",
+              "6": "End",
+              "7": "Delete",
+              "8": "Backspace",
+              "9": "Tab",
+              "10": "Insert",
+              "11": "Page Up",
+              "12": "Page Down",
+              "13": "Enter",
+              "27": "Esc",
+              "32..126": "Space to \"~\" -- all printable ASCII (symbols, digits, letters)"
+            },
             "examples": [
-              "DEBUG(PC_KEY)"
+              {
+                "code": "' Spin2: read keypresses from a TERM window (long in hub)\nVAR\n  long key\nPUB main()\n  DEBUG(`TERM MyTerm)\n  REPEAT\n    DEBUG(`MyTerm PC_KEY(@key))        ' PC_KEY must be last in the statement\n    IF key\n      handle_key(key)\n",
+                "description": "Read host keypresses into a Spin2 hub long"
+              }
+            ],
+            "notes": [
+              "PC_KEY returns one LONG; the keyboard mapping is the same in all nine windows (no per-window keyboard differences).",
+              "Non-printable keys map to the small control codes above (1..13); printable keys map to their ASCII value (32..126); Esc = 27."
+            ],
+            "related": [
+              "language/spin2/debug-commands/pc_mouse.yaml",
+              "language/spin2/debug-displays/plot.yaml"
             ]
           },
           "unknown": {
@@ -28738,10 +28909,78 @@
             "command": "PC_MOUSE",
             "type": "debug_command",
             "category": "Debug Control",
-            "description": "PC mouse input\n",
-            "syntax": "['PC_MOUSE']",
+            "description": "PC_MOUSE reads the host PC's mouse into the P2 from within a graphical DEBUG()\ndisplay. It returns the current mouse status as a 7-LONG structure written through\na caller-supplied pointer. The mechanism is identical for all nine DEBUG display\nwindows; only the reported coordinate basis differs per window.\n",
+            "documentation_source": "Spin2 v51 (debug-section.txt) + PNut v55 directive matrix",
+            "documentation_level": "comprehensive",
+            "source": "engineering/ingestion/sources/spin2-v51/debug-section.txt:815-852 (PC_MOUSE P2-side API + 7-long struct); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md sections 4.3-4.4 (host side: SendMousePos 3537-3577, per-window coordinate mapping)",
+            "syntax": "PC_MOUSE(pointer_to_7_longs)",
+            "usage_rules": [
+              "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",
+              "Must be the LAST command in the DEBUG() statement.",
+              "The DEBUG() display must have focus for the scroll-wheel delta to be reported.",
+              "Universal: accepted in every DEBUG display window's update phase."
+            ],
+            "pointer": {
+              "spin2": "The seven longs must be in hub RAM -- pass @xpos (the first of seven consecutive longs).",
+              "pasm2": "The seven longs must be cog registers -- pass #xpos (the first of seven consecutive registers)."
+            },
+            "returns": {
+              "structure": "7 consecutive LONGs, in order:",
+              "longs": [
+                {
+                  "name": "xpos",
+                  "description": "X position within the DEBUG display (xpos<0 AND ypos<0 if the mouse is outside the display)"
+                },
+                {
+                  "name": "ypos",
+                  "description": "Y position within the DEBUG display"
+                },
+                {
+                  "name": "wheeldelta",
+                  "description": "Scroll-wheel delta: 0, or +/-1 if changed (display must have focus)"
+                },
+                {
+                  "name": "lbutton",
+                  "description": "Left-button state: 0, or -1 if pressed"
+                },
+                {
+                  "name": "mbutton",
+                  "description": "Middle-button state: 0, or -1 if pressed"
+                },
+                {
+                  "name": "rbutton",
+                  "description": "Right-button state: 0, or -1 if pressed"
+                },
+                {
+                  "name": "pixel",
+                  "description": "Pixel color at the mouse position: $00_RR_GG_BB, or -1 if outside the display"
+                }
+              ]
+            },
+            "coordinate_basis_per_window": {
+              "note": "The reported xpos/ypos basis is transformed per display type (matrix section 4.4).",
+              "LOGIC": "sample index x channel row (origin bottom-right)",
+              "SCOPE_FFT": "pixel offset from plot origin, Y inverted",
+              "SCOPE_XY": "scaled data value; Cartesian or polar (rho,theta) per POLAR/LOGSCALE",
+              "PLOT_SPECTRO_BITMAP": "pixel / DOTSIZE, honoring direction/flip flags",
+              "TERM": "character column,row; off-text-area returns the off-window sentinel",
+              "MIDI": "no coordinate readout"
+            },
             "examples": [
-              "DEBUG(PC_MOUSE)"
+              {
+                "code": "' Spin2: read the mouse in a PLOT window (7 longs in hub)\nVAR\n  long xpos, ypos, wheel, lb, mb, rb, pixel\nPUB main()\n  DEBUG(`PLOT MyPlot SIZE 256 256)\n  REPEAT\n    DEBUG(`MyPlot PC_MOUSE(@xpos))     ' PC_MOUSE must be last; fills 7 longs\n    IF lb                               ' left button pressed (-1)\n      DEBUG(`MyPlot SET `(xpos) `(ypos) DOT)\n",
+                "description": "Track mouse position and draw on left-click"
+              }
+            ],
+            "notes": [
+              "PC_MOUSE returns 7 LONGs (xpos, ypos, wheeldelta, lbutton, mbutton, rbutton, pixel).",
+              "Mouse-outside-display is signaled by xpos<0 and ypos<0, and pixel = -1.",
+              "Button states are 0 (up) or -1 (pressed); the wheel delta is momentary (0 or +/-1).",
+              "HIDEXY hides the on-screen measurement cursor but does NOT disable PC_MOUSE reporting back to the P2."
+            ],
+            "related": [
+              "language/spin2/debug-commands/pc_key.yaml",
+              "language/spin2/debug-displays/plot.yaml"
             ]
           },
           "DEBUG": {
