@@ -20,6 +20,14 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.6.0] - 2026-06-02
+
+**XBYTE dispatch-mode control via SETQ and SETQ2**
+
+### Added
+- XBYTE engine: SETQ arms the persistent dispatch mode; SETQ2 sets a one-shot mode for the next bytecode, then reverts — the mechanism for two-table bytecode VMs
+- SETQ / SETQ2: XBYTE mode-control role documented alongside their block-transfer use
+
 ## [1.5.1] - 2026-05-31
 
 **CORDIC scale-factor and SETQ block-size accuracy**

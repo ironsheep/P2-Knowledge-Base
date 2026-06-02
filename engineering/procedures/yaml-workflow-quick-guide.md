@@ -53,6 +53,8 @@ related:
 
 **Why this matters**: The index generator and validator use different key transformation logic. Full paths bypass this inconsistency and ensure 100% resolution.
 
+**Findability is continual**: Every YAML touch should leave the remote agent better able to find what it needs. When you spot a referencing hole (a missing cross-ref, a concept reachable under one name but not its sibling), *add* the link in the same pass — the active twin of "never remove references." See the `yaml-knowledge-base-maintenance` skill.
+
 ### Step 3: Commit YAML Changes
 ```bash
 git add deliverables/ai/P2/path/to/changed.yaml

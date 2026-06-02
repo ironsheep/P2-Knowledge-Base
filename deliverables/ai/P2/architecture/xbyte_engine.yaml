@@ -59,17 +59,52 @@ execution_cycle:
 starting_xbyte:
   setup:
     code: |
-      _RET_   SETQ    {#}D     ' Configure XBYTE mode
+      _RET_   SETQ    {#}D     ' Configure PERSISTENT XBYTE mode (armed once)
+      _RET_   SETQ2   {#}D     ' Configure ONE-SHOT XBYTE mode (next bytecode only, then reverts)
     requirement: "$1FF must be on stack (from CALL)"
-    
+
   configuration:
-    d_parameter: "32-bit configuration value"
+    d_parameter: "32-bit configuration value (the same mode operand for both SETQ and SETQ2)"
     stack_requirement: "Hardware stack must contain $1FF"
-    
+
   automatic_start:
     description: |
-      When RET executes with $1FF on stack after SETQ,
+      When RET executes with $1FF on stack after SETQ (or SETQ2),
       XBYTE mode begins automatically
+
+  mode_persistence:
+    summary: |
+      The mode operand (table base + compression threshold + flag-write bit; see
+      configuration_patterns and flag_control) is loaded by EITHER SETQ or SETQ2.
+      Choosing SETQ vs SETQ2 chooses PERSISTENCE; the operand value chooses table
+      base + compression + flags. The two decisions are orthogonal — one
+      instruction, two independent choices.
+    setq:
+      role: "Sets the PERSISTENT XBYTE mode."
+      behavior: |
+        The table base / compression / flag configuration loaded by SETQ is
+        retained by XBYTE and applies to every subsequent bytecode. Bytecode
+        routines that end in a plain _RET_ continue dispatching through this mode;
+        it is armed once, not per-bytecode.
+    setq2:
+      role: "Sets a ONE-SHOT XBYTE mode for only the next bytecode."
+      behavior: |
+        The configuration loaded by SETQ2 applies to exactly the next bytecode,
+        after which XBYTE automatically reverts to the mode last set by SETQ. No
+        instruction is needed to switch back.
+    use_case: |
+      Lets one XBYTE-driven VM operate two dispatch tables: a default table
+      (armed once with SETQ) and an alternate table borrowed for exactly one
+      opcode at a time (via SETQ2), after which dispatch returns to the default
+      table on its own. This is a general bytecode-VM pattern — for example, a
+      "setup bytecode then alternate-table bytecode" pairing that keeps the
+      bytecode stream compact while supporting an alternate handler set on demand.
+    mnemonic_aid: |
+      Mirrors the SETQ/SETQ2 personality split elsewhere in the ISA: SETQ targets
+      COG-RAM block transfers / SETQ2 targets LUT-RAM block transfers; here SETQ
+      sets the persistent XBYTE mode / SETQ2 sets the transient one. The "2"
+      variant is consistently the alternate / one-shot form.
+    source: "Chip Gracey, P2 silicon designer; v55 Spin2 interpreter Theory-of-Operations review."
 
 configuration_patterns:
   full_256_bytecodes:
@@ -253,3 +288,9 @@ see_also:
   - "SKIPF instruction patterns"
   - "Virtual machine design"
   - "Bytecode optimization techniques"
+
+related:
+  - language/pasm2/setq.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/skipf.yaml
+  - language/pasm2/execf.yaml

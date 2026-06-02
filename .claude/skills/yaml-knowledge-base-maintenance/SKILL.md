@@ -28,6 +28,15 @@ deliverables/ai/P2/
 
 **Do not edit `engineering/knowledge-base/P2/`.** That tree is transient and stale. Its cleanup is a separate concern (see the `cleanup-backups` recommendation in the recommendations doc).
 
+## Findability is a continually-improving asset
+
+The KB is download-on-demand: remote agents request entries by name and follow `related:` chains to reach connected concepts. **Every time you touch a YAML, leave the remote agent better able to find what it needs than before.** This is continual, the same way process improvement is continual.
+
+- When you observe a referencing hole — a missing cross-ref, a concept reachable under one name but not its sibling (e.g. `SETQ` documented for XBYTE but not `SETQ2`; `queue`/`queue2` not resolving), a dead-end entry — **fix it in the same pass**, not a follow-up.
+- Gap/observation reports exist to *strengthen referencing and coverage*, not just patch the one reported line. Sweep the neighborhood.
+- Bad findability is as harmful as bad content: a missing link means the agent silently fails to find correct info.
+- This complements Sacred Rule #7 (never *remove* a cross-ref) with its active twin: proactively *add* the cross-refs and aliases a consumer would need.
+
 ## Sacred Rule #7 — Cross-references: never remove, always redirect
 
 When a `related:` reference points at a file that doesn't exist, **find where that concept IS documented and redirect to that file**. Deleting the reference loses an intentional link.
