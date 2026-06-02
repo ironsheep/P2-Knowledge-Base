@@ -15,6 +15,8 @@ controlling when the display updates.
 > they share one mechanism across every window type, so they are covered together
 > in Chapter 12. This chapter is about output.
 
+![The TERM window as a positioned status dashboard.](inbox/assets/fig-03-term-dashboard.png){width=75%}
+
 ## Creating a TERM window
 
 You create and configure a window in a single `DEBUG` statement. The first token

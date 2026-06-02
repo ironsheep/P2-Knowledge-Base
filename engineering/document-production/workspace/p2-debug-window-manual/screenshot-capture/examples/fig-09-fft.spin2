@@ -1,0 +1,22 @@
+' Capture: FFT window — two tones; a channel is defined so the spectrum draws.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000
+
+PUB main() | i, s, ph1, ph2
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 'Mag' 4 80000 250 0 0 $00FF00)
+  waitms(700)
+  ph1 := 0
+  ph2 := 0
+  repeat 4                                  ' a few frames so the spectrum settles
+    repeat i from 1 to 1024
+      s := qsin(700, ph1, $1_0000) + qsin(400, ph2, $1_0000)   ' two tones
+      ph1 += $0600
+      ph2 += $1100
+      debug(`Spectrum `(s))
+  waitms(500)
+  debug(`Spectrum SAVE 'fig-09-fft')
+  waitms(2000)
+  debug("### CAPTURE DONE: fig-09-fft saved -- safe to quit pnut-term-ts ###")
+  debug(`Spectrum CLOSE)
+  waitms(1000)

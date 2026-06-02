@@ -18,6 +18,8 @@ chapter runs on a bare P2 with no external MIDI hardware.
 > every other window. They share one mechanism across all window types, so they
 > are covered together in Chapter 12. This chapter is about the keyboard display.
 
+![The MIDI window showing notes lit on a piano keyboard.](inbox/assets/fig-11-midi.png){width=100%}
+
 ## Creating a MIDI window
 
 You create and configure the window in a single `DEBUG` statement. The first

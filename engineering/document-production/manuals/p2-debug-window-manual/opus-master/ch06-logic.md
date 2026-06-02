@@ -21,6 +21,8 @@ declaring its channels in that one statement, then feed it sample values by name
 > data formats are shared across the instrument windows and are detailed in
 > Chapter 13; this chapter shows how LOGIC uses them.
 
+![The LOGIC window showing eight channels of a binary ripple counter.](inbox/assets/fig-06-logic.png){width=95%}
+
 ## Creating a LOGIC window and declaring channels
 
 You create the window, set its display options, and declare its channels in a single

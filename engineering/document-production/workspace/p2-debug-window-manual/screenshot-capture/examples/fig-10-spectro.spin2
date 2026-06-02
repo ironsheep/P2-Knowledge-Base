@@ -1,0 +1,30 @@
+' Capture: SPECTRO window — rising-tone sweep; lower RANGE + MAG so it's visible.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000
+
+PUB main() | i, phase, ainc, frames, sample
+  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $8000 MAG 4 RATE 512 TRACE 8 LUMA8X)
+  waitms(700)
+  phase := 0
+  ainc  := 30_000
+  repeat frames from 1 to 60                ' enough sweeping frames to fill the waterfall
+    repeat i from 1 to 512
+      sample := sine(2000, phase)
+      phase += ainc
+      debug(`Chirp `(sample))
+    ainc += 20_000
+    if ainc > 1_000_000
+      ainc := 30_000
+  waitms(500)
+  debug(`Chirp SAVE 'fig-10-spectro')
+  waitms(2000)
+  debug("### CAPTURE DONE: fig-10-spectro saved -- safe to quit pnut-term-ts ###")
+  debug(`Chirp CLOSE)
+  waitms(1000)
+
+PRI sine(amp, angle) : y
+  org
+    qrotate amp, angle
+    getqy   y
+  end

@@ -1,0 +1,21 @@
+' Capture: BITMAP window — a CORDIC plasma; feed paced per row to avoid streaks.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000
+
+PUB main() | x, y, r, g, b
+  debug(`BITMAP Img SIZE 128 128 RGB24)
+  waitms(700)
+  repeat y from 0 to 127
+    repeat x from 0 to 127
+      r := 128 + qsin(120, x << 9, $1_0000)
+      g := 128 + qsin(120, y << 9, $1_0000)
+      b := 128 + qsin(120, (x + y) << 8, $1_0000)
+      debug(`Img `((r << 16) | (g << 8) | b))
+    waitms(5)                                ' pace each row so the host keeps up
+  waitms(500)
+  debug(`Img SAVE 'fig-04-bitmap')
+  waitms(2000)
+  debug("### CAPTURE DONE: fig-04-bitmap saved -- safe to quit pnut-term-ts ###")
+  debug(`Img CLOSE)
+  waitms(1000)

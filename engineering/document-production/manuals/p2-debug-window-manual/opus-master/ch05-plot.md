@@ -446,6 +446,8 @@ PUB main()
 
 ### Animating with a sprite
 
+![A sprite stamped at several scales in the PLOT window.](inbox/assets/fig-05-plot-sprite.png){width=50%}
+
 Re-stamping a sprite is cheaper than re-drawing the geometry that produced it. Define
 the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command at the
 new position — you re-send one command, not the primitives. In buffered mode the motion
@@ -580,6 +582,8 @@ reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
 
 ## A worked instrument: an analog gauge
+
+![An analog gauge drawn in the PLOT window using polar coordinates.](inbox/assets/fig-05-plot-gauge.png){width=55%}
 
 Polar mode turns an instrument needle into a single `LINE`. Center the origin,
 switch to polar so the cursor's coordinates are (radius, angle), and the needle for

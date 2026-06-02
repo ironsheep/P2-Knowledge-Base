@@ -1,0 +1,18 @@
+' Capture: SCOPE window — a CORDIC sine, explicit range so it doesn't clip.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000
+
+PUB main() | ang, i
+  debug(`SCOPE Sig SIZE 400 200 'Wave' -1200 1200)   ' channel name + explicit lo/hi range
+  waitms(700)
+  ang := 0
+  repeat i from 1 to 300
+    debug(`Sig `(qsin(1000, ang, 256)))
+    ang += 4
+  waitms(500)
+  debug(`Sig SAVE 'fig-07-scope')
+  waitms(2000)
+  debug("### CAPTURE DONE: fig-07-scope saved -- safe to quit pnut-term-ts ###")
+  debug(`Sig CLOSE)
+  waitms(1000)

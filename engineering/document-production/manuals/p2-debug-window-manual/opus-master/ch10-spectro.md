@@ -24,6 +24,8 @@ runtime commands.
 > they share one mechanism across every window type and are covered together in
 > Chapter 12. This chapter is about the display.
 
+![The SPECTRO window as a rising-tone spectrogram waterfall.](inbox/assets/fig-10-spectro.png){width=65%}
+
 ## Creating a SPECTRO window
 
 You create and configure the window in a single `DEBUG` statement. The first token

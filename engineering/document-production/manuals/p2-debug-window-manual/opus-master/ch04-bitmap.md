@@ -17,6 +17,8 @@ commands that position, scroll, clear, and save the canvas.
 > share one mechanism across every window type, so they are covered together in
 > Chapter 12. This chapter is about output.
 
+![The BITMAP window showing a CORDIC-generated plasma field.](inbox/assets/fig-04-bitmap.png){width=50%}
+
 ## Creating a BITMAP window
 
 You create and configure the window in a single `DEBUG` statement. The first token

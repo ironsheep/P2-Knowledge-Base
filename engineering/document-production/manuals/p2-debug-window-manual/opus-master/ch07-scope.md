@@ -18,6 +18,8 @@ it bare numeric values for the rest of the run.
 > all windows together in Chapter 12. Packed data formats, which let you move
 > samples faster over the debug link, are covered in Chapter 13.
 
+![The SCOPE window displaying a time-domain sine waveform.](inbox/assets/fig-07-scope.png){width=80%}
+
 ## Creating the window and declaring its channels
 
 You create and configure a SCOPE window in a single `DEBUG` statement. The first

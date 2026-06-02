@@ -1,0 +1,17 @@
+' Capture: MIDI window — a C-major triad; notes sent individually so all three light.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000
+
+PUB main()
+  debug(`MIDI Piano SIZE 6 CHANNEL 0)
+  waitms(700)
+  debug(`Piano $90 60 96)                    ' note-on C
+  debug(`Piano $90 64 96)                    ' note-on E
+  debug(`Piano $90 67 96)                    ' note-on G
+  waitms(500)
+  debug(`Piano SAVE 'fig-11-midi')
+  waitms(2000)
+  debug("### CAPTURE DONE: fig-11-midi saved -- safe to quit pnut-term-ts ###")
+  debug(`Piano CLOSE)
+  waitms(1000)

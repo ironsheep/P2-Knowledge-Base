@@ -1,0 +1,31 @@
+' Screenshot-capture variant of the ch05 PLOT gauge.
+' DEBUG_DELAY holds transmission until pnut-term-ts has the window open; then set
+' background + centered POLAR origin, draw the dial, render, SAVE, flush, CLOSE.
+CON
+  _clkfreq    = 200_000_000
+  DEBUG_DELAY = 1000                       ' ms: let pnut-term-ts open before we transmit
+
+PUB main() | value, needle, i, tick
+  debug(`PLOT Gauge SIZE 400 400)
+  waitms(700)                              ' window finishes opening
+  debug(`Gauge BACKCOLOR $000000 ORIGIN 200 200 POLAR 360)  ' black bg, centered, degrees
+  debug(`Gauge CLEAR)
+  waitms(200)
+
+  value  := 70                             ' a representative reading for the figure
+  needle := (value * 240 / 100) - 120
+
+  debug(`Gauge COLOR $404040)
+  repeat i from 0 to 10
+    tick := (i * 24) - 120
+    debug(`Gauge SET 155 `(tick) LINE 175 `(tick) 2 255)
+  debug(`Gauge SET 0 0 CIRCLE 360 2 255)                    ' dial ring (radius 180)
+  debug(`Gauge COLOR $00FFFF SET 0 0 CIRCLE 20 0 255)       ' hub
+  debug(`Gauge COLOR $FF7F00 SET 0 0 LINE 165 `(needle) 5 255)  ' needle
+
+  waitms(500)                              ' let the draws render on the host
+  debug(`Gauge SAVE 'fig-05-plot-gauge')   ' writes fig-05-plot-gauge.bmp
+  waitms(2000)                             ' flush
+  debug("### CAPTURE DONE: fig-05-plot-gauge saved -- safe to quit pnut-term-ts ###")
+  debug(`Gauge CLOSE)
+  waitms(1000)

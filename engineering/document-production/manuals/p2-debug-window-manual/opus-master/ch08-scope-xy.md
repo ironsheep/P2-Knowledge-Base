@@ -20,6 +20,8 @@ see.
 > window; they share one mechanism documented in Chapter 12. This chapter is about
 > output — configuring the plot and feeding it coordinate pairs.
 
+![The SCOPE_XY window tracing a 2:3 Lissajous figure.](inbox/assets/fig-08-scope-xy.png){width=65%}
+
 ## Creating a SCOPE_XY window
 
 You create and configure the window in one `DEBUG` statement. The first token after

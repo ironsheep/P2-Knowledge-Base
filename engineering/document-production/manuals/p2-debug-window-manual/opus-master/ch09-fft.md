@@ -21,6 +21,8 @@ size, feeding samples across one or more channels, the two amplitude controls
 > share one mechanism across every window type, so they are covered together in
 > Chapter 12. This chapter is about the spectrum display.
 
+![The FFT window showing two tones as spectral peaks.](inbox/assets/fig-09-fft.png){width=80%}
+
 ## What the FFT window does with your samples
 
 You send a continuous stream of time-domain samples. The window stores them in a
