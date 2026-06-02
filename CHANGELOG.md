@@ -20,6 +20,13 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.6.1] - 2026-06-02
+
+**Index integrity verification**
+
+### Added
+- Published index: each entry carries a SHA-256 content hash, letting consumers verify fetched content matches the index
+
 ## [1.6.0] - 2026-06-02
 
 **XBYTE dispatch-mode control via SETQ and SETQ2**

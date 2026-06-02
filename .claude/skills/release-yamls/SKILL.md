@@ -33,11 +33,11 @@ The published index (`deliverables/ai/p2kb-index.json`) is **derived** from the 
 
 This skill enforces the correct order:
 
-1. Stage and commit content (YAMLs, docs, skills, tools) — **no index files**
-2. Regenerate index against the just-committed state
+1. Stage and commit content (YAMLs, docs, skills, tools) — **no derived artifacts** (index, AI reference)
+2. Regenerate ALL derived artifacts (index + AI reference) against the just-committed state
 3. Validate the fresh index
-4. Stage and commit the index
-5. Tag the index commit (the one consumers fetch)
+4. Stage and commit the derived artifacts
+5. Tag the derived-artifact commit (the one consumers fetch)
 6. Push both commits + tag
 
 ## 1. Verify precondition — YAML work is ready to publish
@@ -129,21 +129,35 @@ Verify staging with `git status --short`. Confirm the index files are NOT staged
 git commit -m "$(cat <<'EOF'
 Release P2 Knowledge Base v<X.Y.Z>: <one-line theme>
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
 
 The Co-Authored-By line is optional; include only if the user wants the agent attributed.
 
-### 6b. Regenerate the published index against the committed state
+### 6b. Regenerate ALL derived artifacts against the committed state
+
+The published index **and** the AI reference bundle are both derived from the
+content YAMLs. Regenerate **both** every release — never just the index — or the
+un-regenerated artifact silently drifts behind the content it claims to mirror.
 
 ```bash
-python engineering/tools/generate-p2kb-index.py
+python engineering/tools/generate-p2kb-index.py                  # deliverables/ai/p2kb-index.json
 gzip -c deliverables/ai/p2kb-index.json > deliverables/ai/p2kb-index.json.gz
+python engineering/tools/update-p2-reference-complete.py         # deliverables/ai-reference/p2-reference.json
 ```
 
-Now every entry's `mtime` field is the file's actual v<X.Y.Z> commit timestamp.
+Now every index entry's `mtime` is the file's actual v<X.Y.Z> commit timestamp,
+every entry's `sha256` is the git-blob hash of the committed content, and
+`p2-reference.json` reflects the just-committed YAMLs.
+
+**Drift gate.** After regenerating, `git status --short` must show changes to
+the three derived artifacts (`p2kb-index.json`, `p2kb-index.json.gz`,
+`p2-reference.json`) and **nothing under `deliverables/ai/P2/`**. If a content
+YAML shows as modified, a regenerator rewrote a source file — stop and
+investigate. If a derived artifact does **not** appear as changed when content
+did change, its regenerator was skipped — do not proceed.
 
 ### 6c. Validate the fresh index
 
@@ -154,11 +168,12 @@ python engineering/tools/validate-dod-release.py      # expect ALL VALIDATIONS P
 
 Both must pass. If validation fails, fix the underlying issue and re-regen the index. Do NOT proceed to the index commit with validation errors.
 
-### 6d. Commit the index
+### 6d. Commit the derived artifacts
 
 ```bash
-git add deliverables/ai/p2kb-index.json deliverables/ai/p2kb-index.json.gz
-git commit -m "Regenerate published index for v<X.Y.Z>"
+git add deliverables/ai/p2kb-index.json deliverables/ai/p2kb-index.json.gz \
+        deliverables/ai-reference/p2-reference.json
+git commit -m "Regenerate published index + AI reference for v<X.Y.Z>"
 ```
 
 ### 6e. Tag (the INDEX commit) and push
@@ -185,6 +200,32 @@ This step is relevant **only when p2kb-mcp is installed locally** (this containe
 
 If the push hasn't happened yet, do not refresh — the cache would just re-load the pre-push state. Wait for confirmation.
 
+### 7b. Verify the publish actually reached the server (content probe)
+
+`p2kb_refresh` reporting success is **necessary but not sufficient.** It keys
+staleness off index timestamps and can return `0 invalidated` while the server
+still serves a stale *body* cache — the index reads fresh while the content
+bodies lag. A version/count check cannot catch this either: in-place edits to
+existing entries change no counts. **Only a content probe proves the publish is
+live.**
+
+Fetch an entry whose YAML changed this release and check for content you KNOW
+shipped:
+
+```
+mcp__p2kb-mcp__p2kb_get <a key whose YAML changed this release>
+```
+
+Grep the returned body for a phrase unique to this release's edit:
+- **Present** → the publish is live; the release is complete.
+- **Old content** → the server is serving a stale body cache. Refreshing again
+  will NOT fix it. The local MCP must be **restarted** (or its cache directory
+  cleared) to drop the stale body, then re-probe. Do not report the release as
+  complete until the probe shows the new content.
+
+Once the index carries per-entry `sha256` (schema ≥ 3.5.0) and the server
+verifies it pre-filter, this probe becomes automatic; until then, do it by hand.
+
 ## Hand back
 
 Report:
@@ -199,7 +240,7 @@ Report:
 - Does not edit YAMLs (`yaml-knowledge-base-maintenance` does that)
 - Does not auto-execute git commands without explicit user authorization (per CLAUDE.md)
 - Does not handle PDF manual releases (`release-manual` does)
-- Does not handle AI-package releases (separate candidate, not built)
+- Regenerates the AI reference bundle (`p2-reference.json`) as part of every release (Step 6b); does NOT build the separate downloadable AI-package *distribution* (separate candidate, not built)
 - Does not auto-refresh remote consumers — only the local MCP cache after push
 - Does not use the `AskUserQuestion` tool (this repo's convention is direct chat questions)
 

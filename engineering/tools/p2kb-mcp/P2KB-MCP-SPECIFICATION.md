@@ -60,25 +60,38 @@ The index (`p2kb-index.json`) has this structure:
 ```json
 {
   "system": {
-    "version": "3.2.0",
-    "generated": "2025-12-12T09:49:58.396586",
-    "total_entries": 970,
-    "total_categories": 47
+    "version": "3.5.0",
+    "generated": "2026-06-02T10:00:00.000000",
+    "total_entries": 1165,
+    "total_categories": 49,
+    "total_aliases": 1008
   },
   "categories": {
     "pasm2_branch": ["p2kbPasm2Call", "p2kbPasm2Jmp", ...],
     "pasm2_math": ["p2kbPasm2Add", "p2kbPasm2Sub", ...],
     ...
   },
+  "aliases": {
+    "ABS": ["p2kbPasm2Abs", "p2kbSpin2Abs"],
+    ...
+  },
   "files": {
     "p2kbPasm2Mov": {
       "path": "deliverables/ai/P2/pasm2/instructions/mov.yaml",
-      "mtime": 1764449566
+      "mtime": 1764449566,
+      "sha256": "<64-char lowercase hex, SHA-256 of the git blob bytes>"
     },
     ...
   }
 }
 ```
+
+**Entry container key is `files`** (not `entries`). Each entry carries:
+- `path` — repo-relative path; content fetched from the raw GitHub URL for it
+- `mtime` — committer timestamp (`git log -1 --format=%ct`) of the file's last commit
+- `sha256` — (schema ≥ 3.5.0) SHA-256 of the file's **git blob** bytes, i.e. exactly what `raw.githubusercontent.com` serves. The server should hash the raw HTTP response **before `FilterMetadata`** and compare to this; a mismatch means a stale/poisoned cache → cache-bust re-fetch. Hash the blob, not the working tree.
+
+**`aliases`** maps an alias name to an array of target entry keys. `p2kb_find` must search this section in addition to `files` keys (resolving each match to its target(s) and deduping), so alias-only lookups are discoverable without synthetic `files` entries.
 
 ---
 

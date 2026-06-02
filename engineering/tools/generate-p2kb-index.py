@@ -8,6 +8,7 @@ in deliverables/ai/P2/.
 Version 3.2.0 adds categories section for navigation support.
 Version 3.3.0 adds single-value aliases for instruction/method lookup.
 Version 3.4.0 changes aliases to arrays - preserves ALL matches (e.g., ABS → [PASM2, Spin2]).
+Version 3.5.0 adds per-entry sha256 (of the git blob) for cache-integrity verification.
 
 Keys follow the naming convention: p2kb + Category + Name in CamelCase.
 
@@ -20,6 +21,7 @@ Example keys:
 Git mtime is used for version tracking - no manual version numbers needed.
 """
 
+import hashlib
 import json
 import os
 import re
@@ -133,6 +135,32 @@ def get_git_mtime(filepath: Path) -> int:
 
     # Fallback to filesystem mtime if git fails
     return int(filepath.stat().st_mtime)
+
+
+def get_git_blob_sha256(repo_rel_path: str) -> str:
+    """SHA-256 (lowercase hex) of the file's committed git blob bytes.
+
+    Hashes `git show HEAD:<path>` — the exact bytes raw.githubusercontent.com
+    serves — NOT the working-tree file, so the hash is immune to working-tree
+    line-ending / BOM normalization. Consumers verify by hashing the raw HTTP
+    response BEFORE any metadata filtering; a mismatch means a stale/poisoned
+    cache. Falls back to working-tree bytes for never-committed files.
+    """
+    try:
+        result = subprocess.run(
+            ['git', 'show', f'HEAD:{repo_rel_path}'],
+            capture_output=True
+        )
+        if result.returncode == 0:
+            return hashlib.sha256(result.stdout).hexdigest()
+    except Exception:
+        pass
+
+    # Fallback: hash working-tree bytes (never-committed file)
+    try:
+        return hashlib.sha256(Path(repo_rel_path).read_bytes()).hexdigest()
+    except Exception:
+        return ""
 
 
 def get_category_prefix(rel_path: Path) -> str:
@@ -403,6 +431,7 @@ def promote_aliases_to_files(files: Dict[str, Any], aliases: Dict[str, List[str]
         files[alias] = {
             'path': files[primary_target]['path'],
             'mtime': files[primary_target]['mtime'],
+            'sha256': files[primary_target].get('sha256', ''),
             'alias_of': primary_target
         }
         promoted_count += 1
@@ -457,7 +486,8 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
 
         files[key] = {
             'path': full_path,
-            'mtime': mtime
+            'mtime': mtime,
+            'sha256': get_git_blob_sha256(full_path)
         }
 
         # Harvest aliases from this YAML file
@@ -493,7 +523,7 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
     # Build index structure
     index = {
         'system': {
-            'version': '3.4.0',
+            'version': '3.5.0',
             'generated': datetime.now().isoformat(),
             'total_entries': len(files),
             'total_categories': len(categories),
@@ -532,7 +562,7 @@ def main():
     """Main entry point."""
     base_path = Path.cwd()
 
-    print("Generating p2kb-index.json v3.4 (with array-based aliases)...")
+    print("Generating p2kb-index.json v3.5 (array aliases + sha256 cache-integrity)...")
     print(f"  Source: {base_path / 'deliverables/ai/P2/'}")
 
     # Generate the index
