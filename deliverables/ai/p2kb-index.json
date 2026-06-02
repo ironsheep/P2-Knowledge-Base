@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.4.0",
-    "generated": "2026-05-31T23:35:29.727157",
+    "generated": "2026-06-02T05:14:34.205656",
     "total_entries": 1165,
     "total_categories": 49,
     "total_aliases": 1008,
@@ -4003,7 +4003,7 @@
     },
     "p2kbArchXbyteEngine": {
       "path": "deliverables/ai/P2/architecture/xbyte_engine.yaml",
-      "mtime": 1777496128
+      "mtime": 1780377153
     },
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
@@ -5955,11 +5955,11 @@
     },
     "p2kbPasm2Setq": {
       "path": "deliverables/ai/P2/language/pasm2/setq.yaml",
-      "mtime": 1780269492
+      "mtime": 1780377153
     },
     "p2kbPasm2Setq2": {
       "path": "deliverables/ai/P2/language/pasm2/setq2.yaml",
-      "mtime": 1764449566
+      "mtime": 1780377153
     },
     "p2kbPasm2Setr": {
       "path": "deliverables/ai/P2/language/pasm2/setr.yaml",
