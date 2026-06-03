@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-02",
-    "last_updated": "2026-06-02T10:31:06.294813",
+    "release_date": "2026-06-03",
+    "last_updated": "2026-06-03T20:44:18.723246",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-02T10:31:06.294813",
+    "extraction_date": "2026-06-03T20:44:18.723246",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -16942,7 +16942,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set streamer NCO frequency to D. The NCO uses a 32-bit phase accumulator where D is added each clock cycle. Output frequency = (D \u00d7 clkfreq) / 2^32. For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits for 64-bit precision frequency control.",
+            "description": "Set streamer NCO frequency to D. The NCO phase accumulator masks its MSB before each add (modulus $8000_0000), so D is the system-clock multiplier scaled by $8000_0000 = 2^31. Output frequency = (D \u00d7 clkfreq) / $8000_0000, i.e. D = target_freq \u00d7 $8000_0000 / clkfreq. For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits for 64-bit precision frequency control.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -18369,7 +18369,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-02T10:31:06.294813",
+    "extraction_date": "2026-06-03T20:44:18.723246",
     "categories": {
       "keywords": {
         "count": 37,
