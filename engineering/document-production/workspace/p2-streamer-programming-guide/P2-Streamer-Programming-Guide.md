@@ -739,7 +739,7 @@ DAC0 := LUT.byte[0] ^ $80
 
 sin := LUT.byte[3] (sign-extended)
 cos := LUT.byte[2] (sign-extended)
-m := ADC_bit ? +1 : -1
+m := bitstream sum, -3 to +3 (±1 per selected ADC pin)
 
 sin_acc += sin × m
 cos_acc += cos × m
@@ -771,9 +771,9 @@ repeat i from 0 to 511
 | Accumulation | Direct | Double integration |
 | Q factor | Lower | Higher |
 | Selectivity | Broader | Sharper |
-| Max amplitude | ±127 (full signed byte) | Reduced (prevents overflow) |
+| Max amplitude | ±127 (full signed byte) | ±10 (prevents overflow) |
 
-⚠️ **Pitfall:** SINC2 double-integrates, so its accumulators grow far faster than SINC1's. Scale the LUT waveform amplitude well below the ±127 signed-byte range to prevent accumulator overflow.
+⚠️ **Pitfall:** SINC2 double-integrates, so its accumulators grow far faster than SINC1's. Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
 
 ## 10.5 Reading Results
 
@@ -791,10 +791,10 @@ repeat i from 0 to 511
 To detect frequency F at clock rate CLK:
 
 ```formula
-frequency = $1_0000_0000 × F / CLK
+frequency = $8000_0000 × F / CLK
 ```
 
-🔧 **Hardware:** The 32-bit frequency word gives sub-Hz resolution at typical system clocks (`clock_frequency / 2³²`, about 0.06 Hz at 250 MHz).
+🔧 **Hardware:** The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2³¹`, about 0.12 Hz at 250 MHz.
 
 # Part III: Configuration Reference
 
@@ -1324,9 +1324,10 @@ Goertzel analysis detects specific frequencies in ADC input.
 **Detection Loop:**
 
 ```pasm2
-detect:         ' Calculate NCO frequency for target
-                qfrac   target_freq, clkfreq
+detect:         ' Calculate NCO frequency for target (2^31-scaled for the NCO)
+                qfrac   target_freq, clkfreq    ' QFRAC = 2^32 × target/clk
                 getqx   xfrq
+                shr     xfrq, #1                ' halve to the NCO's 2^31 scaling
 
                 ' Run Goertzel analysis
                 setword dds_cmd, cycles, #0
@@ -1363,9 +1364,10 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
                 setq2   #$200-1
                 rdlong  0, ##waveform_table
 
-                ' Set output frequency
-                qfrac   output_freq, clkfreq
+                ' Set output frequency (2^31-scaled for the NCO)
+                qfrac   output_freq, clkfreq    ' QFRAC = 2^32 × output/clk
                 getqx   xfrq
+                shr     xfrq, #1                ' halve to the NCO's 2^31 scaling
                 setxfrq xfrq
 
                 ' Continuous output
@@ -1460,14 +1462,25 @@ wait_trigger:   testp   #trigger_pin wc
 | `%0110` | `%0000` | IMM 8×4, 4-pin | `X_IMM_8X4_4DAC1` |
 | `%0110` | `%0010` | IMM 8×4, 2-pin | `X_IMM_8X4_2DAC2` |
 | `%0110` | `%0100` | IMM 8×4, 1-pin | `X_IMM_8X4_1DAC4` |
+| `%0110` | `%0110` | IMM 4×8, 4-pin 2-DAC | `X_IMM_4X8_4DAC2` |
+| `%0110` | `%0111` | IMM 4×8, 2-pin 4-DAC | `X_IMM_4X8_2DAC4` |
+| `%0110` | `%1110` | IMM 4×8, 1-pin 8-DAC | `X_IMM_4X8_1DAC8` |
+| `%0110` | `%1111` | IMM 2×16, 4-pin 4-DAC | `X_IMM_2X16_4DAC4` |
+| `%0111` | `%0000` | IMM 2×16, 2-pin 8-DAC | `X_IMM_2X16_2DAC8` |
+| `%0111` | `%0001` | IMM 1×32, 4-pin 8-DAC | `X_IMM_1X32_4DAC8` |
 | `%0111` | `%001a` | RFLONG 32×1 → LUT | `X_RFLONG_32X1_LUT` |
 | `%0111` | `%010a` | RFLONG 16×2 → LUT | `X_RFLONG_16X2_LUT` |
 | `%0111` | `%011a` | RFLONG 8×4 → LUT | `X_RFLONG_8X4_LUT` |
 | `%0111` | `%1000` | RFLONG 4×8 → LUT | `X_RFLONG_4X8_LUT` |
 | `%1000` | `%pppp` | RFBYTE, 1-pin | `X_RFBYTE_1P_1DAC1` |
 | `%1001` | `%ppp0` | RFBYTE, 2-pin | `X_RFBYTE_2P_2DAC1` |
+| `%1001` | `%ppp0`+2 | RFBYTE, 2-pin 2-DAC | `X_RFBYTE_2P_1DAC2` |
 | `%1010` | `%pp00` | RFBYTE, 4-pin | `X_RFBYTE_4P_4DAC1` |
-| `%1010` | `%p000` | RFBYTE, 8-pin | `X_RFBYTE_8P_1DAC8` |
+| `%1010` | `%pp00`+2 | RFBYTE, 4-pin 2-DAC | `X_RFBYTE_4P_2DAC2` |
+| `%1010` | `%pp00`+4 | RFBYTE, 4-pin 4-DAC | `X_RFBYTE_4P_1DAC4` |
+| `%1010` | `%p000`+6 | RFBYTE, 8-pin 2-DAC | `X_RFBYTE_8P_4DAC2` |
+| `%1010` | `%p000`+7 | RFBYTE, 8-pin 4-DAC | `X_RFBYTE_8P_2DAC4` |
+| `%1010` | `%p000`+$E | RFBYTE, 8-pin 8-DAC | `X_RFBYTE_8P_1DAC8` |
 | `%1010` | `%1111` | RFWORD, 16-pin | `X_RFWORD_16P_4DAC4` |
 | `%1011` | `%0000` | RFWORD, 16-pin | `X_RFWORD_16P_2DAC8` |
 | `%1011` | `%0001` | RFLONG, 32-pin | `X_RFLONG_32P_4DAC8` |
@@ -1478,11 +1491,21 @@ wait_trigger:   testp   #trigger_pin wc
 | `%1011` | `%0110` | RFLONG RGB24 | `X_RFLONG_RGB24` |
 | `%1100` | `%pppp` | 1-pin → WFBYTE | `X_1P_1DAC1_WFBYTE` |
 | `%1101` | `%ppp0` | 2-pin → WFBYTE | `X_2P_2DAC1_WFBYTE` |
+| `%1101` | `%ppp0`+2 | 1-pin 2-DAC → WFBYTE | `X_2P_1DAC2_WFBYTE` |
 | `%1110` | `%pp00` | 4-pin → WFBYTE | `X_4P_4DAC1_WFBYTE` |
+| `%1110` | `%pp00`+2 | 2-pin 2-DAC → WFBYTE | `X_4P_2DAC2_WFBYTE` |
+| `%1110` | `%pp00`+4 | 1-pin 4-DAC → WFBYTE | `X_4P_1DAC4_WFBYTE` |
+| `%1110` | `%p000`+6 | 4-pin 2-DAC → WFBYTE | `X_8P_4DAC2_WFBYTE` |
+| `%1110` | `%p000`+7 | 2-pin 4-DAC → WFBYTE | `X_8P_2DAC4_WFBYTE` |
+| `%1110` | `%p000`+$E | 1-pin 8-DAC → WFBYTE | `X_8P_1DAC8_WFBYTE` |
 | `%1110` | `%1111` | 16-pin → WFWORD | `X_16P_4DAC4_WFWORD` |
 | `%1111` | `%0000` | 16-pin → WFWORD | `X_16P_2DAC8_WFWORD` |
 | `%1111` | `%0001` | 32-pin → WFLONG | `X_32P_4DAC8_WFLONG` |
 | `%1111` | `%0010` | 1 ADC → WFBYTE | `X_1ADC8_0P_1DAC8_WFBYTE` |
+| `%1111` | `%0011` | 1 ADC + 8-pin → WFWORD | `X_1ADC8_8P_2DAC8_WFWORD` |
+| `%1111` | `%0100` | 2 ADC → WFWORD | `X_2ADC8_0P_2DAC8_WFWORD` |
+| `%1111` | `%0101` | 2 ADC + 16-pin → WFLONG | `X_2ADC8_16P_4DAC8_WFLONG` |
+| `%1111` | `%0110` | 4 ADC → WFLONG | `X_4ADC8_0P_4DAC8_WFLONG` |
 | `%1111` | `%0111` | DDS/Goertzel SINC1 | `X_DDS_GOERTZEL_SINC1` |
 | `%1111` | `%0111` (D[23]=1) | DDS/Goertzel SINC2 | `X_DDS_GOERTZEL_SINC2` |
 
@@ -1494,14 +1517,22 @@ wait_trigger:   testp   #trigger_pin wc
 X_IMM_32X1_LUT          X_IMM_16X2_LUT          X_IMM_8X4_LUT
 X_IMM_4X8_LUT           X_IMM_32X1_1DAC1        X_IMM_16X2_2DAC1
 X_IMM_16X2_1DAC2        X_IMM_8X4_4DAC1         X_IMM_8X4_2DAC2
-X_IMM_8X4_1DAC4         X_RFLONG_32X1_LUT       X_RFLONG_16X2_LUT
+X_IMM_8X4_1DAC4         X_IMM_4X8_4DAC2         X_IMM_4X8_2DAC4
+X_IMM_4X8_1DAC8         X_IMM_2X16_4DAC4        X_IMM_2X16_2DAC8
+X_IMM_1X32_4DAC8        X_RFLONG_32X1_LUT       X_RFLONG_16X2_LUT
 X_RFLONG_8X4_LUT        X_RFLONG_4X8_LUT        X_RFBYTE_1P_1DAC1
-X_RFBYTE_2P_2DAC1       X_RFBYTE_4P_4DAC1       X_RFBYTE_8P_1DAC8
-X_RFWORD_16P_4DAC4      X_RFWORD_16P_2DAC8      X_RFLONG_32P_4DAC8
-X_RFBYTE_LUMA8          X_RFBYTE_RGBI8          X_RFBYTE_RGB8
-X_RFWORD_RGB16          X_RFLONG_RGB24          X_1P_1DAC1_WFBYTE
-X_2P_2DAC1_WFBYTE       X_4P_4DAC1_WFBYTE       X_32P_4DAC8_WFLONG
-X_1ADC8_0P_1DAC8_WFBYTE X_DDS_GOERTZEL_SINC1    X_DDS_GOERTZEL_SINC2
+X_RFBYTE_2P_2DAC1       X_RFBYTE_2P_1DAC2       X_RFBYTE_4P_4DAC1
+X_RFBYTE_4P_2DAC2       X_RFBYTE_4P_1DAC4       X_RFBYTE_8P_4DAC2
+X_RFBYTE_8P_2DAC4       X_RFBYTE_8P_1DAC8       X_RFWORD_16P_4DAC4
+X_RFWORD_16P_2DAC8      X_RFLONG_32P_4DAC8      X_RFBYTE_LUMA8
+X_RFBYTE_RGBI8          X_RFBYTE_RGB8           X_RFWORD_RGB16
+X_RFLONG_RGB24          X_1P_1DAC1_WFBYTE       X_2P_2DAC1_WFBYTE
+X_2P_1DAC2_WFBYTE       X_4P_4DAC1_WFBYTE       X_4P_2DAC2_WFBYTE
+X_4P_1DAC4_WFBYTE       X_8P_4DAC2_WFBYTE       X_8P_2DAC4_WFBYTE
+X_8P_1DAC8_WFBYTE       X_16P_4DAC4_WFWORD      X_16P_2DAC8_WFWORD
+X_32P_4DAC8_WFLONG      X_1ADC8_0P_1DAC8_WFBYTE X_1ADC8_8P_2DAC8_WFWORD
+X_2ADC8_0P_2DAC8_WFWORD X_2ADC8_16P_4DAC8_WFLONG X_4ADC8_0P_4DAC8_WFLONG
+X_DDS_GOERTZEL_SINC1    X_DDS_GOERTZEL_SINC2
 ```
 
 ## Control Symbols
@@ -1593,7 +1624,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 1. LUT contains signed sine/cosine values
 2. ADC pin configured for ADC mode
 3. Sample count adequate for frequency resolution
-4. SINC2 amplitude reduced to prevent overflow
+4. SINC2 amplitude reduced to ±10 to prevent overflow
 
 # Index
 

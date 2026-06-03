@@ -36,6 +36,6 @@ technical correctness):
 
 ## Other open items (carried from the content audit)
 
-- [ ] **§15.1 VGA `$F080_0000` sync mode-long** — unverified encoding (cited from OBEX); validate against the actual OBEX streamer VGA driver before it's treated as authoritative.
-- [ ] **Emoji markers (⚠️ 💡 🔧)** — confirm acceptable rendering on the Forge build (family-consistent with the live PASM2 manual; fallback = a symbol mapping if they show as missing-glyph boxes).
-- [ ] **8 upstream KB defects** (F-016…F-021 in `engineering/operations/P2KB-CORRECTION-FINDINGS.md`) — separate `yaml-knowledge-base-maintenance` pass.
+- [ ] **§15.1 VGA `$F080_0000` sync mode-long** — STILL UNVERIFIED. 2026-06-03 attempt: it decodes to mode `%1111`, D[23]=1, D[19:16]=`%0000` = `X_16P_2DAC8_WFWORD`, a **capture** mode — inconsistent with using it for fixed-level **output**. Could not be confirmed from the Silicon Doc / KB, and the OBEX tools did not surface the source driver. Left unchanged (do not rewrite on incomplete analysis); validate against the actual working VGA driver before it's treated as authoritative.
+- [x] **Emoji markers (⚠️ 💡 🔧)** — POLICY RESOLVED 2026-06-03: `voice-guide.md` §3 ("Enhancement Markers") explicitly prescribes these; they are by-design and family-consistent with the live PASM2 manual. Build-render watch remains: confirm they render on the Forge build; fallback = symbol mapping (`\warningmarker = \blacktriangle`) if they box.
+- [x] **Upstream KB defects** — DONE: applied in **KB v1.6.2** (F-016…F-022; F-019 split, F-022 new). Manual synced to the corrected KB on 2026-06-03: DDS/Goertzel frequency → `$8000_0000` (2³¹) at §10.6/§17.1/§17.2, SINC2 amplitude → ±10, Goertzel bitstream sum → −3..+3, Appendix A + B completed to all 56 mode symbols.
