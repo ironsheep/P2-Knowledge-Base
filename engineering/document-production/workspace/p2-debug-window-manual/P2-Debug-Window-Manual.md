@@ -21,7 +21,7 @@
 \vspace{0.3cm}
 {\Large\itshape See What Your Program Is Doing\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large June 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
@@ -103,7 +103,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ### Acknowledgments
 
-**Parallax Inc.** and **Chip Gracey** for the Propeller 2 and its DEBUG display system. The reverse-engineered per-window theory-of-operations references that ground this manual were derived from the PNut v51a implementation.
+**Parallax Inc.** and **Chip Gracey** for the Propeller 2 and its DEBUG display system. The reverse-engineered per-window theory-of-operations references that ground this manual were verified against the PNut v55 implementation.
 
 ```{=latex}
 \clearpage
@@ -158,6 +158,23 @@ window that matches the shape of your data:
 These nine are the complete set the tool implements. Up to 32 display windows can
 run at the same time, so a single program can drive a terminal, a scope, and a
 plot together.
+
+### Which window for which problem
+
+When you know the *kind* of data — or the question you are trying to answer — this
+maps it to the window to reach for:
+
+| You want to see… | Reach for | Chapter |
+|------------------|-----------|---------|
+| Text — status lines, logs, variable dumps | TERM | 3 |
+| A raw pixel image or framebuffer | BITMAP | 4 |
+| A custom instrument, gauge, or drawn UI | PLOT | 5 |
+| Several digital signals and their timing | LOGIC | 6 |
+| A value changing over time (a waveform) | SCOPE | 7 |
+| The relationship between two values (phase, Lissajous) | SCOPE_XY | 8 |
+| The frequency content of a signal | FFT | 9 |
+| How frequency content evolves over time | SPECTRO | 10 |
+| MIDI note activity on a keyboard | MIDI | 11 |
 
 ## Create by name, feed by name
 
@@ -478,11 +495,6 @@ You now have the loop that every chapter relies on: compile with `-d`, run from
   **MIDI** (11). Each follows the same create-then-feed pattern shown here.
 
 
-```{=latex}
-\part{The Windows}
-```
-
-
 # Chapter 3: The TERM Window — Text Output
 
 The TERM window is the text terminal of the P2 debug system. You send it
@@ -499,6 +511,8 @@ controlling when the display updates.
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the TERM window too, but
 > they share one mechanism across every window type, so they are covered together
 > in Chapter 12. This chapter is about output.
+
+![The TERM window as a positioned status dashboard.](inbox/assets/fig-03-term-dashboard.png){width=75%}
 
 ## Creating a TERM window
 
@@ -519,7 +533,7 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `TERM` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
-| `TEXTSIZE` | `points` | host default | Font size; the window sizes itself to fit |
+| `TEXTSIZE` | `points` | `10` | Font size; the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
 | `BACKCOLOR` | `rgb` | black | The window background color |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
@@ -605,12 +619,12 @@ To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-debug(`TERM Log SIZE 60 20 COLOR $FF8000 $000000 $000000 $FF8000 $00FF00 $000000 $FF0000 $000000)
+debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
 '                                    pair0 fg/bg     pair1 fg/bg     pair2 fg/bg     pair3 fg/bg
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
-green-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
+lime-on-black, pair 3 = red-on-black — a common scheme for normal / highlighted /
 success / error text.
 
 ## Cursor, tabs, and scrolling
@@ -676,6 +690,51 @@ Two more runtime keyword commands round out the set:
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
 - `` `SAVE `` — saves the current window image to a file on the host.
 
+## A positioned dashboard
+
+The scrolling log and the buffered Panel both rewrite the whole display each pass.
+When a panel's *layout* is fixed — the labels never move, only the values change —
+draw the labels once, then overprint just the value fields in place with the `3`
+(set row) and `2` (set column) codes. Nothing scrolls, and there is no full clear.
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, signal, count
+  debug(`TERM Panel SIZE 40 8)
+
+  ' Draw the static layout once: a title and three fixed labels.
+  debug(`Panel 0 4 "SIGNAL MONITOR")     ' clear, pair 0, title at (0,0)
+  debug(`Panel 3 2 2 0 "Sample:")        ' row 2, col 0
+  debug(`Panel 3 3 2 0 "Value :")        ' row 3, col 0
+  debug(`Panel 3 4 2 0 "State :")        ' row 4, col 0
+
+  ang := 0
+  count := 0
+  repeat
+    signal := qsin(1000, ang, 256)       ' software-generated waveform
+
+    ' Overprint only the value fields, each at a fixed (row, col). Trailing
+    ' spaces pad to a fixed width so a shorter value erases a longer old one.
+    debug(`Panel 3 2 2 8 `udec_(count) "    ")
+    debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
+    if abs signal > 800
+      debug(`Panel 3 4 2 8 7 "HIGH " 4)  ' pair 3 (red), then back to pair 0
+    else
+      debug(`Panel 3 4 2 8 6 "ok   " 4)  ' pair 2 (lime), then back to pair 0
+
+    ang   += 4
+    count += 1
+    waitms(50)
+```
+
+The labels are written once; the loop touches only the three value cells, so the
+fields never scroll or interfere — the panel reads like a fixed instrument face.
+
+> Pad every in-place field to a constant width (the trailing spaces above).
+> Overprinting replaces only the characters you send, so without padding, printing
+> `9` over `123` leaves `923`.
+
 ## Considerations
 
 - **Pick the grid to the job.** A status panel might be `40 10`; a scrolling log
@@ -697,6 +756,11 @@ you will have used creation config, command codes, color pairs, and buffered
 updates together.
 
 
+```{=latex}
+\part{The Windows}
+```
+
+
 # Chapter 4: The BITMAP Window — Pixel Raster
 
 The BITMAP window is the framebuffer of the P2 debug system. You send it pixel
@@ -715,6 +779,8 @@ commands that position, scroll, clear, and save the canvas.
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the BITMAP window, but they
 > share one mechanism across every window type, so they are covered together in
 > Chapter 12. This chapter is about output.
+
+![The BITMAP window showing a CORDIC-generated plasma field.](inbox/assets/fig-04-bitmap.png){width=50%}
 
 ## Creating a BITMAP window
 
@@ -737,7 +803,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `width height` | — | Canvas size in pixels; each is **1–2048** |
 | `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
 | `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
-| *color mode* | (varies) | `LUT8` | One of the 19 color-mode keywords (see below) |
+| *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
 | `LUTCOLORS` | up to 256 `rgb` | grayscale | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
 | `RATE` | `count` | full canvas | Pixels written between display refreshes |
@@ -771,8 +837,9 @@ The modes fall into four families:
 | `LUT4` | 4 | 16 | bits 0–3 → entry 0–15 |
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
-`LUT8` is the default color mode. If you select a LUT mode without defining a
-palette, the default palette is grayscale (entry 0 black, entry 255 white).
+`RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
+mode without defining a palette, the default palette is grayscale (entry 0 black,
+entry 255 white).
 
 **Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
 color you pick with a color-tune keyword:
@@ -841,7 +908,7 @@ visible digits:
 
 ```spin2
 debug(`Img `(color))      ' write one pixel = the value of `color`
-debug(`Img `($FF8000))    ' write one orange pixel (RGB24)
+debug(`Img `($FF7F00))    ' write one orange pixel (RGB24)
 ```
 
 Each pixel is plotted at the current position, and then the position advances to the
@@ -1096,17 +1163,14 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `Plot` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | `512 512` | Canvas size in pixels; each is **32–2048** |
-| `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–64** |
-| `CARTESIAN` | `{flipy {flipx}}` | on | Cartesian mode, with optional axis flips |
-| `POLAR` | `{twopi {theta}}` | — | Switches the window into polar coordinates |
-| `TEXTSIZE` | `points` | `9` | Default font size for `TEXT` |
+| `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **32–2048** |
+| `DOTSIZE` | `x {y}` | `1 1` | Pixel magnification; each axis **1–256** |
 | `BACKCOLOR` | `rgb` | black | Background fill color (`$RRGGBB`) |
 | `UPDATE` | — | off | Enables buffered mode (see "The update model") |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
 
 `SIZE` is measured in pixels, and both dimensions are clamped to the range
-**32–2048**. The default is `512 512`. The canvas is drawn into an off-screen
+**32–2048**. The default is `256 256`. The canvas is drawn into an off-screen
 bitmap and stretched to fill the window, so resizing the window scales the
 picture rather than revealing more canvas.
 
@@ -1114,9 +1178,11 @@ picture rather than revealing more canvas.
 a 2×2 block, which is useful when you want a small drawing shown large. The two
 axes can differ.
 
-The remaining creation keywords — `CARTESIAN`, `POLAR`, `TEXTSIZE` — also work as
-runtime commands, so you can set them on the creation line or change them later.
-They are described in the sections that follow.
+`CARTESIAN`, `POLAR`, and `TEXTSIZE` are **runtime commands, not creation-line
+keywords** — issue them after the window exists, not in the `DEBUG(\`PLOT …)`
+creation call. `CARTESIAN` and `POLAR` select the coordinate system; `TEXTSIZE`
+sets the default font size for `TEXT` (default `10`, range 6–200). They are
+described in the sections that follow.
 
 ## The coordinate system
 
@@ -1495,12 +1561,43 @@ PUB main()
   debug(`Scene CROP 1)                            ' composite full background
   debug(`Scene SPRITEDEF 0 2 2 0 1 1 0 $00000000 $FFFFFFFF)   ' tiny 2x2 sprite
   debug(`Scene SET 256 256 SPRITE 0 0 8 255)      ' stamp it, 8x scale
-  debug(`Scene SHOW)
+  debug(`Scene UPDATE)                            ' present the buffered frame
 ```
 
 > **Layers are indexed 1–8.** A common error is using layer 0; the lowest valid
 > layer is 1, and `LAYER`/`CROP` ignore an index outside 1–8. Sprite *ids*, by
 > contrast, start at 0 and run to 255.
+
+### Animating with a sprite
+
+![A sprite stamped at several scales in the PLOT window.](inbox/assets/fig-05-plot-sprite.png){width=50%}
+
+Re-stamping a sprite is cheaper than re-drawing the geometry that produced it. Define
+the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command at the
+new position — you re-send one command, not the primitives. In buffered mode the motion
+is flicker-free:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | x
+  debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
+  ' Define a 3x3 "blip" sprite once: index 1 = lit, index 0 = transparent.
+  ' Palette: entry 0 = transparent ($00......), entry 1 = opaque cyan ($FF00FFFF).
+  debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
+
+  x := 0
+  repeat
+    debug(`Field CLEAR)                           ' clear the buffered canvas
+    debug(`Field SET `(x) 128 SPRITE 0 0 8 255)   ' stamp the sprite at (x,128), 8x
+    debug(`Field UPDATE)                          ' present the frame
+    x := (x + 4) +// 256                          ' move right, wrap
+    waitms(20)
+```
+
+The sprite is defined once; the loop re-stamps it with one `SPRITE` per frame. For a
+shape built from many primitives the saving is larger still — the geometry is rasterized
+into the sprite once, and every later frame costs a single stamp.
 
 ## The update model
 
@@ -1513,9 +1610,9 @@ for a handful of primitives or a static figure.
 
 **Buffered mode** is enabled by the `UPDATE` keyword on the creation line. In
 this mode your primitives accumulate on the off-screen canvas and **nothing is
-shown until you send the `` `SHOW `` command**. Buffered mode is the right choice
-for a scene built from many primitives, and it is essential for flicker-free
-animation: clear, redraw the whole frame, then `SHOW` once.
+shown until you send a runtime `` `UPDATE `` command**. Buffered mode is the right
+choice for a scene built from many primitives, and it is essential for
+flicker-free animation: clear, redraw the whole frame, then `UPDATE` once.
 
 ```spin2
 PUB main() | f, ballx
@@ -1524,7 +1621,7 @@ PUB main() | f, ballx
   repeat f from 0 to 200
     debug(`Anim CLEAR)                                       ' erase (off-screen)
     debug(`Anim COLOR $FFFF00 SET `(ballx) 128 CIRCLE 30 0 255)
-    debug(`Anim SHOW)                                        ' present one frame
+    debug(`Anim UPDATE)                                      ' present one frame
     ballx := (ballx + 4) +// 512
     waitms(20)
 ```
@@ -1533,14 +1630,14 @@ Two more commands round out display control:
 
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
-  becomes visible at the next `SHOW`.
+  becomes visible at the next `UPDATE`.
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
   `SAVE` for a default filename, or `SAVE 'name.bmp'` to choose one.
 
-> Note the two distinct keywords. `UPDATE` is the **creation-line flag** that
-> turns buffered mode on. `` `SHOW `` is the **runtime command** that presents the
-> accumulated drawing. You enable buffering once with `UPDATE`, then trigger each
-> repaint with `SHOW`.
+> `UPDATE` plays two roles. On the creation line it is the **flag** that turns
+> buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
+> accumulated drawing. You enable buffering once with the creation-line `UPDATE`,
+> then trigger each repaint with a runtime `` `UPDATE ``.
 
 ## A complete worked example
 
@@ -1608,6 +1705,61 @@ software-only sine source that needs no lookup table and no hardware. `rnd`
 reads the on-chip random generator with **GETRND**. Both are wrapped in inline
 PASM so the example builds and runs on a bare P2 board.
 
+## A worked instrument: an analog gauge
+
+![An analog gauge drawn in the PLOT window using polar coordinates.](inbox/assets/fig-05-plot-gauge.png){width=55%}
+
+Polar mode turns an instrument needle into a single `LINE`. Center the origin,
+switch to polar so the cursor's coordinates are (radius, angle), and the needle for
+any reading is one line from the center out to that reading's angle. The dial — tick
+marks and a ring — is drawn the same way, so a complete analog gauge needs only
+`LINE` and `CIRCLE`. This program sweeps a software-generated reading across a 240°
+scale, redrawing in buffered mode so it never flickers:
+
+```spin2
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, value, needle, i, tick
+  ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
+  debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
+  debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
+  debug(`Gauge POLAR 360)                 ' angles in degrees; theta 0 points up
+
+  ang := 0
+  repeat
+    value  := 50 + qsin(50, ang, 360)     ' software-generated 0..100 reading
+    needle := (value * 240 / 100) - 120   ' map 0..100 -> -120..+120 degrees
+
+    debug(`Gauge CLEAR)
+
+    ' Scale: eleven radial ticks across the 240-degree sweep.
+    debug(`Gauge COLOR $404040)
+    repeat i from 0 to 10
+      tick := (i * 24) - 120
+      debug(`Gauge SET 90 `(tick) LINE 100 `(tick) 2 255)
+
+    ' Dial ring and center hub.
+    debug(`Gauge SET 0 0 CIRCLE 210 2 255)
+    debug(`Gauge COLOR $00FFFF SET 0 0 CIRCLE 12 0 255)
+
+    ' Needle: one polar line from center out to the reading's angle.
+    debug(`Gauge COLOR $FF7F00 SET 0 0 LINE 95 `(needle) 4 255)
+
+    debug(`Gauge UPDATE)                   ' present the frame
+
+    ang += 3
+    waitms(30)
+```
+
+Each frame clears the buffered canvas, draws the scale ticks and ring as polar lines
+and a centered circle, places the needle with one `LINE` at the reading's angle, and
+presents the frame with `UPDATE`. The reading here comes from `QSIN`; wire it to any
+value your program computes and the needle follows.
+
+> Buffered mode (`UPDATE` on the creation line) keeps the gauge smooth: the whole
+> dial is redrawn off-screen each frame, then shown at once. Without it you would see
+> the needle erase-and-redraw flicker.
+
 ## Considerations
 
 - **Match the coordinate system to the figure.** Set `ORIGIN` and the
@@ -1623,8 +1775,8 @@ PASM so the example builds and runs on a bare P2 board.
   draw a path; use `SET` before a `DOT`, `CIRCLE`, or `TEXT` to position it.
 - **Use buffered mode for whole-scene redraws.** A static figure or a few
   primitives can run in automatic mode. For animation or a many-primitive scene,
-  add `UPDATE` and present each frame with one `` `SHOW ``, which removes the
-  flicker of per-primitive repainting.
+  add `UPDATE` and present each frame with one runtime `` `UPDATE ``, which
+  removes the flicker of per-primitive repainting.
 - **Composite prebuilt layers and sprites instead of redrawing geometry.** When a
   background or a repeated element is fixed, load it once with `LAYER` (or define
   a sprite once with `SPRITEDEF`) and place it each frame with `CROP` or
@@ -1638,7 +1790,7 @@ PASM so the example builds and runs on a bare P2 board.
 Start from the worked example. Then: switch the window to buffered mode by adding
 `UPDATE` to the creation line, wrap the whole drawing in a `repeat`, animate the
 phase by adding a growing offset to `angle`, and end each frame with `CLEAR` …
-draw … `` `SHOW ``. You will have a scrolling sine wave with a fresh scatter each
+draw … `` `UPDATE ``. You will have a scrolling sine wave with a fresh scatter each
 frame, built entirely from CORDIC and the RNG, using the coordinate system,
 primitives, color, and the buffered update model together.
 
@@ -1665,6 +1817,8 @@ declaring its channels in that one statement, then feed it sample values by name
 > share one mechanism across every window type and are covered in Chapter 12. Packed
 > data formats are shared across the instrument windows and are detailed in
 > Chapter 13; this chapter shows how LOGIC uses them.
+
+![The LOGIC window showing eight channels of a binary ripple counter.](inbox/assets/fig-06-logic.png){width=95%}
 
 ## Creating a LOGIC window and declaring channels
 
@@ -1696,7 +1850,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `divisor` | `1` | 1–2048 | Redraw once per `divisor` samples |
 | `DOTSIZE` | `pixels` | `0` | 0–32 | Dot diameter at each sample (`0` = no dots) |
 | `LINESIZE` | `pixels` | `3` | 1–32 | Waveform line thickness |
-| `TEXTSIZE` | `points` | font default | 6–200 | Channel-label font size |
+| `TEXTSIZE` | `points` | `10` | 6–200 | Channel-label font size |
 | `COLOR` | `back grid` | black / gray | `$RRGGBB` | Background and grid colors |
 | `HIDEXY` | — | shown | — | Hides the mouse-coordinate readout |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | unpacked | 12 modes | Sets the data-packing mode (see "Packed sample data") |
@@ -1858,8 +2012,8 @@ debug(`Bus TRIGGER $3 $1 16)       ' fire when ch0=1 and ch1=0, event 16 samples
 debug(`Bus TRIGGER 0 0)            ' disable trigger (free-running)
 ```
 
-You issue `TRIGGER` as a runtime command after the window exists, or you can place it
-on the creation line. The trigger only evaluates once the 2048-sample buffer has
+You issue `TRIGGER` as a runtime command after the window exists; it is not a
+creation-line keyword. The trigger only evaluates once the 2048-sample buffer has
 filled.
 
 ### Holdoff
@@ -2018,6 +2172,8 @@ it bare numeric values for the rest of the run.
 > all windows together in Chapter 12. Packed data formats, which let you move
 > samples faster over the debug link, are covered in Chapter 13.
 
+![The SCOPE window displaying a time-domain sine waveform.](inbox/assets/fig-07-scope.png){width=80%}
+
 ## Creating the window and declaring its channels
 
 You create and configure a SCOPE window in a single `DEBUG` statement. The first
@@ -2041,12 +2197,12 @@ The configuration keywords you can place on the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `Scope` | The window's title-bar text |
 | `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `width height` | `512 256` | Display size in pixels; each is **32–2048** |
-| `SAMPLES` | `count` | `512` | Horizontal resolution — sets displayed at once; **16–2048** |
+| `SIZE` | `width height` | `256 256` | Display size in pixels; each is **32–2048** |
+| `SAMPLES` | `count` | `256` | Horizontal resolution — sets displayed at once; **16–2048** |
 | `RATE` | `divisor` | `1` | Display-update divisor (see "Considerations"); **1–2048** |
 | `DOTSIZE` | `pixels` | `0` | Dot diameter; **0–32** (`0` = no dots) |
 | `LINESIZE` | `pixels` | `3` | Line thickness; **0–32** (`0` = no lines) |
-| `TEXTSIZE` | `points` | `9` | Label font size; **6–200** |
+| `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
 | Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see Chapter 13) |
@@ -2329,6 +2485,8 @@ see.
 > window; they share one mechanism documented in Chapter 12. This chapter is about
 > output — configuring the plot and feeding it coordinate pairs.
 
+![The SCOPE_XY window tracing a 2:3 Lissajous figure.](inbox/assets/fig-08-scope-xy.png){width=65%}
+
 ## Creating a SCOPE_XY window
 
 You create and configure the window in one `DEBUG` statement. The first token after
@@ -2346,14 +2504,14 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | none | The window's title-bar caption |
-| `POS` | `left top` | `0 0` | Screen position of the window, in pixels |
+| `TITLE` | `'text'` | `Scope_XY` | The window's title-bar caption |
+| `POS` | `left top` | cascaded | Screen position of the window, in pixels |
 | `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
 | `DOTSIZE` | `pixels` | `6` | Dot diameter, `2`–`20` |
-| `TEXTSIZE` | `points` | editor size | Legend text size, `6`–`200` |
+| `TEXTSIZE` | `points` | `10` | Legend text size, `6`–`200` |
 | `COLOR` | `back {grid}` | black, gray | Background color and, optionally, grid color |
 | `POLAR` | `{twopi {offset}}` | — | Interpret pairs as `(radius, angle)` instead of `(x, y)` — see below |
 | `LOGSCALE` | — | linear | Logarithmic radial scale, to magnify points near the center |
@@ -2572,6 +2730,8 @@ size, feeding samples across one or more channels, the two amplitude controls
 > share one mechanism across every window type, so they are covered together in
 > Chapter 12. This chapter is about the spectrum display.
 
+![The FFT window showing two tones as spectral peaks.](inbox/assets/fig-09-fft.png){width=80%}
+
 ## What the FFT window does with your samples
 
 You send a continuous stream of time-domain samples. The window stores them in a
@@ -2618,7 +2778,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
 | `LINESIZE` | `width` | `3` | Line width (**−32–32**; negative draws filled bars) |
-| `TEXTSIZE` | `points` | host default | Label font size |
+| `TEXTSIZE` | `points` | `10` | Label font size |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |
@@ -2687,7 +2847,7 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF8000)
+  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)
@@ -2912,6 +3072,8 @@ runtime commands.
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the SPECTRO window, but
 > they share one mechanism across every window type and are covered together in
 > Chapter 12. This chapter is about the display.
+
+![The SPECTRO window as a rising-tone spectrogram waterfall.](inbox/assets/fig-10-spectro.png){width=65%}
 
 ## Creating a SPECTRO window
 
@@ -3218,6 +3380,8 @@ chapter runs on a bare P2 with no external MIDI hardware.
 > every other window. They share one mechanism across all window types, so they
 > are covered together in Chapter 12. This chapter is about the keyboard display.
 
+![The MIDI window showing notes lit on a piano keyboard.](inbox/assets/fig-11-midi.png){width=100%}
+
 ## Creating a MIDI window
 
 You create and configure the window in a single `DEBUG` statement. The first
@@ -3259,7 +3423,7 @@ A few things to know about these:
 
 ```spin2
 ' One octave, large keys, green/orange lit colors, channel 0
-debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF8000)
+debug(`MIDI Keys SIZE 8 RANGE 60 72 CHANNEL 0 COLOR $00FF00 $FF7F00)
 ```
 
 Each key is labelled with its MIDI **note number** (0–127), drawn rotated along
@@ -3393,7 +3557,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | vel
-  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF8000)
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
 
   vel := 24
   repeat 5
@@ -4108,6 +4272,12 @@ PUB main() | x
   that window's `` `SAVE `` command, which writes a `.bmp` on the host; capturing the
   whole screen is an action you take on the PC, outside the DEBUG system.
 
+- **Use `` `SAVE `` to capture a window for documentation or a bug report.** Send
+  `` `SAVE 'name.bmp' `` at the moment the display shows what you want to keep — for
+  example after a trigger fires or an anomaly appears — and the host writes that frame
+  to a file you can attach to notes or a report. It is the supported way to turn a live
+  window into a static artifact.
+
 - **Keep PASM `DEBUG` out of tight interrupt service routines.** A `DEBUG` taken
   inside an ISR can skew the cog's timing enough to disturb retriggering. Prefer
   doing `DEBUG` from cogs that are not running background ISRs (see the Spin2 v5.1
@@ -4185,11 +4355,11 @@ every window are listed once at the end.
 ## PLOT — vector drawing canvas (Chapter 5)
 
 **Create:** `` DEBUG(`PLOT Name <config>) ``
-**Config:** `TITLE` · `POS` · `SIZE w h` (32–2048, default 512) · `DOTSIZE x {y}` (1–64) · `CARTESIAN {flipy {flipx}}` · `POLAR {twopi {theta}}` · `TEXTSIZE` · `BACKCOLOR` · `UPDATE` · `HIDEXY`
-**Position/state:** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0-255` · `LINESIZE`
+**Config:** `TITLE` · `POS` · `SIZE w h` (32–2048, default 256×256) · `DOTSIZE x {y}` (1–256) · color mode (see Appendix C) · `LUTCOLORS` · `BACKCOLOR` · `UPDATE` · `HIDEXY`
+**Position/state (runtime):** `SET x y` · `ORIGIN {x y}` · `PRECISE` · `COLOR rgb` · `OPACITY 0-255` · `LINESIZE` · `CARTESIAN {flipy {flipx}}` · `POLAR {twopi {theta}}` · `TEXTSIZE`
 **Primitives (cursor-relative):** `DOT {linesize {opacity}}` · `LINE x y {linesize {opacity}}` · `CIRCLE diameter {...}` · `OVAL w h {...}` · `BOX w h {...}` · `OBOX w h xr yr {...}` · `TEXT {size {style {angle}}} 'string'`
 **Layers/sprites:** `LAYER n 'file.bmp'` (n = 1–8) · `CROP n` / `CROP n AUTO x y` / `CROP n left top w h {x y}` · `SPRITEDEF id xsize ysize ...` (id 0–255, size 1–32) · `SPRITE id orient ...` (orient 0–7)
-**Runtime:** `CLEAR` · `SHOW` (buffered repaint trigger) · `SAVE`
+**Runtime:** `CLEAR` · `UPDATE` (buffered repaint trigger) · `SAVE`
 
 ## LOGIC — logic analyzer (Chapter 6)
 
@@ -4285,7 +4455,7 @@ accept packed data include BITMAP, LOGIC, SCOPE, SCOPE_XY, FFT, and SPECTRO.
 
 ## Color values
 
-Colors are 24-bit RGB written `$RRGGBB` (for example `$FF8000` is orange). You can
+Colors are 24-bit RGB written `$RRGGBB` (for example `$FF7F00` is orange). You can
 also use the Spin2 named color constants where a color is expected.
 
 ### TERM color pairs
@@ -4304,9 +4474,9 @@ Set your own with `COLOR` on the creation line (eight values: fg0 bg0 fg1 bg1 fg
 
 ### BITMAP color modes
 
-BITMAP selects a pixel format with one of these mode keywords (default `LUT8`):
+BITMAP selects a pixel format with one of these mode keywords (default `RGB24`):
 `LUT1` `LUT2` `LUT4` `LUT8` · `LUMA8` `LUMA8W` `LUMA8X` · `RGBI8` `RGBI8W` `RGBI8X` ·
-`HSV8` `HSV8W` `HSV8X` · `HSV16` `HSV16W` `HSV16X` · `RGB8` · `RGB16` (5:6:5) · `RGB24`.
+`HSV8` `HSV8W` `HSV8X` · `HSV16` `HSV16W` `HSV16X` · `RGB8` (3:3:2) · `RGB16` (5:6:5) · `RGB24` (8:8:8).
 `LUT`-mode palettes are loaded with `LUTCOLORS`.
 
 ### SPECTRO color modes
