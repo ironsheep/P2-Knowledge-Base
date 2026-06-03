@@ -1,6 +1,8 @@
 # SPECTRO Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -221,6 +223,83 @@ var
 
 ---
 
+## Directive Reference (v55-verified)
+
+> Source authority: `DebugDisplayUnit.pas` (PNut v55). See also §5.5 and §4 of the
+> [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md).
+
+### Configuration directives
+
+Accepted in `SPECTRO_Configure` (lines 1719–1790). All are optional; defaults shown.
+
+| Directive | Parameter(s) | Range / notes | Default | Pascal lines |
+|---|---|---|---|---|
+| `TITLE 'str'` | string | window title | `"SPECTRO"` | 1737-1738 |
+| `POS left top` | two integers | window position | auto | 1739-1740 |
+| `SAMPLES n {first last}` | n = FFT size; optional first/last bin | n clamped to nearest power-of-2 in 4..2048; first ∈ [0, n/2−2], last ∈ [first+1, n/2−1] | 512 (bins 0..255) | 1741-1750 |
+| `DEPTH n` | integer | 1..2048 (time-history lines) | *varies by trace* | 1751-1752 |
+| `MAG n` | integer | 0..11 (2^n magnitude multiplier) | 0 | 1753-1754 |
+| `RANGE n` | integer | 1..$7FFFFFFF | $7FFFFFFF | 1755-1756 |
+| `RATE n` | integer | 1..2048 samples per display update | samples÷8 | 1757-1758 |
+| `TRACE n` | integer | 0..15 (bits 0-2 = direction, bit 3 = scroll) | 15 ($F) | 1759-1760 |
+| `DOTSIZE x {y}` | 1 or 2 integers | each 1..16 | 1, 1 | 1761-1765 |
+| color-mode | one keyword | **RESTRICTED:** `LUMA8`, `LUMA8W`, `LUMA8X`, `HSV16`, `HSV16W`, `HSV16X` only (line 1767) | `LUMA8X` | 1767-1768 |
+| `LOGSCALE` | none | enable log-magnitude display | off | 1769-1770 |
+| `HIDEXY` | none | suppress on-screen measurement cursor | off | 1771-1772 |
+| packed `LONGS_1BIT..BYTES_4BIT` | none | select data packing mode | none | 1773-1774 |
+
+**Color-mode restriction** (line 1767): SPECTRO accepts only the luminance and
+16-bit HSV families — `key_luma8..key_luma8x` and `key_hsv16..key_hsv16x`.
+The broader LUT, RGBI, RGB8, HSV8, RGB16, RGB24 families present in other
+windows are **not** accepted here.
+
+### Display / data directives
+
+Accepted in `SPECTRO_Update` (lines 1792–1834).
+
+| Directive | Notes | Pascal lines |
+|---|---|---|
+| numeric sample stream | bare `ele_num` values; unpacked through current packing mode; triggers FFT+draw when buffer full and rate cycles | 1818-1831 |
+| `CLEAR` | clears bitmap, resets sample-pop counter and rate counter, resets trace position | 1801-1808 |
+| `SAVE` | saves current bitmap to file | 1809-1810 |
+| `PC_KEY` | polls latched keypress; triggers `SendKeyPress` | 1811-1812 |
+| `PC_MOUSE` | polls cursor position + buttons + wheel; triggers `SendMousePos` | 1813-1814 |
+
+Strings and all other directives not listed above are rejected (string causes
+immediate loop break; unrecognised keys are silently skipped).
+
+### Keyboard & mouse
+
+SPECTRO uses the **shared input model** — there is no per-window keyboard or
+mouse handling logic beyond coordinate mapping.
+
+| Handler | Lines | Behaviour |
+|---|---|---|
+| `WMGetDlgCode` | 585-589 | Captures Tab key (`DLGC_WANTTAB`); Tab does not change focus. |
+| `FormMouseMove` | 647-809 | Draws live measurement cursor showing `x,y` coordinates. For SPECTRO: `x = pixel ÷ vDotSize`, `y = pixel ÷ vDotSizeY` (line 733-734). Suppressed when `HIDEXY` set (line 737). |
+| `FormMouseWheel` | 811-823 | Latches wheel direction (+1/−1) into `vMouseWheel` for 100 ms, then auto-clears. |
+| `FormKeyPress` | 825-831 | Latches key byte into `vKeyPress` for 100 ms, then auto-clears. |
+| `FormKeyDown` | 833-851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12. |
+
+**`PC_KEY` → `SendKeyPress`** (3579-3583): transmits one LONG = latched `vKeyPress` byte (0 if none), then clears it. Behaviour is identical across all nine windows.
+
+**`PC_MOUSE` → `SendMousePos`** (3537-3577): transmits two LONGs.
+- LONG 1: bits 0-12 = x, bits 13-25 = y, bits 26-27 = wheel, bits 28-30 = L/M/R buttons. `$03FFFFFF`/`$FFFFFFFF` sentinel when cursor is outside the window.
+- LONG 2: RGB color of pixel under cursor (byte-swapped to `$RRGGBB`).
+
+⚠️ SPECTRO's **on-screen readout** and **`PC_MOUSE` wire value differ in Y origin**:
+- **On-screen readout** (`FormMouseMove`, lines 733-734): `x = X ÷ vDotSize`, `y = Y ÷
+  vDotSizeY` — top-origin, no direction flip.
+- **`PC_MOUSE` wire value** (`SendMousePos`, in the shared `dis_spectro, dis_plot,
+  dis_bitmap` branch): applies `if not vDirY then y := ClientHeight − y` *before* dividing.
+  Since `vDirY` is always `False` for SPECTRO (only PLOT's `CARTESIAN` sets it), the wire
+  value is **Y-inverted** (bottom-origin): `x = X ÷ vDotSize`, `y = (ClientHeight − Y) ÷
+  vDotSizeY`. So the P2 receives a bottom-origin Y, opposite the on-screen readout.
+
+`HIDEXY` suppresses the on-screen readout only; `PC_MOUSE` still reports to the P2.
+
+---
+
 ## 4. Configuration and Initialization
 
 ### 4.1 SPECTRO_Configure Method
@@ -317,7 +396,7 @@ end;
 | **rate** | key_rate | integer | 1-2048 | samples/8 | Display update rate (samples per update) |
 | **trace** | key_trace | integer | 0-15 | 15 | Trace direction and scroll mode |
 | **dotsize** | key_dotsize | integer(s) | 1-16 | 1 | Pixel scaling (X, optional Y) |
-| **colormode** | key_luma8..key_rgb24 | enum | - | key_luma8x | Color encoding mode |
+| **colormode** | key_luma8..key_luma8x, key_hsv16..key_hsv16x | enum | restricted set (line 1767) | key_luma8x | Color encoding mode |
 | **logscale** | key_logscale | boolean | - | false | Logarithmic magnitude scaling |
 | **hidexy** | key_hidexy | boolean | - | false | Hide axis labels |
 | **packing** | key_longs_1bit..key_bytes_4bit | enum | - | none | Data packing mode |
@@ -1233,6 +1312,16 @@ if x = FFTlast then BitmapToCanvas(0);  // Capture just before scroll
 SetSize(0, 0, 0, 0);
 ```
 
+**Default window size**: with all defaults (depth `vWidth = 256` from `SetDefaults`,
+FFT 512 → bins `vHeight = FFTlast − FFTfirst + 1 = 256`, `vTrace = $F` so bit 2 is set
+→ **no** width/height swap, `vDotSize = vDotSizeY = 1`), the client area is **256 × 256
+px**. (The §4 example uses `depth=300, trace=0`, which *does* swap — that is an example,
+not the default.)
+
+**Font size**: SPECTRO renders **no text labels** — `SPECTRO_Configure` does not set
+`vTextSize`, so it stays at `DefaultTextSize = 10` (`SetDefaults`, 2894), and SPECTRO
+exposes **no `TEXTSIZE` directive**. The value is effectively unused.
+
 **Actual Size Determined By**:
 - **vWidth**: Frequency bins (after swap) or time depth
 - **vHeight**: Time depth (after swap) or frequency bins
@@ -1644,16 +1733,26 @@ DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;
 
 ### 18.2 SPECTRO Configuration Example
 
+SPECTRO has **no** `SIZE`, `LOGSIZE`, or `LUTCOLORS` directives — those keys are
+not handled by `SPECTRO_Configure` (lines 1735-1775). FFT size is set with
+`SAMPLES`, time depth with `DEPTH`, and color via the restricted color-mode set.
+A representative configuration element array is:
+
 ```
 Element Array:
-[0] type=ele_key   value=key_size        → SIZE
-[1] type=ele_num   value=256             → width
-[2] type=ele_num   value=512             → height
-[3] type=ele_key   value=key_logsize     → LOGSIZE
-[4] type=ele_num   value=9               → 512-point FFT
-[5] type=ele_key   value=key_lutcolors   → LUTCOLORS
-[6] type=ele_end   value=0
+[0] type=ele_key   value=key_samples   → SAMPLES
+[1] type=ele_num   value=512           → 512-point FFT (FFTexp = 9, bins 0..255)
+[2] type=ele_key   value=key_depth     → DEPTH
+[3] type=ele_num   value=400           → 400 time-history lines (vWidth)
+[4] type=ele_key   value=key_trace     → TRACE
+[5] type=ele_num   value=$F            → direction 7 + scroll (KeyVal → vTrace)
+[6] type=ele_key   value=key_luma8x    → LUMA8X color mode
+[7] type=ele_end   value=0
 ```
+
+`SAMPLES` passes its first numeric value through `Within(val, 4, FFTmax)` and
+`Trunc(Log2(...))` to derive `FFTexp` (line 1744); optional first/last bin values
+follow. See `SPECTRO_Configure` lines 1741-1750.
 
 ### 18.3 SPECTRO Sample Data Example
 
@@ -1670,40 +1769,49 @@ Element Array:
 
 ### 19.1 Sample Buffer
 
+**DebugDisplayUnit.pas:363**
 ```pascal
-SampleBuff: array[0..SampleSets - 1] of integer;  // 2048 samples
+SPECTRO_SampleBuff: array [0..SPECTRO_Samples - 1] of integer;  // 2048 samples
 ```
 
-**Circular Buffer**: Stores time-domain samples before FFT processing.
+**Circular Buffer**: Stores time-domain samples before FFT processing. Indexed
+by `SamplePtr` advanced with `and SPECTRO_PtrMask` (= 2047). `SamplePop` tracks
+fill level up to `vSamples`; the buffer is "full" once `SamplePop = vSamples`
+(`SPECTRO_Update` lines 1825-1828).
 
 ### 19.2 FFT Processing Flow
 
 ```
-1. Collect samples in circular buffer
-2. On rate cycle: Copy samples to FFT input buffer
-3. Perform FFT (fixed-point, optimized)
-4. Calculate magnitude/phase
-5. Map to color values
-6. Plot line on bitmap
-7. Scroll bitmap for waterfall effect
+1. Collect samples in circular buffer (SPECTRO_Update, 1818-1830)
+2. Buffer full (SamplePop = vSamples) and RateCycle true → SPECTRO_Draw (1828-1829)
+3. Copy newest vSamples into FFTsamp, perform FFT (SPECTRO_Draw 1842-1844)
+4. Magnitude/phase produced in FFTpower/FFTangle (PerformFFT)
+5. Scale + (optional) log + (HSV16) phase, TranslateColor (SPECTRO_Draw 1846-1852)
+6. PlotPixel writes one bin per pixel at vPixelX,vPixelY (3433-3445)
+7. StepTrace advances/scrolls the bitmap for the waterfall effect (2982-3061)
 ```
 
 ### 19.3 Scrolling Mechanics
 
-**8 Scroll Directions**:
-```pascal
-vScroll values:
-  0 = down (default)
-  1 = down-right
-  2 = right
-  3 = up-right
-  4 = up
-  5 = up-left
-  6 = left
-  7 = down-left
-```
+There is **no** `vScroll` variable in v55. Scrolling is driven entirely by the
+`vTrace` bit-field via `StepTrace` (lines 2982-3061): `vTrace and 7` selects one
+of 8 directions and `vTrace and 8` enables bitmap scrolling. The eight directions
+and their scroll vectors (the `ScrollBitmap(x, y)` call each emits) are:
 
-**Scroll Operation**: Bitmap shifted by 1 pixel, new FFT line drawn in freed space.
+| `vTrace and 7` | Primary advance | Scroll call at edge |
+|---|---|---|
+| 0 | X+ then Y+ | `ScrollBitmap(0, 1)` (down) |
+| 1 | X− then Y+ | `ScrollBitmap(0, 1)` (down) |
+| 2 | X+ then Y− | `ScrollBitmap(0, -1)` (up) |
+| 3 | X− then Y− | `ScrollBitmap(0, -1)` (up) |
+| 4 | Y+ then X+ | `ScrollBitmap(1, 0)` (right) |
+| 5 | Y− then X+ | `ScrollBitmap(1, 0)` (right) |
+| 6 | Y+ then X− | `ScrollBitmap(-1, 0)` (left) |
+| 7 | Y− then X− | `ScrollBitmap(-1, 0)` (left) |
+
+When `vTrace and 8 = 0` (no scroll), the secondary axis wraps instead of
+scrolling. `ScrollBitmap` shifts the bitmap by 1 unit and fills the freed edge
+strip with background; the next line of bins is then plotted into that strip.
 
 ---
 
@@ -1711,42 +1819,46 @@ vScroll values:
 
 ### 20.1 Bitmap Architecture
 
-```pascal
-Bitmap: array[0..1] of TBitmap;  // Double-buffered
-```
-
-**Color Depth**: 32-bit RGBA for high-quality color mapping.
+SPECTRO renders into the shared `Bitmap[0]` (drawing target) and presents via
+`BitmapToCanvas(0)` (line 3522). `PlotPixel` writes directly to scanline
+pointers cached in `BitmapLine[]` as **RGB24** (3 bytes/pixel: blue, green, red —
+`PlotPixel` lines 3438-3442). There is no separate RGBA buffer.
 
 ### 20.2 Waterfall Rendering
 
-```pascal
-// Scroll existing content
-ScrollBitmap(vScroll);
+The real draw loop is `SPECTRO_Draw` (lines 1846-1856): it does **not** call
+`ScrollBitmap` directly, and it has no `FFTmag[x]`/`MapToColor` array. Each bin
+is read from `FFTpower[x]`, scaled, optionally log-mapped, optionally OR-ed with
+phase for HSV16 modes, then `PlotPixel(p)` writes it at the current trace
+position. `StepTrace` (called after each pixel) is what advances the position and
+issues `ScrollBitmap` at a row/column edge:
 
-// Draw new FFT line
-for x := 0 to FFTsize div 2 - 1 do
+```pascal
+for x := FFTfirst to FFTlast do
 begin
-  magnitude := FFTmag[x];
-  color := MapToColor(magnitude);
-  PlotPixel(x, new_line_position, color);
+  v := FFTpower[x];
+  if vLogScale then v := Round(Log2(Int64(v)+1) / Log2(Int64(vRange)+1) * vRange);
+  p := Round(v * fScale);                     // fScale = 255 / vRange
+  if p > $FF then p := $FF;
+  if vColorMode in [key_hsv16..key_hsv16x] then
+    p := p or FFTangle[x] shr 16 and $FF00;   // phase into upper byte
+  PlotPixel(p);                                // TranslateColor → RGB24 scanline
+  if x = FFTlast then BitmapToCanvas(0);       // capture before final StepTrace
+  StepTrace;                                   // advance / ScrollBitmap
 end;
 ```
 
 ### 20.3 Color Mapping
 
-**LUT (Lookup Table)** mode:
-```pascal
-color_index := magnitude >> (31 - vLutSize);  // Scale to LUT size
-color := vLUT[color_index];
-```
-
-**HSV16** mode:
-```pascal
-hue := phase_angle >> 16;       // Upper 8 bits
-saturation := 255;
-value := magnitude >> 23;        // Lower 8 bits
-color := HSVtoRGB(hue, sat, val);
-```
+SPECTRO does not use a runtime LUT. Color is produced by `TranslateColor(p, vColorMode)`
+(called inside `PlotPixel`, line 3437), and `vColorMode` is restricted to the
+luminance and 16-bit HSV families only (`key_luma8..key_luma8x`,
+`key_hsv16..key_hsv16x`; restriction at `SPECTRO_Configure` line 1767). For the
+HSV16 family, `SPECTRO_Draw` packs phase into bits 8-15 of `p` before plotting
+(line 1852: `p := p or FFTangle[x] shr 16 and $FF00`), so the byte value carries
+both magnitude (low byte) and phase/hue (high byte). The HSV→RGB conversion uses
+the precomputed `PolarColors[]` table (built by `SetPolarColors`, lines 3207-3228),
+not a magnitude-indexed LUT.
 
 ---
 
@@ -1762,12 +1874,26 @@ SPECTRO shares the same fixed-point FFT engine as FFT display:
 
 ### 21.2 Color System
 
-**Default Spectrum Colors**:
-```pascal
-DefaultSpectrumColors: array[0..255] of TColor;
-```
+SPECTRO shares the standard color path: `TranslateColor` (3082-3165) plus the
+`PolarColors[0..255]` table (declared line 365, built by `SetPolarColors`
+lines 3207-3228). There is no `DefaultSpectrumColors` array in v55 —
+`PolarColors` is the only precomputed color table, and it serves the HSV color
+modes (red→yellow→green→cyan→blue→magenta hue wheel). Luminance modes are
+computed arithmetically in `TranslateColor` from `vColorTune` (see §7.2).
 
-Generated with smooth gradients for magnitude visualization.
+Like BITMAP, SPECTRO has **no fixed channel/trace palette** (`DefaultScopeColors`
+does not apply). The only fixed color constants are the **background** values
+returned by `GetBackground` (`DebugDisplayUnit.pas` 3180–3205), selected by color
+mode:
+
+| Color mode | Background | Hex |
+|---|---|---|
+| LUT1/2/4/8 | `vLut[0]` | (first palette entry) |
+| LUMA8/8X, HSV16/16X (and other non-"W" modes) | `clBlack` | `$000000` |
+| LUMA8W, HSV16W (white-base "W" modes) | `clWhite` | `$FFFFFF` |
+
+`clBlack`/`clWhite` are literal RGB24 values (`DebugDisplayUnit.pas` 187–188).
+(SPECTRO restricts its config color mode to the LUMA8/HSV16 families — see §17.4.)
 
 ### 21.3 Data Packing
 
@@ -1780,56 +1906,60 @@ Uses standard 12 packing modes:
 
 ## 22. Initialization Lifecycle
 
-### 22.1 Window Creation
+### 22.1 Configuration Lifecycle
+
+There is no `vLogSize`, `vScroll`, `vLutSize`, `InitializeFFT`, or
+`GenerateSpectrumLUT` in v55. Initialization is performed entirely by
+`SPECTRO_Configure` (lines 1719-1790) in this real order:
 
 ```pascal
-// 1. Create form
-DebugDisplayForm := TDebugDisplayForm.Create(Application);
-DebugDisplayForm.DisplayType := dis_spectro;
+// 1. Set unique defaults (1723-1733)
+vTrace := $F; vColorMode := key_luma8x; vSamples := fft_default;  // 512
+FFTexp := Trunc(Log2(fft_default));                               // 9
+FFTfirst := 0; FFTlast := fft_default div 2 - 1;                  // 0..255
+FFTmag := 0; vDotSize := 1; vDotSizeY := 1; vRange := $7FFFFFFF;
 
-// 2. Set defaults
-vWidth := 256;
-vHeight := 512;
-vLogSize := 9;           // 512-point FFT
-vScroll := 0;            // Down
-vColorMode := key_lut;   // LUT color mapping
-vLutSize := 8;           // 256-color LUT
+// 2. Process element-array directives (1735-1775)
+while NextKey do case val of ... end;   // SAMPLES/DEPTH/MAG/RANGE/RATE/TRACE/...
 
-// 3. Configure from element array
-SPECTRO_Configure;
+// 3. Build FFT tables for the chosen size (1777)
+PrepareFFT;                              // sin/cos/Hanning, sized by FFTexp
 
-// 4. Initialize FFT
-InitializeFFT(1 << vLogSize);
+// 4. Default rate, prime rate counter (1778-1779)
+if vRate = 0 then vRate := vSamples div 8;
+vRateCount := vRate - 1;
 
-// 5. Create bitmaps
-Bitmap[0].SetSize(vWidth, vHeight);
-Bitmap[1].SetSize(vWidth, vHeight);
+// 5. Compute metrics; swap W/H for horizontal traces (1781-1787)
+vHeight := FFTlast - FFTfirst + 1;
+if vTrace and $4 = 0 then begin i := vWidth; vWidth := vHeight; vHeight := i; end;
 
-// 6. Generate default color LUT
-GenerateSpectrumLUT;
-
-// 7. Show window
-Show;
+// 6. Allocate/size bitmap + scanline pointers, then set trace origin (1788-1789)
+SetSize(0, 0, 0, 0);
+SetTrace(vTrace, False);
 ```
+
+`SetSize` (not a manual `Bitmap[n].SetSize`) establishes the bitmap and
+`BitmapLine[]` scanline pointers; `SetTrace` (2973-2980) seeds `vPixelX`/`vPixelY`
+to the correct starting corner for the trace direction.
 
 ### 22.2 FFT Configuration
 
-```pascal
-FFTsize := 1 << vLogSize;  // 2^logsize (128 to 2048)
-FFTmag := vLogMag;         // Magnitude scaling
-FFTexp := vLogSize;        // Exponent for scaling
-```
+FFT size derives from `vSamples`/`FFTexp` set during step 1-2 above. `FFTexp` is
+`Trunc(Log2(...))` of the clamped `SAMPLES` value (line 1744); `FFTmag` is the
+0..11 magnitude shift from `MAG` (line 1753). `PrepareFFT` (4170-4183) then
+fills `FFTsin`/`FFTcos`/`FFTwin` for `1 shl FFTexp` points. There is no separate
+`FFTsize` variable — the size is always `1 shl FFTexp` / `vSamples`.
 
 ### 22.3 Runtime State
 
 ```
-[Acquiring] → Collect samples
+[Acquiring]  → SPECTRO_Update stores samples into SPECTRO_SampleBuff (1818-1830)
+     ↓ (SamplePop = vSamples AND RateCycle)
+[FFT]        → SPECTRO_Draw copies window, calls PerformFFT (1842-1844)
      ↓
-[FFT Ready] → Perform FFT
+[Rendering]  → per bin: scale/log/HSV-phase → PlotPixel → StepTrace (1846-1856)
      ↓
-[Rendering] → Map colors, scroll, plot line
-     ↓
-[Display] → BitmapToCanvas
+[Display]    → BitmapToCanvas(0) at last bin, before final StepTrace scroll (1854)
      ↓
 Loop back to Acquiring
 ```

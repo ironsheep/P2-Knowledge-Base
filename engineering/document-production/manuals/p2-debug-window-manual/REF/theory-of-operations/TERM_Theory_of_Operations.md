@@ -1,6 +1,8 @@
 # TERM Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -191,6 +193,96 @@ var
 
 ---
 
+## Directive Reference (v55-verified)
+
+This section is the single authoritative lookup for every directive TERM accepts,
+verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01. See the
+[Directive Matrix §5.7](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) for the cross-window
+view.
+
+### Configuration directives
+
+Processed once by `TERM_Configure` (lines 2181-2221). Applied before the window
+opens.
+
+| Directive | Pascal key | Parameters | Range / notes |
+|-----------|-----------|------------|---------------|
+| `TITLE 'str'` | `key_title` | string | Free string · window title bar text |
+| `POS left top` | `key_pos` | 2 integers | left, top · offset from base window position |
+| `SIZE cols rows` | `key_size` | 2 integers | **Columns × rows** (not pixels); cols int **1..256** · default 40; rows int **1..256** · default 20. Clamped by `KeySize(…, term_colmin, term_colmax, term_rowmin, term_rowmax)` (`2199-2200`; constants `term_colmin/_rowmin`=1, `term_colmax/_rowmax`=256, lines 224-227) |
+| `TEXTSIZE n` | `key_textsize` | integer | Font point size · int **6..200** · default 10 (global `FontSize` user preference); applied via `KeyTextSize` |
+| `COLOR c0 c1 … c7` | `key_color` | up to 8 RGB24 values | Fills `vColor[0..7]` — 4 text/background pairs; reads up to 8, stops early if a value is absent (`2203-2204`). Each value is a named color (§7.1, optional 0–15 brightness nibble) or numeric. Default: `ORANGE/BLACK, BLACK/ORANGE, LIME/BLACK, BLACK/LIME` |
+| `BACKCOLOR color` | `key_backcolor` | 1 RGB24 value | Window canvas background (used for clear/scroll fill), not character background (`2205-2206`) |
+| `UPDATE` | `key_update` | *(flag)* | Enables buffered mode — screen only updates on explicit `UPDATE` directive (`2207-2208`) |
+| `HIDEXY` | `key_hidexy` | *(flag)* | Hides the live measurement-cursor coordinate readout; does **not** disable `PC_MOUSE` (`2209-2210`) |
+
+### Display / data directives
+
+Processed on every subsequent message by `TERM_Update` (lines 2223-2315).
+
+**Named-color key directives** (`key_black`..`key_gray`, lines 2232-2237):
+
+| Directive | Action |
+|-----------|--------|
+| `BLACK` `WHITE` `ORANGE` `BLUE` `GREEN` `CYAN` `RED` `MAGENTA` `YELLOW` `GRAY` `{brightness}` | Sets `vTextColor` (text foreground) to the named color, then reads an optional second color into `vTextBackColor` (text background). Both use `KeyColor` which accepts an optional 0–15 brightness nibble after the color name. |
+| `BACKCOLOR color` | Sets `vTextBackColor` only (`key_backcolor`, line 2238-2239) |
+
+**Keyword directives**:
+
+| Directive | Action |
+|-----------|--------|
+| `CLEAR` | `key_clear` — clear entire bitmap, home cursor to (0,0), set update flag (lines 2240-2246) |
+| `UPDATE` | `key_update` — immediately copy `Bitmap[0]` to canvas (`BitmapToCanvas(0)`), line 2247-2248 |
+| `SAVE` | `key_save` — save bitmap to file (`KeySave`, line 2249-2250) |
+| `PC_KEY` | `key_pc_key` — transmit latched keypress LONG to P2 (`SendKeyPress`, line 2251-2252) |
+| `PC_MOUSE` | `key_pc_mouse` — transmit mouse position + buttons LONG pair to P2 (`SendMousePos`, line 2253-2254) |
+
+**Numeric control codes** (lines 2258-2305, `ele_num` values). Each is a numeric
+element in the **0..13** control range or **32..255** printable range; numbers
+14–31 fall through the `case` with no action:
+
+| Value | Parameter range | Action |
+|-------|-----------------|--------|
+| `0` | — | Clear screen + home cursor (0,0) |
+| `1` | — | Home cursor to (0,0), no clear |
+| `2 n` | `n` int **0..vCols−1** (clamped, `2273`) | Set column to `n` via `KeyValWithin(vCol, 0, vCols-1)` |
+| `3 n` | `n` int **0..vRows−1** (clamped, `2275`) | Set row to `n` via `KeyValWithin(vRow, 0, vRows-1)` |
+| `4` | — | Select color pair 0 → `vColor[0]`/`vColor[1]` |
+| `5` | — | Select color pair 1 → `vColor[2]`/`vColor[3]` |
+| `6` | — | Select color pair 2 → `vColor[4]`/`vColor[5]` |
+| `7` | — | Select color pair 3 → `vColor[6]`/`vColor[7]` |
+| `8` | — | Backspace — move cursor back one, wrap to previous row; no-op at (0,0) |
+| `9` | — | Tab — print spaces until next 8-column boundary (minimum 1 space) |
+| `10` | — | Line feed — treated identically to CR (calls `TERM_Chr(Chr(13))`) |
+| `13` | — | Carriage return — advance to next row (or scroll), reset column to 0; consumes a following `10` if present |
+| `32..255` | — | Printable character — render glyph at current cursor, advance column |
+
+**String** (`ele_str`): Prints each character of the string verbatim via `TERM_Chr`
+(lines 2307-2311). Characters in the string that happen to be control-code values
+(e.g. `Chr(13)`) are passed directly to `TERM_Chr` and act as newlines.
+
+### Keyboard & mouse
+
+TERM uses the **shared input model** inherited by all nine display windows — there
+is no TERM-specific keyboard or mouse handler. See
+[Directive Matrix §4](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) for the full shared
+model. TERM-specific notes:
+
+| Handler | Lines | TERM behavior |
+|---------|-------|---------------|
+| `WMGetDlgCode` | 585-589 | Captures Tab key (all windows) |
+| `FormKeyPress` | 825-831 | Latches key byte into `vKeyPress` for 100 ms |
+| `FormKeyDown` | 833-851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12 |
+| `FormMouseMove` | 725-732 | Displays character **col,row** as live measurement cursor; empty string (no readout) if cursor is outside the text area |
+| `FormMouseWheel` | 811-817 | Latches wheel direction (+1/−1) into `vMouseWheel` for 100 ms |
+| `PC_KEY` → `SendKeyPress` | 3579-3583 | Sends one LONG = `vKeyPress` byte (0 if none), then clears it |
+| `PC_MOUSE` → `SendMousePos` | 3563-3567 | LONG 1: `x` = char column, `y` = char row, wheel bits 26-27, L/M/R buttons bits 28-30; if cursor is **outside the text area** (margin-bounded character grid), LONG 1 = `$03FFFFFF`, LONG 2 = `$FFFFFFFF` (off-window sentinel). LONG 2: RGB color under cursor |
+
+`HIDEXY` suppresses the on-screen readout from `FormMouseMove` but does **not**
+prevent `PC_MOUSE` from reporting coordinates back to the P2.
+
+---
+
 ## 4. Configuration and Initialization
 
 ### 4.1 TERM_Configure Method
@@ -250,7 +342,7 @@ end;
 | **title** | key_title | string | - | "TERM" | Window title text |
 | **pos** | key_pos | x, y, width, height | - | auto | Window position and size |
 | **size** | key_size | columns, rows | 1-256 | 40×20 | Terminal grid size |
-| **textsize** | key_textsize | integer | 4-50 | FontSize | Font size in points |
+| **textsize** | key_textsize | integer | 6-200 | `FontSize` (default 10) | Font size in points (`KeyTextSize` clamp) |
 | **color** | key_color | 8 integers | RGB24 | DefaultTermColors | 8 color values (4 pairs) |
 | **backcolor** | key_backcolor | integer | RGB24 | clBlack | Window background color |
 | **update** | key_update | boolean | - | false | Enable buffered update mode |
@@ -282,7 +374,7 @@ SetSize(i, i, i, i);             // Set margins
 
 ### 5.1 TERM_Update Method
 
-**DebugDisplayUnit.pas:2223-2307**
+**DebugDisplayUnit.pas:2223-2315**
 ```pascal
 procedure TDebugDisplayForm.TERM_Update;
 var
@@ -293,6 +385,14 @@ begin
   begin
     if NextKey then
     case val of
+      key_black..key_gray:      // set text color and maybe text background color
+      begin
+        Dec(ptr);
+        KeyColor(vTextColor);
+        KeyColor(vTextBackColor);
+      end;
+      key_backcolor:            // set text background color
+        KeyColor(vTextBackColor);
       key_clear:                // clear screen and home
       begin
         ClearBitmap;
@@ -349,9 +449,9 @@ begin
           TERM_Chr(' ');
           while vCol and 7 <> 0 do TERM_Chr(' ');
         end;
-        10:                     // new line (LF)
+        10:                     // new line (10)
           TERM_Chr(Chr(13));
-        13:                     // new line (CR), ignore trailing LF
+        13:                     // new line (13), ignore trailing linefeed (10)
         begin
           TERM_Chr(Chr(13));
           if NextNum then if val <> 10 then Dec(ptr)
@@ -395,6 +495,8 @@ end;
 
 | Key | Action |
 |-----|--------|
+| **key_black..key_gray** | Set text foreground color (named color + optional brightness); optionally set text background color from next element (lines 2232-2237) |
+| **key_backcolor** | Set text background color only (line 2238-2239) |
 | **key_clear** | Clear screen and home cursor |
 | **key_update** | Force display update (buffered mode) |
 | **key_save** | Save display to image file |
@@ -410,7 +512,7 @@ end;
 
 ### 6.1 TERM_Chr Method
 
-**DebugDisplayUnit.pas:2309-2346**
+**DebugDisplayUnit.pas:2317-2354**
 ```pascal
 procedure TDebugDisplayForm.TERM_Chr(c: Char);
 var
@@ -609,7 +711,7 @@ while vCol and 7 <> 0 do          // Until 8-column boundary
 
 **Condition**: Newline (CR) when cursor is at bottom row (vRow = vRows - 1).
 
-**DebugDisplayUnit.pas:2316-2327**
+**DebugDisplayUnit.pas:2324-2335**
 ```pascal
 if vRow <> vRows - 1 then
   Inc(vRow)              // Normal case: move to next row
@@ -684,7 +786,7 @@ vUpdateFlag := True;
 
 **Command**: 0 or key_clear
 
-**DebugDisplayUnit.pas:2232-2238, 2252-2258**
+**DebugDisplayUnit.pas:2240-2246, 2260-2266**
 ```pascal
 ClearBitmap;
 vUpdateFlag := True;
@@ -701,7 +803,7 @@ vRow := 0;
 
 **Command**: 1
 
-**DebugDisplayUnit.pas:2259-2263**
+**DebugDisplayUnit.pas:2267-2271**
 ```pascal
 vCol := 0;
 vRow := 0;
@@ -713,7 +815,7 @@ vRow := 0;
 
 **Commands**: 4, 5, 6, 7 (select color pairs 0-3)
 
-**DebugDisplayUnit.pas:2268-2272**
+**DebugDisplayUnit.pas:2276-2280**
 ```pascal
 vTextColor := vColor[(val - 4) * 2 + 0];
 vTextBackColor := vColor[(val - 4) * 2 + 1];
@@ -729,7 +831,7 @@ vTextBackColor := vColor[(val - 4) * 2 + 1];
 
 **Command**: 8
 
-**DebugDisplayUnit.pas:2273-2282**
+**DebugDisplayUnit.pas:2281-2290**
 ```pascal
 if (vCol <> 0) or (vRow <> 0) then
 begin
@@ -752,7 +854,7 @@ end;
 
 **Command**: 9
 
-**DebugDisplayUnit.pas:2283-2287**
+**DebugDisplayUnit.pas:2291-2295**
 ```pascal
 TERM_Chr(' ');
 while vCol and 7 <> 0 do TERM_Chr(' ');
@@ -776,7 +878,7 @@ Column 14: Tab → advance to 16 (2 spaces)
 
 **Commands**: 10 (LF), 13 (CR)
 
-**DebugDisplayUnit.pas:2288-2294**
+**DebugDisplayUnit.pas:2296-2302**
 ```pascal
 10:                     // new line (10)
   TERM_Chr(Chr(13));
@@ -820,11 +922,14 @@ Pair 3: vColor[6] (foreground), vColor[7] (background)
 **Default Colors** (DebugDisplayUnit.pas:242):
 ```pascal
 DefaultTermColors: array[0..7] of integer =
-  (clOrange, clBlack,    // Pair 0: Orange on black
-   clBlack, clOrange,    // Pair 1: Black on orange
-   clLime, clBlack,      // Pair 2: Lime on black
-   clBlack, clLime);     // Pair 3: Black on lime
+  (clOrange, clBlack,    // Pair 0: Orange ($FF7F00) on black ($000000)
+   clBlack, clOrange,    // Pair 1: Black ($000000) on orange ($FF7F00)
+   clLime, clBlack,      // Pair 2: Lime ($00FF00) on black ($000000)
+   clBlack, clLime);     // Pair 3: Black ($000000) on lime ($00FF00)
 ```
+The `clXxx` constants are literal RGB24 values (`DebugDisplayUnit.pas` 179–191):
+`clOrange = $FF7F00` (note: **NOT** web `$FF8000`/`$FFA500`), `clLime = $00FF00`,
+`clBlack = $000000`. `WinRGB` swaps R↔B to BGR only at GDI draw time.
 
 ### 10.3 Color Selection
 
@@ -872,7 +977,7 @@ Bitmap[0].Canvas.Brush.Color := WinRGB(vBackColor);     // Window background
 
 ### 11.1 SetTextMetrics Method
 
-**DebugDisplayUnit.pas:2911-2916**
+**DebugDisplayUnit.pas:2919-2925**
 ```pascal
 procedure TDebugDisplayForm.SetTextMetrics;
 begin
@@ -897,7 +1002,11 @@ ChrWidth: integer;   // Pixels per character (horizontal)
 ChrHeight: integer;  // Pixels per character (vertical)
 ```
 
-**Font**: Uses Windows default proportional font (typically MS Sans Serif or Segoe UI).
+**Font**: `SetTextMetrics` sets only `Bitmap[0].Canvas.Font.Size := vTextSize` and
+does **not** assign a font name — the canvas's inherited font face is used. The cell
+size is the measured width/height of the glyph `'X'` at the requested point size
+(`2921-2924`); `'X'` is a representative wide glyph, so proportional fonts are
+accommodated by sizing every cell to that width.
 
 **Example Measurements** (approximate):
 
@@ -1040,9 +1149,9 @@ debug(`TERM "Positioned text")
 
 **Configuration**:
 ```
-TERM SIZE 40 20 COLOR $FF8000 $000000 $000000 $FF8000 $00FF00 $000000 $FF0000 $000000
+TERM SIZE 40 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000
 ```
-Pairs: Orange/Black, Black/Orange, Green/Black, Red/Black
+Pairs: Orange/Black, Black/Orange, Green/Black, Red/Black (here Orange = `clOrange` `$FF7F00`)
 
 **Propeller 2 Code**:
 ```spin2
@@ -1293,7 +1402,10 @@ Canvas.TextRect(r, x, y, c);
 
 **Background**: Filled automatically using Brush.Color.
 
-**Font Metrics**: Proportional fonts supported, but character cells sized to fit widest character.
+**Font Metrics**: Character cells are sized to the measured width/height of `'X'`
+at the configured point size (`SetTextMetrics`, 2919-2925) — not to the widest
+glyph in the font. Glyphs wider than `'X'` may be clipped by the `TextRect`
+clipping rectangle.
 
 ### 16.3 Coordinate System
 
@@ -1313,7 +1425,7 @@ y := vMarginTop + vRow * ChrHeight;
 
 ### 16.4 String Processing
 
-**DebugDisplayUnit.pas:2299-2303**
+**DebugDisplayUnit.pas:2307-2311**
 ```pascal
 if NextStr then
 begin
@@ -1385,65 +1497,51 @@ Each character processed sequentially through TERM_Chr.
 
 ## 18. Buffer Management and Timing
 
-### 18.1 Character Grid Buffer
+TERM holds **no character-grid model** in v55. There is no `TermBuff`, no
+per-cell record, and no glyph/attribute store. The only retained terminal state is
+the cursor position (`vCol`, `vRow`) and the active colors (`vTextColor`,
+`vTextBackColor`, `vBackColor`); the on-screen text itself lives solely as pixels
+in `Bitmap[0]`. All buffer management is therefore bitmap management.
 
-```pascal
-TermBuff: array[0..vRows - 1, 0..vCols - 1] of TCharCell;
-```
+### 18.1 The Bitmap Is the Buffer
 
-**TCharCell Structure**:
-```pascal
-type TCharCell = record
-  ch: Char;           // Character value
-  fg: TColor;         // Foreground color
-  bg: TColor;         // Background color
-end;
-```
-
-**Size Calculation** (40×25 terminal):
-```
-40 × 25 × (1 + 4 + 4) bytes = 9,000 bytes
-```
+`TERM_Chr` (lines 2317-2354) paints each glyph straight into `Bitmap[0]` with
+`Canvas.TextRect`. The "buffer" of displayed characters is the bitmap — once a
+glyph is drawn there is no record of which character occupies a cell, only the
+rendered pixels. Consequently TERM cannot read back a cell's character; operations
+that "erase" (e.g. backspace, code 8) only move the cursor and never repaint the
+cell (see §9.4).
 
 ### 18.2 Write Operations
 
-```pascal
-// Store character at cursor position
-TermBuff[vRow][vCol].ch := character;
-TermBuff[vRow][vCol].fg := vForeColor;
-TermBuff[vRow][vCol].bg := vBackColor;
-
-// Render to bitmap
-RenderChar(vRow, vCol);
-
-// Advance cursor
-vCol := vCol + 1;
-if vCol >= vCols then
-begin
-  vCol := 0;
-  vRow := vRow + 1;
-  if vRow >= vRows then ScrollUp;
-end;
-```
+Writing a printable character runs the `else` branch of `TERM_Chr` (lines
+2338-2353). It computes the cell's pixel rectangle from `vCol`/`vRow` and the
+metrics `ChrWidth`/`ChrHeight` (lines 2341-2343), sets the fg/bg colors and draws
+the glyph with `TextRect` (lines 2344-2346), then `Inc(vCol)` (line 2347).
+Auto-wrap is handled first: `if vCol = vCols then TERM_Chr(Chr(13))` (line 2340),
+which performs a CR (column reset + row advance or scroll) before drawing. There is
+no intermediate cell store to update — the write is the draw.
 
 ### 18.3 Scrolling Operations
 
-```pascal
-procedure ScrollUp;
-begin
-  // Shift rows up
-  for row := 0 to vRows - 2 do
-    TermBuff[row] := TermBuff[row + 1];
+Scrolling is purely a pixel operation. When a CR arrives with the cursor already on
+the last row (`vRow = vRows - 1`), the `else` block (lines 2326-2335) copies the
+text area up one line with a single `Bitmap[0].Canvas.CopyRect` (line 2330) and
+then `FillRect`s the freed bottom line with `vBackColor` (lines 2331-2333), setting
+`vUpdateFlag` (line 2334). No row array is shifted — the rows move because their
+pixels are block-copied. See §8 for the exact source rectangles.
 
-  // Clear bottom row
-  FillChar(TermBuff[vRows - 1], vCols * SizeOf(TCharCell), 0);
+### 18.4 Update Timing
 
-  // Redraw entire screen
-  RedrawAll;
-end;
-```
-
-**Performance**: Full screen redraw on scroll (acceptable for typical terminal usage).
+In real-time mode (`vUpdate = False`, default) each `TERM_Chr` immediately mirrors
+the just-drawn cell rectangle from `Bitmap[0]` to `Bitmap[1]` and to the on-screen
+`Canvas` (lines 2349-2353), so output appears character-by-character. In buffered
+mode (`vUpdate = True`, set by the `UPDATE` config directive) those per-character
+copies are skipped; `Bitmap[0]` accumulates silently until an explicit `UPDATE`
+directive runs `BitmapToCanvas(0)` (line 2248). Independently, `vUpdateFlag` is set
+whenever a clear or scroll dirties the whole bitmap; at the end of `TERM_Update`,
+`if not vUpdate and vUpdateFlag then BitmapToCanvas(0)` (line 2314) flushes those
+full-bitmap changes in one copy.
 
 ---
 
@@ -1451,59 +1549,37 @@ end;
 
 ### 19.1 Bitmap Architecture
 
+The v55 TERM window uses the same shared double-buffer present in all display
+windows (declared in the form, not TERM-specific):
+
 ```pascal
-Bitmap: array[0..1] of TBitmap;  // Double-buffered
+Bitmap: array[0..1] of TBitmap;  // Double-buffered (shared infrastructure)
 ```
 
-**Memory Size** (typical 400×300 terminal):
-```
-400 × 300 × 4 bytes × 2 bitmaps = 960 KB
-```
+**Roles in TERM:**
+- `Bitmap[0]` — render target; all `TERM_Chr` drawing goes here
+- `Bitmap[1]` — display buffer; in real-time mode each character rect is also
+  copied here and to `Canvas` immediately; in buffered mode only copied on `UPDATE`
 
 ### 19.2 Character Rendering
 
-```pascal
-procedure RenderChar(row, col: integer);
-var
-  cell: TCharCell;
-  x, y: integer;
-begin
-  cell := TermBuff[row][col];
-
-  // Calculate pixel position
-  x := vMarginLeft + col * ChrWidth;
-  y := vMarginTop + row * ChrHeight;
-
-  // Clear background
-  Bitmap[BitmapPtr].Canvas.Brush.Color := cell.bg;
-  Bitmap[BitmapPtr].Canvas.FillRect(Rect(x, y, x + ChrWidth, y + ChrHeight));
-
-  // Draw character
-  Bitmap[BitmapPtr].Canvas.Font.Color := cell.fg;
-  Bitmap[BitmapPtr].Canvas.TextOut(x, y, cell.ch);
-end;
-```
+Character rendering in v55 is performed entirely inside `TERM_Chr` (lines
+2317-2354); there is no separate `RenderChar` helper and no `TCharCell` cell type.
+The procedure sets `Bitmap[0].Canvas.Font.Color := WinRGB(vTextColor)` and
+`Bitmap[0].Canvas.Brush.Color := WinRGB(vTextBackColor)`, then calls
+`Bitmap[0].Canvas.TextRect(r, x, y, c)` where `r` is the cell rectangle derived
+from `vCol`/`vRow` × `ChrWidth`/`ChrHeight` plus the margins (lines 2344-2348). The
+`Brush.Color` fills the cell background as part of the `TextRect` call, so each
+glyph is opaque over its background pair color. See §6.1 for the full procedure.
 
 ### 19.3 Cursor Rendering
 
-```pascal
-procedure RenderCursor;
-begin
-  if vCursorVisible then
-  begin
-    x := vMarginLeft + vCol * ChrWidth;
-    y := vMarginTop + vRow * ChrHeight;
-
-    // Draw cursor block
-    Bitmap[BitmapPtr].Canvas.Brush.Color := vCursorColor;
-    Bitmap[BitmapPtr].Canvas.FillRect(
-      Rect(x, y + ChrHeight - 2, x + ChrWidth, y + ChrHeight)
-    );
-  end;
-end;
-```
-
-**Cursor Style**: Horizontal line at bottom of character cell.
+There is **no cursor rendering** in TERM. The terminal cursor is purely the implicit
+write position `vCol`/`vRow` — the next glyph is drawn there. `DebugDisplayUnit.pas`
+contains no caret-draw, no blink timer, and no cursor erase/restore for the TERM
+window: nothing in `TERM_Chr` or `TERM_Update` paints a cursor indicator. Cursor
+movement directives (home/set-column/set-row/backspace) only update the integer
+pair `vCol`/`vRow`; they leave the bitmap untouched.
 
 ---
 
@@ -1511,44 +1587,54 @@ end;
 
 ### 20.1 Color System
 
-**Default Colors**:
+TERM color is controlled entirely by the eight-element `vColor[0..7]` array — four
+text/background pairs filled at configuration time from `key_color` (or the
+`DefaultTermColors`). There is no separate color-mode/LUT machinery for TERM (the
+`LUT1..RGB24` color modes used by PLOT/BITMAP do not apply here), and there is no
+`~n` color-escape syntax in the byte stream — color changes arrive only as numeric
+codes 4-7 (select pair) or as named-color key directives (`key_black..key_gray`).
+See §10 and the Directive Reference above for the runtime mechanics.
+
+**TERM color storage (v55)**:
 ```pascal
-vColors: array[0..3] of record fg, bg: TColor end = (
-  (fg: clWhite,   bg: clBlack),    // 0: Normal
-  (fg: clYellow,  bg: clBlack),    // 1: Warning
-  (fg: clRed,     bg: clBlack),    // 2: Error
-  (fg: clLime,    bg: clBlack)     // 3: Success
-);
+vColor: array [0..7] of integer;     // 4 text/background pairs (config-time)
+vTextColor, vTextBackColor: integer; // currently active text fg / bg
+vBackColor: integer;                 // window canvas background (clear/scroll fill)
 ```
 
-**Color Commands**:
-- `~0`: Normal (white on black)
-- `~1`: Warning (yellow on black)
-- `~2`: Error (red on black)
-- `~3`: Success (green on black)
+`vTextColor`/`vTextBackColor` are the colors applied per glyph by `TERM_Chr` (§19.2);
+`vBackColor` is the fill used by `ClearBitmap` and by the scroll's bottom-line
+`FillRect` (§8.1).
 
 ### 20.2 Text Metrics
 
+The v55 `SetTextMetrics` measures `'X'` and does not assign a font name (see §11.1,
+lines 2919-2925):
+
 ```pascal
-procedure SetTextMetrics;
+procedure TDebugDisplayForm.SetTextMetrics;
 begin
-  Bitmap[0].Canvas.Font.Name := 'Consolas';  // Monospace font
   Bitmap[0].Canvas.Font.Size := vTextSize;
-  ChrWidth := Bitmap[0].Canvas.TextWidth('W');
-  ChrHeight := Bitmap[0].Canvas.TextHeight('W');
+  ChrWidth := Bitmap[0].Canvas.TextWidth('X');
+  ChrHeight := Bitmap[0].Canvas.TextHeight('X');
 end;
 ```
 
-**Monospace Requirement**: Character grid assumes fixed-width font.
-
 ### 20.3 Control Character Processing
 
-**Special Characters**:
-- `\n` (LF): Line feed, move to next line
-- `\r` (CR): Carriage return, move to column 0
-- `\b` (BS): Backspace, move back one character
-- `\t` (TAB): Tab, move to next tab stop (every 8 characters)
-- `~`: Escape character for color commands
+Control behavior is driven by **numeric elements**, not by in-band escape bytes.
+`TERM_Update` (lines 2223-2315) dispatches each `ele_num` value through a `case`:
+values 0-13 perform the control actions in §9 (clear, home, set column/row, select
+color pair, backspace, tab, newline) and values 32-255 print a glyph via
+`TERM_Chr`. There is no `~`-style escape mechanism in TERM — directives reach the
+window as discrete protocol elements (`ele_key`, `ele_num`, `ele_str`), so a
+control code such as CR is the integer `13`, not an embedded escape sequence.
+
+The one place raw character bytes are interpreted is inside an `ele_str`: each
+character of the string is passed to `TERM_Chr` verbatim (lines 2307-2311), so a
+`Chr(13)` embedded in a string acts as a newline, but the string path still routes
+through `TERM_Chr` rather than the numeric `case`. See §9 and the Directive
+Reference above for the authoritative code table.
 
 ---
 
@@ -1556,76 +1642,62 @@ end;
 
 ### 21.1 Window Creation
 
-```pascal
-// 1. Create form
-DebugDisplayForm := TDebugDisplayForm.Create(Application);
-DebugDisplayForm.DisplayType := dis_term;
+The TERM window is created by the shared form infrastructure and configured by
+`TERM_Configure` (lines 2181-2221). The lifecycle at creation:
 
-// 2. Set defaults
-vCols := 40;
-vRows := 25;
-vTextSize := 9;
-vRow := 0;
-vCol := 0;
-vColorIndex := 0;  // Normal colors
-vCursorVisible := True;
+1. Shared `FormCreate` (`591-643`) runs — selects the display type and creates the
+   double-buffer `Bitmap[0]`/`Bitmap[1]` and the form-level timers/handlers common
+   to all nine windows.
+2. `TERM_Configure` is called — applies TERM's unique defaults: `vTextSize := FontSize`,
+   `vCols := DefaultCols` (40), `vRows := DefaultRows` (20), `vCol := 0`, `vRow := 0`,
+   and `vColor[0..7] := DefaultTermColors` (lines 2185-2190). It then walks the
+   element stream with `NextKey`, applying any `TITLE/POS/SIZE/TEXTSIZE/COLOR/
+   BACKCOLOR/UPDATE/HIDEXY` directives (lines 2192-2210).
+3. Active colors are seeded from pair 0: `vTextColor := vColor[0]`,
+   `vTextBackColor := vColor[1]` (lines 2212-2213).
+4. `SetTextMetrics` (2919-2925) runs inside `TERM_Configure` — sets the font size
+   and measures `'X'` to get `ChrWidth`/`ChrHeight`; then `vWidth := vCols*ChrWidth`,
+   `vHeight := vRows*ChrHeight` (lines 2215-2218).
+5. `SetSize(i, i, i, i)` is called with `i := ChrWidth div 2` margin on all sides
+   (lines 2219-2220); `SetSize` (2926-2972) sizes both bitmaps to the margined
+   client area and calls `ClearBitmap`.
 
-// 3. Configure from element array
-TERM_Configure;
-
-// 4. Calculate text metrics
-SetTextMetrics;
-
-// 5. Calculate window size
-vWidth := vMarginLeft + vCols * ChrWidth + vMarginRight;
-vHeight := vMarginTop + vRows * ChrHeight + vMarginBottom;
-
-// 6. Create bitmaps
-Bitmap[0].SetSize(vWidth, vHeight);
-Bitmap[1].SetSize(vWidth, vHeight);
-
-// 7. Clear terminal buffer
-FillChar(TermBuff, SizeOf(TermBuff), 0);
-
-// 8. Initial render
-ClearScreen;
-
-// 9. Show window
-Show;
-```
+There is no `vCursorVisible`, no `vColorIndex`, and no `TermBuff` — none of these
+exist in the v55 source. The only TERM state initialized is the cursor pair, the
+colors, and the grid dimensions.
 
 ### 21.2 Configuration Processing
 
+The actual v55 configuration parser (from `TERM_Configure` lines 2193-2211):
+
 ```pascal
-while not NextEnd do
-begin
-  if NextKey then
-  case val of
-    key_size:
-    begin
-      if NextNum then vCols := Within(val, 10, 200);
-      if NextNum then vRows := Within(val, 10, 100);
-    end;
-    key_textsize: KeyTextSize;
-    key_color: KeyTermColors;  // Configure color pairs
-  end
-  else if NextStr then
-    ProcessString(PChar(val));  // Output string
+while NextKey do
+case val of
+  key_title:    KeyTitle;
+  key_pos:      KeyPos;
+  key_size:     KeySize(vCols, vRows, term_colmin, term_colmax, term_rowmin, term_rowmax);
+  key_textsize: KeyTextSize;
+  key_color:    for i := 0 to 7 do if not KeyColor(vColor[i]) then Break;
+  key_backcolor: KeyColor(vBackColor);
+  key_update:   vUpdate := True;
+  key_hidexy:   vHideXY := True;
 end;
 ```
 
 ### 21.3 Runtime State
 
 ```
-[Ready] → Character arrives
+[Ready] → TERM_Update called with element stream
    ↓
-[Process] → Control character? → Special handling
-   ↓ (regular char)
-[Store] → TermBuff[row][col] := char
+[Dispatch] → ele_key? → named color / CLEAR / UPDATE / SAVE / PC_KEY / PC_MOUSE
+             ele_num?  → control codes 0-13 or printable 32-255 → TERM_Chr
+             ele_str?  → iterate chars → TERM_Chr each
+   ↓ (per printable char in TERM_Chr)
+[Render] → TextRect to Bitmap[0] at (vCol,vRow) pixel position
    ↓
-[Render] → Draw character to bitmap
-   ↓
-[Advance] → Move cursor (handle wrap/scroll)
+[Advance cursor] → Inc(vCol); if vCol=vCols → wrap/scroll via TERM_Chr(Chr(13))
+   ↓ (if not vUpdate)
+[Copy rect] → Bitmap[1] + Canvas immediately updated
    ↓
 Loop back to Ready
 ```

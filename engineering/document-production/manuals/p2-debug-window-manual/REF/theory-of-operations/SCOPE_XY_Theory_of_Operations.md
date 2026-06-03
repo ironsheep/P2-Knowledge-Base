@@ -1,6 +1,8 @@
 # SCOPE_XY Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -160,8 +162,9 @@ XY_PtrMask       = XY_Sets - 1;          // 2047 (for circular buffer)
 
 **Memory Calculation**:
 ```
-XY_SampleBuff: 2048 pairs × 8 traces × 2 values × 4 bytes = 131,072 bytes = 128 KB
+XY_SampleBuff: 2048 sets × 16 integers × 4 bytes/int = 131,072 bytes = 128 KB
 ```
+(Each integer is 32-bit regardless of bitmap pixel format.)
 
 **Source Locations**: Lines 171-174 in DebugDisplayUnit.pas
 
@@ -179,11 +182,13 @@ scope_xy_wmax = SmoothFillMax;           // Maximum size (2048)
 ### 3.4 Default Values
 
 ```pascal
-// From SCOPE_XY_Configure (lines 1388-1392)
+// From SCOPE_XY_Configure (lines 1388-1392) — SCOPE_XY-specific overrides only
 vRange       := $7FFFFFFF;       // Default range (max 32-bit signed)
 vRate        := 1;               // Default rate divisor
 vDotSize     := 6;               // Default dot diameter (larger than SCOPE)
-vTextSize    := FontSize;        // Default label font size (9)
+vTextSize    := FontSize;        // Default label font size (global FontSize, default 10)
+// NOTE: vSamples is NOT reset here; it inherits 256 from SetDefaults (line 2886).
+// Effective default: 256-sample fading trail (NOT persistent/0).
 ```
 
 ---
@@ -280,6 +285,87 @@ vIndex          : integer;       // Number of active traces
 
 ---
 
+## 4a. Directive Reference (v55-verified)
+
+> Cross-referenced from §5.3 and §4 of [DEBUG-WINDOW-DIRECTIVE-MATRIX.md](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md).
+> All line references are to `DebugDisplayUnit.pas` (v55).
+
+### Configuration directives
+
+Accepted during `SCOPE_XY_Configure` (lines 1386–1441).
+
+| Directive | Syntax | Default | Clamped range | Pascal lines | Notes |
+|---|---|---|---|---|---|
+| `TITLE` | `TITLE 'str'` | `"Scope_XY"` | — | `1398-1399` | Window caption |
+| `POS` | `POS left top` | Cascaded | Screen coords | `1400-1401` | |
+| `SIZE` | `SIZE val` | 256 (→ 512 px) | 16..1024 (→ 32..2048 px) | `1402-1406` | **One value only (square).** `vWidth = val*2; vHeight = vWidth`. |
+| `RANGE` | `RANGE n` | `$7FFFFFFF` | 1..`$7FFFFFFF` | `1407-1408` | Coordinate extent; both axes |
+| `SAMPLES` | `SAMPLES n` | `256` (from `SetDefaults` line 2886) | 0..2048 | `1409-1410` | `0` = persistent (no buffer); `>0` = fading trail depth; SCOPE_XY_Configure does NOT reset this |
+| `RATE` | `RATE n` | `1` | 1..2048 | `1411-1412` | Display update divisor |
+| `DOTSIZE` | `DOTSIZE n` | `6` | 2..20 | `1413-1414` | Dot diameter in pixels |
+| `TEXTSIZE` | `TEXTSIZE n` | `FontSize` (default 10) | 6..200 | `1415-1416` | Label font size |
+| `COLOR` | `COLOR back grid` | Black / Gray | RGB24 | `1417-1419` | Background then grid color |
+| `POLAR` | `POLAR {twopi {theta}}` | Off | — | `1420-1421` | Enables polar (rho, theta) mode; see §6.2 |
+| `LOGSCALE` | `LOGSCALE` | Off (linear) | — | `1422-1423` | Logarithmic scale on both axes |
+| `HIDEXY` | `HIDEXY` | Off | — | `1424-1425` | Suppresses on-screen measurement cursor; does **not** block `PC_MOUSE` |
+| Packing | `LONGS_1BIT`…`BYTES_4BIT` | `LONGS_1BIT` | 12 modes | `1426-1427` | Sub-sample packing density |
+| *label string* | `'label' {color}` | — | up to 8 traces | `1429-1434` | One string per trace; optional RGB24 color follows |
+
+**SIZE specifics**: `SIZE` takes **one** numeric value (the half-width / radius). The window width and height are both set to `val * 2`, enforcing a square display. Minimum stored width = 32 px, maximum = `SmoothFillMax` (2048 px). Pascal: `vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax); vHeight := vWidth` (lines 1404–1405).
+
+**POLAR specifics**: Calling `POLAR` invokes `KeyTwoPi` which sets `vPolar := True`, `vTwoPi := $100000000` (2³²), `vTheta := 0`. An optional first numeric argument overrides `vTwoPi` (pass `0` or `-1` for ±2³² default; any other value sets degrees/custom units). An optional second argument sets `vTheta` (angular offset). Examples:
+```
+POLAR              → vTwoPi=$100000000, vTheta=0
+POLAR 360          → vTwoPi=360 (degrees), vTheta=0
+POLAR 360 90       → vTwoPi=360, vTheta=90
+POLAR -1           → vTwoPi=-$100000000 (clockwise)
+```
+
+**SAMPLES 0 = persistent display**: Points are never cleared; they accumulate on the bitmap until a `CLEAR` command. No circular buffer is used in persistent mode.
+
+### Display / data directives
+
+Accepted during `SCOPE_XY_Update` (lines 1443–1509).
+
+| Directive | Pascal lines | Notes |
+|---|---|---|
+| *numeric data stream* | 1469–1507 | Packed XY (or rho/theta) pairs; one pair per active trace per sample set |
+| `CLEAR` | 1454–1460 | Clears bitmap, resets `SamplePop` and `vRateCount` |
+| `SAVE {filename}` | 1461–1462 | Saves current bitmap to `.bmp` |
+| `PC_KEY` | 1463–1464 | Returns latched key byte to P2 (`SendKeyPress`, 3579–3583) |
+| `PC_MOUSE` | 1465–1466 | Returns cursor position + buttons + color to P2 (`SendMousePos`, 3537–3577) |
+
+*Strings in the update phase break the sample loop (`NextStr` → `Break`, line 1451).*
+
+### Keyboard & mouse
+
+All input handling is **shared across all nine display windows** — SCOPE_XY has no unique keyboard logic.
+
+| Handler | Lines | Behavior |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Captures Tab key (sets `DLGC_WANTTAB`) |
+| `FormKeyPress` | 825–831 | Latches pressed key byte into `vKeyPress` for **100 ms**, then auto-clears |
+| `FormKeyDown` | 833–851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12 |
+| `FormMouseMove` | 647–809 | Draws live measurement cursor with data-coordinate readout (suppressed by `HIDEXY`, line 737) |
+| `FormMouseWheel` | 811–817 | Latches wheel direction (+1/−1) into `vMouseWheel` for **100 ms**, then auto-clears |
+| `SendKeyPress` | 3579–3583 | Transmits 1 LONG = `vKeyPress` byte (0 if none), then clears it |
+| `SendMousePos` | 3537–3577 | Transmits 2 LONGs: position+buttons+wheel, then pixel color |
+
+**SCOPE_XY cursor coordinate mapping** — ⚠️ the scaled/polar transform below is the
+**on-screen readout** (`FormMouseMove` lines 676–718) only. `SendMousePos` (3537–3577)
+has **no `dis_scope_xy` branch**, so `PC_MOUSE` transmits the **raw client-pixel** `x,y`
+to the P2 — *not* the scaled data value or polar `(rho,theta)` shown on screen.
+
+On-screen readout (`FormMouseMove`):
+- **Cartesian mode** (linear): cursor pixel offset from center is divided by `vScale` to recover data units → reported as `x,y`.
+  - A centering bias (`Round(vWidth / vRange / 4)`) is applied to center multi-pixel spans (line 691–695).
+- **Cartesian mode** (log scale): inverse log transform applied to pixel radius before reporting.
+- **Polar mode**: pixel offset from center converted to `(rho, theta)` → reported as `rho,theta*` (trailing `*` indicates polar). Theta is displayed as hex (`$XXXXXXXX*`) when `vTwoPi` is `±$100000000`.
+- Off-window: `SendMousePos` returns sentinel `($03FFFFFF, $FFFFFFFF)` (this part *is* shared by both paths).
+- `HIDEXY` suppresses the on-screen readout but does **not** prevent `PC_MOUSE` from reporting to the P2.
+
+---
+
 ## 5. Configuration and Initialization
 
 ### 5.1 SCOPE_XY_Configure Method
@@ -343,10 +429,10 @@ end;
 | Position | `POS x y` | Cascaded | Screen coords | Window position |
 | Size | `SIZE radius` | 256 | 16-1024 | Display radius (width = height = radius × 2) |
 | Range | `RANGE value` | $7FFFFFFF | 1-$7FFFFFFF | Coordinate system extent |
-| Samples | `SAMPLES count` | 0 | 0-2048 | Fade buffer depth (0=persistent) |
+| Samples | `SAMPLES count` | 256 (from `SetDefaults`) | 0-2048 | Fade buffer depth (0=persistent, >0=fading); SCOPE_XY_Configure does not reset this |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
 | Dot Size | `DOTSIZE pixels` | 6 | 2-20 | Dot diameter |
-| Text Size | `TEXTSIZE size` | 9 | 6-200 | Label font size |
+| Text Size | `TEXTSIZE size` | 10 (`FontSize`) | 6-200 | Label font size |
 | Colors | `COLOR back grid` | Black/Gray | RGB24 | Background and grid colors |
 | Polar | `POLAR {twopi {theta}}` | - | - | Enable polar coordinates |
 | Log Scale | `LOGSCALE` | Linear | - | Enable logarithmic scaling |
@@ -987,14 +1073,14 @@ XY_SampleBuff: 2048 pairs × 8 traces × 2 values × 4 bytes = 128 KB
 
 **Persistent mode**: No buffer (0 bytes)
 
-**Display Bitmaps**:
+**Display Bitmaps** (pf24bit = 3 bytes/pixel):
 ```
-Typical: 512×512 × 4 bytes × 2 = 2 MB
+Typical: 512×512 × 3 bytes × 2 = 1.5 MB
 ```
 
 **Total**:
-- Persistent mode: ~2 MB
-- Fading mode: ~2.13 MB
+- Persistent mode: ~1.5 MB
+- Fading mode: ~1.63 MB (+ 128 KB sample buffer)
 
 ### 12.2 Rendering Performance
 
@@ -1219,8 +1305,8 @@ The SCOPE_XY display receives configuration and sample data through an **element
 
 **Element Storage** (GlobalUnit.pas:126-127):
 ```pascal
-DebugDisplayType:  array[0..DebugDisplayLimit - 1] of integer;
-DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;
+DebugDisplayType:  array[0..DebugDisplayLimit - 1] of byte;     // element type tag
+DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;  // element value
 ```
 
 **Capacity**: 1100 elements per message (DebugDisplayLimit = 1100)
@@ -1242,54 +1328,43 @@ ele_str = 5;   // String data (pointer to PChar)
 
 ### 16.3 Parser Functions
 
-**NextKey** - Check for and consume keyword element:
+All four parser functions are thin wrappers (lines 4109-4139):
+
 ```pascal
-function NextKey: boolean;
+function TDebugDisplayForm.NextKey: boolean;
 begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_key);
-  if Result then
+  Result := NextElement(ele_key);
+end;
+
+function TDebugDisplayForm.NextNum: boolean;
+begin
+  Result := NextElement(ele_num);
+end;
+
+function TDebugDisplayForm.NextStr: boolean;
+begin
+  Result := NextElement(ele_str);
+end;
+
+function TDebugDisplayForm.NextEnd: boolean;
+begin
+  Result := P2.DebugDisplayType[ptr] = ele_end;
+end;
+
+function TDebugDisplayForm.NextElement(Element: integer): boolean;
+begin
+  if P2.DebugDisplayType[ptr] = Element then
   begin
-    val := DebugDisplayValue[ElementPtr];
-    Inc(ElementPtr);
-  end;
+    val := P2.DebugDisplayValue[ptr];
+    Inc(ptr);
+    Result := True;
+  end
+  else
+    Result := False;
 end;
 ```
 
-**NextNum** - Check for and consume numeric element:
-```pascal
-function NextNum: boolean;
-begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_num);
-  if Result then
-  begin
-    val := DebugDisplayValue[ElementPtr];
-    Inc(ElementPtr);
-  end;
-end;
-```
-
-**NextStr** - Check for and consume string element:
-```pascal
-function NextStr: boolean;
-begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_str);
-  if Result then
-  begin
-    val := DebugDisplayValue[ElementPtr];  // Pointer to PChar
-    Inc(ElementPtr);
-  end;
-end;
-```
-
-**NextEnd** - Check if end reached:
-```pascal
-function NextEnd: boolean;
-begin
-  Result := (ElementPtr >= ElementEnd) or (DebugDisplayType[ElementPtr] = ele_end);
-end;
-```
-
-**Source Location**: Lines 4101-4131 in DebugDisplayUnit.pas
+The element array lives in the `P2` global object (`P2.DebugDisplayType[]` / `P2.DebugDisplayValue[]`); the current position is tracked by the form-local `ptr` field (not `ElementPtr`/`ElementEnd` as earlier drafts suggested). `NextEnd` checks for `ele_end` type at the current position without advancing `ptr`.
 
 ### 16.4 SCOPE_XY Configuration Message Example
 
@@ -1563,7 +1638,7 @@ k = 99 (oldest):  opa = 255 - (99 * 255 / 100) = 2 (nearly transparent)
 function RateCycle: boolean;
 begin
   Inc(vRateCount);
-  if vRateCount >= vRate then
+  if vRateCount = vRate then
   begin
     vRateCount := 0;
     Result := True;
@@ -1624,65 +1699,49 @@ Bitmap: array[0..1] of TBitmap;
 - **Bitmap[0]**: Render target (all drawing operations)
 - **Bitmap[1]**: Display buffer (copied to Canvas)
 
-**Configuration**:
+**Configuration** (lines 596-599):
 ```pascal
-Bitmap[0].PixelFormat := pf32bit;     // 32-bit RGBA
-Bitmap[1].PixelFormat := pf32bit;
-Bitmap[0].SetSize(vBitmapWidth, vBitmapHeight);
-Bitmap[1].SetSize(vBitmapWidth, vBitmapHeight);
+Bitmap[0].PixelFormat := pf24bit;     // 24-bit BGR (Windows VCL default)
+Bitmap[1].PixelFormat := pf24bit;
 ```
 
 ### 18.2 Memory Layout
 
-**Pixel Format**: 32-bit RGBA (4 bytes per pixel)
+**Pixel Format**: 24-bit BGR (3 bytes per pixel, `pf24bit`, lines 597-599)
 
 **Memory Organization**:
 ```
 Bitmap[0]:
-  Row 0: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
-  Row 1: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
+  Row 0: [B0][G0][R0][B1][G1][R1]...[Bn][Gn][Rn]
+  Row 1: [B0][G0][R0][B1][G1][R1]...[Bn][Gn][Rn]
   ...
-  Row N: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
 ```
 
-**Byte Order**: BGRA (Windows convention)
+**Byte Order**: BGR (Windows VCL convention; no alpha channel in the bitmap itself — opacity is handled by SmoothLine's blending logic).
 
 **Memory Size** (typical 512×512 display):
 ```
-512 × 512 × 4 bytes × 2 bitmaps = 2,097,152 bytes = 2 MB
+512 × 512 × 3 bytes × 2 bitmaps = 1,572,864 bytes ≈ 1.5 MB
 ```
 
 ### 18.3 BitmapToCanvas Transfer
 
-**Implementation** (DebugDisplayUnit.pas:3514-3522):
+**Implementation** (lines 3522-3530):
 ```pascal
-procedure BitmapToCanvas(i: integer);
+procedure TDebugDisplayForm.BitmapToCanvas(Level: integer);
 begin
-  // Swap bitmaps
-  BitmapPtr := BitmapPtr xor 1;
-
-  // Copy render target to display buffer
-  Bitmap[BitmapPtr xor 1].Canvas.Draw(0, 0, Bitmap[BitmapPtr]);
-
-  // Trigger Windows paint event
-  Invalidate;
+  if Level = 0 then
+    Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);
+  if DisplayType in [dis_spectro, dis_plot, dis_bitmap] then
+    Canvas.StretchDraw(Rect(0, 0, vClientWidth, vClientHeight), Bitmap[1])
+  else
+    Canvas.Draw(0, 0, Bitmap[1]);
 end;
 ```
 
-**Double-Buffer Swap**:
-```
-Before:
-  Bitmap[0] = render target (being drawn to)
-  Bitmap[1] = display buffer (visible)
-  BitmapPtr = 0
+`Level = 0` copies Bitmap[0] (render target) into Bitmap[1] (display buffer), then blits Bitmap[1] to the form canvas. For SCOPE_XY (`Level` is always passed as `0`), both the copy and the blit happen every call. There is no `BitmapPtr` swap — Bitmap[0] is always the render target and Bitmap[1] is always the display buffer for SCOPE_XY.
 
-After BitmapToCanvas:
-  BitmapPtr = 1
-  Bitmap[1] = new render target (will be drawn to next)
-  Bitmap[0] = new display buffer (visible)
-```
-
-**Purpose**: Eliminate flicker by separating render and display operations.
+**Purpose**: Decouple rendering from display refresh; `Canvas.Draw` triggers the Windows paint mechanism.
 
 **Timing**:
 - Persistent mode: Called on rate cycle after plotting new points
@@ -1701,43 +1760,15 @@ SmoothDot(x, y, vDotSize shl 6, color, opacity);
 - `color`: RGB24 color value
 - `opacity`: Alpha value (0-255)
 
-**Rendering Algorithm** (simplified):
+**Real implementation** (lines 3839-3842):
 ```pascal
-procedure SmoothDot(x, y, radius, color, opacity);
+procedure TDebugDisplayForm.SmoothDot(x, y, radius, color: integer; opacity: byte);
 begin
-  // Convert fixed-point to integer pixel coordinates
-  cx := x shr 8;
-  cy := y shr 8;
-  r := radius shr 6;
-
-  // Render circle with anti-aliasing
-  for py := cy - r to cy + r do
-    for px := cx - r to cx + r do
-    begin
-      // Calculate distance from center (fixed-point)
-      dx := (px shl 8) - x;
-      dy := (py shl 8) - y;
-      dist := Sqrt(dx * dx + dy * dy);
-
-      // Calculate coverage (0.0 to 1.0)
-      if dist < radius - 128 then
-        coverage := 1.0             // Fully inside
-      else if dist > radius + 128 then
-        coverage := 0.0             // Fully outside
-      else
-        coverage := smooth_falloff(dist, radius);  // Anti-aliased edge
-
-      // Blend with existing pixel
-      alpha := Round(opacity * coverage);
-      if alpha > 0 then
-        BlendPixel(px, py, color, alpha);
-    end;
+  SmoothLine(x, y, x, y, radius, color, opacity);
 end;
 ```
 
-**Anti-Aliasing**: Sub-pixel accuracy for smooth edges.
-
-**Alpha Blending**: Combines dot color with existing bitmap content.
+`SmoothDot` is a one-liner that delegates to `SmoothLine` with both endpoints identical (a degenerate zero-length line), which produces the filled anti-aliased circle. All clipping, sub-pixel coverage, and alpha-blending logic lives in `SmoothLine` (lines 3844 onward). There is no inline loop in `SmoothDot` itself.
 
 ### 18.5 Persistent vs. Fading Rendering
 
@@ -1807,56 +1838,61 @@ SmoothDot (line 1544):
 
 SCOPE_XY shares the same data packing system as all other display types. This system enables bandwidth optimization by packing multiple samples into single 32-bit values.
 
-**12 Packing Modes** (DebugDisplayUnit.pas:29-40):
+**12 Packing Modes** (DebugDisplayUnit.pas:63-74):
 ```pascal
-key_longs_1bit   = $10;   // 32 values per long (1 bit each)
-key_longs_2bit   = $11;   // 16 values per long (2 bits each)
-key_longs_4bit   = $12;   // 8 values per long (4 bits each)
-key_longs_8bit   = $13;   // 4 values per long (8 bits each)
-key_longs_16bit  = $14;   // 2 values per long (16 bits each)
-key_words_1bit   = $15;   // 16 values per word (1 bit each)
-key_words_2bit   = $16;   // 8 values per word (2 bits each)
-key_words_4bit   = $17;   // 4 values per word (4 bits each)
-key_words_8bit   = $18;   // 2 values per word (8 bits each)
-key_bytes_1bit   = $19;   // 8 values per byte (1 bit each)
-key_bytes_2bit   = $1A;   // 4 values per byte (2 bits each)
-key_bytes_4bit   = $1B;   // 2 values per byte (4 bits each)
+key_longs_1bit   = 29;    // 32 values per long (1 bit each)
+key_longs_2bit   = 30;    // 16 values per long (2 bits each)
+key_longs_4bit   = 31;    // 8 values per long (4 bits each)
+key_longs_8bit   = 32;    // 4 values per long (8 bits each)
+key_longs_16bit  = 33;    // 2 values per long (16 bits each)
+key_words_1bit   = 34;    // 16 values per word (1 bit each)
+key_words_2bit   = 35;    // 8 values per word (2 bits each)
+key_words_4bit   = 36;    // 4 values per word (4 bits each)
+key_words_8bit   = 37;    // 2 values per word (8 bits each)
+key_bytes_1bit   = 38;    // 8 values per byte (1 bit each)
+key_bytes_2bit   = 39;    // 4 values per byte (2 bits each)
+key_bytes_4bit   = 40;    // 2 values per byte (4 bits each)
 ```
 
-**SetPack Function** (lines 4138-4150):
+**SetPack Function** (lines 4146-4156):
 ```pascal
-procedure SetPack(mode: integer);
-const
-  counts: array[$10..$1B] of integer = (32,16,8,4,2, 16,8,4,2, 8,4,2);
-  sizes:  array[$10..$1B] of integer = (1,2,4,8,16, 1,2,4,8, 1,2,4);
+procedure TDebugDisplayForm.SetPack(val: integer; alt, signx: boolean);
+var
+  i: integer;
 begin
-  vPackMode := mode;
-  vPackCount := counts[mode];
-  vPackSize := sizes[mode];
-  vPackMask := (Int64(1) shl vPackSize) - 1;
-  vPackIndex := 0;
+  vPackAlt := alt;
+  vPackSignx := signx;
+  if val = 0 then i := 32 shl 8 + 1 else i := PackDef[val];
+  if val = 0 then vPackMask := $FFFFFFFF else vPackMask := 1 shl (i shr 8 and $FF) - 1;
+  vPackShift := i shr 8 and $FF;
+  vPackCount := i and $FF;
 end;
 ```
 
-**UnPack Function** (lines 4152-4163):
+`val = 0` is the reset/default form (32-bit width, count=1). Non-zero `val` indexes into the `PackDef` constant array (lines 140–152), which encodes `(shift shl 8 + count)` for each of the 12 packing modes. `alt` enables bit-reversal within each sub-unit; `signx` enables sign-extension on unpack.
+
+**NewPack Function** (lines 4158-4164):
 ```pascal
-function UnPack(var v: integer): integer;
+function TDebugDisplayForm.NewPack: integer;
 begin
-  // Extract bits
+  Result := val;
+  if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
+  if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
+  if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
+end;
+```
+
+**UnPack Function** (lines 4166-4171):
+```pascal
+function TDebugDisplayForm.UnPack(var v: integer): integer;
+begin
   Result := v and vPackMask;
-
-  // Sign-extend if MSB set
-  if (Result shr (vPackSize - 1)) <> 0 then
-    Result := Result or (not vPackMask);
-
-  // Advance to next value
-  Inc(vPackIndex);
-  if vPackIndex < vPackCount then
-    v := v shr vPackSize
-  else
-    vPackIndex := 0;
+  v := v shr vPackShift;
+  if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then Result := Result or ($FFFFFFFF xor vPackMask);
 end;
 ```
+
+Each call to `UnPack` extracts the next sub-value from `v` using a right-shift of `vPackShift` bits. Sign-extension (when `vPackSignx` is true) tests the MSB of the extracted field and fills the upper bits with `1`s if set.
 
 **SCOPE_XY Typical Usage**: LONGS_16BIT (2 values per long)
 
@@ -1869,35 +1905,36 @@ LONGS_16BIT mode:
 
 ### 19.2 Color System
 
-**TranslateColor Function** (shared with all displays):
+**TranslateColor Function** (shared with all displays, line 3090):
 ```pascal
-function TranslateColor(c: integer): integer;
-begin
-  if c < 0 then
-    Result := DefaultScopeColors[(-c - 1) mod 8]
-  else
-    Result := SwapRGB(c);  // Convert RGB to BGR for Windows
-end;
+function TDebugDisplayForm.TranslateColor(p, mode: integer): integer;
 ```
 
-**Default Scope Colors** (8 colors):
+This function takes a raw pixel value `p` and a color-mode key (`mode`), then converts `p` to an RGB24 value according to the active color mode (LUT1/2/4/8, luma8, rgbi8, rgb8, rgb16, rgb24, etc.). For SCOPE_XY, trace colors are stored as pre-translated RGB24 values in `vColor[]` (set by `KeyColor` during configure), so `TranslateColor` is not called during plotting. The fabricated single-argument form shown in earlier drafts does not exist in v55.
+
+**Default Scope Colors** (8 colors, line 241):
 ```pascal
 DefaultScopeColors: array[0..7] of integer = (
-  $00FFFF,  // Yellow
-  $FF00FF,  // Magenta
-  $FFFF00,  // Cyan
-  $0000FF,  // Red
-  $00FF00,  // Green
-  $FF0000,  // Blue
-  $00FFAA,  // Orange
-  $FF00AA   // Purple
-);
+  clLime,     // $00FF00 — Lime green
+  clRed,      // $FF0000 — Red
+  clCyan,     // $00FFFF — Cyan
+  clYellow,   // $FFFF00 — Yellow
+  clMagenta,  // $FF00FF — Magenta
+  clBlue,     // $7F7FFF — Blue   (note: NOT pure $0000FF)
+  clOrange,   // $FF7F00 — Orange (note: NOT web $FFA500)
+  clOlive);   // $7F7F00 — Olive  (note: NOT web $808000)
 ```
 
+These `clXxx` constants are **locally defined as literal RGB24 values** at
+`DebugDisplayUnit.pas` 179–191 — they are *not* VCL palette `TColor`s and do **not**
+depend on the Windows palette. The stored `vColor[]` values are these RGB24 integers;
+`WinRGB` swaps R↔B to BGR only at GDI draw time. The order (Lime, Red, Cyan, Yellow,
+Magenta, Blue, Orange, Olive) cycles through traces 0–7 when no explicit color is given.
+
 **SCOPE_XY Color Usage**:
-- Trace colors: vColor[0..7]
-- Background color: vBackColor (default black)
-- Grid color: vGridColor (default gray)
+- Trace colors: `vColor[0..7]` (RGB24 from `DefaultScopeColors`, or per-trace `COLOR`)
+- Background color: `vBackColor` (global default `clBlack` `$000000`)
+- Grid color: `vGridColor` (global default `clGray` `$404040`)
 
 ### 19.3 Fixed-Point Arithmetic
 
@@ -1969,16 +2006,16 @@ log_value := Log2(value);
 
 ### 19.5 Text Rendering
 
-**Text Metrics** (SetTextMetrics):
+**Text Metrics** (SetTextMetrics, lines 2919-2924):
 ```pascal
-procedure SetTextMetrics;
+procedure TDebugDisplayForm.SetTextMetrics;
 begin
-  Bitmap[0].Canvas.Font.Name := 'Consolas';
   Bitmap[0].Canvas.Font.Size := vTextSize;
   ChrWidth := Bitmap[0].Canvas.TextWidth('X');
   ChrHeight := Bitmap[0].Canvas.TextHeight('X');
 end;
 ```
+(No font name is set here; the font inherits whatever was established at form creation — `FontName` constant is set on the canvas at init time, line 600.)
 
 **SCOPE_XY Text Usage**:
 - Trace labels (configured via string elements)
@@ -1992,7 +2029,7 @@ end;
 function RateCycle: boolean;
 begin
   Inc(vRateCount);
-  if vRateCount >= vRate then
+  if vRateCount = vRate then
   begin
     vRateCount := 0;
     Result := True;
@@ -2011,20 +2048,18 @@ end;
 
 ### 19.7 File Operations
 
-**Save to BMP** (shared SaveBitmap function):
+**Save to BMP** (`KeySave`, lines 2839-2870):
 ```pascal
-procedure SaveBitmap(filename: string);
+procedure TDebugDisplayForm.KeySave;
 begin
-  if filename = '' then
-    filename := Format('scope_xy_%d.bmp', [SaveCounter]);
-  Bitmap[BitmapPtr xor 1].SaveToFile(filename);
-  Inc(SaveCounter);
+  if NextStr then Bitmap[1].SaveToFile(PChar(val) + '.bmp')
+  else ...  // optional WINDOW / coordinate-rect form
 end;
 ```
 
-**SCOPE_XY Command**: `SAVE {filename}`
+When `SAVE` is followed by a string element, it appends `.bmp` to the supplied name and saves `Bitmap[1]` (the display buffer). No auto-counter or format string is used; the filename must be supplied explicitly, or the optional `WINDOW` / rect form captures a screen region instead.
 
-**Behavior**: Saves current display buffer to BMP file.
+**SCOPE_XY Command**: `SAVE {filename}`
 
 ---
 
@@ -2041,49 +2076,44 @@ end;
 DebugDisplayForm := TDebugDisplayForm.Create(Application);
 DebugDisplayForm.DisplayType := dis_scope_xy;
 
-// 2. Initialize element parser
-ElementPtr := 0;
-ElementEnd := element_count;
+// 2. Initialize element parser (ptr field, P2.DebugDisplayType/Value arrays)
+ptr := 0;  // form-local position; element array is in P2.DebugDisplayType/Value
 
-// 3. Set defaults
-vRange := $7FFFFFFF;
-vRate := 1;
-vDotSize := 6;
-vTextSize := FontSize;
-vBackColor := $000000;  // Black
-vGridColor := $404040;  // Gray
-vPolar := False;
-vLogScale := False;
-vSamples := 0;          // Persistent mode default
-vIndex := 0;            // No traces configured yet
+// 3. SetDefaults is called first (line 631), establishing cross-window defaults
+//    including vSamples := 256, SetPack(0, False, False), vPolar := False, etc.
+//    Key defaults from SetDefaults (lines 2880-2917):
+vWidth       := 256;
+vHeight      := 256;
+vSamples     := 256;     // 256-sample fading trail (NOT persistent)
+vBackColor   := DefaultBackColor;
+vGridColor   := DefaultGridColor;
+vLogScale    := False;
+vPolar       := False;
+vTwoPi       := $100000000;
+vTheta       := 0;
+SetPack(0, False, False); // 32-bit, count=1 (unpacked), no alt/sign
 
-// 4. Call SCOPE_XY_Configure
+// 4. Call SCOPE_XY_Configure — sets SCOPE_XY-specific overrides only:
+//    vRange := $7FFFFFFF; vRate := 1; vDotSize := 6; vTextSize := FontSize;
+//    (vSamples is NOT reset here; it retains 256 from SetDefaults)
 SCOPE_XY_Configure;
 
-// 5. Calculate scale factor
+// 5. Scale factor calculated at end of SCOPE_XY_Configure (line 1437)
 vScale := vWidth / 2 / vRange;
 
-// 6. Create bitmaps
-Bitmap[0] := TBitmap.Create;
-Bitmap[1] := TBitmap.Create;
-Bitmap[0].PixelFormat := pf32bit;
-Bitmap[1].PixelFormat := pf32bit;
-Bitmap[0].SetSize(vBitmapWidth, vBitmapHeight);
-Bitmap[1].SetSize(vBitmapWidth, vBitmapHeight);
+// 6. Bitmaps already created at form-create time (lines 596-599), pf24bit
+//    SetSize called via SetSize() at end of SCOPE_XY_Configure (line 1440)
 
 // 7. Set form size and position
 ClientWidth := vWidth + margins;
 ClientHeight := vHeight + margins;
 SetFormPosition;  // From POS command or cascade
 
-// 8. Initialize packing mode
-SetPack(key_longs_1bit);  // Default
-
-// 9. Clear display
+// 8. Clear display
 ClearBitmap;
 BitmapToCanvas(0);
 
-// 10. Show window
+// 9. Show window
 Show;
 ```
 
@@ -2127,10 +2157,10 @@ end;
 ```
 
 **Default Overrides**:
-- SIZE not specified → vWidth = 512 (from default)
-- RANGE not specified → vRange = $7FFFFFFF
-- SAMPLES not specified → vSamples = 0 (persistent)
-- Packing not specified → LONGS_1BIT
+- SIZE not specified → vWidth = 256 (from `SetDefaults` line 2884), vHeight = 256
+- RANGE not specified → vRange = $7FFFFFFF (set by SCOPE_XY_Configure, line 1389)
+- SAMPLES not specified → vSamples = 256 (from `SetDefaults` line 2886; SCOPE_XY_Configure does NOT reset this)
+- Packing not specified → `SetPack(0, False, False)` (val=0: 32-bit, count=1, no alt/sign, line 2915)
 
 **Validation**:
 - SIZE clamped to 32-2048 (radius), resulting in 64-4096 display
@@ -2177,11 +2207,11 @@ POLAR -1           → vTwoPi = -$100000000 (clockwise)
 XY_SampleBuff: array[0..32767] of integer;  // 128 KB, shared among all SCOPE_XY windows
 ```
 
-**Per-Window State**:
+**Per-Window State** (reset by `SetDefaults`, lines 2906-2907, 2886):
 ```pascal
 SamplePtr := 0;    // Write position
 SamplePop := 0;    // Number of valid samples
-vSamples := 0;     // Fade buffer depth (0 = persistent)
+vSamples := 256;   // Default fading trail depth (from SetDefaults line 2886)
 ```
 
 **Memory Ownership**: Each SCOPE_XY window has independent state variables but shares the global buffer array. In practice, only one SCOPE_XY window is typically active at a time.
@@ -2193,10 +2223,10 @@ vSamples := 0;     // Fade buffer depth (0 = persistent)
 Window: Created and visible
 Display: Black (cleared)
 Buffer: SamplePtr = 0, SamplePop = 0
-Mode: Determined by vSamples (0 = persistent, >0 = fading)
+Mode: Fading (vSamples = 256 unless overridden by SAMPLES directive)
 Scale: vScale = (width / 2) / vRange
 Coordinates: Cartesian or polar (determined by vPolar)
-Packing: LONGS_1BIT (default) or configured mode
+Packing: val=0 / 32-bit unpacked (SetPack(0,False,False)) unless packing directive given
 ```
 
 **Ready for Data**: Window now waits for SCOPE_XY_Update calls with sample data.
@@ -2258,7 +2288,7 @@ The **SCOPE_XY** display window is a versatile XY plotter for the Propeller 2 de
 **Performance Profile**:
 - Persistent mode: Minimal CPU usage (plot on arrival)
 - Fading mode: Moderate CPU usage (redraw all samples per update)
-- Memory: 2 MB (persistent), 2.13 MB (fading with full buffer)
+- Memory: ~1.5 MB bitmaps (persistent), ~1.63 MB (fading with full buffer)
 
 **Common Use Cases**:
 - Lissajous figures (frequency/phase analysis)

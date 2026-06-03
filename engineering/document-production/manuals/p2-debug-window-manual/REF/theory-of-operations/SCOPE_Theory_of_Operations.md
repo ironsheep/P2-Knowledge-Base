@@ -1,6 +1,8 @@
 # SCOPE Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -38,7 +40,7 @@ The **SCOPE** display window is a multi-channel oscilloscope for the Propeller 2
 - **Manual scaling control** (low, high, tall, base, grid)
 - **Level-based triggering** with rising/falling edge detection
 - **Holdoff control** to stabilize display
-- **Circular sample buffer** (2048 samples per channel)
+- **Circular sample buffer** (single interleaved buffer: 2048 sets × 8 channels)
 - **Rate limiting** for display update control
 - **Anti-aliased trace rendering**
 - **Flexible data packing** (12 packing modes)
@@ -180,7 +182,7 @@ scope_hmax    = SmoothFillMax;           // Maximum height (2048)
 vRate        := 1;               // Default rate divisor (1 = every sample)
 vDotSize     := 0;               // Default dot size (0 = no dots)
 vLineSize    := 3;               // Default line thickness (pixels)
-vTextSize    := FontSize;        // Default label font size (9)
+vTextSize    := FontSize;        // Default label font size (FontSize global, default 10)
 ```
 
 ---
@@ -228,7 +230,7 @@ vLow         : array[0..Channels - 1] of integer;     // Low value (bottom of ra
 vHigh        : array[0..Channels - 1] of integer;     // High value (top of range)
 vTall        : array[0..Channels - 1] of integer;     // Vertical height in pixels
 vBase        : array[0..Channels - 1] of integer;     // Vertical offset in pixels
-vGrid        : array[0..Channels - 1] of integer;     // Grid spacing (not rendered in SCOPE)
+vGrid        : array[0..Channels - 1] of integer;     // Grid flag bitmask (rendered in ClearBitmap)
 vLabel       : array[0..Channels - 1] of string;      // Channel labels
 vColor       : array[0..Channels - 1] of integer;     // Trace colors (RGB24)
 ```
@@ -255,9 +257,10 @@ vColor       : array[0..Channels - 1] of integer;     // Trace colors (RGB24)
 - Default: 0 (no offset)
 - Useful for overlaying multiple channels
 
-**vGrid**: Grid spacing (reserved, not rendered)
-- Intended for grid line rendering
-- Not currently implemented in SCOPE_Draw
+**vGrid**: Grid flag bitmask (rendered, default 0 = off)
+- Drawn in `ClearBitmap` for `dis_scope` (lines 3290-3333), not in `SCOPE_Draw`
+- 4-bit mask: bit0=baseline line, bit1=top line, bit2=min-value label, bit3=max-value label
+- Lines/labels use a channel-tinted color (`AlphaBlend(vColor[i], vBackColor, $40)`)
 
 **Default Initialization** (lines 1189-1197):
 ```pascal
@@ -339,6 +342,95 @@ vIndex          : integer;       // Number of active channels
 
 ---
 
+## Directive Reference (v55-verified)
+
+> Quick lookup tables drawn from §5.2 of the [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) and §4 shared input model. Pascal line numbers refer to `DebugDisplayUnit.pas` (v55).
+
+### Configuration directives
+
+Accepted by `SCOPE_Configure` (lines 1151–1207). All directives are optional; the window may be opened with only a name.
+
+| Directive | Parameters | Range / default | Pascal lines |
+|---|---|---|---|
+| `TITLE` | `'string'` | — | 1163–1164 |
+| `POS` | `left top` | screen coords / cascaded | 1165–1166 |
+| `SIZE` | `width height` (pixels) | each int 32–2048 / 256×256 | 1167–1168 |
+| `SAMPLES` | `n` | int 16–2048 / 256 | 1169–1170 |
+| `RATE` | `n` | int 1–2048 / 1 | 1171–1172 |
+| `DOTSIZE` | `n` | int 0–32 / 0¹ | 1173–1174 |
+| `LINESIZE` | `n` | int 0–32 / 3¹ | 1175–1176 |
+| `TEXTSIZE` | `n` | int 6–200 / 10 (`FontSize`) | 1177–1178 |
+| `COLOR` | `back grid` | each: named color or RGB24 / black `$000000`, gray `$404040` | 1179–1181 |
+| `HIDEXY` | *(flag)* | — / shown | 1182–1183 |
+| `LONGS_1BIT`…`BYTES_4BIT` | *(packing mode)* | 12 modes / LONGS_1BIT | 1184–1185 |
+
+¹ Post-configure default: if both `DOTSIZE` and `LINESIZE` are 0, `DOTSIZE` is forced to 1 (line 1188).
+
+### Display / data directives
+
+Accepted by `SCOPE_Update` (lines 1209–1337) on every subsequent message.
+
+| Directive | Parameters | Range / value-set / default | Pascal lines |
+|---|---|---|---|
+| *string* (channel def) | `'label' (AUTO \| lo hi) {tall} {base} {grid} {color}` | `label`: free string. `AUTO`: keyword flag → vAuto:=True. `lo`/`hi`: int32 (defaults −$80000000 / $7FFFFFFF). `tall`: int / vHeight. `base`: int / 0. `grid`: int / 0 (parsed, never rendered). `color`: named or RGB24 / `DefaultScopeColors[i]`. Up to 8 channels (`Channels`=8); further defs ignored | 1217–1231 |
+| `TRIGGER` | `channel (AUTO \| arm fire) {offset}` | `channel`: int **−1..7** (−1=disabled/free-run). `AUTO`: keyword flag → vTriggerAuto:=True (else `arm`,`fire`: int32). `offset`: int **0…vSamples−1** / vSamples div 2 | 1236–1249 |
+| `HOLDOFF` | `n` | int **2..2048** / vSamples (set in Configure); resets vHoldOffCount:=0 | 1250–1251 |
+| `CLEAR` | *(none)* | Clears bitmap + resets SamplePop and RateCount | 1252–1259 |
+| `SAVE` | *{filename}* | Saves window bitmap to BMP | 1260–1261 |
+| `PC_KEY` | *(none)* | Transmits latched key byte → P2 | 1262–1263 |
+| `PC_MOUSE` | *(none)* | Transmits mouse position + color → P2 | 1264–1265 |
+
+### Keyboard & mouse
+
+Input handling is **shared across all nine display windows** via form-level event handlers on `TDebugDisplayForm`. Per-window variation is **only** in coordinate mapping.
+
+**Shared handlers** (identical for all windows):
+
+| Handler | Lines | Behavior |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Captures Tab key (`DLGC_WANTTAB`); Tab does not change focus |
+| `FormMouseMove` | 647–809 | Renders live measurement-cursor overlay showing window coordinates. Suppressed when `HIDEXY` set (line 737) |
+| `FormMouseWheel` | 811–817 | Latches wheel direction into `vMouseWheel` (+1/−1) for **100 ms**, then auto-clears (819–823) |
+| `FormKeyPress` | 825–831 | Latches pressed key byte into `vKeyPress` for **100 ms**, then auto-clears (853–857) |
+| `FormKeyDown` | 833–851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12; forwards to `FormKeyPress` |
+
+The 100 ms latch means a key/wheel event not polled within that window is silently dropped.
+
+**`PC_KEY` → `SendKeyPress`** (3579–3583): transmits one LONG = latched `vKeyPress` byte (0 if none), then clears it. Behavior is **identical for all nine windows**.
+
+**`PC_MOUSE` → `SendMousePos`** (3537–3577): transmits two LONGs:
+- LONG 1: `x` bits 0–12, `y` bits 13–25, `wheel` bits 26–27, L/M/R buttons bits 28/29/30. If cursor is outside the client area, LONG 1 = `$03FFFFFF`.
+- LONG 2: RGB color of pixel under cursor (`$RRGGBB`). If off-window, `$FFFFFFFF`.
+
+**SCOPE coordinate mapping** — ⚠️ the **on-screen readout** and the **`PC_MOUSE` wire
+value use different coordinates**:
+
+- **On-screen readout** (`FormMouseMove` lines 668–675): SCOPE and FFT share this branch.
+  The cursor is shown as a pixel offset from the plot origin with **Y inverted**:
+  ```
+  x = cursor_x − vMarginLeft               (0 = left edge of plot)
+  y = vMarginTop + vHeight − 1 − cursor_y  (0 = bottom of plot, increasing upward)
+  ```
+  Outside the plot rectangle the readout string is empty (no overlay drawn).
+- **`PC_MOUSE` wire value** (`SendMousePos`, 3537–3577): `SendMousePos` has **no `dis_scope`
+  branch** — it only transforms SPECTRO/PLOT/BITMAP (÷dotsize) and TERM (char cells). For
+  SCOPE it transmits the **raw client-pixel** `x,y` (no margin offset, no Y inversion). The
+  P2 therefore receives raw pixels, *not* the inverted plot-origin coordinate shown on screen.
+
+`HIDEXY` suppresses the on-screen readout but does **not** disable `PC_MOUSE` reporting.
+
+**TRIGGER form** (SCOPE-specific, `SCOPE_Update` lines 1236–1249):
+```
+TRIGGER channel (AUTO | arm fire) {offset}
+  channel : -1 (disable/free-run) | 0..7
+  AUTO    : arm/fire auto-computed from buffer range each sample set
+  arm     : arm threshold (integer)
+  fire    : fire threshold (integer)
+  offset  : trigger position 0..vSamples-1 (default = vSamples div 2)
+```
+
+---
+
 ## 5. Configuration and Initialization
 
 ### 5.1 SCOPE_Configure Method
@@ -402,12 +494,12 @@ end;
 |-----------|---------|---------|-------|---------|
 | Title | `TITLE 'string'` | "Scope" | - | Window title |
 | Position | `POS x y` | Cascaded | Screen coords | Window position |
-| Size | `SIZE width height` | 512 × 256 | 32-2048 | Display dimensions |
-| Samples | `SAMPLES count` | 512 | 16-2048 | Horizontal resolution |
+| Size | `SIZE width height` | 256 × 256 | 32-2048 | Display dimensions |
+| Samples | `SAMPLES count` | 256 | 16-2048 | Horizontal resolution |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
 | Dot Size | `DOTSIZE pixels` | 0 | 0-32 | Dot diameter (0 = no dots) |
 | Line Size | `LINESIZE pixels` | 3 | 0-32 | Line thickness (0 = no lines) |
-| Text Size | `TEXTSIZE size` | 9 | 6-200 | Label font size |
+| Text Size | `TEXTSIZE size` | 10 (FontSize) | 6-200 | Label font size |
 | Colors | `COLOR back grid` | Black/Gray | RGB24 | Background and grid colors |
 | Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
 | Packing | `LONGS_1BIT` etc. | LONGS_1BIT | 12 modes | Data packing format |
@@ -440,7 +532,7 @@ if (vDotSize = 0) and (vLineSize = 0) then vDotSize := 1;
 - `low high`: Manual range (min/max values)
 - `tall`: Vertical height in pixels (default: vHeight)
 - `base`: Vertical offset in pixels (default: 0)
-- `grid`: Grid spacing (default: 0, not rendered)
+- `grid`: Grid flag bitmask (default: 0; bits select baseline/top lines and min/max labels — see §4.2/§19.3)
 - `color`: Trace color (RGB24, default: cycle through DefaultScopeColors)
 
 ### 6.2 Auto-Ranging Mode
@@ -488,7 +580,7 @@ end
 - High: 127 (top of display)
 - Tall: 256 pixels (vertical span)
 - Base: 0 (no vertical offset)
-- Grid: 0 (no grid)
+- Grid: 0 (no grid lines/labels; nonzero would enable them per the bitmask)
 - Color: Red ($FF0000)
 
 **Behavior**:
@@ -1430,58 +1522,65 @@ Element Array:
 
 ## 18. Buffer Management and Timing
 
-### 18.1 Circular Buffer Per Channel
+### 18.1 Single Interleaved Circular Buffer (not per-channel)
 
-SCOPE uses **independent circular buffers** for each channel:
+SCOPE uses **one** shared circular buffer holding interleaved sample sets — there is no per-channel array. The buffer and its pointers are declared once:
 
 ```pascal
-SampleBuff: array[0..Channels - 1, 0..SampleSets - 1] of integer;
+Y_SampleBuff : array[0..Y_Sets * Y_SetSize - 1] of integer;   // line 361
+SamplePtr    : integer;                                        // line 402
+SamplePop    : integer;                                        // line 403
 ```
 
-**Dimensions**:
+**Constants** (lines 167-169, resolved via §7.2 of the matrix):
 ```
-Channels = 8                  // Maximum channels
-SampleSets = 2048            // Samples per channel
-Total size = 8 × 2048 × 4 bytes = 65,536 bytes
+Channels  = 8            // also Y_SetSize: one slot per channel in each set
+Y_Sets    = 2048         // number of sample sets
+Y_PtrMask = Y_Sets - 1   // 2047, circular wrap mask
+Total = 2048 × 8 × 4 bytes = 65,536 bytes
 ```
+
+A single write pointer `SamplePtr` and a single fill counter `SamplePop` are shared by **all** channels, because every channel's sample for one time-slot lives in the same set. There are no `SamplePtr[ch]`/`SamplePop[ch]` arrays and no `SamplePtrMask` symbol.
 
 ### 18.2 Write Operations
 
+A full set (all active channels) is assembled in a local `samp` array, then block-copied into the buffer (`SCOPE_Update`, lines 1281-1283):
+
 ```pascal
-// Store sample for channel
-SampleBuff[channel][SamplePtr[channel]] := value;
-SamplePtr[channel] := (SamplePtr[channel] + 1) and SamplePtrMask;
-if SamplePop[channel] < SampleSets then Inc(SamplePop[channel]);
+Move(samp, Y_SampleBuff[SamplePtr * Y_SetSize], Y_SetSize shl 2);  // copy 8 longs (32 bytes)
+SamplePtr := (SamplePtr + 1) and Y_PtrMask;
+if SamplePop < vSamples then Inc(SamplePop);
+```
+
+`SamplePop` saturates at `vSamples` (the displayed width), not at `Y_Sets`. Any individual sample for set `k`-back, channel `j`, is read as:
+
+```pascal
+Y_SampleBuff[((SamplePtr - k - 1) and Y_PtrMask) * Y_SetSize + j]
 ```
 
 ### 18.3 Auto-Ranging Updates
 
-```pascal
-// Track min/max for auto-ranging
-if value < vMin[channel] then vMin[channel] := value;
-if value > vMax[channel] then vMax[channel] := value;
+There are **no** running `vMin/vMax/vScale/vCenter` accumulators. Range is recomputed from scratch by a full O(SamplePop) buffer scan in `SCOPE_Range` (lines 1366-1379), invoked at draw time for each auto channel (`SCOPE_Draw`, line 1346):
 
-// Periodically recalculate range
-if AutoRangeCycle then
-begin
-  range := vMax[channel] - vMin[channel];
-  vScale[channel] := vHeight / range;
-end;
+```pascal
+for j := vIndex - 1 downto 0 do if vAuto[j] then SCOPE_Range(j, vLow[j], vHigh[j]);
+```
+
+`SCOPE_Range` writes the discovered min/max directly into `vLow[j]`/`vHigh[j]`. The pixel scale is then derived per draw (line 1352), not stored:
+
+```pascal
+fScale := (vTall[j] - 1) / Abs(Int64(vHigh[j]) - Int64(vLow[j])) * $100;
 ```
 
 ### 18.4 Trigger Detection
 
+SCOPE triggering is **level-based** (arm/fire), not a single-level edge crossing, and is evaluated inline in `SCOPE_Update` (lines 1286-1332) immediately after each set is stored — never from a separate `prev_value`/`vTriggerLevel` comparison. The sample tested is read at the configured offset from the buffer:
+
 ```pascal
-if vTrigger and (channel = vTriggerChannel) then
-begin
-  // Check level crossing
-  if (prev_value < vTriggerLevel) and (value >= vTriggerLevel) then
-  begin
-    // Rising edge trigger
-    TriggerPos := SamplePtr[channel];
-  end;
-end;
+t := Y_SampleBuff[((SamplePtr - vTriggerOffset - 1) and Y_PtrMask) * Y_SetSize + vTriggerChannel];
 ```
+
+See §9 for the full arm→fire state machine, holdoff, and free-run path.
 
 ---
 
@@ -1489,46 +1588,56 @@ end;
 
 ### 19.1 Bitmap Architecture
 
+Two bitmaps, both 24-bit, created in `FormCreate` (lines 596-599) and freed in `FormDestroy` (lines 875-876):
+
 ```pascal
-Bitmap: array[0..1] of TBitmap;  // Double-buffered
+Bitmap : array[0..1] of TBitmap;   // line 257
+Bitmap[0].PixelFormat := pf24bit;  // render target
+Bitmap[1].PixelFormat := pf24bit;  // present buffer
 ```
 
-**Memory Size** (512×512 display):
-```
-512 × 512 × 4 bytes × 2 bitmaps = 2 MB
-```
+`Bitmap[0]` is the off-screen render target; `Bitmap[1]` is the buffer drawn to the window canvas. Both are sized to the full client area in `SetSize` (lines 2958-2964); for SCOPE that is `vMarginLeft + vWidth + vMarginRight` × `vMarginTop + vHeight + vMarginBottom`, so `vBitmapWidth`/`vBitmapHeight` are the client dimensions (not an unconditional 512×512).
+
+`BitmapToCanvas(0)` (lines 3522-3530) performs the present: copy `Bitmap[0]`→`Bitmap[1]`, then `Canvas.Draw(0,0,Bitmap[1])` (SCOPE is **not** in the StretchDraw set `[dis_spectro,dis_plot,dis_bitmap]`, so it blits 1:1, no stretch).
 
 ### 19.2 Trace Rendering
 
+The real render loop is in `SCOPE_Draw` (lines 1355-1361). It walks the **single interleaved** buffer newest-to-oldest (`k` from `SamplePop-1` downto 0) and plots each point through `DrawLineDot` — there is no `SampleBuff[ch][idx]`, no `vCenter`/`vScale`, and no direct `SmoothLine`/`SmoothDot` calls here:
+
 ```pascal
-for x := 0 to vSamples - 1 do
+for k := SamplePop - 1 downto 0 do
 begin
-  // Get sample value
-  idx := ((SamplePtr[ch] - vSamples + x) and SamplePtrMask);
-  value := SampleBuff[ch][idx];
-
-  // Scale to display
-  y := vBase + Round((value - vCenter[ch]) * vScale[ch]);
-
-  // Draw line
-  if vLineStyle then
-    SmoothLine(x_prev, y_prev, x, y, vDotSize, color, 255)
-  else
-    SmoothDot(x, y, vDotSize, color, 255);
+  v := Y_SampleBuff[((SamplePtr - k - 1) and Y_PtrMask) * Y_SetSize + j];
+  x := (vMarginLeft + vWidth - 1) shl 8 - Round(k / vSamples * vWidth * $100);
+  y := (vMarginTop + vHeight - 1 - vBase[j]) shl 8 - Round((v - offset) * fScale);
+  DrawLineDot(x, y, color, k = SamplePop - 1)
 end;
 ```
 
-### 19.3 Vertical Scaling
+`DrawLineDot` (lines 3423-3431) is the only line/dot API and decides between the two primitives by configured size — it connects to the previous point with `SmoothLine` when `vLineSize > 0` (and not the first point), and overlays `SmoothDot` when `vDotSize > 0`. The boolean argument is `k = SamplePop - 1` (the oldest point, drawn first), which suppresses the connecting line on the first plotted point:
 
-**vTall Parameter**: Scales channel height
 ```pascal
-channel_height := vHeight / vIndex / vTall;
+if (vLineSize > 0) and not first then SmoothLine(vPixelX, vPixelY, x, y, vLineSize shl 6, color, $FF);
+if (vDotSize > 0)             then SmoothDot(x, y, vDotSize shl 7, color, $FF);
+vPixelX := x;  vPixelY := y;
 ```
 
-**vBase Parameter**: Offsets channel vertically
-```pascal
-y_offset := vBase * vHeight / 100;
-```
+There is no `vLineStyle` boolean in SCOPE; line-vs-dot is purely a function of `vLineSize`/`vDotSize` (both may be active simultaneously).
+
+### 19.3 Vertical Scaling and Grid
+
+`vTall[j]` is a **per-channel pixel span**, not a divisor of `vHeight/vIndex`. `vBase[j]` is a **per-channel pixel offset** subtracted from the baseline, not a percentage. Both feed the fixed-point `y` formula above directly (line 1359): the bottom of channel `j`'s band sits at `vMarginTop + vHeight - 1 - vBase[j]`, and `fScale = (vTall[j]-1)/|vHigh[j]-vLow[j]| × $100` maps value units to sub-pixels.
+
+`vGrid[j]` **is** rendered — in `ClearBitmap` for the `dis_scope` case (lines 3290-3333), it is a 4-bit flag mask drawn as dotted grid lines / value labels in a channel-tinted color (`AlphaBlend(vColor[i], vBackColor, $40)`):
+
+| Bit | Value | Drawn |
+|---|---|---|
+| 0 | 1 | baseline line at `vBase[i]` (3298-3303) |
+| 1 | 2 | top line at `vBase[i]+vTall[i]` (3304-3309) |
+| 2 | 4 | min-value text label at baseline (3310-3321) |
+| 3 | 8 | max-value text label at top (3322-3333) |
+
+`ClearBitmap` also draws the plot frame (3287-3289), channel name labels (3366+), and, when `vTriggered`, a dotted trigger-position indicator line (3337-3357).
 
 ---
 
@@ -1538,16 +1647,18 @@ y_offset := vBase * vHeight / 100;
 
 ```pascal
 DefaultScopeColors: array[0..7] of integer = (
-  $00FFFF,  // Yellow
-  $FF00FF,  // Magenta
-  $FFFF00,  // Cyan
-  $0000FF,  // Red
-  $00FF00,  // Green
-  $FF0000,  // Blue
-  $00FFAA,  // Orange
-  $FF00AA   // Purple
+  clLime,     // $00FF00 — Lime green
+  clRed,      // $FF0000 — Red
+  clCyan,     // $00FFFF — Cyan
+  clYellow,   // $FFFF00 — Yellow
+  clMagenta,  // $FF00FF — Magenta
+  clBlue,     // $7F7FFF — Blue
+  clOrange,   // $FF7F00 — Orange
+  clOlive     // $7F7F00 — Olive
 );
 ```
+
+**Source Location**: Line 241 in DebugDisplayUnit.pas
 
 ### 20.2 Data Packing System
 
@@ -1556,25 +1667,24 @@ SCOPE typically uses:
 - **LONGS_8BIT**: 4 samples per long (8-bit signed)
 
 ```pascal
-function UnPack(var v: integer): integer;
+// UnPack (lines 4166-4171)
+function TDebugDisplayForm.UnPack(var v: integer): integer;
 begin
   Result := v and vPackMask;
-  if (Result shr (vPackSize - 1)) <> 0 then
-    Result := Result or (not vPackMask);  // Sign-extend
-  Inc(vPackIndex);
-  if vPackIndex < vPackCount then
-    v := v shr vPackSize
-  else
-    vPackIndex := 0;
+  v := v shr vPackShift;                                          // advance to next sub-sample
+  if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then  // sign-extend only when SIGNED set
+    Result := Result or ($FFFFFFFF xor vPackMask);
 end;
 ```
 
+The unpack state uses `vPackMask`, `vPackShift`, and `vPackSignx` (set by `KeyPack`); there is no `vPackSize`/`vPackIndex` counter. `SCOPE_Update` iterates `vPackCount` sub-samples per transmitted value (line 1272), each obtained from a fresh `v := NewPack` (line 1271). `NewPack` (lines 4158-4164) optionally re-orders nibble/word lanes when the `ALT` modifier is active.
+
 ### 20.3 Fixed-Point Arithmetic
 
-**8.8 fixed-point** for sub-pixel rendering:
+**8.8 fixed-point** for sub-pixel rendering. `SCOPE_Draw` builds `x`/`y` in `<<8` units (lines 1358-1359) and `DrawLineDot` scales pen/dot sizes the same way (`vLineSize shl 6`, `vDotSize shl 7`, lines 3425-3427):
 ```pascal
-x := sample_index * pixel_width * 256;
-y := channel_y_position * 256;
+x := (vMarginLeft + vWidth - 1) shl 8 - Round(k / vSamples * vWidth * $100);  // 1358
+y := (vMarginTop + vHeight - 1 - vBase[j]) shl 8 - Round((v - offset) * fScale); // 1359
 ```
 
 ---
@@ -1583,103 +1693,90 @@ y := channel_y_position * 256;
 
 ### 21.1 Window Creation Sequence
 
+The real lifecycle runs entirely in `FormCreate` (lines 591-643), which dispatches to `SCOPE_Configure` for `dis_scope`. There is no `vLineStyle`/`vTrigger` boolean, no per-channel buffer init loop, and `vAuto` defaults to **False**, not True.
+
 ```pascal
-// 1. Form instantiation
-DebugDisplayForm := TDebugDisplayForm.Create(Application);
-DebugDisplayForm.DisplayType := dis_scope;
-
-// 2. Set defaults
-vWidth := 512;
-vHeight := 512;
-vSamples := 256;
-vTall := 1;
-vBase := 0;
-vDotSize := 4;
-vLineStyle := True;
-vTrigger := False;
-
-// 3. Call SCOPE_Configure
-SCOPE_Configure;
-
-// 4. Create bitmaps
-Bitmap[0].SetSize(vBitmapWidth, vBitmapHeight);
-Bitmap[1].SetSize(vBitmapWidth, vBitmapHeight);
-
-// 5. Initialize buffers
-for ch := 0 to Channels - 1 do
-begin
-  SamplePtr[ch] := 0;
-  SamplePop[ch] := 0;
-  vAuto[ch] := True;  // Auto-ranging enabled
-end;
-
-// 6. Show window
-Show;
+// FormCreate (591-635), abridged
+Bitmap[0] := TBitmap.Create;  Bitmap[0].PixelFormat := pf24bit;   // 596-597
+Bitmap[1] := TBitmap.Create;  Bitmap[1].PixelFormat := pf24bit;   // 598-599
+vTextSize := FontSize;  SetTextMetrics;                           // 601-602
+// ... cursor/desktop bitmaps, polar colors ...
+DisplayType := P2.DebugDisplayValue[0];                           // 625
+SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType]); // 626
+Left := P2.DebugDisplayLeft;  Top := P2.DebugDisplayTop;          // 628-629
+SetDefaults;                                                       // 631 (2880-2917)
+ptr := 2;
+case DisplayType of
+  dis_scope: SCOPE_Configure;                                      // 635
+  ...
 ```
+
+`SetDefaults` (lines 2880-2917) primes the shared state before SCOPE's own defaults: `vWidth:=256`, `vHeight:=256`, `vSamples:=256`, `vIndex:=0`, `vColor[i]:=DefaultScopeColors[i]` for all 8 channels (line 2888), `vColorMode:=key_rgb24`. `SCOPE_Configure` then overrides `vRate:=1`, `vDotSize:=0`, `vLineSize:=3`, `vTextSize:=FontSize` (lines 1156-1159).
 
 ### 21.2 Configuration Parameter Processing
 
+`SCOPE_Configure` parses **keys only** (lines 1161-1186); channel-label strings and `TRIGGER`/`HOLDOFF` are handled later by `SCOPE_Update`, not here. There is no `key_tall`/`key_base`/`key_line`/`key_dot` and no `KeyRange`:
+
 ```pascal
-while not NextEnd do
-begin
-  if NextKey then
-  case val of
-    key_samples:     KeyValWithin(vSamples, 4, 2047);
-    key_tall:        KeyValWithin(vTall, 1, 8);
-    key_base:        KeyValWithin(vBase, -100, 100);
-    key_dotsize:     KeyValWithin(vDotSize, 2, 20);
-    key_trigger:     KeyTrigger;
-    key_line:        vLineStyle := True;
-    key_dot:         vLineStyle := False;
-    key_longs_1bit..key_bytes_4bit:  KeyPack;
-  end
-  else if NextStr then  // Channel label
-  begin
-    if vIndex <> Channels then Inc(vIndex);
-    vLabel[vIndex - 1] := PChar(val);
-    KeyColor(vColor[vIndex - 1]);
-    KeyRange;  // Optional RANGE for manual scaling
-  end;
+while NextKey do
+case val of
+  key_title:    KeyTitle;
+  key_pos:      KeyPos;
+  key_size:     KeySize(vWidth, vHeight, scope_wmin, scope_wmax, scope_hmin, scope_hmax);
+  key_samples:  KeyValWithin(vSamples, 16, Y_Sets);
+  key_rate:     KeyValWithin(vRate, 1, Y_Sets);
+  key_dotsize:  KeyValWithin(vDotSize, 0, 32);
+  key_linesize: KeyValWithin(vLineSize, 0, 32);
+  key_textsize: KeyTextSize;
+  key_color:    if KeyColor(vBackColor) then KeyColor(vGridColor);
+  key_hidexy:   vHideXY := True;
+  key_longs_1bit..key_bytes_4bit: KeyPack;
 end;
 ```
 
-### 21.3 Auto-Ranging Initialization
+### 21.3 Channel-Default and Trigger Initialization
+
+After key parsing, `SCOPE_Configure` (lines 1188-1203) forces a dot if no rendering mode is set, then initializes the per-channel arrays and trigger state. Note `vAuto[i] := False` (manual ranging is the default) and the full-32-bit initial range:
 
 ```pascal
-for ch := 0 to vIndex - 1 do
+if (vDotSize = 0) and (vLineSize = 0) then vDotSize := 1;     // 1188
+for i := 0 to Channels - 1 do
 begin
-  if vAuto[ch] then
-  begin
-    vMin[ch] := MaxInt;
-    vMax[ch] := MinInt;
-    vCenter[ch] := 0;
-    vScale[ch] := 1.0;
-  end;
+  vAuto[i] := False;          // NOT True
+  vLow[i]  := -$80000000;
+  vHigh[i] := $7FFFFFFF;
+  vTall[i] := vHeight;
+  vBase[i] := 0;
+  vGrid[i] := 0;
 end;
+vTriggerChannel := -1;        // trigger disabled (free-run) by default
+vTriggerAuto    := False;
+vTriggerArm     := -1;
+vTriggerFire    := 0;
+vTriggerOffset  := vSamples div 2;
+vHoldOff        := vSamples;
 ```
 
-### 21.4 Trigger Initialization
+There are no `vMin/vMax/vCenter/vScale` accumulators to initialize (see §18.3). `SamplePtr`/`SamplePop` are plain integers reset to 0 by global allocation / `CLEAR`, not a per-channel loop.
+
+### 21.4 Form Metrics and Bitmap Sizing
+
+`SCOPE_Configure` closes by establishing text metrics and margins (lines 1204-1206):
 
 ```pascal
-procedure KeyTrigger;
-begin
-  vTrigger := True;
-  if NextNum then vTriggerChannel := Within(val, 0, vIndex - 1);
-  if NextNum then vTriggerLevel := val;
-  if NextNum then vTriggerPos := Within(val, 0, SampleSets);
-  if NextNum then vTriggerHoldoff := Within(val, 0, 1000);
-  vTriggerRising := True;  // Default: rising edge
-end;
+SetTextMetrics;
+SetSize(ChrWidth, ChrHeight * 2, ChrWidth, ChrWidth);  // left, top, right, bottom margins
 ```
+
+`SetSize` (lines 2926-2970) sets the client area to `margins + vWidth/vHeight`, sizes **both** bitmaps to that client area (2958-2961), caches `vBitmapWidth`/`vBitmapHeight`, rebuilds the `BitmapLine` scanline table, then clears the bitmap with `vTriggered := False; ClearBitmap`.
 
 ### 21.5 Cleanup and Destruction
 
+Bitmaps are released in `FormDestroy` (lines 875-876); the form's timers are freed in the `Destroy` destructor (lines 580-582):
+
 ```pascal
-// Window Close
-FormClosing := True;
-Bitmap[0].Free;
-Bitmap[1].Free;
-Form.Free;
+Bitmap[0].Free;   // FormDestroy, 875
+Bitmap[1].Free;   // FormDestroy, 876
 ```
 
 ---
@@ -1693,7 +1790,7 @@ The **SCOPE** display window is a comprehensive multi-channel oscilloscope for t
 - Auto-ranging or manual range specification per channel
 - Level-based triggering with rising/falling edge detection
 - Vertical scaling (vTall) and offset (vBase) for channel overlay
-- 2048-sample circular buffer per channel
+- Single 2048-set interleaved circular buffer (shared `SamplePtr`/`SamplePop`)
 - Rate limiting and holdoff for display control
 - Anti-aliased trace rendering with lines and/or dots
 

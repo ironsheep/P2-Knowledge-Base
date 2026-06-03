@@ -1,6 +1,8 @@
 # MIDI Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -194,11 +196,63 @@ var
 
 ---
 
+## Directive Reference (v55-verified)
+
+Verified against `DebugDisplayUnit.pas` (v55): `MIDI_Configure` (2492–2588), `MIDI_Update` (2590–2643), shared input handlers (585–857, 3537–3583).
+
+### Configuration directives
+
+Accepted in `MIDI_Configure` (run once at window creation).
+
+Each row: directive → parameter(s) with **type · legal range · default** (matrix §7.3 MIDI; ranges resolved from `KeyValWithin`/`KeyColor` calls in `MIDI_Configure`, §7.1).
+
+| Directive | Parameter(s) — type · range · default | Pascal lines |
+|---|---|---|
+| `TITLE 'str'` | `'text'` · free string · "MIDI" | 2508–2509 |
+| `POS left top` | left, top · int (offset from base window pos) | 2510–2511 |
+| `SIZE n` | n · int **1..50** · **4** — key-size scalar (NOT pixels); `MidiKeySize = 8 + n×4` | 2512–2513 |
+| `RANGE firstKey lastKey` | firstKey · int **0..127** · **21**; lastKey · int **firstKey..127** · **108** (lastKey clamped ≥ firstKey, 2517–2518) | 2514–2519 |
+| `CHANNEL n` | n · int **0..15** · **0** — exact MIDI channel filter (no "all" sentinel) | 2520–2521 |
+| `COLOR onWhite onBlack` | onWhite, onBlack · color, color · **CYAN, MAGENTA** — velocity colors for white keys then black keys (`vColor[0]`, `vColor[1]`) | 2522–2524 |
+
+Color parameters accept a named color (§7.1: `BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY`, optional brightness nibble) or a numeric value through the current color mode (`KeyColor`, 2752–2783).
+
+**Not accepted by MIDI_Configure**: `HIDEXY` (matrix §2, §6). MIDI is the only window that does **not** accept `HIDEXY` — there is no `key_hidexy` arm in the `MIDI_Configure` case statement (2506–2525).
+
+### Display / data directives
+
+Accepted in `MIDI_Update` (run on every subsequent message).
+
+| Directive / data | Description | Pascal lines |
+|---|---|---|
+| Numeric byte stream (`ele_num` values) | Raw MIDI bytes; decoded by 5-state note-on/off velocity machine | 2606–2641 |
+| `CLEAR` | Reset all 128 note velocities to 0 and redraw | 2597–2598 |
+| `SAVE` | Save window bitmap to file (`KeySave`) | 2599–2600 |
+
+**Not accepted in Update phase**: `UPDATE`, `TRACE`, `SET`, `SCROLL`, color-mode directives, `HIDEXY` — none present in `MIDI_Update`.
+
+### Keyboard & mouse
+
+MIDI uses the **identical shared input model** as all nine windows (`TDebugDisplayForm` form-level handlers). There is **no per-MIDI coordinate mapping** — `FormMouseMove` draws no measurement cursor, and `SendMousePos` reports raw pixel coordinates (off-window sentinel `$03FFFFFF` / `$FFFFFFFF` applies normally).
+
+| Handler / directive | Lines | Behavior |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Captures Tab (`DLGC_WANTTAB`) |
+| `FormMouseMove` | 647–809 | Live measurement cursor suppressed when `HIDEXY` set (737) — but MIDI never sets `HIDEXY` |
+| `FormMouseWheel` | 811–823 | Latches wheel direction (`vMouseWheel` ±1) for 100 ms |
+| `FormKeyPress` / `FormKeyDown` | 825–857 | Latches key byte for 100 ms; non-printable mapped: Left=1 Right=2 Up=3 Down=4 Home=5 End=6 Del=7 Ins=10 PgUp=11 PgDn=12 |
+| `PC_KEY` (Update) | `SendKeyPress` 3579–3583 | Sends latched `vKeyPress` byte (0 if none) |
+| `PC_MOUSE` (Update) | `SendMousePos` 3537–3577 | Sends 2 LONGs: packed x/y/buttons/wheel + RGB pixel under cursor |
+
+**MIDI-specific note**: The matrix (§4.4) confirms MIDI has no coordinate readout and no special mouse coordinate mapping. `HIDEXY` is irrelevant to MIDI since MIDI does not accept it in Configure.
+
+---
+
 ## 4. Configuration and Initialization
 
 ### 4.1 MIDI_Configure Method
 
-**DebugDisplayUnit.pas:2484-2580**
+**DebugDisplayUnit.pas:2492-2588**
 ```pascal
 procedure TDebugDisplayForm.MIDI_Configure;
 var
@@ -398,7 +452,7 @@ vHeight := MidiKeySize * 6 + border;
 
 ### 5.1 MIDI_Update Method
 
-**DebugDisplayUnit.pas:2582-2635**
+**DebugDisplayUnit.pas:2590-2643**
 ```pascal
 procedure TDebugDisplayForm.MIDI_Update;
 begin
@@ -522,7 +576,7 @@ $80, $3C, $00
 
 ### 5.4 Status Byte Handling
 
-**DebugDisplayUnit.pas:2602-2603**
+**DebugDisplayUnit.pas:2610-2611**
 ```pascal
 val := val and $FF;                    // Ensure 8-bit
 if val and $80 <> 0 then MidiState := 0;  // Reset on status byte
@@ -536,7 +590,7 @@ if val and $80 <> 0 then MidiState := 0;  // Reset on status byte
 
 ### 5.5 Channel Filtering
 
-**DebugDisplayUnit.pas:2607-2608**
+**DebugDisplayUnit.pas:2615-2616**
 ```pascal
 if (val and $F0 = $90) and (val and $0F = MidiChannel) then ...
 if (val and $F0 = $80) and (val and $0F = MidiChannel) then ...
@@ -573,7 +627,7 @@ MidiVelocity[MidiNote] := -val;  // Negative velocity (release)
 
 ### 6.1 MIDI_Draw Method
 
-**DebugDisplayUnit.pas:2637-2657**
+**DebugDisplayUnit.pas:2645-2665**
 ```pascal
 procedure TDebugDisplayForm.MIDI_Draw(Clear: boolean);
 var
@@ -649,7 +703,7 @@ r := MidiKeySize div 4;  // Rounded corners
 
 ### 7.1 MIDI_DrawKey Method
 
-**DebugDisplayUnit.pas:2659-2674**
+**DebugDisplayUnit.pas:2667-2682**
 ```pascal
 procedure TDebugDisplayForm.MIDI_DrawKey(i, OffColor, OnColor, r: integer);
 begin
@@ -882,7 +936,7 @@ if MidiVelocity[i] > 0 then
 
 ### 10.1 Color Configuration
 
-**DebugDisplayUnit.pas:2494-2495, 2514-2516**
+**DebugDisplayUnit.pas:2502-2503, 2522-2524**
 ```pascal
 vColor[0] := clCyan;      // Default white key active color
 vColor[1] := clMagenta;   // Default black key active color
@@ -899,13 +953,19 @@ key_color:
 
 ### 10.2 Default Colors
 
-**Pre-defined Constants**:
+**Pre-defined Constants** (all from `DebugDisplayUnit.pas` 179–191) — every fixed
+color MIDI uses:
 ```pascal
-clCyan    = $00FFFF;  // Cyan (R=0, G=255, B=255)
-clMagenta = $FF00FF;  // Magenta (R=255, G=0, B=255)
-clWhite   = $FFFFFF;  // White (R=255, G=255, B=255)
-clBlack   = $000000;  // Black (R=0, G=0, B=0)
+clCyan    = $00FFFF;  // vColor[0] default — active white-key tint (2502)
+clMagenta = $FF00FF;  // vColor[1] default — active black-key tint (2503)
+clWhite   = $FFFFFF;  // white-key fill (2658)
+clBlack   = $000000;  // black-key fill (2662)
+clGray2   = $808080;  // keyboard outline pen + black-key labels (2651, 2660)
+clGray3   = $D0D0D0;  // white-key labels (2656)
 ```
+The keyboard background is the Windows system color `clInactiveCaption` (2650) — a
+GDI palette color, **not** a fixed RGB24 literal. All other colors above are literal
+RGB24 values; `WinRGB` swaps R↔B to BGR only at GDI draw time.
 
 **Default Scheme**:
 - White keys: White → Cyan (inactive → active)
@@ -937,7 +997,7 @@ Brush.Color := WinRGB(OnColor);
 
 **Example 1** (warm colors):
 ```
-COLOR $FF8000 $FFFF00  // Orange, Yellow
+COLOR $FF7F00 $FFFF00  // Orange (clOrange), Yellow (clYellow)
 ```
 
 **Example 2** (cool colors):
@@ -1423,784 +1483,252 @@ AngleTextOut(x, y, text, style, angle);
 
 ## 17. Element Array Protocol Specification
 
-The **MIDI** display window uses the same **Element Array Protocol** as all other display windows for configuration and data transmission. This section describes the MIDI-specific interpretation of the protocol.
+The **MIDI** display window receives its parameters and data through the same element-stream parser as every other window. The parser is the family of `Next*` helpers (`NextKey`, `NextNum`, `NextStr`, `NextEnd`) that walk the decoded element list; the value of the current element is exposed in the global `val`. There are **no** MIDI-specific element-type constants such as `TYPE_CHANNEL` or `TYPE_MIDI_BYTE` — the same `key_*` keyword ids and numeric elements used by all windows apply.
 
 ### 17.1 Configuration Elements
 
-**Array Structure**:
-- **DebugDisplayType[]**: Element type identifiers (configuration vs. data)
-- **DebugDisplayValue[]**: Associated values for each element
-- **Capacity**: 1100 elements per transmission
+Configuration is consumed once by `MIDI_Configure` (2492–2588). Its parameter loop (2506–2525) is a `while NextKey do case val of …` over keyword ids:
 
-**MIDI-Specific Configuration**:
 ```pascal
-// MIDI Window Configuration Example
-DebugDisplayType[0] := TYPE_CHANNEL;     // MIDI channel filter
-DebugDisplayValue[0] := 1;               // Channel 1 (0 = all channels)
-
-DebugDisplayType[1] := TYPE_SIZE;        // Window sizing
-DebugDisplayValue[1] := 2;               // 2× magnification
-
-DebugDisplayType[2] := TYPE_KEYLUT;      // Custom key layout (optional)
-DebugDisplayValue[2] := @CustomKeyLUT;   // Pointer to custom layout
-
-DebugDisplayType[3] := TYPE_COLOR;       // Velocity color mapping
-DebugDisplayValue[3] := $FF8800;         // Orange for active notes
-```
-
-**Configuration Parameters**:
-- **vChannel**: MIDI channel filter (0 = all, 1-16 = specific channel)
-- **vSize**: Display magnification (1× to 50×)
-- **vKeyLUT**: Optional custom keyboard layout
-- **vColor**: Base color for velocity mapping
-- **vUpdate**: Update mode (0 = manual, 1 = automatic)
-
-### 17.2 MIDI Data Elements
-
-**MIDI Byte Protocol**:
-```pascal
-// Note-On Event
-DebugDisplayType[n] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n] := $90;             // Status byte (Note-On, Channel 0)
-
-DebugDisplayType[n+1] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n+1] := 60;            // Note number (Middle C)
-
-DebugDisplayType[n+2] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n+2] := 100;           // Velocity (0-127)
-
-// Note-Off Event
-DebugDisplayType[n+3] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n+3] := $80;           // Status byte (Note-Off, Channel 0)
-
-DebugDisplayType[n+4] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n+4] := 60;            // Note number
-
-DebugDisplayType[n+5] := TYPE_MIDI_BYTE;
-DebugDisplayValue[n+5] := 64;            // Release velocity
-```
-
-**MIDI Message Types**:
-- **$8n**: Note-Off (channel n)
-- **$9n**: Note-On (channel n)
-- **$An**: Polyphonic Aftertouch
-- **$Bn**: Control Change
-- **$Cn**: Program Change
-- **$Dn**: Channel Aftertouch
-- **$En**: Pitch Bend
-
-**State Machine Processing**:
-1. **Status Byte** received → Identify message type
-2. **Data Byte 1** received → Store note number
-3. **Data Byte 2** received → Store velocity, trigger rendering
-4. **Display Update** → Render key state change
-
-### 17.3 Bulk MIDI Data Transmission
-
-**Efficient Multi-Note Updates**:
-```pascal
-// Send multiple note events in one transmission
-for i := 0 to NoteCount - 1 do
-begin
-  idx := i * 3;
-  DebugDisplayType[idx] := TYPE_MIDI_BYTE;
-  DebugDisplayValue[idx] := $90 or MidiChannel;  // Note-On
-
-  DebugDisplayType[idx + 1] := TYPE_MIDI_BYTE;
-  DebugDisplayValue[idx + 1] := NoteNumbers[i];
-
-  DebugDisplayType[idx + 2] := TYPE_MIDI_BYTE;
-  DebugDisplayValue[idx + 2] := Velocities[i];
+while NextKey do
+case val of
+  key_title:   KeyTitle;                          // TITLE 'str'
+  key_pos:     KeyPos;                             // POS left top
+  key_size:    KeyValWithin(MidiSize, 1, 50);     // SIZE n   (1..50, default 4)
+  key_range:   if KeyValWithin(MidiKeyFirst, 0, 127) then
+               begin
+                 MidiKeyLast := MidiKeyFirst;
+                 KeyValWithin(MidiKeyLast, MidiKeyFirst, 127);
+               end;                                // RANGE firstKey lastKey
+  key_channel: KeyValWithin(MidiChannel, 0, 15);  // CHANNEL n (0..15, default 0)
+  key_color:   if KeyColor(vColor[0]) then
+                 KeyColor(vColor[1]);             // COLOR onWhite onBlack
 end;
 ```
 
-**Throughput**:
-- **Maximum**: 1100 elements / 3 bytes per note = ~366 simultaneous note events
-- **Practical**: Most musical applications use < 20 simultaneous notes
-- **Latency**: Sub-20ms from byte reception to display update
+**Real configuration state** (2497–2503, defaults set before the loop):
+- **MidiSize** — key-size scalar 1..50, default 4.
+- **MidiKeyFirst / MidiKeyLast** — display range 0..127, default 21..108.
+- **MidiChannel** — exact channel filter 0..15, default 0. There is **no "all channels" value**; channel 0 means literally channel 0.
+- **vColor[0] / vColor[1]** — white-key and black-key velocity colors, defaults `clCyan` / `clMagenta`.
+
+`UPDATE`, `KEYLUT`, and a custom-layout pointer do **not** exist in MIDI; there is no update-mode flag and no per-key lookup table.
+
+### 17.2 MIDI Data Elements
+
+Data is consumed by `MIDI_Update` (2590–2643). Inside the per-message loop, `MIDI_Update` first tries `NextKey` (handling `key_clear`, `key_save`, `key_pc_key`, `key_pc_mouse`); when the next element is numeric it falls into `while NextNum do` (2607) and feeds each value to the inline state machine. Every MIDI byte is just an ordinary numeric element — there is no dedicated `TYPE_MIDI_BYTE`.
+
+Each numeric value is masked to 8 bits, and **any** byte with bit 7 set (a status byte, $80–$FF) resets `MidiState` to 0 (2610–2611):
+
+```pascal
+val := val and $FF;
+if val and $80 <> 0 then MidiState := 0;
+```
+
+**Message types actually recognized** — only note-on and note-off, and only on the configured channel (2615–2616):
+- **$9n** (`val and $F0 = $90`) with `val and $0F = MidiChannel` → note-on (MidiState := 1).
+- **$8n** (`val and $F0 = $80`) with `val and $0F = MidiChannel` → note-off (MidiState := 3).
+
+All other status bytes ($An–$Fn: aftertouch, control change, program change, pitch bend, system) match neither test, so they simply leave the machine in state 0 and are ignored. They are **not** parsed or stored.
+
+### 17.3 Multi-Note Transmission (Running Status)
+
+There is no buffered "bulk" element format — multiple notes are sent simply as consecutive numeric elements consumed by the same `while NextNum` loop. After a `$9n` status byte the machine stays in the note-on pair-cycle (state 1→2→1→2…), so additional `note, velocity` pairs need no repeated status byte (2618–2628). The same applies to `$8n` note-off (states 3↔4, 2629–2639). A redraw (`MIDI_Draw(False)`) fires once per completed pair (2627, 2638).
 
 ---
 
 ## 18. Buffer Management and Timing
 
-The **MIDI** display window maintains **note state buffers** to track which notes are currently active, their velocities, and their visual representation.
+The **MIDI** window keeps note state in a single flat array, not a record buffer. There is no `TNoteState` record, no per-note channel or timestamp, and no `NoteStates[]`.
 
-### 18.1 Note State Buffer
+### 18.1 Note State Array
 
-**Data Structure**:
+**Real data structure** (declared with the other Midi vars, ~369–382):
 ```pascal
-type TNoteState = record
-  Active: Boolean;        // Is note currently on?
-  Velocity: Byte;        // Note-On velocity (0-127)
-  Channel: Byte;         // MIDI channel (0-15)
-  Timestamp: Cardinal;   // When note was activated (ms)
-end;
-
 var
-  NoteStates: array[0..127] of TNoteState;  // One entry per MIDI note
+  MidiVelocity: array [0..127] of integer;  // signed velocity per note
 ```
 
-**Buffer Organization**:
-- **128 entries**: One for each MIDI note (0-127)
-- **Note 0-11**: C-1 through B-1 (lowest octave)
-- **Note 60**: Middle C (C4)
-- **Note 120-127**: C9 through G9 (highest notes)
+One signed integer per MIDI note encodes both activity and velocity:
+- **MidiVelocity[note] > 0** — note is on; the value is the note-on velocity (1..127).
+- **MidiVelocity[note] ≤ 0** — note is off; note-off stores the negated release velocity (2636), so the value is 0 or negative.
 
-**State Transitions**:
+`MIDI_DrawKey` keys its colored fill solely on `MidiVelocity[i] > 0` (2673). No `Active`/`Channel`/`Timestamp` fields exist; channel was already enforced at parse time (see §18.3), so it is not re-stored per note.
+
+**State write, note-on** (2623–2628):
 ```pascal
-procedure ProcessNoteOn(note, velocity, channel: Byte);
-begin
-  if (vChannel = 0) or (channel = vChannel - 1) then
-  begin
-    NoteStates[note].Active := True;
-    NoteStates[note].Velocity := velocity;
-    NoteStates[note].Channel := channel;
-    NoteStates[note].Timestamp := GetTickCount;
-    RenderKey(note, velocity);
-  end;
-end;
-
-procedure ProcessNoteOff(note, velocity, channel: Byte);
-begin
-  if (vChannel = 0) or (channel = vChannel - 1) then
-  begin
-    NoteStates[note].Active := False;
-    RenderKey(note, 0);  // Render as inactive
-  end;
-end;
+MidiVelocity[MidiNote] := val;   // positive velocity
+MidiState := 1;
+MIDI_Draw(False);
 ```
 
-### 18.2 MIDI Byte State Machine
-
-**Parsing State**:
+**State write, note-off** (2634–2639):
 ```pascal
-type TMidiParserState = (
-  STATE_IDLE,           // Waiting for status byte
-  STATE_NOTE_DATA1,     // Expecting note number
-  STATE_NOTE_DATA2,     // Expecting velocity
-  STATE_CC_DATA1,       // Expecting CC number
-  STATE_CC_DATA2        // Expecting CC value
-);
-
-var
-  ParserState: TMidiParserState;
-  StatusByte: Byte;
-  DataByte1: Byte;
+MidiVelocity[MidiNote] := -val;  // negated release velocity
+MidiState := 3;
+MIDI_Draw(False);
 ```
 
-**State Machine Flow**:
-1. **STATE_IDLE**: Wait for status byte ($80-$EF)
-2. **STATUS_RECEIVED**: Decode message type
-   - Note-On/Off → STATE_NOTE_DATA1
-   - Control Change → STATE_CC_DATA1
-3. **DATA1_RECEIVED**: Store first data byte
-4. **DATA2_RECEIVED**: Complete message, update display
-5. **RETURN_TO_IDLE**: Ready for next message
+`CLEAR` (and the initial draw) zero the whole array via `MIDI_Draw(True)` (2649).
 
-### 18.3 Timing and Latency
+### 18.2 The Inline MidiState Machine
 
-**Event Processing Timeline**:
-```
-t=0ms:   MIDI byte received via Element Array Protocol
-t=1ms:   State machine processes byte
-t=2ms:   Note state buffer updated
-t=3ms:   Key rendering begins
-t=18ms:  Display update complete (bitmap swap)
-```
+There is **no** `TMidiParserState` enum and no control-change handling. The parser is the integer `MidiState` (0..4) advanced inside `MIDI_Update`'s `while NextNum` loop (2607–2640):
 
-**Throughput Characteristics**:
-- **MIDI Bytes per Second**: 31,250 bps (standard MIDI rate)
-- **Events per Second**: ~10,400 three-byte messages
-- **Display Update Rate**: 60 Hz (16.67ms per frame)
-- **Buffer Depth**: Single-buffered note states (current state only)
+| State | Meaning | On next byte | → |
+|---|---|---|---|
+| 0 | idle — waiting for note-on/off status | `$9x` & chan match → 1; `$8x` & chan match → 3 (2615–2616) | 1 or 3 |
+| 1 | note-on: expecting note number | `MidiNote := val` (2620) | 2 |
+| 2 | note-on: expecting velocity | `MidiVelocity[MidiNote] := val`; draw (2625–2627) | 1 (running status) |
+| 3 | note-off: expecting note number | `MidiNote := val` (2631) | 4 |
+| 4 | note-off: expecting velocity | `MidiVelocity[MidiNote] := -val`; draw (2636–2638) | 3 (running status) |
 
-**Running Status Optimization** (not currently implemented):
+Before the case, every byte with bit 7 set forces `MidiState := 0` (2611), so any new status byte (including an unsupported one) re-synchronizes the machine. After a completed pair the machine returns to its on/off state (1 or 3), not to 0 — this is the running-status behavior.
+
+### 18.3 Channel Filtering — Exact Match Only
+
+The window processes a note **only** when the status byte's low nibble equals the configured `MidiChannel`; there is no "all channels" mode (2615–2616):
+
 ```pascal
-// Standard: 3 bytes per note
-SendMIDI([$90, 60, 100]);  // Note-On C4
-SendMIDI([$90, 64, 100]);  // Note-On E4
-SendMIDI([$90, 67, 100]);  // Note-On G4
-
-// Running status: 1 + 2 + 2 = 5 bytes for 3 notes
-SendMIDI([$90, 60, 100, 64, 100, 67, 100]);  // More efficient
+if (val and $F0 = $90) and (val and $0F = MidiChannel) then MidiState := 1;
+if (val and $F0 = $80) and (val and $0F = MidiChannel) then MidiState := 3;
 ```
 
-### 18.4 Channel Filtering
+- `MidiChannel = 0` shows **only channel 0** (MIDI channel 1), not all channels.
+- `MidiChannel = 9` shows only channel 9 (MIDI channel 10, typically percussion).
+- A `$9n`/`$8n` on a non-matching channel fails the test, leaving the machine in state 0; that message's data bytes are then ignored as well.
 
-**Multi-Channel Processing**:
-```pascal
-// vChannel = 0: Accept all channels
-if vChannel = 0 then
-  AcceptMessage := True
-// vChannel = 1-16: Filter specific channel
-else
-  AcceptMessage := (ExtractChannel(StatusByte) = vChannel - 1);
-```
+### 18.4 Redraw Cadence
 
-**Use Cases**:
-- **vChannel = 0**: Monitor all 16 MIDI channels (full keyboard)
-- **vChannel = 1**: Show only channel 1 (single instrument)
-- **vChannel = 10**: Show only percussion (MIDI channel 10)
+A full redraw (`MIDI_Draw(False)`) fires once per completed note-on or note-off pair (2627, 2638), and a clearing redraw (`MIDI_Draw(True)`) fires on `CLEAR` (2598) and at configuration end (2587). Each redraw repaints every displayed key (2657–2662); there is no incremental single-key update path.
 
 ---
 
 ## 19. Bitmap System and Double-Buffering
 
-The **MIDI** display window uses the standard **double-buffering** system to eliminate flicker during piano keyboard rendering.
+The **MIDI** window renders into a single off-screen bitmap, `Bitmap[0]`, then blits it to the visible canvas with `BitmapToCanvas(0)` (2664). There is **no** front/back buffer pair, no `SwapBuffers`, and no `vUpdate` mode — MIDI does not accept `UPDATE`, so every note event paints immediately.
 
-### 19.1 Double-Buffered Rendering
+### 19.1 Draw Pass (MIDI_Draw)
 
-**Bitmap Structure**:
+`MIDI_Draw(Clear)` (2645–2665) does the whole frame in one call:
+1. If `Clear`, zero all 128 `MidiVelocity[]` entries (2649).
+2. Fill the bitmap with `clInactiveCaption`, pen `clGray2` width 1 (2650–2653).
+3. Compute corner radius `r := MidiKeySize div 4` (2654).
+4. **Pass 1** — draw white keys (`not MidiBlack[i]`) with font color `clGray3` (2656–2658).
+5. **Pass 2** — draw black keys (`MidiBlack[i]`) with font color `clGray2`, on top (2660–2662).
+6. `BitmapToCanvas(0)` (2664).
+
+The two-pass order is the painter's algorithm so black keys overlap white ones; there is no per-key invalidation list.
+
+### 19.2 Key Rendering (MIDI_DrawKey)
+
+Both passes call the one helper `MIDI_DrawKey(i, OffColor, OnColor, r)` (2667–2682): white keys with `(clWhite, vColor[0])`, black keys with `(clBlack, vColor[1])` (2658, 2662). Keys are drawn with **`RoundRect`**, not `Rectangle`, using the pre-computed geometry arrays `MidiLeft/MidiRight/MidiBottom` (shifted by `MidiOffset`) — they are **not** recomputed from note number at draw time:
+
 ```pascal
-var
-  Bitmap: array[0..1] of TBitmap;  // Two bitmaps for double-buffering
-  FrontBuffer: Integer;            // Currently displayed buffer (0 or 1)
-  BackBuffer: Integer;             // Currently being drawn (1 or 0)
+// plain (off) key — full key in OffColor
+Bitmap[0].Canvas.Brush.Color := WinRGB(OffColor);
+Bitmap[0].Canvas.RoundRect(MidiLeft[i] - MidiOffset, -r,
+                           MidiRight[i] - MidiOffset, MidiBottom[i], r, r);
 ```
 
-**Rendering Pipeline**:
-1. **Clear Back Buffer**: Fill with background color
-2. **Draw Piano Keyboard**: White keys, then black keys
-3. **Render Active Notes**: Color keys based on velocity
-4. **Draw Key Labels**: Optional note names (C4, D4, etc.)
-5. **Swap Buffers**: Make back buffer visible
-6. **Update Display**: BitBlt to canvas
+### 19.3 Velocity-Proportional Fill
 
-**Swap Operation**:
+There is **no** velocity-to-color gradient function. The on-color is the flat configured color (`vColor[0]`/`vColor[1]`); velocity controls the **height** of a second `RoundRect` overdrawn from the bottom of the key (2673–2679):
+
 ```pascal
-procedure SwapBuffers;
+if MidiVelocity[i] > 0 then
 begin
-  FrontBuffer := 1 - FrontBuffer;   // Toggle 0↔1
-  BackBuffer := 1 - BackBuffer;     // Toggle 1↔0
-  BitmapToCanvas(FrontBuffer);      // Show new front buffer
+  Bitmap[0].Canvas.Brush.Color := WinRGB(OnColor);
+  Bitmap[0].Canvas.RoundRect(MidiLeft[i] - MidiOffset,
+    MidiBottom[i] - r - (MidiBottom[i] - r) * MidiVelocity[i] div 127,
+    MidiRight[i] - MidiOffset, MidiBottom[i], r, r);
 end;
 ```
 
-### 19.2 Piano Keyboard Rendering
+So `velocity = 127` fills the full key height (minus the corner radius) and `velocity = 1` fills a sliver; the hue is constant. A key is colored only while `MidiVelocity[i] > 0`, i.e. note-off (negative velocity) leaves it in its OffColor.
 
-**Key Rendering Order** (painter's algorithm):
-```pascal
-procedure RenderKeyboard;
-begin
-  // Step 1: Draw all white keys
-  for note := LowestNote to HighestNote do
-    if not IsBlackKey(note) then
-      DrawWhiteKey(note, NoteStates[note]);
-
-  // Step 2: Draw all black keys (on top)
-  for note := LowestNote to HighestNote do
-    if IsBlackKey(note) then
-      DrawBlackKey(note, NoteStates[note]);
-end;
-```
-
-**White Key Rendering**:
-```pascal
-procedure DrawWhiteKey(note: Byte; state: TNoteState);
-var
-  x, y, w, h: Integer;
-  color: TColor;
-begin
-  x := NoteToPixelX(note);
-  y := 0;
-  w := vSize;                    // Key width
-  h := vSize * 6;                // Key height (6:1 ratio)
-
-  if state.Active then
-    color := VelocityToColor(state.Velocity)
-  else
-    color := clWhite;
-
-  Canvas.Brush.Color := color;
-  Canvas.Pen.Color := clBlack;
-  Canvas.Rectangle(x, y, x + w, y + h);
-end;
-```
-
-**Black Key Rendering**:
-```pascal
-procedure DrawBlackKey(note: Byte; state: TNoteState);
-var
-  x, y, w, h: Integer;
-  offset: Integer;
-begin
-  x := NoteToPixelX(note);
-  offset := GetBlackKeyOffset(note);  // Center between white keys
-  x := x - (vSize div 2) + offset;
-
-  y := 0;
-  w := vSize * 2 div 3;           // 67% width of white key
-  h := vSize * 4;                 // 67% height of white key
-
-  if state.Active then
-    Canvas.Brush.Color := VelocityToColor(state.Velocity)
-  else
-    Canvas.Brush.Color := clBlack;
-
-  Canvas.Pen.Color := clBlack;
-  Canvas.Rectangle(x, y, x + w, y + h);
-end;
-```
-
-### 19.3 Velocity-Proportional Coloring
-
-**Color Mapping Function**:
-```pascal
-function VelocityToColor(velocity: Byte): TColor;
-var
-  intensity: Byte;
-  r, g, b: Byte;
-begin
-  // Map velocity (0-127) to intensity (0-255)
-  intensity := (velocity * 2) and $FF;
-
-  // Orange gradient: dark orange → bright orange
-  r := 255;
-  g := intensity;
-  b := 0;
-
-  Result := RGB(r, g, b);
-end;
-```
-
-**Velocity Ranges**:
-- **0-31**: Pianissimo (pp) - Dark orange ($FF4000)
-- **32-63**: Piano (p) - Medium orange ($FF8000)
-- **64-95**: Mezzo-forte (mf) - Bright orange ($FFBF00)
-- **96-127**: Fortissimo (ff) - Very bright orange ($FFFF00)
-
-**Custom Color Base**:
-```pascal
-// Use vColor as base for velocity mapping
-function VelocityToColor(velocity: Byte): TColor;
-var
-  intensity: Byte;
-  r, g, b: Byte;
-begin
-  intensity := (velocity * 2) and $FF;
-
-  // Extract RGB from vColor
-  r := (vColor shr 16) and $FF;
-  g := (vColor shr 8) and $FF;
-  b := vColor and $FF;
-
-  // Scale by intensity
-  r := (r * intensity) div 255;
-  g := (g * intensity) div 255;
-  b := (b * intensity) div 255;
-
-  Result := RGB(r, g, b);
-end;
-```
-
-### 19.4 Update Modes
-
-**Manual Update Mode** (vUpdate = 0):
-```pascal
-// Update after each MIDI message
-procedure ProcessMidiMessage(msg: TMidiMessage);
-begin
-  UpdateNoteState(msg);
-  RenderAffectedKey(msg.Note);
-  BitmapToCanvas(FrontBuffer);    // Immediate display update
-end;
-```
-
-**Automatic Update Mode** (vUpdate = 1):
-```pascal
-// Batch updates, refresh at fixed rate (60 Hz)
-procedure ProcessMidiMessage(msg: TMidiMessage);
-begin
-  UpdateNoteState(msg);
-  InvalidateKey(msg.Note);        // Mark for redraw
-  // Display updated in timer callback
-end;
-
-procedure OnTimerTick;
-begin
-  if HasInvalidKeys then
-  begin
-    RenderInvalidKeys;
-    SwapBuffers;
-  end;
-end;
-```
+After the fill, the note number label is drawn rotated −90° via `AngleTextOut` (2680–2681).
 
 ---
 
 ## 20. Shared Infrastructure
 
-The **MIDI** display window leverages shared rendering infrastructure and utilities common across all PNut debug display types.
+The **MIDI** window uses the same shared canvas helpers as the other windows, but its keyboard geometry and labels are MIDI-specific and are computed in `MIDI_Configure`, not via the helper functions invented in earlier drafts (no `NoteToPixelX`, `WhiteKeyIndex`, `GetBlackKeyOffset`, `NoteToString`, `IsBlackKey` bitmask, or `TranslateColor` exist).
 
 ### 20.1 Color System
 
-**Default MIDI Colors**:
+MIDI stores its two velocity colors in the shared `vColor[]` array — `vColor[0]` (white-key on, default `clCyan`) and `vColor[1]` (black-key on, default `clMagenta`), set at 2502–2503 and overridable by `COLOR` (2522–2524). At draw time the brush color is resolved through the shared `WinRGB(...)` helper (2670, 2675); fixed colors used directly are `clInactiveCaption` (background), `clGray2`/`clGray3` (pen and label colors), `clWhite`, and `clBlack`. There is no `TranslateColor`/`GetSysColor` indirection in this path.
+
+### 20.2 Rotated Number Labels
+
+Each key is labeled with its **MIDI note number** (`IntToStr(i)`), not a pitch name like `'C4'`. The label is drawn through the shared `AngleTextOut` helper at angle −900 (−90°, tenths of a degree) (2680–2681):
+
 ```pascal
-const
-  COLOR_WHITE_KEY = clWhite;        // Inactive white keys
-  COLOR_BLACK_KEY = clBlack;        // Inactive black keys
-  COLOR_ACTIVE_NOTE = $FF8800;      // Active notes (orange)
-  COLOR_KEY_OUTLINE = clBlack;      // Key borders
-  COLOR_TEXT = clBlack;             // Note labels
-  COLOR_BACKGROUND = clBtnFace;     // Window background
+Bitmap[0].Canvas.Brush.Style := bsClear;
+AngleTextOut(MidiNumX[i] - MidiOffset, ChrWidth, IntToStr(i), $20, -900);
 ```
 
-**TranslateColor Function**:
+Label font size derives from `vTextSize := MidiKeySize div 3`, applied via `SetTextMetrics` during configuration (2528–2529). The horizontal label position `MidiNumX[i]` is precomputed per note in Configure (2556 for black keys, 2563 for white keys).
+
+### 20.3 Keyboard Geometry (precomputed in Configure)
+
+Key positions are **not** derived at draw time from `note mod 12`. `MIDI_Configure` walks all 128 notes once (2534–2572), filling four arrays — `MidiLeft[i]`, `MidiRight[i]`, `MidiBottom[i]`, `MidiNumX[i]` — plus `MidiBlack[i]`. White keys advance the running `x` by `MidiKeySize`; black keys are placed relative to that `x` using the per-pitch `tweak` table (2536–2549):
+
 ```pascal
-function TranslateColor(color: TColor): TColor;
+black := note in [1, 3, 6, 8, 10];     // exact black-key test
+if black then
 begin
-  if color < 0 then
-    Result := GetSysColor(color and $000000FF)  // System color
-  else
-    Result := color;                             // RGB color
+  left   := x - (MidiKeySize * (10 - tweak) + 16) div 32;
+  right  := left + MidiKeySize * 20 div 32;   // ~0.625 × white width
+  bottom := MidiKeySize * 4;                   // shorter than white
+end
+else
+begin
+  left   := x;
+  right  := left + MidiKeySize;
+  bottom := MidiKeySize * 6;
+  Inc(x, MidiKeySize);
 end;
 ```
 
-**System Color Constants**:
-- **clWhite** = $FFFFFF (inactive white keys)
-- **clBlack** = $000000 (inactive black keys, borders)
-- **clBtnFace** = $F0F0F0 (window background)
+The whole keyboard is then shifted left by `MidiOffset` at draw time (`MidiLeft[i] - MidiOffset`, etc.) so the first displayed key sits at the border (2574–2580).
 
-### 20.2 Font Rendering System
+### 20.4 Black-Key Detection
 
-**Text Rendering** (note labels):
-```pascal
-procedure RenderNoteLabel(note: Byte; x, y: Integer);
-var
-  noteName: string;
-  fontSize: Integer;
-begin
-  noteName := NoteToString(note);    // 'C4', 'D#4', etc.
-  fontSize := vSize div 3;           // Scale with key size
-
-  Canvas.Font.Size := fontSize;
-  Canvas.Font.Color := COLOR_TEXT;
-  Canvas.Font.Name := 'Arial';
-  Canvas.Font.Style := [];
-
-  // Vertical text (rotated 90° clockwise)
-  AngleTextOut(x, y, noteName, [], -900);
-end;
-```
-
-**AngleTextOut Function** (rotated text):
-```pascal
-procedure AngleTextOut(x, y: Integer; const text: string;
-                       style: TFontStyles; angle: Integer);
-var
-  lf: TLogFont;
-begin
-  GetObject(Canvas.Font.Handle, SizeOf(lf), @lf);
-  lf.lfEscapement := angle;          // Tenths of degrees
-  lf.lfOrientation := angle;
-  Canvas.Font.Handle := CreateFontIndirect(lf);
-  Canvas.TextOut(x, y, text);
-end;
-```
-
-**Font Sizing**:
-- **vSize = 8**: Font size = 2.67 ≈ 3 points (tiny)
-- **vSize = 24**: Font size = 8 points (readable)
-- **vSize = 48**: Font size = 16 points (large)
-- **vSize = 96**: Font size = 32 points (very large)
-
-### 20.3 Coordinate Mapping
-
-**Note-to-Pixel Conversion**:
-```pascal
-function NoteToPixelX(note: Byte): Integer;
-var
-  octave, pitchClass: Integer;
-  whiteKeysBefore: Integer;
-begin
-  octave := note div 12;
-  pitchClass := note mod 12;
-
-  // Count white keys before this note
-  whiteKeysBefore := octave * 7 + WhiteKeyIndex[pitchClass];
-
-  Result := whiteKeysBefore * vSize;
-end;
-
-const
-  WhiteKeyIndex: array[0..11] of Integer = (
-    0,  // C
-    0,  // C#
-    1,  // D
-    1,  // D#
-    2,  // E
-    3,  // F
-    3,  // F#
-    4,  // G
-    4,  // G#
-    5,  // A
-    5,  // A#
-    6   // B
-  );
-```
-
-**Black Key Positioning**:
-```pascal
-function GetBlackKeyOffset(note: Byte): Integer;
-const
-  // Offset from left edge of white key (in vSize units)
-  BlackKeyOffsets: array[0..11] of Integer = (
-    0,   // C (not used)
-    3,   // C# (3/4 to the right)
-    0,   // D (not used)
-    3,   // D# (3/4 to the right)
-    0,   // E (not used)
-    0,   // F (not used)
-    2,   // F# (2/3 to the right)
-    0,   // G (not used)
-    2,   // G# (2/3 to the right)
-    0,   // A (not used)
-    3,   // A# (3/4 to the right)
-    0    // B (not used)
-  );
-begin
-  Result := (BlackKeyOffsets[note mod 12] * vSize) div 4;
-end;
-```
-
-### 20.4 Note Name Conversion
-
-**Note Number to String**:
-```pascal
-function NoteToString(note: Byte): string;
-const
-  NoteNames: array[0..11] of string = (
-    'C', 'C#', 'D', 'D#', 'E', 'F',
-    'F#', 'G', 'G#', 'A', 'A#', 'B'
-  );
-var
-  octave: Integer;
-  pitchClass: Integer;
-begin
-  octave := (note div 12) - 1;      // MIDI octave numbering
-  pitchClass := note mod 12;
-  Result := NoteNames[pitchClass] + IntToStr(octave);
-end;
-```
-
-**Examples**:
-- Note 0 → 'C-1'
-- Note 60 → 'C4' (Middle C)
-- Note 69 → 'A4' (Concert A, 440 Hz)
-- Note 127 → 'G9'
-
-### 20.5 Black Key Detection
-
-**Key Type Identification**:
-```pascal
-function IsBlackKey(note: Byte): Boolean;
-const
-  BlackKeyMask = $054A;  // Binary: 010101001010
-  // Bit positions:  B A# G# F# D# C#
-begin
-  Result := ((BlackKeyMask shr (note mod 12)) and 1) <> 0;
-end;
-```
-
-**Bit Pattern Explanation**:
-```
-Note:  C  C# D  D# E  F  F# G  G# A  A# B
-Bit:   0  1  0  1  0  0  1  0  1  0  1  0
-       White  White  Wh Wh   White  White
-```
+Black keys are identified by the set membership test **`note in [1, 3, 6, 8, 10]`** (2550), where `note` is the 0..11 octave position maintained by the `Inc/reset` counter (2570) — *not* by a `$054A` bitmask or any `IsBlackKey` function. The five black pitch-classes are C#(1), D#(3), F#(6), G#(8), A#(10); the seven others are white.
 
 ---
 
 ## 21. Initialization Lifecycle
 
-The **MIDI** display window follows a structured initialization sequence to configure the piano keyboard display and prepare for MIDI event processing.
+All MIDI initialization happens inside the single procedure `MIDI_Configure` (2492–2588), run once when the window is created. There is no separate `CreateMidiWindow`, no `ParseConfigurationElements` over `TYPE_*` constants, no `vUpdate`, no custom `KeyLUT`, and no lazy "first MIDI byte triggers init" path. The bitmap/window objects are created by the shared form machinery; `MIDI_Configure` only sets MIDI state and geometry.
 
-### 21.1 Window Creation Sequence
+### 21.1 Configure Sequence
 
-**Step-by-Step Initialization**:
+**Step order as written** (2496–2587):
+1. **Set defaults** (2497–2503): `MidiSize := 4`, `MidiKeyFirst := 21`, `MidiKeyLast := 108`, `MidiChannel := 0`, `vColor[0] := clCyan`, `vColor[1] := clMagenta`, `MidiState := 0`.
+2. **Parse parameters** (2506–2525): the `while NextKey do case val of …` loop (§17.1) applies `TITLE`, `POS`, `SIZE`, `RANGE`, `CHANNEL`, `COLOR`.
+3. **Derive metrics** (2527–2530): `MidiKeySize := MidiSizeBase + MidiSize * MidiSizeFactor` (= 8 + size×4), `vTextSize := MidiKeySize div 3`, `SetTextMetrics`, `border := MidiKeySize div ((MidiSizeBase + MidiSizeFactor) div 2)`.
+4. **Build geometry** (2531–2572): loop over all 128 notes filling `MidiBlack/MidiLeft/MidiRight/MidiBottom/MidiNumX` and counting `whitekeys` within the display range (§20.3).
+5. **Resolve offset & edge padding** (2573–2582): set `MidiOffset`; if first or last displayed key is black, add a white-key slot.
+6. **Set form size** (2583–2586): `vWidth := MidiKeySize * whitekeys + border * 2`, `vHeight := MidiKeySize * 6 + border`, then `SetSize(0, 0, 0, 0)`.
+7. **Initial draw** (2587): `MIDI_Draw(True)` — clears all velocities and paints the empty keyboard.
+
+### 21.2 Window Sizing
+
+Window dimensions are computed from `MidiKeySize` and the **actual** white-key count in `[MidiKeyFirst..MidiKeyLast]` (plus up to two edge-padding slots), not a fixed 88-key assumption:
+
 ```pascal
-procedure CreateMidiWindow;
-begin
-  // 1. Allocate window resources
-  MidiWindow := TDebugDisplayForm.Create(nil);
-  MidiWindow.DisplayType := dtMidi;
-  MidiWindow.Caption := 'Debug Display (MIDI)';
-
-  // 2. Set default dimensions
-  MidiWindow.ClientWidth := 88 * 24;     // 88 keys × 24 pixels = 2112 px
-  MidiWindow.ClientHeight := 24 * 6;     // 24 × 6 = 144 px
-
-  // 3. Create double-buffering bitmaps
-  Bitmap[0] := TBitmap.Create;
-  Bitmap[1] := TBitmap.Create;
-  Bitmap[0].SetSize(MidiWindow.ClientWidth, MidiWindow.ClientHeight);
-  Bitmap[1].SetSize(MidiWindow.ClientWidth, MidiWindow.ClientHeight);
-
-  // 4. Initialize note state buffer
-  for i := 0 to 127 do
-  begin
-    NoteStates[i].Active := False;
-    NoteStates[i].Velocity := 0;
-    NoteStates[i].Channel := 0;
-    NoteStates[i].Timestamp := 0;
-  end;
-
-  // 5. Set default configuration
-  vChannel := 0;           // Accept all channels
-  vSize := 24;             // Default key width
-  vColor := $FF8800;       // Orange for active notes
-  vUpdate := 1;            // Automatic update mode
-  vTextSize := vSize div 3; // Note label font size
-
-  // 6. Initialize MIDI parser
-  ParserState := STATE_IDLE;
-  StatusByte := 0;
-  DataByte1 := 0;
-
-  // 7. Render initial keyboard
-  FrontBuffer := 0;
-  BackBuffer := 1;
-  RenderKeyboard;
-  SwapBuffers;
-
-  // 8. Show window
-  MidiWindow.Show;
-end;
+vWidth  := MidiKeySize * whitekeys + border * 2;   // 2584
+vHeight := MidiKeySize * 6 + border;               // 2585
+SetSize(0, 0, 0, 0);                               // 2586
 ```
 
-### 21.2 Configuration Parsing
+`SIZE` is the 1..50 scalar feeding `MidiKeySize` (default 4 ⇒ key width 24); it is clamped by `KeyValWithin(MidiSize, 1, 50)` (2512–2513). There is no separate runtime `ResizeWindow` — changing size means reconfiguring the window.
 
-**Element Array Processing**:
-```pascal
-procedure ParseConfigurationElements;
-var
-  i: Integer;
-begin
-  i := 0;
-  while i < ElementCount do
-  begin
-    case DebugDisplayType[i] of
-      TYPE_CHANNEL:
-        vChannel := DebugDisplayValue[i];
+### 21.3 No Custom Layout / No Lazy Init
 
-      TYPE_SIZE:
-        begin
-          vSize := DebugDisplayValue[i];
-          vTextSize := vSize div 3;
-          ResizeWindow;
-        end;
-
-      TYPE_COLOR:
-        vColor := DebugDisplayValue[i];
-
-      TYPE_UPDATE:
-        vUpdate := DebugDisplayValue[i];
-
-      TYPE_KEYLUT:
-        LoadCustomKeyLUT(DebugDisplayValue[i]);
-
-      TYPE_MIDI_BYTE:
-        ProcessMidiByte(DebugDisplayValue[i]);
-    end;
-    Inc(i);
-  end;
-end;
-```
-
-### 21.3 Window Resizing
-
-**Dynamic Size Adjustment**:
-```pascal
-procedure ResizeWindow;
-var
-  newWidth, newHeight: Integer;
-begin
-  // Calculate new dimensions based on vSize
-  newWidth := 88 * vSize;         // 88 white keys
-  newHeight := vSize * 6;         // 6:1 aspect ratio
-
-  // Resize window
-  MidiWindow.ClientWidth := newWidth;
-  MidiWindow.ClientHeight := newHeight;
-
-  // Resize bitmaps
-  Bitmap[0].SetSize(newWidth, newHeight);
-  Bitmap[1].SetSize(newWidth, newHeight);
-
-  // Re-render keyboard at new size
-  RenderKeyboard;
-  SwapBuffers;
-end;
-```
-
-**Size Constraints**:
-- **Minimum**: vSize = 1 (88 × 6 pixels, barely visible)
-- **Default**: vSize = 24 (2112 × 144 pixels)
-- **Maximum**: vSize = 50 (4400 × 300 pixels)
-
-### 21.4 Custom Keyboard Layout
-
-**KeyLUT (Lookup Table)** for non-standard keyboards:
-```pascal
-type TKeyLUT = array[0..127] of record
-  Display: Boolean;        // Show this key?
-  Color: TColor;          // Custom color
-  Label: string[4];       // Custom label
-end;
-
-procedure LoadCustomKeyLUT(lutPtr: Pointer);
-var
-  i: Integer;
-  lut: ^TKeyLUT;
-begin
-  lut := lutPtr;
-  for i := 0 to 127 do
-  begin
-    NoteStates[i].CustomColor := lut^[i].Color;
-    NoteStates[i].CustomLabel := lut^[i].Label;
-    NoteStates[i].Visible := lut^[i].Display;
-  end;
-  RenderKeyboard;
-end;
-```
-
-**Use Case**:
-- Display only 25-key controller (C3-C5)
-- Custom color-coded zones (percussion, bass, melody)
-- Alternative note labels (solfège: Do, Re, Mi, Fa...)
-
-### 21.5 First MIDI Event
-
-**Initial Event Processing**:
-```pascal
-// First MIDI byte triggers full initialization
-procedure ProcessFirstMidiByte(value: Byte);
-begin
-  if not Initialized then
-  begin
-    // Ensure window is ready
-    if not MidiWindow.Visible then
-      MidiWindow.Show;
-
-    // Activate parser
-    ParserState := STATE_IDLE;
-    Initialized := True;
-  end;
-
-  // Process the byte
-  StateMachineStep(value);
-end;
-```
-
-**Initialization Complete** when:
-1. Window created and visible
-2. Bitmaps allocated and sized
-3. Note state buffer initialized
-4. Configuration parsed
-5. Initial keyboard rendered
-6. MIDI parser active
-
-**Total Initialization Time**: < 50ms (window creation to first event processing)
+The window always renders the full configured `[MidiKeyFirst..MidiKeyLast]` range with note-number labels. There is no per-key visibility table, custom-color table, or alternate-label (solfège) support — `TKeyLUT`/`LoadCustomKeyLUT` do not exist. The keyboard is fully drawn at the end of `MIDI_Configure` (2587) before any MIDI data arrives; subsequent bytes only update `MidiVelocity[]` and redraw.
 
 ---
 

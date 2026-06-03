@@ -1,10 +1,11 @@
 # FFT Window - Complete Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
-**Document Version**: 1.0
-**Date**: 2025-11-01
+**Current as of**: PNut v55 for Propeller 2
+**Document Version**: 1.1
+**Date**: 2026-06-01
 **Source Files**: DebugDisplayUnit.pas, DebugUnit.pas, SerialUnit.pas, GlobalUnit.pas
 **Author**: Analysis of P2 PNut Debug Display System
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window directive reference; directive coverage re-verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01
 
 ---
 
@@ -111,6 +112,72 @@ vColor[0..7]  : integer    // Channel color (RGB format: $00RRGGBB)
 ```
 
 **Location**: DebugDisplayUnit.pas:303-311
+
+---
+
+## Directive Reference (v55-verified)
+
+> Line references are to `DebugDisplayUnit.pas` (PNut v55). Matrix authority: §5.4 and §4 of
+> [DEBUG-WINDOW-DIRECTIVE-MATRIX.md](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md).
+
+### Configuration directives
+
+Accepted by `FFT_Configure` (lines 1552–1618) — run once at window creation.
+
+| Directive | Parameters / range · default | Notes |
+|---|---|---|
+| `TITLE 'str'` | string | Window title (`KeyTitle`) |
+| `POS left top` | integers | Window screen position (`KeyPos`) |
+| `SIZE w h` | int **32..2048** · 256, int **32..2048** · 256 | Plot area in pixels (`KeySize`, clamped to `scope_w/hmin..max`) |
+| `SAMPLES n {first last}` | n: int **4..2048** (snapped to power-of-2) · 512; first: int **0..n/2−2** · 0; last: int **first+1..n/2−1** · n/2−1 | Sets `vSamples` AND the displayed bin range `FFTfirst`/`FFTlast`. Without `first last`, full spectrum (0 .. n/2−1) is shown. Lines 1573–1582. |
+| `RATE n` | int **1..2048** · `vSamples` | Update every *n* new samples (line 1583–1584) |
+| `DOTSIZE n` | int **0..32** · 0 | Dot radius (0 = none). If both DOTSIZE and LINESIZE are 0 after configure, DOTSIZE is forced to 1 (line 1606). |
+| `LINESIZE n` | int **−32..32** · 3 | Line width. **Positive**: connected polyline mode. **Zero**: no lines. **Negative**: vertical filled-bar mode (absolute value = bar width). Lines 1587–1588. |
+| `TEXTSIZE n` | int **6..200** · FontSize | Label text size (`KeyTextSize`, line 1589) |
+| `COLOR back grid` | named-color or numeric · black, gray | Background then grid color (lines 1591–1593) |
+| `LOGSCALE` | *(flag)* | Logarithmic amplitude scaling (line 1594) |
+| `HIDEXY` | *(flag)* | Suppress on-screen measurement cursor readout (line 1596) |
+| `LONGS_1BIT` … `BYTES_4BIT` | *(packed-data declaration)* | Sample packing format (`KeyPack`, lines 1598–1599) |
+
+Default values set at configure time: `vSamples`=512, `FFTexp`=9, `FFTfirst`=0, `FFTlast`=255,
+`vDotSize`=0, `vLineSize`=3, `vTextSize`=FontSize.  
+Per-channel defaults (all 8 channels): `vMag`=0, `vHigh`=$7FFFFFFF, `vTall`=vHeight, `vBase`=0, `vGrid`=0.
+
+### Display / data directives
+
+Accepted by `FFT_Update` (lines 1620–1679) — run on every subsequent message.
+
+| Directive / element | Parameters | Notes |
+|---|---|---|
+| **Numeric sample stream** | integers | The primary data stream. Samples are interleaved by channel: Ch0, Ch1, …, Ch(N−1), Ch0, … One FFT drawn per `vRate` complete sample sets after the circular buffer is full (`vSamples` samples). Lines 1657–1678. |
+| **Channel-def string** | `'label' {mag {high {tall {base {grid {color}}}}}}` | A string element defines (or redefines) the next channel in order. All parameters are optional and positional: *mag* int **0..11** (right-shift divisor for FFT magnitude, default 0); *high* int **1..$7FFFFFFF** (Y-axis full-scale, default $7FFFFFFF); *tall* int (height in px, default vHeight); *base* int (baseline offset in px, default 0); *grid* int (bitfield: bit 0=baseline line, bit 1=top line, default 0); *color* named-color or $00RRGGBB. Lines 1628–1638. |
+| `CLEAR` | — | Erase display, reset `SamplePop` and rate counter (lines 1642–1648) |
+| `SAVE` | — | Save bitmap to file (`KeySave`, line 1649) |
+| `PC_KEY` | — | Poll latched keypress and transmit to P2 (`SendKeyPress`, line 1651) |
+| `PC_MOUSE` | — | Poll mouse position/buttons/wheel and transmit to P2 (`SendMousePos`, line 1653) |
+
+### Keyboard & mouse
+
+FFT uses the **shared form-level input model** — identical to all other display windows.
+
+| Mechanism | Lines | Behavior |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Sets `DLGC_WANTTAB` so the window captures Tab keystrokes. |
+| `FormMouseMove` | 647–809 | Draws a live measurement cursor overlay showing `x,y` as **pixel offset from plot origin, Y inverted** (`dis_fft` branch at line 668). Suppressed when `HIDEXY` is set (line 737). |
+| `FormMouseWheel` | 811–817 | Latches wheel direction into `vMouseWheel` (+1/−1) for 100 ms, then auto-clears. |
+| `FormKeyPress` | 825–831 | Latches pressed key byte into `vKeyPress` for 100 ms, then auto-clears. |
+| `FormKeyDown` | 833–851 | Maps non-printable keys to control codes: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PageUp=11, PageDown=12. |
+
+**`PC_KEY` → `SendKeyPress`** (3579–3583): transmits one LONG = `vKeyPress` byte (0 if none), then clears it.
+
+**`PC_MOUSE` → `SendMousePos`** (3537–3577): transmits two LONGs.
+- **LONG 1**: `x` = bits 0–12, `y` = bits 13–25, `wheel` = bits 26–27, L/M/R buttons = bits 28/29/30.
+  ⚠️ For FFT, `SendMousePos` has **no transform branch** (it only special-cases SPECTRO/PLOT/BITMAP and TERM), so it transmits the **raw client-pixel** `x,y`. The `x = cursor − vMarginLeft`, `y = vMarginTop + vHeight − 1 − mouseY` inversion (line 668–675) is the **on-screen readout** (`FormMouseMove`) only — it is *not* what the P2 receives via `PC_MOUSE`.
+  If cursor is outside the client area: LONG 1 = `$03FFFFFF`.
+- **LONG 2**: RGB color of the pixel under the cursor (byte-swapped to `$RRGGBB`).
+  If outside: LONG 2 = `$FFFFFFFF`.
+
+The 100 ms latch means a key or wheel event not consumed by a `PC_KEY`/`PC_MOUSE` poll within that window is dropped. `HIDEXY` suppresses the on-screen readout only; `PC_MOUSE` reporting to the P2 is unaffected.
 
 ---
 
@@ -359,7 +426,7 @@ begin
 end;
 ```
 
-### 4.4 Element Parsing Helpers (DebugDisplayUnit.pas:4101-4131)
+### 4.4 Element Parsing Helpers (DebugDisplayUnit.pas:4109-4139)
 
 ```pascal
 function NextKey: boolean;    // Returns true if next element is a keyword
@@ -367,7 +434,7 @@ function NextNum: boolean;    // Returns true if next element is a number
 function NextStr: boolean;    // Returns true if next element is a string
 function NextEnd: boolean;    // Returns true if at end of command (ele_end)
 
-function NextElement(Element: integer): boolean;
+function TDebugDisplayForm.NextElement(Element: integer): boolean;
 begin
   if P2.DebugDisplayType[ptr] = Element then
   begin
@@ -684,8 +751,8 @@ begin
       DrawLineDot(x, y, color, k = FFTfirst)       // Line + dot mode
     else
     begin
-      // Filled bar mode (vLineSize negative)
-      SmoothLine(x, baseline, x, y, -vLineSize shl 6, color, $FF);
+      // Filled bar mode (vLineSize negative) — line 1705
+      SmoothLine(x, (vMarginTop + vHeight - 1 - vBase[j]) shl 8, x, y, -vLineSize shl 6, color, $FF);
       if vDotSize > 0 then
         SmoothDot(x, y, vDotSize shl 7, color, $FF);
     end
@@ -754,7 +821,7 @@ end;
 
 ## 7. FFT Algorithm Implementation
 
-### 7.1 PrepareFFT - Lookup Table Generation (DebugDisplayUnit.pas:4170-4183)
+### 7.1 PrepareFFT - Lookup Table Generation (DebugDisplayUnit.pas:4178-4191)
 
 **Purpose**: Pre-compute sine/cosine/window functions for FFT
 
@@ -799,7 +866,7 @@ end;
 - Provides ~12 bits of fractional precision
 - Division by $1000 occurs during butterfly operations
 
-**Rev32 Function** (DebugDisplayUnit.pas:4245-4252):
+**Rev32 Function** (DebugDisplayUnit.pas:4253-4260):
 ```pascal
 function TDebugDisplayForm.Rev32(i: integer): int64;
 const
@@ -807,19 +874,14 @@ const
 begin
   Result := (Rev4[i shr 0 and $F] shl 28 or
              Rev4[i shr 4 and $F] shl 24 or
-             Rev4[i shr 8 and $F] shl 20 or
-             Rev4[i shr 12 and $F] shl 16 or
-             Rev4[i shr 16 and $F] shl 12 or
-             Rev4[i shr 20 and $F] shl 8 or
-             Rev4[i shr 24 and $F] shl 4 or
-             Rev4[i shr 28 and $F] shl 0);
+             Rev4[i shr 8 and $F] shl 20) and $FFF00000;
 end;
 ```
-- Reverses all 32 bits of an integer
-- Uses 4-bit lookup table (Rev4)
-- Each nibble reversed and re-positioned
+- Reverses only the **low 12 bits** of `i` into the top 3 nibbles (bits 20–31), masked to `$FFF00000`
+- Sufficient for the FFT sizes supported (max FFTexp=11, so max 11-bit index)
+- The subsequent `shr (32 - FFTexp)` in PerformFFT brings the reversed bits into position 0..(FFTexp-1)
 
-### 7.2 PerformFFT - Core Algorithm (DebugDisplayUnit.pas:4185-4243)
+### 7.2 PerformFFT - Core Algorithm (DebugDisplayUnit.pas:4193-4251)
 
 **Algorithm Type**: Cooley-Tukey Decimation-in-Time (DIT) FFT with in-place computation
 
@@ -1282,7 +1344,7 @@ key_logscale     // Enable logarithmic amplitude scaling
 #### Rendering
 ```pascal
 key_dotsize      // Set dot radius (0-32, 0=none)
-key_linesize     // Set line width (0-32, 0=none, negative=filled bars)
+key_linesize     // Set line width (-32..32; positive=polyline, 0=none, negative=vertical filled-bar mode)
 key_textsize     // Set text size (points)
 ```
 
@@ -1804,15 +1866,15 @@ key_longs_1bit..key_bytes_4bit:
 
 **PackDef Array** (DebugDisplayUnit.pas:140-152):
 ```pascal
-PackDef[key_longs_1bit]  = 0 shl 16 +  1 shl 8 + 32    // offset=0, bits=1, count=32
-PackDef[key_longs_2bit]  = 0 shl 16 +  2 shl 8 + 16    // offset=0, bits=2, count=16
+PackDef[key_longs_1bit]  = 0 shl 16 +  1 shl 8 + 32    // sign=0, shift=1, count=32
+PackDef[key_longs_2bit]  = 0 shl 16 +  2 shl 8 + 16    // sign=0, shift=2, count=16
 // ... etc
 ```
 
-**Encoding**:
-- Bits 0-7: Sample count per packed value
-- Bits 8-15: Bits per sample
-- Bits 16-23: Offset (for words/bytes in longs)
+**Encoding** (decoded by `SetPack`, lines 4146–4156):
+- Bits 0-7: `vPackCount` — sample count per packed value
+- Bits 8-15: `vPackShift` — bits per sample (right-shift amount)
+- Bit 16: sign-extend flag (0 = unsigned; set to 1 by the `SIGNED` modifier keyword)
 
 **NewPack Function**:
 ```pascal
@@ -1874,15 +1936,11 @@ CursorColor.Canvas.TextOut(8, 8, Str);                   // Draw text
 // ... create cursor from bitmaps
 ```
 
-**Send to P2** (key_pc_mouse command):
-```pascal
-procedure TDebugDisplayForm.SendMousePos;
-begin
-  p := ScreenToClient(Mouse.CursorPos);
-  c := cardinal(p.X) shl 16 or cardinal(p.Y);
-  TLong(c);                                    // Transmit to P2
-end;
-```
+**Send to P2** (key_pc_mouse command, lines 3537–3577):
+Transmits two LONGs. If the cursor is outside the client area, LONG 1 = `$03FFFFFF` and LONG 2 = `$FFFFFFFF`. Otherwise:
+- LONG 1: `x` = bits 0–12, `y` = bits 13–25, `vMouseWheel` = bits 26–27, L/M/R buttons = bits 28/29/30 (via `GetAsyncKeyState`). Then clears `vMouseWheel`.
+- LONG 2: pixel color under cursor (byte-swapped to `$RRGGBB`).
+For FFT (same case as SCOPE): coordinates are raw client-area pixel x,y — **no** margin subtraction or Y-inversion is applied inside `SendMousePos`; the coordinate mapping described in §4.4 applies only to the on-screen measurement-cursor overlay in `FormMouseMove`.
 
 ### 13.3 Keyboard Feedback
 
@@ -1903,13 +1961,15 @@ begin
 end;
 ```
 
-**Send to P2** (key_pc_key command):
+**Send to P2** (key_pc_key command, lines 3579–3583):
 ```pascal
 procedure TDebugDisplayForm.SendKeyPress;
 begin
-  TByte(vKeyPress);                            // Transmit to P2
+  TLong(integer(vKeyPress));   // Transmit one LONG = vKeyPress (0 if none)
+  vKeyPress := 0;              // Clear after transmit
 end;
 ```
+Note: transmits a **LONG** (4 bytes), not a byte.
 
 **Use Cases**:
 - Interactive control of P2 program
@@ -1920,21 +1980,30 @@ end;
 
 **Trigger**: `key_save` command
 
-**KeySave Method**:
+**KeySave Method** (lines 2839–2866):
 ```pascal
 procedure TDebugDisplayForm.KeySave;
-var
-  s: string;
 begin
-  if not NextStr then Exit;
-  s := PChar(val) + '.bmp';                    // Append .bmp extension
-  Bitmap[0].SaveToFile(s);                     // Save to file
+  if NextStr then Bitmap[1].SaveToFile(PChar(val) + '.bmp')
+  else
+  begin
+    // WINDOW or l/t/w/h variant: capture desktop region to DesktopBitmap
+    if NextKey then
+    begin
+      if val <> key_window then Exit;
+      // uses window Left/Top/Width/Height
+    end else
+    begin
+      // reads l, t, w, h parameters
+    end;
+    if NextStr then DesktopBitmap.SaveToFile(PChar(val) + '.bmp');
+  end;
 end;
 ```
 
 **Format**: Windows BMP (24-bit)
 
-**Content**: Current Bitmap[0] (rendered display)
+**Content**: `Bitmap[1]` (the display/front buffer) for the simple `SAVE 'name'` form. For the `SAVE WINDOW 'name'` or `SAVE l t w h 'name'` forms, saves a captured desktop region via `DesktopBitmap` (BitBlt from `DesktopDC`).
 
 **Example**:
 ```
@@ -1991,9 +2060,14 @@ vSamples := 1 shl FFTexp;
 
 ### 14.2 Display Resolution
 
-**Window Size Constraints**:
+**Default window size**: `vWidth × vHeight = 256 × 256` (from global `SetDefaults`,
+2880–2884 — `FFT_Configure` does not override them). Overridable by `SIZE w h`. The
+plot bitmap is `256 × 256`; the client window adds margins (`ChrWidth` left/right/bottom,
+`ChrHeight × 2` top — `SetSize` at 1617).
+
+**Window Size Constraints** (`SIZE` directive, `KeySize`):
 ```pascal
-scope_wmin = 32
+scope_wmin = 32     // FFT reuses the SCOPE size limits
 scope_wmax = 2048
 scope_hmin = 32
 scope_hmax = 2048
@@ -2250,34 +2324,34 @@ const
 
 ### 16.3 Protocol Parser Functions
 
-**DebugDisplayUnit.pas:4101-4131**:
+**DebugDisplayUnit.pas:4109-4139**:
 ```pascal
-function NextKey: boolean;
+function TDebugDisplayForm.NextKey: boolean;
 begin
   Result := NextElement(ele_key);
 end;
 
-function NextNum: boolean;
+function TDebugDisplayForm.NextNum: boolean;
 begin
   Result := NextElement(ele_num);
 end;
 
-function NextStr: boolean;
+function TDebugDisplayForm.NextStr: boolean;
 begin
   Result := NextElement(ele_str);
 end;
 
-function NextEnd: boolean;
+function TDebugDisplayForm.NextEnd: boolean;
 begin
-  Result := DebugDisplayType[ptr] = ele_end;
+  Result := P2.DebugDisplayType[ptr] = ele_end;
 end;
 
-function NextElement(Element: integer): boolean;
+function TDebugDisplayForm.NextElement(Element: integer): boolean;
 begin
-  if DebugDisplayType[ptr] = Element then
+  if P2.DebugDisplayType[ptr] = Element then
   begin
-    val := DebugDisplayValue[ptr];   // Extract value
-    Inc(ptr);                         // Advance pointer
+    val := P2.DebugDisplayValue[ptr];   // Extract value into global 'val'
+    Inc(ptr);                            // Advance pointer
     Result := True;
   end
   else
@@ -2305,14 +2379,15 @@ end;
 
 **ASCII Debug Command** (from Propeller 2):
 ```spin2
-debug(`FFT SIZE 8 1024 RATE 128 DOTSIZE 2 LUMA8X LOGSCALE TITLE "Audio Spectrum")
+debug(`FFT SIZE 256 128 RATE 128 DOTSIZE 2 LOGSCALE TITLE "Audio Spectrum")
 ```
+Note: `LUMA8X` is **not** a valid FFT directive — it belongs to SPECTRO only. FFT does not accept color-mode keywords.
 
 **Resulting Element Array** (conceptual representation):
 ```
-Type:  [ele_key] [ele_num] [ele_num] [ele_key] [ele_num] [ele_key] [ele_num] [ele_key] [ele_key] [ele_key] [ele_str] [ele_end]
-Value: [key_size] [8]     [1024]   [key_rate] [128]    [key_dotsize] [2]  [key_luma8x] [key_logscale] [key_title] ["Audio..."] [0]
-Index: [0]       [1]      [2]      [3]        [4]      [5]           [6]  [7]          [8]            [9]         [10]         [11]
+Type:  [ele_key]  [ele_num] [ele_num] [ele_key]  [ele_num] [ele_key]    [ele_num] [ele_key]    [ele_key]   [ele_str]        [ele_end]
+Value: [key_size] [256]     [128]     [key_rate]  [128]    [key_dotsize] [2]      [key_logscale] [key_title] ["Audio Spectrum"] [0]
+Index: [0]        [1]       [2]       [3]         [4]      [5]           [6]      [7]            [8]         [9]               [10]
 ```
 
 **Parsing Sequence**:
@@ -2321,25 +2396,17 @@ Index: [0]       [1]      [2]      [3]        [4]      [5]           [6]  [7]   
 while NextKey do                    // ptr=0: ele_key → val=key_size, ptr→1
   case val of
     key_size:
-      if NextNum then               // ptr=1: ele_num → val=8, ptr→2
-        vIndex := val;
-      if NextNum then               // ptr=2: ele_num → val=1024, ptr→3
-        vSamples := val;
-    key_rate:                       // ptr=3: ele_key → val=key_rate, ptr→4
-      if NextNum then               // ptr=4: ele_num → val=128, ptr→5
-        vRate := val;
-    key_dotsize:                    // ptr=5: ele_key → val=key_dotsize, ptr→6
-      if NextNum then               // ptr=6: ele_num → val=2, ptr→7
-        vDotSize := val;
-    key_luma8x:                     // ptr=7: ele_key, ptr→8
-      vColorMode := key_luma8x;
-    key_logscale:                   // ptr=8: ele_key, ptr→9
+      KeySize(vWidth, vHeight, ...); // consumes two ele_num values (256, 128)
+    key_rate:                        // ptr=3: ele_key → val=key_rate, ptr→4
+      KeyValWithin(vRate, 1, FFTmax); // ptr=4: ele_num → val=128, ptr→5
+    key_dotsize:                     // ptr=5: ele_key → val=key_dotsize, ptr→6
+      KeyValWithin(vDotSize, 0, 32); // ptr=6: ele_num → val=2, ptr→7
+    key_logscale:                    // ptr=7: ele_key, ptr→8
       vLogScale := True;
-    key_title:                      // ptr=9: ele_key, ptr→10
-      if NextStr then               // ptr=10: ele_str → val=PChar, ptr→11
-        Caption := PChar(val);
+    key_title:                       // ptr=8: ele_key, ptr→9
+      KeyTitle;                      // ptr=9: ele_str consumed, ptr→10
   end;
-// ptr=11: NextKey returns False (ele_end found)
+// ptr=10: NextKey returns False (ele_end found)
 ```
 
 ### 16.5 Data Update Example
@@ -2358,19 +2425,25 @@ Value: [packed_samples] [0]
 Index: [0]       [1]
 ```
 
-**Parsing in FFT_Update**:
+**Parsing in FFT_Update** (simplified; see §5.5 and §17.2 for the full loop):
 ```pascal
 while not NextEnd do
 begin
   while NextNum do                  // ptr=0: ele_num → val=packed_samples
   begin
-    v := NewPack;                   // Initialize unpacking
+    v := NewPack;                   // Apply ALT bit-reversal if set; return val
     for i := 1 to vPackCount do     // Loop 4 times (LONGS_8BIT)
     begin
-      Y_SampleBuff[SamplePtr * Y_SetSize + channel] := UnPack(v);
-      SamplePtr := (SamplePtr + 1) and Y_PtrMask;
-      if SamplePop < vSamples then Inc(SamplePop);
-      // Trigger draw when buffer full
+      samp[ch] := UnPack(v);        // Extract one channel sample
+      Inc(ch);
+      if ch = vIndex then           // Complete set received?
+      begin
+        ch := 0;
+        Move(samp, Y_SampleBuff[SamplePtr * Y_SetSize], Y_SetSize shl 2);
+        SamplePtr := (SamplePtr + 1) and Y_PtrMask;
+        if SamplePop < vSamples then Inc(SamplePop);
+        if SamplePop = vSamples then if RateCycle then FFT_Draw;
+      end;
     end;
   end;
 end;
@@ -2412,31 +2485,33 @@ index = (set_number and Y_PtrMask) * Y_SetSize + channel_number
 
 ### 17.2 Write Operation Timing
 
-**When Samples Are Written** (FFT_Update, DebugDisplayUnit.pas:1620-1638):
+**When Samples Are Written** (FFT_Update, DebugDisplayUnit.pas:1657-1678):
 
 ```pascal
 while NextNum do                    // For each numeric value in message
 begin
-  v := NewPack;                     // Get packed value
-  for i := 1 to vPackCount do       // Unpack multiple samples
+  v := NewPack;                     // Get packed value (with optional ALT)
+  for i := 1 to vPackCount do       // Unpack all sub-samples
   begin
-    for j := vIndex - 1 downto 0 do // For each active channel
+    samp[ch] := UnPack(v);          // Extract one sample into local ch slot
+    Inc(ch);
+    if ch = vIndex then             // Complete interleaved set received?
     begin
-      // WRITE HAPPENS HERE
-      Y_SampleBuff[SamplePtr * Y_SetSize + j] := UnPack(v);
-
-      // Increment write pointer with wraparound
+      ch := 0;
+      // WRITE HAPPENS HERE: entire set written atomically
+      Move(samp, Y_SampleBuff[SamplePtr * Y_SetSize], Y_SetSize shl 2);
       SamplePtr := (SamplePtr + 1) and Y_PtrMask;
-
-      // Track fill level
       if SamplePop < vSamples then Inc(SamplePop);
+      if SamplePop <> vSamples then Continue;    // Buffer not yet full
+      if RateCycle then FFT_Draw;
     end;
   end;
 end;
 ```
 
 **Write Characteristics**:
-- **Frequency**: On every `ele_num` element received
+- **Channel interleaving**: samples arrive Ch0, Ch1, …, Ch(vIndex−1), Ch0, … in order; `ch` tracks the current channel slot
+- **Atomic set write**: `Move()` copies all 8 channel slots in one operation; only triggered when a complete set is accumulated
 - **Pointer Update**: Immediate wraparound using `and Y_PtrMask`
 - **Thread Safety**: Single-threaded (no locking needed)
 - **Overwrite Policy**: Oldest data overwritten when full
@@ -2476,18 +2551,17 @@ Result: FFTsamp[] = [Y_SampleBuff[792], Y_SampleBuff[800], Y_SampleBuff[808], Y_
 
 ### 17.4 Rate Control and Draw Triggering
 
-**RateCycle Function** (DebugDisplayUnit.pas:3071-3080):
+**RateCycle Function** (DebugDisplayUnit.pas:3079-3088):
 ```pascal
-function RateCycle: boolean;
+function TDebugDisplayForm.RateCycle: boolean;
 begin
-  Inc(vRateCount);                  // Increment counter
-  if vRateCount = vRate then        // Check if rate reached
+  Inc(vRateCount);
+  if vRateCount = vRate then
   begin
-    vRateCount := 0;                // Reset counter
-    Result := True;                 // Trigger draw
+    vRateCount := 0;
+    Result := True;
   end
-  else
-    Result := False;                // Skip draw
+  else Result := False;
 end;
 ```
 
@@ -2632,25 +2706,42 @@ end;
 
 **Purpose**: Reduce serial bandwidth by packing multiple samples into single integer.
 
-**SetPack Method** (DebugDisplayUnit.pas:4138-4148):
+**SetPack Method** (DebugDisplayUnit.pas:4146-4156):
 ```pascal
-procedure SetPack(val: integer; alt, signx: boolean);
+procedure TDebugDisplayForm.SetPack(val: integer; alt, signx: boolean);
+var
+  i: integer;
 begin
-  vPackSignx := (val shr 16 and 1 = 1) xor signx;  // Sign-extend flag
-  vPackShift := val shr 8 and $FF;                 // Bits per sample
-  vPackCount := val and $FF;                       // Samples per integer
-  vPackMask := (1 shl vPackShift) - 1;             // Bit mask
+  vPackAlt := alt;
+  vPackSignx := signx;
+  if val = 0 then i := 32 shl 8 + 1 else i := PackDef[val];
+  if val = 0 then vPackMask := $FFFFFFFF else vPackMask := 1 shl (i shr 8 and $FF) - 1;
+  vPackShift := i shr 8 and $FF;    // Bits per sample
+  vPackCount := i and $FF;          // Samples per packed integer
 end;
 ```
 
-**UnPack Method** (DebugDisplayUnit.pas:4158-4163):
+**NewPack Method** (DebugDisplayUnit.pas:4158-4164):
 ```pascal
-function UnPack(var v: integer): integer;
+function TDebugDisplayForm.NewPack: integer;
 begin
-  Result := v and vPackMask;                       // Extract bits
-  v := v shr vPackShift;                           // Shift remaining
+  Result := val;
+  // ALT mode: reverse nibble/byte/word ordering
+  if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
+  if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
+  if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
+end;
+```
+`NewPack` returns `val` (the already-consumed numeric element) with optional ALT bit-reversal applied. It does **not** call `NextNum` — the caller (`FFT_Update`'s `while NextNum do` loop) already advanced `ptr`.
+
+**UnPack Method** (DebugDisplayUnit.pas:4166-4171):
+```pascal
+function TDebugDisplayForm.UnPack(var v: integer): integer;
+begin
+  Result := v and vPackMask;                                        // Extract low bits
+  v := v shr vPackShift;                                            // Shift for next sample
   if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then
-    Result := Result or ($FFFFFFFF xor vPackMask); // Sign-extend
+    Result := Result or ($FFFFFFFF xor vPackMask);                  // Sign-extend
 end;
 ```
 
@@ -2670,6 +2761,34 @@ Unpack 4: $12 (extract bits 0-7,  shift right 8)  → result=$12
 **Modes**: LUT (palette), LUMA8, HSV8/16, RGBI8, RGB8/16/24.
 
 **Shared By**: FFT, SPECTRO, BITMAP, PLOT (color-based displays).
+
+FFT itself does **not** call `TranslateColor` for its channel curves — trace colors are
+stored pre-resolved as RGB24 in `vColor[]` (set by `KeyColor` at configure, or from the
+default palette below).
+
+#### 19.2.1 Default Channel Colors
+
+FFT uses the shared `DefaultScopeColors` palette for its up-to-8 channel curves; the
+global `SetDefaults` assigns `vColor[0..7] := DefaultScopeColors` before
+`FFT_Configure` runs (`DebugDisplayUnit.pas` 2888).
+
+```pascal
+DefaultScopeColors: array[0..7] of integer = (   // DebugDisplayUnit.pas line 241
+  clLime,     // $00FF00 — Lime green   (channel 0)
+  clRed,      // $FF0000 — Red          (channel 1)
+  clCyan,     // $00FFFF — Cyan         (channel 2)
+  clYellow,   // $FFFF00 — Yellow       (channel 3)
+  clMagenta,  // $FF00FF — Magenta      (channel 4)
+  clBlue,     // $7F7FFF — Blue         (channel 5; note: NOT pure $0000FF)
+  clOrange,   // $FF7F00 — Orange       (channel 6; note: NOT web $FFA500)
+  clOlive);   // $7F7F00 — Olive        (channel 7; note: NOT web $808000)
+```
+
+- Background color: `vBackColor` (global default `clBlack` `$000000`).
+- Grid color: `vGridColor` (global default `clGray` `$404040`).
+
+The `clXxx` constants are literal RGB24 values defined at `DebugDisplayUnit.pas` 179–191;
+they are not VCL palette `TColor`s. `WinRGB` swaps R↔B to BGR only at GDI draw time.
 
 ### 19.3 Fixed-Point Arithmetic
 
@@ -2735,12 +2854,16 @@ end;
 
 **5. FFT_Configure Execution**:
 ```pascal
-// Set defaults
+// Set unique defaults (lines 1557-1563)
 vSamples := fft_default;  // 512
 FFTexp := 9;              // log2(512)
-vIndex := 8;              // All channels
+FFTfirst := 0;
+FFTlast := 255;           // vSamples/2 - 1
+vDotSize := 0;
+vLineSize := 3;
+vTextSize := FontSize;
 
-// Parse configuration parameters
+// Parse configuration parameters (lines 1565-1600)
 while NextKey do
   case val of
     key_size: ...;
@@ -2748,11 +2871,13 @@ while NextKey do
     key_rate: ...;
   end;
 
-// Allocate resources
+// Prepare (lines 1602-1617)
 PrepareFFT;               // Pre-compute sin/cos/window tables
 SetSize(...);             // Set bitmap dimensions
 
 // Ready for data
+// Note: vIndex is NOT set here; it starts at 0 (from SetDefaults)
+// and is incremented to 1..8 only as channel-def strings arrive in FFT_Update.
 ```
 
 **6. Ready State**:

@@ -1,10 +1,11 @@
 # BITMAP Window - Complete Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
-**Document Version**: 1.0
-**Date**: 2025-11-01
+**Current as of**: PNut v55 for Propeller 2
+**Document Version**: 1.1
+**Date**: 2026-06-01
 **Source Files**: DebugDisplayUnit.pas, DebugUnit.pas, SerialUnit.pas, GlobalUnit.pas
 **Author**: Analysis of P2 PNut Debug Display System
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window directive reference; directive coverage re-verified against `DebugDisplayUnit.pas` (v55) on 2026-06-01
 
 ---
 
@@ -138,6 +139,82 @@ vPackCount          : integer               // Samples per packed value (1-32)
 
 ---
 
+## Directive Reference (v55-verified)
+
+Complete directive coverage for BITMAP from the [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) §5.8, re-verified against `DebugDisplayUnit.pas` v55. Line references point into that file.
+
+### Configuration directives
+
+Parsed in `BITMAP_Configure` (lines 2372–2414) during window creation.
+
+| Directive | Parameters | Range / default / notes | Pascal line |
+|---|---|---|---|
+| `TITLE` | `'string'` | Free text; sets window caption | `KeyTitle` |
+| `POS` | `left top` | int, int; window screen position | `KeyPos` |
+| `SIZE` | `w h` | int **1..2048** each; default 256 × 256 (`bitmap_wmin/wmax`, `bitmap_hmin/hmax`) | `2386` |
+| `DOTSIZE` | `x {y}` | int **1..256** each; default 1 × 1; if `y` omitted it copies `x` | `2388–2392` |
+| `SPARSE` | `color` | named color or RGB24; enables sparse mode (default −1 = off / normal) | `2393–2394` |
+| color-mode | `LUT1` `LUT2` `LUT4` `LUT8` `LUMA8` `LUMA8W` `LUMA8X` `RGBI8` `RGBI8W` `RGBI8X` `RGB8` `HSV8` `HSV8W` `HSV8X` `HSV16` `HSV16W` `HSV16X` `RGB16` `RGB24` | 19 modes; default `RGB24`; LUMA/RGBI/HSV take optional tint keyword | `KeyColorMode`; `2395–2396` |
+| `LUTCOLORS` | `rgb24…` | Up to 256 RGB24 palette entries; only meaningful with LUT1/2/4/8 mode | `2397–2398` |
+| `TRACE` | `n` | int **0..15** (bits 0–2 = scan pattern 0–7, bit 3 = scroll enable); default 0 | `2399–2400`; see §3.2 |
+| `RATE` | `n` | int; pixels per screen update; −1 ⇒ auto-set to `vWidth × vHeight` after configure; 0 ⇒ `SetTrace` sets it to `vWidth` (h-scan) or `vHeight` (v-scan); default 0 | `2401–2402`, `2412–2413` |
+| packed | `LONGS_1BIT` … `BYTES_4BIT` | 12 keywords; optional `ALT` and/or `SIGNED` modifiers | `KeyPack`; `2403–2404` |
+| `UPDATE` | — | Flag; enables manual-refresh mode; display only updates on explicit `UPDATE` command | `2405–2406` |
+| `HIDEXY` | — | Flag; suppresses on-screen measurement-cursor readout; does **not** disable `PC_MOUSE` | `2407–2408` |
+
+> After `BITMAP_Configure` completes: `SetSize(0,0,0,0)` (zero margins), `SetTrace(vTrace, vRate=0)` (initialise pixel position), then `if vRate = -1 then vRate := vWidth * vHeight` (`2411–2413`).
+
+> **Default window size:** `vWidth × vHeight = 256 × 256` (from global `SetDefaults`,
+> `2880–2884`; overridable by `SIZE`, range 1..2048 each). With `vDotSize = vDotSizeY = 1`
+> the client area is `256 × 256` px; sparse mode multiplies by dot size (`vWidth·vDotSize ×
+> vHeight·vDotSizeY`).
+>
+> **Font size:** BITMAP draws **no text** — `BITMAP_Configure` does not touch `vTextSize`,
+> so it remains at `DefaultTextSize = 10` (`SetDefaults`, 2894), and BITMAP exposes **no
+> `TEXTSIZE` directive**. The value is effectively unused.
+
+### Display / data directives
+
+Parsed in `BITMAP_Update` (lines 2416–2485) on every subsequent debug message.
+
+| Directive | Parameters | Range / default / behavior | Pascal line |
+|---|---|---|---|
+| *numeric pixel stream* | integer values | Each number → one pixel (or multiple if packed); color-translated via `vColorMode` and plotted at current trace position; `BitmapToCanvas` called every `vRate` pixels (via `RateCycle`) | `2459–2483` |
+| color-mode | (same 19 modes as config) | Change active color mode mid-stream; affects all subsequent pixels | `2425–2426` |
+| `LUTCOLORS` | `rgb24…` | Replace LUT palette entries at runtime | `2427–2428` |
+| `TRACE` | `n` | int **0..15**; change scan pattern mid-stream; resets pixel position; `SetTrace(val,True)` also adjusts `vRate` | `2429–2430` |
+| `RATE` | `n` | int; change pixels-per-update rate at runtime | `2431–2432` |
+| `SET` | `x y` | x: int **0..w−1**; y: int **0..h−1**; jump cursor and **cancel scroll** (clears bit 3 of `vTrace`) | `2433–2438` |
+| `SCROLL` | `x y` | x: int **−w..w**; y: int **−h..h**; positive x = right, positive y = down; fills vacated area with background | `2439–2442` |
+| `CLEAR` | — | Fill bitmap with background, reset pixel position to trace start, refresh display (unless `UPDATE` mode) | `2443–2448` |
+| `UPDATE` | — | Force screen refresh (`BitmapToCanvas(0)`); required when manual-refresh mode active | `2449–2450` |
+| `SAVE` | `{filename}` | Write window bitmap to `.bmp` file; `SAVE WINDOW` or `SAVE l t w h` for desktop region | `KeySave`; `2451–2452` |
+
+### Keyboard & mouse
+
+Implemented via the **shared input model** — identical form-level handlers for all nine debug display windows (§4 of the Directive Matrix).
+
+| Handler | Lines | Notes |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Captures Tab key (`DLGC_WANTTAB`); prevents focus change |
+| `FormMouseMove` | 647–809 | Draws live measurement cursor; suppressed when `HIDEXY` set (`737`) |
+| `FormMouseWheel` | 811–823 | Latches wheel direction into `vMouseWheel` ±1 for 100 ms |
+| `FormKeyPress` / `FormKeyDown` | 825–857 | Latches key byte into `vKeyPress` for 100 ms; arrow/nav keys mapped to codes 1–12 |
+
+**`PC_KEY`** → `SendKeyPress` (3579–3583): transmits one LONG = latched `vKeyPress` byte (0 if none), then clears it.
+
+**`PC_MOUSE`** → `SendMousePos` (3537–3577): transmits two LONGs.
+- LONG 1: `x` bits 0–12, `y` bits 13–25, `vMouseWheel` bits 26–27, L/M/R buttons bits 28–30. Sentinel `$03FFFFFF` / `$FFFFFFFF` when cursor is outside the client area.
+- LONG 2: RGB color of pixel under cursor.
+
+**BITMAP coordinate mapping** — ⚠️ **on-screen readout and `PC_MOUSE` wire value differ in Y origin** (same situation as SPECTRO):
+- **On-screen readout** (`FormMouseMove`, 733–734): `x = X ÷ DOTSIZE`, `y = Y ÷ DOTSIZEY` — top-origin, **no** direction flip.
+- **`PC_MOUSE` wire value** (`SendMousePos`, 3556–3562, shared `dis_spectro, dis_plot, dis_bitmap` branch): applies `if not vDirY then y := ClientHeight − y` before dividing. `vDirY` is always `False` for BITMAP (only PLOT's `CARTESIAN` sets it), so the wire value is **Y-inverted** (bottom-origin): `y = (ClientHeight − Y) ÷ DOTSIZEY`.
+
+`HIDEXY` suppresses the on-screen readout but does **not** disable `PC_MOUSE` reporting.
+
+---
+
 ## 3. Window Creation and Initialization
 
 ### 3.1 Creation Flow (DebugDisplayUnit.pas:591-645)
@@ -156,16 +233,16 @@ vPackCount          : integer               // Samples per packed value (1-32)
 6. Sets `ptr := 2` (starts parsing parameters at index 2)
 7. Calls `BITMAP_Configure()` based on DisplayType
 
-### 3.2 BITMAP_Configure Method (DebugDisplayUnit.pas:2364-2406)
+### 3.2 BITMAP_Configure Method (DebugDisplayUnit.pas:2372-2414)
 
-**Default Values Set** (lines 2367-2369):
+**Default Values Set** (lines 2375-2377):
 ```pascal
 vTrace      = 0             // Top line, left-to-right, no scroll
 vDotSize    = 1             // 1:1 pixel mapping
 vDotSizeY   = 1             // 1:1 pixel mapping
 ```
 
-**Parameter Parsing Loop** (lines 2371-2401):
+**Parameter Parsing Loop** (lines 2379-2409):
 ```pascal
 while NextKey do
   case val of
@@ -201,7 +278,7 @@ while NextKey do
 | `update` | - | Enable manual update mode |
 | `hidexy` | - | Hide mouse coordinate display |
 
-**Trace Mode Encoding** (DebugDisplayUnit.pas:2353-2362):
+**Trace Mode Encoding** (DebugDisplayUnit.pas:2362-2370):
 ```
 Bits 0-2: Scan pattern (0-7)
 Bit 3:    Scroll enable (0=wrap, 1=scroll)
@@ -225,27 +302,21 @@ Bit 3:    Scroll enable (0=wrap, 1=scroll)
 %1111: Right line, bottom-to-top,  scroll left
 ```
 
-**Preparation Phase** (lines 2403-2405):
+**Preparation Phase** (lines 2411-2413):
 ```pascal
 SetSize(0, 0, 0, 0);                     // Zero margins for bitmap
 SetTrace(vTrace, vRate = 0);             // Initialize pixel position
 if vRate = -1 then vRate := vWidth * vHeight;  // Default: full bitmap
 ```
 
-**SetTrace Method** (DebugDisplayUnit.pas:2965-2972):
+**SetTrace Method** (DebugDisplayUnit.pas:2973-2980):
 ```pascal
 procedure TDebugDisplayForm.SetTrace(Path: integer; ModifyRate: boolean);
 begin
-  // Set initial X position based on trace mode
   if Path and 7 in [0, 2, 4, 5] then vPixelX := 0 else vPixelX := vWidth - 1;
-
-  // Set initial Y position based on trace mode
   if Path and 7 in [0, 1, 4, 6] then vPixelY := 0 else vPixelY := vHeight - 1;
-
-  // Set default rate for horizontal/vertical traces
   if ModifyRate then
     if Path and 7 in [0, 1, 2, 3] then vRate := vWidth else vRate := vHeight;
-
   vTrace := Path and $F;
 end;
 ```
@@ -301,7 +372,7 @@ for i := 0 to vBitmapHeight - 1 do
 
 ## 5. BITMAP_Update Method - Data Processing
 
-### 5.1 Method Signature (DebugDisplayUnit.pas:2408-2477)
+### 5.1 Method Signature (DebugDisplayUnit.pas:2416-2485)
 ```pascal
 procedure TDebugDisplayForm.BITMAP_Update;
 var
@@ -313,7 +384,7 @@ var
 - Plot pixels to bitmap using current trace mode
 - Handle runtime configuration changes
 
-### 5.2 Update Loop Structure (lines 2412-2476)
+### 5.2 Update Loop Structure (lines 2420-2484)
 ```pascal
 while not NextEnd do              // Process all elements until ele_end
 begin
@@ -339,9 +410,9 @@ begin
 end;
 ```
 
-### 5.3 Command Processing (lines 2415-2448)
+### 5.3 Command Processing (lines 2423-2456)
 
-**key_lut1..key_rgb24** (lines 2417-2418):
+**key_lut1..key_rgb24** (lines 2425-2426):
 ```pascal
 key_lut1..key_rgb24:
   KeyColorMode;    // Change active color mode
@@ -349,7 +420,7 @@ key_lut1..key_rgb24:
 - Changes `vColorMode` to new palette/color format
 - Affects all subsequent pixel data interpretation
 
-**key_lutcolors** (lines 2419-2420):
+**key_lutcolors** (lines 2427-2428):
 ```pascal
 key_lutcolors:
   KeyLutColors;    // Update LUT palette entries
@@ -358,7 +429,7 @@ key_lutcolors:
 - Stores in `vLut[]` array
 - Only affects LUT1/LUT2/LUT4/LUT8 color modes
 
-**key_trace** (lines 2421-2422):
+**key_trace** (lines 2429-2430):
 ```pascal
 key_trace:
   if NextNum then SetTrace(val, True);
@@ -367,7 +438,7 @@ key_trace:
 - Resets pixel position to starting corner
 - Optionally adjusts `vRate` for new pattern
 
-**key_set** (lines 2425-2430):
+**key_set** (lines 2433-2438):
 ```pascal
 key_set:
 begin
@@ -380,7 +451,7 @@ end;
 - Disables scroll mode (keeps scan pattern)
 - Useful for random-access pixel writes
 
-**key_scroll** (lines 2431-2434):
+**key_scroll** (lines 2439-2442):
 ```pascal
 key_scroll:
   if KeyValWithin(x, -vWidth, vWidth) then
@@ -392,7 +463,7 @@ key_scroll:
 - Positive y = scroll down, negative = scroll up
 - Fills vacated area with background color
 
-**key_clear** (lines 2435-2440):
+**key_clear** (lines 2443-2448):
 ```pascal
 key_clear:
 begin
@@ -405,7 +476,7 @@ end;
 - Resets pixel position to starting corner
 - Updates display (unless manual update mode)
 
-**key_update** (lines 2441-2442):
+**key_update** (lines 2449-2450):
 ```pascal
 key_update:
   BitmapToCanvas(0);    // Force screen update
@@ -413,7 +484,7 @@ key_update:
 - Manually triggers display refresh
 - Required when `vUpdate = True` (manual mode)
 
-### 5.4 Pixel Processing (lines 2450-2475)
+### 5.4 Pixel Processing (lines 2458-2483)
 
 **Two Rendering Paths**:
 
@@ -434,7 +505,7 @@ begin
 end;
 ```
 
-**PlotPixel Method** (DebugDisplayUnit.pas:3425-3436):
+**PlotPixel Method** (DebugDisplayUnit.pas:3433-3444):
 ```pascal
 procedure TDebugDisplayForm.PlotPixel(p: integer);
 var
@@ -512,7 +583,7 @@ end;
 | RGB16 | `key_rgb16` | 16 | 5:6:5 RGB (R5 G6 B5) |
 | RGB24 | `key_rgb24` | 24 | 8:8:8 RGB (full color) |
 
-### 6.2 TranslateColor Function (DebugDisplayUnit.pas:3082-3165)
+### 6.2 TranslateColor Function (DebugDisplayUnit.pas:3090-3173)
 
 **Purpose**: Convert pixel value from any color mode to RGB24
 
@@ -523,7 +594,7 @@ function TDebugDisplayForm.TranslateColor(p, mode: integer): integer;
 
 **Implementation Details**:
 
-#### LUT Modes (lines 3089-3096)
+#### LUT Modes (lines 3097-3104)
 ```pascal
 key_lut1:  p := vLut[p and $01];        // 1 bit → 2 colors
 key_lut2:  p := vLut[p and $03];        // 2 bits → 4 colors
@@ -534,7 +605,7 @@ key_lut8:  p := vLut[p and $FF];        // 8 bits → 256 colors
 - `vLut[]` contains 256 RGB24 values
 - Default palette: grayscale (0=black, 255=white)
 
-#### LUMA8/RGBI8 Modes (lines 3097-3134)
+#### LUMA8/RGBI8 Modes (lines 3105-3142)
 
 **Color Selection**:
 ```pascal
@@ -578,7 +649,7 @@ else
   p := color_channels * p
 ```
 
-#### HSV Modes (lines 3135-3152)
+#### HSV Modes (lines 3143-3160)
 
 **8-bit HSV** (key_hsv8, key_hsv8w, key_hsv8x):
 ```pascal
@@ -613,7 +684,7 @@ p := (v shr 16 and $FF * p + $FF) shr 8 shl 16 or
 if w then p := p xor $FFFFFF;    // Invert back
 ```
 
-#### RGB8 Mode (lines 3153-3156)
+#### RGB8 Mode (lines 3161-3164)
 ```pascal
 key_rgb8:
   p := p and $E0 * $1236E and $FF0000 or    // R (3 bits → 8 bits)
@@ -623,7 +694,7 @@ key_rgb8:
 - 3:3:2 format (RRRGGGBB)
 - Multipliers expand to full 8-bit range
 
-#### RGB16 Mode (lines 3157-3160)
+#### RGB16 Mode (lines 3165-3168)
 ```pascal
 key_rgb16:
   p := p and $F800 shl 8 or p and $E000 shl 3 or    // R (5 bits → 8 bits)
@@ -633,7 +704,7 @@ key_rgb16:
 - 5:6:5 format (RRRRRGGGGGGBBBBB)
 - Bit replication fills lower bits
 
-#### RGB24 Mode (lines 3161-3162)
+#### RGB24 Mode (lines 3169-3170)
 ```pascal
 key_rgb24:
   p := p and $00FFFFFF;    // Already 24-bit RGB
@@ -641,11 +712,11 @@ key_rgb24:
 - No conversion needed
 - Mask to 24 bits
 
-### 6.3 PolarColors Table (SetPolarColors, DebugDisplayUnit.pas:3197-3220)
+### 6.3 PolarColors Table (SetPolarColors, DebugDisplayUnit.pas:3207-3228)
 
 **Purpose**: Pre-computed HSV hue → RGB conversion
 
-**Generation** (lines 3207-3219):
+**Generation** (lines 3215-3227):
 ```pascal
 for i := 0 to 255 do
 begin
@@ -678,7 +749,7 @@ end;
 
 ## 7. Trace Modes and Pixel Positioning
 
-### 7.1 Trace Mode Encoding (DebugDisplayUnit.pas:2353-2362)
+### 7.1 Trace Mode Encoding (DebugDisplayUnit.pas:2362-2370)
 
 **Bit Layout**:
 ```
@@ -699,7 +770,7 @@ Bit 3:    Scroll enable (0=wrap, 1=scroll)
 | 6 | Right line, T→B | (W-1,0) | Y++ | X-- | Wrap/Scroll left |
 | 7 | Right line, B→T | (W-1,H-1) | Y-- | X-- | Wrap/Scroll left |
 
-### 7.2 StepTrace Method (DebugDisplayUnit.pas:2974-3053)
+### 7.2 StepTrace Method (DebugDisplayUnit.pas:2982-3061)
 
 **Purpose**: Advance pixel position after each pixel write
 
@@ -777,7 +848,7 @@ end;
 - Direct scanline writes for maximum speed
 - Client window size = bitmap size
 
-**PlotPixel Implementation** (DebugDisplayUnit.pas:3425-3436):
+**PlotPixel Implementation** (DebugDisplayUnit.pas:3433-3444):
 ```pascal
 procedure TDebugDisplayForm.PlotPixel(p: integer);
 begin
@@ -808,7 +879,7 @@ size 64 64 dotsize 8 8 sparse $404040
 - Client window: 512×512 pixels
 - Grid color: dark gray ($404040)
 
-**Rendering** (BITMAP_Update, lines 2462-2471):
+**Rendering** (BITMAP_Update, lines 2469-2479):
 ```pascal
 // Calculate center of sparse pixel
 x := vPixelX * vDotSize + vDotSize shr 1;
@@ -889,7 +960,7 @@ end;
 
 ## 9. Scrolling System
 
-### 9.1 ScrollBitmap Method (DebugDisplayUnit.pas:3438-3473)
+### 9.1 ScrollBitmap Method (DebugDisplayUnit.pas:3446-3481)
 
 **Purpose**: Shift bitmap content and fill vacated area with background
 
@@ -1201,6 +1272,8 @@ SmoothPixel(x, y, color, xopa * opacity / 255);
 ---
 
 ## 12. Sprite System
+
+> **Note**: `SPRITEDEF` and `SPRITE` directives are processed only in `PLOT_Update`, not in `BITMAP_Update`. BITMAP shares the sprite data arrays (see §17.3), but the BITMAP window does **not** accept sprite commands. This section documents the shared data structures and the PLOT-side command handling for reference.
 
 ### 12.1 Sprite Data Structures (DebugDisplayUnit.pas:397-400)
 
@@ -1547,7 +1620,7 @@ ClientHeight := vHeight * vDotSizeY;
 
 ### 16.1 Manual Pixel Positioning
 
-**SET Command** (DebugDisplayUnit.pas:2425-2430):
+**SET Command** (DebugDisplayUnit.pas:2433-2438):
 ```pascal
 key_set:
 begin
@@ -1569,7 +1642,7 @@ BITMAP `0 set 50 75 $FF0000 set 100 150 $00FF00
 
 ### 16.2 Bitmap Scrolling
 
-**SCROLL Command** (DebugDisplayUnit.pas:2431-2434):
+**SCROLL Command** (DebugDisplayUnit.pas:2439-2442):
 ```pascal
 key_scroll:
   if KeyValWithin(x, -vWidth, vWidth) then
@@ -1902,22 +1975,26 @@ Pixel 320: PlotPixel at (319,0), StepTrace → (0,1) + maybe scroll
 **Direct Positioning**:
 ```pascal
 key_set:
-  if NextNum then vPixelX := val;
-  if NextNum then vPixelY := val;
+begin
+  vTrace := vTrace and 7;              // Cancel scrolling (clear bit 3)
+  if KeyValWithin(vPixelX, 0, vWidth - 1) then
+    KeyValWithin(vPixelY, 0, vHeight - 1);
+end;
 ```
 
-**Allows**: Jump to any (x,y) position without trace pattern.
+**Allows**: Jump to any (x,y) position without trace pattern; also cancels scroll mode.
 
 **Use Case**: Drawing non-sequential graphics (sprites, text, shapes).
 
 ### 20.4 Display Update Timing
 
-**BitmapToCanvas Call**:
-- **Sparse mode**: Called after StepTrace if not in sparse mode
-- **Normal mode**: Updates immediately after pixel write
-- **Manual**: key_update forces display refresh
-
-**No Rate Control**: BITMAP renders as fast as data arrives (no RateCycle).
+**BitmapToCanvas Call** (line 2480):
+```pascal
+if RateCycle and not vUpdate then BitmapToCanvas(0);
+```
+- **Automatic (default)**: Display updates every `vRate` pixels via `RateCycle`. Both normal and sparse pixel paths share the same `RateCycle` gate.
+- **Manual mode** (`vUpdate = True`): `BitmapToCanvas` is suppressed during pixel writes; explicit `UPDATE` directive forces refresh.
+- `RateCycle` increments `vRateCount` and returns `True` when it reaches `vRate`, then resets to 0 (lines 3079–3088).
 
 ---
 
@@ -1939,19 +2016,23 @@ Bitmap[1]: TBitmap;    // Display buffer (front buffer)
 Total: 450 KB for both bitmaps
 ```
 
-### 21.2 Sparse Mode Scaling
+### 21.2 Canvas Display Scaling
 
-**When vSparse ≠ -1**:
+`BitmapToCanvas` always uses `StretchDraw` for BITMAP (and also for SPECTRO and PLOT), regardless of sparse mode. Normal mode: `vClientWidth = vWidth`, `vClientHeight = vHeight`, so the stretch is 1:1. Sparse mode: `vClientWidth = vWidth * vDotSize`, `vClientHeight = vHeight * vDotSizeY`, so the bitmap is scaled up (lines 3522–3530):
+
 ```pascal
-// Bitmap dimensions = logical size
-Bitmap[0].Width := vWidth;
-Bitmap[0].Height := vHeight;
-
-// Display scaled up
-Canvas.StretchDraw(Rect(0, 0, vWidth*vDotSize, vHeight*vDotSizeY), Bitmap[1]);
+procedure TDebugDisplayForm.BitmapToCanvas(Level: integer);
+begin
+  if Level = 0 then
+    Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);   // copy back→front
+  if DisplayType in [dis_spectro, dis_plot, dis_bitmap] then
+    Canvas.StretchDraw(Rect(0, 0, vClientWidth, vClientHeight), Bitmap[1])
+  else
+    Canvas.Draw(0, 0, Bitmap[1]);
+end;
 ```
 
-**Effect**: 64×64 bitmap stretched to 640×640 pixels with grid lines.
+**Effect in sparse mode**: 64×64 logical bitmap stretched to `64*vDotSize × 64*vDotSizeY` physical pixels. The `SmoothShape` grid is drawn directly into `Bitmap[0]` at physical coordinates before the copy, so the grid lines are part of the bitmap data, not overlaid by the stretch.
 
 ### 21.3 BitmapToCanvas Operation
 
@@ -2004,6 +2085,20 @@ end;
 ```pascal
 p := vLut[p and $FF];    // Index into 256-color palette
 ```
+
+**Color constants**: BITMAP has **no fixed channel/trace palette** (the
+`DefaultScopeColors` table does not apply) — every pixel color is produced by
+`TranslateColor` from the active color mode/LUT. The only fixed color constants are
+the **background** values returned by `GetBackground` (`DebugDisplayUnit.pas`
+3180–3205), selected by color mode:
+
+| Color mode | Background | Hex |
+|---|---|---|
+| LUT1/2/4/8 | `vLut[0]` | (first palette entry) |
+| LUMA8/8X, HSV8/8X, RGBI8/8X, RGB8, HSV16/16X, RGB16, RGB24 | `clBlack` | `$000000` |
+| LUMA8W, HSV8W, RGBI8W, HSV16W (white-base "W" modes) | `clWhite` | `$FFFFFF` |
+
+`clBlack`/`clWhite` are literal RGB24 values (`DebugDisplayUnit.pas` 187–188).
 
 ### 22.2 Data Packing System
 
@@ -2067,14 +2162,14 @@ end;
 // Set defaults
 vTrace := 0;
 vDotSize := 1;
-vColorMode := key_lut8;
+vColorMode := key_rgb24;   // SetDefaults (line 2889); overridden by color-mode directive in BITMAP_Configure
 
 // Parse parameters
 while NextKey do
   case val of
     key_size: ...;
     key_trace: ...;
-    key_lut8..key_rgb24: KeyColorMode;
+    key_lut1..key_rgb24: KeyColorMode;
     key_longs_1bit..key_bytes_4bit: KeyPack;
   end;
 ```

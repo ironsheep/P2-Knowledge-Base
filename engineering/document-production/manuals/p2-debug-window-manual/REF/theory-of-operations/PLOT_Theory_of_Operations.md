@@ -1,6 +1,8 @@
 # PLOT Display Window - Theory of Operations
 
-**Current as of**: PNut v51a for Propeller 2
+**Current as of**: PNut v55 for Propeller 2
+**Directive coverage verified**: 2026-06-01 against `DebugDisplayUnit.pas` (v55)
+**Companion**: [Debug Window Directive Matrix](../DEBUG-WINDOW-DIRECTIVE-MATRIX.md) — cross-window config/display/keyboard/mouse reference
 
 ## Table of Contents
 
@@ -226,15 +228,23 @@ vTheta       : integer;     // Theta offset for polar coordinates
 - **vTwoPi**: Defines the value representing a full circle in polar mode
 - **vTheta**: Adds an angular offset to all polar coordinates
 
-**Default Values** (from PLOT_Configure, lines 1876-1884):
+**Default Values** (from PLOT_Configure v55, lines 1869–1880):
 ```pascal
-vPolar := False;          // Start in Cartesian mode
 vDirX := False;           // No X flipping
 vDirY := False;           // No Y flipping
 vOffsetX := 0;            // Origin at (0, 0)
 vOffsetY := 0;
+vPixelX := 0;
+vPixelY := 0;
+vDotSize := 1;
+vDotSizeY := 1;
+vPlotColor := DefaultPlotColor;
+vTextColor := DefaultTextColor;
+vOpacity := $FF;
 vPrecise := 8;            // Sub-pixel precision enabled
 ```
+
+> **v55 note:** `vPolar` is **not** reset in `PLOT_Configure`. It retains whatever value it had at window creation (typically False from `FormCreate`). `vPolar` is only written by `POLAR`/`CARTESIAN` directives in the update phase.
 
 ### 4.2 Drawing State Variables
 
@@ -256,7 +266,9 @@ vLineSize    : integer;     // Line/dot size in pixels
 ### 4.3 Text Rendering Variables
 
 ```pascal
-vTextSize    : integer;     // Font size in points
+vTextSize    : integer;     // Font size in points — default DefaultTextSize = 10
+                            //   (PLOT_Configure does not set it; changed at runtime
+                            //   via TEXTSIZE or the inline size of TEXT, clamp 6..200)
 vTextStyle   : integer;     // Style encoding (weight, italic, underline, alignment)
 vTextAngle   : integer;     // Text rotation angle (tenths of degrees: 0-3600)
 ```
@@ -290,14 +302,12 @@ PlotBitmap   : array[0..plot_layermax - 1] of TBitmap;  // 8 layer bitmaps
 - Layers are loaded from external BMP files
 - Layers are composited using CROP command
 
-**Initialization** (PLOT_Configure, lines 1903-1905):
+**Initialization** (PLOT_Configure, line 1908):
 ```pascal
-for i := 0 to plot_layermax - 1 do
-begin
-  PlotBitmap[i] := TBitmap.Create;
-  PlotBitmap[i].PixelFormat := pf32bit;
-end;
+for i := 0 to plot_layermax - 1 do PlotBitmap[i] := TBitmap.Create;
 ```
+
+> **v55 note:** `PixelFormat := pf32bit` is not set in v55 — it was present in an earlier revision.
 
 **Cleanup** (PLOT_Close, lines 2169-2174):
 ```pascal
@@ -334,6 +344,91 @@ var
 
 ---
 
+## Directive Reference (v55-verified)
+
+> Source: `DebugDisplayUnit.pas` v55. Line references are into that file.
+> All directives verified against `PLOT_Configure` (1864–1916) and `PLOT_Update` (1918–2155).
+
+### Configuration directives
+
+Accepted by `PLOT_Configure` only (window-creation phase). Line refs: 1882–1906.
+
+| Directive | Parameters | Range / Default | Notes |
+|---|---|---|---|
+| `TITLE` | `'string'` | — | Window title |
+| `POS` | `left top` | Screen coords | Window screen position |
+| `SIZE` | `width height` | 32–2048 each; **default 256 × 256** (from global `SetDefaults` 2880–2884; `PLOT_Configure` does not override) | Canvas dimensions (client = `vWidth·vDotSize × vHeight·vDotSizeY`; with default dotsize 1×1 → 256 × 256 px, zero margins) |
+| `DOTSIZE` | `x {y}` | **1–256** each; default **1×1** | Pixel-scaling factor; if only x given, y copies x (`1891-1894`) |
+| color-mode | `LUT1`…`RGB24` | Keyword token | Initial color mode (`KeyColorMode`; `1896-1897`) |
+| `LUTCOLORS` | `rgb24…` | 256 color longs | 256-entry LUT palette (`1898-1899`) |
+| `BACKCOLOR` | `color` | Default: Black (`$000000`) | Background fill color (`1900-1901`) |
+| `UPDATE` | _(flag)_ | Default: off (auto-update) | Enable manual-update (buffered) mode (`1902-1903`) |
+| `HIDEXY` | _(flag)_ | Default: show | Suppress on-screen cursor coordinate readout (`1904-1905`) |
+
+> **v55 note:** `POLAR`, `CARTESIAN`, `TEXTSIZE`, `SAMPLES`, and `RATE` are **not** accepted in `PLOT_Configure` — they are update-phase-only directives. The v51a-era documentation of those as config parameters was incorrect.
+
+### Display / data directives (drawing command set)
+
+Accepted by `PLOT_Update` (1918–2155). PLOT is the only window whose update phase is a full vector/raster drawing command set.
+
+| Directive | Parameter shape | Range / Default | Source lines | Notes |
+|---|---|---|---|---|
+| color-mode | `LUT1`…`RGB24` | Keyword token | 1928–1929 | Change active color mode |
+| `LUTCOLORS` | `rgb24…` | 256 color longs | 1930–1931 | Redefine LUT palette |
+| `BACKCOLOR` | `color` | Any color | 1932–1933 | Set background color |
+| `COLOR` | `color` | Any color | 1934–1943 | Set `vPlotColor`; if next key is `TEXT`, also sets `vTextColor` |
+| `BLACK`…`GRAY` | `{brightness}` | Brightness 0–15 | 1934–1943 | Named-color shorthand; optional brightness nibble |
+| `OPACITY` | `byte` | **0–255**; default `$FF` | 1944–1945 | Set `vOpacity` |
+| `PRECISE` | _(toggle)_ | Starts at 8 (on) | 1946–1947 | XOR `vPrecise` 8↔0; enables/disables sub-pixel fixed-point |
+| `LINESIZE` | `size` | — | 1948–1949 | Set `vLineSize` default for DOT/LINE |
+| `ORIGIN` | `{x y}` | — | 1950–1956 | Set coordinate origin; no args = use current `vPixelX,vPixelY` |
+| `SET` | `x_rho y_theta` | — | 1957–1964 | Set current position; applies polar conversion if `vPolar` |
+| `DOT` | `{linesize {opacity}}` | linesize default `vLineSize`; opacity default `vOpacity` | 1965–1979 | Draw dot at current position; does **not** advance position |
+| `LINE` | `x_rho y_theta {linesize {opacity}}` | linesize default `vLineSize`; opacity default `vOpacity` | 1980–2011 | Draw line; advances `vPixelX/Y` to destination |
+| `CIRCLE` | `width {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Filled/outlined circle; center = current pos via `PLOT_GetXY` |
+| `OVAL` | `width height {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Filled/outlined ellipse; center = current pos |
+| `BOX` | `width height {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Filled/outlined rectangle; center = current pos |
+| `OBOX` | `width height xradius yradius {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Rounded rectangle; center = current pos |
+| `TEXTSIZE` | `size` | — | 2037–2038 | Set default text point size (`KeyTextSize`) |
+| `TEXTSTYLE` | `style` | byte 0–255 | 2039–2040 | Set `vTextStyle` byte (weight/italic/underline/halign/valign) |
+| `TEXTANGLE` | `angle` | degrees 0–359 (Cartesian) or 0–vTwoPi (polar) | 2041–2042 | Set `vTextAngle`; calls `MakeTextAngle` for unit conversion |
+| `TEXT` | `{size {style {angle}}} 'string'` | up to 3 optional numeric overrides | 2043–2055 | Render string |
+| `LAYER` | `layer 'filename.bmp'` | layer **1–8** | 2056–2062 | Load BMP file into layer; file must exist with `.bmp` extension |
+| `CROP` | `layer {left top width height {x y}}` or `layer AUTO x y` | layer **1–8** | 2063–2089 | Composite layer onto canvas; no args = full layer at (0,0) |
+| `SPRITEDEF` | `id xsize ysize pixels… colors…` | id **0–255**; xsize,ysize **1–32** each; 256 RGBA color longs | 2090–2101 | Define sprite: xsize×ysize palette-index bytes then 256 RGBA color longs |
+| `SPRITE` | `id {orientation {scale {opacity}}}` | id **0–255**; orientation **0–7** default 0; scale **1–64** default 1; opacity **0–255** default `vOpacity` | 2102–2134 | Render sprite at current pos |
+| `POLAR` | `{twopi {theta}}` | twopi default `$100000000`; theta default 0 | 2135–2136 | Enable polar mode (`KeyTwoPi`); sets `vPolar`, `vTwoPi`, `vTheta` |
+| `CARTESIAN` | `{flipy {flipx}}` | flipy/flipx 0 or 1 | 2137–2142 | Disable polar mode; optionally set `vDirY`, `vDirX` flip flags |
+| `CLEAR` | _(none)_ | — | 2143–2144 | Clear canvas to `vBackColor` (`ClearBitmap`) |
+| `UPDATE` | _(none)_ | — | 2145–2146 | Flush `Bitmap[0]` to screen (`BitmapToCanvas(0)`) |
+| `SAVE` | _(see KeySave)_ | — | 2147–2148 | Write canvas to `<name>.bmp` or desktop region |
+| `PC_KEY` | _(none)_ | — | 2149–2150 | Poll keyboard latch → transmit 1 LONG to P2 (`SendKeyPress`) |
+| `PC_MOUSE` | _(none)_ | — | 2151–2152 | Transmit 2 LONGs to P2: packed x/y/buttons/wheel + pixel color (`SendMousePos`) |
+
+### Keyboard & mouse
+
+PLOT uses the **shared input model** (see Matrix §4). All nine debug-display windows share identical form-level handlers — there is no PLOT-specific keyboard or mouse logic beyond coordinate mapping.
+
+| Handler | Lines | Behavior |
+|---|---|---|
+| `WMGetDlgCode` | 585–589 | Captures Tab key (`DLGC_WANTTAB`) |
+| `FormMouseMove` | 647–809 (PLOT: 719–724) | Draws live measurement cursor; reports `pixel ÷ DOTSIZE`, honoring `vDirX`/`vDirY` flip flags |
+| `FormMouseWheel` | 811–823 | Latches wheel direction ±1 into `vMouseWheel` for 100 ms |
+| `FormKeyPress` | 825–831 | Latches key byte into `vKeyPress` for 100 ms |
+| `FormKeyDown` | 833–851 | Maps non-printable keys: Left=1, Right=2, Up=3, Down=4, Home=5, End=6, Delete=7, Insert=10, PgUp=11, PgDn=12 |
+
+**`PC_KEY`** (`SendKeyPress`, 3579–3583): transmits 1 LONG = `vKeyPress` byte (0 if none), then clears it.
+
+**`PC_MOUSE`** (`SendMousePos`, 3537–3577): transmits 2 LONGs:
+- LONG 1: bits 0–12 = x, bits 13–25 = y, bits 26–27 = wheel, bits 28/29/30 = L/M/R buttons. Sentinel `$03FFFFFF`/`$FFFFFFFF` when cursor is off-window.
+- LONG 2: RGB color of pixel under cursor (byte-swapped to `$RRGGBB`).
+
+**PLOT coordinate mapping** (lines 719–724, 3558–3561): reported x = `(ClientWidth − X) ÷ vDotSize` when `vDirX`, else `X ÷ vDotSize`; reported y = `Y ÷ vDotSizeY` when `vDirY`, else `(ClientHeight − Y) ÷ vDotSizeY`.
+
+`HIDEXY` suppresses the on-screen readout; it does **not** disable `PC_MOUSE` reporting.
+
+---
+
 ## 5. Configuration and Initialization
 
 ### 5.1 PLOT_Configure Method
@@ -344,81 +439,71 @@ var
   i: integer;
 begin
   // Set unique defaults
-  vWidth := plot_default;               // Default canvas width
-  vHeight := plot_default;              // Default canvas height
-  vDotSize := 1;                        // No pixel scaling
-  vPolar := False;                      // Cartesian coordinates
-  vDirX := False;                       // No X direction flip
-  vDirY := False;                       // No Y direction flip
-  vOffsetX := 0;                        // Origin at (0, 0)
+  vDirX := False;
+  vDirY := False;
+  vOffsetX := 0;
   vOffsetY := 0;
-  vPrecise := 8;                        // Sub-pixel precision
-
+  vPixelX := 0;
+  vPixelY := 0;
+  vDotSize := 1;
+  vDotSizeY := 1;
+  vPlotColor := DefaultPlotColor;
+  vTextColor := DefaultTextColor;
+  vOpacity := $FF;
+  vPrecise := 8;
   // Process any parameters
   while NextKey do
   case val of
-    key_title:
+    key_title:                                        // TITLE 'string'
       KeyTitle;
-    key_pos:
+    key_pos:                                          // POS left top
       KeyPos;
-    key_size:
+    key_size:                                         // SIZE width height
       KeySize(vWidth, vHeight, plot_wmin, plot_wmax, plot_hmin, plot_hmax);
-    key_dotsize:                        // DOTSIZE x_y y
-      if not KeyValWithin(vDotSize, 1, 64) then
-        KeyValWithin(vDotSizeY, 1, 64);
-    key_polar:
-      KeyTwoPi;
-    key_cartesian:
-    begin
-      vPolar := False;
-      if not KeyBool(vDirY) then Continue;
-      KeyBool(vDirX);
-    end;
-    key_textsize:
-      KeyTextSize;
-    key_lutcolors:
+    key_dotsize:                                      // DOTSIZE x_y y
+      if KeyValWithin(vDotSize, 1, 256) then
+      begin
+        vDotSizeY := vDotSize;
+        KeyValWithin(vDotSizeY, 1, 256);
+      end;
+    key_lut1..key_rgb24:                              // lut1..rgb24
+      KeyColorMode;
+    key_lutcolors:                                    // LUTCOLORS
       KeyLutColors;
-    key_backcolor:
+    key_backcolor:                                    // BACKCOLOR color
       KeyColor(vBackColor);
-    key_samples:
-      KeyRate;
-    key_update:
+    key_update:                                       // UPDATE
       vUpdate := True;
-    key_hidexy:
+    key_hidexy:                                       // HIDEXY
       vHideXY := True;
   end;
-
-  // Create layer bitmaps
-  for i := 0 to plot_layermax - 1 do
-  begin
-    PlotBitmap[i] := TBitmap.Create;
-    PlotBitmap[i].PixelFormat := pf32bit;
-  end;
-
-  // Set form metrics
-  vBitmapWidth := vWidth;
-  vBitmapHeight := vHeight;
+  // Set up layer bitmaps
+  for i := 0 to plot_layermax - 1 do PlotBitmap[i] := TBitmap.Create;
+  // Clear sprite data
+  FillChar(SpritePixels, SizeOf(SpritePixels), 0);
+  FillChar(SpriteColors, SizeOf(SpriteColors), 0);
+  FillChar(SpriteSizeX, SizeOf(SpriteSizeX), 0);
+  FillChar(SpriteSizeY, SizeOf(SpriteSizeY), 0);
+  // Set initial form size
   SetSize(0, 0, 0, 0);
-  ClearBitmap;
 end;
 ```
 
-**Source Location**: Lines 1864-1916
+**Source Location**: Lines 1864–1916
 
 ### 5.2 Configuration Parameters
+
+> **v55:** Only the directives below are parsed in `PLOT_Configure`. `POLAR`, `CARTESIAN`, `TEXTSIZE`, `SAMPLES`, and `RATE` are **not** config-phase directives — they are update-phase only.
 
 | Parameter | Command | Default | Range | Purpose |
 |-----------|---------|---------|-------|---------|
 | Title | `TITLE 'string'` | "Plot" | - | Window title |
 | Position | `POS x y` | Cascaded | Screen coords | Window position |
-| Size | `SIZE width height` | 512 × 512 | 32-2048 | Canvas dimensions |
-| Dot Size | `DOTSIZE x {y}` | 1 × 1 | 1-64 | Pixel scaling |
-| Polar Mode | `POLAR {twopi {theta}}` | - | - | Enable polar coordinates |
-| Cartesian | `CARTESIAN {flipy {flipx}}` | Enabled | - | Cartesian with flipping |
-| Text Size | `TEXTSIZE size` | 9 | Font size | Text font size |
+| Size | `SIZE width height` | 512 × 512 | 32–2048 | Canvas dimensions |
+| Dot Size | `DOTSIZE x {y}` | 1 × 1 | **1–256** | Pixel scaling (v55: `1891-1894`) |
+| Color mode | `LUT1`…`RGB24` | - | - | Initial color mode |
 | LUT Colors | `LUTCOLORS rgb24...` | - | 256 colors | Palette for LUT modes |
 | Back Color | `BACKCOLOR color` | Black | RGB24 | Background color |
-| Samples | `SAMPLES rate` | 1 | 1-65536 | Update rate divisor |
 | Update Mode | `UPDATE` | Auto | - | Manual update mode |
 | Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
 
@@ -426,14 +511,17 @@ end;
 
 **Step 1**: Set default values
 ```pascal
-vWidth := plot_default;       // 512
-vHeight := plot_default;      // 512
-vDotSize := 1;                // No scaling
-vPolar := False;              // Cartesian mode
-vDirX := False;               // No flipping
-vDirY := False;
-vOffsetX := 0;                // Origin at top-left
+vDirX := False;               // No X direction flip
+vDirY := False;               // No Y direction flip
+vOffsetX := 0;                // Origin at (0, 0)
 vOffsetY := 0;
+vPixelX := 0;                 // Current position
+vPixelY := 0;
+vDotSize := 1;                // No scaling
+vDotSizeY := 1;
+vPlotColor := DefaultPlotColor;
+vTextColor := DefaultTextColor;
+vOpacity := $FF;              // Fully opaque
 vPrecise := 8;                // Sub-pixel precision
 ```
 
@@ -441,22 +529,22 @@ vPrecise := 8;                // Sub-pixel precision
 - Parse element array for configuration parameters
 - Override defaults with user-specified values
 
-**Step 3**: Create layer bitmaps
+**Step 3**: Create layer bitmaps and clear sprite data
 ```pascal
-for i := 0 to plot_layermax - 1 do
-begin
-  PlotBitmap[i] := TBitmap.Create;
-  PlotBitmap[i].PixelFormat := pf32bit;
-end;
+for i := 0 to plot_layermax - 1 do PlotBitmap[i] := TBitmap.Create;
+FillChar(SpritePixels, SizeOf(SpritePixels), 0);
+FillChar(SpriteColors, SizeOf(SpriteColors), 0);
+FillChar(SpriteSizeX, SizeOf(SpriteSizeX), 0);
+FillChar(SpriteSizeY, SizeOf(SpriteSizeY), 0);
 ```
 
 **Step 4**: Initialize display canvas
 ```pascal
-vBitmapWidth := vWidth;
-vBitmapHeight := vHeight;
 SetSize(0, 0, 0, 0);          // Create window with canvas size
-ClearBitmap;                   // Fill with background color
 ```
+
+> **v55 note:** `PixelFormat := pf32bit` is **not** set on layer bitmaps in v55, and `ClearBitmap` is **not** called during configure. The initial canvas is cleared by `SetSize`.
+
 
 ---
 
@@ -548,7 +636,7 @@ vTheta := 0;                  // Default angular offset
 **Polar to Cartesian Conversion**:
 
 ```pascal
-// From PolarToCartesian (lines 3055-3063)
+// From PolarToCartesian (lines 3063-3071)
 procedure TDebugDisplayForm.PolarToCartesian(var rho_x, theta_y: integer);
 var
   Tf, Xf, Yf: extended;
@@ -1030,7 +1118,7 @@ procedure SmoothShape(x, y, w, h, rx, ry, t: integer; c: integer; opa: integer);
 - `c`: Color (RGB24 format)
 - `opa`: Opacity (0-255)
 
-**Rendering Algorithm** (lines 3582-3735):
+**Rendering Algorithm** (lines 3590–3743):
 
 The SmoothShape method implements a sophisticated anti-aliased rendering algorithm:
 
@@ -1189,7 +1277,7 @@ $87 = Heavy, bold, italic, underlined, centered
 
 ### 8.3 Text Angle Conversion
 
-**MakeTextAngle Method** (lines 3065-3069):
+**MakeTextAngle Method** (lines 3073–3077):
 
 ```pascal
 procedure TDebugDisplayForm.MakeTextAngle(var a: integer);
@@ -1227,7 +1315,7 @@ end;
 procedure AngleTextOut(x, y: integer; s: string; style, angle: integer);
 ```
 
-**Implementation** (lines 3475-3512):
+**Implementation** (lines 3483–3520):
 
 ```pascal
 procedure TDebugDisplayForm.AngleTextOut(x, y: integer; s: string; style, angle: integer);
@@ -1404,18 +1492,15 @@ The PLOT window supports up to 8 independent bitmap layers that can be loaded fr
 PlotBitmap: array[0..plot_layermax - 1] of TBitmap;  // 8 layers (0-7)
 ```
 
-**Initialization** (PLOT_Configure, lines 1903-1905):
+**Initialization** (PLOT_Configure, line 1908):
 ```pascal
-for i := 0 to plot_layermax - 1 do
-begin
-  PlotBitmap[i] := TBitmap.Create;
-  PlotBitmap[i].PixelFormat := pf32bit;
-end;
+for i := 0 to plot_layermax - 1 do PlotBitmap[i] := TBitmap.Create;
 ```
+
+> **v55 note:** `PixelFormat := pf32bit` is not set in v55.
 
 **Characteristics**:
 - Each layer is an independent TBitmap object
-- 32-bit pixel format (supports alpha channel)
 - Layers can have arbitrary dimensions
 - Layers persist until replaced or window closed
 
@@ -2116,7 +2201,7 @@ begin
 end;
 ```
 
-**Source Location**: Lines 3514-3522
+**Source Location**: Lines 3522–3530
 
 **Processing**:
 1. If `Level = 0`: Copy Bitmap[0] to Bitmap[1]
@@ -2243,7 +2328,7 @@ key_pc_mouse:
   SendMousePos;
 ```
 
-**SendMousePos Method** (lines 3529-3575):
+**SendMousePos Method** (lines 3537–3577):
 
 ```pascal
 procedure TDebugDisplayForm.SendMousePos;
@@ -2254,7 +2339,7 @@ begin
   p := ScreenToClient(Mouse.CursorPos);
   if (p.x < 0) or (p.x >= ClientWidth) or (p.y < 0) or (p.y >= ClientHeight) then
   begin
-    v := $03FFFFFF;           // Out of bounds marker
+    v := $03FFFFFF;
     c := $FFFFFFFF;
   end
   else
@@ -2269,37 +2354,41 @@ begin
         p.x := p.x div vDotSize;
         p.y := p.y div vDotSizeY;
       end;
-      // ... other display types
+      dis_term:
+      begin
+        p.x := (p.x - vMarginLeft) div ChrWidth;
+        p.y := (p.y - vMarginTop) div ChrHeight;
+      end;
     end;
-    v := (p.y and $FFF) shl 12 or (p.x and $FFF);
+    v := vMouseWheel and 3 shl 26 or p.y and $1FFF shl 13 or p.x and $1FFF;
+    if GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0 then v := v or $10000000;
+    if GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0 then v := v or $20000000;
+    if GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0 then v := v or $40000000;
   end;
-  // Send v and c back to P2 via serial
+  TLong(v);
+  TLong(c);
+  vMouseWheel := 0;
 end;
 ```
 
-**Return Values**:
-- `v`: Packed position (Y in bits 23-12, X in bits 11-0)
-- `c`: Color at mouse position (RGB24)
+**Return Values** (LONG 1 = `v`):
+- bits 12–0: X coordinate (13 bits, `p.x and $1FFF`)
+- bits 25–13: Y coordinate (13 bits, `p.y and $1FFF`)
+- bits 27–26: Mouse wheel direction ±1 (`vMouseWheel and 3`)
+- bit 28: Left button
+- bit 29: Middle button
+- bit 30: Right button
+- Sentinel when cursor is off-window: `v = $03FFFFFF`, `c = $FFFFFFFF`
 
-**Special Values**:
-- If mouse out of bounds: `v = $03FFFFFF`, `c = $FFFFFFFF`
+**Return Values** (LONG 2 = `c`):
+- RGB color of pixel under cursor (byte-swapped from Windows BGR to `$RRGGBB`)
+- `$FFFFFFFF` when cursor is off-window
 
-**Coordinate Transformation**:
+**Coordinate Transformation** (lines 3558–3561):
 - Screen position converted to canvas coordinates
-- Direction flipping applied (vDirX, vDirY)
-- Scaled by vDotSize (for zoomed displays)
-
-**Usage Example**:
-```spin2
-' P2 Spin2 code to read mouse position
-PC_MOUSE
-position := receive_long()    ' Packed X/Y
-color := receive_long()       ' RGB24
-if position <> $03FFFFFF then
-  x := position & $FFF
-  y := position >> 12 & $FFF
-  ' Mouse is at (x, y) with color under cursor
-```
+- `vDirX`: `p.x = ClientWidth - p.x`
+- `vDirY` (not set): `p.y = ClientHeight - p.y`
+- Scaled by `vDotSize` / `vDotSizeY`
 
 ---
 
@@ -2815,206 +2904,62 @@ Now coordinates match mathematical convention:
 
 ### 18.1 Protocol Overview
 
-The PLOT display receives configuration and drawing commands through an **element array protocol** that uses parallel arrays of types and values. This protocol enables flexible command transmission while maintaining ASCII compatibility.
+The PLOT display receives configuration and drawing commands through an **element array protocol**. The host software parses DEBUG directives from P2 output, building typed element arrays that are then consumed by `PLOT_Configure` and `PLOT_Update`.
 
-**Element Storage** (GlobalUnit.pas:126-127):
-```pascal
-DebugDisplayType:  array[0..DebugDisplayLimit - 1] of integer;
-DebugDisplayValue: array[0..DebugDisplayLimit - 1] of integer;
+The parser helpers (`NextKey`, `NextNum`, `NextStr`, `KeyVal`, `KeyValWithin`, `KeyIs`, `KeyBool`) are defined in `DebugDisplayUnit.pas`. They advance an internal pointer through the element sequence and set the shared `val` variable.
+
+### 18.2 PLOT_Configure Parsing Flow
+
+`PLOT_Configure` (lines 1882–1906) uses a `while NextKey do case val of` loop. Only the directives listed in the Configuration table above are recognized; any unrecognized key breaks the loop. After the loop, layer bitmaps are created and sprite arrays zeroed (lines 1908–1913).
+
+**Example command stream** → `PLOT SIZE 256 256 DOTSIZE 2 UPDATE`:
 ```
-
-**Capacity**: 1100 elements per message (DebugDisplayLimit = 1100)
-
-### 18.2 Element Types
-
-**Type Constants** (DebugDisplayUnit.pas:15-20):
-```pascal
-ele_end = 0;   // End of element array
-ele_key = 3;   // Configuration keyword/command
-ele_num = 4;   // Numeric data value
-ele_str = 5;   // String data (pointer to PChar)
+NextKey → key_size    → KeySize(vWidth, vHeight, 32, 2048, 32, 2048)  → vWidth=256, vHeight=256
+NextKey → key_dotsize → KeyValWithin(vDotSize,1,256)                   → vDotSize=2
+                      → vDotSizeY := vDotSize                          → vDotSizeY=2
+                      → KeyValWithin(vDotSizeY,1,256)                  (no second num: unchanged)
+NextKey → key_update  → vUpdate := True
+(no more keys) → exit loop
 ```
 
-**Type Encoding**:
-- Each element has a type (stored in DebugDisplayType array)
-- Each element has a value (stored in DebugDisplayValue array)
-- Arrays are traversed in parallel using parser functions
+### 18.3 PLOT_Update Parsing Flow
 
-### 18.3 Parser Functions
+`PLOT_Update` (lines 1918–2155) also uses a `while NextKey do case val of` loop. Drawing commands read their numeric parameters with `KeyVal` / `KeyValWithin`; optional parameters are read conditionally. After the loop, if `vUpdate = False`, `BitmapToCanvas(0)` is called automatically.
 
-**NextKey** - Check for and consume keyword element:
-```pascal
-function NextKey: boolean;
-begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_key);
-  if Result then
-  begin
-    val := DebugDisplayValue[ElementPtr];
-    Inc(ElementPtr);
-  end;
-end;
+**Example command stream** → `DOT 10 200`:
+```
+NextKey → key_dot
+  t1 := vLineSize   (default)
+  t2 := vOpacity    (default)
+  KeyVal(t1) → t1=10
+  KeyVal(t2) → t2=200
+  compute fixed-point coords from vPixelX, vPixelY
+  SmoothDot(t3, t4, t1 shl vPrecise shr 1, vPlotColor, t2)
 ```
 
-**NextNum** - Check for and consume numeric element:
-```pascal
-function NextNum: boolean;
-begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_num);
-  if Result then
-  begin
-    val := DebugDisplayValue[ElementPtr];
-    Inc(ElementPtr);
-  end;
-end;
+**Example command stream** → `SPRITE 0 1 4 128`:
+```
+NextKey → key_sprite
+  PLOT_GetXY(t1, t2)            (screen position from current vPixelX/Y)
+  KeyValWithin(t3, 0, 255) → t3=0   (sprite id)
+  t4=0; t5=1; t6=vOpacity
+  KeyValWithin(t4, 0, 7)  → t4=1   (orientation)
+  KeyValWithin(t5, 1, 64) → t5=4   (scale)
+  KeyValWithin(t6, 0, 255)→ t6=128 (opacity)
+  … render loop …
 ```
 
-**NextStr** - Check for and consume string element:
-```pascal
-function NextStr: boolean;
-begin
-  Result := (ElementPtr < ElementEnd) and (DebugDisplayType[ElementPtr] = ele_str);
-  if Result then
-  begin
-    val := DebugDisplayValue[ElementPtr];  // Pointer to PChar
-    Inc(ElementPtr);
-  end;
-end;
-```
+### 18.4 Key Parsing Helpers
 
-**NextEnd** - Check if end reached:
-```pascal
-function NextEnd: boolean;
-begin
-  Result := (ElementPtr >= ElementEnd) or (DebugDisplayType[ElementPtr] = ele_end);
-end;
-```
+The helpers are shared across all display types. Their exact behavior is relevant to understanding optional-parameter chains:
 
-**Source Location**: Lines 4101-4131 in DebugDisplayUnit.pas
+- **`KeyVal(var x)`**: reads next element if it is a number; returns True and sets x; otherwise returns False and leaves x unchanged.
+- **`KeyValWithin(var x, lo, hi)`**: same, but clamps to [lo, hi].
+- **`KeyBool(var b)`**: reads next number element; sets boolean b to `val <> 0`.
+- **`KeyIs(key)`**: peeks at the next element; if it is the given key, consumes it and returns True.
+- **`NextStr`**: reads the next element if it is a string pointer; sets `val` to the PChar pointer.
 
-### 18.4 PLOT Configuration Message Example
-
-**Basic Configuration**:
-```
-Element Array:
-[0] type=ele_key   value=key_size        → SIZE
-[1] type=ele_num   value=256             → width
-[2] type=ele_num   value=256             → height
-[3] type=ele_key   value=key_range       → RANGE
-[4] type=ele_num   value=512             → coordinate range
-[5] type=ele_key   value=key_color       → COLOR
-[6] type=ele_num   value=$000000         → background (black)
-[7] type=ele_num   value=$808080         → grid (gray)
-[8] type=ele_key   value=key_update      → UPDATE
-[9] type=ele_end   value=0               → end marker
-```
-
-**Parsing Flow**:
-```pascal
-PLOT_Configure:
-  NextKey → key_size → NextNum → 256 → NextNum → 256 → vWidth := 256, vHeight := 256
-  NextKey → key_range → NextNum → 512 → vRange := 512
-  NextKey → key_color → NextNum → $000000 → vBackColor := $000000
-                      → NextNum → $808080 → vGridColor := $808080
-  NextKey → key_update → vUpdate := True (manual update mode)
-  NextEnd → done
-```
-
-### 18.5 PLOT Drawing Command Examples
-
-**DOT Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_dot         → DOT
-[1] type=ele_num   value=100             → x coordinate
-[2] type=ele_num   value=150             → y coordinate
-[3] type=ele_num   value=$FF0000         → color (red)
-[4] type=ele_end   value=0
-```
-
-**LINE Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_line        → LINE
-[1] type=ele_num   value=50              → x1
-[2] type=ele_num   value=50              → y1
-[3] type=ele_num   value=200             → x2
-[4] type=ele_num   value=200             → y2
-[5] type=ele_num   value=$00FF00         → color (green)
-[6] type=ele_end   value=0
-```
-
-**TEXT Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_text        → TEXT
-[1] type=ele_num   value=100             → x coordinate
-[2] type=ele_num   value=100             → y coordinate
-[3] type=ele_str   value=<ptr>           → "Hello World"
-[4] type=ele_num   value=$FFFFFF         → color (white)
-[5] type=ele_num   value=0               → angle (0 degrees)
-[6] type=ele_num   value=$0000           → style (normal)
-[7] type=ele_end   value=0
-```
-
-**SPRITE Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_sprite      → SPRITE
-[1] type=ele_num   value=5               → sprite index
-[2] type=ele_num   value=0               → orientation
-[3] type=ele_num   value=150             → x coordinate
-[4] type=ele_num   value=200             → y coordinate
-[5] type=ele_num   value=$100            → scale (1.0 = 256)
-[6] type=ele_num   value=255             → opacity
-[7] type=ele_end   value=0
-```
-
-### 18.6 Polar Mode Command Example
-
-**Configuration with Polar Mode**:
-```
-Element Array:
-[0] type=ele_key   value=key_polar       → POLAR
-[1] type=ele_num   value=360             → degrees per circle
-[2] type=ele_num   value=0               → angular offset
-[3] type=ele_end   value=0
-```
-
-**LINE in Polar Coordinates**:
-```
-Element Array:
-[0] type=ele_key   value=key_line        → LINE
-[1] type=ele_num   value=100             → rho1 (radius)
-[2] type=ele_num   value=0               → theta1 (angle)
-[3] type=ele_num   value=150             → rho2
-[4] type=ele_num   value=90              → theta2
-[5] type=ele_num   value=$FFFF00         → color (cyan)
-[6] type=ele_end   value=0
-```
-
-### 18.7 Runtime Command Examples
-
-**CLEAR Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_clear
-[1] type=ele_end   value=0
-```
-
-**SHOW Command** (manual update mode):
-```
-Element Array:
-[0] type=ele_key   value=key_show
-[1] type=ele_end   value=0
-```
-
-**SAVE Command**:
-```
-Element Array:
-[0] type=ele_key   value=key_save
-[1] type=ele_str   value=<ptr>           → 'plot_output.bmp'
-[2] type=ele_end   value=0
-```
+These helpers are what make all PLOT parameters truly optional — each helper returns False if the element is absent or not the expected type, leaving the variable at its default.
 
 ---
 
@@ -3022,177 +2967,68 @@ Element Array:
 
 ### 19.1 Update Mode Model
 
-PLOT supports two update modes that control when the display is refreshed:
+PLOT supports two update modes that control when the display is refreshed (line 2154):
 
-**Automatic Update Mode** (default):
-- Each drawing command immediately updates the display
-- BitmapToCanvas called after each primitive
-- Simple but potentially slower for many commands
-- Best for single or few drawing operations
-
-**Manual Update Mode** (`UPDATE` keyword):
-- Drawing commands accumulate on bitmap
-- Display only refreshed on explicit `SHOW` command
-- Much faster for batch drawing operations
-- Best for complex scenes with many primitives
-
-### 19.2 Update Mode Configuration
-
-**Automatic Mode** (default):
 ```pascal
-vUpdate := False;  // Automatic updates
+if not vUpdate then BitmapToCanvas(0);
+```
+
+**Automatic Update Mode** (default, `vUpdate = False`):
+- `BitmapToCanvas(0)` is called at the end of every `PLOT_Update` invocation.
+- Each serial command batch results in an immediate screen update.
+
+**Manual Update Mode** (`vUpdate = True`, set by `UPDATE` in configure phase, line 1903):
+- `BitmapToCanvas(0)` is **not** called automatically.
+- The P2 program must send the `UPDATE` drawing command (line 2145–2146) to flush `Bitmap[0]` to the screen.
+- Allows rendering an entire frame into `Bitmap[0]` before it becomes visible, eliminating flicker.
+
+### 19.2 Drawing Command Flow
+
+**Automatic Mode**:
+```
+PLOT_Update called → process all commands in element array → BitmapToCanvas(0)
 ```
 
 **Manual Mode**:
+```
+PLOT_Update called → process all commands in element array → (no flush)
+...
+key_update in element array → BitmapToCanvas(0) → visible update
+```
+
+### 19.3 PLOT_GetXY (lines 2157–2167)
+
+`PLOT_GetXY` converts the current drawing position (`vPixelX`, `vPixelY`) to screen-space integer pixel coordinates for use by text and shape helpers. It is **not** the fixed-point coordinate path used by DOT and LINE — those commands compute their own fixed-point coords inline (lines 1970–1978, 1990–2007).
+
 ```pascal
-// Configuration
-PLOT_Configure:
-  key_update → vUpdate := True
-```
-
-**Display Refresh Control**:
-```pascal
-// Automatic mode
-if not vUpdate then
-  BitmapToCanvas(0);  // Update after each drawing command
-
-// Manual mode
-key_show → BitmapToCanvas(0);  // Update only on SHOW command
-```
-
-### 19.3 Drawing Command Flow
-
-**Automatic Mode Flow**:
-```
-P2 Command → Parse → PLOT_GetXY → Draw Primitive → BitmapToCanvas → Display Update
-                                       ↓
-                                  SmoothDot/SmoothLine/etc.
-```
-
-**Manual Mode Flow**:
-```
-P2 Command 1 → Parse → PLOT_GetXY → Draw Primitive → Bitmap (no display)
-P2 Command 2 → Parse → PLOT_GetXY → Draw Primitive → Bitmap (no display)
-P2 Command 3 → Parse → PLOT_GetXY → Draw Primitive → Bitmap (no display)
-    ...
-SHOW Command → BitmapToCanvas → Display Update (all accumulated changes)
-```
-
-### 19.4 Layer System Timing
-
-**Layer Loading**:
-```pascal
-key_load:
+procedure TDebugDisplayForm.PLOT_GetXY(var x, y: integer);
 begin
-  LoadLayer(layer_index, filename, x, y, width, height);
-  if not vUpdate then BitmapToCanvas(0);
+  if vDirX then
+    x := vWidth - 1 - vOffsetX - vPixelX
+  else
+    x := vOffsetX + vPixelX;
+  if vDirY then
+    y := vOffsetY + vPixelY
+  else
+    y := vHeight - 1 - vOffsetY - vPixelY;
 end;
 ```
 
-**Layer Compositing**:
-- Layers loaded from external BMP files
-- Cropped to specified rectangle during load
-- Composited onto main bitmap during PLOT_Update
-- Each layer add respects update mode
+`PLOT_GetXY` is called by `CIRCLE`, `OVAL`, `BOX`, `OBOX` (line 2018), `TEXT` (line 2053), and `SPRITE` (line 2104). It does not perform any polar conversion or floating-point scaling — those are handled separately by `PolarToCartesian` at the `SET` / `LINE` level.
 
-**Layer Memory**:
-```
-PlotLayers: array[0..7] of TBitmap;  // 8 independent layer bitmaps
-```
+### 19.4 Layer System
+
+Layers are stored as `PlotBitmap: array[0..plot_layermax - 1] of TBitmap` (8 elements, indices 0–7 internally, 1–8 in directives).
+
+- **`LAYER`** (lines 2056–2062): validates the file exists and has `.bmp` extension, then calls `PlotBitmap[t1-1].LoadFromFile(...)`.
+- **`CROP`** (lines 2063–2089): composites a rectangular region of a layer onto `Bitmap[0]` using `Canvas.CopyRect`. No scaling is performed — source and destination rectangles have the same dimensions.
+- Neither command triggers `BitmapToCanvas`; the update model (§19.1) governs when the result becomes visible.
 
 ### 19.5 Sprite System Timing
 
-**Sprite Definition**:
-```pascal
-key_spritedef:
-begin
-  DefineSpriteFromPixels(index, width, height, pixels);
-  // No display update (definition only)
-end;
-```
-
-**Sprite Rendering**:
-```pascal
-key_sprite:
-begin
-  RenderSprite(index, orientation, x, y, scale, opacity);
-  if not vUpdate then BitmapToCanvas(0);
-end;
-```
-
-**Sprite Performance**:
-- 256 sprite definitions (shared with BITMAP display)
-- 8 orientations pre-rendered per sprite
-- Scaling done at render time (affects performance)
-- Each sprite draw can involve many SmoothShape calls
-
-### 19.6 Coordinate Transformation Timing
-
-**PLOT_GetXY Function** (lines 2157-2167):
-```pascal
-procedure PLOT_GetXY(var x, y: integer);
-var
-  r, a: extended;
-begin
-  if vPolar then
-  begin
-    // Convert polar to Cartesian
-    r := x * vScale;
-    a := Pi / 2 - y / vTwoPi * Pi * 2;
-    x := Round(r * Cos(a) * $100);
-    y := Round(r * Sin(a) * $100);
-  end
-  else
-  begin
-    // Linear Cartesian scaling
-    x := Round((x - vOriginX) * vScale * vFlipX * $100);
-    y := Round((y - vOriginY) * vScale * vFlipY * $100);
-  end;
-
-  // Add display offset
-  x := x + vBitmapWidth shl 7;
-  y := vBitmapHeight shl 7 - y;
-end;
-```
-
-**Transformation Cost**:
-- Cartesian mode: Simple multiplication and addition
-- Polar mode: Trigonometric functions (cos, sin) - more expensive
-- Called once per coordinate for most primitives
-- Called twice for lines and rectangles (start and end points)
-
-### 19.7 Text Rendering Timing
-
-**Text Drawing Pipeline**:
-```
-TEXT command → Parse string → Set font/style → Calculate rotation matrix → Render to bitmap
-                                                                              ↓
-                                                               RotatedTextOut (Windows GDI)
-```
-
-**Performance Factors**:
-- Font loading (cached after first use)
-- Rotation angle (0° and 90° increments are fastest)
-- String length (per-character rendering cost)
-- Style encoding (bold, italic add rendering overhead)
-
-### 19.8 Memory Access Patterns
-
-**Drawing Operations**:
-```
-Command → Transform → Render → Bitmap[BitmapPtr]
-                                     (32-bit RGBA)
-```
-
-**Display Operations**:
-```
-SHOW or auto-update → BitmapToCanvas → Swap buffers → Windows paint event
-```
-
-**Cache Efficiency**:
-- Sequential pixel access during line/shape rendering
-- Good locality for small primitives
-- Sprite rendering can be scattered (depends on sprite size)
+- `SPRITEDEF` stores pixel indices and palette colors into the global flat arrays (`SpritePixels`, `SpriteColors`). No display update occurs.
+- `SPRITE` iterates over all sprite pixels, calls `SmoothShape` per non-transparent pixel, and the result sits in `Bitmap[0]`; the update model controls when it becomes visible.
+- There is no pre-rendering of orientations — all 8 orientation transforms are computed at render time via the coordinate arithmetic in the `case t4 of` block (lines 2123–2132).
 
 ---
 
@@ -3200,285 +3036,79 @@ SHOW or auto-update → BitmapToCanvas → Swap buffers → Windows paint event
 
 ### 20.1 Bitmap Architecture
 
-PLOT uses the same double-buffered bitmap system as other display types.
+PLOT uses the shared two-bitmap system defined by the base `TDebugDisplayForm`. All nine display types share the same infrastructure.
 
-**Bitmap Array** (DebugDisplayUnit.pas):
+**Bitmap Array** (`DebugDisplayUnit.pas`):
 ```pascal
 Bitmap: array[0..1] of TBitmap;
 ```
 
 **Bitmap Roles**:
-- **Bitmap[0]**: Render target (all drawing operations)
-- **Bitmap[1]**: Display buffer (copied to Canvas)
+- **Bitmap[0]**: Render target — all drawing operations go here.
+- **Bitmap[1]**: Display buffer — copied to the form `Canvas` for display.
 
-**Configuration**:
+> **v55 note:** `PixelFormat := pf32bit` is **not** explicitly set in `PLOT_Configure`. The bitmaps are created inside `SetSize` (called at line 1915). The exact pixel format depends on the shared `SetSize` implementation, not on PLOT-specific code.
+
+### 20.2 BitmapToCanvas Transfer (lines 3522–3530)
+
 ```pascal
-Bitmap[0].PixelFormat := pf32bit;     // 32-bit RGBA
-Bitmap[1].PixelFormat := pf32bit;
-Bitmap[0].SetSize(vBitmapWidth, vBitmapHeight);
-Bitmap[1].SetSize(vBitmapWidth, vBitmapHeight);
-```
-
-### 20.2 Memory Layout
-
-**Pixel Format**: 32-bit RGBA (4 bytes per pixel)
-
-**Memory Organization**:
-```
-Bitmap[0]:
-  Row 0: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
-  Row 1: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
-  ...
-  Row N: [B0][G0][R0][A0][B1][G1][R1][A1]...[Bn][Gn][Rn][An]
-```
-
-**Byte Order**: BGRA (Windows convention)
-
-**Memory Size** (typical 512×512 display):
-```
-512 × 512 × 4 bytes × 2 bitmaps = 2,097,152 bytes = 2 MB
-```
-
-### 20.3 BitmapToCanvas Transfer
-
-**Implementation** (DebugDisplayUnit.pas:3514-3522):
-```pascal
-procedure BitmapToCanvas(i: integer);
+procedure TDebugDisplayForm.BitmapToCanvas(Level: integer);
 begin
-  // Swap bitmaps
-  BitmapPtr := BitmapPtr xor 1;
-
-  // Copy render target to display buffer
-  Bitmap[BitmapPtr xor 1].Canvas.Draw(0, 0, Bitmap[BitmapPtr]);
-
-  // Trigger Windows paint event
-  Invalidate;
+  if Level = 0 then
+    Bitmap[1].Canvas.Draw(0, 0, Bitmap[0]);
+  if DisplayType in [dis_spectro, dis_plot, dis_bitmap] then
+    Canvas.StretchDraw(Rect(0, 0, vClientWidth, vClientHeight), Bitmap[1])
+  else
+    Canvas.Draw(0, 0, Bitmap[1]);
 end;
 ```
 
-**Double-Buffer Swap**:
-```
-Before:
-  Bitmap[0] = render target (being drawn to)
-  Bitmap[1] = display buffer (visible)
-  BitmapPtr = 0
+There is **no buffer swap** — the roles of Bitmap[0] and Bitmap[1] are fixed. `Level = 0` copies Bitmap[0] (render target) into Bitmap[1] (display buffer), then Bitmap[1] is stretch-drawn to the form canvas. For PLOT (and BITMAP/SPECTRO), `StretchDraw` is used, which scales the bitmap if the window has been resized.
 
-After BitmapToCanvas:
-  BitmapPtr = 1
-  Bitmap[1] = new render target (will be drawn to next)
-  Bitmap[0] = new display buffer (visible)
-```
+### 20.3 Anti-Aliased Primitive Rendering
 
-**Purpose**: Eliminate flicker by separating render and display operations.
+The actual signatures used in `PLOT_Update` are:
 
-**Timing**:
-- Automatic mode: Called after each drawing command
-- Manual mode: Called only on SHOW command
-
-### 20.4 Anti-Aliased Primitive Rendering
-
-**SmoothDot** - Circular dot with anti-aliasing:
 ```pascal
-SmoothDot(x, y, radius, color, opacity);
+// DOT path (line 1978):
+SmoothDot(t3, t4, t1 shl vPrecise shr 1, vPlotColor, t2);
+// SmoothDot(x_fixed8, y_fixed8, radius_fixed8, color: integer; opacity: byte)
+
+// LINE path (line 2008):
+SmoothLine(t5, t6, t7, t8, t3 shl vPrecise shr 1, vPlotColor, t4);
+// SmoothLine(x1, y1, x2, y2, halfwidth_fixed8, color: integer; opacity: byte)
+
+// Shapes path (lines 2031–2034):
+SmoothShape(xc, yc, xs, ys, xro, yro, thick, color: integer; opacity: byte);
+// (lines 3590+) — center in integer pixels, size/radii/thickness in integer pixels
 ```
 
-**SmoothLine** - Anti-aliased line:
+The `t3/t4` (DOT) and `t5–t8` (LINE) coordinates are 8.8 fixed-point values computed inline; `PLOT_GetXY` returns plain integer screen coordinates used by shapes and text.
+
+### 20.4 Layer and Sprite Storage (v55 names)
+
+**Layers**:
 ```pascal
-SmoothLine(x1, y1, x2, y2, thickness, color, opacity);
+PlotBitmap: array[0..plot_layermax - 1] of TBitmap;  // plot_layermax = 8
 ```
 
-**SmoothShape** - Anti-aliased filled shape:
+**Sprites** (flat global arrays, shared with BITMAP display):
 ```pascal
-SmoothShape(points, num_points, color, opacity);
+SpritePixels : array[0..SpriteMax * SpriteMaxX * SpriteMaxY - 1] of byte;
+SpriteColors : array[0..SpriteMax * 256 - 1] of integer;
+SpriteSizeX  : array[0..SpriteMax - 1] of integer;
+SpriteSizeY  : array[0..SpriteMax - 1] of integer;
 ```
 
-**Rendering Parameters**:
-- `x, y`: Center position in 8.8 fixed-point (256 = 1 pixel)
-- `radius`, `thickness`: Size in 6.6 fixed-point (64 = 1 pixel)
-- `color`: RGB24 color value
-- `opacity`: Alpha value (0-255)
+There is no `Sprite[0..255, 0..7] of TBitmap` structure. Sprite orientations are computed at render time using the coordinate arithmetic in the `case t4 of` block (lines 2123–2132). No pre-rendering or bilinear scaling is performed.
 
-**Rendering Algorithm** (simplified):
-```pascal
-procedure SmoothDot(x, y, radius, color, opacity);
-begin
-  // Convert fixed-point to integer pixel coordinates
-  cx := x shr 8;
-  cy := y shr 8;
-  r := radius shr 6;
+### 20.5 Update Model Summary
 
-  // Render circle with anti-aliasing
-  for py := cy - r to cy + r do
-    for px := cx - r to cx + r do
-    begin
-      // Calculate distance from center (fixed-point)
-      dx := (px shl 8) - x;
-      dy := (py shl 8) - y;
-      dist := Sqrt(dx * dx + dy * dy);
-
-      // Calculate coverage (0.0 to 1.0)
-      if dist < radius - 128 then
-        coverage := 1.0             // Fully inside
-      else if dist > radius + 128 then
-        coverage := 0.0             // Fully outside
-      else
-        coverage := smooth_falloff(dist, radius);  // Anti-aliased edge
-
-      // Blend with existing pixel
-      alpha := Round(opacity * coverage);
-      if alpha > 0 then
-        BlendPixel(px, py, color, alpha);
-    end;
-end;
-```
-
-**Anti-Aliasing**: Sub-pixel accuracy for smooth edges.
-
-**Alpha Blending**: Combines primitive color with existing bitmap content.
-
-### 20.5 Layer Compositing
-
-**Layer Bitmap Storage**:
-```pascal
-PlotLayers: array[0..7] of TBitmap;
-```
-
-**Layer Loading**:
-```pascal
-procedure LoadLayer(index: integer; filename: string; x, y, w, h: integer);
-begin
-  // Load BMP file
-  TempBitmap.LoadFromFile(filename);
-
-  // Crop to specified rectangle
-  PlotLayers[index].Canvas.CopyRect(
-    Rect(0, 0, w, h),
-    TempBitmap.Canvas,
-    Rect(x, y, x + w, y + h)
-  );
-end;
-```
-
-**Layer Compositing During Render**:
-```pascal
-procedure CompositeLayer(index: integer; x, y: integer);
-begin
-  // Blend layer onto main bitmap
-  Bitmap[BitmapPtr].Canvas.Draw(x, y, PlotLayers[index]);
-end;
-```
-
-**Layer Memory**:
-```
-8 layers × typical 256×256 × 4 bytes = 2,097,152 bytes = 2 MB
-(varies based on loaded layer sizes)
-```
-
-### 20.6 Sprite Rendering
-
-**Sprite Storage**:
-```pascal
-Sprite: array[0..255, 0..7] of TBitmap;  // 256 sprites × 8 orientations
-```
-
-**Sprite Rendering Pipeline**:
-```
-1. Lookup sprite bitmap: Sprite[index][orientation]
-2. Scale sprite if needed (scale ≠ 256)
-3. Render using SmoothShape with opacity
-4. Composite onto main bitmap
-```
-
-**Memory Impact**:
-```
-Typical sprite: 32×32 × 4 bytes × 8 orientations = 32,768 bytes = 32 KB
-256 sprites: 256 × 32 KB = 8,388,608 bytes = 8 MB (if all defined)
-```
-
-**Scaling Performance**:
-- Scale = 256 (1.0): Direct copy, fast
-- Scale ≠ 256: Bilinear interpolation, slower
-- Opacity < 255: Alpha blending, moderate cost
-
-### 20.7 Text Rendering Integration
-
-**Windows GDI Text**:
-```pascal
-procedure RenderText(x, y: integer; text: string; angle: integer);
-begin
-  // Set font and style
-  Bitmap[BitmapPtr].Canvas.Font := ConfiguredFont;
-
-  // Render rotated text
-  RotatedTextOut(Bitmap[BitmapPtr].Canvas, x, y, angle, text);
-end;
-```
-
-**Text Rendering**:
-- Uses Windows GDI (not custom anti-aliasing)
-- Supports arbitrary rotation angles
-- Font rendering cached by Windows
-- Blends with existing bitmap content
-
-### 20.8 Automatic vs. Manual Update Rendering
-
-**Automatic Mode Rendering Flow**:
-```
-1. Drawing command arrives
-2. Parse parameters
-3. Transform coordinates (PLOT_GetXY)
-4. Render primitive → Bitmap[0]
-5. BitmapToCanvas → Display (immediate update)
-6. Next command → Repeat from step 1
-```
-
-**Manual Mode Rendering Flow**:
-```
-1. Drawing command arrives
-2. Parse parameters
-3. Transform coordinates (PLOT_GetXY)
-4. Render primitive → Bitmap[0] (accumulate)
-5. Next command → Repeat from step 1
-   ...
-N. SHOW command
-N+1. BitmapToCanvas → Display (batch update)
-```
-
-**Key Difference**:
-- Automatic: Immediate visual feedback, N display updates
-- Manual: Deferred visual feedback, 1 display update (faster)
-
-### 20.9 Coordinate Transformation Integration
-
-**Fixed-Point Pipeline**:
-```
-Input: x, y (integer coordinates in value units)
-  ↓
-Transform: PLOT_GetXY (Cartesian/Polar, Origin, Flip, Scale)
-  ↓
-Fixed-Point: x * scale * 256, y * scale * 256 (8.8 format)
-  ↓
-Center: x += (width/2) * 256, y += (height/2) * 256
-  ↓
-Render: SmoothDot/SmoothLine/etc. → Bitmap[0]
-```
-
-**Example** (Cartesian, range=512, scale=1.0, width=512):
-```
-Input: x=100, y=100
-
-Transform (PLOT_GetXY):
-  x = (100 - 0) * 1.0 * 1.0 * 256 = 25,600 (fixed-point)
-  y = (100 - 0) * 1.0 * 1.0 * 256 = 25,600
-
-Center:
-  x = 25,600 + (512 shl 7) = 25,600 + 65,536 = 91,136
-  y = (512 shl 7) - 25,600 = 65,536 - 25,600 = 39,936
-
-SmoothDot:
-  SmoothDot(91,136, 39,936, radius, color, opacity)
-  → Plots at pixel (356, 156) with anti-aliasing
-```
+| Condition | When `BitmapToCanvas(0)` is called |
+|---|---|
+| `vUpdate = False` (default) | End of every `PLOT_Update` call (line 2154) |
+| `vUpdate = True` (manual mode) | Only when `key_update` is encountered in `PLOT_Update` (lines 2145–2146) |
+| Always | When `key_clear` runs (`ClearBitmap` is called, then update-mode rule applies) |
 
 ---
 
@@ -3486,216 +3116,93 @@ SmoothDot:
 
 ### 21.1 Color System
 
-**TranslateColor Function** (shared with all displays):
+Drawing colors (`vPlotColor`, `vTextColor`, `vBackColor`) are stored internally in the P2 RGB24 format (`$RRGGBB`). Before writing to a Windows GDI `TCanvas`, the shared helper `WinRGB` (used at line 2052 for text, and implicitly by the Smooth* helpers) byte-swaps R↔B because Windows GDI uses BGR order.
+
 ```pascal
-function TranslateColor(c: integer): integer;
-begin
-  if c < 0 then
-    Result := DefaultScopeColors[(-c - 1) mod 8]
-  else
-    Result := SwapRGB(c);  // Convert RGB to BGR for Windows
-end;
+// Used at line 2052 for TEXT:
+Bitmap[0].Canvas.Font.Color := WinRGB(vTextColor);
 ```
 
-**Default Colors** (8 colors):
-```pascal
-DefaultScopeColors: array[0..7] of integer = (
-  $00FFFF,  // Yellow
-  $FF00FF,  // Magenta
-  $FFFF00,  // Cyan
-  $0000FF,  // Red
-  $00FF00,  // Green
-  $FF0000,  // Blue
-  $00FFAA,  // Orange
-  $FF00AA   // Purple
-);
-```
+**Default color constants** (assigned in `PLOT_Configure`, 1877–1878, and global
+`SetDefaults`, 2891) — `clXxx` are literal RGB24 values from `DebugDisplayUnit.pas`
+179–196:
 
-**PLOT Color Usage**:
-- Background color: vBackColor (default black)
-- Grid color: vGridColor (default gray)
-- Drawing primitives: per-command color parameters
-- Text: per-TEXT command color
+| Variable | Default constant | Hex | Source |
+|---|---|---|---|
+| `vPlotColor` | `DefaultPlotColor` = `clCyan` | `$00FFFF` | 1877 |
+| `vTextColor` | `DefaultTextColor` = `clWhite` | `$FFFFFF` | 1878 |
+| `vBackColor` | `DefaultBackColor` = `clBlack` | `$000000` | 2891 (global) |
+
+There is no `TranslateColor` function in PLOT and no `vGridColor` variable (PLOT draws
+no grid), and no default scope-color table relevant to PLOT. Named colors
+(`BLACK`…`GRAY`) are resolved by the shared `KeyColor` helper; per-element colors and
+sprite palettes are taken as literal RGB24/RGBA values.
 
 ### 21.2 Fixed-Point Arithmetic
 
-PLOT uses **8.8 fixed-point** format (8 integer bits, 8 fractional bits).
+DOT and LINE use an **8.8 fixed-point** scheme (not `PLOT_GetXY`). The conversion is:
 
-**Conversion**:
-```
-Integer to fixed-point: x << 8 (multiply by 256)
-Fixed-point to integer: x >> 8 (divide by 256)
-```
-
-**Example**:
-```
-x = 10.5 pixels → fixed-point = 10.5 × 256 = 2688
-x = 2688 (fixed-point) → pixels = 2688 / 256 = 10.5
-```
-
-**Purpose**: Sub-pixel positioning for anti-aliased rendering.
-
-**PLOT Scaling**:
 ```pascal
-x := Round((x - vOriginX) * vScale * vFlipX * $100);  // $100 = 256
-y := Round((y - vOriginY) * vScale * vFlipY * $100);
+// Cartesian, no flip:
+t3 := vOffsetX shl 8 + vPixelX shl vPrecise;   // X fixed-point
+t4 := (vHeight - 1 - vOffsetY) shl 8 - vPixelY shl vPrecise;  // Y fixed-point
 ```
 
-### 21.3 Trigonometric Functions
+- When `vPrecise = 8` (default on): `pixel shl 8` → full 8.8 precision, 1/256-pixel resolution.
+- When `vPrecise = 0` (toggled off): `pixel shl 0` → whole-pixel addressing.
 
-**Polar Coordinate Conversion** (PLOT_GetXY):
+The DOT radius is `t1 shl vPrecise shr 1`, making radius half the linesize, in matching precision units.
+
+### 21.3 Polar Coordinate Conversion
+
+Polar-to-Cartesian conversion is performed by `PolarToCartesian` (called from `SET` at line 1961 and `LINE` at line 1987):
+
 ```pascal
-r := x * vScale;
-a := Pi / 2 - y / vTwoPi * Pi * 2;
-x := Round(r * Cos(a) * $100);
-y := Round(r * Sin(a) * $100);
+procedure TDebugDisplayForm.PolarToCartesian(var rho_x, theta_y: integer);
+var
+  Tf, Xf, Yf: extended;
+begin
+  Tf := (Int64(theta_y) + Int64(vTheta)) / vTwoPi * Pi * 2;
+  SinCos(Tf, Yf, Xf);
+  theta_y := Round(Yf * rho_x);
+  rho_x := Round(Xf * rho_x);
+end;
 ```
 
-**Purpose**: Convert polar (rho, theta) to Cartesian (x, y).
+`PLOT_GetXY` does **not** perform polar conversion — it only applies the `vDirX/vDirY/vOffsetX/vOffsetY` transform on whatever `vPixelX/vPixelY` already contain. By the time `PLOT_GetXY` is called (for shapes/text/sprites), those variables already hold Cartesian values.
 
-**PLOT Usage**:
-- Polar mode: All coordinates transformed via PLOT_GetXY
-- Text rotation: Angle parameter passed to RotatedTextOut
-- Sprite orientation: Pre-rendered rotations
+### 21.4 Precision Mode (`vPrecise`)
 
-### 21.4 Precision Mode
+`vPrecise` is an `integer` (not a boolean). It holds either `8` (sub-pixel on, default) or `0` (sub-pixel off). The `PRECISE` directive XORs it: `vPrecise := vPrecise xor 8` (line 1947).
 
-**vPrecise Flag**:
-```pascal
-vPrecise: boolean;  // True = sub-pixel (default), False = integer pixels
-```
-
-**Impact**:
-```pascal
-if vPrecise then
-  // Use 8.8 fixed-point coordinates for anti-aliasing
-  SmoothDot(x_fixed, y_fixed, radius, color, opacity)
-else
-  // Round to integer pixels
-  SmoothDot((x shr 8) shl 8, (y shr 8) shl 8, radius, color, opacity)
-```
-
-**Use Cases**:
-- `PRECISE`: Smooth anti-aliased graphics (default)
-- `PRECISE_OFF`: Pixel-aligned graphics (faster, no sub-pixel)
+There is no `PRECISE_OFF` command — a single `PRECISE` directive toggles the state.
 
 ### 21.5 Text Rendering Infrastructure
 
-**Font Configuration**:
-```pascal
-vFont:       string;       // Font name (default: 'Arial')
-vFontSize:   integer;      // Font size in points
-vFontWeight: integer;      // Bold weight (400=normal, 700=bold)
-vFontItalic: boolean;      // Italic flag
-vFontUnder:  boolean;      // Underline flag
-```
-
-**RotatedTextOut** (Windows GDI helper):
-```pascal
-procedure RotatedTextOut(Canvas: TCanvas; x, y, angle: integer; text: string);
-begin
-  // Create rotated font
-  LogFont.lfEscapement := angle * 10;  // Angle in 0.1 degree units
-  Font := CreateFontIndirect(LogFont);
-
-  // Select font and render
-  SelectObject(Canvas.Handle, Font);
-  TextOut(Canvas.Handle, x, y, PChar(text), Length(text));
-
-  // Cleanup
-  DeleteObject(Font);
-end;
-```
-
-**Text Metrics**:
-```pascal
-procedure SetTextMetrics;
-begin
-  Bitmap[0].Canvas.Font.Name := vFont;
-  Bitmap[0].Canvas.Font.Size := vFontSize;
-  ChrWidth := Bitmap[0].Canvas.TextWidth('X');
-  ChrHeight := Bitmap[0].Canvas.TextHeight('X');
-end;
-```
+Text rendering uses the Windows GDI `TCanvas.TextOut` with a custom `LOGFONT`. The complete implementation is `AngleTextOut` (lines 3483–3520; see §8.4). Font properties (weight, italic, underline) are encoded in `vTextStyle`; font size is in `vTextSize`. There is no separate `vFont`/`vFontName` variable in PLOT — the font face is whatever is set on `Bitmap[0].Canvas.Font` by the size assignment at line 2050.
 
 ### 21.6 Origin and Flip Control
 
-**Origin Configuration**:
+The actual v55 variables are:
+
 ```pascal
-vOriginX: integer;  // Origin X offset (default: 0)
-vOriginY: integer;  // Origin Y offset (default: 0)
-vFlipX:   integer;  // X direction (+1 or -1, default: +1)
-vFlipY:   integer;  // Y direction (+1 or -1, default: +1)
+vOffsetX : integer;   // origin X (set by ORIGIN)
+vOffsetY : integer;   // origin Y (set by ORIGIN)
+vDirX    : boolean;   // X flip (set by CARTESIAN {flipy {flipx}})
+vDirY    : boolean;   // Y flip (set by CARTESIAN {flipy {flipx}})
 ```
 
-**Coordinate Transformation**:
-```pascal
-// Shift origin and flip axes
-x := Round((x - vOriginX) * vScale * vFlipX * $100);
-y := Round((y - vOriginY) * vScale * vFlipY * $100);
-```
-
-**Examples**:
-```
-ORIGIN 256 256  → Shift origin to (256, 256)
-FLIPX           → Flip X axis (mirror horizontally)
-FLIPY           → Flip Y axis (mirror vertically)
-```
+There are no `vFlipX`/`vFlipY` integer variables (those would be ±1 multipliers), no `FLIPX`/`FLIPY` commands, and no `vScale`/`vRange` variables. Direction is controlled as boolean flags through the `CARTESIAN` directive.
 
 ### 21.7 Sprite System
 
-**Sprite Definition Sharing**:
-- 256 sprite slots shared between PLOT and BITMAP displays
-- SpriteDefine function (shared code)
-- Sprite data stored globally
+Sprite data is shared globally between PLOT and BITMAP windows via the flat arrays described in §4.5. Sprites are **not** pre-rendered into orientation bitmaps; all 8 orientations are rendered on-the-fly during `SPRITE` execution using the pixel-position formulas in lines 2123–2132 (see §10.4).
 
-**Sprite Orientation**:
-```
-0: Original
-1: Flip X
-2: Flip Y
-3: Flip X+Y (180° rotation)
-4: Rotate 90° CW
-5: Rotate 90° CW + Flip X
-6: Rotate 90° CW + Flip Y
-7: Rotate 90° CW + Flip X+Y (270° CW)
-```
-
-**Sprite Scaling**:
-```
-scale = 256: 1:1 (original size)
-scale = 128: 0.5:1 (half size)
-scale = 512: 2:1 (double size)
-```
+Sprite scale range is **1–64** (integer pixel size per sprite pixel, enforced by `KeyValWithin(t5, 1, 64)` at line 2109). There is no fractional scale or `scale=256` convention.
 
 ### 21.8 File Operations
 
-**Save to BMP** (shared SaveBitmap function):
-```pascal
-procedure SaveBitmap(filename: string);
-begin
-  if filename = '' then
-    filename := Format('plot_%d.bmp', [SaveCounter]);
-  Bitmap[BitmapPtr xor 1].SaveToFile(filename);
-  Inc(SaveCounter);
-end;
-```
-
-**PLOT Command**: `SAVE {filename}`
-
-**Behavior**: Saves current display buffer to BMP file.
-
-**Layer Loading**:
-```pascal
-procedure LoadLayerBitmap(index: integer; filename: string);
-begin
-  PlotLayers[index].LoadFromFile(filename);
-end;
-```
-
-**PLOT Command**: `LOAD layer filename x y width height`
-
-**Behavior**: Loads BMP file into specified layer with cropping.
+The `SAVE` command invokes `KeySave` (line 2148), a shared helper that writes the current canvas contents to a `.bmp` file. The `LAYER` command uses `PlotBitmap[t1-1].LoadFromFile(PChar(val))` directly (line 2061). There is no `LOAD` command distinct from `LAYER`; `LAYER` is the only file-load directive.
 
 ---
 
@@ -3703,302 +3210,115 @@ end;
 
 ### 22.1 Window Creation Sequence
 
-**Trigger**: Host software calls `CreateDebugDisplay(display_type, element_array)`.
+The display manager (in `DebugUnit.pas`) creates the `TDebugDisplayForm`, sets `DisplayType := dis_plot`, and then calls `PLOT_Configure` with the element array from the serial command. The relevant PLOT-specific portion is `PLOT_Configure` (lines 1864–1916).
 
-**PLOT Creation** (display_type = dis_plot = 3):
+### 22.2 PLOT_Configure: What It Actually Does (v55)
 
+**Step 1 — Set defaults** (lines 1869–1880):
 ```pascal
-// 1. Form instantiation
-DebugDisplayForm := TDebugDisplayForm.Create(Application);
-DebugDisplayForm.DisplayType := dis_plot;
-
-// 2. Initialize element parser
-ElementPtr := 0;
-ElementEnd := element_count;
-
-// 3. Set defaults
-vWidth := 512;
-vHeight := 512;
-vRange := 512;
-vScale := 1.0;
-vBackColor := $000000;     // Black
-vGridColor := $404040;     // Gray
-vPolar := False;
-vUpdate := False;          // Automatic update mode
-vPrecise := True;          // Sub-pixel precision
-vOriginX := 0;
-vOriginY := 0;
-vFlipX := 1;
-vFlipY := 1;
-vFont := 'Arial';
-vFontSize := 12;
-vLwidth := 1;              // Line thickness = 1 pixel
-vOpacity := 255;           // Full opacity
-
-// 4. Call PLOT_Configure
-PLOT_Configure;
-
-// 5. Calculate scale factor
-vScale := vWidth / 2 / vRange;
-
-// 6. Create bitmaps
-Bitmap[0] := TBitmap.Create;
-Bitmap[1] := TBitmap.Create;
-Bitmap[0].PixelFormat := pf32bit;
-Bitmap[1].PixelFormat := pf32bit;
-Bitmap[0].SetSize(vBitmapWidth, vBitmapHeight);
-Bitmap[1].SetSize(vBitmapWidth, vBitmapHeight);
-
-// 7. Initialize layers
-for i := 0 to 7 do
-  PlotLayers[i] := TBitmap.Create;
-
-// 8. Set form size and position
-ClientWidth := vWidth + margins;
-ClientHeight := vHeight + margins;
-SetFormPosition;  // From POS command or cascade
-
-// 9. Clear display
-ClearBitmap;
-BitmapToCanvas(0);
-
-// 10. Show window
-Show;
+vDirX := False;
+vDirY := False;
+vOffsetX := 0;
+vOffsetY := 0;
+vPixelX := 0;
+vPixelY := 0;
+vDotSize := 1;
+vDotSizeY := 1;
+vPlotColor := DefaultPlotColor;
+vTextColor := DefaultTextColor;
+vOpacity := $FF;
+vPrecise := 8;
 ```
 
-**Source Locations**:
-- PLOT_Configure: Lines 1864-1916
-- Form creation: DebugUnit.pas (display manager)
-
-### 22.2 Configuration Parameter Processing
-
-**Parameter Parsing Loop** (lines 1870-1910):
+**Step 2 — Parse configuration directives** (lines 1882–1906):
 ```pascal
-while not NextEnd do
-begin
-  if NextKey then
-  case val of
-    key_title:       KeyTitle;                    // Window title
-    key_pos:         KeyPos;                      // Window position
-    key_size:        KeySize;                     // Display dimensions
-    key_range:       KeyValWithin(vRange, 1, $7FFFFFFF);
-    key_color:       if KeyColor(vBackColor) then KeyColor(vGridColor);
-    key_polar:       KeyTwoPi;                    // Enable polar mode
-    key_update:      vUpdate := True;             // Manual update mode
-    key_precise:     vPrecise := True;            // Sub-pixel precision
-    key_precise_off: vPrecise := False;           // Integer pixels
-    key_origin:      KeyOrigin;                   // Set origin point
-    key_flipx:       vFlipX := -vFlipX;           // Flip X axis
-    key_flipy:       vFlipY := -vFlipY;           // Flip Y axis
-    key_font:        KeyFont;                     // Set font properties
-    key_lwidth:      KeyValWithin(vLwidth, 1, 20); // Line thickness
-    key_opacity:     KeyValWithin(vOpacity, 0, 255); // Default opacity
-  end;
+while NextKey do
+case val of
+  key_title:           KeyTitle;
+  key_pos:             KeyPos;
+  key_size:            KeySize(vWidth, vHeight, plot_wmin, plot_wmax, plot_hmin, plot_hmax);
+  key_dotsize:         if KeyValWithin(vDotSize, 1, 256) then
+                       begin
+                         vDotSizeY := vDotSize;
+                         KeyValWithin(vDotSizeY, 1, 256);
+                       end;
+  key_lut1..key_rgb24: KeyColorMode;
+  key_lutcolors:       KeyLutColors;
+  key_backcolor:       KeyColor(vBackColor);
+  key_update:          vUpdate := True;
+  key_hidexy:          vHideXY := True;
 end;
 ```
 
-**Default Overrides**:
-- SIZE not specified → vWidth = 512, vHeight = 512
-- RANGE not specified → vRange = 512
-- UPDATE not specified → vUpdate = False (automatic)
-- PRECISE not specified → vPrecise = True (sub-pixel)
-- ORIGIN not specified → vOriginX = 0, vOriginY = 0
-- Font not specified → 'Arial', size 12
+The accepted config directives are exactly these nine cases — no `POLAR`, `CARTESIAN`, `RANGE`, `FONT`, `FLIPX`, `FLIPY`, `LWIDTH`, `OPACITY`, or `PRECISE` in the configure phase.
 
-**Validation**:
-- SIZE clamped to minimum 32, maximum determined by system
-- RANGE clamped to 1-$7FFFFFFF
-- LWIDTH clamped to 1-20 pixels
-- OPACITY clamped to 0-255
+**Step 3 — Create layer bitmaps and zero sprite arrays** (lines 1908–1913):
+```pascal
+for i := 0 to plot_layermax - 1 do PlotBitmap[i] := TBitmap.Create;
+FillChar(SpritePixels, SizeOf(SpritePixels), 0);
+FillChar(SpriteColors, SizeOf(SpriteColors), 0);
+FillChar(SpriteSizeX,  SizeOf(SpriteSizeX),  0);
+FillChar(SpriteSizeY,  SizeOf(SpriteSizeY),  0);
+```
+
+**Step 4 — Set initial window size** (line 1915):
+```pascal
+SetSize(0, 0, 0, 0);
+```
+
+`SetSize` is the shared helper that creates the bitmaps and sizes the form.
 
 ### 22.3 Polar Mode Initialization
 
-**KeyTwoPi Processing**:
-```pascal
-procedure KeyTwoPi;
-begin
-  vPolar := True;
-  vTwoPi := $100000000;  // Default: 2^32 units per circle
-  vTheta := 0;           // Default: no angular offset
+`POLAR` is not accepted in `PLOT_Configure`. Polar mode is enabled only via the `POLAR` drawing directive in `PLOT_Update` (line 2135–2136: `key_polar: KeyTwoPi`). `KeyTwoPi` sets `vPolar := True`, `vTwoPi`, and `vTheta`.
 
-  if NextNum then
-  begin
-    case val of
-      -1: vTwoPi := -$100000000;  // Clockwise rotation
-       0: vTwoPi := $100000000;   // Keep default
-    else
-      vTwoPi := val;              // Custom value (e.g., 360 for degrees)
-    end;
-    KeyVal(vTheta);               // Optional theta offset
-  end;
-end;
+### 22.4 Initial Display State (after PLOT_Configure)
+
+```
+vDirX = False, vDirY = False
+vOffsetX = 0, vOffsetY = 0
+vPixelX = 0, vPixelY = 0
+vDotSize = 1, vDotSizeY = 1
+vPlotColor = DefaultPlotColor
+vTextColor = DefaultTextColor
+vOpacity = $FF (255)
+vPrecise = 8 (sub-pixel on)
+vPolar = False (not reset here; retains FormCreate value, which is False)
+vUpdate = False (automatic) unless UPDATE specified
+vHideXY = False unless HIDEXY specified
+PlotBitmap[0..7] = freshly created empty TBitmap objects
+SpritePixels/Colors/SizeX/SizeY = zeroed
 ```
 
-**Polar Configuration Examples**:
-```
-POLAR              → vTwoPi = $100000000 (2^32), vTheta = 0
-POLAR 360          → vTwoPi = 360 (degrees), vTheta = 0
-POLAR 360 90       → vTwoPi = 360, vTheta = 90 (90° offset)
-POLAR -1           → vTwoPi = -$100000000 (clockwise)
-```
+### 22.5 Runtime State Transitions
 
-### 22.4 Layer Initialization
-
-**Layer Bitmap Creation**:
-```pascal
-for i := 0 to 7 do
-begin
-  PlotLayers[i] := TBitmap.Create;
-  PlotLayers[i].PixelFormat := pf32bit;
-  // Size set during LOAD command
-end;
-```
-
-**Layer Loading** (runtime):
-```pascal
-key_load:
-begin
-  if NextNum then layer := Within(val, 0, 7) else Continue;
-  if NextStr then filename := PChar(val) else Continue;
-  if NextNum then x := val else x := 0;
-  if NextNum then y := val else y := 0;
-  if NextNum then w := val else w := -1;  // -1 = full width
-  if NextNum then h := val else h := -1;  // -1 = full height
-
-  LoadLayer(layer, filename, x, y, w, h);
-  if not vUpdate then BitmapToCanvas(0);
-end;
-```
-
-### 22.5 Sprite System Initialization
-
-**Sprite Array** (shared global):
-```pascal
-Sprite: array[0..255, 0..7] of TBitmap;
-```
-
-**Sprite Definition** (runtime):
-```pascal
-key_spritedef:
-begin
-  if NextNum then index := Within(val, 0, 255) else Continue;
-  if NextNum then width := val else Continue;
-  if NextNum then height := val else Continue;
-
-  // Read pixel data
-  SetLength(pixels, width * height);
-  for i := 0 to width * height - 1 do
-    if NextNum then pixels[i] := val;
-
-  DefineSpriteFromPixels(index, width, height, pixels);
-end;
-```
-
-**Sprite Storage**:
-- Sprites persist across PLOT windows (global state)
-- Each sprite stores 8 orientations (pre-rendered)
-- Memory allocated on-demand during SPRITEDEF
-
-### 22.6 Font Initialization
-
-**Font Configuration**:
-```pascal
-procedure KeyFont;
-begin
-  if NextStr then vFont := PChar(val);
-  if NextNum then vFontSize := Within(val, 6, 200);
-end;
-```
-
-**Font Selection**:
-```pascal
-procedure SetFont;
-begin
-  with Bitmap[0].Canvas.Font do
-  begin
-    Name := vFont;
-    Size := vFontSize;
-    // Weight, italic, underline set per TEXT command
-  end;
-end;
-```
-
-### 22.7 Initial Display State
-
-**After Initialization**:
-```
-Window: Created and visible
-Display: Black (cleared)
-Mode: Cartesian or polar (determined by vPolar)
-Update: Automatic or manual (determined by vUpdate)
-Scale: vScale = (width / 2) / vRange
-Origin: (vOriginX, vOriginY)
-Precision: Sub-pixel or integer (determined by vPrecise)
-Layers: 8 empty layer bitmaps allocated
-Sprites: Shared sprite array (may contain previously defined sprites)
-```
-
-**Ready for Data**: Window now waits for PLOT_Update calls with drawing commands.
-
-### 22.8 Runtime State Transitions
-
-**State Diagram**:
 ```
 [Created] → PLOT_Configure → [Configured]
                                    ↓
-                      PLOT_Update (first drawing command)
+                      PLOT_Update (drawing commands)
                                    ↓
                               [Active]
-                                ↓    ↑
-                          Drawing commands
-                                ↓    ↑
-                          PLOT_GetXY transform
-                                ↓    ↑
-                          Render primitive
-                                ↓    ↑
-                          BitmapToCanvas (if auto-update)
+                              ↓         ↑
+                        Drawing commands
+                              ↓         ↑
+                     BitmapToCanvas (if auto-update, line 2154)
 
-CLEAR command → ClearBitmap, BitmapToCanvas
-SHOW command → BitmapToCanvas (manual mode)
-Close window → PLOT_Close → Cleanup → [Destroyed]
+key_clear → ClearBitmap; (then auto-update rule applies)
+key_update in update phase → BitmapToCanvas(0) explicitly (line 2145-2146)
+Close window → PLOT_Close → free PlotBitmap[0..7] → [Destroyed]
 ```
 
-### 22.9 Cleanup and Destruction
+### 22.6 Cleanup: PLOT_Close (lines 2169–2174)
 
-**PLOT_Close Method** (lines 2169-2174):
 ```pascal
-procedure PLOT_Close;
-var
-  i: integer;
+procedure TDebugDisplayForm.PLOT_Close;
+var i: integer;
 begin
-  // Free layer bitmaps
-  for i := 0 to 7 do
-    PlotLayers[i].Free;
-
-  // Main bitmaps freed by parent class
-  // Sprite data is shared, not freed
+  for i := 0 to plot_layermax - 1 do PlotBitmap[i].Free;
 end;
 ```
 
-**Window Close**:
-```pascal
-// 1. Call PLOT_Close
-PLOT_Close;
-
-// 2. Stop processing updates
-FormClosing := True;
-
-// 3. Free bitmaps
-Bitmap[0].Free;
-Bitmap[1].Free;
-
-// 4. Free form
-Form.Free;
-```
-
-**Sprite Cleanup**: Sprite array is shared globally, not freed per-window. Sprites persist across multiple PLOT/BITMAP window instances.
-
-**Layer Cleanup**: Layer bitmaps are window-specific and freed during PLOT_Close.
+Only the layer bitmaps are freed here. The shared sprite arrays (`SpritePixels`, `SpriteColors`, `SpriteSizeX`, `SpriteSizeY`) are global and not freed per-window. The main `Bitmap[0]`/`Bitmap[1]` are freed by the shared form destruction logic.
 
 ---
 

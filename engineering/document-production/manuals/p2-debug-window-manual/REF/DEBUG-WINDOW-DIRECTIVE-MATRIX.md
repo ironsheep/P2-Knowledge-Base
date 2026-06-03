@@ -212,21 +212,35 @@ Transmits **two LONGs**:
 
 ### 4.4 Per-window coordinate mapping (the only input difference)
 
-The cursor coordinate reported by **both** the live measurement cursor
-(`FormMouseMove`) and `PC_MOUSE` (`SendMousePos`) is transformed per display type:
+⚠️ **Two different coordinate systems** — the on-screen measurement readout and the
+`PC_MOUSE` wire value are computed by *different code* and do **not** agree for every
+window. Do not assume the P2 receives what the readout shows.
 
-| Window | Reported coordinate basis |
+**(a) On-screen measurement readout** (`FormMouseMove`, `656-740`) — full per-window
+transform, shown only as the live cursor text (suppressed by `HIDEXY`):
+
+| Window | On-screen coordinate basis |
 |---|---|
-| LOGIC | sample index (−) × channel row; origin bottom-right (`660-667`) |
+| LOGIC | sample index (−) , channel row; origin bottom-right (`660-667`) |
 | SCOPE, FFT | pixel offset from plot origin, Y inverted (`668-675`) |
 | SCOPE_XY | scaled data value; Cartesian *or* polar (rho,theta) per `POLAR`/`LOGSCALE` (`676-718`) |
-| PLOT | `pixel ÷ DOTSIZE`, honoring `CARTESIAN` flip flags `vDirX`/`vDirY` (`719-724`, `3558-3561`) |
-| TERM | character **column,row** (`÷ ChrWidth/ChrHeight`); off-text-area = sentinel (`725-732`, `3563-3567`) |
-| SPECTRO, BITMAP | `pixel ÷ DOTSIZE`, honoring direction flags (`733-734`, `3556-3562`) |
-| MIDI | *(no coordinate readout / no special mapping)* |
+| PLOT | `pixel ÷ DOTSIZE`, honoring `CARTESIAN` flip flags `vDirX`/`vDirY` (`719-724`) |
+| TERM | character **column,row** (`÷ ChrWidth/ChrHeight`); off-text-area = blank (`725-732`) |
+| SPECTRO, BITMAP | `pixel ÷ DOTSIZE` (no direction flip in the readout) (`733-734`) |
+| MIDI | *(no coordinate readout)* |
 
-`HIDEXY` (config directive) suppresses the on-screen measurement-cursor readout;
-it does **not** disable `PC_MOUSE` reporting back to the P2.
+**(b) `PC_MOUSE` wire value** (`SendMousePos`, `3537-3577`) — only **two** transforms
+exist; everything else is sent as **raw client pixels**:
+
+| Window(s) | `PC_MOUSE` x,y transform |
+|---|---|
+| SPECTRO, PLOT, BITMAP | `÷ DOTSIZE`, with `if vDirX: x:=ClientWidth−x` and `if not vDirY: y:=ClientHeight−y` (`3556-3562`) — note this **Y-inverts SPECTRO/BITMAP**, which the on-screen readout does **not** |
+| TERM | character column,row, `÷ ChrWidth/ChrHeight` from the text origin (`3563-3567`) |
+| LOGIC, SCOPE, SCOPE_XY, FFT | **none — raw client pixel x,y** (the sample-index / Y-inversion / scaled-value transforms in (a) are *not* applied on the wire) |
+| MIDI | raw client pixel x,y |
+
+`HIDEXY` suppresses only the (a) on-screen readout; it does **not** disable (b)
+`PC_MOUSE` reporting back to the P2.
 
 ---
 
@@ -325,6 +339,321 @@ Line refs are to `DebugDisplayUnit.pas` (v55).
 
 ---
 
-*Authored 2026-05-31 against PNut v55 `DebugDisplayUnit.pas`. This matrix is the
-punch-list for refreshing the nine per-window Theory-of-Operations docs under
+## 7. Parameter values & legal ranges
+
+This section gives the **value space** of every directive parameter: numeric range,
+enumerated keyword set, or free-string format. All ranges are the exact
+`Within`/`KeyValWithin(v, min, max)` clamps in v55 source. Out-of-range numeric
+values are **clamped** (not rejected); an unrecognized keyword ends parsing of the
+current directive.
+
+### 7.0 Global defaults (`SetDefaults`, 2880-2917)
+
+Applied to every window *before* its `_Configure` runs; a window's "unique
+defaults" then override some of these.
+
+| State | Default | State | Default |
+|---|---|---|---|
+| width × height | 256 × 256 | colorMode | `RGB24` |
+| samples | 256 | colorTune | 0 |
+| backColor | `clBlack` `$000000` | gridColor | `clGray` `$404040` |
+| lineSize | 1 | dotSize | (per-window) |
+| textSize | 10 | textStyle | 1 |
+| textAngle | 0 | logScale | off |
+| update mode | off | hideXY | off |
+| rate | 0 | holdOff | 0 |
+| polar | off | twoPi / theta | `$100000000` / 0 |
+| sparse | −1 (off) | plotColor | `clCyan` `$00FFFF` |
+| textColor | `clWhite` `$FFFFFF` | channel colors | `DefaultScopeColors[0..7]` (see §7.1 palette) |
+
+### 7.0a Per-window font size & default window size
+
+**Font size.** The global `FontSize` preference (set in `EditorUnit`, default **10**,
+user-adjustable 1–72) and the `DefaultTextSize = 10` constant both default to **10**, so
+every display window starts at **10 pt** except MIDI. The `TEXTSIZE` directive (where
+accepted) clamps to **6..200** via `KeyTextSize` (2834-2837).
+
+| Window | Default font size | Set in | `TEXTSIZE` directive? |
+|---|---|---|---|
+| LOGIC    | `FontSize` = **10** | 939 | yes — config (961) |
+| SCOPE    | `FontSize` = **10** | 1159 | yes — config (1178) |
+| SCOPE_XY | `FontSize` = **10** | 1392 | yes — config (1416) |
+| FFT      | `FontSize` = **10** | 1563 | yes — config (1590) |
+| TERM     | `FontSize` = **10** | 2186 | yes — config (2202) |
+| PLOT     | `DefaultTextSize` = **10** | inherits `SetDefaults` 2894 | yes — **update phase** only (2037; also inline `TEXT`) |
+| SPECTRO  | `DefaultTextSize` = **10** (no text drawn) | inherits 2894 | **no** |
+| BITMAP   | `DefaultTextSize` = **10** (no text drawn) | inherits 2894 | **no** |
+| MIDI     | `MidiKeySize div 3` = **8** | 2528 | no — scales with `SIZE` (`MidiSize` 1..50 ⇒ font 4..69) |
+| *Debugger (single-step)* | `FontSize` ≈ **10**, auto-shrunk so 123 cols ≤ 4096 px | `DebuggerUnit` 597-604 | no |
+
+**Default window size.** All sizes are before user `SIZE`/`POS`. SCOPE/SCOPE_XY/FFT
+inherit `vWidth=vHeight=256` from `SetDefaults`; PLOT/SPECTRO/BITMAP draw a `vWidth ×
+vHeight` (× dotsize) client with zero margins; LOGIC/TERM/MIDI compute size from
+content; the debugger is a fixed character grid.
+
+| Window | Default size (pre-`SIZE`) | `SIZE` directive | Notes |
+|---|---|---|---|
+| LOGIC    | `vSamples·vSpacing × channels·ChrHeight` = `32·8 × 32·ChrHeight` = **256 px** wide × 32-channel tall | — (driven by `SAMPLES`/`SPACING`/channel count) | + label-width left margin, `ChrHeight` top/bottom |
+| SCOPE    | **256 × 256** (plot area) | `w h`, 32..2048 each | + `ChrWidth`/`ChrHeight·2` margins |
+| SCOPE_XY | **256 × 256** (square) | `w` → `w·2` clamped 32..2048; height = width | square; + `ChrHeight·2` margins all sides |
+| FFT      | **256 × 256** (plot area) | `w h`, 32..2048 each | + `ChrWidth`/`ChrHeight·2` margins |
+| SPECTRO  | **256 × 256** (depth 256 × bins 256; `vTrace=$F` → no swap) | `DEPTH` 1..2048 + `SAMPLES` (bins) | zero margins; ×`vDotSize`/`vDotSizeY` (1×1) |
+| PLOT     | **256 × 256** | `w h`, 32..2048 each | zero margins; ×dotsize (1×1) |
+| TERM     | **40 × 20 chars** (`DefaultCols × DefaultRows`) → `40·ChrWidth × 20·ChrHeight` px | `cols rows`, 1..256 each | + `ChrWidth div 2` margins |
+| BITMAP   | **256 × 256** | `w h`, 1..2048 each | zero margins; ×dotsize (1×1) |
+| MIDI     | computed: `MidiKeySize·whiteKeys + border·2 × MidiKeySize·6 + border`; default 88-key (`RANGE` 21..108), `MidiSize=4` ⇒ ≈ **1256 × 148 px** | `SIZE` = `MidiSize` 1..50 | also `RANGE` changes key span |
+| *Debugger* | `ChrWidth·123 × (ChrHeight·77)÷2` (fixed `123 × 77`-half-row grid) ⇒ ≈ **985 × 655 px** @ 10 pt | none (not resizable) | `DebuggerUnit.SmoothFillMax = 4096` |
+
+### 7.1 Enumerated keyword value sets — the "legal strings"
+
+These are the fixed keyword vocabularies a parameter may take. A color parameter
+(`KeyColor`, 2752-2783) accepts **either** a named color **or** a numeric value
+interpreted through the current color mode.
+
+**Named colors** (`key_black..key_gray`, ids 0-9) — optional trailing brightness
+nibble `0..15` (default `8`) for all except BLACK/WHITE (`KeyColor`, `2756-2783`).
+
+⚠️ **These named-directive colors are NOT the `clXxx` palette constants** (see
+the palette table below). Only `BLACK` and `WHITE` are returned as fixed literals
+(`$000000`/`$FFFFFF`, special-cased at `2764-2767`). The other eight are *computed*
+through the **RGBI8X** color space: `c := TranslateColor(h shl 5 or p shl 1,
+key_rgbi8x)` where `h = id − key_orange` (the hue 0-7) and `p` is the brightness
+nibble. The resolved RGB therefore depends on brightness and only *approximates*
+the similarly-named palette constant. Values below are at the **default brightness
+8** (verified by executing the Pascal `TranslateColor`/`KeyColor` math):
+
+| Keyword | id | RGB @ bri 8 | RGB @ bri 15 | Keyword | id | RGB @ bri 8 | RGB @ bri 15 |
+|---|--:|---|---|---|--:|---|---|
+| `BLACK`   | 0 | `$000000` (fixed) | `$000000` | `CYAN`    | 5 | `$09FFFF` | `$EFFFFF` |
+| `WHITE`   | 1 | `$FFFFFF` (fixed) | `$FFFFFF` | `RED`     | 6 | `$FF0909` | `$FFEFEF` |
+| `ORANGE`  | 2 | `$FF8409` | `$FFF7EF` | `MAGENTA` | 7 | `$FF09FF` | `$FFEFFF` |
+| `BLUE`    | 3 | `$0909FF` | `$EFEFFF` | `YELLOW`  | 8 | `$FFFF09` | `$FFFFEF` |
+| `GREEN`   | 4 | `$09FF09` | `$EFFFEF` | `GRAY`    | 9 | `$848484` | `$F7F7F7` |
+
+Higher brightness nibbles blend the hue toward white; lower nibbles toward black.
+A numeric value (no keyword) is instead interpreted through the *current* color
+mode (`vColorMode`), not RGBI8X.
+
+**Palette constants** (`clXxx`, `DebugDisplayUnit.pas` 179-191) — these are the
+**fixed literal RGB24 values** used for window/channel *defaults* (e.g.
+`DefaultScopeColors`, `DefaultTermColors`, grid/back/plot/text defaults). They are
+locally-defined literals, **not** VCL `TColor`s and **not** the named-directive
+colors above:
+
+| Constant | Hex | Constant | Hex | Constant | Hex |
+|---|---|---|---|---|---|
+| `clRed`    | `$FF0000` | `clCyan`    | `$00FFFF` | `clWhite` | `$FFFFFF` |
+| `clLime`   | `$00FF00` | `clOrange`  | `$FF7F00` | `clBlack` | `$000000` |
+| `clBlue`   | `$7F7FFF` | `clOlive`   | `$7F7F00` | `clGray`  | `$404040` |
+| `clYellow` | `$FFFF00` | `clMagenta` | `$FF00FF` | `clGray2` | `$808080` |
+|            |           |             |           | `clGray3` | `$D0D0D0` |
+
+**Color modes** (`key_lut1..key_rgb24`, ids 10-28; `KeyColorMode`, 2785-2804).
+LUMA/HSV/RGBI variants take a tune parameter (`W`/`X` suffixes select tuning
+behavior):
+`LUT1 LUT2 LUT4 LUT8 LUMA8 LUMA8W LUMA8X HSV8 HSV8W HSV8X RGBI8 RGBI8W RGBI8X RGB8
+HSV16 HSV16W HSV16X RGB16 RGB24`.
+*SPECTRO restricts its config color mode to `LUMA8 LUMA8W LUMA8X HSV16 HSV16W
+HSV16X` only (1767).*
+
+**Packed-data formats** (`key_longs_1bit..key_bytes_4bit`, ids 29-40;
+`PackDef`, 140-152) — each unpacks one transmitted value into N sub-samples of B
+bits:
+
+| Keyword | sub-samples × bits | Keyword | sub-samples × bits |
+|---|---|---|---|
+| `LONGS_1BIT`  | 32 × 1 | `WORDS_1BIT` | 16 × 1 |
+| `LONGS_2BIT`  | 16 × 2 | `WORDS_2BIT` | 8 × 2 |
+| `LONGS_4BIT`  | 8 × 4  | `WORDS_4BIT` | 4 × 4 |
+| `LONGS_8BIT`  | 4 × 8  | `WORDS_8BIT` | 2 × 8 |
+| `LONGS_16BIT` | 2 × 16 | `BYTES_1BIT` | 8 × 1 |
+| `BYTES_2BIT`  | 4 × 2  | `BYTES_4BIT` | 2 × 4 |
+
+Modifiers (follow a packed keyword, `KeyPack` 2817-2832): `ALT` (alternate
+nibble/word ordering) and `SIGNED` (sign-extend sub-samples). Either or both,
+any order.
+
+**Standalone modifier keywords:** `AUTO` (SCOPE channel/trigger auto-range;
+PLOT CROP), `RANGE` (LOGIC channel range grouping), `WINDOW` (SAVE whole-window
+region).
+
+**Free-text string parameters** (no enumeration):
+- `TITLE 'text'` — window caption (any text).
+- channel/label strings (LOGIC/SCOPE/SCOPE_XY/FFT) — any text; LOGIC label may be
+  followed by count/RANGE/color.
+- `LAYER n 'file.bmp'` — path; **must exist and end in `.bmp`** (2060).
+- `SAVE 'name'` — writes `name.bmp`; `SAVE l t w h 'name'` or `SAVE WINDOW 'name'`
+  for a desktop region (`KeySave`, 2839-2866).
+
+### 7.2 Resolved limit constants (symbol → value, 154-239)
+
+| Symbol | Value | Symbol | Value |
+|---|--:|---|--:|
+| `DataSets` (`LogicSets`,`Y_Sets`,`XY_Sets`,`FFTmax`,`SmoothFillMax`) | 2048 ¹ | `Channels` | 8 |
+| `LogicChannels` | 32 | `FFTexpMax` | 11 |
+| `fft_default` | 512 | `DefaultCols` × `DefaultRows` | 40 × 20 |
+| `scope/scope_xy/plot _wmin/_hmin` | 32 | `…_wmax/_hmax` | 2048 |
+| `bitmap_wmin/_hmin` | 1 | `bitmap_wmax/_hmax` | 2048 |
+| `term_colmin/_rowmin` | 1 | `term_colmax/_rowmax` | 256 |
+| `plot_layermax` | 8 | `SpriteMax` | 256 |
+| `SpriteMaxX/Y` | 32 | `DefaultTextSize` | 10 |
+
+¹ These five are all `DataSets = 1 shl 11 = 2048` in **`DebugDisplayUnit.pas`** (the nine
+debug-display windows). ⚠️ The single-step debugger is a separate unit: **`DebuggerUnit.pas`
+redefines `SmoothFillMax = 4096`** (`DataSets`/`LogicSets`/etc. do not exist there). Don't
+carry the 2048 value across to the debugger window.
+
+### 7.3 Per-window parameter value tables
+
+Each row: directive → parameter(s) with **type · legal range / legal set ·
+default**. "color" = named color (§7.1) or numeric-through-color-mode.
+
+#### LOGIC (`Configure 926`, `Update 1034`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `TITLE` | `'text'` · free string |
+| `POS` | left, top · int (offset from base window pos) |
+| `SAMPLES` | n · int **4..2047** · 32 |
+| `SPACING` | n · int **1..32** · 8 |
+| `RATE` | n · int **1..2048** · 1 |
+| `DOTSIZE` | n · int **0..32** · 0 |
+| `LINESIZE` | n · int **1..32** · 3 |
+| `TEXTSIZE` | n · int **6..200** · 10 |
+| `COLOR` | back, grid · color, color |
+| `HIDEXY` | *(flag)* |
+| packed | `LONGS_1BIT..BYTES_4BIT` `{ALT}{SIGNED}` |
+| channel str | `'name'` · {count int **1..32**} · {`RANGE`} · {color} |
+| *(Update)* `TRIGGER` | mask, match · int; offset · int **0..samples-1** |
+| *(Update)* `HOLDOFF` | n · int **2..2048** |
+
+#### SCOPE (`Configure 1151`, `Update 1209`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `TITLE` / `POS` | as LOGIC |
+| `SIZE` | w · int **32..2048** · 256; h · int **32..2048** · 256 |
+| `SAMPLES` | n · int **16..2048** · 256 |
+| `RATE` | n · int **1..2048** · 1 |
+| `DOTSIZE` | n · int **0..32** · 0¹ |
+| `LINESIZE` | n · int **0..32** · 3¹ |
+| `TEXTSIZE` | n · int **6..200** · 10 |
+| `COLOR` | back, grid · color, color |
+| `HIDEXY` / packed | as LOGIC |
+| channel str | `'label'` · (`AUTO` \| low, high · int32) · tall, base, grid · int · {color} |
+| *(Update)* `TRIGGER` | channel · int **−1..7**; (`AUTO` \| arm, fire · int32); offset · int **0..samples-1** |
+| *(Update)* `HOLDOFF` | n · int **2..2048** |
+
+¹ if DOTSIZE and LINESIZE both 0, DOTSIZE forced to 1 (1188).
+
+#### SCOPE_XY (`Configure 1386`, `Update 1443`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | n · int; effective width = `n*2` clamped **32..2048**; square |
+| `RANGE` | n · int **1..$7FFFFFFF** · $7FFFFFFF |
+| `SAMPLES` | n · int **0..2048** · 256 (0 = persistent display) |
+| `RATE` | n · int **1..2048** · 1 |
+| `DOTSIZE` | n · int **2..20** · 6 |
+| `TEXTSIZE` | n · int **6..200** · 10 |
+| `COLOR` | back, grid · color, color |
+| `POLAR` | twoPi · int (−1/0 ⇒ `$100000000`, else value); theta · int |
+| `LOGSCALE` / `HIDEXY` | *(flags)* |
+| label str | `'label'` · {color} |
+
+#### FFT (`Configure 1552`, `Update 1620`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | w, h · int **32..2048** · 256, 256 |
+| `SAMPLES` | n · int **4..2048** (→ rounded to power of 2) · 512; first · int **0..n/2−2** · 0; last · int **first+1..n/2−1** · n/2−1 |
+| `RATE` | n · int **1..2048** |
+| `DOTSIZE` | n · int **0..32** · 0 |
+| `LINESIZE` | n · int **−32..32** · 3 (negative ⇒ vertical filled bars) |
+| `TEXTSIZE` | n · int **6..200** · 10 |
+| `COLOR` | back, grid · color, color |
+| `LOGSCALE` / `HIDEXY` / packed | as above |
+| channel str | `'label'` · mag · int **0..11**; high · int **1..$7FFFFFFF**; tall, base, grid · int · {color} |
+
+#### SPECTRO (`Configure 1719`, `Update 1792`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SAMPLES` | n · int **4..2048** · 512; first/last as FFT |
+| `DEPTH` | n · int **1..2048** |
+| `MAG` | n · int **0..11** · 0 |
+| `RANGE` | n · int **1..$7FFFFFFF** · $7FFFFFFF |
+| `RATE` | n · int **1..2048** |
+| `TRACE` | n · int (bit-field; 3 dir bits + scroll) · $F |
+| `DOTSIZE` | x · int **1..16** · 1; y · int **1..16** · 1 |
+| color-mode | `LUMA8 LUMA8W LUMA8X HSV16 HSV16W HSV16X` only · LUMA8X |
+| `LOGSCALE` / `HIDEXY` / packed | as above |
+
+#### PLOT (`Configure 1864`, `Update 1918`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | w, h · int **32..2048** · 256, 256 |
+| `DOTSIZE` | x · int **1..256** · 1; y · int **1..256** · 1 |
+| color-mode / `LUTCOLORS` / `BACKCOLOR` | mode keyword / up to 256 rgb24 / color |
+| `UPDATE` / `HIDEXY` | *(flags)* |
+| *(Update)* `COLOR` | color · color (or `BLACK..GRAY {bright 0..15}`) |
+| *(Update)* `OPACITY` | byte · int **0..255** · 255 |
+| *(Update)* `PRECISE` | *(toggle; sub-pixel on/off)* |
+| *(Update)* `LINESIZE` | n · int |
+| *(Update)* `ORIGIN` | {x, y · int} (else current pixel) |
+| *(Update)* `SET` | x, y · int (rho/theta if polar) |
+| *(Update)* `DOT` | {linesize · int {opacity · int **0..255**}} |
+| *(Update)* `LINE` | x, y · int {linesize {opacity}} |
+| *(Update)* `CIRCLE` | width {linesize {opacity}} |
+| *(Update)* `OVAL`/`BOX` | width, height {linesize {opacity}} |
+| *(Update)* `OBOX` | width, height, xradius, yradius {linesize {opacity}} |
+| *(Update)* `TEXT` | {size {style {angle}}} `'string'` |
+| *(Update)* `TEXTSIZE`/`TEXTSTYLE`/`TEXTANGLE` | n · int |
+| *(Update)* `LAYER` | n · int **1..8**; `'file.bmp'` (must exist) |
+| *(Update)* `CROP` | layer **1..8**; (`AUTO` x y \| left top width height {x y}) |
+| *(Update)* `SPRITEDEF` | id **0..255**; xsize **1..32**; ysize **1..32**; pixels…; 256 colors |
+| *(Update)* `SPRITE` | id **0..255** {orient **0..7** {scale **1..64** {opacity **0..255**}}} |
+| *(Update)* `POLAR` | {twoPi; theta} · int | `CARTESIAN` {flipY {flipX} · bool} |
+
+#### TERM (`Configure 2181`, `Update 2223`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | cols · int **1..256** · 40; rows · int **1..256** · 20 |
+| `TEXTSIZE` | n · int **6..200** · 10 |
+| `COLOR` | up to **8** colors (4 text/back pairs) · default `ORANGE/BLACK ×2, LIME/BLACK ×2` |
+| `BACKCOLOR` | color |
+| `UPDATE` / `HIDEXY` | *(flags)* |
+| *(Update)* color | `BLACK..GRAY` (text {, back}) · `BACKCOLOR` color |
+| *(Update)* control | int **0..13** (0=clr+home,1=home,2=col,3=row,4-7=color pair,8=bksp,9=tab,10/13=newline) and **32..255**=printable |
+| *(Update)* string | any text (printed verbatim) |
+
+`set column` arg **0..cols−1**; `set row` arg **0..rows−1** (2273-2275).
+
+#### BITMAP (`Configure 2372`, `Update 2416`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | w · int **1..2048** · 256; h · int **1..2048** · 256 |
+| `DOTSIZE` | x · int **1..256** · 1; y · int **1..256** · 1 |
+| `SPARSE` | color (−1 = off/normal) |
+| color-mode / `LUTCOLORS` | as PLOT |
+| `TRACE` | n · int (8 scan patterns + scroll bit) · 0 |
+| `RATE` | n · int (−1 ⇒ width×height) |
+| packed / `UPDATE` / `HIDEXY` | as above |
+| *(Update)* `SET` | x · int **0..w−1**; y · int **0..h−1** (cancels scroll) |
+| *(Update)* `SCROLL` | x · int **−w..w**; y · int **−h..h** |
+| *(Update)* `TRACE` | n · int | `RATE` n · int |
+| *(Update)* pixel | int (through color mode / packing) |
+
+#### MIDI (`Configure 2492`, `Update 2590`)
+| Directive | Parameter(s) — type · range · default |
+|---|---|
+| `SIZE` | n · int **1..50** · 4 (key-size scalar) |
+| `RANGE` | firstKey · int **0..127** · 21; lastKey · int **firstKey..127** · 108 |
+| `CHANNEL` | n · int **0..15** · 0 |
+| `COLOR` | onWhite, onBlack · color, color · `CYAN`, `MAGENTA` |
+| *(Update)* MIDI bytes | int **0..255** (note-on/off velocity state machine) |
+| *(Update)* `CLEAR`/`SAVE` | — |
+
+*(All windows additionally accept `PC_KEY` and `PC_MOUSE` in their update phase — see §4 for the shared keyboard/mouse model and return-value layouts.)*
+
+---
+
+*Authored 2026-05-31, value/range reference added 2026-06-01, against PNut v55
+`DebugDisplayUnit.pas`. This matrix is the punch-list for refreshing the nine
+per-window Theory-of-Operations docs under
 `DOCs/pascal-REF/theory-of-operations/` (which were last verified at v51 / 2025-11-08).*
