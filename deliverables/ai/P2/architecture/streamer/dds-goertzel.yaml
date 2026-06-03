@@ -43,7 +43,7 @@ operation:
   goertzel_calculation: |
     sin := LUT.byte[3] (sign-extended)
     cos := LUT.byte[2] (sign-extended)
-    m := ADC_bit ? +1 : -1
+    m := bitstream sum, -3..+3 (±1 per selected ADC pin)
     
     sin_acc += sin * m
     cos_acc += cos * m
@@ -97,17 +97,20 @@ reading_results:
 # Frequency calculation
 frequency:
   description: "NCO frequency for target detection/synthesis"
-  formula: "frequency = $1_0000_0000 * target_freq / clock_freq"
-  
+  formula: "frequency = $8000_0000 * target_freq / clock_freq"
+
   note: |
-    DDS/Goertzel uses 33-bit frequency calculation internally,
-    providing sub-Hz resolution at typical system clocks.
-    
+    Set via SETXFRQ — the streamer NCO masks its MSB before each add, so the
+    multiplier is $8000_0000 (2^31), not 2^32. Sub-Hz resolution at typical
+    system clocks. (See pasm2/setxfrq.yaml and streamer/nco-timing.yaml.)
+
   example: |
     ' Detect 40 kHz at 200 MHz clock:
-    ' frequency = $1_0000_0000 * 40000 / 200000000
-    qfrac   ##40000, clkfreq
+    ' frequency = $8000_0000 * 40000 / 200000000
+    qfrac   ##40000, clkfreq   ' QFRAC = 2^32 * 40000/clkfreq
     getqx   xfrq
+    shr     xfrq, #1           ' halve to 2^31 scaling for the NCO
+    setxfrq xfrq
 
 # SINC1 vs SINC2 comparison
 filter_comparison:

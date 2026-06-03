@@ -16,8 +16,9 @@ operation:
   formula: "phase = (phase & $7FFF_FFFF) + frequency"
   
   hardware_note: |
-    The MSB mask before addition means the NCO uses 31 bits for
-    phase accumulation, with MSB serving as rollover indicator.
+    The phase accumulator is a 32-bit register, but its MSB is masked
+    (cleared) before each add and serves as the rollover flag — so 31 bits
+    hold the accumulating phase and resolution is clkfreq / 2^31.
 
 # Frequency calculation
 frequency_calculation:
@@ -79,25 +80,27 @@ common_values:
 video_rates:
   vga_640x480:
     pixel_rate: "25.175 MHz"
-    at_250mhz: "$0CCC_CCCD"
-    at_300mhz: "$0AAA_AAAB"
-    at_320mhz: "$0A00_0000"
-    
+    at_250mhz: "$0CE3_BCD3"
+    at_300mhz: "$0ABD_C805"
+    at_320mhz: "$0A11_EB85"
+
   vga_800x600:
     pixel_rate: "40.000 MHz"
-    at_250mhz: "$1999_999A"
-    at_300mhz: "$1555_5556"
-    at_320mhz: "$1400_0000"
-    
+    at_250mhz: "$147A_E148"
+    at_300mhz: "$1111_1111"
+    at_320mhz: "$1000_0000"
+
   vga_1024x768:
     pixel_rate: "65.000 MHz"
-    at_250mhz: "$2947_AE15"
-    at_300mhz: "$2222_2223"
-    at_320mhz: "$2080_0000"
-    
+    at_250mhz: "$2147_AE14"
+    at_300mhz: "$1BBB_BBBC"
+    at_320mhz: "$1A00_0000"
+
   hdmi_720p:
     pixel_rate: "74.250 MHz"
-    at_300mhz: "$2777_7778"
+    at_250mhz: "$2604_1893"
+    at_300mhz: "$1FAE_147B"
+    at_320mhz: "$1DB3_3333"
     note: "Requires 10x for TMDS"
 
 # Setting frequency
@@ -128,7 +131,7 @@ phase_control:
 
 # Timing precision
 precision:
-  resolution: "31 bits of phase"
+  resolution: "clkfreq / 2^31 per LSB (32-bit accumulator, MSB masked as rollover flag)"
   sub_hz: "Sub-Hz frequency resolution at typical clocks"
   jitter: "Deterministic - no jitter from NCO"
   

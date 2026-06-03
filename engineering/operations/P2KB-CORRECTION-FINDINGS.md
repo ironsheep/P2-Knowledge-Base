@@ -322,7 +322,7 @@ The `/2³²` form yields **double** the correct word for every rate.
 
 **Proposed correction:** In `modes-reference.yaml`, change SINC2's `d_19_16` to indicate `%0111 with D[23]=1 (SINC2 select)`. (The manual's Appendix A was corrected the same way.)
 
-### F-019 — `dds-goertzel.yaml` carries two unsourced specifics  ·  `NEEDS-VERIFICATION`
+### F-019 — `dds-goertzel.yaml` carries two unsourced specifics  ·  `RESOLVED` (2026-06-03 verification — split outcome)
 
 **File:** `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml`
 
@@ -333,6 +333,10 @@ The `/2³²` form yields **double** the correct word for every rate.
 The manual was softened (dropped "33-bit", replaced "±10" with "well below ±127") pending verification.
 
 **Evidence/needed:** Check the full Silicon Doc v35 (PDF parts, not just the facts extract) for the DDS/Goertzel section. If unsupported, drop "33-bit" (the formula is 2³²) and the "±10" figure from `dds-goertzel.yaml`.
+
+> **Resolved (2026-06-03 verification pass)** — the two suspects split:
+> - **"33-bit" → DROP (CONFIRMED unsourced).** The only "33-bit" in the Silicon Doc is the smart-pin Z-result bus (`p2-documentation.txt:7567`) — unrelated. The Goertzel NCO frequency is set by SETXFRQ (the canonical Goertzel example does `setxfrq freq`, `:4185`), which is 2³¹-scaled (see F-016 / F-022), not "33-bit". Remove the gloss.
+> - **"±10" → KEEP + CITE (suspicion REFUTED).** The Silicon Doc's own Goertzel example sets `ampl = sinc2 ? 10 : 127` (`:4161`, comment "small sin/cos amplitude for SINC2", `:4167`). ±10 for SINC2 / ±127 for SINC1 is correct and now citable — do NOT drop it; the manual's softened "well below ±127" can be tightened back to the canonical 10.
 
 ### F-020 — `nco-timing.yaml` "31-bit phase" gloss is misleading  ·  `CONFIRMED` (minor)
 
@@ -353,6 +357,45 @@ The manual was softened (dropped "33-bit", replaced "±10" with "well below ±12
 **Evidence:** Cross-check `modes-reference.yaml` against `streamer-symbols.yaml` (authoritative values) and the corrected manual Appendix A.
 
 **Proposed correction:** Backfill the missing rows in `modes-reference.yaml` from the symbol values.
+
+---
+
+## Source-verification pass — 2026-06-03 (streamer findings F-016..F-021)
+
+All six open streamer findings were re-verified against the **golden ingestion sources** before any YAML edit, per the standing "confirmed ingestion-source confidence" rule. Outcomes:
+
+| Finding | Verdict | Decisive source |
+|---|---|---|
+| **F-016** | CONFIRMED | `silicon-doc/p2-documentation.txt:2753-2754` verbatim: SETXFRQ D/# "must be multiplied by **$8000_0000**" (2³¹); multiplier table `:2781-2788` (1/2=$4000_0000 … 1/8=$1000_0000) all 2³¹. `setxfrq.yaml`'s `/2³²` formula + every example/common-value is 2× too large. (`nco-timing.yaml` already uses the correct 2³¹ form — KB was self-contradictory.) |
+| **F-017** | CONFIRMED | All 12 proposed values verified = `round(2³¹ × rate/clk)` (Python). All 12 current `nco-timing.yaml video_rates` values wrong; several off by a whole ratio step (e.g. 800×600@250 carried the 50 MHz word $1999_999A). |
+| **F-018** | CONFIRMED | `p2-documentation.txt:4100` "D[23] selects between SINC1 and SINC2"; symbols `X_DDS_GOERTZEL_SINC1=$F007_0000` vs `SINC2=$F087_0000` differ only in bit 23. `modes-reference.yaml` SINC2 `d_19_16:"%1000_0111"` (8 bits in a 4-bit field) → `%0111` + D[23]=1. |
+| **F-019** | SPLIT | "33-bit" → DROP (unsourced); "±10" → KEEP+CITE (`:4161`). See updated F-019 above. |
+| **F-020** | CONFIRMED | `silicon-doc-v35-facts-only.md:338` "32-bit phase accumulator" (+ `:339` MSB-mask). Reword `nco-timing.yaml` "uses 31 bits" / "resolution: 31 bits of phase" → 32-bit register, MSB masked each add as rollover flag, resolution `clkfreq/2³¹`. |
+| **F-021** | CONFIRMED — **corrected list** | The finding's 6 named symbols (`X_RFWORD_16P_4DAC4`, `X_RFWORD_16P_2DAC8`, `X_RFLONG_32P_4DAC8`, `X_16P_4DAC4_WFWORD`, `X_16P_2DAC8_WFWORD`, `X_32P_4DAC8_WFLONG`) are **already present**. Programmatic diff shows **12** genuinely-missing rows: `X_IMM_4X8_4DAC2`/`_2DAC4`/`_1DAC8`, `X_IMM_2X16_4DAC4`/`_2DAC8`, `X_IMM_1X32_4DAC8`, `X_2P_1DAC2_WFBYTE`, `X_4P_2DAC2_WFBYTE`, `X_4P_1DAC4_WFBYTE`, `X_8P_4DAC2_WFBYTE`, `X_8P_2DAC4_WFBYTE`, `X_8P_1DAC8_WFBYTE`. All 12 trace to **`spin2-v51/streamer-events-symbols.txt`** + `complete-streamer-symbols.md` (primary source). |
+
+> **APPLIED — 2026-06-03.** F-016, F-017, F-018, F-019 (split), F-020, F-021, and F-022 are **applied to the YAMLs and validated** — 4 files: `pasm2/setxfrq.yaml`, `streamer/nco-timing.yaml`, `streamer/modes-reference.yaml`, `streamer/dds-goertzel.yaml`. YAML format verify 4/4 clean; cross-ref validation 100% (0 unresolved). These are DONE; the per-finding `CONFIRMED` markers above are kept for history.
+
+### F-022 — `dds-goertzel.yaml` Goertzel-frequency formula uses 2³² (should be 2³¹)  ·  `DONE` (2026-06-03; NEW — missed by the 2026-06-01 audit)
+
+**File:** `deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml` (`frequency.formula` ~L100 and the `qfrac ##40000, clkfreq` example ~L106-110)
+
+**What's wrong:** `frequency = $1_0000_0000 * target_freq / clock_freq` (2³²) and the `qfrac target, clkfreq` example (which yields a 2³²-scaled word). DDS/Goertzel uses the **same streamer NCO**, configured with **SETXFRQ** — the Silicon Doc's canonical Goertzel example does exactly this (`p2-documentation.txt:4185` `setxfrq freq`), and SETXFRQ is 2³¹-scaled (F-016, `:2753`). So the Goertzel frequency word is 2³¹-scaled too; the 2³² formula/example are 2× too high — same root cause as F-016/F-017.
+
+**Evidence:** `p2-documentation.txt:2753-2754` (SETXFRQ ×$8000_0000) + `:4185` (Goertzel example sets the NCO via `setxfrq`).
+
+**Proposed correction:** Change the formula to `D = target_freq × $8000_0000 / clkfreq` and fix the example. Reconcile with F-016.
+
+> **Minor (noted):** the Silicon Doc says the Goertzel bitstream multiplier is "an integer from **−3 to +3**" (`:4094`, sum of up to 3 selected ADC pins), whereas `dds-goertzel.yaml` shows only `m := ADC_bit ? +1 : -1`. Incomplete (correct for 1 pin) — **widened to −3..+3 in the 2026-06-03 pass.**
+
+### F-023 — `setxfrq.yaml` SETQ+SETXFRQ "64-bit precision frequency" claim is unverified  ·  `NEEDS-VERIFICATION`
+
+**File:** `deliverables/ai/P2/language/pasm2/setxfrq.yaml` (description ~L14-15, example 3 ~L44-49, `related_instructions` SETQ note)
+
+**What's suspect:** The file states "For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits for 64-bit precision frequency control." The streamer NCO is a single 32-bit (31-bit-effective) phase accumulator — there is no 64-bit NCO frequency register, so a "64-bit precision" frequency word is dimensionally suspect. Not mentioned in the Silicon Doc v35 SETXFRQ section (`p2-documentation.txt:2753-2790`).
+
+**Why not fixed now:** Surfaced 2026-06-03 during the F-016 scaling fix; left **verbatim** per the hard-facts rule (no golden source consulted on what SETQ-before-SETXFRQ actually does). The F-016 edit changed only the 2³¹/2³² scaling, not this claim.
+
+**Proposed action:** Verify against the Silicon Doc / `pnut_ts` whether SETQ augments SETXFRQ at all. If unsupported, remove the 64-bit claim from the description, example 3, and the `related_instructions` SETQ note.
 
 ---
 

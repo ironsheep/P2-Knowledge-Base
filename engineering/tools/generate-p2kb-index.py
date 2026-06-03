@@ -388,56 +388,6 @@ def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[st
     return categories
 
 
-def promote_aliases_to_files(files: Dict[str, Any], aliases: Dict[str, List[str]]) -> int:
-    """
-    Workaround: add alias entries to the 'files' section so p2kb_find can
-    discover entries by alias name (e.g., 'RCFAST' -> p2kbArchClockSystem).
-
-    Required because the p2kb-mcp server's p2kb_find tool does case-insensitive
-    substring matching against keys in the 'files' section ONLY — it does not
-    consult the 'aliases' section. Promoting aliases as synthetic file entries
-    makes them findable via that substring search.
-
-    Each synthetic entry carries an 'alias_of' field marking it as derived from
-    an alias rather than a real YAML file. Real entries have only 'path' and
-    'mtime' (no 'alias_of' field).
-
-    REMOVE THIS FUNCTION AND ITS CALL once the p2kb-mcp server is updated to
-    also consult the aliases section in p2kb_find. After that update, the
-    canonical alias map alone provides discoverability; this synthetic-entry
-    workaround becomes redundant.
-
-    Skip logic:
-      - Aliases <=2 chars (single-letter flag names like Z/C/N) — too noisy
-      - Aliases that exactly match an existing canonical key — don't shadow
-      - Aliases already findable as case-insensitive substring of some canonical
-        key (e.g., 'MOV' is already in 'p2kbPasm2Mov') — promotion adds no value
-
-    Returns the count of aliases promoted.
-    """
-    canonical_keys_lower = [k.lower() for k in files.keys()]
-    promoted_count = 0
-    for alias, target_keys in aliases.items():
-        if len(alias) <= 2:
-            continue
-        if alias in files:
-            continue
-        alias_lower = alias.lower()
-        if any(alias_lower in k for k in canonical_keys_lower):
-            continue
-        primary_target = target_keys[0]
-        if primary_target not in files:
-            continue
-        files[alias] = {
-            'path': files[primary_target]['path'],
-            'mtime': files[primary_target]['mtime'],
-            'sha256': files[primary_target].get('sha256', ''),
-            'alias_of': primary_target
-        }
-        promoted_count += 1
-    return promoted_count
-
-
 def generate_index(base_path: Path) -> Dict[str, Any]:
     """Generate the complete index structure."""
     ai_path = base_path / "deliverables" / "ai" / "P2"
@@ -507,9 +457,6 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
                 'targets': targets
             })
 
-    # Promote aliases into 'files' for p2kb_find discoverability (see function docstring).
-    promoted_alias_count = promote_aliases_to_files(files, aliases)
-
     # Load category definitions and build categories
     cat_defs = load_category_definitions(base_path)
     categories = build_categories(files, cat_defs)
@@ -550,10 +497,6 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
             print(f"  - '{c['alias']}' -> {c['targets']}")
         if len(multi_target_aliases) > 5:
             print(f"  ... and {len(multi_target_aliases) - 5} more")
-
-    # Report alias promotion (workaround for p2kb_find discoverability)
-    if promoted_alias_count:
-        print(f"\nINFO: {promoted_alias_count} alias(es) promoted to 'files' for p2kb_find discoverability (see promote_aliases_to_files docstring)")
 
     return index
 

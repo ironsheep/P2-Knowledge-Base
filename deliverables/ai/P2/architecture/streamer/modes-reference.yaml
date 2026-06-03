@@ -97,6 +97,36 @@ modes:
     description: "8×4-bit immediate → 1 pin, 4 DAC bits"
     d_19_16: "%0100"
 
+  - mode: "%0110"
+    symbol: X_IMM_4X8_4DAC2
+    description: "4×8-bit immediate → 4 pins, 2 DAC bits"
+    d_19_16: "%0110"
+
+  - mode: "%0110"
+    symbol: X_IMM_4X8_2DAC4
+    description: "4×8-bit immediate → 2 pins, 4 DAC bits"
+    d_19_16: "%0111"
+
+  - mode: "%0110"
+    symbol: X_IMM_4X8_1DAC8
+    description: "4×8-bit immediate → 1 pin, 8 DAC bits"
+    d_19_16: "%1110"
+
+  - mode: "%0110"
+    symbol: X_IMM_2X16_4DAC4
+    description: "2×16-bit immediate → 4 pins, 4 DAC bits"
+    d_19_16: "%1111"
+
+  - mode: "%0111"
+    symbol: X_IMM_2X16_2DAC8
+    description: "2×16-bit immediate → 2 pins, 8 DAC bits"
+    d_19_16: "%0000"
+
+  - mode: "%0111"
+    symbol: X_IMM_1X32_4DAC8
+    description: "1×32-bit immediate → 4 pins, 8 DAC bits"
+    d_19_16: "%0001"
+
   # RDFAST → LUT → Pins/DACs
   - mode: "%0111"
     symbol: X_RFLONG_32X1_LUT
@@ -216,11 +246,41 @@ modes:
     symbol: X_2P_2DAC1_WFBYTE
     description: "2 pins → WFBYTE"
     d_19_16: "%ppp0"
+
+  - mode: "%1101"
+    symbol: X_2P_1DAC2_WFBYTE
+    description: "1 pin, 2 DAC → WFBYTE"
+    d_19_16: "%ppp0 + 2"
     
   - mode: "%1110"
     symbol: X_4P_4DAC1_WFBYTE
     description: "4 pins → WFBYTE"
     d_19_16: "%pp00"
+
+  - mode: "%1110"
+    symbol: X_4P_2DAC2_WFBYTE
+    description: "2 pins, 2 DAC → WFBYTE"
+    d_19_16: "%pp00 + 2"
+
+  - mode: "%1110"
+    symbol: X_4P_1DAC4_WFBYTE
+    description: "1 pin, 4 DAC → WFBYTE"
+    d_19_16: "%pp00 + 4"
+
+  - mode: "%1110"
+    symbol: X_8P_4DAC2_WFBYTE
+    description: "4 pins, 2 DAC → WFBYTE"
+    d_19_16: "%p000 + 6"
+
+  - mode: "%1110"
+    symbol: X_8P_2DAC4_WFBYTE
+    description: "2 pins, 4 DAC → WFBYTE"
+    d_19_16: "%p000 + 7"
+
+  - mode: "%1110"
+    symbol: X_8P_1DAC8_WFBYTE
+    description: "1 pin, 8 DAC → WFBYTE"
+    d_19_16: "%p000 + $E"
     
   - mode: "%1110"
     symbol: X_16P_4DAC4_WFWORD
@@ -273,7 +333,7 @@ modes:
   - mode: "%1111"
     symbol: X_DDS_GOERTZEL_SINC2
     description: "DDS output + Goertzel SINC2"
-    d_19_16: "%1000_0111"
+    d_19_16: "%0111 (with D[23]=1 — SINC2 select)"
     details: dds-goertzel.yaml
 
 # Quick mode selection guide

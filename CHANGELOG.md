@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.6.2] - 2026-06-03
+
+**Streamer NCO timing and mode-configuration coverage**
+
+### Added
+- Streamer mode table: immediate 4×8 / 2×16 / 1×32 and multi-DAC capture configurations now enumerated (`X_IMM_4X8_*`, `X_IMM_2X16_*`, `X_IMM_1X32_4DAC8`, `X_*P_*DAC*_WFBYTE`)
+
+### Changed
+- Streamer NCO frequency: SETXFRQ word, video pixel-rate tables, and DDS/Goertzel synthesis use the `$8000_0000` (2³¹) system-clock multiplier
+- Goertzel analysis: SINC1/SINC2 mode selected at D[23]; SINC2 small-amplitude (±10) operation documented
+
 ## [1.6.1] - 2026-06-02
 
 **Index integrity verification**

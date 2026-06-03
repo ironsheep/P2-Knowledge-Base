@@ -9,8 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set streamer NCO frequency to D. The NCO uses a 32-bit phase accumulator
-  where D is added each clock cycle. Output frequency = (D × clkfreq) / 2^32.
+description: Set streamer NCO frequency to D. The NCO phase accumulator masks its
+  MSB before each add (modulus $8000_0000), so D is the system-clock multiplier
+  scaled by $8000_0000 = 2^31. Output frequency = (D × clkfreq) / $8000_0000,
+  i.e. D = target_freq × $8000_0000 / clkfreq.
   For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits
   for 64-bit precision frequency control.
 flags_affected:
@@ -32,13 +34,13 @@ oneliner: Set streamer NCO frequency to D
 examples:
   - context: VGA pixel clock at 25.175 MHz (sysclk=250MHz)
     code: |
-      ' Calculate: (25_175_000 * 2^32) / 250_000_000 = $19999999
-      setxfrq ##$19999999       ' ~25.175 MHz pixel rate
+      ' Calculate: 25_175_000 * $8000_0000 / 250_000_000 = $0CE3_BCD3
+      setxfrq ##$0CE3_BCD3      ' ~25.175 MHz pixel rate
     notes: Use ## for 32-bit immediate values
   - context: Audio sample rate 48 kHz
     code: |
-      ' Calculate: (48_000 * 2^32) / 250_000_000 = $C49BA
-      setxfrq ##$C49BA          ' 48 kHz sample rate
+      ' Calculate: 48_000 * $8000_0000 / 250_000_000 = $0006_4A9D
+      setxfrq ##$0006_4A9D      ' 48 kHz sample rate
   - context: High-precision frequency with SETQ
     code: |
       ' 64-bit precision: SETQ provides low 32 bits
@@ -46,22 +48,23 @@ examples:
       setxfrq freq_high         ' High 32 bits, combined with SETQ
     notes: SETQ+SETXFRQ enables sub-Hz frequency resolution
 frequency_formula:
-  formula: "D = (target_frequency × 2^32) / clkfreq"
-  inverse: "output_frequency = (D × clkfreq) / 2^32"
-  precision: "Resolution = clkfreq / 2^32 Hz per LSB"
+  formula: "D = (target_frequency × $8000_0000) / clkfreq"
+  inverse: "output_frequency = (D × clkfreq) / $8000_0000"
+  precision: "Resolution = clkfreq / 2^31 Hz per LSB"
+  note: "The NCO masks its MSB before each add, so the multiplier is $8000_0000 (2^31), not 2^32 (Silicon Doc v35 SETXFRQ). nco-timing.yaml uses the same convention."
 common_values:
   - target: "25.175 MHz (VGA)"
     sysclk: "250 MHz"
-    value: "$19999999"
+    value: "$0CE3_BCD3"
   - target: "25.000 MHz"
     sysclk: "250 MHz"
-    value: "$1999999A"
+    value: "$0CCC_CCCD"
   - target: "48 kHz (audio)"
     sysclk: "250 MHz"
-    value: "$C49BA"
+    value: "$0006_4A9D"
   - target: "44.1 kHz (CD audio)"
     sysclk: "250 MHz"
-    value: "$B4FDF"
+    value: "$0005_C7C0"
 related_instructions:
   - SETQ: Prefix for 64-bit precision frequency
   - GETXACC: Read phase accumulator (Goertzel mode)
