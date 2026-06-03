@@ -942,11 +942,11 @@ Part IV puts the pieces together into real applications, beginning with the stre
 
 ## 15.1 VGA Output
 
-VGA uses analog RGB via DAC channels with composite sync.
+VGA uses analog RGB on DAC channels, with **separate** horizontal and vertical sync. The streamer drives the analog levels: the horizontal-sync level rides the streamer's immediate operand, while vertical sync is a plain pin toggle.
 
 **Hardware Requirements:**
-- Three DAC pins for R, G, B
-- One pin for composite sync (active-low)
+- Three DAC pins for R, G, B, plus one DAC pin for the horizontal-sync level
+- One additional digital pin for vertical sync (toggled directly, not streamed)
 - Resistor DAC network or direct DAC output
 
 **Timing Structure (640×480 @ 60 Hz):**
@@ -965,59 +965,53 @@ VGA uses analog RGB via DAC channels with composite sync.
 
 **Example:**
 
+The non-visible intervals — front porch, sync, back porch, and whole blank lines — stream a **fixed DAC level** through an *immediate* mode, `X_IMM_1X32_4DAC8 | X_DACS_3_2_1_0` (`$7F01_0000`). Its S operand is the 32-bit level held across the four DAC channels for `D[15:0]` pixels, so the **horizontal-sync** level is simply a different S value during the sync interval. **Vertical sync is not streamed** — it is a separate pin toggled with `DRVNOT` around the vsync lines.
+
 ```pasm2
 DAT             org
+                setxfrq pixfreq                  ' 25 MHz pixel NCO (2^31-scaled)
+                mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate digital pin
+                drvc    vsync_pin                 ' establish initial VSYNC level
 
-                ' Setup 250 MHz from 20 MHz crystal
-                hubset  ##%1_000001_0000011000_1111_10_00
-                waitx   ##20_000_000/200
-                hubset  ##%1_000001_0000011000_1111_10_11
-
-                rdfast  ##640*480*2/64, ##framebuffer
-                setxfrq ##$0CCC_CCCC+1            ' 25 MHz pixel rate
-
-field:          mov     line_count, #480
-
-visible_loop:   call    #hsync
-                xcont   m_visible, #0           ' 640 RGB16 pixels
-                djnz    line_count, #visible_loop
-
-                callpa  #10, #blank_lines       ' Bottom blanking
-                call    #vsync
-                callpa  #33, #blank_lines       ' Top blanking
+field:          mov     y, #10                    ' vertical front porch (lines)
+                call    #blank
+                rdfast  #0, ##framebuffer         ' visible pixels stream from the FIFO
+                mov     y, #480                   ' visible lines
+line:           call    #hsync
+                xcont   m_visible, #0             ' 640 RGB pixels (pipeline: Chapter 7)
+                djnz    y, #line
+                mov     y, #33                    ' vertical back porch (lines)
+                call    #blank
+                drvnot  vsync_pin                 ' VSYNC active
+                mov     y, #2                     ' vertical sync (lines)
+                call    #blank
+                drvnot  vsync_pin                 ' VSYNC inactive
                 jmp     #field
 
-hsync:          xcont   m_front, sync_off       ' 16 pixels front porch
-                xzero   m_sync, sync_on         ' 96 pixels sync
-          _ret_ xcont   m_back, sync_off        ' 48 pixels back porch
+' One non-visible line: horizontal sync, then a flat blank level
+blank:          call    #hsync
+                xcont   m_blank, #0
+          _ret_ djnz    y, #blank
 
-blank_lines:    call    #hsync
-                xcont   m_blank, sync_off
-          _ret_ djnz    pa, #blank_lines
+' Horizontal sync: porches hold blank (#0); the sync interval holds sync (#1)
+hsync:          xcont   m_front, #0               ' 16px front porch
+                xcont   m_sync,  #1               ' 96px hsync pulse
+          _ret_ xcont   m_back,  #0               ' 48px back porch
 
-vsync:          ' Two lines with vsync active
-                xcont   m_front, sync_on
-                xzero   m_sync, sync_on
-                xcont   m_back, sync_on
-                xcont   m_blank, sync_on
-                xcont   m_front, sync_on
-                xzero   m_sync, sync_on
-                xcont   m_back, sync_on
-          _ret_ xcont   m_blank, sync_on
+' Immediate level mode X_IMM_1X32_4DAC8 ($7001_0000) | X_DACS_3_2_1_0
+' ($0F00_0000) = $7F01_0000; D[15:0] = pixel count for the interval.
+m_front         long    $7F01_0000 + 16
+m_sync          long    $7F01_0000 + 96
+m_back          long    $7F01_0000 + 48
+m_blank         long    $7F01_0000 + 800          ' whole line, no visible pixels
+m_visible       long    $B085_0000 + 640          ' X_RFWORD_RGB16 | X_PINS_ON
 
-' Constants
-sync_off        long    %00_01_01_01            ' RGB active, sync off
-sync_on         long    %00_01_01_00            ' RGB active, sync on
-
-m_front         long    $F080_0000 + vga_base<<17 + 16
-m_sync          long    $F080_0000 + vga_base<<17 + 96
-m_back          long    $F080_0000 + vga_base<<17 + 48
-m_visible       long    $B085_0000 + vga_base<<17 + 640  ' RGB16
-m_blank         long    $F080_0000 + vga_base<<17 + 640
-
-vga_base        long    0                       ' Set to actual pin
-line_count      res     1
+pixfreq         long    $0CCC_CCCD                ' 25 MHz at 250 MHz clock
+vsync_pin       res     1
+y               res     1
 ```
+
+> Verified against Eric R. Smith's VGA driver (Parallax OBEX #2847): sync and blanking are immediate DAC-level streams, and vertical sync is a direct pin toggle.
 
 ## 15.2 HDMI/DVI Output
 
