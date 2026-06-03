@@ -32,6 +32,7 @@ engineering/tools/conversion/
 
 - **Sacred Rule #1** — Backup workspace working copy before overwriting it (>50KB or >100 lines). Use `cp <file> <file>.backup.$(date +%Y%m%d_%H%M%S)`.
 - **Sacred Rule #6** — Only stage files to outbound that **actually changed**. Forge is persistent and keeps the last version of every file. Sending unchanged files wastes the user's deployment time. The markdown changes every iteration; templates/filters/`request.json` usually do not.
+- **Document-switch override — ALWAYS stage `request.json` when switching documents.** `request.json` is the *directive* Forge reads to know what to do (input, template, lua_filters, metadata). Forge keeps only the LAST document's `request.json`. So whenever the manual you are preparing differs from the one prepared last time, you MUST stage `request.json` to outbound **even though git shows it unchanged** — otherwise Forge builds the new markdown with the *previous* document's template/filters/input. This is the one sanctioned exception to Sacred Rule #6. Track the last-prepared manual in todo-mcp context key `pdf_forge_last_prepared_manual`; compare it to the current slug in Step 4, force-stage `request.json` on a mismatch (or when the key is absent), and update the key in Step 7.
 - **Sacred Rule #5** — Never rename files. The working-copy filename in `request.json` is sacred and identical in workspace and outbound.
 - Outbound is **FLAT** — no subdirectories for templates/filters. (Assets, if used, do go in `outbound/<slug>/assets/`.)
 
@@ -76,6 +77,8 @@ Classify each modified file:
 
 Also compare opus-master modtime/size to workspace working copy to know if a refresh is needed.
 
+**Document-switch check (decides `request.json` staging).** Read the todo-mcp context key `pdf_forge_last_prepared_manual`. If it is **absent or differs** from the current `<slug>`, this is a **document switch** — `request.json` MUST be staged in Step 6 regardless of its git status, because Forge still holds the previous document's directive (wrong template/filters/input). If it **equals** the current slug, stage `request.json` only if it actually changed this session.
+
 ### Step 5 — Present the plan and ask for confirmation
 
 **FIRST**, also check for **hardcoded version/date strings in the markdown source** (the cover page is rendered from the markdown, not from `request.json` metadata — `request.json` metadata only affects PDF properties / headers / footers, not the visible cover):
@@ -115,15 +118,20 @@ In order (each step depends on the previous):
    ```bash
    cp workspace/<slug>/templates/<file> outbound/<slug>/        # FLAT — no templates/ subdir
    cp workspace/<slug>/filters/<file>   outbound/<slug>/        # FLAT — no filters/ subdir
-   cp workspace/<slug>/request.json     outbound/<slug>/        # If metadata bumped or filters changed
+   cp workspace/<slug>/request.json     outbound/<slug>/        # If metadata bumped, filters changed, OR a document switch (Step 4)
    ```
+   **Always** run that `request.json` copy on a document switch (the Step 4 check), even with no git change — otherwise Forge builds with the previous document's directive.
    For asset changes: `cp workspace/<slug>/assets/<file> outbound/<slug>/assets/` (the `assets/` subdir IS used in outbound).
 
-### Step 7 — Report
+### Step 7 — Report (and update the document tracker)
+
+**Update the last-prepared tracker** so the next run can detect a switch:
+`mcp__todo-mcp__context_set key:"pdf_forge_last_prepared_manual" value:"<slug>"`.
 
 End with a brief summary:
 - Final list of files in `outbound/<slug>/` with sizes (`ls -la`).
 - Note which aux files were intentionally NOT staged (= Forge already has them).
+- If this was a document switch, say so and confirm `request.json` was force-staged.
 - Tell user the bundle is ready to move to PDF Forge.
 - Mention the auto-backup the escape script created (harmless).
 
