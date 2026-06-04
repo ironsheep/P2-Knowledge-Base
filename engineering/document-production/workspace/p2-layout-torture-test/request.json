@@ -1,0 +1,30 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Layout-Torture-Test.md",
+      "output": "P2-Layout-Torture-Test.pdf",
+      "template": "p2kb-torture-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-torture-figures",
+        "p2kb-torture-tables",
+        "p2kb-torture-mnemonic-bold",
+        "p2kb-torture-code-coloring",
+        "p2kb-torture-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Layout Torture Test",
+        "subtitle": "Every Page-Break and Table Defect, On Purpose",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v0.3",
+        "date": "June 2026"
+      }
+    }
+  ]
+}

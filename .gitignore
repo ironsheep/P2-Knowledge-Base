@@ -137,6 +137,12 @@ TEST-*.sty
 TEST-*.latex
 TEST-*.lua
 
+# Exception: the P2 Layout Torture Test is a permanent engineering harness for the
+# manual layout-standards effort, NOT a transient test output — keep it versioned
+# despite the *-TEST.md rule above. (Backups stay ignored via the *.backup.* rule.)
+!engineering/document-production/manuals/p2-layout-torture-test/opus-master/P2-Layout-Torture-Test.md
+!engineering/document-production/workspace/p2-layout-torture-test/P2-Layout-Torture-Test.md
+
 # Archive directories
 archive/
 archive-*/

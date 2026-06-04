@@ -1,0 +1,49 @@
+% P2KB Torture Programming Guide LaTeX Template
+% Main template for the P2 Torture Programming Guide
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% LAYOUT: One-sided for PDF screen viewing
+% For physical print with binding, change to: twoside,openany
+%
+% Template Stack:
+%   1. p2kb-torture-foundation.sty - Pandoc compatibility, core setup
+%   2. p2kb-torture-content.sty    - Guide environments + code/reference blocks
+%   3. p2kb-torture-diagrams.sty   - TikZ stub (no built-in diagrams)
+
+\documentclass[11pt,letterpaper,oneside]{book}
+
+% ==================== LOAD FOUNDATION LAYER ====================
+\usepackage{p2kb-torture-foundation}
+
+% ==================== LOAD CONTENT LAYER ====================
+\usepackage{p2kb-torture-content}
+
+% ==================== LOAD DIAGRAMS ====================
+\usepackage{p2kb-torture-diagrams}
+
+% ==================== DOCUMENT METADATA ====================
+% These can be overridden by pandoc metadata
+\title{P2 Torture Programming Guide}
+\author{Iron Sheep Productions, LLC}
+\date{June 2026}
+
+% ==================== ADDITIONAL USER GUIDE SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% Load multicol (used by potential two-column appendices)
+\usepackage{multicol}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page - no headers/footers
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (includes title page at beginning)
+$body$
+
+\end{document}

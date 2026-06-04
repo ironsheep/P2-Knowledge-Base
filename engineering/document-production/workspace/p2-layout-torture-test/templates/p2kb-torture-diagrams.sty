@@ -1,0 +1,240 @@
+% P2KB Torture Programming Guide Diagrams Package
+% TikZ diagrams for the Torture Guide. Styles (palette, iospbox/iospflow flow
+% nodes, wsig waveforms, the fld bit-field pattern, the tedge/ttick clock grid)
+% are carried over verbatim from the live IOSP / PASM2 stacks so the figures
+% match the family; the \Diag* macros below are Torture-specific.
+%
+% Invocation (from the body): a bare raw-LaTeX block
+%   ```{=latex}
+%   \DiagTortureArch
+%   ```
+% Each macro is a self-contained, per-chapter-numbered figure (internal \caption).
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-torture-diagrams}[2026/06/01 P2KB Torture Diagrams Package v2.0]
+
+\RequirePackage{tikz}
+\RequirePackage{float}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit}
+
+% ---- Shared diagram palette (matches the live publications) ----
+\definecolor{diagram-box}{HTML}{E8E8E8}
+\definecolor{diagram-border}{HTML}{666666}
+\definecolor{diagram-highlight}{HTML}{D4E8D4}
+\definecolor{diagram-text}{HTML}{333333}
+\definecolor{diagram-accent}{HTML}{CC6600}
+
+% ---- Shared node/edge styles for flow & block diagrams ----
+\tikzset{
+  iospbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                  align=center, font=\small, text=diagram-text, minimum height=11mm,
+                  text width=20mm, inner sep=3pt},
+  iospkey/.style={iospbox, fill=diagram-highlight},
+  iospflow/.style={-{Stealth[length=2.6mm]}, draw=diagram-border, line width=0.9pt}
+}
+
+% ---- Waveform styles (wsig = signal trace; wcell = cell divider) ----
+\tikzset{
+  wsig/.style={draw=diagram-border, line width=1pt},
+  wcell/.style={diagram-border!30, densely dotted},
+  wlbl/.style={font=\scriptsize, text=diagram-text}
+}
+
+% ---- Clock-grid / point-event styles ----
+\tikzset{
+  ttick/.style={draw=diagram-accent, line width=1.1pt},
+  tbrace/.style={decorate, decoration={brace, amplitude=4pt, mirror}, draw=diagram-border}
+}
+
+% ==================== Chapter 2 -- torture architecture ====================
+
+% Fig 2.1 -- the torture data path (replaces the ASCII block diagram)
+\newcommand{\DiagTortureArch}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 14mm]
+  % main left-to-right pipeline
+  \node[iospbox, text width=18mm] (fifo) {FIFO\\Interface};
+  \node[iospbox, right=of fifo, text width=22mm] (shift) {Data Shifter\\\& Formatter};
+  \node[iospbox, right=of shift, text width=20mm] (lut) {LUT Lookup\\\textit{(optional)}};
+  \node[iospkey, right=of lut, text width=16mm] (pins) {Pins (32)};
+  % hub input
+  \node[wlbl, left=12mm of fifo, align=center] (hub) {Hub Memory\\{\scriptsize via RDFAST}};
+  \draw[iospflow] (hub)--(fifo);
+  \draw[iospflow] (fifo)--(shift);
+  \draw[iospflow] (shift)--(lut);
+  \draw[iospflow] (lut)--(pins);
+  % DAC output below the pin output
+  \node[iospkey, below=10mm of pins, text width=20mm] (dac) {DAC Channels\\X0--X3};
+  \draw[iospflow] (lut.south) |- (dac.west);
+  \node[wlbl, right=8mm of dac] {DAC0--DAC3};
+  % NCO timing feeds the shifter from below
+  \node[iospbox, below=16mm of shift, text width=18mm] (nco) {NCO\\{\scriptsize 32-bit}};
+  \node[wlbl, left=10mm of nco] (sx) {SETXFRQ};
+  \draw[iospflow] (sx)--(nco);
+  \draw[iospflow] (nco)--(shift);
+  % command buffer above the shifter
+  \node[iospbox, above=10mm of shift, text width=22mm] (cmd) {Command\\Buffer};
+  \node[wlbl, left=10mm of cmd, align=center] (xi) {XINIT / XCONT\\XZERO / XSTOP};
+  \draw[iospflow] (xi)--(cmd);
+  \draw[iospflow] (cmd)--(shift);
+  % Goertzel analyzer branch
+  \node[iospbox, below=10mm of nco, text width=20mm] (go) {Goertzel\\Analyzer};
+  \node[wlbl, left=10mm of go] (adc) {ADC Pins};
+  \draw[iospflow] (adc)--(go);
+  \node[wlbl, right=12mm of go] (gx) {GETXACC};
+  \draw[iospflow] (go)--(gx);
+\end{tikzpicture}}
+}
+
+% Fig 2.2 -- data-flow paths (sources -> routes -> destinations)
+\newcommand{\DiagDataFlow}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=8mm and 18mm, font=\small]
+  % sources
+  \node[iospbox, text width=22mm] (imm) {Immediate\\{\scriptsize S operand}};
+  \node[iospbox, below=of imm, text width=22mm] (rd) {RDFAST\\{\scriptsize Hub FIFO}};
+  % routes
+  \node[iospbox, right=of imm, text width=20mm] (lut) {LUT index};
+  \node[iospbox, below=of lut, text width=20mm] (dir) {Direct};
+  \node[iospbox, below=of dir, text width=24mm] (rgb) {Colorspace\\(RGB)};
+  % destination
+  \node[iospkey, right=of dir, text width=18mm] (out) {Pins / DACs};
+  \draw[iospflow] (imm)--(lut); \draw[iospflow] (imm.east)--(dir.west);
+  \draw[iospflow] (rd.east)--(lut.west); \draw[iospflow] (rd)--(dir); \draw[iospflow] (rd.east)--(rgb.west);
+  \draw[iospflow] (lut)--(out); \draw[iospflow] (dir)--(out); \draw[iospflow] (rgb.east)--(out.west);
+  % input (capture) path
+  \node[iospbox, below=16mm of rgb, text width=24mm] (cap) {Pins / ADC};
+  \node[iospkey, right=of cap, text width=24mm] (wr) {WRFAST $\to$ Hub};
+  \draw[iospflow] (cap)--(wr);
+\end{tikzpicture}}
+}
+
+% ==================== Chapter 3 -- NCO timing ====================
+
+% Fig 3.1 -- phase accumulation and rollover (sawtooth + data-advance ticks)
+\newcommand{\DiagNcoRollover}{%
+\begin{tikzpicture}[x=10mm, y=8mm, font=\scriptsize]
+  \draw[diagram-border!50, line width=0.6pt, -{Stealth[length=2mm]}] (0,0)--(11,0) node[right]{clocks};
+  \draw[diagram-border!50, line width=0.6pt, -{Stealth[length=2mm]}] (0,0)--(0,3.3) node[above]{phase};
+  \node[wlbl, anchor=east] at (-0.15,3){$2^{31}$};
+  \draw[diagram-border!30, densely dashed] (0,3)--(10.5,3);
+  % three phase ramps that wrap at 2^31
+  \draw[wsig] (0,0)--(3,3)--(3,0)--(6,3)--(6,0)--(9,3)--(9,0)--(10.5,1.5);
+  \foreach \x/\n in {3/1, 6/2, 9/3}{
+    \draw[ttick] (\x,-0.35)--(\x,0.35);
+    \node[wlbl, text=diagram-accent, anchor=north] at (\x,-0.5){advance \n};}
+  \node[wlbl, font=\scriptsize\itshape, anchor=west] at (0.2,3.45){MSB set $\to$ rollover $\to$ next data element};
+\end{tikzpicture}
+}
+
+% ==================== Chapter 4 -- command word ====================
+
+% Fig 4.1 -- the D-operand command word bit-field (replaces the ASCII layout)
+\newcommand{\DiagCommandWord}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize,
+  fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
+              align=center, font=\ttfamily\small, inner sep=2pt},
+  lbl/.style={font=\scriptsize, text=diagram-text, align=center},
+  flbl/.style={font=\tiny, text=diagram-text, align=center}]
+  \node[fld, minimum width=16mm] (mode) {Mode};
+  \node[fld, minimum width=16mm, right=0pt of mode] (dac) {dddd};
+  \node[fld, minimum width=9mm,  right=0pt of dac, fill=diagram-highlight] (ew) {e/w};
+  \node[fld, minimum width=14mm, right=0pt of ew] (ppp) {ppp};
+  \node[fld, minimum width=16mm, right=0pt of ppp] (cfg) {config};
+  \node[fld, minimum width=46mm, right=0pt of cfg, fill=diagram-highlight] (cnt) {count};
+  \node[lbl, above=1mm of mode] {31:28}; \node[lbl, above=1mm of dac] {27:24};
+  \node[lbl, above=1mm of ew] {23};      \node[lbl, above=1mm of ppp] {22:20};
+  \node[lbl, above=1mm of cfg] {19:16};  \node[lbl, above=1mm of cnt] {15:0};
+  \node[flbl, below=1mm of mode, text width=16mm] {data path};
+  \node[flbl, below=1mm of dac, text width=16mm] {DAC routing};
+  \node[flbl, below=1mm of ew, text width=11mm] {pin / write enable};
+  \node[flbl, below=1mm of ppp, text width=14mm] {pin group};
+  \node[flbl, below=1mm of cfg, text width=16mm] {mode-specific};
+  \node[flbl, below=1mm of cnt, text width=46mm] {NCO rollovers (\$FFFF = perpetual)};
+\end{tikzpicture}}
+}
+
+% ==================== Chapter 7 -- RGB pixel formats ====================
+
+% Fig 7.1 -- bit-packing of the five RGB source formats
+\newcommand{\DiagRgbFormats}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[font=\footnotesize,
+  seg/.style={draw=diagram-border, minimum height=7mm, align=center,
+              font=\ttfamily\scriptsize, inner sep=1pt},
+  rseg/.style={seg, fill=diagram-box},
+  gseg/.style={seg, fill=diagram-highlight},
+  bseg/.style={seg, fill=diagram-box},
+  iseg/.style={seg, fill=white},
+  rl/.style={font=\scriptsize, text=diagram-text, anchor=east}]
+  % LUMA8 (8)
+  \node[rl] at (-1,4) {LUMA8};
+  \node[seg, fill=diagram-box, minimum width=32mm, anchor=west] at (0,4) {luma (8)};
+  % RGBI8 2:2:2:2
+  \node[rl] at (-1,3) {RGBI8};
+  \node[rseg, minimum width=8mm, anchor=west] (a0) at (0,3) {R 2};
+  \node[gseg, minimum width=8mm, right=0pt of a0] (a1) {G 2};
+  \node[bseg, minimum width=8mm, right=0pt of a1] (a2) {B 2};
+  \node[iseg, minimum width=8mm, right=0pt of a2] {I 2};
+  % RGB8 3:3:2
+  \node[rl] at (-1,2) {RGB8};
+  \node[rseg, minimum width=12mm, anchor=west] (b0) at (0,2) {R 3};
+  \node[gseg, minimum width=12mm, right=0pt of b0] (b1) {G 3};
+  \node[bseg, minimum width=8mm,  right=0pt of b1] {B 2};
+  % RGB16 5:6:5
+  \node[rl] at (-1,1) {RGB16};
+  \node[rseg, minimum width=20mm, anchor=west] (c0) at (0,1) {R 5};
+  \node[gseg, minimum width=24mm, right=0pt of c0] (c1) {G 6};
+  \node[bseg, minimum width=20mm, right=0pt of c1] {B 5};
+  % RGB24 8:8:8
+  \node[rl] at (-1,0) {RGB24};
+  \node[rseg, minimum width=32mm, anchor=west] (d0) at (0,0) {R 8};
+  \node[gseg, minimum width=32mm, right=0pt of d0] (d1) {G 8};
+  \node[bseg, minimum width=32mm, right=0pt of d1] {B 8};
+\end{tikzpicture}}
+}
+
+% ==================== Chapter 10 -- DDS / Goertzel ====================
+
+% Fig 10.1 -- per-clock DDS output + Goertzel multiply-accumulate
+\newcommand{\DiagDdsGoertzel}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=10mm and 16mm, font=\small,
+  op/.style={draw=diagram-border, fill=diagram-box, circle, minimum size=8mm,
+             font=\small, inner sep=1pt}]
+  \node[iospbox, text width=14mm] (nco) {NCO};
+  \node[iospbox, right=of nco, text width=28mm] (lut) {LUT\\{\scriptsize entry = LUT[NCO[30:22]]}};
+  \node[iospkey, right=of lut, text width=22mm] (dac) {DACs\\{\scriptsize byte $\oplus$ \$80}};
+  \draw[iospflow] (nco)--(lut);
+  \draw[iospflow] (lut)--(dac);
+  % multiply-accumulate branch below
+  \node[op, below=14mm of lut] (mul) {$\times$};
+  \node[wlbl, left=12mm of mul, align=center] (adc) {ADC bit\\{\scriptsize $\pm 1$}};
+  \node[iospkey, right=of mul, text width=26mm] (acc) {sin / cos\\accumulators};
+  \node[wlbl, right=12mm of acc] (gx) {GETXACC};
+  \draw[iospflow] (lut.south)-- node[right, font=\scriptsize] {sin, cos} (mul.north);
+  \draw[iospflow] (adc)--(mul);
+  \draw[iospflow] (mul)--(acc);
+  \draw[iospflow] (acc)--(gx);
+\end{tikzpicture}}
+}
+
+% ==================== Chapter 15 -- VGA line timing ====================
+
+% Fig 15.1 -- VGA 640x480 horizontal line (HSYNC active-low) with segments
+\newcommand{\DiagVgaTiming}{%
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[x=1mm, y=6mm, font=\scriptsize]
+  % scaled pixel counts /10: visible 0-64, front 64-72, sync 72-96, back 96-112
+  \node[wlbl, anchor=east] at (-2,0.6){HSYNC};
+  \draw[wsig] (0,1.2)--(72,1.2)--(72,0)--(96,0)--(96,1.2)--(112,1.2);
+  \foreach \a/\b/\t in {0/64/{visible (640)}, 64/72/{front (16)}, 72/96/{sync (96)}, 96/112/{back (48)}}{
+    \draw[diagram-border!40] (\a,-0.2)--(\a,1.5);
+    \node[wlbl, anchor=north] at ({(\a+\b)/2},-0.35){\t};}
+  \draw[diagram-border!40] (112,-0.2)--(112,1.5);
+  \node[wlbl, font=\scriptsize\itshape, anchor=west] at (0,2.1){one line = 800 pixels @ 25.175 MHz $\approx$ 31.78\,$\mu$s};
+\end{tikzpicture}}
+}
+
+\endinput
