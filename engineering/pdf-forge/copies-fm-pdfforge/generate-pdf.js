@@ -137,14 +137,20 @@ async function generatePDF(
       ...process.env,
       TEXINPUTS: `./templates//:${process.env.TEXINPUTS || ''}`
     };
-    execSync(texCommand, { stdio: 'pipe', env: envWithTexInputs, timeout: 300000 }); // 5 minute timeout
-    console.log(chalk.green('✅ TEX generated successfully!'));
+    const texStartTime = Date.now();
+    execSync(texCommand, { stdio: 'pipe', env: envWithTexInputs, timeout: 1200000 }); // 20 minute timeout
+    const texDuration = ((Date.now() - texStartTime) / 1000).toFixed(1);
+    console.log(chalk.green(`✅ TEX generated successfully! (${texDuration}s)`));
   } catch (error) {
     console.error(chalk.red('❌ TEX generation failed:'));
     console.error(error.message);
   }
 
   // Build pandoc command for PDF
+  // --verbose makes pandoc echo the FULL xelatex transcript, including recoverable
+  // LaTeX errors ("Float(s) lost", "Not in outer par mode", ...) that still exit 0.
+  // Without it, pandoc suppresses those on a "successful" build, so content can be
+  // dropped silently. The transcript is captured and written to the compile log below.
   const command = [
     'pandoc',
     `"${inputFile}"`,
@@ -153,11 +159,17 @@ async function generatePDF(
     '--template',
     `"${templatePath}"`,
     '--pdf-engine=xelatex',
+    '--verbose',       // LOG: echo the xelatex engine output so it can be captured
     '--listings',
     resourcePath,      // ASSET SUPPORT: Tell pandoc where to find resources
     customPandocArgs,  // NEW: Include custom pandoc args
     varArgs,
   ].filter(arg => arg !== '').join(' ');
+
+  // Compile log sits next to the PDF in output/ (e.g. output/Doc.compile.log).
+  const compileLogFile = outputFile.replace(/\.pdf$/, '.compile.log');
+  let compileOutput = '';
+  let pdfOk = false;
 
   try {
     console.log(chalk.gray('Running pandoc for PDF...'));
@@ -167,14 +179,53 @@ async function generatePDF(
       ...process.env,
       TEXINPUTS: `./templates//:${process.env.TEXINPUTS || ''}`
     };
-    execSync(command, { stdio: 'pipe', env: envWithTexInputs, timeout: 600000 }); // 10 minute timeout
-    console.log(chalk.green('✅ PDF generated successfully!'));
-    return true;
+    const pdfStartTime = Date.now();
+    // 2>&1 folds stderr into stdout so the captured buffer is the complete transcript.
+    // maxBuffer is raised well above the default 1 MB because --verbose output is large
+    // (an undersized buffer would itself fail the build with ENOBUFS).
+    compileOutput = execSync(`${command} 2>&1`, {
+      stdio: 'pipe',
+      env: envWithTexInputs,
+      timeout: 1200000,            // 20 minute timeout
+      maxBuffer: 64 * 1024 * 1024, // 64 MB
+    }).toString();
+    const pdfDuration = ((Date.now() - pdfStartTime) / 1000).toFixed(1);
+    console.log(chalk.green(`✅ PDF generated successfully! (${pdfDuration}s)`));
+    pdfOk = true;
   } catch (error) {
+    // With 2>&1 the combined output is on error.stdout; keep stderr/message as backup.
+    compileOutput = (error.stdout ? error.stdout.toString() : '')
+                  + (error.stderr ? error.stderr.toString() : '')
+                  + `\n[generate-pdf] ${error.message}\n`;
     console.error(chalk.red('❌ PDF generation failed:'));
     console.error(error.message);
-    return false;
   }
+
+  // ALWAYS persist the transcript — this is the one place recoverable LaTeX errors
+  // become visible even when xelatex exits 0 and the build "succeeds".
+  try {
+    await fs.writeFile(compileLogFile, compileOutput || '(no pandoc/xelatex output captured)\n');
+    console.log(chalk.gray(`  📝 Compile log: ${compileLogFile}`));
+  } catch (logErr) {
+    console.error(chalk.red(`⚠️  Failed to write compile log ${compileLogFile}: ${logErr.message}`));
+  }
+
+  // Surface silent-but-serious LaTeX diagnostics so a 0 exit code doesn't hide dropped
+  // content. (Overfull/Underfull boxes are intentionally excluded — too common to warn on.)
+  const DIAG_SIGNATURES = [
+    'Float(s) lost',
+    'Not in outer par mode',
+    '! LaTeX Error',
+    '! Undefined control sequence',
+    '! Emergency stop',
+  ];
+  const hits = DIAG_SIGNATURES.filter(sig => compileOutput.includes(sig));
+  if (hits.length > 0) {
+    console.warn(chalk.yellow(`  ⚠️  LaTeX diagnostics in ${path.basename(compileLogFile)}: ${hits.join(', ')}`));
+    console.warn(chalk.yellow('     Content may be MISSING despite a successful exit — review the compile log.'));
+  }
+
+  return pdfOk;
 }
 
 async function processRequest() {
