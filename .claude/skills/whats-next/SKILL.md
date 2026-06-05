@@ -33,7 +33,7 @@ The three heads, their registry, and their standing state:
 
 | Head | Registry | Per-element standing state | Progress notion |
 |------|----------|----------------------------|-----------------|
-| **manual** | `engineering/document-production/PUBLICATION-ROSTER.md` | the manual's folder — `CHANGELOG.md`, `audit/`, working notes | version |
+| **manual** | `engineering/document-production/PUBLICATION-ROSTER.md` (publications); workspace folder existence (in-dev / **instruments**) | the manual's folder — `CHANGELOG.md`, `audit/`, working notes; **instruments**: their own run artifacts (e.g. forge interactive-testing) | version (instruments: none) |
 | **yaml** (P2KB) | the YAML tree / index | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (**empty ⇒ nothing outstanding**; non-empty ⇒ the to-do list) | version |
 | **ingestion** | `engineering/ingestion/INGESTION-DASHBOARD.md` | dashboard row (completeness %, gates) + `sources/<src>/<src>-complete-extraction-audit.md` | completeness % + gates (no version) |
 
@@ -50,6 +50,14 @@ above:
 - **manual:`<m>`** — the `PUBLICATION-ROSTER` row + the manual's folder
   (CHANGELOG latest entry, `audit/` open findings, working notes), and the
   recent commits touching that manual (`git log --oneline -- <manual path>`).
+  For a **manual-class instrument** (no CHANGELOG/version), state lives
+  wherever *that* instrument records its runs — recognize the instrument by
+  its workspace folder + the effort it serves, **not** by any one tooling
+  path. For forge-driven instruments like the **P2 Layout Torture Test**
+  that's the newest `engineering/pdf-forge/interactive-testing/test-runs/<name>-roundtrip-v*/`
+  (`full-doc/output.pdf` = "generated") + the workspace `.md`'s latest edit;
+  other instruments record elsewhere. "Where was I" = latest run + whether a
+  visual-defect pass has run since.
 - **yaml:p2kb** — read `P2KB-CORRECTION-FINDINGS.md`. Empty ⇒ "all
   published, nothing outstanding." Non-empty ⇒ the open findings ARE the
   to-do list; summarize the `CONFIRMED` / `NEEDS-VERIFICATION` counts.
@@ -70,15 +78,29 @@ Determine the head + element to pick up (from what they say, or ask). This
 is the head-pickup selection — the stateful evolution of the old "What are
 we working on today?" prompt.
 
-## 4. Verify the target against the registries
+## 4. Verify the target against the registry
 
-- **manual** → is it a row in `PUBLICATION-ROSTER.md`?
-- **yaml** → there is one P2KB set; it always exists. State via
+`PUBLICATION-ROSTER.md` is **complete and authoritative** — every
+manual-shaped folder is categorized in it. Resolve the target's category,
+then act:
+
+- **manual** → find it in `PUBLICATION-ROSTER.md`:
+  - **Live** (manual or presentation) or **In development / parked** →
+    resume (§5).
+  - **Instrument** → resume into the **effort it serves** (§5); never treat
+    it as a publication, never add it to the live set.
+  - **Orphaned (not carrying forward)** → do **not** silently resume.
+    Confirm with {{USER_NAME}}: "this is retired (superseded/abandoned) — are
+    we reviving it?" Proceed only on a yes.
+  - **A `workspace|manuals|outbound/<name>` folder exists but has no roster
+    entry** → **anomaly**, not a guess: surface it, have {{USER_NAME}}
+    classify it, add it to the roster (preserving the "every folder appears
+    once" invariant), then resume per its new category.
+  - **No entry and no folder** → genuinely new → §6.
+- **yaml** → one P2KB set; always exists. State via
   `P2KB-CORRECTION-FINDINGS.md`.
-- **ingestion** → is it a row in `INGESTION-DASHBOARD.md`? (When turning to
-  ingestion, also refresh the dashboard per `INGESTION-UPDATE-WORKFLOW.md`.)
-
-**Found → §5 (resume). Not found → §6 (add-new-element).**
+- **ingestion** → row in `INGESTION-DASHBOARD.md`? (refresh per
+  `INGESTION-UPDATE-WORKFLOW.md` when turning to ingestion).
 
 ## 5. Set active and resume
 

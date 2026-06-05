@@ -1,11 +1,23 @@
 # Publication Roster
 
-Tracks which P2 document-production publications are **live** (actively produced /
-in front of the community) versus **dormant** (in development, not yet released).
-This roster exists so cross-publication consistency work has a clear, authoritative
-scope: **only the live set must stay mutually consistent.**
+Tracks every **manual-shaped** publication and document instrument in
+`engineering/document-production/`, by category. The categories drive both
+**consistency scope** (only the live set must stay mutually consistent) and
+**how skills resume work** (e.g. `whats-next` reads this roster to decide
+resume-vs-revive-vs-new).
 
-*Established: 2026-05-28 — Updated: 2026-06-04 (live set expanded from 3 to 7).*
+Categories: **Live** (in front of the community) · **In development / parked**
+(intended; may be a pre-production walk-away — *not* orphaned) · **Instruments**
+(test/standards harnesses, not publications) · **Orphaned** (not carrying
+forward). The discriminator between *parked* and *orphaned* is **intent**, not
+state — a started-then-paused doc is parked if we still mean to ship it.
+
+**Invariant:** every `workspace|manuals|outbound/<name>` folder appears in
+exactly **one** section below. A folder with no entry is an **anomaly to
+reconcile** (classify it), not a silent guess.
+
+*Established: 2026-05-28 — Updated: 2026-06-05 (categorized into live / parked /
+instruments / orphaned; Green Book retired in favor of the I/O & Smart Pins guide).*
 
 ---
 
@@ -31,15 +43,35 @@ convention is a change to all of them.
 > of the manual layout-standards effort. Until then, the three original live publications
 > remain the reconciled reference.
 
-## Dormant publications (NOT live)
+## In development / parked (NOT live)
 
-In development or on hold. Free to evolve independently; they do **not** constrain
-the live set and are **not** constrained by it until they are promoted to live.
+Intended for production but not released — actively progressing or a
+pre-production walk-away we still mean to ship. Free to evolve independently;
+they do **not** constrain the live set and are **not** constrained by it until
+promoted. Reconcile conventions against this roster at promotion.
 
-| Publication | Workspace |
-|-------------|-----------|
-| Smart Pins Tutorial ("Green Book") | `workspace/p2-smart-pins-tutorial/` |
-| Spin2 Reference Manual | `workspace/spin2-reference-manual/` |
+| Publication | Workspace | State |
+|-------------|-----------|-------|
+| Spin2 Reference Manual | `workspace/spin2-reference-manual/` | parked; may go forward |
+
+## Instruments (not publications)
+
+Test / standards harnesses. Manual-shaped (full folder triad, generate PDFs) but
+never released; each serves an **effort**, not the community. Not
+consistency-bound. Resume into the effort it serves.
+
+| Instrument | Workspace | Serves |
+|------------|-----------|--------|
+| P2 Layout Torture Test | `workspace/p2-layout-torture-test/` | the manual layout-standards effort (`methodology/manual-layout-standards-*`) |
+
+## Orphaned (not carrying forward)
+
+Started, then retired by decision — superseded or abandoned. Kept for history;
+**not** resumed without an explicit revive decision; never consistency-bound.
+
+| Publication | Workspace | Why retired |
+|-------------|-----------|-------------|
+| Smart Pins Tutorial ("Green Book") | `workspace/p2-smart-pins-tutorial/` | superseded by the I/O & Smart Pins User Guide (newer generation) |
 
 ---
 

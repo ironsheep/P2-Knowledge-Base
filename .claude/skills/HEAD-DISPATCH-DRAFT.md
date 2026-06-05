@@ -37,7 +37,7 @@ set `active_element` so downstream skills stay consistent.
 
 | Head | Detection | "Element" the artifacts attach to |
 |------|-----------|-----------------------------------|
-| **MANUAL** | target under `engineering/document-production/manuals/<m>/` or `…/workspace/<m>/` | that manual |
+| **MANUAL** | target under `engineering/document-production/manuals/<m>/` or `…/workspace/<m>/` | that manual — **publication** (in `PUBLICATION-ROSTER.md`) or **instrument** (workspace folder only, e.g. P2 Layout Torture Test; no version; state wherever it records runs — forge interactive-testing is one example, not the rule; purpose traces to the effort/sprint it serves) |
 | **YAML (KB-for-agents)** | target under `deliverables/ai/P2/` (the P2KB YAML set) | the P2KB data set |
 | **INGESTION** | target under `engineering/ingestion/sources/<src>/` | that ingestion source |
 
@@ -152,6 +152,35 @@ The ingestion dashboard should mark these P1 sources as **of interest**;
 the other ingestion sources are all P2 and in reasonable state (none
 currently "of interest"). Community pull here is lightweight (~30% drag),
 comparable to the just-produced streamer manual.
+
+## Manual-head taxonomy + plan model (2026-06-05)
+
+The **manual head is not flat** — it has a *type*, and the work on it has a *scope*.
+
+**Type — recorded in `PUBLICATION-ROSTER.md`, now the complete + authoritative registry:**
+- **Live** — manual (6) or presentation (AI Privacy) — consistency-bound.
+- **In development / parked** — intended; may be a pre-production walk-away
+  (Spin2 Ref). *Not* orphaned (intent, not state, is the discriminator).
+- **Instrument** — test/standards harness (P2 Layout Torture Test);
+  manual-shaped, generates PDFs, never released; serves an effort.
+- **Orphaned** — not carrying forward (Green Book, superseded by IO&SP).
+
+Physical signals (the `workspace|manuals|outbound` folder triad, a generated
+PDF) prove *existence/progress*, never *category* — instruments have both.
+Category = intent, read from the roster. A folder with **no** roster entry =
+**anomaly to reconcile**, not a guess.
+
+**Scope of the work — plan location (resolves the `PLAN_DIR` sentinel + the
+cross-element open item):**
+- **single-element** sprint plan → co-located with its element (the manual's folder).
+- **cross-element** sprint plan → co-located with the **effort** it serves (an
+  effort has its own home). The all-manuals layout-standards plan lives in
+  `engineering/document-production/methodology/`.
+
+**Plans-in-flight** are a resumable unit alongside elements: `whats-next` can
+resume an **element** *or* a **plan/sprint** (which declares its target
+scope — one element or many). For cross-element work the *plan* is the thing in
+flight, not any single element.
 
 ## Built this pass (2026-06-05)
 
