@@ -50,6 +50,6 @@ The master filename `P2-Streamer-Programming-Guide.md` is sacred — never renam
 
 ## Notes for first build
 
-- One open content item: the §15.1 VGA `$F080_0000` sync mode-long is unverified (cited from OBEX) — see the audit doc.
+- §15.1 VGA sync/blank mode-long: **resolved 2026-06-03** (commit `bdddd12`) — verified against the OBEX VGA driver (Eric R. Smith / Total Spectrum, OBEX #2847, `vga_tile_driver.spin2`); corrected `$F080_0000` → `$7F01_0000` (`X_IMM_1X32_4DAC8 | X_DACS_3_2_1_0`) with VSYNC as a separate `DRVNOT` pin toggle. See `PUNCH-LIST.md`.
 - Emoji markers (⚠️ 💡 🔧) match the live PASM2 manual; confirm rendering on first build.
 - Eight upstream KB defects found during the audit are staged in `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (F-016…F-021) for a separate YAML pass.
