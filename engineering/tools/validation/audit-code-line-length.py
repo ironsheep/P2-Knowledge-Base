@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""
+audit-code-line-length.py - flag code lines that exceed a manual's column budget K.
+
+WHY THIS EXISTS
+    Code boxes in the P2 manuals do NOT wrap. A typeset wrap cannot break a comment
+    and re-indent it, nor insert the language's line-continuation for a split
+    statement, so an auto-wrap renders wrong-looking code AND hides the problem.
+    Therefore an over-long code line is an AUTHORSHIP defect: it must be shortened
+    in the source (break the comment + re-indent, or continue the statement). This
+    tool detects those lines so the author can fix them.
+
+THE BUDGET K
+    K is the widest code line the box prints - it is font/box specific, so it is
+    measured per code-box style (see the calibration ruler in the P2 Layout Torture
+    Test, case 2.2). Each manual records its K in creation-guide.md as a tagged line:
+
+        **Max code columns (K): 76**
+
+    This tool reads that line (or takes --budget) and flags any source code line
+    whose display width exceeds K.
+
+USAGE
+    audit-code-line-length.py [options] <markdown-file> [<markdown-file> ...]
+
+OPTIONS
+    --budget N           Override K (else read from the creation guide).
+    --creation-guide P   creation-guide.md to read K from. If omitted, it is
+                         auto-derived: the nearest creation-guide.md at, or above,
+                         each markdown file's directory (handles the usual
+                         manuals/<name>/opus-master/<file>.md layout).
+    --tabstop N          Tab width in columns for display-width counting
+                         (default 8 - the fancyvrb Verbatim default the colored
+                         code boxes render with).
+    --quiet              Print only violations and the summary (suppress per-file OK).
+
+SCOPE
+    Every fenced ``` (or ~~~) code block whose info string is empty or a code
+    language (pasm2/spin2/cordic/multicog/antipattern/iosp/...) - i.e. anything that
+    renders in a code box. Raw passthrough fences (```{=latex}, ```{=html}) are
+    skipped: they are LaTeX/HTML, not code in a box.
+
+EXIT STATUS
+    0  no code line exceeds K
+    1  one or more lines exceed K (so this can gate prepare-manual / a release)
+    2  usage / configuration error (e.g. no budget found)
+"""
+
+import argparse
+import os
+import re
+import sys
+
+CODE_BUDGET_RE = re.compile(r'Max\s+code\s+columns\s*\(K\)\s*:\s*(\d+)', re.IGNORECASE)
+FENCE_RE = re.compile(r'^(\s*)(`{3,}|~{3,})(.*)$')
+
+
+def find_creation_guide(md_path):
+    """Walk up from the markdown file's directory looking for creation-guide.md."""
+    d = os.path.dirname(os.path.abspath(md_path))
+    prev = None
+    while d and d != prev:
+        candidate = os.path.join(d, 'creation-guide.md')
+        if os.path.isfile(candidate):
+            return candidate
+        prev, d = d, os.path.dirname(d)
+    return None
+
+
+def read_budget(creation_guide_path):
+    """Extract K from the creation guide's tagged line, or None if absent."""
+    try:
+        with open(creation_guide_path, encoding='utf-8') as fh:
+            text = fh.read()
+    except OSError:
+        return None
+    m = CODE_BUDGET_RE.search(text)
+    return int(m.group(1)) if m else None
+
+
+def display_width(line, tabstop):
+    """Display columns occupied by a line, expanding tabs to the tab stop."""
+    w = 0
+    for ch in line:
+        if ch == '\t':
+            w += tabstop - (w % tabstop)
+        else:
+            w += 1
+    return w
+
+
+def is_code_fence(info):
+    """True if a fence info string denotes a code box (not a raw passthrough)."""
+    info = info.strip()
+    # ```{=latex} / ```{=html} / ```{.foo} attribute syntax -> not a plain code box
+    if info.startswith('{'):
+        return False
+    return True
+
+
+def scan_markdown(md_path, budget, tabstop):
+    """Return a list of (lineno, cols, text) for code lines over budget."""
+    with open(md_path, encoding='utf-8') as fh:
+        lines = fh.readlines()
+
+    violations = []
+    fence = None  # (marker, indent_len) when inside a code fence we audit
+    in_raw = False  # inside a fence we skip (raw passthrough)
+
+    for idx, raw in enumerate(lines, start=1):
+        line = raw.rstrip('\n')
+        m = FENCE_RE.match(line)
+        if fence is None and not in_raw:
+            # not in any fence: a fence line opens one
+            if m:
+                marker, info = m.group(2), m.group(3)
+                if is_code_fence(info):
+                    fence = (marker[0], len(marker))
+                else:
+                    in_raw = (marker[0], len(marker))
+            continue
+        # inside a fence: a closing fence is same char, >= length, no info
+        if m:
+            marker, info = m.group(2), m.group(3)
+            active = fence if fence is not None else in_raw
+            if marker[0] == active[0] and len(marker) >= active[1] and info.strip() == '':
+                fence = None
+                in_raw = False
+                continue
+        # a content line inside a fence
+        if fence is not None:
+            cols = display_width(line, tabstop)
+            if cols > budget:
+                violations.append((idx, cols, line))
+    return violations
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description='Flag code lines exceeding a manual\'s column budget K.')
+    ap.add_argument('files', nargs='+', help='manual markdown source file(s)')
+    ap.add_argument('--budget', type=int, default=None,
+                    help='override K (else read from the creation guide)')
+    ap.add_argument('--creation-guide', default=None,
+                    help='creation-guide.md to read K from (else auto-derived)')
+    ap.add_argument('--tabstop', type=int, default=8,
+                    help='tab width in columns (default 8)')
+    ap.add_argument('--quiet', action='store_true',
+                    help='print only violations and the summary')
+    args = ap.parse_args(argv)
+
+    total_violations = 0
+    files_with_violations = 0
+
+    for md in args.files:
+        if not os.path.isfile(md):
+            print(f'error: not a file: {md}', file=sys.stderr)
+            return 2
+
+        budget = args.budget
+        source = 'budget flag'
+        if budget is None:
+            cg = args.creation_guide or find_creation_guide(md)
+            if not cg:
+                print(f'error: no creation-guide.md found for {md} and no --budget '
+                      f'given', file=sys.stderr)
+                return 2
+            budget = read_budget(cg)
+            if budget is None:
+                print(f'error: no "Max code columns (K): N" line in {cg}',
+                      file=sys.stderr)
+                return 2
+            source = cg
+
+        violations = scan_markdown(md, budget, args.tabstop)
+        if violations:
+            files_with_violations += 1
+            total_violations += len(violations)
+            print(f'\n{md}  (budget K={budget}, from {source}):')
+            for lineno, cols, text in violations:
+                shown = text if len(text) <= 90 else text[:87] + '...'
+                print(f'  {md}:{lineno}: {cols} cols (>{budget})  | {shown}')
+        elif not args.quiet:
+            print(f'{md}: OK (no code line over K={budget})')
+
+    if total_violations:
+        print(f'\nFAIL: {total_violations} code line(s) over budget in '
+              f'{files_with_violations} file(s). Shorten them in source: break the '
+              f'comment and re-indent, or continue the statement.')
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

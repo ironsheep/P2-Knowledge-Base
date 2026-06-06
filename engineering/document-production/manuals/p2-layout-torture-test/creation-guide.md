@@ -70,6 +70,31 @@ a layout fix proven here ports to them verbatim. See
 - **A1 (minimize blank areas) vs C5/C7 (keep-together):** the doc deliberately puts these in
   tension so we can tune the whitespace-tolerance threshold centrally.
 
+## Code Line Budget
+
+Code boxes do **not** wrap — a typeset wrap can't break a comment and re-indent it,
+nor add a language line-continuation, so over-long code lines are an authorship
+defect to fix in source, not a template concern. The budget below is the widest code
+line the box prints; the `prepare-manual` line-length audit
+(`engineering/tools/validation/audit-code-line-length.py`) flags any source code
+line wider than it.
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** `IOSPBlock` (the shared `::: pasm/iosp` / ```` ```pasm2 ````
+  colored box), Latin Modern Mono at the box's code size, with the `numbers=left`
+  gutter present. This is the **platform reference K** — the live manuals fork this
+  same code-box style, so they inherit this number unless a manual diverges its code
+  font (then it re-measures its own K).
+- **Calibrated:** case 2.2's column ruler, render **v22** (2026-06-06). The box frame
+  falls at the col-76/78 boundary (col-76 marker prints inside the frame, col-78
+  outside; pitch ≈ 5.75 pt/col). Lines near K sit close to the right border; target a
+  few columns under K for breathing room.
+- **Re-measure when** the code font size or box geometry changes: re-render case 2.2,
+  read the largest ruler marker still inside the box, update this number.
+- **Remediation (authorship rule):** keep every code line ≤ K. If a line is too long,
+  break the comment onto a new comment line and re-indent it, or split the statement
+  using the language's line continuation and re-indent — never let the typesetter wrap.
+
 ## Maintenance
 
 - Canonical source: `manuals/p2-layout-torture-test/opus-master/P2-Layout-Torture-Test.md`.

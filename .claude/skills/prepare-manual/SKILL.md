@@ -107,8 +107,19 @@ In order (each step depends on the previous):
    ```
 2. **Apply markdown source edits FIRST** if confirmed in Step 5 (cover-page version/date in `front-matter.md` for multi-file, or cover region of single-file master). Do this BEFORE assembly so the new values flow into the assembled working copy.
 3. **Assemble or copy** from opus-master per Step 3. If using `assemble-manual.sh` and it errors with "bad interpreter: Permission denied", run `chmod +x <script>` and retry — the executable bit doesn't always survive across systems.
-4. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
-5. **Escape** the markdown into outbound:
+4. **Code line-length gate.** Code boxes do NOT wrap, so an over-long code line is an authorship defect, not a template concern. Audit the **opus-master source** (so the reported `file:line` points at what the author edits — pass the single master file, or the chapter tree for a multi-file manual) against the manual's calibrated column budget K:
+   ```bash
+   # single-file: manuals/<slug>/opus-master/<DocName>.md
+   # multi-file:  manuals/<slug>/opus-master/**/*.md  (the audit accepts many files)
+   python3 engineering/tools/validation/audit-code-line-length.py \
+       engineering/document-production/manuals/<slug>/opus-master/<DocName>.md
+   ```
+   It reads K from `manuals/<slug>/creation-guide.md` (the `**Max code columns (K): N**` line).
+   - **Clean (exit 0)** — proceed.
+   - **Violations (exit 1)** — STOP. Relay the located `file:line: cols` list; the lines must be shortened in **opus-master** source (break the comment + re-indent, or continue the statement with the language continuation) before staging. Re-assemble and re-run. Do not escape/stage with violations outstanding.
+   - **No budget yet (exit 2)** — this manual's K is not calibrated. STOP and calibrate first: if the manual forks the shared code-box stack (page margins `left/right=1in`, `IOSPBlock left=30pt,right=10pt`, identical code `Verbatim`) it **inherits the platform K** (see `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget); otherwise measure it with the case-2.2 column ruler on a test render. Add a `## Code Line Budget` section (with the tagged `**Max code columns (K): N**` line + provenance) to the manual's creation-guide, then re-run.
+5. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
+6. **Escape** the markdown into outbound:
    ```bash
    cd workspace/<slug>
    ../../../tools/conversion/latex-escape-all.sh \
@@ -116,7 +127,7 @@ In order (each step depends on the previous):
        ../../outbound/<slug>/<DocName>.md
    ```
    The escape script creates its own backup of the workspace source — that's expected, harmless.
-6. **Stage changed aux files** confirmed in Step 5:
+7. **Stage changed aux files** confirmed in Step 5:
    ```bash
    cp workspace/<slug>/templates/<file> outbound/<slug>/        # FLAT — no templates/ subdir
    cp workspace/<slug>/filters/<file>   outbound/<slug>/        # FLAT — no filters/ subdir
