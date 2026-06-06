@@ -38,7 +38,9 @@ a layout fix proven here ports to them verbatim. See
 | §2.3 short listing at page foot | code orphan | Code block not stranded at a page bottom. |
 | §3.1 long nested list | list split | List splits sensibly; no single item stranded. |
 | §3.2 block quote | quote | Block quote renders/splits cleanly. |
-| §3.3 boxed formula | boxed split | `formula` box does not split awkwardly at a boundary. |
+| §3.3 boxed formula forced to a boundary | **keep-together** | Tall `formula` (FormulaBlock) is **not breakable** → moves WHOLE to the next page, never splits its markerless left bar. Per the reference: keep short notation together, don't signpost a split. |
+| §3.4 syntax form forced to a boundary | **keep-together** | `syntax`/`pasm-syntax` (SyntaxBlock) is **not breakable** → moves WHOLE, same standard as §3.3. |
+| §3.5 register-layout diagram spanning a page | **C9/C10/C11** | `layout` (LayoutBlock) is full-frame+fill+breakable like a code box → spanning it MUST carry the shared continuation markers (footer "continues" + header "continued", bronze frame/fill intact). Closes the gap where LayoutBlock split silently. |
 | Chapter 4 long prose | **C5** | No single widow/orphan line stranded at a page boundary. |
 | Part II intro → "Chapter 5" | **B4** | Confirms the part-intro fix works for *every* part. |
 | §5.1 long table (60+ rows) | **C9** | Splits across pages with header row repeated + clear continuation marker. (No standard yet.) |

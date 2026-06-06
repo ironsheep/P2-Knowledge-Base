@@ -258,16 +258,24 @@
 % #1 = green (PASM2) or blue (Spin2) -- so PASM2/Spin2 syntax share the bar
 % treatment but stay distinguishable, with NO title line. Fill-vs-bar is the
 % primary cue: filled box = runnable code; left bar = reference/notation.
+% KEEP-TOGETHER (not breakable): a syntax form is short notation; like
+% FormulaBlock it moves WHOLE to the next page rather than splitting through a
+% markerless left-bar (layout reference: keep short items together).
 \newtcolorbox{SyntaxBlock}[1]{%
-  enhanced, breakable, colback=white, frame hidden, sharp corners, boxrule=0pt,
+  enhanced, colback=white, frame hidden, sharp corners, boxrule=0pt,
   borderline west={4pt}{0pt}{#1},
   left=12pt, right=10pt, top=6pt, bottom=6pt,
   before skip=12pt, after skip=12pt
 }
 
 % Bit-field / register-layout diagrams. No line numbers (it is a diagram, not
-% code), so a tighter left pad. Bronze = "blueprint".
+% code), so a tighter left pad. Bronze = "blueprint". Full frame + fill +
+% breakable = visually identical split risk to the code boxes, so it carries the
+% same continuation markers (C9/C10/C11): a register-layout diagram long enough
+% to span a page signposts the break instead of leaving two bronze bands
+% ambiguous across facing pages.
 \newtcolorbox{LayoutBlock}{%
+  contmarkers,
   colback=iosp-layout-bg, colframe=iosp-layout-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=12pt, right=10pt, top=8pt, bottom=8pt,
@@ -276,8 +284,13 @@
 
 % Math/timing formulas and worked calculations = LEFT-BAR treatment (no fill),
 % indigo bar. Reference/notation, not runnable code -> bar, not filled box.
+% KEEP-TOGETHER (not breakable): a formula/worked calculation is short notation,
+% so per the layout reference ("keep lines together, not a hard page break" for
+% short items) it moves WHOLE to the next page rather than splitting. A left-bar
+% block has no top/bottom rule, so a split would be ambiguous AND markerless;
+% keeping it whole is the right standard, not signposting a split.
 \newtcolorbox{FormulaBlock}{%
-  enhanced, breakable, colback=white, frame hidden, sharp corners, boxrule=0pt,
+  enhanced, colback=white, frame hidden, sharp corners, boxrule=0pt,
   borderline west={4pt}{0pt}{iosp-formula-border},
   left=12pt, right=10pt, top=6pt, bottom=6pt,
   before skip=12pt, after skip=12pt
