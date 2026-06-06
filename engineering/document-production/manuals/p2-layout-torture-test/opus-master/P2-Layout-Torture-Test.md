@@ -41,6 +41,24 @@
   coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-verified-bg,
   title={$\checkmark$ VERIFIED --- renders correctly (already implemented)}
 }
+% ProcessBox (blue): a case whose standard is enforced at BUILD TIME and in the
+% SOURCE, not by the template render. The template makes the condition VISIBLE
+% (e.g. an over-long code line overflows rather than silently wrapping); a
+% prepare-time audit flags it against a calibrated budget; the author fixes the
+% source. So the render below deliberately shows the un-fixed condition --- it is
+% the audit's test fixture, not a defect the template should paper over.
+\definecolor{torture-process-bg}{HTML}{E8EDF5}
+\definecolor{torture-process-frame}{HTML}{3F51B5}
+\newtcolorbox{ProcessBox}{%
+  enhanced, unbreakable,
+  colback=torture-process-bg, colframe=torture-process-frame,
+  boxrule=1pt, leftrule=5pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=12pt, after skip=10pt,
+  fontupper=\small,
+  coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-process-bg,
+  title={PROCESS --- enforced by the build audit + in source, not by the template}
+}
 % \leavebottom{X}: force the following demo toward the page foot so it must straddle the
 % boundary (the whole point of the torture cases) — but SAFELY. The earlier version dropped
 % content because it measured \pagetotal while the EXPECT box was still breakable (deferred),
@@ -280,16 +298,38 @@ recover mov     count, ##BLOCKS     ' reload the block counter
 \clearpage
 ```
 
-## 2.2 A Listing With Lines Too Long for the Box
+## 2.2 Code Lines Too Long for the Box (the column budget)
 
 ```{=latex}
-\begin{VerifiedBox}
-The two code lines below are far wider than the text block. The long lines wrap inside the colored
-box --- each continuation marked with a small hook and indented to the code's left edge --- so no
-text runs past the right edge of the box or off the page margin. Verified in the v16 render: the colored
-listing now wraps over-wide lines at spaces (mnemonics stay whole).
-\end{VerifiedBox}
+\begin{ProcessBox}
+Code boxes do NOT wrap. A typeset wrap cannot break a comment and re-indent it, nor insert the
+language's line continuation for a split statement, so it would render wrong-looking code AND hide
+the problem. Instead, the box has a column budget K --- the widest code line it holds. Read K off the
+ruler below: it is the last column still inside the box before the text spills past the right edge.
+K is recorded in each manual's creation-guide; the prepare-manual line-length audit flags any source
+line longer than K; the author shortens it (break the comment and re-indent, or continue the
+statement). The two demo lines further below are deliberately over-length --- they overflow here on
+purpose, and double as the audit's self-test fixture.
+\end{ProcessBox}
 ```
+
+The column ruler (tens row, units row, then exact-length end markers). The box's right edge falls
+between two of the labelled markers --- the largest marker still fully inside the box is K:
+
+```pasm2
+         1         2         3         4         5         6         7         8         9         0
+1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+col 76 --------------------------------------------------------------------|
+col 78 ----------------------------------------------------------------------|
+col 80 ------------------------------------------------------------------------|
+col 82 --------------------------------------------------------------------------|
+col 84 ----------------------------------------------------------------------------|
+col 86 ------------------------------------------------------------------------------|
+col 88 --------------------------------------------------------------------------------|
+col 90 ----------------------------------------------------------------------------------|
+```
+
+Deliberately over-length lines (these MUST overflow the box AND be flagged by the audit):
 
 ```pasm2
         rep     @.endrep, #16       ' this comment is deliberately extended well past the usual width to force the code line to exceed the printable text block and reveal how the code box handles overflow at the right edge

@@ -2,10 +2,12 @@
 -- Purpose: ONLY handles code block coloring for div-wrapped blocks
 -- No pagination - single responsibility
 --
--- Fix #4 (torture case 2.2): colored-block Verbatims now set breaklines so
--- over-wide code lines wrap INSIDE the box (with a hook continuation marker)
--- instead of running off the right margin. breakanywhere is left off so breaks
--- happen at spaces and mnemonics/identifiers are never split.
+-- Code line width policy: code boxes do NOT wrap (no fancyvrb breaklines). A
+-- typeset wrap can't break a comment and re-indent it, nor add a language line
+-- continuation, so it produces wrong-looking code AND hides the problem. Over-
+-- long code lines are instead an AUTHORSHIP issue: the prepare-manual line-
+-- length audit flags any source line exceeding the manual's calibrated column
+-- budget K (recorded in its creation-guide.md), and the author shortens it.
 --
 -- Supported div block types (5-color code system):
 --   Spin2 blocks (green):         ::: spin2 (includes configuration)
@@ -161,7 +163,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for antipattern styling
       local latex_block = '\\begin{AntipatternBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{AntipatternBlock}'
@@ -183,7 +185,7 @@ function Div(div)
     if code_block then
       -- Return complete LaTeX block for Spin2 styling
       local latex_block = '\\begin{Spin2Block}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          code_block.text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{Spin2Block}'
@@ -206,7 +208,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block using Verbatim
       local latex_block = '\\begin{IOSPBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{IOSPBlock}'
@@ -229,7 +231,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for CORDIC styling
       local latex_block = '\\begin{CORDICBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{CORDICBlock}'
@@ -252,7 +254,7 @@ function Div(div)
       local processed_text = uppercase_mnemonics(code_block.text)
       -- Return complete LaTeX block for Multi-COG styling
       local latex_block = '\\begin{MultiCOGBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          processed_text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{MultiCOGBlock}'
@@ -389,7 +391,7 @@ function CodeBlock(cb)
   if classes:includes("iosp") or classes:includes("pasm") or classes:includes("pasm2") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{IOSPBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{IOSPBlock}'
@@ -398,7 +400,7 @@ function CodeBlock(cb)
   -- Check for spin2 language tag
   elseif classes:includes("spin2") then
     local latex_block = '\\begin{Spin2Block}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        cb.text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{Spin2Block}'
@@ -408,7 +410,7 @@ function CodeBlock(cb)
   elseif classes:includes("cordic") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{CORDICBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{CORDICBlock}'
@@ -418,7 +420,7 @@ function CodeBlock(cb)
   elseif classes:includes("multicog") then
     local processed_text = uppercase_mnemonics(cb.text)
     local latex_block = '\\begin{MultiCOGBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt,breaklines=true,breakautoindent=true,breaksymbolleft={\\tiny\\ensuremath{\\hookrightarrow}}]\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{MultiCOGBlock}'
