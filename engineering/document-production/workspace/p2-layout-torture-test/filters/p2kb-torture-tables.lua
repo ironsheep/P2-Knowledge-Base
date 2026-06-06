@@ -1,6 +1,8 @@
 -- P2KB IOSP Table Formatting Filter
 -- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
+-- Version: 6.9 - Fix #5: many-col tables (<=12) routed to token-fit wide branch + \tiny tier (6.1);
+--                is_instr_desc col-1 width is token-aware so long symbols never overflow (6.2)
 -- Version: 6.8 - Fix #3: wide+many-row auto-shrink tables use breakable longtblr (case 5.1)
 --
 -- Strategy:
@@ -54,6 +56,30 @@ local function get_max_column_length(el, col_index)
   end
 
   return max_len
+end
+
+-- Get the longest UNBREAKABLE token (whitespace-delimited run) in a column.
+-- This is the minimum width that column must have: identifiers like
+-- P_OE_FLOAT_LOW_1K5_PULLUP_FILTER cannot be hyphenated or wrapped, so the
+-- column has to be at least this wide or the token spills into the next column.
+local function get_max_token_length(el, col_index)
+  local max_tok = 1
+  local function scan(rows)
+    if not rows then return end
+    for _, row in ipairs(rows) do
+      if row.cells and row.cells[col_index] then
+        local s = pandoc.utils.stringify(row.cells[col_index].contents)
+        for tok in s:gmatch("%S+") do
+          if #tok > max_tok then max_tok = #tok end
+        end
+      end
+    end
+  end
+  if el.head then scan(el.head.rows) end
+  for _, body in ipairs(el.bodies) do
+    if body.body then scan(body.body) end
+  end
+  return max_tok
 end
 
 -- Handle 9-column encoding tables specially
@@ -508,7 +534,7 @@ local function handle_auto_shrink_table(el)
   -- Wide tables would overflow the right margin with plain "l" columns, so they
   -- switch to width=\linewidth with proportional wrapping X columns + smaller font.
   local maxlen = {}   -- longest full cell (chars) per column
-  local maxtok = {}   -- longest UNBREAKABLE token (chars) per column
+  local maxtok = {}   -- longest UNBREAKABLE unit (chars) per column
   for i = 1, num_cols do maxlen[i] = 1; maxtok[i] = 1 end
   local function measure(cells)
     if not cells then return end
@@ -517,11 +543,30 @@ local function handle_auto_shrink_table(el)
         local s = pandoc.utils.stringify(cell.contents)
         local n = #s
         if n > maxlen[i] then maxlen[i] = n end
-        -- longest whitespace-delimited token: this is the minimum width the
-        -- column must have, because identifiers like P_COUNTER_PERIODS cannot
-        -- be hyphenated/wrapped and would otherwise overflow into the next column
-        for tok in s:gmatch("%S+") do
-          if #tok > maxtok[i] then maxtok[i] = #tok end
+        -- A column's minimum width is its longest UNBREAKABLE unit. Identifiers
+        -- like P_COUNTER_PERIODS cannot be hyphenated and must fit whole, but
+        -- ordinary words DO hyphenate -- so counting every word as unbreakable
+        -- over-reserves width on prose-heavy tables and forces an unreadably
+        -- small font (which then can't even fit the real identifiers; that was
+        -- the 6.1 overlap). Split on spaces, hyphens and en/em dashes (all real
+        -- break points), then let only "hard" units -- anything that is NOT a
+        -- plain Capitalized/lowercase word (i.e. has underscores, digits,
+        -- acronym caps, slashes...) -- set the floor. Plain words wrap freely.
+        -- Hard units (identifiers) must fit whole; soft words only need room for
+        -- a hyphenation fragment, so they are capped at SOFT_FLOOR characters. A
+        -- column's floor is the larger of the two, which keeps prose columns wide
+        -- enough to hyphenate cleanly without over-reserving for whole words.
+        local SOFT_FLOOR = 6
+        -- Identifier glyphs (caps, digits, underscores) are noticeably wider than
+        -- the mixed-case average the cpl constants are calibrated for, so a hard
+        -- unit needs ~25% more width than its raw character count or it overruns
+        -- its column into the next one.
+        local HARD_FACTOR = 1.25
+        local t = s:gsub("\226\128\147", " "):gsub("\226\128\148", " ")  -- en/em dash -> space
+        for unit in t:gmatch("[^%s%-]+") do
+          local hard = not unit:match("^%u?%l+$")
+          local need = hard and math.ceil(#unit * HARD_FACTOR) or math.min(#unit, SOFT_FLOOR)
+          if need > maxtok[i] then maxtok[i] = need end
         end
       end
     end
@@ -576,9 +621,16 @@ local function handle_auto_shrink_table(el)
       {name="\\small",      cpl=72, cs="5pt"},
       {name="\\footnotesize", cpl=84, cs="4pt"},
       {name="\\scriptsize", cpl=100, cs="3pt"},
+      -- Smallest tier: lets very wide many-column tables (e.g. the 10-column
+      -- torture 6.1) fit their token-minimum widths across \linewidth. Only
+      -- selected when the larger tiers cannot fit the per-column tokens.
+      {name="\\tiny",       cpl=115, cs="2pt"},
     }
     local pad = 1.0          -- breathing room (chars) added to each token width
-    local usable = 0.97      -- fraction of \linewidth available to columns
+    -- Leave headroom below 1.0 for the inter-column colsep: tblr forces the table
+    -- to width=\linewidth, so if the Q widths + colseps exceed it the columns get
+    -- silently compressed below their computed widths and identifiers overrun.
+    local usable = 0.93      -- fraction of \linewidth available to column bodies
     local chosen, minfrac
     for _, f in ipairs(fonts) do
       local frac = {}
@@ -766,11 +818,18 @@ local function handle_content_table(el)
     end
     has_widths = true
   elseif is_instr_desc then
-    -- Instruction | Description tables (Appendix B)
-    -- Force consistent widths: 18% instruction name, 77% description
-    -- This prevents Pandoc from inferring 50/50 on shorter tables
-    widths[1] = 0.18
-    widths[2] = 0.77
+    -- Symbol/Instruction | Description tables (Appendix B, torture 6.2).
+    -- Column 1 is a fixed Q[wd] column, so a long unbreakable symbol like
+    -- P_OE_FLOAT_LOW_1K5_PULLUP_FILTER (32 chars) overflows into the description
+    -- unless the column is at least as wide as that token. Size column 1 to its
+    -- longest token (never split the symbol) instead of a fixed 18%: ~60 chars
+    -- span \linewidth at the body \normalsize, +1 char breathing room. Floor at
+    -- 0.18 (keep short-name tables compact) and cap at 0.55 (always leave the
+    -- description a readable half). Column 2 takes the rest.
+    local tok1 = get_max_token_length(el, 1)
+    local need1 = (tok1 + 1) / 60
+    widths[1] = math.max(0.18, math.min(0.55, need1))
+    widths[2] = 0.95 - widths[1]
     has_widths = true
   elseif is_op_desc_ex then
     -- Operator | Description | Example tables (Chapter 2)
@@ -1007,12 +1066,15 @@ function Table(el)
     return handle_content_table(el)
   end
 
-  -- Default: auto-shrink tables to content width (no wrapping)
-  -- This produces cleaner output for short explanatory tables
-  if num_cols >= 2 and num_cols <= 8 then
+  -- Default: auto-shrink tables to content width. The wide branch allocates a
+  -- token-fit fixed width per column and shrinks the font as needed, so this also
+  -- covers many-column tables (up to 12) that would otherwise fall to pandoc's
+  -- narrow defaults and overlap (torture 6.1, a 10-column table). 9-column
+  -- encoding tables are already handled above and never reach here.
+  if num_cols >= 2 and num_cols <= 12 then
     return handle_auto_shrink_table(el)
   end
 
-  -- For tables outside our handling (1 column or 10+ columns), pass through
+  -- For tables outside our handling (1 column or 13+ columns), pass through
   return el
 end

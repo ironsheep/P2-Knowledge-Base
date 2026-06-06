@@ -542,11 +542,13 @@ Table: Streamer event sources and the instructions that clear them.
 ## 6.1 Many Wide Columns
 
 ```{=latex}
-\begin{ExpectBox}
-This table has ten columns, several carrying wide text. EXPECT: it fits the page width with wrapped
-cells (or shrinks, or rotates). THE DEFECT (current): adjacent columns are written on top of each
-other and the text is unreadable, because it falls to pandoc-default narrow columns.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This table has ten columns, several carrying wide text. It fits the page width: each column is given
+a token-fit width and the whole table is shrunk to a small font, with the prose cells wrapping inside
+their columns. No columns are written on top of each other. Verified in the v20 render: many-column
+tables are now routed to the token-fit width allocator (with a small-font tier) instead of falling to
+pandoc's narrow defaults.
+\end{VerifiedBox}
 ```
 
 | Mode | Mnemonic | Bits/Clk | DAC Channels | Pin Group | NCO Source | Event Raised | Typical Application | Companion Instruction | Reset Behavior |
@@ -558,11 +560,13 @@ other and the text is unreadable, because it falls to pandoc-default narrow colu
 ## 6.2 Long Unbreakable Tokens in a Narrow Column
 
 ```{=latex}
-\begin{ExpectBox}
-The left column is narrow; the symbols in it are long and have no spaces to wrap on. EXPECT: the
-long token wraps (broken at underscores) or the column widens to fit. THE DEFECT (current): the
-token runs straight out of its column and overlaps the description column to its right.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The left column is narrow; the symbols in it are long and have no spaces to wrap on. The column
+widens to fit its longest symbol --- the symbol is never split, and it no longer runs out of its
+column or overlaps the description to its right. Verified in the v20 render: the symbol/description
+width allocator now sizes column 1 to its longest unbreakable token (capped so the description keeps
+a readable half).
+\end{VerifiedBox}
 ```
 
 | Symbol | Description |
