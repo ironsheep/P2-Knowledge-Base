@@ -384,12 +384,11 @@ shift_trigger  = high_bits_of(NCO_phase)
 # Chapter 4: Widows and Orphans in Prose
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 The paragraph below is forced to begin near the page foot so it must break across the boundary.
-EXPECT: at least two lines on each side of the break. THE DEFECT: a single line is stranded — one
-line alone at the bottom (orphan) or one line alone at the top of the next page (widow). The
-foundation currently sets no clubpenalty/widowpenalty, so this is expected to fail today.
-\end{ExpectBox}
+It keeps at least two lines on each side --- no single line is stranded (no orphan at the foot,
+no widow at the top). Verified: the foundation now sets clubpenalty/widowpenalty = 10000.
+\end{VerifiedBox}
 \leavebottom{1.0in}
 ```
 

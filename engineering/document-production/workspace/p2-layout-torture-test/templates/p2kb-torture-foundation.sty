@@ -90,6 +90,13 @@
 \RequirePackage{enumitem}
 \RequirePackage{etoolbox}  % For patching chapter command
 
+% ==================== PAGE-BREAK BEHAVIOR (layout standard) ====================
+% Widow/orphan control: never strand a single line of a paragraph at a page
+% boundary (fixes torture case Ch4 — the foundation previously set no penalties).
+\clubpenalty=10000          % no orphan: first line of a paragraph alone at the page foot
+\widowpenalty=10000         % no widow: last line of a paragraph alone at the page top
+\displaywidowpenalty=10000  % same, for a paragraph ending just before a display
+
 % Load tcolorbox libraries
 \tcbuselibrary{skins,breakable}
 
