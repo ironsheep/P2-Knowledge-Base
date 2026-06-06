@@ -12,11 +12,11 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
-        "p2kb-streamer-figures",
-        "p2kb-streamer-tables",
-        "p2kb-streamer-mnemonic-bold",
-        "p2kb-streamer-code-coloring",
-        "p2kb-streamer-pagination"
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "P2 Streamer Programming Guide",

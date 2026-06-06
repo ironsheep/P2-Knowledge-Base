@@ -6,20 +6,24 @@
 % LAYOUT: One-sided for PDF screen viewing
 % For physical print with binding, change to: twoside,openany
 %
-% Template Stack:
-%   1. p2kb-streamer-foundation.sty - Pandoc compatibility, core setup
-%   2. p2kb-streamer-content.sty    - Guide environments + code/reference blocks
-%   3. p2kb-streamer-diagrams.sty   - TikZ stub (no built-in diagrams)
+% Template Stack (PLATFORM-UNIFIED — see methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty - shared: geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty     - shared: code/reference box family, contmarkers, keep-together
+%   3. p2kb-streamer-local.sty       - per-manual override (skins / local tail) — thin for this twin
+%   4. p2kb-streamer-diagrams.sty    - per-manual TikZ diagram content macros
 
 \documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LOAD FOUNDATION LAYER ====================
-\usepackage{p2kb-streamer-foundation}
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
 
-% ==================== LOAD CONTENT LAYER ====================
-\usepackage{p2kb-streamer-content}
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
 
-% ==================== LOAD DIAGRAMS ====================
+% ==================== LOAD PER-MANUAL OVERRIDE (skins / local tail) ====================
+\usepackage{p2kb-streamer-local}
+
+% ==================== LOAD PER-MANUAL DIAGRAMS ====================
 \usepackage{p2kb-streamer-diagrams}
 
 % ==================== DOCUMENT METADATA ====================
