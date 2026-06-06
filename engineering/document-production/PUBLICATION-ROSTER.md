@@ -58,7 +58,10 @@ promoted. Reconcile conventions against this roster at promotion.
 
 Test / standards harnesses. Manual-shaped (full folder triad, generate PDFs) but
 never released; each serves an **effort**, not the community. Not
-consistency-bound. Resume into the effort it serves.
+consistency-bound. Resume into the effort it serves. **An instrument's analysis
+IS its product** — unlike a publication's transient release-audit, its `audit/`
+is **git-tracked** alongside its cases (see the `.gitignore` exception), so the
+instrument, its analysis, and the fixes it drives version together.
 
 | Instrument | Workspace | Serves |
 |------------|-----------|--------|

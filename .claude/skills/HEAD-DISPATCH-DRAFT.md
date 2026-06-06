@@ -162,7 +162,11 @@ The **manual head is not flat** — it has a *type*, and the work on it has a *s
 - **In development / parked** — intended; may be a pre-production walk-away
   (Spin2 Ref). *Not* orphaned (intent, not state, is the discriminator).
 - **Instrument** — test/standards harness (P2 Layout Torture Test);
-  manual-shaped, generates PDFs, never released; serves an effort.
+  manual-shaped, generates PDFs, never released; serves an effort. **Its
+  analysis (`audit/`) is versioned with it** — an instrument's analysis is
+  durable product, not transient release-audit, so its `audit/` gets a
+  `.gitignore` exception (the general `manuals/*/audit/` ignore stays for
+  publications).
 - **Orphaned** — not carrying forward (Green Book, superseded by IO&SP).
 
 Physical signals (the `workspace|manuals|outbound` folder triad, a generated
