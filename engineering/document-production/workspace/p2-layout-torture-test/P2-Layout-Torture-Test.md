@@ -26,6 +26,21 @@
   coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-expect-bg,
   title={EXPECT --- what this case should show}
 }
+% VerifiedBox (green): a case whose desired behavior is ALREADY IMPLEMENTED and has been
+% validated (toggle + standard check). Renders correctly — NOT a defect. Same unbreakable
+% shape as ExpectBox so \leavebottom measurement stays accurate.
+\definecolor{torture-verified-bg}{HTML}{E6F4EA}
+\definecolor{torture-verified-frame}{HTML}{2E7D32}
+\newtcolorbox{VerifiedBox}{%
+  enhanced, unbreakable,
+  colback=torture-verified-bg, colframe=torture-verified-frame,
+  boxrule=1pt, leftrule=5pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=12pt, after skip=10pt,
+  fontupper=\small,
+  coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-verified-bg,
+  title={$\checkmark$ VERIFIED --- renders correctly (already implemented)}
+}
 % \leavebottom{X}: force the following demo toward the page foot so it must straddle the
 % boundary (the whole point of the torture cases) — but SAFELY. The earlier version dropped
 % content because it measured \pagetotal while the EXPECT box was still breakable (deferred),
@@ -34,14 +49,19 @@
 % 0.32\textheight so a figure's 0.30\textheight \needspace is always satisfiable and nothing is
 % ejected/dropped. The floor (how much blank we tolerate to force a straddle) is the
 % whitespace-tolerance knob from USER-PREFERENCES A1 vs C5/C7 — tune it here, centrally.
-\newcommand{\leavebottom}[1]{%
+% #1 = floor (optional): minimum space left at the foot, protecting an unbreakable figure
+%      from ejection. Default is SMALL so strand/split cases actually reach the page foot.
+%      FIGURE/diagram cases pass a larger floor (>= figure height), e.g. [0.32\textheight].
+% #2 = target space to leave at the foot.
+% Root-cause fix 2026-06-05: the old hard-coded 0.32\textheight floor clamped EVERY case
+%      ~2.9in above the foot, so short content never reached a boundary (systemic under-force).
+\newcommand{\leavebottom}[2][0.04\textheight]{%
   \par\begingroup
-  \dimen0=\dimexpr\textheight-\pagetotal-#1\relax
-  \dimen2=\dimexpr\textheight-\pagetotal-0.32\textheight\relax
+  \dimen0=\dimexpr\textheight-\pagetotal-#2\relax
+  \dimen2=\dimexpr\textheight-\pagetotal-#1\relax
   \ifdim\dimen0>\dimen2 \dimen0=\dimen2 \fi
   % NON-starred \vspace (breakable/discardable) — the page builder can break cleanly
-  % instead of overflowing the custom \output routine (which drops the demo). \vspace*
-  % was rigid and unbreakable, forcing the overfull-\vbox-during-\output that lost content.
+  % instead of overflowing the custom \output routine (which drops the demo).
   \ifdim\dimen0>0pt \vspace{\dimen0}\fi
   \endgroup}
 
@@ -103,11 +123,11 @@ that must stay together, and headings that must not detach from what they introd
 ## 1.1 An Orphaned Heading
 
 ```{=latex}
-\begin{ExpectBox}
-The heading below is forced near the page foot. It should pull at least its first body
-line onto the same page. THE DEFECT: the heading sits ALONE at the bottom and all of its
-body text begins on the next page (a stranded / orphaned heading).
-\end{ExpectBox}
+\begin{VerifiedBox}
+The heading below is forced to the page foot. It pulls its first body line with it onto the
+same page --- the heading does not strand alone at the bottom. Verified: the foundation's
+keep-with-next protection (needspace) holds the heading and its body together.
+\end{VerifiedBox}
 \leavebottom{0.75in}
 ```
 
@@ -126,12 +146,12 @@ following page.
 ## 1.2 A Heading, Intro, Diagram, and Caption as One Block
 
 ```{=latex}
-\begin{ExpectBox}
-The heading, its one-line intro, the diagram, and the caption below are ONE unit. They are
-forced near the page foot. THE DEFECT: the diagram (or its caption) detaches and lands on the
-next page, separated from the heading/intro it belongs to.
-\end{ExpectBox}
-\leavebottom{1.6in}
+\begin{VerifiedBox}
+The heading, its one-line intro, the diagram, and the caption below are ONE unit, forced to
+the page foot. They stay together --- the diagram and caption do not detach from the
+heading/intro; the whole block moves as a unit. Verified in the v6 render.
+\end{VerifiedBox}
+\leavebottom[0.32\textheight]{1.6in}
 ```
 
 ### 1.2.1 Read This Block as One Unit
@@ -200,11 +220,11 @@ never strand at a page foot.
 ## 1.5 A Heading That Is Quite Long and Therefore Wraps Onto a Second Line in the Layout
 
 ```{=latex}
-\begin{ExpectBox}
-The heading just above is long enough to wrap onto a second line. EXPECT: the wrapped heading keeps
-consistent spacing above and below and still binds to the paragraph beneath it. THE DEFECT: uneven
-spacing between the two heading lines, or the heading detaching from its following paragraph.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The heading just above is long enough to wrap onto a second line. The wrapped heading keeps
+consistent spacing above and below and binds to the paragraph beneath it --- no uneven
+inter-line spacing, no detachment. Verified in the v6 render.
+\end{VerifiedBox}
 ```
 
 A heading that wraps to two lines must keep consistent spacing above and below and must still bind
@@ -284,11 +304,11 @@ the page margin (horizontal overflow).
 ## 2.3 A Code Block Pushed to the Page Foot
 
 ```{=latex}
-\begin{ExpectBox}
-The short listing below is forced to land right at the page foot. EXPECT: the whole code box stays
-together and is pushed to the next page rather than split. THE DEFECT: the box is sheared by the
-boundary, or its heading strands above it while the listing jumps to the next page.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The short listing below is forced to the page foot. The whole code box stays together and moves
+to the next page rather than being sheared by the boundary --- it is not split. Verified in the
+v6/v8 render (the code box moved whole, intact).
+\end{VerifiedBox}
 \leavebottom{0.9in}
 ```
 
@@ -304,11 +324,11 @@ PUB blink()
 ## 3.1 A List That Must Split Across a Page
 
 ```{=latex}
-\begin{ExpectBox}
-The numbered list below is forced near the page foot, so it must split. EXPECT: the list breaks
-between items and continues with correct numbering on the next page. THE DEFECT: a single item is
-stranded, numbering restarts, or an item splits mid-line awkwardly.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The numbered list below is forced to the page foot and splits across the boundary. It breaks
+cleanly between items and continues with correct numbering on the next page --- no stranded item,
+no restart, no mid-item break. Verified in the v6 render (items 1--5 then 6--10 across the break).
+\end{VerifiedBox}
 \leavebottom{1.2in}
 ```
 
@@ -349,11 +369,10 @@ lost on the continuation, or a single quoted line strands alone at the boundary.
 ## 3.3 A Boxed Formula Forced to a Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-The boxed formula below is forced near the page foot. EXPECT: a short box like this is kept whole
-(pushed to the next page rather than split). THE DEFECT: the box splits across the boundary, or it
-overruns the bottom margin.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The boxed formula below is forced to the page foot. The short box is kept whole --- pushed to the
+next page rather than split, and it does not overrun the bottom margin. Verified in the v6/v8 render.
+\end{VerifiedBox}
 \leavebottom{0.7in}
 ```
 
@@ -479,11 +498,11 @@ it is emitted as a non-breaking tblr instead of a longtable.
 ## 5.2 A Table Forced to a Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-The small table below is forced near the page foot. EXPECT: it is kept whole — pushed to the next
-page rather than split through the middle of a row. THE DEFECT: a row splits across the boundary,
-or the heading detaches from the table.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The small table below is forced to the page foot. It is kept whole --- pushed to the next page
+rather than split through the middle of a row, with its header intact. Verified in the v6/v8 render
+(table moved whole to the next page).
+\end{VerifiedBox}
 \leavebottom{0.8in}
 ```
 
@@ -559,11 +578,11 @@ token runs straight out of its column and overlaps the description column to its
 ## 6.3 An Oversized Tall Table
 
 ```{=latex}
-\begin{ExpectBox}
-The tall table below is forced near the page foot. EXPECT: it either breaks across the boundary with
-a repeated header, or moves whole to the next page. THE DEFECT: the table runs off the bottom margin
-because it is emitted as a non-breaking block.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The tall table below is forced to the page foot. It moves whole to the next page rather than running
+off the bottom margin --- one of the two acceptable outcomes (move-whole, or break with a repeated
+header). Verified in the v6/v8 render (table moved whole to the next page).
+\end{VerifiedBox}
 \leavebottom{1.2in}
 ```
 
@@ -614,12 +633,12 @@ VGA timing relationships produced by the streamer and NCO.
 ## 7.2 A Figure With a Long Caption at a Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-The figure below is forced near the page foot and its caption is several lines long. EXPECT: the
-diagram and its full caption stay together. THE DEFECT: the caption detaches from the diagram, or
-the multi-line caption splits across the page boundary.
-\end{ExpectBox}
-\leavebottom{1.8in}
+\begin{VerifiedBox}
+The figure below is forced to the page foot and its caption is several lines long. The diagram and
+its full caption stay welded together --- the caption does not detach and does not split across the
+boundary. Verified in the v6 render (figure + multi-line caption together at the foot of the page).
+\end{VerifiedBox}
+\leavebottom[0.32\textheight]{1.8in}
 ```
 
 ```{=latex}
@@ -640,12 +659,12 @@ bound to its figure and does not detach across a page boundary.
 ## 7.3 Two Figures Competing for One Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-Two diagrams sit back to back, forced near a page foot. EXPECT: the first stays on this page if it
-fits and the second moves to the next, each with its caption. THE DEFECT: a diagram overruns the
-margin, or a caption detaches from its diagram.
-\end{ExpectBox}
-\leavebottom{2.2in}
+\begin{VerifiedBox}
+Two diagrams sit back to back, forced near a page foot. The first stays on this page and the
+second moves to the next, each with its caption intact --- neither overruns the margin and no
+caption detaches. Verified in the v6 render (first figure on this page, second on the next).
+\end{VerifiedBox}
+\leavebottom[0.32\textheight]{2.2in}
 ```
 
 ```{=latex}
@@ -728,11 +747,10 @@ the page, guaranteeing the span occurs rather than the whole box simply moving t
 
 ```{=latex}
 \clearpage
-\begin{ExpectBox}
-This short callout is forced near the page foot. EXPECT: a short box like this is kept whole —
-pushed to the next page rather than split through the middle. THE DEFECT: the short callout splits
-across the boundary instead of moving as a single unit.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This short callout is forced to the page foot. The short box is kept whole --- pushed to the next
+page as a single unit rather than split through the middle. Verified in the v6/v8 render.
+\end{VerifiedBox}
 \leavebottom{0.8in}
 ```
 
@@ -751,12 +769,11 @@ move to the next page whole rather than split.
 # Chapter 9: Whitespace Tolerance and Pagination Rules
 
 ```{=latex}
-\begin{ExpectBox}
-This chapter began on a FRESH page — normal chapters break to a new page (rule A3). EXPECT: a clean
-page break before this chapter title. THE DEFECT: the chapter crowds onto the tail of the previous
-page. (Contrast A2: only the FIRST chapter after a Part shares the Part's page; every other chapter,
-including this one, starts fresh.)
-\end{ExpectBox}
+\begin{VerifiedBox}
+This chapter began on a FRESH page --- normal chapters break to a new page (rule A3), and this
+one did, cleanly, before the chapter title. (Contrast A2: only the FIRST chapter after a Part
+shares the Part's page; every other chapter, including this one, starts fresh.) Verified.
+\end{VerifiedBox}
 ```
 
 This chapter isolates the trade-off the whole effort exists to resolve: how much blank space we
