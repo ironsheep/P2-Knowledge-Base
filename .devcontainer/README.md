@@ -9,11 +9,10 @@ This directory contains the VSCode Dev Container configuration for the P2 Knowle
    - [VSCode](https://code.visualstudio.com/)
    - [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-2. **Add PNut-TS Binary:**
-   ```bash
-   # Copy your Linux x86_64 pnut_ts binary to:
-   .devcontainer/bin/pnut_ts
-   ```
+2. **PNut-TS Binary:**
+   The Linux ARM64 `pnut-ts` compiler ships as a checked-in zip in this
+   directory (`pnut-ts-linux-arm64-*.zip`) and is installed automatically
+   by `postCreateCommand`. No manual step required.
 
 3. **Open in Container:**
    - Open this repository in VSCode
@@ -40,8 +39,7 @@ This directory contains the VSCode Dev Container configuration for the P2 Knowle
 
 ### P2 Tools
 - **PNut-TS** - P2 Spin2/PASM2 compiler
-  - Location: `/opt/pnut_ts/pnut_ts`
-  - Symlink: `/usr/local/bin/pnut_ts` (in PATH)
+  - Location: `/usr/local/bin/pnut-ts` (in PATH)
 
 ### VSCode Extensions (Auto-installed)
 - Python (ms-python.python)
@@ -53,24 +51,19 @@ This directory contains the VSCode Dev Container configuration for the P2 Knowle
 
 ```
 .devcontainer/
-├── devcontainer.json    # Main configuration
-├── bin/                 # Binaries to copy into container
-│   └── pnut_ts         # YOUR P2 compiler (Linux x86_64 binary)
-└── README.md           # This file
+├── devcontainer.json              # Main configuration
+├── docker-compose.yml             # Base service (image + workspace mount)
+├── docker-compose.override.yml    # Local-only mounts (gitignored)
+├── pnut-ts-linux-arm64-*.zip      # Bundled P2 compiler (installed by postCreate)
+└── README.md                      # This file
 ```
 
 ## PNut-TS Installation
 
-The `pnut_ts` binary is:
-1. Mounted from `.devcontainer/bin/` to `/tmp/devcontainer-bin/` (read-only)
-2. Copied to `/opt/pnut_ts/pnut_ts` during container creation
-3. Symlinked to `/usr/local/bin/pnut_ts` for PATH access
-4. Made executable with `chmod +x`
-
-**Why `/opt/`?**
-- Standard Linux location for third-party software
-- Tools expect to find compilers in `/opt/` or `/usr/local/`
-- Clean separation from system binaries
+During container creation, `postCreateCommand`:
+1. Unzips the bundled `pnut-ts-linux-arm64-*.zip`
+2. Copies the `pnut-ts` binary to `/usr/local/bin/pnut-ts`
+3. Makes it executable with `chmod +x`
 
 ## Customization
 
@@ -128,10 +121,9 @@ which npm        # Should show /usr/local/bin/npm or similar
 ### PNut-TS Not Found
 ```bash
 # Inside container, check:
-ls -la /opt/pnut_ts/pnut_ts
-ls -la /usr/local/bin/pnut_ts
-which pnut_ts
-pnut_ts --version  # Or whatever shows version
+ls -la /usr/local/bin/pnut-ts
+which pnut-ts
+pnut-ts --version
 ```
 
 ### Python Package Issues
@@ -166,7 +158,7 @@ If things get weird:
 - Container runs as non-root user (`vscode`)
 - Sudo access available for installing packages
 - Repository mounted as volume (changes persist)
-- PNut-TS mounted read-only initially, then copied
+- PNut-TS installed from a bundled zip during container creation
 
 ## Support
 

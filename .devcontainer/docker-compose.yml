@@ -3,5 +3,8 @@ services:
     image: mcr.microsoft.com/devcontainers/python:3.12
     volumes:
       - ..:/workspaces/P2-Knowledge-Base:cached
-      - ./bin:/tmp/devcontainer-bin:ro
+      - todo-mcp-data:/home/vscode/.local/share/todo-mcp
     command: sleep infinity
+
+volumes:
+  todo-mcp-data:

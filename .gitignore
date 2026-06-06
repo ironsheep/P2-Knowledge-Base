@@ -197,11 +197,7 @@ extracted_images_enhanced_test/
 .mcp.json
 # Devcontainer - local-only files (host-provided binaries and config)
 .devcontainer/docker-compose.override.yml
-.devcontainer/bin/container-tools/
-.devcontainer/bin/container-tools-OLD/
-.devcontainer/bin/pnut-ts-*.zip
 .devcontainer/.DS_Store
-.devcontainer/bin/.DS_Store
 engineering/document-production/WORKSPACE-REORGANIZATION-COMPLETE.md
 /engineering/document-production/outbound
 engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md.v1-before-yourturn-fixes

@@ -1,7 +1,7 @@
-# FILE: .bash_aliases
+#!/bin/bash
+# Workspace shell customizations — appended to ~/.bashrc by the devcontainer postCreate.
 
 # Claude Code path (installed via claude.ai/install.sh to ~/.local/bin)
-# Note: ~/.local/bin is already added by ~/.profile, but we ensure it here
 if [ -d "$HOME/.local/bin" ] ; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
