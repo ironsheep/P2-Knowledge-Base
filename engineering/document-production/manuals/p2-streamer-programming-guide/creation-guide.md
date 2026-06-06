@@ -682,6 +682,24 @@ All code examples must:
 
 ---
 
-*Version: 1.1 - Added Pedagogical Framework (Section 3)*
+## Code Line Budget
+
+Code boxes do **not** wrap — a typeset wrap can't break a comment and re-indent it,
+nor add a language line-continuation, so over-long code lines are an authorship
+defect to fix in source, not a template concern. The `prepare-manual` line-length
+audit (`engineering/tools/validation/audit-code-line-length.py`) flags any source
+code line wider than the budget below.
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** the shared platform code-box family (`p2kb-platform-content.sty`
+  — ```` ```spin2 ```` / ```` ```pasm2 ```` colored boxes), Latin Modern Mono at the box's
+  code size with the `numbers=left` gutter. Streamer is a **twin** that consumes the
+  platform stack unchanged, so it **inherits the platform reference K = 76** (calibrated
+  on the torture instrument, render v22, case 2.2 column ruler). It does not re-measure
+  unless it diverges its code font (it does not).
+
+---
+
+*Version: 1.2 - Added Code Line Budget (K=76, inherits platform); platform-stack migration*
 *Created: 2026-01-22*
-*Updated: 2026-01-22*
+*Updated: 2026-06-06*

@@ -54,7 +54,7 @@ If `forge-ready.txt`'s stamp is more than a few minutes old (or missing), the da
   engineering/tools/conversion/latex-escape-all.sh <source>.md \
       engineering/pdf-forge/interactive-testing/test-documents/<Doc>.md
   ```
-- **Assets** (if any) → `assets/`.
+- **Assets** (if any) → stage to **the exact path the markdown/template references**, not a guessed dir. Covers and inline images are commonly referenced as `inbox/assets/<img>` (pandoc runs with `--resource-path` rooted at the shared workspace), so a cover `\includegraphics{inbox/assets/book-artwork.png}` needs the file at `interactive-testing/inbox/assets/book-artwork.png`. Grep the template/markdown for the image path and mirror it.
 
 Copy only what this test needs; the daemon persists files across runs by name.
 
@@ -84,6 +84,8 @@ Gotchas (learned the hard way):
 - `template` needs the **`.latex` extension** (resolved as `templates/<template>`).
 - Include **both `input` and `document`** with the same value — daemon versions differ on which they read.
 - `lua_filters` names need **no `.lua`**. `pandoc_args` should **NOT** include `--pdf-engine` (the daemon adds `xelatex`).
+- **A missing referenced image is FATAL, not a warning** — `! Unable to load picture or PDF file '…'` → `No pages of output` → no PDF, even though earlier lines say only `LaTeX Warning: File not found`. If a build fails with no obvious LaTeX error, grep the compile log for `Unable to load picture`; the fix is staging the asset to the referenced path (see Step 1 Assets).
+- **A newly-added `.latex` template only registers when the daemon sees it.** It's resolved from `templates/` per request, so a host-side copy is normally picked up; if a brand-new template reports "Template not found," confirm it landed in `templates/` and re-submit.
 
 ## Step 3 — Wait for completion
 

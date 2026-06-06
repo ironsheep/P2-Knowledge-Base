@@ -202,7 +202,8 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 **Method 1: SETXFRQ instruction**
 
 ```pasm2
-        setxfrq ##$0CCC_CCCC+1        ' 1/10 clock = 25 MHz; the +1 forces the first rollover
+        ' 1/10 clock = 25 MHz; the +1 forces the first rollover
+        setxfrq ##$0CCC_CCCC+1
 ```
 
 The `+1` is the rounding-up habit from the pitfall above: `$0CCC_CCCC` is the truncated 1/10 value, and adding 1 makes the streamer roll over on the 10th clock instead of the 11th (and keeps the word off zero). You will see this `+1` throughout the examples.
@@ -461,7 +462,8 @@ Video is the streamer's headline act, and it earns its own family of modes becau
         rdfast  ##640*480*2/64, ##framebuffer
         setxfrq ##$0CCC_CCCC+1                    ' 25 MHz pixel rate
 
-        xcont   ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + base<<17 + 640, #0
+        xcont   ##X_RFWORD_RGB16 | X_PINS_ON | ...
+                  X_DACS_3_2_1_0 + base<<17 + 640, #0
 ```
 
 💡 **Tip:** RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory efficiency for most video applications.
@@ -527,7 +529,8 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 
 ' Capture 1024 ADC samples
         wrfast  #0, ##adc_buffer
-        xinit   ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON + adc_pin<<17 + 1024, #0
+        xinit   ##X_1ADC8_0P_1DAC8_WFBYTE | ...
+                  X_WRITE_ON + adc_pin<<17 + 1024, #0
         waitxfi
 ```
 
@@ -969,18 +972,25 @@ The non-visible intervals — front porch, sync, back porch, and whole blank lin
 
 ```pasm2
 DAT             org
-                setxfrq pixfreq                  ' 25 MHz pixel NCO (2^31-scaled)
-                mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate digital pin
-                drvc    vsync_pin                 ' establish initial VSYNC level
+                ' 25 MHz pixel NCO (2^31-scaled)
+                setxfrq pixfreq
+                ' VSYNC: a separate digital pin
+                mov     vsync_pin, ##VGA_BASE + 4
+                ' establish initial VSYNC level
+                drvc    vsync_pin
 
-field:          mov     y, #10                    ' vertical front porch (lines)
+                ' vertical front porch (lines)
+field:          mov     y, #10
                 call    #blank
-                rdfast  #0, ##framebuffer         ' visible pixels stream from the FIFO
+                ' visible pixels stream from the FIFO
+                rdfast  #0, ##framebuffer
                 mov     y, #480                   ' visible lines
 line:           call    #hsync
-                xcont   m_visible, #0             ' 640 RGB pixels (pipeline: Chapter 7)
+                ' 640 RGB pixels (pipeline: Chapter 7)
+                xcont   m_visible, #0
                 djnz    y, #line
-                mov     y, #33                    ' vertical back porch (lines)
+                ' vertical back porch (lines)
+                mov     y, #33
                 call    #blank
                 drvnot  vsync_pin                 ' VSYNC active
                 mov     y, #2                     ' vertical sync (lines)
@@ -993,7 +1003,8 @@ blank:          call    #hsync
                 xcont   m_blank, #0
           _ret_ djnz    y, #blank
 
-' Horizontal sync: porches hold blank (#0); the sync interval holds sync (#1)
+' Horizontal sync: porches hold blank (#0);
+' the sync interval holds sync (#1)
 hsync:          xcont   m_front, #0               ' 16px front porch
                 xcont   m_sync,  #1               ' 96px hsync pulse
           _ret_ xcont   m_back,  #0               ' 48px back porch
@@ -1003,8 +1014,10 @@ hsync:          xcont   m_front, #0               ' 16px front porch
 m_front         long    $7F01_0000 + 16
 m_sync          long    $7F01_0000 + 96
 m_back          long    $7F01_0000 + 48
-m_blank         long    $7F01_0000 + 800          ' whole line, no visible pixels
-m_visible       long    $B085_0000 + 640          ' X_RFWORD_RGB16 | X_PINS_ON
+' whole line, no visible pixels
+m_blank         long    $7F01_0000 + 800
+' X_RFWORD_RGB16 | X_PINS_ON
+m_visible       long    $B085_0000 + 640
 
 pixfreq         long    $0CCC_CCCD                ' 25 MHz at 250 MHz clock
 vsync_pin       res     1
@@ -1085,7 +1098,8 @@ spi_byte:       xinit   bmode, pa               ' Output 8 bits
                 wypin   #16, #spi_clk           ' 16 clock transitions
           _ret_ waitxfi
 
-bmode           long    X_IMM_8X4_1DAC4 | X_PINS_ON | X_ALT_ON + spi_do<<17 + 8
+bmode           long    X_IMM_8X4_1DAC4 | X_PINS_ON | ...
+                        X_ALT_ON + spi_do<<17 + 8
 ```
 
 **Bulk Transfer:**
@@ -1096,7 +1110,8 @@ spi_block:      rdfast  #0, ptra                ' Point to data
                 wypin   ##256*8*2, #spi_clk     ' Clock transitions
           _ret_ waitxfi
 
-rmode           long    X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON + spi_do<<17 + 256*8
+rmode           long    X_RFBYTE_1P_1DAC1 | X_PINS_ON | ...
+                        X_ALT_ON + spi_do<<17 + 256*8
 ```
 
 ## 16.2 Coordinating with WAITXFI
@@ -1141,10 +1156,12 @@ Goertzel analysis detects specific frequencies in ADC input.
 **Detection Loop:**
 
 ```pasm2
-detect:         ' Calculate NCO frequency for target (2^31-scaled for the NCO)
+' Calculate NCO frequency for target (2^31-scaled for the NCO)
+detect:
                 qfrac   target_freq, clkfreq    ' QFRAC = 2^32 × target/clk
                 getqx   xfrq
-                shr     xfrq, #1                ' halve to the NCO's 2^31 scaling
+                ' halve to the NCO's 2^31 scaling
+                shr     xfrq, #1
 
                 ' Run Goertzel analysis
                 setword dds_cmd, cycles, #0
@@ -1184,7 +1201,8 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
                 ' Set output frequency (2^31-scaled for the NCO)
                 qfrac   output_freq, clkfreq    ' QFRAC = 2^32 × output/clk
                 getqx   xfrq
-                shr     xfrq, #1                ' halve to the NCO's 2^31 scaling
+                ' halve to the NCO's 2^31 scaling
+                shr     xfrq, #1
                 setxfrq xfrq
 
                 ' Continuous output
