@@ -41,6 +41,24 @@
   coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-verified-bg,
   title={$\checkmark$ VERIFIED --- renders correctly (already implemented)}
 }
+% ProcessBox (blue): a case whose standard is enforced at BUILD TIME and in the
+% SOURCE, not by the template render. The template makes the condition VISIBLE
+% (e.g. an over-long code line overflows rather than silently wrapping); a
+% prepare-time audit flags it against a calibrated budget; the author fixes the
+% source. So the render below deliberately shows the un-fixed condition --- it is
+% the audit's test fixture, not a defect the template should paper over.
+\definecolor{torture-process-bg}{HTML}{E8EDF5}
+\definecolor{torture-process-frame}{HTML}{3F51B5}
+\newtcolorbox{ProcessBox}{%
+  enhanced, unbreakable,
+  colback=torture-process-bg, colframe=torture-process-frame,
+  boxrule=1pt, leftrule=5pt, arc=2pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  before skip=12pt, after skip=10pt,
+  fontupper=\small,
+  coltitle=black, fonttitle=\bfseries\small, colbacktitle=torture-process-bg,
+  title={PROCESS --- enforced by the build audit + in source, not by the template}
+}
 % \leavebottom{X}: force the following demo toward the page foot so it must straddle the
 % boundary (the whole point of the torture cases) — but SAFELY. The earlier version dropped
 % content because it measured \pagetotal while the EXPECT box was still breakable (deferred),
@@ -73,7 +91,7 @@
 \vspace{0.6cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.3 (engineering harness)\par}
+{\large\color{blue}Version 0.4 (engineering harness)\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -93,14 +111,28 @@ boundary. Read each EXPECT box, then look at what actually happened just below i
 \clearpage
 ```
 
+```{=latex}
+\begin{ExpectBox}
+EXPECT: the List of Figures lists all five captioned figures with chapter-scoped numbers
+(Figure C.N) and page numbers; the List of Tables lists the two captioned tables (Table 5.1,
+Table 5.2). THE DEFECT (the bug this revision certifies fixed): either list is empty --- which
+happened while captions were emitted as unnumbered \texttt{\textbackslash caption*} --- or a
+caption is missing its number.
+\end{ExpectBox}
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+```
+
 # Part I: Page-Break and Keep-Together Torture
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 This Part has an introduction (the two paragraphs below). The first chapter heading
-(``Chapter 1'') should appear cleanly \emph{below} this intro text, with normal spacing.
-THE DEFECT: the chapter title prints on top of / overlapping these intro lines.
-\end{ExpectBox}
+(``Chapter 1'') appears cleanly \emph{below} this intro text with normal spacing --- it does
+not overlap the intro lines. Verified: the pinned-chapter spacing fix in the content layer.
+\end{VerifiedBox}
 ```
 
 This is a **Part introduction** — prose that belongs to the part as a whole, sitting between
@@ -242,15 +274,13 @@ across a page, a listing whose lines are wider than the box, and a short listing
 ## 2.1 A Listing That Must Split Across a Page
 
 ```{=latex}
-\begin{ExpectBox}
-The listing below is forced to begin near the page foot, so it must span onto the next page.
-EXPECT (the standard we WANT — C10): the colored code box breaks cleanly AND signposts the span the
-way a continued table does — a "listing continues on next page" marker in the FOOTER where it breaks
-and a "listing continued" marker in the HEADER where it resumes, with the box border/background
-intact on both parts. THE DEFECT (today): the box splits with NO continuation markers — the reader
-cannot tell it is one listing across two pages — or it loses its border/background on the
-continuation, or overruns the bottom margin. We have no code-block page-spanning standard yet.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The listing below is forced to begin near the page foot, so it spans onto the next page. The colored
+code box breaks cleanly and signposts the span the way a continued table does --- a ``continues on
+next page'' marker in the footer where it breaks and a ``continued from previous page'' marker in the
+header where it resumes, with the box border and background intact on both parts. Verified in the v21
+render: the breakable styled boxes now carry continuation markers (standard C10).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 
@@ -282,15 +312,38 @@ recover mov     count, ##BLOCKS     ' reload the block counter
 \clearpage
 ```
 
-## 2.2 A Listing With Lines Too Long for the Box
+## 2.2 Code Lines Too Long for the Box (the column budget)
 
 ```{=latex}
-\begin{ExpectBox}
-The two code lines below are far wider than the text block. EXPECT: long code lines wrap or are
-clipped inside the colored box. THE DEFECT: the text runs past the right edge of the box and off
-the page margin (horizontal overflow).
-\end{ExpectBox}
+\begin{ProcessBox}
+Code boxes do NOT wrap. A typeset wrap cannot break a comment and re-indent it, nor insert the
+language's line continuation for a split statement, so it would render wrong-looking code AND hide
+the problem. Instead, the box has a column budget K --- the widest code line it holds. Read K off the
+ruler below: it is the last column still inside the box before the text spills past the right edge.
+K is recorded in each manual's creation-guide; the prepare-manual line-length audit flags any source
+line longer than K; the author shortens it (break the comment and re-indent, or continue the
+statement). The two demo lines further below are deliberately over-length --- they overflow here on
+purpose, and double as the audit's self-test fixture.
+\end{ProcessBox}
 ```
+
+The column ruler (tens row, units row, then exact-length end markers). The box's right edge falls
+between two of the labelled markers --- the largest marker still fully inside the box is K:
+
+```pasm2
+         1         2         3         4         5         6         7         8         9         0
+1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+col 76 --------------------------------------------------------------------|
+col 78 ----------------------------------------------------------------------|
+col 80 ------------------------------------------------------------------------|
+col 82 --------------------------------------------------------------------------|
+col 84 ----------------------------------------------------------------------------|
+col 86 ------------------------------------------------------------------------------|
+col 88 --------------------------------------------------------------------------------|
+col 90 ----------------------------------------------------------------------------------|
+```
+
+Deliberately over-length lines (these MUST overflow the box AND be flagged by the audit):
 
 ```pasm2
         rep     @.endrep, #16       ' this comment is deliberately extended well past the usual width to force the code line to exceed the printable text block and reveal how the code box handles overflow at the right edge
@@ -384,12 +437,11 @@ shift_trigger  = high_bits_of(NCO_phase)
 # Chapter 4: Widows and Orphans in Prose
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 The paragraph below is forced to begin near the page foot so it must break across the boundary.
-EXPECT: at least two lines on each side of the break. THE DEFECT: a single line is stranded — one
-line alone at the bottom (orphan) or one line alone at the top of the next page (widow). The
-foundation currently sets no clubpenalty/widowpenalty, so this is expected to fail today.
-\end{ExpectBox}
+It keeps at least two lines on each side --- no single line is stranded (no orphan at the foot,
+no widow at the top). Verified: the foundation now sets clubpenalty/widowpenalty = 10000.
+\end{VerifiedBox}
 \leavebottom{1.0in}
 ```
 
@@ -404,11 +456,11 @@ for the rhythmic, pin-facing transfers a Propeller is built around. The final se
 # Part II: Table and Figure Torture
 
 ```{=latex}
-\begin{ExpectBox}
-This second Part also has an introduction, to confirm the part-intro fix works for EVERY part.
-The ``Chapter 5'' heading should sit cleanly below this intro. THE DEFECT: the chapter title
-overlaps these intro lines, exactly as in Part I.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This second Part also has an introduction, confirming the part-intro fix works for EVERY part.
+The ``Chapter 5'' heading sits cleanly below this intro --- no overlap, exactly as in Part I.
+Verified.
+\end{VerifiedBox}
 ```
 
 This second part introduction confirms the part-intro-to-chapter flow works for *every* part, not
@@ -419,13 +471,16 @@ only the first. The chapters here stress table layout and figure placement.
 ## 5.1 A Long Multi-Page Table
 
 ```{=latex}
-\begin{ExpectBox}
-This table has 60+ rows — far more than fit on one page. EXPECT: it breaks across pages, repeating
-its header row at the top of each continuation page, with a clear ``(continued)'' marker. THE
-DEFECT (current): the table runs straight off the bottom of the page and does NOT continue, because
-it is emitted as a non-breaking tblr instead of a longtable.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This table has 60+ rows --- far more than fit on one page. It breaks cleanly across pages, repeating
+its header row at the top of each continuation page, so no rows are lost off the page bottom. Verified
+in the v13 render: wide tables with many rows are now emitted as a breakable longtblr (with a repeating
+header) instead of a non-breaking tblr. NEW this revision: it carries a numbered caption (Table 5.1)
+shown once at the top, registered in the List of Tables --- exercising the longtblr caption path.
+\end{VerifiedBox}
 ```
+
+Table: Streamer transfer modes --- the full mode matrix (a breaking table, captioned).
 
 | Mode | Command | Bits/Clock | Source | Destination | Notes |
 |------|---------|-----------:|--------|-------------|-------|
@@ -523,8 +578,9 @@ rather than split through the middle of a row, with its header intact. Verified 
 ```{=latex}
 \begin{ExpectBox}
 The captioned table below is forced near the page foot. EXPECT: the caption stays welded to its
-table — both move together to the next page if they do not fit. THE DEFECT: the caption detaches
-from the table, or lands on a different page from the rows it describes.
+table --- both move together to the next page if they do not fit --- and reads ``Table 5.2''
+(numbered, chapter-scoped) with the table registered in the List of Tables. THE DEFECT: the caption
+detaches from the table, lands on a different page from the rows it describes, or shows no number.
 \end{ExpectBox}
 \leavebottom{0.9in}
 ```
@@ -542,11 +598,13 @@ Table: Streamer event sources and the instructions that clear them.
 ## 6.1 Many Wide Columns
 
 ```{=latex}
-\begin{ExpectBox}
-This table has ten columns, several carrying wide text. EXPECT: it fits the page width with wrapped
-cells (or shrinks, or rotates). THE DEFECT (current): adjacent columns are written on top of each
-other and the text is unreadable, because it falls to pandoc-default narrow columns.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This table has ten columns, several carrying wide text. It fits the page width: each column is given
+a token-fit width and the whole table is shrunk to a small font, with the prose cells wrapping inside
+their columns. No columns are written on top of each other. Verified in the v20 render: many-column
+tables are now routed to the token-fit width allocator (with a small-font tier) instead of falling to
+pandoc's narrow defaults.
+\end{VerifiedBox}
 ```
 
 | Mode | Mnemonic | Bits/Clk | DAC Channels | Pin Group | NCO Source | Event Raised | Typical Application | Companion Instruction | Reset Behavior |
@@ -558,11 +616,13 @@ other and the text is unreadable, because it falls to pandoc-default narrow colu
 ## 6.2 Long Unbreakable Tokens in a Narrow Column
 
 ```{=latex}
-\begin{ExpectBox}
-The left column is narrow; the symbols in it are long and have no spaces to wrap on. EXPECT: the
-long token wraps (broken at underscores) or the column widens to fit. THE DEFECT (current): the
-token runs straight out of its column and overlaps the description column to its right.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The left column is narrow; the symbols in it are long and have no spaces to wrap on. The column
+widens to fit its longest symbol --- the symbol is never split, and it no longer runs out of its
+column or overlaps the description to its right. Verified in the v20 render: the symbol/description
+width allocator now sizes column 1 to its longest unbreakable token (capped so the description keeps
+a readable half).
+\end{VerifiedBox}
 ```
 
 | Symbol | Description |
@@ -610,11 +670,12 @@ header). Verified in the v6/v8 render (table moved whole to the next page).
 ## 7.1 A Diagram Forced to a Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-The diagram below is forced near the page foot. Because the figures filter forces [H] placement,
-it cannot float to the next page. EXPECT: it moves whole to the next page, OR splits gracefully.
-THE DEFECT: it overruns the bottom margin (runs off the page) because [H] pins it in place.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The diagram below is forced near the page foot. Because it is an unbreakable [H] figure that cannot
+fit in the space left at the foot, the page breaks before it and the whole diagram --- with its
+caption --- moves to the next page rather than overrunning the bottom margin. Verified in the v21
+render (VGA timing diagram + caption together at the top of the following page, nothing off-page).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 
@@ -686,12 +747,12 @@ RGB packing formats for the video output modes.
 # Part III: Boxes, Whitespace, and Pagination
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 This third Part also has an introduction, so the part-intro-to-chapter flow (B4) and the
 "first chapter shares the Part's page" rule (A2) are checked a third time. The ``Chapter 8''
-heading should sit cleanly below this intro, ON THIS PAGE. THE DEFECT: the chapter title overlaps
-the intro, or is pushed onto a fresh page of its own (violating A2).
-\end{ExpectBox}
+heading sits cleanly below this intro, ON THIS PAGE --- no overlap, not pushed to a fresh page.
+Verified (A2 + B4).
+\end{VerifiedBox}
 ```
 
 This third part stresses the styled-box family — colored callout boxes — plus the central
@@ -707,15 +768,13 @@ span a page cleanly, and a short one must not be split needlessly.
 
 ```{=latex}
 \clearpage
-\begin{ExpectBox}
-This colored callout is long and is forced to begin near the page foot, so it must span onto the
-next page. EXPECT (the standard we WANT — C11, same as C10/C9): it splits cleanly and SIGNPOSTS the
-span like a continued table — a "callout continues" marker in the FOOTER where it breaks and a
-"callout continued" marker in the HEADER where it resumes, box fill/border intact on both parts.
-THE DEFECT (today): it splits with NO continuation markers, or loses its styling on the
-continuation. OPEN POLICY: we have not decided whether long callouts are allowed at all, or must be
-kept short — see C11.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This colored callout is long and is forced to begin near the page foot, so it spans onto the next
+page. It splits cleanly and signposts the span like a continued table --- a ``continues on next
+page'' marker in the footer where it breaks and a ``continued from previous page'' marker in the
+header where it resumes, the colored fill and border intact on both parts. Verified in the v21
+render: callout boxes share the same continuation-marker standard as code boxes (C11 = C10 = C9).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 

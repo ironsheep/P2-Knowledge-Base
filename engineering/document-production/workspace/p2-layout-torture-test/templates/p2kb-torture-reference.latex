@@ -6,20 +6,25 @@
 % LAYOUT: One-sided for PDF screen viewing
 % For physical print with binding, change to: twoside,openany
 %
-% Template Stack:
-%   1. p2kb-torture-foundation.sty - Pandoc compatibility, core setup
-%   2. p2kb-torture-content.sty    - Guide environments + code/reference blocks
-%   3. p2kb-torture-diagrams.sty   - TikZ stub (no built-in diagrams)
+% Template Stack (PLATFORM-UNIFIED — see methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty - shared: geometry, penalties, titlespacing, hyperref, fig/table numbering
+%   2. p2kb-platform-content.sty     - shared: code/reference box family, contmarkers, caption style, screenshot keyline
+%   3. p2kb-torture-diagrams.sty     - instrument-specific TikZ \DiagTorture* macros
+%
+% The torture instrument CONSUMES the platform (it is not a fork): certifying the
+% instrument certifies the exact platform bytes every manual ships. The test-harness
+% boxes (ExpectBox / VerifiedBox / ProcessBox / \leavebottom) are defined inline in
+% the torture markdown's preamble, so they travel with the document, not this stack.
 
 \documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LOAD FOUNDATION LAYER ====================
-\usepackage{p2kb-torture-foundation}
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
 
-% ==================== LOAD CONTENT LAYER ====================
-\usepackage{p2kb-torture-content}
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
 
-% ==================== LOAD DIAGRAMS ====================
+% ==================== LOAD INSTRUMENT DIAGRAMS ====================
 \usepackage{p2kb-torture-diagrams}
 
 % ==================== DOCUMENT METADATA ====================

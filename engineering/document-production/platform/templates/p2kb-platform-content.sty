@@ -19,6 +19,49 @@
 \captionsetup{font=small, labelfont=bf, labelsep=period, justification=centering,
               singlelinecheck=true, skip=4pt, width=0.82\linewidth}
 
+% ---- tabularray (longtblr) caption styling — match the caption package ----
+% A BREAKING table (longtblr) emits its numbered caption through tabularray's OWN
+% caption template, NOT the caption package, so by default it reads "Table N:" at
+% full body size with a colon — drifting from the figure / short-table captions
+% (\small, period separator, bold "Table N.M" label). A short (non-breaking) table
+% is a table[H] float captioned by the caption package, so the two table paths
+% would otherwise look different. Re-style the tabularray caption templates to the
+% same look: period separator, \small, bold label, upright small text. (Centering
+% is tabularray's default caption placement.) Keep both table-caption paths
+% identical — that visual consistency is the whole point of the platform.
+\DefTblrTemplate{caption-sep}{default}{.\space}
+% Centered, 0.82\linewidth block — matches the caption package's
+% justification=centering + width=0.82\linewidth so a breaking-table caption is the
+% same narrow centered shape as a figure / short-table caption (not full-width left).
+\DefTblrTemplate{caption}{default}{%
+  \centerline{\parbox{0.82\linewidth}{\centering
+    {\small\bfseries\UseTblrTemplate{caption-tag}{default}\UseTblrTemplate{caption-sep}{default}}%
+    {\small\UseTblrTemplate{caption-text}{default}}}}%
+}
+
+% ==================== SCREENSHOT KEYLINE (layout standard) ====================
+% Screenshots (captured IDE / oscilloscope / UI images, as opposed to vector
+% diagrams) get a thin ~0.5pt mid-gray keyline that HUGS the image, so a capture
+% with a white or pale background never bleeds into the page -- the image edge is
+% always distinct. Promoted from the Debug Window manual's screenshot box and
+% thinned to a single hairline. Default-ON: any screenshot drawn with
+% \screenshotfig carries the keyline.
+%
+% Authoring rides the existing figure -> numbered-caption pipeline (same shape as
+% a TikZ diagram): invoke \screenshotfig in a {=latex} block, then a figurecaption
+% div, and p2kb-platform-figures.lua wraps the pair into a numbered figure:
+%     ```{=latex}
+%     \screenshotfig{assets/scope-capture.png}
+%     ```
+%     ::: {.figurecaption #fig:scope}
+%     Oscilloscope capture of the streamer output.
+%     :::
+\definecolor{p2kb-screenshot-keyline}{gray}{0.5}   % mid-gray hairline
+\newcommand{\screenshotfig}[1]{%
+  {\setlength{\fboxrule}{0.5pt}\setlength{\fboxsep}{1pt}%
+   \fcolorbox{p2kb-screenshot-keyline}{white}{\includegraphics{#1}}}%
+}
+
 % ==================== COLOR PALETTE ====================
 % User guide color scheme — professional and readable
 

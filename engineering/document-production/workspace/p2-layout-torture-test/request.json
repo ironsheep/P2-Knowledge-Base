@@ -12,17 +12,17 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
-        "p2kb-torture-figures",
-        "p2kb-torture-tables",
-        "p2kb-torture-mnemonic-bold",
-        "p2kb-torture-code-coloring",
-        "p2kb-torture-pagination"
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "P2 Layout Torture Test",
         "subtitle": "Every Page-Break and Table Defect, On Purpose",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v0.3",
+        "version": "v0.4",
         "date": "June 2026"
       }
     }

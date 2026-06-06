@@ -11,11 +11,11 @@ instrument stack (2026-06-06).
 
 ```
 platform/templates/
-  p2kb-platform-foundation.sty   geometry, widow/orphan penalties, titlespacing, hyperref
-  p2kb-platform-content.sty      code/reference box family, contmarkers, keep-together, iosp-* palette
+  p2kb-platform-foundation.sty   geometry, widow/orphan penalties, titlespacing, hyperref, figure+table chapter numbering, caption pkg
+  p2kb-platform-content.sty      code/reference box family, contmarkers, keep-together, iosp-* palette, caption style, screenshot keyline (\screenshotfig)
 platform/filters/
-  p2kb-platform-figures.lua      figure move-whole (needspace)
-  p2kb-platform-tables.lua       longtblr split + rowhead + token-fit (fix #5) + continuation markers
+  p2kb-platform-figures.lua      figure move-whole (needspace) + numbered \caption (List of Figures)
+  p2kb-platform-tables.lua       longtblr split + rowhead + token-fit (fix #5) + continuation markers + numbered \caption welded to table (List of Tables)
   p2kb-platform-code-coloring.lua
   p2kb-platform-mnemonic-bold.lua
   p2kb-platform-pagination.lua
@@ -44,6 +44,8 @@ certifies the exact files manuals ship.
 ## Pilot status
 
 - **Streamer** migrated first (twin manual). Initial PDF generated on the platform
-  stack: 65 pp, clean compile (run `streamer-platform-v3`). Remaining before
-  release: Figures & Tables standard + screenshot keyline (catalog §8), fix 18
-  overlong code lines + seed K=76, then production.
+  stack: 65 pp, clean compile (run `streamer-platform-v3`). Code-line budget K=76
+  seeded and all 18 overlong lines fixed (compile-verified). Figures & Tables
+  numbering standard + screenshot keyline (catalog §8) now implemented in the
+  platform. Remaining before release: re-certify the torture instrument on the
+  updated platform, final Streamer render + inspect, then production.

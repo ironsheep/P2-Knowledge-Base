@@ -1,6 +1,13 @@
 -- P2KB IOSP Table Formatting Filter
 -- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
+-- Version: 6.10 - Numbered table captions (layout standard). When a markdown table
+--                 carries a "Table: ..." caption, emit a NUMBERED \caption that
+--                 registers it in the List of Tables and keeps caption welded to
+--                 the table: non-breaking tblr is wrapped in a table[H] float;
+--                 breakable longtblr uses the [caption=,label=] outer key;
+--                 longtable encoding tables use a leading \caption row. Uncaptioned
+--                 tables are unchanged (bare, unnumbered).
 -- Version: 6.9 - Fix #5: many-col tables (<=12) routed to token-fit wide branch + \tiny tier (6.1);
 --                is_instr_desc col-1 width is token-aware so long symbols never overflow (6.2)
 -- Version: 6.8 - Fix #3: wide+many-row auto-shrink tables use breakable longtblr (case 5.1)
@@ -13,6 +20,74 @@
 --   * Instruction | Description (Appendix B style)
 -- - All other tables: Auto-shrink to content width (no wrapping)
 -- - This produces cleaner output for short explanatory tables
+
+-- ==================== NUMBERED CAPTIONS (layout standard) ====================
+-- A markdown table caption ("Table: ...", or ": ..." below the table) lands in
+-- el.caption.long. Render it to LaTeX and pair it with the table's identifier
+-- (e.g. {#tbl:foo}) as a \label. Returns ("","") when the table has no caption
+-- so uncaptioned tables stay bare and unnumbered.
+local function table_caption_and_label(el)
+  local cap = ""
+  if el.caption and el.caption.long and #el.caption.long > 0 then
+    local ok, res = pcall(function()
+      local s = pandoc.write(pandoc.Pandoc(el.caption.long), "latex")
+      return (s or ""):gsub("%s+$", "")
+    end)
+    if ok and res and res ~= "" then
+      cap = res
+    else
+      cap = pandoc.utils.stringify(el.caption.long)
+    end
+  end
+  local label = el.identifier or ""
+  return cap, label
+end
+
+-- Opening line for a breaking table (longtblr), adding the numbered-caption outer
+-- key when present. longtblr ALWAYS emits (and counts) a caption of its own, so the
+-- caption MUST go through this native key -- emitting a separate \captionof would
+-- double the caption and skew the table counter. The caption's VISUAL style (period
+-- separator, small font, bold "Table N.M" label) is matched to the caption-package
+-- look used by figures and short tables via the tabularray caption-template
+-- overrides in p2kb-platform-content.sty, so both table paths read identically.
+local function longtblr_begin(cap, label)
+  if cap == "" then
+    return "\\begin{longtblr}{"
+  end
+  local opt = "caption={" .. cap .. "}"
+  if label ~= "" then
+    opt = opt .. ",label={" .. label .. "}"
+  end
+  return "\\begin{longtblr}[" .. opt .. "]{"
+end
+
+-- Caption row for a classic longtable (the encoding/master tables). longtable
+-- takes its caption as a leading row before \endfirsthead; it numbers the table
+-- and registers it in the List of Tables. Returns nil when there is no caption.
+local function longtable_caption_row(cap, label)
+  if cap == "" then
+    return nil
+  end
+  local s = "\\caption{" .. cap .. "}"
+  if label ~= "" then
+    s = s .. "\\label{" .. label .. "}"
+  end
+  return s .. " \\\\"
+end
+
+-- Wrap a NON-breaking table environment (tblr / short tblr) in a table[H] float so
+-- a numbered \caption sits welded above it (both move together to the next page if
+-- they do not fit -- the H float is an unbreakable unit). No caption => unchanged.
+local function wrap_float(inner, cap, label)
+  if cap == "" then
+    return inner
+  end
+  local pre = "\\begin{table}[H]\n\\centering\n\\caption{" .. cap .. "}"
+  if label ~= "" then
+    pre = pre .. "\\label{" .. label .. "}"
+  end
+  return pre .. "\n" .. inner .. "\n\\end{table}"
+end
 
 -- Count total data rows in a table (excluding header)
 local function count_data_rows(el)
@@ -90,6 +165,7 @@ local function handle_encoding_table(el)
   -- Count rows to decide between tabular and longtable
   local row_count = count_data_rows(el)
   local use_longtable = row_count > 20  -- Use longtable for tables with 20+ rows
+  local cap, label = table_caption_and_label(el)
 
   -- Helper to render cell contents as LaTeX
   local function cell_to_latex(cell)
@@ -121,6 +197,10 @@ local function handle_encoding_table(el)
     -- Use standard longtable for reliable page breaks
     -- Column spec: p{width} for fixed columns, centered
     table.insert(latex, "\\begin{longtable}{|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.055\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.075\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.04\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.095\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.095\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.12\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.12\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.17\\linewidth}|>{\\centering\\arraybackslash\\small}p{0.05\\linewidth}|}")
+
+    -- Numbered caption (registers in List of Tables), if the table carries one
+    local cap_row = longtable_caption_row(cap, label)
+    if cap_row then table.insert(latex, cap_row) end
 
     -- Build colored header row (cell colors for each zone)
     local header_row = "\\cellcolor{iosp-enc-instruction}\\textbf{" .. headers[1] .. "} & " ..
@@ -204,12 +284,13 @@ local function handle_encoding_table(el)
 
   if use_longtable then
     table.insert(latex, "\\end{longtable}")
+    -- Return as RawBlock (longtable carries its own caption row above)
+    return pandoc.RawBlock("latex", table.concat(latex, "\n"))
   else
     table.insert(latex, "\\end{tblr}")
+    -- Short encoding tables are non-breaking tblr -> weld caption via table[H] float
+    return pandoc.RawBlock("latex", wrap_float(table.concat(latex, "\n"), cap, label))
   end
-
-  -- Return as RawBlock
-  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
 -- Detect if this is a 6-column encoding master table (Appendix A pattern)
@@ -241,6 +322,7 @@ end
 -- Uses standard longtable for reliable multi-page support
 local function handle_encoding_master_table(el)
   local row_count = count_data_rows(el)
+  local cap, label = table_caption_and_label(el)
 
   -- Helper to render cell contents as LaTeX (with escaping)
   local function cell_to_latex(cell)
@@ -277,6 +359,10 @@ local function handle_encoding_master_table(el)
   -- Always use longtable for this table (it has 300+ rows)
   -- Column spec: fixed widths for all columns
   table.insert(latex, "\\begin{longtable}{|>{\\raggedright\\arraybackslash}p{0.14\\linewidth}|>{\\centering\\arraybackslash\\ttfamily\\small}p{0.10\\linewidth}|>{\\centering\\arraybackslash}p{0.05\\linewidth}|>{\\centering\\arraybackslash}p{0.07\\linewidth}|>{\\raggedright\\arraybackslash\\small}p{0.26\\linewidth}|>{\\raggedright\\arraybackslash\\small}p{0.26\\linewidth}|}")
+
+  -- Numbered caption (registers in List of Tables), if the table carries one
+  local cap_row = longtable_caption_row(cap, label)
+  if cap_row then table.insert(latex, cap_row) end
 
   -- Build header row
   local header_row_tex = "\\textbf{" .. headers[1] .. "} & " ..
@@ -505,6 +591,7 @@ end
 -- Handle auto-shrink tables: no width constraint, columns size to content
 local function handle_auto_shrink_table(el)
   local num_cols = #el.colspecs
+  local cap, label = table_caption_and_label(el)
 
   -- Helper to render cell contents as LaTeX
   local function cell_to_latex(cell)
@@ -603,7 +690,7 @@ local function handle_auto_shrink_table(el)
 
   local latex = {}
   if use_longtblr then
-    table.insert(latex, "\\begin{longtblr}{")
+    table.insert(latex, longtblr_begin(cap, label))
   else
     table.insert(latex, "\\begin{tblr}{")
   end
@@ -737,13 +824,16 @@ local function handle_auto_shrink_table(el)
 
   if use_longtblr then
     table.insert(latex, "\\end{longtblr}")
+    -- Breaking longtblr carries its caption via the native [caption=] key above.
+    -- Add vertical space after table to separate from following content
+    table.insert(latex, "\\vspace{12pt}")
+    return pandoc.RawBlock("latex", table.concat(latex, "\n"))
   else
     table.insert(latex, "\\end{tblr}")
+    -- Non-breaking tblr -> weld a numbered caption above it via a table[H] float
+    local body = wrap_float(table.concat(latex, "\n"), cap, label)
+    return pandoc.RawBlock("latex", body .. "\n\\vspace{12pt}")
   end
-  -- Add vertical space after table to separate from following content
-  table.insert(latex, "\\vspace{12pt}")
-
-  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
 -- Handle content tables (2-8 columns) with page-width constraint
@@ -751,6 +841,7 @@ end
 -- If no widths specified in markdown, uses equal distribution with last column flexible
 local function handle_content_table(el)
   local num_cols = #el.colspecs
+  local cap, label = table_caption_and_label(el)
 
   -- Special handling for "Constant | Value | Description" tables (Appendix E, F)
   -- These need specific widths because Value column has long binary patterns
@@ -958,7 +1049,7 @@ local function handle_content_table(el)
   -- Build tabularray LaTeX
   local latex = {}
   if use_longtblr then
-    table.insert(latex, "\\begin{longtblr}{")
+    table.insert(latex, longtblr_begin(cap, label))
   else
     table.insert(latex, "\\begin{tblr}{")
   end
@@ -1039,11 +1130,13 @@ local function handle_content_table(el)
 
   if use_longtblr then
     table.insert(latex, "\\end{longtblr}")
+    -- Breaking longtblr carries its caption via the native [caption=] key above.
+    return pandoc.RawBlock("latex", table.concat(latex, "\n"))
   else
     table.insert(latex, "\\end{tblr}")
+    -- Non-breaking tblr -> weld a numbered caption above it via a table[H] float
+    return pandoc.RawBlock("latex", wrap_float(table.concat(latex, "\n"), cap, label))
   end
-
-  return pandoc.RawBlock("latex", table.concat(latex, "\n"))
 end
 
 function Table(el)

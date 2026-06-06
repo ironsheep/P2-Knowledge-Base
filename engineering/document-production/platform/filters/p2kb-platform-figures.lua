@@ -14,14 +14,19 @@
 --   \begin{figure}[H]
 --   \centering
 --   \DiagramMacroName
---   \caption*{Caption Text Here}
+--   \caption{Caption Text Here}
 --   \label{fig:some-id}
 --   \end{figure}
 --
--- Version: 1.1
--- Date: 2026-01-23
+-- Version: 1.2
+-- Date: 2026-06-06
 -- Implements: Rayman review item C1 (figure numbering)
 -- v1.1: Use \caption*{} for hardcoded figure numbers (no auto-numbering)
+-- v1.2: Switch to NUMBERED \caption{} (layout standard). The figurecaption div
+--       carries bare caption text (no "Figure N" prefix), so \caption auto-numbers
+--       as "Figure C.N" (chapter-scoped via \counterwithin in foundation) AND
+--       registers the figure in the List of Figures. The div is already
+--       consolidated into this single caption -- there is no separate rendering.
 
 -- Process blocks to find RawBlock + figurecaption Div pairs
 function Blocks(blocks)
@@ -53,7 +58,7 @@ function Blocks(blocks)
       local figure_latex = "\\begin{figure}[H]\n" ..
                           "\\centering\n" ..
                           diagram_latex .. "\n" ..
-                          "\\caption*{" .. caption_text .. "}\n"
+                          "\\caption{" .. caption_text .. "}\n"
 
       -- Add label if present
       if label_id ~= "" then

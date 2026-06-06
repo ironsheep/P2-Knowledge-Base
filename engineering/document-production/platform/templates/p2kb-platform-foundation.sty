@@ -76,10 +76,15 @@
 \renewcommand{\fps@figure}{H}
 \makeatother
 
-% ==================== FIGURE NUMBERING ====================
-% Chapter-based figure numbering: Figure 1.1, 1.2, 2.1, etc.
-% Implements Rayman review item C1
+% ==================== FIGURE / TABLE NUMBERING ====================
+% Chapter-based figure AND table numbering: Figure 1.1 / Table 1.1, 1.2, ...
+% Figures implement Rayman review item C1; tables follow the same convention so
+% the Lua-emitted numbered \caption reads "Table C.N" and the List of Tables
+% populates. The chapter counter still drives the N.M prefix even though chapter
+% headings carry no visible number (secnumdepth = -1) -- the counter increments
+% regardless, exactly as it already does for figures.
 \counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
 
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=0.75in,left=1in,right=1in]{geometry}
