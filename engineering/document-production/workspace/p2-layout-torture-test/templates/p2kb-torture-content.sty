@@ -48,7 +48,11 @@
 \newcommand{\conditionalclearpage}{%
   \ifbool{aftermanualpart}{%
     \global\boolfalse{aftermanualpart}%
-    % Skip clearpage - chapter stays on same page as part
+    % Chapter stays on the part's page (no clearpage). Add positive vertical
+    % space so the chapter title flows BELOW the part intro: this cancels the
+    % chapter's -38pt top-pull (foundation \titlespacing, meant for a fresh
+    % page top) and leaves a clean gap. Without it the title overlaps the intro.
+    \par\nobreak\vspace{60pt}%
   }{%
     \clearpage%
   }%

@@ -96,11 +96,11 @@ boundary. Read each EXPECT box, then look at what actually happened just below i
 # Part I: Page-Break and Keep-Together Torture
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 This Part has an introduction (the two paragraphs below). The first chapter heading
-(``Chapter 1'') should appear cleanly \emph{below} this intro text, with normal spacing.
-THE DEFECT: the chapter title prints on top of / overlapping these intro lines.
-\end{ExpectBox}
+(``Chapter 1'') appears cleanly \emph{below} this intro text with normal spacing --- it does
+not overlap the intro lines. Verified: the pinned-chapter spacing fix in the content layer.
+\end{VerifiedBox}
 ```
 
 This is a **Part introduction** — prose that belongs to the part as a whole, sitting between
@@ -403,11 +403,11 @@ for the rhythmic, pin-facing transfers a Propeller is built around. The final se
 # Part II: Table and Figure Torture
 
 ```{=latex}
-\begin{ExpectBox}
-This second Part also has an introduction, to confirm the part-intro fix works for EVERY part.
-The ``Chapter 5'' heading should sit cleanly below this intro. THE DEFECT: the chapter title
-overlaps these intro lines, exactly as in Part I.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This second Part also has an introduction, confirming the part-intro fix works for EVERY part.
+The ``Chapter 5'' heading sits cleanly below this intro --- no overlap, exactly as in Part I.
+Verified.
+\end{VerifiedBox}
 ```
 
 This second part introduction confirms the part-intro-to-chapter flow works for *every* part, not
@@ -685,12 +685,12 @@ RGB packing formats for the video output modes.
 # Part III: Boxes, Whitespace, and Pagination
 
 ```{=latex}
-\begin{ExpectBox}
+\begin{VerifiedBox}
 This third Part also has an introduction, so the part-intro-to-chapter flow (B4) and the
 "first chapter shares the Part's page" rule (A2) are checked a third time. The ``Chapter 8''
-heading should sit cleanly below this intro, ON THIS PAGE. THE DEFECT: the chapter title overlaps
-the intro, or is pushed onto a fresh page of its own (violating A2).
-\end{ExpectBox}
+heading sits cleanly below this intro, ON THIS PAGE --- no overlap, not pushed to a fresh page.
+Verified (A2 + B4).
+\end{VerifiedBox}
 ```
 
 This third part stresses the styled-box family — colored callout boxes — plus the central
