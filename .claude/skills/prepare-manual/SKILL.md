@@ -33,6 +33,8 @@ engineering/tools/conversion/
 - **Sacred Rule #1** — Backup workspace working copy before overwriting it (>50KB or >100 lines). Use `cp <file> <file>.backup.$(date +%Y%m%d_%H%M%S)`.
 - **Sacred Rule #6** — Only stage files to outbound that **actually changed** (vs. what Forge already holds). Sending unchanged files wastes the user's deployment time. The markdown changes every iteration; templates/filters/`request.json` usually do not.
 - **How PDF Forge persistence works (the mental model).** When the user moves outbound → Forge, the files are **removed from outbound**. Outbound going empty after a deploy is **expected, not an error** — never treat a previously-staged file's absence from outbound as a problem. Forge then **retains the last-moved version of each file, keyed by filename, until that filename is overwritten.** Consequence: files with **unique per-document names** (e.g. the streamer's `templates/*` and `filters/p2kb-streamer-*`) accumulate on Forge and survive across documents — stage them only on the first build of a document or when they change. But **`request.json` has the SAME filename for every manual**, so Forge only ever holds ONE — whichever document was deployed last.
+  - **Forge has TWO COMPLETELY SEPARATE file stores: the manual-PDF-generation store and the interactive/daemon store.** This prepare-manual → outbound → manual-PDF-generation path feeds ONLY the **manual store**. The `forge-test` interactive daemon feeds ONLY the **interactive store**. A file sent to one does **not** appear in the other — there is no shared store. To make any file appear in the manual store, it MUST travel the manual PDF generation process. The keyed-by-filename persistence rule (above) holds *within each store independently*.
+  - **Consequence — "changed since Forge last had it" means "since the MANUAL store last had it," not since the last daemon render.** Templates/filters iterated and verified via the daemon are NOT in the manual store; they must be staged through outbound to reach it. So the FIRST time a document goes through the manual PDF generation process, the manual store has NONE of its files → **stage the COMPLETE stack** (all templates + all filters + request.json + md), even though they were "already on Forge" via the daemon. On subsequent manual builds, stage only what changed *since the last manual build* (the daemon's separate history is irrelevant to the manual store).
 - **Document-switch override — ALWAYS stage `request.json` when switching documents.** Because `request.json` shares one filename across all manuals (previous point), Forge's copy is for the *previous* document — its directive (input, template, lua_filters, metadata) points at the wrong manual. So whenever the manual you are preparing differs from the one prepared last time, you MUST stage `request.json` to outbound **even though git shows it unchanged**. This is the one sanctioned exception to Sacred Rule #6. Track the last-prepared manual in todo-mcp context key `pdf_forge_last_prepared_manual`; compare it to the current slug in Step 4, force-stage `request.json` on a mismatch (or when the key is absent), and update the key in Step 7. (On a *first-ever* build of a document, also stage its uniquely-named templates/filters — Forge does not have them yet.)
 - **A `.tex` file appearing in outbound is a layout-debug hand-back — NOT a staging artifact.** When a PDF has a gnarly layout problem, the user occasionally takes the **`.tex`** that PDF Forge emits during generation (the Pandoc-produced LaTeX, before xelatex makes the PDF) and drops it **back into `outbound/<slug>/`** for inspection. If you see a `.tex` there, it is the actual generated LaTeX for you to **read and diagnose** the layout issue against the template/filters — do NOT delete it, overwrite it, escape it, or treat it as something to send to Forge. Leave it in place and use it; it is inbound-for-debugging, not outbound-for-deploy.
 - **Sacred Rule #5** — Never rename files. The working-copy filename in `request.json` is sacred and identical in workspace and outbound.
@@ -81,6 +83,12 @@ Also compare opus-master modtime/size to workspace working copy to know if a ref
 
 **Document-switch check (decides `request.json` staging).** Read the todo-mcp context key `pdf_forge_last_prepared_manual`. If it is **absent or differs** from the current `<slug>`, this is a **document switch** — `request.json` MUST be staged in Step 6 regardless of its git status, because Forge still holds the previous document's directive (wrong template/filters/input). If it **equals** the current slug, stage `request.json` only if it actually changed this session.
 
+**Manual-store-seeded check (decides whether the FULL stack may be staged).** The "first manual build → stage the complete stack" clause (templates + filters + request.json + md) applies ONLY when the **manual** PDF-generation store is genuinely empty for this document. Determine seeded-ness from concrete signals, not memory:
+- todo-mcp context key `manual_store_seeded_<slug>` is set, **OR**
+- a previously manually-generated PDF exists for this document (e.g. in `deliverables/.../DOCs/` or wherever this manual's PDF lands).
+
+If **either** signal is true, the manual store already holds this document's full stack → **stage ONLY the files that changed since the last manual build.** Do NOT re-stage unchanged templates/filters — that is the Sacred Rule #6 violation. (Tell: re-copying the whole `p2kb-<slug>-*` stack when only a few files changed. Iterating templates/filters via the `forge-test` daemon does NOT seed the manual store — daemon history is irrelevant here.) Treat a build as first-only when BOTH signals are false.
+
 ### Step 5 — Present the plan and ask for confirmation
 
 **FIRST**, also check for **hardcoded version/date strings in the markdown source** (the cover page is rendered from the markdown, not from `request.json` metadata — `request.json` metadata only affects PDF properties / headers / footers, not the visible cover):
@@ -93,7 +101,7 @@ Typical pattern is two LaTeX lines inside a `{=latex}` block: `{\large <Month> <
 Then use `AskUserQuestion` to present:
 1. **Refresh source?** — show opus-master vs working-copy diff summary (newer/older/same).
 2. **Version bump?** — show CURRENT values in BOTH (a) `request.json` metadata and (b) markdown cover (front-matter file or single-file cover region). If recent commits to opus-master mention a version (e.g., "v2.3.0"), suggest that. Today's month/year as date. Offer: bump both to suggested / keep as-is / custom. Bumping ONE without the other creates a confusing mismatch — flag this risk explicitly if the user wants to do partial.
-3. **Files to stage** — list each candidate template/filter/`request.json` with its git status. Offer: stage all / pick a subset / stage none (markdown only).
+3. **Files to stage** — list each candidate template/filter/`request.json` with its git status. **Gate the offer on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). Default: stage just the changed aux files + the markdown.
 
 If the user has clearly signaled "just do it" in this session, you may skip confirmation for unambiguous cases — but always show what you're about to do at minimum.
 
@@ -140,6 +148,9 @@ In order (each step depends on the previous):
 
 **Update the last-prepared tracker** so the next run can detect a switch:
 `mcp__todo-mcp__context_set key:"pdf_forge_last_prepared_manual" value:"<slug>"`.
+
+**Set the manual-store-seeded flag** so future runs know the full stack is already on Forge and stage only changes:
+`mcp__todo-mcp__context_set key:"manual_store_seeded_<slug>" value:"true"`.
 
 End with a brief summary:
 - Final list of files in `outbound/<slug>/` with sizes (`ls -la`).
