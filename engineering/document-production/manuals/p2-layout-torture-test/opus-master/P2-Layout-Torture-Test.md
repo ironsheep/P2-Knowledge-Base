@@ -285,11 +285,12 @@ recover mov     count, ##BLOCKS     ' reload the block counter
 ## 2.2 A Listing With Lines Too Long for the Box
 
 ```{=latex}
-\begin{ExpectBox}
-The two code lines below are far wider than the text block. EXPECT: long code lines wrap or are
-clipped inside the colored box. THE DEFECT: the text runs past the right edge of the box and off
-the page margin (horizontal overflow).
-\end{ExpectBox}
+\begin{VerifiedBox}
+The two code lines below are far wider than the text block. The long lines wrap inside the colored
+box --- each continuation marked with a small hook and indented to the code's left edge --- so no
+text runs past the right edge of the box or off the page margin. Verified in the v16 render: the colored
+listing now wraps over-wide lines at spaces (mnemonics stay whole).
+\end{VerifiedBox}
 ```
 
 ```pasm2
