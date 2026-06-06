@@ -972,25 +972,25 @@ The non-visible intervals — front porch, sync, back porch, and whole blank lin
 
 ```pasm2
 DAT             org
-                ' 25 MHz pixel NCO (2^31-scaled)
-                setxfrq pixfreq
-                ' VSYNC: a separate digital pin
-                mov     vsync_pin, ##VGA_BASE + 4
-                ' establish initial VSYNC level
-                drvc    vsync_pin
+                setxfrq pixfreq                   ' 25 MHz pixel NCO
+                                                  ' (2^31-scaled)
+                mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate
+                                                  ' digital pin
+                drvc    vsync_pin                 ' establish initial
+                                                  ' VSYNC level
 
-                ' vertical front porch (lines)
-field:          mov     y, #10
+field:          mov     y, #10                    ' vertical front porch
+                                                  ' (lines)
                 call    #blank
-                ' visible pixels stream from the FIFO
-                rdfast  #0, ##framebuffer
+                rdfast  #0, ##framebuffer         ' visible pixels stream
+                                                  ' from the FIFO
                 mov     y, #480                   ' visible lines
 line:           call    #hsync
-                ' 640 RGB pixels (pipeline: Chapter 7)
-                xcont   m_visible, #0
+                xcont   m_visible, #0             ' 640 RGB pixels
+                                                  ' (pipeline: Chapter 7)
                 djnz    y, #line
-                ' vertical back porch (lines)
-                mov     y, #33
+                mov     y, #33                    ' vertical back porch
+                                                  ' (lines)
                 call    #blank
                 drvnot  vsync_pin                 ' VSYNC active
                 mov     y, #2                     ' vertical sync (lines)
@@ -1160,8 +1160,8 @@ Goertzel analysis detects specific frequencies in ADC input.
 detect:
                 qfrac   target_freq, clkfreq    ' QFRAC = 2^32 × target/clk
                 getqx   xfrq
-                ' halve to the NCO's 2^31 scaling
-                shr     xfrq, #1
+                shr     xfrq, #1                ' halve to the NCO's
+                                                ' 2^31 scaling
 
                 ' Run Goertzel analysis
                 setword dds_cmd, cycles, #0
@@ -1201,8 +1201,8 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
                 ' Set output frequency (2^31-scaled for the NCO)
                 qfrac   output_freq, clkfreq    ' QFRAC = 2^32 × output/clk
                 getqx   xfrq
-                ' halve to the NCO's 2^31 scaling
-                shr     xfrq, #1
+                shr     xfrq, #1                ' halve to the NCO's
+                                                ' 2^31 scaling
                 setxfrq xfrq
 
                 ' Continuous output
