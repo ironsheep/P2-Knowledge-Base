@@ -169,9 +169,35 @@
 \definecolor{iosp-antipattern-bg}{HTML}{FFF5F5}    % Very soft pink (Antipattern)
 \definecolor{iosp-antipattern-border}{HTML}{C08080} % Muted rose border (Antipattern)
 
+% ---- Page-spanning continuation markers (layout standard C9/C10/C11) ----
+% When a breakable styled box (code listing or callout) splits across a page,
+% signpost the span the way a continued longtable does: a "continues on next
+% page" marker in the FOOTER on the part where it breaks, and a "continued from
+% previous page" marker in the HEADER on the part where it resumes. The
+% breakable library keeps the colored frame/fill intact on every part by itself;
+% these overlays only add the wording. The overlay keys target exactly the right
+% parts -- "first and middle" = every part that is followed by more (gets the
+% footer), "middle and last" = every part that follows more (gets the header) --
+% so an UNBROKEN box shows no markers at all. Drawn just outside the frame edge
+% so they never overprint the box content.
+\tcbset{
+  contmarkers/.style={
+    enhanced,
+    overlay first and middle={%
+      \node[anchor=north east, font=\scriptsize\itshape, text=black!55, inner sep=0pt]
+        at ([yshift=-2.5pt]frame.south east) {continues on next page $\rightarrow$};%
+    },
+    overlay middle and last={%
+      \node[anchor=south east, font=\scriptsize\itshape, text=black!55, inner sep=0pt]
+        at ([yshift=2.5pt]frame.north east) {$\hookrightarrow$ continued from previous page};%
+    },
+  }
+}
+
 % Shared geometry for all five code blocks (matches the live publications):
 %   thick left rule for accessibility, left=30pt to clear inset line numbers.
 \newtcolorbox{Spin2Block}{%
+  contmarkers,
   colback=iosp-spin2-bg, colframe=iosp-spin2-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
@@ -179,6 +205,7 @@
 }
 
 \newtcolorbox{IOSPBlock}{%
+  contmarkers,
   colback=iosp-pasm2-bg, colframe=iosp-pasm2-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
@@ -186,6 +213,7 @@
 }
 
 \newtcolorbox{CORDICBlock}{%
+  contmarkers,
   colback=iosp-cordic-bg, colframe=iosp-cordic-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
@@ -193,6 +221,7 @@
 }
 
 \newtcolorbox{MultiCOGBlock}{%
+  contmarkers,
   colback=iosp-multicog-bg, colframe=iosp-multicog-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,
@@ -200,6 +229,7 @@
 }
 
 \newtcolorbox{AntipatternBlock}{%
+  contmarkers,
   colback=iosp-antipattern-bg, colframe=iosp-antipattern-border,
   boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
   rounded corners, left=30pt, right=10pt, top=8pt, bottom=8pt,

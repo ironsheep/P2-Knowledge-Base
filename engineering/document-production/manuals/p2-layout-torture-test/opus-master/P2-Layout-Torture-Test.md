@@ -242,15 +242,13 @@ across a page, a listing whose lines are wider than the box, and a short listing
 ## 2.1 A Listing That Must Split Across a Page
 
 ```{=latex}
-\begin{ExpectBox}
-The listing below is forced to begin near the page foot, so it must span onto the next page.
-EXPECT (the standard we WANT — C10): the colored code box breaks cleanly AND signposts the span the
-way a continued table does — a "listing continues on next page" marker in the FOOTER where it breaks
-and a "listing continued" marker in the HEADER where it resumes, with the box border/background
-intact on both parts. THE DEFECT (today): the box splits with NO continuation markers — the reader
-cannot tell it is one listing across two pages — or it loses its border/background on the
-continuation, or overruns the bottom margin. We have no code-block page-spanning standard yet.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The listing below is forced to begin near the page foot, so it spans onto the next page. The colored
+code box breaks cleanly and signposts the span the way a continued table does --- a ``continues on
+next page'' marker in the footer where it breaks and a ``continued from previous page'' marker in the
+header where it resumes, with the box border and background intact on both parts. Verified in the v21
+render: the breakable styled boxes now carry continuation markers (standard C10).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 
@@ -614,11 +612,12 @@ header). Verified in the v6/v8 render (table moved whole to the next page).
 ## 7.1 A Diagram Forced to a Boundary
 
 ```{=latex}
-\begin{ExpectBox}
-The diagram below is forced near the page foot. Because the figures filter forces [H] placement,
-it cannot float to the next page. EXPECT: it moves whole to the next page, OR splits gracefully.
-THE DEFECT: it overruns the bottom margin (runs off the page) because [H] pins it in place.
-\end{ExpectBox}
+\begin{VerifiedBox}
+The diagram below is forced near the page foot. Because it is an unbreakable [H] figure that cannot
+fit in the space left at the foot, the page breaks before it and the whole diagram --- with its
+caption --- moves to the next page rather than overrunning the bottom margin. Verified in the v21
+render (VGA timing diagram + caption together at the top of the following page, nothing off-page).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 
@@ -711,15 +710,13 @@ span a page cleanly, and a short one must not be split needlessly.
 
 ```{=latex}
 \clearpage
-\begin{ExpectBox}
-This colored callout is long and is forced to begin near the page foot, so it must span onto the
-next page. EXPECT (the standard we WANT — C11, same as C10/C9): it splits cleanly and SIGNPOSTS the
-span like a continued table — a "callout continues" marker in the FOOTER where it breaks and a
-"callout continued" marker in the HEADER where it resumes, box fill/border intact on both parts.
-THE DEFECT (today): it splits with NO continuation markers, or loses its styling on the
-continuation. OPEN POLICY: we have not decided whether long callouts are allowed at all, or must be
-kept short — see C11.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This colored callout is long and is forced to begin near the page foot, so it spans onto the next
+page. It splits cleanly and signposts the span like a continued table --- a ``continues on next
+page'' marker in the footer where it breaks and a ``continued from previous page'' marker in the
+header where it resumes, the colored fill and border intact on both parts. Verified in the v21
+render: callout boxes share the same continuation-marker standard as code boxes (C11 = C10 = C9).
+\end{VerifiedBox}
 \leavebottom{1.5in}
 ```
 
