@@ -1,7 +1,7 @@
 -- P2KB IOSP Table Formatting Filter
 -- Auto-shrink tables to content width, full-width only when needed
 -- Author: Iron Sheep Productions, LLC
--- Version: 6.7 - Fix: escape & and other special chars in longtable cells
+-- Version: 6.8 - Fix #3: wide+many-row auto-shrink tables use breakable longtblr (case 5.1)
 --
 -- Strategy:
 -- - 9-column encoding tables: Fixed widths with colored headers (tabularray)
@@ -548,8 +548,20 @@ local function handle_auto_shrink_table(el)
   -- whole table (and its legend paragraph) fits on one page.
   local tall = count_data_rows(el) > 24
 
+  -- A WIDE table with many rows cannot fit on one page: a non-breaking tblr runs
+  -- straight off the page bottom and silently loses its tail (torture case 5.1).
+  -- Route such tables to longtblr instead -- breakable, with a repeating header
+  -- row (rowhead=1). The narrow "tall" branch is deliberately NOT converted: it
+  -- compresses onto a SINGLE page by design (Table 1.10 + its legend stay
+  -- together), which is a different, already-verified goal.
+  local use_longtblr = wide and count_data_rows(el) > 20
+
   local latex = {}
-  table.insert(latex, "\\begin{tblr}{")
+  if use_longtblr then
+    table.insert(latex, "\\begin{longtblr}{")
+  else
+    table.insert(latex, "\\begin{tblr}{")
+  end
   if wide then
     -- Width allocation that never overflows AND never splits a name.
     -- Every column is given a FIXED width (Q[wd=...]) of at least its longest
@@ -630,6 +642,10 @@ local function handle_auto_shrink_table(el)
     table.insert(latex, "  colspec={" .. table.concat(colspec_parts, " ") .. "},")
     table.insert(latex, "  row{1}={font=\\bfseries},")
   end
+  -- Repeat the header row at the top of each continuation page.
+  if use_longtblr then
+    table.insert(latex, "  rowhead=1,")
+  end
   table.insert(latex, "  hline{1,2}={solid},")
   table.insert(latex, "  hline{Z}={solid},")
   table.insert(latex, "}")
@@ -667,7 +683,11 @@ local function handle_auto_shrink_table(el)
     end
   end
 
-  table.insert(latex, "\\end{tblr}")
+  if use_longtblr then
+    table.insert(latex, "\\end{longtblr}")
+  else
+    table.insert(latex, "\\end{tblr}")
+  end
   -- Add vertical space after table to separate from following content
   table.insert(latex, "\\vspace{12pt}")
 

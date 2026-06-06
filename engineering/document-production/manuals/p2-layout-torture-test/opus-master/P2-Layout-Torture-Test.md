@@ -418,12 +418,12 @@ only the first. The chapters here stress table layout and figure placement.
 ## 5.1 A Long Multi-Page Table
 
 ```{=latex}
-\begin{ExpectBox}
-This table has 60+ rows — far more than fit on one page. EXPECT: it breaks across pages, repeating
-its header row at the top of each continuation page, with a clear ``(continued)'' marker. THE
-DEFECT (current): the table runs straight off the bottom of the page and does NOT continue, because
-it is emitted as a non-breaking tblr instead of a longtable.
-\end{ExpectBox}
+\begin{VerifiedBox}
+This table has 60+ rows --- far more than fit on one page. It breaks cleanly across pages, repeating
+its header row at the top of each continuation page, so no rows are lost off the page bottom. Verified
+in the v13 render: wide tables with many rows are now emitted as a breakable longtblr (with a repeating
+header) instead of a non-breaking tblr.
+\end{VerifiedBox}
 ```
 
 | Mode | Command | Bits/Clock | Source | Destination | Notes |
