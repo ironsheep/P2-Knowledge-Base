@@ -126,8 +126,15 @@ In order (each step depends on the previous):
    - **Clean (exit 0)** — proceed.
    - **Violations (exit 1)** — STOP. Relay the located `file:line: cols` list; the lines must be shortened in **opus-master** source (break the comment + re-indent, or continue the statement with the language continuation) before staging. Re-assemble and re-run. Do not escape/stage with violations outstanding.
    - **No budget yet (exit 2)** — this manual's K is not calibrated. STOP and calibrate first: if the manual forks the shared code-box stack (page margins `left/right=1in`, `IOSPBlock left=30pt,right=10pt`, identical code `Verbatim`) it **inherits the platform K** (see `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget); otherwise measure it with the case-2.2 column ruler on a test render. Add a `## Code Line Budget` section (with the tagged `**Max code columns (K): N**` line + provenance) to the manual's creation-guide, then re-run.
-5. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
-6. **Escape** the markdown into outbound:
+5. **Code compile-certification gate.** These manuals **certify** runnable code, not just eyeball it. A code example that is *runnable* — a complete object/program, or a self-contained block — MUST compile clean with `pnut-ts` before staging:
+   ```bash
+   pnut-ts -q <example>.spin2     # exit 0 = clean; relay any error with file:line
+   ```
+   - **Runnable example fails** → STOP, fix in **opus-master** source, re-run. Never stage runnable code that does not compile.
+   - **Illustrative fragment** (a single line, or a block that references out-of-scope symbols defined in the surrounding program) → not standalone-compilable by design; certify it is *syntactically* valid (wrap it minimally and compile if in doubt). A long line is shortened with the **legal Spin2 line continuation `...`** at a logical boundary (verified: compiles to the identical value — confirm via the P2KB MCP / a `pnut-ts` round-trip) or by moving a comment to its own line above the instruction — **never** by a typeset wrap.
+   - This gate is the compile half of code quality; Step 4 is the width half. Both pass before staging.
+6. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
+7. **Escape** the markdown into outbound:
    ```bash
    cd workspace/<slug>
    ../../../tools/conversion/latex-escape-all.sh \
@@ -135,7 +142,7 @@ In order (each step depends on the previous):
        ../../outbound/<slug>/<DocName>.md
    ```
    The escape script creates its own backup of the workspace source — that's expected, harmless.
-7. **Stage changed aux files** confirmed in Step 5:
+8. **Stage changed aux files** confirmed in Step 5:
    ```bash
    cp workspace/<slug>/templates/<file> outbound/<slug>/        # FLAT — no templates/ subdir
    cp workspace/<slug>/filters/<file>   outbound/<slug>/        # FLAT — no filters/ subdir
