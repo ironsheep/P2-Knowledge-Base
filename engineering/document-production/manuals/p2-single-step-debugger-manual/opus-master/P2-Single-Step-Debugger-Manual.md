@@ -101,7 +101,7 @@ to a paused program.
 The P2 compiler is **`pnut_ts`**. Add the `-d` flag to build your program with
 debugging turned on:
 
-```
+```command
 pnut_ts -d myprogram.spin2
 ```
 
@@ -341,7 +341,7 @@ PRI add_two(x, y) : result
 
 **1. Compile with debugging and run it.**
 
-```
+```command
 pnut_ts -d firststep.spin2
 ```
 
@@ -491,26 +491,39 @@ digits.
 
 ## Registers and the special-function registers
 
-The special-function registers occupy the top of COG memory:
+The special-function registers occupy the top of COG memory. Grouped by function,
+they are the interrupt vectors, the pointer/parameter registers, and the I/O
+registers:
 
-| Register | Address | Purpose |
-|----------|---------|---------|
-| IJMP3 | $1F0 | INT3 jump vector |
-| IRET3 | $1F1 | INT3 return address |
-| IJMP2 | $1F2 | INT2 jump vector |
-| IRET2 | $1F3 | INT2 return address |
-| IJMP1 | $1F4 | INT1 jump vector |
-| IRET1 | $1F5 | INT1 return address |
-| PA | $1F6 | Port A scratch / call argument |
-| PB | $1F7 | Port B scratch / call argument |
-| PTRA | $1F8 | Pointer A |
-| PTRB | $1F9 | Pointer B |
-| DIRA | $1FA | Direction register — pins 0–31 |
-| DIRB | $1FB | Direction register — pins 32–63 |
-| OUTA | $1FC | Output register — pins 0–31 |
-| OUTB | $1FD | Output register — pins 32–63 |
-| INA | $1FE | Input register — pins 0–31 (read-only) |
-| INB | $1FF | Input register — pins 32–63 (read-only) |
+```{=latex}
+\SpecialRegistersMapDiagram
+```
+
+The table below gives each register's read/write access — the detail you act on at
+the debugger:
+
+| Register | Address | R/W | Purpose |
+|----------|---------|-----|---------|
+| IJMP3 | $1F0 | R/W | INT3 jump vector |
+| IRET3 | $1F1 | R/W | INT3 return address |
+| IJMP2 | $1F2 | R/W | INT2 jump vector |
+| IRET2 | $1F3 | R/W | INT2 return address |
+| IJMP1 | $1F4 | R/W | INT1 jump vector |
+| IRET1 | $1F5 | R/W | INT1 return address |
+| PA | $1F6 | R/W | Port A scratch / call argument |
+| PB | $1F7 | R/W | Port B scratch / call argument |
+| PTRA | $1F8 | R/W | Pointer A |
+| PTRB | $1F9 | R/W | Pointer B |
+| DIRA | $1FA | R/W | Direction register — pins 0–31 |
+| DIRB | $1FB | R/W | Direction register — pins 32–63 |
+| OUTA | $1FC | R/W | Output register — pins 0–31 |
+| OUTB | $1FD | R/W | Output register — pins 32–63 |
+| INA | $1FE | R | Input register — pins 0–31 (read-only) |
+| INB | $1FF | R | Input register — pins 32–63 (read-only) |
+
+In the debugger these appear in the **SFR** group: you watch them update as you
+step; **INA/INB** are read-only (they mirror the live pins), and clicking a
+**PTRA**/**PTRB** value jumps the hub viewer to that address.
 
 The P2's 64 I/O pins are split into two banks of 32, and each of these registers
 covers one bank: the **A** registers (DIRA/OUTA/INA) address pins **0–31**, and

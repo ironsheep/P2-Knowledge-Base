@@ -20,6 +20,10 @@
 \definecolor{diagram-highlight}{HTML}{D4E8D4}  % terminal / key block fill (green)
 \definecolor{diagram-text}{HTML}{333333}       % label text
 \definecolor{diagram-accent}{HTML}{CC6600}     % event/tick accents
+% Register-group fills for the special-registers map (functional families):
+\definecolor{reg-vector}{HTML}{F0F0E0}         % interrupt vectors (light yellow)
+\definecolor{reg-io}{HTML}{FBE4C8}             % I/O direction/output/input (peach)
+% (pointers PA/PB/PTRA/PTRB use diagram-highlight green)
 
 % ==================== THE DIAGRAM BLOCK STANDARD ====================
 % A block is a NAME, not a paragraph. Modest min height + content sizing keep
@@ -58,5 +62,47 @@
     \usebox{\diagramsavebox}%
   \fi
 }
+
+% ==================== SHARED DIAGRAM: SPECIAL REGISTERS MAP ($1F0-$1FF) ====================
+% Canonical color-grouped map of the 16 special registers at the top of COG RAM.
+% Shared so every manual (PASM2 reference, single-step debugger, debug-window, IOSP)
+% shows it the same way. Functional families by fill: interrupt vectors (yellow),
+% PA/PB/PTRA/PTRB pointers (green), I/O DIR/OUT/IN (peach). Self-contained numbered
+% figure (caption = title); \diagramscale keeps it natural-size and centered.
+\newcommand{\SpecialRegistersMapDiagram}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[
+    regbox/.style={rectangle, draw=diagram-border, minimum width=3cm,
+                   minimum height=0.6cm, align=center, font=\footnotesize\ttfamily},
+    addr/.style={font=\scriptsize\ttfamily, text=diagram-text},
+    desc/.style={font=\scriptsize, text=diagram-text, anchor=west}
+]
+  % Column headers
+  \node[font=\scriptsize\bfseries] at (-2.5, 4.3) {Address};
+  \node[font=\scriptsize\bfseries] at (0, 4.3) {Register};
+  \node[font=\scriptsize\bfseries] at (3.3, 4.3) {Function};
+  % Interrupt vectors (yellow)
+  \node[addr] at (-2.5, 3.6) {\$1F0}; \node[regbox, fill=reg-vector] at (0, 3.6) {IJMP3}; \node[desc] at (1.8, 3.6) {Interrupt 3 jump address};
+  \node[addr] at (-2.5, 2.9) {\$1F1}; \node[regbox, fill=reg-vector] at (0, 2.9) {IRET3}; \node[desc] at (1.8, 2.9) {Interrupt 3 return address};
+  \node[addr] at (-2.5, 2.2) {\$1F2}; \node[regbox, fill=reg-vector] at (0, 2.2) {IJMP2}; \node[desc] at (1.8, 2.2) {Interrupt 2 jump address};
+  \node[addr] at (-2.5, 1.5) {\$1F3}; \node[regbox, fill=reg-vector] at (0, 1.5) {IRET2}; \node[desc] at (1.8, 1.5) {Interrupt 2 return address};
+  \node[addr] at (-2.5, 0.8) {\$1F4}; \node[regbox, fill=reg-vector] at (0, 0.8) {IJMP1}; \node[desc] at (1.8, 0.8) {Interrupt 1 jump address};
+  \node[addr] at (-2.5, 0.1) {\$1F5}; \node[regbox, fill=reg-vector] at (0, 0.1) {IRET1}; \node[desc] at (1.8, 0.1) {Interrupt 1 return address};
+  % Pointers / parameters (green)
+  \node[addr] at (-2.5, -0.6) {\$1F6}; \node[regbox, fill=diagram-highlight] at (0, -0.6) {PA};   \node[desc] at (1.8, -0.6) {Parameter A (COGINIT)};
+  \node[addr] at (-2.5, -1.3) {\$1F7}; \node[regbox, fill=diagram-highlight] at (0, -1.3) {PB};   \node[desc] at (1.8, -1.3) {Parameter B (COGINIT)};
+  \node[addr] at (-2.5, -2.0) {\$1F8}; \node[regbox, fill=diagram-highlight] at (0, -2.0) {PTRA}; \node[desc] at (1.8, -2.0) {Hub pointer A};
+  \node[addr] at (-2.5, -2.7) {\$1F9}; \node[regbox, fill=diagram-highlight] at (0, -2.7) {PTRB}; \node[desc] at (1.8, -2.7) {Hub pointer B};
+  % I/O registers (peach)
+  \node[addr] at (-2.5, -3.4) {\$1FA}; \node[regbox, fill=reg-io] at (0, -3.4) {DIRA}; \node[desc] at (1.8, -3.4) {Direction P0--P31};
+  \node[addr] at (-2.5, -4.1) {\$1FB}; \node[regbox, fill=reg-io] at (0, -4.1) {DIRB}; \node[desc] at (1.8, -4.1) {Direction P32--P63};
+  \node[addr] at (-2.5, -4.8) {\$1FC}; \node[regbox, fill=reg-io] at (0, -4.8) {OUTA}; \node[desc] at (1.8, -4.8) {Output P0--P31};
+  \node[addr] at (-2.5, -5.5) {\$1FD}; \node[regbox, fill=reg-io] at (0, -5.5) {OUTB}; \node[desc] at (1.8, -5.5) {Output P32--P63};
+  \node[addr] at (-2.5, -6.2) {\$1FE}; \node[regbox, fill=reg-io] at (0, -6.2) {INA};  \node[desc] at (1.8, -6.2) {Input P0--P31 (read-only)};
+  \node[addr] at (-2.5, -6.9) {\$1FF}; \node[regbox, fill=reg-io] at (0, -6.9) {INB};  \node[desc] at (1.8, -6.9) {Input P32--P63 (read-only)};
+\end{tikzpicture}}
+\caption{Special registers (\$1F0--\$1FF)}\label{fig:special-registers}
+\end{figure}}
 
 \endinput

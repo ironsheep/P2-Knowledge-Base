@@ -282,6 +282,28 @@
   before skip=15pt, after skip=15pt, breakable
 }
 
+% ==================== COMMAND BLOCK (terminal invocation) ====================
+% A shell command the reader TYPES at their OS terminal — deliberately distinct from
+% P2 source code: NO line numbers, NO prompt prefix (cross-platform), a faint neutral
+% tint (not the blue/green code fills), a thin charcoal frame and a small "TERMINAL"
+% tag so it reads instantly as "run this," not "code." Emitted by the code-coloring
+% filter from a ```command (or ```console / ```terminal / ```shell) fence. Platform
+% standard — any manual gets it.
+\definecolor{cmd-frame}{HTML}{4A4A4A}   % charcoal frame + tag
+\definecolor{cmd-bg}{HTML}{F4F4F2}      % faint neutral tint (distinct from code blocks)
+\newtcolorbox{CommandBlock}{%
+  enhanced, breakable,
+  colback=cmd-bg, colframe=cmd-frame,
+  boxrule=0.8pt, sharp corners,
+  left=8pt, right=8pt, top=7pt, bottom=6pt,
+  before skip=12pt, after skip=12pt,
+  attach boxed title to top left={yshift=-2mm, xshift=8pt},
+  title={\sffamily\bfseries\scriptsize TERMINAL},
+  coltitle=white,
+  boxed title style={colback=cmd-frame, colframe=cmd-frame, sharp corners,
+                     boxrule=0pt, left=4pt, right=4pt, top=1pt, bottom=1pt}
+}
+
 % ==================== REFERENCE BLOCKS (non-language notation) ====================
 % Two-tier pedagogy: the LANGUAGE blocks above (Spin2 blue, PASM2 green) are
 % saturated/IDE-aligned = "code you would type". The REFERENCE blocks below are a

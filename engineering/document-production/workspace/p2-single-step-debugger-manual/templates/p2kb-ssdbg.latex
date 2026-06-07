@@ -8,6 +8,7 @@
 % ==================== LOAD PLATFORM STACK (shared) ====================
 \usepackage{p2kb-platform-foundation}  % shared: geometry, penalties, titlesec, fontspec, caption, fig/table numbering
 \usepackage{p2kb-platform-content}      % shared: code/reference box family, screenshot keyline (\screenshotfig)
+\usepackage{p2kb-platform-diagrams}     % shared: special-registers map diagram + diagram styles
 
 % ==================== DOCUMENT METADATA ====================
 \title{$title$}

@@ -469,6 +469,19 @@ function CodeBlock(cb)
                        '\\end{Verbatim}\n' ..
                        '\\end{FormulaBlock}'
     return pandoc.RawBlock('latex', latex_block)
+
+  -- Terminal commands: ```command (or console/terminal/shell) -> CommandBlock.
+  -- A command typed at the OS terminal, NOT P2 source: no line numbers, no prompt
+  -- prefix (cross-platform). Styled distinctly so it never reads as code.
+  elseif classes:includes("command") or classes:includes("console")
+         or classes:includes("terminal") or classes:includes("shell") then
+    local txt = cb.text:gsub("%s+$", "")
+    local latex_block = '\\begin{CommandBlock}\n' ..
+                       '\\begin{Verbatim}[xleftmargin=0pt]\n' ..
+                       txt .. '\n' ..
+                       '\\end{Verbatim}\n' ..
+                       '\\end{CommandBlock}'
+    return pandoc.RawBlock('latex', latex_block)
   end
 
   -- Return unchanged if not a recognized language
