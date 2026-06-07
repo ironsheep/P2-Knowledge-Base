@@ -90,6 +90,8 @@ Under the following terms:
 - **NonCommercial** — You may not use the material for commercial purposes.
 - **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
 
+**Commercial use:** For uses that may be commercial (including paid courses, kits, or redistribution with products), please contact Iron Sheep Productions, LLC and Parallax Inc. (info@ironsheep.biz) for separate permission.
+
 To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 ### Trademarks
