@@ -228,6 +228,74 @@ async function generatePDF(
   return pdfOk;
 }
 
+// ============================================================================
+// DEPLOY PLACEMENT AUDIT (pre-flight)
+// ----------------------------------------------------------------------------
+// Catches files that landed in the WRONG folder when outbound was moved onto the
+// Forge — the failure mode that otherwise surfaces 100 lines into xelatex as a
+// cryptic "! Undefined control sequence" (e.g. a template .latex left in root or
+// inbox, so the OLD templates/ copy is used). Each handed-in artifact has exactly
+// one correct home:
+//     inbox/      document .md (named by request.json) + request.json (+ assets/)
+//     templates/  the .latex template + any .sty
+//     filters/    the .lua filters
+// Driven off request.json so it inspects ONLY the files THIS build uses — READMEs,
+// root setup guides, and archived docs in inbox/ subfolders are never examined, so
+// they can't false-positive. A tiny backstop sweep flags a stray .latex/.sty/.lua
+// sitting at the top level of the wrong folder (these types have a single home and
+// no legitimate copies elsewhere; .md is deliberately NOT swept).
+async function auditPlacement(request) {
+  const errors = [];
+  // Which top-level dirs a deploy can scatter files across.
+  const SEARCH_DIRS = ['.', 'inbox', 'templates', 'filters'];
+  const locate = async (basename) => {
+    const hits = [];
+    for (const d of SEARCH_DIRS) {
+      if (await fs.pathExists(path.join(d, basename))) hits.push(d === '.' ? 'root' : d);
+    }
+    return hits;
+  };
+  const requireIn = async (basename, home, kind) => {
+    const where = await locate(basename);
+    if (!where.includes(home)) {
+      errors.push(`${kind} "${basename}" must be in ${home}/ — found in: ${where.length ? where.join(', ') : 'NOWHERE (missing)'}`);
+    }
+  };
+
+  // 1) request.json-driven: each named artifact in its correct folder.
+  for (const doc of (request.documents || [])) {
+    if (doc.input) await requireIn(doc.input, 'inbox', 'document');
+    if (doc.template) {
+      const t = doc.template.endsWith('.latex') ? doc.template : `${doc.template}.latex`;
+      await requireIn(t, 'templates', 'template');
+    }
+    for (const f of (doc.lua_filters || [])) {
+      const fn = f.endsWith('.lua') ? f : `${f}.lua`;
+      await requireIn(fn, 'filters', 'filter');
+    }
+  }
+
+  // 2) Backstop sweep — stray single-home types at the top level of the wrong dir.
+  //    (top-level files only: archives in subfolders and node_modules are skipped;
+  //     .md is intentionally excluded — READMEs/guides/the doc are all legit .md)
+  const RULES = [
+    { dir: '.',         bad: /\.(latex|sty|lua)$/i, where: 'root',        msg: '.latex/.sty belong in templates/, .lua in filters/' },
+    { dir: 'inbox',     bad: /\.(latex|sty|lua)$/i, where: 'inbox/',      msg: '.latex/.sty belong in templates/, .lua in filters/' },
+    { dir: 'templates', bad: /\.lua$/i,             where: 'templates/',  msg: '.lua belongs in filters/' },
+    { dir: 'filters',   bad: /\.(latex|sty)$/i,     where: 'filters/',    msg: '.latex/.sty belong in templates/' },
+  ];
+  for (const r of RULES) {
+    if (!(await fs.pathExists(r.dir))) continue;
+    for (const name of await fs.readdir(r.dir)) {
+      let st; try { st = await fs.stat(path.join(r.dir, name)); } catch { continue; }
+      if (st.isFile() && r.bad.test(name)) {
+        errors.push(`"${name}" is in ${r.where} but ${r.msg}`);
+      }
+    }
+  }
+  return errors;
+}
+
 async function processRequest() {
   try {
     // Read request.json
@@ -256,6 +324,18 @@ async function processRequest() {
     console.log(
       chalk.blue(`Found ${request.documents.length} document(s) to process`)
     );
+
+    // PRE-FLIGHT: deploy placement audit — fail fast (with a precise message) if a
+    // handed-in file landed in the wrong folder, before pandoc turns it into a
+    // cryptic "undefined control sequence".
+    const misplaced = await auditPlacement(request);
+    if (misplaced.length > 0) {
+      console.error(chalk.red('❌ FATAL: deploy placement audit found misplaced file(s):'));
+      misplaced.forEach((m) => console.error(chalk.red(`   • ${m}`)));
+      console.error(chalk.yellow('   Fix placement — filters→filters/, .latex/.sty→templates/, document .md + request.json→inbox/ — then re-run.'));
+      process.exit(1);
+    }
+    console.log(chalk.green('✓ Placement audit passed (inputs are in the right folders)'));
 
     // Ensure output directory exists
     try {
