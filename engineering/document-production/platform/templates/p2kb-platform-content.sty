@@ -108,22 +108,22 @@
 \makeatother
 
 % Custom \manualpart command
-% Renders part title on its own page; the first chapter is PINNED below it
-% (intentional: no lonely part page -- the chapter comes up under the title).
-% This requires that NO body text sit between \manualpart and the first chapter
-% heading, or that text pushes the chapter title down. Keep part dividers bare.
+% The part opener flows as a HEADING on a fresh page, not a centered divider with
+% big whitespace bands: the part title rides near the top (minimal space above),
+% then the Part narrative prose, then the first chapter -- all on this same page
+% (aftermanualpart suppresses the chapter's clearpage; the chapter follows the
+% narrative). This replaces the old 0.9in-band centered divider, which left an inch+
+% of dead space above and below the title.
 \newcommand{\manualpart}[1]{%
   \clearpage%
   \thispagestyle{empty}%
   \refstepcounter{part}%
   \addcontentsline{toc}{part}{#1}%
-  % Center the part title in the opening whitespace: equal vertical bands above
-  % and below, so the title sits midway in the gap rather than riding at the top
-  % with all the space beneath it. The first chapter still follows on this page
-  % (aftermanualpart suppresses its clearpage), just pushed down by the lower band.
-  \vspace*{0.9in}%
+  % Minimal space above the title (<= 1/4in), then a small gap below before the
+  % narrative prose flows. Title centered (house style for part openers).
+  \vspace*{0.12in}%
   {\centering\Huge\bfseries #1\par}%
-  \vspace{0.9in}%
+  \vspace{0.18in}%
   \nobreak%
   \global\booltrue{aftermanualpart}%
 }

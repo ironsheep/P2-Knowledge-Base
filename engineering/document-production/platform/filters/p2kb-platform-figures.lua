@@ -28,7 +28,41 @@
 --       registers the figure in the List of Figures. The div is already
 --       consolidated into this single caption -- there is no separate rendering.
 
--- Process blocks to find RawBlock + figurecaption Div pairs
+-- A "bold lead-in" is a short paragraph that is a single bold run -- a label like
+-- **Immediate -> LUT -> Pins/DACs:** that introduces the table directly below it.
+-- (Every top-level inline is Strong/Space/SoftBreak, at least one Strong, and the
+-- whole thing is short.) Ordinary prose that merely contains a bold word is NOT a
+-- lead-in (it has Str inlines outside the Strong).
+local function is_bold_leadin(blk)
+  if blk.t ~= "Para" and blk.t ~= "Plain" then return false end
+  if #pandoc.utils.stringify(blk.content) > 60 then return false end
+  local seen_strong = false
+  for _, il in ipairs(blk.content) do
+    if il.t == "Strong" then
+      seen_strong = true
+    elseif il.t == "Space" or il.t == "SoftBreak" then
+      -- allowed (surrounding/trailing space)
+    else
+      return false
+    end
+  end
+  return seen_strong
+end
+
+-- Count data rows in a pandoc Table element (excluding the header row).
+local function table_data_rows(t)
+  local n = 0
+  if t.bodies then
+    for _, b in ipairs(t.bodies) do
+      if b.body then n = n + #b.body end
+    end
+  end
+  return n
+end
+
+-- Process blocks to find RawBlock + figurecaption Div pairs, AND bold-lead-in +
+-- table pairs (keep the label welded to its table). Runs before the table filter,
+-- so the table is still a pandoc Table element here (row count is available).
 function Blocks(blocks)
   local result = {}
   local i = 1
@@ -72,8 +106,21 @@ function Blocks(blocks)
 
       -- Skip both the RawBlock and the Div (advance by 2)
       i = i + 2
+    elseif is_bold_leadin(current) and next_block and next_block.t == "Table" then
+      -- Keep a bold lead-in label welded to the table it introduces: reserve space
+      -- for the label + table so a page break moves the whole unit instead of
+      -- stranding the label at the page foot (Ch 13.1 / 14.2 symbol tables). Size
+      -- the reserve to the table's height (data rows + header + label line), capped
+      -- so a very tall table -- which the table filter makes breakable anyway --
+      -- never over-reserves and forces a needless early break.
+      local n = table_data_rows(next_block) + 4
+      if n > 28 then n = 28 end
+      table.insert(result, pandoc.RawBlock("latex",
+        string.format("\\needspace{%d\\baselineskip}", n)))
+      table.insert(result, current)
+      i = i + 1
     else
-      -- Not a figure pattern, keep the block as-is
+      -- Not a figure or lead-in pattern, keep the block as-is
       table.insert(result, current)
       i = i + 1
     end

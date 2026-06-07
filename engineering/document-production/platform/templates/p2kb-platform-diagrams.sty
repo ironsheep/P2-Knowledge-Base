@@ -1,0 +1,62 @@
+% P2KB Platform Diagrams Base — shared TikZ palette, node/edge styles, and the
+% diagram look-and-feel STANDARD. Consumed by every manual's <slug>-diagrams.sty,
+% which then \RequirePackage{p2kb-platform-diagrams} and defines only its own
+% \Diag* macros against these styles. One place, one look across all manuals.
+% Standard write-up: methodology/diagram-block-standard.md
+%
+% Author: Iron Sheep Productions, LLC
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-platform-diagrams}[2026/06/07 P2KB Platform Diagrams Base v1.0]
+
+\RequirePackage{tikz}
+\RequirePackage{float}
+\RequirePackage{graphicx}  % \resizebox (shrink-to-fit in \diagramscale)
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc,
+                decorations.pathreplacing, patterns, fit}
+
+% ==================== SHARED PALETTE ====================
+\definecolor{diagram-box}{HTML}{E8E8E8}        % primary block fill (neutral gray)
+\definecolor{diagram-border}{HTML}{666666}     % block border / flow arrows
+\definecolor{diagram-highlight}{HTML}{D4E8D4}  % terminal / key block fill (green)
+\definecolor{diagram-text}{HTML}{333333}       % label text
+\definecolor{diagram-accent}{HTML}{CC6600}     % event/tick accents
+
+% ==================== THE DIAGRAM BLOCK STANDARD ====================
+% A block is a NAME, not a paragraph. Modest min height + content sizing keep
+% single-word blocks compact and two-line blocks from ballooning; descriptive
+% detail goes in an `iospsub` sub-label BELOW the block, not crammed inside it.
+% Two block roles only: iospbox (primary, gray) and iospkey (terminal, green).
+\tikzset{
+  iospbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
+                  align=center, font=\small, text=diagram-text,
+                  minimum height=7mm, minimum width=14mm, inner sep=4pt},
+  iospkey/.style={iospbox, fill=diagram-highlight},
+  iospflow/.style={-{Stealth[length=2.6mm]}, draw=diagram-border, line width=0.9pt},
+  % sub-label: the qualifier that USED to be crammed into a block, set beneath it
+  iospsub/.style={font=\scriptsize\itshape, text=diagram-text, align=center, inner sep=1pt},
+  % waveform / signal-trace styles
+  wsig/.style={draw=diagram-border, line width=1pt},
+  wcell/.style={diagram-border!30, densely dotted},
+  wlbl/.style={font=\scriptsize, text=diagram-text},
+  % clock-grid / point-event styles
+  ttick/.style={draw=diagram-accent, line width=1.1pt},
+  tbrace/.style={decorate, decoration={brace, amplitude=4pt, mirror}, draw=diagram-border}
+}
+
+% ==================== CONSISTENT SCALING: SHRINK-TO-FIT, NEVER UPSCALE ====================
+% \resizebox{\textwidth}{!}{...} stretches a sparse diagram to fill the page, which
+% blows its blocks up out of proportion -- the "overbearing" look. \diagramscale
+% renders the picture at its NATURAL size and only shrinks it when it is wider than
+% the text block, so blocks stay a consistent size from figure to figure. The
+% surrounding figure's \centering keeps it centered.
+\newsavebox{\diagramsavebox}
+\newcommand{\diagramscale}[1]{%
+  \sbox{\diagramsavebox}{#1}%
+  \ifdim\wd\diagramsavebox>\linewidth
+    \resizebox{\linewidth}{!}{\usebox{\diagramsavebox}}%
+  \else
+    \usebox{\diagramsavebox}%
+  \fi
+}
+
+\endinput

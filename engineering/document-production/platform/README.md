@@ -12,9 +12,10 @@ instrument stack (2026-06-06).
 ```
 platform/templates/
   p2kb-platform-foundation.sty   geometry, widow/orphan penalties, titlespacing, hyperref, figure+table chapter numbering, caption pkg
-  p2kb-platform-content.sty      code/reference box family, contmarkers, keep-together, iosp-* palette, caption style, screenshot keyline (\screenshotfig)
+  p2kb-platform-content.sty      code/reference box family, contmarkers, keep-together, iosp-* palette, caption style, screenshot keyline (\screenshotfig), part-opener (\manualpart: title near top + narrative + chapter, no whitespace bands)
+  p2kb-platform-diagrams.sty     shared TikZ palette + node/edge styles (the diagram block standard) + \diagramscale (shrink-to-fit, never upscale); see ../methodology/diagram-block-standard.md
 platform/filters/
-  p2kb-platform-figures.lua      figure move-whole (needspace) + numbered \caption (List of Figures)
+  p2kb-platform-figures.lua      figure move-whole (needspace) + numbered \caption (List of Figures) + bold-lead-in welded to its table
   p2kb-platform-tables.lua       longtblr split + rowhead + token-fit (fix #5) + continuation markers + numbered \caption welded to table (List of Tables)
   p2kb-platform-code-coloring.lua
   p2kb-platform-mnemonic-bold.lua
