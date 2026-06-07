@@ -50,13 +50,16 @@ overridable per manual.
 | `pasm2` | PASM2 source | green fill/border | BR+M |
 | `cordic` | CORDIC example | purple | BR+M |
 | `multicog` | multi-COG example | teal / blue-gray | BR+M |
-| `command` | terminal command you TYPE (NOT P2 source) | charcoal frame + faint tint + "TERMINAL" tag; **no line numbers, no prompt** | BR |
+| `command` | shell command you run (NOT P2 source) | faint tint + thin gray rounded frame + white **RUN THIS** tag top-right; **no line numbers, no prompt** | BR |
 
 > **Naming fix:** the technical twins call the PASM2 box `IOSPBlock` (legacy).
 > Canonical type is **`pasm2`**; `IOSPBlock` becomes an alias to retire.
 > **`command`** is the platform `CommandBlock` (added 2026-06-07): author shell/CLI
 > invocations as ` ```command ` (aliases: `console`/`terminal`/`shell`) so they read
-> as "run this," never as code. Cross-platform — deliberately no `$`/`>` prompt.
+> as "run this," never as code. Cross-platform — deliberately no `$`/`>` prompt. The
+> **RUN THIS** tag sits top-right (the command starts at the left, so a left/dark tag
+> competes with reading it) in a quiet light-gray chip; "TERMINAL" was rejected (it
+> collides with electrical terminals in P2 docs).
 
 ### 3b. Notation / reference family — author as ` ```kind ` (technical manuals)
 
