@@ -82,6 +82,14 @@ line the box prints; the `prepare-manual` line-length audit
 line wider than it.
 
 - **Max code columns (K): 76**
+- **Code-line gate: EXEMPT (instrument).** This is the ONE document that deliberately
+  carries over-budget code lines as **fixtures** — the case-2.2 column ruler ("col 78"
+  … "col 90") and the ProcessBox's intentionally-extended comments demonstrate the
+  overflow behavior the gate exists to catch. So `audit-code-line-length.py` reports
+  those lines for information but does NOT fail (exit stays 0), and `prepare-manual`
+  does not block on them. The exemption is keyed off this tagged line — do not remove
+  it, and do NOT "fix" the case-2.2 ruler/ProcessBox lines: they are the test fixture.
+  (K=76 above still governs every *real* manual that inherits this code-box style.)
 - **Code-box style / font:** `IOSPBlock` (the shared `::: pasm/iosp` / ```` ```pasm2 ````
   colored box), Latin Modern Mono at the box's code size, with the `numbers=left`
   gutter present. This is the **platform reference K** — the live manuals fork this

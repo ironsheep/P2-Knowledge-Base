@@ -41,7 +41,8 @@ SCOPE
     skipped: they are LaTeX/HTML, not code in a box.
 
 EXIT STATUS
-    0  no code line exceeds K
+    0  no code line exceeds K  (also: an EXEMPT instrument doc — over-budget lines
+       reported for information but not gated; see --exempt / "Code-line gate: EXEMPT")
     1  one or more lines exceed K (so this can gate prepare-manual / a release)
     2  usage / configuration error (e.g. no budget found)
 """
@@ -52,6 +53,11 @@ import re
 import sys
 
 CODE_BUDGET_RE = re.compile(r'Max\s+code\s+columns\s*\(K\)\s*:\s*(\d+)', re.IGNORECASE)
+# An INSTRUMENT doc (e.g. the layout torture test) deliberately carries
+# over-budget code lines as fixtures, so its creation guide opts OUT of the gate
+# with a tagged line: "Code-line gate: EXEMPT (instrument)". Over-budget lines are
+# then reported for information but do NOT fail the run (exit stays 0).
+CODE_GATE_EXEMPT_RE = re.compile(r'Code[-\s]line\s+gate\s*:\s*EXEMPT', re.IGNORECASE)
 FENCE_RE = re.compile(r'^(\s*)(`{3,}|~{3,})(.*)$')
 
 
@@ -76,6 +82,21 @@ def read_budget(creation_guide_path):
         return None
     m = CODE_BUDGET_RE.search(text)
     return int(m.group(1)) if m else None
+
+
+def read_exempt(creation_guide_path):
+    """True if the creation guide declares the code-line gate EXEMPT — an instrument
+    doc that deliberately carries over-budget lines as fixtures (e.g. the layout
+    torture test's case-2.2 column ruler). Over-budget lines are then reported but
+    do not fail the gate."""
+    if not creation_guide_path:
+        return False
+    try:
+        with open(creation_guide_path, encoding='utf-8') as fh:
+            text = fh.read()
+    except OSError:
+        return False
+    return bool(CODE_GATE_EXEMPT_RE.search(text))
 
 
 def display_width(line, tabstop):
@@ -147,10 +168,17 @@ def main(argv=None):
                     help='tab width in columns (default 8)')
     ap.add_argument('--quiet', action='store_true',
                     help='print only violations and the summary')
+    ap.add_argument('--exempt', action='store_true',
+                    help='treat over-budget lines as informational, not a gate '
+                         'failure — for INSTRUMENT docs that carry deliberate '
+                         'over-budget fixtures. Auto-detected from the creation '
+                         'guide\'s "Code-line gate: EXEMPT" line.')
     args = ap.parse_args(argv)
 
     total_violations = 0
     files_with_violations = 0
+    exempt_lines = 0
+    exempt_files = 0
 
     for md in args.files:
         if not os.path.isfile(md):
@@ -159,6 +187,7 @@ def main(argv=None):
 
         budget = args.budget
         source = 'budget flag'
+        cg = args.creation_guide
         if budget is None:
             cg = args.creation_guide or find_creation_guide(md)
             if not cg:
@@ -172,8 +201,21 @@ def main(argv=None):
                 return 2
             source = cg
 
+        # An instrument doc opts out of the GATE (CLI flag or creation-guide tag):
+        # over-budget lines are still reported, but they do not fail the run.
+        exempt = args.exempt or read_exempt(cg)
+
         violations = scan_markdown(md, budget, args.tabstop)
-        if violations:
+        if violations and exempt:
+            exempt_files += 1
+            exempt_lines += len(violations)
+            print(f'\n{md}  (budget K={budget}, from {source}) — EXEMPT (instrument):')
+            for lineno, cols, text in violations:
+                shown = text if len(text) <= 90 else text[:87] + '...'
+                print(f'  {md}:{lineno}: {cols} cols (>{budget})  | {shown}')
+            print(f'  ^ {len(violations)} over-budget line(s) are declared instrument '
+                  f'fixtures ("Code-line gate: EXEMPT") — reported, NOT gated.')
+        elif violations:
             files_with_violations += 1
             total_violations += len(violations)
             print(f'\n{md}  (budget K={budget}, from {source}):')
@@ -188,6 +230,9 @@ def main(argv=None):
               f'{files_with_violations} file(s). Shorten them in source: break the '
               f'comment and re-indent, or continue the statement.')
         return 1
+    if exempt_lines and not args.quiet:
+        print(f'\nEXEMPT: {exempt_lines} over-budget line(s) in {exempt_files} '
+              f'instrument file(s) reported for information; gate not triggered (exit 0).')
     return 0
 
 
