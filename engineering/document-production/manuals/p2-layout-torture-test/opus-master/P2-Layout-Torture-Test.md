@@ -91,7 +91,7 @@
 \vspace{0.6cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.4 (engineering harness)\par}
+{\large\color{blue}Version 0.5 (engineering harness)\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -108,6 +108,20 @@ boundary. Read each EXPECT box, then look at what actually happened just below i
 \vfill
 \end{center}
 
+\clearpage
+```
+
+```{=latex}
+\begin{ExpectBox}
+EXPECT: the List of Figures lists all five captioned figures with chapter-scoped numbers
+(Figure C.N) and page numbers; the List of Tables lists the two captioned tables (Table 5.1,
+Table 5.2). THE DEFECT (the bug this revision certifies fixed): either list is empty --- which
+happened while captions were emitted as unnumbered \texttt{\textbackslash caption*} --- or a
+caption is missing its number.
+\end{ExpectBox}
+\listoffigures
+\clearpage
+\listoftables
 \clearpage
 ```
 
@@ -557,9 +571,12 @@ only the first. The chapters here stress table layout and figure placement.
 This table has 60+ rows --- far more than fit on one page. It breaks cleanly across pages, repeating
 its header row at the top of each continuation page, so no rows are lost off the page bottom. Verified
 in the v13 render: wide tables with many rows are now emitted as a breakable longtblr (with a repeating
-header) instead of a non-breaking tblr.
+header) instead of a non-breaking tblr. NEW this revision: it carries a numbered caption (Table 5.1)
+shown once at the top, registered in the List of Tables --- exercising the longtblr caption path.
 \end{VerifiedBox}
 ```
+
+Table: Streamer transfer modes --- the full mode matrix (a breaking table, captioned).
 
 | Mode | Command | Bits/Clock | Source | Destination | Notes |
 |------|---------|-----------:|--------|-------------|-------|
@@ -657,8 +674,9 @@ rather than split through the middle of a row, with its header intact. Verified 
 ```{=latex}
 \begin{ExpectBox}
 The captioned table below is forced near the page foot. EXPECT: the caption stays welded to its
-table — both move together to the next page if they do not fit. THE DEFECT: the caption detaches
-from the table, or lands on a different page from the rows it describes.
+table --- both move together to the next page if they do not fit --- and reads ``Table 5.2''
+(numbered, chapter-scoped) with the table registered in the List of Tables. THE DEFECT: the caption
+detaches from the table, lands on a different page from the rows it describes, or shows no number.
 \end{ExpectBox}
 \leavebottom{0.9in}
 ```

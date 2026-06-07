@@ -91,7 +91,7 @@
 \vspace{0.6cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.4 (engineering harness)\par}
+{\large\color{blue}Version 0.5 (engineering harness)\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -423,15 +423,111 @@ lost on the continuation, or a single quoted line strands alone at the boundary.
 
 ```{=latex}
 \begin{VerifiedBox}
-The boxed formula below is forced to the page foot. The short box is kept whole --- pushed to the
-next page rather than split, and it does not overrun the bottom margin. Verified in the v6/v8 render.
+The tall 10-line worked calculation below is a FormulaBlock forced toward the page foot, large enough
+that it cannot fit in the space remaining. It is kept whole --- the entire box moves to the next page
+as a single unit rather than splitting its markerless left bar, and it does not overrun the bottom
+margin. Keep-together is the right standard for short notation, not signposting a split. Verified in
+the v23 render (whole box on p21).
 \end{VerifiedBox}
-\leavebottom{0.7in}
+\leavebottom{2.2in}
 ```
 
 ```formula
-NCO_phase(t+1) = (NCO_phase(t) + FREQ) mod 2^32
-shift_trigger  = high_bits_of(NCO_phase)
+NCO_phase(t+1)  = (NCO_phase(t) + FREQ) mod 2^32
+shift_trigger   = high_bits_of(NCO_phase)
+NCO_period      = 2^32 / FREQ
+sample_rate     = clkfreq / NCO_period
+words_per_frame = active_pixels / pixels_per_word
+dma_bytes       = words_per_frame * bytes_per_word
+fifo_depth_min  = dma_bytes / hub_window_bytes
+worst_case_lat  = fifo_depth_min * hub_window_clocks
+margin_clocks   = available_clocks - worst_case_lat
+safe            = (margin_clocks >= 0)
+```
+
+```{=latex}
+\clearpage
+```
+
+## 3.4 A Syntax Form Forced to a Boundary
+
+```{=latex}
+\begin{VerifiedBox}
+The multi-line PASM2 syntax form below is a SyntaxBlock forced toward the page foot. It is kept whole
+--- the entire box moves to the next page as a single unit, never split through its slate left bar.
+Same keep-together standard as the boxed formula above. Verified in the v23 render (whole box on
+p23).
+\end{VerifiedBox}
+\leavebottom{1.6in}
+```
+
+```pasm-syntax
+WRPIN   {#}D,{#}S       ' set smart-pin mode
+WXPIN   {#}D,{#}S       ' set X parameter
+WYPIN   {#}D,{#}S       ' set Y parameter
+RDPIN   D,{#}S    {WC}  ' read pin, acknowledge
+RQPIN   D,{#}S    {WC}  ' read pin, no acknowledge
+AKPIN   {#}S           ' acknowledge pin
+```
+
+```{=latex}
+\clearpage
+```
+
+## 3.5 A Register-Layout Diagram That Must Span a Page
+
+```{=latex}
+\clearpage
+\begin{VerifiedBox}
+The long bit-field layout diagram below is a LayoutBlock forced to begin near the page foot, so it
+spans onto the next page. It splits cleanly and signposts the span exactly like a continued code box
+or table --- a "continues on next page" marker in the footer where it breaks and a "continued from
+previous page" marker in the header where it resumes, with the bronze fill and border intact on both
+parts. LayoutBlock shares the full frame and fill of the code boxes, so it now carries the same
+continuation markers (C9 = C10 = C11). Verified in the v23 render (footer marker p25, header marker
+p26, frame unbroken on both pages).
+\end{VerifiedBox}
+\leavebottom{1.5in}
+```
+
+```layout
+[ Illustrative bit-field layout specimen --- generic field names ]
+
+Register A  (32 bits)
+ 31      28 27      24 23                8 7                 0
++----------+----------+------------------+------------------+
+|  MODE    | SUBMODE  |     FIELD_A       |     FIELD_B      |
++----------+----------+------------------+------------------+
+
+Register B  (32 bits)
+ 31                  16 15                8 7                 0
++----------------------+------------------+------------------+
+|       FIELD_C         |     FIELD_D      |     FIELD_E      |
++----------------------+------------------+------------------+
+
+Register C  (32 bits)
+ 31  30      24 23                          8 7              0
++---+----------+----------------------------+----------------+
+| E | RESERVED |          FIELD_F            |    FIELD_G     |
++---+----------+----------------------------+----------------+
+
+Register D  (32 bits)
+ 31              24 23      16 15      8 7                   0
++------------------+----------+---------+--------------------+
+|     FIELD_H       | FIELD_I  | FIELD_J |      FIELD_K       |
++------------------+----------+---------+--------------------+
+
+Register E  (32 bits)
+ 31                          12 11                          0
++------------------------------+----------------------------+
+|           FIELD_L             |          FIELD_M           |
++------------------------------+----------------------------+
+
+Register F  (32 bits)
+ 31      28 27                              4 3              0
++----------+--------------------------------+----------------+
+|  FLAGS   |             FIELD_N             |    FIELD_O     |
++----------+--------------------------------+----------------+
 ```
 
 # Chapter 4: Widows and Orphans in Prose
