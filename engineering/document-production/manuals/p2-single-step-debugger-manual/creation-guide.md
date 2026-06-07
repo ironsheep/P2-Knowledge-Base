@@ -116,6 +116,28 @@ Sibling filters to copy from (same lineage — Smart Pins → IOSP → here):
    adapted here (the sibling `*-mnemonic-bold.lua` filters drop blank lines in
    code blocks — see the IOSP pending-fixes audit; do not inherit that bug).
 
+## 5b. Code Line Budget
+
+The colored code boxes do NOT wrap, so an over-long code line is an authorship
+defect caught by the `prepare-manual` line-length audit
+(`engineering/tools/validation/audit-code-line-length.py`).
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** the shared **platform** code boxes (`Spin2Block` /
+  `IOSPBlock`), Latin Modern Mono at the box's code size with the `numbers=left`
+  gutter. This manual consumes the platform code-box stack unchanged, so it
+  **inherits the platform reference K** (calibrated in
+  `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget). Re-measure
+  only if this manual ever diverges its code font/box geometry from the platform.
+
+> **Platform note (migrated 2026-06-07):** this manual now renders on the shared
+> platform — `p2kb-ssdbg.latex` loads `p2kb-platform-foundation` +
+> `p2kb-platform-content`; the five `p2kb-platform-*` Lua filters replace the lone
+> `ssdbg-code-coloring` (so PASM2 is `IOSPBlock` green, headings use the platform
+> `titlesec` path, figures/tables number per chapter). Screenshots use the platform
+> `\screenshotfig` keyline. The §5a build-time filter plan below is superseded by
+> the platform stack.
+
 ## 6. Correction checklist (apply to ALL carried-forward content)
 
 Each item is a trust-chain fix, sourced:

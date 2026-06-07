@@ -57,9 +57,12 @@
 %     Oscilloscope capture of the streamer output.
 %     :::
 \definecolor{p2kb-screenshot-keyline}{gray}{0.5}   % mid-gray hairline
-\newcommand{\screenshotfig}[1]{%
+% \screenshotfig[<includegraphics opts>]{<path>} — optional first arg passes the
+% sizing (default width=\linewidth); e.g. \screenshotfig[height=3.2in]{...} or
+% \screenshotfig[width=1.6in]{...}. Use inside the existing figure+caption block.
+\newcommand{\screenshotfig}[2][width=\linewidth]{%
   {\setlength{\fboxrule}{0.5pt}\setlength{\fboxsep}{1pt}%
-   \fcolorbox{p2kb-screenshot-keyline}{white}{\includegraphics{#1}}}%
+   \fcolorbox{p2kb-screenshot-keyline}{white}{\includegraphics[#1]{#2}}}%
 }
 
 % ==================== COLOR PALETTE ====================

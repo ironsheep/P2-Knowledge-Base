@@ -1,13 +1,13 @@
 % P2 Single-Step Debugger Manual - Main Template
-% Layered stack: foundation (Pandoc compat + core) + content (code coloring).
-% Chapter-based reference (top-level division = chapter).
+% PLATFORM-UNIFIED stack (see methodology/presentation-platform-unification-STUDY.md).
+% Chapter-based reference (top-level division = chapter); no Parts.
 % Version: 1.0  -  Author: Iron Sheep Productions, LLC
 
 \documentclass[11pt,letterpaper,oneside,english]{book}
 
-% ==================== LAYERED TEMPLATE STACK ====================
-\usepackage{p2kb-ssdbg-foundation}  % Pandoc compatibility + core formatting
-\usepackage{p2kb-ssdbg-content}     % Code-block coloring (Spin2 blue / PASM2 green)
+% ==================== LOAD PLATFORM STACK (shared) ====================
+\usepackage{p2kb-platform-foundation}  % shared: geometry, penalties, titlesec, fontspec, caption, fig/table numbering
+\usepackage{p2kb-platform-content}      % shared: code/reference box family, screenshot keyline (\screenshotfig)
 
 % ==================== DOCUMENT METADATA ====================
 \title{$title$}

@@ -12,7 +12,11 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
-        "p2kb-ssdbg-code-coloring"
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "P2 Single-Step Debugger Manual",

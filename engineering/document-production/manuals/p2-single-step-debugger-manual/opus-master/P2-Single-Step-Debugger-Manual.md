@@ -133,7 +133,8 @@ PUB main() | a, b, sum
   b := 32
   DEBUG                            ' single-step debugger opens here
   sum := add_two(a, b)
-  DEBUG("sum = ", UDEC_(sum))      ' display output only — does NOT open the debugger
+  ' display output only — does NOT open the debugger
+  DEBUG("sum = ", UDEC_(sum))
 
 PRI add_two(x, y) : result
   result := x + y
@@ -221,7 +222,7 @@ whole window; the rest of this chapter walks through each pane in turn.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{inbox/assets/ssdb-fullScreen.png}
+\screenshotfig[width=\linewidth]{inbox/assets/ssdb-fullScreen.png}
 \caption{The single-step debugger window (debugging Cog 0).}
 \end{figure}
 ```
@@ -239,7 +240,7 @@ the window, they are shown on their own here.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[height=3.2in]{inbox/assets/reg-lut-heatmaps-tall.25.23.png}
+\screenshotfig[height=3.2in]{inbox/assets/reg-lut-heatmaps-tall.25.23.png}
 \caption{COG (REG) and LUT register heat-map columns.}
 \end{figure}
 ```
@@ -256,7 +257,7 @@ values that define *where you are*:
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{inbox/assets/flags-pc-skipf-xbyte.png}
+\screenshotfig[width=\linewidth]{inbox/assets/flags-pc-skipf-xbyte.png}
 \caption{The control-register strip: C, Z, PC, SKIPF, XBYTE, and CT.}
 \end{figure}
 ```
@@ -268,7 +269,7 @@ depth show here too.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\linewidth]{inbox/assets/dissassembly.png}
+\screenshotfig[width=0.85\linewidth]{inbox/assets/dissassembly.png}
 \caption{The disassembly pane; the highlighted line is the next instruction (the current PC).}
 \end{figure}
 ```
@@ -283,7 +284,7 @@ PTRA / PTRB pointer values.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{inbox/assets/stack.png}
+\screenshotfig[width=\linewidth]{inbox/assets/stack.png}
 \caption{The hardware call stack: eight long values.}
 \end{figure}
 ```
@@ -294,7 +295,7 @@ column alongside, plus a mini-map for jumping around quickly.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{inbox/assets/hub-viewer.png}
+\screenshotfig[width=\linewidth]{inbox/assets/hub-viewer.png}
 \caption{The hub-memory viewer: hex bytes, an ASCII column, and a navigation mini-map.}
 \end{figure}
 ```
@@ -305,7 +306,7 @@ clickable with the mouse.
 ```{=latex}
 \begin{figure}[H]
 \centering
-\includegraphics[width=1.6in]{inbox/assets/controls.png}
+\screenshotfig[width=1.6in]{inbox/assets/controls.png}
 \caption{The control buttons: breakpoint mode toggles and the GO/STOP control.}
 \end{figure}
 ```
@@ -328,9 +329,11 @@ along.
 PUB main() | a, b, sum
   a := 10
   b := 32
-  DEBUG                            ' argument-less: single-step debugger opens here
+  ' argument-less: single-step debugger opens here
+  DEBUG
   sum := add_two(a, b)
-  DEBUG("sum = ", UDEC_(sum))      ' has arguments: display output only, no break
+  ' has arguments: display output only, no break
+  DEBUG("sum = ", UDEC_(sum))
 
 PRI add_two(x, y) : result
   result := x + y
@@ -582,7 +585,8 @@ VAR
   long stack[64]
 
 PUB main()
-  DEBUG                                ' break in main; the debugger opens here
+  ' break in main; the debugger opens here
+  DEBUG
   COGSPIN(NEWCOG, blink(56, 5_000_000), @stack[0])
   repeat
     waitms(1000)
@@ -590,7 +594,8 @@ PUB main()
 PRI blink(pin, half) | t
   t := GETCT()
   repeat
-    DEBUG                              ' break in the blink COG (opens its own window)
+    ' break in the blink COG (opens its own window)
+    DEBUG
     PINTOGGLE(pin)
     t += half
     waitct(t)
