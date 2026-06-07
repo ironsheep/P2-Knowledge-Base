@@ -13,45 +13,17 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{p2kb-streamer-diagrams}[2026/06/01 P2KB Streamer Diagrams Package v2.0]
 
-\RequirePackage{tikz}
-\RequirePackage{float}
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit}
-
-% ---- Shared diagram palette (matches the live publications) ----
-\definecolor{diagram-box}{HTML}{E8E8E8}
-\definecolor{diagram-border}{HTML}{666666}
-\definecolor{diagram-highlight}{HTML}{D4E8D4}
-\definecolor{diagram-text}{HTML}{333333}
-\definecolor{diagram-accent}{HTML}{CC6600}
-
-% ---- Shared node/edge styles for flow & block diagrams ----
-\tikzset{
-  iospbox/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
-                  align=center, font=\small, text=diagram-text, minimum height=11mm,
-                  text width=20mm, inner sep=3pt},
-  iospkey/.style={iospbox, fill=diagram-highlight},
-  iospflow/.style={-{Stealth[length=2.6mm]}, draw=diagram-border, line width=0.9pt}
-}
-
-% ---- Waveform styles (wsig = signal trace; wcell = cell divider) ----
-\tikzset{
-  wsig/.style={draw=diagram-border, line width=1pt},
-  wcell/.style={diagram-border!30, densely dotted},
-  wlbl/.style={font=\scriptsize, text=diagram-text}
-}
-
-% ---- Clock-grid / point-event styles ----
-\tikzset{
-  ttick/.style={draw=diagram-accent, line width=1.1pt},
-  tbrace/.style={decorate, decoration={brace, amplitude=4pt, mirror}, draw=diagram-border}
-}
+% Shared TikZ palette, node/edge styles (the diagram block standard), and the
+% \diagramscale shrink-to-fit wrapper come from the platform diagrams base. This
+% manual defines only its own \Diag* macros below, against those shared styles.
+\RequirePackage{p2kb-platform-diagrams}
 
 % ==================== Chapter 2 -- streamer architecture ====================
 
 % Fig 2.1 -- the streamer data path (replaces the ASCII block diagram)
 \newcommand{\DiagStreamerArch}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[node distance=10mm and 14mm]
   % main left-to-right pipeline
   \node[iospbox, text width=18mm] (fifo) {FIFO\\Interface};
@@ -91,7 +63,7 @@
 % Fig 2.2 -- data-flow paths (sources -> routes -> destinations)
 \newcommand{\DiagDataFlow}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[node distance=8mm and 18mm, font=\small]
   % sources
   \node[iospbox, text width=22mm] (imm) {Immediate\\{\scriptsize S operand}};
@@ -138,7 +110,7 @@
 % Fig 4.1 -- the D-operand command word bit-field (replaces the ASCII layout)
 \newcommand{\DiagCommandWord}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[font=\footnotesize,
   fld/.style={draw=diagram-border, fill=diagram-box, minimum height=9mm,
               align=center, font=\ttfamily\small, inner sep=2pt},
@@ -168,7 +140,7 @@
 % Fig 7.1 -- bit-packing of the five RGB source formats
 \newcommand{\DiagRgbFormats}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[font=\footnotesize,
   seg/.style={draw=diagram-border, minimum height=7mm, align=center,
               font=\ttfamily\scriptsize, inner sep=1pt},
@@ -210,7 +182,7 @@
 % Fig 10.1 -- per-clock DDS output + Goertzel multiply-accumulate
 \newcommand{\DiagDdsGoertzel}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[node distance=10mm and 16mm, font=\small,
   op/.style={draw=diagram-border, fill=diagram-box, circle, minimum size=8mm,
              font=\small, inner sep=1pt}]
@@ -237,7 +209,7 @@
 % Fig 15.1 -- VGA 640x480 horizontal line (HSYNC active-low) with segments
 \newcommand{\DiagVgaTiming}{%
 \begin{figure}[H]\centering
-\resizebox{\textwidth}{!}{%
+\diagramscale{%
 \begin{tikzpicture}[x=1mm, y=6mm, font=\scriptsize]
   % scaled pixel counts /10: visible 0-64, front 64-72, sync 72-96, back 96-112
   \node[wlbl, anchor=east] at (-2,0.6){HSYNC};

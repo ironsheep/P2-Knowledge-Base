@@ -16,16 +16,16 @@
 \end{tcolorbox}
 
 \begin{center}
-\vspace{0.6cm}
+\vspace{0.35cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 Streamer Programming Guide\par}
 \vspace{0.3cm}
 {\Large\itshape Comprehensive Reference for Propeller 2 Streamer Hardware\par}
-\vspace{0.6cm}
+\vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
-\vfill
+\vspace{0.1cm}
 \begin{tcolorbox}[
   colback=gray!5,
   colframe=gray!40,
@@ -38,7 +38,8 @@
 ]
 \textbf{High-Speed I/O, Video, and Signal Processing with the P2 Streamer}
 
-\vspace{0.3cm}
+\vspace{0.08cm}
+{\footnotesize
 \begin{minipage}[t]{0.45\textwidth}
 \textbf{Part I: Streamer Fundamentals}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
@@ -47,7 +48,7 @@
 \item NCO and Timing
 \item Command Structure
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part II: Mode Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Immediate Modes
@@ -57,7 +58,7 @@
 \item ADC Sampling Modes
 \item DDS/Goertzel Mode
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part III: Configuration Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item DAC Channel Configuration
@@ -75,7 +76,7 @@
 \item Signal Processing
 \item Integration Patterns
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part V: Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Complete Mode Encoding Table
@@ -85,8 +86,9 @@
 \item Index
 \end{itemize}
 \end{minipage}
+}
 \end{tcolorbox}
-\vspace{0.5cm}
+\vspace{0.05cm}
 
 {\small Iron Sheep Productions, LLC\par}
 {\small P2 Knowledge Base Project\par}
@@ -105,19 +107,19 @@
 
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+This work is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
 
 You are free to:
 
 - **Share** — copy and redistribute the material in any medium or format
-- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
 
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
-- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made (for example, formatting or excerpting).
+- **NonCommercial** — You may not use the material for commercial purposes.
+- **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
 
-To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 ### Trademarks
 

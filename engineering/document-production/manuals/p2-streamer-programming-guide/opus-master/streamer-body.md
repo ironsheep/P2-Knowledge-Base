@@ -1,5 +1,7 @@
 # Part I: Streamer Fundamentals
 
+The streamer rewards a little grounding before the encodings. This Part builds the mental model — what the streamer is, how its NCO sets the pace, and the command vocabulary you will use everywhere else — so the mode tables in Part II read as deliberate choices rather than magic.
+
 # Chapter 1: Understanding the Streamer
 
 Before the mode tables and bit fields, it helps to know what the streamer *is*, why the P2 has one, and how to think about it when you sit down to build something. This chapter builds that picture. The rest of the guide is the detailed reference; this chapter is the map.
@@ -308,6 +310,8 @@ Specifies the number of NCO rollovers before the command completes.
 ⚠️ **Pitfall:** Issuing **XCONT** or **XZERO** when no command is active causes unpredictable behavior. Use **XINIT** to start the streamer initially.
 
 # Part II: Mode Reference
+
+The streamer's modes are the heart of this reference. This Part documents each family in turn — immediate, hub-streamed, video, pin-capture, ADC, and the special DDS/Goertzel mode. Each chapter opens with what its modes are *for* before giving the exact encodings.
 
 # Chapter 5: Immediate Modes
 
@@ -624,6 +628,8 @@ frequency = $8000_0000 × F / CLK
 
 # Part III: Configuration Reference
 
+These chapters cover the choices that apply across modes — where data goes among the DAC channels, which pins are driven, how commands are named, and how your code stays in step with the streamer.
+
 # Chapter 11: DAC Channel Configuration
 
 Many modes send data to the DAC channels, but none of them say *which* channels, or *how*. That is this chapter's job. The %dddd routing field is the knob from Chapter 1's stereo example: it decides how the streamer's data spreads across the four 8-bit DAC channels — one channel, a stereo pair, a differential pair, or all four independently. The same data becomes mono, stereo, or four-channel purely by changing this field.
@@ -938,6 +944,8 @@ line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 💡 **Tip:** Use **XZERO** at line start to prevent phase accumulation errors over many lines.
 
 # Part IV: Applications
+
+Here the modes come together into the things people actually build: video, high-speed serial, signal processing, and the patterns that combine them.
 
 # Chapter 15: Video Output
 
@@ -1282,6 +1290,8 @@ wait_trigger:   testp   #trigger_pin wc
 ```
 
 # Part V: Appendices
+
+The appendices are lookup material: the complete mode-encoding table, the symbol quick-reference, the frequency-calculation tables, and a troubleshooting guide. Reach for them once you know which mode you need and want the exact bits.
 
 # Appendix A: Complete Mode Encoding Table
 

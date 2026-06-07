@@ -16,16 +16,16 @@
 \end{tcolorbox}
 
 \begin{center}
-\vspace{0.6cm}
+\vspace{0.35cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 Streamer Programming Guide\par}
 \vspace{0.3cm}
 {\Large\itshape Comprehensive Reference for Propeller 2 Streamer Hardware\par}
-\vspace{0.6cm}
+\vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0\par}
 
-\vfill
+\vspace{0.1cm}
 \begin{tcolorbox}[
   colback=gray!5,
   colframe=gray!40,
@@ -38,7 +38,8 @@
 ]
 \textbf{High-Speed I/O, Video, and Signal Processing with the P2 Streamer}
 
-\vspace{0.3cm}
+\vspace{0.08cm}
+{\footnotesize
 \begin{minipage}[t]{0.45\textwidth}
 \textbf{Part I: Streamer Fundamentals}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
@@ -47,7 +48,7 @@
 \item NCO and Timing
 \item Command Structure
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part II: Mode Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Immediate Modes
@@ -57,7 +58,7 @@
 \item ADC Sampling Modes
 \item DDS/Goertzel Mode
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part III: Configuration Reference}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item DAC Channel Configuration
@@ -75,7 +76,7 @@
 \item Signal Processing
 \item Integration Patterns
 \end{itemize}
-\vspace{0.3cm}
+\vspace{0.03cm}
 \textbf{Part V: Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Complete Mode Encoding Table
@@ -85,8 +86,9 @@
 \item Index
 \end{itemize}
 \end{minipage}
+}
 \end{tcolorbox}
-\vspace{0.5cm}
+\vspace{0.05cm}
 
 {\small Iron Sheep Productions, LLC\par}
 {\small P2 Knowledge Base Project\par}
@@ -105,19 +107,19 @@
 
 Copyright © 2026 Iron Sheep Productions, LLC and Parallax Inc.
 
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+This work is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
 
 You are free to:
 
 - **Share** — copy and redistribute the material in any medium or format
-- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
 
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
-- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made (for example, formatting or excerpting).
+- **NonCommercial** — You may not use the material for commercial purposes.
+- **NoDerivatives** — If you remix, transform, translate, or build upon the material, you may not distribute the modified material.
 
-To view the full license, visit: https://creativecommons.org/licenses/by-sa/4.0/
+To view the full license, visit: https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 ### Trademarks
 
@@ -176,6 +178,8 @@ This reference serves developers implementing high-speed I/O on the Propeller 2.
 
 
 # Part I: Streamer Fundamentals
+
+The streamer rewards a little grounding before the encodings. This Part builds the mental model — what the streamer is, how its NCO sets the pace, and the command vocabulary you will use everywhere else — so the mode tables in Part II read as deliberate choices rather than magic.
 
 # Chapter 1: Understanding the Streamer
 
@@ -485,6 +489,8 @@ Specifies the number of NCO rollovers before the command completes.
 ⚠️ **Pitfall:** Issuing **XCONT** or **XZERO** when no command is active causes unpredictable behavior. Use **XINIT** to start the streamer initially.
 
 # Part II: Mode Reference
+
+The streamer's modes are the heart of this reference. This Part documents each family in turn — immediate, hub-streamed, video, pin-capture, ADC, and the special DDS/Goertzel mode. Each chapter opens with what its modes are *for* before giving the exact encodings.
 
 # Chapter 5: Immediate Modes
 
@@ -801,6 +807,8 @@ frequency = $8000_0000 × F / CLK
 
 # Part III: Configuration Reference
 
+These chapters cover the choices that apply across modes — where data goes among the DAC channels, which pins are driven, how commands are named, and how your code stays in step with the streamer.
+
 # Chapter 11: DAC Channel Configuration
 
 Many modes send data to the DAC channels, but none of them say *which* channels, or *how*. That is this chapter's job. The %dddd routing field is the knob from Chapter 1's stereo example: it decides how the streamer's data spreads across the four 8-bit DAC channels — one channel, a stereo pair, a differential pair, or all four independently. The same data becomes mono, stereo, or four-channel purely by changing this field.
@@ -1115,6 +1123,8 @@ line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 💡 **Tip:** Use **XZERO** at line start to prevent phase accumulation errors over many lines.
 
 # Part IV: Applications
+
+Here the modes come together into the things people actually build: video, high-speed serial, signal processing, and the patterns that combine them.
 
 # Chapter 15: Video Output
 
@@ -1459,6 +1469,8 @@ wait_trigger:   testp   #trigger_pin wc
 ```
 
 # Part V: Appendices
+
+The appendices are lookup material: the complete mode-encoding table, the symbol quick-reference, the frequency-calculation tables, and a troubleshooting guide. Reach for them once you know which mode you need and want the exact bits.
 
 # Appendix A: Complete Mode Encoding Table
 
