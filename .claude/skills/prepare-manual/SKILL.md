@@ -47,22 +47,27 @@ study: `methodology/presentation-platform-unification-STUDY.md`).
 - **How PDF Forge persistence works (the mental model).** When the user moves outbound → Forge, the files are **removed from outbound**. Outbound going empty after a deploy is **expected, not an error** — never treat a previously-staged file's absence from outbound as a problem. Forge then **retains the last-moved version of each file, keyed by filename, until that filename is overwritten.** Consequence: files with **unique per-document names** (e.g. the streamer's `templates/*` and `filters/p2kb-streamer-*`) accumulate on Forge and survive across documents — stage them only on the first build of a document or when they change. But **`request.json` has the SAME filename for every manual**, so Forge only ever holds ONE — whichever document was deployed last.
   - **Forge has TWO COMPLETELY SEPARATE file stores: the manual-PDF-generation store and the interactive/daemon store.** This prepare-manual → outbound → manual-PDF-generation path feeds ONLY the **manual store**. The `forge-test` interactive daemon feeds ONLY the **interactive store**. A file sent to one does **not** appear in the other — there is no shared store. To make any file appear in the manual store, it MUST travel the manual PDF generation process. The keyed-by-filename persistence rule (above) holds *within each store independently*.
   - **Consequence — "changed since Forge last had it" means "since the MANUAL store last had it," not since the last daemon render.** Templates/filters iterated and verified via the daemon are NOT in the manual store; they must be staged through outbound to reach it. So the FIRST time a document goes through the manual PDF generation process, the manual store has NONE of its files → **stage the COMPLETE stack** (all templates + all filters + request.json + md), even though they were "already on Forge" via the daemon. On subsequent manual builds, stage only what changed *since the last manual build* (the daemon's separate history is irrelevant to the manual store).
-- **Platform-stack staging rule (shared files, shared names).** For a
-  platform-consuming manual (see above), the platform `.sty` its `reference.latex`
-  loads (`platform/templates/p2kb-platform-*.sty`) and the platform `.lua` named in
-  its `request.json` (`platform/filters/p2kb-platform-*.lua`) are part of the stack
-  Forge must hold — but they are NOT under `workspace/<slug>/`, so they need explicit
-  staging from `platform/`. Because every manual ships these under the SAME filenames,
-  the manual store holds ONE copy each, keyed by filename — so seeding is **global**,
-  tracked in todo-mcp key `manual_store_platform_seeded` (NOT per-slug). Stage the
-  platform files this manual uses when **either**: (a) `manual_store_platform_seeded`
-  is unset (the manual store has no platform files yet — first platform-consuming
-  build ever), **or** (b) `git status --porcelain engineering/document-production/platform/`
-  shows the platform files changed (a platform fix must reach Forge). Otherwise the
-  manual store already has the current platform bytes — do NOT re-stage them (Sacred
-  Rule #6). After staging, set `manual_store_platform_seeded` (Step 7). Note: because
-  the flag is global, a platform CHANGE must re-stage for whichever manual is built
-  next — rely on the git-status signal (b), not just the flag, to catch that.
+- **Platform-stack staging rule — COMMON files, staged ONLY when the platform itself changes.**
+  The platform `.sty`/`.lua` are **shared infrastructure**, NOT per-manual files. Every
+  manual ships them under the SAME filenames, so Forge's manual store holds ONE copy of
+  each, shared by all manuals. Therefore platform staging is driven **purely by whether
+  the platform CONTENT changed since it was last sent to the store** — it is NOT triggered
+  by which manual you are building, nor by a manual's first-build / seeded status. A
+  manual's first build stages the manual's OWN files; it does NOT, by itself, re-stage the
+  platform.
+  - **The diff (content hash, not git-status).** Track the per-file content hash of the
+    platform files currently in the manual store in todo-mcp key
+    `manual_store_platform_hashes` (one `basename md5` per line, **global**, not per-slug).
+    On each run, hash the live `platform/` files this manual uses and **stage ONLY the
+    files whose hash differs from the stored value (or are absent from it)**. If every
+    hash matches, the store already has the current bytes → **stage NOTHING** (the common
+    case — do not over-stage). Use a content hash, NOT `git status`: a *committed* platform
+    change reads "clean" in git but is still absent from the store until deployed, so
+    git-status would silently miss it.
+  - After staging, update `manual_store_platform_hashes` for exactly the files you staged
+    (Step 7). This optimistically assumes the bundle is deployed (same assumption as all
+    outbound staging). The OLD `manual_store_platform_seeded` boolean is retired — delete
+    it if present; the hash map subsumes it (empty/missing map ⇒ first seed ⇒ all stage).
 - **Document-switch override — ALWAYS stage `request.json` when switching documents.** Because `request.json` shares one filename across all manuals (previous point), Forge's copy is for the *previous* document — its directive (input, template, lua_filters, metadata) points at the wrong manual. So whenever the manual you are preparing differs from the one prepared last time, you MUST stage `request.json` to outbound **even though git shows it unchanged**. This is the one sanctioned exception to Sacred Rule #6. Track the last-prepared manual in todo-mcp context key `pdf_forge_last_prepared_manual`; compare it to the current slug in Step 4, force-stage `request.json` on a mismatch (or when the key is absent), and update the key in Step 7. (On a *first-ever* build of a document, also stage its uniquely-named templates/filters — Forge does not have them yet.)
 - **A `.tex` file appearing in outbound is a layout-debug hand-back — NOT a staging artifact.** When a PDF has a gnarly layout problem, the user occasionally takes the **`.tex`** that PDF Forge emits during generation (the Pandoc-produced LaTeX, before xelatex makes the PDF) and drops it **back into `outbound/<slug>/`** for inspection. If you see a `.tex` there, it is the actual generated LaTeX for you to **read and diagnose** the layout issue against the template/filters — do NOT delete it, overwrite it, escape it, or treat it as something to send to Forge. Leave it in place and use it; it is inbound-for-debugging, not outbound-for-deploy.
 - **Sacred Rule #5** — Never rename files. The working-copy filename in `request.json` is sacred and identical in workspace and outbound.
@@ -117,12 +122,14 @@ Also compare opus-master modtime/size to workspace working copy to know if a ref
 
 If **either** signal is true, the manual store already holds this document's full stack → **stage ONLY the files that changed since the last manual build.** Do NOT re-stage unchanged templates/filters — that is the Sacred Rule #6 violation. (Tell: re-copying the whole `p2kb-<slug>-*` stack when only a few files changed. Iterating templates/filters via the `forge-test` daemon does NOT seed the manual store — daemon history is irrelevant here.) Treat a build as first-only when BOTH signals are false.
 
-**Platform-stack check (decides whether the shared `platform/` files stage).** If this manual consumes the platform (its `reference.latex` loads `p2kb-platform-*` or its `request.json` names `p2kb-platform-*` filters), determine whether the shared files must stage per the **Platform-stack staging rule** above:
+**Platform-stack check (content-hash diff — decides which, if any, shared `platform/` files stage).** Only if this manual consumes the platform (its `reference.latex` loads `p2kb-platform-*` or its `request.json` names `p2kb-platform-*` filters). First resolve WHICH platform files it uses: grep `reference.latex` for `\usepackage{p2kb-platform-...}` (→ `platform/templates/*.sty`) and read the `p2kb-platform-*` entries in `request.json` `lua_filters` (→ `platform/filters/*.lua`). Then diff their live content against the store's recorded hashes:
 ```bash
-git status --porcelain engineering/document-production/platform/   # (b) platform changed?
-mcp__todo-mcp__context_get key:"manual_store_platform_seeded"      # (a) ever seeded?
+mcp__todo-mcp__context_get key:"manual_store_platform_hashes"   # stored: "basename md5" per line
+# live hashes (basename + md5) for the files this manual uses:
+md5sum platform/templates/p2kb-platform-foundation.sty platform/templates/p2kb-platform-content.sty \
+       platform/filters/p2kb-platform-<each-used-filter>.lua | awk '{n=split($2,a,"/"); print a[n], $1}'
 ```
-Stage the platform `.sty`/`.lua` this manual uses when the key is unset **or** the git status is non-empty. Resolve WHICH platform files: grep the manual's `reference.latex` for `\usepackage{p2kb-platform-...}` (→ `platform/templates/*.sty`) and read the `p2kb-platform-*` entries in `request.json` `lua_filters` (→ `platform/filters/*.lua`).
+**Stage ONLY the platform files whose live md5 differs from the stored value (or are absent from the stored map).** If all match → stage NO platform files (do not over-stage). This is independent of the per-manual seeded/first-build checks below — a manual's first build never re-stages an unchanged platform.
 
 ### Step 5 — Present the plan and ask for confirmation
 
@@ -136,7 +143,7 @@ Typical pattern is two LaTeX lines inside a `{=latex}` block: `{\large <Month> <
 Then use `AskUserQuestion` to present:
 1. **Refresh source?** — show opus-master vs working-copy diff summary (newer/older/same).
 2. **Version bump?** — show CURRENT values in BOTH (a) `request.json` metadata and (b) markdown cover (front-matter file or single-file cover region). If recent commits to opus-master mention a version (e.g., "v2.3.0"), suggest that. Today's month/year as date. Offer: bump both to suggested / keep as-is / custom. Bumping ONE without the other creates a confusing mismatch — flag this risk explicitly if the user wants to do partial.
-3. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files flagged by the Step-4 Platform-stack check. **Gate the offer on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN gate (global platform-seeded flag + platform git status), independent of the per-manual seeded check. Default: stage just the changed aux files + the markdown (+ platform files if their gate fires).
+3. **Files to stage** — list each candidate template/filter/`request.json` with its git status, PLUS any shared `platform/` files whose **content hash changed** per the Step-4 Platform-stack check (often NONE). **Gate the manual's OWN files on the Step-4 manual-store-seeded check:** if the store is seeded (key set OR a manual PDF already exists), offer ONLY the files that changed this session — do NOT offer "stage the full stack." Offer the complete stack ONLY on a genuine first manual build (both signals false). The platform files follow their OWN content-diff gate (changed-hash only), **independent** of the per-manual seeded/first-build check — a first manual build does NOT drag the platform along if the platform is unchanged. Default: stage just the changed aux files + the markdown (+ only the platform files whose hash changed).
 
 If the user has clearly signaled "just do it" in this session, you may skip confirmation for unambiguous cases — but always show what you're about to do at minimum.
 
@@ -186,13 +193,13 @@ In order (each step depends on the previous):
    ```
    **Always** run that `request.json` copy on a document switch (the Step 4 check), even with no git change — otherwise Forge builds with the previous document's directive.
    For asset changes: `cp workspace/<slug>/assets/<file> outbound/<slug>/assets/` (the `assets/` subdir IS used in outbound).
-9. **Stage the shared platform files** (only if the Step-4 Platform-stack check said to — first platform-seed OR platform changed). These come from `platform/`, FLAT into outbound, same as any other `.sty`/`.lua`:
+9. **Stage the shared platform files — ONLY the ones whose hash changed** (per the Step-4 content-hash diff). Usually this list is **empty** → stage nothing here. Copy each changed file from `platform/`, FLAT into outbound:
    ```bash
-   cp engineering/document-production/platform/templates/p2kb-platform-foundation.sty outbound/<slug>/
-   cp engineering/document-production/platform/templates/p2kb-platform-content.sty    outbound/<slug>/
-   cp engineering/document-production/platform/filters/p2kb-platform-<name>.lua       outbound/<slug>/   # each platform filter in request.json
+   # ONLY for each platform file whose live md5 != stored md5 (Step 4):
+   cp engineering/document-production/platform/templates/p2kb-platform-<changed>.sty outbound/<slug>/
+   cp engineering/document-production/platform/filters/p2kb-platform-<changed>.lua   outbound/<slug>/
    ```
-   Stage only the platform files THIS manual actually uses (resolved in Step 4). If the check said the manual store already holds the current platform bytes, skip this — do not re-stage (Sacred Rule #6).
+   Never copy the whole platform set "to be safe" — that is the over-staging this rule exists to prevent (Sacred Rule #6). An unchanged platform stages nothing, even on a manual's first build.
 
 ### Step 7 — Report (and update the document tracker)
 
@@ -202,8 +209,8 @@ In order (each step depends on the previous):
 **Set the manual-store-seeded flag** so future runs know the full stack is already on Forge and stage only changes:
 `mcp__todo-mcp__context_set key:"manual_store_seeded_<slug>" value:"true"`.
 
-**If platform files were staged this run, set the global platform-seeded flag:**
-`mcp__todo-mcp__context_set key:"manual_store_platform_seeded" value:"true"`. (Leave it set on later runs; a platform CHANGE re-stages via the git-status signal, not this flag.)
+**If any platform files were staged this run, update their recorded hashes** so the next run's content-diff sees them as current and does NOT re-stage them:
+`mcp__todo-mcp__context_set key:"manual_store_platform_hashes" value:"<basename md5 per line for ALL platform files now in the store>"`. Write the full current map (every platform file's basename + live md5), not just the changed ones, so the map always reflects the store's full platform state. If no platform files were staged, leave the key unchanged.
 
 End with a brief summary:
 - Final list of files in `outbound/<slug>/` with sizes (`ls -la`).
