@@ -27,21 +27,28 @@ These are the live working set. Any shared visual or editorial convention MUST b
 kept consistent across the live set — a change to one that affects a shared
 convention is a change to all of them.
 
-| Publication | Workspace | Live since | Convention-reconciled? | Notes |
-|-------------|-----------|-----------|------------------------|-------|
-| P2 I/O & Smart Pins User Guide | `workspace/p2-io-and-smart-pins-user-guide/` | 2026-05-28 | yes | "Blue Book" reference; the standard others rebase on |
-| P2 Assembly Language Reference | `workspace/p2-assembly-language-manual/` | 2026-05-28 | yes | PASM2 instruction reference |
-| DeSilva PASM2 Tutorial | `workspace/p2-pasm-desilva-style/` | 2026-05-28 | yes | Pedagogical homage tutorial |
-| P2 Debug Window Manual | `workspace/p2-debug-window-manual/` | 2026-06-04 | **pending** | promoted 2026-06-04 |
-| P2 Single-Step Debugger Manual | `workspace/p2-single-step-debugger-manual/` | 2026-06-04 | **pending** | promoted 2026-06-04 |
-| P2 Streamer Programming Guide | `workspace/p2-streamer-programming-guide/` | 2026-06-04 | **pending** | promoted 2026-06-04 |
-| AI Privacy Guide | `workspace/ai-privacy-guide/` | 2026-06-04 | **pending** | presentation-class; rides pristine `p2kb-foundation.sty` |
+**Status pipeline** — each manual migrates left → right through these gates. `Chip`
+and `Community` review are **independent** (a manual can be released and
+community-reviewed while chip review is still outstanding — see Assembly / DeSilva).
+Markers: ✅ done · 🔄 in review / in progress · ⏳ awaiting · — n/a · _(blank)_ not yet reached.
+`Platform` = migrated onto the shared **`p2kb-platform`** display stack and its
+cross-publication conventions (the **Rule** at the bottom); `—` = a different class
+that does not ride the shared stack.
 
-> **Newly-promoted (2026-06-04):** Debug Window, Single-Step Debugger, Streamer, and
-> AI Privacy Guide are now live, but their cross-publication convention reconciliation
-> (per the **Rule** at the bottom of this file) is **pending** — to be completed as part
-> of the manual layout-standards effort. Until then, the three original live publications
-> remain the reconciled reference.
+| Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
+|-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
+| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | awaiting Stephen's technical review + asset review; "Blue Book" reference |
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | released; chip review outstanding |
+| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | released; chip review outstanding |
+| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ⏳ | ✅ | | | | awaiting screenshots — 5/10 hero figures + TERM captures still placeholders |
+| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ⏳ | ⏳ | ⏳ | | awaiting chip + community review |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ⏳ | ⏳ | ⏳ | | awaiting chip + community review |
+| AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
+
+**Slug** is the one folder name each manual uses across all three trees —
+`manuals/<slug>/`, `workspace/<slug>/`, and `outbound/<slug>/`. When a manual needs
+more detail than fits in **Notes**, add a slim `↳` continuation row (markers blank,
+detail in Notes).
 
 ## In development / parked (NOT live)
 
@@ -102,9 +109,11 @@ Defined in each *reconciled* live publication's content style package:
 - `p2-assembly-language-manual/templates/p2kb-pasm2-content.sty`
 - `p2-pasm-desilva-style/templates/p2kb-desilva-content.sty`
 
-> The four publications promoted 2026-06-04 (debug-window, ssdbg, streamer,
-> ai-privacy) must have this convention verified/added to their content style
-> packages as part of reconciliation — see the newly-promoted note above.
+> Publications still pending platform reconciliation (`Platform ⏳` in the status
+> pipeline above — currently **Single-Step Debugger** and **Streamer**) must have
+> this convention verified/added to their content style packages. Debug Window
+> reconciled 2026-06-08 (now on the shared `p2kb-platform-content`); the AI Privacy
+> Guide is presentation-class and does not ride the shared stack.
 
 > **Note:** In the I/O & Smart Pins guide the assembly/PASM2 code-block
 > environment is named `IOSPBlock` (guide-specific name) but is colored **green**
