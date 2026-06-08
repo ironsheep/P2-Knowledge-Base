@@ -1,4 +1,4 @@
-# Chapter 7: The SCOPE Window — Time-Domain Oscilloscope
+# Chapter 7: The SCOPE Window — Time-Domain Oscilloscope {#ch-7}
 
 The SCOPE window plots values against time, the way a bench oscilloscope does.
 You send it a stream of samples; it scrolls them across the display, newest at the
@@ -13,12 +13,18 @@ declare the window once, naming its channels in the same statement, and then fee
 it bare numeric values for the rest of the run.
 
 > SCOPE plots one value against time. For one value against *another* value — phase
-> plots, Lissajous figures, XY trajectories — use the SCOPE_XY window in Chapter 8.
+> plots, Lissajous figures, XY trajectories — use the SCOPE_XY window in [Chapter 8](#ch-8).
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work here too and are covered for
-> all windows together in Chapter 12. Packed data formats, which let you move
-> samples faster over the debug link, are covered in Chapter 13.
+> all windows together in [Chapter 12](#ch-12). Packed data formats, which let you move
+> samples faster over the debug link, are covered in [Chapter 13](#ch-13).
 
-![The SCOPE window displaying a time-domain sine waveform.](inbox/assets/fig-07-scope.png){width=80%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.80\linewidth]{inbox/assets/fig-07-scope.png}
+\caption{The SCOPE window displaying a time-domain sine waveform.}
+\end{figure}
+```
 
 ## Creating the window and declaring its channels
 
@@ -29,7 +35,8 @@ declarations follow on the same line:
 
 ```spin2
 PUB main() | ang
-  debug(`SCOPE Sig SIZE 400 200 'Wave' AUTO)   ' create, one auto-ranging channel
+  ' create, one auto-ranging channel
+  debug(`SCOPE Sig SIZE 400 200 'Wave' AUTO)
   ang := 0
   repeat
     debug(`Sig `(qsin(1000, ang, 256)))         ' feed it by name
@@ -51,7 +58,7 @@ The configuration keywords you can place on the creation line:
 | `TEXTSIZE` | `points` | `10` | Label font size; **6–200** |
 | `COLOR` | `back grid` | black / gray | Background color, then grid color (`$RRGGBB` each) |
 | `HIDEXY` | — | off | Hides the mouse-coordinate readout |
-| Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see Chapter 13) |
+| Packing keyword | — | `LONGS_1BIT` | Sets the data-packing format (see [Chapter 13](#ch-13)) |
 
 If you set both `DOTSIZE` and `LINESIZE` to `0`, the window forces a dot size of 1
 so traces remain visible.
@@ -62,7 +69,7 @@ You do not declare channels with a `CHANNELS` or `LABELS` keyword. Each channel 
 introduced by a **quoted label** in the creation stream, optionally followed by
 numeric arguments that configure that one channel:
 
-```
+```debug-config
 'label' {AUTO | lo hi} {tall} {base} {grid} {color}
 ```
 
@@ -144,7 +151,7 @@ stationary and a one-shot event is captured at a known position.
 
 You configure the trigger at runtime with the `TRIGGER` command:
 
-```
+```debug-update
 TRIGGER channel {AUTO | arm fire} {offset}
 ```
 
@@ -156,8 +163,9 @@ TRIGGER channel {AUTO | arm fire} {offset}
 | `offset` | Where the trigger point sits in the display, `0`..`SAMPLES-1` (default: `SAMPLES/2`) |
 
 ```spin2
-debug(`Capture TRIGGER 0 -500 500 256)   ' channel 0, arm -500, fire 500, centered
-debug(`Capture TRIGGER 0 AUTO)            ' channel 0, levels chosen automatically
+' channel 0, arm -500, fire 500, centered
+debug(`Capture TRIGGER 0 -500 500 256)
+debug(`Capture TRIGGER 0 AUTO)  ' channel 0, levels chosen automatically
 debug(`Capture TRIGGER -1)                ' disable: back to free-running
 ```
 
@@ -166,7 +174,7 @@ debug(`Capture TRIGGER -1)                ' disable: back to free-running
 There is no `RISING` or `FALLING` keyword. The direction follows from how `fire`
 compares to `arm`:
 
-- **`fire` ≥ `arm` → rising-edge trigger.** The window arms when the signal falls to
+- **`fire` >= `arm` → rising-edge trigger.** The window arms when the signal falls to
   or below `arm`, then fires when it rises to or above `fire`.
 - **`fire` < `arm` → falling-edge trigger.** The window arms when the signal rises to
   or above `arm`, then fires when it falls to or below `fire`.
@@ -199,7 +207,8 @@ After a trigger fires, `HOLDOFF` suppresses re-triggering for a number of sample
 which steadies the display of a busy or bursty signal:
 
 ```spin2
-debug(`Capture HOLDOFF 512)   ' ignore new triggers for 512 samples after one fires
+' ignore new triggers for 512 samples after one fires
+debug(`Capture HOLDOFF 512)
 ```
 
 The holdoff count ranges from **2 to 2048**. It defaults to `SAMPLES` — one full
@@ -232,7 +241,8 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | ang, sine, tri, dir, noise
-  ' Three stacked channels: fixed -1000..1000 range, 100px tall, offset by 'base'
+  ' Three stacked channels: fixed -1000..1000 range,
+  ' 100px tall, offset by 'base'
   debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2 ...
     'Sine'  -1000 1000 100   0 0 $00FF00 ...
     'Tri'   -1000 1000 100 100 0 $FF0000 ...
@@ -243,13 +253,15 @@ PUB main() | ang, sine, tri, dir, noise
   dir := 40
 
   repeat
-    sine  := qsin(1000, ang, 256)          ' CORDIC sine, amplitude 1000, 256 steps/cycle
+    ' CORDIC sine, amplitude 1000, 256 steps/cycle
+    sine  := qsin(1000, ang, 256)
     tri   += dir                           ' ramp up/down for a triangle
     if tri >= 1000 or tri <= -1000
       dir := -dir
     noise := (GETRND() // 2001) - 1000     ' random in -1000..1000
 
-    debug(`Waves `(sine) `(tri) `(noise))  ' one set: three values, in channel order
+    ' one set: three values, in channel order
+    debug(`Waves `(sine) `(tri) `(noise))
 
     ang += 4
     waitms(5)                              ' your loop sets the time scale
@@ -257,7 +269,7 @@ PUB main() | ang, sine, tri, dir, noise
 
 To turn the same display into a **triggered capture**, declare one channel and add a
 trigger. The window then waits for the signal to rise through 0 (armed below −500,
-fired at or above 500 — `fire` ≥ `arm`, so rising) and freezes a 512-sample frame
+fired at or above 500 — `fire` >= `arm`, so rising) and freezes a 512-sample frame
 with the trigger point centered:
 
 ```spin2
@@ -266,8 +278,9 @@ CON
 
 PUB main() | ang, sig
   debug(`SCOPE Capture SIZE 512 256 SAMPLES 512 'Signal' -1000 1000)
-  debug(`Capture TRIGGER 0 -500 500 256)   ' rising edge, trigger centered in the frame
-  debug(`Capture HOLDOFF 512)              ' one frame of holdoff before re-arming
+  ' rising edge, trigger centered in the frame
+  debug(`Capture TRIGGER 0 -500 500 256)
+  debug(`Capture HOLDOFF 512)  ' one frame of holdoff before re-arming
 
   ang := 0
   repeat
@@ -296,7 +309,7 @@ PUB main() | ang, sig
   holdoff and the default trigger offset, so raising `SAMPLES` widens the captured
   frame and the pre-trigger window together.
 - **For high sample rates, pack the data.** Bare per-channel values are simplest; the
-  packing keywords (Chapter 13) move more samples per `DEBUG` packet over the link.
+  packing keywords ([Chapter 13](#ch-13)) move more samples per `DEBUG` packet over the link.
 
 ## Try it
 

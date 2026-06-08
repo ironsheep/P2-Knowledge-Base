@@ -31,8 +31,8 @@ declare -a REQUIRED_FILES=(
     "part-1-foundation.md"
     "ch01-foundation.md"
     "ch02-getting-started.md"
-    "ch03-term.md"
     "part-2-windows.md"
+    "ch03-term.md"
     "ch04-bitmap.md"
     "ch05-plot.md"
     "ch06-logic.md"
@@ -49,6 +49,7 @@ declare -a REQUIRED_FILES=(
     "appendix-a-command-reference.md"
     "appendix-b-packed-data.md"
     "appendix-c-color-coordinate.md"
+    "index.md"
 )
 
 echo "Verifying source files..."

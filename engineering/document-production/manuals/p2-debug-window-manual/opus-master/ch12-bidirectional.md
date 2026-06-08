@@ -1,4 +1,4 @@
-# Chapter 12: Bidirectional Control — Keyboard and Mouse
+# Chapter 12: Bidirectional Control — Keyboard and Mouse {#ch-12}
 
 Every chapter so far has sent data one way: your P2 produces output, a DEBUG
 display window shows it. This chapter reverses the direction. Using two commands —

@@ -1,7 +1,7 @@
-# Chapter 8: The SCOPE_XY Window — XY, Lissajous, and Phase Plots
+# Chapter 8: The SCOPE_XY Window — XY, Lissajous, and Phase Plots {#ch-8}
 
 The SCOPE_XY window plots one value against another. Where the SCOPE window
-(Chapter 7) shows a signal *over time* — amplitude on the vertical axis, time
+([Chapter 7](#ch-7)) shows a signal *over time* — amplitude on the vertical axis, time
 marching across the horizontal — SCOPE_XY puts the *first* value on the X axis and
 the *second* on the Y axis, and draws a dot where they meet. Feed it a stream of
 `(x, y)` pairs and it draws the path those pairs trace out: a Lissajous figure from
@@ -17,10 +17,16 @@ SCOPE_XY is the right tool when the *shape* in the plane is the thing you want t
 see.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in SCOPE_XY as in every
-> window; they share one mechanism documented in Chapter 12. This chapter is about
+> window; they share one mechanism documented in [Chapter 12](#ch-12). This chapter is about
 > output — configuring the plot and feeding it coordinate pairs.
 
-![The SCOPE_XY window tracing a 2:3 Lissajous figure.](inbox/assets/fig-08-scope-xy.png){width=65%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.65\linewidth]{inbox/assets/fig-08-scope-xy.png}
+\caption{The SCOPE\_XY window tracing a 2:3 Lissajous figure.}
+\end{figure}
+```
 
 ## Creating a SCOPE_XY window
 
@@ -31,8 +37,9 @@ may be followed by a color:
 
 ```spin2
 PUB main()
-  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 'XY')  ' create + name
-  debug(`Lissajous `(500, 250))                                  ' feed by name
+  ' create + name
+  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 'XY')
+  debug(`Lissajous `(500, 250))  ' feed by name
 ```
 
 The configuration keywords you can add to the creation line:
@@ -223,7 +230,7 @@ a comet sweeping around a circle:
 - **Match amplitude to `RANGE` with QSIN's `length`.** Because `QSIN`/`QCOS` scale
   by their `length` argument, setting `length` equal to `RANGE` makes a unit-circle
   signal fill the plot. Scale `length` down to shrink the figure.
-- **SCOPE vs. SCOPE_XY.** Use SCOPE (Chapter 7) for a value over time; use SCOPE_XY
+- **SCOPE vs. SCOPE_XY.** Use SCOPE ([Chapter 7](#ch-7)) for a value over time; use SCOPE_XY
   for one value against another. Two signals you would view as separate traces in
   SCOPE become a single shape in SCOPE_XY, and that shape is what reveals their phase
   and frequency relationship.

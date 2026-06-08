@@ -1,0 +1,19 @@
+% p2kb-debugwin-local.sty — Debug Window Manual per-manual override layer
+% Loaded AFTER p2kb-platform-content.sty so anything here overrides platform defaults.
+%
+% Debug Window migrated to the shared platform stack (presentation-platform-unification).
+% Its earlier bespoke "Visual Discovery System" environments (the DebugWin*/dw* blocks in
+% the retired p2kb-debugwin-content.sty) are NOT carried forward — the current content does
+% not invoke them (no fenced divs, no raw \begin{DebugWin...}). They remain recoverable from
+% git (and from the still-present, now-unloaded p2kb-debugwin-content.sty) if a future
+% revision revives that styling.
+%
+% To override a platform default, redefine it here (e.g. \renewtcolorbox, \definecolor).
+% Add genuinely-new block types only after checking the block catalog
+% (methodology/presentation-block-catalog.md) and via its promotion gate.
+
+\ProvidesPackage{p2kb-debugwin-local}[2026/06/07 P2KB Debug Window per-manual override layer v1.0]
+
+% (no overrides at present)
+
+\endinput

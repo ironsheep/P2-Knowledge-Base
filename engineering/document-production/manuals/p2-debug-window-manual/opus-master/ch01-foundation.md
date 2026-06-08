@@ -1,4 +1,4 @@
-# Chapter 1: The DEBUG Display Windows
+# Chapter 1: The DEBUG Display Windows {#ch-1}
 
 The P2 gives you nine kinds of on-screen window that draw the data your program
 sends. You do not wire up a display or write a rendering loop. You add a
@@ -28,15 +28,15 @@ window that matches the shape of your data:
 
 | Window | What it shows | Chapter |
 |--------|---------------|---------|
-| **TERM** | A scrolling text terminal — status lines, variable dumps, logs | Ch 3 |
-| **BITMAP** | A pixel raster you draw into directly, framebuffer-style | Ch 4 |
-| **PLOT** | An XY plotting surface with layered drawing and sprites | Ch 5 |
-| **LOGIC** | A logic-analyzer trace of 1–32 digital channels | Ch 6 |
-| **SCOPE** | A time-domain oscilloscope of 1–8 sampled values | Ch 7 |
-| **SCOPE_XY** | An XY (Lissajous / phase) scope | Ch 8 |
-| **FFT** | A frequency-domain spectrum | Ch 9 |
-| **SPECTRO** | A spectrogram — frequency content over time | Ch 10 |
-| **MIDI** | A piano-keyboard display driven by MIDI note messages | Ch 11 |
+| **TERM** | A scrolling text terminal — status lines, variable dumps, logs | [Ch 3](#ch-3) |
+| **BITMAP** | A pixel raster you draw into directly, framebuffer-style | [Ch 4](#ch-4) |
+| **PLOT** | An XY plotting surface with layered drawing and sprites | [Ch 5](#ch-5) |
+| **LOGIC** | A logic-analyzer trace of 1–32 digital channels | [Ch 6](#ch-6) |
+| **SCOPE** | A time-domain oscilloscope of 1–8 sampled values | [Ch 7](#ch-7) |
+| **SCOPE_XY** | An XY (Lissajous / phase) scope | [Ch 8](#ch-8) |
+| **FFT** | A frequency-domain spectrum | [Ch 9](#ch-9) |
+| **SPECTRO** | A spectrogram — frequency content over time | [Ch 10](#ch-10) |
+| **MIDI** | A piano-keyboard display driven by MIDI note messages | [Ch 11](#ch-11) |
 
 These nine are the complete set the tool implements. Up to 32 display windows can
 run at the same time, so a single program can drive a terminal, a scope, and a
@@ -96,7 +96,7 @@ PUB main()
   repeat                           ' keep the program (and window) alive
 ```
 
-Compile this with `pnut_ts -d` (Chapter 2 covers the setup) and a 40×20 terminal
+Compile this with `pnut_ts -d` ([Chapter 2](#ch-2) covers the setup) and a 40×20 terminal
 named `Status` opens and shows `Ready.`. The final `repeat` matters: when a P2
 program ends, it stops sending, so keep the program running while you want to watch
 the window.
@@ -147,6 +147,26 @@ it does in a SCOPE window (a sample value). Those meanings are documented in the
 per-window chapters. The element model — keywords, strings, formatted values,
 and bare command numbers — is the same everywhere.
 
+## Configuration versus commands
+
+Within that element model, the keywords a window understands fall into three
+groups — the distinction the per-window chapters and the command reference
+([Appendix A](#appendix-a)) are organized around:
+
+- **Creation-line configuration** sets the window up once, on the `` DEBUG(`TYPE
+  Name ...) `` line that creates it — `SIZE`, `TITLE`, `POS`, and the rest. Most
+  cannot be changed once the window exists.
+- **Runtime commands** are sent *after* creation, in later feeds, to change the
+  window's state or act on it: `COLOR` and `SET` on PLOT, `TRIGGER` on SCOPE, and
+  so on. A few keywords are runtime-only and must not appear on the creation line;
+  each window's chapter flags which.
+- **Shared commands** are the handful every window understands, covered just below.
+
+A window opens when its creation `DEBUG()` runs and stays open as long as your
+program keeps running. There is no close command: when the program ends it stops
+feeding and the window stops updating — which is why the examples end in a
+`repeat`, to keep the program, and its windows, alive.
+
 ## Commands common across windows
 
 Most windows share a small set of named-keyword commands. You send them by name,
@@ -163,7 +183,7 @@ after the window name, the same way you send data:
   chapter says whether it does.
 - **`PC_KEY`** and **`PC_MOUSE`** — read the host keyboard and mouse back into your
   program, so a window can be interactive. These work across window types and share
-  one mechanism, so they are covered together in Chapter 12.
+  one mechanism, so they are covered together in [Chapter 12](#ch-12).
 
 Each window also has commands of its own — `TRIGGER` and `HOLDOFF` on SCOPE and
 LOGIC, the drawing commands on PLOT, and so on. Those belong to the window and are
@@ -190,7 +210,7 @@ you reach for these display windows.
 
 These windows are hosted by **`pnut_term_ts`**, the host application that opens and
 draws them. You produce a program that drives them by compiling with **`pnut_ts`**
-using the `-d` (debug) option. Chapter 2 walks through installing and running both.
+using the `-d` (debug) option. [Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates
 
@@ -199,13 +219,13 @@ rate at which a window can be fed is bounded by that link. When you need to push
 data fast — capturing a high-speed signal, for instance — the streaming windows
 accept **packed-data modes** that unpack many samples from each long you send,
 moving far more data per `DEBUG()` statement. Packed-data modes are covered in
-Chapter 13; you do not need them to get started.
+[Chapter 13](#ch-13); you do not need them to get started.
 
 ## Where to go next
 
-Read **Chapter 2** for setup — installing the tools and getting your first window
-on screen. Then go to the chapter for the window you need: **TERM** (Ch 3) is the
+Read **[Chapter 2](#ch-2)** for setup — installing the tools and getting your first window
+on screen. Then go to the chapter for the window you need: **TERM** ([Ch 3](#ch-3)) is the
 right first stop, since most debugging starts as text and the chapter exercises
 every part of the model you just learned. From there, choose by the shape of your
-data — a waveform wants **SCOPE** (Ch 7), digital channels want **LOGIC** (Ch 6), a
-custom instrument wants **PLOT** (Ch 5), and so on down the table above.
+data — a waveform wants **SCOPE** ([Ch 7](#ch-7)), digital channels want **LOGIC** ([Ch 6](#ch-6)), a
+custom instrument wants **PLOT** ([Ch 5](#ch-5)), and so on down the table above.

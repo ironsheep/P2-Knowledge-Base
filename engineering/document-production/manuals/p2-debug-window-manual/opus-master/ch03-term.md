@@ -1,4 +1,4 @@
-# Chapter 3: The TERM Window — Text Output
+# Chapter 3: The TERM Window — Text Output {#ch-3}
 
 The TERM window is the text terminal of the P2 debug system. You send it
 characters and strings; it shows them in a scrolling grid, the way a classic
@@ -13,9 +13,15 @@ controlling when the display updates.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the TERM window too, but
 > they share one mechanism across every window type, so they are covered together
-> in Chapter 12. This chapter is about output.
+> in [Chapter 12](#ch-12). This chapter is about output.
 
-![The TERM window as a positioned status dashboard.](inbox/assets/fig-03-term-dashboard.png){width=75%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.75\linewidth]{inbox/assets/fig-03-term-dashboard.png}
+\caption{The TERM window as a positioned status dashboard.}
+\end{figure}
+```
 
 ## Creating a TERM window
 
@@ -54,6 +60,14 @@ value of a variable:
 
 ```spin2
 debug(`Status "Temperature: " `udec_(temp) " C")
+```
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.60\linewidth]{inbox/assets/fig-03-term-first.png}
+\caption{The TERM window after its first formatted value --- with \texttt{temp} holding 25, the window shows \texttt{Temperature: 25 C}.}
+\end{figure}
 ```
 
 Two things are happening here, and the difference matters:
@@ -122,8 +136,11 @@ To choose your own colors, set all eight values (four pairs, foreground then
 background each) on the creation line with `COLOR`. Values are `$RRGGBB`:
 
 ```spin2
-debug(`TERM Log SIZE 60 20 COLOR $FF7F00 $000000 $000000 $FF7F00 $00FF00 $000000 $FF0000 $000000)
-'                                    pair0 fg/bg     pair1 fg/bg     pair2 fg/bg     pair3 fg/bg
+debug(`TERM Log SIZE 60 20 COLOR ...
+      $FF7F00 $000000 ...                ' pair0 fg/bg
+      $000000 $FF7F00 ...                ' pair1 fg/bg
+      $00FF00 $000000 ...                ' pair2 fg/bg
+      $FF0000 $000000)                   ' pair3 fg/bg
 ```
 
 That gives pair 0 = orange-on-black, pair 1 = black-on-orange, pair 2 =
@@ -218,13 +235,15 @@ PUB main() | ang, signal, count
     signal := qsin(1000, ang, 256)       ' software-generated waveform
 
     ' Overprint only the value fields, each at a fixed (row, col). Trailing
-    ' spaces pad to a fixed width so a shorter value erases a longer old one.
+    ' spaces pad to a fixed width so a shorter value erases a
+    ' longer old one.
     debug(`Panel 3 2 2 8 `udec_(count) "    ")
     debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
     if abs signal > 800
       debug(`Panel 3 4 2 8 7 "HIGH " 4)  ' pair 3 (red), then back to pair 0
     else
-      debug(`Panel 3 4 2 8 6 "ok   " 4)  ' pair 2 (lime), then back to pair 0
+      ' pair 2 (lime), then back to pair 0
+      debug(`Panel 3 4 2 8 6 "ok   " 4)
 
     ang   += 4
     count += 1

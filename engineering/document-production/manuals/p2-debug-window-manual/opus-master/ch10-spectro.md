@@ -1,4 +1,4 @@
-# Chapter 10: The SPECTRO Window — Spectrogram Waterfall
+# Chapter 10: The SPECTRO Window — Spectrogram Waterfall {#ch-10}
 
 The SPECTRO window shows how a signal's frequency content changes over time. It
 runs an FFT on a sliding window of samples, turns each transform into one line of
@@ -7,7 +7,7 @@ and scrolls the line stack so the newest spectrum appears at the edge and older
 spectra drift away. The result is a *waterfall*: frequency along one axis, time
 along the other, intensity carried by color.
 
-This is the difference between SPECTRO and the FFT window of Chapter 9. The FFT
+This is the difference between SPECTRO and the FFT window of [Chapter 9](#ch-9). The FFT
 window draws one spectrum at a time as a magnitude-versus-frequency graph and
 redraws it on every update; you see *now*, and nothing else. SPECTRO keeps a
 history. A tone that slides up in pitch traces a diagonal streak; a steady harmonic
@@ -22,9 +22,15 @@ runtime commands.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the SPECTRO window, but
 > they share one mechanism across every window type and are covered together in
-> Chapter 12. This chapter is about the display.
+> [Chapter 12](#ch-12). This chapter is about the display.
 
-![The SPECTRO window as a rising-tone spectrogram waterfall.](inbox/assets/fig-10-spectro.png){width=65%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.65\linewidth]{inbox/assets/fig-10-spectro.png}
+\caption{The SPECTRO window as a rising-tone spectrogram waterfall.}
+\end{figure}
+```
 
 ## Creating a SPECTRO window
 
@@ -94,7 +100,8 @@ how many samples each long carries and whether they are sign-extended.
 
 ```spin2
 debug(`SPECTRO Pk SAMPLES 512 RANGE $4000 LONGS_8BIT LUMA8X)
-debug(`Pk `($7F | $40 << 8 | $C0 << 16 | $10 << 24))  ' four signed bytes -> four samples
+' four signed bytes -> four samples
+debug(`Pk `($7F | $40 << 8 | $C0 << 16 | $10 << 24))
 ```
 
 The packing keywords are `LONGS_1BIT`, `LONGS_2BIT`, `LONGS_4BIT`, `LONGS_8BIT`,
@@ -128,7 +135,8 @@ horizontally — use a direction in the 4–7 group with bit 3 set, for example
 `TRACE 12`:
 
 ```spin2
-debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 RANGE $20000 HSV16X LOGSCALE)
+debug(`SPECTRO Vert SAMPLES 256 DEPTH 400 TRACE 12 ...
+       RANGE $20000 HSV16X LOGSCALE)
 ```
 
 > **Set scrolling on (`TRACE` 8–15) for a waterfall.** Values 0–7 wrap in place,
@@ -148,7 +156,8 @@ effective scroll rate in lines per second is your sample feed rate divided by
 represents.
 
 ```spin2
-debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 RANGE $80000 LUMA8X)
+debug(`SPECTRO Slow SAMPLES 2048 DEPTH 200 RATE 512 TRACE 8 ...
+       RANGE $80000 LUMA8X)
 ```
 
 `RATE` accepts **1–2048**.
@@ -229,7 +238,8 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 RATE 512 TRACE 8 LUMA8X)
+  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 ...
+         RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
   ainc  := 30_000              ' starting phase step (a low tone)
@@ -240,7 +250,7 @@ PUB main() | i, phase, ainc, sample
       sample := sine(2000, phase)
       phase += ainc            ' advance the synthesized tone
       debug(`Chirp `(sample))
-    ainc += 20_000             ' next block is a higher tone -> diagonal streak
+    ainc += 20_000  ' next block is a higher tone -> diagonal streak
     if ainc > 1_000_000
       debug(`Chirp `CLEAR)     ' wrap: clear and restart the sweep
       ainc := 30_000
@@ -268,7 +278,7 @@ feed a burst of one frequency surrounded by silence.
 ## Considerations
 
 - **Single channel.** SPECTRO analyzes one sample stream. To compare several signals
-  in the frequency domain at one instant, the FFT window (Chapter 9) overlays up to
+  in the frequency domain at one instant, the FFT window ([Chapter 9](#ch-9)) overlays up to
   eight channels; SPECTRO trades that for time history on one channel.
 - **The window is a fixed Hanning window.** You cannot select a different window
   function or set overlap. Spectral leakage is what Hanning gives you — the same as

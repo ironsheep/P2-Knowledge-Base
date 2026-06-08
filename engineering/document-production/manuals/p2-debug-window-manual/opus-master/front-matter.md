@@ -16,16 +16,16 @@
 \end{tcolorbox}
 
 \begin{center}
-\vspace{0.6cm}
+\vspace{0.4cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 Debug Window Manual\par}
 \vspace{0.3cm}
 {\Large\itshape See What Your Program Is Doing\par}
-\vspace{0.6cm}
+\vspace{0.35cm}
 {\large June 2026\par}
-\vspace{0.2cm}
+\vspace{0.15cm}
 {\large\color{blue}Version 1.0\par}
 
-\vfill
+\vspace{0.5cm}
 \begin{tcolorbox}[
   colback=gray!5,
   colframe=gray!40,
@@ -36,16 +36,17 @@
   colbacktitle=gray!15,
   coltitle=black
 ]
+{\footnotesize
 \textbf{The nine DEBUG display windows of the Propeller 2}
 
-\vspace{0.3cm}
+\vspace{0.2cm}
 \begin{minipage}[t]{0.45\textwidth}
 \textbf{Part I --- Foundation}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item The DEBUG Display Windows
 \item Getting Started
 \end{itemize}
-\vspace{0.25cm}
+\vspace{0.15cm}
 \textbf{Part II --- The Windows}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item TERM --- Text Output
@@ -66,7 +67,7 @@
 \item Packed Data
 \item Multiple Windows \& PASM
 \end{itemize}
-\vspace{0.25cm}
+\vspace{0.15cm}
 \textbf{Appendices}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Command Reference
@@ -74,9 +75,10 @@
 \item Color \& Coordinate
 \end{itemize}
 \end{minipage}
+} % end \footnotesize
 
 \end{tcolorbox}
-\vspace{0.5cm}
+\vspace{0.3cm}
 
 {\small Iron Sheep Productions, LLC\par}
 {\small P2 Knowledge Base Project\par}

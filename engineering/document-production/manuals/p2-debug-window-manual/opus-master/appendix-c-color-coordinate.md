@@ -1,4 +1,4 @@
-# Appendix C: Color and Coordinate Reference
+# Appendix C: Color and Coordinate Reference {#appendix-c}
 
 ## Color values
 

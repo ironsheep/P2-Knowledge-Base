@@ -718,6 +718,27 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 
 ---
 
+## Code Line Budget
+
+Code boxes do **not** wrap — a typeset wrap can't break a comment and re-indent it,
+nor add a language line-continuation, so over-long code lines are an authorship
+defect to fix in source, not a template concern. The `prepare-manual` line-length
+audit (`engineering/tools/validation/audit-code-line-length.py`) flags any source
+code line wider than the budget below.
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** the shared platform code-box family (`p2kb-platform-content.sty`
+  — ```` ```spin2 ```` / ```` ```pasm2 ```` colored boxes), Latin Modern Mono at the box's
+  code size with the `numbers=left` gutter. Debug Window is a **twin** that, as of the
+  2026-06-07 platform-stack migration, consumes the platform code-box stack unchanged
+  (identical page margins `left/right=1in`, `IOSPBlock left=30pt,right=10pt`, same code
+  `Verbatim`), so it **inherits the platform reference K = 76** rather than measuring its own.
+- **Provenance:** K calibrated on the layout-torture-test instrument's case-2.2 column ruler
+  (see `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget) and shared by
+  every twin on the platform stack.
+
+---
+
 ## Version Control
 
 - **Version**: 2.0 (Post-Phase 1 Update)

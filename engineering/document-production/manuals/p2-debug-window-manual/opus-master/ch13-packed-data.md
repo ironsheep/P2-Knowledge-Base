@@ -1,4 +1,4 @@
-# Chapter 13: Packed Data — Compact High-Rate Transfers
+# Chapter 13: Packed Data — Compact High-Rate Transfers {#ch-13}
 
 Every element you send to a window travels over the `DEBUG()` serial link. That
 link is finite — by default the P2 transmits debug output on pin P62 at 2 Mbaud in
@@ -83,7 +83,8 @@ A mode keyword may be followed by either or both of two optional keywords:
   often bitmap data composed in a standard pixel format.
 
 ```spin2
-debug(`SCOPE Sig SIZE 256 128 'val' LONGS_16BIT SIGNED)   ' two signed 16-bit values per long
+' two signed 16-bit values per long
+debug(`SCOPE Sig SIZE 256 128 'val' LONGS_16BIT SIGNED)
 ```
 
 ## How to send packed data
@@ -107,8 +108,9 @@ PUB main() | packed, i
   repeat
     packed := 0
     repeat i from 0 to 31
-      packed := (packed << 1) | (getrnd() & 1)   ' pack 32 one-bit samples into a long
-    debug(`Stream `(packed))                      ' send one long = 32 samples
+      ' pack 32 one-bit samples into a long
+      packed := (packed << 1) | (getrnd() & 1)
+    debug(`Stream `(packed))  ' send one long = 32 samples
     waitms(50)
 ```
 
@@ -128,8 +130,9 @@ PUB main() | packed, i, ch
   repeat
     packed := 0
     repeat i from 0 to 3
-      packed := packed | ((ch++ & $FF) << (i * 8))   ' four 8-bit values, low byte first
-    debug(`Sig `(packed))                              ' one long = 4 samples
+      ' four 8-bit values, low byte first
+      packed := packed | ((ch++ & $FF) << (i * 8))
+    debug(`Sig `(packed))  ' one long = 4 samples
     waitms(20)
 ```
 
@@ -146,9 +149,9 @@ PUB main() | row, x, packed, bit
     repeat row from 0 to 15
       packed := 0
       repeat x from 0 to 31
-        bit := ((x + row) & 3) == 0                  ' a diagonal stripe pattern
+        bit := ((x + row) & 3) == 0  ' a diagonal stripe pattern
         packed := packed | (bit << x)
-      debug(`Frame `(packed))                         ' one long = 32 pixels of one row
+      debug(`Frame `(packed))  ' one long = 32 pixels of one row
     waitms(200)
 ```
 
@@ -192,9 +195,9 @@ four-level (2-bit) bitmap uses `LONGS_2BIT` (16×).
   raw rate. It is the lever you reach for when a window can't keep up — but the
   ceiling is still the 2 Mbaud debug link.
 
-The windows that read packed data are LOGIC (Chapter 6), SCOPE (Chapter 7),
-SCOPE_XY (Chapter 8), FFT (Chapter 9), SPECTRO (Chapter 10), and BITMAP
-(Chapter 4). Each chapter shows the mode keyword in its creation-line table; this
+The windows that read packed data are LOGIC ([Chapter 6](#ch-6)), SCOPE ([Chapter 7](#ch-7)),
+SCOPE_XY ([Chapter 8](#ch-8)), FFT ([Chapter 9](#ch-9)), SPECTRO ([Chapter 10](#ch-10)), and BITMAP
+([Chapter 4](#ch-4)). Each chapter shows the mode keyword in its creation-line table; this
 chapter is the shared reference for what those keywords mean.
 
 ## Try it

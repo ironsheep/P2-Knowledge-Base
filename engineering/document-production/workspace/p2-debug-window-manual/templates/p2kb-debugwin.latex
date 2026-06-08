@@ -1,38 +1,54 @@
-% P2 Debug Window Manual - Main Template
-% Layered stack: foundation (Pandoc compat + core) + content (code coloring).
-% Chapter-based (top-level division = chapter). The cover/title page, TOC, and
-% copyright come from front-matter.md (the shared front-matter style with the
-% Parallax-approved book artwork) prepended to the body -- NOT hardcoded here --
-% so this manual matches the other P2 manuals.
-% Version: 1.1  -  Author: Iron Sheep Productions, LLC
+% P2KB Debug Window Manual LaTeX Template
+% Main template for the P2 Debug Window Manual
+% Author: Iron Sheep Productions, LLC
+% Version: 2.0  (platform-unified)
+%
+% LAYOUT: One-sided for PDF screen viewing
+% For physical print with binding, change to: twoside,openany
+%
+% Template Stack (PLATFORM-UNIFIED — see methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty - shared: geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty     - shared: code/reference box family, contmarkers, keep-together
+%   3. p2kb-debugwin-local.sty       - per-manual override (skins / local tail) — thin for this twin
+%
+% The cover/title page, TOC, and copyright come from front-matter.md (prepended to the
+% body) — NOT hardcoded here — so this manual matches the other P2 manuals.
 
-\documentclass[11pt,a4paper,oneside,english]{book}
+\documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LAYERED TEMPLATE STACK ====================
-\usepackage{p2kb-debugwin-foundation}  % Pandoc compatibility + core formatting
-\usepackage{p2kb-debugwin-content}     % Code-block coloring (Spin2 blue / PASM2 green)
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
+
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
+
+% ==================== LOAD PER-MANUAL OVERRIDE (skins / local tail) ====================
+\usepackage{p2kb-debugwin-local}
 
 % ==================== DOCUMENT METADATA ====================
-\title{$title$}
-\author{$author$}
-\date{$date$}
-\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+% These can be overridden by pandoc metadata
+\title{P2 Debug Window Manual}
+\author{Iron Sheep Productions, LLC}
+\date{June 2026}
 
-% Pandoc header-includes (syntax-highlight macros, etc.)
-$for(header-includes)$
-$header-includes$
-$endfor$
+% ==================== ADDITIONAL SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% Load multicol (used by potential two-column appendices)
+\usepackage{multicol}
 
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 
-% Front matter (cover, title, TOC, copyright) arrives first from front-matter.md.
+% Title page - no headers/footers
 \thispagestyle{empty}
+\enlargethispage{2cm}
 
-% Main content from Pandoc (front matter first, then chapters)
+% Main content from Pandoc (includes title page at beginning).
+% The back-matter Index is authored as markdown (opus-master/index.md, a
+% chapter-referenced list) and flows in with the body -- no makeindex needed.
 $body$
 
 \end{document}
-$for(include-after)$
-$include-after$
-$endfor$

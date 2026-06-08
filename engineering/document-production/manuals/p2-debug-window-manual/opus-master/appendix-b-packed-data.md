@@ -1,8 +1,8 @@
-# Appendix B: Packed-Data Format Reference
+# Appendix B: Packed-Data Format Reference {#appendix-b}
 
 Packed-data modes let one `DEBUG` call carry many small samples, multiplying the
 throughput of the debug link. You name a packing mode in a window's feed, then send
-packed longs/words/bytes; the window unpacks them. See Chapter 13 for usage.
+packed longs/words/bytes; the window unpacks them. See [Chapter 13](#ch-13) for usage.
 
 ## The twelve formats
 

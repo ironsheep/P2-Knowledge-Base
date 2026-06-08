@@ -1,4 +1,4 @@
-# Chapter 6: The LOGIC Window — Digital Waveforms
+# Chapter 6: The LOGIC Window — Digital Waveforms {#ch-6}
 
 The LOGIC window is a digital-waveform visualizer. You send it sample values; it
 renders the individual bits of those samples as stacked logic traces, the way a
@@ -17,11 +17,17 @@ You create one LOGIC window per `` DEBUG(`LOGIC ...) `` declaration, naming it a
 declaring its channels in that one statement, then feed it sample values by name.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the LOGIC window, but they
-> share one mechanism across every window type and are covered in Chapter 12. Packed
+> share one mechanism across every window type and are covered in [Chapter 12](#ch-12). Packed
 > data formats are shared across the instrument windows and are detailed in
-> Chapter 13; this chapter shows how LOGIC uses them.
+> [Chapter 13](#ch-13); this chapter shows how LOGIC uses them.
 
-![The LOGIC window showing eight channels of a binary ripple counter.](inbox/assets/fig-06-logic.png){width=95%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.95\linewidth]{inbox/assets/fig-06-logic.png}
+\caption{The LOGIC window showing eight channels of a binary ripple counter.}
+\end{figure}
+```
 
 ## Creating a LOGIC window and declaring channels
 
@@ -34,8 +40,9 @@ count, the `RANGE` keyword, and a color. There are no `CHANNELS`, `LABELS`, or
 
 ```spin2
 PUB main() | sample
-  debug(`LOGIC Bus SAMPLES 64 'CLK' $00FF00 'DATA' $FFFF00 'CS' 'WR')  ' create + declare 4 channels
-  debug(`Bus `(sample))                                                 ' feed it by name
+  ' create + declare 4 channels
+  debug(`LOGIC Bus SAMPLES 64 'CLK' $00FF00 'DATA' $FFFF00 'CS' 'WR')
+  debug(`Bus `(sample))  ' feed it by name
 ```
 
 That line creates a window named `Bus` with four single-bit channels: `CLK`
@@ -74,7 +81,7 @@ sample wider.
 Each channel element follows this form, with the optional parts in any of the
 combinations shown below:
 
-```
+```debug-config
 'label' {count} {RANGE} {color}
 ```
 
@@ -95,14 +102,15 @@ debug(`LOGIC L 'CLK')              ' one channel, bit 0, default lime
 that many consecutive single-bit channels, labeled `D 0`, `1`, `2`, …:
 
 ```spin2
-debug(`LOGIC L 'D' 8)              ' 8 single-bit channels: D 0 .. D 7, bits 0..7
+debug(`LOGIC L 'D' 8)  ' 8 single-bit channels: D 0 .. D 7, bits 0..7
 ```
 
 **A multi-bit range channel** — `RANGE` after a count makes a single channel that
 many bits wide, drawn as a waveform whose height tracks the value:
 
 ```spin2
-debug(`LOGIC L 'ADC' 8 RANGE $FF0000)   ' one 8-bit channel, value 0..255 -> height
+' one 8-bit channel, value 0..255 -> height
+debug(`LOGIC L 'ADC' 8 RANGE $FF0000)
 ```
 
 **A mix** — declare them in the order you want them stacked (channel 0 at the
@@ -181,7 +189,7 @@ PUB main() | packed, j
 
 Packing trades serial bandwidth for the work of assembling the value in your code.
 The packing system is shared across the instrument windows and described in full in
-Chapter 13. The names are `LONGS_`, `WORDS_`, and `BYTES_` followed by the bit width
+[Chapter 13](#ch-13). The names are `LONGS_`, `WORDS_`, and `BYTES_` followed by the bit width
 (`_1BIT`, `_2BIT`, `_4BIT`, `_8BIT`, `_16BIT`); there are no `PACK1`-style shortcuts
 and no run-length or compression modes.
 
@@ -192,7 +200,7 @@ redraws the trace. To stabilize the display on a repeating event, set a trigger.
 trigger watches a chosen set of channels for a specific bit pattern and aligns the
 display to the moment that pattern is matched.
 
-```
+```debug-update
 TRIGGER mask match {offset}
 ```
 
@@ -210,8 +218,10 @@ sample that does *not* match (which arms it), then fires on the next sample that
 every sample.
 
 ```spin2
-debug(`Bus TRIGGER $1 $1 32)       ' fire when channel 0 (CLK) goes high, event at sample 32
-debug(`Bus TRIGGER $3 $1 16)       ' fire when ch0=1 and ch1=0, event 16 samples from left
+' fire when channel 0 (CLK) goes high, event at sample 32
+debug(`Bus TRIGGER $1 $1 32)
+' fire when ch0=1 and ch1=0, event 16 samples from left
+debug(`Bus TRIGGER $3 $1 16)
 debug(`Bus TRIGGER 0 0)            ' disable trigger (free-running)
 ```
 
@@ -224,7 +234,7 @@ filled.
 After a trigger fires, `HOLDOFF` suppresses further triggers for a number of samples,
 so a busy or noisy signal does not re-trigger immediately:
 
-```
+```debug-update
 HOLDOFF count
 ```
 
@@ -232,7 +242,8 @@ HOLDOFF count
 for `count` samples, then re-arms.
 
 ```spin2
-debug(`Bus HOLDOFF 128)            ' after a trigger, skip 128 samples before re-arming
+' after a trigger, skip 128 samples before re-arming
+debug(`Bus HOLDOFF 128)
 ```
 
 ## Clearing and saving
@@ -246,7 +257,7 @@ Two runtime commands manage the display:
 
 ```spin2
 debug(`Bus CLEAR)                  ' empty the buffer and blank the trace
-debug(`Bus SAVE)                   ' write the current image to a bitmap file
+debug(`Bus SAVE)  ' write the current image to a bitmap file
 ```
 
 ## A complete software-only example
@@ -266,8 +277,10 @@ CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
-  debug(`SPIbus TRIGGER $1 $0 32)            ' align display to CS going low (frame start)
+  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 ...
+         'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
+  ' align display to CS going low (frame start)
+  debug(`SPIbus TRIGGER $1 $0 32)
 
   tx_byte := $A5
   repeat
@@ -282,7 +295,8 @@ PUB main() | tx_byte, i, cs, clk, mosi
     cs := 0
     emit(cs, clk, mosi)
 
-    ' clock out 8 bits, MSB first (mode 0: data set on low, sampled on rising edge)
+    ' clock out 8 bits, MSB first
+    ' (mode 0: data set on low, sampled on rising edge)
     repeat i from 7 to 0
       mosi := (tx_byte >> i) & 1
       clk := 0
@@ -298,7 +312,8 @@ PUB main() | tx_byte, i, cs, clk, mosi
     tx_byte := (tx_byte + 1) & $FF           ' next byte
 
 PRI emit(cs, clk, mosi) | s
-  s := cs | (clk << 1) | (mosi << 2)         ' pack 3 lines into bits 0,1,2 of one sample
+  ' pack 3 lines into bits 0,1,2 of one sample
+  s := cs | (clk << 1) | (mosi << 2)
   debug(`SPIbus `(s))
 ```
 
@@ -311,7 +326,8 @@ the byte value directly:
 ```spin2
 debug(`LOGIC Counter SAMPLES 256 'BYTE' 8 RANGE $00FF00)
 repeat
-  debug(`Counter `(value++ & $FF))           ' 8-bit ramp drawn as an analog-style trace
+  ' 8-bit ramp drawn as an analog-style trace
+  debug(`Counter `(value++ & $FF))
 ```
 
 ## Considerations
@@ -332,16 +348,16 @@ repeat
   re-triggering.
 - **Pack when bandwidth matters.** One long per sample is simplest; the `LONGS_`/
   `WORDS_`/`BYTES_` packing modes carry many narrow samples per transmitted value at
-  the cost of assembling that value in your code (Chapter 13).
+  the cost of assembling that value in your code ([Chapter 13](#ch-13)).
 - **`RATE` thins redraws, not samples.** A high `RATE` divisor reduces how often the
   trace repaints, lowering host load, while every sample still enters the buffer.
 - **LOGIC vs. SCOPE.** Use LOGIC for discrete digital lines and bit patterns; use
-  SCOPE (Chapter 7) for a continuously varying analog value over time. A `RANGE`
+  SCOPE ([Chapter 7](#ch-7)) for a continuously varying analog value over time. A `RANGE`
   channel bridges the two when you want a small multi-bit value shown as a stepped
   waveform alongside digital lines.
 
-> See also: Chapter 7 (SCOPE) for analog time-domain traces, Chapter 12 for `PC_KEY`
-> and `PC_MOUSE` input, and Chapter 13 for the shared packed-data formats.
+> See also: [Chapter 7](#ch-7) (SCOPE) for analog time-domain traces, [Chapter 12](#ch-12) for `PC_KEY`
+> and `PC_MOUSE` input, and [Chapter 13](#ch-13) for the shared packed-data formats.
 
 ## Try it
 

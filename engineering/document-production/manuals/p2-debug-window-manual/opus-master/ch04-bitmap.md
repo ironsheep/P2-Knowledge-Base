@@ -1,4 +1,4 @@
-# Chapter 4: The BITMAP Window — Pixel Raster
+# Chapter 4: The BITMAP Window — Pixel Raster {#ch-4}
 
 The BITMAP window is the framebuffer of the P2 debug system. You send it pixel
 values; it writes them straight into a bitmap canvas, one pixel per value, and
@@ -15,9 +15,15 @@ commands that position, scroll, clear, and save the canvas.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the BITMAP window, but they
 > share one mechanism across every window type, so they are covered together in
-> Chapter 12. This chapter is about output.
+> [Chapter 12](#ch-12). This chapter is about output.
 
-![The BITMAP window showing a CORDIC-generated plasma field.](inbox/assets/fig-04-bitmap.png){width=50%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.50\linewidth]{inbox/assets/fig-04-bitmap.png}
+\caption{The BITMAP window showing a CORDIC-generated plasma field.}
+\end{figure}
+```
 
 ## Creating a BITMAP window
 
@@ -27,7 +33,8 @@ You feed the window afterward by that name:
 
 ```spin2
 PUB main()
-  debug(`BITMAP Img SIZE 256 256 RGB24)   ' create a 256x256 true-color canvas
+  ' create a 256x256 true-color canvas
+  debug(`BITMAP Img SIZE 256 256 RGB24)
   debug(`Img `($FF0000))                  ' write one red pixel
 ```
 
@@ -127,10 +134,14 @@ entries at the first non-numeric element:
 ```spin2
 PUB main() | x, y
   ' LUT4: a 16-color palette defined inline
-  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS $000000 $202020 $400000 $004000 $000040 $404000 $004040 $400040 $808080 $C0C0C0 $FF0000 $00FF00 $0000FF $FFFF00 $00FFFF $FFFFFF)
+  debug(`BITMAP Tiles SIZE 16 16 LUT4 LUTCOLORS ...
+         $000000 $202020 $400000 $004000 ...
+         $000040 $404000 $004040 $400040 ...
+         $808080 $C0C0C0 $FF0000 $00FF00 ...
+         $0000FF $FFFF00 $00FFFF $FFFFFF)
   repeat y from 0 to 15
     repeat x from 0 to 15
-      debug(`Tiles `((x ^ y) & $0F))    ' each pixel is a 4-bit palette index
+      debug(`Tiles `((x ^ y) & $0F))  ' each pixel is a 4-bit palette index
 ```
 
 Because the pixels store palette *indices*, you can resend `LUTCOLORS` later to
@@ -346,7 +357,7 @@ sinusoids so the field drifts from one frame to the next.
   LED-matrix and pixel-art views — but it renders far more slowly than the 1:1 path,
   so keep the logical canvas small.
 - **There are no drawing primitives here.** BITMAP plots pixels only. For lines,
-  shapes, text, and sprites, use the PLOT window (Chapter 5), which shares BITMAP's
+  shapes, text, and sprites, use the PLOT window ([Chapter 5](#ch-5)), which shares BITMAP's
   color modes but adds a coordinate system and drawing commands.
 
 ## Try it

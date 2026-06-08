@@ -1,4 +1,4 @@
-# Chapter 9: The FFT Window — Frequency Spectrum
+# Chapter 9: The FFT Window — Frequency Spectrum {#ch-9}
 
 The FFT window shows you the *frequency content* of a signal. Where SCOPE plots
 a value against time — the waveform itself — FFT takes a block of samples,
@@ -19,9 +19,15 @@ size, feeding samples across one or more channels, the two amplitude controls
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the FFT window, but they
 > share one mechanism across every window type, so they are covered together in
-> Chapter 12. This chapter is about the spectrum display.
+> [Chapter 12](#ch-12). This chapter is about the spectrum display.
 
-![The FFT window showing two tones as spectral peaks.](inbox/assets/fig-09-fft.png){width=80%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.80\linewidth]{inbox/assets/fig-09-fft.png}
+\caption{The FFT window showing two tones as spectral peaks.}
+\end{figure}
+```
 
 ## What the FFT window does with your samples
 
@@ -138,7 +144,8 @@ half and one in the upper half — declare both, then interleave their samples:
 ```spin2
 PUB main() | a, b
   debug(`FFT Dual SIZE 512 256 SAMPLES 512)
-  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
+  debug(`Dual 'Left'  0 $7FFF_FFFF 128 0   1 $00FF00 ...
+         'Right' 0 $7FFF_FFFF 128 128 1 $FF7F00)
   repeat
     repeat 512
       a := qsin(20000, getct(), $1_0000)
@@ -187,7 +194,7 @@ to a frequency is a calculation you do yourself.
 If you feed the window samples at a known rate, each bin corresponds to a fixed
 frequency:
 
-```
+```formula
 frequency of bin k  =  k x (sample_rate / N)
 ```
 
@@ -311,9 +318,9 @@ Change an increment and watch the corresponding spike slide along the axis.
 
 - **FFT** — you care about *which frequencies* are present: tones, harmonics,
   resonances, noise floor.
-- **SCOPE** (Chapter 8) — you care about the *waveform over time*: shape, timing,
+- **SCOPE** ([Chapter 8](#ch-8)) — you care about the *waveform over time*: shape, timing,
   transients.
-- **SPECTRO** (Chapter 10) — you care about *how the spectrum changes over time*:
+- **SPECTRO** ([Chapter 10](#ch-10)) — you care about *how the spectrum changes over time*:
   a scrolling waterfall built from the same FFT, one column per transform.
 
 FFT and SPECTRO share the same transform and the same `SAMPLES`/`MAG`/range

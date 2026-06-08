@@ -1,4 +1,4 @@
-# Chapter 5: The PLOT Window — Vector Drawing Canvas
+# Chapter 5: The PLOT Window — Vector Drawing Canvas {#ch-5}
 
 The PLOT window is a vector drawing canvas. You move a drawing cursor around a
 2D surface and issue primitives — dots, lines, circles, ovals, rectangles,
@@ -7,8 +7,8 @@ anti-aliasing. On top of the primitives it gives you a coordinate system you can
 re-origin and flip, a polar mode, per-element opacity, eight bitmap layers you
 can composite with `CROP`, and a 256-entry sprite system. It is the window you
 reach for when you need a custom instrument face, a graph, a geometric figure,
-or any picture that is not a text grid (Chapter 3, TERM) or a raw pixel buffer
-(Chapter 4, BITMAP).
+or any picture that is not a text grid ([Chapter 3](#ch-3), TERM) or a raw pixel buffer
+([Chapter 4](#ch-4), BITMAP).
 
 You create one PLOT window per `` DEBUG(`PLOT ...) `` declaration, give it a name,
 and from then on address it by that name. This chapter covers everything the
@@ -18,7 +18,7 @@ when your drawing becomes visible.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the PLOT window — the
 > window can report the cursor position and the color under it — but that
-> mechanism is shared across every window type, so it is covered in Chapter 12.
+> mechanism is shared across every window type, so it is covered in [Chapter 12](#ch-12).
 > This chapter is about drawing.
 
 ## Creating a PLOT window
@@ -29,7 +29,7 @@ You feed the window afterward by that name:
 
 ```spin2
 PUB main()
-  debug(`PLOT Canvas SIZE 512 512)        ' create a 512x512 canvas named "Canvas"
+  debug(`PLOT Canvas SIZE 512 512)  ' create a 512x512 canvas named "Canvas"
   debug(`Canvas COLOR $00FF00 SET 256 256 DOT)   ' a green dot at the center
 ```
 
@@ -73,7 +73,7 @@ Cartesian is the default. Out of the box the origin is the top-left corner,
 **x increases rightward, and y increases downward** — the screen convention. You
 change that with `CARTESIAN`:
 
-```
+```debug-update
 CARTESIAN {flipy {flipx}}
 ```
 
@@ -89,7 +89,7 @@ Cartesian mode (from polar) without changing the flips.
 
 `ORIGIN` sets the point that coordinate (0, 0) maps to:
 
-```
+```debug-update
 ORIGIN {x y}
 ```
 
@@ -112,22 +112,23 @@ PUB main()
 
 ### SET — moving the cursor
 
-`SET` places the drawing cursor:
+`SET` places the drawing cursor. Its two arguments are required, but they take
+different names depending on the active coordinate system:
 
-```
-SET x y
+```debug-update
+SET x y          ' Cartesian: x, y
+SET rho theta    ' polar: radius, angle
 ```
 
-In Cartesian mode the two values are x and y. In polar mode they are rho (radius)
-and theta (angle) — see below. `SET` does not draw anything; it positions the
-cursor for the next primitive.
+`SET` does not draw anything; it positions the cursor for the next primitive.
+(Polar mode is covered below.)
 
 ### Polar mode
 
 `POLAR` switches the window so that the cursor's two coordinates are interpreted
 as **(rho, theta)** — radius and angle — and converted to Cartesian internally:
 
-```
+```debug-update
 POLAR {twopi {theta}}
 ```
 
@@ -158,7 +159,7 @@ Coordinates are stored internally in a fixed-point format, and by default the
 window keeps **sub-pixel precision** (1/256 of a pixel), so anti-aliased
 primitives land on exact positions. `PRECISE` toggles this:
 
-```
+```debug-update
 PRECISE
 ```
 
@@ -180,7 +181,7 @@ to the window's current line size and opacity.
 
 ### DOT — a dot at the cursor
 
-```
+```debug-update
 DOT {linesize {opacity}}
 ```
 
@@ -190,12 +191,13 @@ DOT {linesize {opacity}}
 `DOT` draws at the cursor and **does not move it**.
 
 ```spin2
-debug(`Canvas COLOR $0000FF SET 100 100 DOT 10 128)  ' semi-transparent blue dot
+' semi-transparent blue dot
+debug(`Canvas COLOR $0000FF SET 100 100 DOT 10 128)
 ```
 
 ### LINE — a line to a new point
 
-```
+```debug-update
 LINE x y {linesize {opacity}}
 ```
 
@@ -215,7 +217,7 @@ PUB main()
 
 ### CIRCLE — a circle centered on the cursor
 
-```
+```debug-update
 CIRCLE width {linesize {opacity}}
 ```
 
@@ -232,7 +234,7 @@ debug(`Canvas CIRCLE 120 5 255)    ' red ring, diameter 120, 5-pixel outline
 
 ### OVAL — an ellipse centered on the cursor
 
-```
+```debug-update
 OVAL width height {linesize {opacity}}
 ```
 
@@ -240,12 +242,13 @@ OVAL width height {linesize {opacity}}
 `opacity` behave as for `CIRCLE` (`0` linesize fills).
 
 ```spin2
-debug(`Canvas COLOR $00FF00 SET 256 256 OVAL 200 100 0 255)   ' filled ellipse
+' filled ellipse
+debug(`Canvas COLOR $00FF00 SET 256 256 OVAL 200 100 0 255)
 ```
 
 ### BOX — a rectangle centered on the cursor
 
-```
+```debug-update
 BOX width height {linesize {opacity}}
 ```
 
@@ -253,13 +256,13 @@ BOX width height {linesize {opacity}}
 than zero outlines. The rectangle is centered on the cursor.
 
 ```spin2
-debug(`Canvas COLOR $0000FF SET 100 100 BOX 80 60 0 255)   ' filled rectangle
-debug(`Canvas BOX 90 70 3 128)                             ' outline, thickness 3
+debug(`Canvas COLOR $0000FF SET 100 100 BOX 80 60 0 255)  ' filled rectangle
+debug(`Canvas BOX 90 70 3 128)  ' outline, thickness 3
 ```
 
 ### OBOX — a rounded rectangle centered on the cursor
 
-```
+```debug-update
 OBOX width height xradius yradius {linesize {opacity}}
 ```
 
@@ -275,7 +278,7 @@ debug(`Canvas OBOX 120 100 15 15 4 200)   ' outline, thickness 4
 
 ### TEXT — a string at the cursor
 
-```
+```debug-update
 TEXT {size {style {angle}}} 'string'
 ```
 
@@ -294,7 +297,8 @@ PUB main()
   debug(`Labels COLOR $000000 SET 300 200)
   debug(`Labels TEXT 'Default')           ' size 14 (the window default)
   debug(`Labels TEXT 20 'Bigger')         ' size 20
-  debug(`Labels TEXT 16 $02 90 'Rotated') ' size 16, bold, rotated 90 degrees
+  ' size 16, bold, rotated 90 degrees
+  debug(`Labels TEXT 16 $02 90 'Rotated')
 ```
 
 The `style` byte packs weight, italic, underline, and alignment into one value:
@@ -319,7 +323,7 @@ default you set.
 The PLOT window draws in 24-bit RGB. You set the active drawing color with
 `COLOR`:
 
-```
+```debug-update
 COLOR rgb
 ```
 
@@ -334,7 +338,7 @@ with. It is most often set on the creation line.
 `OPACITY` sets the default alpha applied to primitives that do not specify their
 own:
 
-```
+```debug-update
 OPACITY byte
 ```
 
@@ -347,8 +351,8 @@ overrides this default for that one primitive.
 PUB main()
   debug(`PLOT Blend SIZE 512 512 BACKCOLOR $000000)
   debug(`Blend COLOR $FF0000 OPACITY 128)        ' default to 50% opacity
-  debug(`Blend SET 128 128 BOX 100 100 0 255)    ' this box overrides: opaque
-  debug(`Blend SET 180 128 BOX 100 100)          ' this box uses the 128 default
+  debug(`Blend SET 128 128 BOX 100 100 0 255)  ' this box overrides: opaque
+  debug(`Blend SET 180 128 BOX 100 100)  ' this box uses the 128 default
 ```
 
 `LINESIZE size` sets the default line/dot thickness used when `DOT` and `LINE`
@@ -363,7 +367,7 @@ sprite with a single command, which avoids re-issuing the geometry that built it
 
 ### LAYER — load a bitmap into a layer
 
-```
+```debug-update
 LAYER layer 'filename.bmp'
 ```
 
@@ -383,7 +387,7 @@ host-side.
 
 `CROP` copies pixels from a loaded layer onto the main canvas. It has three forms:
 
-```
+```debug-update
 CROP layer
 CROP layer AUTO x y
 CROP layer left top width height {x y}
@@ -405,7 +409,7 @@ once and then stamp anywhere, at any of eight orientations and any scale.
 
 `SPRITEDEF` defines one:
 
-```
+```debug-update
 SPRITEDEF id xsize ysize pixels... colors...
 ```
 
@@ -417,7 +421,7 @@ SPRITEDEF id xsize ysize pixels... colors...
 
 `SPRITE` stamps a defined sprite at the cursor:
 
-```
+```debug-update
 SPRITE id {orientation {scale {opacity}}}
 ```
 
@@ -434,10 +438,11 @@ PUB main()
   debug(`PLOT Scene SIZE 512 512 BACKCOLOR $000000 UPDATE)
   debug(`Scene CLEAR)
   debug(`Scene LAYER 1 'background.bmp')          ' host-supplied artwork
-  debug(`Scene CROP 1)                            ' composite full background
-  debug(`Scene SPRITEDEF 0 2 2 0 1 1 0 $00000000 $FFFFFFFF)   ' tiny 2x2 sprite
+  debug(`Scene CROP 1)  ' composite full background
+  ' tiny 2x2 sprite
+  debug(`Scene SPRITEDEF 0 2 2 0 1 1 0 $00000000 $FFFFFFFF)
   debug(`Scene SET 256 256 SPRITE 0 0 8 255)      ' stamp it, 8x scale
-  debug(`Scene UPDATE)                            ' present the buffered frame
+  debug(`Scene UPDATE)  ' present the buffered frame
 ```
 
 > **Layers are indexed 1–8.** A common error is using layer 0; the lowest valid
@@ -446,7 +451,13 @@ PUB main()
 
 ### Animating with a sprite
 
-![A sprite stamped at several scales in the PLOT window.](inbox/assets/fig-05-plot-sprite.png){width=50%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.50\linewidth]{inbox/assets/fig-05-plot-sprite.png}
+\caption{A sprite stamped at several scales in the PLOT window.}
+\end{figure}
+```
 
 Re-stamping a sprite is cheaper than re-drawing the geometry that produced it. Define
 the shape once with `SPRITEDEF`, then each frame issue a single `SPRITE` command at the
@@ -459,13 +470,15 @@ CON _clkfreq = 200_000_000
 PUB main() | x
   debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
   ' Define a 3x3 "blip" sprite once: index 1 = lit, index 0 = transparent.
-  ' Palette: entry 0 = transparent ($00......), entry 1 = opaque cyan ($FF00FFFF).
+  ' Palette: entry 0 = transparent ($00......),
+  ' entry 1 = opaque cyan ($FF00FFFF).
   debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
 
   x := 0
   repeat
-    debug(`Field CLEAR)                           ' clear the buffered canvas
-    debug(`Field SET `(x) 128 SPRITE 0 0 8 255)   ' stamp the sprite at (x,128), 8x
+    debug(`Field CLEAR)  ' clear the buffered canvas
+    ' stamp the sprite at (x,128), 8x
+    debug(`Field SET `(x) 128 SPRITE 0 0 8 255)
     debug(`Field UPDATE)                          ' present the frame
     x := (x + 4) +// 256                          ' move right, wrap
     waitms(20)
@@ -495,9 +508,9 @@ PUB main() | f, ballx
   debug(`PLOT Anim SIZE 512 256 BACKCOLOR $000000 UPDATE)   ' buffered
   ballx := 0
   repeat f from 0 to 200
-    debug(`Anim CLEAR)                                       ' erase (off-screen)
+    debug(`Anim CLEAR)  ' erase (off-screen)
     debug(`Anim COLOR $FFFF00 SET `(ballx) 128 CIRCLE 30 0 255)
-    debug(`Anim UPDATE)                                      ' present one frame
+    debug(`Anim UPDATE)  ' present one frame
     ballx := (ballx + 4) +// 512
     waitms(20)
 ```
@@ -541,7 +554,8 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave LINE 511 0 1 255)
 
   ' One cycle of a CORDIC sine wave, drawn as a connected polyline.
-  ' angle sweeps the full circle ($0000_0000..$FFFF_FFFF) across 512 columns.
+  ' angle sweeps the full circle ($0000_0000..$FFFF_FFFF)
+  ' across 512 columns.
   debug(`Wave COLOR $00FF00)
   debug(`Wave SET 0 0)
   repeat x from 0 to 511
@@ -565,13 +579,13 @@ PUB main() | x, y, angle, i, sx, sy
 PRI sine(angle, length) : result
   org
               setq      #0                        ' Y coordinate = 0
-              qrotate   length, angle             ' rotate (length, 0) by angle
-              getqy     result                    ' result = length * sin(angle)
+              qrotate   length, angle  ' rotate (length, 0) by angle
+              getqy     result  ' result = length * sin(angle)
   end
 
 PRI rnd() : r
   org
-              getrnd    r                         ' 32-bit hardware random value
+              getrnd    r  ' 32-bit hardware random value
   end
 ```
 
@@ -583,7 +597,13 @@ PASM so the example builds and runs on a bare P2 board.
 
 ## A worked instrument: an analog gauge
 
-![An analog gauge drawn in the PLOT window using polar coordinates.](inbox/assets/fig-05-plot-gauge.png){width=55%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.55\linewidth]{inbox/assets/fig-05-plot-gauge.png}
+\caption{An analog gauge drawn in the PLOT window using polar coordinates.}
+\end{figure}
+```
 
 Polar mode turns an instrument needle into a single `LINE`. Center the origin,
 switch to polar so the cursor's coordinates are (radius, angle), and the needle for
@@ -599,11 +619,11 @@ PUB main() | ang, value, needle, i, tick
   ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
   debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
   debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
-  debug(`Gauge POLAR 360)                 ' angles in degrees; theta 0 points up
+  debug(`Gauge POLAR 360)  ' angles in degrees; theta 0 points up
 
   ang := 0
   repeat
-    value  := 50 + qsin(50, ang, 360)     ' software-generated 0..100 reading
+    value  := 50 + qsin(50, ang, 360)  ' software-generated 0..100 reading
     needle := (value * 240 / 100) - 120   ' map 0..100 -> -120..+120 degrees
 
     debug(`Gauge CLEAR)

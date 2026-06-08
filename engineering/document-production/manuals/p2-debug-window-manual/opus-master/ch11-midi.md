@@ -1,4 +1,4 @@
-# Chapter 11: The MIDI Window — Piano-Keyboard Display
+# Chapter 11: The MIDI Window — Piano-Keyboard Display {#ch-11}
 
 The MIDI window draws an on-screen piano keyboard and lights its keys in
 response to MIDI note messages. You feed it raw MIDI bytes — the same Note-On
@@ -16,9 +16,15 @@ chapter runs on a bare P2 with no external MIDI hardware.
 
 > Keyboard and mouse input (`PC_KEY`, `PC_MOUSE`) work in the MIDI window as in
 > every other window. They share one mechanism across all window types, so they
-> are covered together in Chapter 12. This chapter is about the keyboard display.
+> are covered together in [Chapter 12](#ch-12). This chapter is about the keyboard display.
 
-![The MIDI window showing notes lit on a piano keyboard.](inbox/assets/fig-11-midi.png){width=100%}
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=\linewidth]{inbox/assets/fig-11-midi.png}
+\caption{The MIDI window showing notes lit on a piano keyboard.}
+\end{figure}
+```
 
 ## Creating a MIDI window
 
@@ -28,7 +34,7 @@ choose. You feed the window afterward by that name:
 
 ```spin2
 debug(`MIDI Piano SIZE 6 RANGE 48 84 CHANNEL 0)   ' create, named "Piano"
-debug(`Piano $90 60 96)                            ' feed it by name: note-on
+debug(`Piano $90 60 96)  ' feed it by name: note-on
 ```
 
 The configuration keywords you can add to the creation line:
@@ -173,7 +179,8 @@ PUB main() | i, note
     waitms(60)
 
   ' --- C major chord via running status: one $90, then note/vel pairs ---
-  debug(`Piano $90 60 80 64 80 67 80)  ' C E G, all velocity 80, held together
+  ' C E G, all velocity 80, held together
+  debug(`Piano $90 60 80 64 80 67 80)
   waitms(1000)
   debug(`Piano $80 60 0 64 0 67 0)     ' release all three (running status)
   waitms(300)
@@ -244,4 +251,4 @@ velocity on the bass note to confirm the lit fill tracks velocity from the botto
 up.
 
 > **See also.** Keyboard and mouse input in any window, including this one, is
-> covered in Chapter 12.
+> covered in [Chapter 12](#ch-12).

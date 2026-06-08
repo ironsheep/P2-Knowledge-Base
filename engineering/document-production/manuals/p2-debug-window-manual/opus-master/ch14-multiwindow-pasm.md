@@ -1,4 +1,4 @@
-# Chapter 14: Multiple Windows and PASM Debugging
+# Chapter 14: Multiple Windows and PASM Debugging {#ch-14}
 
 Up to this point each chapter has driven a single window. Real debugging rarely
 stays that simple: you want a SCOPE showing a waveform *and* a TERM panel printing
@@ -91,14 +91,15 @@ statement that fans out to multiple windows; you write the second feed yourself.
 
 ```spin2
 debug(`Wave `(sine))                    ' the SCOPE gets the sample
-debug(`Status "now: " `sdec_(sine) 13)  ' the TERM gets the same value, formatted
+' the TERM gets the same value, formatted
+debug(`Status "now: " `sdec_(sine) 13)
 ```
 
 > **What does not exist.** There is no `TIMESTAMP`, `OVERLAY`, `ALL_WINDOWS`,
 > `SYNC_GROUP`, `TRIGGER EXTERNAL`, or broadcast command, and no command that makes
 > one window transparent over another. If you need timestamps in a log, format
 > `GETCT()` yourself into a TERM feed; if you need two signals compared, put them on
-> two channels of one SCOPE (Chapter 7) or use SCOPE_XY (Chapter 8). Coordination
+> two channels of one SCOPE ([Chapter 7](#ch-7)) or use SCOPE_XY ([Chapter 8](#ch-8)). Coordination
 > lives in your code.
 
 > A separate, application-wide timestamp facility does exist: defining the
@@ -127,7 +128,7 @@ CON
   _clkfreq = 200_000_000
 
 PUB main()
-  coginit(COGEXEC_NEW, @blink, 0)        ' launch the PASM program in its own cog
+  coginit(COGEXEC_NEW, @blink, 0)  ' launch the PASM program in its own cog
   repeat                                  ' keep the Spin2 cog alive
 
 DAT
@@ -137,7 +138,8 @@ blink
 .loop
               add       value, #4        ' advance a software ramp
               and       value, #$FF
-              debug(`Wave `(value))      ' feed the window with the register's value
+              ' feed the window with the register's value
+              debug(`Wave `(value))
               waitx     ##2_000_000
               jmp       #.loop
 
@@ -190,7 +192,7 @@ PUB main() | x
 ```
 
 > **Pointers differ between Spin2 and PASM.** The interactive commands `PC_KEY` and
-> `PC_MOUSE` (Chapter 12) take a pointer to a result buffer. In Spin2 that buffer is
+> `PC_MOUSE` ([Chapter 12](#ch-12)) take a pointer to a result buffer. In Spin2 that buffer is
 > in hub, passed as `@key`; in PASM it must be a **cog register**, passed as `#key`.
 > This is the one place the language changes the call, and it applies only to those
 > input commands, not to the value formatters.
@@ -216,7 +218,7 @@ PUB main() | x
 
 - **For high-rate data, pack it rather than sending faster.** When a single window
   needs more samples than the link comfortably carries one-at-a-time, the packed-data
-  formats (Chapter 13) move many samples per `DEBUG` packet, which is the right tool
+  formats ([Chapter 13](#ch-13)) move many samples per `DEBUG` packet, which is the right tool
   before you reach for a faster loop.
 
 - **There is no chip-side screenshot or export.** No `DEBUG` command captures the
@@ -262,11 +264,12 @@ PUB main() | ang, signal, peak, count
     if abs signal > peak
       peak := abs signal                   ' track the running peak
 
-    ' Coordination is nothing more than feeding both windows in the same loop:
+    ' Coordination is nothing more than feeding both windows
+    ' in the same loop:
     debug(`Trace `(signal))                ' one sample to the SCOPE
     debug(`Panel 0 "Samples: " `udec_(count) 13 ...
           "Current: " `sdec_(signal) 13 ...
-          "Peak:    " `udec_(peak) 13)     ' a fresh status block to the TERM
+          "Peak:    " `udec_(peak) 13)  ' a fresh status block to the TERM
 
     ang   += 4
     count += 1

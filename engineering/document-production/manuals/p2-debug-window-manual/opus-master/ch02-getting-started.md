@@ -1,4 +1,4 @@
-# Chapter 2: Getting Started
+# Chapter 2: Getting Started {#ch-2}
 
 This chapter takes you from a `.spin2` source file to a live DEBUG display
 window on your screen. The path is short: compile with debugging enabled, run the
@@ -26,7 +26,7 @@ compiler strips every `DEBUG()` statement, so a release build carries no debuggi
 overhead. To keep the DEBUG statements — and the display windows they drive — you
 compile with the `-d` flag:
 
-```
+```command
 pnut_ts -d myprogram.spin2
 ```
 
@@ -56,7 +56,7 @@ Here is a complete program that opens a text window and prints a value:
 CON _clkfreq = 200_000_000
 
 PUB main() | reading
-  debug(`TERM Status SIZE 30 5)        ' create a 30x5 text window named "Status"
+  debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
   reading := 42
   debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
 ```
@@ -157,9 +157,10 @@ PUB main()
 You now have the loop that every chapter relies on: compile with `-d`, run from
 `pnut_term_ts`, address a window by the name you gave it. From here:
 
-- **Chapter 3 — TERM** covers the text window in full: cursor positioning, command
+- **[Chapter 3](#ch-3) — TERM** covers the text window in full: cursor positioning, command
   codes, color pairs, and buffered updates. Start there if you are new to the
   display windows.
-- The graphical windows each have their own chapter — **BITMAP** (4), **PLOT** (5),
-  **LOGIC** (6), **SCOPE** (7), **SCOPE_XY** (8), **FFT** (9), **SPECTRO** (10), and
-  **MIDI** (11). Each follows the same create-then-feed pattern shown here.
+- The graphical windows each have their own chapter — **BITMAP** ([Ch 4](#ch-4)),
+  **PLOT** ([Ch 5](#ch-5)), **LOGIC** ([Ch 6](#ch-6)), **SCOPE** ([Ch 7](#ch-7)),
+  **SCOPE_XY** ([Ch 8](#ch-8)), **FFT** ([Ch 9](#ch-9)), **SPECTRO** ([Ch 10](#ch-10)),
+  and **MIDI** ([Ch 11](#ch-11)). Each follows the same create-then-feed pattern shown here.
