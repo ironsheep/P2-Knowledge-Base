@@ -1,0 +1,29 @@
+'' fig-04-bitmap.spin2  ->  fig-04-bitmap.png
+'' BITMAP window, full-color plasma painted one full pass (Chapter 4).
+'' Buffered (UPDATE) so the captured frame is whole. See README.md.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | x, y, v
+  ' 128x128 true-color canvas, manual update for a flicker-free frame
+  debug(`BITMAP Plasma SIZE 128 128 RGB24 UPDATE)
+  debug(`Plasma `CLEAR)
+
+  ' one full pass paints every pixel (TRACE 0: left-to-right, top-down)
+  repeat y from 0 to 127
+    repeat x from 0 to 127
+      v := plasma(x, y, 64)                 ' fixed frame 64 for determinism
+      debug(`Plasma `(v))
+  debug(`Plasma `UPDATE)
+
+  waitms(200)
+  debug(`Plasma SAVE WINDOW 'fig-04-bitmap')
+  repeat
+
+PRI plasma(x, y, t) : rgb | r, g, b
+  ' two CORDIC sinusoids drive R and G; their sum drives B. All 0..255.
+  r := (qsin(127, x*3 + t, 256) + 128) & $FF
+  g := (qsin(127, y*3 - t, 256) + 128) & $FF
+  b := (qsin(127, (x+y)*2 + t, 256) + 128) & $FF
+  rgb := (r << 16) | (g << 8) | b

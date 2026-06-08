@@ -1,0 +1,15 @@
+'' fig-03-term-first.spin2  ->  fig-03-term-first.png
+'' TERM window, the simplest first terminal (Chapter 3).
+'' Run on a P2; the host writes fig-03-term-first.bmp. See README.md.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  ' create a 40x20 terminal named "Status" and print one line
+  debug(`TERM Status SIZE 40 20)
+  debug(`Status "Ready.")
+
+  waitms(200)                               ' let the host render the frame
+  debug(`Status SAVE WINDOW 'fig-03-term-first')   ' -> fig-03-term-first.bmp
+  repeat                                     ' hold the window open

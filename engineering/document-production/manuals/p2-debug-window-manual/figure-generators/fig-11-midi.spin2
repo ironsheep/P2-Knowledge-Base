@@ -1,0 +1,27 @@
+'' fig-11-midi.spin2  ->  fig-11-midi.png
+'' MIDI window, a piano keyboard (Chapter 11).
+'' Plays a C-major scale, then holds a C-major chord and captures it lit.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | i, note
+  debug(`MIDI Piano SIZE 6 RANGE 48 84 CHANNEL 0)
+
+  ' play a C-major scale, one note at a time (visual warm-up)
+  repeat i from 0 to 6
+    note := word[@scale][i]
+    debug(`Piano $90 `(note) 96)             ' note-on,  velocity 96
+    waitms(150)
+    debug(`Piano $80 `(note) 0)              ' note-off
+
+  ' hold a C-major chord (C E G) via running status, then capture it lit
+  debug(`Piano $90 60 80 64 80 67 80)
+  waitms(300)
+  debug(`Piano SAVE WINDOW 'fig-11-midi')
+  waitms(700)
+  debug(`Piano $80 60 0 64 0 67 0)           ' release all three
+  repeat
+
+DAT
+scale word 60, 62, 64, 65, 67, 69, 71        ' C D E F G A B

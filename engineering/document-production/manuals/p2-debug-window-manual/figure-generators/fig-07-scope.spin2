@@ -1,0 +1,18 @@
+'' fig-07-scope.spin2  ->  fig-07-scope.png
+'' SCOPE window, one auto-ranging channel showing a sine wave (Chapter 7).
+'' Feeds ~1000 samples to draw a full trace, then captures.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, i
+  debug(`SCOPE Sig SIZE 400 200 'Wave' AUTO)
+
+  ang := 0
+  repeat i from 0 to 999
+    debug(`Sig `(qsin(1000, ang, 256)))      ' CORDIC sine, period 256
+    ang += 4
+
+  waitms(200)
+  debug(`Sig SAVE WINDOW 'fig-07-scope')
+  repeat

@@ -1,0 +1,26 @@
+'' fig-03-term-dashboard.spin2  ->  fig-03-term-dashboard.png
+'' TERM window, a fixed-layout status panel (Chapter 3).
+'' Draws the static layout + one set of values, then captures. See README.md.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | signal, count
+  debug(`TERM Panel SIZE 40 8)
+
+  ' static layout: title + three fixed labels
+  debug(`Panel 0 4 "SIGNAL MONITOR")        ' clear, pair 0, title at (0,0)
+  debug(`Panel 3 2 2 0 "Sample:")           ' row 2, col 0
+  debug(`Panel 3 3 2 0 "Value :")           ' row 3, col 0
+  debug(`Panel 3 4 2 0 "State :")           ' row 4, col 0
+
+  ' one representative set of values (fixed, for a stable capture)
+  count  := 42
+  signal := 920
+  debug(`Panel 3 2 2 8 `udec_(count) "    ")
+  debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
+  debug(`Panel 3 4 2 8 7 "HIGH " 4)         ' pair 3 (red), back to pair 0
+
+  waitms(200)
+  debug(`Panel SAVE WINDOW 'fig-03-term-dashboard')
+  repeat

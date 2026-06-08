@@ -1,0 +1,47 @@
+'' fig-06-logic.spin2  ->  fig-06-logic.png
+'' LOGIC window, software-SPI bus traffic (Chapter 6).
+'' Feeds ~10 bytes to fill the 200-sample window, then captures.
+
+CON
+  _clkfreq = 100_000_000
+
+PUB main() | tx_byte, i, cs, clk, mosi, b
+  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
+  debug(`SPIbus TRIGGER $1 $0 32)           ' align to CS going low
+
+  tx_byte := $A5
+  repeat b from 0 to 9                       ' ~10 bytes fills the window
+    ' idle: CS high, CLK low
+    cs := 1
+    clk := 0
+    mosi := 0
+    emit(cs, clk, mosi)
+    emit(cs, clk, mosi)
+
+    ' start frame: assert CS low
+    cs := 0
+    emit(cs, clk, mosi)
+
+    ' clock out 8 bits, MSB first (mode 0)
+    repeat i from 7 to 0
+      mosi := (tx_byte >> i) & 1
+      clk := 0
+      emit(cs, clk, mosi)                    ' present data, clock low
+      clk := 1
+      emit(cs, clk, mosi)                    ' rising edge
+
+    ' end frame: release CS
+    clk := 0
+    cs := 1
+    emit(cs, clk, mosi)
+
+    tx_byte := (tx_byte + 1) & $FF           ' next byte
+
+  waitms(200)
+  debug(`SPIbus SAVE WINDOW 'fig-06-logic')
+  repeat
+
+PRI emit(cs, clk, mosi) | s
+  ' pack the three lines into bits 0,1,2 of one sample
+  s := cs | (clk << 1) | (mosi << 2)
+  debug(`SPIbus `(s))

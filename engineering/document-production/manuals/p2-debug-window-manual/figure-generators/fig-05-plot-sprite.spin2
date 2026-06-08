@@ -1,0 +1,24 @@
+'' fig-05-plot-sprite.spin2  ->  fig-05-plot-sprite.png
+'' PLOT window, sprite blitting from an INLINE sprite definition (Chapter 5).
+'' Self-contained: no host .bmp art needed (SPRITEDEF defines the sprite).
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
+
+  ' a 3x3 "blip": index 1 = lit, index 0 = transparent.
+  ' palette: entry 0 = transparent ($00......), entry 1 = opaque cyan.
+  debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
+
+  debug(`Field CLEAR)
+  ' stamp the sprite three times across the canvas, 8x scale
+  debug(`Field SET 64 128 SPRITE 0 0 8 255)
+  debug(`Field SET 128 128 SPRITE 0 0 8 255)
+  debug(`Field SET 192 128 SPRITE 0 0 8 255)
+  debug(`Field UPDATE)
+
+  waitms(200)
+  debug(`Field SAVE WINDOW 'fig-05-plot-sprite')
+  repeat

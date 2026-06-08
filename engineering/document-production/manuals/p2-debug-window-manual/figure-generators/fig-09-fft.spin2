@@ -1,0 +1,29 @@
+'' fig-09-fft.spin2  ->  fig-09-fft.png
+'' FFT window, log-amplitude spectrum of a three-tone signal (Chapter 9).
+'' Feeds one full 1024-sample buffer, then captures.
+
+CON
+  _clkfreq = 180_000_000
+  N        = 1024                            ' FFT size
+
+PUB main() | p1, p2, p3, s, i
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE)
+  ' one channel: label, MAG=0, full scale, 256 tall, baseline 0, grid, green
+  debug(`Spectrum 'Signal' 0 $7FFF_FFFF 256 0 1 $00FF00)
+
+  p1 := 0                                    ' phase accumulators
+  p2 := 0
+  p3 := 0
+  repeat i from 1 to N                       ' one full FFT buffer
+    s :=  qsin(20000, p1, $1_0000)           ' tone 1
+    s += qsin(12000, p2, $1_0000)            ' tone 2
+    s += qsin( 6000, p3, $1_0000)            ' tone 3
+    s += (getrnd() & $FFF) - $800            ' +/- noise
+    debug(`Spectrum `(s))
+    p1 += $0080_0000
+    p2 += $0140_0000
+    p3 += $0300_0000
+
+  waitms(200)
+  debug(`Spectrum SAVE WINDOW 'fig-09-fft')
+  repeat

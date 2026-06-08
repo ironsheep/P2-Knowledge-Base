@@ -1,0 +1,20 @@
+'' fig-08-scope-xy.spin2  ->  fig-08-scope-xy.png
+'' SCOPE_XY window, a Lissajous figure (Chapter 8).
+'' SAMPLES 0 = persistent, so the full curve accumulates before capture.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | a, x, y, i
+  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 'XY')
+
+  a := 0
+  repeat i from 0 to 1999
+    x := qsin(900, a*3, 1024)               ' 3:2 frequency ratio
+    y := qsin(900, a*2 + 256, 1024)         ' +256 = quarter-period phase
+    debug(`Lissajous `(x, y))
+    a += 1
+
+  waitms(200)
+  debug(`Lissajous SAVE WINDOW 'fig-08-scope-xy')
+  repeat

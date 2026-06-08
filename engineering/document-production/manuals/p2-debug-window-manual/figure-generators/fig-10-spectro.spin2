@@ -1,0 +1,30 @@
+'' fig-10-spectro.spin2  ->  fig-10-spectro.png
+'' SPECTRO window, a rising-tone chirp waterfall (Chapter 10).
+'' Feeds 48 blocks of an upward sweep to fill the history, then captures.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | i, phase, ainc, sample
+  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 RATE 512 TRACE 8 LUMA8X)
+
+  phase := 0
+  ainc  := 30_000                            ' starting phase step (low tone)
+
+  repeat 48                                  ' 48 blocks -> a diagonal streak
+    repeat i from 1 to 512                    ' one FFT window of samples
+      sample := sine(2000, phase)
+      phase += ainc
+      debug(`Chirp `(sample))
+    ainc += 20_000                           ' next block: a higher tone
+
+  waitms(200)
+  debug(`Chirp SAVE WINDOW 'fig-10-spectro')
+  repeat
+
+PRI sine(amp, angle) : y
+  ' amp * sin(angle) via the CORDIC; angle spans one full circle.
+  org
+    qrotate amp, angle
+    getqy   y
+  end
