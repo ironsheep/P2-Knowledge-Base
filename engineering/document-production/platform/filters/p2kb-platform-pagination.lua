@@ -75,7 +75,24 @@ function Header(header)
           '\\renewcommand{\\thechapter}{\\Alph{chapter}}\\setcounter{chapter}{' .. idx .. '}\\setcounter{figure}{0}'))
       end
 
+      -- Split a "Title — Subtitle" chapter heading: the Title stays on the
+      -- \chapter (so the TOC + running head carry the window name only); the
+      -- Subtitle renders just under it via \chaptersubtitle (foundation macro).
+      -- Numbered chapters only; " — " is space + em-dash (U+2014, bytes
+      -- \226\128\148) + space = 5 bytes.
+      local subtitle = nil
+      if cnum then
+        local sep = title:find(" \226\128\148 ", 1, true)
+        if sep then
+          header.content = { pandoc.Str(title:sub(1, sep - 1)) }
+          subtitle = title:sub(sep + 5)
+        end
+      end
+
       table.insert(blocks, header)
+      if subtitle then
+        table.insert(blocks, pandoc.RawBlock('latex', '\\chaptersubtitle{' .. subtitle .. '}'))
+      end
       return blocks
     end
   end

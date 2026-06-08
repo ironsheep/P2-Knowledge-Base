@@ -149,6 +149,19 @@
   {}
 \titlespacing*{\chapter}{0pt}{-38pt}{15pt}  % Adjusted: -38pt gives ~12pt below header rule
 
+% Chapter subtitle / deck: a lighter, smaller descriptor under the chapter title.
+% Emitted by the pagination filter when a chapter heading is "Title — Subtitle":
+% the Title stays the \chapter (so TOC + running head carry the window name only);
+% the Subtitle renders here. Roman, medium weight, sub-chapter size, lightly
+% greyed — deliberately quieter than the \Huge\bfseries title so it reads as a
+% deck, not a second heading. The negative \vspace cancels the chapter's 15pt
+% bottom gap so the subtitle sits close under the title.
+\newcommand{\chaptersubtitle}[1]{%
+  \vspace{-12pt}%
+  {\noindent\raggedright\LARGE\normalfont\mdseries\color{black!58}#1\par}%
+  \vspace{8pt}%
+}
+
 \titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{4pt plus 1pt minus 1pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
 \titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}

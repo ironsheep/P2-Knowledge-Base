@@ -430,20 +430,41 @@ function CodeBlock(cb)
   -- Line numbers ONLY when multi-line (single-line forms read cleaner without
   -- a "1" gutter). Content is shown verbatim (KB-sourced, already uppercased).
   elseif classes:includes("spin-syntax") or classes:includes("syntax")
-         or classes:includes("pasm-syntax") then
+         or classes:includes("pasm-syntax") or classes:includes("debug-syntax")
+         or classes:includes("debug-config") or classes:includes("debug-update") then
     local txt = cb.text:gsub("%s+$", "")
-    -- Bar color + enclosed title encode language: Spin2 = blue, PASM2 = green.
-    -- The title is a small bold label inside the bar (relocates the section
-    -- heading into the block), making the bar self-documenting.
-    local is_spin = classes:includes("spin-syntax")
-    local barcolor = is_spin and 'iosp-spin2-border' or 'iosp-pasm2-border'
-    local title = is_spin and 'Spin2 Syntax' or 'PASM2 Syntax'
+    -- Bar color + enclosed title encode the syntax dialect / DEBUG-directive phase.
+    -- The title is a SMALL, quiet bold tag (\footnotesize) so the directive itself
+    -- stays the prominent thing, not its label:
+    --   spin-syntax                  -> blue,  "Spin2 Syntax"
+    --   debug-config                 -> blue,  "Configuration Directive" (DEBUG
+    --                                   window Configuration phase, XXX_Configure:
+    --                                   creation-line setup directives)
+    --   debug-update / debug-syntax  -> blue,  "Update Directive" (DEBUG window
+    --                                   Update phase, XXX_Update: directives sent
+    --                                   after creation, incl. data feeds + CLEAR/SAVE)
+    --   syntax / pasm-syntax         -> green, "PASM2 Syntax"
+    local is_debug = classes:includes("debug-config") or classes:includes("debug-update")
+                     or classes:includes("debug-syntax")
+    local barcolor, title
+    if classes:includes("spin-syntax") then
+      barcolor, title = 'iosp-spin2-border', 'Spin2 Syntax'
+    elseif classes:includes("debug-config") then
+      barcolor, title = 'iosp-spin2-border', 'Configuration Directive'
+    elseif classes:includes("debug-update") or classes:includes("debug-syntax") then
+      barcolor, title = 'iosp-spin2-border', 'Update Directive'
+    else
+      barcolor, title = 'iosp-pasm2-border', 'PASM2 Syntax'
+    end
+    -- Syntax forms read cleaner without a line-number gutter. DEBUG directive forms
+    -- never get numbers (a directive may show 2 variant lines, e.g. SET Cartesian /
+    -- polar); other syntax forms keep numbers only when genuinely multi-line.
     local multiline = txt:find("\n") ~= nil
-    local verb = multiline
+    local verb = (multiline and not is_debug)
       and '\\begin{Verbatim}[numbers=left,numbersep=6pt]\n'
       or  '\\begin{Verbatim}\n'
     local latex_block = '\\begin{SyntaxBlock}{' .. barcolor .. '}\n' ..
-                       '{\\small\\bfseries\\color{' .. barcolor .. '}' .. title .. '}\\par\\vspace{2pt}\n' ..
+                       '{\\footnotesize\\bfseries\\color{' .. barcolor .. '}' .. title .. '}\\par\\vspace{2pt}\n' ..
                        verb ..
                        txt .. '\n' ..
                        '\\end{Verbatim}\n' ..
