@@ -43,6 +43,34 @@ audit doctrine:
   [[project_p2kb_corrections_register]].) A manual-only finding stays in
   the document's own inventory / `audit/` folder.
 
+## Augments the fix step — apply each fix in the correct tree
+
+P2 manuals are **multi-tree**: edit the wrong one and the fix is silently lost
+on the next assemble. Before applying any finding, decide where it lands.
+
+- **Content fixes → `manuals/<slug>/opus-master/`.** ALL document prose and
+  structure is authored here — chapter/appendix text, part intros, and the
+  cover/front-matter (`front-matter.md`, *including* its `{=latex}` cover-layout
+  block). This is the canonical source. A cover that overflows, a jumbled
+  appendix, missing part intros, an index tag, a clickable cross-reference — all
+  opus-master edits.
+- **NEVER edit `workspace/<slug>/<DocName>.md`.** That assembled working copy is
+  a build artifact — `prepare-manual` regenerates it from opus-master on every
+  run (`assemble-manual.sh` for multi-file, a copy for single-file), so any edit
+  there is overwritten and lost. If you catch yourself editing the workspace
+  `.md`, stop: the fix belongs in opus-master.
+- **Style fixes → `workspace/<slug>/templates/` & `filters/`, or `platform/`.**
+  The stylesheets (`*.latex`, `*.sty`) and Lua filters (`*.lua`) define
+  *presentation*; edit them in place. Shared platform files (`p2kb-platform-*`)
+  live under `engineering/document-production/platform/` and are edited there,
+  never copied into a manual. `assemble-manual.sh` (chapter order) is a workspace
+  build script, edited in workspace.
+- **The discriminator:** editing the **document** (what it says / its
+  front-matter) → opus-master; editing the **stylesheet/template/filter** (how it
+  looks) → workspace or platform. When a single finding spans both — e.g. an
+  index needs `\index{}` tags (content → opus-master) *and* `\makeindex`/`\printindex`
+  (template → workspace) — split it and edit each part in its own tree.
+
 ## Augments §5–§6 — Render once, then verify / Hand back
 
 Because manuals render on PDF Forge (not a local `DOC_RENDER_COMMAND`),

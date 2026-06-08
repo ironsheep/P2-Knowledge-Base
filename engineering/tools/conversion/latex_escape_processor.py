@@ -174,6 +174,19 @@ def process_latex_escaping(input_file, output_file):
             protected_inline_code.append(match.group(1))
             line = line.replace(match.group(1), placeholder, 1)
 
+        # PROTECT PANDOC IMAGE/SPAN ATTRIBUTE BLOCKS  {width=75%}, {height=2in}, ...
+        # Pandoc sizing attributes attached to an image — ![alt](src){width=75%} —
+        # are markdown syntax, NOT literal content. Escaping their braces/percent
+        # (\{width=75\%\}) breaks Pandoc's attribute parse: the block leaks into the
+        # page as literal text AND the image loses its width. Only braces that contain
+        # width=/height= are protected, so prose/code is unaffected. Restored verbatim.
+        protected_attrs = []
+        attr_pattern = r'\{[^{}]*(?:width|height)=[^{}]*\}'
+        for match in re.finditer(attr_pattern, line):
+            placeholder = f'XPROTECTIMGATTR{len(protected_attrs)}X'
+            protected_attrs.append(match.group(0))
+            line = line.replace(match.group(0), placeholder, 1)
+
         # PROTECT PANDOC SUPERSCRIPT SYNTAX ^text^
         # Pandoc converts ^text^ to \textsuperscript{text} in LaTeX
         # If we escape ^ to \^{}, Pandoc outputs literal ^{} which breaks LaTeX
@@ -373,6 +386,11 @@ def process_latex_escaping(input_file, output_file):
 
         # 6a. Restore markdown escaped pipe verbatim (kept as "\|" for Pandoc)
         line = line.replace('XPROTECTESCPIPEX', '\\|')
+
+        # 6a2. Restore protected Pandoc image/span attribute blocks (UNCHANGED)
+        for i, attr in enumerate(protected_attrs):
+            placeholder = f'XPROTECTIMGATTR{i}X'
+            line = line.replace(placeholder, attr)
 
         # 6b. Restore protected Pandoc superscript syntax (UNCHANGED - Pandoc converts to \textsuperscript)
         for i, sup in enumerate(protected_superscripts):
