@@ -175,7 +175,9 @@ after the window name, the same way you send data:
 - **`CLEAR`** — clear the window's contents and reset it to wait for new data.
 - **`SAVE`** — save the window's current image to a file on the host. Most windows
   accept `SAVE 'filename'`, and optionally `SAVE WINDOW 'filename'` to capture the
-  whole window rather than just the display area.
+  whole window rather than just the display area. The file is a `.bmp`; the
+  extension is appended automatically, so give the name *without* it (`'scope'`,
+  not `'scope.bmp'`).
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This eliminates flicker when

@@ -319,7 +319,9 @@ after the window name, the same way you send data:
 - **`CLEAR`** — clear the window's contents and reset it to wait for new data.
 - **`SAVE`** — save the window's current image to a file on the host. Most windows
   accept `SAVE 'filename'`, and optionally `SAVE WINDOW 'filename'` to capture the
-  whole window rather than just the display area.
+  whole window rather than just the display area. The file is a `.bmp`; the
+  extension is appended automatically, so give the name *without* it (`'scope'`,
+  not `'scope.bmp'`).
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This eliminates flicker when
@@ -1752,7 +1754,8 @@ Two more commands round out display control:
   frame. In buffered mode this clears the off-screen canvas; the cleared state
   becomes visible at the next `UPDATE`.
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
-  `SAVE` for a default filename, or `SAVE 'name.bmp'` to choose one.
+  `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
+  extension is added for you — do not include it).
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
@@ -2778,13 +2781,14 @@ Two runtime commands you send by the window's name:
 - `` `CLEAR `` — clears the plot and empties the sample buffer, then waits for new
   data. Use it to start a fresh figure, especially in persistent mode
   (`SAMPLES 0`) where points otherwise never disappear.
-- `` `SAVE 'filename.bmp' `` — writes a `.bmp` image of the plot area to the host.
+- `` `SAVE 'filename' `` — writes a `.bmp` image of the plot area to the host (the
+  `.bmp` extension is appended automatically — give the name without it).
   Add the keyword `WINDOW` before the filename to capture the entire window instead
   of just the plot.
 
 ```spin2
 debug(`Lissajous CLEAR)              ' wipe the plot
-debug(`Lissajous SAVE 'figure.bmp')  ' save the plot area to a file
+debug(`Lissajous SAVE 'figure')      ' save the plot area to figure.bmp
 ```
 
 A third runtime command, `` `CLOSE ``, closes the window.
@@ -3811,7 +3815,7 @@ samples into a single `DEBUG()` call so a high-rate capture keeps up. [Chapter 1
 runs several windows at once and reaches into PASM2, driving the same windows from
 assembly in their own cog. [Chapter 15](#ch-15) combines the pieces into **control and
 status panels** — instrument readouts you watch and on-screen surfaces you operate —
-the most productive everyday use of the display windows.
+built from the windows you already know, in a few dozen lines of code.
 
 None of these is a new window. Each is a technique that combines the windows you
 already know.
@@ -4481,7 +4485,7 @@ PUB main() | x
   whole screen is an action you take on the PC, outside the DEBUG system.
 
 - **Use `` `SAVE `` to capture a window for documentation or a bug report.** Send
-  `` `SAVE 'name.bmp' `` at the moment the display shows what you want to keep — for
+  `` `SAVE 'name' `` at the moment the display shows what you want to keep — for
   example after a trigger fires or an anomaly appears — and the host writes that frame
   to a file you can attach to notes or a report. It is the supported way to turn a live
   window into a static artifact.

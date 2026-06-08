@@ -399,6 +399,22 @@ All six open streamer findings were re-verified against the **golden ingestion s
 
 ---
 
+## Debug Window Manual production pass — 2026-06-08
+
+### F-024 — Debug Window Manual: `SAVE` examples wrongly append `.bmp` to the filename argument  ·  `DONE` (2026-06-08)
+
+**Location (manual content, not YAML):** `engineering/document-production/manuals/p2-debug-window-manual/opus-master/` — `ch05-plot.md:536`, `ch08-scope-xy.md:160` and `:166`, `ch14-multiwindow-pasm.md:230`.
+
+**What was wrong:** Four `SAVE` examples wrote the filename with an explicit `.bmp` extension (`SAVE 'name.bmp'`, `` debug(`Lissajous SAVE 'figure.bmp') ``). The DEBUG-window `SAVE` directive **appends `.bmp` automatically**, so these would have produced `name.bmp.bmp` / `figure.bmp.bmp`. The manual was internally inconsistent — `ch09-fft.md` already showed the correct extension-less form (`SAVE 'spectrum'` → `spectrum.bmp`).
+
+**Evidence (authority):** Spin2 v51 `engineering/ingestion/sources/spin2-v51/debug-section.txt` (repeated for every window type, e.g. lines 1802/1805): syntax is `SAVE {WINDOW} 'filename'` — "Save a bitmap file (.bmp) of either the entire window or just the display area." The argument is a bare `'filename'`; the `.bmp` is the command's output format, not part of the name.
+
+**Correction applied:** Removed `.bmp` from all four `SAVE` arguments; added a canonical "extension is appended automatically — give the name without it" note at the definitional site (`ch01-foundation.md`) and short reminders at ch05/ch08. `LAYER`/`SPRITEDEF` *load* arguments (which name real files on the host, e.g. `LAYER 1 'background.bmp'`) were correctly left untouched. Distinct from the YAML KB — no `deliverables/ai/P2/` change.
+
+**Related tooling opportunity (separate repo, not actioned here):** `pnut-term-ts` could defensively detect a trailing `.bmp` on a `SAVE` argument and avoid double-appending — a tolerance, not a substitute for the corrected docs.
+
+---
+
 ## To investigate
 
 ### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile  ·  `WONTFIX` (agent usage error; KB is correct)

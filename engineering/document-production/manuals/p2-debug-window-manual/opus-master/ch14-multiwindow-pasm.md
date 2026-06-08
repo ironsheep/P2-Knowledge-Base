@@ -227,7 +227,7 @@ PUB main() | x
   whole screen is an action you take on the PC, outside the DEBUG system.
 
 - **Use `` `SAVE `` to capture a window for documentation or a bug report.** Send
-  `` `SAVE 'name.bmp' `` at the moment the display shows what you want to keep — for
+  `` `SAVE 'name' `` at the moment the display shows what you want to keep — for
   example after a trigger fires or an anomaly appears — and the host writes that frame
   to a file you can attach to notes or a report. It is the supported way to turn a live
   window into a static artifact.

@@ -533,7 +533,8 @@ Two more commands round out display control:
   frame. In buffered mode this clears the off-screen canvas; the cleared state
   becomes visible at the next `UPDATE`.
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
-  `SAVE` for a default filename, or `SAVE 'name.bmp'` to choose one.
+  `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
+  extension is added for you — do not include it).
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the

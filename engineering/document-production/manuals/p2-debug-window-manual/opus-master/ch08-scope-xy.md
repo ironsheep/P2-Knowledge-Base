@@ -157,13 +157,14 @@ Two runtime commands you send by the window's name:
 - `` `CLEAR `` — clears the plot and empties the sample buffer, then waits for new
   data. Use it to start a fresh figure, especially in persistent mode
   (`SAMPLES 0`) where points otherwise never disappear.
-- `` `SAVE 'filename.bmp' `` — writes a `.bmp` image of the plot area to the host.
+- `` `SAVE 'filename' `` — writes a `.bmp` image of the plot area to the host (the
+  `.bmp` extension is appended automatically — give the name without it).
   Add the keyword `WINDOW` before the filename to capture the entire window instead
   of just the plot.
 
 ```spin2
 debug(`Lissajous CLEAR)              ' wipe the plot
-debug(`Lissajous SAVE 'figure.bmp')  ' save the plot area to a file
+debug(`Lissajous SAVE 'figure')      ' save the plot area to figure.bmp
 ```
 
 A third runtime command, `` `CLOSE ``, closes the window.
