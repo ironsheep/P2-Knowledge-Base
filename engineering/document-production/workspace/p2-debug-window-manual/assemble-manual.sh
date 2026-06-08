@@ -45,6 +45,7 @@ declare -a REQUIRED_FILES=(
     "ch12-bidirectional.md"
     "ch13-packed-data.md"
     "ch14-multiwindow-pasm.md"
+    "ch15-panels.md"
     "part-4-appendices.md"
     "appendix-a-command-reference.md"
     "appendix-b-packed-data.md"

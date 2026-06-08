@@ -365,13 +365,20 @@ Beyond live primitives, the PLOT window holds **eight bitmap layers** and a
 rather than redrawing primitives every frame: you composite a layer or stamp a
 sprite with a single command, which avoids re-issuing the geometry that built it.
 
+> **`{Spin2_v50}` required.** `LAYER`, `CROP`, `SPRITEDEF`, and `SPRITE` are V50
+> additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
+> with a Spin2 v50+ `pnut_ts`; without it these commands are not recognized.
+
 ### LAYER — load a bitmap into a layer
 
 ```debug-update
 LAYER layer 'filename.bmp'
 ```
 
-`LAYER` loads a Windows BMP file from the host into one of the eight layers.
+`LAYER` loads a Windows BMP file from the host into one of the eight layers. The
+file must be **24-bit, uncompressed (BI_RGB), with no alpha channel**; one BMP pixel
+maps to one canvas pixel with no scaling, so author the image at the exact pixel size
+you will display it.
 
 - `layer` — the layer index, **`1`–`8`** (there is no layer 0).
 - `filename` — a path to a file that must exist on the host and must end in
@@ -400,7 +407,12 @@ CROP layer left top width height {x y}
   canvas. The destination defaults to (`left`, `top`) and can be overridden with
   the optional trailing (`x`, `y`).
 
-The copy is a pixel-for-pixel block transfer with no scaling.
+The copy is a pixel-for-pixel block transfer with no scaling, and it is **opaque** —
+there is no transparency, so each `CROP` overwrites its destination rectangle
+completely. That is why there is no separate "clear": you *erase by restoring* —
+copy clean background back over a region (the second form) or repaint the whole scene
+(the first form). [Chapter 15](#ch-15) builds the sprite-sheet panel technique on
+these three idioms.
 
 ### SPRITEDEF and SPRITE — defining and stamping sprites
 
