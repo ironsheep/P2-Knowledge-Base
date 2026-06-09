@@ -16,8 +16,11 @@ state — a started-then-paused doc is parked if we still mean to ship it.
 exactly **one** section below. A folder with no entry is an **anomaly to
 reconcile** (classify it), not a silent guess.
 
-*Established: 2026-05-28 — Updated: 2026-06-05 (categorized into live / parked /
-instruments / orphaned; Green Book retired in favor of the I/O & Smart Pins guide).*
+*Established: 2026-05-28 — Updated: 2026-06-09 (Platform column corrected against
+on-disk reality: I/O & Smart Pins / Assembly / DeSilva are bespoke forks ⏳ — NOT
+yet migrated; Single-Step / Streamer confirmed ✅ on the shared platform stack).
+2026-06-05: categorized into live / parked / instruments / orphaned; Green Book
+retired in favor of the I/O & Smart Pins guide.*
 
 ---
 
@@ -37,12 +40,12 @@ that does not ride the shared stack.
 
 | Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
 |-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
-| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | awaiting Stephen's technical review + asset review; "Blue Book" reference |
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | released; chip review outstanding |
-| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | released; chip review outstanding |
+| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ⏳ | | | | bespoke `p2kb-iosp-*` fork (sty+lua, forked ~2026-05-30); awaiting platform migration; awaiting Stephen's technical review + asset review; "Blue Book" reference |
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ⏳ | ⏳ | ✅ | ✅ | released on bespoke `p2kb-pasm2-*` fork (sty+lua, forked ~2026-01-23); awaiting platform migration; chip review outstanding |
+| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | ✅ | ⏳ | ⏳ | ✅ | ✅ | released on bespoke `p2kb-desilva-*` fork (sty+lua, forked 2026-01... templates dated 2025-12-12; unique `desilva-semantic` filter for "your-turn" boxes); migration in progress; chip review outstanding |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ⏳ | ✅ | | | | awaiting screenshots — 5/10 hero figures + TERM captures still placeholders |
-| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ⏳ | ⏳ | ⏳ | | awaiting chip + community review |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ⏳ | ⏳ | ⏳ | | awaiting chip + community review |
+| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content + streamer-local/-diagrams); awaiting chip + community review |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
 
 **Slug** is the one folder name each manual uses across all three trees —
@@ -104,16 +107,23 @@ Geometry (all five): `boxrule=2pt`, `leftrule=4pt` (accessibility), other rules
 `0.5pt`, rounded corners, `left=30pt` (clears inset line numbers), `right=10pt`,
 `top/bottom=8pt`, `before/after skip=15pt`, `breakable`.
 
-Defined in each *reconciled* live publication's content style package:
+Defined **once** in the shared platform content package for every reconciled live
+publication:
+- `platform/templates/p2kb-platform-content.sty` — used by **Debug Window**,
+  **Single-Step Debugger**, and **Streamer**.
+
+The not-yet-reconciled forks each still define the convention in their **own**
+content package (these are retired on migration onto `p2kb-platform-content`):
 - `p2-io-and-smart-pins-user-guide/templates/p2kb-iosp-content.sty`
 - `p2-assembly-language-manual/templates/p2kb-pasm2-content.sty`
 - `p2-pasm-desilva-style/templates/p2kb-desilva-content.sty`
 
 > Publications still pending platform reconciliation (`Platform ⏳` in the status
-> pipeline above — currently **Single-Step Debugger** and **Streamer**) must have
-> this convention verified/added to their content style packages. Debug Window
-> reconciled 2026-06-08 (now on the shared `p2kb-platform-content`); the AI Privacy
-> Guide is presentation-class and does not ride the shared stack.
+> pipeline above — currently **I/O & Smart Pins**, **Assembly Language Reference**,
+> and **DeSilva**) must migrate onto the shared `p2kb-platform-*` stack (retiring
+> their bespoke fork `.sty` + `.lua`). Debug Window, Single-Step, and Streamer are
+> reconciled (on the shared `p2kb-platform-content`); the AI Privacy Guide is
+> presentation-class and does not ride the shared stack.
 
 > **Note:** In the I/O & Smart Pins guide the assembly/PASM2 code-block
 > environment is named `IOSPBlock` (guide-specific name) but is colored **green**
