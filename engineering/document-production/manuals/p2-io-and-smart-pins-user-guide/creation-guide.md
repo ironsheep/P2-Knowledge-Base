@@ -5,6 +5,22 @@
 
 ---
 
+## Code Line Budget
+
+The colored code boxes do NOT wrap, so an over-long code line is an authorship
+defect caught by the `prepare-manual` line-length audit
+(`engineering/tools/validation/audit-code-line-length.py`).
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** as of the 2026-06-09 platform migration this guide
+  rides the shared **platform** code boxes (`Spin2Block` blue / `IOSPBlock` green),
+  Latin Modern Mono with the `numbers=left` gutter. It consumes the platform
+  code-box stack unchanged, so it **inherits the platform reference K** (calibrated
+  in `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget).
+  Re-measure only if this guide ever diverges its code font/box geometry.
+
+---
+
 ## 1. Document Identity
 
 ### 1.1 Purpose and Scope

@@ -13,13 +13,20 @@
 
 \documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LOAD FOUNDATION LAYER ====================
-\usepackage{p2kb-iosp-foundation}
+% ==================== LOAD SHARED PLATFORM STACK ====================
+% Migrated 2026-06-09 onto the shared platform stack (was the bespoke p2kb-iosp-*
+% fork from which the platform was originally derived). Gains the standards the
+% frozen fork missed: continuation markers, numbered captions + LoF/LoT,
+% \screenshotfig keyline, redesigned \manualpart, CommandBlock.
+\usepackage{p2kb-platform-foundation}
+\usepackage{p2kb-platform-content}
 
-% ==================== LOAD CONTENT LAYER ====================
-\usepackage{p2kb-iosp-content}
+% ==================== LOAD IOSP LOCAL OVERRIDE LAYER ====================
+% Per-manual overrides (currently empty — twin manual, no bespoke skin).
+\usepackage{p2kb-iosp-local}
 
 % ==================== LOAD DIAGRAMS ====================
+% Bespoke I/O & Smart Pins TikZ diagrams (kept; self-contained).
 \usepackage{p2kb-iosp-diagrams}
 
 % ==================== DOCUMENT METADATA ====================

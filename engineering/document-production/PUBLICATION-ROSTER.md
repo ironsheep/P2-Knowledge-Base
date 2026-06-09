@@ -40,7 +40,7 @@ that does not ride the shared stack.
 
 | Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
 |-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
-| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ⏳ | | | | bespoke `p2kb-iosp-*` fork (sty+lua, forked ~2026-05-30); awaiting platform migration; awaiting Stephen's technical review + asset review; "Blue Book" reference |
+| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF). **ASSET TODO:** cover `book-artwork.png` missing. Awaiting Stephen's technical + asset review; "Blue Book" reference |
 | P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ⏳ | ⏳ | ✅ | ✅ | released on bespoke `p2kb-pasm2-*` fork (sty+lua, forked ~2026-01-23); awaiting platform migration; chip review outstanding |
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay for pedagogical boxes, 5 platform lua filters); proven on forge daemon (172pp, clean log); chip review outstanding. **ASSET TODO (not release-blocking, already released):** the "P1 COG" image — `\CogAnatomyDiagram` in Ch2 "COG Anatomy 101" (`opus-master` ~L557) — needs adjustment/repair before the next release. |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ⏳ | ✅ | | | | awaiting screenshots — 5/10 hero figures + TERM captures still placeholders |
@@ -110,19 +110,18 @@ Geometry (all five): `boxrule=2pt`, `leftrule=4pt` (accessibility), other rules
 Defined **once** in the shared platform content package for every reconciled live
 publication:
 - `platform/templates/p2kb-platform-content.sty` — used by **Debug Window**,
-  **Single-Step Debugger**, **Streamer**, and **DeSilva**.
+  **Single-Step Debugger**, **Streamer**, **DeSilva**, and **I/O & Smart Pins**.
 
-The not-yet-reconciled forks each still define the convention in their **own**
-content package (these are retired on migration onto `p2kb-platform-content`):
-- `p2-io-and-smart-pins-user-guide/templates/p2kb-iosp-content.sty`
+The one not-yet-reconciled fork still defines the convention in its **own**
+content package (retired on migration onto `p2kb-platform-content`):
 - `p2-assembly-language-manual/templates/p2kb-pasm2-content.sty`
 
 > Publications still pending platform reconciliation (`Platform ⏳` in the status
-> pipeline above — currently **I/O & Smart Pins** and **Assembly Language
-> Reference**) must migrate onto the shared `p2kb-platform-*` stack (retiring their
-> bespoke fork `.sty` + `.lua`). Debug Window, Single-Step, Streamer, and DeSilva
-> are reconciled (on the shared `p2kb-platform-content`); the AI Privacy Guide is
-> presentation-class and does not ride the shared stack.
+> pipeline above — only **Assembly Language Reference** remains) must migrate onto
+> the shared `p2kb-platform-*` stack (retiring their bespoke fork `.sty` + `.lua`).
+> Debug Window, Single-Step, Streamer, DeSilva, and I/O & Smart Pins are reconciled
+> (on the shared `p2kb-platform-content`); the AI Privacy Guide is presentation-class
+> and does not ride the shared stack.
 
 > **Note:** In the I/O & Smart Pins guide the assembly/PASM2 code-block
 > environment is named `IOSPBlock` (guide-specific name) but is colored **green**

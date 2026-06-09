@@ -12,11 +12,11 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
-        "p2kb-iosp-figures",
-        "p2kb-iosp-tables",
-        "p2kb-iosp-mnemonic-bold",
-        "p2kb-iosp-code-coloring",
-        "p2kb-iosp-pagination"
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "P2 I/O & Smart Pins User Guide",
