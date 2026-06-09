@@ -217,8 +217,8 @@ Two keyword commands work at runtime, sent by the window's name:
 - `` `SAVE `` — saves the current window image to a file on the host.
 
 ```spin2
-debug(`Wfall `CLEAR)
-debug(`Wfall `SAVE)
+debug(`Wfall CLEAR)
+debug(`Wfall SAVE)
 ```
 
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`
@@ -252,7 +252,7 @@ PUB main() | i, phase, ainc, sample
       debug(`Chirp `(sample))
     ainc += 20_000  ' next block is a higher tone -> diagonal streak
     if ainc > 1_000_000
-      debug(`Chirp `CLEAR)     ' wrap: clear and restart the sweep
+      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
       ainc := 30_000
 
 PRI sine(amp, angle) : y

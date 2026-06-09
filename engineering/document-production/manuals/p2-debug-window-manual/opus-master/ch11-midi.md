@@ -153,7 +153,7 @@ Two runtime keyword commands round out the set:
 - `` `SAVE `` — saves the current window image to a file on the host.
 
 ```spin2
-debug(`Piano `CLEAR)   ' all keys dark again
+debug(`Piano CLEAR)   ' all keys dark again
 ```
 
 ## A complete software-only example
@@ -185,7 +185,7 @@ PUB main() | i, note
   debug(`Piano $80 60 0 64 0 67 0)     ' release all three (running status)
   waitms(300)
 
-  debug(`Piano `CLEAR)                 ' reset every key
+  debug(`Piano CLEAR)                 ' reset every key
 
 DAT
 scale word 60, 62, 64, 65, 67, 69, 71  ' C D E F G A B (MIDI note numbers)

@@ -247,8 +247,8 @@ PUB main() | x, y, v
     x := getrnd() +// 128            ' GETRND gives the coordinates
     y := getrnd() +// 128
     v := getrnd() & $FFFFFF          ' and the color
-    debug(`Dots `SET(x, y) `(v))     ' place one pixel at (x, y)
-  debug(`Dots `UPDATE)               ' show the result once
+    debug(`Dots SET `(x, y) `(v))    ' place one pixel at (x, y)
+  debug(`Dots UPDATE)                ' show the result once
 ```
 
 Use `SET` for scattered or non-sequential writes; use a trace pattern when the data
@@ -314,12 +314,12 @@ PUB main() | x, y, frame, v
   repeat
     ' TRACE 0 (the default) lays pixels along the top line left-to-right,
     ' wrapping down one line at a time, so one full pass paints the canvas.
-    debug(`Plasma `CLEAR)
+    debug(`Plasma CLEAR)
     repeat y from 0 to 127
       repeat x from 0 to 127
         v := plasma(x, y, frame)
         debug(`Plasma `(v))
-    debug(`Plasma `UPDATE)
+    debug(`Plasma UPDATE)
     frame += 4
 
 PRI plasma(x, y, t) : rgb | r, g, b

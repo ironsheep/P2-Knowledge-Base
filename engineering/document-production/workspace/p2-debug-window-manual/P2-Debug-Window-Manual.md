@@ -765,7 +765,7 @@ PUB dashboard() | temp, press
     debug(`Panel 0)                       ' clear (off-screen)
     debug(`Panel "Temp:  " `udec_(temp) " C" 13)
     debug(`Panel "Press: " `udec_(press) " mb" 13)
-    debug(`Panel `UPDATE)                 ' repaint once, flicker-free
+    debug(`Panel UPDATE)                  ' repaint once, flicker-free
     waitms(250)
 
 PRI read_temp()  : v
@@ -1096,8 +1096,8 @@ PUB main() | x, y, v
     x := getrnd() +// 128            ' GETRND gives the coordinates
     y := getrnd() +// 128
     v := getrnd() & $FFFFFF          ' and the color
-    debug(`Dots `SET(x, y) `(v))     ' place one pixel at (x, y)
-  debug(`Dots `UPDATE)               ' show the result once
+    debug(`Dots SET `(x, y) `(v))    ' place one pixel at (x, y)
+  debug(`Dots UPDATE)                ' show the result once
 ```
 
 Use `SET` for scattered or non-sequential writes; use a trace pattern when the data
@@ -1163,12 +1163,12 @@ PUB main() | x, y, frame, v
   repeat
     ' TRACE 0 (the default) lays pixels along the top line left-to-right,
     ' wrapping down one line at a time, so one full pass paints the canvas.
-    debug(`Plasma `CLEAR)
+    debug(`Plasma CLEAR)
     repeat y from 0 to 127
       repeat x from 0 to 127
         v := plasma(x, y, frame)
         debug(`Plasma `(v))
-    debug(`Plasma `UPDATE)
+    debug(`Plasma UPDATE)
     frame += 4
 
 PRI plasma(x, y, t) : rgb | r, g, b
@@ -3440,8 +3440,8 @@ Two keyword commands work at runtime, sent by the window's name:
 - `` `SAVE `` — saves the current window image to a file on the host.
 
 ```spin2
-debug(`Wfall `CLEAR)
-debug(`Wfall `SAVE)
+debug(`Wfall CLEAR)
+debug(`Wfall SAVE)
 ```
 
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`
@@ -3475,7 +3475,7 @@ PUB main() | i, phase, ainc, sample
       debug(`Chirp `(sample))
     ainc += 20_000  ' next block is a higher tone -> diagonal streak
     if ainc > 1_000_000
-      debug(`Chirp `CLEAR)     ' wrap: clear and restart the sweep
+      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
       ainc := 30_000
 
 PRI sine(amp, angle) : y
@@ -3699,7 +3699,7 @@ Two runtime keyword commands round out the set:
 - `` `SAVE `` — saves the current window image to a file on the host.
 
 ```spin2
-debug(`Piano `CLEAR)   ' all keys dark again
+debug(`Piano CLEAR)   ' all keys dark again
 ```
 
 ## A complete software-only example
@@ -3731,7 +3731,7 @@ PUB main() | i, note
   debug(`Piano $80 60 0 64 0 67 0)     ' release all three (running status)
   waitms(300)
 
-  debug(`Piano `CLEAR)                 ' reset every key
+  debug(`Piano CLEAR)                 ' reset every key
 
 DAT
 scale word 60, 62, 64, 65, 67, 69, 71  ' C D E F G A B (MIDI note numbers)

@@ -196,7 +196,7 @@ PUB dashboard() | temp, press
     debug(`Panel 0)                       ' clear (off-screen)
     debug(`Panel "Temp:  " `udec_(temp) " C" 13)
     debug(`Panel "Press: " `udec_(press) " mb" 13)
-    debug(`Panel `UPDATE)                 ' repaint once, flicker-free
+    debug(`Panel UPDATE)                  ' repaint once, flicker-free
     waitms(250)
 
 PRI read_temp()  : v

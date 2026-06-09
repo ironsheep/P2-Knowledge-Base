@@ -415,6 +415,22 @@ All six open streamer findings were re-verified against the **golden ingestion s
 
 ---
 
+### F-025 — Debug Window Manual: inner backtick before bare DEBUG-window commands  ·  `DONE` (2026-06-09)
+
+**Location (manual content):** `opus-master/` — `ch03-term.md:199`, `ch04-bitmap.md:250/251/317/322`, `ch10-spectro.md:220/221/255`, `ch11-midi.md:156/188` (10 occurrences, 4 chapters).
+
+**What was wrong:** A DEBUG-window display command was written with a spurious **inner backtick** — `` debug(`Plasma `CLEAR) ``, `` `UPDATE ``, `` `SAVE ``, and `` `SET(x, y) ``. A display command takes **no** backtick; the backtick introduces a runtime value/expression (`` `(expr) ``) or an output-format command (`` `udec_ ``). The inner-backtick-command form is a syntax error the moment the DEBUG stream is actually parsed.
+
+**Evidence (authority):** `pnut-ts` v1.55.0 **with `-d`** (compile-with-DEBUG) rejects it: `error: Expected "?", ".", "(", "$", "%", "#", or DEBUG command`. The correct forms compile clean. Verified each fix under `-d`.
+
+**Why it slipped through:** `pnut-ts` only parses the contents of `debug()` directives when invoked with **`-d`**; without it the directives are stripped, so a plain `pnut-ts <file>` compile reports success even with broken debug syntax. The earlier compile-cert pass did not use `-d`.
+
+**Correction applied:** Removed the inner backtick (`` `CLEAR `` → `CLEAR`, etc.). For the runtime-coordinate case, `` `SET(x, y) `` → `` SET `(x, y) `` (command bare; coordinates as a runtime expression). `` `(expr) ``, `` `udec_ ``, and the leading display reference (`` debug(`Name ``) are correct and were left untouched.
+
+**Process note (gate hardening):** the code compile-cert gate — in `prepare-manual` and for the `figure-generators/` — must run `pnut-ts -d` for DEBUG-window code, or directive errors go undetected.
+
+---
+
 ## To investigate
 
 ### F-002 — `?` (RNG) and `||` (abs) operator forms failed to compile  ·  `WONTFIX` (agent usage error; KB is correct)
