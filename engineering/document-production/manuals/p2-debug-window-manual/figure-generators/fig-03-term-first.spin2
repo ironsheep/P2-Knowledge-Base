@@ -10,6 +10,9 @@ PUB main()
   debug(`TERM Status SIZE 40 20)
   debug(`Status "Ready.")
 
-  waitms(200)                               ' let the host render the frame
-  debug(`Status SAVE WINDOW 'fig-03-term-first')   ' -> fig-03-term-first.bmp
-  repeat                                     ' hold the window open
+  waitms(200)                               ' let the host render the final frame
+  debug(`Status save 'fig-03-term-first')              ' display area (no chrome)
+  debug(`Status save window 'fig-03-term-first_WDW')   ' window, incl. chrome
+  debug(`Status close)
+  debug("* TERM-FIRST complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

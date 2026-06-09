@@ -13,6 +13,9 @@ PUB main() | ang, i
     debug(`Sig `(qsin(1000, ang, 256)))      ' CORDIC sine, period 256
     ang += 4
 
-  waitms(200)
-  debug(`Sig SAVE WINDOW 'fig-07-scope')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Sig save 'fig-07-scope')                    ' display area (no chrome)
+  debug(`Sig save window 'fig-07-scope_WDW')         ' window, incl. chrome
+  debug(`Sig close)
+  debug("* SCOPE complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

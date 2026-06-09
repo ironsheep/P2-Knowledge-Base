@@ -24,6 +24,9 @@ PUB main() | p1, p2, p3, s, i
     p2 += $0140_0000
     p3 += $0300_0000
 
-  waitms(200)
-  debug(`Spectrum SAVE WINDOW 'fig-09-fft')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Spectrum save 'fig-09-fft')                 ' display area (no chrome)
+  debug(`Spectrum save window 'fig-09-fft_WDW')      ' window, incl. chrome
+  debug(`Spectrum close)
+  debug("* FFT complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

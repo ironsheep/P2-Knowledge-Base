@@ -18,9 +18,12 @@ PUB main() | i, phase, ainc, sample
       debug(`Chirp `(sample))
     ainc += 20_000                           ' next block: a higher tone
 
-  waitms(200)
-  debug(`Chirp SAVE WINDOW 'fig-10-spectro')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Chirp save 'fig-10-spectro')                ' display area (no chrome)
+  debug(`Chirp save window 'fig-10-spectro_WDW')     ' window, incl. chrome
+  debug(`Chirp close)
+  debug("* SPECTRO complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
 
 PRI sine(amp, angle) : y
   ' amp * sin(angle) via the CORDIC; angle spans one full circle.

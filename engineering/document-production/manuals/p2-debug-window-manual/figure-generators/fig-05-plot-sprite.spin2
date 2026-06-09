@@ -19,6 +19,9 @@ PUB main()
   debug(`Field SET 192 128 SPRITE 0 0 8 255)
   debug(`Field UPDATE)
 
-  waitms(200)
-  debug(`Field SAVE WINDOW 'fig-05-plot-sprite')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Field save 'fig-05-plot-sprite')            ' display area (no chrome)
+  debug(`Field save window 'fig-05-plot-sprite_WDW') ' window, incl. chrome
+  debug(`Field close)
+  debug("* PLOT-SPRITE complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

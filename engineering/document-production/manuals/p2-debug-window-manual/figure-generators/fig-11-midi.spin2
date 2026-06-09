@@ -17,11 +17,13 @@ PUB main() | i, note
 
   ' hold a C-major chord (C E G) via running status, then capture it lit
   debug(`Piano $90 60 80 64 80 67 80)
-  waitms(300)
-  debug(`Piano SAVE WINDOW 'fig-11-midi')
-  waitms(700)
+  waitms(300)                               ' let the host render the held chord
+  debug(`Piano save 'fig-11-midi')                   ' display area (no chrome)
+  debug(`Piano save window 'fig-11-midi_WDW')        ' window, incl. chrome
   debug(`Piano $80 60 0 64 0 67 0)           ' release all three
-  repeat
+  debug(`Piano close)
+  debug("* MIDI complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
 
 DAT
 scale word 60, 62, 64, 65, 67, 69, 71        ' C D E F G A B

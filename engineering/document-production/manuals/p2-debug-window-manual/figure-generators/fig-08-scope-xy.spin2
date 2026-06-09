@@ -15,6 +15,9 @@ PUB main() | a, x, y, i
     debug(`Lissajous `(x, y))
     a += 1
 
-  waitms(200)
-  debug(`Lissajous SAVE WINDOW 'fig-08-scope-xy')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Lissajous save 'fig-08-scope-xy')           ' display area (no chrome)
+  debug(`Lissajous save window 'fig-08-scope-xy_WDW') ' window, incl. chrome
+  debug(`Lissajous close)
+  debug("* SCOPE-XY complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

@@ -37,9 +37,12 @@ PUB main() | tx_byte, i, cs, clk, mosi, b
 
     tx_byte := (tx_byte + 1) & $FF           ' next byte
 
-  waitms(200)
-  debug(`SPIbus SAVE WINDOW 'fig-06-logic')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`SPIbus save 'fig-06-logic')                 ' display area (no chrome)
+  debug(`SPIbus save window 'fig-06-logic_WDW')      ' window, incl. chrome
+  debug(`SPIbus close)
+  debug("* LOGIC complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
 
 PRI emit(cs, clk, mosi) | s
   ' pack the three lines into bits 0,1,2 of one sample

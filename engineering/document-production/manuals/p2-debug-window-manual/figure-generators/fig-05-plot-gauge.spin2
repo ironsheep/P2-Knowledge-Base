@@ -25,6 +25,9 @@ PUB main() | i, tick, needle
   debug(`Gauge LINE 150 `(needle) 1 255)
 
   debug(`Gauge UPDATE)
-  waitms(200)
-  debug(`Gauge SAVE WINDOW 'fig-05-plot-gauge')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Gauge save 'fig-05-plot-gauge')             ' display area (no chrome)
+  debug(`Gauge save window 'fig-05-plot-gauge_WDW')  ' window, incl. chrome
+  debug(`Gauge close)
+  debug("* PLOT-GAUGE complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

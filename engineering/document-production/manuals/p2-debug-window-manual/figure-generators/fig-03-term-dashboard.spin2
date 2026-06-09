@@ -21,6 +21,9 @@ PUB main() | signal, count
   debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
   debug(`Panel 3 4 2 8 7 "HIGH " 4)         ' pair 3 (red), back to pair 0
 
-  waitms(200)
-  debug(`Panel SAVE WINDOW 'fig-03-term-dashboard')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Panel save 'fig-03-term-dashboard')           ' display area (no chrome)
+  debug(`Panel save window 'fig-03-term-dashboard_WDW') ' window, incl. chrome
+  debug(`Panel close)
+  debug("* TERM-DASHBOARD complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next

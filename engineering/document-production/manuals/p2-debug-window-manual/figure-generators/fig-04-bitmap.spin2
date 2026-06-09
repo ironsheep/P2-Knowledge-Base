@@ -8,18 +8,21 @@ CON
 PUB main() | x, y, v
   ' 128x128 true-color canvas, manual update for a flicker-free frame
   debug(`BITMAP Plasma SIZE 128 128 RGB24 UPDATE)
-  debug(`Plasma `CLEAR)
+  debug(`Plasma CLEAR)
 
   ' one full pass paints every pixel (TRACE 0: left-to-right, top-down)
   repeat y from 0 to 127
     repeat x from 0 to 127
       v := plasma(x, y, 64)                 ' fixed frame 64 for determinism
       debug(`Plasma `(v))
-  debug(`Plasma `UPDATE)
+  debug(`Plasma UPDATE)
 
-  waitms(200)
-  debug(`Plasma SAVE WINDOW 'fig-04-bitmap')
-  repeat
+  waitms(200)                               ' let the host render the final frame
+  debug(`Plasma save 'fig-04-bitmap')                ' display area (no chrome)
+  debug(`Plasma save window 'fig-04-bitmap_WDW')     ' window, incl. chrome
+  debug(`Plasma close)
+  debug("* BITMAP complete")
+  debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
 
 PRI plasma(x, y, t) : rgb | r, g, b
   ' two CORDIC sinusoids drive R and G; their sum drives B. All 0..255.
