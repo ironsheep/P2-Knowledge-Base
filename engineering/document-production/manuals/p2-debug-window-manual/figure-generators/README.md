@@ -22,9 +22,10 @@ These are **separate from the manual's teaching examples** — the capture plumb
 name **without** an extension; the directive appends `.bmp` automatically
 (`'fig-07-scope'` → `fig-07-scope.bmp`). Including `.bmp` yields `.bmp.bmp`.
 
-> **Open item — host capture tool.** Where the `.bmp` lands (and exact convert
-> step) depends on the host terminal driving the link: PNut-on-Windows vs.
-> `pnut-term-ts`. Confirm before a capture run.
+> **Capture host: `pnut-term-ts`.** It drives the window display and performs the
+> `SAVE WINDOW` capture, writing a `.bmp`. Hand the `.bmp` files back; they are
+> converted to the `.png` the manual embeds (PIL one-liner above), then copied
+> into the manual's `assets/`.
 
 ## Figure → generator map
 
