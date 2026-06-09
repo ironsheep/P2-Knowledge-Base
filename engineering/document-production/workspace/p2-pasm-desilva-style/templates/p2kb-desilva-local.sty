@@ -1,0 +1,104 @@
+% p2kb-desilva-local.sty — DeSilva PASM2 Tutorial per-manual override layer
+% Loaded AFTER p2kb-platform-content.sty so anything here overrides platform defaults.
+%
+% DeSilva rides the shared platform stack (foundation + content + the 5 platform
+% lua filters) for everything generic: the 5-color code boxes (Spin2Block,
+% IOSPBlock=green PASM2, CORDICBlock, MultiCOGBlock, AntipatternBlock), reference
+% boxes, figure/table numbering, headings, index. This file holds ONLY what is
+% genuinely DeSilva-specific: the pedagogical PROSE callouts that the platform
+% code-coloring filter's Div path emits but platform-content does not define.
+%
+% Markdown div -> environment (emitted by p2kb-platform-code-coloring.lua Div path):
+%   ::: medicine-cabinet -> dsmedicinecabinet   ::: your-turn  -> dsyourturn
+%   ::: sidetrack        -> dssidetrack          ::: interlude  -> InterludeBlock
+%   ::: chapterend       -> dschapterend         ::: uff/well/have-fun -> ds{uff,well,havefun}
+% Code is authored as language-tagged FENCES (```pasm2 etc.), NOT divisions.
+%
+% Colors + geometry lifted verbatim from the retired p2kb-desilva-content.sty so the
+% pedagogical look is unchanged from the pre-migration design.
+
+\ProvidesPackage{p2kb-desilva-local}[2026/06/09 P2KB DeSilva per-manual override layer v1.0]
+
+% tcolorbox + skins/breakable + needspace come from p2kb-platform-foundation.
+
+% ==================== PEDAGOGICAL COLOR PALETTE ====================
+\definecolor{desilva-medicine-bg}{HTML}{FFF8F0}        % Warm cream — band-aid light
+\definecolor{desilva-medicine-border}{HTML}{D2A679}    % Band-aid tan
+\definecolor{desilva-yourturn-bg}{HTML}{FFFDF8}        % Ultra-light warm — almost white
+\definecolor{desilva-yourturn-border}{HTML}{F9A825}    % Golden amber — "action time!"
+\definecolor{desilva-sidetrack-bg}{HTML}{FDF5F5}       % Light rose — visible red tint
+\definecolor{desilva-sidetrack-border}{HTML}{B05050}   % Rose-red
+\definecolor{desilva-interlude-bg}{HTML}{FFFDFB}       % Ultra-light orange — almost white
+\definecolor{desilva-interlude-border}{HTML}{CC7A00}   % Soft orange
+
+% ==================== PEDAGOGICAL ENVIRONMENTS ====================
+% Medicine Cabinet — simpler alternatives when overwhelmed.
+\newtcolorbox{dsmedicinecabinet}{
+  title=The Medicine Cabinet, fonttitle=\bfseries\color{white},
+  colbacktitle=desilva-medicine-border, colback=desilva-medicine-bg,
+  colframe=desilva-medicine-border, boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  before upper={\needspace{0.4\textheight}}, breakable, enhanced
+}
+
+% Your Turn — hands-on exercises.
+\newtcolorbox{dsyourturn}{
+  title=Your Turn, fonttitle=\bfseries\color{white},
+  colbacktitle=desilva-yourturn-border, colback=desilva-yourturn-bg,
+  colframe=desilva-yourturn-border, boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+
+% Sidetrack — interesting diversions and deeper explanations.
+\newtcolorbox{dssidetrack}{
+  title=Sidetrack, fonttitle=\bfseries\color{white},
+  colbacktitle=desilva-sidetrack-border, colback=desilva-sidetrack-bg,
+  colframe=desilva-sidetrack-border, boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+
+% Interlude — stories and historical context. (Platform filter emits InterludeBlock.)
+\newtcolorbox{InterludeBlock}{
+  title=Interlude, fonttitle=\bfseries\color{white},
+  colbacktitle=desilva-interlude-border, colback=desilva-interlude-bg,
+  colframe=desilva-interlude-border, boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  before upper={\needspace{0.4\textheight}}, breakable, enhanced
+}
+
+% Chapter End — summary and encouragement.
+\newtcolorbox{dschapterend}{
+  title=Chapter Summary, fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black, colback=blue!5, colframe=blue!60!black,
+  boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+
+% Uff! / Well... / Have Fun! — additional deSilva-voice callouts (defined for
+% completeness; the platform filter emits these for ::: uff / well / have-fun).
+\newtcolorbox{dsuff}{
+  title=Uff!, fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black, colback=orange!5, colframe=orange!70!black,
+  boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+\newtcolorbox{dswell}{
+  title=Well..., fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black, colback=blue!5, colframe=blue!60!black,
+  boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+\newtcolorbox{dshavefun}{
+  title=Have Fun!, fonttitle=\bfseries\color{white},
+  colbacktitle=magenta!60!black, colback=magenta!5, colframe=magenta!60!black,
+  boxrule=2pt, rounded corners,
+  left=15pt, right=15pt, top=10pt, bottom=10pt, before skip=20pt, after skip=20pt,
+  breakable, enhanced
+}
+
+\endinput

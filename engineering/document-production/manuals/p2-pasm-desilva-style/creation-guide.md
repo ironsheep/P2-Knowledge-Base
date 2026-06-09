@@ -14,6 +14,20 @@ This manual is part of a modular documentation system:
 
 **Rationale**: Cognitive load management - Core PASM2 alone is substantial enough for one focused manual.
 
+## Code Line Budget
+
+The colored code boxes do NOT wrap, so an over-long code line is an authorship
+defect caught by the `prepare-manual` line-length audit
+(`engineering/tools/validation/audit-code-line-length.py`).
+
+- **Max code columns (K): 76**
+- **Code-box style / font:** as of the 2026-06-09 platform migration this manual
+  rides the shared **platform** code boxes (`IOSPBlock` green PASM2 / `Spin2Block`
+  blue), Latin Modern Mono with the `numbers=left` gutter. It consumes the platform
+  code-box stack unchanged, so it **inherits the platform reference K** (calibrated
+  in `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget).
+  Re-measure only if this manual ever diverges its code font/box geometry.
+
 ## 📚 Content Sources & Production Method (2025-01-09 Addition)
 
 ### Primary Content Sources

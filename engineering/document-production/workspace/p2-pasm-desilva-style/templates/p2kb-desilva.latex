@@ -11,16 +11,22 @@
 
 \documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LOAD FOUNDATION LAYER ====================
-% DeSilva-specific foundation: pandoc compatibility, basic setup, pagination logic
-\usepackage{p2kb-desilva-foundation}
+% ==================== LOAD SHARED PLATFORM STACK ====================
+% Migrated 2026-06-09 onto the shared platform stack (was the bespoke
+% p2kb-desilva-foundation/content fork). Foundation: geometry, penalties,
+% titlesec, fontspec, caption, fig/table numbering, makeindex, fancyhdr.
+\usepackage{p2kb-platform-foundation}
+% Content: 5-color code-box family (Spin2Block/IOSPBlock/CORDICBlock/MultiCOGBlock/
+% AntipatternBlock), reference boxes, part handling.
+\usepackage{p2kb-platform-content}
 
-% ==================== LOAD CONTENT LAYER ====================
-% DeSilva-specific: 5-color code blocks and pedagogical environments
-\usepackage{p2kb-desilva-content}
+% ==================== LOAD DESILVA LOCAL OVERRIDE LAYER ====================
+% DeSilva-specific pedagogical prose callouts (Your Turn, Medicine Cabinet,
+% Sidetrack, Interlude, Chapter Summary, ...). Loaded AFTER platform-content.
+\usepackage{p2kb-desilva-local}
 
 % ==================== LOAD DIAGRAMS ====================
-% TikZ diagrams for COG and Hub memory layouts
+% TikZ diagrams for COG/Hub memory layouts (self-contained: loads its own tikz).
 \usepackage{p2kb-desilva-diagrams}
 
 % ==================== DOCUMENT STRUCTURE ====================

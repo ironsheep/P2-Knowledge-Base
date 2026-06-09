@@ -12,10 +12,11 @@
         "--toc-depth=1"
       ],
       "lua_filters": [
-        "p2kb-desilva-mnemonic-bold",
-        "p2kb-desilva-code-coloring",
-        "p2kb-desilva-semantic",
-        "p2kb-desilva-pagination"
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "Discovering P2 Assembly",

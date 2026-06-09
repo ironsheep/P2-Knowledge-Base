@@ -374,6 +374,14 @@ function Div(div)
     end
     table.insert(result, pandoc.RawBlock('latex', '\\end{InterludeBlock}'))
     return result
+
+  elseif classes:includes("chapterend") then
+    local result = {pandoc.RawBlock('latex', '\\begin{dschapterend}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dschapterend}'))
+    return result
   end
 
   -- Return div unchanged if not a recognized type
@@ -424,6 +432,18 @@ function CodeBlock(cb)
                        processed_text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{MultiCOGBlock}'
+    return pandoc.RawBlock('latex', latex_block)
+
+  -- Antipattern code: ```antipattern -> AntipatternBlock (red). "What NOT to do."
+  -- Mnemonics uppercased like the other code colors; line numbers on. The DeSilva
+  -- tutorial authors any "wrong way" caption as prose ABOVE this fence (not inside).
+  elseif classes:includes("antipattern") then
+    local processed_text = uppercase_mnemonics(cb.text)
+    local latex_block = '\\begin{AntipatternBlock}\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
+                       processed_text .. '\n' ..
+                       '\\end{Verbatim}\n' ..
+                       '\\end{AntipatternBlock}'
     return pandoc.RawBlock('latex', latex_block)
 
   -- Instruction syntax forms: ```syntax -> SyntaxBlock (slate, reference tier).
