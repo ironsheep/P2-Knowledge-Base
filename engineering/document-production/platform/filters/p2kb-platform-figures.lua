@@ -60,6 +60,38 @@ local function table_data_rows(t)
   return n
 end
 
+-- A "code box" block: a fenced CodeBlock, or a Div wrapping one (::: pasm2 etc.).
+-- These become the colored code boxes (IOSPBlock/Spin2Block/...) in
+-- p2kb-platform-code-coloring.lua, which runs AFTER this filter -- so here they
+-- are still CodeBlock / Div elements.
+local CODE_DIV_CLASSES = {
+  pasm2 = true, spin2 = true, iosp = true, pasm = true,
+  cordic = true, multicog = true, antipattern = true,
+}
+local function is_code_box(blk)
+  if blk.t == "CodeBlock" then return true end
+  if blk.t == "Div" and blk.classes then
+    for c in pairs(CODE_DIV_CLASSES) do
+      if blk.classes:includes(c) then return true end
+    end
+  end
+  return false
+end
+
+-- Line count of the code inside a code-box block (sizes the needspace reserve).
+local function code_box_lines(blk)
+  local cb = nil
+  if blk.t == "CodeBlock" then
+    cb = blk
+  elseif blk.t == "Div" then
+    pandoc.walk_block(blk, { CodeBlock = function(c) cb = c; return c end })
+  end
+  if not cb then return 1 end
+  local n = 1
+  for _ in cb.text:gmatch("\n") do n = n + 1 end
+  return n
+end
+
 -- Process blocks to find RawBlock + figurecaption Div pairs, AND bold-lead-in +
 -- table pairs (keep the label welded to its table). Runs before the table filter,
 -- so the table is still a pandoc Table element here (row count is available).
@@ -119,6 +151,20 @@ function Blocks(blocks)
         string.format("\\needspace{%d\\baselineskip}", n)))
       table.insert(result, current)
       i = i + 1
+    elseif is_bold_leadin(current) and next_block and is_code_box(next_block) then
+      -- Keep a bold lead-in label welded to the code box it introduces (e.g.
+      -- "**PASM2 Example:**" directly above a ```pasm2 block): reserve space for
+      -- the label + the box so a page break moves the whole unit instead of
+      -- stranding the label at the page foot (I/O "Document Conventions" p14).
+      -- Sized to the code's line count (+ a few lines for the box padding /
+      -- before-skip), capped so a long breakable box -- which splits across pages
+      -- anyway -- never over-reserves and forces a needless early break.
+      local n = code_box_lines(next_block) + 3
+      if n > 14 then n = 14 end
+      table.insert(result, pandoc.RawBlock("latex",
+        string.format("\\needspace{%d\\baselineskip}", n)))
+      table.insert(result, current)
+      i = i + 1
     else
       -- Not a figure or lead-in pattern, keep the block as-is
       table.insert(result, current)
@@ -149,11 +195,21 @@ function Pandoc(doc)
   end
 
   -- Walk back from block i to the nearest preceding Header within `lookback`.
+  -- When that header is the bottom of a run of IMMEDIATELY-consecutive headers
+  -- (e.g. a \section directly above the \subsection that introduces the diagram),
+  -- mark the OUTERMOST header of the run so the reserve sits before the WHOLE
+  -- heading stack -- otherwise the big reserve lands between the headings and the
+  -- outer one is stranded alone at the page foot (I/O Ch1 "1.2 Timing").
   local function reserve_before_heading(i, lookback, frac)
     local back = 0
     for j = i - 1, 1, -1 do
       back = back + 1
-      if blocks[j].t == "Header" then mark(j, frac); return end
+      if blocks[j].t == "Header" then
+        local k = j
+        while k - 1 >= 1 and blocks[k - 1].t == "Header" do k = k - 1 end
+        mark(k, frac)
+        return
+      end
       if back >= lookback then return end
     end
   end
@@ -203,17 +259,29 @@ function Pandoc(doc)
 
   local out = {}
   for i, b in ipairs(blocks) do
+    local prev_is_header = (i > 1 and blocks[i - 1].t == "Header")
     if needs_reserve[i] then
       table.insert(out, pandoc.RawBlock("latex",
         string.format("\\needspace{%.2f\\textheight}", needs_reserve[i])))
-    elseif b.t == "Header" and b.level and b.level >= 2 and b.level <= 4 then
-      -- Orphan-heading guard: reserve a few lines before every section /
-      -- subsection / subsubsection heading so a heading near the page bottom
-      -- moves to the next page WITH its first lines of content, instead of
-      -- being stranded alone at the foot of the page. Small fixed reserve (not
-      -- a \textheight fraction) so it never gaps the page like the larger
-      -- diagram/table reserves above; those take precedence via the if-branch.
-      table.insert(out, pandoc.RawBlock("latex", "\\needspace{3\\baselineskip}"))
+    elseif b.t == "Header" and b.level and b.level >= 2 and b.level <= 4
+           and not prev_is_header then
+      -- Orphan-heading guard, STACK-AWARE: reserve space before a section /
+      -- subsection / subsubsection heading so a heading near the page bottom moves
+      -- to the next page WITH its first lines of content instead of being stranded
+      -- at the foot. When a heading sits directly above more headings (section ->
+      -- subsection), the reserve must cover the WHOLE run + a couple of body lines
+      -- and be emitted ONCE before the run's first heading -- otherwise the outer
+      -- heading places, then an inner heading's own guard breaks the page and
+      -- strands the outer one (I/O §8.5 "Analog Output with DAC"). Inner headers
+      -- (prev_is_header) get no guard. Small fixed reserve (not a \textheight
+      -- fraction) so it never gaps the page like the diagram/table reserves above.
+      local run = 1
+      local j = i + 1
+      while blocks[j] and blocks[j].t == "Header" do run = run + 1; j = j + 1 end
+      local n = run * 2 + 2          -- ~2 lines per heading in the run + ~2 body lines
+      if n > 10 then n = 10 end
+      table.insert(out, pandoc.RawBlock("latex",
+        string.format("\\needspace{%d\\baselineskip}", n)))
     end
     table.insert(out, b)
   end
