@@ -1,31 +1,32 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
-## v2.3.0 (2026-06-10)
+## v3.0.0 (2026-06-10)
 
-**Content-accuracy release** — a complete chapter-by-chapter re-audit of every technical claim against the current P2 Knowledge Base corrected roughly thirty latent errors in instruction semantics, timings, and code examples. Presentation and structure are unchanged.
+**Content re-audit on the shared presentation platform** — every technical claim re-verified against the current P2 Knowledge Base, delivered on the common P2 manual presentation platform.
 
-### Corrected Instruction Semantics
+### Instruction Semantics
 
-- MUL/MULS now described as 16×16→32 (was 32×32→32); QMUL labeled unsigned (was "signed")
-- MERGEB described as a bit-merge, the inverse of SPLITB (was a byte shuffle)
-- QLOG/QEXP corrected to base-2 logarithm / 2^x (were "natural logarithm" / "e^x")
-- Removed two non-existent mnemonics — SCL (now a shift) and DRVRNOT (now DRVRND)
-- OUTH/OUTL clarified: they set the OUT bit only and do not change pin direction
+- MUL/MULS: 16×16→32 multiply; QMUL is unsigned
+- MERGEB: bit-merge, the inverse of SPLITB
+- QLOG/QEXP: base-2 logarithm and 2^x
+- OUTH/OUTL: set the OUT bit only, leaving pin direction unchanged
 
-### Corrected Timings and Values
+### Timings and Values
 
-- QDIV result latency is 55 clocks (was 30); CORDIC angle resolution and a spiral rotation angle corrected
-- Random hub-access and FIFO-depth figures aligned to the silicon (9–16 clocks; 19-stage FIFO)
-- COG load size stated as 504 longs ($000–$1F7); the COG code ceiling made consistent at 496 instructions
+- QDIV result latency is 55 clocks; CORDIC angle resolution and spiral rotation angles match the silicon
+- Random hub-access timing is 9–16 clocks; the FIFO is 19 stages deep
+- COG load size is 504 longs ($000–$1F7), with a 496-instruction code ceiling
 
-### Corrected Code Examples
+### Code Examples
 
-- LOCKTRY spin-locks now retry on failure — the carry condition was inverted in two examples
-- QVECTOR examples pass Y as the S operand (no SETQ); a COGINIT-passed value is now read from PTRA with MOV
-- The SKIP example demonstrates the correct LSB-first bit order; the servo-frame loop now terminates
-- SETSE edge/level mode bits, the EVENT_XRL description, the ADC sample period, and the PWM/streamer setup examples corrected
+- LOCKTRY spin-locks retry on failure with the correct carry polarity
+- QVECTOR examples pass Y as the S operand; a COGINIT-passed value is read from PTRA with MOV
+- The SKIP example uses LSB-first bit order, and the servo-frame loop terminates
+- SETSE edge/level modes, the EVENT_XRL description, the ADC sample period, and the PWM/streamer setup examples verified against the silicon
 
-*All corrections were verified against the current P2KB YAML and Silicon Doc; the full audit record is in `audit/content-reaudit-2026-06-10.md`.*
+### Presentation
+
+- Figures and tables are numbered with captions and collected in Lists of Figures and Tables; long tables and code blocks carry continuation markers across page breaks
 
 ---
 
