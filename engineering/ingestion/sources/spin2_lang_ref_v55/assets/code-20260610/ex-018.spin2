@@ -1,0 +1,5 @@
+PUB MinimalSpin2Program()         'first PUB method executes
+
+  REPEAT
+    PINWRITE(7..0, GETRND())      'write a random pattern to P7..P0
+    WAITMS(100)                   'wait 1/10th of a second, loop

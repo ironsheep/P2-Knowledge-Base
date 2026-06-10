@@ -1,0 +1,3 @@
+  x,y := ROTXY(xin,yin,theta)	'use both the x and y results
+  _,y := ROTXY(xin,yin,theta)	'use only the y result
+  x,_ := ROTXY(xin,yin,theta)	'use only the x result

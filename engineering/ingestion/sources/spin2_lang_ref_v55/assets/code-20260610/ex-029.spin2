@@ -1,0 +1,11 @@
+DAT
+
+Str0            BYTE    "Monkeys",0   'strings with symbols
+Str1            BYTE    "Gorillas",0
+Str2            BYTE    "Chimpanzees",0
+Str3            BYTE    "Humanzees",0
+
+StrList         WORD    @Str0         'in Spin2, these are offsets of strings relative to start of object
+                WORD    @Str1         'in Spin2, @@StrList[i] will return address of Str0..Str3 for i = 0..3
+                WORD    @Str2         'in PASM-only programs, these are absolute addresses of strings
+                WORD    @Str3         '(use of WORD supposes offsets/addresses are under 64KB)

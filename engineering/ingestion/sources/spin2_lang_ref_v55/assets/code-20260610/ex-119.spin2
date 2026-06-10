@@ -1,0 +1,12 @@
+Cog0  INIT $0000_0000 $0000_0000 load
+Cog0  INIT $0000_0D6C $0000_10BC jump
+Cog0  i = 0
+Cog0  i = 1
+Cog0  i = 2
+Cog0  i = 3
+Cog0  i = 4
+Cog0  i = 5
+Cog0  i = 6
+Cog0  i = 7
+Cog0  i = 8
+Cog0  i = 9

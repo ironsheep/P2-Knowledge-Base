@@ -1,0 +1,4 @@
+1x_11
+CON  _xinfreq =  32_000_000
+     _clkfreq = 297_500_000
+     _errfreq =     100_000

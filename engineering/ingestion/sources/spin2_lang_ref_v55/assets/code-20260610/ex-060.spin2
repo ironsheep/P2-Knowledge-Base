@@ -1,0 +1,10 @@
+VAR i
+
+PUB Go()
+  RECV := @GetPattern
+  REPEAT
+    PINWRITE(56 ADDPINS 7, !RECV())
+    WAITMS(125)
+
+PRI GetPattern() : Pattern
+  RETURN DECOD(i++ & 7)

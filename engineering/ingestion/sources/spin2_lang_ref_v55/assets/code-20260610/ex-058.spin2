@@ -1,0 +1,5 @@
+LongVar()                                         'no parameters and no return values
+LongVar(Par1, Par2)                               'two parameters and no return values
+Var := LongVar():1                                'no parameters and one return value
+Var1,Var2 := LongVar(Par1):2                      'one parameters and two return values
+Var1,Var2 := POLXY(LongVar(Par1,Par2,Par3):2)     'three parameters and two return values

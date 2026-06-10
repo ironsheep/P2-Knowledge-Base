@@ -1,0 +1,3 @@
+$00
+$FF
+UHEX_WORD_ARRAY(hub_pointer,size)

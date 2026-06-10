@@ -1,0 +1,14 @@
+@echo off
+set ERROR_FILE=error.txt
+if exist %ERROR_FILE% del /q /f %ERROR_FILE%
+if exist %1 set GOOD_SRC=1
+if exist %1.spin2 set GOOD_SRC=1
+if defined GOOD_SRC ( 
+    pnut_v48 %1 %2 %3
+    set pnuterror = %ERRORLEVEL%
+    for /f "tokens=*" %%i in (%ERROR_FILE%) do echo %%i 1>&2
+) else (
+    set pnuterror=-1
+    echo "Error: File NOT found - %1" 1>&2
+)
+exit %pnuterror%

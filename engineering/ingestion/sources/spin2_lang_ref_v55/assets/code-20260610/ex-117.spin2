@@ -1,0 +1,7 @@
+LONG xpos           'X position within the DEBUG Display (xpos<0 and ypos<0 if mouse is outside)
+LONG ypos           'Y position within the DEBUG Display
+LONG wheeldelta     'Scroll-wheel delta, 0 or +/-1 if changed (the DEBUG Display must have focus)
+LONG lbutton        'Left-button state, 0 or -1 if pressed
+LONG mbutton        'Middle-button state, 0 or -1 if pressed
+LONG rbutton        'Right-button state, 0 or -1 if pressed
+LONG pixel          'Pixel color at mouse position, $00_RR_GG_BB or -1 if outside the DEBUG Display

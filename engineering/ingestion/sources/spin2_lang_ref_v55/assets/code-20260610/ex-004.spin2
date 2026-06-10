@@ -1,0 +1,20 @@
+{Spin2_v50}
+
+This code…
+
+symbol1 DITTO   8                             'symbol allowed here
+        wypin   pin_nco+$$,#pin_base+$$       'no symbols allowed within, use #$+n
+symbol2 DITTO   END                           'symbol allowed here
+
+Generates…
+
+symbol1
+        wypin   pin_nco+0,#pin_base+0         '$$ iterated from 0 to 7
+        wypin   pin_nco+1,#pin_base+1
+        wypin   pin_nco+2,#pin_base+2
+        wypin   pin_nco+3,#pin_base+3
+        wypin   pin_nco+4,#pin_base+4
+        wypin   pin_nco+5,#pin_base+5
+        wypin   pin_nco+6,#pin_base+6
+        wypin   pin_nco+7,#pin_base+7
+symbol2

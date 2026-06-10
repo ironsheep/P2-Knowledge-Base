@@ -1,0 +1,22 @@
+  CASE flag
+    0: CASE_FAST chr
+         0:     BYTEFILL(@screen, " ", screen_size)
+                col := row := 0
+         1:     col := row := 0
+         2..7:  flag := chr
+                RETURN
+         8:     IF col
+                  col--
+         9:     REPEAT
+                  out(" ")
+                WHILE col & 7
+         10:    RETURN
+         11:    color := $00
+         12:    color := $80
+         13:    newline()
+         OTHER: out(chr)
+
+    2:    col := chr // cols
+    3:    row := chr // rows
+    4..7: background0_[flag-$04] := chr << 8
+  flag := 0

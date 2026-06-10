@@ -1,0 +1,8 @@
+This code…
+
+  IF_C  DEBUG   ("Hello")        'only execute DEBUG on condition
+
+Generates…
+
+  IF_NC SKIP    #1               'on opposite condition, skip next instruction
+        DEBUG   ("Hello")        'BRK instruction used for DEBUG

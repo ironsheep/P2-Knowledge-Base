@@ -1,0 +1,24 @@
+DAT             org
+
+clock_change    rep     #99,#1                  'use REP to stall all interrupts (including debug)
+
+                andn    old_mode,#%11           'switch to 20 MHz while maintaining old pll/xtal settings
+                hubset  old_mode
+
+                mov     old_mode,new_mode       'establish new pll/xtal settings while staying at 20 MHz
+                andn    old_mode,#%11
+                hubset  old_mode
+
+                waitx   ##20_000_000/100        'allow 10ms for new settings to stabilize
+
+                mov     old_mode,new_mode       'switch to new settings
+                hubset  old_mode
+
+                dirh    #63                     'must enable smart pin to update long repository
+                wxpin   new_freq,#63            'write new_freq to rx pin long repository
+        _ret_   dirl    #63                     'put smart pin back to sleep, REP cancels upon _ret_
+
+
+old_mode        res     1
+new_mode        res     1
+new_freq        res     1

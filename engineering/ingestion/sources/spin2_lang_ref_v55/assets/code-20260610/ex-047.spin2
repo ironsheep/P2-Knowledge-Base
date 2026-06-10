@@ -1,0 +1,4 @@
+AnyVar[index].[bitfield]
+HubVar.BYTE[index].[bitfield]
+LONG[address][index].[bitfield]
+REG[register][index].[bitfield]

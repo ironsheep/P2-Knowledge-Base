@@ -1,0 +1,8 @@
+\a = 7, alarm bell
+\b = 8, backspace
+\t = 9, tab
+\n = 10, new line
+\f = 12, form feed
+\r = 13, carriage return
+\\ = 92, "\"
+\x01 to \xFF = $01 to $FF

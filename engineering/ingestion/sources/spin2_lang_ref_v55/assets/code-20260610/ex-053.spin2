@@ -1,0 +1,6 @@
+  x,y := SumPoints(POLXY(rho1,theta1), POLXY(rho2,theta2))
+
+…where…
+
+PRI SumPoints(x1, y1, x2, y2) : x, y
+  RETURN x1+x2, y1+y2

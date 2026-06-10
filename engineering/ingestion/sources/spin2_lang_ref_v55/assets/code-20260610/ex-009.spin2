@@ -1,0 +1,7 @@
+fpx POW fpy  'returns fpx to the power of fpy, 3.0 POW 4.0 = 81.0
+LOG2 fp      'returns the base-2 log of fp, LOG2 257.0 = 8.005625
+EXP2 fp      'returns 2 to the power of fp, EXP2 8.005625 = 257.0
+LOG10 fp     'returns the base-10 log of fp, LOG10 150.0 = 2.176091
+EXP10 fp     'returns 10 to the power of fp, EXP10 2.176091 = 150.0
+LOG fp       'returns the natural log of fp, LOG 0.0001 = -9.210340
+EXP fp       'returns e to the power of fp, EXP -9.210340 = 0.0001

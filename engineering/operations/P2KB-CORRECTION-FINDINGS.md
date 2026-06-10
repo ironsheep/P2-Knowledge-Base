@@ -1327,3 +1327,51 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 **Authority cited:** Spin2 v51 spec (authority that defines these constants): /workspaces/P2-Knowledge-Base/engineering/ingestion/sources/spin2-v51/spin2-v51-narrative.txt:5050 ("P_ADC_3X ... ADC 3.16x → IN, output OUT") and :5054 ("P_ADC_30X ... ADC 31.6x → IN, output OUT"). Manual: …
 
 **Proposed correction (verify first):** Leave the manual unchanged (it is correct). Fix the YAML data set to the precise √10-spaced gain ladder per the Spin2 v51 spec: in smart-pin-11000-adc-internal-clock.yaml change line 147 to "P_ADC_3X - 3.16x gain" and line 149 to "P_ADC_30X - 31.6x gain"; in addon-goertzel-touch.yaml correct the "3x" labels (lines 91 and 155) to "3.16x". Route to the P2KB corrections register.
+
+## Spin2 v55 delta-ingestion conflict audit — 2026-06-10 (F-098..F-100)
+
+Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingestion/sources/spin2_lang_ref_v55/`) as a delta over the prior v51a baseline (`ingest-source` skill, first run). The v52→v55 language extensions were **already present** in the KB (ingested earlier, likely from PNut release notes), so there was **no gap-fill** — but the conflict audit (each feature gate boundary-probed against `pnut-ts v1.55.0`, the PNut-v55-ratified compiler) found three defects. ENDIANL/ENDIANW (`{Spin2_v52}`), OFFSETOF (`{Spin2_v53}`), and struct-bitfields (`{Spin2_v45}` enforced, `v54` intent) were **verified correct** — no action.
+
+### F-098 — `NEXT`/`QUIT` level: fabricated `NEXTN`/`QUITN` keywords + wrong range + inverted semantics + over-claimed gate  ·  `CONFIRMED` (compiler-probed, twice)
+
+**Files (5):** `language/spin2/constructs/next.yaml`, `constructs/quit.yaml`, `constructs/repeat.yaml`, `language/spin2/keywords/NEXT.yaml`, `keywords/QUIT.yaml`
+
+**What's wrong:**
+1. **Fabricated keyword forms `NEXTN`/`QUITN`** — these do not exist. The real form is `NEXT level` / `QUIT level` (keyword, space, integer). `constructs/next.yaml`/`quit.yaml`/`repeat.yaml` document `NEXTN`/`QUITN` with examples (`NEXTN 2`, `QUITN 2`).
+2. **Wrong range `1-16` / "maximum level is 16"** — the valid range is **1-15**.
+3. **Inverted semantics** — the YAMLs say "level 1 = innermost loop (default)". Actual: bare `NEXT`/`QUIT` targets the **current** loop; `NEXT 1`/`QUIT 1` targets the **1st-outer** loop, counting **outward** (so `QUIT 1` requires ≥2 nesting, `NEXT 2` requires ≥3).
+4. **Over-claimed gate** — `NEXT.yaml`/`QUIT.yaml` imply a `{Spin2_v52}` requirement; the compiler does **not** enforce one (the integer form compiles at `{Spin2_v41}`).
+
+**Evidence (pnut-ts v1.55.0; verified independently by the v55 delta-audit agent AND a second hand-probe):**
+- `nextn 2` and `quitn 2` (properly nested) → `error: Expected an instruction or variable` (keyword unrecognized — fabricated).
+- `next 16` → `error: NEXT/QUIT level must be from 1 to 15` (range is 1-15).
+- `quit 1` inside 2 nested `repeat`s → compiles clean (outward counting; `QUIT 1` = 1st-outer).
+- `next 2` with explicit `{Spin2_v41}` → only `error: NEXT/QUIT is not sufficiently nested…` (a nesting error, no version-gate error → ungated).
+- v55 spec `spin2-v55-text.txt` (v52 entry): "NEXT and QUIT can now be followed by an integer 1..15 to indicate an alternate" loop level.
+
+**Proposed correction (verify first):** (a) `constructs/next.yaml`,`quit.yaml`,`repeat.yaml` — replace every `NEXTN`/`QUITN` with `NEXT level`/`QUIT level` (and `QUITN 2`→`QUIT 1` etc.). (b) `keywords/NEXT.yaml`,`QUIT.yaml` — range `1-16`→`1-15`, "maximum level is 16"→"15"; rewrite semantics to outward-counting (bare = current loop; `N` = N-th outer); drop the `{Spin2_v52}` gate claim (mark ungated; `v52` is edition-of-introduction only). Honor Sacred Rule #7 on any `related:` churn.
+
+### F-099 — `debug-end-session.yaml` invents a mechanism AND omits the real documented behavior + purpose  ·  `CONFIRMED` (vs v55 spec; ground-truthed 2026-06-10)
+
+**File:** `language/spin2/constants/debug-end-session.yaml`
+
+**The feature is REAL and its core facts are CORRECT** — constant, **value 27**, gate **`{Spin2_v52}`** (compiler-verified), and "closes the DEBUG window(s)" are all right. This is a rewrite-and-**enrich**, not a deletion. **pnut-ts implements it (no compiler bug):** `debug(DEBUG_END_SESSION)` compiles under `{Spin2_v52}` and the symbol is a usable constant; the `{Spin2_v52}` gate is enforced (fails at v41/v51); value confirmed **27** via a compile-time divide-by-zero oracle (`1/(DEBUG_END_SESSION-27)` → "Divide by zero", while `-26` compiles clean). The runtime side-effects (DEBUG.LOG/PNut close, P2 continues) are the DEBUG **host** (`pnut-term`)'s job, not the compiler's — nothing missing on the compiler side.
+
+**What's wrong — two parts, the omission being the larger:**
+1. **Invented mechanism.** The `debug_behavior` steps (lines 59-64) — "Character code 27 sent to debug display" → "Debug display **sets DebugActive = false**" → "Debug window closes" — describe an internal flag/sequence that **appears nowhere in v55**. Likewise the description (lines 12-14) "sets DebugActive to false".
+2. **Omits the actual documented behavior and the whole purpose.** v55 (`spin2-v55-text.txt:101-107`, verbatim) states `DEBUG(DEBUG_END_SESSION)` was **"added for facilitating AI-assisted code development"**, and when it executes: **"Any open DEBUG.LOG file and DEBUG window(s) get closed. If `PNut <filename> -rd` was used to launch PNut, PNut closes, as well. The P2 continues executing."** The YAML mentions **none** of: the DEBUG.LOG-file close (v55's *first* effect), the PNut `-rd` close, the **"P2 continues executing"** fact, or the AI-dev-loop purpose (assistant deletes DEBUG.LOG → recompiles `-rd` → waits for DEBUG.LOG to close → reads results).
+3. **Unsourced notes:** "Value is 27 (**ASCII ESC character**)" and "**Equivalent to DEBUG(27)**" — v55 states neither (27 = 0x1B *is* ESC arithmetically, but v55 treats this as a recognized DEBUG sentinel, not an escape char).
+
+**Evidence:** v55 spec `spin2-v55-text.txt:101-107` (behavior + purpose, verbatim) and `:152` (symbol table: `DEBUG_END_SESSION … (27) for use in DEBUG … {Spin2_v52}`). Runtime behavior is not compiler-probeable; v55 is the authority.
+
+**Proposed correction (verify first):** Keep value 27 + `{Spin2_v52}`. Replace the invented `debug_behavior`/`DebugActive` content with the v55-sourced behavior: closes any open **DEBUG.LOG file** and **DEBUG window(s)**; closes **PNut** if launched with `-rd`; **the P2 continues executing**. Add the purpose ("facilitating AI-assisted code development" — the DEBUG.LOG close is the signal an AI tool waits on). Drop "ASCII ESC character" and the unsourced "Equivalent to DEBUG(27)" unless separately verified.
+
+### F-100 — `movbyts.yaml` gating field is ambiguous (feature is ungated, not v52-enforced)  ·  `CONFIRMED` (compiler) · minor
+
+**File:** `language/spin2/methods/movbyts.yaml`
+
+**What's wrong:** Carries `minimum_version: "v52"` (a bare field readable as an enforced compiler gate) while its own prose correctly says "no version directive required". The compiler does **not** enforce a gate — `MOVBYTS(...)` compiles at `{Spin2_v41}` and with no directive. Inconsistent, too, with its same-batch siblings `endianl.yaml`/`endianw.yaml` which use structured `requires_version`/`version_directive` (and ARE genuinely v52-gated). This is the same "required-directive claim refuted" class as F-095 (debug[N]).
+
+**Evidence:** pnut-ts v1.55.0 boundary-probe — `MOVBYTS` compiles at `{Spin2_v41}`/no-directive (ungated); contrast `ENDIANL` which fails below `{Spin2_v52}`.
+
+**Proposed correction (verify first):** Make the ungated status explicit/machine-readable (e.g. `requires_version: none` + a note: "Introduced in PNut/pnut_ts v52; the compiler does NOT enforce a version directive — verified by boundary probe. 'v52' is the edition of introduction, not an enforced gate."). Per [[reference_language_gating_is_yaml_golden]], the YAML is the golden home for gating — it must read unambiguously.

@@ -1,0 +1,8 @@
+PUB go() | i
+
+        ORGH               'execute PASM code from hub with local variable access
+        sub	i,#1          'SUB, 1 long
+        debug(uhex(i))     'DEBUG, 1 long
+        long	0[$FFFB]      'lots of NOPs, $FFFB longs
+        debug(sdec(i))     'DEBUG, 1 long, followed by RET, 1 long
+        END                'end of PASM hub code, at limit of $FFFF longs

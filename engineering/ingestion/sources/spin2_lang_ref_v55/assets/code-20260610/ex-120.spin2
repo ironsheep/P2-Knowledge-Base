@@ -1,0 +1,10 @@
+CON _clkfreq = 10_000_000       'set 10 MHz clock (assumes 20 MHz crystal)
+
+DAT     ORG
+
+        MOV     i,#9            'set i to 9
+loop    DEBUG   (UHEX_LONG(i))  'debug, output i in hex
+        DJNF    i,#loop         'decrement i and loop if not -1
+        JMP     #$              'don't go wandering off, stay here
+
+i       RES     1               'reserve one register as 'i'

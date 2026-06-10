@@ -1,0 +1,4 @@
+ptrvar                  'the pointed-to variable, has same usage syntax as a regular variable
+@ptrvar                 'the address of the pointed-to variable, equals the pointer variable
+[ptrvar]                'the pointer variable, equals the address of the pointed-to variable
+@[ptrvar]               'the address of the pointer variable

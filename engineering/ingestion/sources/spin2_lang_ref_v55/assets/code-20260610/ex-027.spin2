@@ -1,0 +1,36 @@
+PUB go()
+PUB SetupADC(pins)
+PUB StartTx(pin, baud) : Okay
+PRI RotateXY(X, Y, Angle) : NewX, NewY | p,q,r
+PRI Shuffle() | i, j
+PRI FFT1024(^LONG DataPtr) | a, b, x[1024], y[1024]
+PRI ReMix() : Length, SampleRate | WORD Buff[20000], k
+PRI StrCheck(StrPtrA, StrPtrB) : Pass | i, BYTE Str[64]
+PRI Analyze(^StructTypeX pX) | StructTypeX sX[10]
+0
+1
+2
+3
+0
+1
+0
+2
+1
+0
+0
+1
+2
+0
+0
+2
+1
+0
+0
+0
+0
+3 longs
+2 longs
+1+1+1024+1024 longs
+20000 words + 1 long
+1 long + 64 bytes
+sizeof(StructTypeX) x 10

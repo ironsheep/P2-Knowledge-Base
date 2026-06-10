@@ -1,0 +1,10 @@
+DAT             ORGH    $400          'begin a hub-exec program at $400 (no symbol allowed before ORGH)
+                                      'COGINIT(32+16, @IncPins, 0) will launch this program in a free cog
+IncPins         MOV     DIRA,#$FF     'In Spin2, IncPins is the 'MOV' instruction (long)
+Loop            ADD     OUTA,#1       'In Spin2, @IncPins is the hub address of the 'MOV' instruction
+                JMP     #Loop         'In PASM, Loop is the hub address ($00404) of the 'ADD' instruction
+                JMP     #$            '$ is the current origin, which steps by 4 with each hub-exec instruction
+                ORGH                  'set hub-exec mode, hub origin = $00400, origin limit = $100000 (both defaults)
+                ORGH    $1000         'set hub-exec mode, hub origin = $01000, origin limit = $100000 (default limit)
+                ORGH    $FC000,$FC800 'set hub-exec mode, hub origin = $FC000, origin limit = $FC800
+                FIT     $2000         'test to make sure hub address has not exceeded $2000

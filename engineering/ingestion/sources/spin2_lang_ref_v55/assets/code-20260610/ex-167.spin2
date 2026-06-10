@@ -1,0 +1,3 @@
+	HUBSET  ##clkmode_ & !3    'start crystal/PLL, stay in RCFAST
+	WAITX   ##20_000_000/100   'wait 10ms
+	HUBSET  ##clkmode_         'switch to crystal/PLL

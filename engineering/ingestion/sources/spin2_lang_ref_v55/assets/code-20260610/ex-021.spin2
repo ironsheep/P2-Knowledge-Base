@@ -1,0 +1,16 @@
+CON  EnableFlow = 8                'single assignments
+     DisableFlow = 4
+     ColorBurstFreq = 3_579_545
+     UpperNibs = $F0F0F0F0
+
+     PWM_base = 8
+     PWM_pins = PWM_base ADDPINS 7
+
+     x = 5, y = -5, z = 1          'comma-separated assignments
+
+     HalfPi = 1.5707963268         'IEEE-754 single-precision float values
+     QuarPi = HalfPi / 2.0
+     NegG   = -1e9
+     Micro  = 1e-6
+
+     j = ROUND(4000.0 / QuarPi)    'float to integer

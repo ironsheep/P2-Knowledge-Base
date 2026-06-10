@@ -1,0 +1,4 @@
+VAR  ^BYTE a, b, c
+VAR  ^WORD d, e, f
+VAR  ^LONG g, h, i
+VAR  ^structname j, k, l

@@ -14,24 +14,38 @@ Systematic workflow for extracting, validating, and cataloging source code snipp
 
 ### 1. Format Assessment & Preparation
 
-**PDF-First Strategy**: Always prefer PDF format for code extraction
+> **SUPERSEDED 2026-06-10 (Spin2 v55 ingestion).** The original "PDF-First /
+> request-a-PDF-if-only-DOCX" rule was a tooling-era workaround. The
+> authoritative procedure is now the **`ingest-source` skill** (`.claude/skills/`),
+> which is **DOCX-primary, validator-driven**. Rationale below.
 
-**Why PDF is Critical**:
-- **Exact whitespace preservation** - Critical for Spin2 (deeply whitespace sensitive) and PASM2 (whitespace sensitive)
-- **Visual fidelity** - What you see is what you extract, no interpretation layer
-- **Font-based detection** - Can identify code blocks by monospace font properties
-- **No conversion artifacts** - Direct extraction from final formatted document
+**DOCX-primary, `pnut_ts`-validated** (not PDF-first):
+- A `.docx` carries the **literal character stream** in `word/document.xml` —
+  exact spaces/tabs are *in the XML*. PDF text extraction *reconstructs* spacing
+  from glyph X-positions, the same mechanism that causes table column-bleed.
+  For whitespace-sensitive Spin2, DOCX is at least as faithful — **verified on
+  v55** (nested `REPEAT`/`ORG`/`END` indentation extracted verbatim).
+- **The compiler is the fidelity gate.** Extract from DOCX, compile every
+  example with `pnut_ts` (use `-d` for DEBUG-window code). If it compiles clean,
+  it is faithful — the validator settles it, not the format.
 
-**Format Decision Tree**:
-1. **PDF Available** → Proceed with extraction
-2. **DOCX Only** → Request human intervention for PDF
-3. **No Source** → Document not ready for code extraction
+**Format decision (validator-driven):**
+1. **DOCX available** → primary extraction source. Compile-validate each example.
+2. **A specific example fails / shows whitespace damage** → fall back to the **PDF
+   for that example only**; diff the two extractions, keep the faithful one.
+3. **No source** → not ready for code extraction.
 
-**Human Escalation Protocol**:
-- **Trigger**: Target document only available as DOCX
-- **Request**: "Please provide PDF version of [Document] for code extraction"
-- **Rationale**: "PDF format ensures exact whitespace preservation critical for P2 code accuracy"
-- **Action**: Wait for PDF provision before proceeding
+**⚠️ DOCX auto-correct hazards — normalize before validating** (Word/Docs silently
+substitute characters that break code and look like "fragment" failures):
+- **`…` (U+2026) vs `...`** — `...` (three ASCII periods) is a Spin2 **line-continuation**
+  marker (v37+). Auto-correct can fold `...`→`…`, which the compiler rejects
+  (`Unrecognized character $2026`). Classify by context: `…` at a code line *end*
+  = mangled continuation → restore `...`; mid-sentence `…` = prose elision (the
+  block is mis-classified prose — drop it).
+- Curly quotes `‘ ’ “ ”` → straight `' "`; en/em dash `– —` → `-`; nbsp → space.
+- **Font-based detection over-includes prose-in-monospace**: a block that fails
+  to compile AND is pure prose/emoji/table-cell is not a code example — validate,
+  then filter it out (don't count it as a failure).
 
 ### 2. Automated Code Detection & Extraction
 

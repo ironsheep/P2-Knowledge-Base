@@ -1,0 +1,3 @@
+FIELD[fieldpointer + @record].
+FIELD[fieldpointer + SectorBase(x)].
+FIELD[fieldpointer - 4].

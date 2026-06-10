@@ -1,0 +1,3 @@
+$0000
+$FFFF
+UHEX_LONG_ARRAY(hub_pointer,size)

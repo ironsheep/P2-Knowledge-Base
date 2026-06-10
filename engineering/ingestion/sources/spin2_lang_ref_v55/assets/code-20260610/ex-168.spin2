@@ -1,0 +1,11 @@
+	RDLONG  x,#@clkmode       'read clkmode into x
+	WRLONG  x,#@clkmode       'write x to clkmode
+
+	RDLONG  x,#@clkfreq       'read clkfreq into x
+	WRLONG  x,#@clkfreq       'write x to clkfreq
+
+	SETQ    #2-1              'read clkmode and clkfreq into x and x+1
+	RDLONG  x,#@clkmode
+
+	SETQ    #2-1              'write x and x+1 to clkmode and clkfreq
+	WRLONG  x,#@clkmode

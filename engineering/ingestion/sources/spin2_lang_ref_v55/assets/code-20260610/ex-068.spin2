@@ -1,0 +1,6 @@
+structure~			'fill structure with $00's
+structure~~			'fill structure with $FF's
+structureA := structureB	'copy structure's contents
+structureA :=: structureB	'swap structures' contents
+
+structure := 1,2,3		'write arbitrary longs to a structure (15 longs, max)

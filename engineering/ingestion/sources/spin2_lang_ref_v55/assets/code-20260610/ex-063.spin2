@@ -1,0 +1,11 @@
+PUB go() | x
+
+  REPEAT
+
+    ORG                 'ORG/ORGH must be indented to the intended scope level
+        GETRND  WC      'rotate a random bit into x
+        RCL     x,#1
+    END
+
+    PINWRITE(56 ADDPINS 7, x)     'output x to the P2 Eval board's LEDs
+    WAITMS(100)

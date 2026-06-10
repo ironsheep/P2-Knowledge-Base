@@ -1,0 +1,5 @@
+CON _clkfreq = 10_000_000      'set 10 MHz clock (assumes 20 MHz crystal)
+
+PUB go() | i
+  REPEAT i FROM 0 TO 9         'count from 0 to 9
+    DEBUG(UDEC(i))             'debug, output i

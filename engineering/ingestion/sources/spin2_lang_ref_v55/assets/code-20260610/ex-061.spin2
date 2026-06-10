@@ -1,0 +1,3 @@
+  IF cog                                 'if cog <> 0
+    COGSTOP(cog-1)                       '..then stop cog
+    PINCLEAR(av_base_pin_ ADDPINS 4)     '..then clear pin mode(s)

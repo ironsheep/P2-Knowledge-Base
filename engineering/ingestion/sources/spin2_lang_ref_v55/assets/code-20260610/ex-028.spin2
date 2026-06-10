@@ -1,0 +1,35 @@
+DAT                                               'symbols without data take the size of the previous declaration
+
+HexChrs         BYTE    "0123456789ABCDEF"        'HexChrs is a byte symbol that points to the "0"
+symbol0                                           'symbol0 is a byte symbol that points after the "F"
+
+Pattern         WORD    $CCCC,$3333,$AAAA,$5555   'Pattern is word symbol that points to $CCCC
+symbol1                                           'symbol1 is a word symbol that points after $5555
+
+Billion         LONG    1_000_000_000             'Billion is a long symbol that points to 1_000_000_000
+symbol2                                           'symbol2 is a long symbol that points after 1_000_000_000
+
+DoNothing       NOP                               'DoNothing is a long symbol that points to a NOP instruction
+symbol3                                           'symbol3 is a long symbol that points after the NOP instruction
+
+symbol4         BYTE                              'symbol4 is a byte symbol that points to $78
+symbol5         WORD                              'symbol5 is a word symbol that points to $5678
+symbol6         LONG                              'symbol6 is a long symbol that points to $12345678
+
+                LONG    $12345678                 'long value $12345678
+
+                LONG    1.0                       'IEEE-754 1.0 is long value $3F800000
+
+                BYTE    100[64]                   '64 bytes of value 100
+
+                BYTE    10, WORD 500, LONG $FC000 'BYTE/WORD/LONG overrides allowed for single values
+                BYTE    FVAR 99, FVARS -99        'FVAR/FVARS overrides allowed, can be read via RFVAR/RFVARS
+
+                BYTEFIT -$80,$FF                  'size-check data, overrides allowed for single values
+                WORDFIT -$8000,$FFFF              'size-check data, overrides allowed for single values
+
+BaseLine        line                              'BaseLine is a symbol marking the start of a 'line' structure
+                LONG    0,0,1919,1079             'define the contents of the 'line' structure
+FileDat         FILE    "Filename"                'include binary file, FileDat is a byte symbol that points to file
+                ALIGNW                            'word-align to hub by emitting a zero byte, if necessary
+                ALIGNL                            'long-align to hub by emitting 1 to 3 zero bytes, if necessary

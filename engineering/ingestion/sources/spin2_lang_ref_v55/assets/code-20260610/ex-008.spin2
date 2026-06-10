@@ -1,0 +1,3 @@
+CON STRUCT sABC(Method, Time)
+VAR sABC ABC
+PUB/PRI… ABC := ABC.Method(ABC.Time) : sABC

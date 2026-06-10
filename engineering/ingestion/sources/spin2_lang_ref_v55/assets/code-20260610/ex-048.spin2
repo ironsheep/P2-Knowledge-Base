@@ -1,0 +1,6 @@
+.[BitfieldCon]
+13..9
+CON BitfieldCon = 9 ADDBITS 4             'BitfieldCon useful in PASM, too
+.[BitfieldVar]
+?
+BitfieldVar := BaseBit ADDBITS ExtraBits  'wraps if BaseBit + ExtraBits > 31

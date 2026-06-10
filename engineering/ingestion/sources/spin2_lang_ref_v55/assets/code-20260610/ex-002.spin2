@@ -1,0 +1,6 @@
+ptrvar		'read/modify/write the pointed-to variable
+ptrvar[++]	'read/modify/write the pointed-to variable, post-inc pointer
+ptrvar[--]	'read/modify/write the pointed-to variable, post-dec pointer
+[++]ptrvar	'read/modify/write the pointed-to variable, pre-inc pointer
+[--]ptrvar	'read/modify/write the pointed-to variable, pre-dec pointer
+[ptrvar]	'read/modify/write the pointer variable, itself

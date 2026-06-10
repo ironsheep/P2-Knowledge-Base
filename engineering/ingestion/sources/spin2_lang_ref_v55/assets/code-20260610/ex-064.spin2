@@ -1,0 +1,12 @@
+PUB go()
+
+  REPEAT
+    CALL(@random)
+    PINWRITE(56 ADDPINS 7, pr0)
+    WAITMS(100)
+
+
+DAT     ORGH    'hub PASM program to rotate a random bit into x
+
+random  GETRND  WC
+ _RET_  RCL     pr0,#1

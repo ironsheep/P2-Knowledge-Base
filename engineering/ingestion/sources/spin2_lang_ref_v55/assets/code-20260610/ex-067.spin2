@@ -1,0 +1,35 @@
+{Spin2_v46}
+
+CON  STRUCT sPoint(byte x, byte y)
+     STRUCT sLine(sPoint a, sPoint b, byte color)
+
+     LineCount = 100
+
+VAR  sLine Line[LineCount]              'Line is an array of sLine structures
+
+
+PUB go() | i
+
+  debug(`plot myplot size 256 256 hsv8x update)
+
+  repeat
+    repeat LineCount with i             'set up random lines
+      Line[i].a.x := getrnd()
+      Line[i].a.y := getrnd()
+      Line[i].b.x := getrnd()
+      Line[i].b.y := getrnd()
+      Line[i].color := getrnd()
+
+    drawLines(@Line, LineCount)         'draw them by passing Line base-structure address
+
+
+PRI drawLines(^sLine pLine, count) | i  'pLine is a structure pointer of type sLine
+
+  debug(`myplot clear linesize 2)
+
+  repeat count with i
+    debug(`myplot color `(pLine[i].color))
+    debug(`myplot set  `(pLine[i].a.x, pLine[i].a.y))
+    debug(`myplot line `(pLine[i].b.x, pLine[i].b.y))
+
+  debug(`myplot update)

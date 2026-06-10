@@ -2,7 +2,7 @@
 
 **Purpose**: Track how all documents relate, their sources, and trust levels  
 **Living Document**: Updated every time we add new documents  
-**Last Updated**: August 15, 2025
+**Last Updated**: June 10, 2026
 
 ## Lineage Philosophy
 
@@ -11,6 +11,18 @@ Every document in our knowledge base has:
 - **Trust lineage**: How reliable the information is
 - **Dependency chain**: What depends on this document
 - **Overall trust**: Combined assessment for user confidence
+
+## Supersessions
+
+- **Spin2 language reference: v51a → v55 (2026-06-10).** `spin2_lang_ref_v55`
+  (Parallax Spin2 Documentation v55, 2026-05-07) supersedes `spin2-v51` as the
+  authoritative source for **Spin2 language facts** — it is the **matched-compiler
+  edition** (pnut-ts v1.55.0 is ratified against PNut v55). Ingested as a *delta*
+  (v52→v55) via the `ingest-source` skill; the v51 extraction is retained for
+  lineage/diff. Delta features (`ENDIANL`/`ENDIANW`/`OFFSETOF`/`MOVBYTS`,
+  structure bitfields, `NEXT`/`QUIT` levels, `DEBUG_END_SESSION`) were already
+  in the KB; the audit confirmed 4 and routed 3 defects to the corrections
+  register (F-098..F-100). See `sources/spin2_lang_ref_v55/spin2-v55-complete-extraction-audit.md`.
 
 ## Precise Source Attribution
 

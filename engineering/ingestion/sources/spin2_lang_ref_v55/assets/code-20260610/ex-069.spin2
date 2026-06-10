@@ -1,0 +1,8 @@
+CON _clkfreq = 10_000_000
+
+PUB go() | p, k
+
+  p := ^@k.[23..21]   'get a pointer to three bits within k
+
+  repeat 9
+    debug(ubin_long(k), udec(field[p]++))   'show k and three bits via p

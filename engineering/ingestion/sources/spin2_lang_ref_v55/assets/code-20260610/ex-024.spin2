@@ -1,0 +1,7 @@
+OBJ  vga       : "VGA_Driver"                 'instantiate "VGA_Driver.spin2" as "vga"
+
+     mouse     : "USB_Mouse"                  'instantiate "USB_Mouse.spin2" as "mouse"
+
+     pwm       : "PWM_Driver" | p = 8, w = 4  'instantiate "PWM_Driver.spin2" as "pwm" with parameters
+
+     v[16]     : "VocalSynth"                 'instantiate an array of 16 objects, v[0] through v[15]

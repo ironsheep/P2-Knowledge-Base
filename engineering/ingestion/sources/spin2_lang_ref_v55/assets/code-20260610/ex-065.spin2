@@ -1,0 +1,17 @@
+PUB go()
+
+  REGLOAD(@chunk)    'load self-defined chunk from hub into registers
+
+  REPEAT
+    CALL(#start)     'call program within chunk at register address
+    WAITMS(100)
+
+DAT
+
+chunk   WORD    start,finish-start-1  'define chunk start and size-1
+
+        ORG     $100                  'org can be $000..$120-size
+
+start   DRVRND  #0 ADDPINS 7	         'some code
+ _RET_  DRVNOT  #8                    'more code + return
+finish

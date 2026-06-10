@@ -1,0 +1,4 @@
+CON STRUCT sMulti(A, B .tnib[31..28] .bnib[3..0]) 'declaration - longs with bits
+VAR sMulti vMulti                                 'instantiation
+vMulti.A, vMulti.B                                'long members
+vMulti.B.tnib, vMulti.B.bnib                      'long bitfield members

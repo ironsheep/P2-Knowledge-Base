@@ -1,0 +1,38 @@
+CON
+
+  STRUCT sPoint(x, y)
+  'sPoint contains long x and long y.
+  'sPoint would generate this in memory if instantiated as "VAR sPoint point":
+  '
+  ' +00: long point.x
+  ' +04: long point.y
+
+
+  STRUCT sLine(sPoint a, sPoint b, BYTE color)
+  'sLine contains sPoint a, sPoint b, and byte color.
+  'sLine would allocate this in memory if instantiated as "VAR sLine line":
+  '
+  ' +00: long line.a.x
+  ' +04: long line.a.y
+  ' +08: long line.b.x
+  ' +0C: long line.b.y
+  ' +10: byte line.color
+  '
+  'sLine would allocate this in memory if instantiated as "VAR sLine line[2]":
+  '
+  ' +00: long line[0].a.x
+  ' +04: long line[0].a.y
+  ' +08: long line[0].b.x
+  ' +0C: long line[0].b.y
+  ' +10: byte line[0].color
+  ' +11: long line[1].a.x
+  ' +15: long line[1].a.y
+  ' +19: long line[1].b.x
+  ' +1D: long line[1].b.y
+  ' +21: byte line[1].color
+
+  STRUCT sCopyA = sLine
+  'sCopyA is a copy of the sLine structure
+
+  STRUCT sCopyB = object.structure
+  'sCopyB is a copy of a child object's structure

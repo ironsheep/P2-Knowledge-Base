@@ -1,0 +1,11 @@
+PRI Sub1() : Error    'Sub1 calls Sub2 with an ABORT trap
+  Error := \Sub2()    '\ means call method and trap any ABORT
+  \Sub2()             'in this case, the ABORT value is ignored
+
+PRI Sub2()            'Sub2 calls Sub3
+  Sub3()              'Sub3 never returns here due to the ABORT
+  PINHIGH(0)          'PINHIGH never executes
+
+PRI Sub3()            'Sub3 ABORTs, returning to Sub1 with ErrorCode
+  ABORT ErrorCode     'ABORT and return ErrorCode
+  PINLOW(0)           'PINLOW never executes

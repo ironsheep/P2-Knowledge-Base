@@ -1,0 +1,6 @@
+CON STRUCT StructX(Object.StructA x[10]) 'StructX is ten StructA's, exported
+CON STRUCT StructY = Object.StructA      'StructY is a copy of StructA, exported
+VAR Object.StructA StructJ               'StructJ is an instance of StructA
+VAR ^Object.StructA StructK              'StructK is a pointer to StructA
+PUB Name(^Object.StructA StructL)        'StructL is a pointer to StructA
+DAT StructM Object.StructA               'StructM is an instance of StructA

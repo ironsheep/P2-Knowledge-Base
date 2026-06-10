@@ -1,0 +1,16 @@
+CON _clkfreq = 10_000_000     'Normal mode
+
+PUB go() | x, y
+  debug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')
+  repeat x from -8 to 8
+    repeat y from -8 to 8
+      debug(`MyXY `(x,y))
+
+
+CON _clkfreq = 10_000_000     'LOGSCALE mode magnifies low-level details
+
+PUB go() | x, y
+  debug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 LOGSCALE 'Logscale')
+  repeat x from -8 to 8
+    repeat y from -8 to 8
+      debug(`MyXY `(x,y))

@@ -1,0 +1,36 @@
+register_name
+
+REG[address]
+^@register
+^@register.[bbbbb addbits sssss]
+^@register.[msbit..lsbit]
+^@register.[bit]
+00_11111_00000_00000000000rrrrrrrrr
+00_sssss_bbbbb_00000000000rrrrrrrrr
+byte_name
+
+BYTE[address]
+^@byte
+^@byte.[bbbbb addbits sssss]
+^@byte.[msbit..lsbit]
+^@byte.[bit]
+01_00111_00000_aaaaaaaaaaaaaaaaaaaa
+01_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa
+word_name
+
+WORD[address]
+^@word
+^@word.[bbbbb addbits sssss]
+^@word.[msbit..lsbit]
+^@word.[bit]
+10_01111_00000_aaaaaaaaaaaaaaaaaaaa
+10_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa
+long_name
+
+LONG[address]
+^@long
+^@long.[bbbbb addbits sssss]
+^@long.[msbit..lsbit]
+^@long.[bit]
+11_11111_00000_aaaaaaaaaaaaaaaaaaaa
+11_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa

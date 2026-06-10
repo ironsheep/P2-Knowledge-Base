@@ -1,0 +1,3 @@
+MOVBYTS(longvalue, pattern)  'returns byte-moved/copied long value
+ENDIANL(longvalue)           'returns reverse-endian long value
+ENDIANW(wordvalue)           'returns reverse-endian word value

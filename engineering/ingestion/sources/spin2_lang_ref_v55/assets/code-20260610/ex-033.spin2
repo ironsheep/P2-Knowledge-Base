@@ -1,0 +1,5 @@
+Hub-exec code may use absolute and relative addressing, since origin always matches hub address.
+ORGH fills hub memory with zeros, up to the specified address.
+
+DAT     ORGH             'set hub-exec mode at current hub address
+        ORGH    $400     'set hub-exec mode and fill hub memory with zeros to $400

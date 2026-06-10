@@ -1,0 +1,42 @@
+CON  _clkfreq = 250_000_000
+     _errfreq = 0
+
+CON  _xtlfreq =  12_000_000
+     _clkfreq = 148_500_000
+     _errfreq =     150_000
+
+CON  _xinfreq =  32_000_000
+     _clkfreq = 297_500_000
+     _errfreq =     100_000
+
+CON  _xtlfreq =  16_000_000
+
+CON  _xinfreq = 100_000_000
+10_11
+
+
+1x_11
+
+
+
+01_11
+
+
+
+1x_10
+
+01_10
+
+
+
+
+
+    HUBSET  ##clkmode_ & !%11    'start external clock, stay in RCFAST mode
+    WAITX   ##20_000_000/100     'allow 10ms for external clock to stabilize
+    HUBSET  ##clkmode_           'switch to external clock mode
+CON  _rcslow
+00_01
+    HUBSET  #1                   'switch to RCSLOW mode
+CON  _rcfast
+00_00
+    HUBSET  #0                   'stay in RCFAST mode

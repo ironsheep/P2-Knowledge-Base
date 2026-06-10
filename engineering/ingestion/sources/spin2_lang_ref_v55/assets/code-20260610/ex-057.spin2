@@ -1,0 +1,3 @@
+LongVar := @SomeMethod                            'a method within the current object
+LongVar := @SomeObject.SomeMethod                 'a method within a child object
+LongVar := @SomeObject[index].SomeMethod          'a method within an indexed child object

@@ -1,0 +1,13 @@
+PUB Go()
+  SEND := @SetLED
+  REPEAT
+    SEND(Flash(),$01,$02,$04,$08,$10,$20,$40,$80)
+
+PRI Flash() : x
+  REPEAT 2
+    SEND($00,$FF,$00)
+  RETURN $AA
+
+PRI SetLED(x)
+  PINWRITE(56 ADDPINS 7, !x)
+  WAITMS(125)

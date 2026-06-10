@@ -2,6 +2,21 @@
 **Enhanced with Coordinate-Aware Rescue System**  
 **Date**: 2025-09-06
 
+> **SUPERSEDED for DOCX sources 2026-06-10 (Spin2 v55 ingestion).** When the
+> source is a **DOCX**, the authoritative procedure is the **`ingest-source`
+> skill** (`.claude/skills/`): pull the original embedded assets losslessly from
+> `word/media/` (one `unzip`), then analyze with the **`image-tools-mcp`** server.
+> This **eliminates the v3.0 failure class at the source** — there is no PyMuPDF
+> extraction, so no black images, no full-page mis-captures, no false-success
+> (verified on v55: 24/24 figures, 0 black). `image-tools-mcp` natively provides
+> the quality gate (`image_dimensions` + `image_dominant_colors` — a failed image
+> reads `#000000`-dominant), segmentation (`image_detect_rectangles`/`_lines`/
+> `_text_regions`), and a capability the old pipeline lacked: **figure-content
+> OCR** (`image_ocr_full`/`_region`) for cataloging and for cross-validating
+> prose/YAML against what a diagram shows. The PyMuPDF + coordinate-rescue
+> pipeline below is the **fallback** for PDF-only sources or assets not embedded
+> in the DOCX.
+
 ## Overview
 Advanced systematic workflow for extracting, documenting, and enriching images from source documents with **coordinate-aware rescue system** to handle failed extractions and ensure 100% success rate.
 

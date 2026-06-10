@@ -1,0 +1,9 @@
+CON _clkfreq = 10_000_000
+
+PUB go() | p, k, i
+
+  p := ^@k.[2..0]        'get a pointer to the three lowest bits of k
+
+  repeat 10
+    field[p][i++]~~      'set three bits at a time, progressing upwards
+    debug(ubin_long(k))

@@ -1,0 +1,5 @@
+DAT     ORG                       'start PASM at hub $00000 for cog $000
+
+loop    DRVRND  #0 ADDPINS 7      'write a random pattern to P7..P0
+        WAITX   ##clkfreq_/10     'wait 100ms (## for >9 bits), loop
+        JMP     #loop

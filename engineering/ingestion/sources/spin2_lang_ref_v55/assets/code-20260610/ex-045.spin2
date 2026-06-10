@@ -1,0 +1,4 @@
+AnyVar[index]
+HubVar.BYTE[index]
+LONG[address][index]
+REG[register][index]

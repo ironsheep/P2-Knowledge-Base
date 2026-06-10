@@ -1,0 +1,19 @@
+CON _clkfreq = 200_000_000
+    debug_main                  'run debugger(s) for all main code
+
+PUB go() | i
+
+  coginit(newcog, @pasm, 0)     'start another cog with a pasm program
+
+  repeat                        'increment i
+    i++
+
+DAT     org
+
+pasm    add     $100,#1         'increment some registers
+        add     $101,#1
+        add     $102,#1
+        add     $103,#1
+        jmp     #pasm           'loop
+
+        long    0[11]           'clear space after code for clarity

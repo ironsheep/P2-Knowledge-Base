@@ -1,0 +1,4 @@
+x := 4, {{comment here}} y := 5
+
+{{comment here
+comment here}}

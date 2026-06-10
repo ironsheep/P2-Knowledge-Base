@@ -1,0 +1,44 @@
+CON _clkfreq = 297_000_000                      'set clock frequency
+
+OBJ vga : "VGA_640x480_text_80x40"              'instantiate vga object
+
+VAR time, i                                     'declare object-wide variables
+
+
+PUB go()                                        'this first public method executes, cog stops after
+
+  vga.start(8)                                  'start vga on base pin 8
+
+  SEND := @vga.print                            'establish SEND pointer
+
+  SEND(4, $004040, 5, $00FFFF)                  'set light cyan on dark cyan
+
+  time := GETCT()                               'capture time
+
+  i := @text                                    'print file to vga screen
+  REPEAT @textend-i
+    SEND(byte[i++])
+
+  time := GETCT() - time                        'capture time delta in clock cycles
+
+  time := MULDIV64(time, 1_000_000, clkfreq)    'get time delta in microseconds
+
+  SEND(12, "Time elapsed during printing was ", dec(time), " microseconds.")  'print time delta
+
+
+PRI dec(value) | flag, place, digit             'private method prints decimals, three local variables
+
+  flag~                                         'reset digit-printed flag
+  place := 1_000_000_000                        'start at the one-billion's place and work downward
+  REPEAT
+    IF flag ||= (digit := value / place // 10) || place == 1      'print a digit?
+      SEND("0" + digit)                                           'yes
+      IF LOOKDOWN(place : 1_000_000_000, 1_000_000, 1_000)        'also print a comma?
+        SEND(",")                                                 'yes
+  WHILE place /= 10                             'next place, done?
+
+
+DAT
+
+text	FILE	"VGA_640x480_text_80x40.txt"       'include raw file data for printing
+textend

@@ -1,0 +1,7 @@
+Hub-exec code must use relative addressing, since it is not located at its place of origin.
+The LOC instruction can be used to get addresses of data assets within relative hub-exec code.
+ORGH must specify at least $400, so that pure hub-exec code will be assembled.
+The default ORGH address of $400 is always appropriate, unless you are writing code which will be moved to its actual ORGH address at runtime, so that it can use absolute addressing.
+
+DAT     ORGH             'set hub-exec mode and set origin to $400
+        ORGH    $FC000   'set hub-exec mode and set origin to $FC000

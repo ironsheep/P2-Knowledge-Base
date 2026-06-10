@@ -1,0 +1,24 @@
+PUB go()
+
+  REGEXEC(@chunk)                       'load self-defined chunk and execute it
+                                        'chunk starts timer interrupt and returns
+  REPEAT
+    PINWRITE(60 ADDPINS 3, GETRND())    'randomize pins 60..63
+    WAITMS(100)                         'pins 56..59 toggle via interrupt
+
+DAT
+
+chunk   WORD    start,finish-start-1    'define chunk start and size-1
+        ORG     $118                    'org can be $000..$120-size
+
+start   MOV     IJMP1,#isr              'set int1 vector
+        SETINT1 #1                      'set int1 to ct-passed-ct1 event
+        GETCT   PR0                     'get ct
+ _ret_  ADDCT1  PR0,bigwait             'set initial ct1 target, return to Spin2
+
+isr     DRVNOT  #56 ADDPINS 3           'interrupt service routine, toggle 56..59
+        ADDCT1  PR0,bigwait             'set next ct1 target
+        RETI1                           'return from interrupt
+
+bigwait LONG    20_000_000 / 2          '500ms second on RCFAST
+finish

@@ -1,0 +1,6 @@
+PINLOW(PinfieldCon)
+53..50
+CON PinfieldCon = 50 ADDPINS 3            'PinfieldCon useful in PASM, too
+PINLOW(PinfieldVar)
+?
+PinfieldVar := BasePin ADDPINS ExtraPins  'wraps if BasePin + ExtraPins > 31

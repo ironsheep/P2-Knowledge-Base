@@ -1,0 +1,3 @@
+-%10000000
+%01111111
+SBIN_WORD_ARRAY(hub_pointer,size)

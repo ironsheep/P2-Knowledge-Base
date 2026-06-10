@@ -1,0 +1,6 @@
+CON STRUCT sByte(byte .top3[7..5] .bot5[4..0])    'declaration - just bits!
+VAR sByte vByte                                   'instantiation
+vByte                                             'byte structure/variable
+vByte.top3, vByte.bot5 
+
+                           'bitfield members, only

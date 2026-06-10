@@ -1,0 +1,3 @@
+  x := GETRND() +// 100	'Get a random number between 0 and 99
+
+  BYTEMOVE(ToStr, FromStr, STRSIZE(FromStr) + 1)
