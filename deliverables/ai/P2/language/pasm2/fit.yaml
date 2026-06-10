@@ -7,7 +7,7 @@ description: 'Verify that code fits within specified address limit
   '
 category: Assembly Directives
 documentation_level: complete
-syntax: FIT [address]
+syntax: FIT address
 examples:
 - code: ''' Cog code
 
@@ -15,17 +15,24 @@ examples:
 
     '' ... code ...
 
-    FIT  $1F0        '' Ensure code fits before cog special registers
+    FIT  $1F0        '' Ensure code fits before the special-register area
 
     '
-  description: Verify code fits in available cog space
-- code: 'FIT              '' Default: ensure fits in cog RAM (< $200)
+  description: Verify code fits before the special-register area (COG addresses 0-$1EF)
+- code: ''' Standard COG program
+
+    ORG  0
+
+    '' ... code ...
+
+    FIT  $1F8        '' Ensure fits in standard COG RAM (the bare-ORG default limit)
 
     '
-  description: Default fit check
+  description: Verify code fits within the standard COG RAM limit
 notes:
-- FIT without parameter checks for cog RAM limit ($200)
-- Generates assembly error if limit exceeded
+- FIT always requires a limit parameter; bare FIT (no parameter) is a compile error -- compiler-verified
+- 'Common limits: $1F0 (user area before special registers), $1F8 (standard COG RAM / bare-ORG default), $200 (full COG), $400 (COG + LUT)'
+- Generates an assembly error if the current address reaches/exceeds the limit
 - Essential for cog code size verification
 related:
 - ORG

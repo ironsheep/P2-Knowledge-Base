@@ -36,5 +36,5 @@ manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values plus carry flag
 related:
 - CMP
-- CMPX
+- CMPS
 - CMPSX

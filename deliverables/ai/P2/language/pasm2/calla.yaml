@@ -6,17 +6,18 @@ encoding:
   write: —
   c: D[31]
   z: D[30]
-  clocks: 5...12 *
+  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 - bits: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
   write: —
   c: —
   z: —
-  clocks: 5...12 *
+  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 timing:
-  cycles: 5-12
+  cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
+  notes: 5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)
 description: Write current C and Z flags and address of the next instruction into
-  the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
+  the 4-byte Hub RAM location at PTRA, increment PTRA by 4, set PC to new relative
   or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
   += A, else PC = A.
 flags_affected:
@@ -44,4 +45,4 @@ parameters:
   new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 category: Branch
-oneliner: Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++
+oneliner: Call a subroutine; store return context in the Hub long at PTRA++

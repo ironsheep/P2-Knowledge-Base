@@ -12,14 +12,14 @@ timing:
 description: >-
   Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified,
   wait 2+(D AND RND) clock cycles, where RND is a random value, producing a
-  randomized delay. C and Z are always cleared to 0 after completion. The 2-cycle
+  randomized delay; C and Z are cleared to 0 after completion. The 2-cycle
   overhead is inherent to the instruction. Stalls the cog pipeline during the wait;
   no instructions execute and no interrupts are processed until the wait completes.
   Critical for bit-banging protocols, PWM generation, and timing-sensitive operations
   where precise delays are required.
 flags_affected:
-  C: Set to 0 after completion
-  Z: Set to 0 after completion
+  C: Set to 0 only when WC or WCZ is specified
+  Z: Set to 0 only when WZ or WCZ is specified
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

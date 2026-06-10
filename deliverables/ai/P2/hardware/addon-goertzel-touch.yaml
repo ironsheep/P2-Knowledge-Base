@@ -88,9 +88,9 @@ signals:
     function: "Receive ultrasonic signal for correlation"
     smart_pin_modes:
       1x: "P_ADC_1X"
-      3x: "P_ADC_3X"
+      3.16x: "P_ADC_3X"
       10x: "P_ADC_10X"
-      31x: "P_ADC_31X"
+      31.6x: "P_ADC_30X"
       100x: "P_ADC_100X"
     default_magnification: "100x (adcmag = 4)"
     signal_type: "Ultrasonic return signal"
@@ -152,9 +152,9 @@ protocol_constraints:
     mode: "P_ADC_1X through P_ADC_100X"
     magnification_codes:
       0: "1x"
-      1: "3x"
+      1: "3.16x"
       2: "10x"
-      3: "31x"
+      3: "31.6x"
       4: "100x"
     bitstream_output: "+1 or -1 per clock"
 

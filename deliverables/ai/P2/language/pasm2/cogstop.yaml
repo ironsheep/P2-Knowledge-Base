@@ -41,4 +41,4 @@ manual_extraction_date: '2025-01-19'
 oneliner: Stop a cog by ID
 related:
 - COGINIT
-- COGSTOP
+- COGID

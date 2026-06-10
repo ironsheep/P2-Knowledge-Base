@@ -41,6 +41,21 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: —
   z: —
   clocks: '2'
+silicon_errata:
+  setq_ptrx_block_size_delta_cancelled:
+    severity: critical
+    description: |
+      AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancels the
+      special-case block-size PTRx delta. The expected number of longs transfers
+      correctly, but PTRx advances by only a single-long (normal PTRx-expression)
+      delta instead of the block-size delta.
+    example: |
+      SETQ   #16-1         ' ready to load 16 longs
+      AUGD   start_reg     ' AUGD here cancels the block-size PTRx delta!
+      RDLONG 0,ptra++      ' ptra incremented by 4 (1 long), not 16*4
+    workaround: "Do not place AUGD (or ALTx/AUGS) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
+    status: "Active in Rev C silicon (current production)."
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:196-199 (KNOWN BUGS -- 'Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

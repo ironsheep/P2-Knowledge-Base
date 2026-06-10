@@ -46,6 +46,16 @@ flags_affected:
   C: No effect
   Z: No effect
 silicon_errata:
+  setq_ptrx_block_size_delta_cancelled:
+    severity: critical
+    description: |
+      AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancels the
+      special-case block-size PTRx delta. The expected number of longs transfers
+      correctly, but PTRx advances by only a single-long (normal PTRx-expression)
+      delta instead of the block-size delta.
+    workaround: "Do not place AUGS (or ALTx/AUGD) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
+    status: "Active in Rev C silicon (current production)."
+    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:196-199 (KNOWN BUGS -- 'Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
   intervening_altx_immediate_s_consumes_augs:
     severity: critical
     description: |
@@ -59,7 +69,7 @@ silicon_errata:
       ADD   0-0,#$123         ' #$123 is augmented by the AUGS and cancels the AUGS
     workaround: "Use a register (not an immediate #S) for the S operand of any ALTx placed between AUGS and its target."
     status: "Active in Rev C silicon (current production)."
-    scope_note: "The Silicon Doc documents this errata for AUGS only. The same mechanism may apply to AUGD, but that is NOT stated in any golden source -- it is a known-unknown and is deliberately not asserted here."
+    scope_note: "The Silicon Doc documents THIS errata (an intervening ALTx with immediate #S consuming the AUGS value) for AUGS only; AUGD is not mentioned in the source (p2-documentation.txt:212-227). This is distinct from the block-size PTRx-delta bug above (KNOWN BUGS, lines 196-199), which DOES explicitly name ALTx/AUGS/AUGD together. Whether THIS specific intervening-#S errata also applies to AUGD (an AUGD value spuriously consumed by an intervening ALTx with immediate #D) is not stated in any golden source and is deliberately not asserted here."
     source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:212-227 (KNOWN BUGS, Rev C) -- verbatim"
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive

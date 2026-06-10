@@ -16,7 +16,7 @@ parameters:
 - Dest is the register in which to rotate the byte into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
   the target byte to read.
-- Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read.
+- Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 flags_affected:
   C: No effect
   Z: No effect

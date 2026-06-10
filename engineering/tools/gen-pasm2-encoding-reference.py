@@ -60,11 +60,16 @@ for path in sorted(glob.glob(os.path.join(SRC, "*.yaml"))):
         missing_encoding.append(mnem or fn)
 
     # flags the instruction can write
+    # NOTE: flags_affected is a dict {C: <desc>, Z: <desc>}; a key is present even when
+    # the value is "No effect". Test the VALUE, not key presence (see F-047).
     flags = []
     fa = d.get("flags_affected")
+    _no_effect = ("no effect", "—", "-", "--", "none", "")
     if isinstance(fa, dict):
-        if "C" in fa: flags.append("C")
-        if "Z" in fa: flags.append("Z")
+        for k in ("C", "Z"):
+            v = fa.get(k)
+            if v is not None and str(v).strip().lower() not in _no_effect:
+                flags.append(k)
     flags_s = ",".join(flags) if flags else "--"
 
     cycles = ""
@@ -115,10 +120,10 @@ if cond_rows:
     for val, primary, cond, aliases in cond_rows:
         lines.append(f"| `{val}` | {esc(primary)} | {esc(cond)} | {esc(aliases)} |")
     lines.append("")
-    lines.append("> `%0000` is the disassembler edge case: with no `WC`/`WZ` it is the `_RET_`")
-    lines.append("> form (always-execute + return); the assembler shows the bare prefix as")
-    lines.append("> `IF_NEVER` only when flags are written. `%1111` is the default (always), printed")
-    lines.append("> with no `IF_` prefix.\n")
+    lines.append("> `%0000` is exclusively the `_RET_` prefix (always-execute + return); it is NOT")
+    lines.append("> the encoding for `IF_NEVER`. `IF_NEVER` assembles to EEEE=`%1111` (always),")
+    lines.append("> identical to the bare no-prefix form, regardless of whether `WC`/`WZ` are written")
+    lines.append("> (pnut-ts boundary-probed). `%1111` is the default (always), printed with no `IF_` prefix.\n")
 lines.append("---\n")
 lines.append(f"**Coverage:** {len(recs)} instructions, {len(recs)-len(missing_encoding)} with an encoding pattern"
              f"{'' if not missing_encoding else f', {len(missing_encoding)} WITHOUT (listed at end)'}.\n")

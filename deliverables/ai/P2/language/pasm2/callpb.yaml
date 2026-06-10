@@ -4,7 +4,7 @@ category: Branch
 description: CALLPB records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PB, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
 parameters:
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
-  to PA or PB.
+  to PB.
 - 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
   relative or absolute address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
@@ -36,5 +36,4 @@ compiler_encoding:
   operandFormat: 14
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.674467'
-oneliner: Call a subroutine; store return context on the stack and copy D into PA
-  or PB
+oneliner: Call a subroutine; store return context on the stack and copy D into PB

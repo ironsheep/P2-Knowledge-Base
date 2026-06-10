@@ -6,7 +6,7 @@ description: 'Predefined constant for COGINIT instruction
 
   '
 category: Execution Mode Constants
-value: '%0_1_0000'
+value: '%10_0000'
 documentation_level: complete
 syntax: 'COGINIT #HUBEXEC+id, #address'
 usage: 'Used with COGINIT to start a cog executing from hub RAM

@@ -5,13 +5,12 @@ encoding:
   write: —
   c: —
   z: —
-  clocks: '2 or 4'
+  clocks: '2 or 4 / 2 or 13-20'
 timing:
   cycles: 2
   type: variable
   range: 13...20
-description: Test D and jump to S** if D is zero.                                                                                 2
-  or 4 / 2 or
+description: Test D and jump to S** if D is zero.
 flags_affected:
   C: No effect
   Z: No effect

@@ -58,7 +58,7 @@ registers:
     - description: System counter access
     - access: Via GETCT, ADDCT1/2/3, WAITCT1/2/3
     - resolution: System clock cycles
-    - width: 32-bit, free-running
+    - width: 64-bit free-running (Rev B/C silicon); GETCT returns lower 32 bits by default, upper 32 bits with WC
 
   flags:
     - name: C and Z

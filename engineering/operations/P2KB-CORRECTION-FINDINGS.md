@@ -348,7 +348,7 @@ The manual was softened (dropped "33-bit", replaced "±10" with "well below ±12
 
 **Proposed correction:** Reword to "32-bit accumulator; MSB masked each add as the rollover flag; resolution `clkfreq/2³¹`." (Manual §3.1 corrected this way.)
 
-### F-021 — `modes-reference.yaml` is missing several valid mode rows  ·  `NEEDS-VERIFICATION` (completeness)
+### F-021 — `modes-reference.yaml` is missing several valid mode rows  ·  `DONE` (2026-06-03; see applied-note below)
 
 **File:** `deliverables/ai/P2/architecture/streamer/modes-reference.yaml`
 
@@ -387,7 +387,7 @@ All six open streamer findings were re-verified against the **golden ingestion s
 
 > **Minor (noted):** the Silicon Doc says the Goertzel bitstream multiplier is "an integer from **−3 to +3**" (`:4094`, sum of up to 3 selected ADC pins), whereas `dds-goertzel.yaml` shows only `m := ADC_bit ? +1 : -1`. Incomplete (correct for 1 pin) — **widened to −3..+3 in the 2026-06-03 pass.**
 
-### F-023 — `setxfrq.yaml` SETQ+SETXFRQ "64-bit precision frequency" claim is unverified  ·  `NEEDS-VERIFICATION`
+### F-023 — `setxfrq.yaml` SETQ+SETXFRQ "64-bit precision frequency" claim is unverified  ·  `DONE` (2026-06-10)
 
 **File:** `deliverables/ai/P2/language/pasm2/setxfrq.yaml` (description ~L14-15, example 3 ~L44-49, `related_instructions` SETQ note)
 
@@ -464,7 +464,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Cluster note:** the largest single cluster is the **HUBSET clock-configuration bit-field** error in `hubset.yaml` + `clock_system.yaml` (AF-016/018/019/020/021/146/152/163/120) — CC/SS swapped, VCO/divider fields misplaced, an invented crystal-enable bit, wrong cap values, and the chip-reset selector ($1000_0000 = D[31:28]=%0001, not bit 31).
 
-### F-026 — `getct.yaml`: GETSCP YAML records write: '—' although GETSCP writes D (manual, CSV description, and …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-010)
+### F-026 — `getct.yaml`: GETSCP YAML records write: '—' although GETSCP writes D (manual, CSV description, and …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-010)
 
 **File(s):** `getct.yaml`, `getrnd.yaml`, `getscp.yaml`
 
@@ -476,7 +476,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Set getscp.yaml encoding[0].write: D (route to the P2KB corrections register). Leave c/z and flags_affected unchanged — GETSCP affects no flags, which the YAML, manual (C=---, Z=---), and CSV (no WCZ on row 401) all agree on; the encoding-reference "C,Z" Flags column is a generic category header, not instruction-specific.
 
-### F-027 — `clock_system.yaml`: Wrong bit positions: manual says D[23:14], canonical is D[17:8] (magnitudes 10-bit / …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-016)
+### F-027 — `clock_system.yaml`: Wrong bit positions: manual says D[23:14], canonical is D[17:8] (magnitudes 10-bit / …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-016)
 
 **File(s):** `clock_system.yaml`
 
@@ -488,7 +488,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In the manual (instructions-h.md:50) change "D[23:14] - VCO multiplier (10-bit field, multiplies by 1-1024)" to "D[17:8] - VCO multiplier (MMMMMMMMMM, 10-bit; multiplies by 1-1024; stored as multiplier-1)". ALSO fix the YAML hubset_configuration.config_fields block (clock_system.yaml:138): change `d23_14: "VCO multiplier (MMMM_MMMMMM)"` to `d17_8: "VCO multiplier (MMMMMMMMMM)"` so it agrees with the already-correct …
 
-### F-028 — `clock_system.yaml`: hubset.yaml clock_configuration.bit_fields.d3_2.values (lines 42-45) assigns 15pF to …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-018)
+### F-028 — `clock_system.yaml`: hubset.yaml clock_configuration.bit_fields.d3_2.values (lines 42-45) assigns 15pF to …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-018)
 
 **File(s):** `clock_system.yaml`, `hubset.yaml`
 
@@ -500,7 +500,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit deliverables/ai/P2/language/pasm2/hubset.yaml d3_2.values to four entries matching Silicon Doc / clock_system.yaml: 0b00 "XI/XO Hi-Z (oscillator off)"; 0b01 "1MΩ feedback, no caps"; 0b10 "1MΩ feedback, 15pF caps (crystals >= 16 MHz)"; 0b11 "1MΩ feedback, 30pF caps (crystals < 16 MHz)". This both adds the missing 0b10 and moves the 15pF semantics off 0b01.
 
-### F-029 — `clock_system.yaml`: clock_system.yaml contains two disagreeing maps: pll_system block (lines 104-118) is …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-019)
+### F-029 — `clock_system.yaml`: clock_system.yaml contains two disagreeing maps: pll_system block (lines 104-118) is …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-019)
 
 **File(s):** `clock_system.yaml`
 
@@ -512,7 +512,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Rewrite clock_system.yaml hubset_configuration.config_fields (lines 134-144) to the canonical layout: d31='Reset request'; d30_25='Reserved'; d24='PLL enable (E)'; d23_18='XI input divider DDDDDD (1..64, stored as divider-1)'; d17_8='VCO multiplier MMMMMMMMMM (1..1024, stored as mult-1)'; d7_4='Post divider PPPP'; d3_2='Crystal/XI-XO config (CC)'; d1_0='Clock source select (SS)'. Delete the fabricated d8 'Crystal …
 
-### F-030 — `clock_system.yaml`: Example literals written in an SS_CC (source-first) order conflicting with canonical …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-020)
+### F-030 — `clock_system.yaml`: Example literals written in an SS_CC (source-first) order conflicting with canonical …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-020)
 
 **File(s):** `clock_system.yaml`
 
@@ -524,7 +524,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Fix BOTH the manual (part-ii/instructions-h.md) and clock_system.yaml. (1) Field labels in the manual: D[3:2] is the CRYSTAL config (CC), D[1:0] is the clock SOURCE select (SS) — swap the two "(D[3:2])"/"(D[1:0])" annotations at instructions-h.md:38 and :44. (2) Basic-crystal example literals: `##%00_10` -> `##%10_00` (CC=15pF, SS=RCFAST: enable crystal, stay on RCFAST) and `##%10_10` stays as the switch-to-XI step …
 
-### F-031 — `clock_system.yaml`: Literal %0001_0000_0000_00001010_10 does not parse into canonical field widths (uses a …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-021)
+### F-031 — `clock_system.yaml`: Literal %0001_0000_0000_00001010_10 does not parse into canonical field widths (uses a …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-021)
 
 **File(s):** `clock_system.yaml`
 
@@ -536,7 +536,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** MANUAL fixes (instructions-h.md): (1) Replace the field map at lines 49-53 with the canonical bit positions: D[24]=E PLL enable (on/off), D[23:18]=DDDDDD XI input divider /1..64, D[17:8]=MMMMMMMMMM VCO multiplier x1..1024, D[7:4]=PPPP VCO post-divider (0=>VCO/2, 15=>VCO/1), D[3:2]=CC crystal/cap config (%10=15pF), D[1:0]=SS clock source (%11=PLL, %10=XI). Drop the bogus "D[9] PLL power enable" and "D[8] crystal …
 
-### F-032 — `ijnz.yaml`: The YAML ijnz.yaml encoding note says PC is written 'only when the result in Dest is zero …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-024)
+### F-032 — `ijnz.yaml`: The YAML ijnz.yaml encoding note says PC is written 'only when the result in Dest is zero …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-024)
 
 **File(s):** `ijnz.yaml`, `ijz.yaml`
 
@@ -548,7 +548,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/ijnz.yaml, replace the encoding_notes (lines 32-33) with: "Dest is always written; PC is written only when the result in Dest is NOT zero." Remove the inverted "zero" wording and the stale "(or not zero in syntax 2)" parenthetical. No change to ijz.yaml (correctly has no encoding_notes) and no change to the manual (its footnote is correct).
 
-### F-033 — `jnxro.yaml`: Manual is correct (XRO = streamer NCO rollover). jxro.yaml mislabels XRO as 'streamer …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-026)
+### F-033 — `jnxro.yaml`: Manual is correct (XRO = streamer NCO rollover). jxro.yaml mislabels XRO as 'streamer …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-026)
 
 **File(s):** `jnxro.yaml`, `jxro.yaml`, `pollxro.yaml`, `waitxro.yaml`
 
@@ -560,7 +560,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit deliverables/ai/P2/language/pasm2/jxro.yaml line 12 from "description: Jump to S if XRO (streamer ready) event flag is set." to "description: Jump to S if XRO (streamer NCO rollover) event flag is set." Route to the P2KB corrections register. Also recommend a wider sweep of jxro.yaml's oneliner/other fields for any "streamer ready" residue, and a data-set-wide grep for the same mislabel across other XRO-related …
 
-### F-034 — `jatn.yaml`: jxro.yaml and jxmt.yaml are tagged timing.type 'fixed' (no range) while the manual …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-027)
+### F-034 — `jatn.yaml`: jxro.yaml and jxmt.yaml are tagged timing.type 'fixed' (no range) while the manual …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-027)
 
 **File(s):** `jatn.yaml`, `jqmt.yaml`, `jxmt.yaml`, `jxrl.yaml`, `jxro.yaml`
 
@@ -572,7 +572,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/jxro.yaml and jxmt.yaml, change the timing block from `type: fixed` (cycles: 2, no range) to `type: variable` with `range: 13...20`, matching every sibling event-jump (jxrl, jqmt, jatn, jct1, etc.). This routes to the P2KB corrections register. Note: the PASM2-ENCODING-REFERENCE.md shows all event-jumps with a bare "2" (the not-taken cycle count) and does NOT need a change for …
 
-### F-035 — `lockrel.yaml`: The yaml's encoding.c and flags_affected.C ('no effect') contradict both the manual AND …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-028)
+### F-035 — `lockrel.yaml`: The yaml's encoding.c and flags_affected.C ('no effect') contradict both the manual AND …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-028)
 
 **File(s):** `lockrel.yaml`
 
@@ -584,7 +584,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** No manual change — manual is correct. Fix deliverables/ai/P2/language/pasm2/lockrel.yaml: set encoding.c from '—' to reflect C = lock status when WC (e.g. "lock status (when WC)"); change flags_affected.C from "No effect" to "When WC: C = whether lock is currently taken". Leave encoding.z / flags_affected.Z as "No effect" (compiler rejects WZ — confirmed correct). SEPARATELY: PASM2-ENCODING-REFERENCE.md line 218 …
 
-### F-036 — `calld.yaml`: LOC loads a 20-bit address into a pointer register (PA/PB/PTRA/PTRB) — an …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-029)
+### F-036 — `calld.yaml`: LOC loads a 20-bit address into a pointer register (PA/PB/PTRA/PTRB) — an …  ·  `WONTFIX` (2026-06-10)  (PASM2 audit AF-029)
 
 **File(s):** `calld.yaml`, `callpa.yaml`, `callpb.yaml`, `jmp.yaml`, `loc.yaml`
 
@@ -596,7 +596,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Categorize LOC as a Branch / pointer-address instruction across all sources, matching its sibling CALLD. (1) loc.yaml:31 — change category from "Math and Logic" to "Branch" (consistent with calld/callpa/callpb/jmp yaml). (2) Manual — make all three placements consistent: instructions-l.md:11 header → "Branching and Flow Control" (not "Hub Memory Access"); appendix-c-categorical-index.md:50 → move LOC from …
 
-### F-037 — `locknew.yaml`: The manual is correct (variable timing ranges). The yaml timing blocks claim a single …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-031)
+### F-037 — `locknew.yaml`: The manual is correct (variable timing ranges). The yaml timing blocks claim a single …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-031)
 
 **File(s):** `locknew.yaml`, `lockrel.yaml`, `lockret.yaml`, `locktry.yaml`
 
@@ -608,7 +608,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Leave the manual unchanged (verified correct). In locknew/lockrel/lockret/locktry.yaml, replace the fixed timing block with a variable representation reflecting the hub-window range, e.g. for locknew: timing: {min: 4, max: 11, type: variable}; for lockret: {min: 2, max: 9, type: variable}; for lockrel/locktry: {min: 2, max: 9, type: variable, note: "+2 if result written back"}. Make timing consistent with each …
 
-### F-038 — `tjf.yaml`: The manual carries the COMPLETE taken-timing (cog 4 / hub 13-20). Several jump YAMLs are …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-038)
+### F-038 — `tjf.yaml`: The manual carries the COMPLETE taken-timing (cog 4 / hub 13-20). Several jump YAMLs are …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-038)
 
 **File(s):** `tjf.yaml`, `tjns.yaml`, `tjnz.yaml`, `tjv.yaml`, `tjz.yaml`
 
@@ -620,7 +620,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** No manual change (manual matches the canonical Parallax CSV). Fix the derived works to the full form, using the CSV's notation "2 or 4 / 2 or 13...20": (1) tjnz.yaml — set timing.type: variable, replace cycles:2 with the cog/hub note, set encoding.clocks to "2 or 4 / 2 or 13–20"; (2) tjns.yaml — same fixes (currently type:fixed, the worst case); (3) tjz.yaml and tjf.yaml — update encoding.clocks from "2 or 4" to "2 …
 
-### F-039 — `tjf.yaml`: Conditional jumps are inherently variable-timed (taken vs not-taken). Marking TJNZ/TJNS …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-039)
+### F-039 — `tjf.yaml`: Conditional jumps are inherently variable-timed (taken vs not-taken). Marking TJNZ/TJNS …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-039)
 
 **File(s):** `tjf.yaml`, `tjns.yaml`, `tjnz.yaml`, `tjz.yaml`
 
@@ -632,7 +632,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In tjnz.yaml and tjns.yaml, change `timing.type: fixed` to `timing.type: variable`, and add `range: 13...20` to the timing block so they mirror their direct counterparts tjz.yaml / tjf.yaml (which use `type: variable` + `range: 13...20`). No manual change. Route to the P2KB corrections register.
 
-### F-040 — `test.yaml`: The manual provides related cross-references for TESTB; the YAML omits a related: list …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-040)
+### F-040 — `test.yaml`: The manual provides related cross-references for TESTB; the YAML omits a related: list …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-040)
 
 **File(s):** `test.yaml`, `testb.yaml`, `testbn.yaml`, `testn.yaml`, `testp.yaml`, `testpn.yaml`
 
@@ -644,7 +644,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Add a `related:` list to deliverables/ai/P2/language/pasm2/testb.yaml. To match the most complete sibling pattern (test.yaml/testn.yaml), use the full bit-test family minus self: TESTBN, TEST, TESTN, TESTP, TESTPN. All targets exist as YAML files. No manual change. (Routes to P2KB corrections register.)
 
-### F-041 — `tjf.yaml`: tjf.yaml and tjz.yaml description fields contain a mangled trailing fragment ('... 2 or 4 …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-041)
+### F-041 — `tjf.yaml`: tjf.yaml and tjz.yaml description fields contain a mangled trailing fragment ('... 2 or 4 …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-041)
 
 **File(s):** `tjf.yaml`, `tjz.yaml`
 
@@ -656,7 +656,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In tjf.yaml set description to: 'Test D and jump to S** if D is full (D = $FFFF_FFFF).' and in tjz.yaml set description to: 'Test D and jump to S** if D is zero.' — removing the embedded '2 or 4 / 2 or' fragment and the trailing whitespace/folded continuation on lines 13-14. Timing already lives correctly in encoding[0].clocks ('2 or 4'). No manual change. Route to the P2KB corrections register.
 
-### F-042 — `addpix.yaml`: The '(and alpha if present)' parenthetical is a manual-introduced semantic claim the …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-047)
+### F-042 — `addpix.yaml`: The '(and alpha if present)' parenthetical is a manual-introduced semantic claim the …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-047)
 
 **File(s):** `addpix.yaml`
 
@@ -668,7 +668,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT drop the alpha parenthetical (that would make the manual less accurate). Instead correct the channel COUNT in both manual and YAML to match the Silicon Doc: ADDPIX (like all pixel-mixer ops) operates on all FOUR byte fields of the 32-bit register (D[31:24], D[23:16], D[15:08], D[07:00]) unconditionally — for 8:8:8:8 pixel data these are R, G, B and alpha. Manual line 158: change "all three color channels (and …
 
-### F-043 — `addsx.yaml`: The YAML cross-reference set for ADDSX self-references and omits ADDS. The manual already …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-048)
+### F-043 — `addsx.yaml`: The YAML cross-reference set for ADDSX self-references and omits ADDS. The manual already …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-048)
 
 **File(s):** `addsx.yaml`
 
@@ -680,7 +680,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/addsx.yaml, change the related: entry "ADDSX" to "ADDS", yielding the set ADD, ADDX, ADDS, SUBSX (matching the manual). Route to engineering/operations/P2KB-CORRECTION-FINDINGS.md. The manual needs no change.
 
-### F-044 — `add.yaml`: The YAML omits the ADDS cross-reference that the manual (and the rest of the ADD family) …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-049)
+### F-044 — `add.yaml`: The YAML omits the ADDS cross-reference that the manual (and the rest of the ADD family) …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-049)
 
 **File(s):** `add.yaml`, `adds.yaml`, `addsx.yaml`, `addx.yaml`
 
@@ -692,7 +692,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Add 'ADDS' to addx.yaml related: block, yielding ADD, ADDS, ADDSX, SUBX (matches the manual and the rest of the ADD family). Route to engineering/operations/P2KB-CORRECTION-FINDINGS.md.
 
-### F-045 — `augd.yaml`: Manual correctly documents the AUGD SETQ/PTRx errata; augd.yaml omits it, so a remote …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-054)
+### F-045 — `augd.yaml`: Manual correctly documents the AUGD SETQ/PTRx errata; augd.yaml omits it, so a remote …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-054)
 
 **File(s):** `augd.yaml`, `augs.yaml`
 
@@ -704,7 +704,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Add a silicon_errata entry to augd.yaml for the SETQ/SETQ2 → RDLONG/WRLONG/WMLONG block-size PTRx-delta cancellation, sourced to Silicon Doc KNOWN BUGS (p2-documentation.txt:196-198). NOTE the finding's "parallel to augs.yaml" wording is inaccurate: augs.yaml's existing silicon_errata documents a DIFFERENT bug (intervening ALTx-with-immediate-#S consuming AUGS), NOT the block-size PTRx bug. The block-size PTRx …
 
-### F-046 — `augd.yaml`: The augs.yaml scope_note conflates two distinct Silicon-Doc bugs (block-delta vs …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-055)
+### F-046 — `augd.yaml`: The augs.yaml scope_note conflates two distinct Silicon-Doc bugs (block-delta vs …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-055)
 
 **File(s):** `augd.yaml`, `augs.yaml`
 
@@ -716,7 +716,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Two YAML edits (manual needs no change): (1) In augs.yaml, tighten the scope_note so it no longer implies AUGD is absent from ALL golden sources. Replace with something like: "The Silicon Doc documents THIS errata (intervening ALTx with immediate #S consuming the AUGS value) for AUGS only. Note this is distinct from the block-size PTRx-delta bug (Silicon Doc KNOWN BUGS), which DOES name ALTx/AUGS/AUGD together — see …
 
-### F-047 — `altgn.yaml`: The generated encoding reference's per-row flags column asserts C,Z effects for …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-056)
+### F-047 — `altgn.yaml`: The generated encoding reference's per-row flags column asserts C,Z effects for …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-056)
 
 **File(s):** `altgn.yaml`, `alti.yaml`, `augd.yaml`
 
@@ -728,7 +728,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** The finding's proposedCorrection is correct but understated in scope. Fix gen-pasm2-encoding-reference.py:64-67 so the Flags column reflects the VALUE of flags_affected, not the presence of the key. Replace `if "C" in fa: flags.append("C")` with a value test, e.g.: `cv = fa.get("C"); if cv and str(cv).strip().lower() not in ("no effect","—","-","--","none"): flags.append("C")` (same for Z). This is a global bug …
 
-### F-048 — `calla.yaml`: The manual adds a Hub-execution timing figure '13+' that no available KB authority …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-058)
+### F-048 — `calla.yaml`: The manual adds a Hub-execution timing figure '13+' that no available KB authority …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-058)
 
 **File(s):** `calla.yaml`, `callb.yaml`, `reta.yaml`
 
@@ -740,7 +740,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT drop "/ 13+" from the manual — it is correct. Fix the KB instead: add hub-exec timing to calla.yaml (and callb.yaml) to match the manual and the sibling RETA pattern. Suggested: timing.cycles "5-12 (cog/LUT) / 13+ (hub-exec)" with a note "hub-exec branch incurs the >=13-clock hub-branch penalty per Silicon Doc (min 13, +1 if target not long-aligned, plus hub-window wait)"; likewise update …
 
-### F-049 — `call.yaml`: Same as CALLA: the manual adds an unsourced Hub-execution figure '13+' not present in the …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-059)
+### F-049 — `call.yaml`: Same as CALLA: the manual adds an unsourced Hub-execution figure '13+' not present in the …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-059)
 
 **File(s):** `call.yaml`, `calla.yaml`, `callb.yaml`
 
@@ -752,7 +752,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Set the Hub-execution timing to the sourced value 14–32 (with +1 if target not long-aligned) in ALL THREE places — do NOT reduce the manual to "5-12". Manual instructions-c.md: change Clks column on both CALLB rows (lines 117-118) from "5-12 / 13+" to "5-12 / 14-32" and line 135 explanation "13+ cycles for Hub execution" to "14-32 cycles for Hub execution"; apply the same correction to CALLA (lines 73-74, 91, "13+" …
 
-### F-050 — `calla.yaml`: The manual is correct (CALLA uses PTRA only). The YAML description is a copy-paste …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-060)
+### F-050 — `calla.yaml`: The manual is correct (CALLA uses PTRA only). The YAML description is a copy-paste …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-060)
 
 **File(s):** `calla.yaml`, `callb.yaml`
 
@@ -764,7 +764,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit calla.yaml:18-21 description to reference PTRA only: "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRA, increment PTRA by 4, set PC to new relative or absolute address...". IN ADDITION (auditor's correction was incomplete): the identical "PTRA or PTRB" artifact also appears in PASM2-ENCODING-REFERENCE.md:65 (CALLA row says "at PTRA++ or PTRB++" — should be …
 
-### F-051 — `callb.yaml`: The manual is correct (CALLB uses PTRB only). The YAML description copy-paste artifact …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-061)
+### F-051 — `callb.yaml`: The manual is correct (CALLB uses PTRB only). The YAML description copy-paste artifact …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-061)
 
 **File(s):** `callb.yaml`
 
@@ -776,7 +776,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/callb.yaml, edit the `description` field to reference only PTRB: "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRB, increment pointer, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then PC += A, else PC = A." (Routes to the P2KB corrections register.)
 
-### F-052 — `callpa.yaml`: The manual correctly disambiguates (PA for CALLPA, PB for CALLPB); the YAML parameter …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-062)
+### F-052 — `callpa.yaml`: The manual correctly disambiguates (PA for CALLPA, PB for CALLPB); the YAML parameter …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-062)
 
 **File(s):** `callpa.yaml`, `callpb.yaml`
 
@@ -788,7 +788,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In callpa.yaml: change Dest parameter to "...whose value is copied to PA." and oneliner to "Call a subroutine; store return context on the stack and copy D into PA". In callpb.yaml: change Dest parameter to "...whose value is copied to PB." and oneliner to "...copy D into PB". (The description fields in both YAMLs are already correct — only the parameters Dest line and oneliner need the fix.) Route to the P2KB …
 
-### F-053 — `cmp.yaml`: The YAML cross-reference set for CMPSX self-references itself and is missing CMPS. The …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-063)
+### F-053 — `cmp.yaml`: The YAML cross-reference set for CMPSX self-references itself and is missing CMPS. The …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-063)
 
 **File(s):** `cmp.yaml`, `cmps.yaml`, `cmpsx.yaml`, `cmpx.yaml`
 
@@ -800,7 +800,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/cmpsx.yaml, change the related: list from [CMP, CMPX, CMPSX] to [CMP, CMPX, CMPS]. NOTE a co-located defect surfaced while verifying: cmpx.yaml's related: block is [CMP, CMPX, CMPSX] — it likewise self-references CMPX and omits CMPS; its correct set should be [CMP, CMPS, CMPSX]. Recommend fixing both in the same corrections-register pass since they share the identical copy-paste …
 
-### F-054 — `cmp.yaml`: The YAML cross-reference set for CMPX self-references itself and is missing CMPS. The …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-064)
+### F-054 — `cmp.yaml`: The YAML cross-reference set for CMPX self-references itself and is missing CMPS. The …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-064)
 
 **File(s):** `cmp.yaml`, `cmps.yaml`, `cmpsx.yaml`, `cmpx.yaml`
 
@@ -812,7 +812,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/cmpx.yaml, change the related block from [CMP, CMPX, CMPSX] to [CMP, CMPS, CMPSX] — drop the CMPX self-reference, add CMPS. Routes to the P2KB corrections register per Sacred Rule #7 (redirect, not delete).
 
-### F-055 — `cogid.yaml`: The YAML cross-reference set for COGSTOP self-references itself and omits COGID. The …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-065)
+### F-055 — `cogid.yaml`: The YAML cross-reference set for COGSTOP self-references itself and omits COGID. The …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-065)
 
 **File(s):** `cogid.yaml`, `coginit.yaml`, `cogstop.yaml`
 
@@ -824,7 +824,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/cogstop.yaml, change the related list item `- COGSTOP` (line 44) to `- COGID`, yielding related: [COGINIT, COGID]. Bare-name style retained to match the established convention in this file and its siblings (cogid.yaml, coginit.yaml). Route to the P2KB corrections register.
 
-### F-056 — `djf.yaml`: The YAML note states PC is written when the result is "full", but DJNF writes PC (jumps) …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-077)
+### F-056 — `djf.yaml`: The YAML note states PC is written when the result is "full", but DJNF writes PC (jumps) …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-077)
 
 **File(s):** `djf.yaml`, `djnf.yaml`
 
@@ -836,7 +836,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit deliverables/ai/P2/language/pasm2/djnf.yaml encoding_notes (lines 34-35) to: "Dest is always written; PC is written only when the result in Dest is NOT full." Drop the "(or not full in syntax 2)" clause entirely — DJNF has no syntax-2 variant, so the parenthetical is spurious templated text. Route to the P2KB corrections register (engineering/operations/P2KB-CORRECTION-FINDINGS.md).
 
-### F-057 — `djnz.yaml`: The YAML note states PC is written when the result is "zero", but DJNZ writes PC (jumps) …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-078)
+### F-057 — `djnz.yaml`: The YAML note states PC is written when the result is "zero", but DJNZ writes PC (jumps) …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-078)
 
 **File(s):** `djnz.yaml`
 
@@ -848,7 +848,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Fix djnz.yaml encoding_notes (lines 31-33) to: "Dest is always written; PC is written (the jump is taken) only when the result in Dest is NOT zero." Drop the spurious "(or not zero in syntax 2)" clause — DJNZ has only one syntax. Routes to the P2KB corrections register. The manual needs no change.
 
-### F-058 — `rdbyte.yaml`: Manual says RDLONG updates Z (result==0) under WZ/WCZ; rdlong.yaml says Z has no effect. …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-087)
+### F-058 — `rdbyte.yaml`: Manual says RDLONG updates Z (result==0) under WZ/WCZ; rdlong.yaml says Z has no effect. …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-087)
 
 **File(s):** `rdbyte.yaml`, `rdlong.yaml`, `rdword.yaml`
 
@@ -860,7 +860,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Fix deliverables/ai/P2/language/pasm2/rdlong.yaml: set encoding[0].z (line 8) from "—" to "Result = 0", and flags_affected.Z (line 26) from "No effect" to "Set if result equals zero" — matching rdbyte.yaml/rdword.yaml and the Silicon Doc. The manual needs no change. Route to the P2KB corrections register.
 
-### F-059 — `rolbyte.yaml`: The ROLBYTE YAML mislabels the index field as a 'nibble ID'. ROLBYTE selects one of four …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-088)
+### F-059 — `rolbyte.yaml`: The ROLBYTE YAML mislabels the index field as a 'nibble ID'. ROLBYTE selects one of four …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-088)
 
 **File(s):** `rolbyte.yaml`
 
@@ -872,7 +872,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit deliverables/ai/P2/language/pasm2/rolbyte.yaml line 19: replace "Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read." with "Num is a 2-bit literal identifying the byte ID (0-3) of Src to read." (replace "nibble" with "byte"). Routes to the P2KB corrections register.
 
-### F-060 — `rolword.yaml`: The ROLWORD YAML mislabels the index field as a 'nibble ID'. ROLWORD selects one of two …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-089)
+### F-060 — `rolword.yaml`: The ROLWORD YAML mislabels the index field as a 'nibble ID'. ROLWORD selects one of two …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-089)
 
 **File(s):** `rolword.yaml`
 
@@ -884,7 +884,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit rolword.yaml line 19 to read: "Num is a 1-bit literal identifying the word ID (0-1) of Src to read." (replace "nibble" with "word"). Matches the auditor's proposed correction.
 
-### F-061 — `setbyte.yaml`: The manual is correct (N selects a byte, 0-3). The matching SETBYTE YAML mislabels the N …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-090)
+### F-061 — `setbyte.yaml`: The manual is correct (N selects a byte, 0-3). The matching SETBYTE YAML mislabels the N …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-090)
 
 **File(s):** `setbyte.yaml`
 
@@ -896,7 +896,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/setbyte.yaml line 18, change "Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify." to "Num is a 2-bit literal identifying the byte ID (0-3) of Dest to modify." (i.e. replace the word "nibble" with "byte"). YAML-side fix; record in the P2KB corrections register. No manual change needed — manual line 166 is already correct.
 
-### F-062 — `signx.yaml`: SIGNX is Sign Extend and the manual correctly says 'sign-extend beyond'; the YAML wrongly …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-091)
+### F-062 — `signx.yaml`: SIGNX is Sign Extend and the manual correctly says 'sign-extend beyond'; the YAML wrongly …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-091)
 
 **File(s):** `signx.yaml`
 
@@ -908,7 +908,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Edit signx.yaml line 19 to read "...identifies the bit of Dest to sign-extend beyond." (change "zero-extend" to "sign-extend"). Routes to the P2KB corrections register. Manual needs no change.
 
-### F-063 — `waitxro.yaml`: WAITXRO is an unbounded blocking event-wait (clocks 2+), so timing.type: fixed is wrong; …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-094)
+### F-063 — `waitxro.yaml`: WAITXRO is an unbounded blocking event-wait (clocks 2+), so timing.type: fixed is wrong; …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-094)
 
 **File(s):** `waitxro.yaml`
 
@@ -920,7 +920,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/waitxro.yaml, change the timing block from `type: fixed` to `type: variable` (leave cycles: 2 and encoding clocks: 2+ as-is). This brings WAITXRO into agreement with all 15 sibling WAIT* event-wait instructions and with its own clocks "2+" / blocking description. No manual edit required.
 
-### F-064 — `waitx.yaml`: The Result line states 'Sets C and Z to 0 after completion' unconditionally, but flag …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-095)
+### F-064 — `waitx.yaml`: The Result line states 'Sets C and Z to 0 after completion' unconditionally, but flag …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-095)
 
 **File(s):** `waitx.yaml`
 
@@ -932,7 +932,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual (instructions-w.md:231): change the Result line to qualify the flag clear, e.g. "Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears C and Z to 0 after completion." (i.e. remove the standalone unconditional "Sets C and Z to 0" and fold it into the WC/WZ/WCZ clause, matching the line-234 bullet). YAML (waitx.yaml): same fix — …
 
-### F-065 — `wfbyte.yaml`: The YAML description fields contain a column-bleed artifact (Clks value '2' + 'FIFO IN …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-097)
+### F-065 — `wfbyte.yaml`: The YAML description fields contain a column-bleed artifact (Clks value '2' + 'FIFO IN …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-097)
 
 **File(s):** `wfbyte.yaml`, `wflong.yaml`, `wfword.yaml`
 
@@ -944,7 +944,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In wfbyte.yaml, wflong.yaml, and wfword.yaml, fix the description scalar to drop the trailing "2 / FIFO IN USE" bleed (and the wrapped continuation line). Targets: wfbyte → "Used after WRFAST. Write byte in D[7:0] into FIFO."; wflong → "Used after WRFAST. Write long in D[31:0] into FIFO."; wfword → "Used after WRFAST. Write word in D[15:0] into FIFO." Route to the P2KB corrections register; no manual edit needed.
 
-### F-066 — `wmlong.yaml`: Manual and wmlong.yaml agree on `3...10`; the encoding-reference row shows a bare `3` and …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-099)
+### F-066 — `wmlong.yaml`: Manual and wmlong.yaml agree on `3...10`; the encoding-reference row shows a bare `3` and …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-099)
 
 **File(s):** `wmlong.yaml`
 
@@ -956,7 +956,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In PASM2-ENCODING-REFERENCE.md:250, change the WMLONG clocks cell from `3` to `3...10 (cog) / 3...20 (hub-exec)` — matching the format used by the adjacent WRLONG/PUSHA/PUSHB rows and the CSV ground truth (3...10 * / 3...20 *). The finding's proposed value "3...10" is directionally correct but should carry the cog/hub-exec breakout to stay consistent with the rest of that table.
 
-### F-067 — `wrbyte.yaml`: Manual + wrbyte.yaml both carry the cog-vs-hub-exec range; the encoding-reference WRBYTE …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-100)
+### F-067 — `wrbyte.yaml`: Manual + wrbyte.yaml both carry the cog-vs-hub-exec range; the encoding-reference WRBYTE …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-100)
 
 **File(s):** `wrbyte.yaml`
 
@@ -968,7 +968,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/PASM2-ENCODING-REFERENCE.md line 251, change the WRBYTE Clks cell from `3` to `3...10 (cog) / 3...20 (hub-exec)`, matching the WRLONG/WRWORD rows (:252-253), the canonical v35 spreadsheet, wrbyte.yaml, and the manual. (The auditor's proposedCorrection is exactly right.)
 
-### F-068 — `org.yaml`: YAML restricts ORG to COG RAM only (0-$1FF). The manual's wider range (address up to …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-103)
+### F-068 — `org.yaml`: YAML restricts ORG to COG RAM only (0-$1FF). The manual's wider range (address up to …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-103)
 
 **File(s):** `org.yaml`
 
@@ -980,7 +980,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/org.yaml: change parameter `range: 0-$1FF` (line 14) to `0-$3FF` and description (line 15) to "COG/LUT RAM address (0-1023)"; revise note (line 30) from "ORG affects cog RAM addresses only (0-$1FF)" to "ORG addresses COG RAM (0-$1FF) and LUT RAM ($200-$3FF), setting COG-exec mode; auto-limit is $200 for COG-region addresses and $400 for LUT-region addresses." Optionally add the …
 
-### F-069 — `fit.yaml`: The bare-ORG default limit of $1F8 and the conditional $200/$400 auto-limit logic have no …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-104)
+### F-069 — `fit.yaml`: The bare-ORG default limit of $1F8 and the conditional $200/$400 auto-limit logic have no …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-104)
 
 **File(s):** `fit.yaml`, `org.yaml`
 
@@ -992,7 +992,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** No change to the manual — its $1F8 / $200 / $400 figures are correct (compiler-verified). Apply the YAML half of the auditor's proposal: extend deliverables/ai/P2/language/pasm2/org.yaml to (a) document the auto-limit behavior — bare ORG -> limit $1F8; ORG addr<$200 -> limit $200; ORG addr>=$200 -> limit $400; ORG addr,limit -> explicit — and (b) correct the address range/parameters to cover the full 0-$400 COG+LUT …
 
-### F-070 — `orgf.yaml`: Direct contradiction: manual says ORGF is COG-mode-only and errors in ORGH mode; YAML …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-105)
+### F-070 — `orgf.yaml`: Direct contradiction: manual says ORGF is COG-mode-only and errors in ORGH mode; YAML …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-105)
 
 **File(s):** `orgf.yaml`
 
@@ -1004,7 +1004,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Fix deliverables/ai/P2/language/pasm2/orgf.yaml only (manual needs no change). Line 17: drop "or hub address" — change `range: 0-$1FF (cog) or hub address` to a COG-only form, e.g. `range: 0-$1FF (cog mode only; ORGF is not valid in ORGH/hub mode)`. Add a note/restriction documenting that ORGF is rejected with "ORGF is not allowed in ORGH mode" when used after ORGH (mirroring the existing RES treatment). The notes …
 
-### F-071 — `orgf.yaml`: The manual contradicts itself: the parameter table permits a hub address, but the prose …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-106)
+### F-071 — `orgf.yaml`: The manual contradicts itself: the parameter table permits a hub address, but the prose …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-106)
 
 **File(s):** `orgf.yaml`
 
@@ -1016,7 +1016,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual directives.md:138 — change the parameter description to "Target COG address to advance to (0-$1FF), filling intervening space with zeros" and drop "or hub address" (ORGF is COG-only; hub use errors). This makes line 138 consistent with the already-correct restriction/note/pitfall (lines 165/172/178). ALSO fix the YAML (route to P2KB corrections register): orgf.yaml:17 change "range: 0-$1FF (cog) or hub …
 
-### F-072 — `orgh.yaml`: The two authoritative YAMLs disagree on the bare-ORGH default (one $400, one …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-107)
+### F-072 — `orgh.yaml`: The two authoritative YAMLs disagree on the bare-ORGH default (one $400, one …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-107)
 
 **File(s):** `orgh.yaml`
 
@@ -1028,7 +1028,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Keep the manual as-is (it is correct). Reconcile both YAMLs to the contextual rule from Spin2 v51 narrative:1547/1555. In pasm2/orgh.yaml replace the absolute note "Default address is $400 if not specified" with two-context wording: "Bare ORGH default depends on object type: $400 in Spin2+PASM objects (after interpreter); continues from the current hub address in PASM-only objects." In …
 
-### F-073 — `orgh.yaml`: YAML lacks any hub address ceiling, so the constraint is unverifiable; additionally the …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-108)
+### F-073 — `orgh.yaml`: YAML lacks any hub address ceiling, so the constraint is unverifiable; additionally the …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-108)
 
 **File(s):** `orgh.yaml`
 
@@ -1040,7 +1040,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT change the manual — its $400..$100000 range and "Hub address exceeds $100000 ceiling" error text are verbatim-accurate against pnut-ts v1.55.0. Route the fix to the YAML: enrich deliverables/ai/P2/language/pasm2/orgh.yaml to document the verified behavior — default origin $400; optional `limit` operand (ORGH address, limit); the $100000 (1MB) address-space ceiling enforced by PNut (error "Hub address exceeds …
 
-### F-074 — `byte.yaml`: YAML one-line descriptions state these store into Hub memory, but the manual (correctly) …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-109)
+### F-074 — `byte.yaml`: YAML one-line descriptions state these store into Hub memory, but the manual (correctly) …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-109)
 
 **File(s):** `byte.yaml`, `long.yaml`, `word.yaml`
 
@@ -1052,7 +1052,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Broaden the YAML for byte.yaml / word.yaml / long.yaml so the destination is mode-relative, not Hub-only. Change `description:` (line 3) to e.g. "Insert byte/word/long data into the assembly image at the current origin (COG, LUT, or Hub depending on ORG/ORGH mode) at assembly time." ALSO fix the `usage:` blocks (byte.yaml:10ff, and the matching word/long usage text), which currently repeat "stored in Hub memory" — …
 
-### F-075 — `file.yaml`: Contradiction on whether path separators are permitted: manual forbids '/' and other path …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-110)
+### F-075 — `file.yaml`: Contradiction on whether path separators are permitted: manual forbids '/' and other path …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-110)
 
 **File(s):** `file.yaml`
 
@@ -1064,7 +1064,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Overturn auditor's defectSide "both" -> defect is YAML-only. Manual needs NO change (it is correct per pnut-ts). Fix deliverables/ai/P2/language/spin2/assembly-directives/file.yaml: remove the sentence "The file path is relative to the source file location." from the `usage:` field. Replace with the verified behavior: the filename must be a bare name with no path separators or other invalid characters (/ : * ? " < > …
 
-### F-076 — `file.yaml`: The 253-char limit, case-insensitivity, and invalid-character list have no confirming …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-111)
+### F-076 — `file.yaml`: The 253-char limit, case-insensitivity, and invalid-character list have no confirming …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-111)
 
 **File(s):** `file.yaml`
 
@@ -1076,7 +1076,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Two-sided fix. (a) MANUAL (directives.md:539): the "Filename matching is case-insensitive" claim is wrong on case-sensitive filesystems (Linux). Either remove it or rewrite as platform-dependent, e.g. "Filename case-matching follows the host OS filesystem (case-insensitive on Windows; case-sensitive on Linux/macOS-case-sensitive volumes)." Also flag the 253-char limit (directives.md:538) as NEEDS-VERIFICATION until …
 
-### F-077 — `fit.yaml`: The manual omits the no-argument FIT form that the authority documents (defaults to the …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-116)
+### F-077 — `fit.yaml`: The manual omits the no-argument FIT form that the authority documents (defaults to the …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-116)
 
 **File(s):** `fit.yaml`
 
@@ -1088,7 +1088,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT change the manual — it is correct that FIT requires a limit operand. Instead, correct deliverables/ai/P2/language/pasm2/fit.yaml: change syntax `FIT [address]` to `FIT address`; remove the note "FIT without parameter checks for cog RAM limit ($200)"; and remove the example `FIT // Default: ensure fits in cog RAM (< $200)`. These describe a bare-FIT form that pnut-ts v1.55.0 rejects and that the Spin2 v51 …
 
-### F-078 — `getct.yaml`: Three errors: (a) '64-bit' contradicts the 32-bit authority; (b) 'upper 32 bits with WC' …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-119)
+### F-078 — `getct.yaml`: Three errors: (a) '64-bit' contradicts the 32-bit authority; (b) 'upper 32 bits with WC' …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-119)
 
 **File(s):** `getct.yaml`, `special_registers.yaml`
 
@@ -1100,7 +1100,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT change the manual — its line 533 is correct and the proposed rewrite would inject three errors into accurate text. Instead, route a P2KB corrections-register fix to the YAMLs: (1) special_registers.yaml:61 change "width: 32-bit, free-running" to reflect that CT is the lower 32 bits of a free-running 64-bit system counter; (2) pasm2/getct.yaml: document the WC variant — add that `GETCT D WC` retrieves the …
 
-### F-079 — `clock_system.yaml`: Two YAMLs in the data set give different widths for the same counter; the 32-bit value is …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-120)
+### F-079 — `clock_system.yaml`: Two YAMLs in the data set give different widths for the same counter; the 32-bit value is …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-120)
 
 **File(s):** `clock_system.yaml`, `getct.yaml`, `special_registers.yaml`
 
@@ -1112,7 +1112,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT edit clock_system.yaml (its 64-bit labels are correct). Instead, fix deliverables/ai/P2/language/pasm2/concepts/special_registers.yaml:62 from "width: 32-bit, free-running" to "width: 64-bit free-running (Rev B/C silicon); GETCT returns low 32 bits by default, upper 32 bits with WC". Optionally note in spin2/methods/getct.yaml that the underlying counter is 64-bit and GETCT() reads the low 32 bits, to remove …
 
-### F-080 — `addressing_modes.yaml`: Half the claim is corroborated (-32..+31). The '1 to 16' updating range is unverifiable …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-125)
+### F-080 — `addressing_modes.yaml`: Half the claim is corroborated (-32..+31). The '1 to 16' updating range is unverifiable …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-125)
 
 **File(s):** `addressing_modes.yaml`
 
@@ -1124,7 +1124,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Refute the "unverifiable / may be imprecise" claim — the manual's "1 to 16 for updating forms" is exactly correct per Silicon Doc part3-end.txt:181,186 and needs no change. The only actionable item is the YAML findability gap the auditor noticed: addressing_modes.yaml documents index_range only for the non-updating offset leg (line 47) and omits it from the post_modify/auto-update entry (lines 74-81). Add to that …
 
-### F-081 — ch02-instruction-format: The manual documents EEEE=0000 solely as _RET_ and omits the authority-documented nuance …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-130)
+### F-081 — ch02-instruction-format: The manual documents EEEE=0000 solely as _RET_ and omits the authority-documented nuance …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-130)
 
 **File(s):** (file not named — see source finding)
 
@@ -1136,7 +1136,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT edit the manual (the manual-side finding is a false positive — §2.2/Appendix B are correct). Instead fix the SOURCE: PASM2-ENCODING-REFERENCE.md:49-52. The note conflates IF_NEVER with %0000. Empirically (pnut-ts v1.55.0) IF_NEVER → EEEE=1111 in all cases (with or without WC/WZ), identical to the bare always form; %0000 is the `_RET_` prefix only. Replace the note with: "%0000 is the `_RET_` form …
 
-### F-082 — `adds.yaml`: The manual describes ADDS/SUBS C two contradictory ways across §3.4.1 and §3.7.1. The …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-139)
+### F-082 — `adds.yaml`: The manual describes ADDS/SUBS C two contradictory ways across §3.4.1 and §3.7.1. The …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-139)
 
 **File(s):** `adds.yaml`, `subs.yaml`
 
@@ -1148,7 +1148,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual: change §3.4.1 (chapter-03-flags.md:289 ADDS, :291 SUBS) C column from "Signed overflow occurred" to "True sign of result (corrected sign of D±S)", matching §3.7.1. Also fix the prose at :297 — ADDS/SUBS C does not flag overflow; it reports the corrected (true) sign of the signed result (the sign the value would have at full precision). YAML (routes to P2KB corrections register): adds.yaml flags_affected.C → …
 
-### F-083 — `adds.yaml`: Prose asserts ADDS/SUBS C is a signed-overflow flag. Per the encoding authority the C …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-140)
+### F-083 — `adds.yaml`: Prose asserts ADDS/SUBS C is a signed-overflow flag. Per the encoding authority the C …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-140)
 
 **File(s):** `adds.yaml`, `subs.yaml`
 
@@ -1160,7 +1160,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual: rewrite §3.4.1 table rows and the §3.4.1 prose so C is described as the true sign of the result, not signed overflow. Suggested table cell for both ADDS and SUBS C-column: "Sign of result (bit 31)". Suggested prose: "ADDS/SUBS set C to the true sign of the result (result bit 31), not a signed-overflow flag. For signed multi-long arithmetic, use ADD/ADDX for the lower longs and ADDSX (SUBSX) for the final …
 
-### F-084 — `clock_system.yaml`: The named bit positions (CC 1:0, SS 3:2, DDDD 7:4, enables 8/9, VCO mult 23:14, divider …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-146)
+### F-084 — `clock_system.yaml`: The named bit positions (CC 1:0, SS 3:2, DDDD 7:4, enables 8/9, VCO mult 23:14, divider …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-146)
 
 **File(s):** `clock_system.yaml`
 
@@ -1172,7 +1172,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Rewrite the manual §4.1.3 bit-field table to the Silicon Doc layout %0000_xxxE_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS: SS bits 1:0 (clock source select RCFAST/RCSLOW/XI/PLL); CC bits 3:2 (crystal config / XI-XO loading); PPPP bits 7:4 (post divider, value→VCO/2..30, 15=VCO/1); MMMMMMMMMM bits 17:8 (VCO multiplier, 1..1024 = stored value+1); DDDDDD bits 23:18 (XI input divider, 1..64 = stored value+1); E bit 24 (PLL enable); …
 
-### F-085 — `clock_system.yaml`: The manual's 'DC to 350 MHz' matches one authority field exactly, but the KB is …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-152)
+### F-085 — `clock_system.yaml`: The manual's 'DC to 350 MHz' matches one authority field exactly, but the KB is …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-152)
 
 **File(s):** `clock_system.yaml`
 
@@ -1184,7 +1184,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** YAML (clock_system.yaml): reconcile the upper bound. The external-clock/_xinfreq direct-input ceiling is the system-clock max — spec-sheet authoritative value is 320 MHz extended (180 MHz typical), and the PLL theoretical overclock ceiling is 350 MHz (VCO/1). Replace external.frequency_range "DC to 350 MHz" with a sourced figure and align _xinfreq.range so the two fields no longer contradict; the lone "500 MHz" …
 
-### F-086 — `execf.yaml`: The MANUAL matches the authoritative EXECF encoding ([9:0]=address, [31:10]=skip, 22 …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-162)
+### F-086 — `execf.yaml`: The MANUAL matches the authoritative EXECF encoding ([9:0]=address, [31:10]=skip, 22 …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-162)
 
 **File(s):** `execf.yaml`, `xbyte_engine.yaml`
 
@@ -1196,7 +1196,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** No manual change — manual is correct. Fix deliverables/ai/P2/architecture/xbyte_engine.yaml:160-168. entry_format should read: "[9:0] = routine address (10 bits) to jump to in cog/LUT RAM; [31:10] = SKIPF pattern (22 bits)". ALSO fix the execf_operation block in the same node so it is consistent — jump: "To bits [9:0] of LUT entry"; skipf: "Using bits [31:10] as skip pattern". (The auditor's proposedCorrection only …
 
-### F-087 — `clock_system.yaml`: $1000_0000 sets bit 28, not the reset bit. The reset bit is D[31] = $8000_0000. The …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-163)
+### F-087 — `clock_system.yaml`: $1000_0000 sets bit 28, not the reset bit. The reset bit is D[31] = $8000_0000. The …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-163)
 
 **File(s):** `clock_system.yaml`, `hubset.yaml`
 
@@ -1208,7 +1208,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT change the manual — manual line 716 (hubset ##$1000_0000) is correct per the Silicon Doc. Instead, correct the YAMLs to match authority: (1) deliverables/ai/P2/language/pasm2/hubset.yaml — replace the bit_fields d31 "Reset" entry and the chip_reset example "HUBSET ##$80000000 ' Bit 31 = reset" with the correct reset selector: HUBSET ##$1000_0000 (function-select %0001 in D[31:28] = internal reset pulse / …
 
-### F-088 — `locknew.yaml`: Manual is CORRECT per the authoritative instruction YAML. The architecture locks.yaml has …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-167)
+### F-088 — `locknew.yaml`: Manual is CORRECT per the authoritative instruction YAML. The architecture locks.yaml has …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-167)
 
 **File(s):** `locknew.yaml`, `locks.yaml`
 
@@ -1220,7 +1220,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** No change to the manual (it is correct). In deliverables/ai/P2/architecture/locks.yaml, fix the LOCKNEW operation block (lines ~89-91) to "C := 0 (lock allocated, success)" in the IF found branch and "C := 1 (no locks available)" in the ELSE branch. ADDITIONALLY — and beyond the auditor's proposal — correct BOTH usage examples that depend on the inverted semantics: line ~98 ("IF_NC JMP #no_locks") and line ~180 …
 
-### F-089 — `cordic.yaml`: The P2 CORDIC QLOG produces a base-2 logarithm in 5:27 fixed-point (whole part = bit …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-168)
+### F-089 — `cordic.yaml`: The P2 CORDIC QLOG produces a base-2 logarithm in 5:27 fixed-point (whole part = bit …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-168)
 
 **File(s):** `cordic.yaml`, `qlog.yaml`
 
@@ -1232,7 +1232,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual ch05 line 22: change to "Logarithm | QLOG | Base-2 logarithm (5:27 fixed-point) in X". cordic.yaml:78: change operation from "Natural logarithm (base e)" to "Base-2 logarithm (5:27 fixed-point)" (and QEXP at line 84 area should read "2 to the power of D", per Silicon Doc part3-end.txt:466).
 
-### F-090 — `serial_loader.yaml`: Per KB authority, Prop_Hex loads Intel-hex records (colon-prefixed with …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-170)
+### F-090 — `serial_loader.yaml`: Per KB authority, Prop_Hex loads Intel-hex records (colon-prefixed with …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-170)
 
 **File(s):** `serial_loader.yaml`
 
@@ -1244,7 +1244,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT change the manual; leave line 676 as-is (optionally enrich to "Load program data as whitespace-separated hex bytes" but not required). FIX THE YAML deliverables/ai/P2/architecture/serial_loader.yaml:69-82 — this routes to the P2KB corrections register. Replace the bogus prop_hex block with: format: "whitespace-separated hex bytes (raw, not Intel HEX)"; syntax: "Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> …
 
-### F-091 — `addressing_modes.yaml`: The YAML authority labels the -32..+31 non-updating index as '5-bit signed', but the …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-173)
+### F-091 — `addressing_modes.yaml`: The YAML authority labels the -32..+31 non-updating index as '5-bit signed', but the …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-173)
 
 **File(s):** `addressing_modes.yaml`
 
@@ -1256,7 +1256,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In deliverables/ai/P2/language/pasm2/concepts/addressing_modes.yaml line 47, change "index_range: -32 to +31 (5-bit signed)" to "index_range: -32 to +31 (6-bit signed)". This routes to the P2KB corrections register. The manual needs no change.
 
-### F-092 — `addressing_modes.yaml`: YAML-side example-quality issue surfaced during cross-reference: the auto_decrement …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-174)
+### F-092 — `addressing_modes.yaml`: YAML-side example-quality issue surfaced during cross-reference: the auto_decrement …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-174)
 
 **File(s):** `addressing_modes.yaml`, `pushb.yaml`, `special_registers.yaml`
 
@@ -1268,7 +1268,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** In addressing_modes.yaml, remove line 72 ("PUSHB value ' Implicit --PTRB operation") from the auto_decrement: block. If a stack-op illustration is wanted there, use POPB (which IS --PTRB): "POPB value ' Implicit --PTRB (RDLONG value,--PTRB)". Conversely, PUSHB belongs under auto_increment (lines 57-65) as "PUSHB value ' Implicit PTRB++ (WRLONG value,PTRB++)". This is a hard factual correction, not optional cleanup — …
 
-### F-093 — `lockrel.yaml`: The appendix states the inverted polarity. The authoritative meaning is C = lock-was-held …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-180)
+### F-093 — `lockrel.yaml`: The appendix states the inverted polarity. The authoritative meaning is C = lock-was-held …  ·  `WONTFIX` (2026-06-10)  (PASM2 audit AF-180)
 
 **File(s):** `lockrel.yaml`
 
@@ -1280,7 +1280,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual (appendix-c-categorical-index.md:617): change the LOCKREL C-flag meaning from "1 if lock was already free" to "1 if lock is currently taken (held)" — matching the Silicon Doc. YAML (lockrel.yaml): change flags_affected.C from "No effect" to reflect the WC behavior, e.g. "When WC: 1 if lock is currently taken/held (LOCK status); no effect otherwise" — making it consistent with the file's own description and …
 
-### F-094 — `coginit.yaml`: The manual assigns HUBEXEC the bit pattern/hex that actually belongs to COGEXEC_NEW. …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-181)
+### F-094 — `coginit.yaml`: The manual assigns HUBEXEC the bit pattern/hex that actually belongs to COGEXEC_NEW. …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-181)
 
 **File(s):** `coginit.yaml`, `hubexec.yaml`, `spin2-builtin-symbols-complete.yaml`, `spin2_cog_management.yaml`
 
@@ -1292,7 +1292,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Manual part-iii/appendix-e-constants.md HUBEXEC Value table (lines 273-274): change Binary to %1_0_0000 and Hexadecimal to $20. (Use the full grouped form %1_0_0000 to match the table's existing %E_N_xVVV style, e.g. COGEXEC's %0_0_0000 — not the un-grouped %10_0000 in the auditor's text.) Also fix deliverables/ai/P2/language/pasm2/hubexec.yaml line 9 from value: '%0_1_0000' to value: '%10_0000' (or '%1_0_0000' to …
 
-### F-095 — `debug-mask.yaml`: The {Spin2_v46} version-directive requirement is the most-stressed fact about DEBUG_MASK …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-182)
+### F-095 — `debug-mask.yaml`: The {Spin2_v46} version-directive requirement is the most-stressed fact about DEBUG_MASK …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-182)
 
 **File(s):** `debug-mask.yaml`, `special-configuration-symbols.yaml`
 
@@ -1304,7 +1304,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** Do NOT add the {Spin2_v46} requirement to the manual — that would inject a false constraint contradicted by pnut-ts v1.55.0. The finding is refuted on the manual side. Separately, route a YAML correction: in debug-mask.yaml soften the overstated requirement (lines 5-6,17,124 and the notes) and in special-configuration-symbols.yaml (314-315,327) from "REQUIRES {Spin2_v46} or later version directive / causes compile …
 
-### F-096 — `cog_hub_execution.yaml`: '$000-$1F7' and '496 longs' cannot both be literally true (the range is 504 longs; 496 …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-183)
+### F-096 — `cog_hub_execution.yaml`: '$000-$1F7' and '496 longs' cannot both be literally true (the range is 504 longs; 496 …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-183)
 
 **File(s):** `cog_hub_execution.yaml`, `cogexec.yaml`, `coginit.yaml`
 
@@ -1316,7 +1316,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 **Proposed correction (verify first):** MANUAL (appendix-e-constants.md): change every instance of "496 longs" describing the COGINIT/$000-$1F7 load to "504 longs". Specifically: line 230 "loads 496 longs ... into cog RAM registers $000-$1F7" -> "loads 504 longs ... into cog RAM registers $000-$1F7"; line 248 "Loads cog RAM registers $000-$1F7 (496 longs)" -> "(504 longs)"; line 252 "Code size limited to 496 longs" -> "Code size limited to 504 longs (2KB …
 
-### F-097 — `addon-goertzel-touch.yaml`: The manual states the ADC gains as 3.16x and 31.6x (the √10-spaced physical gain values: …  ·  `NEEDS-VERIFICATION`  (PASM2 audit AF-184)
+### F-097 — `addon-goertzel-touch.yaml`: The manual states the ADC gains as 3.16x and 31.6x (the √10-spaced physical gain values: …  ·  `DONE` (2026-06-10)  (PASM2 audit AF-184)
 
 **File(s):** `addon-goertzel-touch.yaml`, `smart-pin-11000-adc-internal-clock.yaml`
 
@@ -1332,7 +1332,9 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingestion/sources/spin2_lang_ref_v55/`) as a delta over the prior v51a baseline (`ingest-source` skill, first run). The v52→v55 language extensions were **already present** in the KB (ingested earlier, likely from PNut release notes), so there was **no gap-fill** — but the conflict audit (each feature gate boundary-probed against `pnut-ts v1.55.0`, the PNut-v55-ratified compiler) found three defects. ENDIANL/ENDIANW (`{Spin2_v52}`), OFFSETOF (`{Spin2_v53}`), and struct-bitfields (`{Spin2_v45}` enforced, `v54` intent) were **verified correct** — no action.
 
-### F-098 — `NEXT`/`QUIT` level: fabricated `NEXTN`/`QUITN` keywords + wrong range + inverted semantics + over-claimed gate  ·  `CONFIRMED` (compiler-probed, twice)
+### F-098 — `NEXT`/`QUIT` level: fabricated `NEXTN`/`QUITN` keywords + wrong range + inverted semantics + over-claimed gate  ·  `DONE` (2026-06-10)
+
+> **Applied 2026-06-10.** Re-probed pnut-ts (next 1 in 2-deep OK; next 2 → "not sufficiently nested"; next 16 → "must be from 1 to 15"; nextn 2 → unrecognized; quit 1 at v41 → compiles=ungated; 3-deep bounds confirmed). Fixed all 5 files: `constructs/next.yaml`, `constructs/quit.yaml`, `constructs/repeat.yaml` (QUITN block → `QUIT/NEXT level`), `keywords/NEXT.yaml`, `keywords/QUIT.yaml` — replaced NEXTN/QUITN with `NEXT level`/`QUIT level`, range 1-16→1-15, rewrote to outward-counting semantics (bare = current loop; `N` = N-th outer), dropped the enforced-`{Spin2_v52}` gate claim (made `enforced_version_gate: none` explicit; v52 = edition of introduction).
 
 **Files (5):** `language/spin2/constructs/next.yaml`, `constructs/quit.yaml`, `constructs/repeat.yaml`, `language/spin2/keywords/NEXT.yaml`, `keywords/QUIT.yaml`
 
@@ -1351,7 +1353,9 @@ Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingesti
 
 **Proposed correction (verify first):** (a) `constructs/next.yaml`,`quit.yaml`,`repeat.yaml` — replace every `NEXTN`/`QUITN` with `NEXT level`/`QUIT level` (and `QUITN 2`→`QUIT 1` etc.). (b) `keywords/NEXT.yaml`,`QUIT.yaml` — range `1-16`→`1-15`, "maximum level is 16"→"15"; rewrite semantics to outward-counting (bare = current loop; `N` = N-th outer); drop the `{Spin2_v52}` gate claim (mark ungated; `v52` is edition-of-introduction only). Honor Sacred Rule #7 on any `related:` churn.
 
-### F-099 — `debug-end-session.yaml` invents a mechanism AND omits the real documented behavior + purpose  ·  `CONFIRMED` (vs v55 spec; ground-truthed 2026-06-10)
+### F-099 — `debug-end-session.yaml` invents a mechanism AND omits the real documented behavior + purpose  ·  `DONE` (2026-06-10)
+
+> **Applied 2026-06-10.** Kept value 27 + the (genuinely enforced) `{Spin2_v52}` gate. Replaced the invented `debug_behavior`/`DebugActive=false` mechanism with the v55-sourced behavior (closes any open DEBUG.LOG file + DEBUG window(s); closes PNut if launched with `-rd`; the P2 continues executing) in description, `debug_behavior`, and notes; added the AI-assisted-dev purpose; dropped "ASCII ESC character" and "Equivalent to DEBUG(27)".
 
 **File:** `language/spin2/constants/debug-end-session.yaml`
 
@@ -1366,7 +1370,9 @@ Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingesti
 
 **Proposed correction (verify first):** Keep value 27 + `{Spin2_v52}`. Replace the invented `debug_behavior`/`DebugActive` content with the v55-sourced behavior: closes any open **DEBUG.LOG file** and **DEBUG window(s)**; closes **PNut** if launched with `-rd`; **the P2 continues executing**. Add the purpose ("facilitating AI-assisted code development" — the DEBUG.LOG close is the signal an AI tool waits on). Drop "ASCII ESC character" and the unsourced "Equivalent to DEBUG(27)" unless separately verified.
 
-### F-100 — `movbyts.yaml` gating field is ambiguous (feature is ungated, not v52-enforced)  ·  `CONFIRMED` (compiler) · minor
+### F-100 — `movbyts.yaml` gating field is ambiguous (feature is ungated, not v52-enforced)  ·  `DONE` (2026-06-10)
+
+> **Applied 2026-06-10.** Re-probed: `MOVBYTS` compiles at no-directive (ungated). Replaced the ambiguous bare `minimum_version: "v52"` with explicit `introduced_in: "v52"` + `enforced_version_gate: none` (boundary-probe verified). The file's prose already correctly stated "no version directive required".
 
 **File:** `language/spin2/methods/movbyts.yaml`
 
@@ -1375,3 +1381,48 @@ Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingesti
 **Evidence:** pnut-ts v1.55.0 boundary-probe — `MOVBYTS` compiles at `{Spin2_v41}`/no-directive (ungated); contrast `ENDIANL` which fails below `{Spin2_v52}`.
 
 **Proposed correction (verify first):** Make the ungated status explicit/machine-readable (e.g. `requires_version: none` + a note: "Introduced in PNut/pnut_ts v52; the compiler does NOT enforce a version directive — verified by boundary probe. 'v52' is the edition of introduction, not an enforced gate."). Per [[reference_language_gating_is_yaml_golden]], the YAML is the golden home for gating — it must read unambiguously.
+
+---
+
+## PASM2-audit correction sweep — 2026-06-10 (Wave 1: F-026..F-050)
+
+Each NEEDS-VERIFICATION finding was independently re-verified against the golden sources (pnut-ts boundary/assembly probes · `silicon-doc` · `p2-instructions-csv` · `spin2_lang_ref_v55` · `chip-gracey-clarifications`) by a bounded verification workflow, then hand-reviewed and applied via `yaml-knowledge-base-maintenance`. Outcome of the 25:
+
+- **24 CONFIRMED + applied → DONE.** F-026 (getscp `write: D`), F-027/F-029/F-030/F-031 (clock_system.yaml HUBSET operand map fully rewritten to canonical `E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS`; CC=D[3:2]/SS=D[1:0] un-swapped; all three example literals recomputed and PASM2-compile-verified), F-028 (hubset.yaml d3_2 CC: 4 entries, 15pF moved off %01 onto %10), F-032 (ijnz note de-inverted), F-033 (jxro "streamer NCO rollover" + oneliner), F-034 (jxro/jxmt variable timing), F-035 (lockrel C = lock-was-held under WC), F-037 (locknew/lockret/locktry/lockrel variable timing), F-038 (tjf/tjz/tjnz/tjns hub clocks), F-039 (tjnz/tjns variable timing), F-040 (testb `related`), F-041 (tjf/tjz column-bleed description fragment removed), F-042 (addpix = 4 byte fields / 8:8:8:8 incl. alpha, per Silicon Doc), F-043/F-044 (addsx/addx `related` self-ref→sibling), F-045 (augd/augs SETQ-block-delta errata), F-046 (augs scope_note tightened), F-048/F-049 (calla/callb hub-exec timing 14-32 added; CSV-confirmed), F-050 (calla PTRA-only description/oneliner). **F-047** (gen-script `flags_affected` key-presence-vs-value bug) fixed in `engineering/tools/gen-pasm2-encoding-reference.py` — corrects the bogus "C,Z" column on 344 rows; takes effect on the encoding-reference regen.
+- **1 REFUTED → WONTFIX.** F-036 — LOC category `Math and Logic` matches the canonical Parallax CSV (row 431) exactly; proposed "Branch" recategorization is wrong. (Manual-side LOC categorization inconsistency is a separate manual-head issue, not a YAML defect.)
+
+**Bundled fixes surfaced during Wave 1 (not separate findings, fixed in the same pass):**
+- F-051 (callb PTRB-only description — a Wave 2 item) applied early while editing `callb.yaml`.
+- See **F-101** below (tjnz/tjns inverted jump-condition prose, the TJ-family analog of F-032).
+
+### F-101 — `tjnz.yaml`/`tjns.yaml` carry inverted jump-condition prose (TJ-family analog of F-032)  ·  `DONE` (2026-06-10)
+
+**Files:** `tjnz.yaml`, `tjns.yaml`
+
+**What was wrong:** `tjnz.yaml` `description` and `encoding_notes` said PC is written "when Dest is **zero** (or not zero in syntax 2)" — but TJNZ = Test and Jump if **Not** Zero. `tjns.yaml` `encoding_notes` said "when Dest is **signed** (or not signed in syntax 2)" — but TJNS = Test and Jump if **Not** Signed. Both are the same stale shared-template parenthetical class as F-032 (ijnz) / F-056/F-057 (djf/djnz).
+
+**Evidence:** `p2-instructions-csv` rows 175/179 — "Test D and jump to S** if D is **not** zero." / "…if D is **not** signed (D[31] = 0)."
+
+**Correction applied:** tjnz description + note → "if it's NOT zero" / "only when Dest is NOT zero"; tjns note → "only when Dest is NOT signed (Dest[31] = 0)". Surfaced while applying F-039 (same files).
+
+---
+
+## PASM2-audit correction sweep — 2026-06-10 (Wave 2: F-051..F-075)
+
+Same verify→fix discipline as Wave 1. All 25 applied (24 CONFIRM + 1 PARTIAL):
+
+- **Cross-ref / specificity:** F-051 (callb PTRB-only desc — applied early in Wave 1), F-052 (callpa→PA, callpb→PB), F-053/F-054 (cmpsx/cmpx `related` self-ref→CMPS), F-055 (cogstop `related`→COGID).
+- **De-inverted jump-condition prose:** F-056 (djnf "NOT full"), F-057 (djnz "NOT zero").
+- **Flag/field/timing:** F-058 (rdlong Z=Result==0 under WZ — was the lone outlier vs rdbyte/rdword), F-059/F-060/F-061 (rolbyte/rolword/setbyte "nibble ID"→byte/word/byte ID), F-062 (signx "zero-extend"→"sign-extend"), F-063 (waitxro fixed→variable), F-064 PARTIAL (waitx C/Z cleared only under WC/WZ/WCZ — YAML side; manual already correct), F-065 (wfbyte/wfword/wflong column-bleed description fragment removed), F-066 (wmlong fixed→variable timing), F-067 (wrbyte timing.cycles range).
+- **Assembler-directive cluster (all compiler-probe-verified):** F-068/F-069 (org.yaml: COG/LUT range 0-$3FF, optional limit, auto-limit table $1F8/$200/$400 — all boundary-probed; fit.yaml: bare FIT is a compile error), F-070/F-071 (orgf.yaml: COG-mode-only, 0-$3FF, ORGH-mode error), F-072/F-073 (orgh.yaml ×2: limit param + $100000 ceiling m361/m372; bare-ORGH default context-dependent $400 vs current-hub — per Spin2 v55 spec §326/§327), F-074 (byte/word/long: "Hub memory"→current ORG/ORGH origin), F-075 (file.yaml filename invalid-char list + DAT-only, merged with F-076).
+
+## PASM2-audit correction sweep — 2026-06-10 (Wave 3: F-023, F-076..F-097)
+
+All applied except one refutation; every high-impact numeric/encoding claim re-verified against primary sources before publishing:
+
+- **Fabrication removed:** F-023 (setxfrq SETQ+SETXFRQ "64-bit precision" — invented; NCO is 32-bit, SETXFRQ takes no SETQ; replaced with the real SETQ-before-XINIT pattern).
+- **Verified-then-applied (probe/source in parens):** F-078/F-079 (GETCT counter is 64-bit; WC=upper 32 — CSV row 260), F-080 (PTRx post-modify index 1-16), F-081 (IF_NEVER assembles to EEEE=%1111, not %0000; %0000 is _RET_-only — EEEE-bit probe), F-082/F-083 (ADDS/SUBS C = correct sign of result, NOT signed overflow — CSV "C = correct sign"), F-085 (XI direct-drive max 200 MHz not 350 — datasheet AC table), F-086 (XBYTE/EXECF LUT entry: addr=D[9:0], skip=D[31:10] — Silicon Doc :1913), F-087 (chip reset = HUBSET ##$1000_0000 D[31:28]=%0001; D[31]=PRNG seed not reset — Silicon Doc :6038/:6465/:6468), F-088 (locks.yaml LOCKNEW C polarity: C=0 success / C=1 none — matches locknew.yaml), F-089 (QLOG base-2 / 5:27 fixed-point, QEXP=2^D — Silicon Doc :7287), F-090 (Prop_Hex is whitespace-separated raw hex, NOT Intel HEX), F-091 (index -32..+31 = 6-bit signed), F-092 (PUSHB=PTRB++, POPB=--PTRB examples), F-094 (HUBEXEC=$20 — divide-by-zero oracle), F-095 (DEBUG_MASK ungated — compiled clean with no directive), F-096 (COGINIT loads $000-$1F7=504 longs; $1F8-$1FF special regs not loaded), F-097 (ADC gains 3.16x/31.6x √10 ladder; fabricated P_ADC_31X→P_ADC_30X).
+- **Covered by a Wave-1 edit (no separate action):** F-077 (fit.yaml — done via F-069), F-084 (clock_system config_fields — done via F-029/F-031), F-076 (file.yaml — merged with F-075).
+- **REFUTED → WONTFIX:** F-093 (lockrel C polarity) — already correct after F-035; the appendix and YAML both read the right polarity today.
+
+**Gen-script fixes (take effect on PASM2-ENCODING-REFERENCE.md regen):** F-047 (Flags column tested dict-key presence not value → bogus "C,Z" on 344 rows) and F-081 (the %0000/_RET_/IF_NEVER explanatory note). Both fixed in `engineering/tools/gen-pasm2-encoding-reference.py`; the `.md` is regenerated, not hand-edited.

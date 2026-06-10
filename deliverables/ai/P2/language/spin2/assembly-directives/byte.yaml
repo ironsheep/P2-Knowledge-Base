@@ -1,15 +1,18 @@
 directive: BYTE
 name: Insert Byte Data
-description: Insert byte data into Hub memory at assembly time
+description: Insert byte data into the assembly image at the current origin at assembly
+  time
 syntax: BYTE value1 {, value2, ...}
 examples:
 - BYTE  $FF              ; Single byte value
 - BYTE  10, 20, 30       ; Multiple byte values
 - BYTE  "Hello", 0       ; String with null terminator
 - BYTE  value[16]        ; Duplicate value 16 times
-usage: 'BYTE is used in DAT sections to define byte-sized data values that will
+usage: 'BYTE is used in DAT sections to define byte-sized data values. Data is placed
 
-  be stored in Hub memory. Multiple values can be specified separated by commas.
+  at the current assembly origin — in COG RAM, LUT RAM, or Hub RAM depending on
+
+  the active ORG/ORGH mode. Multiple values can be specified separated by commas.
 
   Strings are automatically converted to their byte values.
 

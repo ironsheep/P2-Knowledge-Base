@@ -31,8 +31,7 @@ encoding:
   z: —
   clocks: 2 or 4
 encoding_notes:
-- Dest is always written; PC is written only when the result in Dest is full (or not
-  full in syntax 2).
+- Dest is always written; PC is written only when the result in Dest is NOT full.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

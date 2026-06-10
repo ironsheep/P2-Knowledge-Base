@@ -15,7 +15,7 @@ parameters:
 - Dest is the register in which to modify a byte.
 - Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated
   location.
-- Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify.
+- Num is a 2-bit literal identifying the byte ID (0-3) of Dest to modify.
 flags_affected:
   C: No effect
   Z: No effect

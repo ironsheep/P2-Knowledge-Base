@@ -91,8 +91,9 @@ clock_sources:
   external:
     description: "External clock input"
     input_pin: "XI pin"
-    frequency_range: "DC to 350 MHz"
+    frequency_range: "DC to 200 MHz"
     duty_cycle: "40-60% recommended"
+    note: "DC-200 MHz is the direct-drive-into-XI limit (P2 datasheet AC Characteristics). 350 MHz is the absolute VCO/1 overclock ceiling, NOT the XI-input limit; PLL output max = 320 MHz (180 MHz typical)."
 
 pll_system:
   constraints:
@@ -131,21 +132,20 @@ hubset_configuration:
   instruction: "HUBSET {#}D"
   immediate_mode: "HUBSET ##config"
   
+  # Clock-mode operand layout: %0000_000E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS
   config_fields:
-    d31: "Reset request (write 1 to reset chip)"
-    d30_28: "Reserved"
-    d27_24: "XI divider for PLL (PPPP)"
-    d23_14: "VCO multiplier (MMMM_MMMMMM)"
-    d13_10: "Reserved"
-    d9: "PLL power enable"
-    d8: "Crystal oscillator enable"
-    d7_4: "Post divider selection (DDDD)"
-    d3_2: "Clock source select (SS)"
-    d1_0: "Crystal configuration (CC)"
+    d31: "Must be 0 in clock mode; D[31]=1 selects PRNG-seed mode (%1DDD...). Chip reset is a SEPARATE HUBSET mode: HUBSET ##$1000_0000 (D[31:28]=%0001 = hard reset), NOT bit 31 alone."
+    d30_25: "Reserved (must be zero for the clock-mode operand)"
+    d24: "E -- PLL enable (0=PLL off, 1=PLL on)"
+    d23_18: "DDDDDD -- XI input divider /1..64 (stored as divider-1)"
+    d17_8: "MMMMMMMMMM -- VCO multiplier x1..1024 (stored as multiplier-1)"
+    d7_4: "PPPP -- VCO post-divider (0=VCO/2, 1=VCO/4, ..., 14=VCO/30, 15=VCO/1)"
+    d3_2: "CC -- crystal/cap config (%00=Hi-Z, %01=1MΩ no caps, %10=1MΩ 15pF, %11=1MΩ 30pF)"
+    d1_0: "SS -- clock source (%00=RCFAST, %01=RCSLOW, %10=XI, %11=PLL)"
 
 clock_modes:
   crystal_config:
-    cc_field: "D[1:0]"
+    cc_field: "D[3:2]"
     modes:
       0b00: "XI/XO pins Hi-Z (oscillator off)"
       0b01: "XI/XO with 1MΩ feedback, no caps"
@@ -153,7 +153,7 @@ clock_modes:
       0b11: "XI/XO with 1MΩ feedback, 30pF caps"
       
   source_select:
-    ss_field: "D[3:2]"
+    ss_field: "D[1:0]"
     modes:
       0b00: "RCFAST (20-30 MHz)"
       0b01: "RCSLOW (~20 kHz)"
@@ -182,33 +182,33 @@ programming_examples:
   basic_crystal_20mhz:
     code: |
       ' 20 MHz crystal, no PLL
-      HUBSET  ##%00_10      ' Crystal with 15pF caps
+      HUBSET  ##%10_00      ' Enable crystal with 15pF caps, stay on RCFAST
       WAITX   ##20_000_000/100  ' Wait 10ms
-      HUBSET  ##%10_10      ' Switch to crystal
+      HUBSET  ##%10_10      ' Switch to crystal (XI)
       
   pll_160mhz_from_20mhz_crystal:
     code: |
       ' 20 MHz crystal → 160 MHz via PLL
       ' VCO = 20MHz * 16 = 320MHz
       ' Output = 320MHz / 2 = 160MHz
-      HUBSET  ##%00_10                    ' Enable crystal
-      WAITX   ##20_000_000/100            ' Wait 10ms
-      HUBSET  ##%10_10                    ' Switch to crystal
-      HUBSET  ##%0001_0000_0000_00_10_10 ' PLL: /1 * 16 / 2
-      WAITX   ##20_000_000/10000          ' Wait 100µs
-      HUBSET  ##%0001_0000_0000_00_10_11 ' Switch to PLL
+      HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
+      WAITX   ##20_000_000/100                      ' Wait 10ms
+      HUBSET  ##%10_10                              ' Switch to crystal (XI)
+      HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1010  ' PLL on, /1 * 16 / 2, source still XI
+      WAITX   ##20_000_000/10000                    ' Wait 100µs for PLL lock
+      HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1011  ' Switch to PLL output
       
   overclock_250mhz:
     code: |
       ' 20 MHz crystal → 250 MHz (overclock)
       ' VCO = 20MHz * 25 = 500MHz (overclock)
       ' Output = 500MHz / 2 = 250MHz
-      HUBSET  ##%00_10                    ' Enable crystal
-      WAITX   ##20_000_000/100            ' Wait 10ms
-      HUBSET  ##%10_10                    ' Switch to crystal
-      HUBSET  ##%0001_1001_0000_00_10_10 ' PLL: /1 * 25 / 2
-      WAITX   ##20_000_000/10000          ' Wait 100µs
-      HUBSET  ##%0001_1001_0000_00_10_11 ' Switch to PLL
+      HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
+      WAITX   ##20_000_000/100                      ' Wait 10ms
+      HUBSET  ##%10_10                              ' Switch to crystal (XI)
+      HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1010  ' PLL on, /1 * 25 / 2, source still XI
+      WAITX   ##20_000_000/10000                    ' Wait 100µs for PLL lock
+      HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1011  ' Switch to PLL output
 
 clock_distribution:
   system_clock: "Main clock for all COGs"

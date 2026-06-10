@@ -2,7 +2,7 @@ instruction: GETSCP
 syntax: GETSCP  D
 encoding:
 - bits: EEEE 1101011 000 DDDDDDDDD 001110001
-  write: —
+  write: D
   c: —
   z: —
   clocks: '2'

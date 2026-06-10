@@ -144,9 +144,9 @@ configuration_constants:
     - "P_ADC_VIO - VIO-referenced input"
     - "P_ADC_FLOAT - Floating input"
     - "P_ADC_1X - 1x gain"
-    - "P_ADC_3X - 3x gain"
+    - "P_ADC_3X - 3.16x gain (sqrt-10-spaced ladder)"
     - "P_ADC_10X - 10x gain"
-    - "P_ADC_30X - 30x gain"
+    - "P_ADC_30X - 31.6x gain (sqrt-10-spaced ladder)"
     - "P_ADC_100X - 100x gain"
   
   x_register_modes:

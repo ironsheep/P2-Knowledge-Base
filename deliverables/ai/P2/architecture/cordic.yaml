@@ -75,16 +75,16 @@ operations:
     
   logarithm:
     instruction: "QLOG"
-    operation: "Natural logarithm (base e)"
+    operation: "Base-2 logarithm (5:27 fixed-point)"
     setup: "QLOG D"
-    result: "ln(D) in X with 5.32 fixed-point format"
+    result: "log2(D) in X, 5:27 fixed-point (whole part = bit number, fractional part = mantissa)"
     
   exponential:
     instruction: "QEXP"
-    operation: "Exponential (e^x)"
+    operation: "2 to the power of D (antilog, inverse of QLOG)"
     setup: "QEXP D"
-    input_format: "5.32 fixed-point"
-    result: "e^D in X"
+    input_format: "5:27 fixed-point"
+    result: "2^D in X"
 
 result_retrieval:
   getqx:

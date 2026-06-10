@@ -7,7 +7,7 @@ encoding:
   z: —
   clocks: '3...10'
 timing:
-  cycles: 3
+  cycles: '3...10 (cog) / 3...20 (hub-exec)'
   type: variable
   range: 3...10 / 3...20
 description: 'Write byte in D[7:0] to hub address {#}S/PTRx.'

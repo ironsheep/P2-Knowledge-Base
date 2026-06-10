@@ -159,13 +159,13 @@ flag_control:
 
 lut_table_format:
   entry_format: |
-    Each LUT entry contains:
-    [31:23] = Base routine address (9 bits)
-    [22:0] = SKIPF pattern (23 bits) or extended address
+    Each LUT entry contains (per EXECF encoding, Silicon Doc):
+    [9:0]  = Base routine address (10-bit COG/LUT address to jump to)
+    [31:10] = SKIPF pattern (22 bits)
     
   execf_operation:
-    jump: "To bits [31:23] of LUT entry"
-    skipf: "Using bits [22:0] as skip pattern"
+    jump: "To bits [9:0] of LUT entry (10-bit COG/LUT address)"
+    skipf: "Using bits [31:10] as the 22-bit SKIPF pattern"
     
   routine_addressing:
     cog_range: "$000-$1FF"

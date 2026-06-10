@@ -44,7 +44,7 @@ modes:
     syntax: "[base_ptr + index]"
     encoding: PTR with offset encoding
     base: PTRA or PTRB
-    index_range: -32 to +31 (5-bit signed)
+    index_range: -32 to +31 (6-bit signed)
     examples:
       - RDLONG reg, PTRA[4]   ' Read from hub[PTRA + 16] (index scaled by 4)
       - WRWORD reg, PTRB[-2]  ' Write to hub[PTRB - 4] (index scaled by 2)
@@ -61,6 +61,7 @@ modes:
     examples:
       - RDLONG reg, PTRA++    ' Read from hub[PTRA], then PTRA += 4
       - WRWORD reg, PTRB++    ' Write to hub[PTRB], then PTRB += 2
+      - PUSHB value           ' Implicit PTRB++ operation (WRLONG value,PTRB++)
     increment_amount: Based on operation size (1/2/4 bytes)
 
   auto_decrement:
@@ -69,13 +70,14 @@ modes:
     behavior: Decrement first, then use new value
     examples:
       - RDLONG reg, --PTRA    ' PTRA -= 4, then read from hub[PTRA]
-      - PUSHB value           ' Implicit --PTRB operation
+      - POPB value            ' Implicit --PTRB operation (RDLONG value,--PTRB)
     decrement_amount: Based on operation size (1/2/4 bytes)
 
   post_modify:
     syntax: "PTRx++[index]"
     encoding: Combined PTR mode encoding
     behavior: Use current value, then add scaled index
+    index_range: "1 to 16 (magnitude; ++ forms add INDEX*SCALE, -- forms subtract INDEX*SCALE)"
     examples:
       - RDLONG reg, PTRA++[8] ' Read from hub[PTRA], then PTRA += 32
       - WRLONG reg, PTRB++[-1]' Write to hub[PTRB], then PTRB -= 4

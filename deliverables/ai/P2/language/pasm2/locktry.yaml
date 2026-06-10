@@ -7,8 +7,8 @@ encoding:
   z: —
   clocks: '2...9, +2 if result'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: '2...9, +2 if result'
+  type: variable
 description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
 
 

@@ -40,5 +40,5 @@ oneliner: Add two signed extended values
 related:
 - ADD
 - ADDX
-- ADDSX
+- ADDS
 - SUBSX

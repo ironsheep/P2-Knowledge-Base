@@ -1,7 +1,7 @@
 instruction: TJNZ
 syntax: TJNZ    D,{#}S
 category: Branch
-description: Dest is tested and if it's zero (or not zero in syntax 2), PC is set
+description: Dest is tested and if it's NOT zero, PC is set
   to a new relative (#Src) or absolute (Src) address.
 flags_affected:
   C: No effect
@@ -13,15 +13,16 @@ parameters:
   for absolute addressing.'
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 encoding:
 - bits: EEEE 1011100 11I DDDDDDDDD SSSSSSSSS
   write: —
   c: —
   z: —
-  clocks: 2 or 4
+  clocks: '2 or 4 / 2 or 13-20'
 encoding_notes:
-- PC is written only when Dest is zero (or not zero in syntax 2).
+- PC is written only when Dest is NOT zero.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

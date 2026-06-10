@@ -2,7 +2,7 @@ instruction: ADDS
 syntax: ADDS Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Add signed
 category: Math and Logic
-description: ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a signed overflow (signed carry), or is cleared (0) if no overflow. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.
+description: ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the correct sign of (D + S), i.e. bit 31 of the result (C=1 if negative, C=0 if non-negative). C is NOT a signed-overflow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.
 result: Sum of signed Src and signed Dest is stored in Dest.
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is
@@ -11,7 +11,7 @@ parameters:
   into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set if signed overflow (sign of D + S)
+  C: Set to the true sign of the result -- correct sign of (D + S), bit 31 (1=negative, 0=non-negative); NOT signed overflow
   Z: Set if result equals zero
 syntax_variants:
 - ADDS Dest, {#}Src {WC|WZ|WCZ}

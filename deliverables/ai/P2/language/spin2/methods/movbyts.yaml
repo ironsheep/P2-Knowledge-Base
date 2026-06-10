@@ -2,7 +2,8 @@ method: MOVBYTS
 type: method
 category: Byte Manipulation
 
-minimum_version: "v52"
+introduced_in: "v52"          # edition of introduction, NOT an enforced compiler gate
+enforced_version_gate: none    # verified by boundary probe: MOVBYTS compiles at {Spin2_v41}/no-directive
 
 description: |
   Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each 

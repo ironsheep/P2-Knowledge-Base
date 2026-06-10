@@ -2,8 +2,7 @@ constant: DEBUG_MASK
 type: constant
 category: Debug Constants
 
-minimum_version: "v46"
-version_directive: "{Spin2_v46}"
+introduced_in_version: "v46"  # edition of introduction; NOT an enforced compiler gate (boundary-probed)
 
 aliases:
   - DEBUG_MASK
@@ -14,8 +13,9 @@ description: |
   (DEBUG[n]). Each bit in the mask corresponds to a channel (0-31). Only channels
   with their corresponding bit set are compiled; others are completely omitted.
 
-  REQUIRES: {Spin2_v46} or later version directive at the start of your source file.
-  Standard DEBUG() statements (without channel numbers) do NOT require the directive.
+  Available in PNut/pnut_ts v46 and later compilers. No {Spin2_v##} version directive
+  is required -- DEBUG_MASK is a CON constant, not a new keyword subject to keyword gating.
+  Standard DEBUG() statements (without channel numbers) likewise require no directive.
 
 value: "User-defined bitmask (0 to $FFFF_FFFF)"
 
@@ -121,7 +121,7 @@ compilation_behavior:
   - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK"
 
 notes:
-  - "REQUIRES {Spin2_v46} or later version directive at start of source file"
+  - "Introduced in PNut/pnut_ts v46; no {Spin2_v##} version directive required (boundary-probe verified)"
   - "Available in PNut/pnut_ts v46 and later compilers"
   - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
   - "Channel numbers must be 0-31"

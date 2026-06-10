@@ -4,7 +4,7 @@ category: Branch
 description: CALLPA records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PA, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
 parameters:
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
-  to PA or PB.
+  to PA.
 - 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
   relative or absolute address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
@@ -39,4 +39,3 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.515786'
 oneliner: Call a subroutine; store return context on the stack and copy D into PA
-  or PB

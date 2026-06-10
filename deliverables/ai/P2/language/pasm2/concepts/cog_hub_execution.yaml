@@ -56,8 +56,10 @@ cog_execution:
   speed: "2 clock cycles per instruction (deterministic)"
   
   memory_map:
-    $000_$1FF: "496 longs available for code/data"
-    $1F0_$1FF: "16 special purpose registers"
+    $000_$1EF: "496 general-purpose registers (code/data)"
+    $1F0_$1F7: "8 dual-purpose registers (general-purpose, or interrupt vectors IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB when those features are enabled)"
+    $1F8_$1FF: "8 special-purpose registers (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) -- not loaded by COGINIT"
+  coginit_load_range: "COGINIT loads $000-$1F7 = 504 longs (general-purpose + dual-purpose); $1F8-$1FF special-purpose registers are NOT loaded"
   
   advantages:
     - "Deterministic 2-clock execution"

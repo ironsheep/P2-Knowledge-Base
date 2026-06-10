@@ -9,9 +9,15 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: T=0 on reset, CT++ on every clock.
+description: |
+  Read the system counter into D. The underlying counter is a free-running 64-bit counter
+  (Rev B/C silicon) that increments every clock, cleared on reset.
+  Without WC: D receives the lower 32 bits of the 64-bit counter.
+  With WC:    D receives the upper 32 bits of the 64-bit counter.
+  GETCT WC followed by GETCT reads the full 64-bit value. The WC bit is a mode selector,
+  not a flag-write -- C and Z flags are always unchanged.
 flags_affected:
-  C: Unchanged
+  C: Unchanged (WC selects upper/lower 32 bits of the counter; it does not write the C flag)
   Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

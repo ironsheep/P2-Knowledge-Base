@@ -3,7 +3,7 @@ syntax: CALLB #{\}Addr | CALLB Dest {WC|WZ|WCZ}
 brief_description: Call subroutine via PTRB
 category: Branch
 description: Write current C and Z flags and address of the next instruction into
-  the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
+  the 4-byte Hub RAM location at PTRB, increment PTRB by 4, set PC to new relative
   or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
   += A, else PC = A.
 parameters:
@@ -16,19 +16,20 @@ flags_affected:
   C: Set to D[31] if WC/WCZ specified
   Z: Set to D[30] if WZ/WCZ specified
 timing:
-  cycles: 5-12
+  cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
+  notes: 5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)
 encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101111
   write: —
   c: D[31]
   z: D[30]
-  clocks: 5...12 *
+  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 - bits: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
   write: —
   c: —
   z: —
-  clocks: 5...12 *
+  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 encoding_notes:
 - Stores return context at PTRB address then increments PTRB by 4
 documentation_source: PASM2 Manual 2022/11/01

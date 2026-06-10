@@ -7,7 +7,7 @@ description: 'Set the assembly origin to a hub RAM address
   '
 category: Assembly Directives
 documentation_level: complete
-syntax: ORGH [address]
+syntax: 'ORGH [address[, limit]]'
 examples:
 - code: 'ORGH  $400       '' Start at hub address $400
 
@@ -15,13 +15,18 @@ examples:
 
     '
   description: Set hub RAM origin
-- code: 'ORGH             '' Default: start at hub $400
+- code: 'ORGH             '' Default hub origin ($400 in Spin2+PASM programs)
 
     '
   description: Default hub origin
+- code: 'ORGH $FC000,$FC800  '' hub origin = $FC000, origin limit = $FC800
+
+    '
+  description: Set hub origin with an explicit limit
 notes:
-- ORGH sets hub RAM addresses
-- Default address is $400 if not specified
+- ORGH sets hub RAM addresses (hub-exec mode)
+- 'Bare ORGH default address is context-dependent (per Spin2 v55 spec): in Spin2+PASM programs it is $400 (hub-exec code uses relative addressing and is relocated at runtime); in PASM-only programs it is the current hub address (origin always matches the hub address, and ORGH fills hub memory with zeros up to the given address)'
+- 'Optional second parameter sets the origin limit (default $100000); PNut enforces the ceiling -- ORGH address,limit beyond it emits "Hub address exceeds $100000 ceiling (m361)", and a bare ORGH address beyond it emits "Hub address exceeds limit (m372)" -- compiler-verified'
 - Use for hub-exec code and hub data
 related:
 - ORG

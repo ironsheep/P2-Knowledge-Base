@@ -1,17 +1,20 @@
 directive: WORD
 name: Insert Word Data
-description: Insert word (16-bit) data into Hub memory at assembly time
+description: Insert word (16-bit) data into the assembly image at the current origin
+  at assembly time
 syntax: WORD value1 {, value2, ...}
 examples:
 - WORD  $1234            ; Single word value
 - WORD  1000, 2000, 3000 ; Multiple word values
 - WORD  value[8]          ; Duplicate value 8 times
 - WORD  (@label - @base) >> 1  ; Address calculation
-usage: 'WORD is used in DAT sections to define word-sized (16-bit) data values that
+usage: 'WORD is used in DAT sections to define word-sized (16-bit) data values. Data
 
-  will be stored in Hub memory. Multiple values can be specified separated by
+  is placed at the current assembly origin — in COG RAM, LUT RAM, or Hub RAM
 
-  commas. Words are stored in little-endian format.
+  depending on the active ORG/ORGH mode. Multiple values can be specified separated
+
+  by commas. Words are stored in little-endian format.
 
   '
 alignment: 'Words may not be aligned unless preceded by ALIGNW. Using ALIGNW before

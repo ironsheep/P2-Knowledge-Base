@@ -7,8 +7,9 @@ description: >-
   Dest register. If Src is a 9-bit literal, its value is interpreted as positive
   (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction)
   for a 32-bit signed value; negative or positive. If the WC or WCZ effect is
-  specified, the C flag is set (1) if the subtraction results in a signed underflow
-  (signed borrow), or is cleared (0) if no underflow. If the WZ or WCZ effect is
+  specified, the C flag is set to the true sign of the result -- the correct sign of
+  (D - S), i.e. bit 31 of the result (C=1 if negative, C=0 if non-negative); it is
+  NOT a signed-underflow or borrow indicator. If the WZ or WCZ effect is
   specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared
   (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS)
   followed possibly by SUBX, and finally SUBSX as described in Subtracting Two

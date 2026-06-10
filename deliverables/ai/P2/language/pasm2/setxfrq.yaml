@@ -13,8 +13,6 @@ description: Set streamer NCO frequency to D. The NCO phase accumulator masks it
   MSB before each add (modulus $8000_0000), so D is the system-clock multiplier
   scaled by $8000_0000 = 2^31. Output frequency = (D × clkfreq) / $8000_0000,
   i.e. D = target_freq × $8000_0000 / clkfreq.
-  For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits
-  for 64-bit precision frequency control.
 flags_affected:
   C: No effect
   Z: No effect
@@ -41,12 +39,12 @@ examples:
     code: |
       ' Calculate: 48_000 * $8000_0000 / 250_000_000 = $0006_4A9D
       setxfrq ##$0006_4A9D      ' 48 kHz sample rate
-  - context: High-precision frequency with SETQ
+  - context: Alternate frequency set via SETQ before XINIT
     code: |
-      ' 64-bit precision: SETQ provides low 32 bits
-      setq    freq_low          ' Low 32 bits of frequency
-      setxfrq freq_high         ' High 32 bits, combined with SETQ
-    notes: SETQ+SETXFRQ enables sub-Hz frequency resolution
+      ' SETQ before XINIT sets the NCO frequency during the first clock of the command
+      setq    ##$0CE3_BCD3    ' Set NCO frequency (25.175 MHz @ 250MHz sysclk)
+      xinit   ##streamer_mode,#0
+    notes: SETQ before XINIT/XZERO/XCONT sets NCO frequency atomically with the streamer command; SETQ is NOT a modifier for SETXFRQ
 frequency_formula:
   formula: "D = (target_frequency × $8000_0000) / clkfreq"
   inverse: "output_frequency = (D × clkfreq) / $8000_0000"
@@ -66,6 +64,5 @@ common_values:
     sysclk: "250 MHz"
     value: "$0005_C7C0"
 related_instructions:
-  - SETQ: Prefix for 64-bit precision frequency
+  - XINIT: Start streamer with configured frequency; SETQ before XINIT can set NCO frequency atomically
   - GETXACC: Read phase accumulator (Goertzel mode)
-  - XINIT: Start streamer with configured frequency

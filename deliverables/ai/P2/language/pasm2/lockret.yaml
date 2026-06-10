@@ -7,8 +7,8 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: '2...9'
+  type: variable
 description: >-
   Return LOCK D[3:0] for reallocation. After LOCKRET, the lock is returned to the
   pool and can be allocated again via LOCKNEW.

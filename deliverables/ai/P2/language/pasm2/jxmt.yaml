@@ -8,7 +8,8 @@ encoding:
   clocks: '2 or 4'
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 description: >-
   JXMT checks the cog's streamer empty event flag and jumps to the address described
   by Src if the flag is set. PC is set to a new relative (#Src) or absolute (Src)

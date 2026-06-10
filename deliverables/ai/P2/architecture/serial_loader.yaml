@@ -67,19 +67,19 @@ protocol_commands:
     example: "Prop_Clk 2 8 1 (crystal * 8 / 1)"
     
   prop_hex:
-    syntax: "Prop_Hex"
-    format: "Intel hex records"
-    purpose: "Load binary data in hex format"
-    
-    record_format: |
-      :LLAAAATTDD...CC
-      LL = byte count
-      AAAA = address
-      TT = type (00=data, 01=EOF)
-      DD = data bytes
-      CC = checksum
-      
-    example: ":10000000214601360121470136007EFE09D21940"
+    syntax: "Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> <hexdatabytes> ~ | ?"
+    format: "whitespace-separated raw hex bytes (NOT Intel HEX)"
+    purpose: "Load byte data into hub starting at $00000, then execute"
+    terminator: "~ executes unconditionally; ? validates an embedded checksum first"
+    data_format: |
+      Raw hex byte values separated by whitespace.
+      Only the bottom 8 bits of each hex value are used as data.
+      No record structure, no address fields, no per-record checksums.
+    embedded_checksum: |
+      Optional: append a long-aligned checksum long computed as
+      $706F7250 ('Prop') minus the sum of all data longs.
+      Loader sends '.' for correct checksum, '!' for incorrect.
+    example: "Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~"
     
   prop_txt:
     syntax: "Prop_Txt ~"
@@ -110,10 +110,10 @@ loading_process:
     
   data_reception:
     hex_mode:
-      - "Process Intel hex records"
-      - "Validate checksums"
-      - "Write to hub memory"
-      - "Stop on EOF record"
+      - "Receive whitespace-separated raw hex bytes"
+      - "Write each byte to hub memory sequentially from $00000"
+      - "Stop on '~' (run) or '?' (validate embedded checksum, then run or abort)"
+      - "Optional: validate an embedded checksum long if terminated with '?'"
       
     base64_mode:
       - "Decode Base64 stream"
@@ -142,9 +142,7 @@ programming_examples:
     > Prop_Chk
     Prop_Ver Au
     .
-    > Prop_Hex
-    :10000000506F72700400000000020000...
-    :00000001FF
+    > Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~
     .
     (chip executes)
     
@@ -221,7 +219,6 @@ related_components:
 see_also:
   - "Boot ROM source code"
   - "loadp2 utility documentation"
-  - "Intel hex format specification"
   - "Base64 encoding RFC 4648"
 
 related:

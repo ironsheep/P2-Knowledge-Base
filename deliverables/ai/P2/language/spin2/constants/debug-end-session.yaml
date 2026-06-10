@@ -9,9 +9,12 @@ requires_version: "Spin2_v52"
 version_directive: "{Spin2_v52}"
 
 description: |
-  Predefined constant (value 27) that, when sent via DEBUG(), cleanly terminates 
-  the debug session. The debug display receives this as a control code, sets 
-  DebugActive to false, and closes the debug window.
+  Predefined constant (value 27) that, when sent via DEBUG(), cleanly ends the
+  debug session. When it executes, any open DEBUG.LOG file and DEBUG window(s)
+  are closed; if PNut was launched with `-rd`, PNut closes too. The P2 itself
+  continues executing. Added to facilitate AI-assisted code development: an
+  assistant deletes DEBUG.LOG, recompiles with `-rd`, then waits for DEBUG.LOG
+  to be closed as the signal that the run's debug output is complete.
   REQUIRES: {Spin2_v52} or later version directive at start of source file.
 
 value: 27
@@ -57,20 +60,19 @@ examples:
     description: "Using constant in CON block"
 
 debug_behavior:
-  - step: "DEBUG(DEBUG_END_SESSION) called"
-  - step: "Character code 27 sent to debug display"
-  - step: "Debug display sets DebugActive = false"
-  - step: "Debug window closes"
-  - step: "Debug session ends cleanly"
+  - step: "DEBUG(DEBUG_END_SESSION) executes on the P2"
+  - step: "Any open DEBUG.LOG file is closed"
+  - step: "Any open DEBUG window(s) are closed"
+  - step: "If PNut was launched with `-rd`, PNut closes as well"
+  - step: "The P2 continues executing (DEBUG_END_SESSION does not halt the chip)"
 
 notes:
-  - "REQUIRES {Spin2_v52} or later at start of source file"
-  - "Value is 27 (ASCII ESC character)"
-  - "Programmatically terminates debug session"
-  - "Debug window closes when this is received"
-  - "Useful for automated test sequences"
+  - "REQUIRES {Spin2_v52} or later at start of source file (compiler-enforced gate)"
+  - "Value is 27"
+  - "Closes any open DEBUG.LOG file and DEBUG window(s); the P2 keeps executing"
+  - "If PNut was launched with `-rd`, PNut closes too"
+  - "Added for AI-assisted code development; the DEBUG.LOG close is the completion signal an assistant waits on"
   - "Can be used in CON block assignments"
-  - "Equivalent to DEBUG(27)"
 
 related:
   - language/spin2/constants/debug-mask.yaml

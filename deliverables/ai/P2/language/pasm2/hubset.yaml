@@ -16,13 +16,14 @@ description: |
 
   Primary use is clock configuration: selecting clock source (RCFAST, RCSLOW,
   crystal, PLL), configuring PLL dividers and multipliers, and switching between
-  clock sources. Also used for chip reset (bit 31).
+  clock sources. Chip reset uses a separate HUBSET mode: HUBSET ##$1000_0000
+  (D[31:28]=%0001 selects hard reset/reboot). In clock mode, D[31]=1 selects PRNG seed, not reset.
 
 clock_configuration:
   bit_fields:
     d31:
-      name: "Reset"
-      description: "Write 1 to reset the entire chip"
+      name: "PRNG Seed (MSB)"
+      description: "In clock mode, write 1 (with D[30:0] as seed data) to seed the Xoroshiro128** PRNG; does NOT reset the chip. Chip reset is a separate mode: HUBSET ##$1000_0000."
     d24:
       name: "PLL Enable"
       description: "1 = PLL powered on, 0 = PLL off"
@@ -41,8 +42,9 @@ clock_configuration:
       name: "Crystal Config (CC)"
       values:
         0b00: "XI/XO Hi-Z (oscillator off)"
-        0b01: "15pF caps (crystals >= 16 MHz)"
-        0b11: "30pF caps (crystals < 16 MHz)"
+        0b01: "1MΩ feedback, no caps"
+        0b10: "1MΩ feedback, 15pF caps (crystals >= 16 MHz)"
+        0b11: "1MΩ feedback, 30pF caps (crystals < 16 MHz)"
     d1_0:
       name: "Clock Source (SS)"
       values:
@@ -95,9 +97,9 @@ examples:
       HUBSET  ##%1_000000_0000001001_0000_01_11  ' Same config, source=PLL
 
   chip_reset:
-    description: "Reset the entire chip"
+    description: "Reset (reboot) the entire chip -- D[31:28]=%0001 selects hard-reset mode"
     code: |
-      HUBSET  ##$80000000           ' Bit 31 = reset
+      HUBSET  ##$1000_0000          ' D[31:28]=%0001 = hard reset, reboots chip
 flags_affected:
   C: No effect
   Z: No effect

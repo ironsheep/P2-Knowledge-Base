@@ -29,7 +29,7 @@ syntax_variants:
 - WAITXRO {WC|WZ|WCZ}
 timing:
   cycles: 2
-  type: fixed
+  type: variable
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1101011 CZ0 000011100 000100100
   write: —

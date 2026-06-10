@@ -6,8 +6,10 @@ type: "loop_control"
 description: "Exit current REPEAT loop immediately (like 'break')"
 
 syntax:
-  - "QUIT"         # Exit innermost loop
-  - "QUITN level"  # Exit N levels of nested loops
+  - "QUIT"         # Exit the current (innermost enclosing) loop
+  - "QUIT level"   # Exit an OUTER loop; level counts outward, 1-15
+                   #   (bare QUIT = current loop; QUIT 1 = 1st-outer loop, which also escapes
+                   #    every loop nested inside it; QUIT 2 = 2nd-outer; ...)
 
 example: |
   REPEAT i FROM 0 TO 99
@@ -16,16 +18,16 @@ example: |
     process(array[i])
   ' Execution continues here after QUIT
   
-  ' Exit nested loops:
-  REPEAT x FROM 0 TO 9      ' Level 2
-    REPEAT y FROM 0 TO 9    ' Level 1
+  ' Exit nested loops (level counts outward from the current loop):
+  REPEAT x FROM 0 TO 9      ' outer loop
+    REPEAT y FROM 0 TO 9    ' inner loop (current at the QUIT)
       IF grid[x][y] == value
-        QUITN 2             ' Exit both loops
+        QUIT 1              ' Exit the x loop (1 = 1st-outer), escaping both
 
 critical_behavior:
   - "Exits loop completely (not just iteration)"
-  - "QUIT exits innermost loop only"
-  - "QUITN levels count from innermost (1) outward"
+  - "Bare QUIT exits the current loop; QUIT level exits the level-th OUTER loop (1-15)"
+  - "Exiting an outer loop also escapes every loop nested inside it"
   - "Loop counter/state abandoned"
 
 common_patterns: |

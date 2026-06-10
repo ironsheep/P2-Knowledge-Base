@@ -20,6 +20,23 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.6.3] - 2026-06-10
+
+**Knowledge-base accuracy pass: PASM2 instructions, assembler directives, and clock/architecture entries aligned to compiler and silicon ground truth**
+
+### Changed
+- PASM2 instruction flags and timing aligned with the pnut-ts compiler and P2 Instructions CSV: signed add/subtract C is the sign of the result; conditional/event jumps and lock/hub-write instructions carry their variable timing; GETSCP, RDLONG, and the LOCK instructions carry their correct write and flag effects.
+- NEXT/QUIT loop control documented as `NEXT level` / `QUIT level` (1-15, counting outward from the current loop).
+- Assembler directives ORG, ORGF, ORGH, FIT, and BYTE/WORD/LONG/FILE documented to current compiler behavior: COG+LUT address ranges, auto-limits, hub-origin defaults and the $100000 ceiling, and filename rules.
+- HUBSET clock-configuration operand map, crystal/cap and clock-source fields, and PLL examples aligned with the silicon documentation; XI direct-input limit is 200 MHz.
+- GETCT documented as a 64-bit counter (WC selects the upper 32 bits); CORDIC QLOG/QEXP as base-2 log/antilog in 5:27 fixed-point.
+- HUBEXEC value, XBYTE/EXECF LUT layout, chip-reset HUBSET mode, and smart-pin ADC gains (sqrt-10-spaced ladder) aligned with silicon.
+- PASM2 encoding reference Flags column reflects each instruction's actual C/Z effects.
+
+### Added
+- DEBUG_END_SESSION behavior and AI-assisted-development purpose documented from the Spin2 v55 specification.
+- Silicon errata for the SETQ-block / AUGS-AUGD interaction on PASM2 augment instructions.
+
 ## [1.6.2] - 2026-06-03
 
 **Streamer NCO timing and mode-configuration coverage**

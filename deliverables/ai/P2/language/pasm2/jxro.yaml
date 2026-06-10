@@ -8,8 +8,9 @@ encoding:
   clocks: '2 or 4'
 timing:
   cycles: 2
-  type: fixed
-description: Jump to S if XRO (streamer ready) event flag is set.
+  type: variable
+  range: 13...20
+description: Jump to S if XRO (streamer NCO rollover) event flag is set.
 flags_affected:
   C: No effect
   Z: No effect
@@ -31,4 +32,4 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 category: Event
-oneliner: Branch
+oneliner: Jump if streamer NCO rollover (XRO) event flag set

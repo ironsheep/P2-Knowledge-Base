@@ -122,7 +122,7 @@ notes:
   - "Cannot start Spin2 code with COGINIT (use COGSPIN)"
 
 limitations:
-  - "Maximum 496 longs of code+data in COGEXEC mode"
+  - "COGINIT loads $000-$1F7 = 504 longs of code/data; the $1F8-$1FF special-purpose registers are not overwritten by COGINIT"
   - "Only 8 cogs available total"
   - "Cannot determine which cog when using COGEXEC_NEW"
   - "No automatic cleanup if cog crashes"

@@ -1,18 +1,24 @@
 directive: ORG
 name: ORG
-description: 'Set the assembly origin to a specific cog RAM address
+description: 'Set the assembly origin to a specific COG or LUT RAM address.
 
-  All subsequent instructions will be assembled starting from this address
+  All subsequent instructions are assembled starting from this address. ORG also
+  sets an implicit FIT limit based on the address (auto-limit behavior). For hub
+  RAM, use ORGH instead.
 
   '
 category: Assembly Directives
 documentation_level: complete
-syntax: ORG address
+syntax: 'ORG [address[, limit]]'
 parameters:
 - name: address
   type: immediate
-  range: 0-$1FF
-  description: Cog RAM address (0-511)
+  range: 0-$3FF
+  description: 'COG/LUT RAM address (COG $000-$1FF, LUT $200-$3FF). Optional; bare ORG defaults to address 0 with limit $1F8.'
+- name: limit
+  type: immediate
+  range: 0-$400
+  description: 'Optional explicit FIT limit. If omitted, the auto-limit is derived from the address.'
 examples:
 - code: 'ORG  0           '' Start at cog RAM address 0
 
@@ -26,12 +32,23 @@ examples:
 
     '
   description: Place data at specific cog address
+- code: 'ORG  $200        '' Start in LUT RAM
+
+    mov  pa, #0      '' LUT address $200
+
+    '
+  description: Place code in LUT RAM (addresses $200-$3FF)
 notes:
-- ORG affects cog RAM addresses only (0-$1FF)
-- For hub RAM addresses, use ORGH
-- To fill between addresses, use ORGF
+- 'Auto-limit: bare ORG sets address 0 and FIT limit $1F8 (standard COG RAM, before the special registers) -- compiler-verified'
+- 'Auto-limit: ORG address with address < $200 sets limit $200 (COG RAM boundary) -- compiler-verified'
+- 'Auto-limit: ORG address with address >= $200 sets limit $400 (LUT RAM boundary) -- compiler-verified'
+- 'Explicit limit: ORG address, limit uses the provided limit value'
+- ORG addresses COG RAM ($000-$1FF) and LUT RAM ($200-$3FF), setting COG-exec mode; for hub RAM use ORGH
+- To fill the gap between addresses with zeros, use ORGF
+- DAT blocks start in hub mode by default; use ORG to switch to COG/LUT mode
+- 'Pitfall: bare ORG limit is $1F8 (not $200); code approaching the special-register area may hit unexpected FIT errors'
 related:
 - ORGH
 - ORGF
 - FIT
-oneliner: Set the assembly origin to a specific cog RAM address
+oneliner: Set the assembly origin to a specific COG or LUT RAM address

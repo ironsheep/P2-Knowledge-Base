@@ -87,15 +87,15 @@ instructions:
       IF found THEN
         lock[n] := this_cog_id
         D := n (lock number acquired)
-        C := 1 (success)
+        C := 0 (success -- lock allocated)
       ELSE
         D := $FFFFFFFF
-        C := 0 (no locks available)
+        C := 1 (all locks already allocated)
     flags_affected: "C"
     timing: "4 clocks (range 4...11; per locknew.yaml encoding)"
     usage_example: |
-      LOCKNEW my_lock          ' Get any available lock
-      IF_NC   JMP #no_locks    ' Jump if none available
+      LOCKNEW my_lock WC       ' Get any available lock
+      IF_C    JMP #no_locks    ' Jump if none available (C=1)
       ' Lock number is in my_lock
   
   - instruction: "LOCKRET"
@@ -177,7 +177,7 @@ programming_patterns:
     code: |
       ' Allocate a new lock
           LOCKNEW my_lock WC
-          IF_NC   JMP #no_locks_error
+          IF_C    JMP #no_locks_error  ' C=1 means all locks already allocated
           
       ' Save lock number for later use
           MOV     saved_lock, my_lock

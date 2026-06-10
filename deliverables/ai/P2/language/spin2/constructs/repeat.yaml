@@ -139,14 +139,14 @@ control_keywords:
           QUIT              ' Exit loop
         accumulate(value)
     
-  - keyword: "QUITN"
-    syntax: "QUITN level"
-    description: "Exit N levels of nested loops"
+  - keyword: "QUIT level / NEXT level"
+    syntax: "QUIT level   |   NEXT level"
+    description: "Exit (QUIT) or continue (NEXT) an OUTER loop; level counts outward, 1-15 (1 = 1st-outer loop, which also escapes loops nested inside it). Bare QUIT/NEXT acts on the current loop. Introduced in v52; not an enforced compiler gate."
     example: |
-      REPEAT x FROM 0 TO 9
-        REPEAT y FROM 0 TO 9
+      REPEAT x FROM 0 TO 9          ' outer loop
+        REPEAT y FROM 0 TO 9        ' inner loop (current)
           IF grid[x][y] == target
-            QUITN 2         ' Exit both loops
+            QUIT 1       ' Exit the x loop (1st-outer), escaping both
 
 special_behaviors:
   - behavior: "zero_count"

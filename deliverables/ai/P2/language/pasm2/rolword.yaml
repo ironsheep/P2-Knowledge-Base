@@ -16,7 +16,7 @@ parameters:
 - Dest is the register in which to rotate the word into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
   the target word to read.
-- Num is a 1-bit literal identifying the nibble ID (0-1) of Src to read.
+- Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 flags_affected:
   C: No effect
   Z: No effect

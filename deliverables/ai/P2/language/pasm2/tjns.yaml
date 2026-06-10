@@ -23,15 +23,16 @@ parameters:
   for absolute addressing.'
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 encoding:
 - bits: EEEE 1011101 11I DDDDDDDDD SSSSSSSSS
   write: —
   c: —
   z: —
-  clocks: 2 or 4
+  clocks: '2 or 4 / 2 or 13-20'
 encoding_notes:
-- PC is written only when Dest is signed (or not signed in syntax 2).
+- PC is written only when Dest is NOT signed (Dest[31] = 0).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

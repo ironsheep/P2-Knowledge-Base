@@ -16,7 +16,7 @@ parameters:
 - Dest is a register containing the value to sign-extend above bit Src[4:0] and is
   where the result is written.
 - Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit
-  of Dest to zero-extend beyond.
+  of Dest to sign-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   C: Set to MSB of result

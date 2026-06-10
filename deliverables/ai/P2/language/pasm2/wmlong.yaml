@@ -7,8 +7,9 @@ encoding:
   z: —
   clocks: '3...10 *'
 timing:
-  cycles: 3
-  type: fixed
+  cycles: '3...10 (cog) / 3...20 (hub-exec)'
+  type: variable
+  range_source: 'encoding.clocks per P2 Instructions v35 CSV (3...10 * / 3...20 *)'
 description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2
   invokes cog/LUT block transfer.
 flags_affected:

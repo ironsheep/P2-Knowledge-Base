@@ -9,8 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: mode_dependent
-description: Used after WRFAST. Write word in D[15:0] into FIFO.                                                                    2
-  / FIFO IN USE
+description: Used after WRFAST. Write word in D[15:0] into FIFO.
 flags_affected:
   C: No effect
   Z: No effect

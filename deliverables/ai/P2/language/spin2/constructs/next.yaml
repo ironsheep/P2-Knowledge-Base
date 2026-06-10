@@ -6,8 +6,9 @@ type: "loop_control"
 description: "Skip to next iteration of current loop (like 'continue')"
 
 syntax:
-  - "NEXT"         # Skip to next iteration of innermost loop
-  - "NEXTN level"  # Skip to next iteration of Nth enclosing loop
+  - "NEXT"         # Skip to next iteration of the current (innermost enclosing) loop
+  - "NEXT level"   # Skip to next iteration of an OUTER loop; level counts outward, 1-15
+                   #   (bare NEXT = current loop; NEXT 1 = 1st-outer loop; NEXT 2 = 2nd-outer; ...)
 
 example: |
   REPEAT i FROM 0 TO 99
@@ -15,16 +16,16 @@ example: |
       NEXT          ' Skip zeros
     process(array[i])  ' Only non-zero values
   
-  ' Skip in nested loops:
+  ' Skip in nested loops (level counts outward from the current loop):
   REPEAT x FROM 0 TO 9
     REPEAT y FROM 0 TO 9
       IF grid[x][y] < 0
-        NEXTN 2     ' Skip to next x iteration
+        NEXT 1      ' Skip to next x iteration (1 = 1st-outer loop)
 
 critical_behavior:
   - "Counter updates before next iteration"
   - "Loop condition rechecked immediately"
-  - "NEXT affects only specified loop level"
+  - "Bare NEXT targets the current loop; NEXT level targets the level-th outer loop (1-15)"
   - "Continues with loop (not exit)"
 
 common_patterns: |

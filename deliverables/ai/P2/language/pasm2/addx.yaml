@@ -39,5 +39,6 @@ manual_extraction_date: '2025-01-19'
 oneliner: Add two unsigned extended values
 related:
 - ADD
+- ADDS
 - ADDSX
 - SUBX

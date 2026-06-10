@@ -3,9 +3,12 @@ type: keyword
 category: Control Flow
 
 description: |
-  Continues execution at the next iteration of a REPEAT loop, skipping any 
-  remaining code in the current iteration. In v52+, an optional level parameter 
-  allows continuing an outer loop in nested loop structures.
+  Continues execution at the next iteration of a REPEAT loop, skipping any
+  remaining code in the current iteration. An optional level parameter (1-15)
+  continues an OUTER loop instead; the level counts outward from the current
+  loop (1 = 1st-outer loop). Introduced in the v52 edition; the compiler does
+  NOT enforce a version directive (verified by boundary probe — compiles at
+  {Spin2_v41}/no-directive).
 
 syntax:
   basic: "NEXT"
@@ -14,10 +17,11 @@ syntax:
 parameters:
   - name: "level"
     type: "integer"
-    range: "1-16"
+    range: "1-15"
     optional: true
-    minimum_version: "v52"
-    description: "Which loop level to continue (1 = innermost, default)"
+    introduced_in: "v52"        # edition of introduction, NOT an enforced compiler gate
+    enforced_version_gate: none  # verified: NEXT level compiles at {Spin2_v41}/no-directive (pnut-ts probe)
+    description: "Which OUTER loop to continue, counting outward (1 = 1st-outer loop, 2 = 2nd-outer, ...). Bare NEXT continues the current loop."
 
 examples:
   - code: |
@@ -37,34 +41,34 @@ examples:
     description: "Filter using NEXT"
     
   - code: |
-      ' V52: NEXT with level parameter - no version directive needed
-      REPEAT a FROM 1 TO 10                    ' Level 3 (outermost)
-        REPEAT b FROM 1 TO 10                  ' Level 2
-          REPEAT c FROM 1 TO 10                ' Level 1 (innermost)
+      ' NEXT level parameter - no version directive needed; level counts OUTWARD
+      REPEAT a FROM 1 TO 10                    ' outermost loop
+        REPEAT b FROM 1 TO 10                  ' middle loop
+          REPEAT c FROM 1 TO 10                ' innermost loop (current)
             IF some_condition
-              NEXT                             ' Continue c loop (level 1)
+              NEXT                             ' Continue c loop (current)
             IF other_condition
-              NEXT 2                           ' Continue b loop (level 2)
+              NEXT 1                           ' Continue b loop (1st-outer)
             IF third_condition
-              NEXT 3                           ' Continue a loop (level 3)
-    description: "V52 level parameter for nested loops"
+              NEXT 2                           ' Continue a loop (2nd-outer)
+    description: "Level parameter for nested loops (level counts outward from the current loop)"
     
   - code: |
-      ' V52: Skip outer loop iteration from inner loop
+      ' Skip outer loop iteration from inner loop
       REPEAT row FROM 0 TO 9                   ' Outer loop
-        REPEAT col FROM 0 TO 9                 ' Inner loop
+        REPEAT col FROM 0 TO 9                 ' Inner loop (current)
           IF skip_row_condition(row, col)
-            NEXT 2                             ' Skip to next row
+            NEXT 1                             ' Skip to next row (1 = 1st-outer loop)
           process_cell(row, col)
     description: "Continue outer loop from inner loop"
 
 notes:
-  - "NEXT without parameter continues innermost loop (same as NEXT 1)"
-  - "V52+: NEXT level continues the Nth enclosing loop"
-  - "Level 1 = innermost loop, higher = outer loops"
-  - "Maximum level is 16"
-  - "Error if level exceeds actual nesting depth"
-  - "V52 level feature requires v52+ compiler (no directive needed)"
+  - "NEXT without parameter continues the current (innermost enclosing) loop"
+  - "NEXT level continues the level-th OUTER loop; level counts outward (NEXT 1 = 1st-outer)"
+  - "Bare NEXT is NOT the same as NEXT 1 (NEXT 1 targets the 1st-outer loop, not the current one)"
+  - "Valid range is 1-15; pnut-ts rejects level 16+ with 'NEXT/QUIT level must be from 1 to 15'"
+  - "Error if level exceeds actual nesting depth ('NEXT/QUIT is not sufficiently nested')"
+  - "Level feature introduced in the v52 edition; compiler does NOT enforce a version directive (compiles at {Spin2_v41})"
   - "Stack frames for skipped loops are properly cleaned up"
 
 related:

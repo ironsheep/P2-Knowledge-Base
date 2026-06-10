@@ -10,7 +10,7 @@ description: |
 location: DAT block, or inline within PUB/PRI methods (V50+)
 
 syntax:
-  dat_block: "ORGH [address]"
+  dat_block: "ORGH [address[, limit]]"
   inline_spin2: |
     PUB/PRI method()
         ORGH
@@ -22,7 +22,12 @@ parameters:
     type: "integer"
     description: "Hub address for code/data placement (DAT block usage)"
     optional: true
-    default: "Current location"
+    default: "Context-dependent (Spin2 v55): $400 in Spin2+PASM programs; current hub address in PASM-only programs"
+  - name: "limit"
+    type: "integer"
+    description: "Optional origin limit; PNut enforces a $100000 ceiling"
+    optional: true
+    default: "$100000"
 
 examples:
   - code: |
@@ -121,7 +126,8 @@ restrictions:
 
 notes:
   - "In DAT blocks, ORGH sets hub origin for subsequent code/data"
-  - "Default address continues from current compilation position"
+  - "Bare ORGH default address is context-dependent (Spin2 v55): $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)"
+  - "Optional second parameter sets the origin limit (default $100000); ORGH address,limit beyond the ceiling emits 'Hub address exceeds $100000 ceiling (m361)' -- compiler-verified"
   - "V50+: ORGH enables inline hub-execute assembly in Spin2 methods"
   - "Hub-execute code runs in place, no cog RAM copy required"
   - "For inline blocks, ORG uses cog RAM, ORGH uses hub RAM"

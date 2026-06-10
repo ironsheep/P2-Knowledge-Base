@@ -37,4 +37,4 @@ oneliner: Compare two signed values plus carry flag
 related:
 - CMP
 - CMPX
-- CMPSX
+- CMPS

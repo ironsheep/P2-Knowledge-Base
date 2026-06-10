@@ -3,12 +3,12 @@ syntax: LOCKREL {#}D            {WC}
 encoding:
 - bits: EEEE 1101011 C0L DDDDDDDDD 000000111
   write: —
-  c: —
+  c: 1 if lock is currently taken (when WC)
   z: —
   clocks: '2...9, +2 if result'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: '2...9, +2 if result'
+  type: variable
 description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last cog
   id of LOCK owner into
 
@@ -27,7 +27,7 @@ description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last c
 
   '
 flags_affected:
-  C: No effect
+  C: 'When WC: C = 1 if lock is currently taken (last/owner state)'
   Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive

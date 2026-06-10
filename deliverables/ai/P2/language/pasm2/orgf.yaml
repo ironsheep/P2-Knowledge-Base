@@ -14,8 +14,8 @@ syntax: ORGF address
 parameters:
 - name: address
   type: immediate
-  range: 0-$1FF (cog) or hub address
-  description: Target address to advance to, filling intervening space with zeros
+  range: 0-$3FF (COG/LUT registers; COG mode only -- not valid in ORGH/hub mode)
+  description: Target COG or LUT address to advance to, filling intervening space with zeros (subject to the active FIT limit)
 examples:
 - code: 'DAT
     ORG  0
@@ -46,6 +46,7 @@ examples:
 notes:
 - ORGF fills the gap with zero bytes/longs
 - ORG only changes the address counter without filling
+- ORGF is only valid in COG mode (after ORG); using ORGF after ORGH emits 'ORGF is not allowed in ORGH mode' and aborts compilation -- compiler-verified
 - ORGF generates error if target address is less than current address
 - Useful for creating fixed-layout binary structures
 - Essential for interrupt vector tables and memory-mapped structures

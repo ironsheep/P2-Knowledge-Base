@@ -10,15 +10,21 @@ examples:
 - datastart  FILE "config.dat"  ; Label the included data
 usage: 'FILE is used in DAT sections to include the entire contents of an external
 
-  binary file directly into Hub memory. The file path is relative to the
+  binary file directly into Hub memory. The filename must be a bare name (no path
 
-  source file location. This is useful for including images, fonts, lookup
+  separators or other invalid characters); the file is looked up relative to the
+
+  source file''s directory. This is useful for including images, fonts, lookup
 
   tables, or other pre-compiled binary data. The data is inserted byte-for-byte
 
   exactly as it appears in the file.
 
   '
+context: DAT sections only; FILE is not permitted inside inline PASM blocks in PUB/PRI methods
+filename_requirements:
+  invalid_characters: '/ : * ? < > |  -- each yields ''error:Invalid filename character'' at compile time (pnut-ts boundary-probed)'
+  case_sensitivity: Follows the host OS filesystem (case-sensitive on Linux/macOS case-sensitive volumes; case-insensitive on Windows)
 alignment: 'File data begins at the current assembly position without automatic alignment.
 
   Use ALIGNL or ALIGNW before FILE if specific alignment is needed for the data.
@@ -28,6 +34,7 @@ limitations:
 - File must exist at compile time
 - Entire file contents are included
 - No partial file inclusion available
+- FILE is only valid in DAT blocks; using it inside a PUB/PRI inline-PASM block is a compile error
 see_also:
 - BYTE
 - WORD
