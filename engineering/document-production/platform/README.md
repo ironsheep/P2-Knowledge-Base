@@ -42,6 +42,14 @@ and its `request.json` lists the platform filters by name (`p2kb-platform-figure
 torture instrument also consumes the platform, so certifying on the instrument
 certifies the exact files manuals ship.
 
+**Freshness discipline — append to the ledger on every platform edit.** Because a
+platform change silently ages every manual that consumes the changed file, each edit to
+a `platform/` file MUST add (or update) a `PLATFORM` line in the **Platform Freshness
+Ledger** (`../PUBLICATION-ROSTER.md` → "## Platform Freshness Ledger"), datetimed to the
+commit that changes it. That ledger is the only thing that tells us which manuals now
+need reproduction; an un-logged platform edit makes it lie. (Manual side: `prepare-manual`
+logs the matching `PUBLISH` line when a generation is confirmed clean.)
+
 ## Pilot status
 
 - **Streamer** migrated first (twin manual). Initial PDF generated on the platform

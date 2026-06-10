@@ -212,6 +212,15 @@ In order (each step depends on the previous):
 **If any platform files were staged this run, update their recorded hashes** so the next run's content-diff sees them as current and does NOT re-stage them:
 `mcp__todo-mcp__context_set key:"manual_store_platform_hashes" value:"<basename md5 per line for ALL platform files now in the store>"`. Write the full current map (every platform file's basename + live md5), not just the changed ones, so the map always reflects the store's full platform state. If no platform files were staged, leave the key unchanged.
 
+**Platform Freshness Ledger.** This build owes a `PUBLISH` line in the ledger in
+`engineering/document-production/PUBLICATION-ROSTER.md` (→ "## Platform Freshness Ledger") —
+but record it when the Forge generation is **confirmed clean** (compile log audited), NOT
+at stage time. On that confirmation: append/update this manual's `PUBLISH` line with the
+PDF's generation datetime (the Forge-side PDF mtime), then **prune** any `PLATFORM` line now
+sitting below the `PUBLISH` line of *every* consuming manual (fully absorbed — git keeps the
+permanent history). Platform `PLATFORM` lines are added when a `platform/` file is edited
+(per `platform/README.md`), not here.
+
 End with a brief summary:
 - Final list of files in `outbound/<slug>/` with sizes (`ls -la`).
 - Note which aux files were intentionally NOT staged (= Forge already has them).

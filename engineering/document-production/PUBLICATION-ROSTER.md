@@ -131,3 +131,62 @@ content package (retired on migration onto `p2kb-platform-content`):
 updating all reconciled live publications together. When a dormant publication is
 promoted to live, reconcile its conventions against this roster as part of the
 promotion.
+
+---
+
+## Platform Freshness Ledger — which manuals need reproduction
+
+Because the manuals share one `platform/` stack (see the column pipeline above), a
+manual's PDF goes stale the moment a **platform file it consumes** is changed after
+that PDF was generated. This ledger is the detector.
+
+**How it works — a push-down list, newest on top:**
+- **Append a `PLATFORM` line** every time a `platform/` file is modified.
+- **Append a `PUBLISH` line** every time a manual's PDF is generated (record it when
+  the generation is *confirmed clean*, not merely staged).
+- **A manual is OUT OF DATE** if any `PLATFORM` line for a file *it consumes* sits
+  **above** (newer than) that manual's most-recent `PUBLISH` line.
+- **Prune to stay short:** collapse same-item duplicates to the latest; **drop a
+  `PLATFORM` line once every consuming manual has a `PUBLISH` above it** (fully
+  absorbed — git keeps the permanent modification history, so the ledger only carries
+  what is still live). When all platform changes are absorbed, only `PUBLISH` lines
+  remain → everything is current.
+
+> **Source (2026-06-10):** `PUBLISH` datetimes are the **actual PDF mtimes from the
+> Forge outbox** (the authoritative generation times); `PLATFORM` datetimes are the git
+> commit that last modified each file. Two fully-absorbed platform lines (`tables.lua`
+> 2026-06-06, `mnemonic-bold.lua` 2026-06-06 — every manual generated after them) were
+> pruned on seeding. The **Assembly Language Reference** is a bespoke fork (not on the
+> shared platform), so platform changes do not affect it — it joins this ledger when it
+> migrates (its last PDF was 2026-05-23).
+
+```
+2026-06-10 02:37  PUBLISH   p2-pasm-desilva-style            (v2.3.0, 172pp — clean)
+2026-06-09 23:39  PUBLISH   p2-io-and-smart-pins-user-guide
+2026-06-09 22:50  PLATFORM  filters/p2kb-platform-figures.lua
+2026-06-09 21:08  PLATFORM  templates/p2kb-platform-content.sty
+2026-06-09 20:56  PUBLISH   p2-debug-window-manual
+2026-06-09 20:39  PLATFORM  filters/p2kb-platform-code-coloring.lua
+2026-06-08 08:32  PLATFORM  templates/p2kb-platform-foundation.sty
+2026-06-08 08:32  PLATFORM  filters/p2kb-platform-pagination.lua
+2026-06-07 20:25  PUBLISH   p2-streamer-programming-guide
+2026-06-07 08:32  PUBLISH   p2-single-step-debugger-manual
+2026-06-07 06:58  PLATFORM  templates/p2kb-platform-diagrams.sty
+2026-06-07 03:04  PUBLISH   p2-layout-torture-test
+```
+
+**Currently out of date (read off the list above):**
+
+| Manual | Status | Behind on (platform files changed since its PDF was generated) |
+|--------|--------|----------------------------------------------------|
+| `p2-pasm-desilva-style` | ✅ current | — (rebuilt on the latest platform today) |
+| `p2-io-and-smart-pins-user-guide` | ✅ current | — (generated 23:39, *after* `figures.lua` 22:50; its figures.lua carry-over appears already resolved — worth one confirm) |
+| `p2-debug-window-manual` | ⏳ stale | `figures.lua`, `content.sty` (it absorbed `code-coloring.lua` at 20:39) |
+| `p2-streamer-programming-guide` | ⏳ stale | `figures.lua`, `content.sty`, `code-coloring.lua`, `foundation.sty`, `pagination.lua` |
+| `p2-single-step-debugger-manual` | ⏳ stale | `figures.lua`, `content.sty`, `code-coloring.lua`, `foundation.sty`, `pagination.lua` |
+| `p2-layout-torture-test` | ⏳ stale | all of the above + `diagrams.sty` |
+
+**Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`
+appends/updates a `PUBLISH` line when a generation is confirmed clean; any edit to a
+`platform/` file appends/updates a `PLATFORM` line. (Wiring this into those skills so
+it is automatic — rather than hand-maintained — is an open follow-up.)
