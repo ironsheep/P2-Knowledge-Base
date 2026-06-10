@@ -12,13 +12,13 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
-        "p2kb-pasm2-figures",
-        "p2kb-pasm2-tables",
-        "p2kb-pasm2-mnemonic-bold",
-        "p2kb-pasm2-code-coloring",
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
         "p2kb-pasm2-entry-format",
         "p2kb-pasm2-entry-headers",
-        "p2kb-pasm2-pagination"
+        "p2kb-platform-pagination"
       ],
       "metadata": {
         "title": "P2 Assembly Language Reference Manual",

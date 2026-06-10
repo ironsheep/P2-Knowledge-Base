@@ -563,16 +563,12 @@ When naming labels, variables, and symbols in your PASM2 code:
 
 ### Example Conflicts to Avoid
 
-::: antipattern
-
-```pasm2
+```antipattern
 ' WRONG - uses reserved words as labels
 add         mov   x, #1      ' Error: 'add' is instruction
 or          jmp   #loop      ' Error: 'or' is instruction
 byte        long  $0         ' Error: 'byte' is directive
 ```
-
-:::
 
 ```pasm2
 ' CORRECT - uses valid label names

@@ -6,18 +6,24 @@
 % LAYOUT: One-sided for PDF screen viewing
 % For physical print with binding, change to: twoside,openany
 %
-% Template Stack:
-%   1. p2kb-pasm2-foundation.sty - Pandoc compatibility, core setup
-%   2. p2kb-pasm2-content.sty    - Reference manual environments
-%   3. p2kb-pasm2-diagrams.sty   - TikZ diagram macros
+% Template Stack (migrated 2026-06-10 onto the shared platform stack; was the
+% bespoke p2kb-pasm2-{foundation,content}.sty fork):
+%   1. p2kb-platform-foundation.sty - shared geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty     - shared code-box family, contmarkers, part mechanism
+%   3. p2kb-pasm2-local.sty          - PASM2 reference apparatus (loaded AFTER platform)
+%   4. p2kb-pasm2-diagrams.sty       - TikZ diagram macros (manual-local content)
 
 \documentclass[11pt,letterpaper,oneside]{book}
 
-% ==================== LOAD FOUNDATION LAYER ====================
-\usepackage{p2kb-pasm2-foundation}
+% ==================== LOAD PLATFORM FOUNDATION LAYER ====================
+\usepackage{p2kb-platform-foundation}
 
-% ==================== LOAD CONTENT LAYER ====================
-\usepackage{p2kb-pasm2-content}
+% ==================== LOAD PLATFORM CONTENT LAYER ====================
+\usepackage{p2kb-platform-content}
+
+% ==================== LOAD PASM2 PER-MANUAL OVERRIDE LAYER ====================
+% Loaded AFTER platform-content so its reference apparatus / overrides win.
+\usepackage{p2kb-pasm2-local}
 
 % ==================== LOAD DIAGRAMS ====================
 \usepackage{p2kb-pasm2-diagrams}

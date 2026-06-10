@@ -1,0 +1,521 @@
+% p2kb-pasm2-local.sty — P2 Assembly Language (PASM2) Reference per-manual override layer
+% Loaded AFTER p2kb-platform-content.sty so anything here overrides platform defaults.
+%
+% PASM2 rides the shared platform stack (p2kb-platform-foundation + -content + the 5
+% platform lua filters) for everything generic: the code boxes (IOSPBlock=green PASM2,
+% Spin2Block, CORDICBlock, MultiCOGBlock, AntipatternBlock, SyntaxBlock), contmarkers,
+% LayoutBlock/FormulaBlock keep-together, figure/table numbering, the \manualpart part
+% mechanism + \chapter clearpage patch + \part styling, headings, and Shaded.
+%
+% This file holds ONLY what is genuinely PASM2-reference-specific — the instruction-
+% reference apparatus that the local lua filters (p2kb-pasm2-entry-format,
+% p2kb-pasm2-entry-headers) emit and platform-content does not define:
+%   - entry-type header bars (instrheader / dirheader / constheader)
+%   - the "At a Glance" box
+%   - the 9-column encoding-table apparatus + inline encoding snippets
+%   - the four reference admonition boxes (warning / note / tip / hardware)
+%   - the Key Concepts box, instruction-entry container, related-instructions line
+%   - syntax-display helpers, entry-heading helpers, enhancement markers, index helpers
+%   - reference table column types and cross-reference helpers
+%
+% Definitions lifted verbatim from the retired p2kb-pasm2-content.sty so the reference
+% look is unchanged from the pre-migration design. The four platform-owned sections of
+% that file (part handling, DeSilva* code boxes, Shaded renew, \part styling) and the
+% unused \lstdefinelanguage blocks were intentionally dropped — platform provides them.
+%
+% Package dependencies (tcolorbox, tabularray, needspace, enumitem, etoolbox, array,
+% xcolor) are all loaded by p2kb-platform-foundation.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-pasm2-local}[2026/06/10 P2KB PASM2 Reference per-manual override layer v1.0]
+
+% ==================== COLOR PALETTE ====================
+% Reference manual color scheme - professional and readable
+
+% Entry structure colors
+\definecolor{pasm2-entry-header}{HTML}{2C3E50}      % Dark blue-gray for headers
+\definecolor{pasm2-entry-bg}{HTML}{F8F9FA}          % Very light gray background
+\definecolor{pasm2-entry-border}{HTML}{DEE2E6}      % Light gray border
+
+% At a Glance box
+\definecolor{pasm2-glance-bg}{HTML}{E3F2FD}         % Light blue
+\definecolor{pasm2-glance-border}{HTML}{1976D2}     % Blue border
+
+% Encoding table colors (legacy - kept for compatibility)
+\definecolor{pasm2-encoding-header}{HTML}{E8E8E8}   % Gray header row
+\definecolor{pasm2-encoding-cond}{HTML}{F5F5F5}     % Condition field
+\definecolor{pasm2-encoding-op}{HTML}{EEEEEE}       % Opcode field
+
+% Encoding table header zone colors (new - for colored column groups)
+\definecolor{pasm2-enc-instruction}{HTML}{E3F2FD}   % Light blue - cols 1-3 (EEEE, Opcode, CZI)
+\definecolor{pasm2-enc-operand}{HTML}{E8F5E9}       % Light green - cols 4-5 (D, S)
+\definecolor{pasm2-enc-flags}{HTML}{FFF3E0}         % Light orange - cols 6-7 (C, Z)
+\definecolor{pasm2-enc-result}{HTML}{F5F5F5}        % Light gray - cols 8-9 (Result, Clks)
+
+% Encoding-zone colors under the names the SHARED p2kb-platform-tables.lua hardcodes
+% (\cellcolor{iosp-enc-*} on 9-column encoding-table headers). That filter was promoted
+% from the bespoke PASM2 tables.lua, but its color DEFINITIONS were never added to
+% platform-content. PASM2 is the first migrated manual to exercise the encoding-table
+% path, so the per-manual override supplies them here. Same values as pasm2-enc-* above.
+% PLATFORM-IMPROVEMENT CANDIDATE: add safe defaults for these to p2kb-platform-content.sty
+% so future reference-style manuals don't render uncolored / error on undefined color.
+\definecolor{iosp-enc-instruction}{HTML}{E3F2FD}    % Light blue - cols 1-3 (EEEE, Opcode, CZI)
+\definecolor{iosp-enc-operand}{HTML}{E8F5E9}        % Light green - cols 4-5 (D, S)
+\definecolor{iosp-enc-flags}{HTML}{FFF3E0}          % Light orange - cols 6-7 (C, Z)
+\definecolor{iosp-enc-result}{HTML}{F5F5F5}         % Light gray - cols 8-9 (Result, Clks)
+
+% Callout colors
+\definecolor{pasm2-warning-bg}{HTML}{FFF3E0}        % Light orange
+\definecolor{pasm2-warning-border}{HTML}{FF9800}    % Orange
+\definecolor{pasm2-note-bg}{HTML}{E3F2FD}           % Light blue
+\definecolor{pasm2-note-border}{HTML}{2196F3}       % Blue
+\definecolor{pasm2-tip-bg}{HTML}{E8F5E9}            % Light green
+\definecolor{pasm2-tip-border}{HTML}{4CAF50}        % Green
+\definecolor{pasm2-hardware-bg}{HTML}{F3E5F5}       % Light purple
+\definecolor{pasm2-hardware-border}{HTML}{9C27B0}   % Purple
+
+% Code block colors (single style for reference manual)
+\definecolor{pasm2-code-bg}{HTML}{FAFAFA}           % Very light gray
+\definecolor{pasm2-code-border}{HTML}{BDBDBD}       % Gray border
+
+% Entry type color bars (for visual anchoring of entry boundaries)
+\definecolor{pasm2-instr-bar}{HTML}{C62828}         % Brick Red - Instructions
+\definecolor{pasm2-dir-bar}{HTML}{FF8F00}           % Amber 600 - Directives
+\definecolor{pasm2-const-bar}{HTML}{8E24AA}         % Violet 600 - Constants
+
+% ==================== ENTRY TYPE COLOR BAR ENVIRONMENTS ====================
+% Visual anchors for instruction, directive, and constant entry blocks
+% Each wraps the 3-line identity block: mnemonic, expansion, category line
+
+% Instruction header (Brick Red bar)
+% before upper=\needspace prevents orphaned headers at page bottom
+\newtcolorbox{instrheader}{
+  blanker,
+  borderline west={4pt}{0pt}{pasm2-instr-bar},
+  left=10pt,
+  top=2pt,
+  bottom=2pt,
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{11\baselineskip}}
+}
+
+% Directive header (Amber bar)
+\newtcolorbox{dirheader}{
+  blanker,
+  borderline west={4pt}{0pt}{pasm2-dir-bar},
+  left=10pt,
+  top=2pt,
+  bottom=2pt,
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{11\baselineskip}}
+}
+
+% Constant header (Violet bar)
+\newtcolorbox{constheader}{
+  blanker,
+  borderline west={4pt}{0pt}{pasm2-const-bar},
+  left=10pt,
+  top=2pt,
+  bottom=2pt,
+  before skip=24pt,
+  after skip=6pt,
+  before upper={\needspace{11\baselineskip}}
+}
+
+% ==================== AT A GLANCE BOX ====================
+% Summary box at the top of each instruction entry
+
+\newtcolorbox{ataglance}{
+  title=At a Glance,
+  fonttitle=\bfseries\small,
+  colbacktitle=pasm2-glance-border,
+  coltitle=white,
+  colback=pasm2-glance-bg,
+  colframe=pasm2-glance-border,
+  boxrule=1pt,
+  rounded corners=southeast,
+  arc=3pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=12pt,
+  after skip=12pt,
+  enhanced,
+  attach boxed title to top left={xshift=10pt, yshift=-2pt}
+}
+
+% ==================== ENCODING TABLE STYLING ====================
+% For instruction encoding display. Uses tabularray (tblr).
+
+% Gray header row for encoding tables (legacy - kept for compatibility)
+\newcommand{\encodingheader}[1]{%
+  \textbf{#1}%
+}
+
+% Encoding field styling
+\newcommand{\encodingfield}[1]{%
+  \texttt{#1}%
+}
+
+% Define tabularray style for encoding tables
+% 9 columns: EEEE | Opcode | CZI | D | S | C | Z | Result | Clks
+\DefTblrTemplate{contfoot-text}{default}{}
+\DefTblrTemplate{conthead-text}{default}{}
+
+% Row macros that expand to tblr row syntax (used INSIDE a tblr environment)
+\newcommand{\encodingrow}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
+\newcommand{\encodingrowcont}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
+
+% Environment for encoding tables - simple wrapper around tblr
+\newenvironment{encodingtable}{%
+  \par\vspace{6pt}%
+  \noindent
+  \begin{tblr}{
+    width=\linewidth,
+    rowsep=2pt,
+    colsep=4pt,
+    row{1}={bg=pasm2-encoding-header, font=\bfseries\footnotesize},
+    column{1}={wd=0.078\linewidth, halign=c, font=\ttfamily\small},
+    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily\small},
+    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily\small},
+    column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
+    column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
+    column{6}={halign=c, font=\small},
+    column{7}={halign=c, font=\small},
+    column{8}={halign=l, font=\small},
+    column{9}={halign=c, font=\small},
+    hlines,
+    vlines,
+  }
+    EEEE & Opcode & CZI & D & S & C & Z & Result & Clks \\
+}{%
+  \end{tblr}%
+  \par\vspace{6pt}%
+}
+
+% Simple encoding - standalone single-row encoding table
+% Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
+\newcommand{\simpleencoding}[9]{%
+  \par\vspace{6pt}%
+  \noindent
+  \begin{tblr}{
+    width=\linewidth,
+    rowsep=2pt,
+    colsep=4pt,
+    row{1}={bg=pasm2-encoding-header, font=\bfseries\footnotesize},
+    row{2}={font=\small},
+    column{1}={wd=0.078\linewidth, halign=c, font=\ttfamily},
+    column{2}={wd=0.095\linewidth, halign=c, font=\ttfamily},
+    column{3}={wd=0.040\linewidth, halign=c, font=\ttfamily},
+    column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily},
+    column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily},
+    column{6}={halign=c},
+    column{7}={halign=c},
+    column{8}={halign=l},
+    column{9}={halign=c},
+    hlines,
+    vlines,
+  }
+    EEEE & Opcode & CZI & D & S & C & Z & Result & Clks \\
+    #1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\
+  \end{tblr}%
+  \par\vspace{6pt}%
+}
+
+% ==================== CALLOUT BOXES ====================
+% Warning, Note, Tip, Hardware callouts (PASM2-reference admonitions)
+
+% Warning box (orange) - for common mistakes and gotchas
+\newtcolorbox{warningbox}{
+  colback=pasm2-warning-bg,
+  colframe=pasm2-warning-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Note box (blue) - for additional information
+\newtcolorbox{notebox}{
+  colback=pasm2-note-bg,
+  colframe=pasm2-note-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Tip box (green) - for best practices
+\newtcolorbox{tipbox}{
+  colback=pasm2-tip-bg,
+  colframe=pasm2-tip-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Hardware box (purple) - for hardware-specific notes
+\newtcolorbox{hardwarebox}{
+  colback=pasm2-hardware-bg,
+  colframe=pasm2-hardware-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% ==================== KEY CONCEPTS BOX ====================
+% Summary box for key concepts at end of chapters
+
+\definecolor{pasm2-concepts-bg}{HTML}{EDE7F6}         % Deep Purple 50 (cool lavender)
+\definecolor{pasm2-concepts-border}{HTML}{7E57C2}     % Deep Purple 400
+
+\newenvironment{keyconcepts}{%
+  \begin{tcolorbox}[
+    title=Key Concepts,
+    fonttitle=\bfseries\small,
+    colbacktitle=pasm2-concepts-border,
+    coltitle=white,
+    colback=pasm2-concepts-bg,
+    colframe=pasm2-concepts-border,
+    boxrule=1pt,
+    rounded corners,
+    arc=3pt,
+    left=10pt,
+    right=10pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=12pt,
+    after skip=12pt
+  ]
+  \begin{itemize}[leftmargin=15pt, itemsep=4pt, topsep=0pt]
+}{%
+  \end{itemize}
+  \end{tcolorbox}
+}
+
+% ==================== ENTRY STRUCTURE ENVIRONMENTS ====================
+
+% Instruction entry container (optional - for visual separation)
+\newtcolorbox{instructionentry}{
+  colback=white,
+  colframe=pasm2-entry-border,
+  boxrule=0.5pt,
+  rounded corners,
+  arc=3pt,
+  left=12pt,
+  right=12pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Related instructions section styling
+\newcommand{\relatedinstructions}[1]{%
+  \par\vspace{6pt}%
+  \textbf{Related Instructions:} #1%
+  \par%
+}
+
+% ==================== SYNTAX DISPLAY ====================
+% For displaying instruction syntax
+
+% Tight syntax forms - for multi-parameter instruction variants
+\newenvironment{syntaxforms}{%
+  \par\vspace{2pt}%
+  \begingroup
+  \linespread{0.8}\selectfont
+  \setlength{\parskip}{0pt}%
+  \noindent
+}{%
+  \par
+  \endgroup
+  \vspace{4pt}%
+}
+
+% Syntax box with monospace font
+\newtcolorbox{syntaxbox}{
+  colback=pasm2-code-bg,
+  colframe=pasm2-code-border,
+  boxrule=0.5pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=8pt,
+  after skip=8pt
+}
+
+% Inline syntax command
+\newcommand{\syntax}[1]{\texttt{#1}}
+
+% ==================== ENTRY HEADING STYLING ====================
+
+% Instruction name styling (used in section headers)
+\newcommand{\instrname}[1]{%
+  \texttt{\large\bfseries #1}%
+}
+
+% Category label
+\newcommand{\category}[1]{%
+  \textit{\small #1}%
+}
+
+% ==================== ENHANCEMENT MARKERS ====================
+% Visual markers for enhanced content (from voice-guide.md)
+
+\newcommand{\warningmarker}{\textcolor{pasm2-warning-border}{$\blacktriangle$}}
+\newcommand{\tipmarker}{\textcolor{pasm2-tip-border}{$\star$}}
+\newcommand{\hardwaremarker}{\textcolor{pasm2-hardware-border}{$\blacksquare$}}
+
+% ==================== INDEX ENTRIES ====================
+% Automatic index entry creation
+
+\newcommand{\indexinstruction}[1]{%
+  \index{#1 (instruction)}%
+}
+
+\newcommand{\indexdirective}[1]{%
+  \index{#1 (directive)}%
+}
+
+\newcommand{\indexconstant}[1]{%
+  \index{#1 (constant)}%
+}
+
+\newcommand{\indexregister}[1]{%
+  \index{#1 (register)}%
+}
+
+% ==================== INLINE ENCODING EXAMPLES ====================
+% For showing encoding snippets in explanatory text (simpler than full tables)
+
+% Inline encoding snippet - compact single-row encoding example
+% Args: 6 columns - EEEE, Opcode, CZI, D, S, Description
+\newcommand{\inlineencoding}[6]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|l|}
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 \\
+  \hline
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
+% Multi-row inline encoding (for instruction families)
+\newenvironment{inlineencodingtable}{%
+  \par\vspace{6pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+  \hline
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{Write} & \textbf{Flags} & \textbf{Clks} \\
+  \hline
+}{%
+  \end{tabular}%
+  \par\vspace{6pt}%
+}
+
+% Row for inline encoding table
+\newcommand{\inlineencodingrow}[8]{%
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 \\
+  \hline
+}
+
+% Simple 5-column encoding snippet (just bit fields, no result columns)
+\newcommand{\encodingsnippet}[5]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-instruction}}c|>{\columncolor{pasm2-enc-operand}}c|>{\columncolor{pasm2-enc-operand}}c|}
+  \hline
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} \\
+  \hline
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
+% Encoding snippet with annotation below S field
+\newcommand{\encodingsnippetannotated}[6]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|}
+  \hline
+  \cellcolor{pasm2-enc-instruction}\textbf{EEEE} & \cellcolor{pasm2-enc-instruction}\textbf{Opcode} & \cellcolor{pasm2-enc-instruction}\textbf{CZI} & \cellcolor{pasm2-enc-operand}\textbf{D} & \cellcolor{pasm2-enc-operand}\textbf{S} \\
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} \\
+  \hline
+  \multicolumn{5}{c}{\scriptsize\itshape #6} \\
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
+% ==================== TABLE ENHANCEMENTS ====================
+% Column types for encoding tables and appendix reference tables
+
+% Encoding table column types
+\newcolumntype{E}{>{\ttfamily\centering\arraybackslash}p{1.2cm}}  % Encoding field
+\newcolumntype{O}{>{\ttfamily\centering\arraybackslash}p{2cm}}   % Opcode field
+\newcolumntype{C}{>{\centering\arraybackslash}p{0.8cm}}          % CZI field
+\newcolumntype{T}{>{\centering\arraybackslash}p{1cm}}            % Timing field
+
+% ==================== FULL-WIDTH TABLE CONFIGURATION ====================
+% Make all longtables full page width with better column ratios
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt plus 1fill}
+
+% NOTE: the 2-column (N/W) and 3-column (R/M/L) reference-table column types are
+% provided by p2kb-platform-content.sty with identical definitions — do not redefine
+% them here (a duplicate \newcolumntype collides). Only the encoding-specific E/O/C/T
+% types above are PASM2-local (platform does not define those).
+
+% ==================== CROSS-REFERENCE HELPERS ====================
+
+% Cross-reference to instruction (creates hyperlink). PASM2-local: platform does
+% not define \instrref. \chapref and \appref ARE provided by p2kb-platform-content.sty
+% (identical defs) — do not redefine them here (a duplicate \newcommand is fatal).
+\newcommand{\instrref}[1]{\hyperref[instr:#1]{\texttt{#1}}}
+
+\endinput
