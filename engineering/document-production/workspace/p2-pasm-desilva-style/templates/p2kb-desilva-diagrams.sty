@@ -171,18 +171,22 @@
 % === P1 Traditional (Left side) ===
 \node[font=\bfseries] at (-4, 5) {P1 Traditional:};
 
-% COGs in a circle for P1 - taller diagram
+% Central hub as a CIRCLE (same as P2)
+\draw[diagram-border, thick, fill=white] (-4, 2.0) circle (0.9cm);
+\node[font=\footnotesize\bfseries] at (-4, 2.0) {HUB};
+
+% Clockwise rotating arrow inside hub to show rotation (same as P2)
+\draw[thick, green!50!black, ->]
+    ([shift={(45:0.5cm)}]-4,2.0) arc (45:-270:0.5cm);
+
+% COGs around the hub - same ring as P2 (radius 2.2)
 \foreach \i in {0,...,7} {
     \pgfmathsetmacro{\angle}{90 - \i * 45}
-    \node[cogbox] (p1cog\i) at ({-4 + 2.0*cos(\angle)}, {2.0 + 2.0*sin(\angle)}) {\i};
+    \node[cogbox] (p1cog\i) at ({-4 + 2.2*cos(\angle)}, {2.0 + 2.2*sin(\angle)}) {\i};
 }
 
-% Simple lines connecting COGs in ring (no arrows - just shows connection)
-\foreach \i in {0,...,6} {
-    \pgfmathtruncatemacro{\next}{\i + 1}
-    \draw[linestyle, gray] (p1cog\i) -- (p1cog\next);
-}
-\draw[linestyle, gray] (p1cog7) -- (p1cog0);
+% P1: only ONE COG reaches the hub at a time -- single line from COG 0
+\draw[linestyle, green!50!black] (p1cog0) -- ({-4 + 0.95*cos(90)}, {2.0 + 0.95*sin(90)});
 
 % P1 annotation - moved further down
 \node[annotation, text width=3cm, align=center] at (-4, -1.5) {COGs take turns\\Each waits up to\\16 clocks};

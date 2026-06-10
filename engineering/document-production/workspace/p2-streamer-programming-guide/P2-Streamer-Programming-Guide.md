@@ -279,11 +279,11 @@ And it leans on a few neighboring P2 subsystems:
 
 With that picture in place, Chapter 2 opens up the engine itself — the data paths inside the streamer and how the pieces connect.
 
-# Chapter 2: Architecture
+# Chapter 2: Architecture {#ch-2}
 
 Chapter 1 described the streamer as a paced pipe from memory to the pins. This chapter opens that pipe up — the pieces inside, how data flows through them, and how the NCO drives the whole thing. You do not need this depth to *use* the streamer, but it makes the mode choices in Part II feel inevitable rather than arbitrary.
 
-## 2.1 Block Diagram
+## 2.1 Block Diagram {#sec-2-1}
 
 ```{=latex}
 \DiagStreamerArch
@@ -336,7 +336,7 @@ Four 8-bit channels (X0-X3) map to pins based on pin number LSBs. Configurable r
 **Goertzel Analyzer:**
 Hardware frequency detection using Goertzel algorithm. Accumulates sine and cosine products for magnitude/phase extraction.
 
-# Chapter 3: NCO and Timing
+# Chapter 3: NCO and Timing {#ch-3}
 
 The NCO is the streamer's metronome, and it is the single most important thing to understand about the streamer's timing. Everything the streamer does happens on the NCO's beat, so setting its rate correctly is the difference between a steady picture and a rolling one. This chapter shows how the NCO produces that beat and how to compute the value you need for a given rate.
 
@@ -359,7 +359,7 @@ phase = (phase & $7FFF_FFFF) + frequency
 \DiagNcoRollover
 ```
 
-## 3.2 Frequency Calculation
+## 3.2 Frequency Calculation {#sec-3-2}
 
 **Formula:**
 
@@ -380,7 +380,7 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 
 ⚠️ **Pitfall — round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 
-## 3.3 Setting NCO Frequency
+## 3.3 Setting NCO Frequency {#sec-3-3}
 
 **Method 1: SETXFRQ instruction**
 
@@ -412,7 +412,7 @@ Each value is `round($8000_0000 × pixel_rate / clock_frequency)` — the closes
 
 ⚠️ **Pitfall:** Exact VGA pixel rates rarely divide evenly into P2 clock frequencies. The values above are the nearest achievable rate; monitors tolerate small variations.
 
-# Chapter 4: Command Structure
+# Chapter 4: Command Structure {#ch-4}
 
 A streamer command is a single value — the D operand — that packs together every choice from Chapter 1's four questions: what mode, where the data goes, which pins, and how long to run. This chapter lays that packed word out field by field, then introduces the small set of instructions (XINIT, XCONT, XZERO) that start and chain commands.
 
@@ -424,7 +424,7 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 \DiagCommandWord
 ```
 
-## 4.2 Mode Field D[31:28]
+## 4.2 Mode Field D[31:28] {#sec-4-2}
 
 | D[31:28] | Category | Data Source | Data Destination |
 |----------|----------|-------------|------------------|
@@ -463,7 +463,7 @@ Selects which 32-pin block the streamer addresses:
 | `%110` | Pins 15..0, 63..48 (wrap) |
 | `%111` | Pins 23..0, 63..56 (wrap) |
 
-## 4.6 Count Field D[15:0]
+## 4.6 Count Field D[15:0] {#sec-4-6}
 
 Specifies the number of NCO rollovers before the command completes.
 
@@ -471,7 +471,7 @@ Specifies the number of NCO rollovers before the command completes.
 - A count of `$FFFF` (65,535) streams **perpetually** — the command runs until a new command is issued or **XSTOP** stops it
 - A count of 0 stops the streamer (this is exactly what **XSTOP** / `XINIT #0,#0` does)
 
-## 4.7 Streamer Instructions
+## 4.7 Streamer Instructions {#sec-4-7}
 
 | Instruction | Syntax | Effect |
 |-------------|--------|--------|
@@ -494,11 +494,11 @@ Specifies the number of NCO rollovers before the command completes.
 
 The streamer's modes are the heart of this reference. This Part documents each family in turn — immediate, hub-streamed, video, pin-capture, ADC, and the special DDS/Goertzel mode. Each chapter opens with what its modes are *for* before giving the exact encodings.
 
-# Chapter 5: Immediate Modes
+# Chapter 5: Immediate Modes {#ch-5}
 
 Immediate modes are the simplest place to start. Instead of streaming from memory, the data you want to output is a value you hand the streamer directly, in the S operand. Reach for them when you have a small, fixed pattern to emit — a handful of pixels, a test pattern, a short bit sequence — and do not want to set up a hub buffer. The data can go straight to the pins and DACs, or pass through the LUT for palette expansion.
 
-## 5.1 Immediate → LUT → Pins/DACs
+## 5.1 Immediate → LUT → Pins/DACs {#sec-5-1}
 
 The S operand provides index values into the LUT. LUT data drives pins and DACs.
 
@@ -552,13 +552,13 @@ The S operand drives pins and DACs directly without LUT lookup.
         xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON + pin<<17 + 8, ##$12345678
 ```
 
-# Chapter 6: RDFAST Modes
+# Chapter 6: RDFAST Modes {#ch-6}
 
 RDFAST modes are the workhorse of the streamer. Where immediate modes carry a single fixed value, these stream a continuous flow of data out of hub memory — a framebuffer, an audio clip, a bitmap — onto the pins or DACs. This is what you use for anything longer than a few elements. The data arrives through the FIFO, which must be primed with **RDFAST** before the streamer command runs.
 
 ⚠️ **Pitfall:** RDFAST modes require FIFO setup before the streamer command. Without **RDFAST** initialization, the FIFO contains undefined data.
 
-## 6.1 RDFAST → LUT → Pins/DACs
+## 6.1 RDFAST → LUT → Pins/DACs {#sec-6-1}
 
 Hub data serves as LUT index values.
 
@@ -610,7 +610,7 @@ Hub data drives pins and DACs directly.
         xinit   ##X_RFBYTE_8P_1DAC8 | X_PINS_ON + base<<17 + 256, #0
 ```
 
-# Chapter 7: RGB Video Modes
+# Chapter 7: RGB Video Modes {#ch-7}
 
 Video is the streamer's headline act, and it earns its own family of modes because pixels are not just bytes. A color pixel must be unpacked into red, green, and blue and pushed out in a form a monitor understands. These RGB modes pull pixel data from a framebuffer and run it through the P2's colorspace converter on the way to the pins — so your code stores a picture and the streamer turns it into a signal. The modes differ mainly in how many bits each pixel uses, trading color depth against memory.
 
@@ -653,7 +653,7 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 
 💡 **Tip:** RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory efficiency for most video applications.
 
-# Chapter 8: WRFAST Input Modes
+# Chapter 8: WRFAST Input Modes {#ch-8}
 
 Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a COG into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
@@ -689,7 +689,7 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
         waitxfi
 ```
 
-# Chapter 9: ADC Sampling Modes
+# Chapter 9: ADC Sampling Modes {#ch-9}
 
 ADC modes are the analog cousin of the pin-capture modes in the previous chapter. Instead of recording whether a pin is high or low, they record *how much* — the digitized voltage on an ADC-capable pin. Streaming those readings into memory at a steady rate turns a COG into an oscilloscope or a data logger. Reach for these when you need to capture a waveform, not just a bit.
 
@@ -721,7 +721,7 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 
 🔧 **Hardware:** ADC readings are 8-bit values. For higher resolution, use smart pin ADC modes with post-processing.
 
-# Chapter 10: DDS/Goertzel Mode
+# Chapter 10: DDS/Goertzel Mode {#ch-10}
 
 This is the streamer's cleverest mode, and it does two things at once (Chapter 1 introduced both in plain terms). **DDS** *generates* a signal — it steps through a waveform table to synthesize a precise tone or arbitrary shape. **Goertzel** *measures* one — it reports how much of a single chosen frequency is present in an incoming signal, the trick behind touch-tone decoding and ultrasonic ranging. Uniquely, this mode advances on **every clock cycle**, not just on NCO rollovers, which is what gives it the resolution to do real signal processing.
 
@@ -760,7 +760,7 @@ cos_acc += cos × m
 \DiagDdsGoertzel
 ```
 
-## 10.3 LUT Setup
+## 10.3 LUT Setup {#sec-10-3}
 
 The LUT must contain 512 entries with signed sine/cosine values:
 
@@ -775,7 +775,7 @@ repeat i from 0 to 511
   wrlut(t, i)
 ```
 
-## 10.4 SINC1 vs SINC2
+## 10.4 SINC1 vs SINC2 {#sec-10-4}
 
 | Characteristic | SINC1 | SINC2 |
 |---------------|-------|-------|
@@ -786,7 +786,7 @@ repeat i from 0 to 511
 
 ⚠️ **Pitfall:** SINC2 double-integrates, so its accumulators grow far faster than SINC1's. Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
 
-## 10.5 Reading Results
+## 10.5 Reading Results {#sec-10-5}
 
 ```pasm2
         getxacc cos_result          ' Cosine accumulator → D
@@ -811,11 +811,11 @@ frequency = $8000_0000 × F / CLK
 
 These chapters cover the choices that apply across modes — where data goes among the DAC channels, which pins are driven, how commands are named, and how your code stays in step with the streamer.
 
-# Chapter 11: DAC Channel Configuration
+# Chapter 11: DAC Channel Configuration {#ch-11}
 
 Many modes send data to the DAC channels, but none of them say *which* channels, or *how*. That is this chapter's job. The %dddd routing field is the knob from Chapter 1's stereo example: it decides how the streamer's data spreads across the four 8-bit DAC channels — one channel, a stereo pair, a differential pair, or all four independently. The same data becomes mono, stereo, or four-channel purely by changing this field.
 
-## 11.1 DAC Routing Table
+## 11.1 DAC Routing Table {#sec-11-1}
 
 | %dddd | DAC3 | DAC2 | DAC1 | DAC0 | Symbol |
 |-------|------|------|------|------|--------|
@@ -841,7 +841,7 @@ Many modes send data to the DAC channels, but none of them say *which* channels,
 - `!` = One's complement (inverted)
 - `X0`-`X3` = Streamer data channels
 
-## 11.2 DAC Pin Mapping
+## 11.2 DAC Pin Mapping {#sec-11-2}
 
 DAC channels drive pins based on the pin's two LSBs:
 
@@ -876,11 +876,11 @@ mode := X_RFBYTE_1P_1DAC1 | X_DACS_X_X_0N0 | X_PINS_ON + pin<<17 + count
 mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
 ```
 
-# Chapter 12: Pin Selection and Control
+# Chapter 12: Pin Selection and Control {#ch-12}
 
 A streamer command also has to say *which* pins it drives or samples, and that is less obvious than it sounds: the P2 has 64 pins, but a command addresses them 32 at a time, through a window you choose. This chapter covers how to aim the streamer at the right pins, how to enable output, and a few smaller controls such as bit ordering.
 
-## 12.1 Pin Group Selection
+## 12.1 Pin Group Selection {#sec-12-1}
 
 The %ppp field in D[22:20] selects the 32-pin block:
 
@@ -895,7 +895,7 @@ The %ppp field in D[22:20] selects the 32-pin block:
 | `%110` | 15..0, 63..48 | Wrap-around |
 | `%111` | 23..0, 63..56 | Wrap-around |
 
-## 12.2 Sub-Pin Selection
+## 12.2 Sub-Pin Selection {#sec-12-2}
 
 For modes using fewer than 8 pins, D[19:17] refines selection within the group:
 
@@ -910,7 +910,7 @@ For modes using fewer than 8 pins, D[19:17] refines selection within the group:
 | `%110` | Pin 6 | Pins 13..12 | Pins 27..24 |
 | `%111` | Pin 7 | Pins 15..14 | Pins 31..28 |
 
-## 12.3 Enable Control
+## 12.3 Enable Control {#sec-12-3}
 
 **Output Modes:** D[23] must be 1 to drive pins
 
@@ -932,7 +932,7 @@ mode := X_32P_4DAC8_WFLONG | X_WRITE_ON + pin<<17 + count
 mode := X_32P_4DAC8_WFLONG | X_WRITE_OFF + pin<<17 + count
 ```
 
-## 12.4 Alternate Bit Order
+## 12.4 Alternate Bit Order {#sec-12-4}
 
 The %a bit in D[16] controls bit ordering for 1/2/4-bit modes:
 
@@ -947,7 +947,7 @@ The %a bit in D[16] controls bit ordering for 1/2/4-bit modes:
 
 You rarely build a command word bit by bit. Instead you OR together named constants — `X_RFWORD_RGB16`, `X_PINS_ON`, `X_DACS_3_2_1_0` — and the compiler assembles the value for you. This chapter is the catalog of those built-in symbols and shows how they compose. Skim it once to learn the naming pattern; after that the names read almost like sentences.
 
-## 13.1 Mode Symbols
+## 13.1 Mode Symbols {#sec-13-1}
 
 **Immediate → LUT → Pins/DACs:**
 
@@ -1009,7 +1009,7 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 | `X_ALT_OFF` | `%0 << 16` | LSB first |
 | `X_ALT_ON` | `%1 << 16` | MSB first |
 
-## 13.3 DAC Symbols
+## 13.3 DAC Symbols {#sec-13-3}
 
 | Symbol | Value | Configuration |
 |--------|-------|---------------|
@@ -1030,7 +1030,7 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 | `X_DACS_1N1_0N0` | `%1110 << 24` | Differential stereo |
 | `X_DACS_3_2_1_0` | `%1111 << 24` | All 4 independent |
 
-## 13.4 Symbol Composition
+## 13.4 Symbol Composition {#sec-13-4}
 
 Build complete commands by combining symbols:
 
@@ -1045,7 +1045,7 @@ mode := X_IMM_8X4_1DAC4 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
 mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_pin<<17 + cycles
 ```
 
-# Chapter 14: Events and Synchronization
+# Chapter 14: Events and Synchronization {#ch-14}
 
 Because the streamer runs on its own, your code needs a way to ask *where it is up to* — is it ready for another command, has it finished, did the NCO just roll over? The streamer raises events for exactly these moments, and this chapter shows how to poll them, wait on them, or branch on them. Getting this right is how you chain commands seamlessly and keep video and audio free of glitches.
 
@@ -1058,7 +1058,7 @@ Because the streamer runs on its own, your code needs a way to ask *where it is 
 | 12 | `EVENT_XRO` | NCO rollover occurred |
 | 13 | `EVENT_XRL` | LUT address $1FF read |
 
-## 14.2 Event Instructions
+## 14.2 Event Instructions {#sec-14-2}
 
 **Polling (non-blocking):**
 
@@ -1128,11 +1128,11 @@ line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
 
 Here the modes come together into the things people actually build: video, high-speed serial, signal processing, and the patterns that combine them.
 
-# Chapter 15: Video Output
+# Chapter 15: Video Output {#ch-15}
 
 Part IV puts the pieces together into real applications, beginning with the streamer's signature use: video. This chapter walks through generating VGA, HDMI, and composite signals — combining the RGB modes of Chapter 7, the NCO timing of Chapter 3, and the sync discipline that keeps a picture stable. The encoding differs by standard, but the shape is always the same: stream a framebuffer, on the beat, line after line.
 
-## 15.1 VGA Output
+## 15.1 VGA Output {#sec-15-1}
 
 VGA uses analog RGB on DAC channels, with **separate** horizontal and vertical sync. The streamer drives the analog levels: the horizontal-sync level rides the streamer's immediate operand, while vertical sync is a plain pin toggle.
 
@@ -1215,7 +1215,7 @@ y               res     1
 
 > Verified against Eric R. Smith's VGA driver (Parallax OBEX #2847): sync and blanking are immediate DAC-level streams, and vertical sync is a direct pin toggle.
 
-## 15.2 HDMI/DVI Output
+## 15.2 HDMI/DVI Output {#sec-15-2}
 
 HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 
@@ -1240,7 +1240,7 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 
 🔧 **Hardware:** HDMI requires the colorspace converter in DVI mode. The converter generates TMDS encoding automatically from RGB data.
 
-## 15.3 Composite Video
+## 15.3 Composite Video {#sec-15-3}
 
 Composite video uses the colorspace converter to generate NTSC or PAL signals.
 
@@ -1260,7 +1260,7 @@ Composite video uses the colorspace converter to generate NTSC or PAL signals.
                 setcq   ##cq_ntsc
 ```
 
-# Chapter 16: High-Speed Serial (SPI)
+# Chapter 16: High-Speed Serial (SPI) {#ch-16}
 
 Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and the two stay locked together for transfers far faster than a software bit-bang.
 
@@ -1316,7 +1316,7 @@ The **WAITXFI** instruction synchronizes streamer completion with clock generati
 
 ⚠️ **Pitfall:** The smart pin clock and streamer operate independently. Verify both complete before starting the next transfer.
 
-# Chapter 17: Signal Processing
+# Chapter 17: Signal Processing {#ch-17}
 
 This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts them to work — generating waveforms with a function generator's precision, and detecting specific frequencies for tone decoding, distance sensing, and measurement. Where Chapter 10 explained the mechanism, this chapter shows the applications.
 
@@ -1404,7 +1404,7 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
 
 The final chapter collects patterns that cut across everything above: double-buffering so display and rendering never collide, splitting work across multiple COGs, and coordinating the streamer with smart pins. These are the techniques that turn a working streamer demo into a robust system.
 
-## 18.1 Double Buffering
+## 18.1 Double Buffering {#sec-18-1}
 
 Use two buffers to allow simultaneous rendering and display:
 
@@ -1427,7 +1427,7 @@ frame_loop:     ' Start displaying current buffer
                 jmp     #frame_loop
 ```
 
-## 18.2 Multi-COG Video
+## 18.2 Multi-COG Video {#sec-18-2}
 
 Complex video systems span multiple COGs:
 
@@ -1449,7 +1449,7 @@ wait_line:      rdlong  temp, ##line_done_flag wz
         if_z    jmp     #wait_line
 ```
 
-## 18.3 Streamer + Smart Pin Coordination
+## 18.3 Streamer + Smart Pin Coordination {#sec-18-3}
 
 Many applications combine streamer I/O with smart pin timing:
 
@@ -1474,7 +1474,7 @@ wait_trigger:   testp   #trigger_pin wc
 
 The appendices are lookup material: the complete mode-encoding table, the symbol quick-reference, the frequency-calculation tables, and a troubleshooting guide. Reach for them once you know which mode you need and want the exact bits.
 
-# Appendix A: Complete Mode Encoding Table
+# Appendix A: Complete Mode Encoding Table {#app-a}
 
 | D[31:28] | D[19:16] | Mode | Symbol |
 |----------|----------|------|--------|
@@ -1535,7 +1535,7 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%1111` | `%0111` | DDS/Goertzel SINC1 | `X_DDS_GOERTZEL_SINC1` |
 | `%1111` | `%0111` (D[23]=1) | DDS/Goertzel SINC2 | `X_DDS_GOERTZEL_SINC2` |
 
-# Appendix B: Symbol Quick Reference
+# Appendix B: Symbol Quick Reference {#app-b}
 
 ## Mode Symbols
 
@@ -1577,7 +1577,7 @@ X_DACS_0N0_0N0  X_DACS_X_X_0N0    X_DACS_0N0_X_X    X_DACS_1_0_1_0
 X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 ```
 
-# Appendix C: Frequency Calculation Tables
+# Appendix C: Frequency Calculation Tables {#app-c}
 
 ## NCO Frequency Values
 
@@ -1605,7 +1605,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 
 Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 
-# Appendix D: Troubleshooting Guide
+# Appendix D: Troubleshooting Guide {#app-d}
 
 ## Symptom: No Output on Pins
 
@@ -1658,143 +1658,143 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 \indexletter{A}
 ```
 
-- ADC sampling modes: Chapter 9
-- Alternate bit order: 12.4
-- Architecture: Chapter 2
+- ADC sampling modes: [Chapter 9](#ch-9)
+- Alternate bit order: [12.4](#sec-12-4)
+- Architecture: [Chapter 2](#ch-2)
 
 ```{=latex}
 \indexletter{B}
 ```
 
-- Block diagram: 2.1
+- Block diagram: [2.1](#sec-2-1)
 
 ```{=latex}
 \indexletter{C}
 ```
 
-- Colorspace converter: 15.2, 15.3
-- Command structure: Chapter 4
-- Count field: 4.6
+- Colorspace converter: [15.2](#sec-15-2), [15.3](#sec-15-3)
+- Command structure: [Chapter 4](#ch-4)
+- Count field: [4.6](#sec-4-6)
 
 ```{=latex}
 \indexletter{D}
 ```
 
-- DAC channels: Chapter 11
-- DAC pin mapping: 11.2
-- DAC routing table: 11.1
-- DAC symbols: 13.3
-- DDS mode: Chapter 10
-- Double buffering: 18.1
+- DAC channels: [Chapter 11](#ch-11)
+- DAC pin mapping: [11.2](#sec-11-2)
+- DAC routing table: [11.1](#sec-11-1)
+- DAC symbols: [13.3](#sec-13-3)
+- DDS mode: [Chapter 10](#ch-10)
+- Double buffering: [18.1](#sec-18-1)
 
 ```{=latex}
 \indexletter{E}
 ```
 
-- Enable control: 12.3
-- Events: Chapter 14
+- Enable control: [12.3](#sec-12-3)
+- Events: [Chapter 14](#ch-14)
 
 ```{=latex}
 \indexletter{F}
 ```
 
-- Frequency calculation: 3.2, Appendix C
+- Frequency calculation: [3.2](#sec-3-2), [Appendix C](#app-c)
 
 ```{=latex}
 \indexletter{G}
 ```
 
-- GETXACC: 4.7, 10.5
-- Goertzel mode: Chapter 10
+- GETXACC: [4.7](#sec-4-7), [10.5](#sec-10-5)
+- Goertzel mode: [Chapter 10](#ch-10)
 
 ```{=latex}
 \indexletter{H}
 ```
 
-- HDMI output: 15.2
-- Hub FIFO: 6.1
+- HDMI output: [15.2](#sec-15-2)
+- Hub FIFO: [6.1](#sec-6-1)
 
 ```{=latex}
 \indexletter{I}
 ```
 
-- Immediate modes: Chapter 5
+- Immediate modes: [Chapter 5](#ch-5)
 
 ```{=latex}
 \indexletter{L}
 ```
 
-- LUT setup: 5.1, 10.3
+- LUT setup: [5.1](#sec-5-1), [10.3](#sec-10-3)
 
 ```{=latex}
 \indexletter{M}
 ```
 
-- Mode encoding table: Appendix A
-- Mode field: 4.2
-- Mode symbols: 13.1
-- Multi-COG: 18.2
+- Mode encoding table: [Appendix A](#app-a)
+- Mode field: [4.2](#sec-4-2)
+- Mode symbols: [13.1](#sec-13-1)
+- Multi-COG: [18.2](#sec-18-2)
 
 ```{=latex}
 \indexletter{N}
 ```
 
-- NCO: Chapter 3
+- NCO: [Chapter 3](#ch-3)
 
 ```{=latex}
 \indexletter{P}
 ```
 
-- Pin group selection: 12.1
-- Pin selection: Chapter 12
+- Pin group selection: [12.1](#sec-12-1)
+- Pin selection: [Chapter 12](#ch-12)
 
 ```{=latex}
 \indexletter{R}
 ```
 
-- RDFAST modes: Chapter 6
-- RGB modes: Chapter 7
+- RDFAST modes: [Chapter 6](#ch-6)
+- RGB modes: [Chapter 7](#ch-7)
 
 ```{=latex}
 \indexletter{S}
 ```
 
-- SETXFRQ: 3.3, 4.7
-- Signal processing: Chapter 17
-- SINC1/SINC2: 10.4
-- Smart pin coordination: 18.3
-- SPI: Chapter 16
-- Sub-pin selection: 12.2
-- Symbol composition: 13.4
-- Symbols quick reference: Appendix B
+- SETXFRQ: [3.3](#sec-3-3), [4.7](#sec-4-7)
+- Signal processing: [Chapter 17](#ch-17)
+- SINC1/SINC2: [10.4](#sec-10-4)
+- Smart pin coordination: [18.3](#sec-18-3)
+- SPI: [Chapter 16](#ch-16)
+- Sub-pin selection: [12.2](#sec-12-2)
+- Symbol composition: [13.4](#sec-13-4)
+- Symbols quick reference: [Appendix B](#app-b)
 
 ```{=latex}
 \indexletter{T}
 ```
 
-- Troubleshooting: Appendix D
+- Troubleshooting: [Appendix D](#app-d)
 
 ```{=latex}
 \indexletter{V}
 ```
 
-- VGA output: 15.1
-- Video output: Chapter 15
+- VGA output: [15.1](#sec-15-1)
+- Video output: [Chapter 15](#ch-15)
 
 ```{=latex}
 \indexletter{W}
 ```
 
-- WAITXFI: 14.2
-- WRFAST modes: Chapter 8
+- WAITXFI: [14.2](#sec-14-2)
+- WRFAST modes: [Chapter 8](#ch-8)
 
 ```{=latex}
 \indexletter{X}
 ```
 
-- XCONT: 4.7
-- XINIT: 4.7
-- XSTOP: 4.7
-- XZERO: 4.7
+- XCONT: [4.7](#sec-4-7)
+- XINIT: [4.7](#sec-4-7)
+- XSTOP: [4.7](#sec-4-7)
+- XZERO: [4.7](#sec-4-7)
 
 
