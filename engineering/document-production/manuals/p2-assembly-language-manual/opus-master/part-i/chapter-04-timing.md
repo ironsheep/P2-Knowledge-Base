@@ -129,8 +129,8 @@ The instruction encoding table in the P2 documentation provides precise cycle co
 | 2 | Always 2 cycles |
 | 2+ | Minimum 2 cycles, may be more |
 | 2 or 4 | 2 if not taken, 4 if taken |
-| 2 / 8-23 | COG mode / Hub mode |
-| 9..35 | Variable range |
+| 4 (cog) / 13-20 (hub-exec) | Taken branch: COG mode / hub-execution mode |
+| 4...11 | Variable range (bounded) |
 
 A simple "2" means the instruction always takes exactly 2 cycles regardless of operands or conditions. This applies to most arithmetic, logical, and data movement instructions.
 
@@ -138,9 +138,9 @@ The "2+" notation indicates a base time of 2 cycles plus additional variable tim
 
 Branch instructions show "2 or 4" to reflect their dual timing behavior. When the branch condition is false, the processor continues to the next instruction in 2 cycles. When the condition is true, the processor loads a new program counter and takes 4 cycles total.
 
-The "2 / 8-23" notation distinguishes between COG execution mode and hub execution mode. In COG mode (when executing from COG RAM), the instruction takes the first number. In hub execution mode (when executing from hub RAM), the instruction takes longer because the processor must fetch each instruction through the hub access mechanism. The range "8-23" reflects the variability of hub access timing.
+The slash notation—shown here as "4 (cog) / 13-20 (hub-exec)"—separates COG-execution timing (left) from hub-execution timing (right) for instructions whose timing genuinely differs between the two modes. This is **not** a per-instruction fetch penalty. In hub-execution mode the prefetch FIFO streams sequential instructions ahead of execution, so straight-line code runs at the same 2 cycles per instruction as COG mode (see §4.8). The two modes diverge at **taken branches**: hub execution must refill the FIFO from the new address, costing a minimum of 13 clocks (13-20 including the refill's hub-window wait) versus 4 clocks in COG mode. Hub data-access instructions (RDLONG and friends) likewise carry a two-mode entry because the access pipeline is longer in hub-execution mode. CALLA/CALLB and RETA/RETB are other instructions documented with a `cog / hub-exec` pair.
 
-Variable range notation like "9..35" indicates that execution time depends on the instruction's parameters or the processor state. For example, REP (repeat) shows variable timing because the total time depends on how many iterations the repeat block executes.
+Variable range notation like "4...11" indicates that execution time varies within fixed bounds depending on the processor state when the instruction runs. LOCKNEW, for example, is listed as "4...11" clocks: the hub's shared locks are a hub resource, so allocating one is serviced by the hub and the exact cycle count depends on where the COG sits in the hub rotation at that moment. (By contrast REP, despite governing a repeated block, is itself a fixed 2-cycle instruction—it only loads the hardware repeat counter; the variable time is spent in the repeated instructions, not in REP.)
 
 
 ## 4.3 Hub Access Timing
@@ -460,15 +460,15 @@ Another approach aligns the loop body to an 8-cycle boundary and ensures hub acc
 
 ```pasm2
 loop
-        rdlong  data, ptr               ' 9...16 cycles (same slot-wait each time)
+        rdlong  data, ptr               ' 9...16; settles to 14 (5 slot-wait) once aligned
         add     result, data            ' 2 cycles
         add     ptr, #4                 ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
-        nop                             ' 2 cycles - padding to 16 total
-        ' Loop body = 16 cycles (2× hub period)
+        nop                             ' 2 cycles - padding
+        ' Loop body = 24 cycles (3× hub period)
 ```
 
-If the first iteration experiences 3 cycles of hub wait, every subsequent iteration also experiences 3 cycles of wait because the 16-cycle loop maintains alignment with the 8-cycle hub period.
+Once the loop stabilizes—after its first iteration—RDLONG sees a constant 5 cycles of slot-wait every pass, because the 24-cycle loop body is a whole multiple of the 8-cycle hub period and so re-presents RDLONG to the rotation at the same phase each time. Every iteration after the first then takes exactly 24 cycles. (Determinism here does not actually depend on the padding NOP: a loop containing a single hub access always self-aligns to the next multiple of the hub period after one iteration—the NOP only shifts the constant slot-wait, in this case from 7 cycles down to 5.)
 
 ### 4.6.2 Pipelined Hub Access
 

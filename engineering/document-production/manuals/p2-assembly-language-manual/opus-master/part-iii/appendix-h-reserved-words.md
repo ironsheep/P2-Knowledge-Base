@@ -4,7 +4,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 852+** (456 PASM2 + 396 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -585,7 +585,7 @@ byte_data       long  $0
 
 ## Summary
 
-The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
+The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 
 **PASM2-Specific Reserved Words (456):**
 
@@ -599,7 +599,7 @@ The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
 | Effects | 9 | Flag modification suffixes |
 | **PASM2 Subtotal** | **456** | |
 
-**Spin2-Specific Reserved Words (586):**
+**Spin2-Specific Reserved Words (396):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
@@ -617,7 +617,7 @@ The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
 | Graphics Drawing | 32 | Graphics primitives |
 | Text/Display | 12 | Text rendering |
 | Lookup/Misc | 20 | Table lookup and other |
-| **Spin2 Subtotal** | **586** | |
+| **Spin2 Subtotal** | **396** | |
 
 **Hardware Constants (194+):**
 
@@ -627,7 +627,7 @@ The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,236+ reserved identifiers**
+**Grand Total: 1,046+ reserved identifiers**
 
 **Cross-References:**
 
@@ -643,7 +643,7 @@ The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. You cannot use any of these identifiers as labels, symbols, or variable names in your assembly code, even when writing pure PASM2.
 
-**Total Spin2-Only Reserved Words: 586**
+**Total Spin2-Only Reserved Words: 396**
 
 The following sections list Spin2 reserved words organized by category.
 

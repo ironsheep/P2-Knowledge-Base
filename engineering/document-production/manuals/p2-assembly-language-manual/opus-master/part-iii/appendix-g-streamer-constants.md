@@ -175,22 +175,22 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
 
 | Constant | Value | Description |
 |----------|-------|-------------|
-| X_DACS_OFF | (default - no bits set) | Disable all DAC outputs |
-| X_DACS_0_0_0_0 | %0000_0001_0000_0000 << 16 | X0 routed to all four DAC channels (mono) |
-| X_DACS_X_X_0_0 | %0000_0010_0000_0000 << 16 | X0 on DAC channels 1,0; channels 3,2 not overridden |
-| X_DACS_0_0_X_X | %0000_0011_0000_0000 << 16 | X0 on DAC channels 3,2; channels 1,0 not overridden |
-| X_DACS_X_X_X_0 | %0000_0100_0000_0000 << 16 | Only DAC channel 0 enabled |
-| X_DACS_X_X_0_X | %0000_0101_0000_0000 << 16 | Only DAC channel 1 enabled |
-| X_DACS_X_0_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 2 enabled |
-| X_DACS_0_X_X_X | %0000_0111_0000_0000 << 16 | Only DAC channel 3 enabled |
-| X_DACS_0N0_0N0 | %0000_1000_0000_0000 << 16 | Channels 2,0 normal (X0); channels 3,1 inverted (!X0) — differential pairs |
-| X_DACS_X_X_0N0 | %0000_1001_0000_0000 << 16 | Channels 1,0 active; channel 1 inverted (!X0), channel 0 normal (X0) — differential pair on channels 0,1 |
-| X_DACS_0N0_X_X | %0000_1010_0000_0000 << 16 | Channels 3,2 enabled (differential pair); channel 3 inverted (!X0), channel 2 normal (X0) |
-| X_DACS_1_0_1_0 | %0000_1011_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
-| X_DACS_X_X_1_0 | %0000_1100_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
-| X_DACS_1_0_X_X | %0000_1101_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
-| X_DACS_1N1_0N0 | %0000_1110_0000_0000 << 16 | All channels; odd inverted |
-| X_DACS_3_2_1_0 | %0000_1111_0000_0000 << 16 | Use all 4 DAC channels (standard) |
+| X_DACS_OFF | (default - no bits set) | No streamer DAC output (SETDACS values pass through on all channels) |
+| X_DACS_0_0_0_0 | %0000_0001_0000_0000 << 16 | X0 on all four DAC channels (mono) |
+| X_DACS_X_X_0_0 | %0000_0010_0000_0000 << 16 | X0 on DAC channels 1 and 0; channels 3,2 not overridden |
+| X_DACS_0_0_X_X | %0000_0011_0000_0000 << 16 | X0 on DAC channels 3 and 2; channels 1,0 not overridden |
+| X_DACS_X_X_X_0 | %0000_0100_0000_0000 << 16 | X0 on DAC channel 0 only |
+| X_DACS_X_X_0_X | %0000_0101_0000_0000 << 16 | X0 on DAC channel 1 only |
+| X_DACS_X_0_X_X | %0000_0110_0000_0000 << 16 | X0 on DAC channel 2 only |
+| X_DACS_0_X_X_X | %0000_0111_0000_0000 << 16 | X0 on DAC channel 3 only |
+| X_DACS_0N0_0N0 | %0000_1000_0000_0000 << 16 | X0 differential pairs on all four channels: ch3 !X0, ch2 X0, ch1 !X0, ch0 X0 |
+| X_DACS_X_X_0N0 | %0000_1001_0000_0000 << 16 | X0 differential pair on DAC channels 1 and 0: ch1 !X0, ch0 X0 |
+| X_DACS_0N0_X_X | %0000_1010_0000_0000 << 16 | X0 differential pair on DAC channels 3 and 2: ch3 !X0, ch2 X0 |
+| X_DACS_1_0_1_0 | %0000_1011_0000_0000 << 16 | X1,X0 pairs on all four channels: ch3 X1, ch2 X0, ch1 X1, ch0 X0 |
+| X_DACS_X_X_1_0 | %0000_1100_0000_0000 << 16 | X1,X0 on DAC channels 1 and 0: ch1 X1, ch0 X0 |
+| X_DACS_1_0_X_X | %0000_1101_0000_0000 << 16 | X1,X0 on DAC channels 3 and 2: ch3 X1, ch2 X0 |
+| X_DACS_1N1_0N0 | %0000_1110_0000_0000 << 16 | X1,X0 differential pairs on all four channels: ch3 !X1, ch2 X1, ch1 !X0, ch0 X0 |
+| X_DACS_3_2_1_0 | %0000_1111_0000_0000 << 16 | X3,X2,X1,X0 — one streamer word per channel (standard 4-channel) |
 
 ### Pin Output Control
 
