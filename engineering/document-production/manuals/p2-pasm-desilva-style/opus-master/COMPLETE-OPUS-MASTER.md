@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large May 2026\par}
+{\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 2.2\par}
+{\large\color{blue}Version 2.3\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -254,7 +254,7 @@ Here's the P2 philosophy in a nutshell:
 
 **Instead of timing that depends on cache luck**, the hub memory has deterministic access. Your timing loops work the same way every time.
 
-**Instead of calling math libraries**, there's a hardware CORDIC that computes sine, cosine, and arctangent in exactly 55 clocks. Every time.
+**Instead of calling math libraries**, there's a hardware CORDIC that gives you sine, cosine, and arctangent (via vector rotate and convert) with results ready in exactly 55 clocks. Every time.
 
 Does this mean P2 is perfect for everything? Of course not. But if your projects involve multiple real-time tasks, precise timing, video or audio generation, or just running out of peripheral pins - you're in the right place.
 
@@ -276,7 +276,7 @@ DAT
         waitx   ##50_000_000    ' Wait 0.25 seconds at 200MHz
         drvl    #56             ' Drive pin 56 low (LED off)
         waitx   ##50_000_000    ' Wait 0.25 seconds
-        jmp     #$-6            ' Jump back 6 longs (## adds hidden AUGS)
+        jmp     #$-6            ' Jump back 6 longs (## adds hidden AUGD)
 ```
 
 That's it! Five lines of code and you have a blinking LED. Load this into any COG and watch the magic happen.
@@ -295,7 +295,7 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 **`drvl #56`** - Drive low. LED off. You get the pattern.
 
-**`jmp #$-6`** - Jump back 6 longs. The '$' means "current address", so '$-6' means "6 addresses back from here". Why 6? Each `##` immediate generates a hidden AUGS instruction, so we have 6 longs total: drvh, AUGS, waitx, drvl, AUGS, waitx. Infinite loop achieved!
+**`jmp #$-6`** - Jump back 6 longs. The '$' means "current address", so '$-6' means "6 addresses back from here". Why 6? Each `##` immediate generates a hidden AUGD instruction (it augments the `waitx` destination operand), so we have 6 longs total: drvh, AUGD, waitx, drvl, AUGD, waitx. Infinite loop achieved!
 
 ### But Wait, There's More!
 
@@ -432,8 +432,9 @@ This one's a bit tricky - we'll use PWM to fade the LED:
 ```pasm2
         org     0
         
+        dirl    #56                    ' Reset the pin before configuring
         wrpin   ##P_PWM_TRIANGLE, #56  ' Configure pin 56 for PWM
-        wxpin   ##$100, #56            ' Set period to 256
+        wxpin   ##$0100_0001, #56      ' Frame = 256 base periods
         dirh    #56                    ' Enable the pin
         
 .fade   wypin   level, #56             ' Set duty cycle
@@ -469,7 +470,7 @@ You might wonder why COG code always starts at address 0. It's actually quite el
 When a COG is started with `coginit`, the hardware:
 
 1. Stops the COG (if it was running)
-2. Copies 512 longs from hub to COG memory (addresses 0-511)
+2. Copies 504 longs from hub to COG memory (addresses 0-503); the top 8 (504-511) are special hardware registers, not loaded
 3. Starts execution at COG address 0
 
 This means every COG program starts fresh, with a clean slate. No residual state, no confusion. It's like each COG gets a fresh brain transplant every time it starts!
@@ -608,7 +609,7 @@ PUB main() | i
 DAT
         org     0
 cog_code
-        rdlong  pin_num, ptra          ' Get pin number from hub
+        mov     pin_num, ptra          ' Pin number was passed in via PTRA
 
 .loop   drvnot  pin_num                ' Toggle our LED
         shl     pin_num, #24           ' Pin number to bits 24-31
@@ -649,8 +650,8 @@ When multiple COGs might write to the same location, we need locks:
 ```pasm2
 ' Get a lock
 .try_lock
-        locktry lock_id wc     ' Try to get lock
-   if_c jmp     #.try_lock     ' Keep trying if failed
+        locktry lock_id wc     ' Try to get lock (C=1 if we got it)
+  if_nc jmp     #.try_lock     ' Keep trying until we get it
 
         ' Critical section - we have the lock!
         rdlong  value, ##shared_addr
@@ -848,7 +849,7 @@ PUB main() | i
         
 DAT
         org     0
-counter rdlong  hub_ptr, ptra
+counter mov     hub_ptr, ptra          ' Our hub address arrived in PTRA
 .loop   rdlong  value, hub_ptr
         add     value, #1
         wrlong  value, hub_ptr
@@ -1027,7 +1028,7 @@ Moving bits around:
         
 ' Fancy ones
         rev     x              ' Reverse bit order (!!)
-        mergeb  x              ' Merge bytes (AABBCCDD -> ABCDABCD)
+        mergeb  x              ' Merge bits, not bytes (inverse of SPLITB)
 ```
 
 ## Flow Control: Jump!
@@ -1098,7 +1099,7 @@ Here's a clever trick the P2 offers. What if you could execute an instruction *a
 ' Normal way: Two instructions
 add_and_return
         add     x, y            ' Do the add
-        ret                     ' Then return (4+ cycles total)
+        ret                     ' Then return (RET is a ~4-cycle branch)
 
 ' _RET_ way: One instruction!
 add_and_return
@@ -1529,13 +1530,13 @@ The Q flag is special - it's used by CORDIC operations (Chapter 7).
 ### SKIP - The Instruction Skipper
 
 ```pasm2
-        skip    ##%11010000    ' Skip pattern (1=skip, 0=execute)
-        add     x, #1         ' Skipped!
-        add     y, #1         ' Skipped!  
-        add     z, #1         ' Executed
-        sub     a, #1         ' Skipped!
-        sub     b, #1         ' Executed
-        ' ... pattern continues
+        skip    ##%00001010    ' LSB first: 1=skip, 0=execute
+        add     x, #1         ' Executed (bit 0 = 0)
+        add     y, #1         ' Skipped! (bit 1 = 1)
+        add     z, #1         ' Executed (bit 2 = 0)
+        sub     a, #1         ' Skipped! (bit 3 = 1)
+        sub     b, #1         ' Executed (bit 4 = 0)
+        ' ... bit N controls the Nth instruction after SKIP
 ```
 
 This is like having conditional execution on steroids!
@@ -1913,8 +1914,8 @@ Remember doing this with shifts and adds? Those days are over!
 ' Signed multiply  
         muls    result, value     ' Signed version
         
-' Scale and multiply
-        scl     result, ##$8000   ' Scale by 0.5 (32.32 fixed pt)
+' Scale by a power of two
+        shr     result, #1        ' Scale by 0.5 (divide by 2)
 ```
 
 ## Division Without Tears
@@ -1923,7 +1924,7 @@ Remember doing this with shifts and adds? Those days are over!
 ' Start division
         qdiv    dividend, divisor ' Start the operation
         
-' Get results (takes 30 clocks)
+' Get results (takes 55 clocks)
         getqx   quotient         ' Get quotient
         getqy   remainder        ' Get remainder
         
@@ -1951,7 +1952,7 @@ Remember doing this with shifts and adds? Those days are over!
 ```pasm2
 ' 16.16 fixed point multiply (uses CORDIC for full precision)
 fixed_mul
-        qmul    a, b             ' Start 32x32->64 signed multiply
+        qmul    a, b             ' Start 32x32->64 unsigned multiply
         ' ... 55 clocks (do other work) ...
         getqx   low              ' Lower 32 bits
         getqy   high             ' Upper 32 bits
@@ -1965,14 +1966,14 @@ fixed_mul
 ::: medicine-cabinet
 **Quick math reference**:
 
-- **MUL** D, S — unsigned 32×32→32 (low 32 bits only)
-- **MULS** D, S — signed 32×32→32
+- **MUL** D, S — unsigned 16×16→32
+- **MULS** D, S — signed 16×16→32
 - **QMUL** D, S — full 32×32→64 (read via **GETQX**/**GETQY** after 55 clocks)
-- **QDIV** D, S — full 32-bit divide (read via **GETQX** quotient / **GETQY** remainder after 30 clocks)
+- **QDIV** D, S — full 32-bit divide (read via **GETQX** quotient / **GETQY** remainder after 55 clocks)
 - **QFRAC** D, S — fractional divide (returns 32-bit fraction in **GETQX**)
 - 64-bit add: **ADD** + **ADDX** chained with **WC**
 
-For everyday integer work, **MUL**/**MULS** are 2 clocks and you're done. For precision (full 64-bit results, fixed-point math, signed division), **QMUL**/**QDIV** route through the CORDIC and pay 30–55 clocks — but they don't block the COG, so you can interleave other work.
+For everyday integer work, **MUL**/**MULS** are 2 clocks and you're done. For precision (full 64-bit results, fixed-point math, signed division), **QMUL**/**QDIV** route through the CORDIC and pay 55 clocks — but they don't block the COG, so you can interleave other work.
 :::
 
 ## Your Turn: Experiments
@@ -2242,8 +2243,7 @@ This makes angle math incredibly easy - just use regular addition and subtractio
 
 ```pasm2
 ' Convert (x,y) to polar (radius, angle)
-        setq    y              ' Load Y coordinate
-        qvector x, #0          ' Start conversion
+        qvector x, y           ' X in D, Y in S (no SETQ for QVECTOR)
         getqx   radius         ' sqrt(x² + y²)
         getqy   angle          ' atan2(y, x)
 ```
@@ -2258,7 +2258,7 @@ Perfect for:
 
 CORDIC uses 32-bit precision throughout:
 
-- Angles: 32 bits (0.0000084 degree resolution!)
+- Angles: 32 bits (0.00000008 degree resolution!)
 - Coordinates: 32 bits signed
 - Results: Full 32-bit or 64-bit when needed
 
@@ -2355,7 +2355,7 @@ Starting code:
 ```
 
 Goal: Calculate the distance between the two points
-Hint: qvector with Y in Q gives you radius (distance)
+Hint: qvector dx, dy gives you radius (distance) in QX
 Success Check: Distance should be 50 units
 :::
 
@@ -2384,8 +2384,7 @@ Feeling overwhelmed by all this trigonometry? Here's your simplified prescriptio
 **Pattern 3: Get distance**
 
 ```pasm2
-        setq    dy
-        qvector dx, #0
+        qvector dx, dy
         getqx   distance
 ```
 
@@ -2459,7 +2458,7 @@ draw_spiral
         call    #plot_pixel
         
         ' Expand spiral
-        add     angle, ##$0400_0000   ' Rotate ~22.5 degrees
+        add     angle, ##$0400_0000   ' Rotate 5.625 degrees (1/64 turn)
         add     radius, ##100         ' Expand slowly
         
         cmp     radius, ##30000 wcz
@@ -2515,13 +2514,13 @@ Before you pull your hair out debugging, know these:
 Don't worry, we won't leave logarithms and exponentials behind. CORDIC handles those too:
 
 ```pasm2
-' Natural logarithm
+' Base-2 logarithm
         qlog    value
-        getqx   result          ' ln(value) in 5.27 fixed point
+        getqx   result          ' log2(value) in 5.27 fixed point
         
-' Exponential
+' Base-2 exponential (2^x)
         qexp    value  
-        getqx   result          ' e^value
+        getqx   result          ' 2^value
 ```
 
 These are less commonly used but incredibly powerful for DSP and scientific calculations.
@@ -2635,9 +2634,9 @@ And the really clever one:
 ### Random and Pattern Outputs
 
 ```pasm2
-        drvrnot #56            ' Randomly toggle (hardware random!)
-        outl    #56            ' Drive low (alternate form)
-        outh    #56            ' Drive high (alternate form)
+        drvrnd  #56            ' Drive pin to a random level (hardware PRNG)
+        outl    #56            ' Set OUT bit low (dir unchanged)
+        outh    #56            ' Set OUT bit high (dir unchanged)
 ```
 
 ## Digital Input: Reading the World
@@ -3031,9 +3030,7 @@ The Streamer is different from the FIFO - it's a dedicated DMA engine that can m
 
 ```pasm2
 ' Configure streamer for video output
-        setcmod #$100           ' Set color mode
-        setcy   ##640           ' Cycles per line
-        setci   ##LINE_TIME     ' Line timing
+        setxfrq ##PIXEL_FREQ    ' Set the pixel (NCO) output rate
         
 ' Start streaming video data to pins
         xinit   ##STREAM_CMD, #0  ' Start streamer
@@ -3094,7 +3091,7 @@ That's 90% of streaming right there!
 
 ```pasm2
 ' Circular buffer reading
-        rdfast  ##$8000_0000, ##buffer  ' Bit 31 set = wrap mode
+        rdfast  ##BUF_BLOCKS, ##buffer  ' D[13:0]=block count; auto-wraps
         
 circular_loop
         rflong  value                   ' Read from FIFO
@@ -3179,11 +3176,11 @@ Before you pull your hair out wondering why your transfer is one long short, or 
 
 2. **FIFO is shared per COG** - Can't use FIFO for both code execution and data streaming simultaneously
 
-3. **Write synchronization** - WRFAST doesn't wait for writes to complete. Use `waitx #20` if you need to ensure completion
+3. **Write synchronization** - WRFAST writes complete in the background. To force a flush, issue the next RDFAST/WRFAST with D[31]=0 (it waits for the prior WRFAST to finish) rather than relying on a fixed delay
 
 4. **Hub alignment** - Block transfers work best with long-aligned addresses
 
-5. **FIFO depth** - The FIFO is 64 longs deep. Don't outrun it!
+5. **FIFO depth** - The FIFO holds (cogs+11) = 19 longs. It refills automatically, so you rarely outrun it.
 
 ## Performance Numbers
 
@@ -3191,7 +3188,7 @@ Let's talk speed:
 
 - **Block transfer**: Up to 1 long per clock (at 200MHz = 800MB/s!)
 - **FIFO streaming**: Up to 1 long per clock sustained
-- **Random hub access**: 2-9 clocks per access
+- **Random hub access**: 9-16 clocks per access
 - **Streamer to pins**: Up to sysclock/1 rate
 
 Uff! That's seriously fast. Most microcontrollers need dedicated DMA controllers, peripheral coprocessors, and a stack of config registers to achieve what P2 does with two instructions. You're not paying for that DMA controller — it's already in the silicon.
@@ -3242,7 +3239,7 @@ Your streaming skills now include:
 
 ## Coming Up Next
 
-Chapter 10 explores "Hub Execution" - how to break free from the 512-instruction limit and run massive programs directly from hub memory. It's like having your cake and eating it too!
+Chapter 10 explores "Hub Execution" - how to break free from the 496-instruction limit and run massive programs directly from hub memory. It's like having your cake and eating it too!
 
 
 **Have Fun!** Remember, streaming is about throughput, not just speed. It's the difference between carrying one brick at a time and using a wheelbarrow!
@@ -3250,7 +3247,7 @@ Chapter 10 explores "Hub Execution" - how to break free from the 512-instruction
 
 # Chapter 10: Hub Execution
 
-*Breaking free from the 512-instruction limit*
+*Breaking free from the 496-instruction limit*
 
 ## The Hook: Unlimited Code Space
 
@@ -3692,8 +3689,8 @@ check_servos
         waitct1                        ' Wait for exact time
         bitl    outa, index            ' Turn off this servo
         
-        incmod  index, #7
-        tjnz    servo_mask, #check_servos
+        incmod  index, #7  wc          ' C set when index wraps 7->0
+  if_nc jmp     #check_servos          ' Loop until all 8 servos done
         
         ' Wait for 20ms frame
         waitx   ##4_000_000
@@ -4012,13 +4009,13 @@ if_a    jmp     #greater
 if_b    jmp     #less
         jmp     #equal
 
-' With SKIP: no jumps!
-        cmp     x, #5 wcz
-        skip    ##%11000        ' Skip pattern based on flags
-        mov     result, #1      ' Execute if equal
-        mov     result, #2      ' Execute if less
-        mov     result, #3      ' Execute if greater
-        ' No pipeline stalls from jumps!
+' With SKIP: cancel optional steps per a precomputed pattern
+'   bit N (LSB first) skips the Nth instruction after SKIP
+        skip    config_mask     ' e.g. %010 runs steps 0 and 2, skips step 1
+        call    #setup_uart     ' Step 0
+        call    #setup_spi      ' Step 1
+        call    #setup_timer    ' Step 2
+        ' One pattern picks which steps run — no jumps, no stalls!
 ```
 
 ## Hub Access Optimization
@@ -4109,7 +4106,7 @@ copy_ultimate
         rdlong  buffer, source  ' Read all at once
         setq    count           ' (count already decremented)
         wrlong  buffer, dest    ' Write all at once
-        ' <1 clock per long for large blocks!
+        ' ~1 clock per long for large blocks (hub maximum)!
 ```
 
 ::: medicine-cabinet
@@ -4398,7 +4395,7 @@ The LUT sharing pairs are fixed:
 - COG 4 ↔ COG 5
 - COG 6 ↔ COG 7
 
-An even-numbered COG reads its odd neighbor's LUT, and vice versa. You cannot read LUTs from non-adjacent COGs.
+When you enable sharing, your odd/even companion COG's LUT *writes* are copied into your own LUT — so you read the copies from your own LUT. Sharing works only within the fixed pair; non-adjacent COGs cannot share.
 :::
 
 ## Practical Examples
@@ -4764,13 +4761,12 @@ recv    testp   #RX_PIN wc      ' Check for received byte
 ' ADC mode - continuous sampling
         dirl    #ADC_PIN
         wrpin   ##P_ADC | P_ADC_GIO, #ADC_PIN
-        wxpin   ##14, #ADC_PIN          ' 14-bit mode
+        wxpin   ##13, #ADC_PIN          ' 14-bit mode (period = 2^13 clocks)
         dirh    #ADC_PIN
 
 ' Read ADC value
 read_adc
-        rdpin   adc_value, #ADC_PIN     ' Get sample
-        shr     adc_value, #17          ' Right-justify the result
+        rdpin   adc_value, #ADC_PIN     ' Get N-bit ADC count (LSB-aligned)
 ```
 
 ### Quadrature Encoder
@@ -4988,10 +4984,10 @@ The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 | %001 | IN rises (Smart Pin ready) |
 | %010 | IN falls |
 | %011 | IN changes |
-| %100 | Pin high |
-| %101 | Pin low |
-| %110 | Pin rises |
-| %111 | Pin falls |
+| %100 | Pin is low (level) |
+| %101 | Pin is low (level) |
+| %110 | Pin is high (level) |
+| %111 | Pin is high (level) |
 
 ### EVENT_* Constants: When You Need Interrupts
 
@@ -5012,7 +5008,7 @@ While dedicated COGs are usually better than interrupts (see Chapter 11), someti
 | `EVENT_XMT` | %1010 | Streamer needs data |
 | `EVENT_XFI` | %1011 | Streamer operation complete |
 | `EVENT_XRO` | %1100 | NCO frequency counter rolled |
-| `EVENT_XRL` | %1101 | Streamer matched pattern |
+| `EVENT_XRL` | %1101 | Streamer read last LUT location ($1FF) |
 | `EVENT_ATN` | %1110 | Another COG signaled attention |
 | `EVENT_QMT` | %1111 | CORDIC/PIX math complete |
 
@@ -5050,12 +5046,12 @@ You can also wait for raw pin edges (without Smart Pin):
 
 ```pasm2
 ' Wait for rising edge on pin 5
-        setse1  #%110<<6 + 5    ' Rise on pin 5
+        setse1  #%001<<6 + 5    ' Rising edge on pin 5
         waitse1                  ' Sleep until edge
         ' Edge detected!
 
 ' Wait for falling edge on pin 10
-        setse2  #%111<<6 + 10   ' Fall on pin 10
+        setse2  #%010<<6 + 10   ' Falling edge on pin 10
         waitse2
         ' Edge detected!
 ```
@@ -5116,7 +5112,7 @@ With four SE channels, you can monitor multiple sources:
 ```pasm2
 ' Setup multiple events
         setse1  #%001<<6 + RX_PIN     ' Serial data ready
-        setse2  #%110<<6 + BUTTON_PIN ' Button pressed
+        setse2  #%001<<6 + BUTTON_PIN ' Button pressed (rising edge)
         setse3  #%001<<6 + ADC_PIN    ' ADC sample ready
 
 event_loop
@@ -5167,7 +5163,7 @@ wait_with_timeout
 ```pasm2
 ' Wait for clean button press with debounce
 debounced_button
-        setse1  #%110<<6 + BUTTON  ' Rising edge
+        setse1  #%001<<6 + BUTTON  ' Rising edge
         waitse1                     ' Wait for press
 
         waitx   ##2_000_000        ' 10ms debounce at 200MHz
@@ -5267,8 +5263,8 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a C
 | %001 | IN rises (Smart Pin ready) |
 | %010 | IN falls |
 | %011 | IN changes |
-| %110 | Pin rises |
-| %111 | Pin falls |
+| %10x | Pin is low (level) |
+| %11x | Pin is high (level) |
 
 **Wait (blocking):**
 
@@ -5495,8 +5491,8 @@ When multiple COGs need atomic access to the same piece of data, P2 gives you 16
 ```pasm2
 ' Atomic increment using lock
 atomic_increment
-        locktry #COUNTER_LOCK wc
-   if_c jmp     #atomic_increment     ' Retry if busy
+        locktry #COUNTER_LOCK wc      ' C=1 if we got the lock
+  if_nc jmp     #atomic_increment     ' Retry until we get it
         
         rdlong  value, ##COUNTER
         add     value, #1

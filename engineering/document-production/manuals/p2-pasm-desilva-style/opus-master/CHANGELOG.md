@@ -1,5 +1,34 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v2.3.0 (2026-06-10)
+
+**Content-accuracy release** — a complete chapter-by-chapter re-audit of every technical claim against the current P2 Knowledge Base corrected roughly thirty latent errors in instruction semantics, timings, and code examples. Presentation and structure are unchanged.
+
+### Corrected Instruction Semantics
+
+- MUL/MULS now described as 16×16→32 (was 32×32→32); QMUL labeled unsigned (was "signed")
+- MERGEB described as a bit-merge, the inverse of SPLITB (was a byte shuffle)
+- QLOG/QEXP corrected to base-2 logarithm / 2^x (were "natural logarithm" / "e^x")
+- Removed two non-existent mnemonics — SCL (now a shift) and DRVRNOT (now DRVRND)
+- OUTH/OUTL clarified: they set the OUT bit only and do not change pin direction
+
+### Corrected Timings and Values
+
+- QDIV result latency is 55 clocks (was 30); CORDIC angle resolution and a spiral rotation angle corrected
+- Random hub-access and FIFO-depth figures aligned to the silicon (9–16 clocks; 19-stage FIFO)
+- COG load size stated as 504 longs ($000–$1F7); the COG code ceiling made consistent at 496 instructions
+
+### Corrected Code Examples
+
+- LOCKTRY spin-locks now retry on failure — the carry condition was inverted in two examples
+- QVECTOR examples pass Y as the S operand (no SETQ); a COGINIT-passed value is now read from PTRA with MOV
+- The SKIP example demonstrates the correct LSB-first bit order; the servo-frame loop now terminates
+- SETSE edge/level mode bits, the EVENT_XRL description, the ADC sample period, and the PWM/streamer setup examples corrected
+
+*All corrections were verified against the current P2KB YAML and Silicon Doc; the full audit record is in `audit/content-reaudit-2026-06-10.md`.*
+
+---
+
 ## v2.2.0 (2026-05-23)
 
 **Periodic release** — Hub-exec timing accuracy, expanded pedagogical structure across Chapters 4-6 and 13-15, and consistent Your Turn block rendering throughout.
