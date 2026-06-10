@@ -251,8 +251,8 @@ Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for updating forms.
 **Example**:
 ```pasm2
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4 for RDLONG)
-        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1 for RDBYTE)
+        rdlong  data, ptra++            ' Read long, PTRA += 4 (SCALE=4)
+        rdbyte  char, ptra++            ' Read byte, PTRA += 1 (SCALE=1)
         wrlong  data, ptra[4]           ' Address: PTRA + (4 × 4) = PTRA+16
 
         ' Block transfer using SETQ

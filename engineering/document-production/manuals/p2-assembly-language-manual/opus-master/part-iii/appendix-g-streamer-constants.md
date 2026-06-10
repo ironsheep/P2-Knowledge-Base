@@ -21,7 +21,7 @@ Streamer commands are 32-bit values composed of mode selection and control field
 
 ```
 Bits 31-28: Mode selector; bits 27-16: control/config fields
-Bits 15-0:  Transfer count (NCO rollovers); NCO rate is set separately by SETXFRQ
+Bits 15-0:  Transfer count (NCO rollovers); NCO rate is set by SETXFRQ
 ```
 
 The values shown below are the base constants that get combined with control flags using OR operations.

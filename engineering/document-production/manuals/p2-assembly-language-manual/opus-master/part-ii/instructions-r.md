@@ -483,7 +483,7 @@ process_data    rep     @.end, count            ' Repeat until .end label
 .end                                            ' Empty label marks end
 
 ' Alternative using the # prefix with local label:
-fill_buffer     rep     #(.done - $), #256      ' Expression calculates count
+fill_buffer     rep     #(.done - $), #256      ' Expression = count
                 wrbyte  value, ptr
                 add     ptr, #1
 .done
@@ -503,7 +503,7 @@ Both the instruction count (D) and repetition count (S) can exceed the 9-bit imm
 
 ```pasm2
 ' Extended repetition examples
-                rep     @.end, ##1000         ' 1000 iterations (AUGS prefix)
+                rep     @.end, ##1000         ' 1000 reps (AUGS prefix)
                 rep     @.end, big_count      ' Register-based count
                 rep     ##1000, ##2000        ' Both extended (rare)
 ```
@@ -527,7 +527,7 @@ A common PASM2 idiom uses REP with repetition count = 1 to stall interrupts duri
 
 ```pasm2
 ' Protect CORDIC operation from interrupts
-                rep     @.stall, #1           ' Execute block once, atomically
+                rep     @.stall, #1           ' Run block once, atomically
                 qmul    y, x                  ' CORDIC multiply
                 getqx   x                     ' Get result
                 getqy   y                     ' Get overflow

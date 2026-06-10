@@ -60,7 +60,7 @@ The clock switching is glitch-free, and the system automatically falls back to R
 Example: Enable a 20 MHz crystal with 15pF capacitors:
 
 ```pasm2
-        hubset  ##%10_00              ' Enable crystal with 15pF caps, stay on RCFAST
+        hubset  ##%10_00              ' Enable 15pF crystal, stay RCFAST
         waitx   ##20_000_000/100      ' Wait 10ms for stabilization
         hubset  ##%10_10              ' Switch to crystal clock
 ```
@@ -68,12 +68,14 @@ Example: Enable a 20 MHz crystal with 15pF capacitors:
 Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
 
 ```pasm2
-        hubset  ##%10_00                        ' Enable crystal with 15pF caps, stay on RCFAST
-        waitx   ##20_000_000/100                ' Wait 10ms
-        hubset  ##%10_10                        ' Switch to crystal
-        hubset  ##%1_000000_0000001111_0000_10_10  ' PLL on, /1 * 16 / 2, stay on XI while PLL locks
-        waitx   ##20_000_000/10000              ' Wait 100µs for PLL lock
-        hubset  ##%1_000000_0000001111_0000_10_11  ' Switch to PLL output
+        hubset  ##%10_00          ' Enable 15pF crystal, stay RCFAST
+        waitx   ##20_000_000/100  ' Wait 10ms
+        hubset  ##%10_10          ' Switch to crystal
+        ' PLL on, /1 * 16 / 2, stay on XI while PLL locks:
+        hubset  ##%1_000000_0000001111_0000_10_10
+        waitx   ##20_000_000/10000  ' Wait 100µs for PLL lock
+        ' Switch to PLL output:
+        hubset  ##%1_000000_0000001111_0000_10_11
 ```
 
 In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.

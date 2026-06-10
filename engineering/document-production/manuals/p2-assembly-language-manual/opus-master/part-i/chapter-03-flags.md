@@ -87,7 +87,7 @@ Instead of simply replacing Z with the zero test, these instructions AND the new
 
 ```pasm2
 ' 64-bit addition: [hi:lo] += [bhi:blo]
-        add     lo, blo         wcz     ' Add low 32 bits, Z = (lo_result == 0)
+        add     lo, blo         wcz     ' Add low 32 bits, Z = (lo == 0)
         addx    hi, bhi         wcz     ' High + carry, Z = Z AND (hi==0)
         ' Z is now 1 only if BOTH lo and hi were zero
         '  (entire 64-bit result is zero)
@@ -184,9 +184,9 @@ Not all instructions support all effect modifiers. Each instruction defines whic
 ```pasm2
 ' Examples of effect restrictions
         add     x, y            wcz     ' Full support: WC, WZ, or WCZ
-        drvh    #pin            wcz     ' WCZ only: WC or WZ alone not allowed
+        drvh    #pin            wcz     ' WCZ only: WC or WZ alone not OK
         locktry #0              wc      ' WC only: WZ and WCZ not allowed
-        testp   #pin            andc    ' Extended: WC, WZ, ANDC, etc. (no WCZ)
+        testp   #pin            andc    ' Extended: WC, WZ, ANDC (no WCZ)
 ```
 
 Each instruction entry in Part II documents its allowed effects in the encoding table. For a complete reference of effect restrictions by instruction category, see **Appendix C: Categorical Instruction Index**.
@@ -412,7 +412,7 @@ For maximum of two values, invert the conditions:
 Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
 
 ```pasm2
-                abs     result, value   wc      ' Absolute value, C = negative
+                abs     result, value   wc      ' Abs value, C = negative
         if_c    neg     result                  ' Correct if was negative
 ```
 
@@ -607,7 +607,7 @@ The X variants are critical because they:
         ADDX    A1, B1    WCZ     ' A1 = A1 + B1 + carry
         ADDX    A2, B2    WCZ     ' A2 = A2 + B2 + carry
         ADDX    A3, B3    WCZ     ' A3 = A3 + B3 + carry
-        ' After: C = overflow beyond 128 bits, Z = (entire 128-bit result == 0)
+        ' After: C = overflow beyond 128 bits, Z = (128-bit result == 0)
 ```
 
 **64-bit unsigned subtraction** (A = A - B):
@@ -634,7 +634,7 @@ For signed operations, the final instruction must be an SX variant to correctly 
 **64-bit signed addition** (A = A + B):
 
 ```pasm2
-        ADD     A0, B0    WCZ     ' Add low longs (unsigned, generates carry)
+        ADD     A0, B0    WCZ     ' Add low longs (unsigned, gen carry)
         ADDSX   A1, B1    WCZ     ' Add high longs + carry, C = true sign
         ' After: C = true sign of result (1 = negative), Z = (result == 0)
 ```

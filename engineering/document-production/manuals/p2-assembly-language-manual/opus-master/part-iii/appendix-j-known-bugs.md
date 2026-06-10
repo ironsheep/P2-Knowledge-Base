@@ -51,7 +51,7 @@ When AUGS precedes an instruction with an immediate #S operand (its intended tar
 ```pasm2
         AUGS    #$FFFFF123      ' Intended for ADD instruction
         ALTD    index, #base    ' WARNING: #base also receives AUGS value!
-        ADD     0-0, #$123      ' #$123 is augmented as expected, cancels AUGS
+        ADD     0-0, #$123      ' #$123 is augmented, cancels AUGS
 ```
 
 **Expected Behavior:** AUGS should only affect the ADD instruction's #$123 operand.

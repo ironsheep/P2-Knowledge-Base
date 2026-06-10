@@ -435,7 +435,7 @@ The repetition syntax `value[count]` creates multiple copies of the same value, 
 counts  word    1000, 2000, 3000    ' Decimal values
 addr    word    @buffer             ' Address reference (lower 16 bits)
 zeros   word    0[64]               ' 64 zero words (128 bytes)
-sine    word    $8000[256]          ' Initialize sine table with midpoint values
+sine    word    $8000[256]          ' Init sine table with midpoints
 ```
 
 #### Notes
@@ -504,7 +504,7 @@ FILE is only allowed in DAT blocks, not in inline PASM code within PUB or PRI me
 DAT
 ' Include a font file for VGA text display
 font_data   file    "8x8_font.bin"      ' 2KB font bitmap
-font_end                                 ' Label marks end for size calculation
+font_end                                 ' Label marks end for size calc
 
 ' Include pre-computed sine table
 sine_table  file    "sine_256.dat"      ' 256-entry sine lookup
@@ -935,7 +935,7 @@ Use DITTO to generate repetitive code or data patterns without manual duplicatio
 
 #### Example
 ```pasm2
-{Spin2_v50}                     ' Required: must be the first line of the source file
+{Spin2_v50}                     ' Required: must be the first line
 
 CON
   NumChannels = 8
@@ -1208,7 +1208,7 @@ When reserving space for Spin2-declared structures, use the SIZEOF() operator to
 
 ```pasm2
 ' Reserve space for a Spin2 structure (structure defined in CON block)
-mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point structure
+mystruct        RES     SIZEOF(point) / 4       ' Reserve longs for point
 ```
 
 The SIZEOF() operator returns the structure size in bytes, so divide by 4 to convert to longs for RES. For complete documentation of Spin2 structures and the SIZEOF() operator, refer to the Spin2 Reference Manual.

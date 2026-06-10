@@ -258,7 +258,7 @@ The FBLOCK instruction provides dynamic control over the FIFO's wrap behavior. I
 ```pasm2
         rdfast  #16, buffer_a           ' Start reading from buffer A
         ' ... reading proceeds ...
-        fblock  #16, buffer_b           ' Queue buffer B for when A completes
+        fblock  #16, buffer_b           ' Queue buffer B for when A done
         ' ... FIFO seamlessly transitions to buffer B on wrap
 ```
 
@@ -440,7 +440,7 @@ Consider a loop that reads data from hub memory, processes it, and repeats:
 
 ```pasm2
 loop
-        rdlong  data, ptr               ' 9...16 cycles (hub-window dependent)
+        rdlong  data, ptr               ' 9...16 cycles (hub-window dep.)
         add     ptr, #4                 ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)
 ```
@@ -460,7 +460,7 @@ Another approach aligns the loop body to an 8-cycle boundary and ensures hub acc
 
 ```pasm2
 loop
-        rdlong  data, ptr               ' 9...16; settles to 14 (5 slot-wait) once aligned
+        rdlong  data, ptr               ' 9...16; settles to 14 once aligned
         add     result, data            ' 2 cycles
         add     ptr, #4                 ' 2 cycles
         djnz    count, #loop            ' 4 cycles (taken)

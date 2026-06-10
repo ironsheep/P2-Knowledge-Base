@@ -142,7 +142,7 @@ After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect si
 ' Unsigned comparison - either style works
         cmp     a, b            wcz
         if_ae   mov     result, #1      ' "a is above or equal to b"
-        if_ge   mov     result, #1      ' "a is greater or equal to b" (same)
+        if_ge   mov     result, #1      ' "a greater or equal to b" (same)
 
 ' Signed comparison - either style works
         cmps    a, b            wcz
@@ -422,7 +422,7 @@ The AUG instruction provides the upper 23 bits, which combine with the lower 9 b
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        augs    #$12345678              ' Upper 23 bits (bits [31:9])
         mov     dest, #$078             ' Provides lower 9 bits: $078
                                         ' Combined result: $12345678
 ```
@@ -756,20 +756,20 @@ DAT             org
 
 send_byte       rdbyte  x, ptr                  ' Global: send_byte
                 call    #.wait                  ' Reference local .wait
-.loop           testp   tx_pin          wc      ' Local: .loop (scope: send_byte)
+.loop           testp   tx_pin          wc      ' Local .loop in send_byte
         if_nc   jmp     #.loop
                 wypin   x, tx_pin
-.wait           testp   tx_pin          wc      ' Local: .wait (scope: send_byte)
+.wait           testp   tx_pin          wc      ' Local .wait in send_byte
         if_c    jmp     #.wait
                 ret
 
 recv_byte       testp   rx_pin          wc      ' Global: recv_byte
                                                 '  (new scope begins)
-        if_nc   jmp     #.wait                  ' Different .wait (new scope)
-.wait           testp   rx_pin          wc      ' Local: .wait (scope: recv_byte)
+        if_nc   jmp     #.wait                  ' Different .wait, new scope
+.wait           testp   rx_pin          wc      ' Local .wait in recv_byte
         if_nc   jmp     #.wait
                 rdpin   x, rx_pin
-.loop           shr     x, #24                  ' Local: .loop (scope: recv_byte)
+.loop           shr     x, #24                  ' Local .loop in recv_byte
                 ret
 ```
 
@@ -820,7 +820,8 @@ Three events create scope boundaries:
 ```pasm2
 DAT             org
 
-func_a          mov     x, #1                   ' Global: func_a, scope #1 begins
+func_a          mov     x, #1                   ' Global: func_a,
+                                                '  scope #1 begins
 .loop           djnz    x, #.loop               ' Local .loop in scope #1
 
 data_block      long    0, 0, 0, 0              ' Global: data_block,

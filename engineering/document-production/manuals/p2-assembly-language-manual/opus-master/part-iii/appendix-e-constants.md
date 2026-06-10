@@ -103,7 +103,7 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for negative underflow
-                cmps    value, ##NEGX   wc      ' Check if below min negative
+                cmps    value, ##NEGX   wc      ' Check if below min neg
         if_c    jmp     #underflow              ' Jump if underflow
 
 ' Using NEGX as lower limit
@@ -144,7 +144,7 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Usage
 ```pasm2
 ' Checking for positive overflow
-                cmp     value, ##POSX   wc      ' Check if exceeds max positive
+                cmp     value, ##POSX   wc      ' Check if exceeds max
         if_nc   jmp     #overflow               ' Jump if overflow
 
 ' Using POSX as upper limit

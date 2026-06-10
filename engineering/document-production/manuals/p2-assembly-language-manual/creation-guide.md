@@ -985,5 +985,20 @@ For signed addition with signed overflow detection, use ADDS instead.
 
 ---
 
-*Last Updated: 2025-11-28*
-*Version: 1.1 - Updated to Parallax format (encoding tables, not diagrams)*
+## Code Line Budget
+
+**Max code columns (K): 76**
+
+Provenance: Inherited from the shared platform code-box stack. As of the 2026-06-10
+platform migration this manual renders code through the platform `IOSPBlock` / `Spin2Block`
+(via `p2kb-platform-code-coloring.lua`) on the platform page geometry
+(`top/bottom=0.75in, left/right=1in`) and code-box insets (`left=30pt, right=10pt`) —
+geometry identical to the certified torture-test instrument that calibrated K=76. Code
+boxes do not wrap, so an over-budget line is an authorship defect: fix it with the legal
+Spin2 `...` continuation, or by moving / splitting a trailing comment — never a typeset
+wrap.
+
+---
+
+*Last Updated: 2026-06-10*
+*Version: 1.2 - Platform migration; added Code Line Budget (K=76, inherited from platform)*

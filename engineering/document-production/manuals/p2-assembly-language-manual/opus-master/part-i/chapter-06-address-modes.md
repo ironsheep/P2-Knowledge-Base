@@ -18,13 +18,13 @@ The destination field (D) in every instruction specifies a 9-bit COG register ad
 ```pasm2
         add     result, value           ' result is destination register
         mov     counter, #0             ' counter is destination register
-        test    flags, #MASK    wz      ' flags is destination (read-only here)
+        test    flags, #MASK    wz      ' flags is destination (read here)
 ```
 
 The assembler translates symbolic register names to their addresses. Programmers define registers using labels or the RES directive:
 
 ```pasm2
-result          res     1               ' Reserve one long at current address
+result          res     1               ' Reserve one long here
 counter         res     1
 flags           res     1
 ```
@@ -82,7 +82,7 @@ When `#` is used:
 For data instructions the 9-bit immediate field is always zero-extended and treated as unsigned (0-511). Sign-extension of the 9-bit immediate applies only to relative-branch instructions, where the immediate is a signed offset in the range -256..+255:
 
 ```pasm2
-        mov     x, #$1FF                ' x = 511 (9-bit immediate, zero-extended)
+        mov     x, #$1FF                ' x = 511 (9-bit, zero-extended)
         add     x, #1                   ' Add 1
         sub     x, #10                  ' Subtract 10
 ```
@@ -90,7 +90,7 @@ For data instructions the 9-bit immediate field is always zero-extended and trea
 For relative branches, the same 9-bit immediate is interpreted as a signed offset:
 
 ```pasm2
-        jmp     #$-1                    ' Relative branch back by 1 (signed offset)
+        jmp     #$-1                    ' Relative branch back 1 (signed)
 ```
 
 Values outside the 0-511 range require augmentation (see Section 6.3).
@@ -131,7 +131,7 @@ The assembler implements `##` by inserting an AUGS or AUGD instruction before th
         mov     dest, ##$12345678
 
 ' What the assembler generates:
-        augs    #$12345678              ' Provides upper 23 bits (bits [31:9])
+        augs    #$12345678              ' Provides upper 23 bits [31:9]
         mov     dest, #$078             ' Provides lower 9 bits: $078
                                         ' Combined result: $12345678
 ```
@@ -262,9 +262,9 @@ Post-modify is ideal for sequential forward or backward traversal:
 Pre-modify modes update the pointer first, then use the new value for memory access:
 
 ```pasm2
-        rdbyte  x, ++ptra               ' PTRA += 1, then read byte at new PTRA
-        rdword  y, ++ptrb               ' PTRB += 2, then read word at new PTRB
-        rdlong  z, --ptra               ' PTRA -= 4, then read long at new PTRA
+        rdbyte  x, ++ptra               ' PTRA += 1, then read byte there
+        rdword  y, ++ptrb               ' PTRB += 2, then read word there
+        rdlong  z, --ptra               ' PTRA -= 4, then read long there
         wrbyte  x, --ptrb               ' PTRB -= 1, then write byte
 ```
 
@@ -277,7 +277,7 @@ Pre-modify is useful for stack operations and accessing elements relative to a b
 
 ```pasm2
 ' Push onto stack (stack grows upward)
-        wrlong  value, ptra++           ' Post: write at current, then advance
+        wrlong  value, ptra++           ' Post: write here, then advance
 
 ' Pop from stack
         rdlong  value, --ptra           ' Pre: back up first, then read
@@ -293,7 +293,7 @@ Indexed mode accesses memory at an offset from the pointer without modifying the
 
 ```pasm2
         rdlong  x, ptra[0]              ' Read at PTRA + 0*4 = PTRA
-        rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = PTRA + 20 bytes
+        rdlong  y, ptra[5]              ' Read at PTRA + 5*4 = +20 bytes
         rdbyte  z, ptrb[-3]             ' Read at PTRB - 3 bytes
         wrword  w, ptra[10]             ' Write at PTRA + 20 bytes
 ```
@@ -348,7 +348,8 @@ These forms enable strided access patterns:
 ' Read structure array (12-byte structures as 3 longs)
         mov     ptra, ##struct_array
 .loop   rdlong  field1, ptra++[3]       ' Read field1, skip to next struct
-        ' ... (to read all fields, use indexed without update for field2, field3)
+        ' ... (to read all fields, use indexed without update
+        '      for field2, field3)
 ```
 
 ### 6.4.7 Complete PTRx Expression Summary
@@ -373,7 +374,8 @@ All expressions work identically with PTRB.
 For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
 
 ```pasm2
-        rdlong  x, ptra[##1000]         ' Index 1000 = 1000-byte offset (AUGS index is unscaled)
+        rdlong  x, ptra[##1000]         ' Index 1000 = 1000-byte offset
+                                        ' (AUGS index is unscaled)
         rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
 ```
 
@@ -406,7 +408,7 @@ SETQ specifies the count minus one. The transfer moves `count+1` longs at one lo
 When using PTRx with SETQ block transfers, the pointer updates by the **total transfer size**:
 
 ```pasm2
-' Post-increment: read from current PTRA, then advance by total transfer size
+' Post-increment: read from current PTRA, then advance by transfer size
         setq    #15                     ' 16 longs
         rdlong  buffer, ptra++          ' Read 16 longs, PTRA += 64
 
@@ -428,7 +430,7 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 ```pasm2
 ' This does NOT work as expected:
         setq    #15
-        rdlong  buffer, ptra++[5]       ' Index [5] IGNORED! Uses block count
+        rdlong  buffer, ptra++[5]       ' Index [5] IGNORED! Uses count
 ```
 
 ### 6.5.3 SETQ2 for LUT Transfers
@@ -449,7 +451,7 @@ SETQ2 works like SETQ but transfers to/from LUT RAM instead of COG RAM:
 ```pasm2
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
-        altd    dest_reg                ' ALTD cancels block-size PTRx delta!
+        altd    dest_reg                ' ALTD cancels block PTRx delta!
         rdlong  0, ptra++               ' PTRA += 4 (1 long), NOT 64!
 
 ' CORRECT CODE - No intervening instruction
@@ -513,7 +515,7 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
         mov     base, #$100             ' Put base in register
         augs    #$12340000
         altd    index, base             ' Register not affected by AUGS
-        mov     0-0, #$078              ' Only this gets augmented to #$12340078
+        mov     0-0, #$078              ' Only this augments to #$12340078
 ```
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.

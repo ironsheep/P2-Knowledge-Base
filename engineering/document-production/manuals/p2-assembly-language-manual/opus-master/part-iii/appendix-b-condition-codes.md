@@ -146,7 +146,7 @@ The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execu
         _ret_   setq    ##$200           ' New LUT base for all bytecodes
 
 ' Change XBYTE mode for next bytecode only
-        _ret_   setq2   ##$300           ' Temporary LUT base for one bytecode
+        _ret_   setq2   ##$300           ' Temp LUT base for one bytecode
 ```
 
 ### B.3.5 SKIP/SKIPF with _RET_
@@ -188,8 +188,8 @@ When a conditional instruction's condition is false, the instruction does not ex
 
 ```pasm2
                 cmp     a, b            wcz     ' 2 cycles - always
-        if_z    mov     result, #1              ' 2 cycles - whether Z=1 or not
-        if_nz   mov     result, #0              ' 2 cycles - whether Z=0 or not
+        if_z    mov     result, #1              ' 2 cycles - if Z=1 or not
+        if_nz   mov     result, #0              ' 2 cycles - if Z=0 or not
                                                 ' Total: always 6 cycles
 ```
 
