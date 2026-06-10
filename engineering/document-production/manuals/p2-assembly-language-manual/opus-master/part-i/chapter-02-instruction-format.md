@@ -565,7 +565,7 @@ Each instruction name in the Related section is a clickable link that jumps dire
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
 
-**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or Cmd+[) to return to where you were after following a link.
+**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or `Cmd+[`) to return to where you were after following a link.
 
 
 ## 2.9 Constant Expressions and Operators

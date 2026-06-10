@@ -447,7 +447,7 @@ Checking whether a value falls within a range combines comparison and logical co
                 ' Value is in range [min, max)
 ```
 
-This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
+This checks whether `value` is in the range `[min, max)`. The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
 
 
 ## 3.6 Advanced Flag Usage

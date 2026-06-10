@@ -1146,7 +1146,7 @@ Each instruction name in the Related section is a clickable link that jumps dire
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
 
-**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or Cmd+[) to return to where you were after following a link.
+**Navigation tip:** Use your PDF reader's "back" function (often Alt+Left Arrow or `Cmd+[`) to return to where you were after following a link.
 
 
 ## 2.9 Constant Expressions and Operators
@@ -1895,7 +1895,7 @@ Checking whether a value falls within a range combines comparison and logical co
                 ' Value is in range [min, max)
 ```
 
-This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
+This checks whether `value` is in the range `[min, max)`. The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
 
 
 ## 3.6 Advanced Flag Usage
