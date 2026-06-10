@@ -9,6 +9,18 @@ You drive the PDF Forge **interactive watch daemon** end-to-end and verify the r
 
 **Scope:** template/layout/feature testing — "do the images render?", "is the page layout right?", "did this filter change behave?". NOT production. Production deliverables go through `prepare-manual` and the user's manual copy-to-Forge route.
 
+> **Two independent Forge stores — interactive testing does NOT seed manual production.**
+> The interactive daemon (this skill) and the manual-PDF-generation path
+> (`prepare-manual` → outbound → the user's manual copy-to-Forge) feed **two
+> completely separate file stores** on the Forge. A file you stage/prove here lands
+> ONLY in the interactive store — it does **NOT** appear in the manual-production
+> store, and the user cannot easily move it across. So proving a template/filter on
+> the daemon never "pre-stages" it for a manual build: `prepare-manual` must still
+> stage everything the manual store lacks, judging store-presence ONLY from prior
+> *manual* builds, never from daemon activity. Conversely, files in the manual store
+> are not visible to this daemon. When you finish here, the real source edits are
+> what carry the change forward — not the daemon's copies.
+
 ## The bridge (constant)
 
 `engineering/pdf-forge/interactive-testing/` is **bind-mounted to `/workspace/shared/`** on the Forge. You write here; the daemon (running on the user's machine) sees it.
