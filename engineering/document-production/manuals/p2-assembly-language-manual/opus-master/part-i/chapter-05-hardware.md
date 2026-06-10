@@ -19,7 +19,7 @@ The CORDIC provides eight categories of operations, each accessed through dedica
 | Square root | [QSQRT](#qsqrt) | Integer square root in X |
 | Rotate | [QROTATE](#qrotate) | Rotated X coordinate, rotated Y coordinate |
 | Vector | [QVECTOR](#qvector) | Magnitude in X, angle in Y (Cartesian to polar) |
-| Logarithm | [QLOG](#qlog) | Natural log approximation in X |
+| Logarithm | [QLOG](#qlog) | Base-2 logarithm (5:27 fixed-point) in X |
 | Exponential | [QEXP](#qexp) | e^x approximation in X |
 
 Each operation produces one or two 32-bit results, retrieved through [GETQX](#getqx) and [GETQY](#getqy) instructions. The multiply operation (QMUL) is particularly valuable for fixed-point arithmetic, providing the full 64-bit product that would otherwise require complex multi-instruction sequences.
@@ -208,7 +208,7 @@ The P2 provides 64 Smart Pins, one per I/O pin, each containing a complete progr
 Each Smart Pin integrates multiple hardware components that work together to implement various I/O functions:
 
 - **Configurable I/O circuitry:** Programmable pull-up/down resistors, output drivers, and high-impedance (floating) modes
-- **Mode selection logic:** 64 distinct operating modes covering digital, analog, serial, and timing applications
+- **Mode selection logic:** 32 distinct operating modes covering digital, analog, serial, and timing applications
 - **Local state machine:** Autonomous operation once configured, generating events when data is ready
 - **DAC hardware:** 8-bit digital-to-analog converter for analog output and sigma-delta modulation
 - **ADC hardware:** Analog-to-digital conversion using sigma-delta and comparator techniques
@@ -218,7 +218,7 @@ The Smart Pin's autonomous operation is particularly significant. Once configure
 
 ### 5.2.2 Smart Pin Modes
 
-Smart Pins support 64 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
+Smart Pins support 32 distinct modes organized into functional categories. Each mode transforms the pin into a specialized peripheral:
 
 | Category | Example Modes | Typical Applications |
 |----------|---------------|----------------------|
@@ -239,7 +239,7 @@ Smart Pin operation involves three phases: configuration, communication, and dir
 
 Configuration establishes the Smart Pin's operating mode and parameters:
 
-- **WRPIN** - Write pin mode (selects one of 64 operating modes)
+- **WRPIN** - Write pin mode (selects one of 32 operating modes)
 - **WXPIN** - Write X parameter (mode-specific configuration value)
 - **WYPIN** - Write Y parameter (mode-specific configuration value or output data)
 
@@ -257,14 +257,14 @@ The read-and-acknowledge pattern prevents missing data. A Smart Pin sets its rea
 
 **Direction and Output Control Instructions:**
 
-Direction and output control manage the physical pin state. The P2 provides six instruction families, each with six variants (set-low, set-high, clear, not-clear, zero, not-zero):
+Direction and output control manage the physical pin state. The P2 provides four instruction families (DIR, OUT, FLT, DRV), each with eight suffix variants (L, H, C, NC, Z, NZ, NOT, RND):
 
 - **DIR** family - Set pin direction (input vs. output)
 - **OUT** family - Set output value (when pin is output)
 - **FLT** family - Float pin to high-impedance (tri-state)
 - **DRV** family - Drive pin (opposite of float)
 
-Each family includes suffix variants: `L` (low/0), `H` (high/1), `C` (clear if condition), `NC` (not-clear if condition), `Z` (set if zero), `NZ` (set if not-zero). This provides fine-grained control: `DIRL` forces pin low, `DIRZ` sets direction to input only if condition is zero.
+Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z=1 → output, Z=0 → input).
 
 ### 5.2.4 Smart Pin Documentation
 
@@ -343,11 +343,11 @@ The P2 defines numerous event sources, each representing a distinct hardware con
 | CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
 | SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
 | PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
-| FBW | FIFO buffer wrapped | Hub FIFO overflow detection |
-| XMT | Streamer transfer complete | DMA completion notification |
-| XFI | Streamer FIFO interrupt | Buffer refill timing |
+| FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
+| XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
+| XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
 | XRO | Streamer rollover | Circular buffer management |
-| XRL | Streamer read level | Data available threshold |
+| XRL | Streamer read LUT $1FF | LUT-wrap timing event |
 | ATN | Attention from another COG | Inter-COG communication |
 | QMT | CORDIC operation complete | Math coprocessor completion |
 
@@ -369,8 +369,9 @@ Each SETSE instruction selects one condition from dozens of options: pin edges (
 
 Interrupt setup involves two steps: configuring the interrupt source and enabling interrupt processing:
 
-- **SETINT1, SETINT2, SETINT3** - Configure interrupt handlers (sets handler address and event source)
-- **STALLI** - Enable/disable interrupt processing
+- **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
+- **STALLI** - Stall (disable) interrupt processing
+- **ALLOWI** - Allow (enable) interrupt processing (default on COG start)
 
 Each interrupt level (1, 2, 3) has independent configuration. Level 3 can interrupt level 2; level 2 can interrupt level 1; level 1 can interrupt normal execution. This provides priority-based interrupt handling when multiple urgent events require service.
 
@@ -562,14 +563,14 @@ At reset, the P2 initializes to a known state before any user code executes:
 
 | Resource | Initial State |
 |----------|---------------|
-| Clock source | RCFAST (~20-25 MHz internal RC oscillator) |
+| Clock source | RCFAST (~20-30 MHz (typically ~24 MHz) internal RC oscillator) |
 | All COGs | Stopped (except COG 0) |
 | Hub RAM | Undefined contents |
 | I/O pins | High-impedance (floating) |
 | 64-bit counter | Cleared to zero |
 | PRNG | Seeded with thermal noise |
 
-The internal RC oscillator (RCFAST) provides the initial clock. This oscillator is guaranteed to run at least 20 MHz under all conditions, ensuring reliable serial communication during boot. The exact frequency varies with temperature and manufacturing, typically 20-25 MHz. Programs requiring precise timing must configure an external crystal or the PLL after boot.
+The internal RC oscillator (RCFAST) provides the initial clock. This oscillator is guaranteed to run at least 20 MHz under all conditions, ensuring reliable serial communication during boot. The exact frequency varies with temperature and manufacturing, typically ~24 MHz. Programs requiring precise timing must configure an external crystal or the PLL after boot.
 
 The boot ROM seeds the Xoroshiro128** pseudo-random number generator with true random data. The ROM reads thermal noise from pin 63 (configured in ADC calibration mode) fifty times, using each 31-bit sample to seed the PRNG through HUBSET. This establishes high-quality randomness available immediately when user code starts—there is no need to seed the PRNG again, though programs may do so if desired.
 
@@ -580,11 +581,11 @@ The P2 determines its boot source by sensing external pull-up resistors on pins 
 | P61 | P60 | P59 | Boot Behavior |
 |-----|-----|-----|---------------|
 | none | none | none | Serial only (60s window) |
-| pull-up | none | none | SPI flash, then serial (60s) on failure |
-| pull-up | pull-up | none | SPI flash only (fast boot), shutdown on failure |
+| pull-up | none | none | Serial 100 ms window, then SPI flash; serial 60s on flash failure |
+| pull-up | any | pull-down | SPI flash only (fast boot), no serial; shutdown on failure |
 | none | pull-up | none | SD card, then serial (60s) on failure |
 | none | pull-up | pull-down | SD card only, shutdown on failure |
-| pull-up | ignored | ignored | Serial override (60s window) |
+| any | any | pull-up | Serial only (60s window); no flash or SD boot |
 
 The pull-up detection uses internal sensing—no software reads these pins. The boot ROM checks pin states immediately after reset and branches to the appropriate loader. Development boards typically include jumpers or switches to select boot mode; production designs hard-wire the appropriate resistor configuration.
 
@@ -637,7 +638,7 @@ If an external pull-up is detected on P61, the booter attempts SPI flash boot:
 2. Compute the 32-bit sum of these 256 longs
 3. If the sum equals "Prop" ($706F7250), the data is valid:
    - Copy the 256 longs from hub to COG 0 registers $000-$0FF
-   - If P60 also has a pull-up: execute immediately (`JMP #$000`)
+   - If P59 is pulled down: execute immediately (`JMP #$000`)
    - Otherwise: wait for serial commands (100ms timeout), then execute
 
 **Step 2: Serial Loader Window**
@@ -684,7 +685,7 @@ Loaded programs must include a validation header. The loader computes a 32-bit s
 
 ### 5.7.6 Clock Configuration After Boot
 
-User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-25 MHz. For applications requiring precise timing, configure an external crystal or the PLL early in your program:
+User code starts executing with the RCFAST clock source—an internal RC oscillator running approximately 20-30 MHz (typically ~24 MHz). For applications requiring precise timing, configure an external crystal or the PLL early in your program:
 
 ```pasm2
 ' Configure 20 MHz crystal with PLL for 160 MHz operation

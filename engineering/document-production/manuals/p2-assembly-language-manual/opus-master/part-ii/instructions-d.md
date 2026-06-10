@@ -114,8 +114,8 @@ Set Pin Direction by C Flag {#dirnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit† | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit† | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit† | DIR bit† | DIR bit | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -274,8 +274,8 @@ Set Pin Direction by Z Flag {#dirnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit† | --- | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit† | --- | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit† | DIR bit† | DIR bit | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -370,7 +370,7 @@ DJF decrements the value in Dest, writes the result, and jumps to the address de
 
 This instruction is useful for implementing loops that count down until a register wraps from 0 to -1. Use # prefix on Src for relative addressing; omit # for absolute addressing.
 
-The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
+The instruction executes in 2 clock cycles when the branch is not taken. When taken, it executes in 4 clock cycles during cog/LUT execution, or 13-20 clock cycles during hub execution.
 
 
 
@@ -406,7 +406,7 @@ This instruction is useful for implementing loops that continue until a register
 
 Dest is always written with the decremented value. PC is written only when the result in Dest is not full.
 
-The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
+The instruction executes in 2 clock cycles when the branch is not taken. When taken, it takes 4 clock cycles in COG/LUT execution, or 13–20 clock cycles in hub execution.
 
 
 
@@ -458,7 +458,7 @@ Example loop:
         djnz    count, #.loop           ' Decrement and loop if not zero
 ```
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 13–20 clocks during hub execution (pipeline flush).
 
 
 
@@ -482,8 +482,8 @@ Drive Pins by C Flag {#drvnc}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit† | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit† | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit† | OUT bit† | OUT bit | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -501,7 +501,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
+If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
 
 
@@ -648,8 +648,8 @@ Drive Pins by Z Flag {#drvnz}
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit† | --- | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit† | --- | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit† | OUT bit† | OUT bit | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -667,7 +667,7 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
-If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is not modified.
+If the WCZ effect is specified, the C and Z flags are set to the original state of the base OUT bit.
 
 
 
@@ -690,7 +690,7 @@ Drive Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | DIRx + OUTx | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011110 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 

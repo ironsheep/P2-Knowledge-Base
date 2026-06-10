@@ -227,7 +227,7 @@ Execution mode constant for loading code from hub RAM to cog RAM.
 | Hexadecimal | $00 |
 
 #### Description
-COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COGINIT loads 496 longs from hub RAM into cog RAM registers $000-$1F7 and begins execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
+COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COGINIT loads 504 longs from hub RAM into cog RAM registers $000-$1F7 and begins execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
 ```pasm2
@@ -245,11 +245,11 @@ COGINIT #COGEXEC+id, #address
 Where `id` specifies the target cog (0-7) and `address` points to the code in hub RAM.
 
 #### Notes
-- Loads cog RAM registers $000-$1F7 (496 longs) from hub RAM
+- Loads cog RAM registers $000-$1F7 (504 longs) from hub RAM
 - Begins execution at cog register address $000
 - Must specify target cog ID (0-7)
 - Fastest execution mode due to cog RAM access speeds
-- Code size limited to 496 longs (2KB minus register space)
+- Code size limited to 504 longs (2KB minus the 8 special-purpose registers at $1F8-$1FF)
 
 #### Related Constants
 - [HUBEXEC](#hubexec) — Hub execution mode constant
@@ -270,8 +270,8 @@ Execution mode constant for executing code directly from hub RAM.
 #### Value
 | Representation | Value |
 |----------------|-------|
-| Binary | %0_1_0000 |
-| Hexadecimal | $10 |
+| Binary | %1_0_0000 |
+| Hexadecimal | $20 |
 
 #### Description
 HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COGINIT starts the target cog executing instructions directly from hub RAM without loading code to cog RAM. This mode removes code size restrictions at the cost of slower instruction fetch times.
@@ -293,7 +293,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 
 #### Notes
 - Executes instructions directly from hub RAM (no cog RAM load required)
-- Hub execution allows unlimited code size (not limited to 496 longs)
+- Hub execution allows unlimited code size (not limited to 504 longs)
 - Slower than cog execution due to hub RAM access timing and FIFO overhead
 - Instruction fetching occurs through FIFO/streamer mechanism
 - Must specify target cog ID (0-7)
@@ -323,7 +323,7 @@ Execution mode constant for automatically selecting an available cog with COG RA
 Combines COGEXEC base mode with the N (new cog) flag set. The assembler resolves this to the appropriate bit pattern for COGINIT's Dest operand.
 
 #### Description
-COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 496 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
+COGEXEC_NEW instructs COGINIT to find the next available (stopped) cog, load 504 longs from Hub RAM into that cog's RAM, and begin execution at cog address $000. This mode provides maximum execution speed since all instructions execute from fast cog RAM.
 
 #### Usage
 ```pasm2
@@ -388,7 +388,7 @@ Execution mode constant for automatically selecting an available cog with Hub RA
 Combines HUBEXEC base mode with the N (new cog) flag set.
 
 #### Description
-HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 496-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
+HUBEXEC_NEW instructs COGINIT to find the next available (stopped) cog and start it executing instructions directly from Hub RAM without loading code to cog RAM. This mode removes the 504-long code size limitation at the cost of slower instruction fetch times due to Hub access latency.
 
 #### Usage
 ```pasm2

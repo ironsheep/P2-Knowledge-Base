@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter L.
 ## LOC {#loc}
 Load Address
 
-[Hub Memory Access](#hub-memory-access) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
+[Branching and Flow Control](#branching-and-flow-control) - Loads an address into a pointer register (PA, PB, PTRA, or PTRB).
 :::
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*\

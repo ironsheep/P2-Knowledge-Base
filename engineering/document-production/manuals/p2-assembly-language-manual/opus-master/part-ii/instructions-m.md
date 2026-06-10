@@ -136,7 +136,7 @@ MODC provides conditional modification of the C flag based on a 4-bit modifier v
 
 The modifier is applied as: C = cccc[{C,Z}], where {C,Z} forms a 2-bit index into the 4-bit modifier value. For example, if the current C flag is 1 and Z flag is 0, the index is binary 10 (2 decimal), and the C flag is set to bit 2 of the modifier value.
 
-Common modifier values enable useful operations: $F (binary 1111) always sets C to 1, $0 (binary 0000) always clears C to 0, $C (binary 1100) copies C to itself (if Z=0) or clears it (if Z=1), and $3 (binary 0011) sets C if Z=1.
+Common modifier values enable useful operations: $F (binary 1111) always sets C to 1, $0 (binary 0000) always clears C to 0, $C (binary 1100) copies C to itself (C unchanged, independent of Z), and $3 (binary 0011) sets C to the inverse of the current C (NC), independent of Z.
 
 MODC is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
 
@@ -333,7 +333,7 @@ Move Bytes
 | EEEE | 1001111 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
 
 
-**Related:** [MOVBYTS](#movbyts), [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
+**Related:** [MERGEB](#mergeb), [SPLITB](#splitb), [ROLBYTE](#rolbyte)
 
 **Explanation:**
 
@@ -349,8 +349,8 @@ Common patterns include:
 
 - S = $E4 (binary 11_10_01_00): No change (identity)
 - S = $1B (binary 00_01_10_11): Reverse bytes (big/little endian swap)
-- S = $B1 (binary 10_11_00_01): Swap words
-- S = $4E (binary 01_00_11_10): Swap bytes within each word
+- S = $B1 (binary 10_11_00_01): Swap bytes within each word
+- S = $4E (binary 01_00_11_10): Swap words
 
 
 
@@ -644,7 +644,7 @@ Multiplex Nits
 
 MUXNITS selectively copies bit pairs (2-bit fields, called "nits") from Src to Dest based on whether each bit pair in Src is non-zero. For each of the sixteen bit pair positions, if the bit pair in Src is non-zero (01, 10, or 11), that bit pair value is copied to the corresponding position in Dest. If the bit pair in Src is zero (00), the corresponding bit pair in Dest remains unchanged.
 
-For example, if Dest = $5555_5555 (binary 01_01_01_01... in bit pairs) and Src = $00A0_0002 (containing non-zero bit pairs at positions 11, 9, and 0), only those three bit pairs are updated in Dest while the others remain as 01.
+For example, if Dest = $5555_5555 (binary 01_01_01_01... in bit pairs) and Src = $00A0_0002 (containing non-zero bit pairs at positions 11, 10, and 0), only those three bit pairs are updated in Dest while the others remain as 01.
 
 This instruction is particularly useful for pixel graphics operations where 2-bit values represent pixel data (such as in 4-color graphics modes), sparse bit-field updates, and state machine implementations where state variables are represented as 2-bit fields.
 

@@ -135,7 +135,7 @@ Set origin with fill—advance to specified address, filling intervening space w
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| address | Target address to advance to (cog 0-$1FF or hub address) |
+| address | Target COG address to advance to (0-$1FF), filling intervening space with zeros |
 
 #### Usage
 Use ORGF for contiguous binary output with guaranteed zero-filled gaps. ORGF ensures data structures start at exact addresses while maintaining a complete memory image. Essential for interrupt vector tables, memory-mapped structures, and fixed-layout binary formats.
@@ -535,8 +535,8 @@ PUB ShowText() | ptr, len
 - A label before FILE provides a byte-addressable pointer to the data
 - Place a label after the FILE directive to calculate the included file's size
 - FILE is only allowed in DAT blocks (not in inline PASM code)
-- Maximum filename length: 253 characters
-- Filename matching is case-insensitive
+- Maximum filename length: 253 characters <!-- NEEDS-VERIFICATION: trace to PNut_ts source -->
+- Filename case-matching follows the host OS filesystem (case-insensitive on Windows; case-sensitive on Linux and case-sensitive macOS volumes)
 - Common uses: fonts, lookup tables, images, audio samples, pre-computed data
 
 #### Related Directives
@@ -931,10 +931,12 @@ DAT
 | `$$` | Special symbol evaluating to current iteration index (0 to count-1) |
 
 #### Usage
-Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO was introduced in PNut version 50.
+Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is particularly useful for pin initialization sequences, lookup table generation, and multi-channel configurations. DITTO requires Spin2 v50 or later; place the {Spin2_v50} version directive at the start of the source file.
 
 #### Example
 ```pasm2
+{Spin2_v50}                     ' Required: must be the first line of the source file
+
 CON
   NumChannels = 8
   BasePin = 16
@@ -980,12 +982,13 @@ DAT
 |-------------|--------------|
 | ORG inside DITTO | `ORG not allowed within a DITTO block` |
 | ORGH inside DITTO | `ORGH not allowed within a DITTO block` |
-| `$$` outside DITTO | `"$$" (DITTO index) is only allowed within a DITTO block` |
+| `$$` outside DITTO | `"$$" (DITTO index) is only allowed within a DITTO block, inside a DAT block` |
 | Negative count | `DITTO count must be a positive integer or zero` |
 | Missing END | `Expected DITTO END` |
 
 #### Notes
-- Introduced in PNut version 50
+- Requires Spin2 v50 or later — add {Spin2_v50} at the top of the file
+- Requires the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
 - Works in COG, LUT, and ORGH (hub) modes
 - `$$` can be used in any expression: `$$ * 2`, `1 << $$`, `BasePin + $$`
 - Replication occurs at compile time—no runtime overhead

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter H.
 ## HUBSET {#hubset}
 Set Hub Configuration
 
-[COG Control and Locks](#cog-control-and-locks) - Configures hub clock system, crystal, and PLL settings.
+[Hub Control](#hub-control) - Configures hub clock system, crystal, and PLL settings.
 :::
 
 **HUBSET**  *{#}D*
@@ -33,24 +33,24 @@ HUBSET configures the P2's clock system and hub parameters. The 32-bit value in 
 
 The D value contains multiple fields that control different aspects of the clock system:
 
-**Clock Source Selection (D[3:2]):**
+**Clock Source Selection (D[1:0]):**
 - `%00` - RCFAST internal oscillator (~20-25 MHz, boot default)
 - `%01` - RCSLOW internal oscillator (~20 kHz, low power mode)
 - `%10` - Crystal or external clock on XI pin
 - `%11` - PLL output
 
-**Crystal Configuration (D[1:0]):**
+**Crystal Configuration (D[3:2]):**
 - `%00` - XI/XO pins disabled (Hi-Z)
 - `%01` - XI/XO with 1MΩ feedback, no capacitors
 - `%10` - XI/XO with 1MΩ feedback, 15pF capacitors
 - `%11` - XI/XO with 1MΩ feedback, 30pF capacitors
 
 **PLL Configuration:**
-- D[27:24] - Input divider (PPPP field, divides XI input by 1-64)
-- D[23:14] - VCO multiplier (10-bit field, multiplies by 1-1024)
-- D[7:4] - Post divider (DDDD field, divides VCO by 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30)
-- D[9] - PLL power enable
-- D[8] - Crystal oscillator enable
+- D[23:18] - Input divider (DDDDDD field, divides XI input by 1-64; stored as divider-1)
+- D[17:8] - VCO multiplier (MMMMMMMMMM, 10-bit; multiplies by 1-1024; stored as multiplier-1)
+- D[7:4] - Post divider (PPPP field): VCO/2, VCO/4, ..., VCO/30 for PPPP=0..14, and VCO/1 for PPPP=15 (the fast-overclock mode)
+- D[24] - PLL power enable (E)
+  - Note: the XI oscillator is enabled by the crystal-config field CC != %00, not by a dedicated bit.
 
 **System Reset:**
 - D[31] - Write 1 to reset the entire chip
@@ -60,7 +60,7 @@ The clock switching is glitch-free, and the system automatically falls back to R
 Example: Enable a 20 MHz crystal with 15pF capacitors:
 
 ```pasm2
-        hubset  ##%00_10              ' Enable crystal with 15pF caps
+        hubset  ##%10_00              ' Enable crystal with 15pF caps, stay on RCFAST
         waitx   ##20_000_000/100      ' Wait 10ms for stabilization
         hubset  ##%10_10              ' Switch to crystal clock
 ```
@@ -68,12 +68,12 @@ Example: Enable a 20 MHz crystal with 15pF capacitors:
 Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
 
 ```pasm2
-        hubset  ##%00_10                        ' Enable crystal
+        hubset  ##%10_00                        ' Enable crystal with 15pF caps, stay on RCFAST
         waitx   ##20_000_000/100                ' Wait 10ms
         hubset  ##%10_10                        ' Switch to crystal
-        hubset  ##%0001_0000_0000_00001010_10  ' PLL: /1 * 16 / 2
+        hubset  ##%1_000000_0000001111_0000_10_10  ' PLL on, /1 * 16 / 2, stay on XI while PLL locks
         waitx   ##20_000_000/10000              ' Wait 100µs for PLL lock
-        hubset  ##%0001_0000_0000_00001010_11  ' Switch to PLL output
+        hubset  ##%1_000000_0000001111_0000_10_11  ' Switch to PLL output
 ```
 
 In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.

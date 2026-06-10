@@ -70,8 +70,8 @@ Call Subroutine via PTRA
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 13+ |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 13+ |
+| EEEE | 1101110 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101110 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLB](#callb), [CALLD](#calld), [RETA](#reta)
@@ -88,7 +88,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 13+ cycles for Hub execution.
+CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
 
 
 
@@ -114,8 +114,8 @@ Call Subroutine via PTRB
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 13+ |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 13+ |
+| EEEE | 1101111 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 5-12 / 14-32 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101111 | D[31] | D[30] | --- | 5-12 / 14-32 |
 
 
 **Related:** [CALL](#call), [CALLA](#calla), [CALLD](#calld), [RETB](#retb)
@@ -132,7 +132,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 13+ cycles for Hub execution.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for COG/LUT execution, or 14-32 cycles for Hub execution.
 
 
 
@@ -203,7 +203,7 @@ Call Subroutine with PA Parameter
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | K, PA and PC | --- | --- | 4 / 13-20 |
+| EEEE | 1011010 | 0LI | DDDDDDDDD | SSSSSSSSS | --- | --- | K, PA and PC | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPB](#callpb), [CALLD](#calld), [RET](#ret), [PA](#pa)
@@ -239,7 +239,7 @@ Call Subroutine with PB Parameter
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | K, PB and PC | --- | --- | 4 / 13-20 |
+| EEEE | 1011010 | 1LI | DDDDDDDDD | SSSSSSSSS | --- | --- | K, PB and PC | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLD](#calld), [RET](#ret), [PB](#pb)
@@ -593,7 +593,7 @@ COGATN is useful for implementing inter-cog communication, synchronization, and 
 ## COGBRK {#cogbrk}
 Cog Breakpoint
 
-[Miscellaneous](#miscellaneous) - Triggers a breakpoint in a specified cog.
+[Interrupts](#interrupts) - Triggers a breakpoint in a specified cog.
 :::
 
 **COGBRK**  *{#}Dest*
@@ -878,14 +878,14 @@ CRC Iterate Nibble
 
 CRCNIB iterates the CRC value in Dest for a nibble (4 bits) using the polynomial in Src, and shifts the Q register left by 4 bits. This instruction accelerates CRC calculations by processing 4 bits per instruction instead of 1.
 
-The instruction performs four CRC bit iterations in sequence, using the lowest 4 bits from Q as input bits (processed from LSB to MSB). After the operation, Q is shifted left by 4 bits, positioning the next nibble for processing.
+CRCNIB performs four CRC bit-iterations in sequence, consuming the input bits from Q[31:28] (the high nibble), then shifts Q left by 4 bits to bring the next nibble into Q[31:28] for the following CRCNIB.
 
 The typical usage pattern is:
 
 ```pasm2
         setq    data                  ' Load data into Q
         mov     crc, #0               ' Initialize CRC
-.loop   crcnib  crc, poly             ' Process 4 bits from Q[3:0]
+.loop   crcnib  crc, poly             ' Process 4 bits from Q[31:28]
         ' Q is automatically shifted left by 4
         djnz    count, #.loop         ' Repeat for all nibbles
 ```

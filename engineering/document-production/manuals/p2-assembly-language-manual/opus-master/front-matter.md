@@ -42,11 +42,12 @@
 \begin{minipage}[t]{0.45\textwidth}
 \textbf{Part I: Architecture}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item P2 Architecture Overview
-\item Instruction Format \& Encoding
-\item Addressing Modes
-\item Flags \& Conditional Execution
-\item Program Flow
+\item The P2 Execution Model
+\item The Instruction Format
+\item Flags and Conditional Execution
+\item Timing and Determinism
+\item Special Hardware Overview
+\item Address Modes
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -55,10 +56,12 @@
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Instructions (A-Z)
 \item Directives
-\item Constants \& Special Registers
-\item Smart Pin Modes
-\item CORDIC Functions
+\item Constants
+\item Special Registers
 \end{itemize}
+
+\vspace{0.2cm}
+\textbf{Part III: Appendices (A--J)}
 \end{minipage}
 \end{tcolorbox}
 \vspace{0.5cm}
@@ -76,7 +79,7 @@
 
 # Copyright and License
 
-Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
+Copyright © 2025–2026 Iron Sheep Productions, LLC and Parallax Inc.
 
 This work is licensed under the Creative Commons Attribution–NonCommercial–NoDerivatives 4.0 International License (CC BY-NC-ND 4.0).
 
@@ -136,7 +139,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric COGs s
 
 | | P1 | P2 |
 |---|---|---|
-| Clock | 80 MHz | 180 MHz nominal; 320 MHz max¹ |
+| Clock | 80 MHz | 180 MHz recommended; 250 MHz typical overclock; 350 MHz absolute max¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | COG RAM | 512 longs | 512 + 512 LUT |
@@ -236,9 +239,9 @@ Begin with Chapter 1 to understand the P2 execution model. Part II serves as the
 
 **"I need to understand condition codes"** → Appendix B (complete IF_x reference with all aliases)
 
-**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix D (summary table)
+**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix A (Instruction Encoding Summary — C Effect / Z Effect columns)
 
-**"I need Smart Pin configuration values"** → Appendix E (Smart Pin Mode Constants)
+**"I need Smart Pin configuration values"** → Appendix F (Smart Pin Mode Constants)
 
 **"I need CORDIC operations"** → Chapter 5.1 (CORDIC Coprocessor) or Part II instruction entries (QMUL, QDIV, etc.)
 

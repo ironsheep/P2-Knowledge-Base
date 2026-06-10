@@ -221,14 +221,14 @@ Each selectable event flag is cleared by execution of its respective SETSEn, POL
 ## WAITX {#waitx}
 Wait Cycles
 
-[Events and Timing](#events-and-timing) - Stalls the cog for a precise number of clock cycles.
+[Miscellaneous](#miscellaneous) - Stalls the cog for a precise number of clock cycles.
 :::
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
 
 ---
 
-**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay. Sets C and Z to 0 after completion.
+**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears C and Z to 0 after completion.
 
 - Dest is the delay value; total wait is 2 + Dest cycles (0-511 for immediate).
 - WC, WZ, or WCZ enable randomized delay mode; C and Z are set to 0 after completion.

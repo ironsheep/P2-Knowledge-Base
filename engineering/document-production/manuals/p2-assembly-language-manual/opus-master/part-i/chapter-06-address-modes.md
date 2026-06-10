@@ -79,12 +79,18 @@ When `#` is used:
 
 ### 6.2.2 Immediate Range and Signedness
 
-The 9-bit immediate field is always treated as unsigned (0-511). For instructions that interpret operands as signed values, the 9-bit value is sign-extended:
+For data instructions the 9-bit immediate field is always zero-extended and treated as unsigned (0-511). Sign-extension of the 9-bit immediate applies only to relative-branch instructions, where the immediate is a signed offset in the range -256..+255:
 
 ```pasm2
-        mov     x, #$1FF                ' x = 511 or -1 (sign-extended)
+        mov     x, #$1FF                ' x = 511 (9-bit immediate, zero-extended)
         add     x, #1                   ' Add 1
         sub     x, #10                  ' Subtract 10
+```
+
+For relative branches, the same 9-bit immediate is interpreted as a signed offset:
+
+```pasm2
+        jmp     #$-1                    ' Relative branch back by 1 (signed offset)
 ```
 
 Values outside the 0-511 range require augmentation (see Section 6.3).
@@ -367,7 +373,7 @@ All expressions work identically with PTRB.
 For index values beyond the 5-bit or 6-bit limits, use `##` to invoke AUGS:
 
 ```pasm2
-        rdlong  x, ptra[##1000]         ' Index 1000 (4000 byte offset)
+        rdlong  x, ptra[##1000]         ' Index 1000 = 1000-byte offset (AUGS index is unscaled)
         rdbyte  y, ++ptrb[##$12345]     ' 20-bit index with update
 ```
 

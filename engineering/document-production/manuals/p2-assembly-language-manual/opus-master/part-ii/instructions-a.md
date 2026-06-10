@@ -151,11 +151,11 @@ Add Pixels
 
 **Explanation:**
 
-ADDPIX sums individual RGB (red, green, blue) color values of Src into that of Dest and stores the result in the Dest register. Each byte is treated as a separate color channel and is saturated to prevent wraparound.
+ADDPIX sums the individual byte fields of Src into those of Dest and stores the result in the Dest register. Each of the four bytes of the 32-bit register is treated as a separate field — for 8:8:8:8 pixel data these are the red, green, blue, and alpha/fourth bytes — and each is saturated independently to prevent wraparound.
 
 Saturation means that if the sum of a color channel exceeds 255, the result is clamped to 255 rather than wrapping around to a low value. This prevents color distortion when combining bright colors and produces visually correct results for color blending operations.
 
-The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles.
+The instruction processes all four byte fields (the three RGB color channels plus the alpha/fourth byte) in parallel, completing in 7 clock cycles.
 
 
 

@@ -193,7 +193,7 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 
 
-### PR0-PR7 {#pr0-pr7}
+## Communication Registers (PR0-PR7) {#pr0-pr7}
 
 Addresses $1D8-$1DF. Eight general-purpose registers with predefined symbols.
 
@@ -226,7 +226,7 @@ Address $1F8. Pointer A to Hub RAM. Primary pointer register for Hub RAM access 
 
 **Access**: Read/Write
 
-**Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. The pointer is 20 bits wide, addressing the full Hub RAM space.
+**Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. PTRA is a 32-bit register; its low 20 bits address the full 1 MB Hub RAM space. On COGINIT, the target cog's PTRA receives the SETQ value (typically a parameter-block hub address) if a SETQ was executed immediately before the COGINIT; otherwise PTRA is cleared to 0. This is the standard P2 mechanism for passing a 32-bit parameter or data-structure pointer to a launched cog.
 
 **Addressing Modes**:
 
@@ -411,7 +411,7 @@ Address $1FD. Output register B for pins 32-63. Sets the output state for pins c
 
 Address $1FE. Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
 
-**Access**: Read-only for pin states (also serves as debug interrupt call address)
+**Access**: Read-only for pin states (overlaid as IJMP0, R/W, during a debug ISR)
 
 **Bit Field**:
 
@@ -419,7 +419,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |
 
-**Usage**: INA returns the actual electrical state of pins 0-31, regardless of whether they are configured as inputs or outputs. This allows output pins to be read back to verify their state. Reading INA captures the pin states at the moment the instruction executes, providing a consistent snapshot of all 32 pins. INA also serves as the debug interrupt call address when debug interrupts are enabled.
+**Usage**: INA returns the actual electrical state of pins 0-31, regardless of whether they are configured as inputs or outputs. This allows output pins to be read back to verify their state. Reading INA captures the pin states at the moment the instruction executes, providing a consistent snapshot of all 32 pins. During a debug ISR, $1FE is overlaid as IJMP0 — the debug-interrupt jump address — and becomes read/write (it is initialized to $1F8, the debug-ISR-entry routine, on COGINIT).
 
 **Example**:
 ```pasm2
@@ -442,7 +442,7 @@ Address $1FE. Input register A for pins 0-31. Reads the current state of pins re
 
 Address $1FF. Input register B for pins 32-63. Reads the current state of pins regardless of direction setting.
 
-**Access**: Read-only for pin states (also serves as debug interrupt return address)
+**Access**: Read-only for pin states (overlaid as IRET0, R/W, during a debug ISR)
 
 **Bit Field**:
 
@@ -450,7 +450,7 @@ Address $1FF. Input register B for pins 32-63. Reads the current state of pins r
 |------|------|-------------|
 | 31:0 | IN | Current state of each pin: 1 = high, 0 = low |
 
-**Usage**: INB returns the actual electrical state of pins 32-63, regardless of whether they are configured as inputs or outputs. The bit positions map to pins 32-63, where bit 0 represents pin 32 and bit 31 represents pin 63. INB also serves as the debug interrupt return address when debug interrupts are enabled.
+**Usage**: INB returns the actual electrical state of pins 32-63, regardless of whether they are configured as inputs or outputs. The bit positions map to pins 32-63, where bit 0 represents pin 32 and bit 31 represents pin 63. During a debug ISR, $1FF is overlaid as IRET0 (the debug-interrupt return address) and becomes read/write.
 
 **Example**:
 ```pasm2

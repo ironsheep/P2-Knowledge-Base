@@ -7,7 +7,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | Column | Description |
 |--------|-------------|
 | Instruction | Mnemonic name |
-| Opcode | 7-bit binary pattern (bits 25-31 of instruction word) |
+| Opcode | 7-bit binary pattern (bits 21-27 of instruction word) (bits 28-31 are the EEEE condition-code field; see Appendix B) |
 | CZI | Available effects (C=WC, Z=WZ, I=immediate) |
 | Cycles | Execution time in clock cycles |
 | C Effect | What C flag indicates after instruction execution |
@@ -170,7 +170,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | JXMT | `1011110` | — | 2 or 4 | — | — |
 | JXRL | `1011110` | — | 2 or 4 | — | — |
 | JXRO | `1011110` | — | 2 or 4 | — | — |
-| LOC | `---` | — | 2 | — | — |
+| LOC | `1110100` | — | 2 | — | — |
 | LOCKNEW | `1101011` | C | 4...11 | 1 if no LOCK available | — |
 | LOCKREL | `1101011` | C | 2...9, +2 if result | — | — |
 | LOCKRET | `1101011` | — | 2...9 | — | — |
@@ -385,7 +385,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | XZERO | `1100101` | — | 2+ | — | — |
 | ZEROX | `0111010` | CZI | 2 | MSB of result | Result = 0 |
 
-**Total Instructions:** 359 (357 executable + 2 compiler directives)
+**Total Instructions:** 359 (357 with a fixed encoding + 2 without: ASMCLK and DEBUG)
 
 
 
@@ -399,5 +399,5 @@ This appendix provides the complete encoding reference for all PASM2 instruction
   - Memory location (cog vs. LUT vs. hub execution)
 - The `*` symbol indicates hub memory access with variable timing
 - See Part II (Instruction Reference) for complete encoding details and all variants
-- Special instructions (ASMCLK, DEBUG) are compiler directives, not executable instructions
+- ASMCLK is a pseudo-instruction (macro) and DEBUG is a debug directive; neither has a single fixed hardware encoding (ASMCLK expands to HUBSET/WAITX, DEBUG emits a debug call under -d)
 

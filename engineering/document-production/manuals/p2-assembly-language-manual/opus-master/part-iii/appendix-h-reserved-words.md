@@ -4,7 +4,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether you are writing pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2 + P_*/X_* constants)
+**Total Reserved Words: 1,042+** (456 PASM2 + 586 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -47,8 +47,8 @@ DAT         DEBUG       DEBUG_BAUD  DEBUG_COGS  DEBUG_COGINIT           DEBUG_DE
 DEBUG_DISABLE           DEBUG_DISPLAY_LEFT      DEBUG_DISPLAY_TOP       DEBUG_HEIGHT
 DEBUG_LEFT  DEBUG_LOG_SIZE          DEBUG_MAIN  DEBUG_MASK  DEBUG_PIN   DEBUG_PIN_RX
 DEBUG_PIN_TX            DEBUG_TIMESTAMP         DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
-DECMOD      DECOD       DEPTH       DEV         DIRA        DIRB
-DIRC        DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
+DECMOD      DECOD       DEPTH       DIRA        DIRB        DIRC
+DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
 DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
 DJZ         DLY         DOT         DOTSIZE     DRVC        DRVH
 DRVL        DRVNC       DRVNOT      DRVNZ       DRVRND      DRVZ
@@ -74,9 +74,9 @@ FVAR        FVARS
 
 ### G
 ```
-GETBRK      GETBYTE     GETCT       GETMS       GETNIB      GETPTR
-GETQX       GETQY       GETREGS     GETRND      GETSCP      GETSEC
-GETWORD     GETXACC     GREEN       GREY
+GETBRK      GETBYTE     GETCRC      GETCT       GETMS       GETNIB
+GETPTR      GETQX       GETQY       GETREGS     GETRND      GETSCP
+GETSEC      GETWORD     GETXACC     GREEN       GREY
 ```
 
 ### H
@@ -117,8 +117,8 @@ JXFI        JXMT        JXRL        JXRO
 ### L
 ```
 LINE        LINESIZE    LOC         LOCKCHK     LOCKNEW     LOCKREL
-LOCKRET     LOCKTRY     LOGIC       LOGSCALE    LONG        LONGFILL
-LONGMOVE    LONGS_16BIT LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT
+LOCKRET     LOCKTRY     LOGIC       LONG        LONGFILL    LONGMOVE
+LONGS_16BIT LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT
 LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ     LSTR        LSTR_
 LUMA8       LUMA8W      LUMA8X      LUT1        LUT2        LUT4
 LUT8        LUTCOLORS
@@ -183,7 +183,11 @@ ROLWORD     ROR         ROTXY       ROUND       RQPIN
 
 ### S
 ```
-SAL         SAMPLES     SAR         SAVE        SCA         SCAS
+SAL         SAMPLES     SAR         SAVE        SBIN        SBIN_
+SBIN_BYTE   SBIN_BYTE_  SBIN_BYTE_ARRAY         SBIN_BYTE_ARRAY_
+SBIN_LONG   SBIN_LONG_  SBIN_LONG_ARRAY         SBIN_LONG_ARRAY_
+SBIN_REG_ARRAY          SBIN_REG_ARRAY_         SBIN_WORD   SBIN_WORD_
+SBIN_WORD_ARRAY         SBIN_WORD_ARRAY_        SCA         SCAS
 SCOPE       SCOPE_XY    SCROLL      SDEC        SDEC_       SDEC_BYTE
 SDEC_BYTE_  SDEC_BYTE_ARRAY         SDEC_BYTE_ARRAY_        SDEC_LONG
 SDEC_LONG_  SDEC_LONG_ARRAY         SDEC_LONG_ARRAY_        SDEC_REG_ARRAY
@@ -200,9 +204,9 @@ SHEX_REG_ARRAY          SHEX_REG_ARRAY_         SHEX_WORD   SHEX_WORD_
 SHEX_WORD_ARRAY         SHEX_WORD_ARRAY_        SHL         SHR
 SIGNED      SIGNX       SIZE        SKIP        SKIPF       SPACING
 SPECTRO     SPLITB      SPLITW      SPRITE      SPRITEDEF   SQRT
-STALLI      STEP        STRCOMP     STRING      STRSIZE     SUB
-SUBR        SUBS        SUBSX       SUBX        SUMC        SUMNC
-SUMNZ       SUMZ
+STALLI      STEP        STRCOMP     STRCOPY     STRING      STRSIZE
+STRUCT      SUB         SUBR        SUBS        SUBSX       SUBX
+SUMC        SUMNC       SUMNZ       SUMZ
 ```
 
 ### T
@@ -237,11 +241,11 @@ VAR         VARBASE     WAITATN     WAITCT      WAITCT1     WAITCT2
 WAITCT3     WAITFBW     WAITINT     WAITMS      WAITPAT     WAITSE1
 WAITSE2     WAITSE3     WAITSE4     WAITUS      WAITX       WAITXFI
 WAITXMT     WAITXRL     WAITXRO     WC          WCZ         WFBYTE
-WFLONG      WFWORD      WHITE       WHILE       WINDOW      WMLONG
-WORD        WORDFILL    WORDFIT     WORDMOVE    WORDS_1BIT  WORDS_2BIT
-WORDS_4BIT  WORDS_8BIT  WRBYTE      WRC         WRFAST      WRLONG
-WRLUT       WRNC        WRNZ        WRPIN       WRWORD      WRZ
-WXPIN       WYPIN       WZ
+WFLONG      WFWORD      WHITE       WHILE       WINDOW      WITH
+WMLONG      WORD        WORDFILL    WORDFIT     WORDMOVE    WORDS_1BIT
+WORDS_2BIT  WORDS_4BIT  WORDS_8BIT  WRBYTE      WRC         WRFAST
+WRLONG      WRLUT       WRNC        WRNZ        WRPIN       WRWORD
+WRZ         WXPIN       WYPIN       WZ
 ```
 
 ### X-Z
@@ -599,11 +603,11 @@ The Propeller 2 compiler reserves **1,042+ identifiers** across PASM2 and Spin2:
 
 | Category | Count | Purpose |
 |----------|-------|---------|
-| Language Keywords | 18 | Core Spin2 constructs |
-| DEBUG Parameters | 114 | Debug output formatting |
+| Language Keywords | 20 | Core Spin2 constructs |
+| DEBUG Parameters | 120 | Debug output formatting |
 | Graphics/Color | 34 | Color names and display |
-| String/Data Methods | 21 | Memory/string manipulation |
-| Math/Conversion | 12 | Math functions |
+| String/Data Methods | 22 | Memory/string manipulation |
+| Math/Conversion | 11 | Math functions |
 | Event Constants | 16 | Event source identifiers |
 | Pin Methods | 14 | High-level pin control |
 | Condition Shortcuts | 32 | Underscore-prefixed conditions |
@@ -645,15 +649,18 @@ The following sections list Spin2 reserved words organized by category.
 
 
 
-### Language Keywords (18 words)
+### Language Keywords (20 words)
 
 Core Spin2 language constructs (block names CON, DAT, VAR, PUB, PRI, OBJ are listed under PASM2 Assembly Directives):
 
 ```
 ABORT       CASE        CASE_FAST   ELSE        ELSEIF      ELSEIFNOT
 END         FROM        IF          IFNOT       NEXT        OTHER
-QUIT        REPEAT      RETURN      TO          UNTIL       WHILE
+QUIT        REPEAT      RETURN      STRUCT      TO          UNTIL
+WHILE       WITH
 ```
+
+**Note:** STRUCT requires Spin2 v45 or later; WITH is the REPEAT positive-count loop-counter binding (`REPEAT <count> WITH <var>`).
 
 
 
@@ -704,10 +711,10 @@ UHEX_WORD_            UHEX_WORD_ARRAY  UHEX_WORD_ARRAY_
 
 **Signed binary (SBIN) variants:**
 ```
-SBIN        SBIN_       SBIN_BYTE_       SBIN_BYTE_ARRAY  SBIN_BYTE_ARRAY_
-SBIN_LONG   SBIN_LONG_  SBIN_LONG_ARRAY  SBIN_LONG_ARRAY_ SBIN_REG_ARRAY
-SBIN_REG_ARRAY_       SBIN_WORD        SBIN_WORD_       SBIN_WORD_ARRAY
-SBIN_WORD_ARRAY_
+SBIN        SBIN_       SBIN_BYTE        SBIN_BYTE_       SBIN_BYTE_ARRAY
+SBIN_BYTE_ARRAY_      SBIN_LONG        SBIN_LONG_       SBIN_LONG_ARRAY
+SBIN_LONG_ARRAY_      SBIN_REG_ARRAY   SBIN_REG_ARRAY_  SBIN_WORD
+SBIN_WORD_            SBIN_WORD_ARRAY  SBIN_WORD_ARRAY_
 ```
 
 **Unsigned binary (UBIN) variants:**
@@ -754,13 +761,13 @@ LUT8        LUTCOLORS
 
 
 
-### String and Data Methods (21 words)
+### String and Data Methods (22 words)
 
 Memory and string manipulation:
 
 ```
-BYTEFILL    BYTEMOVE    LONGFILL    LONGMOVE    STRCOMP     STRING
-STRSIZE     WORDFILL    WORDMOVE
+BYTEFILL    BYTEMOVE    LONGFILL    LONGMOVE    STRCOMP     STRCOPY
+STRING      STRSIZE     WORDFILL    WORDMOVE
 ```
 
 **Bit-packing constants:**
@@ -772,13 +779,13 @@ LONGS_1BIT  LONGS_2BIT  LONGS_4BIT  LONGS_8BIT  LONGS_16BIT
 
 
 
-### Math and Conversion Methods (12 words)
+### Math and Conversion Methods (11 words)
 
 Mathematical functions available in Spin2:
 
 ```
-FABS        FLOAT       FRAC        FSQRT       LOGSCALE    MULDIV64
-NAN         QCOS        QSIN        ROUND       SQRT        TRUNC
+FABS        FLOAT       FRAC        FSQRT       MULDIV64    NAN
+QCOS        QSIN        ROUND       SQRT        TRUNC
 ```
 
 
@@ -892,7 +899,7 @@ System control and I/O operations (FILE is listed under PASM2 Assembly Directive
 
 ```
 CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
-DEV         GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
+GETCRC      GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
 NEWCOG      RECV        REG         REGEXEC     REGLOAD     SEND
 SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
 WINDOW

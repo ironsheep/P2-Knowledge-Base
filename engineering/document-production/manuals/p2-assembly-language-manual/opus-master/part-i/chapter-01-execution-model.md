@@ -110,7 +110,7 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 Figure 1.4: Eight-COG Architecture with LUT Write Sharing
 :::
 
-The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, writes from its paired COG's `WRLUT` instruction are mirrored to both COGs' LUT memory via the LUT's second port. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS activates cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
+The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent COG pairs. When a COG executes `SETLUTS #1`, the paired COG's `WRLUT` writes are copied into this COG's LUT via the LUT's second port. This is one-directional; for two-way mirroring both COGs of the pair must execute `SETLUTS #1`. Adjacent pairs are COGs 0-1, 2-3, 4-5, and 6-7. Each COG retains its own 512-long LUT; SETLUTS activates cross-COG write access rather than expanding LUT size. This feature supports producer-consumer patterns where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
 
 ## 1.4 Hub Memory
@@ -143,7 +143,7 @@ When a COG accesses a specific Hub address, it must wait up to 7 clocks to reach
 
 The hardware FIFO smooths out data flow for non-sequential or variable-rate access. The FIFO can be configured for hub-RAM-read or hub-RAM-write operation, allowing sequential transfers in any combination of bytes, words, or longs at rates up to one long per clock. The FIFO maintains proper hub slice alignment without programmer intervention.
 
-Hub RAM read/write instructions (RDLONG, WRLONG, etc.) take 9-16 clocks in COG/LUT execution mode, or 9-26 clocks in Hub execution mode where the FIFO is dedicated to instruction fetch. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
+Hub read instructions (RDBYTE/RDWORD/RDLONG) take 9-16 clocks in COG/LUT execution mode (9-26 in Hub execution mode). Hub write instructions (WRBYTE/WRWORD/WRLONG) take 3-10 clocks in COG/LUT mode (3-20 in Hub execution mode). All ranges are egg-beater hub-window dependent. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks.
 
 Despite the variable initial wait, hub timing remains deterministic. The maximum wait is always seven clocks, and once aligned, sequential access proceeds at one long per clock. Programs requiring precise timing use COG execution mode for critical sections and Hub memory for data storage and inter-COG communication.
 
@@ -209,7 +209,7 @@ Hub execution mode provides access to the full 512KB Hub address space, enabling
 
 `COGINIT` determines execution mode when starting a COG. The initialization parameter specifies either COG execution (code loaded from Hub to COG RAM, then executed) or Hub execution (code executed directly from Hub RAM). The `ORGH` assembler directive marks code intended for Hub execution, while `ORG` marks code for COG execution.
 
-⚠️ **Pitfall:** While executing from Hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during Hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and streamer modes that engage the FIFO. Code requiring these instructions must execute from COG RAM.
+⚠️ **Pitfall:** While executing from Hub RAM, the FIFO hardware is dedicated to instruction prefetch and cannot be used for other purposes. The following instructions are unavailable during Hub execution: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and the streamer FIFO instructions XINIT, XZERO, and XCONT when the streamer mode engages the FIFO. Code requiring these instructions must execute from COG RAM.
 
 ### 1.6.4 Switching Between Modes
 

@@ -65,12 +65,12 @@ Execute with Skip Pattern
 
 **Result:** PC is set to Dest[9:0] and the SKIPF pattern is set to Dest[31:10].
 
-- Dest is a register or 10-bit literal specifying the target address in bits [9:0] and the skip pattern in bits [31:10].
+- Dest is a register or immediate value 0-511 (augmentable to a full 32-bit value via AUGD). Bits [9:0] of the resulting Dest value specify the target COG/LUT address and bits [31:10] specify the 22-bit skip pattern.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | 00I | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
+| EEEE | 1101011 | 00L | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 
 
 **Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)

@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter G.
 ## GETBRK {#getbrk}
 Get Breakpoint Status
 
-[Miscellaneous](#miscellaneous) - Retrieves breakpoint or COG status information.
+[Interrupts](#interrupts) - Retrieves breakpoint or COG status information.
 :::
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
@@ -226,7 +226,7 @@ If the WC or WCZ effect is specified, the C flag is set to X[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
+GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
 
 
 
@@ -264,7 +264,7 @@ If the WC or WCZ effect is specified, the C flag is set to Y[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 55 clocks from when the operation was queued).
+GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
 
 
 
@@ -306,7 +306,7 @@ If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the
 
 If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per COG, meaning each COG's RNG produces independent bit sequences at this position, useful for multi-COG systems requiring independent randomness.
 
-The random number generator uses a maximal-length linear feedback shift register (LFSR) to produce a deterministic but statistically random sequence. The sequence repeats with a period of 2^32 - 1 values.
+The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128 - 1).
 
 
 

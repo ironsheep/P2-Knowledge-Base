@@ -93,7 +93,7 @@ toggle_pin0                             ' Subroutine: toggle pin 0
 
 This is significantly faster than a separate instruction followed by RET.
 
-**Timing:** The `_RET_` prefix adds +2 cycles in COG/LUT mode, or +11 to +18 cycles in Hub mode.
+**Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in COG/LUT mode. In Hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
 
 > **📖 Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
@@ -242,11 +242,14 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 | Value | Meaning |
 |-------|---------|
 | `D` | Destination register is written |
-| `D and PC` | Both destination and program counter written (for jumps/calls) |
+| `D and PC` | Both destination and program counter written (for jumps/calls); rendered `D + PC*` in the tables |
 | `PC` | Only PC written |
-| `---` | Nothing written (compare, test instructions) |
-| `LUT` | LUT memory written |
-| `Hub` | Hub memory written |
+| `---` | Nothing written, or output goes to Hub/LUT memory rather than a COG register (compare, test, and memory-write instructions) |
+| `OUTx` | Pin output state written |
+| `DIR bit` | A pin direction bit is written |
+| `OUT bit` | A pin output bit is written |
+| `DIRx, OUTx` | Pin direction and output state written |
+| `†` / `*` | Footnote markers flagging conditional or qualified write behavior |
 
 **Flag columns:**
 
@@ -302,7 +305,7 @@ Syntax 2: `GETBYTE  Dest`
 | EEEE | 1000111 | 000 | DDDDDDDDD | 000000000 | --- | --- | D | 2 |
 
 
-The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row shows the ALTGB-compatible form where Dest is both read and written.
+The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row is the ALTGB-driven form (GETBYTE Dest = GETBYTE Dest,0,#0): a prior ALTGB instruction rewrites this instruction's pipelined Src and Num fields to point at the next byte in Reg RAM, and GETBYTE writes that byte into Dest.
 
 ### 2.4.3 Key Principle
 

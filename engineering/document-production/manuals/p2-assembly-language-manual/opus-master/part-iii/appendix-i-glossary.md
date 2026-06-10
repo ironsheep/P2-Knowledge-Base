@@ -6,7 +6,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 ## Encoding Field Terms
 
 **A / Addr**
-: A 20-bit relative or absolute value used to change PC (the program counter). This field appears in branch and call instructions where the destination spans both the D and S fields of the instruction word.
+: A 20-bit relative or absolute value used to change PC (the program counter). This field appears in branch and call instructions where the 20-bit address occupies the two low bits of the CZI/FX field (positions 19-18) together with the D and S fields; the R bit (position 20) selects relative (PC += A) vs. absolute (PC = A) addressing.
 
 **C / Carry Flag**
 : A 1-bit persistent flag value representing a special state before or after instruction execution. Traditionally, the C flag indicates that an arithmetic operation resulted in a carry (addition) or borrow (subtraction). The P2 extends this with instruction-specific meanings for both input and output. When C appears in an instruction's opcode encoding, it indicates optional flag writing governed by the WC or WCZ effect.
@@ -36,7 +36,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 : When set (L=1), the D field contains a literal value rather than a register address. This is less common than immediate S operands and appears in specific instructions. The `#` prefix on the destination in source code sets this bit where valid.
 
 **N / Index Number**
-: A small index value (typically 0-1, 0-3, or 0-7) used as a third operand in some instructions. Examples include interrupt numbers (0-3), event selector indices, and bit position specifiers.
+: A small index value (typically 0-1, 0-3, or 0-7) used as a third operand in some instructions. Examples include interrupt numbers (1-3), event selector indices, and bit position specifiers.
 
 **PC / Program Counter**
 : A dedicated internal register that determines the next instruction address. Automatically increments by 1 (COG/LUT execution) or 4 (Hub execution) after each instruction unless altered by a branch. Not directly accessible but affected by JMP, CALL, RET, and conditional branches.

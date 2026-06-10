@@ -20,8 +20,8 @@ Streamer commands are issued via XINIT, XCONT, and related instructions.
 Streamer commands are 32-bit values composed of mode selection and control fields:
 
 ```
-Bits 31-16: Mode and sub-mode selection
-Bits 15-0:  Additional parameters (NCO rate typically passed separately)
+Bits 31-28: Mode selector; bits 27-16: control/config fields
+Bits 15-0:  Transfer count (NCO rollovers); NCO rate is set separately by SETXFRQ
 ```
 
 The values shown below are the base constants that get combined with control flags using OR operations.
@@ -171,26 +171,26 @@ These flags modify Streamer behavior and are combined with mode constants using 
 
 ### DAC Channel Selection
 
-The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) are active and how they're configured. The naming convention uses X for disabled channels, 0/1 for channel values, and N suffix for inverted output.
+The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) are active and how they're configured. In the naming convention, 0 = streamer data channel X0, 1 = data channel X1 (likewise 2 = X2, 3 = X3), X = no override (the SETDACS value for that DAC passes through), and the N suffix = one's-complement (inverted) output.
 
 | Constant | Value | Description |
 |----------|-------|-------------|
 | X_DACS_OFF | (default - no bits set) | Disable all DAC outputs |
-| X_DACS_0_0_0_0 | %0000_0000_0000_0000 << 16 | All 4 DAC channels output 0 |
-| X_DACS_X_X_0_0 | %0000_0001_0000_0000 << 16 | DAC channels 3,2 disabled; 1,0 output 0 |
-| X_DACS_0_0_X_X | %0000_0010_0000_0000 << 16 | DAC channels 3,2 output 0; 1,0 disabled |
-| X_DACS_X_X_X_0 | %0000_0011_0000_0000 << 16 | Only DAC channel 0 enabled |
-| X_DACS_X_X_0_X | %0000_0100_0000_0000 << 16 | Only DAC channel 1 enabled |
-| X_DACS_X_0_X_X | %0000_0101_0000_0000 << 16 | Only DAC channel 2 enabled |
-| X_DACS_0_X_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 3 enabled |
-| X_DACS_0N0_0N0 | %0000_0111_0000_0000 << 16 | Channels 3,1 normal; channels 2,0 inverted |
-| X_DACS_X_X_0N0 | %0000_1000_0000_0000 << 16 | Channels 1,0 enabled; channel 0 inverted |
-| X_DACS_0N0_X_X | %0000_1001_0000_0000 << 16 | Channels 3,2 enabled; channel 2 inverted |
-| X_DACS_1_0_1_0 | %0000_1010_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
-| X_DACS_X_X_1_0 | %0000_1011_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
-| X_DACS_1_0_X_X | %0000_1100_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
-| X_DACS_1N1_0N0 | %0000_1101_0000_0000 << 16 | All channels; odd inverted |
-| X_DACS_3_2_1_0 | %0000_1110_0000_0000 << 16 | Use all 4 DAC channels (standard) |
+| X_DACS_0_0_0_0 | %0000_0001_0000_0000 << 16 | X0 routed to all four DAC channels (mono) |
+| X_DACS_X_X_0_0 | %0000_0010_0000_0000 << 16 | X0 on DAC channels 1,0; channels 3,2 not overridden |
+| X_DACS_0_0_X_X | %0000_0011_0000_0000 << 16 | X0 on DAC channels 3,2; channels 1,0 not overridden |
+| X_DACS_X_X_X_0 | %0000_0100_0000_0000 << 16 | Only DAC channel 0 enabled |
+| X_DACS_X_X_0_X | %0000_0101_0000_0000 << 16 | Only DAC channel 1 enabled |
+| X_DACS_X_0_X_X | %0000_0110_0000_0000 << 16 | Only DAC channel 2 enabled |
+| X_DACS_0_X_X_X | %0000_0111_0000_0000 << 16 | Only DAC channel 3 enabled |
+| X_DACS_0N0_0N0 | %0000_1000_0000_0000 << 16 | Channels 2,0 normal (X0); channels 3,1 inverted (!X0) — differential pairs |
+| X_DACS_X_X_0N0 | %0000_1001_0000_0000 << 16 | Channels 1,0 active; channel 1 inverted (!X0), channel 0 normal (X0) — differential pair on channels 0,1 |
+| X_DACS_0N0_X_X | %0000_1010_0000_0000 << 16 | Channels 3,2 enabled (differential pair); channel 3 inverted (!X0), channel 2 normal (X0) |
+| X_DACS_1_0_1_0 | %0000_1011_0000_0000 << 16 | Alternating 1,0 pattern across all channels |
+| X_DACS_X_X_1_0 | %0000_1100_0000_0000 << 16 | Channels 1,0 with 1,0 pattern |
+| X_DACS_1_0_X_X | %0000_1101_0000_0000 << 16 | Channels 3,2 with 1,0 pattern |
+| X_DACS_1N1_0N0 | %0000_1110_0000_0000 << 16 | All channels; odd inverted |
+| X_DACS_3_2_1_0 | %0000_1111_0000_0000 << 16 | Use all 4 DAC channels (standard) |
 
 ### Pin Output Control
 

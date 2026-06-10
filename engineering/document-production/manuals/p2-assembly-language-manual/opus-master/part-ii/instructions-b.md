@@ -71,7 +71,7 @@ Bit High
 
 - Dest is a register whose value will have one or more bits set high.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
+- WCZ is an optional effect to update the C and Z flags.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -89,7 +89,7 @@ Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicate
 
 When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITH, substituting SETQ's Dest[4:0] in place of value bits[9:5].
 
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was set high.
+If the WCZ effect is specified, both the C and Z flags are set (1) if the original Dest base bit (before modification) was set, or are cleared (0) if it was clear. This preserves information about the original bit state before it was set high.
 
 
 
@@ -108,7 +108,7 @@ Bit Low
 
 - Dest is a register whose value will have one or more bits set low.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
+- WCZ is an optional effect to update the C and Z flags.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -126,7 +126,7 @@ Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicate
 
 When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITL, substituting SETQ's Dest[4:0] in place of value bits[9:5].
 
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was cleared to low.
+If the WCZ effect is specified, both the C flag and the Z flag are set (1) if the original Dest base bit (before modification) was set, or are cleared (0) if it was clear. This preserves information about the original bit state before it was cleared to low.
 
 
 
@@ -202,7 +202,7 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 
 If the WCZ effect is specified, the C and Z flags are set (1) if the original Dest base bit (before modification) was set, or are cleared (0) if it was clear. This preserves information about the original state of the base bit before randomization.
 
-Each bit in the range is set independently from the PRNG, producing true random values suitable for cryptographic initialization vectors, random number generation, and simulation applications.
+Each bit in the range is set independently from the Xoroshiro128** PRNG, producing pseudo-random values suitable for randomization, dithering, and simulation applications. The PRNG is not cryptographically secure and should not be used to generate cryptographic key material or IVs.
 
 
 

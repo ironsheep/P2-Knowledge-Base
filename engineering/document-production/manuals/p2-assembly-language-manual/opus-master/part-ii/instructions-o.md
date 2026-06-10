@@ -107,18 +107,18 @@ Output By Flag State
 
 ---
 
-**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets Z to original output state.
+**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state. Optionally sets C and Z to the original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
-- WCZ is an optional effect to set Z to the original output state.
+- WCZ is an optional effect to set C and Z to the original output state.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | --- | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | --- | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | --- | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | --- | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001010 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001011 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001100 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001001101 | OUT bit† | OUT bit† | OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -137,7 +137,7 @@ These instructions set pin output level(s) based on flag state:
 
 OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
-If WCZ is specified, the Z flag is set to the original output state of the base pin before modification.
+If WCZ is specified, both the C flag and the Z flag are set to the original output state of the base pin before modification.
 
 
 

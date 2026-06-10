@@ -721,7 +721,7 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETSCP {#setscp}
 Set Oscilloscope
 
-[Miscellaneous](#miscellaneous) - Configures the four-channel hardware oscilloscope for debugging.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -777,7 +777,7 @@ Set Selectable Event (1, 2, 3, Or 4)
 
 **Explanation:**
 
-SETSE1, SETSE2, SETSE3, and SETSE4 configure their respective selectable event's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
+SETSE1, SETSE2, SETSE3, and SETSE4 configure their respective selectable event's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event. Configuring SETSEn also clears the corresponding SEn event flag.
 
 The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
 

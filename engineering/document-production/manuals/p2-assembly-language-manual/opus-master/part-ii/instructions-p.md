@@ -443,7 +443,7 @@ Pop From Hub Stack A
 
 **Explanation:**
 
-POPA reads a long from Hub address --PTRA into the destination register Dest. PTRA is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
+POPA reads a long from Hub address --PTRA into the destination register Dest. PTRA is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHA's post-increment write to PTRA++, this implements an ascending stack that grows upward in memory (toward higher addresses).
 
 If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
@@ -479,7 +479,7 @@ Pop From Hub Stack B
 
 **Explanation:**
 
-POPB reads a long from Hub address --PTRB into the destination register Dest. PTRB is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
+POPB reads a long from Hub address --PTRB into the destination register Dest. PTRB is automatically decremented by 4 before the read occurs (pre-decrement). Paired with PUSHB's post-increment write to PTRB++, this implements an ascending stack that grows upward (toward higher addresses) in memory.
 
 If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
@@ -549,7 +549,7 @@ PUSHA writes the long value in Dest (or a 9-bit immediate value) to Hub address 
 
 This instruction does not affect any flags. The post-increment model means PTRA always points to the next available stack location after the push operation.
 
-PUSHA paired with POPA implements a descending stack in Hub RAM.
+PUSHA paired with POPA implements an ascending stack in Hub RAM (the pointer advances to higher addresses on each push).
 
 
 

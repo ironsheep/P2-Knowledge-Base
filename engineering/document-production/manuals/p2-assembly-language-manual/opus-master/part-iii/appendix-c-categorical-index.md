@@ -606,15 +606,14 @@ These fall into five families of eight instructions each:
 
 ### WC-Only Instructions
 
-These nine instructions produce meaningful output only for the C flag:
+These eight instructions produce meaningful output only for the C flag:
 
 | Instruction | C Flag Meaning |
 |-------------|----------------|
 | COGID | 1 if cog is running |
 | COGINIT | 1 if no free cog available |
-| GETCT | CT[32] (bit 32 of system counter) |
 | LOCKNEW | 1 if no lock available |
-| LOCKREL | 1 if lock was already free |
+| LOCKREL | 1 if lock is currently taken (held) |
 | LOCKTRY | 1 if lock was acquired |
 | MODC | Result of cccc expression |
 | RDPIN | Modal result (depends on Smart Pin mode) |

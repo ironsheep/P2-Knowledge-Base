@@ -100,7 +100,7 @@ Exclusive Or
 **Result:** Dest XOR Src is stored in Dest. Optionally sets C to parity of result and Z if result equals zero.
 
 - Dest is the register containing the value to XOR with Src.
-- Src is a register or 9-bit literal whose value is XORed with Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal (##) whose value is XORed with Dest.
 - WC sets C to the parity (odd number of 1 bits) of the result.
 - WZ sets Z if the result equals zero.
 - WCZ sets both C and Z.
@@ -220,7 +220,7 @@ XSTOP is useful when:
 - Dynamic control flow needs to terminate streaming based on data content
 - Cleanup is required before reconfiguring the streamer
 
-After XSTOP, the streamer remains idle until a new XINIT command is issued. The phase accumulator state is undefined after XSTOP—use XINIT (which zeros the phase) rather than XCONT to restart operations.
+After XSTOP, the streamer remains idle until a new XINIT command is issued. XSTOP is itself an alias for XINIT #0,#0, so it leaves the phase accumulator zeroed. To restart, issue XINIT (which begins a new command with phase reset to zero); XCONT cannot be used to restart from idle because it only buffers behind an active command.
 
 
 

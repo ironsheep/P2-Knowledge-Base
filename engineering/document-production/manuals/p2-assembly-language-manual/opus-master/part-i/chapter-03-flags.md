@@ -286,15 +286,15 @@ Arithmetic instructions set C based on unsigned overflow (carry or borrow) and s
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
 | ADD | Unsigned carry out of bit 31 | Result = 0 |
-| ADDS | Signed overflow occurred | Result = 0 |
+| ADDS | True sign of result (corrected sign of D+S) | Result = 0 |
 | SUB | Unsigned borrow (A < B) | Result = 0 |
-| SUBS | Signed overflow occurred | Result = 0 |
+| SUBS | True sign of result (corrected sign of D−S) | Result = 0 |
 | CMP | Unsigned borrow (A < B) | A = B |
-| CMPS | Sign mismatch (signed A < B) | A = B |
+| CMPS | Signed A < B (true sign of A−B) | A = B |
 
 For ADD, C=1 indicates that adding the operands produced a value larger than 32 bits can represent—a carry occurred. For SUB and CMP, C=1 indicates the first operand is less than the second (a borrow would be required). The result is always written to the destination (for ADD/SUB) or the flags are set (for CMP/CMPS).
 
-ADDS and SUBS handle signed overflow detection. Signed overflow occurs when adding two positive values produces a negative result, or adding two negative values produces a positive result. The C flag captures this condition with WC.
+ADDS and SUBS set C to the true sign of the result (result bit 31), not a signed-overflow flag — it is the sign the value would have at full precision after overflow correction. For signed multi-long arithmetic, use ADD/ADDX (SUB/SUBX) for the lower longs and ADDSX (SUBSX) for the final long so C reflects the overall result's sign.
 
 ### 3.4.2 Logic Instructions
 
@@ -305,7 +305,7 @@ Logical instructions set C based on parity and set Z based on whether the result
 | AND | Parity (odd # of 1 bits) | Result = 0 |
 | OR | Parity (odd # of 1 bits) | Result = 0 |
 | XOR | Parity (odd # of 1 bits) | Result = 0 |
-| NOT | Parity (odd # of 1 bits) | Result = 0 |
+| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result = 0 |
 
 Parity means C=1 when the result contains an odd number of 1 bits, and C=0 when the result contains an even number of 1 bits. This enables parity checking for error detection—XOR all data bits together, and C indicates odd parity.
 
@@ -333,11 +333,10 @@ Move and data manipulation instructions set flags based on the source or result 
 | Instruction | C Flag (with WC) | Z Flag (with WZ) |
 |-------------|------------------|------------------|
 | MOV | MSB of source (S[31]) | Source = 0 |
-| NEG | Source was non-zero | Result = 0 |
+| NEG | Result is negative (result bit 31) | Result = 0 |
 | ABS | Source was negative | Result = 0 |
-| NOT | Parity of result | Result = 0 |
-| ENCOD | MSB of result | Result = 0 |
-| DECOD | 0 (always cleared) | Result = 0 |
+| NOT | Inverse of operand bit 31 (!S[31] / !D[31]) | Result = 0 |
+| ENCOD | Source was non-zero | Result = 0 |
 
 MOV is notable because its C flag reflects the sign bit of the source value, not the result (which is identical to the source). This enables sign testing without a separate comparison:
 
@@ -346,7 +345,7 @@ MOV is notable because its C flag reflects the sign bit of the source value, not
         if_c    jmp     #negative       ' Branch if negative
 ```
 
-NEG sets C=1 if the source was non-zero, which indicates that negation actually changed the value. When the source is zero, negation produces zero and C=0.
+NEG sets C to the sign bit of the result — C=1 if the negated value is negative, C=0 if it is positive (or zero).
 
 ABS sets C=1 if the source was negative, indicating that the absolute value operation inverted the sign. This flag persists even for the special case of NEGX ($80000000), whose absolute value cannot be represented in 32 bits.
 
@@ -503,17 +502,17 @@ Sometimes you need to preserve flag values across operations that might modify t
 
 ```pasm2
         ' Save flags
-        wrc     temp            ' Write C to temp[0]
-        wrz     temp            ' Write Z to temp[1]
+        wrc     cflag           ' cflag = {31'b0, C}  (C in bit 0)
+        wrz     zflag           ' zflag = {31'b0, Z}  (Z in bit 0)
 
         ' ... operations that modify flags ...
 
         ' Restore flags
-        testb   temp, #0        wc      ' Read temp[0] into C
-        testb   temp, #1        wz      ' Read temp[1] into Z
+        testb   cflag, #0       wc      ' C from cflag bit 0
+        testb   zflag, #0       wz      ' Z from zflag bit 0
 ```
 
-The WRC instruction writes C to the specified bit of a register (typically bit 0), and WRZ writes Z to a specified bit (typically bit 1). TESTB tests a specific bit and sets C or Z accordingly, effectively restoring the saved flag values.
+WRC sets the destination register to {31'b0, C} — C in bit 0, all other bits cleared — overwriting the whole register; WRZ does the same with Z (also in bit 0). Neither takes a bit-select operand. Because each overwrites the entire register, save C and Z into separate registers (or combine them explicitly, e.g. wrc tmp then shl/or with Z) rather than into two bits of one register. TESTB tests a specific bit and sets C or Z accordingly, effectively restoring the saved flag values.
 
 An alternative approach uses MODCZ with computed values, but the TESTB pattern is more common and more readable.
 
