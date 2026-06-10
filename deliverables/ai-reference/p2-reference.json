@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-03",
-    "last_updated": "2026-06-03T20:44:18.723246",
+    "release_date": "2026-06-10",
+    "last_updated": "2026-06-10T07:35:36.136084",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-03T20:44:18.723246",
+    "extraction_date": "2026-06-10T07:35:36.136084",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -303,7 +303,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set (1) if the subtraction results in a signed underflow (signed borrow), or is cleared (0) if no underflow. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
+            "description": "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the correct sign of (D - S), i.e. bit 31 of the result (C=1 if negative, C=0 if non-negative); it is NOT a signed-underflow or borrow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
             "result": "Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.",
             "timing": {
               "cycles": 2,
@@ -439,7 +439,7 @@
             ],
             "related": [
               "CMP",
-              "CMPX",
+              "CMPS",
               "CMPSX"
             ],
             "compiler_info": {
@@ -555,7 +555,7 @@
             "related": [
               "CMP",
               "CMPX",
-              "CMPSX"
+              "CMPS"
             ],
             "compiler_info": {
               "syntax": "",
@@ -813,7 +813,7 @@
             "parameters": [
               "Dest is the register in which to rotate the word into.",
               "Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target word to read.",
-              "Num is a 1-bit literal identifying the nibble ID (0-1) of Src to read."
+              "Num is a 1-bit literal identifying the word ID (0-1) of Src to read."
             ],
             "syntax_variants": [
               "ROLWORD Dest, {#}Src, #Num",
@@ -1302,6 +1302,7 @@
             ],
             "related": [
               "ADD",
+              "ADDS",
               "ADDSX",
               "SUBX"
             ],
@@ -1505,7 +1506,7 @@
             "parameters": [
               "Dest is the register in which to rotate the byte into.",
               "Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to read.",
-              "Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read."
+              "Num is a 2-bit literal identifying the byte ID (0-3) of Src to read."
             ],
             "syntax_variants": [
               "ROLBYTE Dest, {#}Src, #Num",
@@ -1869,7 +1870,7 @@
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set if signed overflow (sign of D + S)",
+              "C": "Set to the true sign of the result -- correct sign of (D + S), bit 31 (1=negative, 0=non-negative); NOT signed overflow",
               "Z": "Set if result equals zero"
             },
             "parameters": [
@@ -3650,7 +3651,13 @@
             "syntax_variants": [
               "TESTB D,{#}S"
             ],
-            "related": [],
+            "related": [
+              "TESTBN",
+              "TEST",
+              "TESTN",
+              "TESTP",
+              "TESTPN"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -4062,7 +4069,7 @@
             },
             "parameters": [
               "Dest is a register containing the value to sign-extend above bit Src[4:0] and is where the result is written.",
-              "Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to zero-extend beyond.",
+              "Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to sign-extend beyond.",
               "WC, WZ, or WCZ are optional effects to update flags."
             ],
             "syntax_variants": [
@@ -4278,7 +4285,7 @@
             "related": [
               "ADD",
               "ADDX",
-              "ADDSX",
+              "ADDS",
               "SUBSX"
             ],
             "compiler_info": {
@@ -4453,7 +4460,7 @@
             "parameters": [
               "Dest is the register in which to modify a byte.",
               "Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.",
-              "Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify."
+              "Num is a 2-bit literal identifying the byte ID (0-3) of Dest to modify."
             ],
             "syntax_variants": [
               "SETBYTE D,{#}S,#N",
@@ -7591,7 +7598,7 @@
             "mnemonic": "JXRO",
             "syntax": "JXRO    {#}S",
             "brief_description": "",
-            "oneliner": "Branch",
+            "oneliner": "Jump if streamer NCO rollover (XRO) event flag set",
             "encoding": [
               {
                 "bits": "EEEE 1011110 01I 000001100 SSSSSSSSS",
@@ -7601,11 +7608,12 @@
                 "clocks": "2 or 4"
               }
             ],
-            "description": "Jump to S if XRO (streamer ready) event flag is set.",
+            "description": "Jump to S if XRO (streamer NCO rollover) event flag is set.",
             "result": "",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable",
+              "range": "13...20"
             },
             "flags_affected": {
               "C": "No effect",
@@ -8873,7 +8881,8 @@
             "result": "",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable",
+              "range": "13...20"
             },
             "flags_affected": {
               "C": "No effect",
@@ -8968,7 +8977,7 @@
             "result": "Wait for streamer-NCO-rollover event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable"
             },
             "flags_affected": {
               "C": "Set if timeout occurred before event",
@@ -12038,14 +12047,14 @@
                 "clocks": "2"
               }
             ],
-            "description": "T=0 on reset, CT++ on every clock.",
+            "description": "Read the system counter into D. The underlying counter is a free-running 64-bit counter\n(Rev B/C silicon) that increments every clock, cleared on reset.\nWithout WC: D receives the lower 32 bits of the 64-bit counter.\nWith WC:    D receives the upper 32 bits of the 64-bit counter.\nGETCT WC followed by GETCT reads the full 64-bit value. The WC bit is a mode selector,\nnot a flag-write -- C and Z flags are always unchanged.\n",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Unchanged",
+              "C": "Unchanged (WC selects upper/lower 32 bits of the counter; it does not write the C flag)",
               "Z": "No effect"
             },
             "parameters": [],
@@ -12136,15 +12145,15 @@
                 "clocks": "2 + D"
               }
             ],
-            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay. C and Z are always cleared to 0 after completion. The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
+            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay; C and Z are cleared to 0 after completion. The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
             "result": "",
             "timing": {
               "cycles": "2 + D",
               "type": "variable"
             },
             "flags_affected": {
-              "C": "Set to 0 after completion",
-              "Z": "Set to 0 after completion"
+              "C": "Set to 0 only when WC or WCZ is specified",
+              "Z": "Set to 0 only when WZ or WCZ is specified"
             },
             "parameters": [],
             "syntax_variants": [],
@@ -13112,14 +13121,15 @@
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "2 or 4"
+                "clocks": "2 or 4 / 2 or 13-20"
               }
             ],
-            "description": "Dest is tested and if it's zero (or not zero in syntax 2), PC is set to a new relative (#Src) or absolute (Src) address.",
+            "description": "Dest is tested and if it's NOT zero, PC is set to a new relative (#Src) or absolute (Src) address.",
             "result": "",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable",
+              "range": "13...20"
             },
             "flags_affected": {
               "C": "No effect",
@@ -13280,10 +13290,10 @@
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "2 or 4"
+                "clocks": "2 or 4 / 2 or 13-20"
               }
             ],
-            "description": "Test D and jump to S** if D is full (D = $FFFF_FFFF).                                                                    2 or 4 / 2 or",
+            "description": "Test D and jump to S** if D is full (D = $FFFF_FFFF).",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -13320,7 +13330,7 @@
             "mnemonic": "CALLPB",
             "syntax": "CALLPB  {#}D,{#}S",
             "brief_description": "",
-            "oneliner": "Call a subroutine; store return context on the stack and copy D into PA or PB",
+            "oneliner": "Call a subroutine; store return context on the stack and copy D into PB",
             "encoding": [
               {
                 "bits": "EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS",
@@ -13342,7 +13352,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PA or PB.",
+              "Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PB.",
               "Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing."
             ],
             "syntax_variants": [],
@@ -13625,21 +13635,22 @@
                 "write": "\u2014",
                 "c": "D[31]",
                 "z": "D[30]",
-                "clocks": "5...12 *"
+                "clocks": "5...12 * (cog/LUT) / 14...32 * (hub-exec)"
               },
               {
                 "bits": "EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA",
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "5...12 *"
+                "clocks": "5...12 * (cog/LUT) / 14...32 * (hub-exec)"
               }
             ],
-            "description": "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then PC += A, else PC = A.",
+            "description": "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRB, increment PTRB by 4, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then PC += A, else PC = A.",
             "result": "",
             "timing": {
-              "cycles": "5-12",
-              "type": "variable"
+              "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
+              "type": "variable",
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)"
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -14329,10 +14340,10 @@
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "2 or 4"
+                "clocks": "2 or 4 / 2 or 13-20"
               }
             ],
-            "description": "Test D and jump to S** if D is zero.                                                                                 2 or 4 / 2 or",
+            "description": "Test D and jump to S** if D is zero.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -14376,14 +14387,15 @@
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "2 or 4"
+                "clocks": "2 or 4 / 2 or 13-20"
               }
             ],
             "description": "TJNS tests the value in Dest and jumps to the address described by Src if the value is not signed (Dest[31] = 0). The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJNS.",
             "result": "Dest is tested and if it's not signed (Dest[31] = 0), PC is set to a new relative (#Src) or absolute (Src) address.",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable",
+              "range": "13...20"
             },
             "flags_affected": {
               "C": "No effect",
@@ -14614,28 +14626,29 @@
             "mnemonic": "CALLA",
             "syntax": "CALLA",
             "brief_description": "Call subroutine via PTRA",
-            "oneliner": "Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++",
+            "oneliner": "Call a subroutine; store return context in the Hub long at PTRA++",
             "encoding": [
               {
                 "bits": "EEEE 1101011 CZ0 DDDDDDDDD 000101110",
                 "write": "\u2014",
                 "c": "D[31]",
                 "z": "D[30]",
-                "clocks": "5...12 *"
+                "clocks": "5...12 * (cog/LUT) / 14...32 * (hub-exec)"
               },
               {
                 "bits": "EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA",
                 "write": "\u2014",
                 "c": "\u2014",
                 "z": "\u2014",
-                "clocks": "5...12 *"
+                "clocks": "5...12 * (cog/LUT) / 14...32 * (hub-exec)"
               }
             ],
-            "description": "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then PC += A, else PC = A.",
+            "description": "Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRA, increment PTRA by 4, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then PC += A, else PC = A.",
             "result": "",
             "timing": {
-              "cycles": "5-12",
-              "type": "variable"
+              "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
+              "type": "variable",
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)"
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -14673,7 +14686,7 @@
             "mnemonic": "CALLPA",
             "syntax": "CALLPA  {#}D,{#}S",
             "brief_description": "",
-            "oneliner": "Call a subroutine; store return context on the stack and copy D into PA or PB",
+            "oneliner": "Call a subroutine; store return context on the stack and copy D into PA",
             "encoding": [
               {
                 "bits": "EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS",
@@ -14695,7 +14708,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PA or PB.",
+              "Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PA.",
               "Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute address to set PC to. Use # for relative addressing; omit # for absolute addressing."
             ],
             "syntax_variants": [
@@ -15081,7 +15094,7 @@
                 "bits": "EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
                 "c": "MSB of long",
-                "z": "\u2014",
+                "z": "Result = 0",
                 "clocks": "9...16 *"
               }
             ],
@@ -15095,7 +15108,7 @@
             },
             "flags_affected": {
               "C": "Set to MSB of long",
-              "Z": "No effect"
+              "Z": "Set if result equals zero"
             },
             "parameters": [],
             "syntax_variants": [
@@ -15313,7 +15326,7 @@
             "description": "Write byte in D[7:0] to hub address {#}S/PTRx.",
             "result": "",
             "timing": {
-              "cycles": 3,
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
               "range": "3...10 / 3...20"
             },
@@ -15360,8 +15373,9 @@
             "description": "Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.",
             "result": "",
             "timing": {
-              "cycles": 3,
-              "type": "fixed"
+              "cycles": "3...10 (cog) / 3...20 (hub-exec)",
+              "type": "variable",
+              "range_source": "encoding.clocks per P2 Instructions v35 CSV (3...10 * / 3...20 *)"
             },
             "flags_affected": {
               "C": "No effect",
@@ -15879,7 +15893,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Used after WRFAST. Write byte in D[7:0] into FIFO.                                                                     2 / FIFO IN USE",
+            "description": "Used after WRFAST. Write byte in D[7:0] into FIFO.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15977,7 +15991,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Used after WRFAST. Write word in D[15:0] into FIFO.                                                                    2 / FIFO IN USE",
+            "description": "Used after WRFAST. Write word in D[15:0] into FIFO.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16023,7 +16037,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Used after WRFAST. Write long in D[31:0] into FIFO.                                                                    2 / FIFO IN USE",
+            "description": "Used after WRFAST. Write long in D[31:0] into FIFO.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16381,7 +16395,7 @@
             ],
             "related": [
               "COGINIT",
-              "COGSTOP"
+              "COGID"
             ],
             "compiler_info": {
               "syntax": "",
@@ -16461,7 +16475,7 @@
               {
                 "bits": "EEEE 1101011 C0L DDDDDDDDD 000000111",
                 "write": "\u2014",
-                "c": "\u2014",
+                "c": "1 if lock is currently taken (when WC)",
                 "z": "\u2014",
                 "clocks": "2...9, +2 if result"
               }
@@ -16469,11 +16483,11 @@
             "description": "Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into\nD and LOCK status into C.\n\nKey features:\n- Releases previously acquired lock\n- Optional owner identification with WC\n- Essential for proper resource cleanup\n- Must balance with LOCKTRY calls\n",
             "result": "",
             "timing": {
-              "cycles": 2,
-              "type": "fixed"
+              "cycles": "2...9, +2 if result",
+              "type": "variable"
             },
             "flags_affected": {
-              "C": "No effect",
+              "C": "When WC: C = 1 if lock is currently taken (last/owner state)",
               "Z": "No effect"
             },
             "parameters": [],
@@ -16510,7 +16524,7 @@
                 "clocks": "2...9"
               }
             ],
-            "description": "Set hub configuration to D. HUBSET configures various hub parameters including\nclock source, crystal settings, and PLL configuration. The exact operation\ndepends on the bits set in D.\n\nPrimary use is clock configuration: selecting clock source (RCFAST, RCSLOW,\ncrystal, PLL), configuring PLL dividers and multipliers, and switching between\nclock sources. Also used for chip reset (bit 31).\n",
+            "description": "Set hub configuration to D. HUBSET configures various hub parameters including\nclock source, crystal settings, and PLL configuration. The exact operation\ndepends on the bits set in D.\n\nPrimary use is clock configuration: selecting clock source (RCFAST, RCSLOW,\ncrystal, PLL), configuring PLL dividers and multipliers, and switching between\nclock sources. Chip reset uses a separate HUBSET mode: HUBSET ##$1000_0000\n(D[31:28]=%0001 selects hard reset/reboot). In clock mode, D[31]=1 selects PRNG seed, not reset.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16569,8 +16583,8 @@
             "description": "Return LOCK D[3:0] for reallocation. After LOCKRET, the lock is returned to the pool and can be allocated again via LOCKNEW.",
             "result": "",
             "timing": {
-              "cycles": 2,
-              "type": "fixed"
+              "cycles": "2...9",
+              "type": "variable"
             },
             "flags_affected": {
               "C": "No effect",
@@ -16613,8 +16627,8 @@
             "description": "Try to acquire lock D[3:0]. C = 1 if got LOCK.\n\nP2 provides 16 hardware locks (0-15) for inter-COG synchronization:\n- Atomic test-and-set operation\n- Non-blocking (returns immediately)\n- Perfect for resource protection\n- Essential for multi-COG coordination\n",
             "result": "",
             "timing": {
-              "cycles": 2,
-              "type": "fixed"
+              "cycles": "2...9, +2 if result",
+              "type": "variable"
             },
             "flags_affected": {
               "C": "Set if LOCK acquired",
@@ -16657,8 +16671,8 @@
             "description": "Request a LOCK. D will be written with the LOCK number (0 to 15). If the WC effect is specified, C = 1 if no LOCK is available.",
             "result": "",
             "timing": {
-              "cycles": 4,
-              "type": "fixed"
+              "cycles": "4...11",
+              "type": "variable"
             },
             "flags_affected": {
               "C": "Set if no LOCK available",
@@ -16942,7 +16956,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set streamer NCO frequency to D. The NCO phase accumulator masks its MSB before each add (modulus $8000_0000), so D is the system-clock multiplier scaled by $8000_0000 = 2^31. Output frequency = (D \u00d7 clkfreq) / $8000_0000, i.e. D = target_freq \u00d7 $8000_0000 / clkfreq. For SETQ+SETXFRQ pattern, SETQ provides low 32 bits, D provides high 32 bits for 64-bit precision frequency control.",
+            "description": "Set streamer NCO frequency to D. The NCO phase accumulator masks its MSB before each add (modulus $8000_0000), so D is the system-clock multiplier scaled by $8000_0000 = 2^31. Output frequency = (D \u00d7 clkfreq) / $8000_0000, i.e. D = target_freq \u00d7 $8000_0000 / clkfreq.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -17353,7 +17367,7 @@
             "encoding": [
               {
                 "bits": "EEEE 1101011 000 DDDDDDDDD 001110001",
-                "write": "\u2014",
+                "write": "D",
                 "c": "\u2014",
                 "z": "\u2014",
                 "clocks": "2"
@@ -18137,7 +18151,7 @@
             "mnemonic": "ADDPIX",
             "syntax": "ADDPIX Dest, {#}Src",
             "brief_description": "Add pixels",
-            "oneliner": "Add RGB colors with full saturation",
+            "oneliner": "Add 8:8:8:8 pixel bytes with full saturation",
             "encoding": [
               {
                 "bits": "EEEE 1010010 00I DDDDDDDDD SSSSSSSSS",
@@ -18147,8 +18161,8 @@
                 "clocks": "7"
               }
             ],
-            "description": "ADDPIX sums individual RGB (red, green, blue) color values of Src into that of Dest and stores the result in the Dest register. Each byte is saturated to prevent wraparound.",
-            "result": "Src color value bytes are added into Dest color value bytes with full saturation.",
+            "description": "ADDPIX sums all four byte fields of Src into those of Dest and stores the result in the Dest register. For 8:8:8:8 pixel data the four bytes are the red, green, blue, and alpha channels. Each byte is saturated independently to prevent wraparound.",
+            "result": "All four byte fields of Src are added into the corresponding byte fields of Dest with full saturation (8:8:8:8 pixel data).",
             "timing": {
               "cycles": 7,
               "type": "fixed"
@@ -18158,8 +18172,8 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is a register containing the RGB color value to add Src to, and is where the result is written.",
-              "Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added into Dest."
+              "Dest is a register containing the 8:8:8:8 pixel value to add Src to, and is where the result is written.",
+              "Src is a register, 9-bit literal, or 32-bit augmented literal whose four byte fields are added into Dest."
             ],
             "syntax_variants": [
               "ADDPIX Dest, {#}Src"
@@ -18369,7 +18383,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-03T20:44:18.723246",
+    "extraction_date": "2026-06-10T07:35:36.136084",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18790,7 +18804,7 @@
             "keyword": "NEXT",
             "type": "keyword",
             "category": "Control Flow",
-            "description": "Continues execution at the next iteration of a REPEAT loop, skipping any \nremaining code in the current iteration. In v52+, an optional level parameter \nallows continuing an outer loop in nested loop structures.\n",
+            "description": "Continues execution at the next iteration of a REPEAT loop, skipping any\nremaining code in the current iteration. An optional level parameter (1-15)\ncontinues an OUTER loop instead; the level counts outward from the current\nloop (1 = 1st-outer loop). Introduced in the v52 edition; the compiler does\nNOT enforce a version directive (verified by boundary probe \u2014 compiles at\n{Spin2_v41}/no-directive).\n",
             "syntax": {
               "basic": "NEXT",
               "with_level": "NEXT level"
@@ -18799,10 +18813,11 @@
               {
                 "name": "level",
                 "type": "integer",
-                "range": "1-16",
+                "range": "1-15",
                 "optional": true,
-                "minimum_version": "v52",
-                "description": "Which loop level to continue (1 = innermost, default)"
+                "introduced_in": "v52",
+                "enforced_version_gate": "none",
+                "description": "Which OUTER loop to continue, counting outward (1 = 1st-outer loop, 2 = 2nd-outer, ...). Bare NEXT continues the current loop."
               }
             ],
             "examples": [
@@ -18815,21 +18830,21 @@
                 "description": "Filter using NEXT"
               },
               {
-                "code": "' V52: NEXT with level parameter - no version directive needed\nREPEAT a FROM 1 TO 10                    ' Level 3 (outermost)\n  REPEAT b FROM 1 TO 10                  ' Level 2\n    REPEAT c FROM 1 TO 10                ' Level 1 (innermost)\n      IF some_condition\n        NEXT                             ' Continue c loop (level 1)\n      IF other_condition\n        NEXT 2                           ' Continue b loop (level 2)\n      IF third_condition\n        NEXT 3                           ' Continue a loop (level 3)\n",
-                "description": "V52 level parameter for nested loops"
+                "code": "' NEXT level parameter - no version directive needed; level counts OUTWARD\nREPEAT a FROM 1 TO 10                    ' outermost loop\n  REPEAT b FROM 1 TO 10                  ' middle loop\n    REPEAT c FROM 1 TO 10                ' innermost loop (current)\n      IF some_condition\n        NEXT                             ' Continue c loop (current)\n      IF other_condition\n        NEXT 1                           ' Continue b loop (1st-outer)\n      IF third_condition\n        NEXT 2                           ' Continue a loop (2nd-outer)\n",
+                "description": "Level parameter for nested loops (level counts outward from the current loop)"
               },
               {
-                "code": "' V52: Skip outer loop iteration from inner loop\nREPEAT row FROM 0 TO 9                   ' Outer loop\n  REPEAT col FROM 0 TO 9                 ' Inner loop\n    IF skip_row_condition(row, col)\n      NEXT 2                             ' Skip to next row\n    process_cell(row, col)\n",
+                "code": "' Skip outer loop iteration from inner loop\nREPEAT row FROM 0 TO 9                   ' Outer loop\n  REPEAT col FROM 0 TO 9                 ' Inner loop (current)\n    IF skip_row_condition(row, col)\n      NEXT 1                             ' Skip to next row (1 = 1st-outer loop)\n    process_cell(row, col)\n",
                 "description": "Continue outer loop from inner loop"
               }
             ],
             "notes": [
-              "NEXT without parameter continues innermost loop (same as NEXT 1)",
-              "V52+: NEXT level continues the Nth enclosing loop",
-              "Level 1 = innermost loop, higher = outer loops",
-              "Maximum level is 16",
-              "Error if level exceeds actual nesting depth",
-              "V52 level feature requires v52+ compiler (no directive needed)",
+              "NEXT without parameter continues the current (innermost enclosing) loop",
+              "NEXT level continues the level-th OUTER loop; level counts outward (NEXT 1 = 1st-outer)",
+              "Bare NEXT is NOT the same as NEXT 1 (NEXT 1 targets the 1st-outer loop, not the current one)",
+              "Valid range is 1-15; pnut-ts rejects level 16+ with 'NEXT/QUIT level must be from 1 to 15'",
+              "Error if level exceeds actual nesting depth ('NEXT/QUIT is not sufficiently nested')",
+              "Level feature introduced in the v52 edition; compiler does NOT enforce a version directive (compiles at {Spin2_v41})",
               "Stack frames for skipped loops are properly cleaned up"
             ],
             "related": [
@@ -18857,7 +18872,7 @@
             "keyword": "QUIT",
             "type": "keyword",
             "category": "Control Flow",
-            "description": "Exits a REPEAT loop immediately, continuing execution after the loop. In v52+, \nan optional level parameter allows exiting multiple nested loops at once.\n",
+            "description": "Exits a REPEAT loop immediately, continuing execution after the loop. An\noptional level parameter (1-15) exits an OUTER loop instead; level counts\noutward from the current loop (QUIT 1 = 1st-outer loop), and exiting an outer\nloop also escapes every loop nested inside it. Introduced in the v52 edition;\nthe compiler does NOT enforce a version directive (verified by boundary probe\n\u2014 compiles at {Spin2_v41}/no-directive).\n",
             "syntax": {
               "basic": "QUIT",
               "with_level": "QUIT level"
@@ -18866,10 +18881,11 @@
               {
                 "name": "level",
                 "type": "integer",
-                "range": "1-16",
+                "range": "1-15",
                 "optional": true,
-                "minimum_version": "v52",
-                "description": "How many loop levels to exit (1 = innermost only, default)"
+                "introduced_in": "v52",
+                "enforced_version_gate": "none",
+                "description": "Which OUTER loop to exit, counting outward (1 = 1st-outer, 2 = 2nd-outer, ...); exiting it also escapes all loops nested inside. Bare QUIT exits the current loop."
               }
             ],
             "examples": [
@@ -18882,25 +18898,26 @@
                 "description": "Early exit when condition met"
               },
               {
-                "code": "' V52: QUIT with level parameter - no version directive needed\nREPEAT a FROM 1 TO 10                    ' Level 3 (outermost)\n  REPEAT b FROM 1 TO 10                  ' Level 2\n    REPEAT c FROM 1 TO 10                ' Level 1 (innermost)\n      IF found_it\n        QUIT 3                           ' Exit ALL three loops\n      IF skip_rest_of_b\n        QUIT 2                           ' Exit c and b loops\n      IF skip_rest_of_c\n        QUIT                             ' Exit c loop only (level 1)\n",
-                "description": "V52 level parameter for nested loops"
+                "code": "' QUIT with level parameter - no version directive needed; level counts OUTWARD\nREPEAT a FROM 1 TO 10                    ' outermost loop\n  REPEAT b FROM 1 TO 10                  ' middle loop\n    REPEAT c FROM 1 TO 10                ' innermost loop (current)\n      IF found_it\n        QUIT 2                           ' Exit the a loop (2nd-outer) -> escapes all three\n      IF skip_rest_of_b\n        QUIT 1                           ' Exit the b loop (1st-outer) -> escapes c and b\n      IF skip_rest_of_c\n        QUIT                             ' Exit c loop only (current)\n",
+                "description": "Level parameter for nested loops (level counts outward; exiting an outer loop escapes its inner loops)"
               },
               {
-                "code": "' V52: Exit multiple loops on error\nREPEAT outer FROM 0 TO max_outer\n  REPEAT inner FROM 0 TO max_inner\n    result := process(outer, inner)\n    IF result < 0\n      error_code := result\n      QUIT 2                             ' Exit both loops on error\nIF error_code < 0\n  handle_error(error_code)\n",
+                "code": "' Exit multiple loops on error\nREPEAT outer FROM 0 TO max_outer\n  REPEAT inner FROM 0 TO max_inner       ' current loop\n    result := process(outer, inner)\n    IF result < 0\n      error_code := result\n      QUIT 1                             ' Exit the outer loop (1st-outer) -> escapes both\nIF error_code < 0\n  handle_error(error_code)\n",
                 "description": "Exit all loops on error condition"
               },
               {
-                "code": "' V52: Matrix search with multi-level exit\nREPEAT row FROM 0 TO rows - 1\n  REPEAT col FROM 0 TO cols - 1\n    IF matrix[row][col] == target\n      found_row := row\n      found_col := col\n      QUIT 2                             ' Exit both loops\n' found_row/found_col contain result\n",
+                "code": "' Matrix search with multi-level exit\nREPEAT row FROM 0 TO rows - 1\n  REPEAT col FROM 0 TO cols - 1           ' current loop\n    IF matrix[row][col] == target\n      found_row := row\n      found_col := col\n      QUIT 1                             ' Exit the row loop (1st-outer) -> escapes both\n' found_row/found_col contain result\n",
                 "description": "2D search with immediate exit on find"
               }
             ],
             "notes": [
-              "QUIT without parameter exits innermost loop (same as QUIT 1)",
-              "V52+: QUIT level exits N enclosing loops",
-              "Level 1 = exit innermost only, level 2 = exit two loops, etc.",
-              "Maximum level is 16",
-              "Error if level exceeds actual nesting depth",
-              "V52 level feature requires v52+ compiler (no directive needed)",
+              "QUIT without parameter exits the current (innermost enclosing) loop",
+              "QUIT level exits the level-th OUTER loop; level counts outward (QUIT 1 = 1st-outer)",
+              "Exiting an outer loop also escapes every loop nested inside it (so QUIT 1 leaves the current loop AND the 1st-outer loop)",
+              "Bare QUIT is NOT the same as QUIT 1 (QUIT 1 targets the 1st-outer loop)",
+              "Valid range is 1-15; pnut-ts rejects level 16+ with 'NEXT/QUIT level must be from 1 to 15'",
+              "Error if level exceeds actual nesting depth ('NEXT/QUIT is not sufficiently nested')",
+              "Level feature introduced in the v52 edition; compiler does NOT enforce a version directive (compiles at {Spin2_v41})",
               "All intermediate loop stack frames are properly cleaned up"
             ],
             "related": [
@@ -21132,7 +21149,7 @@
             "method": "GETCT",
             "category": "timing",
             "type": "method",
-            "description": "Get the current 32-bit system counter value.\nThe system counter increments once per clock cycle continuously from boot.\nWraps around from $FFFF_FFFF to $0000_0000 approximately every 21 seconds at 200MHz.\nEssential for precise timing measurements and delays.\n",
+            "description": "Get the lower 32 bits of the 64-bit system counter.\nThe underlying counter is a free-running 64-bit value that increments once per clock cycle\ncontinuously from boot (Rev B/C silicon). GETCT() returns only the lower 32 bits, which\nwraps around from $FFFF_FFFF to $0000_0000 approximately every 21 seconds at 200MHz.\nFor the upper 32 bits use the PASM2 GETCT D WC form. Essential for precise timing\nmeasurements and delays.\n",
             "syntax": "GETCT() : Count",
             "parameters": "none",
             "returns": {
@@ -21190,7 +21207,9 @@
             ],
             "notes": [
               "Counter runs continuously from boot",
-              "Wraps around every 2^32 clocks",
+              "Underlying hardware counter is 64-bit (Rev B/C silicon); GETCT() returns the lower 32 bits",
+              "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction",
+              "Wraps around every 2^32 clocks (lower 32 bits)",
               "Subtraction handles wrap correctly",
               "All cogs see same counter value",
               "Not affected by cog start/stop",
@@ -21411,7 +21430,7 @@
               "Cannot start Spin2 code with COGINIT (use COGSPIN)"
             ],
             "limitations": [
-              "Maximum 496 longs of code+data in COGEXEC mode",
+              "COGINIT loads $000-$1F7 = 504 longs of code/data; the $1F8-$1FF special-purpose registers are not overwritten by COGINIT",
               "Only 8 cogs available total",
               "Cannot determine which cog when using COGEXEC_NEW",
               "No automatic cleanup if cog crashes"
@@ -24128,7 +24147,8 @@
             "method": "MOVBYTS",
             "type": "method",
             "category": "Byte Manipulation",
-            "minimum_version": "v52",
+            "introduced_in": "v52",
+            "enforced_version_gate": "none",
             "description": "Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each \ndigit in the pattern (0-3) specifies which source byte maps to that destination \nposition. This is the Spin2 function version of the PASM2 MOVBYTS instruction.\nAvailable in PNut/pnut_ts v52 and later compilers. No version directive required.\n",
             "syntax": "result := MOVBYTS(value, order)",
             "parameters": [
@@ -28469,7 +28489,7 @@
             "description": "Sets the origin address for hub RAM assembly code. In DAT blocks, ORGH positions \ncode/data at a specific hub address. In V50+, ORGH also enables inline hub-execute \nassembly within Spin2 methods for performance-critical code sections.\n",
             "location": "DAT block, or inline within PUB/PRI methods (V50+)",
             "syntax": {
-              "dat_block": "ORGH [address]",
+              "dat_block": "ORGH [address[, limit]]",
               "inline_spin2": "PUB/PRI method()\n    ORGH\n        ' Hub-execute PASM2 code\n    END\n"
             },
             "parameters": [
@@ -28478,7 +28498,14 @@
                 "type": "integer",
                 "description": "Hub address for code/data placement (DAT block usage)",
                 "optional": true,
-                "default": "Current location"
+                "default": "Context-dependent (Spin2 v55): $400 in Spin2+PASM programs; current hub address in PASM-only programs"
+              },
+              {
+                "name": "limit",
+                "type": "integer",
+                "description": "Optional origin limit; PNut enforces a $100000 ceiling",
+                "optional": true,
+                "default": "$100000"
               }
             ],
             "examples": [
@@ -28552,7 +28579,8 @@
             ],
             "notes": [
               "In DAT blocks, ORGH sets hub origin for subsequent code/data",
-              "Default address continues from current compilation position",
+              "Bare ORGH default address is context-dependent (Spin2 v55): $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)",
+              "Optional second parameter sets the origin limit (default $100000); ORGH address,limit beyond the ceiling emits 'Hub address exceeds $100000 ceiling (m361)' -- compiler-verified",
               "V50+: ORGH enables inline hub-execute assembly in Spin2 methods",
               "Hub-execute code runs in place, no cog RAM copy required",
               "For inline blocks, ORG uses cog RAM, ORGH uses hub RAM",
@@ -28631,12 +28659,18 @@
               "FILE  \"font8x8.dat\"    ; Include font data",
               "datastart  FILE \"config.dat\"  ; Label the included data"
             ],
-            "usage": "FILE is used in DAT sections to include the entire contents of an external\nbinary file directly into Hub memory. The file path is relative to the\nsource file location. This is useful for including images, fonts, lookup\ntables, or other pre-compiled binary data. The data is inserted byte-for-byte\nexactly as it appears in the file.\n",
+            "usage": "FILE is used in DAT sections to include the entire contents of an external\nbinary file directly into Hub memory. The filename must be a bare name (no path\nseparators or other invalid characters); the file is looked up relative to the\nsource file's directory. This is useful for including images, fonts, lookup\ntables, or other pre-compiled binary data. The data is inserted byte-for-byte\nexactly as it appears in the file.\n",
+            "context": "DAT sections only; FILE is not permitted inside inline PASM blocks in PUB/PRI methods",
+            "filename_requirements": {
+              "invalid_characters": "/ : * ? < > |  -- each yields 'error:Invalid filename character' at compile time (pnut-ts boundary-probed)",
+              "case_sensitivity": "Follows the host OS filesystem (case-sensitive on Linux/macOS case-sensitive volumes; case-insensitive on Windows)"
+            },
             "alignment": "File data begins at the current assembly position without automatic alignment.\nUse ALIGNL or ALIGNW before FILE if specific alignment is needed for the data.\n",
             "limitations": [
               "File must exist at compile time",
               "Entire file contents are included",
-              "No partial file inclusion available"
+              "No partial file inclusion available",
+              "FILE is only valid in DAT blocks; using it inside a PUB/PRI inline-PASM block is a compile error"
             ],
             "see_also": [
               "BYTE",
@@ -28686,7 +28720,7 @@
           "Insert Byte Data": {
             "directive": "BYTE",
             "name": "Insert Byte Data",
-            "description": "Insert byte data into Hub memory at assembly time",
+            "description": "Insert byte data into the assembly image at the current origin at assembly time",
             "syntax": "BYTE value1 {, value2, ...}",
             "examples": [
               "BYTE  $FF              ; Single byte value",
@@ -28694,7 +28728,7 @@
               "BYTE  \"Hello\", 0       ; String with null terminator",
               "BYTE  value[16]        ; Duplicate value 16 times"
             ],
-            "usage": "BYTE is used in DAT sections to define byte-sized data values that will\nbe stored in Hub memory. Multiple values can be specified separated by commas.\nStrings are automatically converted to their byte values.\n",
+            "usage": "BYTE is used in DAT sections to define byte-sized data values. Data is placed\nat the current assembly origin \u2014 in COG RAM, LUT RAM, or Hub RAM depending on\nthe active ORG/ORGH mode. Multiple values can be specified separated by commas.\nStrings are automatically converted to their byte values.\n",
             "alignment": "Bytes are packed sequentially without padding",
             "see_also": [
               "WORD",
@@ -28710,7 +28744,7 @@
           "Insert Word Data": {
             "directive": "WORD",
             "name": "Insert Word Data",
-            "description": "Insert word (16-bit) data into Hub memory at assembly time",
+            "description": "Insert word (16-bit) data into the assembly image at the current origin at assembly time",
             "syntax": "WORD value1 {, value2, ...}",
             "examples": [
               "WORD  $1234            ; Single word value",
@@ -28718,7 +28752,7 @@
               "WORD  value[8]          ; Duplicate value 8 times",
               "WORD  (@label - @base) >> 1  ; Address calculation"
             ],
-            "usage": "WORD is used in DAT sections to define word-sized (16-bit) data values that\nwill be stored in Hub memory. Multiple values can be specified separated by\ncommas. Words are stored in little-endian format.\n",
+            "usage": "WORD is used in DAT sections to define word-sized (16-bit) data values. Data\nis placed at the current assembly origin \u2014 in COG RAM, LUT RAM, or Hub RAM\ndepending on the active ORG/ORGH mode. Multiple values can be specified separated\nby commas. Words are stored in little-endian format.\n",
             "alignment": "Words may not be aligned unless preceded by ALIGNW. Using ALIGNW before\nWORD data ensures proper word alignment for efficient access.\n",
             "see_also": [
               "BYTE",
@@ -28745,7 +28779,7 @@
           "Insert Long Data": {
             "directive": "LONG",
             "name": "Insert Long Data",
-            "description": "Insert long (32-bit) data into Hub memory at assembly time",
+            "description": "Insert long (32-bit) data into the assembly image at the current origin at assembly time",
             "syntax": "LONG value1 {, value2, ...}",
             "examples": [
               "LONG  $12345678        ; Single long value",
@@ -28754,7 +28788,7 @@
               "LONG  @label            ; Address of label",
               "LONG  %%3210            ; Quaternary literal"
             ],
-            "usage": "LONG is used in DAT sections to define long-sized (32-bit) data values that\nwill be stored in Hub memory. Multiple values can be specified separated by\ncommas. This is the native data size for P2 operations. Longs are stored\nin little-endian format.\n",
+            "usage": "LONG is used in DAT sections to define long-sized (32-bit) data values. Data\nis placed at the current assembly origin \u2014 in COG RAM, LUT RAM, or Hub RAM\ndepending on the active ORG/ORGH mode. Multiple values can be specified separated\nby commas. This is the native data size for P2 operations. Longs are stored\nin little-endian format.\n",
             "alignment": "Longs may not be aligned unless preceded by ALIGNL. Using ALIGNL before\nLONG data ensures proper long alignment for efficient access and is\nespecially important for data that will be accessed as longs.\n",
             "see_also": [
               "BYTE",
