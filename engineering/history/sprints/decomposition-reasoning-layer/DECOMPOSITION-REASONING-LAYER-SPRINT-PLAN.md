@@ -1,7 +1,7 @@
 # Sprint Plan — P2 Functional-Decomposition Reasoning Layer
 
 **Head:** yaml (KB-for-agents) · **active_element:** `yaml:p2kb`
-**Status:** STARTED 2026-06-11 — ships as KB `v1.7.0` (see Sprint-start record)
+**Status:** ✅ CLOSED 2026-06-11 — shipped as KB `v1.7.0` (tag `v1.7.0`, index commit `56a1771`). Closeout audit: `engineering/history/sprints/decomposition-reasoning-layer/2026-06-11-decomposition-reasoning-layer-CLOSEOUT.md`.
 **Design rationale (companion):** `engineering/planning/DECOMPOSITION-LAYER-SYNTHESIS-PLAN.md`
 (decisions D-A…D-E resolved there; this doc is the executable, deliverable-structured plan)
 
