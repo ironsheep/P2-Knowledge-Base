@@ -64,7 +64,7 @@ BUILD_VERSION_EXAMPLE:   <per-head — e.g. manual "2.3.0"; see skill overlay>
 ANALYSIS_DIR:  engineering/analysis/
 
 # PER-HEAD (sentinel) — resolved by Work Type Routing / skill overlay:
-PLAN_DIR:           <per-head — manual plan co-located with the manual; ingestion plan with its source; YAML-set plan in its own home; see skill overlay>
+PLAN_DIR:           engineering/planning/   # SINGLE dir for ALL engineering heads (decided 2026-06-11 — unify; supersedes the per-head sentinel). Stragglers in operations/planning + operations/sprints migrate here (separable cleanup). Archive stays PLAN_ARCHIVE_DIR.
 PLAN_ARCHIVE_DIR:   engineering/history/sprints/
 PUNCH_LIST_DOC:     <per-head — one per manual, per ingestion source, and for the P2KB YAML set; P2KB-CORRECTION-FINDINGS.md is the YAML-set register; see skill overlay>
 RELEASE_NOTES_DOC:  <per-head — manual CHANGELOG, or P2KB YAML release notes; N/A for ingestion (uses completeness dashboard); see skill overlay>
