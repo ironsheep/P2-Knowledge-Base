@@ -1,7 +1,7 @@
 # DEBUG Window YAML — v55 Reconciliation & Findability Sprint Plan
 
 **Head:** KB-for-agents (P2KB YAML set) · **Version target:** P2KB **v1.8.0** (agreed at start)
-**Status:** STARTED 2026-06-11 — §0 decisions confirmed by Stephen as-is; entry checks recorded below
+**Status:** CLOSED 2026-06-11 — shipped as KB **v1.8.0** (content `4165987` → index `9a8c12c`, tag pushed). Plan certified done (all §1–§12 SHIPPED). Closeout audit: `engineering/history/sprints/debug-window-yaml-v55-reconciliation/2026-06-11-debug-window-yaml-v55-reconciliation-CLOSEOUT.md`.
 **Authored:** 2026-06-11
 
 ## Entry checks (sprint-start, 2026-06-11)
