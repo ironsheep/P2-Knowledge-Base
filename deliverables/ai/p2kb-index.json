@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-11T21:06:58.741837",
-    "total_entries": 1061,
-    "total_categories": 50,
-    "total_aliases": 1012,
-    "multi_target_aliases": 54,
+    "generated": "2026-06-11T23:03:44.760999",
+    "total_entries": 1062,
+    "total_categories": 51,
+    "total_aliases": 1093,
+    "multi_target_aliases": 58,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -623,6 +623,17 @@
       "p2kbSpin2SpecialConfigurationSymbols",
       "p2kbSpin2Thistask"
     ],
+    "spin2_debug_displays": [
+      "p2kbSpin2Bitmap",
+      "p2kbSpin2Fft",
+      "p2kbSpin2Logic",
+      "p2kbSpin2Midi",
+      "p2kbSpin2Plot",
+      "p2kbSpin2Scope",
+      "p2kbSpin2ScopeXy",
+      "p2kbSpin2Spectro",
+      "p2kbSpin2Term"
+    ],
     "guides_getting_started": [
       "p2kbGuidePasm2GettingStarted",
       "p2kbGuideQuickQueries",
@@ -698,6 +709,9 @@
     "ALTSW": [
       "p2kbPasm2Altsw"
     ],
+    "ANALOG DISPLAY": [
+      "p2kbSpin2Scope"
+    ],
     "AND": [
       "p2kbPasm2And"
     ],
@@ -721,6 +735,9 @@
     ],
     "BITL": [
       "p2kbPasm2Bitl"
+    ],
+    "BITMAP": [
+      "p2kbSpin2Bitmap"
     ],
     "BITNC": [
       "p2kbPasm2Bitnc"
@@ -779,6 +796,12 @@
     ],
     "CALLPB": [
       "p2kbPasm2Callpb"
+    ],
+    "CANVAS": [
+      "p2kbSpin2Plot"
+    ],
+    "CARTESIAN": [
+      "p2kbSpin2Plot"
     ],
     "CLKFREQ": [
       "p2kbArchClockSystem"
@@ -844,8 +867,38 @@
     "CRCNIB": [
       "p2kbPasm2Crcnib"
     ],
+    "CROP": [
+      "p2kbSpin2Plot"
+    ],
     "DEBUG": [
       "p2kbPasm2Debug"
+    ],
+    "DEBUG BITMAP": [
+      "p2kbSpin2Bitmap"
+    ],
+    "DEBUG FFT": [
+      "p2kbSpin2Fft"
+    ],
+    "DEBUG LOGIC": [
+      "p2kbSpin2Logic"
+    ],
+    "DEBUG MIDI": [
+      "p2kbSpin2Midi"
+    ],
+    "DEBUG PLOT": [
+      "p2kbSpin2Plot"
+    ],
+    "DEBUG SCOPE": [
+      "p2kbSpin2Scope"
+    ],
+    "DEBUG SCOPE_XY": [
+      "p2kbSpin2ScopeXy"
+    ],
+    "DEBUG SPECTRO": [
+      "p2kbSpin2Spectro"
+    ],
+    "DEBUG TERM": [
+      "p2kbSpin2Term"
     ],
     "DEBUG_255_LIMIT": [
       "p2kbSpin2DbgDebugStrategyGuide"
@@ -921,6 +974,9 @@
     ],
     "DECOD": [
       "p2kbPasm2Decod"
+    ],
+    "DIGITAL SIGNALS": [
+      "p2kbSpin2Logic"
     ],
     "DIRC": [
       "p2kbPasm2Dirc"
@@ -1009,6 +1065,9 @@
     "FBLOCK": [
       "p2kbPasm2Fblock"
     ],
+    "FFT": [
+      "p2kbSpin2Fft"
+    ],
     "FGE": [
       "p2kbPasm2Fge"
     ],
@@ -1047,6 +1106,12 @@
     ],
     "FLTZ": [
       "p2kbPasm2Fltz"
+    ],
+    "FRAMEBUFFER": [
+      "p2kbSpin2Bitmap"
+    ],
+    "FREQUENCY DISPLAY": [
+      "p2kbSpin2Fft"
     ],
     "GETBRK": [
       "p2kbPasm2Getbrk"
@@ -1105,6 +1170,9 @@
     ],
     "IJZ": [
       "p2kbPasm2Ijz"
+    ],
+    "IMAGE DISPLAY": [
+      "p2kbSpin2Bitmap"
     ],
     "INCMOD": [
       "p2kbPasm2Incmod"
@@ -1211,6 +1279,12 @@
     "JXRO": [
       "p2kbPasm2Jxro"
     ],
+    "LAYER": [
+      "p2kbSpin2Plot"
+    ],
+    "LISSAJOUS": [
+      "p2kbSpin2ScopeXy"
+    ],
     "LOC": [
       "p2kbPasm2Loc"
     ],
@@ -1242,6 +1316,12 @@
     "LOG2": [
       "p2kbSpin2Log2"
     ],
+    "LOGIC": [
+      "p2kbSpin2Logic"
+    ],
+    "LOGIC ANALYZER": [
+      "p2kbSpin2Logic"
+    ],
     "LONG": [
       "p2kbSpin2Long"
     ],
@@ -1272,11 +1352,17 @@
     "LSTRING": [
       "p2kbSpin2Lstring"
     ],
+    "Lissajous": [
+      "p2kbSpin2ScopeXy"
+    ],
     "MERGEB": [
       "p2kbPasm2Mergeb"
     ],
     "MERGEW": [
       "p2kbPasm2Mergew"
+    ],
+    "MIDI": [
+      "p2kbSpin2Midi"
     ],
     "MISO": [
       "p2kbArchSpiImplementationGuide"
@@ -1314,6 +1400,9 @@
     ],
     "MULS": [
       "p2kbPasm2Muls"
+    ],
+    "MUSIC KEYBOARD": [
+      "p2kbSpin2Midi"
     ],
     "MUXC": [
       "p2kbPasm2Muxc"
@@ -1372,6 +1461,12 @@
     "NOT": [
       "p2kbPasm2Not"
     ],
+    "NOTE DISPLAY": [
+      "p2kbSpin2Midi"
+    ],
+    "NOTE VELOCITY": [
+      "p2kbSpin2Midi"
+    ],
     "OFFSETOF": [
       "p2kbSpin2Offsetof"
     ],
@@ -1380,6 +1475,9 @@
     ],
     "OR": [
       "p2kbPasm2Or"
+    ],
+    "OSCILLOSCOPE": [
+      "p2kbSpin2Scope"
     ],
     "OUTC": [
       "p2kbPasm2Outc"
@@ -1407,6 +1505,12 @@
     ],
     "OUTZ": [
       "p2kbPasm2Outz"
+    ],
+    "PHASE PLOT": [
+      "p2kbSpin2ScopeXy"
+    ],
+    "PIANO KEYBOARD": [
+      "p2kbSpin2Midi"
     ],
     "PINCLEAR": [
       "p2kbSpin2Pinclear"
@@ -1458,6 +1562,13 @@
     ],
     "PLL": [
       "p2kbArchClockSystem"
+    ],
+    "PLOT": [
+      "p2kbSpin2Plot"
+    ],
+    "POLAR PLOT": [
+      "p2kbSpin2Plot",
+      "p2kbSpin2ScopeXy"
     ],
     "POLLATN": [
       "p2kbPasm2Pollatn",
@@ -1743,8 +1854,17 @@
     "SCAS": [
       "p2kbPasm2Scas"
     ],
+    "SCOPE": [
+      "p2kbSpin2Scope"
+    ],
+    "SCOPE_XY": [
+      "p2kbSpin2ScopeXy"
+    ],
     "SEND": [
       "p2kbSpin2Send"
+    ],
+    "SERIAL TERMINAL": [
+      "p2kbSpin2Term"
     ],
     "SETBYTE": [
       "p2kbPasm2Setbyte"
@@ -1857,6 +1977,15 @@
     "SMART_PIN_CONFIGURATION": [
       "p2kbArchSmartPins"
     ],
+    "SPECTRO": [
+      "p2kbSpin2Spectro"
+    ],
+    "SPECTROGRAM": [
+      "p2kbSpin2Spectro"
+    ],
+    "SPECTRUM": [
+      "p2kbSpin2Fft"
+    ],
     "SPI": [
       "p2kbArchSpiImplementationGuide"
     ],
@@ -1874,6 +2003,12 @@
     ],
     "SPLITW": [
       "p2kbPasm2Splitw"
+    ],
+    "SPRITE": [
+      "p2kbSpin2Plot"
+    ],
+    "SPRITEDEF": [
+      "p2kbSpin2Plot"
     ],
     "SQRT": [
       "p2kbSpin2Sqrt"
@@ -1944,6 +2079,12 @@
     "TASKWAIT": [
       "p2kbSpin2Taskwait"
     ],
+    "TERM": [
+      "p2kbSpin2Term"
+    ],
+    "TERMINAL": [
+      "p2kbSpin2Term"
+    ],
     "TEST": [
       "p2kbPasm2Test"
     ],
@@ -1961,6 +2102,9 @@
     ],
     "TESTPN": [
       "p2kbPasm2Testpn"
+    ],
+    "TEXT WINDOW": [
+      "p2kbSpin2Term"
     ],
     "THISTASK": [
       "p2kbSpin2Thistask"
@@ -1986,6 +2130,9 @@
     "TJZ": [
       "p2kbPasm2Tjz"
     ],
+    "TRAJECTORY PLOT": [
+      "p2kbSpin2ScopeXy"
+    ],
     "TRGINT1": [
       "p2kbPasm2Trgint1"
     ],
@@ -2000,6 +2147,9 @@
     ],
     "TT_BITS": [
       "p2kbArchSmartPins"
+    ],
+    "VECTOR GRAPHICS": [
+      "p2kbSpin2Plot"
     ],
     "VSCODE_SPIN2_COMMENTS": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -2061,6 +2211,13 @@
     ],
     "WAITXRO": [
       "p2kbPasm2Waitxro"
+    ],
+    "WATERFALL": [
+      "p2kbSpin2Spectro"
+    ],
+    "WAVEFORM": [
+      "p2kbSpin2Logic",
+      "p2kbSpin2Scope"
     ],
     "WFBYTE": [
       "p2kbPasm2Wfbyte"
@@ -2151,6 +2308,12 @@
     ],
     "XSTOP": [
       "p2kbPasm2Xstop"
+    ],
+    "XY OSCILLOSCOPE": [
+      "p2kbSpin2ScopeXy"
+    ],
+    "XY oscilloscope": [
+      "p2kbSpin2ScopeXy"
     ],
     "XYPOL": [
       "p2kbSpin2Xypol"
@@ -2274,6 +2437,9 @@
     "altsw": [
       "p2kbPasm2Altsw"
     ],
+    "analog display": [
+      "p2kbSpin2Scope"
+    ],
     "and": [
       "p2kbPasm2And"
     ],
@@ -2309,6 +2475,9 @@
     ],
     "bitl": [
       "p2kbPasm2Bitl"
+    ],
+    "bitmap": [
+      "p2kbSpin2Bitmap"
     ],
     "bitnc": [
       "p2kbPasm2Bitnc"
@@ -2371,6 +2540,12 @@
     ],
     "callpb": [
       "p2kbPasm2Callpb"
+    ],
+    "canvas": [
+      "p2kbSpin2Plot"
+    ],
+    "cartesian": [
+      "p2kbSpin2Plot"
     ],
     "clkset": [
       "p2kbSpin2Clkset"
@@ -2440,6 +2615,9 @@
     "crcnib": [
       "p2kbPasm2Crcnib"
     ],
+    "crop": [
+      "p2kbSpin2Plot"
+    ],
     "data_logger": [
       "p2kbSpin2DataLogger"
     ],
@@ -2466,6 +2644,9 @@
     ],
     "diagnostic_output": [
       "p2kbSpin2Spin2DiagnosticOutput"
+    ],
+    "digital signals": [
+      "p2kbSpin2Logic"
     ],
     "dirc": [
       "p2kbPasm2Dirc"
@@ -2605,8 +2786,14 @@
     "fltz": [
       "p2kbPasm2Fltz"
     ],
+    "framebuffer": [
+      "p2kbSpin2Bitmap"
+    ],
     "framework_pattern": [
       "p2kbSpin2FrameworkPattern"
+    ],
+    "frequency display": [
+      "p2kbSpin2Fft"
     ],
     "getbrk": [
       "p2kbPasm2Getbrk"
@@ -2667,6 +2854,9 @@
     ],
     "ijz": [
       "p2kbPasm2Ijz"
+    ],
+    "image display": [
+      "p2kbSpin2Bitmap"
     ],
     "incmod": [
       "p2kbPasm2Incmod"
@@ -2779,6 +2969,9 @@
     "latest_wins_mailbox": [
       "p2kbSpin2Spin2LatestWinsMailbox"
     ],
+    "layer": [
+      "p2kbSpin2Plot"
+    ],
     "layered_architecture": [
       "p2kbSpin2Spin2LayeredArchitecture"
     ],
@@ -2812,6 +3005,9 @@
     ],
     "log2": [
       "p2kbSpin2Log2"
+    ],
+    "logic analyzer": [
+      "p2kbSpin2Logic"
     ],
     "long": [
       "p2kbSpin2Long"
@@ -2907,6 +3103,9 @@
     "multimedia_device": [
       "p2kbSpin2MultimediaDevice"
     ],
+    "music keyboard": [
+      "p2kbSpin2Midi"
+    ],
     "muxc": [
       "p2kbPasm2Muxc"
     ],
@@ -2965,6 +3164,12 @@
     "not": [
       "p2kbPasm2Not"
     ],
+    "note display": [
+      "p2kbSpin2Midi"
+    ],
+    "note velocity": [
+      "p2kbSpin2Midi"
+    ],
     "offsetof": [
       "p2kbSpin2Offsetof"
     ],
@@ -2973,6 +3178,9 @@
     ],
     "or": [
       "p2kbPasm2Or"
+    ],
+    "oscilloscope": [
+      "p2kbSpin2Scope"
     ],
     "outc": [
       "p2kbPasm2Outc"
@@ -3004,6 +3212,12 @@
     "pasm2_initialization": [
       "p2kbPasm2Pasm2Initialization"
     ],
+    "phase plot": [
+      "p2kbSpin2ScopeXy"
+    ],
+    "piano keyboard": [
+      "p2kbSpin2Midi"
+    ],
     "pin_control": [
       "p2kbSpin2Spin2PinControl"
     ],
@@ -3031,8 +3245,15 @@
     "pinwrite": [
       "p2kbSpin2Pinwrite"
     ],
+    "plot": [
+      "p2kbSpin2Plot"
+    ],
     "plugin_system": [
       "p2kbSpin2Spin2PluginSystem"
+    ],
+    "polar plot": [
+      "p2kbSpin2Plot",
+      "p2kbSpin2ScopeXy"
     ],
     "pollatn": [
       "p2kbPasm2Pollatn",
@@ -3289,6 +3510,9 @@
     "scas": [
       "p2kbPasm2Scas"
     ],
+    "scope_xy": [
+      "p2kbSpin2ScopeXy"
+    ],
     "send": [
       "p2kbSpin2Send"
     ],
@@ -3297,6 +3521,9 @@
     ],
     "sensor_reader": [
       "p2kbSpin2SensorReader"
+    ],
+    "serial terminal": [
+      "p2kbSpin2Term"
     ],
     "setbyte": [
       "p2kbPasm2Setbyte"
@@ -3424,6 +3651,12 @@
     "smart_pin_usage": [
       "p2kbArchSmartPinUsageAnalysis"
     ],
+    "spectrogram": [
+      "p2kbSpin2Spectro"
+    ],
+    "spectrum": [
+      "p2kbSpin2Fft"
+    ],
     "spin2_docs_vscode": [
       "p2kbSpin2VscodePnutDocumentationStyle"
     ],
@@ -3435,6 +3668,12 @@
     ],
     "splitw": [
       "p2kbPasm2Splitw"
+    ],
+    "sprite": [
+      "p2kbSpin2Plot"
+    ],
+    "spritedef": [
+      "p2kbSpin2Plot"
     ],
     "sqrt": [
       "p2kbSpin2Sqrt"
@@ -3509,6 +3748,9 @@
     "taskwait": [
       "p2kbSpin2Taskwait"
     ],
+    "terminal": [
+      "p2kbSpin2Term"
+    ],
     "test": [
       "p2kbPasm2Test"
     ],
@@ -3529,6 +3771,9 @@
     ],
     "testpn": [
       "p2kbPasm2Testpn"
+    ],
+    "text window": [
+      "p2kbSpin2Term"
     ],
     "timing_control": [
       "p2kbArchTimingControlAnalysis",
@@ -3555,6 +3800,9 @@
     "tjz": [
       "p2kbPasm2Tjz"
     ],
+    "trajectory plot": [
+      "p2kbSpin2ScopeXy"
+    ],
     "trgint1": [
       "p2kbPasm2Trgint1"
     ],
@@ -3569,6 +3817,9 @@
     ],
     "utility_library": [
       "p2kbSpin2UtilityLibrary"
+    ],
+    "vector graphics": [
+      "p2kbSpin2Plot"
     ],
     "vscode_spin2_comments": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -3630,6 +3881,13 @@
     ],
     "waitxro": [
       "p2kbPasm2Waitxro"
+    ],
+    "waterfall": [
+      "p2kbSpin2Spectro"
+    ],
+    "waveform": [
+      "p2kbSpin2Logic",
+      "p2kbSpin2Scope"
     ],
     "wfbyte": [
       "p2kbPasm2Wfbyte"
@@ -7335,8 +7593,8 @@
     },
     "p2kbSpin2DbgDebug": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug.yaml",
-      "mtime": 1764449566,
-      "sha256": "db1a883e2779163a07f375ac5d33d684dd53aee7b5349a8b326a24476bd3c007"
+      "mtime": 1781218822,
+      "sha256": "c79fcfdcc5183bb1307257fc57b7f78519d4893ae96d975a4fcaba735d1dff64"
     },
     "p2kbSpin2DbgDly": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/dly.yaml",
@@ -7355,43 +7613,48 @@
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
-      "mtime": 1764449566,
-      "sha256": "ff5ee596c7a0fb323c8fd0c8709322d69ae230c00e1e5e53662fd17f9bb5709e"
+      "mtime": 1781218822,
+      "sha256": "137db7166f048cd3c295ddafc1e15ee80c26d9270a08e2f83645f9e4602c461b"
     },
     "p2kbSpin2Fft": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/fft.yaml",
-      "mtime": 1764449566,
-      "sha256": "52819b41bc12ddca37574fd2a94c893734f5d0c4fe152272b7a85c984ec91ca7"
+      "mtime": 1781218822,
+      "sha256": "8404297e32de00962c62151e1ad28247346807d0462b1e151852bbb2a939079a"
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1780269492,
-      "sha256": "b2cbc32d216b0225683c101f1cc65d7018772f71096ad3f97ea1fcd9cc6ae629"
+      "mtime": 1781218822,
+      "sha256": "a8f9b6489d964938ceb2c1b215c6e52b2bdfbd752c58694b5a289a177b58cf94"
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1780269492,
-      "sha256": "afe84b0352e25b2513ffaeef10424a5b7e9759564fde3d543e5e75dbd3c1f620"
+      "mtime": 1781218822,
+      "sha256": "d1fa807aceed62ada1b3ccf683bc9e40ca689d2ec1c287b997cbca5aa62fe414"
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1780269492,
-      "sha256": "387da2877134532ef21f7a7e2fddb66224e9e89cab808db740bedeb723a2ba26"
+      "mtime": 1781218822,
+      "sha256": "5e51fe9484882e3c36bcf9cdf728a23dedf222aaa77d61b1d4fd00f25507001d"
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
-      "mtime": 1764449566,
-      "sha256": "3e9b47814e2b2830fe7ecb483b28c92119b6fe933e55fae2f79a1b206b822468"
+      "mtime": 1781218822,
+      "sha256": "a3939dd9825e221ed3c69a3ce7783d2596773897e6a91b209a69217e15000596"
+    },
+    "p2kbSpin2ScopeXy": {
+      "path": "deliverables/ai/P2/language/spin2/debug-displays/scope_xy.yaml",
+      "mtime": 1781218822,
+      "sha256": "3a903b088d991e5641c7b0072c94a5cdceca3650700a2711dbdee5cc23ab198f"
     },
     "p2kbSpin2Spectro": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/spectro.yaml",
-      "mtime": 1764449566,
-      "sha256": "b000baf9ab959c68a425c9023abeb5ed82a854f00c2946a63ef1802a2f0ccfda"
+      "mtime": 1781218822,
+      "sha256": "57e78f059601ceb14745057088de7c972e452caa28030e927fa0af8b2032880a"
     },
     "p2kbSpin2Term": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/term.yaml",
-      "mtime": 1764449566,
-      "sha256": "cc941d234cee2896a7f97ca9cc0b1fce9b1ec0f84f2a3b4c0e57656181a0ff4f"
+      "mtime": 1781218822,
+      "sha256": "5afda5b24a0eb2cedcd97ba58e5eaeb594d9e8d865f8eead1d15705c46221eb6"
     },
     "p2kbSpin2BitManipulation": {
       "path": "deliverables/ai/P2/language/spin2/idioms/bit-manipulation.yaml",
@@ -8995,8 +9258,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1764449566,
-      "sha256": "317dd31d7166eb3b91cbdace2747a4773f12c16f6d8fffc960222436c1cc1dea"
+      "mtime": 1781218822,
+      "sha256": "6c2357a468f0ed138e06eba1f423c997eb2c066b1cd338e8c5542a3e647a2d44"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",

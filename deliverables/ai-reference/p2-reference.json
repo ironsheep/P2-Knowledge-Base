@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-06-11",
-    "last_updated": "2026-06-11T21:06:58.784825",
+    "last_updated": "2026-06-11T23:03:44.808694",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-11T21:06:58.784825",
+    "extraction_date": "2026-06-11T23:03:44.808694",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18383,7 +18383,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-11T21:06:58.784825",
+    "extraction_date": "2026-06-11T23:03:44.808694",
     "categories": {
       "keywords": {
         "count": 37,
@@ -29038,7 +29038,17 @@
               "uhex",
               "uhex_",
               "ubin",
-              "ubin_"
+              "ubin_",
+              "language/spin2/statements/debug.yaml",
+              "language/spin2/debug-displays/term.yaml",
+              "language/spin2/debug-displays/scope.yaml",
+              "language/spin2/debug-displays/scope_xy.yaml",
+              "language/spin2/debug-displays/fft.yaml",
+              "language/spin2/debug-displays/spectro.yaml",
+              "language/spin2/debug-displays/plot.yaml",
+              "language/spin2/debug-displays/bitmap.yaml",
+              "language/spin2/debug-displays/logic.yaml",
+              "language/spin2/debug-displays/midi.yaml"
             ]
           }
         }
