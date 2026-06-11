@@ -70,8 +70,11 @@ sources/originals/*.pdf
 sources/originals/*.csv
 *.pdf
 
-# Exception: Allow PDFs in deliverables (final documents for community)
+# Exception: Allow PDFs in deliverables (final documents for community).
+# The PDFs live in the DOCs/ subdirectory, so the exception must reach it —
+# otherwise *.pdf above silently ignores them (they only track via git add -f).
 !deliverables/documents/*.pdf
+!deliverables/documents/DOCs/*.pdf
 
 # Archived V1 extractions (superseded by V2)
 sources/extractions-v1-archived/

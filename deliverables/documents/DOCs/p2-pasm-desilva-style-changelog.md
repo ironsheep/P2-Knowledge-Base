@@ -1,5 +1,35 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.0 (2026-06-10)
+
+**Content re-audit on the shared presentation platform** — every technical claim re-verified against the current P2 Knowledge Base, delivered on the common P2 manual presentation platform.
+
+### Instruction Semantics
+
+- MUL/MULS: 16×16→32 multiply; QMUL is unsigned
+- MERGEB: bit-merge, the inverse of SPLITB
+- QLOG/QEXP: base-2 logarithm and 2^x
+- OUTH/OUTL: set the OUT bit only, leaving pin direction unchanged
+
+### Timings and Values
+
+- QDIV result latency is 55 clocks; CORDIC angle resolution and spiral rotation angles match the silicon
+- Random hub-access timing is 9–16 clocks; the FIFO is 19 stages deep
+- COG load size is 504 longs ($000–$1F7), with a 496-instruction code ceiling
+
+### Code Examples
+
+- LOCKTRY spin-locks retry on failure with the correct carry polarity
+- QVECTOR examples pass Y as the S operand; a COGINIT-passed value is read from PTRA with MOV
+- The SKIP example uses LSB-first bit order, and the servo-frame loop terminates
+- SETSE edge/level modes, the EVENT_XRL description, the ADC sample period, and the PWM/streamer setup examples verified against the silicon
+
+### Presentation
+
+- Figures and tables are numbered with captions and collected in Lists of Figures and Tables; long tables and code blocks carry continuation markers across page breaks
+
+---
+
 ## v2.2.0 (2026-05-23)
 
 **Periodic release** — Hub-exec timing accuracy, expanded pedagogical structure across Chapters 4-6 and 13-15, and consistent Your Turn block rendering throughout.

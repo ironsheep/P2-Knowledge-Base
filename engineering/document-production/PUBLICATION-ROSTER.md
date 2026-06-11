@@ -41,8 +41,8 @@ that does not ride the shared stack.
 | Publication | Slug | Draft | Assets | Platform | Chip review | Community review | Released | Notes |
 |-------------|------|:--:|:--:|:--:|:--:|:--:|:--:|-------|
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF); production bundle prepared. Uses the shared common cover (`book-artwork.png`, identical across all manuals). Awaiting Stephen's technical + asset review; "Blue Book" reference |
-| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ⏳ | ⏳ | ✅ | ✅ | released on bespoke `p2kb-pasm2-*` fork (sty+lua, forked ~2026-01-23); awaiting platform migration; chip review outstanding |
-| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay, 5 platform lua filters). **v2.3.0 (2026-06-10) content-accuracy release** — complete chapter-by-chapter re-audit vs the current P2KB fixed ~33 latent errors (4 CRITICAL incl. two inverted LOCKTRY spin-locks, an inverted SKIP table, a fabricated SETSE edge mode); regenerated clean (172pp, clean log, vbox-overflow 0). Audit record: local `audit/content-reaudit-2026-06-10.md`. chip review outstanding. **DEFERRED to final wrap-up (both REQUIRED, not release-blocking):** (1) repair the "P1 COG" image `\CogAnatomyDiagram` (Ch2 "COG Anatomy 101", `opus-master` ~L557); (2) `pnut-ts` compile-cert re-audit of ALL built-in code examples (use `-d` for DEBUG blocks). |
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.0 (2026-06-10)** — migrated off the bespoke `p2kb-pasm2-*` fork onto the shared platform stack (`p2kb-pasm2-local` overlay + 5 platform lua filters + 2 local entry filters); content re-certified vs the current P2KB and rebuilt clean (492pp). chip review outstanding |
+| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay, 5 platform lua filters). **v3.0.0 (2026-06-10) release** — absorbs the content-accuracy re-audit (~33 latent errors fixed vs the current P2KB: two inverted LOCKTRY spin-locks, an inverted SKIP table, a fabricated SETSE edge mode, etc.) and the Ch2 egg-beater diagram fix; regenerated clean (172pp). Audit record: local `audit/content-reaudit-2026-06-10.md`. chip review outstanding. **DEFERRED to final wrap-up (both REQUIRED, not release-blocking):** (1) repair the "P1 COG" image `\CogAnatomyDiagram` (Ch2 "COG Anatomy 101", `opus-master` ~L557); (2) `pnut-ts` compile-cert re-audit of ALL built-in code examples (use `-d` for DEBUG blocks). |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ⏳ | ✅ | | | | awaiting screenshots — 5/10 hero figures + TERM captures still placeholders |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
 | P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content + streamer-local/-diagrams); awaiting chip + community review |
@@ -109,19 +109,15 @@ Geometry (all five): `boxrule=2pt`, `leftrule=4pt` (accessibility), other rules
 
 Defined **once** in the shared platform content package for every reconciled live
 publication:
-- `platform/templates/p2kb-platform-content.sty` — used by **Debug Window**,
-  **Single-Step Debugger**, **Streamer**, **DeSilva**, and **I/O & Smart Pins**.
+- `platform/templates/p2kb-platform-content.sty` — used by **Assembly Language
+  Reference**, **Debug Window**, **Single-Step Debugger**, **Streamer**, **DeSilva**,
+  and **I/O & Smart Pins** (all six live technical publications).
 
-The one not-yet-reconciled fork still defines the convention in its **own**
-content package (retired on migration onto `p2kb-platform-content`):
-- `p2-assembly-language-manual/templates/p2kb-pasm2-content.sty`
-
-> Publications still pending platform reconciliation (`Platform ⏳` in the status
-> pipeline above — only **Assembly Language Reference** remains) must migrate onto
-> the shared `p2kb-platform-*` stack (retiring their bespoke fork `.sty` + `.lua`).
-> Debug Window, Single-Step, Streamer, DeSilva, and I/O & Smart Pins are reconciled
-> (on the shared `p2kb-platform-content`); the AI Privacy Guide is presentation-class
-> and does not ride the shared stack.
+> All live technical publications are now reconciled onto the shared
+> `p2kb-platform-*` stack — the **Assembly Language Reference** completed migration in
+> **v3.0.0 (2026-06-10)**, retiring the last bespoke fork (`p2kb-pasm2-*`; its
+> `p2kb-pasm2-content.sty` is now vestigial). The AI Privacy Guide is
+> presentation-class and does not ride the shared stack.
 
 > **Note:** In the I/O & Smart Pins guide the assembly/PASM2 code-block
 > environment is named `IOSPBlock` (guide-specific name) but is colored **green**
@@ -156,12 +152,14 @@ that PDF was generated. This ledger is the detector.
 > Forge outbox** (the authoritative generation times); `PLATFORM` datetimes are the git
 > commit that last modified each file. Two fully-absorbed platform lines (`tables.lua`
 > 2026-06-06, `mnemonic-bold.lua` 2026-06-06 — every manual generated after them) were
-> pruned on seeding. The **Assembly Language Reference** is a bespoke fork (not on the
-> shared platform), so platform changes do not affect it — it joins this ledger when it
-> migrates (its last PDF was 2026-05-23).
+> pruned on seeding. The **Assembly Language Reference** completed its platform
+> migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
-2026-06-10 02:37  PUBLISH   p2-pasm-desilva-style            (v2.3.0, 172pp — clean)
+2026-06-10 23:41  PUBLISH   p2-streamer-programming-guide    (v1.0.0 — clickable index added)
+2026-06-10 23:35  PUBLISH   p2-pasm-desilva-style            (v3.0.0, 172pp — egg-beater Ch2 diagram fixed)
+2026-06-10 23:33  PUBLISH   p2-single-step-debugger-manual   (regression rebuild on the latest platform)
+2026-06-10 23:32  PUBLISH   p2-assembly-language-manual      (v3.0.0, 492pp — migrated off the bespoke fork onto the platform)
 2026-06-09 23:39  PUBLISH   p2-io-and-smart-pins-user-guide
 2026-06-09 22:50  PLATFORM  filters/p2kb-platform-figures.lua
 2026-06-09 21:08  PLATFORM  templates/p2kb-platform-content.sty
@@ -169,22 +167,23 @@ that PDF was generated. This ledger is the detector.
 2026-06-09 20:39  PLATFORM  filters/p2kb-platform-code-coloring.lua
 2026-06-08 08:32  PLATFORM  templates/p2kb-platform-foundation.sty
 2026-06-08 08:32  PLATFORM  filters/p2kb-platform-pagination.lua
-2026-06-07 20:25  PUBLISH   p2-streamer-programming-guide
-2026-06-07 08:32  PUBLISH   p2-single-step-debugger-manual
 2026-06-07 06:58  PLATFORM  templates/p2kb-platform-diagrams.sty
 2026-06-07 03:04  PUBLISH   p2-layout-torture-test
 ```
 
 **Currently out of date (read off the list above):**
 
-| Manual | Status | Behind on (platform files changed since its PDF was generated) |
+**Regeneration wave 2026-06-10 — four rebuilt on the latest templates; two remain.**
+
+| Manual | Status | Notes |
 |--------|--------|----------------------------------------------------|
-| `p2-pasm-desilva-style` | ✅ current | — (rebuilt on the latest platform today) |
-| `p2-io-and-smart-pins-user-guide` | ✅ current | — (generated 23:39, *after* `figures.lua` 22:50; its figures.lua carry-over appears already resolved — worth one confirm) |
-| `p2-debug-window-manual` | ⏳ stale | `figures.lua`, `content.sty` (it absorbed `code-coloring.lua` at 20:39) |
-| `p2-streamer-programming-guide` | ⏳ stale | `figures.lua`, `content.sty`, `code-coloring.lua`, `foundation.sty`, `pagination.lua` |
-| `p2-single-step-debugger-manual` | ⏳ stale | `figures.lua`, `content.sty`, `code-coloring.lua`, `foundation.sty`, `pagination.lua` |
-| `p2-layout-torture-test` | ⏳ stale | all of the above + `diagrams.sty` |
+| `p2-assembly-language-manual` | ✅ current | migrated + rebuilt **v3.0.0** today on the latest platform (492pp) |
+| `p2-pasm-desilva-style` | ✅ current | rebuilt **v3.0.0** today (egg-beater Ch2 diagram fixed, 172pp) |
+| `p2-streamer-programming-guide` | ✅ current | rebuilt **v1.0.0** today (clickable index added) |
+| `p2-single-step-debugger-manual` | ✅ current | regression rebuild today on the latest platform |
+| `p2-io-and-smart-pins-user-guide` | ⏳ to regenerate | **one of the two remaining** for this wave (last built 2026-06-09) |
+| `p2-debug-window-manual` | ⏳ to regenerate | **one of the two remaining** — also behind `figures.lua` / `content.sty` |
+| `p2-layout-torture-test` | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`
 appends/updates a `PUBLISH` line when a generation is confirmed clean; any edit to a

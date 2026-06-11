@@ -1,5 +1,34 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.0.0 (2026-06-10)
+
+**Full content re-audit on the shared presentation platform** — every checkable claim re-verified against the current P2 Knowledge Base, with figures, tables, and code rendered on the common manual platform.
+
+### Part I: Architectural Foundation
+
+- Timing, flag effects, and addressing across Chapters 2–6 verified against the Knowledge Base
+- §4.2.3: the Clocks-column notation covers the cog / hub-exec split and the taken-branch refill cost
+- §4.6.1: the hub-aligned loop example documents its steady-state period of 24 cycles (3× the 8-cycle hub window)
+
+### Part II: Instruction Reference
+
+- Encodings, semantics, flag effects, and timing ranges verified against the Knowledge Base across every instruction chapter
+- Hub-access and branch instructions carry both cog and hub-exec timing ranges
+
+### Part III: Appendices
+
+- Appendix G: X_DACS streamer constants document per-channel DAC routing
+- Appendix H: reserved-word listings and category counts are internally consistent
+- Encoding and reference tables size columns to content and repeat their headers across page breaks; long code blocks carry continuation markers
+- Figures and tables are numbered with captions, with Lists of Figures and Tables
+
+### Throughout
+
+- Code examples fit within the code box
+- Licensed under CC BY-NC-ND 4.0
+
+---
+
 ## v2.3.0 (2026-05-22)
 
 **Periodic release** — Hub-exec timing accuracy across timing tables and prose, ALTx cross-mode compatibility documented, inline-PASM-with-multitasking gap closed, and seven code-example fixes.
