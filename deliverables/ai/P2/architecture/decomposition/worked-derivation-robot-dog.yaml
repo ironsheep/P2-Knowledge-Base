@@ -1,0 +1,120 @@
+concept: worked_derivation_robot_dog
+title: "Worked Derivation (EXAMPLE) — A Quadruped Robot, End to End"
+category: decomposition_reasoning
+
+summary: |
+  One narrated decomposition, from a hardware list to an object-and-cog set, with every
+  step tagged by the force or plane decision that drives it. This is the thing a noun
+  list and a verb list cannot give you: a whole-system derivation you can read to see
+  the grammar exercised. It walks the first-contact procedure step by step on a quadruped
+  robot built around two I2C buses and a handful of discrete signals.
+
+  EVERYTHING here is EXAMPLE / illustrative-not-normative. It is frozen at one point in
+  time and describes one machine; a different hardware mix yields a different — equally
+  sound — result. Read it to see the method in motion; never copy it as the answer, and
+  never treat any object below as a mandated structure. Objects are named by ROLE, not by
+  any file or product, so the derivation reads standalone.
+
+illustrative_not_normative: true
+authority_tier: EXAMPLE
+
+# A banner the consuming agent should honor before reading further.
+reading_contract:
+  authority_tier: EXAMPLE
+  body: |
+    This entire entry is an illustration. The forces, the procedure, and the evaluation
+    vocabulary are the normative content of the layer; this derivation merely exercises
+    them. If you find yourself copying an object boundary from here into a different
+    machine, stop and run the procedure against THAT machine's wiring instead.
+
+the_machine:
+  authority_tier: EXAMPLE
+  body: |
+    The hardware mix (the only input the derivation starts from):
+    - I2C bus 1: a multi-channel PWM/servo controller, an IMU, and a battery ADC — all
+      behind a hard ~50 Hz motion deadline.
+    - I2C bus 2: a voice-recognition module that clock-stretches and is polled slowly.
+    - Three discrete signals: an addressable LED chain (timing-exact serial), a buzzer,
+      and an ultrasonic range sensor (a one-shot ping/echo).
+    Nothing about the object set is given; it is derived below.
+
+derivation_steps:
+  authority_tier: EXAMPLE
+  steps:
+    - step: 1
+      name: "Enumerate the wires"
+      force: "Force 1 (resource ownership)"
+      reasoning: "List the serialized resources: I2C bus 1, I2C bus 2, and the three discrete pins. These are the things that can be in exactly one state at a time."
+      output: "Two buses + three discrete signals = the resource inventory."
+    - step: 2
+      name: "Triage against the smart pins"
+      force: "the physical axis (smart-pin absorption)"
+      reasoning: "The LED chain (precise serial framing), the buzzer (tone/PWM), and the ultrasonic ping/echo (pulse timing) each map to an autonomous smart-pin mode — the pin can own the protocol so no cog bit-bangs it. The two I2C buses are multi-byte stateful protocols that survive triage and need software owners."
+      output: "Three discrete signals become smart-pin-owned; two buses remain for cog ownership."
+    - step: 3
+      name: "Assign owners"
+      force: "Force 1 (resource ownership)"
+      reasoning: "Bus 1 has three sharers behind one timing budget -> one owning cog plus a DAT-state SINGLETON transport (one bus configuration, three register-level chip drivers calling it). Bus 2 has a single device -> a different owning cog with a VAR-state INSTANCE transport (nothing to share). The discrete smart pins are owned by whichever cog already owns their timing domain. Same protocol (I2C), two state models, because the SHARING TOPOLOGY decided the shape."
+      output: "Cog map: bus-1 owner (DAT singleton), bus-2 owner (VAR instance), discrete pins folded onto existing owners."
+    - step: 4
+      name: "List the cadences"
+      force: "Force 3 (rate adaptation)"
+      reasoning: "Bus 1 serves three cadences: servos ~50 Hz, IMU ~100 Hz, battery ~1 Hz. The voice module is polled lazily. Discrete events (a finished ping, a recognized word) are sporadic. Mark the rate-domain boundaries and the one discrete->continuous path (a 'walk' command must become a smooth servo trajectory)."
+      output: "Rate-domain boundaries identified; one slew path flagged."
+    - step: 5
+      name: "Resolve same-bus rate conflicts"
+      force: "the Force 1 x Force 3 tension"
+      reasoning: "Bus 1 alone serves three cadences, but Force 1 forbids splitting it across cogs. Resolution: cooperative tasks WITHIN the bus-1 owning cog — a dispatch task, a motion task, and a sense task — each running at its own cadence and yielding at bus-transaction boundaries."
+      output: "Three cooperative tasks inside the bus-1 cog, sharing the bus coherently."
+    - step: 6
+      name: "Draw the seams"
+      force: "Force 2 (data-flow contract), per plane"
+      reasoning: "Orchestrator -> motion seam (CONTROL plane): a latest-wins command mailbox with a seq/ack handshake — args written first, seq bumped LAST. Motion -> anyone (DATA/telemetry): lock-free published telemetry (attitude, battery, mode, leg angles) in atomic single longs, one writer, many lock-free readers. Inbound device events (EVENT plane): value + monotonically-bumped freshness counter, edge-detected by the slow poll. No blocking anywhere."
+      output: "Command mailbox, telemetry block, and event freshness counters — each on the right plane."
+    - step: 7
+      name: "Layer each branch"
+      force: "Force 4 (altitude layering)"
+      reasoning: "The servo branch splits by unit conversion / axis of change into four tiers: PWM-chip register driver (changes if the chip changes) -> servo pulse-width/channel semantics (changes if servo wiring changes) -> leg inverse-kinematics, foot-XYZ to joint-degrees (changes if leg geometry changes) -> gait/pose policy (changes if behavior changes). A line-count rule would never produce this; the unit-conversion rule produces it automatically."
+      output: "A four-tier stack on the motion branch, each tier changing for exactly one reason."
+    - step: 8
+      name: "Place the cross-cutting objects"
+      force: "cross-cutting C1-C5"
+      reasoning: "C1 safety: a critical-battery hard-halt latch above policy that suppresses ALL motion regardless of intent, plus per-cog stack sentinels. C2 translation: a voice-vocabulary -> internal-command map at the edge, separate from both the recognizer driver and the policy. C3 config: a per-unit calibration/trim store the drivers read but never hard-code. C4 testability: a bring-up test per layer (bus scan -> chip -> servo-center -> leg IK -> gait). C5 lifecycle: the top-level orchestrator as sequencer, owning cog launch order, pre-seeded stacks, and waking the PWM chip from sleep before any servo write."
+      output: "Five cross-cutting objects placed relative to the tree."
+    - step: 9
+      name: "Reconcile against budget and deadline"
+      force: "the force tensions + the resource budget"
+      reasoning: "Check the allocation: cogs (orchestrator, bus-1 body-control, discrete-IO) within 8; smart pins for the three discrete signals within 64; locks — none needed because telemetry is single-writer atomic publish; hub bandwidth modest (mailbox words, not bulk streaming); the ~50 Hz motion deadline is the hardest and the motion task is structured so it never blocks on the orchestrator. The design fits; nothing forces a re-cut."
+      output: "The final object-and-cog set, validated against the lattice and the hardest deadline."
+
+what_to_notice:
+  authority_tier: EXAMPLE
+  body: |
+    Three things the derivation makes visible that a catalogue cannot: (1) the two I2C
+    transports are the same protocol with different state models, decided by sharing
+    topology, not taste; (2) the rate adapters (the in-cog cooperative tasks and the
+    frame-advancing slew) correspond to no chip and no feature — they fell out of rate
+    MISMATCHES; (3) the cross-cutting objects had nowhere to live until the structural
+    tree was drawn, then each took a definite place. Judge the result with the evaluation
+    vocabulary: coupling is low (telemetry crosses as atomic longs, no shared invariant,
+    no locks), and the one dynamic connascence that crosses a cog boundary
+    (execution-order on the command mailbox) is tamed to static by the publish-last
+    discipline.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+
+see_also:
+  - "The procedure this derivation walks: p2kbArchFirstContactProcedure"
+  - "The generative theory behind it: p2kbArchDecompositionMethod"
+  - "Force 1 — the ownership cuts in steps 1-3: p2kbArchResourceOwnership"
+  - "Force 2 — the seams in step 6: p2kbArchDataFlowContracts"
+  - "Force 3 — the rate adapters in steps 4-5: p2kbArchRateAdaptation"
+  - "Force 4 — the layering in step 7: p2kbArchAltitudeLayering"
+  - "Cross-cutting C1-C5 in step 8: p2kbArchCrossCuttingForces"
+  - "The evaluation vocabulary used in step 9 / what-to-notice: p2kbArchEvaluationVocabulary"
+  - "The budget reconciled in step 9: p2kbArchResourceBudget"
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+
+oneliner: "An illustrative end-to-end derivation: a quadruped robot's object-and-cog set derived by walking the first-contact procedure, every step tagged with the force or plane that drives it — read to see the grammar exercised, never copy."

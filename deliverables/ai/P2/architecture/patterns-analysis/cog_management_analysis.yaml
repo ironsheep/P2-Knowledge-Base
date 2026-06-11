@@ -1,75 +1,23 @@
+# Cog Management — SUPERSEDED (decomposition reasoning layer, KB v1.7.0)
+#
+# This pattern-analysis file predates the decomposition reasoning layer.
+# The decision of how many cogs to spend and which resources each one owns
+# is now DERIVED — from Force 1 (resource ownership) — rather than chosen
+# from a frequency-ranked pattern catalog. Retained as a stub so existing
+# references keep resolving (Sacred Rule #7: redirect, never delete). The
+# original frequency-analysis content is preserved in git history.
+
 pattern_id: "cog_management"
 category: "architecture"
-usage_frequency: "38.5%"
-file_count: 281
+status: "superseded"
+superseded_by: "decomposition reasoning layer (architecture/decomposition/)"
 
-selection_criteria:
-  use_when:
-    - Need to coordinate multiple parallel processing units
-    - Have compute-intensive tasks that can be parallelized
-    - Managing real-time operations across multiple cogs
-    - Implementing multicore system architectures
-    - Need to balance processing load across available cogs
-  avoid_when:
-    - Simple single-threaded operations are sufficient
-    - Memory constraints make multiple cogs impractical
-    - Task doesn't benefit from parallelization
-    - Cog communication overhead exceeds benefits
+note: >
+  Superseded by the decomposition reasoning layer. "Which cog owns which
+  resource, and when it launches" is the output of Force 1 (resource
+  ownership), not a catalog selection. Start from the method and let the
+  forces produce the cog cuts.
 
-structural_signature:
-  cog_startup:
-    - "cognew(function, stack_pointer)"
-    - "coginit(cog_id, function, parameter)"
-  cog_coordination:
-    - "Hub variables for inter-cog communication"
-    - "Mailbox systems between cogs"
-    - "Shared memory regions"
-  cog_synchronization:
-    - "Hub memory polling"
-    - "Event-driven coordination"
-    - "Lock mechanisms"
-
-implementation_template: |
-  PUB start_system()
-    ' Start multiple cogs for parallel processing
-    cognew(sensor_cog(@sensor_mailbox), @sensor_stack)
-    cognew(control_cog(@control_mailbox), @control_stack)
-    cognew(communication_cog(@comm_mailbox), @comm_stack)
-    
-  PUB sensor_cog(mailbox_ptr) | value
-    repeat
-      value := read_sensors()
-      long[mailbox_ptr] := value
-      waitms(10)
-      
-  PUB control_cog(mailbox_ptr)
-    repeat
-      if long[mailbox_ptr] <> 0
-        process_sensor_data(long[mailbox_ptr])
-        long[mailbox_ptr] := 0
-
-resource_profile:
-  memory_usage: "1-8 cogs (512 bytes stack each minimum)"
-  hub_memory: "Communication variables and shared data"
-  timing: "Parallel execution, coordination overhead"
-  power: "Higher consumption with multiple active cogs"
-
-composition_rules:
-  combines_with:
-    - "timing_control: For synchronized multi-cog operations"
-    - "buffer_management: For inter-cog data sharing"
-    - "state_machine: Each cog can run independent state machines"
-  conflicts_with:
-    - "Single-threaded patterns"
-    - "Memory-constrained designs"
-
-real_examples:
-  - "Multi-motor control systems"
-  - "Sensor fusion applications"
-  - "Real-time data acquisition"
-  - "Communication protocol handlers"
-  - "Display refresh engines"
-
-statistics:
-  prevalence: "281 of 730 files"
-  percentage: "38.5%"
+see_also:
+  - "Force 1 — resource ownership (cog lifecycle, launch order, who owns what): p2kbArchResourceOwnership"
+  - "The generative method that derives the cog cuts: p2kbArchDecompositionMethod"

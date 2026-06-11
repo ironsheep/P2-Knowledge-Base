@@ -97,3 +97,6 @@ implementation_template: |
       ' Turn away from obstacle
       motor_speeds[LEFT] := -TURN_SPEED
       motor_speeds[RIGHT] := TURN_SPEED
+
+see_also:
+  - "End-to-end worked derivation of a robot from first contact to cog map (this domain's reasoning, fully worked): p2kbArchWorkedDerivationRobotDog"

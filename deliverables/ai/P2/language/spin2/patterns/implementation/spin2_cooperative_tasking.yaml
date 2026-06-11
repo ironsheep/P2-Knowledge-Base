@@ -1,0 +1,85 @@
+pattern_id: "cooperative_tasking"
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+description: |
+  Multiple cooperative tasks (coroutines) running inside ONE cog, sharing one bus or
+  resource, each at its own cadence. This is the resolution of the Force 1 x Force 3
+  tension: when several devices on one bus want different cadences (servos 50 Hz, IMU
+  100 Hz, battery 1 Hz), Force 1 forbids splitting the bus across cogs, so the cadences
+  are separated as tasks WITHIN the single owning cog instead. Each task yields with
+  tasknext(); a task always COMPLETES its bus transaction before yielding, so the bus
+  stays coherent with no lock.
+
+  REQUIRES the {Spin2_v47} version directive as the first line of the source file: the
+  TASKSPIN / TASKNEXT cooperative-multitasking methods are gated behind Spin2 v47, and
+  the compiler will not recognize them without it.
+
+  Launch sibling tasks with taskspin(NEWTASK, ...); one routine becomes the steady-state
+  task by simply not returning. See the rate-adaptation and resource-ownership
+  decomposition entries for when this beats adding a second cog.
+
+when_use:
+  - "One bus / shared resource must serve multiple cadences (one owner, many rates)"
+  - "Force 1 forbids splitting the resource but Force 3 wants the cadences separated"
+  - "Cooperative (not preemptive) concurrency is acceptable -- tasks yield voluntarily"
+
+implementation: |
+  {Spin2_v47}                               ' REQUIRED first line -- enables TASKSPIN / TASKNEXT
+
+  CON
+    TASK_STACK_LONGS = 192                  ' per-task cooperative stack (size for the deepest call chain)
+
+  DAT
+    motionStack   LONG 0[TASK_STACK_LONGS]
+    senseStack    LONG 0[TASK_STACK_LONGS]
+
+  ' --- the cog's entry: launch siblings, then become the dispatch task ---
+  PUB start(pinSCL, pinSDA)
+    ' (this PUB runs in its own cog, launched by the parent via cogspin(NEWCOG, start(...), @stack))
+    taskspin(NEWTASK, motionTask(), @motionStack)   ' cooperative sibling #1
+    taskspin(NEWTASK, senseTask(), @senseStack)     ' cooperative sibling #2
+    dispatchLoop()                                  ' this routine BECOMES the dispatch task (never returns)
+
+  ' --- a fixed-rate task: do a bounded unit of work, then yield ---
+  PRI motionTask() | nextFrameCt
+    nextFrameCt := getct()
+    repeat
+      if (getct() - nextFrameCt) >= 0
+        nextFrameCt += frameTicks
+        advanceFrame()                              ' completes ALL its bus writes...
+      tasknext()                                    ' ...BEFORE yielding -> bus stays coherent, no lock
+
+  PRI senseTask()
+    repeat
+      refreshAttitude()                             ' a different cadence, same bus
+      tasknext()
+
+  PRI dispatchLoop()
+    repeat
+      consumePendingCommands()
+      tasknext()
+
+anti_patterns:
+  - "Adding a SECOND cog on the same bus to get a second cadence -- violates Force 1 (no hardware bus mutex; guaranteed corruption)."
+  - "Yielding (tasknext) in the MIDDLE of a bus transaction -- another task can interleave and corrupt the protocol; always complete the transaction first."
+  - "Using cooperative tasks for a hard-real-time cadence that cannot tolerate a sibling's worst-case run time between yields -- then the device does not truly share the timing domain; re-cut it onto its own cog or smart pin."
+
+resources:
+  memory: "one stack per task (size TASK_STACK_LONGS for the deepest call chain, e.g. CORDIC IK)"
+  locks: "none -- cooperative yield discipline replaces the lock"
+  cogs: "one cog hosts all the tasks"
+
+combines_with:
+  - "cog_management"
+  - "slew_easing_engine"
+  - "latest_wins_mailbox"
+
+related:
+  - architecture/decomposition/rate-adaptation.yaml
+  - architecture/decomposition/resource-ownership.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml
+
+see_also:
+  - "The Force 1 x Force 3 tension this resolves: p2kbArchRateAdaptation"
+  - "Force 1 -- one owning cog per bus (why you cannot split it): p2kbArchResourceOwnership"
+  - "Where this is chosen in the routine (step 5): p2kbArchFirstContactProcedure"

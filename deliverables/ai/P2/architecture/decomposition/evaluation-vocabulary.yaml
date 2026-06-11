@@ -1,0 +1,113 @@
+concept: evaluation_vocabulary
+title: "Evaluation Vocabulary — How to Judge a Decomposition"
+category: decomposition_reasoning
+
+summary: |
+  The toolkit for JUDGING a cut, not merely proposing one — the part most absent from
+  the P2 knowledge base today and the highest-value thing this layer supplies. Three
+  tools, in increasing sharpness: coupling stated as a countable integer; connascence
+  (Page-Jones) as the sharpest measure, with a concrete P2 manifestation for each type;
+  and back-pressure stated precisely as a min-cut objective. Together they let an agent
+  EVALUATE any decomposition against a crisp objective rather than an aesthetic.
+
+  All three are PRINCIPLE-grade, grounded in the durable canon (Constantine & Yourdon
+  for coupling/cohesion; Page-Jones for connascence). The P2-specific danger they make
+  visible is dynamic connascence crossing a cog boundary, which the hardware expresses
+  as jitter and races.
+
+coupling_as_integer:
+  authority_tier: PRINCIPLE
+  body: |
+    On the P2, coupling between two cogs is physical and COUNTABLE — it stops being a
+    vibe and becomes an integer the agent can minimize. Count, across the boundary:
+      - longs crossing the boundary per unit time,
+      - fields under a shared invariant (data that must change together to stay correct),
+      - locks held across the cut.
+    Minimize that integer. Two candidate cuts can be compared directly by their counts;
+    the lower-coupled cut wins unless cohesion (below) argues otherwise.
+  grounding:
+    - "Coupling/cohesion origin — reference canon (Constantine & Yourdon, 1979) via p2kbArchDecompositionGlossary"
+    - "Longs cross via hub; locks are finite (16) — architecture/p2-architecture-mental-model.yaml (hub_ram, inter_cog_communication); architecture/locks.yaml"
+
+connascence:
+  authority_tier: PRINCIPLE
+  definition: |
+    Two elements are CONNASCENT if changing one forces a change in the other to stay
+    correct. It comes in STATIC forms (visible in source) and DYNAMIC forms (only true at
+    runtime). Static forms are generally weaker; dynamic forms are stronger and more
+    dangerous.
+  governing_rule: |
+    Maximize connascence INSIDE a boundary; minimize what crosses it; and convert
+    strong/dynamic forms into weak/static forms AT the boundary. On the P2 the dangerous
+    cases are dynamic connascence that crosses a COG boundary — timing, execution-order,
+    and value entanglements between cogs — because the hardware will express them as
+    jitter and races. This is the sharpest single tool for judging a cut.
+  p2_danger_grounding:
+    - "Cogs are independent time domains -> cross-cog timing/order connascence becomes jitter & races — architecture/cog.yaml (cog_independence); architecture/hub.yaml (egg_beater timing)"
+  types:
+    static:
+      - type: "connascence of name"
+        p2_manifestation: "Both sides agree on a symbol/label (e.g. a shared constant name for a mailbox slot). Weakest; visible in source."
+      - type: "connascence of type"
+        p2_manifestation: "Both sides agree a field is a long/word/byte — parameter-block field types."
+      - type: "connascence of position"
+        p2_manifestation: "Parameter-block field ORDER — both cogs must lay out the shared hub structure identically; reordering one side silently corrupts the other."
+      - type: "connascence of algorithm"
+        p2_manifestation: "A CRC, checksum, or bit-mask duplicated on both sides of a seam — change the polynomial on one cog and the other miscomputes. Convert to a single shared routine where possible."
+    dynamic:
+      - type: "connascence of execution order"
+        p2_manifestation: "'Write the signalling word LAST' — the reader is correct only if the writer publishes the seq counter after the args. Crossing a cog boundary, this is the classic torn-read source."
+      - type: "connascence of timing"
+        p2_manifestation: "Protocol edge requirements (setup/hold, bit timing) and any reliance on a consumer reading within a window. Across cogs the hardware turns a timing assumption into a race."
+      - type: "connascence of value"
+        p2_manifestation: "A ring buffer's head/tail invariant shared across cogs — the two indices must satisfy a relationship at every instant; a non-atomic update breaks it."
+      - type: "connascence of meaning"
+        p2_manifestation: "What a mailbox CODE stands for (what command 3 means) — both sides must share the interpretation; a drift in meaning is silent."
+      - type: "connascence of identity"
+        p2_manifestation: "Two cogs must refer to the SAME hub object (same base address/lock id); an identity mismatch points one cog at the wrong buffer."
+
+back_pressure_min_cut:
+  authority_tier: PRINCIPLE
+  body: |
+    State back-pressure precisely. Every boundary the agent draws carries a back-pressure
+    equal to:
+
+        (the connascence forced to cross it) x (the cost of the channel that carries it)
+
+    where the channel cost is concrete on the P2 — a hub mailbox's traffic, a lock's
+    contention, an attention signal's latency. A GOOD boundary is a MIN-CUT: the cohesion
+    gained inside each piece exceeds the back-pressure across the cut. This gives the
+    agent a crisp objective to optimize — draw the boundary where the stuff that must
+    stay together stays together and the least (and weakest) connascence crosses the
+    cheapest channel — rather than an aesthetic.
+  grounding:
+    - "Channel costs: hub mailbox traffic, lock contention, attention-signal latency — architecture/p2-architecture-mental-model.yaml (inter_cog_communication); architecture/locks.yaml; architecture/cog_attention.yaml"
+
+how_to_apply:
+  authority_tier: PRINCIPLE
+  body: |
+    Given a candidate decomposition: (1) for each boundary, count the coupling integer
+    and list the connascence types that cross it; (2) flag every DYNAMIC connascence that
+    crosses a cog boundary as a jitter/race risk and try to convert it to static at the
+    seam (e.g. publish-last to tame execution-order; a single shared routine to tame
+    algorithm); (3) compute each boundary's back-pressure and confirm it is a min-cut. If
+    a cut is not a min-cut, re-draw it — that is the signal Force 1/Force 4 mis-placed a
+    boundary.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - architecture/cog.yaml
+  - architecture/hub.yaml
+  - architecture/locks.yaml
+  - architecture/cog_attention.yaml
+
+see_also:
+  - "The canon behind these tools (Page-Jones, Constantine & Yourdon): p2kbArchDecompositionGlossary"
+  - "The generative theory the cut comes from: p2kbArchDecompositionMethod"
+  - "Where judging happens in the routine (step 9 — reconcile): p2kbArchFirstContactProcedure"
+  - "Force 2 — publish-last tames execution-order connascence: p2kbArchDataFlowContracts"
+  - "Force 1 — the cog boundaries this judges: p2kbArchResourceOwnership"
+  - "The smells a high-back-pressure cut produces: p2kbArchSpatialComputing"
+  - "The budget the min-cut is checked against: p2kbArchResourceBudget"
+
+oneliner: "Judge a cut with three tools: coupling as a countable integer, connascence (maximize inside / minimize crossing / convert dynamic->static, each type with a P2 manifestation), and back-pressure as a min-cut objective."

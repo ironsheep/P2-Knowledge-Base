@@ -1,0 +1,283 @@
+concept: decomposition_glossary
+title: "Decomposition Reasoning Layer — Glossary, Authority-Tier Legend, and Reference Canon"
+category: decomposition_reasoning
+
+summary: |
+  The shared vocabulary for the P2 functional-decomposition reasoning layer. This
+  layer teaches a consuming agent HOW to derive an object/cog decomposition for an
+  unfamiliar P2 hardware mix; this entry fixes the canonical names every other entry
+  in the layer reconciles against, so the same underlying force is never described
+  under two labels.
+
+  It carries three things: (1) the authority-tier legend — the discipline that keeps
+  the layer generative rather than a rulebook, telling the agent how much freedom it
+  has with each statement; (2) the canonical-name map — the four decomposition forces,
+  the five cross-cutting forces, and the three planes of an inter-cog link, each paired
+  with the P2 mechanism it governs; (3) the reference-canon index — the durable
+  published works the layer draws its decision-guidance from, each named so the agent
+  can reach for the matching literature when a problem exceeds this layer.
+
+  Read this first. Every force, procedure, and lens entry in the layer links back here.
+
+# =============================================================================
+# 1. AUTHORITY-TIER LEGEND — how to read every statement in this layer
+# =============================================================================
+# This legend is the layer's reading discipline. It is meta-guidance about the
+# layer itself (PRINCIPLE-grade): it tells the agent how much latitude each tagged
+# statement permits, and it selects how that statement is grounded.
+
+authority_tier_legend:
+  authority_tier: PRINCIPLE
+  purpose: |
+    Every body section in this layer carries an `authority_tier`. The tier tells the
+    consuming agent how much freedom it has with the statement, and it selects how the
+    statement is grounded. Where a section genuinely mixes tiers, individual claims are
+    inline-tagged. A HEURISTIC with no stated escape condition is a disguised law and
+    is a defect; a PATTERN or EXAMPLE must be unmistakably marked so it is never read
+    as a PRINCIPLE.
+  tiers:
+    - tier: PHYSICS
+      meaning: "A silicon truth that cannot be violated."
+      agent_freedom: "None — design within it."
+      grounding: "Cites an internal P2KB key/path (the architectural fact)."
+    - tier: PRINCIPLE
+      meaning: "A force or trade-off, and WHY it exists."
+      agent_freedom: "Applies it with judgment."
+      grounding: "Cites the durable reference canon (author / title / year)."
+    - tier: HEURISTIC
+      meaning: "A default WITH an explicit escape condition."
+      agent_freedom: "Overrides it for a stated reason."
+      grounding: "Cites the durable reference canon, plus the escape condition."
+    - tier: PATTERN
+      meaning: "One resolution of a named set of forces (a generative skeleton)."
+      agent_freedom: "Consults it as illustration."
+      grounding: "Source citation; marked so it cannot be read as a PRINCIPLE."
+    - tier: EXAMPLE
+      meaning: "Concrete code or a derivation, frozen at one point in time."
+      agent_freedom: "Reads it; never copies it as law."
+      grounding: "Inlined and self-contained; tagged illustrative-not-normative."
+
+# =============================================================================
+# 2. THE DECOMPOSITION FORCES — Forces 1-4 (the structural grammar)
+# =============================================================================
+# Object shape on the P2 is DERIVED from the hardware, not chosen up front. Four
+# forces drive the cuts. These are the canonical names; the matching force entries
+# carry the full treatment. Each force pairs with the P2 mechanism that gives rise
+# to it. PRINCIPLE-grade, with the PHYSICS each force rests on cited inline.
+
+decomposition_forces:
+  authority_tier: PRINCIPLE
+  reconciliation_rule: |
+    Use these names as the reconciliation key. Different sources name the same
+    underlying force differently ("module boundary" reconciles to resource ownership;
+    "event debounce" reconciles to rate adaptation). Merge by the underlying force,
+    not the label. Add a NEW force only when no existing one covers it.
+  forces:
+    - id: force_1
+      canonical_name: "resource ownership"
+      also_known_as: ["hardware resource ownership", "timing-domain ownership", "module boundary"]
+      governs: |
+        Singular ownership of each serialized hardware resource (a bus, a
+        timing-critical pin group) by exactly one cog, and the singleton-vs-instance
+        choice for the transport driver, derived from how many devices share the wire.
+      p2_mechanism: |
+        Eight independent cogs; pin outputs are wire-OR'd with no hardware bus mutex;
+        a single-long hub read/write is atomic.
+      physics_grounding:  # inline PHYSICS the PRINCIPLE rests on
+        - "8 cogs / cog independence — architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
+        - "OR'd pins / no bus mutex — architecture/p2-architecture-mental-model.yaml (pin_io); architecture/smart_pins.yaml (pin_output_hierarchy)"
+        - "single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+      entry: "see_also: resourceOwnership"
+    - id: force_2
+      canonical_name: "data-flow contract"
+      also_known_as: ["inter-object contract", "coupling contract", "seam contract"]
+      governs: |
+        The contract chosen for each inter-cog (or object) seam — blocking call,
+        latest-wins mailbox, ring buffer, request/response with ack, lock-free
+        published telemetry. The coupling the deadline tolerates determines where the
+        seam goes and who depends on whom.
+      p2_mechanism: |
+        Hub mailboxes / parameter blocks, locks, the hub FIFO and streamer for bulk
+        movement, cog-attention signalling for events.
+      physics_grounding:
+        - "No OS/IPC; hub + atomic + locks + cogatn — architecture/p2-architecture-mental-model.yaml (inter_cog_communication); architecture/cog_attention.yaml"
+        - "16 locks — architecture/locks.yaml (total_locks)"
+      entry: "see_also: dataFlowContracts"
+    - id: force_3
+      canonical_name: "rate adaptation"
+      also_known_as: ["rate-domain crossing", "clock-domain crossing", "event debounce", "slew / easing"]
+      governs: |
+        The objects inserted BETWEEN ownership layers wherever two cadences meet: a
+        sampler/buffer at each rate-domain boundary, and a slew/easing engine wherever
+        a discrete intent must become a continuous device stream. When several devices
+        on ONE bus run at different cadences, the resolution is cooperative
+        tasks-within-a-cog, not a bus split.
+      p2_mechanism: |
+        Smart-pin autonomous timing modes, the hub FIFO/streamer for elastic buffering,
+        and cooperative tasking within a single owning cog.
+      physics_grounding:
+        - "64 smart pins / autonomous modes — architecture/smart_pins.yaml (pin_count, independence)"
+        - "Streamer + hub FIFO — architecture/fifo.yaml; architecture/streamer/overview.yaml"
+      entry: "see_also: rateAdaptation"
+    - id: force_4
+      canonical_name: "altitude layering"
+      also_known_as: ["unit-conversion layering", "axis-of-change layering", "vertical decomposition"]
+      governs: |
+        Within an ownership domain, stack objects so each tier performs exactly one
+        unit conversion and changes for exactly one reason: transport (bits) → chip
+        driver (registers) → semantic driver (physical units: mm, degrees, millivolts)
+        → policy (behavior). Layer by unit conversion and axis of change, never by line
+        or component count.
+      p2_mechanism: |
+        Cog RAM is small (512 longs / 496 usable PASM registers), so deep layering
+        trades against per-call cost and cog-local memory — altitude sometimes yields
+        to pragmatism.
+      physics_grounding:
+        - "Cog-local RAM size bound — architecture/cog.yaml; architecture/p2-architecture-mental-model.yaml (cog_independence)"
+      entry: "see_also: altitudeLayering"
+
+# =============================================================================
+# 3. CROSS-CUTTING FORCES — C1-C5 (objects that span or guard the tree)
+# =============================================================================
+# After the structural tree is drawn by Forces 1-4, five cross-cutting forces place
+# the objects that span or guard it. Teach the agent to ask WHERE each of these goes.
+# PRINCIPLE-grade; the full treatment is in the cross-cutting-forces entry.
+
+cross_cutting_forces:
+  authority_tier: PRINCIPLE
+  forces:
+    - id: c1
+      canonical_name: "safety override"
+      also_known_as: ["fault containment", "supervisory override"]
+      governs: "A privileged path that can suppress all policy (e.g. a critical-battery hard-halt latch; per-cog stack sentinels)."
+    - id: c2
+      canonical_name: "external-interface translation"
+      also_known_as: ["anti-corruption boundary", "vocabulary quarantine"]
+      governs: "Quarantine a vendor/external vocabulary behind one seam, so it never leaks into the internal model."
+    - id: c3
+      canonical_name: "per-unit configuration"
+      also_known_as: ["configuration store", "per-unit variation", "calibration"]
+      governs: "Separate per-robot / per-board variation (trims, serial, custom tables) from per-design fixed structure."
+    - id: c4
+      canonical_name: "testability seam"
+      also_known_as: ["bring-up isolation", "test seam"]
+      governs: "Each layer exercisable standalone on hardware — per-layer bring-up tests."
+    - id: c5
+      canonical_name: "lifecycle / init order"
+      also_known_as: ["initialization ordering", "lifecycle sequencer"]
+      governs: "Someone owns the temporal dependency graph — cog launch order, pre-seeded stacks, wake-before-write sequencing."
+  entry: "see_also: crossCuttingForces"
+
+# =============================================================================
+# 4. THE THREE PLANES — one inter-cog link, three superimposed relationships
+# =============================================================================
+# Every link between two cogs (and each peripheral binding) is three relationships
+# superimposed, each with a different correct mechanism and a different body of theory.
+# Building all three on one mechanism is the signature way to use the chip badly.
+# PRINCIPLE-grade, with the P2 mechanisms each plane reaches for cited as PHYSICS.
+
+the_three_planes:
+  authority_tier: PRINCIPLE
+  rank_by_cost_of_getting_wrong: |
+    The planes rank by cost-of-getting-wrong, and design care is spent in that inverse
+    order: a data-plane error wastes bandwidth (visible, recoverable); a control-plane
+    error corrupts state (an intermittent race); an event-plane error misses a deadline
+    (silent until the field). Conflating planes is a concrete, catchable mistake — e.g.
+    polling a hub flag (a control mechanism) to deliver an urgent event (an event need),
+    or pushing bulk data through mailbox words (a control mechanism) instead of the
+    streaming path.
+  planes:
+    - id: data_plane
+      canonical_name: "data plane"
+      concerns: "Bulk, rate-defined movement: throughput, rate-matching, buffering, elasticity, back-pressure."
+      p2_mechanisms: "Streamer, hub FIFO, burst hub transfers, smart-pin serial/analog modes, LUT sharing."
+      physics_grounding:
+        - "Streamer + hub FIFO — architecture/fifo.yaml; architecture/streamer/overview.yaml"
+        - "Adjacent-cog LUT sharing — architecture/lookup_ram.yaml (LUT_sharing)"
+      relevant_theory: ["synchronous dataflow (buffer sizing)", "Kahn process networks (determinacy)", "latency-insensitive design (jitter tolerance)", "systolic arrays (pipelines)"]
+    - id: control_plane
+      canonical_name: "control plane"
+      concerns: "Commands and state — low-rate but correctness-critical: atomicity, ordering, ownership of who-may-write-what."
+      p2_mechanisms: "Hub mailboxes / parameter blocks, locks, shared state."
+      physics_grounding:
+        - "Single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+        - "16 locks — architecture/locks.yaml (total_locks)"
+      relevant_theory: ["CSP rendezvous", "domain-driven aggregates (a lock is a consistency boundary)", "connascence-of-meaning"]
+    - id: event_plane
+      canonical_name: "event plane"
+      concerns: "Signalling and urgency: latency tiers, urgency, jitter, priority inversion."
+      p2_mechanisms: "Lightweight attention signalling, the event system, interrupt levels, deliberate polling."
+      physics_grounding:
+        - "Attention / event system — architecture/cog_attention.yaml; architecture/event_system.yaml"
+      relevant_theory: ["real-time / rate-monotonic scheduling", "the interrupt-versus-poll trade-off"]
+
+# =============================================================================
+# 5. REFERENCE CANON — the durable literature this layer draws its guidance from
+# =============================================================================
+# Decision-guidance (how to reason about a cut) is grounded in published canon, not in
+# P2 facts. Each work is named with its full bibliographic identity (self-sufficient,
+# location-independent) and paired with the P2 mechanism or decision it informs, so the
+# agent can reach for the matching literature when a problem exceeds this layer. This
+# canon is a starting set: when a system pushes past it (fault tolerance, power,
+# security isolation, probabilistic timing), name the new discipline and grow an entry.
+
+reference_canon:
+  authority_tier: PRINCIPLE
+  groups:
+    - group: "Logical decomposition"
+      works:
+        - cite: "Parnas, D.L. — \"On the Criteria To Be Used in Decomposing Systems into Modules\" — Communications of the ACM, 1972."
+          informs: "Information hiding: decompose around secrets and likely changes, not processing steps. Grounds altitude layering (axis of change) and module boundaries."
+        - cite: "Constantine, L.L. & Yourdon, E. — \"Structured Design: Fundamentals of a Discipline of Computer Program and Systems Design\" — Prentice-Hall, 1979."
+          informs: "The origin of coupling and cohesion — the measures behind a good seam (low coupling across cogs, high cohesion within one)."
+        - cite: "Page-Jones, M. — \"Fundamentals of Object-Oriented Design in UML\" — Addison-Wesley, 1999 (connascence; see also CACM, 1992)."
+          informs: "Connascence — the sharpest evaluation tool for a cut. Maximize connascence inside a boundary, minimize the dynamic connascence that crosses a cog boundary (timing, execution-order, value)."
+    - group: "Concurrent processes"
+      works:
+        - cite: "Hoare, C.A.R. — \"Communicating Sequential Processes\" — Prentice-Hall, 1985 (orig. CACM, 1978); occam / Transputer lineage — INMOS, occam Programming Manual, 1984."
+          informs: "Cogs are CSP processes, mailboxes are channels. The P2 is very nearly a Transputer reborn — independent processors, a message-passing fabric, no shared OS — inheriting decades of correctness reasoning. Grounds the control plane and data-flow contracts."
+        - cite: "Kahn, G. — \"The Semantics of a Simple Language for Parallel Programming\" — IFIP Congress, 1974."
+          informs: "Kahn process networks: processes communicating only by blocking reads on FIFO channels are determinate regardless of timing — the rule for inter-cog dataflow that survives hub jitter. Grounds the data plane."
+    - group: "Dataflow and hardware"
+      works:
+        - cite: "Lee, E.A. & Messerschmitt, D.G. — \"Synchronous Data Flow\" — Proceedings of the IEEE, 1987."
+          informs: "Static rates yield static schedules and computable buffer sizes — the math behind the acceleration/deceleration of data. Grounds rate adaptation and data-plane buffer sizing."
+        - cite: "Carloni, L.P., McMillan, K.L. & Sangiovanni-Vincentelli, A.L. — \"Theory of Latency-Insensitive Design\" — IEEE TCAD, 2001."
+          informs: "Correctness by order, not time — the bridge to the FPGA/spatial domain; jitter tolerance on the data plane."
+        - cite: "Chapiro, D.M. — \"Globally-Asynchronous Locally-Synchronous Systems\" — PhD thesis, Stanford University, 1984."
+          informs: "GALS is the exact characterization of the P2 — locally synchronous cogs, an asynchronous hub fabric — importing the whole clock-domain-crossing discipline. Grounds rate adaptation across cogs."
+        - cite: "Kung, H.T. & Leiserson, C.E. — \"Systolic Arrays (for VLSI)\" — in Mead & Conway, Introduction to VLSI Systems, 1980."
+          informs: "Rhythmic data through a regular array of processing elements — the spatial-compute mental model for using cogs as pipeline stages."
+    - group: "Boundaries and generativity"
+      works:
+        - cite: "Evans, E. — \"Domain-Driven Design: Tackling Complexity in the Heart of Software\" — Addison-Wesley, 2003."
+          informs: "Bounded contexts as cog/subsystem boundaries with their own internal language; aggregates as lock domains. Grounds external-interface translation (C2) and the control plane."
+        - cite: "Alexander, C. — \"A Pattern Language: Towns, Buildings, Construction\" — Oxford University Press, 1977."
+          informs: "The generative form the layer's patterns must take — a grammar that composes, not a catalogue. Grounds the layer's PATTERN tier."
+        - cite: "Liu, C.L. & Layland, J.W. — \"Scheduling Algorithms for Multiprogramming in a Hard-Real-Time Environment\" — Journal of the ACM, 1973."
+          informs: "Rate-monotonic / EDF scheduling for the event plane's urgency tiers — assigning priority by cadence and reasoning about deadlines."
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+  - architecture/cog.yaml
+  - architecture/smart_pins.yaml
+  - architecture/locks.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/lookup_ram.yaml
+  - architecture/cog_attention.yaml
+  - architecture/event_system.yaml
+
+see_also:
+  - "The generative decomposition theory (forces as grammar): p2kbArchDecompositionMethod"
+  - "The first-contact observation routine: p2kbArchFirstContactProcedure"
+  - "Force 1 — resource ownership: p2kbArchResourceOwnership"
+  - "Force 2 — data-flow contracts: p2kbArchDataFlowContracts"
+  - "Force 3 — rate adaptation: p2kbArchRateAdaptation"
+  - "Force 4 — altitude layering: p2kbArchAltitudeLayering"
+  - "Cross-cutting forces C1-C5: p2kbArchCrossCuttingForces"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+  - "Object archetypes (the vocabulary this grammar derives): p2kbSpin2ObjectArchetypes"
+
+oneliner: "Canonical vocabulary for the P2 decomposition layer — authority-tier legend, the four forces + five cross-cutting forces + three planes, and the durable reference canon."

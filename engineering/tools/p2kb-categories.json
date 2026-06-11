@@ -110,6 +110,23 @@
     "execution": {
       "description": "Execution engines",
       "files": ["xbyte_engine"]
+    },
+    "decomposition": {
+      "description": "Decomposition reasoning layer — the generative method, forces, lenses, and worked derivation for cutting a design across the P2's parallel fabric",
+      "files": [
+        "decomposition-glossary",
+        "decomposition-method",
+        "first-contact-procedure",
+        "resource-ownership",
+        "data-flow-contracts",
+        "rate-adaptation",
+        "altitude-layering",
+        "cross-cutting-forces",
+        "spatial-computing",
+        "evaluation-vocabulary",
+        "resource-budget",
+        "worked-derivation-robot-dog"
+      ]
     }
   },
 

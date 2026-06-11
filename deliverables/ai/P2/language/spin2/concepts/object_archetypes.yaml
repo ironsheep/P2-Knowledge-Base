@@ -489,5 +489,6 @@ see_also:
   - "Driver development"
   - "Multi-COG programming"
   - "Resource management"
+  - "The grammar that DERIVES these archetypes (forces as generative rules): p2kbArchDecompositionMethod"
 
 oneliner: "Canonical object archetypes for Spin2 development with patterns and anti-patterns"

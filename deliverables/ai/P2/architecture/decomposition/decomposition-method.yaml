@@ -1,0 +1,187 @@
+concept: decomposition_method
+title: "Decomposition Method — From Machine to Object Set (the Generative Theory)"
+category: decomposition_reasoning
+
+summary: |
+  The generative theory of the P2 decomposition reasoning layer. It teaches the
+  consuming agent the central move: on the P2, the shape of your object set is NOT a
+  matter of taste picked from a menu — it is DERIVED by reconciling a small number of
+  physical and architectural forces. The archetypes are the vocabulary; the forces are
+  the grammar. An agent that understands the forces can derive a sound architecture for
+  a machine it has never seen; an agent that only has the catalogue can only
+  pattern-match.
+
+  Two ideas make this operational. First, decomposition on the P2 is TWO-AXIS: a
+  logical axis (split behavior by cohesion and coupling — classical Parnas /
+  Constantine-Yourdon / Page-Jones) AND a physical axis (allocation onto a finite,
+  heterogeneous resource lattice: 8 cogs, 64 smart pins, one shared CORDIC, 16 locks,
+  hub bandwidth, adjacent-cog LUT sharing, the streamer/FIFO). The physical axis is not
+  only a constraint — it is a decomposition tool. "Where is the boundary" and "what
+  hardware runs it" are ONE decision, co-designed.
+
+  Second, four forces do the cutting (the grammar): three primary forces cut the object
+  set, and a fourth emergent force falls out vertically. This entry frames the method;
+  the per-force entries carry the full treatment, and the first-contact procedure turns
+  the theory into an ordered routine.
+
+# =============================================================================
+# 1. THE THESIS — object shape is derived, not chosen
+# =============================================================================
+
+thesis:
+  authority_tier: PRINCIPLE
+  statement: |
+    On the P2, the shape of your object set is the ANSWER to a set of constraints, most
+    of which come from the hardware and from the rates at which data moves. Change the
+    buses, the deadlines, or the cadences, and the correct object set changes with them.
+    A good decomposition is therefore derived, not chosen. This is why the layer teaches
+    the forces (the grammar) and not a fixed catalogue of object sets: a grammar
+    generalizes to unseen machines; a catalogue only matches seen ones.
+  the_two_roles: |
+    The archetypes (top-level application, driver, semantic driver, policy, buffer,
+    coordinator) are the VOCABULARY — the nouns you can build with. The forces are the
+    GRAMMAR — the rules that decide which nouns to instantiate, how many, and where the
+    boundaries fall. The archetypes assume the decision to create an object was already
+    made; this layer fills the altitude between them and the silicon by supplying the
+    grammar that makes that decision.
+  why_it_matters: |
+    The default failure mode the layer corrects is the "flat device list": every chip
+    driver a sibling reachable from main(), shape chosen by analogy to a catalogue
+    example rather than derived from the wiring. It compiles, then fails as flaky
+    hardware the moment the derivation it skipped would have forbidden the cut.
+
+# =============================================================================
+# 2. THE TWO AXES — logical cohesion/coupling AND physical allocation
+# =============================================================================
+
+two_axis_decomposition:
+  authority_tier: PRINCIPLE
+  logical_axis: |
+    Classical software decomposition is purely logical: split behavior into modules;
+    judge the cuts by cohesion (do a module's insides belong together) and coupling (how
+    much crosses between them). There is no physical substrate in that model. This axis
+    is grounded in the durable canon — see the reference-canon index in the glossary
+    (Parnas information hiding; Constantine & Yourdon coupling/cohesion; Page-Jones
+    connascence as the sharpest measure of a cut).
+  physical_axis: |
+    The P2 adds a second, PHYSICAL axis: allocation onto a finite, heterogeneous
+    resource lattice. The decisive insight the agent must internalize is that the
+    physical axis is not only a constraint — it is a decomposition TOOL. A cog is the
+    strongest encapsulation boundary silicon offers: private memory, deterministic
+    timing, no interference from other cogs. A smart pin can DELETE an entire software
+    module by absorbing its function into hardware. So "where is the boundary" and "what
+    hardware runs it" are one decision, made together.
+  the_resource_lattice:  # PHYSICS — the finite assets the physical axis allocates onto
+    authority_tier: PHYSICS
+    note: "Each asset below is a hard silicon fact; cite the internal key when a cut rests on it."
+    assets:
+      - asset: "8 cogs — the strongest encapsulation boundary (private RAM, deterministic timing, no interference)"
+        cite: "architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
+      - asset: "64 smart pins — autonomous I/O that can absorb a software module into hardware"
+        cite: "architecture/smart_pins.yaml (pin_count, independence)"
+      - asset: "one shared CORDIC pipeline (~54-55 clk latency, shared by all cogs)"
+        cite: "architecture/cordic.yaml (pipeline_depth, result_latency); language/spin2/concepts/cordic_solver.yaml"
+      - asset: "16 locks — hardware mutexes for explicit coordination"
+        cite: "architecture/locks.yaml (total_locks)"
+      - asset: "hub bandwidth via the egg-beater (8-clk rotation) + the hub FIFO/streamer"
+        cite: "architecture/hub.yaml (egg_beater_architecture.rotation_period); architecture/fifo.yaml; architecture/streamer/overview.yaml"
+      - asset: "adjacent-cog LUT sharing (pairs 0-1, 2-3, 4-5, 6-7)"
+        cite: "architecture/lookup_ram.yaml (LUT_sharing)"
+  co_design_rule: |
+    Teach both axes, and teach that they are co-designed. A boundary chosen on the
+    logical axis that ignores the lattice produces an elegant module that cannot run
+    (no cog free, or hub-saturated); a boundary chosen on the physical axis that ignores
+    cohesion produces a cog that owns unrelated work and is impossible to test. Reconcile
+    both; when they conflict, the resource budget (an explicit artifact) decides.
+
+# =============================================================================
+# 3. THE FOUR FORCES — the grammar (framing; full treatment in the force entries)
+# =============================================================================
+
+the_forces:
+  authority_tier: PRINCIPLE
+  framing: |
+    Four forces do the cutting. The first three are PRIMARY — they cut the object set.
+    The fourth is EMERGENT — it falls out of the first three as a vertical consequence.
+    The "why" matters more than the "what": an agent that knows WHY a force exists on
+    the P2 specifically will generalize; one that memorizes a rule will not.
+  forces:
+    - id: force_1
+      name: "resource ownership"
+      kind: "primary"
+      one_line: "Every serialized, stateful hardware resource has exactly one owning cog; the boundary traces the wire. Decides cog cuts and singleton-vs-instance from sharing topology."
+      see_also: "p2kbArchResourceOwnership"
+    - id: force_2
+      name: "data-flow contract"
+      kind: "primary"
+      one_line: "Once Force 1 scatters work across cogs, the contract for each seam (blocking / latest-wins / buffered / request-ack / published telemetry) is itself a decomposition decision — the coupling the deadline tolerates places the seam."
+      see_also: "p2kbArchDataFlowContracts"
+    - id: force_3
+      name: "rate adaptation"
+      kind: "primary"
+      one_line: "Rate-domain boundaries demand objects BETWEEN the layers: samplers/buffers where cadences meet, slew/easing engines where discrete intent becomes continuous stream; one-bus-many-cadences resolves to cooperative tasks within the owning cog."
+      see_also: "p2kbArchRateAdaptation"
+    - id: force_4
+      name: "altitude layering"
+      kind: "emergent"
+      one_line: "Within an ownership domain, stack objects so each tier does exactly one unit conversion and changes for exactly one reason (bits → registers → physical units → behavior). Layer by axis-of-change, not line count."
+      see_also: "p2kbArchAltitudeLayering"
+  forces_interact: |
+    The real skill is that the forces INTERACT and must be reconciled, not applied in
+    isolation. Force 1 says "one cog per bus," but Force 3 says "different cadences want
+    separation" — when three devices on ONE bus run at three cadences you cannot split
+    the bus (Force 1 forbids it), so the resolution is cooperative tasking WITHIN the one
+    owning cog. Force 2 (decouple everything) reconciles against simplicity (not every
+    seam needs a ring buffer; latest-wins is usually enough). Force 4 (layer everything)
+    reconciles against tiny cog memory (deep layering costs per-call and RAM). The
+    cross-cutting forces (C1-C5) are placed after the structural tree is drawn.
+
+# =============================================================================
+# 4. THE GENERATIVE TEST — what makes this a method, not a catalogue
+# =============================================================================
+
+generative_test:
+  authority_tier: PRINCIPLE
+  statement: |
+    This entry is generative — it equips the agent to DERIVE, not to look up. The test
+    it must satisfy: an agent reading the layer should be able to take a hardware mix it
+    has never seen and produce a defensible object set, because it has (a) the
+    VOCABULARY (the archetypes it can instantiate), (b) the FORCES (the grammar that
+    decides which to instantiate and where the boundaries fall), (c) the two AXES
+    (logical cohesion/coupling co-designed with physical allocation onto the lattice),
+    and (d) the INVITATIONS to derive (the first-contact procedure's ordered
+    observation-to-force routine, and the evaluation vocabulary to judge the result).
+  how_to_proceed: |
+    Do not pattern-match to the robot-dog example. Run the first-contact procedure
+    against the actual wiring, apply each force with its stated reasoning, reconcile the
+    tensions, place the cross-cutting objects, and judge the cut with the evaluation
+    vocabulary. The worked derivation is an illustration of the method in motion — read
+    it to see the grammar exercised, never copy it as the answer.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+  - architecture/cog.yaml
+  - architecture/smart_pins.yaml
+  - architecture/cordic.yaml
+  - architecture/locks.yaml
+  - architecture/hub.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/lookup_ram.yaml
+
+see_also:
+  - "The shared vocabulary, tier legend, and reference canon: p2kbArchDecompositionGlossary"
+  - "The ordered observation-to-force routine: p2kbArchFirstContactProcedure"
+  - "Force 1 — resource ownership: p2kbArchResourceOwnership"
+  - "Force 2 — data-flow contracts: p2kbArchDataFlowContracts"
+  - "Force 3 — rate adaptation: p2kbArchRateAdaptation"
+  - "Force 4 — altitude layering: p2kbArchAltitudeLayering"
+  - "Cross-cutting forces C1-C5: p2kbArchCrossCuttingForces"
+  - "Judging a cut (coupling, connascence, back-pressure): p2kbArchEvaluationVocabulary"
+  - "The resource-budget artifact: p2kbArchResourceBudget"
+  - "End-to-end worked derivation: p2kbArchWorkedDerivationRobotDog"
+  - "The object vocabulary this grammar derives: p2kbSpin2ObjectArchetypes"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "The generative theory: object shape is derived by reconciling four forces (the grammar) across two axes — logical cohesion/coupling co-designed with physical allocation onto the P2 resource lattice."

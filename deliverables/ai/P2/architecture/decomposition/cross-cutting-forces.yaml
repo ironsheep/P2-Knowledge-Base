@@ -1,0 +1,136 @@
+concept: cross_cutting_forces
+title: "Cross-Cutting Forces (C1-C5) — Objects That Span or Guard the Tree"
+category: decomposition_reasoning
+
+summary: |
+  Forces 1-4 build the structural tree: who owns what (1), how the branches talk (2),
+  what adapts between cadences (3), how deep each branch layers (4). But some objects
+  exist ACROSS that tree rather than IN it, driven by concerns that do not respect the
+  ownership hierarchy. An agent that applies only Forces 1-4 produces a clean tree and
+  then has nowhere to put the supervisor, the translator, or the per-unit calibration.
+  Naming these five forces prevents that omission — each one PLACES an object, but they
+  cut sideways, not down.
+
+  This entry carries the five force-fields at the class level, then breaks out C1-C5 —
+  safety override, external-interface translation, per-unit configuration, testability
+  seam, lifecycle/init order — each with its own what / why / how-it-cuts / example /
+  failure. Place these AFTER the structural tree is drawn (first-contact step 8).
+
+# ----- the five force-fields, applied to the class of cross-cutting forces -----
+what_it_is:
+  authority_tier: PRINCIPLE
+  body: |
+    Cross-cutting forces are real decomposition forces — each places an object — but the
+    object spans or guards the tree rather than sitting at one node of it. They are
+    driven by concerns (safety, external vocabularies, per-unit variation, testability,
+    init order) that cut sideways across ownership domains. There are five recurring
+    ones, C1-C5.
+
+why_on_p2:
+  authority_tier: PRINCIPLE
+  body: |
+    [PHYSICS] Cogs are independent, so a hung cog will not drag the others down — but it
+    also will not stop driving its pins on its own. [PRINCIPLE] That independence is
+    exactly why several of these forces must be EXPLICIT structures rather than emergent
+    properties: safety cannot be assumed to "fall out" of the design (C1), and init
+    ordering cannot be assumed because cogs launch concurrently (C5). The chip gives you
+    deterministic, isolated cores; the cross-cutting objects are how you reimpose
+    whole-machine guarantees on top of that isolation.
+  grounding:
+    - "Cog independence (a hung cog keeps driving its pins) — architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
+
+how_it_cuts:
+  authority_tier: PRINCIPLE
+  body: |
+    Each cross-cutting force places an object at a specific location relative to the
+    tree: the supervisor sits ABOVE the policy layer (C1); the translator sits at the
+    system EDGE (C2); the configuration store sits BESIDE every driver that reads it
+    (C3); the testability seam is cut INTO each layer boundary (C4); the sequencer sits
+    at the TOP as the orchestrator (C5). Ask "where does each of these go" after the
+    structural tree is drawn — not before, because their placement depends on the tree.
+
+# ----- the five cross-cutting forces -----
+forces:
+  authority_tier: PRINCIPLE
+  list:
+    - id: c1
+      name: "Safety / fault containment / supervisory override"
+      what_it_is: "Some authority must be able to override the whole machine — a low-battery cutoff, a watchdog, an E-stop — and a fault in one place must be contained so it does not cascade."
+      why_on_p2: "[PHYSICS] Cogs are independent: a hung cog won't drag others down, but it also won't stop driving its pins on its own. [PRINCIPLE] So safety must be an explicit, privileged path, never an emergent property. (Grounding: architecture/cog.yaml cog_independence.)"
+      how_it_cuts: "Places a SUPERVISOR with override authority — usually hosted on the cog that owns the actuators — sitting above the policy layer and able to suppress it, plus fault-detection seams (stack sentinels, liveness checks) at each cog."
+      example: "[EXAMPLE, illustrative] A critical-battery hard-halt latch that suppresses ALL motion commands regardless of what policy wants; per-cog stack-overflow sentinels."
+      failure_if_ignored: "Safety logic smeared through every command path, so no single place can guarantee the machine is made safe."
+    - id: c2
+      name: "External-interface translation (anti-corruption boundary)"
+      what_it_is: "When integrating a subsystem with its OWN vocabulary — a sensor's command IDs, a protocol's frame format — put a translation object at the boundary so external naming never leaks inward."
+      why_on_p2: "[PRINCIPLE] The external vocabulary changes on someone else's schedule; quarantining it behind one seam means a vendor change touches one object, not the codebase. (Canon: Domain-Driven Design bounded contexts / anti-corruption layer.)"
+      how_it_cuts: "A thin mapping/adapter at the system edge; internal code speaks only the internal vocabulary."
+      example: "[EXAMPLE, illustrative] A voice->command map turning a recognizer's vendor command IDs into internal CMD_* intents — a deliberate seam, kept separate from both the recognizer driver and the motion policy."
+      failure_if_ignored: "Device-specific magic numbers scattered through the behavior code."
+    - id: c3
+      name: "Configuration & per-unit variation"
+      what_it_is: "Separate what varies PER physical unit or deployment (trim offsets, pin maps, personality data) from what is fixed BY design."
+      why_on_p2: "[PRINCIPLE] Identical firmware should run on every physical unit; per-unit constants belong in data, not code."
+      how_it_cuts: "A configuration/calibration object the rest of the code reads but never hard-codes."
+      example: "[EXAMPLE, illustrative] Per-joint servo trim offsets isolated in one calibration object; version constants; a custom-vocabulary table."
+      failure_if_ignored: "Per-robot constants sprinkled through drivers, so each physical unit needs a forked build."
+    - id: c4
+      name: "Testability / bring-up isolation"
+      what_it_is: "Shape objects so each can be exercised STANDALONE on real hardware before the whole is assembled. The seam you can test at is the seam you should cut at."
+      why_on_p2: "[PRINCIPLE] On embedded specifically you cannot single-step a servo; you bring hardware up one layer at a time, so the observability requirement actively pushes back on the design and often reveals a seam you'd otherwise have fused."
+      how_it_cuts: "Every layer gets a narrow, observable public surface and a minimal harness."
+      example: "[EXAMPLE, illustrative] A bring-up test per layer (bus scan -> chip -> servo-center -> leg IK -> gait), each runnable alone."
+      failure_if_ignored: "A system that only works or fails as a whole, with no way to localize a fault to a layer."
+    - id: c5
+      name: "Lifecycle & initialization ordering"
+      what_it_is: "Objects have a TEMPORAL dependency graph — power and rails before buses, chip wake-from-sleep before actuation, cogs launched in a safe order. Something must own that sequence."
+      why_on_p2: "[PHYSICS] Cogs launch concurrently and independently, so init order is not implied by the call structure. [PRINCIPLE] An explicit sequencer must own the temporal graph. (Grounding: architecture/cog.yaml.)"
+      how_it_cuts: "Justifies the top-level orchestrator as a SEQUENCER, plus a start()/stop() discipline on every driver."
+      example: "[EXAMPLE, illustrative] The launch order of the IO and motion cogs with pre-seeded stacks; a PWM chip wake-from-SLEEP that had to precede any servo write; supplying bus power before I2C can run."
+      failure_if_ignored: "Intermittent boot failures that depend on timing luck."
+
+example:
+  authority_tier: EXAMPLE
+  illustrative_not_normative: true
+  body: |
+    (Illustrative set, frozen at one point — read it to see the forces placed; do not
+    copy as law.) On the robot dog, after Forces 1-4 drew the cog/driver tree, the five
+    cross-cutting objects landed as: a battery hard-halt supervisor above policy (C1); a
+    voice->CMD translator at the edge (C2); a per-joint trim/calibration store (C3);
+    per-layer bring-up tests (C4); and the orchestrator-as-sequencer owning cog launch
+    order and chip wake sequencing (C5). None of these is a node in the structural tree;
+    each guards or spans it.
+
+failure_if_ignored:
+  authority_tier: PRINCIPLE
+  body: |
+    Apply only Forces 1-4 and you get a clean tree with nowhere to put the supervisor,
+    the translator, the calibration, the test seams, or the sequencer — so each gets
+    smeared across the tree: safety in every command path, magic numbers in the behavior
+    code, per-unit constants in drivers, no place to stand for bring-up, and boot order
+    left to luck. Naming C1-C5 and asking where each goes is what prevents the omission.
+
+breadth_gap_note:
+  authority_tier: PRINCIPLE
+  body: |
+    A known gap, flagged not invented: high-bandwidth streaming domains (video, audio,
+    fast-ADC capture via the streamer/DMA) are a distinct domain type with their own
+    decomposition (a streamer-owning cog with double-buffered hub hand-off). This layer
+    does not yet carry a worked streaming example; the spatial-computing entry covers the
+    relevant mechanisms and smells.
+
+related:
+  - architecture/cog.yaml
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+
+see_also:
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "The generative theory: p2kbArchDecompositionMethod"
+  - "Where these are placed in the routine (step 8): p2kbArchFirstContactProcedure"
+  - "Force 4 — the layer boundaries C4 tests at: p2kbArchAltitudeLayering"
+  - "C2 grounds in the same DDD canon as the control plane: p2kbArchDataFlowContracts"
+  - "Streaming-domain mechanisms and smells: p2kbArchSpatialComputing"
+  - "The object vocabulary (supervisor, orchestrator, driver): p2kbSpin2ObjectArchetypes"
+
+oneliner: "C1-C5: the objects that span or guard the tree — safety override, external-interface translation, per-unit configuration, testability seam, lifecycle/init order — placed after Forces 1-4 draw the structure."

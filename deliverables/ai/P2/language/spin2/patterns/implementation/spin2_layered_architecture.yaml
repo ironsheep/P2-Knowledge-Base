@@ -21,3 +21,6 @@ resources:
 combines_with:
   - "framework_pattern"
   - "plugin_system"
+
+see_also:
+  - "Force 4 — altitude layering (the decomposition force this pattern realizes): p2kbArchAltitudeLayering"

@@ -271,3 +271,4 @@ see_also:
   - "Multi-COG synchronization: p2kbPasm2MultiCogSynchronization"
   - "Inline PASM2: p2kbSpin2InlinePasm2"
   - "COG vs Hub execution: p2kbPasm2CogHubExecution"
+  - "How to DECOMPOSE a design across this architecture (the generative method): p2kbArchDecompositionMethod"

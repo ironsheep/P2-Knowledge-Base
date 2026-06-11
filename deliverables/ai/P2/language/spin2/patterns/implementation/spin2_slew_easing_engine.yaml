@@ -1,0 +1,73 @@
+pattern_id: "slew_easing_engine"
+description: |
+  Converts a discrete, one-shot command (a "step": stand, forward, move-to) into a
+  smooth, rate-limited trajectory delivered to an actuator at its native frame rate. A
+  command arrives ONCE and sets a target; a fixed-rate frame loop then blends the current
+  state toward that target over many frames, so the actuator receives a continuous,
+  accelerated-then-decelerated stream rather than a snap.
+
+  This is the "signal shaping" half of rate adaptation (Force 3b). The ramp is a
+  responsibility distinct from BOTH the commander (which knows WHAT) and the device
+  driver (which knows HOW to talk to the chip); decomposing it out of both keeps each
+  clean. The frame loop uses a wrap-safe getct() deadline so timing is deterministic and
+  immune to hub jitter.
+
+when_use:
+  - "A high-level discrete command must become a continuous actuator trajectory"
+  - "Servos / motors that would draw current spikes or mechanical shock if stepped"
+  - "Any discrete-intent -> continuous-output path at a fixed frame rate"
+
+implementation: |
+  CON
+    FRAME_HZ = 50                          ' actuator native frame rate
+
+  VAR
+    long  frameTicks                       ' getct() ticks per frame = clkfreq / FRAME_HZ
+    long  nextFrameCt                      ' getct() deadline for the next frame
+    long  curPose, tgtPose                 ' current and commanded target (per joint in practice)
+
+  ' --- commander side: set the target once (the "step") ---
+  PUB moveTo(target)
+    tgtPose := target                      ' a single discrete intent; no per-servo slew here
+
+  ' --- the frame loop: blend current toward target every frame ---
+  PRI runFrames()
+    frameTicks := clkfreq / FRAME_HZ
+    nextFrameCt := getct()
+    repeat
+      if (getct() - nextFrameCt) >= 0      ' wrap-safe: frame deadline reached?
+        nextFrameCt += frameTicks          ' schedule next frame (drift-free)
+        advanceFrame()
+      ' yield here if cooperating with sibling tasks (see cooperative_tasking)
+
+  PRI advanceFrame()
+    stepPose()                             ' eased lerp of curPose toward tgtPose, one frame's worth
+
+  PRI stepPose()
+    ' move a bounded step toward the target (linear shown; ease-in/out is a curve on this)
+    curPose += (tgtPose - curPose) #> -MAX_STEP <# MAX_STEP
+    writeActuator(curPose)                  ' device driver call -- the ramp does not poke registers itself
+
+anti_patterns:
+  - "Writing a discrete command straight to the actuator (no ramp) -- causes current spikes and mechanical shock."
+  - "Putting the easing math inside the device driver -- fuses two axes of change; the driver should change only when the chip changes."
+  - "Using a free-running counter without a wrap-safe deadline compare -- getct() wraps; `(getct() - deadline) >= 0` is the correct test."
+
+resources:
+  memory: "small -- per-channel current/target plus frame bookkeeping"
+  locks: "none"
+  cogs: "runs in the actuator-owning cog (often as a cooperative task)"
+
+combines_with:
+  - "cooperative_tasking"
+  - "latest_wins_mailbox"
+  - "timing_control"
+
+related:
+  - architecture/decomposition/rate-adaptation.yaml
+  - architecture/decomposition/altitude-layering.yaml
+  - language/spin2/patterns/implementation/spin2_timing_control.yaml
+
+see_also:
+  - "Force 3b -- slew/shaping as an object-worthy responsibility: p2kbArchRateAdaptation"
+  - "Why the ramp is its own layer (axis of change): p2kbArchAltitudeLayering"

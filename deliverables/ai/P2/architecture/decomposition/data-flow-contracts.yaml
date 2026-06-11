@@ -1,0 +1,147 @@
+concept: data_flow_contracts
+title: "Force 2 — The Data-Flow Contract Between Objects (crossed with the Three Planes)"
+category: decomposition_reasoning
+
+summary: |
+  The second primary decomposition force. Once Force 1 has scattered work across cogs,
+  those cogs must exchange data — and the CONTRACT chosen for each exchange (blocking
+  call, latest-wins mailbox, ring buffer, request/response with ack, lock-free published
+  telemetry) is itself a decomposition decision, because the coupling you can tolerate
+  determines where the seam goes and who depends on whom.
+
+  This entry carries the five force-fields and then crosses Force 2 with the THREE
+  PLANES (data / control / event): every inter-cog link is three relationships
+  superimposed, each with a different correct mechanism. It supersedes the blocking
+  mailbox toy (spin2_mailbox_communication) with a real treatment of contracts; the
+  redirect is wired at release.
+
+what_it_is:
+  authority_tier: PRINCIPLE
+  body: |
+    The seam between two cogs IS the data-flow contract, made concrete as a mailbox
+    object or a shared structure. The contract you choose determines the DIRECTION of
+    dependency: a blocking call couples the caller to the callee's worst-case latency; a
+    latest-wins single-slot mailbox decouples them entirely (producer never waits,
+    consumer always sees the freshest value); a ring buffer decouples RATE while
+    preserving every sample; published telemetry makes the producer depend on no one
+    while any number of consumers read it lock-free. Choosing the contract draws the
+    object boundary.
+
+why_on_p2:
+  authority_tier: PHYSICS
+  body: |
+    [PHYSICS] The P2 has NO OS, no IPC layer, no message queue. Inter-cog coordination
+    is whatever the programmer builds out of hub RAM, atomic single-long access, the 16
+    locks, and cog-attention signalling. [PHYSICS] A single-long hub read or write is
+    atomic — which is exactly what makes lock-free single-writer publishing correct.
+
+    [PRINCIPLE] The absence of an imposed mechanism is a FEATURE: you choose the exact
+    coupling your timing budget allows, with nothing forced on you. The right contract
+    is dictated by what the consumer needs and what the producer can afford. An agent
+    that internalizes "there is no free message queue — I am choosing the coupling"
+    designs the seam deliberately; one that reaches for a blocking call by habit throws
+    away the determinism the chip gave it.
+  grounding:
+    - "No OS/IPC; hub + atomic-long + locks + cogatn — architecture/p2-architecture-mental-model.yaml (inter_cog_communication)"
+    - "Single-long hub R/W atomic (lock-free single-writer publish) — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+    - "16 locks — architecture/locks.yaml (total_locks)"
+    - "Cog-attention event signalling — architecture/cog_attention.yaml"
+
+how_it_cuts:
+  authority_tier: PRINCIPLE
+  body: |
+    A real-time control loop cannot tolerate blocking, so its inbound seam MUST be a
+    non-blocking, latest-wins command channel — and that channel, with its publish
+    discipline, becomes a first-class part of the architecture rather than an
+    afterthought. The contract also names the dependency direction: with published
+    telemetry the producer depends on no one and any number of consumers may read it
+    lock-free. Choose the contract per seam; do not default the whole system to one
+    mechanism.
+
+# ----- the three planes: one link, three superimposed relationships -----
+three_planes:
+  authority_tier: PRINCIPLE
+  framing: |
+    Decompose each inter-cog link (and each peripheral binding) into three planes and
+    design each SEPARATELY. Building all three on one mechanism is the signature way to
+    use the chip badly. The planes rank by cost-of-getting-wrong; spend design care in
+    inverse order (event > control > data).
+  planes:
+    - plane: "data plane"
+      need: "Bulk, rate-defined movement; throughput, rate-matching, buffering, back-pressure."
+      contract_choice: "Ring buffer when every sample matters; latest-wins slot when only the freshest does; the streamer/hub-FIFO for sustained bursts."
+      p2_mechanism: "Streamer, hub FIFO, burst hub transfers, smart-pin serial/analog modes, LUT sharing."
+      theory: "Synchronous dataflow (buffer sizing); Kahn process networks (determinacy under jitter)."
+      cost_if_wrong: "Wastes bandwidth — visible and recoverable."
+    - plane: "control plane"
+      need: "Commands and state; low-rate but correctness-critical — atomicity, ordering, who-may-write-what."
+      contract_choice: "Latest-wins command with seq/ack handshake; locks where a multi-long datum must update atomically; single-writer ownership of each shared long."
+      p2_mechanism: "Hub mailboxes / parameter blocks, locks, shared state."
+      theory: "CSP rendezvous; domain-driven aggregates (a lock is a consistency boundary); connascence-of-meaning."
+      cost_if_wrong: "Corrupts state — an intermittent race."
+    - plane: "event plane"
+      need: "Signalling and urgency; latency tiers, jitter, priority inversion."
+      contract_choice: "Published value + monotonically-bumped freshness counter the consumer edge-detects; cog-attention or the event system for true urgency; deliberate polling for the lazy case."
+      p2_mechanism: "Lightweight attention signalling, the event system, interrupt levels, deliberate polling."
+      theory: "Real-time / rate-monotonic scheduling; the interrupt-versus-poll trade-off."
+      cost_if_wrong: "Misses a deadline — silent until the field."
+  conflation_smell: |
+    Conflating planes is a concrete, catchable mistake: polling a hub flag (a control
+    mechanism) to deliver an urgent event (an event need), or pushing bulk data through
+    mailbox words (a control mechanism) instead of the streaming path. Naming the planes
+    lets the agent catch its own error.
+
+example:
+  authority_tier: EXAMPLE
+  illustrative_not_normative: true
+  body: |
+    (Illustrative, frozen at one point — read it to see the contract discipline in
+    motion; do not copy it as law.)
+
+    Orchestrator -> motion-cog seam (CONTROL plane): a latest-wins command mailbox with
+    a seq/ack handshake. The writer fills the argument slots FIRST and bumps a sequence
+    counter LAST (the publish); the reader acts when seq != ack and writes ack := seq
+    when it consumes. The bump-last ordering is what makes a torn read impossible without
+    a lock.
+
+    Motion-cog -> anyone (DATA/telemetry): lock-free published telemetry. Attitude,
+    battery, mode, and per-leg angles sit in hub longs that any cog reads without a lock,
+    because single-long reads are atomic and there is exactly ONE writer.
+
+    Inbound events (EVENT plane): a finished ultrasonic ping or a recognized voice word
+    is published as a value plus a monotonically-bumped freshness counter the consumer
+    edge-detects. No blocking anywhere: the 50 Hz loop never waits on the orchestrator
+    and the orchestrator never waits on a device.
+
+failure_if_ignored:
+  authority_tier: PRINCIPLE
+  body: |
+    Two failure modes. First, blocking calls between cogs that quietly serialize a
+    system that was supposed to be parallel — the fast loop ends up waiting on the slow
+    one, and the determinism the P2 gave you for free is thrown away. Second, shared
+    multi-long structures written by one cog and read mid-update by another with no
+    atomicity discipline, producing torn reads that look like glitches. The fix for the
+    second is structural: publish via a single atomic long, or guard the multi-long
+    update with a lock and bump a sequence counter last.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - architecture/locks.yaml
+  - architecture/cog_attention.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
+  - language/spin2/patterns/implementation/spin2_buffer_management.yaml
+  - language/spin2/patterns/implementation/spin2_shared_memory.yaml
+  - language/spin2/patterns/implementation/spin2_event_dispatcher.yaml
+
+see_also:
+  - "The shared vocabulary, tier legend, and three-plane definitions: p2kbArchDecompositionGlossary"
+  - "The generative theory: p2kbArchDecompositionMethod"
+  - "Where this force runs in the routine (step 6 — draw the seams): p2kbArchFirstContactProcedure"
+  - "Force 1 — the cog cuts that create the seams: p2kbArchResourceOwnership"
+  - "Force 3 — rate decoupling across a seam: p2kbArchRateAdaptation"
+  - "Judging a seam (coupling, connascence, back-pressure): p2kbArchEvaluationVocabulary"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "Force 2: the contract per inter-cog seam (blocking / latest-wins / buffered / request-ack / published telemetry) places the boundary; design each link's data, control, and event planes separately."

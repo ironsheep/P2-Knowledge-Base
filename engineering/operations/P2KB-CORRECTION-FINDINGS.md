@@ -1426,3 +1426,43 @@ All applied except one refutation; every high-impact numeric/encoding claim re-v
 - **REFUTED → WONTFIX:** F-093 (lockrel C polarity) — already correct after F-035; the appendix and YAML both read the right polarity today.
 
 **Gen-script fixes (take effect on PASM2-ENCODING-REFERENCE.md regen):** F-047 (Flags column tested dict-key presence not value → bogus "C,Z" on 344 rows) and F-081 (the %0000/_RET_/IF_NEVER explanatory note). Both fixed in `engineering/tools/gen-pasm2-encoding-reference.py`; the `.md` is regenerated, not hand-edited.
+
+---
+
+## Decomposition-layer supersession sweep — 2026-06-11 (F-102..F-105)
+
+Surfaced while studying the 8 `architecture/patterns-analysis/` files during §15 of the Decomposition Reasoning Layer sprint (KB v1.7.0). These files carried P1-era / foreign-compiler idioms. Seven were superseded by the new `architecture/decomposition/` layer and reduced to redirect stubs (so the incorrect content no longer ships); `asm_integration_analysis.yaml` was kept live and corrected in place. All four findings are therefore **resolved in the same pass** — logged here for the durable record per the "all wrong findings go in the register" rule.
+
+### F-102 — `cog_management_analysis.yaml`: P1 `cognew` cog-start idiom  ·  `DONE` (2026-06-11)
+
+**File:** `deliverables/ai/P2/architecture/patterns-analysis/cog_management_analysis.yaml`
+
+**What was wrong:** `structural_signature` and `implementation_template` started cogs with `cognew(function, stack_pointer)` — a P1 idiom. P2 starts cogs with `coginit` / `cogspin` (`cognew` does not exist in Spin2 for P2).
+
+**Resolution:** File superseded by the decomposition reasoning layer (Force 1 — resource ownership) and reduced to a redirect stub; the `cognew` content no longer ships. Concrete P2 cog-start idioms live in `coginit.yaml` / the `cogspin` method entry.
+
+### F-103 — `timing_control_analysis.yaml` + `state_machine_analysis.yaml`: P1 `CNT` / `waitcnt` timing idiom  ·  `DONE` (2026-06-11)
+
+**Files:** `deliverables/ai/P2/architecture/patterns-analysis/timing_control_analysis.yaml`, `…/state_machine_analysis.yaml`
+
+**What was wrong:** Both used the P1 system-counter idioms `CNT` (e.g. `start_time := CNT`, `state_entry_time := CNT`) and `waitcnt(CNT + delay)`. On P2 there is no `CNT` register read that way and no `waitcnt`: the 64-bit system counter is read with `GETCT()` and waited on with the `WAITCT1/2/3` / `POLLCT*` instructions (or `waitus()` / `waitms()` for unit delays).
+
+**Resolution:** Both files superseded by the decomposition reasoning layer (Force 3 — rate adaptation; control-plane structure) and reduced to redirect stubs (each carries a note flagging the retired CNT/waitcnt idiom); the incorrect content no longer ships.
+
+### F-104 — `memory_management_analysis.yaml`: describes a heap / malloc-free / GC that the P2 does not have  ·  `DONE` (2026-06-11)
+
+**File:** `deliverables/ai/P2/architecture/patterns-analysis/memory_management_analysis.yaml`
+
+**What was wrong:** The entire file described dynamic heap allocation (`malloc`/`free`-style allocators, free lists, fragmentation, garbage collection / compaction). The P2 has **no heap and no runtime allocator** — memory is statically partitioned across hub RAM, each cog's 512-long register space, and LUT RAM, decided at design time. This was not a stray idiom but a wrong mental model that could steer an agent toward a heap that does not exist.
+
+**Resolution:** Replaced with a **corrective stub** (`status: superseded-corrected`) that states plainly the P2 has no heap and redirects to the resource-budget entry; the inappropriate `category` tag was dropped. Incorrect content no longer ships.
+
+### F-105 — `asm_integration_analysis.yaml`: FlexSpin `asm…endasm` inline-PASM syntax + wrong parameter-register model  ·  `DONE` (2026-06-11)
+
+**File:** `deliverables/ai/P2/architecture/patterns-analysis/asm_integration_analysis.yaml`
+
+**What was wrong:** (1) The inline-assembly templates used `asm … endasm` blocks — that is **FlexSpin (fastspin)** syntax, which does not compile with the KB's authority compiler `pnut_ts`; P2 inline PASM uses `ORG … END` inside a method. (2) The example misrepresented parameter passing: `mov pa, ptra ' Get first parameter` — `PTRA` is the pointer register, not the first parameter. In `pnut_ts` inline PASM the method's params/result/locals are addressed **by name** (first param = PR0, second = PR1, return overlaps PR0).
+
+**Evidence:** `deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml` (canonical ORG…END construct, execution model, register mapping). Corrected example compile-verified with `pnut_ts` v1.55.0.
+
+**Resolution:** This file was kept **live** (inline-PASM integration is a legitimate implementation technique, not superseded by a decomposition force). Fixed **in place**: `asm…endasm` → `ORG…END` in both the template and `structural_signature`; the parameter shuffle replaced with direct by-name register references; added a `compiler_note` flagging `asm…endasm` as FlexSpin-only and a `see_also` to the canonical `p2kbSpin2InlinePasm` construct.

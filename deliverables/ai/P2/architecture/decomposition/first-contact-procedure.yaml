@@ -1,0 +1,134 @@
+concept: first_contact_procedure
+title: "First-Contact Procedure — The Ordered Routine for an Unseen Hardware Mix"
+category: decomposition_reasoning
+
+summary: |
+  The spine of the decomposition layer: the ordered observation-to-force routine an
+  agent runs the FIRST time it meets a hardware mix, before writing a single object.
+  The four forces are orthogonal axes; this procedure is the ORDER that avoids rework,
+  because some choices depend on earlier ones (you cannot pick a data-flow contract
+  before you know the cog boundaries). Each step names the observation that triggers it,
+  then the force it routes to, then its output.
+
+  The procedure deliberately inverts classic top-down data-flow decomposition: on the
+  P2 you start from the hardware edge and the timing budget, not from the data model.
+  Run it on a machine no one has seen and it yields a DIFFERENT — but sound —
+  architecture. That generative property, not any single template, is the point.
+
+  This is a PRINCIPLE-level method the agent ADAPTS, not a rigid script. Steps that can
+  be skipped on a given machine state their escape condition (HEURISTIC); the spine
+  steps (enumerate, assign owners, reconcile) always run.
+
+# =============================================================================
+# THE PROCEDURE — run in order; each step routes to the force that resolves it
+# =============================================================================
+
+procedure:
+  authority_tier: PRINCIPLE
+  inversion_note: |
+    Start from the hardware edge and the timing budget, not the data model. Inventory
+    the connected devices and their timing FIRST; only then reason about boundaries,
+    contracts, and layering. The order below is chosen so each step's inputs are already
+    decided by an earlier step.
+  steps:
+    - n: 1
+      name: "Enumerate the wires"
+      observation: "What buses, timing-critical pins, and discrete signals exist?"
+      routes_to: "Force 1 — resource ownership"
+      see_also: "p2kbArchResourceOwnership"
+      output: "The list of serialized hardware resources."
+      authority_tier: PRINCIPLE
+      escape_condition: "None — this spine step always runs; everything downstream depends on it."
+    - n: 2
+      name: "Triage against the smart pins (the physical axis as a tool)"
+      observation: "Can a smart pin absorb this peripheral's protocol entirely in hardware (PWM, serial, quadrature, ADC/DAC, pulse/transition counting)?"
+      routes_to: "the physical axis of the method — a smart pin can delete an entire software module"
+      see_also: "p2kbArchDecompositionMethod"
+      output: "Peripherals reclassified: those a smart pin owns autonomously drop out of the cog-cadence problem entirely; only what survives triage needs a software owner."
+      authority_tier: HEURISTIC
+      escape_condition: "Skip for a peripheral whose protocol no smart-pin mode covers (e.g. a multi-byte I2C transaction) — it stays a software-owned resource and proceeds to step 3."
+      grounding: "64 smart pins / autonomous modes — architecture/smart_pins.yaml (pin_count, independence)"
+    - n: 3
+      name: "Assign owners"
+      observation: "Group surviving devices by bus + timing budget; how many devices share each wire?"
+      routes_to: "Force 1 — resource ownership"
+      see_also: "p2kbArchResourceOwnership"
+      output: "The cog map: each group gets exactly one owning cog and one transport object; singleton-vs-instance is picked by sharing topology (DAT singleton when several devices share one bus; VAR instance when a device is sole)."
+      authority_tier: PRINCIPLE
+      escape_condition: "None — spine step; the cog map gates every later choice."
+    - n: 4
+      name: "List the cadences"
+      observation: "At what rate does each device want service, and where do two rates meet?"
+      routes_to: "Force 3 — rate adaptation"
+      see_also: "p2kbArchRateAdaptation"
+      output: "The rate-domain boundaries needing samplers/buffers, and the discrete->continuous paths needing slew/easing engines."
+      authority_tier: PRINCIPLE
+      escape_condition: "If every device runs at one shared cadence with no discrete->continuous path, no rate adapters are needed — record that and move on."
+    - n: 5
+      name: "Resolve same-bus rate conflicts"
+      observation: "Is any single bus serving multiple cadences (e.g. servos at 50 Hz, IMU at 100 Hz, battery at 1 Hz all on one I2C bus)?"
+      routes_to: "the Force 1 x Force 3 tension — cooperative tasks WITHIN the one owning cog, not a second cog on the bus (Force 1 forbids splitting the bus)"
+      see_also: "p2kbArchRateAdaptation"
+      output: "Per-cadence cooperative tasks (coroutines) inside the single owning cog, each yielding for bus coherence."
+      authority_tier: HEURISTIC
+      escape_condition: "Skip when no bus serves multiple cadences — single-cadence buses need no in-cog tasking."
+    - n: 6
+      name: "Draw the seams"
+      observation: "For each inter-cog edge, what coupling does the deadline allow?"
+      routes_to: "Force 2 — data-flow contract"
+      see_also: "p2kbArchDataFlowContracts"
+      output: "The contract per edge (latest-wins / buffered / request-ack / published telemetry) and the mailbox and telemetry objects it implies; decompose each seam into its three planes (data/control/event) and design each separately."
+      authority_tier: PRINCIPLE
+      escape_condition: "A single-cog design with no inter-cog edge has no seams to draw — skip."
+    - n: 7
+      name: "Layer each branch"
+      observation: "Within an ownership domain, how many distinct unit conversions / axes of change are there (bits -> registers -> physical units -> behavior)?"
+      routes_to: "Force 4 — altitude layering"
+      see_also: "p2kbArchAltitudeLayering"
+      output: "A tier per unit conversion, each changing for exactly one reason."
+      authority_tier: HEURISTIC
+      escape_condition: "Collapse tiers where cog-local memory is tight (512 longs / 496 usable PASM registers) — altitude yields to pragmatism; state the collapse and why. Grounding: architecture/cog.yaml; architecture/p2-architecture-mental-model.yaml (cog_independence)."
+    - n: 8
+      name: "Place the cross-cutting objects"
+      observation: "Where is the safety override (C1)? What external vocabularies need a translator (C2)? What varies per unit (C3)? Where are the bring-up seams (C4)? Who sequences init (C5)?"
+      routes_to: "the cross-cutting forces C1-C5"
+      see_also: "p2kbArchCrossCuttingForces"
+      output: "The objects that span or guard the structural tree, placed after it is drawn."
+      authority_tier: PRINCIPLE
+      escape_condition: "A given machine may not need every cross-cutting object (e.g. no external vocabulary -> no C2 translator) — name the absent ones explicitly so the omission is a decision, not an oversight."
+    - n: 9
+      name: "Reconcile"
+      observation: "Where do two forces disagree, and does the result fit the resource budget?"
+      routes_to: "the force tensions + the resource-budget artifact; the hardware and the hardest deadline win"
+      see_also: "p2kbArchResourceBudget"
+      output: "The final object-and-cog set, checked against the allocation table. 'Running out of cogs' is the concrete signal that the design is too coupled — re-cut, do not cram."
+      authority_tier: PRINCIPLE
+      escape_condition: "None — spine step; the reconciliation against the hardest deadline is what makes the output sound."
+  recurse_note: |
+    After the top-level pass, recurse the same routine into each cog's internals: a
+    cog that owns a bus has its own internal cadences, seams (between its cooperative
+    tasks), and layers. The procedure is fractal; apply it at each altitude.
+  output_summary: |
+    The output is the object-and-cog set plus the resource-budget allocation table.
+    Judge it with the evaluation vocabulary (coupling, connascence across cog
+    boundaries, back-pressure) before committing.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - architecture/smart_pins.yaml
+  - architecture/cog.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+
+see_also:
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "The generative theory behind the routine: p2kbArchDecompositionMethod"
+  - "Force 1 — resource ownership: p2kbArchResourceOwnership"
+  - "Force 2 — data-flow contracts: p2kbArchDataFlowContracts"
+  - "Force 3 — rate adaptation: p2kbArchRateAdaptation"
+  - "Force 4 — altitude layering: p2kbArchAltitudeLayering"
+  - "Cross-cutting forces C1-C5: p2kbArchCrossCuttingForces"
+  - "Judging the result: p2kbArchEvaluationVocabulary"
+  - "The resource-budget artifact: p2kbArchResourceBudget"
+  - "The procedure exercised end-to-end: p2kbArchWorkedDerivationRobotDog"
+
+oneliner: "The ordered observation-to-force routine for an unseen P2 hardware mix: enumerate wires -> smart-pin triage -> assign cog owners -> map cadences -> resolve same-bus rates in-cog -> draw seams -> layer -> place cross-cutting -> reconcile."

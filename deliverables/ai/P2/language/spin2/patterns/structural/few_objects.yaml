@@ -1,7 +1,8 @@
 pattern_id: "few_objects"
 description: |
-  Multiple coordinated objects pattern.
-  See object_archetypes.yaml for detailed archetype templates.
+  A small composition of coordinated objects — shown as a SHAPE example.
+  The object COUNT does not drive the design; composition depth and resource
+  ownership do (see note). See object_archetypes.yaml for archetype templates.
 
 when_use:
   - "2-3 coordinated components"
@@ -29,3 +30,15 @@ combines_with:
 
 related:
   - language/spin2/concepts/object_archetypes.yaml
+
+status: "retagged"
+note: >
+  Object COUNT is not a design driver — two objects with a deep ownership
+  hierarchy can be harder to reason about than several flat peers. What
+  matters is composition DEPTH and which object OWNS which resource. Derive
+  the cut with the decomposition method and Force 1 (resource ownership);
+  treat this entry as a shape example, not a selection-by-count rule.
+
+see_also:
+  - "The generative decomposition method (don't select by object count): p2kbArchDecompositionMethod"
+  - "Force 1 — resource ownership (which object owns which resource): p2kbArchResourceOwnership"

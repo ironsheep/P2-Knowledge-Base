@@ -19,8 +19,8 @@ selection_criteria:
 
 structural_signature:
   inline_assembly:
-    - "asm...endasm blocks within Spin2 functions"
-    - "Direct register manipulation"
+    - "ORG...END blocks within Spin2 methods (loaded into cog RAM, run as cog-exec)"
+    - "Method params/result/locals addressed by name (value1 = PR0, value2 = PR1, ...)"
     - "Custom instruction sequences"
   asm_functions:
     - "Pure assembly methods in Spin2 objects"
@@ -32,30 +32,27 @@ structural_signature:
     - "Return value handling"
 
 implementation_template: |
+  CON
+    PIN_OUTPUT = 56
+
   PUB fast_operation(value1, value2) : result
-    ' High-level setup in Spin2
-    setup_parameters(value1, value2)
-    
-    ' Critical section in assembly
-    asm
-      mov     pa, ptra            ' Get first parameter
-      mov     pb, ptrb            ' Get second parameter
-      add     pa, pb              ' Fast addition
-      shl     pa, #2              ' Shift operation
-      mov     result, pa          ' Return result
-    endasm
-    
-    ' High-level cleanup in Spin2
-    return cleanup_result(result)
-    
+    ' Critical section in inline PASM (ORG..END runs as cog-exec).
+    ' Method params/result map directly to cog registers — reference them
+    ' by NAME: value1 = PR0, value2 = PR1, result overlaps PR0. Do NOT load
+    ' parameters through PTRA/PTRB.
+    ORG
+      ADD   value1, value2        ' value1 += value2
+      SHL   value1, #2            ' scale by 4
+      MOV   result, value1        ' return the scaled sum
+    END
+
   PUB timing_critical_task()
-    asm
-      ' Precise timing control
-      waitx   ##20_000_000        ' Exact delay
-      drvh    #PIN_OUTPUT         ' Immediate pin control
-      waitx   ##1_000_000         ' Short pulse
-      drvl    #PIN_OUTPUT         ' Pin low
-    endasm
+    ' Cycle-accurate pulse — deterministic cog-exec timing.
+    ORG
+      DRVH  #PIN_OUTPUT
+      WAITX ##1_000_000           ' precise hold
+      DRVL  #PIN_OUTPUT
+    END
 
 resource_profile:
   memory_usage: "Minimal additional overhead"
@@ -82,3 +79,15 @@ real_examples:
 statistics:
   prevalence: "210 of 730 files"
   percentage: "28.8%"
+
+compiler_note: >
+  Inline PASM in this KB uses the Parallax pnut_ts / PNut syntax: ORG ... END
+  inside a PUB/PRI method. The asm ... endasm form is FlexSpin (fastspin)
+  syntax — it will NOT compile with pnut_ts, so do not use it in P2KB example
+  code. Inside the block, method parameters, the return value, and locals are
+  addressed by NAME (first param = PR0, second = PR1, return overlaps PR0);
+  do not route them through PTRA/PTRB. Example above compile-verified with
+  pnut_ts v1.55.0.
+
+see_also:
+  - "Canonical inline-PASM construct (ORG..END, execution model, register mapping): p2kbSpin2InlinePasm"

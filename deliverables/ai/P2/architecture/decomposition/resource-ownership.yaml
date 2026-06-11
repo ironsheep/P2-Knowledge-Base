@@ -1,0 +1,129 @@
+concept: resource_ownership
+title: "Force 1 — Resource Ownership and Timing Domains"
+category: decomposition_reasoning
+
+summary: |
+  The primary decomposition force, and the only one that is a CORRECTNESS rule rather
+  than a quality preference. Every serialized, stateful hardware resource — an I2C bus,
+  a one-wire WS2812 chain, a smart pin mid-transaction — is a single thing that can be
+  in exactly one state at a time. The object set must mirror that: ONE owner per
+  resource, and the object boundary traces the wire. This force makes the primary cut
+  (usually a cog boundary) and decides singleton-vs-instance from sharing topology.
+
+  This entry carries the five force-fields (what_it_is, why_on_p2, how_it_cuts, example,
+  failure_if_ignored). Its spine is PHYSICS: P2 pin outputs are wire-OR'd with no
+  hardware bus mutex, so singular ownership is non-negotiable, not stylistic.
+
+# ----- the five required force-fields -----
+
+what_it_is:
+  authority_tier: PRINCIPLE
+  body: |
+    Every serialized, stateful hardware resource is a single thing that can be in
+    exactly one state at a time. A bus is a multi-step stateful protocol (start /
+    address / ack / data / stop); a smart pin mid-transaction holds state; a WS2812
+    chain is a timing-exact serial stream. The object set must mirror that reality:
+    one owning object, in one cog, per such resource — and the object boundary traces
+    the physical wire, not the logical feature list.
+
+why_on_p2:
+  authority_tier: PHYSICS  # the spine is silicon; the conclusion drawn from it is PRINCIPLE (inline-tagged)
+  body: |
+    This is not a style preference; it is a correctness constraint that comes straight
+    out of the silicon.
+
+    [PHYSICS] P2 pin outputs are OR'd together — there is NO hardware mutex on pin
+    access. Two cogs driving the same pin both contribute to the OR'd result; two cogs
+    interleaving on the same SDA/SCL is not "a race you might lose," it is guaranteed
+    protocol corruption, because a bus transaction is a multi-step sequence that assumes
+    a single agent.
+
+    [PHYSICS] A single-long hub read or write is atomic, and the P2 provides 16 locks
+    and cog-attention signalling to coordinate explicitly — but these protect a shared
+    datum, they do not arbitrate a multi-step bus protocol.
+
+    [PRINCIPLE] Therefore the cleanest coordination is STRUCTURAL: make the resource
+    un-shareable by giving it a single owning object in a single cog. The hardware's
+    lack of arbitration is precisely WHY ownership must be explicit and singular in
+    software. An agent that knows this why will generalize it to any serialized
+    resource; one that memorizes "use a lock" will eventually interleave a protocol.
+  grounding:
+    - "OR'd pins / no bus mutex — architecture/p2-architecture-mental-model.yaml (pin_io); architecture/smart_pins.yaml (pin_output_hierarchy)"
+    - "Single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+    - "16 locks + cog-attention coordination — architecture/locks.yaml (total_locks); architecture/cog_attention.yaml"
+    - "8 independent cogs (one can own a resource with deterministic timing) — architecture/cog.yaml (cog_independence)"
+
+how_it_cuts:
+  authority_tier: PRINCIPLE
+  body: |
+    This is the PRIMARY cut, and it is usually a COG boundary, not merely an object
+    boundary. Group devices by which wire they sit on and what timing budget that wire
+    must meet, then give each group one owning cog and one transport object.
+  singleton_vs_instance:
+    authority_tier: HEURISTIC
+    rule: |
+      The sharing topology — not the protocol — decides the transport's state model:
+      - Several devices sharing one bus in one cog -> a DAT-state SINGLETON transport
+        (one configuration, many register-level callers).
+      - One device alone on its own bus -> a VAR-state INSTANCE transport
+        (self-contained, no contention to mediate).
+    escape_condition: |
+      Break the singleton default when two "shared-bus" devices actually demand
+      independent reconfiguration of the bus peripheral (different clock modes that
+      cannot coexist) — then they are not truly sharing one timing domain and Force 1
+      re-cuts them onto separate owners. Break the instance default when a "sole" device
+      will foreseeably gain bus-mates; provision the singleton early to avoid a re-cut.
+
+example:
+  authority_tier: EXAMPLE
+  illustrative_not_normative: true
+  body: |
+    (Illustrative, frozen at one point in time — read it to see the force in motion;
+    never copy it as law. A different machine yields a different, equally sound cut.)
+
+    A quadruped robot has two I2C buses plus three discrete-GPIO signals. The cut fell
+    out almost mechanically from the sharing topology:
+
+    - Bus 1 carries the servo PWM chip, the IMU, and the battery ADC — all behind a hard
+      ~50 Hz motion deadline. -> ONE cog owns bus 1, and a DAT SINGLETON transport is
+      shared by the three register-level chip drivers.
+    - Bus 2 carries one device, a voice recognizer that clock-stretches and is polled
+      slowly. -> a DIFFERENT cog owns bus 2, and a VAR INSTANCE transport lives inside
+      that one driver. No singleton, because there is nothing to share.
+    - Three discrete signals (buzzer, ultrasonic, LED chain) are independent -> separate
+      smart-pin objects, owned by whichever cog already owns that timing domain.
+
+    The two transport objects are the SAME protocol implemented twice with different
+    state models — and that is correct, because the sharing topology, not the protocol,
+    decided the shape.
+
+failure_if_ignored:
+  authority_tier: PRINCIPLE
+  body: |
+    The "flat device list": every chip driver a sibling, every bus reachable from
+    main(). It compiles, and it even runs in single-cog bring-up. Then the moment two
+    cogs touch one bus you get silent corruption that looks like flaky hardware —
+    intermittent, timing-dependent, and nearly impossible to debug from the symptom.
+    A count-based "several objects" template, taken literally, IS this failure mode:
+    it predicts shape from how many devices exist rather than from who shares a wire.
+
+related:
+  - architecture/p2-architecture-mental-model.yaml
+  - architecture/smart_pins.yaml
+  - architecture/locks.yaml
+  - architecture/cog_attention.yaml
+  - architecture/cog.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/patterns/implementation/spin2_cog_management.yaml
+
+see_also:
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "The generative theory (forces as grammar): p2kbArchDecompositionMethod"
+  - "Where this force runs in the routine (steps 1-3): p2kbArchFirstContactProcedure"
+  - "Force 2 — the contract once work is scattered across cogs: p2kbArchDataFlowContracts"
+  - "Force 3 — one bus, many cadences resolves in-cog: p2kbArchRateAdaptation"
+  - "Judging the cut (connascence across a cog boundary): p2kbArchEvaluationVocabulary"
+  - "Counting owned resources against the budget: p2kbArchResourceBudget"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "Force 1 (correctness rule): one owning cog per serialized hardware resource because P2 pins are OR'd with no bus mutex; sharing topology decides DAT-singleton vs VAR-instance transport."

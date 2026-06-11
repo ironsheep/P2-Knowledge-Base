@@ -1,0 +1,103 @@
+concept: altitude_layering
+title: "Force 4 (emergent) — Altitude: Layer by Unit Conversion and Axis of Change"
+category: decomposition_reasoning
+
+summary: |
+  The fourth, emergent force. The first three forces are HORIZONTAL — they decide which
+  cog owns what and how data crosses between them. Force 4 is the VERTICAL consequence:
+  within an ownership domain, stack the objects so each tier performs exactly one unit
+  conversion and changes for exactly one reason. Transport (bits) -> chip driver
+  (registers) -> semantic driver (physical units: mm, degrees, millivolts) -> policy
+  (behavior: gaits, poses, cues).
+
+  This is the answer to "how much code goes in one file." The honest splitting rule is
+  NOT a line count and NOT a component count — it is: split where the UNIT changes, or
+  where the AXIS OF CHANGE changes (Parnas's information hiding: decompose around what
+  varies independently). This entry carries the five force-fields; tiers are
+  PRINCIPLE/HEURISTIC (layer depth yields to tiny cog memory, with the escape stated).
+
+what_it_is:
+  authority_tier: PRINCIPLE
+  body: |
+    Within an ownership domain, stack the objects so each tier does exactly one unit
+    conversion and changes for exactly one reason. The canonical stack: transport (bits
+    on a wire) -> chip driver (device registers) -> semantic driver (physical units) ->
+    policy (behavior). Each tier speaks a different unit than the one below it, and that
+    change of unit is the seam.
+
+why_on_p2:
+  authority_tier: PRINCIPLE
+  body: |
+    [PRINCIPLE] The splitting rule is grounded in Parnas's information hiding: decompose
+    around the things that change independently, not around processing steps. Two pieces
+    of code that will ALWAYS change together for the same reason belong in one object;
+    two that change for different reasons (a new chip vs. a new gait) belong in different
+    objects, even if they sit in the same call chain. [PHYSICS] On the P2 this force is
+    bounded by a hard fact: cog-local memory is tiny (512 longs of cog RAM, 496 usable
+    PASM registers), so unlimited layering is not free — each tier boundary costs a call
+    and some state. The force is real but it negotiates against that limit.
+  grounding:
+    - "Cog-local RAM / register budget bounds layer depth — architecture/cog.yaml; architecture/p2-architecture-mental-model.yaml (cog_independence)"
+
+how_it_cuts:
+  authority_tier: PRINCIPLE
+  body: |
+    Layer by unit conversion / axis of change, never by line or component count. A
+    line-count or device-count rule would never produce a clean four-tier device chain;
+    the unit-conversion rule produces it automatically, because each unit boundary is a
+    place where the code below and above change for different reasons.
+  memory_escape:
+    authority_tier: HEURISTIC
+    rule: "Default to one tier per unit conversion."
+    escape_condition: |
+      Collapse adjacent tiers when cog-local memory or per-call cost makes the full stack
+      unaffordable — e.g. on a PASM cog with 496 registers, fold the transport and chip
+      driver together rather than spend a call boundary. State the collapse and the reason
+      so the lost seam is a deliberate trade, not an accident. The escape is bounded by
+      Force 4's own rule: never collapse two tiers that change for DIFFERENT reasons just
+      to save space — that re-introduces the monolith failure mode.
+
+example:
+  authority_tier: EXAMPLE
+  illustrative_not_normative: true
+  body: |
+    (Illustrative, frozen at one point — read it to see the force in motion; do not copy
+    it as law.)
+
+    One device chain, four files, because each speaks a different unit and changes for a
+    different reason:
+    - PWM-chip register driver — changes if the chip changes.
+    - servo semantics layer (pulse-width / channel) — changes if the servo wiring changes.
+    - leg inverse-kinematics (foot-XYZ <-> joint-degrees) — changes if the leg geometry
+      changes.
+    - gait / pose policy — changes if the BEHAVIOR changes.
+
+    A line-count or device-count rule would never produce this stack; the unit-conversion
+    rule produces it automatically.
+
+failure_if_ignored:
+  authority_tier: PRINCIPLE
+  body: |
+    The monolith — or worse, a "driver" that mixes register pokes with gait logic, so
+    that changing the IMU chip forces you to re-test the walk cycle. When tiers that
+    change for different reasons are fused, every change ripples across unrelated
+    concerns, and the testability seam (C4) you would have cut at the unit boundary is
+    gone.
+
+related:
+  - architecture/cog.yaml
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+  - language/spin2/patterns/implementation/spin2_layered_architecture.yaml
+  - language/spin2/patterns/structural/framework_pattern.yaml
+
+see_also:
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "The generative theory: p2kbArchDecompositionMethod"
+  - "Where this force runs in the routine (step 7 — layer each branch): p2kbArchFirstContactProcedure"
+  - "Force 1 — the ownership domain this force layers within: p2kbArchResourceOwnership"
+  - "Force 3 — the rate adapters this force stacks above: p2kbArchRateAdaptation"
+  - "Cross-cutting C4 — the testability seam each unit boundary affords: p2kbArchCrossCuttingForces"
+  - "The object vocabulary (semantic driver, policy): p2kbSpin2ObjectArchetypes"
+
+oneliner: "Force 4 (emergent): within an ownership domain, layer by unit conversion / axis of change (bits -> registers -> physical units -> behavior), not by line or component count; depth yields to tiny cog memory."

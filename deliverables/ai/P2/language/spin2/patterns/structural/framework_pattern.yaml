@@ -33,3 +33,6 @@ combines_with:
 
 related:
   - language/spin2/concepts/object_archetypes.yaml
+
+see_also:
+  - "The generative decomposition method (a framework is the orchestrator-as-sequencer at the top altitude): p2kbArchDecompositionMethod"

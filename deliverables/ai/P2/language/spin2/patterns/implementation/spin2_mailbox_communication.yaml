@@ -19,3 +19,17 @@ resources:
 combines_with:
   - "cog_management"
   - "shared_memory"
+
+status: "superseded"
+superseded_by: "non-blocking latest-wins command mailbox: p2kbSpin2Spin2LatestWinsMailbox"
+
+note: >
+  This is the minimal BLOCKING mailbox — the sender busy-waits on
+  `repeat while mailbox_cmd`, which stalls a real-time loop. For control-loop
+  use, prefer the non-blocking latest-wins mailbox (args-first, seq-bumped-
+  last, with a seq/ack handshake). The seam this realizes is a data-flow
+  contract. Kept resolving for reference and existing inbound links.
+
+see_also:
+  - "Force 2 — data-flow contracts (the seam this realizes): p2kbArchDataFlowContracts"
+  - "Latest-wins command mailbox, non-blocking (the recommended replacement): p2kbSpin2Spin2LatestWinsMailbox"

@@ -1,0 +1,74 @@
+pattern_id: "latest_wins_mailbox"
+description: |
+  Non-blocking, single-slot command mailbox with a seq/ack handshake. The writer fills
+  the argument slots FIRST and bumps a sequence counter LAST (the publish); the reader
+  acts when seq != ack and writes ack := seq when it consumes. Neither side ever blocks,
+  and a torn read is impossible without a lock because the seq bump is the single atomic
+  long that gates visibility of the args.
+
+  This is the contract a real-time control loop needs for its inbound command seam — the
+  correct replacement for a blocking `repeat while mailbox_cmd` poll, which couples the
+  caller to the consumer's worst-case latency. See the data-flow-contracts decomposition
+  entry for WHEN to choose this (control plane) versus a buffer (data plane) or a
+  freshness counter (event plane).
+
+when_use:
+  - "A producer cog must hand a command to a consumer cog without either one blocking"
+  - "Only the NEWEST command matters (latest-wins); intermediate commands may be dropped"
+  - "A real-time loop must accept commands without stalling on the producer"
+
+implementation: |
+  ' --- shared hub state (one writer = producer cog, one reader = consumer cog) ---
+  VAR
+    long  bCmdArg[4]                       ' command arguments (filled first)
+    long  bCmdId                           ' command id
+    long  bCmdSeq                          ' producer bumps this LAST (publish)
+    long  bAckSeq                          ' consumer sets = bCmdSeq when consumed
+
+  ' --- producer cog: publish a command (never blocks) ---
+  PUB postCommand(commandId, arg0, arg1, arg2, arg3)
+    bCmdArg[0] := arg0
+    bCmdArg[1] := arg1
+    bCmdArg[2] := arg2
+    bCmdArg[3] := arg3
+    bCmdId := commandId
+    bCmdSeq++                              ' publish LAST -- args are now stable & visible
+
+  ' --- consumer cog: service loop (never blocks on the producer) ---
+  PRI serviceLoop()
+    repeat
+      if bCmdSeq <> bAckSeq                ' a new command is pending
+        consumeCommand()
+      ' ... other periodic work continues regardless ...
+
+  PRI consumeCommand() | requestedCmd
+    requestedCmd := bCmdId
+    bAckSeq := bCmdSeq                     ' acknowledge BEFORE acting (latest-wins)
+    case requestedCmd
+      ' ... act on requestedCmd / bCmdArg[] ...
+
+anti_patterns:
+  - "Bumping the seq BEFORE writing the args -- the reader can latch stale/torn arguments."
+  - "A blocking `repeat while mailbox_cmd` handshake -- serializes a system meant to run in parallel and throws away the P2's determinism."
+  - "Using a lock to guard the slot when there is exactly one writer -- the seq-bumped-last discipline already makes it correct lock-free (single-long writes are atomic)."
+
+resources:
+  memory: "~24 bytes per mailbox (4 args + id + cmdSeq + ackSeq)"
+  locks: "none -- single-writer atomic-long publish"
+  cogs: "two (one producer, one consumer)"
+
+combines_with:
+  - "cog_management"
+  - "shared_memory"
+  - "cooperative_tasking"
+
+related:
+  - architecture/decomposition/data-flow-contracts.yaml
+  - architecture/decomposition/evaluation-vocabulary.yaml
+  - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
+  - language/spin2/concepts/object_archetypes.yaml
+
+see_also:
+  - "Force 2 / the three planes -- when to choose this contract: p2kbArchDataFlowContracts"
+  - "Execution-order connascence tamed to static by publish-last: p2kbArchEvaluationVocabulary"
+  - "The blocking mailbox this replaces: p2kbSpin2Spin2MailboxCommunication"

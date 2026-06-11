@@ -1,0 +1,123 @@
+concept: spatial_computing
+title: "Spatial Computing on the P2 — The FPGA-Domain Thesis and the Smell Catalog"
+category: decomposition_reasoning
+
+summary: |
+  The WHY behind the whole decomposition layer, given the weight of a thesis. An FPGA
+  computes in SPACE — function laid out as parallel hardware — while an ordinary
+  microcontroller computes in TIME — function as a sequence of instructions on one core.
+  The P2's eight symmetric, deterministic cogs plus its programmable smart pins form a
+  COARSE-GRAINED SPATIAL FABRIC. They let a design move a long way into FPGA territory —
+  pipelines, dataflow, edge processing — without an FPGA. But that payoff is conditional
+  on decomposition discipline: the same facilities used time-sequentially merely rebuild
+  a slow single-core machine.
+
+  This entry teaches both the rules that EARN the spatial payoff (PRINCIPLE/HEURISTIC)
+  and the SMELLS that squander it — each smell named with the detectable signature an
+  agent can check its own design against.
+
+# =============================================================================
+# 1. THE THESIS — space vs time
+# =============================================================================
+thesis:
+  authority_tier: PRINCIPLE
+  body: |
+    An FPGA computes in space; a single-core MCU computes in time. The P2 is a
+    coarse-grained spatial fabric: eight symmetric deterministic cogs and 64 programmable
+    smart pins, each able to run one sustained concern continuously. Decomposed well, a
+    P2 design behaves like spatial hardware — parallel pipelines with throughput set by
+    rate, not by an instruction count. Decomposed badly, the same silicon collapses back
+    into a slow sequential machine. The decomposition forces exist to keep designs on the
+    spatial side of that line.
+  grounding:
+    - "8 deterministic, symmetric cogs (the spatial fabric) — architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
+    - "64 programmable smart pins (edge compute cells) — architecture/smart_pins.yaml (pin_count, independence)"
+    - "Hub egg-beater bandwidth + FIFO (the interconnect) — architecture/hub.yaml (egg_beater_architecture.rotation_period); architecture/fifo.yaml"
+
+# =============================================================================
+# 2. USING THE FABRIC WELL — the rules that earn the payoff
+# =============================================================================
+using_it_well:
+  authority_tier: PRINCIPLE
+  rules:
+    - rule: "Assign function to SPACE, not time"
+      detail: "One sustained concern per cog or smart pin, running continuously — not one cog time-slicing many concerns. Time-slicing rebuilds the single-core machine."
+    - rule: "Think in PIPELINES"
+      detail: "Data flowing through a chain of cogs; throughput is set by the pipeline rate, not by any one stage's instruction count. (Canon: systolic arrays.)"
+    - rule: "Push computation to the EDGE"
+      detail: "Smart pins are programmable I/O cells — do modulation, counting, timing, framing AT the pin, so cogs receive pre-digested data instead of bit-banging."
+    - rule: "Make the interconnect LATENCY-INSENSITIVE"
+      detail: "Design channels so correctness depends on data ORDER, not arrival TIME — making hub jitter harmless by construction. (Canon: latency-insensitive design; Kahn process networks.)"
+    - rule: "Rate-match at EVERY boundary"
+      detail: "An elastic buffer at each rate-domain crossing (see Force 3). Unmatched boundaries are where the fabric stalls."
+  escape_note:
+    authority_tier: HEURISTIC
+    body: |
+      These are defaults that earn the spatial payoff, not absolutes. The escape:
+      time-slice within one cog when a concern is genuinely low-rate and cog-count is the
+      binding constraint (the resource budget says "out of cogs") — but recognize that
+      this trades spatial parallelism for sequential capacity, and re-cut rather than
+      time-slice a real-time concern.
+
+# =============================================================================
+# 3. THE SMELL CATALOG — using it badly, each with a detectable signature
+# =============================================================================
+smells:
+  authority_tier: HEURISTIC  # SMELL-grade: a detectable signature that suggests, not proves, a bad cut
+  note: "A smell is a SIGNATURE to check your own design against, not a verdict. Each names what to look for."
+  catalog:
+    - smell: "The funnel"
+      what: "All data routed through one cog — a rebuilt sequential bottleneck."
+      detectable_signature: "One cog appears in the data path of most or all seams; its loop rate caps the whole system; removing it is impossible without re-architecting."
+      grounding: "Throughput bounded by one cog's loop, not by hub bandwidth — architecture/cog.yaml; architecture/hub.yaml"
+    - smell: "Hub-bandwidth saturation"
+      what: "Streaming bulk data as individual mailbox words instead of via the FIFO/streaming path."
+      detectable_signature: "A high-rate producer writes many separate hub longs per frame; aggregate hub traffic approaches the egg-beater ceiling; jitter rises with load."
+      grounding: "Egg-beater 8-clk rotation bandwidth ceiling; streaming path — architecture/hub.yaml (egg_beater_architecture.rotation_period); architecture/fifo.yaml; architecture/streamer/overview.yaml"
+    - smell: "Timing-coupled cogs"
+      what: "Relying on cross-cog lockstep or arrival time — a latent race, since cogs drift."
+      detectable_signature: "Correctness depends on cog B reading exactly when cog A writes, with no seq/ack or freshness counter; works on the bench, fails under load or temperature."
+      grounding: "Cogs are independently clocked time domains — architecture/cog.yaml (cog_independence)"
+    - smell: "Poll/signal inversion"
+      what: "Polling for the urgent, interrupting for the routine — the planes are swapped."
+      detectable_signature: "An urgent event is discovered by a slow polling loop (high worst-case latency), while a routine housekeeping task consumes an interrupt level or attention signal."
+      grounding: "Event/attention signalling vs polling trade-off — architecture/cog_attention.yaml; architecture/event_system.yaml"
+    - smell: "Bit-banging an absorbable protocol"
+      what: "A cog software-times a protocol (PWM, serial, quadrature, pulse counting) that a smart pin could absorb in hardware."
+      detectable_signature: "A cog's inner loop is dominated by precise wait/toggle sequences for an I/O protocol that maps to a documented smart-pin mode."
+      grounding: "Smart-pin autonomous modes that absorb the protocol — architecture/smart_pins.yaml"
+    - smell: "Over-locking"
+      what: "Serializing with locks what could be an elastic FIFO — re-coupling what the fabric let you parallelize."
+      detectable_signature: "Locks guard a producer/consumer hand-off that has a single writer (where an atomic published long would do), or a high-rate stream (where a FIFO would decouple); cogs spend cycles spinning on lock acquisition."
+      grounding: "Single-long atomic publish + FIFO decoupling vs locks — architecture/p2-architecture-mental-model.yaml (hub_ram); architecture/locks.yaml; architecture/fifo.yaml"
+  relation_to_failure_modes:
+    authority_tier: PRINCIPLE
+    body: |
+      The two catalogue-level failure modes the layer exists to prevent are the MONOLITH
+      (one file pokes every register, no cuts) and the FLAT DEVICE LIST (one object per
+      chip, all siblings under main(), violating single-owner — Force 1). The funnel and
+      over-locking are how a design that escaped those two can still collapse back toward
+      sequential behavior.
+
+related:
+  - architecture/cog.yaml
+  - architecture/hub.yaml
+  - architecture/smart_pins.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/cog_attention.yaml
+  - architecture/event_system.yaml
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/patterns/implementation/spin2_protocol_implementation.yaml
+  - language/spin2/patterns/implementation/spin2_pin_control.yaml
+
+see_also:
+  - "The shared vocabulary, tier legend, and canon (latency-insensitive, systolic): p2kbArchDecompositionGlossary"
+  - "The generative theory (the physical axis as a tool): p2kbArchDecompositionMethod"
+  - "Force 3 — the elastic buffers that keep the fabric flowing: p2kbArchRateAdaptation"
+  - "Force 2 — latency-insensitive channels and the planes: p2kbArchDataFlowContracts"
+  - "Judging the cut (back-pressure as min-cut): p2kbArchEvaluationVocabulary"
+  - "The resource budget ('out of cogs' = too coupled): p2kbArchResourceBudget"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "The P2 is a coarse-grained spatial fabric (8 cogs + 64 smart pins); assign function to space, pipeline, push to the edge, keep the interconnect latency-insensitive — and watch for the funnel, hub saturation, timing-coupled cogs, poll/signal inversion, bit-banging, and over-locking."

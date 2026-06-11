@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.7.0] - 2026-06-11
+
+**Decomposition reasoning layer: a generative method for cutting a P2 design across cogs, smart pins, and the parallel fabric**
+
+### Added
+- Decomposition reasoning layer (`architecture/decomposition/`): a generative method that derives a design's cog and resource boundaries from four forces — resource ownership, data-flow contracts, rate adaptation, and altitude layering — alongside the cross-cutting forces, a shared glossary, and an ordered first-contact procedure for approaching an unfamiliar build.
+- Evaluation-vocabulary, resource-budget, and spatial-computing lenses for judging a decomposition (coupling, connascence, back-pressure, and pushing work to the autonomous pin edge).
+- End-to-end worked derivation — a walking robot taken from first contact to a concrete cog map — showing the method applied in full.
+- Four Spin2 implementation patterns, each compile-verified with pnut_ts: a latest-wins command mailbox with seq/ack handshake, a rate-domain decoupler, a slew/easing engine, and in-cog cooperative tasking.
+- The layer is cross-linked with the existing Spin2 pattern library and the P2 architecture mental model, so an agent building a system reaches the method from where it already is.
+
 ## [1.6.3] - 2026-06-10
 
 **Knowledge-base accuracy pass: PASM2 instructions, assembler directives, and clock/architecture entries aligned to compiler and silicon ground truth**

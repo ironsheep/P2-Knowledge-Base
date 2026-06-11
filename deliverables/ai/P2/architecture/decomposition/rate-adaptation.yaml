@@ -1,0 +1,140 @@
+concept: rate_adaptation
+title: "Force 3 — Rate Adaptation Across Time Domains (+ Cooperative Tasks-in-a-Cog)"
+category: decomposition_reasoning
+
+summary: |
+  The third primary force, and the one the catalogue is most blind to. Devices and
+  signals live in different TIME DOMAINS: a WS2812 chain wants nanosecond-precise bit
+  timing, servos want a smooth ~50 Hz stream, a voice recognizer is polled lazily and
+  clock-stretches, a battery reading is meaningful at ~1 Hz, an ultrasonic echo is a
+  one-shot event. Whenever data crosses from one cadence to another, something must
+  adapt the rate — and that adapter is its own responsibility, hence its own object.
+
+  Two sub-forces drive decomposition: (3a) rate-domain crossing — decoupling a fast
+  producer from a slow consumer; (3b) signal shaping / slew — turning a discrete step
+  into a continuous, rate-limited trajectory. A third element belongs here too: when one
+  bus must serve multiple cadences, the resolution is cooperative tasks WITHIN the single
+  owning cog (the Force 1 x Force 3 tension), not a second cog on the bus.
+
+  This entry carries the five force-fields. Tiers are PRINCIPLE/HEURISTIC.
+
+what_it_is:
+  authority_tier: PRINCIPLE
+  body: |
+    Whenever data crosses from one cadence to another, an adapter must reconcile the
+    rates, and that adapter is a distinct responsibility — a distinct object. Force 3
+    inserts objects BETWEEN the layers Force 1 created: a sampler/buffer at each
+    rate-domain boundary, and a slew/easing engine wherever a discrete intent must become
+    a continuous device stream. These are easy to overlook because they correspond to no
+    chip and no feature — they correspond to a RATE MISMATCH, which is invisible in a
+    naive feature list.
+
+why_on_p2:
+  authority_tier: PRINCIPLE
+  body: |
+    [PHYSICS] The P2 actively encourages putting different time domains on different cogs
+    and different smart pins — eight deterministic cores and 64 autonomous smart pins
+    exist precisely so each cadence can run undisturbed. [PRINCIPLE] But the moment you
+    do, you have created the software equivalent of a CLOCK-DOMAIN CROSSING, and like its
+    hardware namesake it must be handled deliberately or it produces glitches. The
+    architecture orientation tells the agent to CREATE these domains ("smart pins first,"
+    "a dedicated cog for sustained real-time"); it does not say that CROSSING between
+    them is itself a design problem with its own objects. That is the missing half this
+    force supplies. The canon names the discipline: GALS (globally asynchronous, locally
+    synchronous) is the exact characterization of the P2 — locally synchronous cogs, an
+    asynchronous hub fabric.
+  grounding:
+    - "64 smart pins / autonomous timing modes — architecture/smart_pins.yaml (pin_count, independence)"
+    - "Deterministic cogs (each its own time domain) — architecture/cog.yaml (cog_independence)"
+    - "Streamer + hub FIFO for elastic buffering — architecture/fifo.yaml; architecture/streamer/overview.yaml"
+
+how_it_cuts:
+  authority_tier: PRINCIPLE
+  sub_force_3a_rate_domain_crossing:
+    authority_tier: HEURISTIC
+    body: |
+      A fast producer and a slow consumer (or vice versa) must not stall each other. The
+      decoupling element — a latest-value sampler, a ring buffer, a freshness counter —
+      is a real object with a real job.
+    choice_rule: "Choose a BUFFER when the consumer needs EVERY sample; choose a latest-wins SLOT when it needs only the FRESHEST."
+    escape_condition: "When producer and consumer already share one cadence (no crossing), no decoupler is needed — do not insert ceremony."
+  sub_force_3b_slew_shaping:
+    authority_tier: PRINCIPLE
+    body: |
+      A high-level command is a STEP ("stand," "forward"). A servo physically cannot take
+      a step — it needs a smooth, accelerated-then-decelerated trajectory at its native
+      frame rate. The element that performs that easing — converting a discrete intent
+      into a continuous, rate-limited stream — is a responsibility distinct from BOTH the
+      commander (which knows WHAT) and the driver (which knows HOW to talk to the chip).
+      It is the RAMP. Decomposing the ramp out of both the policy layer and the device
+      layer is what keeps each of those clean.
+  one_bus_many_cadences:
+    authority_tier: HEURISTIC
+    body: |
+      The Force 1 x Force 3 tension: Force 1 says "one cog per bus," but several devices
+      on ONE bus may want different cadences (servos 50 Hz, IMU 100 Hz, battery 1 Hz).
+      You cannot split the bus across cogs (Force 1 forbids it). The resolution is
+      COOPERATIVE TASKING within the one owning cog: multiple coroutines sharing the cog
+      and the bus, each running at its own cadence and yielding for bus coherence. This
+      is a first-class decomposition tool for "shared resource, multiple rates."
+    escape_condition: |
+      Break toward a second cog only if the cadences are so far apart that the fastest
+      task cannot meet its deadline while cooperatively yielding to the others — at which
+      point the devices do not truly share one timing domain and Force 1 re-cuts them
+      (e.g. move the nanosecond-timed device to its own smart pin or cog).
+
+example:
+  authority_tier: EXAMPLE
+  illustrative_not_normative: true
+  body: |
+    (Illustrative, frozen at one point — read it to see the force in motion; do not copy
+    it as law.)
+
+    3a (rate-domain crossing): fast device events are "decelerated" into the
+    orchestrator's lazy poll via a published value + a bumped seq counter. The
+    orchestrator samples the latest and ignores the rest, because for a voice command
+    only the newest matters — a latest-wins slot, not a buffer.
+
+    3b (slew/shaping): the frame-advancing easing engine inside the motion task. A "walk"
+    command arrives ONCE; a 50 Hz loop then blends current pose toward target over many
+    frames, so the servos receive a smooth trajectory rather than a snap.
+
+    one-bus-many-cadences: bus 1 carries servos (50 Hz), the IMU (100 Hz), and the
+    battery ADC (1 Hz). Rather than three cogs fighting over one bus, one owning cog runs
+    three cooperative tasks at three cadences, each yielding at bus-transaction
+    boundaries.
+
+failure_if_ignored:
+  authority_tier: PRINCIPLE
+  body: |
+    Two classic embedded bugs. Without 3a: a slow consumer back-pressures a fast producer
+    (or a fast producer floods a slow consumer), giving dropped frames, stalls, or torn
+    state. Without 3b: servos snap to position instead of moving, drawing huge current
+    spikes and mechanical shock, because a step was written straight to the device with
+    no ramp between intent and actuator. Ignoring one-bus-many-cadences forces a wrong
+    cut — either a second cog illegally sharing the bus (corruption) or one cadence
+    starving another.
+
+related:
+  - architecture/smart_pins.yaml
+  - architecture/cog.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/patterns/implementation/spin2_buffer_management.yaml
+  - language/spin2/patterns/implementation/spin2_timing_control.yaml
+  - language/spin2/patterns/implementation/spin2_rate_domain_decoupler.yaml
+  - language/spin2/patterns/implementation/spin2_slew_easing_engine.yaml
+  - language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml
+
+see_also:
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "The generative theory: p2kbArchDecompositionMethod"
+  - "Where this force runs in the routine (steps 4-5): p2kbArchFirstContactProcedure"
+  - "Force 1 — the bus ownership this force adapts across: p2kbArchResourceOwnership"
+  - "Force 2 — the contract that carries the decoupled data: p2kbArchDataFlowContracts"
+  - "Force 4 — layering above the rate adapters: p2kbArchAltitudeLayering"
+  - "Spatial-computing pipelines and the funnel/hub-saturation smells: p2kbArchSpatialComputing"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "Force 3: rate mismatches demand their own objects — samplers/buffers at rate-domain crossings (3a), slew/easing ramps for discrete->continuous (3b), and cooperative tasks-in-a-cog when one bus serves many cadences."

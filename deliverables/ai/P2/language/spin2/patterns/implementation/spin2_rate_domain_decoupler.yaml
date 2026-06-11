@@ -1,0 +1,68 @@
+pattern_id: "rate_domain_decoupler"
+description: |
+  A latest-value sampler with a freshness counter, for decoupling a fast producer from a
+  slow consumer (or vice versa) when only the NEWEST value matters. The producer
+  publishes a value and bumps a monotonic seq once per event; the consumer reads at its
+  own lazy cadence and edge-detects "new" by comparing the seq against the last one it
+  saw. Intermediate values are intentionally dropped -- the consumer never back-pressures
+  the producer and the producer never waits for the consumer.
+
+  This is the "deceleration" half of rate adaptation (Force 3a). It differs from a ring
+  buffer: a buffer keeps EVERY sample (use it when every sample matters); this keeps only
+  the freshest (use it when only the latest matters, e.g. a voice command or a range
+  reading). See the rate-adaptation decomposition entry for the choice rule.
+
+when_use:
+  - "Fast producer, slow consumer (or vice versa), and only the newest value matters"
+  - "Crossing a rate-domain boundary without stalling either side"
+  - "Sporadic events (a finished ping, a recognized word) sampled by a lazy poll"
+
+implementation: |
+  ' --- producer side: publish value, then bump freshness seq LAST ---
+  VAR
+    long  voiceCmdId                       ' the latest value
+    long  voiceCmdSeq                      ' bumped once per event (publish LAST)
+
+  PRI onRecognition(cmdId)
+    voiceCmdId := cmdId
+    voiceCmdSeq++                           ' readers detect "new" by the seq advance
+
+  PUB getVoiceCmdId() : cmdId
+    cmdId := voiceCmdId
+
+  PUB getVoiceSeq() : seq
+    seq := voiceCmdSeq
+
+  ' --- consumer side: edge-detect freshness at the consumer's own cadence ---
+  VAR
+    long  lastVoiceSeq                      ' previous seq this consumer acted on
+
+  PRI dispatchPass() | seq
+    seq := getVoiceSeq()
+    if seq <> lastVoiceSeq                  ' a fresh value has appeared since last pass
+      lastVoiceSeq := seq
+      handleVoice(getVoiceCmdId())          ' act on the LATEST only; skipped values are ignored
+
+anti_patterns:
+  - "Buffering every sample when the consumer only ever uses the newest -- wastes hub memory and adds latency; use a buffer only when every sample matters."
+  - "Comparing the VALUE instead of the SEQ to detect freshness -- two identical consecutive values would be missed; the monotonic seq edge is what signals 'new'."
+  - "Letting the slow consumer gate the fast producer (a blocking handshake) -- re-introduces the back-pressure this pattern exists to remove."
+
+resources:
+  memory: "~12 bytes per channel (value + producer seq + consumer's last-seen seq)"
+  locks: "none -- single-writer atomic-long publish"
+  cogs: "two (producer and consumer at different cadences)"
+
+combines_with:
+  - "latest_wins_mailbox"
+  - "shared_memory"
+  - "event_dispatcher"
+
+related:
+  - architecture/decomposition/rate-adaptation.yaml
+  - architecture/decomposition/data-flow-contracts.yaml
+  - language/spin2/patterns/implementation/spin2_buffer_management.yaml
+
+see_also:
+  - "Force 3a -- rate-domain crossing and the buffer-vs-latest choice: p2kbArchRateAdaptation"
+  - "The event plane this serves: p2kbArchDataFlowContracts"

@@ -1,0 +1,100 @@
+concept: resource_budget
+title: "The Resource Budget — A Required Design Artifact"
+category: decomposition_reasoning
+
+summary: |
+  Teach the agent to treat the finite, heterogeneous P2 resource lattice as a design
+  INVARIANT, and to emit an allocation table as a deliverable artifact of the design —
+  not an afterthought. The budget enumerates every finite resource (cogs assigned, smart
+  pins assigned, lock usage, CORDIC contention, hub-bandwidth estimate, LUT-pair
+  adjacency exploited) and is checked at the close of the first-contact procedure.
+
+  Its sharpest teaching is a re-cut signal: "running out of cogs" is the P2's concrete
+  expression of "this design is too COUPLED." The budget is where the physical axis
+  (allocation) and the evaluation vocabulary (coupling) meet — when the lattice cannot
+  hold the cut, the cut is wrong, not the chip.
+
+  Tiers are PRINCIPLE (the budget as invariant) and HEURISTIC (the re-cut trigger).
+
+the_artifact:
+  authority_tier: PRINCIPLE
+  body: |
+    Emit an allocation table as an artifact of the design. The finite lattice is a
+    design invariant: you do not get more than what the silicon has, so the budget is
+    not a report written after the fact — it is a constraint you design against from the
+    first cut. Fill it in as the first-contact procedure assigns owners (Force 1) and
+    places adapters (Force 3); close the procedure by reconciling the design against it.
+
+budget_template:
+  authority_tier: PRINCIPLE
+  note: "Every finite resource, with the silicon fact that bounds it. Enumerate all of them; a blank row is a resource you forgot to account for."
+  resources:
+    - resource: "Cogs assigned"
+      finite_limit: "8 independent cogs"
+      track: "Which cog owns which resource/timing domain; how many remain free."
+      grounding: "architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
+    - resource: "Smart pins assigned"
+      finite_limit: "64 smart pins"
+      track: "Which pins run which autonomous mode; pins absorbing a protocol (edge compute) vs plain I/O."
+      grounding: "architecture/smart_pins.yaml (pin_count, independence)"
+    - resource: "Lock usage"
+      finite_limit: "16 hardware locks"
+      track: "Each lock's purpose and which cogs contend for it; prefer atomic single-long publish over a lock where there is one writer."
+      grounding: "architecture/locks.yaml (total_locks)"
+    - resource: "CORDIC contention"
+      finite_limit: "one shared CORDIC pipeline (~54-55 clk latency)"
+      track: "Which cogs issue CORDIC ops and at what rate; contention when multiple cogs pipeline through it."
+      grounding: "architecture/cordic.yaml (pipeline_depth, result_latency); language/spin2/concepts/cordic_solver.yaml"
+    - resource: "Hub-bandwidth estimate"
+      finite_limit: "egg-beater 8-clk rotation; one slice per cog per rotation"
+      track: "Aggregate hub traffic vs the egg-beater ceiling; flag bulk movement that should use the FIFO/streamer not mailbox words."
+      grounding: "architecture/hub.yaml (egg_beater_architecture.rotation_period); architecture/fifo.yaml; architecture/streamer/overview.yaml"
+    - resource: "LUT-pair adjacency exploited"
+      finite_limit: "adjacent-cog LUT sharing, pairs 0-1, 2-3, 4-5, 6-7 only"
+      track: "Which cog pairs share LUT, for what fast hand-off; note that non-adjacent cogs cannot."
+      grounding: "architecture/lookup_ram.yaml (LUT_sharing)"
+    - resource: "Cog RAM / register budget (per cog)"
+      finite_limit: "512 longs cog RAM; 496 usable PASM registers; 512 longs LUT"
+      track: "Per-cog code+data footprint; the limit that bounds altitude-layering depth (Force 4)."
+      grounding: "architecture/cog.yaml; architecture/p2-architecture-mental-model.yaml (cog_independence)"
+
+re_cut_signal:
+  authority_tier: HEURISTIC
+  rule: |
+    "Running out of cogs" (or pins, or locks, or hub bandwidth) is the concrete signal
+    that the design is too coupled — re-cut, do not cram. When the budget cannot hold
+    the proposed allocation, the boundaries are wrong: look for a funnel cog doing
+    several concerns, a protocol that a smart pin could absorb (freeing a cog), or a seam
+    whose back-pressure is so high it should not have been cut there.
+  escape_condition: |
+    The escape from "always re-cut": when the lattice is genuinely full of irreducible,
+    cohesive concerns (every cog owns one sustained real-time domain and none can be
+    absorbed by a smart pin), the design is at capacity and the answer is to reduce SCOPE
+    or move a concern off-chip — not to time-slice a real-time concern onto a shared cog.
+    Time-slicing low-rate, non-real-time concerns onto one orchestration cog is the one
+    sanctioned way to fit more, and only for the non-real-time tier.
+
+related:
+  - architecture/cog.yaml
+  - architecture/smart_pins.yaml
+  - architecture/locks.yaml
+  - architecture/cordic.yaml
+  - architecture/hub.yaml
+  - architecture/fifo.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/lookup_ram.yaml
+  - architecture/p2-architecture-mental-model.yaml
+  - language/spin2/concepts/cordic_solver.yaml
+  - language/spin2/patterns/implementation/spin2_resource_pool.yaml
+
+see_also:
+  - "The lattice the budget allocates onto (the physical axis): p2kbArchDecompositionMethod"
+  - "Where the budget is checked (step 9 — reconcile): p2kbArchFirstContactProcedure"
+  - "The coupling integer that 'out of cogs' reflects: p2kbArchEvaluationVocabulary"
+  - "Smart-pin absorption frees a cog: p2kbArchSpatialComputing"
+  - "Force 1 — the ownership that consumes cogs: p2kbArchResourceOwnership"
+  - "Force 4 — the layering bounded by cog RAM: p2kbArchAltitudeLayering"
+  - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
+  - "P2 architecture orientation: p2kbArchP2ArchitectureMentalModel"
+
+oneliner: "Emit the resource-allocation table as a design artifact (cogs, smart pins, locks, CORDIC, hub bandwidth, LUT pairs, cog RAM); 'out of cogs' means too coupled — re-cut, don't cram."

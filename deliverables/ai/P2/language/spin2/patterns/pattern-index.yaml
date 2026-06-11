@@ -28,7 +28,11 @@ pattern_categories:
       - spin2_plugin_system.yaml
       - spin2_resource_pool.yaml
       - spin2_shared_memory.yaml
-      
+      - spin2_latest_wins_mailbox.yaml
+      - spin2_rate_domain_decoupler.yaml
+      - spin2_slew_easing_engine.yaml
+      - spin2_cooperative_tasking.yaml
+
   applications:
     description: "Application-level patterns"
     patterns:
