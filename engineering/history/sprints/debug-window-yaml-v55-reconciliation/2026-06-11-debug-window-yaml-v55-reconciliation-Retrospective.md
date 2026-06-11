@@ -35,6 +35,24 @@ Captures *what was learned*, not what shipped (the closeout audits scope). Bulle
 **New lesson (already addressed this sprint):**
 - **Pre-flight certification gate** added to `release-yamls` (§5.5): a throwaway working-tree index regen + full validator suite *before* the content commit, proving the post-commit state green. Shipped in this release per "discipline updates ship with the work that revealed them." Generalization candidate: *any* release of a derived artifact validated against the derived artifact (not the source tree) wants a pre-commit regen-and-certify gate — surfaced below for the candidates buffer.
 
-**Existing candidates re-confirmed by this sprint (triage in §5):**
-- `[baseline-health]` validator-coverage gap (entry 2026-06-11): hit directly — `validate-yaml-syntax.py` reports 0 files for the content tree. Re-confirmed; severity rising.
-- `[yaml-knowledge-base-maintenance]` crossref field-type semantics (`see_also` = informational text vs `related` = must-resolve): relied on it twice this sprint (relocating bare-prose topics to `see_also`; deferring scope_xy inbound `related` to post-regen). Re-confirmed as load-bearing.
+**Process change adopted this retrospective (Stephen's directive):** the candidate buffer
+is inverted from "note-and-maybe-promote" to **adopt-locally → certify → promote** — a
+learning is operationalized into a project skill/overlay *in the same retrospective*, then
+accrues certification evidence from real find/fixes; promotion weight = adopted + certified
++ second-project signal. Encoded as `.claude/skills/sprint-retrospective/project-overlay.md`
+(itself adopted locally first, per its own rule). Root cause it fixes: the buffer had become
+a write-only graveyard — two entries below had no skill home at all.
+
+**Existing candidates OPERATIONALIZED this retrospective (first application of the new process):**
+- `[baseline-health]` validator-coverage gap — **Adopted**: created
+  `.claude/skills/baseline-health/project-overlay.md` naming which validator actually covers
+  which tree (`validate-yaml-syntax.py` reports 0 files for the content tree). Certified by
+  this very closeout using `verify-yaml-format` for the exit baseline.
+- `[yaml-knowledge-base-maintenance]` crossref field-type semantics — **Adopted**: written
+  into the skill's Content-shape principles (`see_also` informational vs `related`
+  must-resolve; bare-prose passes silently; top-level only). Certified by twofold use this
+  sprint (bare-prose relocation + scope_xy inbound deferral).
+- `[release-yamls]` pre-flight gate — already **Adopted + Certified** (§5.5; caught the gzip drift).
+
+**Still PROPOSAL (build-sized, parked):** the yaml-kb "author-kb-layer" mode; the
+prepare-manual migration content-conversion checklist (confirm its skill home next pass).
