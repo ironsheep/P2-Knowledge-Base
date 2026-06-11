@@ -124,6 +124,28 @@ Parallax-produced peripheral and support modules:
 
 ---
 
+## 🏆 Compiler Source Extractions (Compiler Trust)
+
+Verified extractions taken **directly from the P2 toolchain's own source code**. These
+carry the highest precedence in conflict resolution (`pnut` compiler, matched edition →
+Silicon Doc → datasheet → …). They are not published Parallax *documents* but are derived
+from Chip Gracey's compiler source, so they represent absolute truth for the behavior they
+describe. (Companion precedent: the Single-Step Debugger Theory-of-Operations under
+`external-inputs/pnut_ts_facts/`, extracted from PNut v52a Pascal.)
+
+### 14. **PNut DEBUG Display Windows — Compiler Source Extraction**
+- **Status**: 🏆 AUTHORITATIVE (compiler trust) — verified against the compiler's own source
+- **Author**: Chip Gracey (PNut) — extracted & re-verified by P2KB
+- **Version**: PNut **v55** — `DebugDisplayUnit.pas` (133,829 bytes, 2025-05-08); re-verified directly against v55 source 2026-05-31 / per-window 2026-06-01
+- **Coverage**: All **9** Pascal-drawn DEBUG display windows — LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, PLOT, TERM, BITMAP, MIDI — with each window's configure / display / keyboard-mouse directives and parameters (the `ele_*` / `key_*` element protocol, `XXX_Configure` vs `XXX_Update` lifecycle)
+- **Trust**: 100% — derived directly from compiler source; wins conflicts at compiler precedence
+- **Artifacts**: Debug Window **Directive Matrix** (cross-window) + **9 per-window Theory-of-Operations** docs
+- **Location**: `/engineering/document-production/manuals/p2-debug-window-manual/REF/` — `DEBUG-WINDOW-DIRECTIVE-MATRIX.md` + `theory-of-operations/{LOGIC,SCOPE,SCOPE_XY,FFT,SPECTRO,PLOT,TERM,BITMAP,MIDI}_Theory_of_Operations.md`
+- **Integration**: Authoritative **audit baseline** for `deliverables/ai/P2/language/spin2/debug-displays/` (audit in progress)
+- **Scope note**: covers the 9 display windows only; the single-step debugger (`DebuggerUnit.pas`) is excluded by design
+
+---
+
 ## 📊 Trust Level Hierarchy
 
 ### 🏆 AUTHORITATIVE Level (100% Trust)

@@ -1,10 +1,10 @@
 # 📊 INGESTION AUDIT MATRIX - LIVE DASHBOARD
 
-**Last Updated**: 2025-09-02  
-**Total Sources**: 24  
+**Last Updated**: 2026-06-11  
+**Total Sources**: 25  
 **Overall Completion**: 85% ⬆️ (was 72% before cross-source connections)  
 **Trust Coverage**: 100% sources have trust levels assigned  
-**Narrative Text Coverage**: 100% ✅ (all sources have narrative files)
+**Narrative Text Coverage**: 100% ✅ (all prose sources have narrative files; compiler-source extractions are N/A)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Metric | Status | Progress |
 |--------|--------|----------|
-| **Sources with Audit Docs** | 19/24 | 79% ✅ |
+| **Sources with Audit Docs** | 20/25 | 80% ✅ |
 | **Sources with Narrative Text** | 24/24 | 100% ✅ |
 | **Sources with Style Analysis** | 2/24 | 8% ❌ |
 | **Sources with Cross-Source Analysis** | 12/24 | 50% ⬆️ |
@@ -27,6 +27,7 @@
 | **smart-pins** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟢 | **80%** |
 | **silicon-doc** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟢 | **80%** |
 | **spin2-v51** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟢 | **80%** |
+| **debug-display-windows** (PNut v55) | ✅ | N/A | N/A | 🔄 | 🔄 | 🏆 | **70%** |
 | **pasm2-manual** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟡 | **80%** |
 | **edge-32mb-module** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟢 | **80%** |
 | **edge-breakout-board** | ✅ | ✅ | ❌ | ✅ | ✅ | 🟢 | **80%** |
@@ -57,6 +58,7 @@
 - 🆕 Newly Added
 - ⬆️ Improved
 - N/A Not Applicable
+- **Trust column**: 🏆 Authoritative / compiler-trust · 🟢 Green · 🟡 Yellow (see `AUTHORITATIVE-SOURCES.md`)
 
 ---
 
