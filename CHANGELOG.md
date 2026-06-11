@@ -20,6 +20,18 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.8.0] - 2026-06-11
+
+**DEBUG display windows: a complete PNut v55 directive reference for all nine visualizers**
+
+### Added
+- DEBUG display windows (`language/spin2/debug-displays/`): all nine visualizers — TERM, SCOPE, SCOPE_XY, FFT, SPECTRO, BITMAP, LOGIC, PLOT, MIDI — carry the PNut v55 directive surface: configuration and display directives with parameter ranges and defaults, the supported color and sample-packing modes, channel/geometry grammar, and a `not_supported:` block per window stating each window's real boundaries.
+- SCOPE_XY window: XY / Lissajous / polar (rho-theta) display documented as its own window, including persistence-on-SAMPLES and the polar twopi/theta controls.
+- Compile-verified examples for every window (all examples build under the pnut_ts v1.55.0 DEBUG compiler).
+
+### Changed
+- DEBUG display findability: natural-language `aliases:` on every window (e.g. "logic analyzer", "oscilloscope", "spectrogram", "piano keyboard"), a `spin2.debug_displays` category, and direct `related:` links from the DEBUG statement entry to all nine windows — so an agent querying by intent lands on the right window.
+
 ## [1.7.0] - 2026-06-11
 
 **Decomposition reasoning layer: a generative method for cutting a P2 design across cogs, smart pins, and the parallel fabric**

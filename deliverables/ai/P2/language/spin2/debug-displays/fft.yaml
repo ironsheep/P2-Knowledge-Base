@@ -1,98 +1,98 @@
 display_type: FFT
 category: DEBUG Display Types
 description: |
-  Fast Fourier Transform display for frequency domain analysis.
-  Converts time-domain signals to frequency spectrum display showing
-  frequency components, harmonics, and spectral characteristics.
-documentation_source: Spin2 v51
+  FFT is the P2 DEBUG frequency-spectrum window. It buffers a streamed sample series,
+  applies a fixed Hanning window + FFT, and plots the magnitude spectrum (up to 8
+  channels). It shows MAGNITUDE only (phase is computed but not displayed here), and
+  has NO measurement features: no THD/SNR/bandwidth, no peak-frequency detection, no
+  harmonic analysis, no averaging, no waterfall (that is the separate SPECTRO window),
+  and no markers/cursors. The only window function is a fixed Hanning -- it is not selectable.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.4) -- verified against DebugDisplayUnit.pas v55: FFT_Configure 1552-1618, FFT_Update 1620-1679, channel def 1628-1638, fixed-Hanning PrepareFFT 4178-4191, FFTmax=2048 (FFTexpMax=11); PC_MOUSE raw-pixel SendMousePos 3537-3577"
 
-syntax: "DEBUG(`FFT title, signal_data`)"
+aliases:
+  - spectrum
+  - frequency display
+  - FFT
+  - DEBUG FFT
 
-capabilities:
-  - "Real-time frequency spectrum"
-  - "Magnitude and phase display"
-  - "Peak frequency detection"
-  - "Harmonic analysis"
-  - "Windowing functions"
-  - "Averaging modes"
-  - "Waterfall display"
-  - "Zoom and markers"
+syntax:
+  create: "DEBUG(`FFT MyFFT <config directives> <channel-def strings>)"
+  update: "DEBUG(`MyFFT <sample longs / directives>)   ' reference the window by name"
 
-fft_parameters:
-  sample_sizes:
-    - "256 points"
-    - "512 points"
-    - "1024 points"
-    - "2048 points"
-    - "4096 points"
-    
-  window_functions:
-    - "Rectangular (none)"
-    - "Hamming"
-    - "Hanning"
-    - "Blackman"
-    - "Kaiser"
-    
-  display_scales:
-    - "Linear magnitude"
-    - "Logarithmic (dB)"
-    - "Power spectral density"
+configuration_directives:
+  note: "Accepted in FFT_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window title"
+  POS: "POS left top -- window screen offset"
+  SIZE: "SIZE width height -- plot area in pixels, each 32..2048 (default 256x256)"
+  SAMPLES: "SAMPLES n {first last} -- n is the FFT size, a power of two 4..2048 (default 512; values are snapped to a power of two; 2048 is the max -- there is NO 4096). Optional first/last select a displayed bin range (zoom): first 0..n/2-2 (default 0), last first+1..n/2-1 (default n/2-1)."
+  RATE: "RATE n -- redraw every n new sample sets, 1..2048 (default = SAMPLES)"
+  DOTSIZE: "DOTSIZE n -- bin dot diameter, 0..32 (default 0)"
+  LINESIZE: "LINESIZE n -- -32..32 (default 3). Positive = polyline thickness; 0 = no line; NEGATIVE = vertical filled bars of width |n|."
+  TEXTSIZE: "TEXTSIZE n -- label font point size, 6..200 (default 10)"
+  COLOR: "COLOR back grid -- window background and grid colors (named or RGB24; default black, gray)"
+  LOGSCALE: "LOGSCALE -- plot log of power. NOTE: this is log of arbitrary power units, NOT calibrated dB."
+  HIDEXY: "HIDEXY -- suppress the on-screen cursor readout (PC_MOUSE still reports)"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes) -- sub-samples packed per transmitted long/word/byte"
+
+channel_definition:
+  note: "Up to 8 channels, each defined by a quoted string in FFT_Update before streaming."
+  grammar: "'label' {mag {high {tall {base {grid {color}}}}}}"
+  fields:
+    mag: "magnitude right-shift divisor, 0..11 (default 0)"
+    high: "Y full-scale value, 1..$7FFFFFFF (default $7FFFFFFF)"
+    tall: "channel height in pixels (default = window height)"
+    base: "baseline offset in pixels (default 0)"
+    grid: "bitfield: bit0 = baseline, bit1 = top (default 0)"
+    color: "trace color (named or $00RRGGBB)"
+
+display_directives:
+  note: "Accepted in FFT_Update (streaming to the named window)."
+  numeric_data: "Sample longs, channel-interleaved. The FFT is drawn every RATE sets once the SAMPLES buffer is full."
+  CLEAR: "CLEAR -- erase and reset the sample/rate counters"
+  SAVE: "SAVE -- write the window bitmap to <name>.bmp"
+  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2; FFT transmits RAW client-pixel x,y (see pc_mouse.yaml)"
+
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "Raw client-pixel x,y (no FFT transform branch); on-screen readout is display-only. See language/spin2/debug-commands/pc_mouse.yaml"
 
 examples:
   - code: |
-      ' Audio spectrum analyzer
-      PUB audio_spectrum() | samples[256], i
-        REPEAT
-          REPEAT i FROM 0 TO 255
-            samples[i] := read_adc()
-            WAITUS(50)  ' 20kHz sample rate
-          DEBUG(`FFT Audio_Spectrum, samples`)
-    description: "Display audio frequency spectrum"
-    
+      ' Single-channel audio spectrum, 512-point FFT, log scale
+      DEBUG(`FFT Audio SAMPLES 512 LOGSCALE 'Spectrum')
+      REPEAT
+        DEBUG(`Audio `(sample))
+    description: "512-point magnitude spectrum on a log scale"
   - code: |
-      ' Vibration analysis
-      PUB vibration_fft() | accel_data[512], i
-        REPEAT
-          REPEAT i FROM 0 TO 511
-            accel_data[i] := read_accelerometer()
-            WAITMS(1)
-          DEBUG(`FFT Vibration, accel_data`)
-    description: "Analyze mechanical vibration"
-    
-  - code: |
-      ' Signal quality check
-      PUB signal_analysis() | signal[1024], i
-        generate_test_signal(@signal)
-        add_noise(@signal)
-        DEBUG(`FFT Signal_Quality, signal`)
-    description: "Analyze signal harmonics"
+      ' Vertical-bar spectrum (negative LINESIZE = bars), zoom to low bins
+      DEBUG(`FFT Vib SAMPLES 1024 256 LINESIZE -2 'Accel')
+      REPEAT
+        DEBUG(`Vib `(accel))
+    description: "Bar-mode spectrum with a displayed bin range (zoom)"
 
-display_features:
-  spectrum_view:
-    - "Frequency on X-axis"
-    - "Magnitude on Y-axis"
-    - "Peak markers"
-    - "Cursor measurements"
-    
-  waterfall_view:
-    - "3D time-frequency display"
-    - "Color-coded magnitude"
-    - "History retention"
-    
-  measurements:
-    - "Peak frequency"
-    - "Total harmonic distortion"
-    - "Signal-to-noise ratio"
-    - "Bandwidth"
+not_supported:
+  - "No measurements -- no THD, SNR, bandwidth, peak-frequency detection, or harmonic analysis (these do not exist in the P2 FFT)."
+  - "No averaging modes."
+  - "No waterfall / time-frequency view -- that is the separate SPECTRO window."
+  - "No markers or measurement cursors. The only 'zoom' is the SAMPLES first/last bin range."
+  - "No selectable window function -- the window is a FIXED Hanning."
+  - "Magnitude only -- phase is computed internally but NOT displayed by the FFT window."
+  - "No calibrated dB or power-spectral-density normalization -- LOGSCALE is log of arbitrary power units."
+  - "SAMPLES maximum is 2048 (not 4096)."
 
-usage_notes:
-  - "Requires buffer of samples"
-  - "Sample rate determines frequency range"
-  - "Window function affects accuracy"
-  - "Processing intensive for large FFTs"
+notes:
+  - "The FFT redraws every RATE sample-sets once the SAMPLES buffer fills."
+  - "SAMPLES is snapped to a power of two; 2048 is the maximum FFT size."
+  - "Channel color/scale are set per channel-def; COLOR sets window back + grid only."
 
 related:
-  - "SPECTRO display type"
-  - "SCOPE display type"
-  - "Signal processing"
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/spectro.yaml
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

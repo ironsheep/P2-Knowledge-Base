@@ -1,0 +1,108 @@
+display_type: SCOPE_XY
+category: DEBUG Display Types
+description: |
+  SCOPE_XY is the P2 DEBUG XY-oscilloscope / phase-plotter window (dis_scope_xy = 2).
+  It plots one signal against another (signal-vs-signal, not signal-vs-time) -- Lissajous
+  figures, phase diagrams, trajectories, and complex (real-vs-imag) plots -- in Cartesian
+  or polar coordinates, with up to 8 traces. It is a DISTINCT window from SCOPE (which is
+  time-domain); SCOPE's "XY mode" prose does NOT cover this window. It has NO trigger,
+  no holdoff, no linesize (it plots dots), no auto-ranging, and no measurement overlays.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.3) -- verified against DebugDisplayUnit.pas v55: SCOPE_XY_Configure 1386-1441, SCOPE_XY_Update 1443-1509, SCOPE_XY_Plot 1511-1545; POLAR KeyTwoPi 2728-2742; PC_MOUSE raw-pixel SendMousePos 3537-3577"
+
+aliases:
+  - XY oscilloscope
+  - Lissajous
+  - polar plot
+  - phase plot
+  - trajectory plot
+  - scope_xy
+  - SCOPE_XY
+  - DEBUG SCOPE_XY
+
+syntax:
+  create: "DEBUG(`SCOPE_XY MyXY <config directives> <trace label strings>)"
+  update: "DEBUG(`MyXY <XY/rho-theta pairs / directives>)   ' reference the window by name"
+
+configuration_directives:
+  note: "Accepted in SCOPE_XY_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window title (default 'Scope_XY')"
+  POS: "POS left top -- window screen offset"
+  SIZE: "SIZE n -- a SINGLE value; the display is SQUARE. Effective width = height = n*2 pixels, clamped 32..2048 (default 256 -> 512 px). (Unlike SCOPE's two-value SIZE w h.)"
+  RANGE: "RANGE n -- coordinate extent, 1..$7FFFFFFF (default $7FFFFFFF). +-n on both axes (Cartesian) or 0..n radius (polar). Scale = width/2/RANGE."
+  SAMPLES: "SAMPLES n -- persistence control, 0..2048 (default 256). 0 = persistent accumulating display (no buffer); >0 = fading trail of depth n (opacity decays opa = 255 - k*255/n)."
+  RATE: "RATE n -- display-update divisor, 1..2048 (default 1)"
+  DOTSIZE: "DOTSIZE n -- dot diameter in pixels, 2..20 (default 6)"
+  TEXTSIZE: "TEXTSIZE n -- label font point size, 6..200 (default 10)"
+  COLOR: "COLOR back grid -- window background and grid colors (RGB24; default black, gray)"
+  POLAR: "POLAR {twopi {theta}} -- enable polar (rho,theta) mode. twopi = full-circle units (-1/0 => $100000000, else the value); theta = angular offset. (SCOPE_XY-only.)"
+  LOGSCALE: "LOGSCALE -- log scale on both axes / radius (default linear)"
+  HIDEXY: "HIDEXY -- suppress the on-screen cursor readout (PC_MOUSE still reports)"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes; default LONGS_1BIT)"
+  trace_label: "'label' {color} -- one per trace, up to 8 traces; optional trailing color"
+
+display_directives:
+  note: "Accepted in SCOPE_XY_Update (streaming to the named window)."
+  numeric_data: "Packed XY (or rho/theta) pairs -- one pair per active trace per sample set; plotted/buffered when a full set (vIndex*2 values) is assembled."
+  CLEAR: "CLEAR -- clear the bitmap and reset sample/rate counters"
+  SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
+  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
+
+coordinate_systems:
+  cartesian: "Default. X plotted against Y; RANGE sets +-extent on both axes."
+  polar: "Enabled by POLAR {twopi {theta}}; pairs are (rho, theta); RANGE sets the 0..n radius."
+  logscale: "LOGSCALE applies log scaling to the XY geometry / radius."
+
+display_modes:
+  persistent: "SAMPLES 0 -- points accumulate indefinitely (no buffer); good for building up a full Lissajous/phase figure."
+  fading_trail: "SAMPLES n>0 -- a circular buffer of n pairs per trace; older points fade (opa = 255 - k*255/n), showing a moving trajectory."
+
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "GOTCHA: SendMousePos has NO dis_scope_xy branch, so PC_MOUSE transmits RAW client-pixel x,y -- NOT the scaled or polar (rho,theta) value shown on screen. Off-window returns sentinel ($03FFFFFF, $FFFFFFFF). See language/spin2/debug-commands/pc_mouse.yaml"
+
+examples:
+  - code: |
+      ' Lissajous: plot X against Y, persistent (SAMPLES 0)
+      DEBUG(`SCOPE_XY Liss SIZE 256 RANGE 1000 SAMPLES 0 'XY')
+      REPEAT
+        DEBUG(`Liss `(x) `(y))
+    description: "Persistent Lissajous figure (signal vs signal)"
+  - code: |
+      ' Fading trajectory trail (SAMPLES > 0) with larger dots
+      DEBUG(`SCOPE_XY Traj SIZE 256 RANGE 2000 SAMPLES 256 DOTSIZE 8 'Path')
+      REPEAT
+        DEBUG(`Traj `(px) `(py))
+    description: "Fading trail trajectory"
+  - code: |
+      ' Polar plot (rho, theta) with a full-circle of 4096 units
+      DEBUG(`SCOPE_XY Pol SIZE 256 RANGE 1000 POLAR 4096 'Polar')
+      REPEAT
+        DEBUG(`Pol `(rho) `(theta))
+    description: "Polar (rho/theta) plot"
+
+not_supported:
+  - "No TRIGGER and no HOLDOFF (those are SCOPE/LOGIC features)."
+  - "No LINESIZE -- SCOPE_XY plots dots, not strokes."
+  - "No auto-ranging -- use RANGE to set the coordinate extent."
+  - "No measurement/statistics overlays and no data-export cursors."
+  - "No UPDATE/buffered mode (that is PLOT/TERM/BITMAP)."
+  - "No polar-grid or complex-number helper features beyond the POLAR coordinate transform."
+
+notes:
+  - "SCOPE_XY is signal-vs-signal (XY); it is a separate window from the time-domain SCOPE."
+  - "SIZE is a single value -- the window is square (width = height = n*2)."
+  - "SAMPLES is a persistence/fade control here, NOT a time-buffer depth as in SCOPE."
+
+related:
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-displays/fft.yaml
+  - language/spin2/debug-displays/spectro.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

@@ -1,97 +1,93 @@
 display_type: BITMAP
 category: DEBUG Display Types
 description: |
-  Bitmap/image display for visualizing pixel data, framebuffers,
-  and 2D arrays. Supports various color formats and pixel organizations
-  for displaying graphics, image processing results, and memory maps.
-documentation_source: Spin2 v51
+  BITMAP is the P2 DEBUG pixel/framebuffer window. It plots a streamed series of
+  numeric pixel values into a w x h bitmap using one of 19 color modes, with scan
+  patterns, optional magnified/sparse pixels, random-access (SET) and SCROLL
+  positioning, and interactive PC_KEY/PC_MOUSE input. Maximum pixel depth is RGB24
+  (24-bit) -- there is NO 32-bit/alpha mode, NO zoom/pan, NO animation engine, and
+  NO sprites (sprites belong to the PLOT window).
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.8) -- verified against DebugDisplayUnit.pas v55: BITMAP_Configure 2372-2414, BITMAP_Update 2416-2485, 19 color modes 2395-2396, TRACE 2399-2400, SET/SCROLL 2433-2442; PC_MOUSE SendMousePos 3537-3577 (Y-inverted wire value)"
 
-syntax: "DEBUG(`BITMAP title, width, height, pixel_data`)"
+aliases:
+  - bitmap
+  - image display
+  - framebuffer
+  - BITMAP
+  - DEBUG BITMAP
 
-capabilities:
-  - "Multiple color formats"
-  - "Scalable display"
-  - "Real-time updates"
-  - "Pixel grid overlay"
-  - "Zoom and pan"
-  - "Color palette support"
-  - "Animation playback"
+syntax:
+  create: "DEBUG(`BITMAP MyWin <config directives>)"
+  update: "DEBUG(`MyWin <pixel longs / directives>)   ' reference the window by name"
 
-color_formats:
-  monochrome:
-    - "1-bit black/white"
-    - "8-bit grayscale"
-    
-  color:
-    - "8-bit palette"
-    - "RGB565 (16-bit)"
-    - "RGB888 (24-bit)"
-    - "RGBA8888 (32-bit)"
+configuration_directives:
+  note: "Accepted in BITMAP_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window caption"
+  POS: "POS left top -- window screen offset"
+  SIZE: "SIZE w h -- pixels, each 1..2048 (default 256x256)"
+  DOTSIZE: "DOTSIZE x {y} -- pixel magnification, each 1..256 (default 1x1; y copies x). Client size = w*x by h*y."
+  SPARSE: "SPARSE color -- grid-border color for the magnified-pixel view (named/RGB24); -1 = off"
+  color_mode: "Color mode keyword -- one of 19: LUT1 LUT2 LUT4 LUT8 LUMA8 LUMA8W LUMA8X RGBI8 RGBI8W RGBI8X RGB8 HSV8 HSV8W HSV8X HSV16 HSV16W HSV16X RGB16 RGB24 (default RGB24). Max depth is RGB24 -- no 32-bit/alpha."
+  LUTCOLORS: "LUTCOLORS c0..cN -- up to 256 RGB24 palette entries (LUT modes only)"
+  TRACE: "TRACE n -- 0..15 bitfield: bits 0-2 = scan pattern (0..7), bit 3 = scroll (default 0)"
+  RATE: "RATE n -- pixels per refresh; -1 = w*h (whole frame), 0 = width (h-scan) or height (v-scan) (default 0)"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes), with optional ALT and/or SIGNED modifiers"
+  UPDATE: "UPDATE -- manual-refresh mode (output accumulates until a runtime UPDATE)"
+  HIDEXY: "HIDEXY -- suppress the on-screen cursor readout (PC_MOUSE still reports)"
+
+display_directives:
+  note: "Accepted in BITMAP_Update (streaming to the named window)."
+  numeric_data: "Pixel longs -- color-translated (per color mode) and packing-aware, plotted at the current trace position."
+  color_mode: "A color-mode keyword may be sent mid-stream to change translation."
+  LUTCOLORS: "Runtime palette replacement (LUT modes)."
+  TRACE: "TRACE n -- mid-stream scan/scroll change; resets pixel position."
+  RATE: "RATE n -- runtime pixels-per-refresh change."
+  SET: "SET x y -- random-access pixel position; x 0..w-1, y 0..h-1; CANCELS scroll."
+  SCROLL: "SCROLL x y -- shift the bitmap; x -w..w (+x = right), y -h..h (+y = down); vacated area filled with background."
+  CLEAR: "CLEAR -- fill with background, reset trace position, refresh (unless in UPDATE mode)"
+  UPDATE: "UPDATE -- force a canvas refresh (needed in manual-refresh mode)"
+  SAVE: "SAVE {filename} | SAVE WINDOW | SAVE l t w h -- write the bitmap (or a region) to <name>.bmp"
+
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "PC_KEY transmits one LONG = latched key byte (0 if none). See language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "PC_MOUSE transmits LONG1 = x(bits 0-12)/y(13-25)/wheel(26-27)/buttons(28-30) and LONG2 = pixel color under the cursor. GOTCHA: the wire Y is inverted (bottom-origin) vs the top-origin on-screen readout; coordinates are divided by DOTSIZE. See language/spin2/debug-commands/pc_mouse.yaml"
 
 examples:
   - code: |
-      ' Display framebuffer
-      PUB show_framebuffer() | buffer[320*240]
-        render_frame(@buffer)
-        DEBUG(`BITMAP Screen, 320, 240, buffer`)
-    description: "Display graphics framebuffer"
-    
+      ' 320x240 grayscale framebuffer, streamed by window name
+      DEBUG(`BITMAP Screen SIZE 320 240 LUMA8)
+      REPEAT
+        DEBUG(`Screen `(pixel))
+    description: "Grayscale (LUMA8) framebuffer"
   - code: |
-      ' Sensor heatmap
-      PUB sensor_map() | sensors[16*16], x, y
-        REPEAT y FROM 0 TO 15
-          REPEAT x FROM 0 TO 15
-            sensors[y*16+x] := read_sensor(x, y)
-        DEBUG(`BITMAP Sensor_Heatmap, 16, 16, sensors`)
-    description: "Display sensor array as heatmap"
-    
-  - code: |
-      ' Memory visualization
-      PUB memory_map() | mem[256*256]
-        REPEAT i FROM 0 TO 65535
-          mem[i] := BYTE[$00000+i]
-        DEBUG(`BITMAP Memory_Map, 256, 256, mem`)
-    description: "Visualize memory contents"
-    
-  - code: |
-      ' Character generator test
-      PUB font_test() | char_data[8*8], c
-        REPEAT c FROM 32 TO 126
-          get_char_bitmap(c, @char_data)
-          DEBUG(`BITMAP Char, 8, 8, char_data`)
-          WAITMS(100)
-    description: "Display font characters"
+      ' 16x16 magnified RGB24 heatmap with a sparse grid
+      DEBUG(`BITMAP Heat SIZE 16 16 DOTSIZE 16 SPARSE $202020 RGB24)
+      REPEAT
+        DEBUG(`Heat `(color))
+    description: "Magnified pixels with a sparse grid border"
 
-pixel_organization:
-  row_major:
-    description: "Left-to-right, top-to-bottom"
-    formula: "pixel[y*width + x]"
-    
-  column_major:
-    description: "Top-to-bottom, left-to-right"
-    formula: "pixel[x*height + y]"
-    
-  packed:
-    description: "Multiple pixels per word"
-    usage: "Efficient memory use"
+not_supported:
+  - "No 32-bit / RGBA8888 / alpha pixel mode -- maximum depth is RGB24."
+  - "The 16-bit mode is RGB16 (the 'RGB565' label is not a valid keyword)."
+  - "No zoom or pan -- only integer DOTSIZE magnification."
+  - "No animation/playback engine -- pixels are rate-gated streaming only."
+  - "No histogram, color-picker, fit-to-window, 1:1-view, or grid-toggle controls -- the grid is the render-time SPARSE effect."
+  - "Pixel addressing follows the TRACE scan patterns -- there is no column-major buffer formula."
+  - "No sprites -- SPRITE/SPRITEDEF belong to the PLOT window, not BITMAP."
 
-display_controls:
-  - "Zoom in/out"
-  - "Fit to window"
-  - "1:1 pixel view"
-  - "Grid overlay toggle"
-  - "Color picker"
-  - "Histogram display"
-  - "Save snapshot"
-
-usage_notes:
-  - "Large images need more memory"
-  - "Updates can be partial"
-  - "Good for visualization"
-  - "Supports animation via updates"
+notes:
+  - "Pixel stream order follows the TRACE scan pattern; SET gives random access, SCROLL shifts the image."
+  - "LUT color modes use the LUTCOLORS palette; max depth is RGB24."
+  - "RATE -1 refreshes the whole frame; RATE 0 refreshes per scan-line."
 
 related:
-  - "Graphics operations"
-  - "Memory visualization"
-  - "Image processing"
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-displays/spectro.yaml
+  - language/spin2/debug-displays/term.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

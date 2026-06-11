@@ -7,7 +7,15 @@ description: |
   filtering, or MIDI-file import/export.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.9) -- verified against DebugDisplayUnit.pas v55: MIDI_Configure 2492, MIDI_Update 2590; usage example debug-section.txt:3929-3933"
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.9, 7) -- verified against DebugDisplayUnit.pas v55: MIDI_Configure 2492-2588, MIDI_Update 2590-2643, shared input handlers 585-857 / 3537-3583; usage example debug-section.txt:3929-3933"
+
+aliases:
+  - MIDI
+  - DEBUG MIDI
+  - piano keyboard
+  - note display
+  - note velocity
+  - music keyboard
 
 syntax:
   create: "DEBUG(`MIDI MyMidi <config directives>)"
@@ -15,18 +23,20 @@ syntax:
 
 configuration_directives:
   note: "Accepted in MIDI_Configure (window creation)."
-  TITLE: "TITLE 'string'"
-  POS: "POS left top"
-  SIZE: "SIZE n -- key-size scalar 1..50 (NOT pixels)"
-  RANGE: "RANGE firstKey lastKey -- displayed MIDI note range (0..127)"
-  CHANNEL: "CHANNEL n -- MIDI channel to display (0..15)"
-  COLOR: "COLOR onWhite onBlack -- two velocity colors (for lit white vs black keys)"
+  TITLE: "TITLE 'string' -- window title (default 'MIDI')"
+  POS: "POS left top -- window screen offset"
+  SIZE: "SIZE n -- key-size scalar 1..50 (default 4); pixel key size is 8 + n*4. This is NOT a pixel dimension."
+  RANGE: "RANGE firstKey lastKey -- displayed MIDI note range, each 0..127 (default 21..108); lastKey is clamped to be >= firstKey."
+  CHANNEL: "CHANNEL n -- MIDI channel to display, 0..15 (default 0). This is an exact channel filter: 0 means channel-0-only, NOT an 'all channels' mode."
+  COLOR: "COLOR onWhite onBlack -- two velocity colors for lit white vs black keys (defaults CYAN, MAGENTA)"
 
 display_directives:
   note: "Accepted in MIDI_Update."
-  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. (n = channel nibble.)"
-  CLEAR: "CLEAR -- clear the keyboard"
-  SAVE: "SAVE ... -- write the window bitmap to <name>.bmp"
+  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. Running status is honored. (n = channel nibble.)"
+  CLEAR: "CLEAR -- clear the keyboard (reset all 128 key velocities to 0 and redraw)"
+  SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
+  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."
@@ -49,11 +59,20 @@ examples:
       DEBUG(`Kbd $90 `(64, 127))            ' full-velocity note
     description: "Range/channel/velocity-color configuration"
 
+not_supported:
+  - "No event list, piano-roll, or timeline -- MIDI is a single-mode LIVE keyboard display only."
+  - "No display-mode selector -- the previously-rumored KEYBOARD / GRID / ROLL / MONITOR modes do NOT exist in the P2 MIDI window."
+  - "No analysis, filtering, or MIDI-file import/export."
+  - "MIDI is the only DEBUG window that does NOT accept HIDEXY (it has no XY readout to suppress)."
+
 notes:
   - "MIDI is a live piano-keyboard display driven by note-on ($9n) / note-off ($8n) bytes; velocity sets the key color."
-  - "SIZE is a key-size scalar (1..50), not pixels."
-  - "There is NO event-list, piano-roll, analysis, filtering, or MIDI-file import/export -- those were never part of the window."
+  - "SIZE is a key-size scalar (1..50), not pixels (the drawn key size is 8 + SIZE*4 pixels)."
+  - "CHANNEL is an exact filter -- there is no 'all channels' value; 0 displays channel 0 only."
 
 related:
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/plot.yaml
   - language/spin2/debug-commands/pc_key.yaml
   - language/spin2/debug-commands/pc_mouse.yaml

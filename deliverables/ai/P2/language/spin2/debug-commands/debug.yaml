@@ -34,3 +34,13 @@ related:
   - "uhex_"
   - "ubin"
   - "ubin_"
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-displays/term.yaml
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-displays/scope_xy.yaml
+  - language/spin2/debug-displays/fft.yaml
+  - language/spin2/debug-displays/spectro.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-displays/bitmap.yaml
+  - language/spin2/debug-displays/logic.yaml
+  - language/spin2/debug-displays/midi.yaml

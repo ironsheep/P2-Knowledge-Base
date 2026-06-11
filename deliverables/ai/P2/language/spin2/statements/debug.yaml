@@ -21,6 +21,10 @@ display_types:
     description: "Oscilloscope display for analog signals"
     usage: "DEBUG(`SCOPE title, channel1, channel2...`)"
     
+  - name: SCOPE_XY
+    description: "XY / Lissajous (phase) display -- the separate XY-mode oscilloscope window"
+    usage: "DEBUG(`SCOPE_XY title, x, y...`)"
+    
   - name: LOGIC
     description: "Logic analyzer display for digital signals"
     usage: "DEBUG(`LOGIC title, signals...`)"
@@ -164,12 +168,21 @@ best_practices:
   - "Consider performance impact of high-frequency DEBUG calls"
 
 related:
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/term.yaml
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-displays/scope_xy.yaml
+  - language/spin2/debug-displays/fft.yaml
+  - language/spin2/debug-displays/spectro.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-displays/bitmap.yaml
+  - language/spin2/debug-displays/logic.yaml
+  - language/spin2/debug-displays/midi.yaml
+
+see_also:
+  - "Debug Display Types"
   - "CON block constants"
   - "Formatting functions"
-  - "Display types"
   - "Conditional compilation"
-  
-see_also:
   - "Spin2 Language Reference v51"
-  - "Debug Display Types"
   - "Formatting Functions Reference"

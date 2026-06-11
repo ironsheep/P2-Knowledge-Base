@@ -107,6 +107,49 @@ Ask the user directly in chat (do NOT use the AskUserQuestion tool in this repo 
 
 Offer: proceed / cancel.
 
+## 5.5 Pre-flight certification gate (certify BEFORE any commit)
+
+**Why this gate exists:** the published index is *derived* and the crossref/DoD
+validators resolve `related:` targets against the **index**, not the filesystem.
+A brand-new file (e.g. a newly authored YAML) exists on disk but is **not yet a
+key in the index**, so inbound links to it read as unresolved until the index is
+regenerated. Without this gate the first time you'd learn the release validates
+is at Step 6c — *after the content commit is already in git history*. This gate
+proves the post-commit state is green **before** committing anything.
+
+**The mechanism — a throwaway working-tree regen (never staged):** crossref/DoD
+resolution depends only on *which keys exist in the index*, not on entry mtimes.
+So regenerating the index against the **working tree** (uncommitted) faithfully
+predicts the post-commit key set. Its mtimes are placeholders (filesystem, not
+commit timestamps) — but nothing the validators check depends on mtime, so the
+certification is sound. Step 6b later overwrites this throwaway index with the
+real post-commit regen (correct mtimes).
+
+Run the **full** derived-artifact regen + validator suite, exactly as 6b/6c will:
+
+```bash
+python engineering/tools/generate-p2kb-index.py                  # working-tree index (throwaway)
+gzip -c deliverables/ai/p2kb-index.json > deliverables/ai/p2kb-index.json.gz   # keep .gz in lock-step
+python engineering/tools/verify-yaml-format.py                   # expect 0 parse failures
+python engineering/tools/validate-crossref-keys.py               # expect 100% — new files now resolve
+python engineering/tools/validate-dod-release.py                 # expect ALL VALIDATIONS PASSED
+```
+
+**Both the index AND its `.gz` must be regenerated together** — the DoD
+"Gzip Compression" check fails if they drift, and that failure is easy to miss if
+you only regen the `.json`. Regenerating the `.gz` here is part of the gate, not
+just Step 6b.
+
+**Gate outcome:**
+- **ALL PASS** → the release is certified; proceed to Step 6. Do **not** stage the
+  throwaway index/`.gz` for the content commit — 6b regenerates them against the
+  committed state.
+- **Any failure** → STOP and fix in the working tree (no commit has been made, so
+  there is nothing to unwind). Re-run the gate until green. This is the entire
+  point: catch it here, never in committed history.
+
+This gate makes Step 6c a confirmation, not a discovery.
+
 ## 6. Execute the two-commit release
 
 Per CLAUDE.md, git actions need explicit user authorization. The default is to **suggest** the commands and have the user run them. If the user explicitly authorizes execution ("commit and push", "do it", etc.), execute the steps below. Otherwise, print them as a script for the user to copy-run.

@@ -1,91 +1,92 @@
 display_type: SPECTRO
 category: DEBUG Display Types
 description: |
-  Spectrogram display showing frequency content over time.
-  Creates a visual representation of spectrum changes using color
-  intensity to show magnitude at each frequency and time point.
-documentation_source: Spin2 v51
+  SPECTRO is the P2 DEBUG spectrogram (waterfall FFT) window. It buffers a streamed
+  sample series, runs an FFT, and paints each spectrum as a line of color, scrolling
+  over time to show frequency content vs time. Color uses a RESTRICTED set of intensity
+  modes (LUMA8/HSV16 families only) -- there are NO named color maps (Heat/Rainbow/etc.),
+  NO persistence/accumulate mode, and NO time-frequency cursors or pattern-recognition
+  features.
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.5) -- verified against DebugDisplayUnit.pas v55: SPECTRO_Configure 1719-1790, SPECTRO_Update 1792-1834, color-mode restriction 1767-1768, TRACE bitfield 1759-1760; PC_MOUSE SendMousePos 3537-3577"
 
-syntax: "DEBUG(`SPECTRO title, signal_data`)"
+aliases:
+  - spectrogram
+  - waterfall
+  - SPECTRO
+  - DEBUG SPECTRO
 
-capabilities:
-  - "Time-frequency visualization"
-  - "Color-mapped intensity"
-  - "Scrolling or static display"
-  - "Frequency zoom"
-  - "Time window adjustment"
-  - "Multiple color maps"
-  - "Persistence modes"
+syntax:
+  create: "DEBUG(`SPECTRO MySpectro <config directives>)"
+  update: "DEBUG(`MySpectro <sample longs / directives>)   ' reference the window by name"
 
-display_parameters:
-  axes:
-    x_axis: "Time"
-    y_axis: "Frequency"
-    z_axis: "Magnitude (color)"
-    
-  color_maps:
-    - "Heat map (red/yellow/white)"
-    - "Cool (blue/green)"
-    - "Rainbow"
-    - "Grayscale"
-    - "High contrast"
+configuration_directives:
+  note: "Accepted in SPECTRO_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window title (default 'SPECTRO')"
+  POS: "POS left top -- window screen offset"
+  SAMPLES: "SAMPLES n {first last} -- n = FFT size, power of two 4..2048 (default 512). Optional first/last select a displayed bin range: first 0..n/2-2, last first+1..n/2-1."
+  DEPTH: "DEPTH n -- number of time-history lines, 1..2048 (the spectrogram's time depth)"
+  MAG: "MAG n -- magnitude multiplier 2^n, 0..11 (default 0)"
+  RANGE: "RANGE n -- full-scale magnitude, 1..$7FFFFFFF (default $7FFFFFFF)"
+  RATE: "RATE n -- samples per display update, 1..2048 (default SAMPLES/8)"
+  TRACE: "TRACE n -- 0..15 bitfield: bits 0-2 = scroll direction (0..7), bit 3 = scroll enable (default $F). This is the scroll-direction / static control."
+  DOTSIZE: "DOTSIZE x {y} -- cell size in pixels, each 1..16 (default 1,1)"
+  color_mode: "Color mode keyword -- RESTRICTED to LUMA8, LUMA8W, LUMA8X, HSV16, HSV16W, HSV16X only (default LUMA8X). The other display windows' LUT/RGB/HSV8 modes are REJECTED by SPECTRO."
+  LOGSCALE: "LOGSCALE -- log-magnitude intensity"
+  HIDEXY: "HIDEXY -- suppress the on-screen cursor readout (PC_MOUSE still reports)"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes) -- sub-samples packed per transmitted long/word/byte"
+
+display_directives:
+  note: "Accepted in SPECTRO_Update (streaming to the named window)."
+  numeric_data: "Sample longs (unpacked per the packing mode). An FFT line is drawn when the SAMPLES buffer fills and RATE cycles elapse."
+  CLEAR: "CLEAR -- clear the bitmap and reset sample/rate counters and trace position"
+  SAVE: "SAVE -- write the window bitmap to <name>.bmp"
+  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
+
+axes:
+  note: "Axis assignment is TRACE-dependent, NOT fixed."
+  default: "Default trace $F (bit 2 set): frequency on X, time on Y (vertical scroll)."
+  horizontal_traces: "Traces 0-3 swap width/height so time runs horizontally."
+
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "Cursor readout is x = pixel/DOTSIZE, y = pixel/DOTSIZEy (top-origin on screen). GOTCHA: the PC_MOUSE WIRE value is Y-inverted (bottom-origin) vs the on-screen readout. See language/spin2/debug-commands/pc_mouse.yaml"
 
 examples:
   - code: |
-      ' Speech pattern analysis
-      PUB voice_spectro() | audio[256], i
-        REPEAT
-          REPEAT i FROM 0 TO 255
-            audio[i] := read_microphone()
-            WAITUS(125)  ' 8kHz sample rate
-          DEBUG(`SPECTRO Voice_Pattern, audio`)
-    description: "Visualize speech patterns"
-    
+      ' Vertical-scroll spectrogram, 512-point FFT, LUMA8X intensity
+      DEBUG(`SPECTRO Voice SAMPLES 512 DEPTH 256 TRACE $F LUMA8X)
+      REPEAT
+        DEBUG(`Voice `(sample))
+    description: "Scrolling spectrogram with restricted LUMA8X color mode"
   - code: |
-      ' Motor noise signature
-      PUB motor_spectro() | vibration[512]
-        REPEAT
-          capture_vibration(@vibration, 512)
-          DEBUG(`SPECTRO Motor_Signature, vibration`)
-          WAITMS(100)
-    description: "Monitor motor frequency signature"
-    
-  - code: |
-      ' RF spectrum monitoring
-      PUB rf_spectro() | rf_samples[1024]
-        REPEAT
-          capture_rf(@rf_samples, 1024)
-          DEBUG(`SPECTRO RF_Activity, rf_samples`)
-    description: "Display RF spectrum activity"
+      ' Log-magnitude spectrogram with a wider cell
+      DEBUG(`SPECTRO RF SAMPLES 1024 LOGSCALE DOTSIZE 2 HSV16X)
+      REPEAT
+        DEBUG(`RF `(rf))
+    description: "Log-scale spectrogram, HSV16X color mode"
 
-display_modes:
-  scrolling:
-    description: "New data scrolls from right"
-    usage: "Real-time monitoring"
-    
-  static:
-    description: "Fixed time window"
-    usage: "Captured events"
-    
-  persistence:
-    description: "Accumulates multiple passes"
-    usage: "Intermittent signals"
+not_supported:
+  - "No named color maps (Heat/Cool/Rainbow/Grayscale/High-contrast) -- only the restricted LUMA8/LUMA8W/LUMA8X and HSV16/HSV16W/HSV16X intensity modes exist."
+  - "No persistence / accumulate mode."
+  - "No time-frequency cursors."
+  - "No frequency-tracking, harmonic-ID, event-detection, or pattern-recognition features (these are application narrative, not compiler features)."
+  - "SPECTRO rejects the LUT/RGB/HSV8 color modes the other windows accept."
 
-analysis_features:
-  - "Frequency tracking"
-  - "Harmonic identification"
-  - "Event detection"
-  - "Pattern recognition"
-  - "Time-frequency cursors"
-
-usage_notes:
-  - "Computationally intensive"
-  - "Good for non-stationary signals"
-  - "Shows frequency changes over time"
-  - "Buffer size affects resolution"
+notes:
+  - "Axes depend on TRACE (default $F = frequency X / time Y); they are not fixed."
+  - "Scroll direction and static-vs-scroll are set by the TRACE bitfield (bits 0-2 direction, bit 3 enable)."
+  - "DEPTH sets how many time-history lines are retained."
 
 related:
-  - "FFT display type"
-  - "SCOPE display type"
-  - "Audio processing"
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/fft.yaml
+  - language/spin2/debug-displays/scope.yaml
+  - language/spin2/debug-displays/bitmap.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml

@@ -221,6 +221,10 @@
     "constants": {
       "description": "Compile-time constants and configuration symbols",
       "files": ["debug-mask", "debug-end-session", "newtask", "thistask", "special-configuration-symbols"]
+    },
+    "debug_displays": {
+      "description": "DEBUG display-window types (the nine PNut DEBUG visualizers)",
+      "files": ["term", "scope", "scope_xy", "fft", "spectro", "plot", "bitmap", "logic", "midi"]
     }
   },
 

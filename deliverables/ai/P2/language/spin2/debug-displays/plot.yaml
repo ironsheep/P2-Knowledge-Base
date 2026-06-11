@@ -8,7 +8,20 @@ description: |
   capable of the nine DEBUG display windows.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.6) -- verified against DebugDisplayUnit.pas v55: PLOT_Configure 1864, PLOT_Update 1918-2155"
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.6) + REF/theory-of-operations/PLOT_Theory_of_Operations.md -- verified against DebugDisplayUnit.pas v55: PLOT_Configure 1864-1916, PLOT_Update 1918-2155, PLOT_GetXY 2157-2167, shared input handlers 585-851 / 3537-3583"
+
+aliases:
+  - plot
+  - PLOT
+  - DEBUG PLOT
+  - sprite
+  - spritedef
+  - layer
+  - crop
+  - canvas
+  - vector graphics
+  - polar plot
+  - cartesian
 
 syntax:
   create: "DEBUG(`PLOT MyPlot <config directives>)"
@@ -18,49 +31,49 @@ configuration_directives:
   note: "Accepted in PLOT_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title"
   POS: "POS left top -- screen position"
-  SIZE: "SIZE width height -- canvas size in pixels"
-  DOTSIZE: "DOTSIZE x {y} -- pixel scale; also the divisor for reported cursor coordinates"
+  SIZE: "SIZE width height -- canvas size in pixels, each 32..2048 (default 256x256)"
+  DOTSIZE: "DOTSIZE x {y} -- pixel scale, each axis 1..256 (default 1x1; y copies x if omitted); also the divisor applied to reported PC_MOUSE cursor coordinates"
   color_mode: "One of LUT1 LUT2 LUT4 LUT8 LUMA8/8W/8X HSV8/8W/8X RGBI8/8W/8X RGB8 HSV16/16W/16X RGB16 RGB24 -- how packed numeric data maps to pixels"
-  LUTCOLORS: "LUTCOLORS rgb24... -- palette for LUT color modes"
-  BACKCOLOR: "BACKCOLOR color -- background color"
-  UPDATE: "UPDATE -- enable buffered/manual-refresh mode (drawing accumulates, shown only on an explicit UPDATE directive)"
+  LUTCOLORS: "LUTCOLORS rgb24... -- palette for LUT color modes (256 longs)"
+  BACKCOLOR: "BACKCOLOR color -- background color (default Black)"
+  UPDATE: "UPDATE -- enable buffered/manual-refresh mode (drawing accumulates in Bitmap[0], shown only on an explicit UPDATE directive)"
   HIDEXY: "HIDEXY -- suppress the on-screen measurement-cursor readout (does NOT disable PC_MOUSE reporting)"
 
 display_directives:
   note: "Accepted in PLOT_Update. PLOT consumes essentially no bare numeric stream -- all geometry comes from these directives."
   color:
     color_mode: "Switch color mode mid-stream (LUT1..RGB24)"
-    LUTCOLORS: "Update the LUT palette"
+    LUTCOLORS: "Update the LUT palette (256 longs)"
     BACKCOLOR: "Set background color"
-    COLOR: "Named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble), or a color value"
-    OPACITY: "OPACITY n -- alpha for subsequent drawing"
-    PRECISE: "PRECISE -- enable sub-pixel precise coordinates"
-    LINESIZE: "LINESIZE n -- stroke width"
+    COLOR: "COLOR (value | named {brightness}) -- a color value OR a named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble). A COLOR issued immediately before a TEXT directive also sets the text color."
+    OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255)"
+    PRECISE: "PRECISE -- toggle sub-pixel coordinates (8.8 fixed-point, coords shifted <<8). Starts ON by default; each PRECISE toggles it."
+    LINESIZE: "LINESIZE n -- stroke width for subsequent strokes"
   geometry:
-    ORIGIN: "ORIGIN {x y} -- set drawing origin"
-    SET: "SET x y -- set the current pen position"
-    DOT: "DOT {size {opacity}} -- plot a dot at the current position"
-    LINE: "LINE x y {size {opacity}} -- line from current position to x,y"
-    CIRCLE: "CIRCLE ... -- circle"
-    OVAL: "OVAL ... -- ellipse"
-    BOX: "BOX ... -- filled/edged rectangle"
-    OBOX: "OBOX ... -- outlined rectangle"
-    POLAR: "POLAR -- interpret subsequent coordinates as polar"
-    CARTESIAN: "CARTESIAN -- interpret coordinates as Cartesian (with optional axis-flip flags)"
+    ORIGIN: "ORIGIN {x y} -- set drawing origin (no args = use current position)"
+    SET: "SET x y -- set the current pen position (polar-converted when POLAR is active)"
+    DOT: "DOT {linesize {opacity}} -- plot a dot at the current position (defaults to vLineSize / vOpacity); does NOT advance the current position"
+    LINE: "LINE x y {linesize {opacity}} -- line from current position to x,y; ADVANCES the current position to the destination"
+    CIRCLE: "CIRCLE width {linesize {opacity}} -- circle centered on the current position; linesize 0 = filled"
+    OVAL: "OVAL width height {linesize {opacity}} -- ellipse centered on the current position; linesize 0 = filled"
+    BOX: "BOX width height {linesize {opacity}} -- rectangle centered on the current position; linesize 0 = filled"
+    OBOX: "OBOX width height xradius yradius {linesize {opacity}} -- ROUNDED rectangle (corner radii xradius/yradius) centered on the current position; linesize 0 = filled"
+    POLAR: "POLAR {twopi {theta}} -- interpret subsequent coordinates as polar (rho, theta). twopi sets the units-per-revolution (default $100000000); theta sets the angular offset (default 0). twopi -1/0 select clockwise/counter-clockwise sense."
+    CARTESIAN: "CARTESIAN {flipy {flipx}} -- interpret coordinates as Cartesian; optional flipy/flipx (0 or 1) set the vDirY/vDirX axis-flip flags"
   text:
-    TEXT: "TEXT 'string' -- draw text at the current position"
-    TEXTSIZE: "TEXTSIZE n"
-    TEXTSTYLE: "TEXTSTYLE n"
-    TEXTANGLE: "TEXTANGLE n"
+    TEXT: "TEXT {size {style {angle}}} 'string' -- draw text at the current position; the optional inline size/style/angle override the current TEXTSIZE/TEXTSTYLE/TEXTANGLE for this string"
+    TEXTSIZE: "TEXTSIZE n -- label font point size (clamped 6..200)"
+    TEXTSTYLE: "TEXTSTYLE n -- style byte 0..255: weight bits0-1, italic bit2, underline bit3, horizontal-align bits4-5, vertical-align bits6-7"
+    TEXTANGLE: "TEXTANGLE n -- text rotation (degrees 0..359 in Cartesian, or 0..twopi in polar)"
   bitmap_layers:
-    LAYER: "LAYER n 'file.bmp' -- load a BMP into layer buffer n"
-    CROP: "CROP layer (AUTO x y | left top width height {x y}) -- copy a region of a layer to the canvas"
-    SPRITEDEF: "SPRITEDEF ... -- define a sprite"
-    SPRITE: "SPRITE ... -- draw a defined sprite"
+    LAYER: "LAYER n 'file.bmp' -- load a BMP into layer buffer n (n 1..8; the .bmp file must exist)"
+    CROP: "CROP layer (AUTO x y | left top width height {x y}) -- copy a region of a layer to the canvas (no args = full layer at 0,0)"
+    SPRITEDEF: "SPRITEDEF id xsize ysize pixels... colors... -- define a sprite: id 0..255; xsize,ysize 1..32 each; then xsize*ysize palette-index bytes (0..255); then 256 RGBA color longs"
+    SPRITE: "SPRITE id {orientation {scale {opacity}}} -- render a defined sprite at the current position: id 0..255; orientation 0..7 (default 0); scale 1..64 (default 1); opacity 0..255 (default current vOpacity)"
   window:
-    CLEAR: "CLEAR -- clear the canvas"
-    UPDATE: "UPDATE -- copy the accumulated buffer to screen (when in UPDATE mode)"
-    SAVE: "SAVE ... -- write the window bitmap to <name>.bmp (or a desktop region)"
+    CLEAR: "CLEAR -- clear the canvas to the background color"
+    UPDATE: "UPDATE -- copy the accumulated buffer (Bitmap[0]) to screen (when in UPDATE mode)"
+    SAVE: "SAVE 'name' -- write the canvas to <name>.bmp; SAVE l t w h 'name' writes a desktop region; SAVE WINDOW 'name' writes the window region"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."
@@ -73,8 +86,21 @@ examples:
       ' Create a 256x256 plot canvas, then draw into it by name
       DEBUG(`PLOT MyPlot SIZE 256 256)
       DEBUG(`MyPlot SET 10 10 LINE 200 200)      ' line from (10,10) to (200,200)
-      DEBUG(`MyPlot COLOR RED CIRCLE 128 128 40)  ' red circle
+      DEBUG(`MyPlot COLOR RED CIRCLE 80)          ' red circle, dia 80, at last position
     description: "Create a canvas and draw a line and a circle"
+  - code: |
+      ' Geometry shapes: filled box, rounded box, outlined oval
+      DEBUG(`PLOT Shapes SIZE 256 256)
+      DEBUG(`Shapes SET 64 64 COLOR BLUE BOX 60 40 0)      ' linesize 0 = filled
+      DEBUG(`Shapes SET 160 64 COLOR GREEN OBOX 60 40 8 8 2) ' rounded rect, 8px corners
+      DEBUG(`Shapes SET 110 180 COLOR RED OVAL 80 50 3)     ' outlined ellipse
+    description: "Filled BOX, rounded OBOX, and outlined OVAL"
+  - code: |
+      ' Define and render a 2x2 sprite (full SPRITEDEF supplies 256 color longs)
+      DEBUG(`PLOT Spr SIZE 128 128)
+      DEBUG(`Spr SPRITEDEF 0 2 2  0 1 1 0  $00000000 $FFFF0000)
+      DEBUG(`Spr SET 64 64 SPRITE 0 0 8)          ' id 0, orientation 0, scale 8x
+    description: "Define a sprite (SPRITEDEF) and render it scaled (SPRITE)"
   - code: |
       ' Layered bitmap + sprite-sheet animation (LAYER/CROP are real PLOT directives)
       DEBUG(`PLOT Game SIZE 320 240)
@@ -90,13 +116,23 @@ examples:
       DEBUG(`Buf UPDATE)                              ' now copy buffer to screen
     description: "Buffered drawing with explicit UPDATE"
 
+not_supported:
+  - "No chart/series API -- no line/scatter/bar charts, no auto-scaling, no axes/legend, no zoom/pan (PLOT is a drawing canvas, not a charting widget)."
+  - "No statistical overlays and no automatic measurements."
+  - "No data-export -- there is no built-in 'export data' path (only SAVE of the bitmap image)."
+
 notes:
   - "PLOT is the only DEBUG window whose update phase is a full vector/raster drawing command set."
-  - "There is NO chart/series API, auto-scaling, statistical overlay, legend, zoom/pan, or data-export -- those were never part of PLOT."
   - "UPDATE in the config turns the window into buffered mode; drawing accumulates in Bitmap[0] and is copied to screen only on an explicit UPDATE directive."
   - "Named colors other than BLACK/WHITE accept an optional 0-15 brightness nibble."
+  - "PRECISE controls 8.8 fixed-point sub-pixel coordinates (coords shifted <<8); it is a toggle and starts ON."
+  - "OBOX is a ROUNDED rectangle (xradius/yradius corners), not merely an outlined one; for all shapes linesize 0 draws filled."
+  - "LAYER/CROP/SPRITEDEF/SPRITE share PLOT's single PLOT_Update dispatch and current-position/opacity state -- they are not a separable subsystem and are documented here, not in a separate file."
 
 related:
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
   - language/spin2/debug-displays/bitmap.yaml
+  - language/spin2/debug-displays/scope.yaml
   - language/spin2/debug-commands/pc_key.yaml
   - language/spin2/debug-commands/pc_mouse.yaml

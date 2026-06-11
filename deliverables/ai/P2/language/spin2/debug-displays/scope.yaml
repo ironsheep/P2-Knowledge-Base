@@ -1,166 +1,107 @@
 display_type: SCOPE
 category: DEBUG Display Types
 description: |
-  Oscilloscope display for visualizing analog signals and waveforms.
-  Provides multi-channel real-time signal visualization with triggering,
-  scaling, and measurement capabilities similar to a digital oscilloscope.
-documentation_source: Spin2 v51
+  SCOPE is the P2 DEBUG analog-waveform (oscilloscope) window. It plots up to 8
+  channels of a streamed sample series against time (Y vs sample index), with a
+  level-based arm/fire trigger and holdoff. It is a time-domain plotter only: there
+  is NO automatic measurement (no Vpp/RMS/frequency/period/duty/rise-fall), NO
+  cursors, NO XY/phase mode (that is the separate SCOPE_XY window), and NO FFT
+  overlay (FFT is its own window).
+documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
+source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.2) -- verified against DebugDisplayUnit.pas v55: SCOPE_Configure 1151-1207, SCOPE_Update 1209-1337, channel def 1217-1231, TRIGGER 1236-1249, SCOPE_Draw 1339-1364, SCOPE_Range 1366-1379; PC_MOUSE raw-pixel note SendMousePos 3537-3577"
 
-syntax: "DEBUG(`SCOPE title, channel1, channel2, ...`)"
+aliases:
+  - oscilloscope
+  - waveform
+  - analog display
+  - DEBUG SCOPE
+  - SCOPE
 
-capabilities:
-  - "Multi-channel display (up to 8 channels)"
-  - "Auto-scaling or manual scaling"
-  - "Trigger modes (auto, normal, single)"
-  - "Time base adjustment"
-  - "Vertical scaling per channel"
-  - "Channel colors and labels"
-  - "Cursors for measurements"
-  - "XY mode for phase plots"
+syntax:
+  create: "DEBUG(`SCOPE MyScope <config directives> <channel-def strings>)"
+  update: "DEBUG(`MyScope <sample longs / directives>)   ' reference the window by name"
 
-channel_configuration:
-  max_channels: 8
-  data_types:
-    - "Signed/unsigned integers"
-    - "Floating point values"
-    - "Scaled ADC readings"
-  sample_rates:
-    - "Automatic based on DEBUG call frequency"
-    - "Configurable buffer depth"
+configuration_directives:
+  note: "Accepted in SCOPE_Configure (window creation)."
+  TITLE: "TITLE 'string' -- window title (default 'Scope')"
+  POS: "POS left top -- window screen offset"
+  SIZE: "SIZE width height -- pixels, each 32..2048 (default 256x256)"
+  SAMPLES: "SAMPLES n -- horizontal resolution, 16..2048 (default 256)"
+  RATE: "RATE n -- draw-rate divisor, 1..2048 (default 1)"
+  DOTSIZE: "DOTSIZE n -- sample dot diameter, 0..32 (default 0 = no dots)"
+  LINESIZE: "LINESIZE n -- trace line thickness, 0..32 (default 3 = lines). If both DOTSIZE and LINESIZE are 0, DOTSIZE is forced to 1."
+  TEXTSIZE: "TEXTSIZE n -- label font point size, 6..200 (default 10)"
+  COLOR: "COLOR back grid -- window background and grid colors (named or RGB24; default black, $404040). NOT per-channel color (that is set per channel-def)."
+  HIDEXY: "HIDEXY -- suppress the on-screen XY readout (PC_MOUSE still reports)"
+  packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes; default LONGS_1BIT) -- how many sub-samples are packed per transmitted long/word/byte"
 
-display_modes:
-  YT_mode:
-    description: "Standard time-based display"
-    usage: "Voltage/value vs time"
-    
-  XY_mode:
-    description: "Phase/Lissajous display"
-    usage: "Channel 1 vs Channel 2"
-    
-  FFT_overlay:
-    description: "Frequency spectrum overlay"
-    usage: "Shows frequency components"
+channel_definition:
+  note: "Up to 8 channels, each defined by a quoted string in SCOPE_Update before streaming."
+  grammar: "'label' (AUTO | lo hi) {tall} {base} {grid} {color}"
+  fields:
+    label: "channel name string"
+    range: "AUTO (auto-range) OR explicit lo hi int32 (default -$80000000 / $7FFFFFFF)"
+    tall: "channel height in pixels (default = window height)"
+    base: "vertical baseline offset (default 0)"
+    grid: "4-bit mask: baseline / top / min-label / max-label (default 0)"
+    color: "trace color (default DefaultScopeColors[channel])"
+
+display_directives:
+  note: "Accepted in SCOPE_Update (streaming to the named window)."
+  numeric_data: "Sample longs -- the analog sample stream plotted as waveforms."
+  TRIGGER: "TRIGGER channel (AUTO | arm fire) {offset} -- level-based trigger. channel -1..7 (-1 = free-run); AUTO auto-computes levels, or arm/fire are explicit level thresholds; offset 0..SAMPLES-1 (default SAMPLES/2). This is a level arm/fire trigger only -- not edge/window/external modes."
+  HOLDOFF: "HOLDOFF n -- minimum samples between triggers, 2..2048 (default SAMPLES)"
+  CLEAR: "CLEAR -- clear the bitmap and reset sample/rate counters"
+  SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
+  PC_KEY: "PC_KEY -- transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
+  PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
+
+input:
+  model: "Shared form-level input model (identical across all nine DEBUG display windows)."
+  PC_KEY: "Universal -- see language/spin2/debug-commands/pc_key.yaml"
+  PC_MOUSE: "PC_MOUSE transmits RAW client-pixel x,y (SCOPE has no scaled branch); the on-screen readout is plot-origin/Y-inverted but the wire value is raw pixels. See language/spin2/debug-commands/pc_mouse.yaml"
 
 examples:
   - code: |
-      ' Single channel ADC display
-      PUB monitor_adc() | value
-        REPEAT
-          value := read_adc(0)
-          DEBUG(`SCOPE ADC_Input, value`)
-          WAITMS(1)
-    description: "Monitor ADC input"
-    
+      ' Single auto-ranged channel, streamed by window name
+      DEBUG(`SCOPE MyScope SIZE 400 200 SAMPLES 256 'Signal' AUTO)
+      REPEAT
+        DEBUG(`MyScope `(value))
+    description: "Single auto-ranging analog channel"
   - code: |
-      ' Dual channel comparison
-      PUB compare_signals() | raw, filtered
-        REPEAT
-          raw := get_sensor()
-          filtered := apply_filter(raw)
-          DEBUG(`SCOPE Filter_Test, raw, filtered`)
-          WAITUS(100)
-    description: "Compare raw and filtered signals"
-    
+      ' Two channels with explicit vertical ranges
+      DEBUG(`SCOPE Cmp SAMPLES 256 'Raw' -2000 2000 'Filtered' -2000 2000)
+      REPEAT
+        DEBUG(`Cmp `(raw) `(filt))
+    description: "Dual channel with fixed ranges"
   - code: |
-      ' Multi-channel sensor array
-      PUB scan_sensors() | i, values[8]
-        REPEAT
-          REPEAT i FROM 0 TO 7
-            values[i] := read_sensor(i)
-          DEBUG(`SCOPE Sensors, values[0], values[1], values[2], values[3]`)
-          WAITMS(10)
-    description: "Display multiple sensor channels"
-    
-  - code: |
-      ' PWM duty cycle visualization
-      PUB pwm_test() | duty
-        REPEAT duty FROM 0 TO 100
-          set_pwm(duty)
-          DEBUG(`SCOPE PWM_Duty, duty`)
-          WAITMS(10)
-    description: "Visualize PWM sweep"
-    
-  - code: |
-      ' Sine wave generation
-      PUB sine_wave() | angle, value
-        REPEAT angle FROM 0 TO 359
-          value := SIN(angle, 1000)
-          DEBUG(`SCOPE Sine_Wave, value`)
-          WAITUS(100)
-    description: "Display generated sine wave"
-    
-  - code: |
-      ' XY mode for phase display
-      PUB phase_plot() | x, y, angle
-        REPEAT angle FROM 0 TO 359
-          x := COS(angle, 100)
-          y := SIN(angle, 100)
-          DEBUG(`SCOPE Phase_XY, x, y`)
-          WAITUS(100)
-    description: "Create Lissajous pattern"
+      ' Level trigger on channel 0 with holdoff
+      DEBUG(`SCOPE Trg SAMPLES 256 'Ch0' -1000 1000)
+      DEBUG(`Trg TRIGGER 0 AUTO HOLDOFF 128)
+      REPEAT
+        DEBUG(`Trg `(adc))
+    description: "Auto level trigger with holdoff"
 
-trigger_options:
-  modes:
-    - "Auto - Continuous update"
-    - "Normal - Wait for trigger condition"
-    - "Single - One-shot capture"
-  conditions:
-    - "Rising edge"
-    - "Falling edge"
-    - "Level crossing"
-    - "Window trigger"
-  sources:
-    - "Any displayed channel"
-    - "External trigger input"
+not_supported:
+  - "No automatic measurements -- no peak-to-peak, RMS, frequency, period, duty cycle, or rise/fall time (these do not exist in the P2 SCOPE)."
+  - "No measurement cursors (time/voltage/delta)."
+  - "No XY / Lissajous / phase mode -- XY plotting is the SEPARATE SCOPE_XY window (display_type SCOPE_XY)."
+  - "No FFT overlay -- frequency display is the separate FFT window."
+  - "No Auto/Normal/Single trigger modes -- the only trigger is the level arm/fire (plus free-run via channel -1)."
+  - "No window-trigger and no external trigger input -- the trigger source is a displayed channel 0..7 only."
+  - "No GUI controls (play/pause, time-base selector, export-data, cursor controls) -- control is via the directives above."
 
-measurement_tools:
-  cursors:
-    - "Time cursors for period/frequency"
-    - "Voltage cursors for amplitude"
-    - "Delta measurements"
-  automatic:
-    - "Peak-to-peak voltage"
-    - "RMS value"
-    - "Frequency"
-    - "Period"
-    - "Duty cycle"
-    - "Rise/fall time"
-
-window_controls:
-  - "Play/Pause button"
-  - "Time base selector"
-  - "Vertical scale per channel"
-  - "Channel enable/disable"
-  - "Trigger settings"
-  - "Grid on/off"
-  - "Cursor controls"
-  - "Export data option"
-
-usage_notes:
-  - "Updates in real-time as DEBUG statements execute"
-  - "Buffer stores recent samples for review"
-  - "Can pause to examine waveforms"
-  - "Channel colors automatically assigned"
-  - "Scaling can be automatic or manual"
-  - "Good for analog signal analysis"
-
-best_practices:
-  - "Use consistent sample rates"
-  - "Scale signals appropriately"
-  - "Label channels clearly"
-  - "Set appropriate time base"
-  - "Use triggering for stable display"
-  - "Limit channels for clarity"
-
-performance:
-  - "Higher sample rates need faster DEBUG calls"
-  - "Multiple channels impact update rate"
-  - "Buffer depth affects memory usage"
-  - "Pause display to reduce CPU load"
+notes:
+  - "SCOPE is always time-domain (Y vs sample index); there is no mode selector."
+  - "Channel color is set per channel-def, not by the COLOR directive (which sets window back + grid)."
+  - "Samples are packed int32 per the packing mode; there is no float sample type."
 
 related:
-  - "DEBUG statement"
-  - "ADC operations"
-  - "Signal processing"
-  - "PLOT display type"
+  - language/spin2/statements/debug.yaml
+  - language/spin2/debug-commands/debug.yaml
+  - language/spin2/debug-displays/fft.yaml
+  - language/spin2/debug-displays/logic.yaml
+  - language/spin2/debug-displays/plot.yaml
+  - language/spin2/debug-commands/pc_key.yaml
+  - language/spin2/debug-commands/pc_mouse.yaml
