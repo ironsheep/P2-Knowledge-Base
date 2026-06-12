@@ -107,6 +107,18 @@ ingestion, and the delta is the organizing principle.
   YAML-correction sprint that leans on the *old* edition's text — re-anchoring
   open findings to the new edition may confirm, refine, or overturn them.
 
+## 0.6 Obsolescence handling — the prior information  _‹NEW — under certification on the Titus rev5 run›_
+
+Every supersession **obsoletes prior information** — and the prior info is handled deliberately, **never silently dropped**. Three flavors (see `DOCUMENT-LINEAGE`): **augment** (newer edition, content grew) · **re-extraction** (prior capture was lossy) · **superseded-by-deliverable** (prior fed our manual). For each, **two kinds** of prior information must be handled:
+
+1. **Prior source artifacts** (the old extraction files / folder):
+   - **Augment** → *keep* the prior edition's folder as lineage (diff/history) — not obsolete, just no longer the authority.
+   - **Re-extraction** → the prior extraction is *obsolete* (a flawed capture). **Archive it, do not delete** — move to a gitignored `archive/` with a one-line pointer to the new extraction (git history is the record). Only **after** the new extraction is validated.
+   - **Superseded-by-deliverable** → the source stays as input.
+2. **Downstream derivations** (YAML entries, manual content, central-analysis matrices built from the prior info): **re-anchor and re-validate against the NEW authoritative extraction** (pass 6). Anything derived from an *obsolete/lossy* extraction is **suspect until re-checked** — a fragmented / whitespace-damaged code example may have produced wrong downstream content. Conflicts touching published YAML → corrections register; manual content → flag for the manual head. Record the supersession + what re-anchored in `DOCUMENT-LINEAGE`. **No dangling references** to archived artifacts (Sacred Rule #7 — redirect to the new).
+
+**This run's case (Titus re-extraction):** prior artifacts = the PDF-scraped Titus extraction in `engineering/ingestion/smart-pins-catalog/` (21 recovered examples, `john-titus-extract.md` per mode, the recovery scripts, `TITUS-CODE-RECOVERY.md`). After the new DOCX extraction validates: archive those with a pointer to the new; then **re-validate any Titus-derived YAML / Smart Pins manual content against the new authoritative extraction** (this dovetails with the Smart Pins manual certification audit) — route conflicts to the corrections register; record in `DOCUMENT-LINEAGE`.
+
 ## 1. The passes a complete document needs
 
 A "complete" ingestion is not one extraction — it is **seven passes**. All of
