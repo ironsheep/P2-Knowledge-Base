@@ -7,9 +7,9 @@
 > live until go-live. Registry grounded in `sources/` on disk (36 folders). _Prototype 2026-06-11._
 
 ## Tier 1 — At a glance
-- **Sources:** 36 on disk · 33 P2 · 3 P1  ‹ground truth, not the stale 24›
-- **By authority:** 🏆 21 · 🟢 7 · 🟡 6 · — 1 untiered (pasm2-manual-development)  ‹35 logical rows; v51a is lineage, not a row›
-- **Ingest completeness:** mature ~17 (≥90% + audit) · partial ~8 (40–89%) · minimal/not-started ~10 (incl. hyperRam un-ingested, Titus rev5 staged, 2 meta-folders)  ‹scanned 2026-06-12›
+- **Sources:** 36 folders on disk → **32 logical sources** · 29 P2 · 3 P1  ‹v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
+- **By authority:** 🏆 21 · 🟢 7 · 🟡 4  ‹32 logical sources; v51a lineage + 3 non-source folders excluded›
+- **Ingest completeness:** mature ~17 (≥90% + audit) · partial ~8 (40–89%) · minimal/not-started ~7 (incl. hyperRam un-ingested, Titus rev5 staged)  ‹scanned 2026-06-12›
 - **Open questions:** _(n)_ in the gap ledger · _(m)_ routed to an expert  ‹rolled up from KNOWLEDGE-GAPS›
 - **Latest ingested:** Spin2 Language Reference @ **v55** (matched-compiler; augmentative over v51a) ‹LIN›
 - **What's next:** re-ingest **Smart Pins (Titus) rev 5** (replaces lossy extraction) — cross-checks the *I/O & Smart Pins User Guide*
@@ -25,11 +25,10 @@ Cells: ✅ done · ◐ partial · ⏳ pending · — n/a · ? verify  |  Passes 
 |--------|------|---|---|---|---|---|-------|
 | silicon-doc | 🏆 | ✅ | ✅ | ✅ | ✅ | ✅ | 75% _(stated; arch 100%, some sections 90%)_ |
 | **Spin2 Language Reference** @ v55 ‹prior v51a — lineage, augmentative› | 🏆 | ✅ | ✅ | ✅ | ✅ | ⏳ | 100% _(delta v52→v55; X pending. v51a lineage fully extracted)_ |
-| p2-instructions-csv | 🏆 | ✅ | — | — | ◐ | ⏳ | 100% _(audit named pasm2-spreadsheet-audit.md — non-canonical ⚠)_ |
+| p2-instructions-csv | 🏆 | ✅ | — | — | ✅ | ⏳ | 100% _(audit: pasm2-spreadsheet-audit.md — aliased)_ |
 | chip-gracey-clarifications | 🏆 | ✅ | — | — | ⏳ | ⏳ | ? _(structured text; no audit / cross-source doc)_ |
 | p2-qa-spreadsheet | 🟢 | ✅ | — | — | ✅ | ⏳ | ~80% _(991 rows; audit present; no cross-source)_ |
 | **PASM2 Manual** (Parallax, preliminary) | 🏆 | ✅ | ◐ | ◐ | ✅ | ✅ | 64% _(stated; code embedded in docx md, not a validated catalog; **superseded** as the PASM2 reference by our Assembly manual)_ |
-| pasm2-manual-development | — | ◐ | — | — | ⏳ | ⏳ | ~10% _(dev scaffold — **collapse** into PASM2 Manual / our workspace; not a separate source)_ |
 
 ### P2 · Smart Pins
 | smart-pins | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | 97% _(stated; 174 examples, 21 mode images)_ |
@@ -39,8 +38,8 @@ Cells: ✅ done · ◐ partial · ⏳ pending · — n/a · ? verify  |  Passes 
 _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins. Add-on boards ride one header or a header pair._
 
 **Datasheets & specs (PDF)**  ‹AUTH "Core Technical" → re-filed as hardware›
-| p2-datasheet | 🏆 | ✅ | — | ✅ | ◐ | ✅ | 94% _(stated; audit named datasheet-audit-report.md — non-canonical ⚠)_ |
-| p2-spec-sheet | 🏆 | ✅ | — | ⏳ | ◐ | ⏳ | 99% _(stated; no images/cross-source; audit non-canonical ⚠)_ |
+| p2-datasheet | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 94% _(stated; audit: datasheet-audit-report.md — aliased)_ |
+| p2-spec-sheet | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 99% _(stated; audit: spec-sheet-audit-report.md — aliased; no images/cross-source)_ |
 
 **Development boards (12-pin header system)**  ‹AUTH "Hardware Boards"›
 | p2-eval-board ‹Rev C — retired / left behind› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(stated)_ |
@@ -65,7 +64,7 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 | flash-loader | 🟢 | ✅ | ✅ | — | ⏳ | ⏳ | ~50% _(.spin2 source; no audit / cross-source)_ |
 
 ### P2 · Compiler & tooling  ‹proposed bucket — veto anytime›
-| pnut-ts-pasm-ref | 🏆 | ✅ | ✅ | — | ◐ | ⏳ | 95% _(stated; 359-instr JSON DB; audit in audit/ subfolder, no root file ⚠)_ |
+| pnut-ts-pasm-ref | 🏆 | ✅ | ✅ | — | ◐ | ⏳ | 95% _(stated; 359-instr JSON DB; audit material in audit/ subfolder — needs a consolidated rollup doc, 5B)_ |
 | iron-sheep-compiler | 🟢 | ◐ | — | — | ⏳ | ⏳ | ~15% _(single condition-codes doc only)_ |
 
 ### P2 · Community code & tutorials  ‹proposed›
@@ -74,14 +73,19 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 
 ### P2 · Other reference  ‹proposed›
 | p2docs-github-io | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~30% _(narrative + validation report only)_ |
-| marketing-materials | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~25% _(**meta-folder** — summary only; a source?)_ |
-| code-analysis | 🟡 | ◐ | ◐ | — | ⏳ | ⏳ | ~30% _(**meta-folder** — derived analysis, not raw extraction; reclassify)_ |
 
 ### P1 · (queued — bring the P1 database up to P2-level richness)  ‹DASH "P1 Sources"›
 _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manual, possibly deSilva P1 tutorial); some already partially ingested (text+audit) → queue completes images/code + enriches._
 | p1-propeller-manual-v1.2 | 🏆 | ✅ | ⏳ | ⏳ | ✅ | ⏳ | ~60% _(803KB text + audit; code inline; no images)_ |
 | p1-datasheet-v1.4 | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 100% _(stated; no images extracted)_ |
 | desilva-p1-tutorial | 🟢 | ✅ | ◐ | ⏳ | ⏳ | ⏳ | ~45% _(text + voice-analysis; code inline; no audit)_ |
+
+## Not standalone sources  ‹folders under sources/ that are NOT registry rows›
+| Folder | Why | Disposition |
+|--------|-----|-------------|
+| code-analysis | derived analysis docs (BLDC / debugger / flash-loader) — not raw extraction | reclassify as derived-analysis; archive/relocate out of `sources/` at cleanup |
+| marketing-materials | 2.9 KB summary, not a source document | reclassify; low value |
+| pasm2-manual-development | dev scaffold for the PASM2 Manual | **collapse** into the PASM2 Manual / workspace; archive |
 
 ## Tier 2b — Domain coverage (by-topic lens)  ‹un-parked per perspectives-study #10›
 > Orthogonal to the per-source registry: how well is each *knowledge domain* covered, across all sources combined? Cells fill at the research pass.
@@ -116,4 +120,4 @@ _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manua
 - **Completeness% method** — two old guesses exist (DASH 75% vs MATRIX 85%, and per-source disagree). Re-derive from passes-done at verification; bracketed for now per your note.
 
 ---
-_Per-source cells **scanned 2026-06-12** (read-only fan-out over all 36 folders). **Normalization findings (for go-live / verification fill):** (1) ⚠ **audit-filename drift** — `p2-instructions-csv`, `p2-datasheet`, `p2-spec-sheet` carry audits under non-canonical names and `pnut-ts-pasm-ref` keeps its audit in an `audit/` subfolder; either rename to `<src>-complete-extraction-audit.md` or teach the scan the aliases. (2) **Reclassify** `code-analysis` + `marketing-materials` (meta-folders, not raw sources) and **collapse** `pasm2-manual-development` into the PASM2 Manual / workspace. (3) **Image debt** is the most common gap (most hardware rows + the P1 docs have no images extracted). (4) **Zero/un-ingested:** `hyperRam-n-hyperFlash` (raw CAD only); `smart-pins-titus` staged (= next ingestion). **Cross-source (X)** is absent on ~20 sources — the bulk of the verification fill. `INGESTION-DASHBOARD.md` + `INGESTION-AUDIT-MATRIX.md` remain live until go-live._
+_Per-source cells **scanned 2026-06-12** (read-only fan-out over all 36 folders). **Normalization findings (for go-live / verification fill):** (1) ✅ **audit-filename drift — RESOLVED (aliased):** actual audit filenames recorded in the rows; canonical `<src>-complete-extraction-audit.md` applies to new ingestions. `pnut-ts-pasm-ref` still needs a *consolidated* rollup audit (5B). (2) ✅ **Non-sources demoted:** `code-analysis` + `marketing-materials` (meta) and `pasm2-manual-development` (dev scaffold) moved out of the registry → see 'Not standalone sources'. Physical archive/relocate deferred to cleanup. (3) **Image debt** is the most common gap (most hardware rows + the P1 docs have no images extracted). (4) **Zero/un-ingested:** `hyperRam-n-hyperFlash` (raw CAD only); `smart-pins-titus` staged (= next ingestion). **Cross-source (X)** is absent on ~20 sources — the bulk of the verification fill. `INGESTION-DASHBOARD.md` + `INGESTION-AUDIT-MATRIX.md` remain live until go-live._
