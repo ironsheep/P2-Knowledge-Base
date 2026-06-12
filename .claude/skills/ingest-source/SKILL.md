@@ -35,12 +35,27 @@ that pass. The standing docs:
 | `methodology/image-extraction-methodology.md` | image pass |
 | `methodology/ingestion-pipeline/ingestion-audit-protocol.md` | completeness verification |
 | `INGESTION-UPDATE-WORKFLOW.md` | propagating an update to central-analysis docs |
-| `AUTHORITATIVE-SOURCES.md` + `README.md` | trust catalog + the registry (dashboard) |
+| `README.md` | the **ingestion dashboard** — source registry + completeness/gates (the head's status home) |
+| `AUTHORITATIVE-SOURCES.md` | trust catalog — per-source tier (the dashboard's Auth column reads from here) |
+| `DOCUMENT-LINEAGE.md` | editions/supersession + source→output + derived cross-source facts |
+| `KNOWLEDGE-GAPS.md` | the moving **gap ledger** + **questions-for-experts** (pass-6 output home) |
 
 > **This skill is written to current tooling and SUPERSEDES two legacy
 > constraints those docs still carry** (see §8). When this skill and a legacy
 > doc disagree on tooling, this skill wins — and you update the legacy doc in
 > the same pass (process fixes ship with the work that revealed them).
+
+## Dashboards & registers — when to update each, and why
+
+The ingestion head owns a **quad** of standing docs (+ one shared register). Update each at the pass shown — this is load-bearing: `whats-next` and the YAML head read these.
+
+| Doc | Update WHEN | WHY |
+|-----|-------------|-----|
+| `README.md` (the dashboard) | **pass 0** (add row at 0%, gates open) → **pass 7** (completeness % + gate status + the C·K·I·A·X cells) | the head's status home; `whats-next` resumes from it |
+| `AUTHORITATIVE-SOURCES.md` | **pass 0 / 7** — assign the source's trust tier (new edition → re-confirm); add aliases / part-numbers for hardware | the dashboard's **Auth** column reads tiers from here; trust propagates to everything derived |
+| `DOCUMENT-LINEAGE.md` | **pass 7** — record supersession (new edition), source→output (when a manual / KB area is fed), and any derived cross-source facts | the lineage half of the sacred trust chain |
+| `KNOWLEDGE-GAPS.md` | **pass 6** — move the gap ledger (answered / new / still-unknown), route expert-only questions, and **harvest reviewer notes** | the moving "what we still don't know"; the dashboard's open-questions rollup reads from here |
+| `P2KB-CORRECTION-FINDINGS.md` (shared register) | **pass 6** — any conflict touching *published* `deliverables/ai/P2/` YAML | hands the defect to the YAML head; this skill never edits YAML itself |
 
 ## 0. Head integration — register the element first
 
@@ -102,8 +117,8 @@ them are required for a new document.
 | 3 | **Images / visual catalog** — extract → quality-check → catalog → consumer registry | `assets/images-<src>-<date>/` + `image-catalog.md` + `INGESTION-IMAGE-EXTRACTION-MATRIX.md` row | **DOCX media** + **`image-tools-mcp`** (PyMuPDF fallback) |
 | 4 | **Post-processing** — relationship matrices, specialized extractions (timing tables, narratives), pattern library | central-analysis matrices | analysis |
 | 5 | **Validation** — section-by-section completeness | `<src>-extraction-audit.md` validation results | `ingestion-audit-protocol.md` 5-pass |
-| 6 | **Cross-source Q&A + conflict audit** — answer prior questions, raise new, **flag conflicts**, score trust | Q&A audit section; **conflicts → `P2KB-CORRECTION-FINDINGS.md`** | corroboration matrix (§4) |
-| 7 | **Registration + update propagation** | `<src>-complete-extraction-audit.md`; `README.md` (dashboard) updated; lineage | `INGESTION-UPDATE-WORKFLOW.md` |
+| 6 | **Cross-source Q&A + conflict audit** — answer prior questions, raise new, harvest reviewer notes, **flag conflicts**, score trust | Q&A audit; **gap ledger + questions-for-experts → `KNOWLEDGE-GAPS.md`**; **conflicts → `P2KB-CORRECTION-FINDINGS.md`** | corroboration matrix (§4) |
+| 7 | **Registration + update propagation** | `<src>-complete-extraction-audit.md`; **`README.md` (dashboard) + `AUTHORITATIVE-SOURCES.md` (tier) + `DOCUMENT-LINEAGE.md`** updated | `INGESTION-UPDATE-WORKFLOW.md` |
 
 ## 2. Format strategy — validator-driven, not dogmatic
 
@@ -216,11 +231,12 @@ Per `source-ingestion-methodology.md` §Cross-Source Q&A, for the new source.
 NOT ship pass 6 having only flagged conflicts.** The corpus accumulates: each
 source *answers* prior holes AND *opens* new ones, so a source that surfaces
 zero answered/new questions is the exception to justify, not the default.
-1. **Answer prior open questions** — review the master gaps doc + prior audits; mark what this source answers (with page/section ref + confidence).
-2. **Raise new questions** this source surfaces.
-3. **Flag conflicts** — `Source A says … / Source B says … / Resolution (which is authoritative and why)`. **A conflict that touches published P2KB YAML is a corrections-register entry** — append it to `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (`NEEDS-VERIFICATION`) for the YAML head to work via `yaml-knowledge-base-maintenance`. This skill does **not** edit `deliverables/ai/P2/` itself.
-4. **Fill-in / ask:** where a fact is unresolved across all eligible sources, ask the user rather than guess — this repo has no AskUserQuestion tool, so ask in plain chat.
-5. **Update trust scoring** (HIGH multi-source-confirmed / MEDIUM single-source / LOW conflict-or-gap).
+1. **Answer prior open questions** — review `KNOWLEDGE-GAPS.md` (the gap ledger) + prior audits; mark what this source answers by moving its ledger row **OPEN→ANSWERED** (page/section ref + the edition that filled it).
+2. **Raise new questions** this source surfaces → add to `KNOWLEDGE-GAPS.md` (Part A gap ledger, status OPEN).
+3. **Harvest embedded reviewer notes as credible feedback** — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). _(e.g. Smart Pins (Titus) rev 5 carries 27 reviewer comments.)_
+4. **Flag conflicts** — `Source A says … / Source B says … / Resolution (which is authoritative and why)`. **A conflict that touches published P2KB YAML is a corrections-register entry** — append it to `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (`NEEDS-VERIFICATION`) for the YAML head to work via `yaml-knowledge-base-maintenance`. This skill does **not** edit `deliverables/ai/P2/` itself.
+5. **Unresolved / expert-only:** where a fact is unresolved across all eligible sources, ask the user rather than guess (plain chat — no AskUserQuestion here); if only the designer can settle it, record it in `KNOWLEDGE-GAPS.md` **Part B** (questions-for-experts + who-to-ask).
+6. **Update trust scoring** (HIGH multi-source-confirmed / MEDIUM single-source / LOW conflict-or-gap).
 
 ## 6. Output layout (mirror the canonical source folder)
 
@@ -241,7 +257,8 @@ Report:
 - Passes completed (1–7) and per-pass counts: paragraphs/tables, code examples (extracted / pnut_ts-validated / failed), images (extracted / quality-passed / OCR-cataloged).
 - Completeness % + gate status written to `README.md` (the dashboard).
 - Q&A audit summary: prior questions answered, new questions, **conflicts routed to `P2KB-CORRECTION-FINDINGS.md`** (with IDs).
-- Lineage/supersession recorded if an updated edition.
+- **Gap ledger + questions-for-experts updated in `KNOWLEDGE-GAPS.md`** (answered rows moved, new raised, reviewer notes harvested, expert-only questions routed).
+- Trust tier set in `AUTHORITATIVE-SOURCES.md`; lineage/supersession recorded in `DOCUMENT-LINEAGE.md` if an updated edition.
 - Suggested next step (e.g. the YAML head working any routed conflicts; or central-repository-build integration).
 
 This skill does NOT commit/push and does NOT edit P2KB YAML. It produces the
