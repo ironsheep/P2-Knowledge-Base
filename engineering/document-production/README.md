@@ -1,6 +1,12 @@
 # Document Production Pipeline
 
-*Last Updated: 2025-08-25 | September 9th Presentation Target*
+*Status synced to PUBLICATION-ROSTER 2026-06-12. The roster is the **source of truth** for
+publication state; this README mirrors its current snapshot. (The sections below the publications
+table still carry the older "shape" and await a separate refresh.)*
+
+> **Authoritative roster → [`PUBLICATION-ROSTER.md`](PUBLICATION-ROSTER.md)** — every manual-shaped
+> folder is categorized there exactly once (live / in-dev / instrument / orphaned), with the full
+> per-gate pipeline. The table below is a glance; the roster is the detail.
 
 ## Production States
 
@@ -12,42 +18,25 @@
 | Released | ✅ | Published and available |
 | Deferred | ⏸️ | Valid but not current priority |
 
-## Priority Queue (September 9th)
+## Live publications (synced to roster)
 
-| Document | Status | Size | Template Stack | Priority |
-|----------|--------|------|----------------|----------|
-| **Smart Pins Reference** | 🟢 Production | 400+ pages | foundation + smart-pins + tech-review | 🔥 Methodology validation |
-| **PASM2 DeSilva Manual** | 🟡 Queued | 4 parts | foundation + pasm-desilva + tech-review | 🔥 Cross-doc validation |
+| Publication | Slug | State |
+|-------------|------|-------|
+| P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ **Released v3.0.0** (492pp, 2026-06-10) — platform-migrated + re-certified; chip review outstanding (external) |
+| DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ **Released v3.0.0** (172pp, 2026-06-10) — re-audit (~33 fixes); chip review outstanding; 2 deferred wrap-up items |
+| AI Privacy Guide | `ai-privacy-guide` | ✅ **Released** — both reviews complete; presentation-class |
+| P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | 🟢 draft (387pp), platform-migrated; **awaiting Stephen's technical + asset review** ("Blue Book") |
+| P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | 🟢 draft, platform stack; **cover repaired 2026-06-12**; in technical review (chip + community) |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | 🟢 draft, platform stack; awaiting chip + community review |
+| P2 Debug Window Manual | `p2-debug-window-manual` | 🟡 draft; **awaiting screenshots** (5/10 hero figures + TERM captures still placeholders) |
 
-## Active Queue
+## In development / parked · Instruments · Orphaned (see roster for detail)
 
-| Document | Status | Source | Template Stack |
-|----------|--------|--------|----------------|
-| **Terminal Window Guide** | 🟡 Ready | Spin2 extractions | foundation + user-guide + draft |
-| **Debugger Guide** | 🟡 Ready | Debugger extractions | foundation + user-guide + draft |
-| **PASM2 Reference** | 🔴 Planned | Parallax foundation | foundation + reference + official |
-| **Spin2 Reference** | 🔴 Planned | Parallax foundation | foundation + reference + official |
-
-## Deferred Queue
-
-| Document | Status | Reason |
-|----------|--------|--------|
-| **AI Privacy Guide** | ⏸️ Deferred | Not P2-related |
-| **Release Notes v1.0** | ⏸️ Deferred | Post-presentation |
-
-## Document Details
-
-### Smart Pins Complete Reference
-- **Working**: `workspace/smart-pins-manual/P2-Smart-Pins-Complete-Reference-WORKING.md`
-- **Examples**: 156 total (98 extracted + 58 created)
-- **Coverage**: All 32 modes with bilingual examples
-- **Current**: Visual refinement iteration
-
-### PASM2 DeSilva Manual
-- **Working**: `workspace/desilva-manual/P2-PASM-deSilva-Style-Part*.md`
-- **Parts**: 4 markdown files
-- **Approach**: Pedagogical tutorial style
-- **Next**: Apply Smart Pins methodology
+| Publication | Slug | Category |
+|-------------|------|----------|
+| Spin2 Reference Manual | `spin2-reference-manual` | in development / parked |
+| P2 Layout Torture Test | `p2-layout-torture-test` | instrument (serves the layout-standards effort) |
+| Smart Pins Tutorial ("Green Book") | `p2-smart-pins-tutorial` | orphaned — superseded by the I/O & Smart Pins guide |
 
 ## Template Architecture
 
