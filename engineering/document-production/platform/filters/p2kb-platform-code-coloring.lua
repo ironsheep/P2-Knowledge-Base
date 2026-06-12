@@ -16,6 +16,10 @@
 --   Multi-COG blocks (blue):      ::: multicog (parallel processing)
 --   Antipattern blocks (red):     ::: antipattern
 --
+-- Prose advisory callouts (set "things to know" apart from running text):
+--   Tip blocks (teal):            ::: tip      (helpful shortcut / optimization)
+--   Caution blocks (amber):       ::: caution  (hazard / gotcha to avoid)
+--
 -- Also handles pedagogical elements (legacy; unused in this reference guide):
 --   Medicine Cabinet, Your Turn, Sidetrack, etc.
 --
@@ -301,6 +305,28 @@ function Div(div)
       table.insert(result, block)
     end
     table.insert(result, pandoc.RawBlock('latex', '\\end{ModeBlock}'))
+    return result
+
+  -- ===== ADVISORY CALLOUTS (prose) =====
+  -- ::: tip      -> TipBlock     (teal, helpful shortcut / optimization)
+  -- ::: caution  -> CautionBlock (amber, hazard / gotcha to avoid)
+  -- Both wrap PROSE content (rendered normally by Pandoc) between the box
+  -- begin/end; the TIP / CAUTION title bar comes from the box definition in
+  -- p2kb-platform-content.sty, so nothing is injected here. Platform standard.
+  elseif classes:includes("tip") then
+    local result = {pandoc.RawBlock('latex', '\\begin{TipBlock}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{TipBlock}'))
+    return result
+
+  elseif classes:includes("caution") then
+    local result = {pandoc.RawBlock('latex', '\\begin{CautionBlock}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{CautionBlock}'))
     return result
 
   -- ===== DESILVA PEDAGOGICAL ELEMENTS =====
