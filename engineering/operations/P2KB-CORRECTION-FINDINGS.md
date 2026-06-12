@@ -1595,3 +1595,28 @@ The board×adapter matrix **data already exists** — the gap is pure **findabil
 - Surfaced 2026-06-12 (Titus↔IOSP cross-audit finding E). **Related:** F-018 (`modes-reference.yaml` mislabels the SINC2 select bit) — same topic, different file; resolve together.
 
 **Proposed correction (`yaml-knowledge-base-maintenance`):** Rewrite `smart-pin-11000-adc-internal-clock.yaml` `bits_5_4` to the encoding above; cross-check `smart-pin-11001` for the `%01` wording ("SINC2 filtering, software post-processing") and align both to the Silicon-Doc terms; reconcile with F-018's `modes-reference.yaml`.
+
+---
+
+### F-119 — `smart_pins.yaml` aggregate mode-summary has two transposed mode-label pairs (sync TX/RX and count-time/count-periods)  ·  `CONFIRMED` (2026-06-12)
+
+**File:** `deliverables/ai/P2/architecture/smart_pins.yaml` (the aggregate mode-summary block: `serial_modes` and `timing_modes`)
+
+**What's wrong:** The aggregate overview file has two pairs of mode labels transposed. This file is the lone outlier — the per-mode YAMLs (`smart-pin-11100-sync-serial-transmit.yaml`, `smart-pin-11101-sync-serial-receive.yaml`) carry the correct assignments, so the data set is internally inconsistent (same pattern as F-118).
+
+1. **`serial_modes` (lines 91–92):** `11100: "Synchronous serial receive"` and `11101: "Synchronous serial transmit"` — **reversed**. (Async pair on lines 93–94 is correct.)
+2. **`timing_modes` (lines 80, 82):** `10101: "For X clocks, count periods"` and `10111: "For X clocks, count time"` — the **count-time / count-periods** roles are transposed. (`10110` count-states on line 81 is correct.) Separately, all three of `10101/10110/10111` say "For X clocks" where the silicon defines them as "For periods in **X+** clock cycles" — the `X+` (window is a *minimum*, snapping to the next whole period) nuance is lost; fix the wording while correcting the transposition.
+
+**Correct (verified) — Silicon Doc v35:**
+- `%11100 = synchronous serial transmit`, `%11101 = synchronous serial receive`
+- `%10101 = For periods in X+ clock cycles, count time`
+- `%10110 = For periods in X+ clock cycles, count states`
+- `%10111 = For periods in X+ clock cycles, count periods`
+
+**Evidence (authority order — Silicon Doc):**
+- `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:141–142`: `11100* = sync serial transmit (A-data, B-clock)` / `11101 = sync serial receive (A-data, B-clock)`.
+- `engineering/ingestion/sources/silicon-doc/p2-documentation.txt:353–356, 9039, 9066`: `%11100 = synchronous serial transmit`, `%11101 = synchronous serial receive`; and the mode list confirms `%10101/%10110/%10111 = For periods in X+ clock cycles, count time / states / periods`.
+- The shipped per-mode YAMLs (`smart-pin-11100-…`, `smart-pin-11101-…`) and our **I/O & Smart Pins User Guide** already match the Silicon Doc; only the `smart_pins.yaml` aggregate summary is wrong.
+- Surfaced 2026-06-12 during the Titus↔IOSP cross-audit (RA-03 flagged the sync TX/RX reversal pointing at `p2kbArchSmartPins`; main-loop hand-verification against the Silicon Doc confirmed it lands in `smart_pins.yaml` and additionally caught the adjacent `10101/10111` transposition in the same block).
+
+**Proposed correction (`yaml-knowledge-base-maintenance`):** In `smart_pins.yaml`, swap lines 91↔92 labels (`11100`→transmit, `11101`→receive) and the line 80↔82 count-roles (`10101`→"count time", `10111`→"count periods"); reword the `10101/10110/10111` group from "For X clocks" to "For periods in X+ clock cycles" to preserve the minimum-window semantics. No code examples in this file. Sweep the file for any other mode-label mismatch against the per-mode YAMLs before closing.
