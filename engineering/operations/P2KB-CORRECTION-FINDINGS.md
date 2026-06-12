@@ -1528,3 +1528,29 @@ grep -rlE "engineering/(ingestion|document-production|operations|tools)/" delive
 **Notable:** all **10 debug-display YAMLs shipped in v1.8.0** (`debug-displays/{term,scope,scope_xy,fft,spectro,bitmap,logic,plot,midi}.yaml:~12`) carry `source: "engineering/document-production/…"` — so the most-recent release added more instances of this class.
 
 **Proposed correction:** Replace each working-path provenance with a **durable bibliographic citation** — e.g. `source: "Parallax Spin2 Language Reference v51a — QSIN/QCOS (CORDIC methods); examples compile-verified with pnut_ts v1.55.0"`, dropping the `file:line`. Where the path was the only pointer to a host-side/manual detail, move that detail into prose, not a working path. **Fix the whole class in one sweep** (per the fix-all discipline — do not patch only the 4), via `yaml-knowledge-base-maintenance`; triggers an index regen + release. See [[feedback_yaml_self_sufficient_references]] and [[feedback_no_unsourced_claims]].
+
+---
+
+## P2KB hardware findability — 2026-06-12 (F-116)
+
+Surfaced by reproducing an **agent DoD failure** (agents using the MCP could not locate hardware info). Probed the live served KB: the hardware **data exists** (31 YAMLs in `deliverables/ai/P2/hardware/`, incl. a rich `hardware-compatibility-matrix.yaml` with board×carrier→pin-access) but is effectively **invisible** to agents.
+
+### F-116 — hardware YAMLs are unfindable: 0 aliases, unregistered categories, matrix hub not surfaced  ·  `CONFIRMED` (2026-06-12)
+
+**Evidence (live MCP probe):**
+- `p2kb_find` category index = **51 categories, ZERO hardware** (all arch/pasm2/smart_pins/spin2); the 31 hardware entries are uncategorized in the browse list.
+- `p2kb_find "edge board pin"` → **0 results**; `"adapter"` → only **2** of many add-on/adapter boards.
+- `p2kb_get "header pinout"` / `"add-on header pins"` → scattered low-score suggestions (even mixing in PASM2 `ADD…`), no clean board×adapter→pin answer.
+
+**Root cause:**
+- **0/31** hardware YAMLs carry `aliases:` — the index harvests `aliases:` for search (see [[reference_p2kb_findability_mechanism]]).
+- only **14/31** carry `category:`, with ad-hoc values (`adapter`/`addon`/`add_on_board`/`carrier_board`/`module`/…) **none registered in `engineering/tools/p2kb-categories.json`** → invisible to category browsing.
+- the consolidated answer (`hardware-compatibility-matrix.yaml`) is not aliased/categorized/cross-linked, so agents never land on it.
+
+**Proposed correction (`yaml-knowledge-base-maintenance`):**
+1. Add `aliases:` to all 31 hardware YAMLs (board names + part numbers #64000…#64019 + edge/pin/header/pinout/adapter/breakout/carrier/add-on/HUB75).
+2. Normalize hardware categories and **register them in `p2kb-categories.json`** (e.g. `hardware_boards` / `hardware_modules` / `hardware_addons` / `hardware_adapters`).
+3. Make `hardware-compatibility-matrix.yaml` the **findable hub**: rich aliases ("board adapter compatibility", "which pins", "pin access"), categorize, cross-link from each board/adapter entry.
+4. Regen index (Path B post-commit) + restart MCP; **re-run the probes** to verify the failure is gone.
+
+The board×adapter matrix **data already exists** — the gap is pure **findability**. This is the served-KB fix for the observed agent hardware-lookup failure.

@@ -326,7 +326,7 @@ items:
 
 ### Key Status Documents:
 - **Engineering overview**: `/engineering/README.md`
-- **Ingestion status**: `/engineering/ingestion/INGESTION-DASHBOARD.md`
+- **Ingestion status**: `/engineering/ingestion/README.md`
 - **Document production**: `/engineering/document-production/README.md`
 
 ---

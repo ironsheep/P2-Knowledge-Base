@@ -35,7 +35,7 @@ The three heads, their registry, and their standing state:
 |------|----------|----------------------------|-----------------|
 | **manual** | `engineering/document-production/PUBLICATION-ROSTER.md` (publications); workspace folder existence (in-dev / **instruments**) | the manual's folder — `CHANGELOG.md`, `audit/`, working notes; **instruments**: their own run artifacts (e.g. forge interactive-testing) | version (instruments: none) |
 | **yaml** (P2KB) | the YAML tree / index | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (**empty ⇒ nothing outstanding**; non-empty ⇒ the to-do list) | version |
-| **ingestion** | `engineering/ingestion/INGESTION-DASHBOARD.md` | dashboard row (completeness %, gates) + `sources/<src>/<src>-complete-extraction-audit.md` | completeness % + gates (no version) |
+| **ingestion** | `engineering/ingestion/README.md` | dashboard row (completeness %, gates) + `sources/<src>/<src>-complete-extraction-audit.md` | completeness % + gates (no version) |
 
 ## 1. Pull session state
 
@@ -99,7 +99,7 @@ then act:
   - **No entry and no folder** → genuinely new → §6.
 - **yaml** → one P2KB set; always exists. State via
   `P2KB-CORRECTION-FINDINGS.md`.
-- **ingestion** → row in `INGESTION-DASHBOARD.md`? (refresh per
+- **ingestion** → row in `README.md` (the dashboard)? (refresh per
   `INGESTION-UPDATE-WORKFLOW.md` when turning to ingestion).
 
 ## 5. Set active and resume
@@ -119,7 +119,7 @@ then act:
 3. **Register it:**
    - new **manual** → add a row to `PUBLICATION-ROSTER.md` and stand up the
      manual folder per the manual conventions.
-   - new **ingestion source** → add a row to `INGESTION-DASHBOARD.md`,
+   - new **ingestion source** → add a row to `README.md` (the dashboard),
      create `sources/<src>/` + its extraction-audit; mark it **"of
      interest"** if it's a priority (e.g. the P1 sources).
    - **yaml** → the P2KB set is single; a "new element" is usually a new

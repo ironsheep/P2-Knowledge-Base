@@ -1,6 +1,6 @@
-# Knowledge Gaps & Questions-for-Experts — Moving Ledger  ‹PROTOTYPE›
+# Knowledge Gaps & Questions-for-Experts — Moving Ledger
 
-> **PROTOTYPE** — backing doc #3 of the ingestion **quad** (README dashboard + `AUTHORITATIVE-SOURCES` +
+> Backing doc #3 of the ingestion **quad** (README dashboard + `AUTHORITATIVE-SOURCES` +
 > `DOCUMENT-LINEAGE` + this). Added per the breadth study (`INGESTION-PERSPECTIVES-STUDY.md`, perspectives
 > **#8 gap-evolution ledger** + **#9 questions-for-experts**) — the single biggest gap the triad was missing.
 > Unlike the other backing docs (static trust / lineage), this is a **moving worklist**: holes open as new

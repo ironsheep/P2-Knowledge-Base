@@ -84,7 +84,7 @@ Created comprehensive descriptions for sources without PDFs:
 With all narrative files in place, we can now:
 
 1. **Resume Cross-Source Analysis**: Continue connecting sources to central hub
-2. **Complete Audit Matrix**: Update INGESTION-AUDIT-MATRIX.md with 100% status
+2. **Complete Audit Matrix**: Update README.md (ingestion dashboard) with 100% status
 3. **Perform Quality Assessment**: Validate narrative quality and completeness
 4. **Extract Key Information**: Mine narratives for instruction details, gaps, etc.
 5. **Build Cross-References**: Link related information across sources

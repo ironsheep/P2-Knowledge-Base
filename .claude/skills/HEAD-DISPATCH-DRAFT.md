@@ -52,7 +52,7 @@ pass) — resolution rule **TBD** (brainstorm).
 | `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | **TBD** | **N/A** |
 | `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | **TBD** | **N/A** |
 | `PLAN_DIR` | co-located with the manual (manual folder) — **exact subpath TBD** | YAML-set plan home — **TBD** | co-located with the ingestion source — **TBD** |
-| `PUNCH_LIST_DOC` | the manual's punch list — **location TBD per manual** | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | the source's `INGESTION-DASHBOARD.md` row + `sources/<src>/<src>-complete-extraction-audit.md` |
+| `PUNCH_LIST_DOC` | the manual's punch list — **location TBD per manual** | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | the source's `README.md` (ingestion dashboard) row + `sources/<src>/<src>-complete-extraction-audit.md` |
 | `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | P2KB YAML release notes — **TBD** | **N/A — uses completeness dashboard** |
 | `SPEC_DOC` | the manual's `creation-guide.md` (candidate) | **TBD** | **N/A — gates + dashboard instead** |
 
@@ -94,7 +94,7 @@ We do **not** maintain a separate heads-in-flight list. At pickup:
 2. **Verify it against the registries.** Current focus (YAML + manuals)
    makes the two primary registries `engineering/operations/P2KB-CORRECTION-FINDINGS.md`
    and `engineering/document-production/PUBLICATION-ROSTER.md`. Consult
-   `engineering/ingestion/INGESTION-DASHBOARD.md` when turning to
+   `engineering/ingestion/README.md` when turning to
    ingestion — and update it as we move on (per `INGESTION-UPDATE-WORKFLOW.md`).
 3. **Found → resume** that element. **Not found → the add-new-element
    process** — decide whether we're genuinely adding a new head/element;

@@ -35,7 +35,7 @@ that pass. The standing docs:
 | `methodology/image-extraction-methodology.md` | image pass |
 | `methodology/ingestion-pipeline/ingestion-audit-protocol.md` | completeness verification |
 | `INGESTION-UPDATE-WORKFLOW.md` | propagating an update to central-analysis docs |
-| `AUTHORITATIVE-SOURCES.md` + `INGESTION-DASHBOARD.md` | trust catalog + the registry |
+| `AUTHORITATIVE-SOURCES.md` + `README.md` | trust catalog + the registry (dashboard) |
 
 > **This skill is written to current tooling and SUPERSEDES two legacy
 > constraints those docs still carry** (see §8). When this skill and a legacy
@@ -46,7 +46,7 @@ that pass. The standing docs:
 
 1. **Set the pointer:** `mcp__todo-mcp__context_set key:"active_element" value:"ingestion:<src>"` (use the source's folder slug, e.g. `spin2-v55`).
 2. **Registry check (the add-new-element gate, per `whats-next` §6):**
-   - New source → add a row to `INGESTION-DASHBOARD.md` (authority level, completeness 0%, gates open); stand up `sources/<src>/`.
+   - New source → add a row to `README.md` (the ingestion dashboard registry; authority level, completeness 0%, gates open); stand up `sources/<src>/`.
    - **Updated edition of an existing source** (e.g. v55 over v51) → it is a *new* source folder (`sources/<src>/`), NOT an in-place overwrite of the old one. Keep the prior edition intact for diff/lineage; mark the new row, and note the supersession in `DOCUMENT-LINEAGE.md`. The old edition's extraction stays until the new one is validated and the dashboard flips authority to it.
 3. **Generate the task scaffold** (`work-modes/document-ingestion-focused.md` — the 5 core `document_ingestion`-tagged tasks). Drive work with `mcp__todo-mcp__todo_next tags:["document_ingestion"]`.
 
@@ -103,7 +103,7 @@ them are required for a new document.
 | 4 | **Post-processing** — relationship matrices, specialized extractions (timing tables, narratives), pattern library | central-analysis matrices | analysis |
 | 5 | **Validation** — section-by-section completeness | `<src>-extraction-audit.md` validation results | `ingestion-audit-protocol.md` 5-pass |
 | 6 | **Cross-source Q&A + conflict audit** — answer prior questions, raise new, **flag conflicts**, score trust | Q&A audit section; **conflicts → `P2KB-CORRECTION-FINDINGS.md`** | corroboration matrix (§4) |
-| 7 | **Registration + update propagation** | `<src>-complete-extraction-audit.md`; `INGESTION-DASHBOARD.md`/`INGESTION-AUDIT-MATRIX.md` updated; lineage | `INGESTION-UPDATE-WORKFLOW.md` |
+| 7 | **Registration + update propagation** | `<src>-complete-extraction-audit.md`; `README.md` (dashboard) updated; lineage | `INGESTION-UPDATE-WORKFLOW.md` |
 
 ## 2. Format strategy — validator-driven, not dogmatic
 
@@ -239,7 +239,7 @@ engineering/ingestion/sources/<src>/
 
 Report:
 - Passes completed (1–7) and per-pass counts: paragraphs/tables, code examples (extracted / pnut_ts-validated / failed), images (extracted / quality-passed / OCR-cataloged).
-- Completeness % + gate status written to `INGESTION-DASHBOARD.md`.
+- Completeness % + gate status written to `README.md` (the dashboard).
 - Q&A audit summary: prior questions answered, new questions, **conflicts routed to `P2KB-CORRECTION-FINDINGS.md`** (with IDs).
 - Lineage/supersession recorded if an updated edition.
 - Suggested next step (e.g. the YAML head working any routed conflicts; or central-repository-build integration).

@@ -37,7 +37,7 @@ These are *live or semi-live* tracking artifacts with **no owning skill**. Each 
 | `operations/README.md` | the ops dashboard (stale since 2025-09) | thin-to-pointer (roster + this catalog are the real trackers) |
 | `project-guidance/validation-sprint-pipeline.md`, `pasm2-narrative-enrichment-status.md`, `forge-status-snapshot-2026-06-04.md`, `project-guidance/mcp-sprint-a1-object-inventory.md` | one-off / drifted status snapshots | delete or keep-as-archive |
 
-**Properly skill-owned trackers (the model to copy):** `PUBLICATION-ROSTER.md` → `release-manual` + `prepare-manual`, read by `whats-next` · `INGESTION-DASHBOARD.md` → `ingest-source` · `P2KB-CORRECTION-FINDINGS.md` → appended by `ingest-source`/`document-finalize`, swept by `punch-list-maintenance`, DONE-marked by `yaml-knowledge-base-maintenance`.
+**Properly skill-owned trackers (the model to copy):** `PUBLICATION-ROSTER.md` → `release-manual` + `prepare-manual`, read by `whats-next` · `README.md` (ingestion dashboard) → `ingest-source` · `P2KB-CORRECTION-FINDINGS.md` → appended by `ingest-source`/`document-finalize`, swept by `punch-list-maintenance`, DONE-marked by `yaml-knowledge-base-maintenance`.
 
 ### B. Skill-superseded clusters (thin-to-pointer or fold→skill+retire)
 

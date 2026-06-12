@@ -156,7 +156,7 @@ For each document:
 3. **Create audit document** (`*-complete-extraction-audit.md`)
 4. **Extract code examples** if present
 5. **Extract images/diagrams** if valuable
-6. **Update INGESTION-AUDIT-MATRIX.md**
+6. **Update README.md (ingestion dashboard)**
 7. **Add to P1 Sources section** in README.md
 
 ---
@@ -178,7 +178,7 @@ For each document:
 
 1. [ ] Verify duplicate PDFs match already-ingested versions
 2. [ ] Begin Phase 1 HIGH priority ingestions
-3. [ ] Update INGESTION-AUDIT-MATRIX.md with P1 section
+3. [ ] Update README.md (ingestion dashboard) with P1 section
 4. [ ] Create central-analysis P1 hub folder if not exists
 5. [ ] Consider P1→P2 comparison documents as part of analysis
 

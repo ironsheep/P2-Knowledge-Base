@@ -1,4 +1,4 @@
-# Ingestion Perspectives — Breadth Study  ‹PROTOTYPE / study artifact›
+# Ingestion Perspectives — Breadth Study  ‹study artifact›
 
 > **Purpose:** before we reconcile the ingestion panels, collect *every lens* we've ever used to track and
 > learn from ingestion — so the new triad carries them all, not just the ones already in it. Built from a
@@ -27,7 +27,7 @@
 | 9 | **Questions-for-experts / unresolved routing** | the answerable-only-by-Chip residue + who-to-ask | A | ✗ **ADD** | questions-for-chip-language-focused, who-to-ask-remaining-questions, missing-content-requests |
 | 10 | **Coverage matrices (instruction / feature / domain)** | X/491 instructions; by-topic domain rollup | A | ✗ (domain = dashboard "parked") **ADD** | P2-FEATURE-COVERAGE-MATRIX, instruction-completion-matrix, P2-COMPLETE-INSTRUCTION-MATRIX |
 | 11 | **Lineage / supersession (editions)** | augment / re-extraction / superseded-by-deliverable | A+R | ✅ lineage | DOCUMENT-LINEAGE, V1-TO-V2-MIGRATION-AUDIT, silicon-v35-comparative |
-| 12 | **Source → output lineage** | which sources fed which manual / KB area | R | ✅ lineage | DOCUMENT-LINEAGE-PROTOTYPE |
+| 12 | **Source → output lineage** | which sources fed which manual / KB area | R | ✅ lineage | DOCUMENT-LINEAGE |
 | 13 | Per-claim corroboration matrix | claim × source → CONSISTENT / conflict | A+R | ⚠ (this is the *format behind* X) | smart-pins basic-io/source-audit, instruction-completion-matrix |
 | 14 | **Derived cross-source facts (hardware pin-mapping &c.)** | board × adapter → accessible pins/power; unified syntheses | R | ✗ **ADD (marquee)** | p2-edge-complete-ecosystem-compatibility-matrix, `sources/p2-board-pin-mapping-knowledge.md`, p2-complete-signal-flow-matrix |
 | 15 | Cross-generation comparison (P1 ↔ P2) | P1-vs-P2 feature/instruction deltas | R | ✗ (folds into #14) | P1-P2-FEATURE-COMPARISON |
