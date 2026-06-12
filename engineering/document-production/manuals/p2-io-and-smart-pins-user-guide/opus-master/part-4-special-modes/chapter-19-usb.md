@@ -54,11 +54,15 @@ CON
   USB_DM = 56                                   ' D- on even pin
   USB_DP = 57                                   ' D+ on odd pin (DM+1)
 
-PUB configure_usb_pins()
+PUB configure_usb_pins() | baud
   ' Configure as USB pair with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  ' WXPIN on the LOWER pin sets USB mode + baud:
+  '   D[15]=1 host / 0 device  D[14]=1 full-speed / 0 low-speed  D[13:0]=baud fraction
+  baud := 12_000_000 / (clkfreq / $10000)         ' full-speed (12 Mbps) fraction of sysclk
+  WXPIN(USB_DM, $4000 | baud)                      ' device, full-speed
+  PINHIGH(USB_DM)
+  PINHIGH(USB_DP)
 ```
 
 ### Output Control
@@ -105,11 +109,11 @@ The USB mode uses the smart pin registers for configuration and data:
 
 | Register | Function |
 |----------|----------|
-| X | USB configuration parameters |
+| X | USB configuration, set via WXPIN on the lower (even) pin: D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed, D[13:0]=baud rate as a 16-bit fraction of sysclk (target_Hz / clkfreq × $10000) |
 | Y | Protocol control |
-| Z | Data and status |
+| Z | Data and 16-bit status word (read via RDPIN/RQPIN) |
 
-**Note:** Detailed register bit assignments require reference to USB implementation examples and Parallax documentation, as the silicon documentation is limited.
+**Note:** WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
 
 ### IN Flag
 
@@ -198,17 +202,21 @@ CON
   USB_DM = 56
   USB_DP = 57
 
-PUB configure_usb()
+PUB configure_usb() | baud
   ' Reset both pins
-  DIRL(USB_DM)
-  DIRL(USB_DP)
+  PINFLOAT(USB_DM)
+  PINFLOAT(USB_DP)
 
   ' Configure USB mode with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
 
+  ' Set USB mode + baud on the lower pin (D[15]=0 device, D[14]=1 full-speed)
+  baud := 12_000_000 / (clkfreq / $10000)
+  WXPIN(USB_DM, $4000 | baud)
+
   ' Enable the USB pair
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  PINHIGH(USB_DM)
+  PINHIGH(USB_DP)
 ```
 
 ### PASM2 Configuration
@@ -220,8 +228,9 @@ DAT           org
               dirl      #USB_DM
               dirl      #USB_DP
 
-              ' Configure USB mode
+              ' Configure USB mode + baud (lower pin)
               wrpin     usb_mode, #USB_DM
+              wxpin     usb_cfg, #USB_DM
 
               ' Enable USB pair
               dirh      #USB_DM
@@ -240,6 +249,7 @@ handle_usb_event
               ret
 
 usb_mode      long      P_USB_PAIR | P_OE
+usb_cfg       long      $4000 | ($10000 * 12 / 200)  ' device, full-speed, 12 Mbps @ 200 MHz
 usb_data      res       1
 ```
 
@@ -307,8 +317,9 @@ Implementing USB requires:
 
 ```spin2
 WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-DIRH(even_pin)                                  ' Enable DM
-DIRH(even_pin+1)                                ' Enable DP
+WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' device, full-speed
+PINHIGH(even_pin)                               ' Enable DM
+PINHIGH(even_pin+1)                             ' Enable DP
 ```
 
 ### Key Points

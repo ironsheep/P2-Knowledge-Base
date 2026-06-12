@@ -221,8 +221,8 @@ PINL(PIN)                 ' Enable Smart Pin
 **PASM2 Example:**
 ```pasm2
 ' Example description
-              wrpin     pin, ##mode_value   ' Configuration step
-              wxpin     pin, ##x_value      ' Parameter setting
+              wrpin     ##mode_value, pin   ' Configuration step
+              wxpin     ##x_value, pin      ' Parameter setting
               drvl      pin                 ' Enable Smart Pin
 ```
 

@@ -634,7 +634,7 @@ WXPIN(pin, 200_000_000)                    ' X = sysclk
 All counting modes when DIR=0:
 
 - IN = low
-- Z = initial adder value (0, 1, or -1 depending on input state)
+- Z = initial adder value: 0 or +1 for unidirectional counters; bidirectional modes (quadrature, up/down) can also load -1, accounting for any edge coincident with reset
 - Counter ready to start on DIR=1
 
 

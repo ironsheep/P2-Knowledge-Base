@@ -1,6 +1,6 @@
 # Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
-Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [4:0] = %00000 (`P_NORMAL`).
+Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
 ## 2.1 Overview
 
@@ -25,7 +25,7 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 **PASM2:**
 ```pasm2
-              wrpin     pin, ##(P_constant1 | P_constant2)
+              wrpin     ##(P_constant1 | P_constant2), pin
 ```
 
 ### The P_ Constant Architecture
@@ -37,11 +37,12 @@ P_ constants are 32-bit values where specific bit fields control different aspec
 | 31:28 | AAAA | A input selection and polarity |
 | 27:24 | BBBB | B input selection and polarity |
 | 23:21 | FFF | A,B input logic / filter selection |
-| 20:12 | MMMMMMMMM | Low-level pin mode and sub-mode |
-| 11:10 | TT | DIR/OUT control (P_OE, P_BITDAC) |
-| 9:5 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
+| 20:8 | MMMMMMMMMMMMM | Low-level pin control (drive, input mode, DAC/ADC) |
+| 7:6 | TT | DIR/OUT control (P_OE, P_BITDAC) |
+| 5:1 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
+| 0 | — | Always 0 |
 
-When mode bits [9:5] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
+When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
 
 ## 2.2 Drive Strength
 
@@ -51,7 +52,7 @@ The P2 provides configurable drive strength for both high-side (driving to VIO) 
 
 Select one drive-high constant. These control the high-side output driver.
 
-| Constant | Bits[17:15] | Drive | Current/Impedance | Use Case |
+| Constant | Bits[13:11] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
 | `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
 | `P_HIGH_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting, protection |
@@ -66,7 +67,7 @@ Select one drive-high constant. These control the high-side output driver.
 
 Select one drive-low constant. These control the low-side output driver.
 
-| Constant | Bits[14:12] | Drive | Current/Impedance | Use Case |
+| Constant | Bits[10:8] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
 | `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
 | `P_LOW_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting |
@@ -275,12 +276,12 @@ Basic DAC modes provide digital-to-analog conversion without Smart Pin modes. Th
 
 **DAC Value Encoding:**
 
-The 8-bit DAC value is encoded in bits [19:12] of the WRPIN configuration:
+The 8-bit DAC value is encoded in bits [15:8] of the WRPIN configuration:
 
 ```spin2
 ' Set pin to output DAC level
 ' dac_value: 0-255 (0V to peak voltage)
-dac_config := P_DAC_990R_3V | (dac_value << 12)
+dac_config := P_DAC_990R_3V | (dac_value << 8)
 WRPIN(pin, dac_config)
 PINH(pin)                                 ' Enable output
 ```
@@ -302,7 +303,7 @@ CON
 
 PUB main()
   ' Output ~1.65V (half of 3.3V)
-  WRPIN(DAC_PIN, P_DAC_990R_3V | (DAC_MIDPOINT << 12))
+  WRPIN(DAC_PIN, P_DAC_990R_3V | (DAC_MIDPOINT << 8))
   PINH(DAC_PIN)                           ' Enable DAC output
 ```
 
@@ -321,12 +322,12 @@ Level comparison modes compare the input voltage to a programmable 8-bit thresho
 
 **Level Encoding:**
 
-The 8-bit comparison level is encoded in bits [19:12]:
+The 8-bit comparison level is encoded in bits [15:8]:
 
 ```spin2
 ' Compare pin A input to threshold level
 ' level: 0-255 (0V to VIO)
-level_config := P_LEVEL_A | (level << 12)
+level_config := P_LEVEL_A | (level << 8)
 WRPIN(pin, level_config)
 ```
 
@@ -469,7 +470,7 @@ CON
   
 PUB set_voltage(level) | config
   ' Output analog voltage proportional to level (0-255)
-  config := P_DAC_990R_3V | (level << 12)
+  config := P_DAC_990R_3V | (level << 8)
   WRPIN(DAC_PIN, config)
   PINH(DAC_PIN)                           ' Enable output
 ```
@@ -478,19 +479,19 @@ PUB set_voltage(level) | config
 
 ```pasm2
 ' Open-drain configuration
-              wrpin sda_pin, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), sda_pin
               drvh      sda_pin              ' Release line (floats high)
 
 ' Internal pull-up button
-              wrpin btn_pin, ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+              wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
               drvh      btn_pin                ' Enable pull-up
 
 ' Current-source LED
-              wrpin     led_pin, ##(P_HIGH_1MA | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1MA | P_LOW_FAST), led_pin
               drvh      led_pin                ' LED on at 1mA
 
 ' DAC output (1.65V = 128 at 3.3V range)
-              wrpin     dac_pin, ##(P_DAC_990R_3V | (128 << 12))
+              wrpin     ##(P_DAC_990R_3V | (128 << 8)), dac_pin
               dirh      dac_pin                ' Enable DAC
 ```
 
@@ -507,7 +508,7 @@ WRPIN(pin, 0)                             ' Same effect
 
 **PASM2:**
 ```pasm2
-              wrpin     pin, #0           ' Reset to P_NORMAL
+              wrpin     #0, pin           ' Reset to P_NORMAL
 ```
 
 This clears all enhanced configuration and Smart Pin modes, returning the pin to basic Direct I/O operation.

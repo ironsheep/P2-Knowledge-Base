@@ -135,14 +135,14 @@ X = ((sysclk × 65536 / baud_rate) & $FFFFFC00) | data_bits
 
 - `X[31:16]`: Integer bit period in clocks
 - `X[15:10]`: Fractional adjustment (1/64 clock)
-- `X[4:0]`: Number of data bits (1-32)
+- `X[4:0]`: Data-bit count, encoded as N−1 (write 0–31 to select 1–32 bits; e.g. write 7 for an 8-bit word)
 - `baud_rate`: Desired baud rate in bits/second
 
 **Worked Example (115200 baud at 200 MHz):**
 ```formula
 X[31:16] = 200,000,000 / 115,200 = 1736 clocks/bit
 bit_period = 1736 × 65536 = 113,770,496
-X = ($06C8_0000 | 8) = $06C8_0008  (8 data bits)
+X = ($06C8_0000 | 7) = $06C8_0007  (8 data bits: field = N-1 = 7)
 ```
 
 

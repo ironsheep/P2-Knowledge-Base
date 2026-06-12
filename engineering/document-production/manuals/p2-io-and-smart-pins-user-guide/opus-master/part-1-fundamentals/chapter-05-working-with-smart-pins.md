@@ -160,9 +160,9 @@ WYPIN(1, duty_1)
 
 ```pasm2
               setq      #7                ' 8 pins
-              wrpin     #0, ##(P_PWM_TRIANGLE | P_OE)
+              wrpin     ##(P_PWM_TRIANGLE | P_OE), #0
               setq      #7
-              wxpin     #0, x_value
+              wxpin     x_value, #0
               setq      #7
               drvl      #0                ' Enable all 8
 ```

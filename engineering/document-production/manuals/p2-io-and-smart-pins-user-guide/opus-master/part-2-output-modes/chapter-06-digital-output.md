@@ -73,7 +73,7 @@ PUB led_off()
 ```
 
 ```pasm2
-              wrpin     #LED_PIN, ##(P_HIGH_1K5 | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1K5 | P_LOW_FAST), #LED_PIN
               drvh      #LED_PIN          ' LED on
               drvl      #LED_PIN          ' LED off
 ```
@@ -120,7 +120,7 @@ PUB sda_read() : state
 
 ```pasm2
 ' Open-drain configuration
-              wrpin #SDA_PIN, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), #SDA_PIN
               
 ' Drive low
               drvl      #SDA_PIN
@@ -306,7 +306,7 @@ The 3-clock output latency is a fixed pipeline delay — it sets *when* each edg
 **Tight loop toggle:**
 ```pasm2
               drvnot    #pin              ' 2 cycles
-              jmp       #$-1              ' 4 cycles (2 for JMP)
+              jmp       #$-1              ' 4 cycles (taken branch)
 ```
 Period: 6 cycles = 30 ns → ~33 MHz maximum at 200 MHz sysclk.
 
@@ -357,7 +357,7 @@ CON
 
 DAT           org
 
-              wrpin     #56, ##(P_HIGH_1MA | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1MA | P_LOW_FAST), #56
 
 .loop         drvh      #56
               waitx     half_sec

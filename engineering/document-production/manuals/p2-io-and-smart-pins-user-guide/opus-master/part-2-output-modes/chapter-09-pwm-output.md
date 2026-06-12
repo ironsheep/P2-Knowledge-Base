@@ -64,8 +64,8 @@ At each base period:
 
 | Register | Field | Purpose |
 |----------|-------|---------|
-| X[15:0] | Base period | Clock cycles per counter update (1-65535) |
-| X[31:16] | Frame period | Counter range (1-65535) |
+| X[15:0] | Base period | Clock cycles per counter update (1-65536; 0 selects 65536) |
+| X[31:16] | Frame period | Counter range (1-65536; a field value of 0 selects 65536) |
 | Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
 
 ### Timing Formulas
@@ -164,7 +164,7 @@ PWM Period = Frame Period × Base Period
 | Register | Field | Purpose |
 |----------|-------|---------|
 | X[15:0] | Base period | Clock cycles per counter update |
-| X[31:16] | Frame period | Counter range (1-65535) |
+| X[31:16] | Frame period | Counter range (1-65536; a field value of 0 selects 65536) |
 | Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
 
 ### Timing Formulas
@@ -342,7 +342,7 @@ P_PWM_SMPS is designed for autonomous operation. After initial configuration wit
 
 ### Updating Y Register
 
-All PWM modes capture Y[15:0] at the start of each frame. To change duty cycle:
+Triangle and sawtooth PWM modes capture Y[15:0] at the start of each frame. (SMPS mode is event-driven: it captures Y[15:0] after the frame period completes *and* the A-input goes low — not at a fixed clock boundary.) To change duty cycle:
 
 **Spin2:**
 ```spin2

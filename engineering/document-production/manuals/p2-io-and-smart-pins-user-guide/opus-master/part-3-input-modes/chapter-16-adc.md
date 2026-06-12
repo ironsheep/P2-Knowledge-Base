@@ -271,8 +271,9 @@ PUB scope_init(trigger_config)
 ### X Register: Trigger Configuration
 
 ```layout
-X[15:8]: Trigger level (0-252, multiples of 4)
-X[7:0]: Arm level (0-252, multiples of 4)
+X[15:10]: B (trigger) value — 6-bit, MSB-justified to the 8-bit sample (0-252 in steps of 4)
+X[7:2]:   A (arm) value — 6-bit, MSB-justified to the 8-bit sample (0-252 in steps of 4)
+X[1:0]:   Filter select — %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
 The hysteretic trigger works as follows:

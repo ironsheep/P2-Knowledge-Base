@@ -38,7 +38,7 @@ Between these interactions, the Smart Pin runs autonomously.
 
 ## 3.2 The Three-Register Model
 
-Every Smart Pin has three internal 32-bit registers that control its operation:
+Every Smart Pin has four 32-bit registers: a mode-configuration register written by WRPIN (the mode-control word, see §3.5), plus the three parameter/result registers—X, Y, and Z—described here. The mode register establishes *what* the pin does; X, Y, and Z carry the data it works with:
 
 ### X Register - Configuration and Parameters
 
@@ -153,7 +153,7 @@ When DIR=0, the Smart Pin is held in reset:
 - Registers are initialized to mode-specific values
 - Configuration instructions (WRPIN/WXPIN/WYPIN) are accepted
 
-**Important:** Always configure a Smart Pin while DIR=0. Configuring while DIR=1 can cause unpredictable behavior.
+**Important:** Always issue WRPIN (mode/routing configuration) while DIR=0 — changing the mode word while the pin is running (DIR=1) can cause unpredictable behavior. WXPIN and WYPIN are different: they are the normal runtime update path and work freely while the Smart Pin is running (DIR=1).
 
 ### State 2: Configured
 
@@ -212,7 +212,7 @@ To completely disable and return to normal mode:
 
 ### Mode Selection via WRPIN
 
-The Smart Pin mode is selected by bits [9:5] of the WRPIN D operand. With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
+The Smart Pin mode is selected by bits [5:1] of the WRPIN D operand (bit 0 is always 0). With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
 
 | Mode Bits | Category |
 |-----------|----------|
@@ -249,7 +249,7 @@ Inter-COG data sharing (Repository) and USB.
 
 Smart Pin configuration is layered. Multiple aspects combine to define complete behavior:
 
-### Layer 1: Smart Pin Mode (bits [9:5])
+### Layer 1: Smart Pin Mode (bits [5:1])
 
 Selects which of the 32 modes is active. Each mode defines fundamental behavior (PWM, ADC, serial, etc.).
 
@@ -272,7 +272,7 @@ Selects input sources:
 - Input polarity: true or inverted
 - Input logic: pass, AND, OR, XOR, or filter
 
-### Layer 4: DIR/OUT Control (bits [11:10])
+### Layer 4: DIR/OUT Control (bits [7:6])
 
 The TT bits control output behavior:
 
@@ -390,7 +390,7 @@ Smart Pins provide autonomous I/O operations through:
 1. **Three registers** (X, Y, Z) for configuration, input, and results
 2. **The IN bit** for event signaling
 3. **A state machine** progressing from disabled through configured to running
-4. **32 modes** selected by bits [9:5] of WRPIN
+4. **32 modes** selected by bits [5:1] of WRPIN
 5. **Layered configuration** combining mode, pin settings, input routing, and output control
 
 The key insight: once configured and enabled, Smart Pins operate independently. The COG is free to perform other work, interacting with the Smart Pin only to read results or update parameters.

@@ -1554,3 +1554,44 @@ Surfaced by reproducing an **agent DoD failure** (agents using the MCP could not
 4. Regen index (Path B post-commit) + restart MCP; **re-run the probes** to verify the failure is gone.
 
 The board×adapter matrix **data already exists** — the gap is pure **findability**. This is the served-KB fix for the observed agent hardware-lookup failure.
+
+---
+
+### F-117 — Long-repository write uses the **X** register (WXPIN), not Y (WYPIN)  ·  `CONFIRMED` (2026-06-12)
+
+**Files:**
+- `deliverables/ai/P2/architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml`
+- `deliverables/ai/P2/architecture/smart-pins/smart-pin-00010-*.yaml` (long-repository variant)
+- `deliverables/ai/P2/architecture/smart-pins/smart-pin-00011-*.yaml` (long-repository variant)
+
+**What's wrong:** The `repository_mode` block (and all repository code examples) say the 32-bit stored long lives in the **Y register**, written with **WYPIN** — e.g. `repository_mode.x_register: "Not used"`, `repository_mode.y_register: "32-bit value to store"`, and examples `WYPIN ##$DEADBEEF, pin` / `WYPIN(REPO_PIN, value)`.
+
+**Correct (verified):** In long-repository mode the long is held in the **X register** and written with **WXPIN**; it is read back from Z via RDPIN/RQPIN. So `x_register: "32-bit value to store (written by WXPIN)"`, `y_register: "Not used"`, `z_register: "Reads back the stored value (RDPIN/RQPIN)"`, and the examples should use `WXPIN`.
+
+**Evidence (authority order — Silicon Doc):**
+- Silicon Doc v35, `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:224`: *"This mode turns the smart pin into a long repository, where **WXPIN** writes the long and RDPIN/RQPIN can read the long."* Line 227: *"When active (DIR=1), **WXPIN** updates the long and raises IN."*
+- Independently corroborated by Jon Titus (Smart Pins rev5) and by our **I/O & Smart Pins User Guide** ch18 (both use WXPIN) — the p2kb YAML is the lone outlier.
+- Surfaced 2026-06-12 during the Titus↔IOSP cross-audit (audit finding #28): the cross-audit agent initially flagged the *manual* as wrong (recommending WYPIN to match the YAML); main-loop hand-verification against the Silicon Doc reversed the verdict — the manual is correct and the YAML is wrong.
+
+**Proposed correction (`yaml-knowledge-base-maintenance`):** In the three repository YAMLs, swap the X/Y register roles in `repository_mode`, and change every repository write example from WYPIN to WXPIN. Leave the **DAC-mode** branch of these same modes untouched (DAC noise/dither legitimately uses Y). Verify a corrected `WXPIN value,#pin` store + `RDPIN`/`RQPIN` read against `pnut_ts`.
+
+---
+
+### F-118 — `smart-pin-11000-adc-internal-clock.yaml` X[5:4] filter-mode encoding is inverted  ·  `CONFIRMED` (2026-06-12)
+
+**File:** `deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` (`registers.x_register.bits_5_4`)
+
+**What's wrong:** The YAML encodes the X[5:4] sample/filter selector as `%00 = Raw bitstream capture, %01 = SINC2 filtering, %10 = SINC3 filtering, %11 = Reserved/unused`. Its sister file `smart-pin-11001-adc-external-clock.yaml` gives a **different** (and correct) encoding for the same field, so the data set is internally inconsistent.
+
+**Correct (verified):** X[5:4] selects the ADC sample/filter mode as:
+- `%00 = SINC2 Sampling` (automatic, power-of-2 periods)
+- `%01 = SINC2 Filtering`
+- `%10 = SINC3 Filtering`
+- `%11 = Bitstream Capturing` (raw 32-bit snapshot)
+
+**Evidence (authority order — Silicon Doc):**
+- Silicon Doc v35, `engineering/ingestion/sources/silicon-doc/p2-documentation.txt`: section headers `SINC2 Sampling Mode (%00)` (line 8496), `SINC2 Filtering Mode (%01)` (line 8531), `SINC3 Filtering Mode (%10)` (line 8622), `Bitstream Capturing Mode (%11)` (line 8737). Line 8421 confirms the field is **X[5:4]**: *"For modes other than SINC2 Sampling (X[5:4] > %00)…"*.
+- The sister `smart-pin-11001` YAML already matches this; our **I/O & Smart Pins User Guide** ch16 also matches. Only `smart-pin-11000` is wrong (bitstream/SINC2 transposed and `%11` wrongly marked reserved).
+- Surfaced 2026-06-12 (Titus↔IOSP cross-audit finding E). **Related:** F-018 (`modes-reference.yaml` mislabels the SINC2 select bit) — same topic, different file; resolve together.
+
+**Proposed correction (`yaml-knowledge-base-maintenance`):** Rewrite `smart-pin-11000-adc-internal-clock.yaml` `bits_5_4` to the encoding above; cross-check `smart-pin-11001` for the `%01` wording ("SINC2 filtering, software post-processing") and align both to the Silicon-Doc terms; reconcile with F-018's `modes-reference.yaml`.

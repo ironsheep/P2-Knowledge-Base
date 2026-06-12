@@ -107,9 +107,9 @@ PUB nco_frequency(freq_hz) | y_value
 **PASM2:**
 ```pasm2
               dirl      #NCO_PIN
-              wrpin     #NCO_PIN, ##(P_NCO_FREQ | P_OE)
-              wxpin     #NCO_PIN, #1              ' Base period = 1
-              wypin     #NCO_PIN, freq_y          ' Frequency value
+              wrpin     ##(P_NCO_FREQ | P_OE), #NCO_PIN
+              wxpin     #1, #NCO_PIN              ' Base period = 1
+              wypin     freq_y, #NCO_PIN          ' Frequency value
               drvl      #NCO_PIN
 ```
 
@@ -141,7 +141,7 @@ P_NCO_DUTY generates a frequency with variable duty cycle. The output reflects t
 
 ### Duty Cycle Control
 
-In P_NCO_DUTY, the duty cycle is controlled by the relationship between Y and the accumulator:
+In P_NCO_DUTY, Y sets the duty cycle directly — the accumulator (Z) is incremented by Y each base period, and the output is high for one base period on every overflow, so the fraction of high time is Y / 2³²:
 
 - Larger Y values → Higher duty cycle
 - Smaller Y values → Lower duty cycle
@@ -166,11 +166,11 @@ CON
   _clkfreq = 200_000_000
   NCO_PIN = 10
 
-PUB nco_duty(freq_hz, duty_percent) | y_value
-  ' Y controls both frequency and duty
-  ' For specific duty at specific frequency, adjust Y
-  y_value := (freq_hz FRAC _clkfreq) * duty_percent / 50
-  
+PUB nco_duty(duty_percent) | y_value
+  ' In NCO_DUTY, Y sets the duty cycle directly: duty = Y / 2^32.
+  ' (Base period is 1 clock, so Z accumulates Y every clock.)
+  y_value := duty_percent frac 100        ' 50 -> $8000_0000, 25 -> $4000_0000
+
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_DUTY | P_OE)
   WXPIN(NCO_PIN, 1)
@@ -371,15 +371,15 @@ DAT           org
 
 ' Setup NCO at 1 kHz
               dirl      #NCO_PIN
-              wrpin     #NCO_PIN, ##(P_NCO_FREQ | P_OE)
-              wxpin     #NCO_PIN, #1
-              wypin     #NCO_PIN, y_start
+              wrpin     ##(P_NCO_FREQ | P_OE), #NCO_PIN
+              wxpin     #1, #NCO_PIN
+              wypin     y_start, #NCO_PIN
               drvl      #NCO_PIN
 
 ' Sweep frequency upward
 sweep_loop
               add       y_current, y_step
-              wypin     #NCO_PIN, y_current
+              wypin     y_current, #NCO_PIN
               waitx     sweep_delay
               cmp       y_current, y_end wc
         if_c  jmp       #sweep_loop

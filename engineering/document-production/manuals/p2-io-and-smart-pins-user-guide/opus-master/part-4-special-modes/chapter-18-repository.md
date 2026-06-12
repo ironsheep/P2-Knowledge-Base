@@ -530,8 +530,8 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
 | Register | Write | Read |
 |----------|-------|------|
-| X | Not used | - |
-| Y via WXPIN | Store value | - |
+| X via WXPIN | Store value | - |
+| Y | Not used | - |
 | Z via RDPIN | - | Retrieve value |
 
 **DAC Dither Modes:**

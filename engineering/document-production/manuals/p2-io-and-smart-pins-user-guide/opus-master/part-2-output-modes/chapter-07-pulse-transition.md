@@ -49,7 +49,7 @@ P_PULSE generates a specified number of pulse cycles. Each cycle consists of a p
 | Register | Field | Purpose |
 |----------|-------|---------|
 | X[15:0] | Base period | Total cycle length in clock cycles |
-| X[31:16] | Compare value | Threshold for high vs low output |
+| X[31:16] | Compare value | Output HIGH while counter > this; numerically the LOW-time clocks |
 | Y[31:0] | Cycle count | Number of cycles to generate |
 
 ### Output Behavior
@@ -74,9 +74,9 @@ For X[15:0] = 4, X[31:16] = 2, Y = 3:
 The duty cycle is determined by the compare value relative to the base period:
 
 ```formula
-High time = X[31:16] clocks
-Low time  = X[15:0] - X[31:16] clocks
-Duty cycle = X[31:16] / X[15:0]
+High time = X[15:0] - X[31:16] clocks
+Low time  = X[31:16] clocks
+Duty cycle = (X[15:0] - X[31:16]) / X[15:0]
 ```
 
 **Special cases:**
@@ -91,13 +91,13 @@ Duty cycle = X[31:16] / X[15:0]
 CON
   PULSE_PIN = 10
   BASE_PERIOD = 1000                      ' 1000 clocks per cycle
-  HIGH_TIME = 500                         ' 500 clocks high (50% duty)
+  LOW_TIME = 500                          ' X[31:16] compare: 500 low, 500 high (50% duty)
   CYCLE_COUNT = 10                        ' Generate 10 pulses
 
 PUB generate_pulses() | ack
   PINFLOAT(PULSE_PIN)                     ' Reset
   WRPIN(PULSE_PIN, P_PULSE | P_OE)        ' Configure mode
-  WXPIN(PULSE_PIN, BASE_PERIOD | (HIGH_TIME << 16))  ' Set timing
+  WXPIN(PULSE_PIN, BASE_PERIOD | (LOW_TIME << 16))  ' Set timing
   PINLOW(PULSE_PIN)                       ' Enable
   
   WYPIN(PULSE_PIN, CYCLE_COUNT)           ' Trigger: generate 10 pulses
@@ -110,11 +110,11 @@ PUB generate_pulses() | ack
 **PASM2:**
 ```pasm2
               dirl      #PULSE_PIN
-              wrpin     #PULSE_PIN, ##(P_PULSE | P_OE)
-              wxpin     #PULSE_PIN, ##(BASE_PERIOD | (HIGH_TIME << 16))
+              wrpin     ##(P_PULSE | P_OE), #PULSE_PIN
+              wxpin     ##(BASE_PERIOD | (LOW_TIME << 16)), #PULSE_PIN
               drvl      #PULSE_PIN
               
-              wypin     #PULSE_PIN, #CYCLE_COUNT     ' Trigger
+              wypin     #CYCLE_COUNT, #PULSE_PIN     ' Trigger
               
 .wait         testp     #PULSE_PIN wc
         if_nc jmp       #.wait
@@ -186,11 +186,11 @@ PUB generate_transitions() | ack
 **PASM2:**
 ```pasm2
               dirl      #TRANS_PIN
-              wrpin     #TRANS_PIN, ##(P_TRANSITION | P_OE)
-              wxpin     #TRANS_PIN, #EDGE_PERIOD
+              wrpin     ##(P_TRANSITION | P_OE), #TRANS_PIN
+              wxpin     #EDGE_PERIOD, #TRANS_PIN
               drvl      #TRANS_PIN
               
-              wypin     #TRANS_PIN, #EDGE_COUNT
+              wypin     #EDGE_COUNT, #TRANS_PIN
               
 .wait         testp     #TRANS_PIN wc
         if_nc jmp       #.wait
@@ -237,15 +237,16 @@ WRPIN(pin, P_PULSE | P_OE | P_INVERT_OUT)
 For P_PULSE:
 ```formula
 Pulse period = X[15:0] × (1 / sysclk)
-High time = X[31:16] × (1 / sysclk)
+High time = (X[15:0] - X[31:16]) × (1 / sysclk)
 ```
 
 **Example at 200 MHz:**
 ```formula
 X[15:0] = 2000, X[31:16] = 500
-Period = 2000 / 200MHz = 10 µs
-High time = 500 / 200MHz = 2.5 µs
-Duty cycle = 25%
+Period    = 2000 / 200MHz = 10 µs
+High time = (2000 - 500) / 200MHz = 7.5 µs
+Low time  = 500 / 200MHz = 2.5 µs
+Duty cycle = 1500 / 2000 = 75%
 ```
 
 ### Transition Period Calculation
@@ -372,13 +373,13 @@ DAT           org
 
 ' Setup
               dirl      #STEP_PIN
-              wrpin     #STEP_PIN, ##(P_PULSE | P_OE)
-              wxpin     #STEP_PIN, ##(STEP_PERIOD | (STEP_HIGH << 16))
+              wrpin     ##(P_PULSE | P_OE), #STEP_PIN
+              wxpin     ##(STEP_PERIOD | (STEP_HIGH << 16)), #STEP_PIN
               drvl      #STEP_PIN
 
 ' Generate steps as needed
 step_loop
-              wypin     #STEP_PIN, steps_needed
+              wypin     steps_needed, #STEP_PIN
               
 .wait         testp     #STEP_PIN wc
         if_nc jmp       #.wait
@@ -406,7 +407,7 @@ result        long      0
 | Parameter | Register | Range | Notes |
 |-----------|----------|-------|-------|
 | Base period | X[15:0] | 1-65535 | Clocks per cycle |
-| Compare value | X[31:16] | 0-65535 | High threshold |
+| Compare value | X[31:16] | 0-65535 | Output HIGH when counter > this (low-time clocks) |
 | Cycle count | Y[31:0] | 1-2³² | Pulses to generate |
 
 ### P_TRANSITION Configuration

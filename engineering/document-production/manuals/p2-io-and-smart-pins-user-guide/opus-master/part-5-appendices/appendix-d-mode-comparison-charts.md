@@ -33,8 +33,8 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Events Ticks | P_EVENTS_TICKS | N events / timeout | 1 clock | Configurable | Yes | Medium | Frequency, watchdog |
 | Quadrature | P_QUADRATURE | Position/velocity | 4x encoder | Every edge | Yes | Low | Encoder |
 | Count Highs | P_COUNT_HIGHS | Gated edges | 32-bit | Configurable | Yes | Low | Freq counter |
-| Count Rises | P_COUNT_RISES | Up/down edges | 32-bit | Configurable | Yes | Low | Step/direction |
-| Count Edges | P_COUNT_RISES | Edge count | 32-bit | Configurable | Yes | Low | Event counter |
+| Count Up/Down | P_REG_UP_DOWN | Up/down by B direction | 32-bit | Configurable | Yes | Low | Step/direction |
+| Count Edges | P_COUNT_RISES | Edge/rise count | 32-bit | Configurable | Yes | Low | Event counter |
 | High Clocks | P_HIGH_TICKS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
 | Periods Ticks | P_PERIODS_TICKS | N period time | 1 clock | N periods | Yes | Medium | Precision freq |
 | Periods Highs | P_PERIODS_HIGHS | N period high | 1 clock | N periods | Yes | Medium | Duty cycle |
@@ -152,7 +152,7 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Pins | 1 (RX) | 1 (Data), clock from adjacent |
 | Bits per frame | 1-32 | 1-32 |
 | Clock routing | N/A | P_PLUS1_B etc. required |
-| Data justification | Right | Left |
+| Data justification | Left (MSB at Z[31]) | Left (MSB at Z[31]) |
 | Best for | RS-232, debug | SPI slave, shift in |
 
 ### Serial Speed Comparison

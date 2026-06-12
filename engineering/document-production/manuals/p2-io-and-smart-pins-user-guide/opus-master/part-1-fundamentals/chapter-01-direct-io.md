@@ -11,12 +11,12 @@ Each cog maintains its own set of pin control registers:
 
 | Register | Cog Address | Function |
 |----------|-------------|----------|
-| DIRA | $1FE | Output enable bits for P0..P31 (active high) |
-| DIRB | $1FF | Output enable bits for P32..P63 (active high) |
-| OUTA | (shared) | Output state bits for P0..P31 |
-| OUTB | (shared) | Output state bits for P32..P63 |
-| INA | (shared) | Input state bits for P0..P31 |
-| INB | (shared) | Input state bits for P32..P63 |
+| DIRA | $1FA | Output enable bits for P0..P31 (active high) |
+| DIRB | $1FB | Output enable bits for P32..P63 (active high) |
+| OUTA | $1FC | Output state bits for P0..P31 |
+| OUTB | $1FD | Output state bits for P32..P63 |
+| INA | $1FE | Input state bits for P0..P31 |
+| INB | $1FF | Input state bits for P32..P63 |
 
 ### The Three-State Model
 
@@ -221,7 +221,7 @@ Drives pin to the current state of the C flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to C flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -248,7 +248,7 @@ Drives pin to the inverse of the C flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !C (inverted C flag)
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -275,7 +275,7 @@ Drives pin to the current state of the Z flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to Z flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -302,7 +302,7 @@ Drives pin to the inverse of the Z flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !Z (inverted Z flag)
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -446,7 +446,7 @@ Sets output state to the C flag value without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to C flag value
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -465,7 +465,7 @@ Sets output state to the inverse of C flag without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to !C
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -484,7 +484,7 @@ Sets output state to the Z flag value without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to Z flag value
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -503,7 +503,7 @@ Sets output state to the inverse of Z flag without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to !Z
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -633,7 +633,7 @@ Sets direction based on C flag.
 **Operation:**
 
 1. Set DIR bit for pin D to C flag value
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -651,7 +651,7 @@ Sets direction based on inverse of C flag.
 **Operation:**
 
 1. Set DIR bit for pin D to !C
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -669,7 +669,7 @@ Sets direction based on Z flag.
 **Operation:**
 
 1. Set DIR bit for pin D to Z flag value
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -687,7 +687,7 @@ Sets direction based on inverse of Z flag.
 **Operation:**
 
 1. Set DIR bit for pin D to !Z
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -808,7 +808,7 @@ Floats pin and sets output register to C flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to C flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -827,7 +827,7 @@ Floats pin and sets output register to inverse of C flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !C
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -846,7 +846,7 @@ Floats pin and sets output register to Z flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to Z flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -865,7 +865,7 @@ Floats pin and sets output register to inverse of Z flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !Z
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -1132,34 +1132,34 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **DRVH** | Drive high | 1 | 1 | C/Z=OUT |
 | **DRVL** | Drive low | 1 | 0 | C/Z=OUT |
 | **DRVNOT** | Drive toggle | 1 | toggle | C/Z=OUT |
-| **DRVC** | Drive to C | 1 | C | Z=OUT |
-| **DRVNC** | Drive to !C | 1 | !C | Z=OUT |
-| **DRVZ** | Drive to Z | 1 | Z | Z=OUT |
-| **DRVNZ** | Drive to !Z | 1 | !Z | Z=OUT |
+| **DRVC** | Drive to C | 1 | C | C/Z=OUT |
+| **DRVNC** | Drive to !C | 1 | !C | C/Z=OUT |
+| **DRVZ** | Drive to Z | 1 | Z | C/Z=OUT |
+| **DRVNZ** | Drive to !Z | 1 | !Z | C/Z=OUT |
 | **DRVRND** | Drive random | 1 | rnd | C/Z=OUT |
 | **OUTH** | Output high | - | 1 | C/Z=OUT |
 | **OUTL** | Output low | - | 0 | C/Z=OUT |
 | **OUTNOT** | Output toggle | - | toggle | C/Z=OUT |
-| **OUTC** | Output to C | - | C | Z=OUT |
-| **OUTNC** | Output to !C | - | !C | Z=OUT |
-| **OUTZ** | Output to Z | - | Z | Z=OUT |
-| **OUTNZ** | Output to !Z | - | !Z | Z=OUT |
+| **OUTC** | Output to C | - | C | C/Z=OUT |
+| **OUTNC** | Output to !C | - | !C | C/Z=OUT |
+| **OUTZ** | Output to Z | - | Z | C/Z=OUT |
+| **OUTNZ** | Output to !Z | - | !Z | C/Z=OUT |
 | **OUTRND** | Output random | - | rnd | C/Z=OUT |
 | **DIRH** | Direction output | 1 | - | C/Z=DIR |
 | **DIRL** | Direction input | 0 | - | C/Z=DIR |
 | **DIRNOT** | Direction toggle | toggle | - | C/Z=DIR |
-| **DIRC** | Direction to C | C | - | Z=DIR |
-| **DIRNC** | Direction to !C | !C | - | Z=DIR |
-| **DIRZ** | Direction to Z | Z | - | Z=DIR |
-| **DIRNZ** | Direction to !Z | !Z | - | Z=DIR |
+| **DIRC** | Direction to C | C | - | C/Z=DIR |
+| **DIRNC** | Direction to !C | !C | - | C/Z=DIR |
+| **DIRZ** | Direction to Z | Z | - | C/Z=DIR |
+| **DIRNZ** | Direction to !Z | !Z | - | C/Z=DIR |
 | **DIRRND** | Direction random | rnd | - | C/Z=DIR |
 | **FLTH** | Float, out high | 0 | 1 | C/Z=OUT |
 | **FLTL** | Float, out low | 0 | 0 | C/Z=OUT |
 | **FLTNOT** | Float, toggle out | 0 | toggle | C/Z=OUT |
-| **FLTC** | Float, out to C | 0 | C | Z=OUT |
-| **FLTNC** | Float, out to !C | 0 | !C | Z=OUT |
-| **FLTZ** | Float, out to Z | 0 | Z | Z=OUT |
-| **FLTNZ** | Float, out to !Z | 0 | !Z | Z=OUT |
+| **FLTC** | Float, out to C | 0 | C | C/Z=OUT |
+| **FLTNC** | Float, out to !C | 0 | !C | C/Z=OUT |
+| **FLTZ** | Float, out to Z | 0 | Z | C/Z=OUT |
+| **FLTNZ** | Float, out to !Z | 0 | !Z | C/Z=OUT |
 | **FLTRND** | Float, out random | 0 | rnd | C/Z=OUT |
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |

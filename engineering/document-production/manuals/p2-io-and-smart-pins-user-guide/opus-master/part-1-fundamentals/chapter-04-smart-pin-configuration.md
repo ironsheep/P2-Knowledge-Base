@@ -95,7 +95,7 @@ WRPIN(pin, P_NCO_FREQ | P_OE)           ' NCO mode with output enable
 
 **PASM2 - Configure NCO frequency mode:**
 ```pasm2
-              wrpin     pin, ##(P_NCO_FREQ | P_OE)
+              wrpin     ##(P_NCO_FREQ | P_OE), pin
 ```
 
 **Spin2 - Configure with drive strength:**
@@ -149,7 +149,7 @@ WXPIN(pin, base_period)                  ' X = base_period
 
 **PASM2 - Set base period with frame count:**
 ```pasm2
-              wxpin     pin, x_value   ' X[15:0] = base, X[31:16] = frame
+              wxpin     x_value, pin   ' X[15:0] = base, X[31:16] = frame
 ```
 
 
@@ -199,7 +199,7 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
 
 **PASM2 - Send serial data:**
 ```pasm2
-              wypin     tx_pin, data      ' Y = data to transmit
+              wypin     data, tx_pin      ' Y = data to transmit
 ```
 
 
@@ -360,7 +360,7 @@ WRPIN(pin, mode | P_OE | ...)          ' Set mode and options
 ```
 
 ```pasm2
-              wrpin     #pin, ##(mode | P_OE)
+              wrpin     ##(mode | P_OE), #pin
 ```
 
 ### Step 3: Set Parameters (WXPIN)
@@ -370,7 +370,7 @@ WXPIN(pin, x_value)                      ' Set X register
 ```
 
 ```pasm2
-              wxpin     #pin, x_value
+              wxpin     x_value, #pin
 ```
 
 ### Step 4: Set Data/Secondary Parameters (WYPIN) - If Needed
@@ -380,7 +380,7 @@ WYPIN(pin, y_value)                      ' Set Y register
 ```
 
 ```pasm2
-              wypin     #pin, y_value
+              wypin     y_value, #pin
 ```
 
 ### Step 5: Enable Smart Pin
@@ -425,9 +425,9 @@ PUB setup_nco() | y_value
 **PASM2:**
 ```pasm2
               dirl      #OUT_PIN          ' Step 1: Reset
-              wrpin     #OUT_PIN, ##(P_NCO_FREQ | P_OE)   ' Step 2: Mode
-              wxpin     #OUT_PIN, #1      ' Step 3: Base period = 1
-              wypin     #OUT_PIN, y_val   ' Step 4: Frequency
+              wrpin     ##(P_NCO_FREQ | P_OE), #OUT_PIN   ' Step 2: Mode
+              wxpin     #1, #OUT_PIN      ' Step 3: Base period = 1
+              wypin     y_val, #OUT_PIN   ' Step 4: Frequency
               drvl      #OUT_PIN          ' Step 5: Enable
 ```
 
@@ -528,10 +528,10 @@ The B input is used for secondary signals (clock, quadrature channel B, etc.).
 | `P_AND_AB` | A AND B, B |
 | `P_OR_AB` | A OR B, B |
 | `P_XOR_AB` | A XOR B, B |
-| `P_FILT0_AB` | Filter 0 applied |
-| `P_FILT1_AB` | Filter 1 applied |
-| `P_FILT2_AB` | Filter 2 applied |
-| `P_FILT3_AB` | Filter 3 applied |
+| `P_FILT0_AB` | A and B both filtered using global filt0 settings |
+| `P_FILT1_AB` | A and B both filtered using global filt1 settings |
+| `P_FILT2_AB` | A and B both filtered using global filt2 settings |
+| `P_FILT3_AB` | A and B both filtered using global filt3 settings |
 
 ### Example - Quadrature Encoder
 
@@ -573,7 +573,7 @@ The S operand (pin number) can include a span:
 
 ```pasm2
               setq      #7                ' 8 pins total (base + 7)
-              wrpin     #0, mode_value    ' Configure pins 0-7
+              wrpin     mode_value, #0    ' Configure pins 0-7
 ```
 
 ### Span Wrap Behavior

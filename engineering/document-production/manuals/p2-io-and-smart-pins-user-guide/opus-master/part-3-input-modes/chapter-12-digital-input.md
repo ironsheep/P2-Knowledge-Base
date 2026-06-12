@@ -111,9 +111,9 @@ WRPIN(pin, P_SCHMITT_A)
 
 **Hysteresis behavior:**
 
-- Rising edge threshold: ~1.8V
-- Falling edge threshold: ~1.4V
-- Hysteresis: ~0.4V
+- Rising edge threshold: ~1.65V
+- Falling edge threshold: ~1.35V
+- Hysteresis: ~0.3V (300 mV)
 
 **Use when:**
 

@@ -39,7 +39,7 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 | %10 | A-edge to B-rise | Any A transition to B rising |
 | %11 | A-edge to B-edge | Any transition to any transition (maximum sensitivity) |
 
-**Note:** B-input can be set to the same pin as A-input for single-pin cycle measurement using ``.
+**Note:** The B-input reads the same pin as the A-input *by default* (when no `P_PLUSn_B` / `P_MINUSn_B` routing modifier is applied) — exactly what single-pin cycle measurement needs. No special constant is required.
 
 
 ## 15.2 Period-Based Modes (Measure X Periods)
@@ -561,7 +561,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 
 | Modifier | Function |
 |----------|----------|
-|  | Use A-input for both A and B (single pin) |
+| (default) | B reads the same pin as A — single-pin measurement |
 | P_PLUS1_B | Use next pin as B-input |
 | P_MINUS1_B | Use previous pin as B-input |
 | P_FILT1_AB | Add input filtering |
