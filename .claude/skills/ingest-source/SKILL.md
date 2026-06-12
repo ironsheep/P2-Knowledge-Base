@@ -49,6 +49,8 @@ that pass. The standing docs:
 
 The ingestion head owns a **quad** of standing docs (+ one shared register). Update each at the pass shown — this is load-bearing: `whats-next` and the YAML head read these.
 
+> **Certification status (2026-06-12):** the quad existed only from today; the **`KNOWLEDGE-GAPS` routing + the reviewer-notes harvest are *adopted, not yet certified*** — the **Smart Pins (Titus) rev 5** ingestion is their first real exercise. If a step doesn't work cleanly on that run, refine it in the same pass; **promote (remove this notice) once the Titus run proves the full quad-update flow end-to-end.**
+
 | Doc | Update WHEN | WHY |
 |-----|-------------|-----|
 | `README.md` (the dashboard) | **pass 0** (add row at 0%, gates open) → **pass 7** (completeness % + gate status + the C·K·I·A·X cells) | the head's status home; `whats-next` resumes from it |
@@ -233,7 +235,7 @@ source *answers* prior holes AND *opens* new ones, so a source that surfaces
 zero answered/new questions is the exception to justify, not the default.
 1. **Answer prior open questions** — review `KNOWLEDGE-GAPS.md` (the gap ledger) + prior audits; mark what this source answers by moving its ledger row **OPEN→ANSWERED** (page/section ref + the edition that filled it).
 2. **Raise new questions** this source surfaces → add to `KNOWLEDGE-GAPS.md` (Part A gap ledger, status OPEN).
-3. **Harvest embedded reviewer notes as credible feedback** — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). _(e.g. Smart Pins (Titus) rev 5 carries 27 reviewer comments.)_
+3. **Harvest embedded reviewer notes as credible feedback**  _‹NEW — under certification on the Titus rev5 run›_ — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). _(e.g. Smart Pins (Titus) rev 5 carries 27 reviewer comments.)_
 4. **Flag conflicts** — `Source A says … / Source B says … / Resolution (which is authoritative and why)`. **A conflict that touches published P2KB YAML is a corrections-register entry** — append it to `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (`NEEDS-VERIFICATION`) for the YAML head to work via `yaml-knowledge-base-maintenance`. This skill does **not** edit `deliverables/ai/P2/` itself.
 5. **Unresolved / expert-only:** where a fact is unresolved across all eligible sources, ask the user rather than guess (plain chat — no AskUserQuestion here); if only the designer can settle it, record it in `KNOWLEDGE-GAPS.md` **Part B** (questions-for-experts + who-to-ask).
 6. **Update trust scoring** (HIGH multi-source-confirmed / MEDIUM single-source / LOW conflict-or-gap).
