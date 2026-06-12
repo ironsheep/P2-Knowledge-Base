@@ -18,10 +18,12 @@ description: >-
 > Work Type Routing brainstorm. Expect to tune with friction. The shared
 > model lives in `.claude/skills/HEAD-DISPATCH-DRAFT.md`.
 
-P2-Knowledge-Base is **three heads** under one repo, and work is
-context-switchy (~70% single-head run-to-completion; ~30% interleaved —
-progress a head, set it aside, pick another, sometimes return). This skill
-is how we re-enter that work without losing the thread.
+P2-Knowledge-Base is **several work-heads** under one repo (manual, yaml,
+ingestion, obex, quickbytes — see the table below; `operations` is cross-cutting
+infrastructure, not a work-head), and work is context-switchy (~70% single-head
+run-to-completion; ~30% interleaved — progress a head, set it aside, pick
+another, sometimes return). This skill is how we re-enter that work without
+losing the thread. The glanceable cross-head map is `engineering/README.md`.
 
 **The only state we actively store is one pointer:** the todo-mcp context
 key `active_element`, value `head:element` — e.g. `manual:p2-streamer-guide`,
@@ -29,13 +31,24 @@ key `active_element`, value `head:element` — e.g. `manual:p2-streamer-guide`,
 I", "what's outstanding") is **reconstructed from standing docs and git**,
 never duplicated into a tracker.
 
-The three heads, their registry, and their standing state:
+The work-heads, their registry, and their standing state (the glanceable
+cross-head map is `engineering/README.md` — the heads board; this table is the
+machine-readable dispatch detail):
 
 | Head | Registry | Per-element standing state | Progress notion |
 |------|----------|----------------------------|-----------------|
 | **manual** | `engineering/document-production/PUBLICATION-ROSTER.md` (publications); workspace folder existence (in-dev / **instruments**) | the manual's folder — `CHANGELOG.md`, `audit/`, working notes; **instruments**: their own run artifacts (e.g. forge interactive-testing) | version (instruments: none) |
 | **yaml** (P2KB) | the YAML tree / index | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (**empty ⇒ nothing outstanding**; non-empty ⇒ the to-do list) | version |
 | **ingestion** | `engineering/ingestion/README.md` | dashboard row (completeness %, gates) + `sources/<src>/<src>-complete-extraction-audit.md` | completeness % + gates (no version) |
+| **obex** | `engineering/obex-integration/README.md` | the integration record (`OBEX-INTEGRATION-COMPLETE.md`) + last-release date; outstanding = **delta vs the last-scan baseline** (2025-09-12) | release version + delta-since-baseline (re-scan) |
+| **quickbytes** | `engineering/quickbytes-integration/README.md` | the dashboard's state line (currently **NOT processed** — plans/scraper staged, ~15% discovered); single-element, parked | not-started → in-progress → integrated (parked at bottom) |
+
+> **Single-element heads.** `yaml`, `obex`, and `quickbytes` are single-element
+> (one P2KB set / one OBEX catalog / one Quick Bytes corpus), so their
+> `active_element` is just `yaml:p2kb`, `obex:catalog`, `quickbytes:quick-bytes`.
+> `manual` and `ingestion` are multi-element (one per manual / per source).
+> **operations** is cross-cutting infrastructure (process + lessons-learned), not
+> a resumable work element — it has no `active_element` form.
 
 ## 1. Pull session state
 
@@ -101,6 +114,11 @@ then act:
   `P2KB-CORRECTION-FINDINGS.md`.
 - **ingestion** → row in `README.md` (the dashboard)? (refresh per
   `INGESTION-UPDATE-WORKFLOW.md` when turning to ingestion).
+- **obex** → single catalog; state via `obex-integration/README.md` (last
+  release + whether a delta re-scan is due vs the 2025-09-12 baseline).
+- **quickbytes** → single corpus; state via `quickbytes-integration/README.md`
+  (currently **NOT processed** — confirm intent before reviving; it's
+  deliberately parked at the bottom of the queue).
 
 ## 5. Set active and resume
 

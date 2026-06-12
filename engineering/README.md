@@ -1,103 +1,46 @@
-# Engineering Operations
+# Engineering — Heads Board (front door)
 
-*Last Updated: 2025-11-26 | Status: PASM2 Assembly Reference Manual - First Technical Draft*
+> The **operational map** of the P2-Knowledge-Base engineering effort: the *heads*
+> (independent work-fronts under one repo), each head's status at a glance, and
+> **the next actionable thing in each**. Per-head detail lives in that head's own
+> dashboard — this board links out, it does not duplicate.
+>
+> **This is the static map. `whats-next` is the guided entry.** Run the
+> `whats-next` skill at session start — it reads the `active_element` pointer,
+> resumes your thread, and routes you into the right head. This README is what you
+> read to see the *whole board* and decide where to push next.
+>
+> _Last refreshed: 2026-06-12._
 
-## Mission Metrics
+## The heads — status & next action
 
-| Metric | Status | Target |
-|--------|--------|--------|
-| **Coverage** | 95% verified (+114% increase) | 100% |
-| **Authoritative Sources** | 🏆 15+ Official (P2: 13+, P1: 2) | - |
-| **Trust Level** | 95% AUTHORITATIVE | 100% |
-| **Code Examples** | 157 validated | 500+ |
-| **Language Elements** | 287 documented | 371+ |
-| **Hardware Docs** | 100% extracted | - |
-| **Smart Pins** | 100% complete | - |
-| **Sprint Velocity** | 2,200% efficiency gain | - |
+| Head | Dashboard | Status at a glance | Next actionable |
+|------|-----------|--------------------|-----------------|
+| **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | 32 logical sources · 8 open gaps + 3 expert-Qs · **Smart Pins (Titus) rev5 ✅ today** | **Smart Pins manual cert audit** (uses Titus); then **5B verification fill** (~20 sources missing cross-source, image debt) |
+| **YAML (P2KB)** | registry → [`operations/P2KB-CORRECTION-FINDINGS.md`](operations/P2KB-CORRECTION-FINDINGS.md) · data → `deliverables/ai/P2/` | ~115 findings DONE · **open: F-115, F-116, G-001** | **YAML correction round** — F-115 (working-path provenance, ~42 files) + F-116 (hardware findability) + G-001 (WRPIN A/B selector add) |
+| **Manual** | [`document-production/README.md`](document-production/README.md) · roster → [`PUBLICATION-ROSTER.md`](document-production/PUBLICATION-ROSTER.md) | Assembly **v3.0.0** ✅ + DeSilva **v3.0.0** ✅ shipped · Single-Step in **tech review** (cover repaired 2026-06-12) · Debug-Window awaiting screenshots | **PASM/Assembly ref is DONE** (chip review is external). Next owned work: Debug-Window screenshots; Streamer review→release |
+| **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ Integrated v2.1 (2025-09-12) · 113 P2 objects · served via p2kb MCP | **Delta re-scan** vs the 2025-09-12 baseline |
+| **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process + dashboard home; owns the corrections register & lessons-learned | (infrastructure — supports the content heads) |
+| **Quick Bytes** | [`quickbytes-integration/README.md`](quickbytes-integration/README.md) | 🔴 **NOT processed** — plans + scraper staged, ~15% discovered, never executed | **Parked at the bottom** — not moving soon (tracked so it isn't lost) |
 
-## Current Focus
+## How the heads work (the model)
+- **~70% of work is single-head run-to-completion; ~30% interleaved** — progress a head, set it aside,
+  pick another, sometimes return. The only state we actively store is one pointer: the todo-mcp context
+  key `active_element` (`head:element`). Everything else is reconstructed from these dashboards + git.
+- **Each head has a working skill** (its execution counterpart): ingestion → `ingest-source`;
+  manual → `prepare-manual` / `release-manual`; yaml → `yaml-knowledge-base-maintenance`;
+  obex/quickbytes → their integration pipelines.
+- **Trust chain (sacred):** Trusted Sources → Trusted YAML → Trusted Documentation → Community.
+  Every head preserves fidelity along this chain.
 
-**Active**: PASM2 Assembly Reference Manual - First Technical Draft
-**Status**: 🚀 IN PROGRESS - YAML cleanup sprint for reference manual source data
-**Milestone**: Clean PASM2 YAML files ready for manual generation
-**Purpose**: Prepare authoritative instruction data for deSilva-style reference manual PDF
-
-## Active Goals
-1. **Enable Production P2 Code Generation** (75%)
-2. **Achieve 90% Trusted Coverage** (80% current)
-3. **Establish Predictable Sprint Velocity** (30%)
-4. **Validate Visual Refinement Methodology** (70%)
-
-## 🏆 Authoritative Sources (15+ Documents)
-
-### P2 Core Technical Documentation (3)
-| Source | Status | Authority |
-|--------|--------|----------|
-| **Silicon Doc v35** | 🏆 AUTHORITATIVE | Chip architecture |
-| **Spin2 v51** | 🏆 AUTHORITATIVE | Language specification |
-| **P2 Datasheet** | 🏆 AUTHORITATIVE | Hardware specifications |
-
-### Hardware Documentation (6)
-| Source | Part # | Authority |
-|--------|--------|----------|
-| **P2 Eval Board Rev C** | #64000 | 🏆 AUTHORITATIVE |
-| **Edge Standard Module** | #64000-ES | 🏆 AUTHORITATIVE |
-| **Edge 32MB Module** | #64000-32MB | 🏆 AUTHORITATIVE |
-| **Edge Module Breadboard** | #64020 | 🏆 AUTHORITATIVE |
-| **Edge Breakout Board** | #64029 | 🏆 AUTHORITATIVE |
-| **Edge Mini Breakout** | #64019 | 🏆 AUTHORITATIVE |
-
-### Add-On Modules (4+)
-| Source | Type | Authority |
-|--------|------|----------|
-| **WX WiFi Module** | Wireless | 🏆 AUTHORITATIVE |
-| **PropPlug Rev E** | Programming | 🏆 AUTHORITATIVE |
-| **Universal Motor Driver** | Motor Control | 🏆 AUTHORITATIVE |
-| **P2 Eval Add-On Boards** | Expansion | 🏆 AUTHORITATIVE |
-
-### P1 (Propeller 1) Documentation (2)
-| Source | Type | Purpose |
-|--------|------|---------|
-| **P1 Propeller Manual v1.2** | Complete Reference | P1 baseline, P2 manual template, migration |
-| **P1 Datasheet v1.4** | Hardware Specification | Electrical/mechanical specs, complements Manual |
-
-## Source Quality Matrix
-
-| Priority | Source | Trust | Extraction | Coverage |
-|----------|--------|-------|------------|----------|
-| 🔴 **1** | Code Examples | HIGH | 25% | Smart Pins ✅, Spin2 ✅, Flash ✅, Silicon Doc ✅ |
-| 🔴 **2** | Critical Images | HIGH | 112 images | P2 Datasheet ✅ (39) + Silicon Doc ✅ (34) + P2 Edge ✅ (39) |
-| 🔴 **3** | P2 Edge 32MB | GREEN | 100% | 30% |
-| 🟡 **4** | PASM2 Manual | GREEN | 64% | TBD |
-| 🟢 **5** | Silicon Doc | GREEN | 100% | ✅ DEEP ANALYSIS |
-| 🟢 **6** | Smart Pins | GREEN | 100% | 100% |
-
-## PDF Pipeline Status
-
-| Stage | Status | Output |
-|-------|--------|--------|
-| **Format** | ✅ Structure→Markdown | `.md` files |
-| **Transform** | ✅ LaTeX escape ready | `*-escaped.md` |
-| **Template** | ✅ Layered architecture | `.latex` + `.sty` |
-| **Generate** | ✅ PDF Forge ready | `.pdf` |
-
-## Quick Access
-
-### Documentation
-- [Ingestion Pipeline](ingestion/)
-- [Document Production](document-production/)
-- [PDF Forge System](pdf-forge/)
-- [Tools & Scripts](tools/)
-
-### Project Management
-- [Operations Guide](operations/)
-- [Sprint History](history/sprints/)
-- [Migration Report](operations/migration/MIGRATION-COMPLETE.md)
-
-### Context & Details
-- [→ About Engineering](ABOUT.md)
-- [→ Public Deliverables](../deliverables/)
-- [→ Todo MCP Mastery](.todo-mcp/mastery/)
+## Cross-cutting references
+- **Process map** → [`operations/PROCESS-GUIDANCE-ARCHITECTURE.md`](operations/PROCESS-GUIDANCE-ARCHITECTURE.md)
+- **Why the rules exist** → [`operations/lessons-learned/INDEX.md`](operations/lessons-learned/INDEX.md)
+- **Repo structure** → [`STRUCTURE-GUIDE.md`](STRUCTURE-GUIDE.md) · [`ABOUT.md`](ABOUT.md)
+- **Standards / procedures** → [`standards/`](standards/) · [`procedures/`](procedures/)
+- **Public landing page** (project intent + content availability) → the repo-root `README.md`
+  *(separate concern — the GitHub-facing pitch, not this operational board)*
 
 ---
-*Dashboard: Metrics-focused view. See ABOUT.md for context and methodology.*
+*This board is the operational front door. Keep each row's "status / next" honest and current — a stale
+board is worse than none. Detail belongs in the per-head dashboards; this stays glanceable.*
