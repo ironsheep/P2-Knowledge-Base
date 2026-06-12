@@ -30,6 +30,8 @@ Cells: ✅ done · ◐ partial · ⏳ pending · — n/a · ? verify  |  Passes 
 | **PASM2 Manual** (Parallax, preliminary) | 🏆 | ✅ | ◐ | ◐ | ✅ | ✅ | 64% _(stated; code embedded in docx md, not a validated catalog; **superseded** as the PASM2 reference by our Assembly manual)_ |
 
 ### P2 · Smart Pins
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | smart-pins | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | 97% _(stated; 174 examples, 21 mode images)_ |
 | **Smart Pins (Titus)** @ rev 5 ‹re-ingest, old extraction retired› | 🟡 **cross-check** | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | 0% _(rev5 docx staged — **next ingestion**; prior PDF extraction retired; cross-checks IOSP guide)_ |
 
@@ -37,10 +39,14 @@ Cells: ✅ done · ◐ partial · ⏳ pending · — n/a · ? verify  |  Passes 
 _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins. Add-on boards ride one header or a header pair._
 
 **Datasheets & specs (PDF)**  ‹AUTH "Core Technical" → re-filed as hardware›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | p2-datasheet | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 94% _(stated; audit: datasheet-audit-report.md — aliased)_ |
 | p2-spec-sheet | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 99% _(stated; audit: spec-sheet-audit-report.md — aliased; no images/cross-source)_ |
 
 **Development boards (12-pin header system)**  ‹AUTH "Hardware Boards"›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | p2-eval-board ‹Rev C — retired / left behind› | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(stated)_ |
 | edge-standard-module | 🏆 | ✅ | — | ✅ | ⏳ | ✅ | ~80% _(missing audit doc — only row with X but no A)_ |
 | edge-32mb-module | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(stated)_ |
@@ -49,32 +55,47 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 | edge-module-breadboard | 🏆 | ✅ | — | ✅ | ✅ | ✅ | 100% _(stated; 20 images — most complete board)_ |
 
 **Add-on boards (ride on headers)**  ‹AUTH "Add-On Modules"›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | p2-eval-add-on-boards ‹collection — incl. HUB75 + range› | 🏆 | ✅ | — | ⏳ | ✅ | ✅ | ~95% _(no images; still enumerate individual add-ons incl. HUB75)_ |
 | universal-motor-driver | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~85% _(raw txt; no images/cross-source)_ |
 | hyperRam-n-hyperFlash | 🟢 | ⏳ | — | ⏳ | ⏳ | ⏳ | 0% _(**un-ingested** — only raw CAD/schematic files)_ |
 
 **Adapters & connectivity**
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | parallax-wx-wifi | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~90% _(stated; 12+ images flagged as debt)_ |
 | p2-wx-adapter | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~90% _(stated; 8+ images flagged as debt)_ |
 | propplug-rev-e | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~95% _(stated; no images)_ |
 
 ### P2 · Boot & loaders
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | rom-booter | 🟢 | ✅ | ✅ | — | ⏳ | ⏳ | ~40% _(.lst assembly; no audit / cross-source)_ |
 | flash-loader | 🟢 | ✅ | ✅ | — | ⏳ | ⏳ | ~50% _(.spin2 source; no audit / cross-source)_ |
 
 ### P2 · Compiler & tooling  ‹proposed bucket — veto anytime›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | pnut-ts-pasm-ref | 🏆 | ✅ | ✅ | — | ◐ | ⏳ | 95% _(stated; 359-instr JSON DB; audit material in audit/ subfolder — needs a consolidated rollup doc, 5B)_ |
 | iron-sheep-compiler | 🟢 | ◐ | — | — | ⏳ | ⏳ | ~15% _(single condition-codes doc only)_ |
 
 ### P2 · Community code & tutorials  ‹proposed›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | taqoz | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~25% _(preliminary web research only; unverified)_ |
 | quick-bytes-code | 🟡 | ⏳ | ◐ | — | ⏳ | ⏳ | ~15% _(one .spin2; zips unextracted; no narrative)_ |
 
 ### P2 · Other reference  ‹proposed›
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | p2docs-github-io | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~30% _(narrative + validation report only)_ |
 
 ### P1 · (queued — bring the P1 database up to P2-level richness)  ‹DASH "P1 Sources"›
 _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manual, possibly deSilva P1 tutorial); some already partially ingested (text+audit) → queue completes images/code + enriches._ **Plan:** `plans/p1-sources-ingestion-plan.md`.
+
+| Source | Auth | C | K | I | A | X | Cmpl* |
+|--------|------|---|---|---|---|---|-------|
 | p1-propeller-manual-v1.2 | 🏆 | ✅ | ⏳ | ⏳ | ✅ | ⏳ | ~60% _(803KB text + audit; code inline; no images)_ |
 | p1-datasheet-v1.4 | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 100% _(stated; no images extracted)_ |
 | desilva-p1-tutorial | 🟢 | ✅ | ◐ | ⏳ | ⏳ | ⏳ | ~45% _(text + voice-analysis; code inline; no audit)_ |
