@@ -1,0 +1,21 @@
+CON
+  _clkfreq = 25_000_000
+  A_ADC = 46
+
+DAT
+	org	0
+      mov dira, #$FF				'LED output
+      dirl      #A_ADC	           'ADC reset
+      wrpin     A_ADC_mode, #A_ADC    'Set up mode for ADC     
+      wxpin     #%00_0111, #A_ADC     '8-bit resolution
+      dirh      #A_ADC                'Enable Smart Pin
+	
+.test_loop	nop
+      waitx ##$100_000			'Delay between output
+      rdpin pin_data, #A_ADC          'Get ADC result
+      mov outa, pin_data              'Data to LEDs
+      jmp #.test_loop                                
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+A_ADC_mode	long	0
+pin_data	     long  0

@@ -1,0 +1,16 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+sync_receive  	mov dira, ##$00FF     'Pins P7--P0 set as outputs
+		
+        dirl #rxin                    'Reset receiver Smart Pin
+        wrpin sync_rx_mode, #rxin	'Set sync receiver mode
+        wxpin #%1_00111, #rxin		'Set receiver to sample on B-
+                                      ' input edge
+        dirh #rxin			      'Enable Smart-Pin sync receiver
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+rxin	long	0
+sync_rx_mode    long  %0000_0001_000_0000000000000_01_11101_0

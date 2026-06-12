@@ -1,0 +1,17 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+.test_loop   waitse1                   'Wait for #1 event
+             rdpin pin_data, #A_ADC    'Event detected, get ADC data
+             sub   pin_data, diff      'Compute sample
+             ADD   diff, pin_data      'Update diff value
+             SHR   pin_data, #6        'Right-justify data		
+             mov   outa, pin_data      'Display result on LEDs
+             jmp #.test_loop           'Run loop again                                
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+A_ADC	long	0
+diff	long	0
+pin_data	     long  0

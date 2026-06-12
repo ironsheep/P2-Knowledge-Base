@@ -1,0 +1,27 @@
+CON
+  _clkfreq = 25_000_000
+  A_in = 53
+
+DAT
+	org	0
+        dirl   #A_in	                 'Count A-input highs mode
+        wrpin  A_in_mode, #A_in        'Set up mode for pin P53     
+        dirh   #A_in                   'Enable Smart Pin
+	
+.test_loop_x	nop
+                rqpin pin_data,  #A_in        'Get Carry bit
+   if_nc        waitx #200                    'Short delay
+   if_nc        jmp   #.test_loop_x           'If C=0 wait for logic-1
+                mov   Logic_1_count, pin_data 'Get logic-1 count
+                                               
+.test_loop_y	nop                          'now wait for C = 0
+                rqpin pin_data,  #A_in wc     'Get carry bit
+   if_c         waitx #200                    'Short wait
+   if_c         jmp   #.test_loop_y           'If C=1 wait for logic-0
+                mov   Logic_0_count, pin_data 'Get logic-0 count
+                jmp   #.test_loop_x           'Go wait for a logic-1
+        
+A_in_mode       long  %0000_0000_000_0001000000000_00_10000_0
+pin_data        long  0       
+Logic_1_count   long  0
+Logic_0_count   long  0

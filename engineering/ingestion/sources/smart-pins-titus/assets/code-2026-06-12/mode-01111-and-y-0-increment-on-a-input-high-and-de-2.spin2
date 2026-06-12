@@ -1,0 +1,27 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+        dirl    #A_in                  'Count A-input highs
+        wrpin   A_in_mode,     #A_in   'Set up mode for pin P53
+        wxpin   ##$17D_7840,   #A_in   'Set continuous count 1-sec,
+        wypin   #0,            #A_in   'Count only A-input highs  
+        dirh    #A_in                  'Enable Smart Pin
+	
+.test_loop	nop
+        testp   #A_in  wc              'Get state of Carry flag
+        nop
+if_nc   jmp     #.test_loop            'If no C flag, repeat testing
+        rdpin   rcvd_data,     #A_in   'Found carry bit, get data		
+        wypin	rcvd_data, #txout      'Counter data sent via SPI
+        wypin   #64,   #clkout         'Start clock, transmit data
+        nop
+        jmp #.test_loop                'Stay in this loop "forever"
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+A_in	long	0
+A_in_mode    long  %0000_0001_000_0000000000000_00_01110_0
+clkout	long	0
+rcvd_data     long	0
+txout	long	0

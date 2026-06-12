@@ -1,0 +1,14 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+      dirl    #20                'Setup Smart Pin at P20
+      wrpin   NCO_Config,  #20   'Set config for Transition mode
+      wxpin   #25, #20           'Base period at 1 usec (25 MHz/25)
+      dirh    #20                'Finished setup
+      wypin   Y_RegData,   #20
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+NCO_Config	long	%0000_0000_000_0000_000000000_01_00110_0
+Y_RegData	long	0

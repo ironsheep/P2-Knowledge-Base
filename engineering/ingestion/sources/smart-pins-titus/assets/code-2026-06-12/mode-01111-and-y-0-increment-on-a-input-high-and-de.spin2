@@ -1,0 +1,21 @@
+CON
+  _clkfreq = 25_000_000
+  clkout = 40
+  txout = 41
+  A_in = 53
+
+DAT
+	org	0
+        dirl                   #txout  'Transmitter setup
+        wrpin   sync_tx_mode,  #txout  'Set sync tx mode for pin 41
+        wxpin	#%1_11111,     #txout  'Set stop/start mode, 32 bits
+        dirh	               #txout	  'Enable transmitter output
+	
+        dirl    #clkout                'Clock output setup
+        wrpin   clock_mode,    #clkout 'Set pin as transition mode
+        wxpin	##$1000,       #clkout 'Set base period for transmit
+        dirh	#clkout                'Enable clock-output
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+clock_mode    long  %0000_0000_000_000000_0_000000_01_00101_0
+sync_tx_mode  long  %0000_1111_000_0000000000000_01_11100_0

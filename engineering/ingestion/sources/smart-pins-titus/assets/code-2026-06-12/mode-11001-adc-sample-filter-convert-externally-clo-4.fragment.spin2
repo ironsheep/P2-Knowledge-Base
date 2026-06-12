@@ -1,0 +1,14 @@
+' Titus rev5 — illustrative conceptual fragment (NOT standalone-compilable)
+' Mode/section: %11001:  ADC sample, filter, convert, externally clock
+' References undefined conceptual symbols; terse Silicon-Doc voice.
+'
+SETSE1 #%001<<6 + adcpin             'SE1 triggers on pin high
+.loop WAITSE1                       'wait for sample period done
+RDPIN x,#adcpin                     'get SINC3 accumulator
+SUB x,diff1                         'compute sample
+ADD diff1,x                         'update diff1 value
+SUB x,diff2                         'compute sample
+ADD diff2,x                         'update diff2 value
+SHR x,#7                            'justify 14-bit sample
+'now use the "x" data from the ADC as you choose
+JMP #.loop                          'loop for next period

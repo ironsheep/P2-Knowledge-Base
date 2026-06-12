@@ -1,0 +1,17 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+        dirl    #20				'Setup Smart Pin at P20
+        wrpin   TransConfig,    #20	'Setup for Transition mode
+        wxpin   TransTiming,    #20	'Set time between transitions
+        dirh    #20				'Finished setup
+        wypin   Cycles,      	#20	'Send pulse count to Y register
+.myloop nop					'Delay two clocks for IN to drop
+        jmp	#.myloop			'Program waits forever
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+Cycles	long	0
+TransConfig	long	0
+TransTiming	long	0

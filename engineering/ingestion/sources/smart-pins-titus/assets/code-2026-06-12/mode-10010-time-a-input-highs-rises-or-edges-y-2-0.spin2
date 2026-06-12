@@ -1,0 +1,21 @@
+CON
+  _clkfreq = 25_000_000
+  A_in = 53
+
+DAT
+	org	0
+      dirl     #A_in                 'Use A_in, pin 53
+      wrpin    A_in_mode,   #A_in    'Set up mode for pin P53     
+      wxpin    ##$7,        #A_in    'Wait for $7 events
+      wypin    ##%001,      #A_in    'Count A-input high states
+      dirh     #A_in                 'Enable Smart Pin
+	
+.test_loop	nop
+           testp #A_in  wc
+if_nc      jmp #.test_loop          'If C=0 wait for logic-1
+           rdpin pin_data, #A_in    'C = 1, so save count
+           jmp #.test_loop                                
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+A_in_mode    long  %0000_0001_000_0000000000000_00_01110_0
+pin_data	     long  0

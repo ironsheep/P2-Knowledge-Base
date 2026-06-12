@@ -1,0 +1,13 @@
+' Titus rev5 — illustrative conceptual fragment (NOT standalone-compilable)
+' Mode/section: %11010 = ADC Scope with Trigger
+' References undefined conceptual symbols; terse Silicon-Doc voice.
+'
+pinblock = 52
+RQPIN x,#pinblock | 3    'read pin3 long into x
+ROLBYTE y,x              'rotate pin3 byte into y
+RQPIN x,#pinblock | 2    'read pin2 long into x
+ROLBYTE y,x              'rotate pin2 byte into y
+RQPIN x,#pinblock | 1    'read pin1 long into x
+ROLBYTE y,x              'rotate pin1 byte into y
+RQPIN x,#pinblock | 0    'read pin0 long into x
+ROLBYTE y,x              'rotate pin0 byte into y

@@ -1,0 +1,31 @@
+CON
+  _clkfreq = 25_000_000
+  clkout = 40
+  txout = 41
+  rxin = 30
+  rxclkin = 31
+
+DAT
+	org	0
+	'Remember to connect these pins as noted!     	
+        coginit	id, ##@sync_receive     'Initialize an available cog
+                                        ' for sync receive
+' Sync-serial transmit of data at set intervals.
+		
+        dirl    #txout                    'Transmitter setup
+        wrpin   sync_tx_mode, #txout      'Set sync tx mode pin 41
+        wxpin   #%1_00111,    #txout     'Set up stop/start mode,
+                                          ' 8 bits (7 + 1)
+	   dirh	#txout                    'Enable xmtr output
+	
+	   dirl    #clkout                   'Clock output setup
+        wrpin   clock_mode,  #clkout       'Set pin as transition-
+                                           'output mode
+	   wxpin	##$1000,     #clkout       'Set output base period
+	   dirh	             #clkout       'Enable clock-output
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+clock_mode    long  %0000_0000_000_000000_0_000000_01_00101_0
+id	long	0
+sync_receive	long	0
+sync_tx_mode  long  %0000_1111_000_0000000000000_01_11100_0

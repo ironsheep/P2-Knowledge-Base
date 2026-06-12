@@ -1,0 +1,14 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+dat       org        0         
+          dirl       #20             'Set DAC at pin P20
+          wrpin      DACconfig, #20  'Set DAC configuration
+          wxpin      DACperiod, #20  'Set DAC update time
+          dirh       #20
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+DACconfig	long	%0000_0000_000_10100_00000000_01_00001_0
+DACperiod long $100

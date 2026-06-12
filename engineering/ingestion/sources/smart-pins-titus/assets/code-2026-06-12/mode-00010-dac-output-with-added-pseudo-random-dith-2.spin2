@@ -1,0 +1,16 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+.myloop   wypin  DACvolt,  #20  'Send voltage value to P20
+.waitper	nop
+          testp  #20  wc        'Test P20, get Carry flag
+if_nc     jmp  #.waitper        'Wait for carry flag = 1
+          add DACvolt,   #$100  'Add $100 (256) to DAC voltage
+          wypin DACvolt, #20    'Load DAC
+          nop
+	jmp	#.myloop              'Do this loop "forever"
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+DACvolt	long	0

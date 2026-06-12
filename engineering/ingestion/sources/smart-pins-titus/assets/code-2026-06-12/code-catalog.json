@@ -1,0 +1,282 @@
+[
+  {
+    "block": 0,
+    "file": null,
+    "label": "Propeller 2 I/O-pin registers and I/O-pin Instructions",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 1,
+    "file": null,
+    "label": "Pin-Direction Instructions",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 2,
+    "file": null,
+    "label": "Pin-Output Instructions",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 3,
+    "file": null,
+    "label": "Pin-Float Instructions",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 4,
+    "file": null,
+    "label": "Pin-Drive Instructions",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 5,
+    "file": null,
+    "label": "WRPIN",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 6,
+    "file": null,
+    "label": "WRPIN",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 7,
+    "file": null,
+    "label": "WRPIN",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 8,
+    "file": "assets/code-2026-06-12/mode-00001-00011-long-depository-when-not-in-dac-mo.spin2",
+    "label": "%00001..%00011:  Long Depository (when not in DAC mode)",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 9,
+    "file": "assets/code-2026-06-12/mode-00001-random-noise-via-dac.spin2",
+    "label": "%00001:  Random noise via DAC",
+    "status": "compiles-clean",
+    "undef_stubbed": 1
+  },
+  {
+    "block": 10,
+    "file": "assets/code-2026-06-12/mode-00010-dac-output-with-added-pseudo-random-dith.spin2",
+    "label": "%00010:  DAC output with added pseudo-random dither",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 11,
+    "file": "assets/code-2026-06-12/mode-00010-dac-output-with-added-pseudo-random-dith-2.spin2",
+    "label": "%00010:  DAC output with added pseudo-random dither",
+    "status": "compiles-clean",
+    "undef_stubbed": 1
+  },
+  {
+    "block": 12,
+    "file": "assets/code-2026-06-12/mode-00011-dac-output-with-added-pwm-dither.spin2",
+    "label": "%00011:  DAC output with added PWM dither",
+    "status": "compiles-clean",
+    "undef_stubbed": 4
+  },
+  {
+    "block": 13,
+    "file": "assets/code-2026-06-12/mode-00100-pulse-cycle-output.spin2",
+    "label": "%00100:  Pulse/cycle output",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 14,
+    "file": "assets/code-2026-06-12/mode-00100-pulse-cycle-output-2.spin2",
+    "label": "%00100:  Pulse/cycle output",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 15,
+    "file": "assets/code-2026-06-12/mode-00110-numerically-controlled-oscillator-nco.spin2",
+    "label": "%00110:  Numerically Controlled Oscillator (NCO)",
+    "status": "compiles-clean",
+    "undef_stubbed": 1
+  },
+  {
+    "block": 16,
+    "file": "assets/code-2026-06-12/mode-00111-numerically-controlled-oscillator-nco-du.spin2",
+    "label": "%00111:  Numerically Controlled Oscillator (NCO) Duty Cycle",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 17,
+    "file": "assets/code-2026-06-12/mode-01000-triangle-wave-pulse-width-modulation-pwm.spin2",
+    "label": "%01000 = Triangle-wave pulse-width modulation (PWM)",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 18,
+    "file": "assets/code-2026-06-12/mode-01001-pwm-sawtooth.spin2",
+    "label": "%01001:  PWM sawtooth",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 19,
+    "file": "assets/code-2026-06-12/mode-01011-a-b-input-quadrature-encoder.spin2",
+    "label": "%01011:  A/B-input quadrature encoder",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 20,
+    "file": "assets/code-2026-06-12/mode-01011-a-b-input-quadrature-encoder-2.spin2",
+    "label": "%01011:  A/B-input quadrature encoder",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 21,
+    "file": "assets/code-2026-06-12/mode-01110-and-y-0-increment-on-a-input-positive-ed.spin2",
+    "label": "%01110 AND Y > 0:  Increment on A-input positive edge and de",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 22,
+    "file": "assets/code-2026-06-12/mode-01111-and-y-0-increment-on-a-input-high-and-de.spin2",
+    "label": "%01111 AND Y > 0:  Increment on A-input high and decrement o",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 23,
+    "file": "assets/code-2026-06-12/mode-01111-and-y-0-increment-on-a-input-high-and-de-2.spin2",
+    "label": "%01111 AND Y > 0:  Increment on A-input high and decrement o",
+    "status": "compiles-clean",
+    "undef_stubbed": 5
+  },
+  {
+    "block": 24,
+    "file": "assets/code-2026-06-12/mode-10000-time-a-input-states.spin2",
+    "label": "%10000:  Time A-input states",
+    "status": "compiles-clean",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 25,
+    "file": "assets/code-2026-06-12/mode-10001-time-logic-1-states-on-a-input.spin2",
+    "label": "%10001:  Time logic-1 states on A-input",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 26,
+    "file": "assets/code-2026-06-12/mode-10010-time-a-input-highs-rises-or-edges-y-2-0.spin2",
+    "label": "%10010:  Time A-input highs, rises, or edges  (Y[2] = 0)",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 27,
+    "file": "assets/code-2026-06-12/mode-10011-measure-time-for-x-events-to-occur.spin2",
+    "label": "%10011:  Measure time for X events to occur",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 28,
+    "file": "assets/code-2026-06-12/mode-11001-adc-sample-filter-convert-externally-clo.spin2",
+    "label": "%11001:  ADC sample, filter, convert, externally clock",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 29,
+    "file": "assets/code-2026-06-12/mode-11001-adc-sample-filter-convert-externally-clo-2.spin2",
+    "label": "%11001:  ADC sample, filter, convert, externally clock",
+    "status": "compiles-clean",
+    "undef_stubbed": 1
+  },
+  {
+    "block": 30,
+    "file": "assets/code-2026-06-12/mode-11001-adc-sample-filter-convert-externally-clo-3.spin2",
+    "label": "%11001:  ADC sample, filter, convert, externally clock",
+    "status": "compiles-clean",
+    "undef_stubbed": 3
+  },
+  {
+    "block": 31,
+    "file": "assets/code-2026-06-12/mode-11001-adc-sample-filter-convert-externally-clo-4.fragment.spin2",
+    "label": "%11001:  ADC sample, filter, convert, externally clock",
+    "status": "illustrative-fragment",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 32,
+    "file": "assets/code-2026-06-12/mode-11010-adc-scope-with-trigger.fragment.spin2",
+    "label": "%11010 = ADC Scope with Trigger",
+    "status": "illustrative-fragment",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 33,
+    "file": "assets/code-2026-06-12/mode-11101-synchronous-serial-receive-ssr.spin2",
+    "label": "%11101:  Synchronous serial receive (SSR)",
+    "status": "compiles-clean",
+    "undef_stubbed": 4
+  },
+  {
+    "block": 34,
+    "file": "assets/code-2026-06-12/mode-11101-synchronous-serial-receive-ssr-2.spin2",
+    "label": "%11101:  Synchronous serial receive (SSR)",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 35,
+    "file": "assets/code-2026-06-12/mode-11101-synchronous-serial-receive-ssr-3.spin2",
+    "label": "%11101:  Synchronous serial receive (SSR)",
+    "status": "compiles-clean",
+    "undef_stubbed": 2
+  },
+  {
+    "block": 36,
+    "file": null,
+    "label": "%11110:  Asynchronous serial transmit (AST)",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 37,
+    "file": "assets/code-2026-06-12/mode-11110-asynchronous-serial-transmit-ast-2.spin2",
+    "label": "%11110:  Asynchronous serial transmit (AST)",
+    "status": "compiles-clean",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 38,
+    "file": null,
+    "label": "%11111:  Asynchronous serial receive (ASR)",
+    "status": "prose-table",
+    "undef_stubbed": 0
+  },
+  {
+    "block": 39,
+    "file": "assets/code-2026-06-12/mode-11111-asynchronous-serial-receive-asr-2.spin2",
+    "label": "%11111:  Asynchronous serial receive (ASR)",
+    "status": "compiles-clean",
+    "undef_stubbed": 6
+  }
+]

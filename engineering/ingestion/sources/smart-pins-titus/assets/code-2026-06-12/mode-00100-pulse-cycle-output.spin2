@@ -1,0 +1,20 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+' 25-MHz system clock frequency
+        dirl     #20                 'Setup Smart Pin at P20
+        wrpin    PulseConfig,  #20   'Set config for pulse/cycle
+        wxpin    PulseTiming,  #20   'Set cycle time and logic-0
+                                     '  period
+        dirh     #20                 'Finished setup
+        wypin	Cycles,     #20	     'Pulse count to Y register
+        nop                          'Delay two clocks for IN to drop
+.myloop				
+        jmp	#.myloop             'Program waits forever
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+Cycles	long	0
+PulseConfig	long	0
+PulseTiming	long	0

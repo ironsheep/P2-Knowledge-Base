@@ -1,0 +1,19 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+.test_loop	testp #rxin  wc			'Wait in loop IN flag = set
+		nop
+if_nc		jmp #.test_loop			'If no C flag, repeat testing
+		rqpin rcvd_data, #rxin	'Put 32-bit data (see text) in
+                                      ' rcvd_data
+		shr rcvd_data, #24		'shift-right 24 bit places to
+                                      ' align LSB at bit 0
+		mov outa, rcvd_data		'Send 8 bit data to LEDs
+		jmp #.test_loop			'Continue to rcv and display
+                                      ' data
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+rcvd_data     long	0
+rxin	long	0

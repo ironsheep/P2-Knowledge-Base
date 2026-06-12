@@ -1,0 +1,21 @@
+CON
+  _clkfreq = 25_000_000
+  txpin = 20
+  bitper = $3640_0007
+  txmode = %0000_0000_000_0000000000000_01_11110_0
+
+DAT
+	org	0
+' Constants for serial-port control
+  
+     wrpin   ##txmode,  #txpin       ' Smart Pin async transmit mode
+     wxpin   ##bitper,  #txpin       ' transmit period for 8 bits
+     dirh    #txpin                   ' enable Smart Pin tx 
+     nop
+     wypin   #$55,       #txpin       ' transmit test %01010101
+     nop
+.flag_test  testp   #txpin  wc        ' wait for empty buffer
+if_nc   jmp     #.flag_test            ' if not empty, test again
+        waitx   ##25_000_000 / 70      ' delay inserted for testing
+        wypin   #$99,        #txpin    ' send testing byte to tx pin
+        jmp     #.flag_test             ' transmit "forever"

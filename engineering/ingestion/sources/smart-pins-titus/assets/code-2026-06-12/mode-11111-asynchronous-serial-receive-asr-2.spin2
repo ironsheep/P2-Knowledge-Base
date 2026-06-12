@@ -1,0 +1,21 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+     wrpin   ##rxmode,  #rxpin    ' Smart Pin async receive mode
+     wxpin   ##_bitper, #_rxpin   ' receive period for 8 bits
+     dirh    #_rxpin              ' enable Smart Pin rcvr
+     nop
+.rcvr   testp  #rxpin  wc         ' test flag, wait for data
+     if_nc   jmp #.rcvr           ' no flag, test again
+     rdpin   rcvd_data, #rxpin    ' data rcvd, save it
+     shr rcvd_data, #32 - numb_bits  'right-justify data
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+_bitper	long	0
+_rxpin	long	0
+numb_bits	long	0
+rcvd_data     long	0
+rxmode	long	0
+rxpin	long	0

@@ -1,0 +1,23 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+      mov dira,    ##$FF			'Set P15..P8 as outputs for LEDs               
+      dirl         #32				 'Setup Smart Pin at P32
+      wrpin QuadEnc_Config,  #32	 'Set for Quad-Encoder mode
+        wxpin   X_RegData,  #32        'Set continuous count update
+        dirh    #32                    'Finished setup       
+        nop                            'Short delay
+.myloop nop
+        rqpin  QuadEnc_data, #32 	 'Get counts
+        sar    QuadEnc_data, #2        'Arithmetic shift right 2
+                                       ' (divide by 4)
+        nop		
+        mov    outa, QuadEnc_data	 'send to LEDs			
+        jmp    #.myloop                'Program waits forever
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+QuadEnc_Config  long	%0000_0001_000_00000_00000000_00_01011_0
+QuadEnc_data    long   $0
+X_RegData	long	0

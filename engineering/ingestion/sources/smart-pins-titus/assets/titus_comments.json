@@ -1,0 +1,191 @@
+[
+  {
+    "id": "0",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T21:55:32Z",
+    "text": "A formula would be needed here ? ie exactly how does the 'random' use the extended data."
+  },
+  {
+    "id": "1",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T23:13:12Z",
+    "text": "What Chip calls 'count states' here, is useful to capture a precise duty cycle. To capture DUTY coming from a small MCU with a 1% RC SysCLK, (or 0.5% resonator) you need to capture overall time and high time on the same pulse(s). The dual capture then ratio removes the remote MCU sysclk calibrate errors, and can now resolve to the jitter on the remote MCU, which is 10~100x better."
+  },
+  {
+    "id": "2",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T23:32:21Z",
+    "text": "These are reciprocal counter modes, and they should say 'For whole periods' as the X+ means the X setting is a minimum, and the actual capture time window is snapped to the next whole Fin cycle. Most common use is to configure TWO smart pin cells mapped onto a single physical pin, and then Frequency = (captured whole periods)/(time for those periods) = cycles per second."
+  },
+  {
+    "id": "3",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T22:58:45Z",
+    "text": "I think from Chip's comment that 8 bit dither frame is fixed, & you cannot change it ? Given 16b is probably optimistic, it may have been useful to have a (eg) 4 bit extension, which would give 12b DAC on a faster average time-period."
+  },
+  {
+    "id": "4",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T22:44:23Z",
+    "text": "The opcode is 9 bits, the P2 legal pin is 6 bits, so maybe this can say 'lower 6 bits' ?"
+  },
+  {
+    "id": "5",
+    "author": "Deleted user",
+    "initials": null,
+    "date": "2021-09-08T08:09:55Z",
+    "text": "This is wrong, see the discussion here: https://forums.parallax.com/discussion/173772/smartpin-mode-sync-serial-pin-issues#latest"
+  },
+  {
+    "id": "6",
+    "author": "Jonathan Shook",
+    "initials": null,
+    "date": "2020-11-08T10:13:50Z",
+    "text": "What is an intuitive example of why you would want to do this (both input and floating pin to some logic state)?"
+  },
+  {
+    "id": "7",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T00:35:00Z",
+    "text": "Chip had this working, and maybe his new debug display/capture features can help the docs here a lot ?"
+  },
+  {
+    "id": "8",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T22:08:21Z",
+    "text": "DOCs should state if Y=0 is valid. Is that continuous output, or no output ?"
+  },
+  {
+    "id": "9",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T23:07:16Z",
+    "text": "Other vendors call this Pin Toggle- should the name be changed ? perhaps Burst Toggle ?\nIn P2's case Pin P, toggles Y times, spaced X sysclks"
+  },
+  {
+    "id": "10",
+    "author": "Anonymous",
+    "initials": null,
+    "date": "2020-08-21T01:27:40Z",
+    "text": "With regards for the D/# and S/# nomenclature, you might explain these are shorthand for \"Source\" and \"Destination\" or in the case of \"#\", immediate data."
+  },
+  {
+    "id": "11",
+    "author": "Miguel Ant\u00f3nio Nunes",
+    "initials": null,
+    "date": "2026-03-31T15:27:35Z",
+    "text": "Maybe Chip is thinking about a 128bit Version for the P3 and with 16 COGs :)"
+  },
+  {
+    "id": "12",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T00:33:09Z",
+    "text": "External 16 bit SDM ADCs are common in 8 pin packages, ones like TI  AMC1035 are non-isolated, and AMC1303 (etc) are isolated, Usually these have  10~20MHz clocks and 78kHz bandwidths for Motor Control."
+  },
+  {
+    "id": "13",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T23:03:06Z",
+    "text": "Chip's code uses 3 pins,  which is less common, but extracts both frequency and precise duty. An important detail when using multiple pins, is this line of code, which starts 3 pins on the same SysCLK\ndirh#msr_pins'concurrently enable smart pins"
+  },
+  {
+    "id": "14",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T23:38:15Z",
+    "text": "Chip's use of words time, states and periods is uncommon and thus confusing. Working from his code,  states is a gated counter, that enables when Fin=H, so a 25% duty cycle will have 25% of the value in the 'states' pin capture, that the SysCLKs captured in the 'time' pin.\nPeriods captures the Fin whole cycles, it can be as low as 1 for low frequencies, where nominal gate time of X+ will  auto-stretch. Thus a X=100ms min gate time, with a 1s Fin will stretch to capture a reading every second."
+  },
+  {
+    "id": "15",
+    "author": "Frank Freedman",
+    "initials": null,
+    "date": "2024-01-24T07:21:41Z",
+    "text": "Drop space ==> Depending"
+  },
+  {
+    "id": "16",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T22:46:49Z",
+    "text": "Triangle PWM provides a easy way to get dead-band control into PWM & there were questions on the Zoom about deadband.\nCan the nice waveform here, be expanded to add a P21 pin set for $0088 ?"
+  },
+  {
+    "id": "17",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T22:41:31Z",
+    "text": "An artifact of NCO is jitter. In this example,  the actual ideal is to add 238609294.22222',  but actually 238609294 is added, that means there will be rare cases of 19us periods here ( every 1073.741823s)"
+  },
+  {
+    "id": "18",
+    "author": "Carroll Moore",
+    "initials": null,
+    "date": "2020-10-31T05:47:00Z",
+    "text": "Should #A_in be followed by wc in .test_loop_x ?  If not, why?"
+  },
+  {
+    "id": "19",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-21T00:50:06Z",
+    "text": "Included here? should be notes on the Pin Electrical choices.\nHere is a doc evanh? did for that :\n\nCogs share the configuring of each per-pin mode register.\nA pin will stay configured even if all cogs are restarted.\n\nWRPIN   {#}D,{#}SWrite D to mode register of pin S[5:0], acknowledge smartpin if operating.\n\n   bit 30    25     20   15   10      5     0\n        |     |      |    |    |      |     |\nD/# = %AAAA_BBBB_FFF_PPPPPPPPPPPPP_TT_MMMMM_0\n\n 2    1    1\n 0    5    0\n%PPPPPPPPPPPPP: low-level custom pin control\n\ncommon labelling of pin config bits\n%C = clocked/registered I/O (extra clock for IN and OUT)\n%I = invert IN output\n%O = invert OUT input\n%HHH/LLL = digital out drive strength\n000: Fast, 20R\n001: 1k5R\n010: 15kR\n011: 150kR\n100: 1mA\n101: 100uA\n110: 10uA\n111: Float\nPinA is specified pin number\nPinB is PinA's odd/even pair\n\n 0      5    0\n%0_VVV_CIOHHHLLL = Digital mode, 3.3 volt\nDIR enables PinA digital output\n%VVV = Digital config\n000: IN = PinA logic, PinA output from OUT\n001: IN = PinA logic, PinA output from IN\n010: IN = PinB logic, PinA output from IN\n011: IN = PinA schmitt, PinA output from OUT\n100: IN = PinA schmitt, PinA output from IN\n101: IN = PinB schmitt, PinA output from IN\n110: IN = PinA > PinB comparator, PinA output from OUT\n111: IN = PinA > PinB comparator, PinA output from IN\n\n 0     5     0\n%100_VVV_OHHHLLL = ADC_MODE, first order sigma-delta\nIN has bitstream, sysclock bitrate, for smartpin mode %01111 (Y=0)\nOUT is PinA digital output, registered\nDIR enables PinA digital output\n%VVV = ADC config\n000: GIO, 1x (~5 volt range, centred on VIO/2)\n001: VIO, 1x       \"\n010: PinB, 1x      \"\n011: PinA, 1x      \"\n100: PinA, 3.16x (~1.58 volt range, centred on VIO/2)\n101: PinA, 10x   (~0.5 volt range, centred on VIO/2)\n110: PinA, 31.6x (~0.158 volt range, centred on VIO/2)\n111: PinA, 100x  (~0.05 volt range, centred on VIO/2)\n\n 0      5    0\n%101_VV_DDDDDDDD = DAC_MODE (%TT = 00 a"
+  },
+  {
+    "id": "20",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T22:57:21Z",
+    "text": "Yes, Chip needs to give a working schematic and code example here."
+  },
+  {
+    "id": "21",
+    "author": "Walter Mosscrop",
+    "initials": null,
+    "date": "2021-07-17T21:25:13Z",
+    "text": "This value is incorrect. It should be x111, and the value of x111 below should be x101. This is true for both AAAA and BBBB selectors."
+  },
+  {
+    "id": "22",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T22:55:09Z",
+    "text": "DOCs should state when Y updates  - I think when IN _/= ?\nIn a multi phase PWM design, which may have 6 or more active pins, SW would usually wait for IN _/= before doing a fast update of all pins, in order to avoid split-update effects which could violate dead-band values. All pins would be started in sync, to ensure all PWMs phase align.\nPerhaps a 3 pin PWM example could be included ?"
+  },
+  {
+    "id": "23",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T00:00:34Z",
+    "text": "Digital pin modes are digital, and the ADC filters here are digital mode."
+  },
+  {
+    "id": "24",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T00:41:56Z",
+    "text": "garryj is the wizard who has USB working. The Smart Pin cell USB support is minimal, and needs extensive SW/opcode help, so maybe the DOCs here can focus on what USB is possible, with code size/cogs reports ?\nFWIR garryj was working on making the builds more SysClk tolerant, and I think SysCLK > 80MHz is needed for FS-USB, & LS-USB can use less."
+  },
+  {
+    "id": "25",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-20T21:57:31Z",
+    "text": "Is that true ? Usually DACs update at the DAC output rate, not sysclk ? A DAC with LSB-dither adding 8b, would have an output frame rate of sysclk/256 ?"
+  },
+  {
+    "id": "26",
+    "author": "Jim Granville",
+    "initials": null,
+    "date": "2020-08-19T22:49:32Z",
+    "text": "The '16 bit' claim here is a bit nominal, maybe that needs clarify ? The usefulness of this will be set by the LSB precision of the 8b DAC steps, If those were precise to 0.04% of the ideal 12.89 mV, then you get 16 bits. I'm guessing P2 will be useful to maybe 10-12 bits DAC"
+  }
+]

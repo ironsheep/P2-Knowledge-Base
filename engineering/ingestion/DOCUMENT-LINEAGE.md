@@ -13,7 +13,7 @@ must preserve fidelity; this doc is the map of those links.
 | Logical source | Current | Prior | Relationship | Prior kept? |
 |----------------|---------|-------|--------------|-------------|
 | Spin2 Language Reference | **v55** | v51a | **augment** — v55 is the full doc (v51a content **+** new language extensions); the document replaces, the material accumulates | yes — lineage/diff |
-| Smart Pins (Titus) | **rev 5** (`.docx`, canonical in `sources/smart-pins-titus/`) | PDF-scraped code (`smart-pins-catalog/`) | **re-extraction** — prior was scraped from the *PDF* (code fragmented at page breaks, whitespace lost; needed a 5-script recovery); the rev-5 *DOCX* restores fidelity | no — discard on re-ingest |
+| Smart Pins (Titus) | **rev 5** (`.docx`, canonical in `sources/smart-pins-titus/`) | PDF-scraped code (`smart-pins-catalog/`) | **re-extraction — DONE 2026-06-12** — prior was scraped from the *PDF* (code fragmented at page breaks, whitespace lost; needed a 5-script recovery); the rev-5 *DOCX* restores fidelity (28/30 examples pnut-ts-validated, 21 figures lossless). Prior `smart-pins-catalog/` **archived** with a pointer (§0.6); downstream re-validation below. | prior archived (not deleted) — git history is the record |
 | PASM2 Manual (Parallax) | preliminary | — | **superseded-by-deliverable** — fed our *P2 Assembly Language Reference Manual*; no longer the reference | source kept as input |
 
 ## Source → output lineage  ‹which inputs feed which produced output›
@@ -43,7 +43,17 @@ edges (corroboration / conflict) are populated by `ingest-source` **pass 6** —
 **Corroboration / conflict edges** (analytical — pass 6): _(populated during the verification fill)_
 | Source A | relation | Source B | on (fact) | resolution (authority) |
 |----------|----------|----------|-----------|------------------------|
-| _…_ | corroborates / conflicts | _…_ | _…_ | _…_ |
+| smart-pins-titus rev5 | **conflicts** | silicon-doc | WRPIN %AAAA/%BBBB input-selector: Titus `x101=−1, x111=−3` vs silicon-doc `x101=−3, x111=−1` | **silicon-doc wins** — Titus has the two swapped (reviewer #21 correct). Our YAML carries neither yet → gap G-001 |
+| smart-pins-titus rev5 | corroborates | silicon-doc · smart-pins | 32-mode taxonomy, mode bit-numbers, X/Y/Z register roles | agree (HIGH) — Titus adds technique/app-note color |
+
+## Downstream re-validation after the Titus re-extraction (§0.6) — 2026-06-12
+The prior Titus capture was a **PDF code-scrape** (`smart-pins-catalog/`), not a prose source, and our
+Smart-Pins YAML + the *I/O & Smart Pins User Guide* derive primarily from `silicon-doc` + `smart-pins`
+(Titus is **cross-check**, not primary). Re-anchoring open findings to the rev5 DOCX surfaced **no
+conflict with existing published YAML** (the one confirmed Titus error, #21, concerns a sub-field our
+YAML does not carry → logged as gap G-001, not a correction). **Action for the Smart-Pins manual
+certification audit:** when it runs, spot-check that no manual text repeated Titus's swapped
+x101/x111 selector values; use the silicon-doc values.
 
 ## Trust propagation
 A source's tier (in `AUTHORITATIVE-SOURCES`) propagates to everything derived from it. A conflict that touches published

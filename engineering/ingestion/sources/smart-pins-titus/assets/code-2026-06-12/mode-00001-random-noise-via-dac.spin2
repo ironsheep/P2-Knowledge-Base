@@ -1,0 +1,13 @@
+CON
+  _clkfreq = 25_000_000
+
+DAT
+	org	0
+        dirl                  #20	'Reset Pin P20
+        wrpin    DACconfig,   #20	'Config DAC mode
+        dirh                  #20     'Start DAC mode
+.loop   nop                           'Loop "forever"
+        jmp #.loop
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+DACconfig	long	%0000_0000_000_10100_00000000_01_00001_0

@@ -49,7 +49,12 @@ that pass. The standing docs:
 
 The ingestion head owns a **quad** of standing docs (+ one shared register). Update each at the pass shown — this is load-bearing: `whats-next` and the YAML head read these.
 
-> **Certification status (2026-06-12):** the quad existed only from today; the **`KNOWLEDGE-GAPS` routing + the reviewer-notes harvest are *adopted, not yet certified*** — the **Smart Pins (Titus) rev 5** ingestion is their first real exercise. If a step doesn't work cleanly on that run, refine it in the same pass; **promote (remove this notice) once the Titus run proves the full quad-update flow end-to-end.**
+> **Certified 2026-06-12** by the **Smart Pins (Titus) rev 5** ingestion: the full quad-update flow ran
+> end-to-end — `KNOWLEDGE-GAPS` routing (8 gaps G-001..008 + 3 expert-Qs Q-001..003 from 27 reviewer
+> comments), reviewer-notes harvest (§5.3), conflict adjudication (#21 WRPIN selector swap confirmed vs
+> silicon-doc → correctly logged as a *gap*, not a corrections-register entry, because our YAML doesn't
+> carry that sub-field), and §0.6 obsolescence handling (with the refinement noted there). Dashboard +
+> AUTHORITATIVE-SOURCES + DOCUMENT-LINEAGE all updated from the same run. The flow is promoted to standard.
 
 | Doc | Update WHEN | WHY |
 |-----|-------------|-----|
@@ -107,13 +112,14 @@ ingestion, and the delta is the organizing principle.
   YAML-correction sprint that leans on the *old* edition's text — re-anchoring
   open findings to the new edition may confirm, refine, or overturn them.
 
-## 0.6 Obsolescence handling — the prior information  _‹NEW — under certification on the Titus rev5 run›_
+## 0.6 Obsolescence handling — the prior information  _‹certified on the Titus rev5 run, with the refinement below›_
 
 Every supersession **obsoletes prior information** — and the prior info is handled deliberately, **never silently dropped**. Three flavors (see `DOCUMENT-LINEAGE`): **augment** (newer edition, content grew) · **re-extraction** (prior capture was lossy) · **superseded-by-deliverable** (prior fed our manual). For each, **two kinds** of prior information must be handled:
 
 1. **Prior source artifacts** (the old extraction files / folder):
    - **Augment** → *keep* the prior edition's folder as lineage (diff/history) — not obsolete, just no longer the authority.
    - **Re-extraction** → the prior extraction is *obsolete* (a flawed capture). **Archive it, do not delete** — move to a gitignored `archive/` with a one-line pointer to the new extraction (git history is the record). Only **after** the new extraction is validated.
+     - **Refinement (Titus rev5):** the literal **archive-MOVE is gated on first redirecting any downstream references** to the prior folder — a move that strands a path referenced elsewhere is a Sacred-Rule-#7 violation. When references exist (esp. in *another head's* docs, e.g. a manual's `creation-guide.md` source table), **mark-in-place** instead: drop a `SUPERSEDED-BY-<new>.md` redirect inside the obsolete folder now, and **defer the physical move until those references are re-pointed** — which, for a manual-feeding source, happens in that manual's certification audit (the downstream re-validation in step 2). Check `git grep <folder>` before moving. _(Note: an untracked/gitignored prior folder has no git-history record — preservation MUST be by the move/marker, not by relying on history.)_
    - **Superseded-by-deliverable** → the source stays as input.
 2. **Downstream derivations** (YAML entries, manual content, central-analysis matrices built from the prior info): **re-anchor and re-validate against the NEW authoritative extraction** (pass 6). Anything derived from an *obsolete/lossy* extraction is **suspect until re-checked** — a fragmented / whitespace-damaged code example may have produced wrong downstream content. Conflicts touching published YAML → corrections register; manual content → flag for the manual head. Record the supersession + what re-anchored in `DOCUMENT-LINEAGE`. **No dangling references** to archived artifacts (Sacred Rule #7 — redirect to the new).
 
@@ -247,7 +253,7 @@ source *answers* prior holes AND *opens* new ones, so a source that surfaces
 zero answered/new questions is the exception to justify, not the default.
 1. **Answer prior open questions** — review `KNOWLEDGE-GAPS.md` (the gap ledger) + prior audits; mark what this source answers by moving its ledger row **OPEN→ANSWERED** (page/section ref + the edition that filled it).
 2. **Raise new questions** this source surfaces → add to `KNOWLEDGE-GAPS.md` (Part A gap ledger, status OPEN).
-3. **Harvest embedded reviewer notes as credible feedback**  _‹NEW — under certification on the Titus rev5 run›_ — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). _(e.g. Smart Pins (Titus) rev 5 carries 27 reviewer comments.)_
+3. **Harvest embedded reviewer notes as credible feedback** — if the source DOCX carries inline editorial notes or Google-Docs comments (`word/comments.xml`), they are **not noise**: classify each (technical question / editorial / P2-fact assertion). Technical questions → `KNOWLEDGE-GAPS.md`; assertions that touch published YAML → cross-check, conflicts → corrections register. Weigh under the source's tier (don't auto-trust a cross-check source's notes as fact). **Extraction:** `word/comments.xml` holds the comment bodies (author/date/id); the comment *anchor* (what text each is attached to) comes from the `commentRangeStart/End` id markers in `word/document.xml` — pair them so each note carries its commented context. _(Certified on Smart Pins (Titus) rev 5's 27 comments — one, #21, surfaced a real bit-field error confirmed against the Silicon Doc.)_
 4. **Flag conflicts** — `Source A says … / Source B says … / Resolution (which is authoritative and why)`. **A conflict that touches published P2KB YAML is a corrections-register entry** — append it to `engineering/operations/P2KB-CORRECTION-FINDINGS.md` (`NEEDS-VERIFICATION`) for the YAML head to work via `yaml-knowledge-base-maintenance`. This skill does **not** edit `deliverables/ai/P2/` itself.
 5. **Unresolved / expert-only:** where a fact is unresolved across all eligible sources, ask the user rather than guess (plain chat — no AskUserQuestion here); if only the designer can settle it, record it in `KNOWLEDGE-GAPS.md` **Part B** (questions-for-experts + who-to-ask).
 6. **Update trust scoring** (HIGH multi-source-confirmed / MEDIUM single-source / LOW conflict-or-gap).

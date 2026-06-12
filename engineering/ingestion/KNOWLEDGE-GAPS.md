@@ -21,7 +21,14 @@ later supersession can re-open it if it overturns the answer.
 
 | # | Domain | The gap (question / missing fact) | Status | Filled by (source @ edition) | Opened | Closed |
 |---|--------|-----------------------------------|--------|------------------------------|--------|--------|
-| _seed from `central-analysis/knowledge-gaps/gaps-consolidated.md` (strikethrough = ANSWERED) + cross-source-qa/questions-remaining_ | | | | | | |
+| G-001 | Smart Pins / WRPIN | WRPIN **%AAAA/%BBBB input-selector** relative-pin sub-field is undocumented in our YAML. Add with **Silicon-Doc** values: bit3=invert; `x000`=this pin, `x001..x011`=+1..+3, `x100`=this pin's OUT, `x101`=−3, `x110`=−2, `x111`=−1. *(Titus rev5 had x101/x111 swapped — use Silicon-Doc, not Titus.)* | OPEN | _value known (silicon-doc); needs YAML add by yaml head_ | smart-pins-titus rev5 (#21) | |
+| G-002 | Smart Pins / DAC dither | Dithered-DAC update cadence: sysclk or sysclk/256? Real effective resolution behind the "16-bit" claim (reviewer says ~10–12b realistic). | OPEN | _verify vs silicon-doc DAC section_ | smart-pins-titus rev5 (#0,#25,#26) | |
+| G-003 | Smart Pins / counting modes | "time" vs "states" vs "periods" terminology (%10011–%10111); reciprocal/"whole-periods" behavior — X+ is a *minimum*, window snaps to next whole Fin cycle. | OPEN | _clarify vs silicon-doc_ | smart-pins-titus rev5 (#2,#14) | |
+| G-004 | Smart Pins / %01010 SMPS | PWM switch-mode-power-supply mode has **no code example** anywhere; Y-register update timing unstated. | OPEN | | smart-pins-titus rev5 (#20,#22) | |
+| G-005 | Smart Pins / %11011 USB | Scope of smart-pin USB support; documented sysclk floor (FS-USB > 80 MHz, LS-USB less). | OPEN | | smart-pins-titus rev5 (#24) | |
+| G-006 | Smart Pins / NCO | Is `Y=0` valid for NCO (%00110/00111) — continuous output or none? NCO quantization jitter (fractional-add → rare long periods). | OPEN | | smart-pins-titus rev5 (#8,#17) | |
+| G-007 | Smart Pins / ADC | %11000/11001 ADC modes: relationship to STREAMERS; "digital filters in digital mode"; external SDM-ADC use (TI AMC1035/1303). | OPEN | | smart-pins-titus rev5 (#7,#12,#23) | |
+| G-008 | Smart Pins / WRPIN | Per-pin **Pin-Electrical** choices + full WRPIN mode-register bit-field map belong in the docs (reviewer cites evanh's bit-layout doc). | OPEN | | smart-pins-titus rev5 (#19) | |
 
 > **Format heritage (from the study):** three prior representations worth carrying — resolution-status tags +
 > per-question source-check list (`questions-remaining.md`), strikethrough before/after (`gaps-consolidated.md`),
@@ -34,7 +41,9 @@ The subset of Part A that **no source can close** — only Chip Gracey (or anoth
 
 | # | Question | Why no source settles it | Who to ask | State (open / asked / answered) | Links |
 |---|----------|--------------------------|------------|---------------------------------|-------|
-| _seed from `questions-for-chip-language-focused`, `who-to-ask-remaining-questions`, `missing-content-requests`_ | | | | | |
+| Q-001 | Is the sync-serial (%11100/%11101) description's "starts with a logic-0 start bit" correct, or does it wrongly borrow async framing? | Reviewer (#5) flagged it wrong, cited a now-unextractable Parallax-forum thread; no in-corpus source settles sync-serial framing detail. | Chip Gracey / Parallax forum (orig. thread) | open | smart-pins-titus #5 |
+| Q-002 | Is the DAC dither frame fixed at 8 bits, or could a (e.g.) 4-bit extension give 12-bit DAC at a faster period? | Design-intent question about silicon capability not stated in any doc. | Chip Gracey | open | smart-pins-titus #3 |
+| Q-003 | What is the realistic scope of smart-pin USB (%11011) support, and the SW/opcode help + sysclk needed for FS/LS-USB? | Implementation knowledge lives with the community implementer, not in docs. | garryj (USB impl.) / Chip Gracey | open | smart-pins-titus #24 |
 
 ---
 

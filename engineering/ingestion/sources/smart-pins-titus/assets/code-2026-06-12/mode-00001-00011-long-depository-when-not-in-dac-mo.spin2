@@ -1,0 +1,17 @@
+CON
+  _clkfreq = 160_000_000
+
+DAT
+	org	0
+			      ' Use P12 as a Smart Pin
+	dirh	 #12	      ' Set direction of P12 to logic-1 (output)
+	wrpin  jat,   #12	' Set repository mode for P12
+	
+	wxpin  Alpha, #12	' Move Alpha to reg X at P12
+	nop			     ' Delay for register clocking
+	rqpin	 Beta,  #12	' Read data from reg X at P12 
+
+' --- auto-stubbed undefined symbols (referenced, not defined in fragment) ---
+Alpha	long	0
+Beta	long	0
+jat	long	0

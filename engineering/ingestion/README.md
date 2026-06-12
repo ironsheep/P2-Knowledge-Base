@@ -8,10 +8,10 @@
 ## Tier 1 — At a glance
 - **Sources:** 36 folders on disk → **32 logical sources** · 29 P2 · 3 P1  ‹v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
 - **By authority:** 🏆 21 · 🟢 7 · 🟡 4  ‹32 logical sources; v51a lineage + 3 non-source folders excluded›
-- **Ingest completeness:** mature ~17 (≥90% + audit) · partial ~8 (40–89%) · minimal/not-started ~7 (incl. hyperRam un-ingested, Titus rev5 staged)  ‹scanned 2026-06-12›
-- **Open questions:** _(n)_ in the gap ledger · _(m)_ routed to an expert  ‹rolled up from KNOWLEDGE-GAPS›
-- **Latest ingested:** Spin2 Language Reference @ **v55** (matched-compiler; augmentative over v51a) ‹LIN›
-- **What's next:** re-ingest **Smart Pins (Titus) rev 5** (replaces lossy extraction) — cross-checks the *I/O & Smart Pins User Guide*
+- **Ingest completeness:** mature ~18 (≥90% + audit, **incl. Titus rev5 ✅**) · partial ~8 (40–89%) · minimal/not-started ~6 (incl. hyperRam un-ingested)  ‹scanned 2026-06-12›
+- **Open questions:** **8** in the gap ledger (G-001..008, all Smart-Pins/Titus) · **3** routed to an expert (Q-001..003)  ‹rolled up from KNOWLEDGE-GAPS›
+- **Latest ingested:** **Smart Pins (Titus) rev 5** (2026-06-12 re-extraction, 🟡 cross-check) · prior authoritative: Spin2 Language Reference @ **v55** ‹LIN›
+- **What's next:** **Smart Pins manual certification audit** (spot-check it didn't inherit Titus's swapped x101/x111) → then **F-116/F-115 YAML round** (incl. G-001 WRPIN selector add) · _(2nd ingestion source TBD)_  ‹Titus rev5 ✅ 2026-06-12›
 - **Why track this:** qualified inputs feed the YAML KB → **download-on-demand (MCP)** → agents writing P1/P2 code their models were never trained on. Input trust + completeness propagate straight to agent reliability.
 
 ## Tier 2 — Source registry (by category — categories preserved from existing trackers)
@@ -33,7 +33,7 @@ Cells: ✅ done · ◐ partial · ⏳ pending · — n/a · ? verify  |  Passes 
 | Source | Auth | C | K | I | A | X | Cmpl* |
 |--------|------|---|---|---|---|---|-------|
 | smart-pins | 🟢 | ✅ | ✅ | ✅ | ✅ | ✅ | 97% _(stated; 174 examples, 21 mode images)_ |
-| **Smart Pins (Titus)** @ rev 5 ‹re-ingest, old extraction retired› | 🟡 **cross-check** | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | 0% _(rev5 docx staged — **next ingestion**; prior PDF extraction retired; cross-checks IOSP guide)_ |
+| **Smart Pins (Titus)** @ rev 5 ‹re-ingest DONE 2026-06-12; old PDF extraction archived› | 🟡 **cross-check** | ✅ | ✅ | ✅ | ✅ | ✅ | ~90% _(32/32 modes; 28/30 code pnut-ts-validated; 21 figures gated (OCR debt); 27 reviewer comments harvested; #21 WRPIN selector error confirmed vs silicon-doc; 0 corrections, 8 gaps + 3 expert-Qs logged)_ |
 
 ### P2 · Hardware ecosystem  ‹distinct top-level category — boards/add-ons/datasheets, NOT software/compilers›
 _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins. Add-on boards ride one header or a header pair._
@@ -136,7 +136,7 @@ _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manua
 ## Planned ingestions  (pushdown — newest intent first)  ‹DASH "Planned"›
 | When | Source | Note |
 |------|--------|------|
-| next | Smart Pins (Titus) rev 5 | canonical staged at `sources/smart-pins-titus/` (rev5 .docx, 2026-03-31, **27 reviewer comments**). **Re-extraction** replaces the lossy *PDF*-scraped prior (`smart-pins-catalog/`). **Harvest the reviewer comments + inline editor notes as credible feedback** → technical Qs to KNOWLEDGE-GAPS. Role: cross-check for IOSP guide. |
+| ✅ done 2026-06-12 | Smart Pins (Titus) rev 5 | **Re-extraction COMPLETE** (certification run for the updated skill). 32/32 modes; 28/30 code pnut-ts-validated; 21 figures gated; **27 reviewer comments harvested** → 8 gaps (G-001..008) + 3 expert-Qs (Q-001..003) in KNOWLEDGE-GAPS; **#21 WRPIN x101/x111 selector swap CONFIRMED** vs silicon-doc (Titus errata, 0 corrections). Prior PDF extraction archived (§0.6). |
 | next | _(2nd source — TBD with user)_ | |
 | **queued** | P1 datasheet + P1 manual (+ deSilva P1?) | bring P1 DB up to P2 richness; some partially ingested → complete + enrich |
 | later | Quick Bytes | plan: `plans/QUICK-BYTES-READY-TO-EXECUTE.md`; scraper tools ready (`scrape-quick-bytes.py`, `extract-tag-taxonomy.py`, `youtube-playlist-correlator.py`); re-confirm intent (old "next 2-3 days" note stale) |
@@ -149,4 +149,4 @@ _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manua
 - **Pipeline deliverables** (P2 Bytecode Spec, Terminal Window Manual, Hardware Interface Guide, Binary Decoder Tool — from old DOCUMENT-LINEAGE) — **OPEN / deferred** (2026-06-12): still planned or stale? Parked in DOCUMENT-LINEAGE 'planned outputs' until confirmed.
 
 ---
-_Per-source cells **scanned 2026-06-12** (read-only fan-out over all 36 folders). **Normalization findings (for go-live / verification fill):** (1) ✅ **audit-filename drift — RESOLVED (aliased):** actual audit filenames recorded in the rows; canonical `<src>-complete-extraction-audit.md` applies to new ingestions. `pnut-ts-pasm-ref` still needs a *consolidated* rollup audit (5B). (2) ✅ **Non-sources demoted:** `code-analysis` + `marketing-materials` (meta) and `pasm2-manual-development` (dev scaffold) moved out of the registry → see 'Not standalone sources'. Physical archive/relocate deferred to cleanup. (3) **Image debt** is the most common gap (most hardware rows + the P1 docs have no images extracted). (4) **Zero/un-ingested:** `hyperRam-n-hyperFlash` (raw CAD only); `smart-pins-titus` staged (= next ingestion). **Cross-source (X)** is absent on ~20 sources — the bulk of the verification fill. folds the former `INGESTION-DASHBOARD` + `INGESTION-AUDIT-MATRIX` (archived 2026-06-12)._
+_Per-source cells **scanned 2026-06-12** (read-only fan-out over all 36 folders). **Normalization findings (for go-live / verification fill):** (1) ✅ **audit-filename drift — RESOLVED (aliased):** actual audit filenames recorded in the rows; canonical `<src>-complete-extraction-audit.md` applies to new ingestions. `pnut-ts-pasm-ref` still needs a *consolidated* rollup audit (5B). (2) ✅ **Non-sources demoted:** `code-analysis` + `marketing-materials` (meta) and `pasm2-manual-development` (dev scaffold) moved out of the registry → see 'Not standalone sources'. Physical archive/relocate deferred to cleanup. (3) **Image debt** is the most common gap (most hardware rows + the P1 docs have no images extracted). (4) **Zero/un-ingested:** `hyperRam-n-hyperFlash` (raw CAD only); `smart-pins-titus` **ingested ✅ 2026-06-12** (first full quad-update + reviewer-harvest run). **Cross-source (X)** is absent on ~20 sources — the bulk of the verification fill. folds the former `INGESTION-DASHBOARD` + `INGESTION-AUDIT-MATRIX` (archived 2026-06-12)._
