@@ -178,6 +178,20 @@ PUB nco_duty(duty_percent) | y_value
   PINLOW(NCO_PIN)
 ```
 
+### Worked Example: Fixed Pulse Width, Variable Period
+
+Because the output is high for exactly one base period on each overflow, P_NCO_DUTY is also a clean way to produce a **fixed-width pulse at an adjustable period** — X sets the pulse width, Y sets the period.
+
+Suppose Fclk = 25 MHz and you want a 1 µs pulse repeating every 18 µs:
+
+- Base period X = 25 clocks (= 1 µs at 25 MHz) — the high time is one base period, so 1 µs.
+- The pin overflows (emits a pulse) once every 18 base periods (18 µs), so Y = 2³² / 18.
+
+```formula
+X = Fclk × t_pulse           = 25 MHz × 1 µs  = 25
+Y = 2³² × t_pulse / t_period = 2³² × 1 / 18   = 238,609,294 ($0E38_E38E)
+```
+
 
 ## 8.4 Phase Synchronization
 
@@ -293,6 +307,10 @@ Y_rounded = 21475
 Actual freq = 21475 × 200,000,000 / 4,294,967,296 = 1000.0076 Hz
 Error = 0.00076%
 ```
+
+::: caution
+**The average frequency is exact; individual periods are not.** Rounding Y bounds only the long-term *average* — the integer accumulator still quantizes each cycle to a whole number of base periods, and the leftover fraction accumulates and occasionally lengthens (or shortens) one period by a single base period. For the fixed-pulse example in §8.3 (Y = 2³²/18, true value 238,609,294.222), the average period is 18 µs, but the dropped .222 surfaces as a rare ~19 µs period roughly every 1,073 s. Invisible for most timing; for jitter-sensitive work (precise pulse trains, sampling clocks) budget for it, or choose X/Y so the fraction is zero.
+:::
 
 ### Frequency Resolution Table
 

@@ -97,6 +97,8 @@ PUB zero_position()
 .read         rdpin     position, #ENC_A    ' Get position
 ```
 
+> **The raw count is 4× the detent count.** A quadrature encoder produces four transitions per detent (two on A, two on B), and this mode counts all of them — so the signed Z value advances by ±4 per click. Reading Z directly (as `read_position()` does) gives the full 4×-resolution count, which is what you want for fine positioning. When you need *detents*, divide by four while preserving the sign with an arithmetic shift right by 2 — `RDPIN(ENC_A) ~> 2` in Spin2, or `sar position, #2` in PASM2 — not a plain unsigned shift, which would corrupt negative (reverse) counts.
+
 ### Velocity Measurement (Periodic Mode)
 
 ```spin2
@@ -392,6 +394,9 @@ For modes using two inputs (A and B):
 | P_MINUS2_B | Pin - 2 |
 | P_PLUS3_B | Pin + 3 |
 | P_MINUS3_B | Pin - 3 |
+| P_OUTBIT_B | This pin's own OUT bit (software-driven) |
+
+`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a COG can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
 
 ### Input Conditioning
 

@@ -182,6 +182,11 @@ SINC3 provides better dynamic response than SINC2, doubling the effective bits f
               ' x now contains the sample
 ```
 
+> **Two things the post-processing must get right.**
+>
+> - **Warm-up.** The difference math depends on a valid prior accumulator state, so the filter is only accurate **from the second period for SINC2, and from the third period for SINC3.** Discard the first reading (SINC2) or the first two (SINC3) after starting.
+> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) − 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
+
 ### Bitstream Capture Mode (%11)
 
 Captures raw ADC bitstream for custom processing algorithms.
@@ -220,7 +225,10 @@ PUB external_adc_init()
 
 ### Custom Sample Periods
 
-Use WYPIN to override the power-of-2 period from X[3:0]:
+Use WYPIN to override the power-of-2 period from X[3:0] with an arbitrary value in **Y[13:0]**:
+
+> The WYPIN override only applies when **X[5:4] > %00** — i.e. in SINC2 Filtering, SINC3 Filtering, or Bitstream modes. In **SINC2 Sampling (X[5:4] = %00)** the period is fixed by X[3:0] and WYPIN has no effect, so a non-power-of-2 rate there requires one of the filtering modes instead.
+
 
 ```spin2
 WRPIN(ADC_PIN, P_ADC_EXT | P_PLUS1_B)

@@ -198,6 +198,8 @@ voltage_mv = (sample × 3300) / full_scale
 - For 8-bit: full_scale = 255
 - For 14-bit: full_scale = 16383
 
+ADC resolution spans roughly **2 to 18 bits** depending on mode and sample period: SINC2 Sampling reaches 14-bit, while SINC3 Filtering with a long enough period (and the externally-clocked delta-sigma path) goes higher — up to ~18 ENOB. Use `full_scale = 2^bits − 1` for the resolution you actually configured.
+
 **Worked Example (8-bit ADC reading 128):**
 ```formula
 voltage_mv = (128 × 3300) / 255 = 1655 mV
@@ -251,6 +253,8 @@ voltage = (DAC_value / 65536) × V_full_scale
 ```formula
 voltage = (32768 / 65536) × 3.3V = 1.65V
 ```
+
+> **The 16-bit DAC is nominal — a temporal-averaging figure, not absolute accuracy.** The hardware DAC is 8-bit (256 levels ≈ 12.9 mV/step at 3.3 V); the dithered modes reach 16-bit *averaged over time*, so the µV/LSB values above are the ideal step size, not guaranteed accuracy. Real effective bits depend on output low-pass filtering and load (see §18.4).
 
 
 ### Voltage to DAC Value

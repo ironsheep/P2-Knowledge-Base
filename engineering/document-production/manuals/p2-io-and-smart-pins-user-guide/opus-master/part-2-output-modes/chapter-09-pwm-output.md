@@ -252,6 +252,8 @@ P_PWM_SMPS generates PWM output for switch-mode power supply control with voltag
 3. When A goes low, start new cycle, capture Y, raise IN
 4. During cycle, if B-input goes high, force output low for remainder
 
+The **IN flag rising marks the cycle boundary** — the instant a fresh Y is captured for the new cycle. That makes IN the synchronization cue for software: wait on (or poll) IN before writing the next duty value with WYPIN, and your update lands cleanly on the upcoming cycle instead of mid-pulse.
+
 ### Block Diagram
 
 ```{=latex}

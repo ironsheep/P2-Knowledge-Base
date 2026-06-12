@@ -116,7 +116,7 @@ PINH(pin)
 
 **16-bit PRNG dithered DAC**
 
-Provides 16-bit DAC resolution using pseudo-random dithering between adjacent 8-bit levels.
+Provides nominal 16-bit DAC resolution (averaged over time) using pseudo-random dithering between adjacent 8-bit levels. The hardware DAC is 8-bit; real precision depends on output filtering — see §18.4.
 :::
 
 ### Register Usage
@@ -625,6 +625,8 @@ Measures duration of each state. IN raised on every transition with previous sta
 | C flag | Previous state (1=was high) |
 | IN | Every transition |
 
+On reset (DIR=0), Z starts at **$0000_0001** (not 0), and Z saturates at **$8000_0000**.
+
 ### Key Constants
 ```spin2
 P_STATE_TICKS | P_SCHMITT_A
@@ -658,6 +660,8 @@ Measures duration of high pulses. IN raised on high-to-low transition.
 | Y | Not used |
 | Z | Duration of previous high (clocks) |
 | IN | High-to-low transition |
+
+On reset (DIR=0), Z starts at **$0000_0001** (not 0). Z saturates at $8000_0000, and bit 31 doubles as the overflow flag — which is why the example masks the result with `$7FFF_FFFF`.
 
 ### Key Constants
 ```spin2
@@ -728,9 +732,11 @@ Measures total clock cycles for X signal periods.
 | Register | Function |
 |----------|----------|
 | X | Number of periods to measure |
-| Y[1:0] | Trigger type |
+| Y[1:0] | A→B event pair: %00 = A-rise→B-rise, %01 = A-rise→B-edge, %10 = A-edge→B-rise, %11 = A-edge→B-edge |
 | Z | Total clocks for all periods |
 | IN | Measurement complete |
+
+This is a **two-input** mode — each period is measured from an A-input event to a B-input event, so B-input routing is required (set B to the same pin as A for single-pin cycle measurement). On reset (DIR=0), Z starts at **$0000_0000** — note that the period-counting modes reset Z to 0, unlike the state/timing modes (%10000–%10010), which reset to $0000_0001. Z saturates at $8000_0000.
 
 ### Key Constants
 ```spin2

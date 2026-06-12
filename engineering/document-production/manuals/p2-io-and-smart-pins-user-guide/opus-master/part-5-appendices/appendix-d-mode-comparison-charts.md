@@ -39,6 +39,7 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Periods Ticks | P_PERIODS_TICKS | N period time | 1 clock | N periods | Yes | Medium | Precision freq |
 | Periods Highs | P_PERIODS_HIGHS | N period high | 1 clock | N periods | Yes | Medium | Duty cycle |
 | Counter Ticks | P_COUNTER_TICKS | Time in window | 1 clock | Time window | Yes | Medium | Freq measurement |
+| Counter Highs | P_COUNTER_HIGHS | High time in window | 1 clock | Time window | Yes | Medium | Duty in window |
 | Counter Periods | P_COUNTER_PERIODS | Periods in window | 1 period | Time window | Yes | Low | Freq counter |
 | ADC | P_ADC | Voltage | 8-14 bits | kHz to MHz | Yes | Medium | Analog sensor |
 | ADC Scope | P_ADC_SCOPE | 4-ch capture | 8 bits | Triggered | Triggered | High | Oscilloscope |

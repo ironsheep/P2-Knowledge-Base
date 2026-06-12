@@ -54,6 +54,8 @@ P_STATE_TICKS continuously measures the duration of each logic state (both high 
 | C flag | Previous state (1=was high, 0=was low) |
 | IN flag | Raised on every transition |
 
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0**. Software that reads Z before the first transition therefore gets 1, never a zero — which keeps a naive `period / Z` calculation from dividing by zero on the first window.
+
 ### Reading Measurements
 
 **Spin2:**
@@ -147,6 +149,8 @@ P_HIGH_TICKS measures only the duration of high states. On each high-to-low tran
 | Z | Duration of previous high state (clocks) |
 | IN flag | Raised on high-to-low transition |
 
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** — the same divide-by-zero-safe initial value as the other timing modes. (Z also saturates at $8000_0000; bit 31 doubles as the overflow indicator, which is why the read examples mask with `$7FFF_FFFF`.)
+
 ### Pulse Width Measurement
 
 **Spin2:**
@@ -221,6 +225,8 @@ P_EVENTS_TICKS operates in two modes controlled by Y[2]:
 
 - **Event timing (Y[2]=0)**: Measures time for X events to occur
 - **Timeout detection (Y[2]=1)**: Detects when no event occurs within X clocks
+
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** in both sub-modes — the same divide-by-zero-safe initial value used by the other timing modes.
 
 ### Event Type Selection
 

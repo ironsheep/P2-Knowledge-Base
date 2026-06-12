@@ -150,6 +150,8 @@ PUB measure_duty() | total_time, high_time, duty_percent
 - %10011: "Measure time for exactly X periods"
 - %10101: "Measure time for all periods within X clocks"
 
+Because the window stretches to the end of the period already in progress, **Z reports the *actual* elapsed clocks — always ≥ X, never exactly X.** Use Z, not the nominal X, as the time term in your math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
+
 **Configuration:**
 ```spin2
 ' Measure periods within 100ms window
@@ -214,6 +216,15 @@ period_count := RDPIN(pin)
 ' For 1-second window, period_count = frequency in Hz
 frequency := period_count
 ```
+
+### Restart and Acknowledge
+
+These modes restart automatically: a new measurement begins on the next trigger after the window completes, so you do not re-arm them by hand. How you *read* the result decides whether the IN flag is cleared:
+
+- **RDPIN** reads Z **and acknowledges** — it clears IN, so the next completed window can raise it again. Use RDPIN as your once-per-window read.
+- **RQPIN** reads Z **quietly** — it does *not* clear IN. Use it to peek mid-stream without disturbing the IN-driven cadence; the matching RDPIN still does the acknowledge.
+
+Reading with RDPIN each time IN rises gives you exactly one fresh result per window, in lock-step with the hardware.
 
 
 ## 15.4 Combined Measurements

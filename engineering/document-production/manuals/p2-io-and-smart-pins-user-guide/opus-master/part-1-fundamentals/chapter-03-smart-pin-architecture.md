@@ -135,6 +135,10 @@ This timing matters in tight polling loops.
 
 The **RQPIN** (read quiet) instruction reads the Z register without acknowledging. This allows multiple COGs to read the same Smart Pin's result without interfering with each other. Only one COG should acknowledge; others can use RQPIN to observe.
 
+::: caution
+**Multi-COG bus collisions.** Every COG reaches each Smart Pin over a shared 34-bit bus for write data and acknowledgment, and the Smart Pin **OR**s the incoming buses from all COGs together — the same way DIR and OUT bits are OR'd before reaching a pin. So if two or more COGs issue **WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN** to the *same* Smart Pin simultaneously, their bus data collides and corrupts. **RQPIN is the lone exception** — it does not use the acknowledge bus, so any number of COGs may RQPIN the same Smart Pin at once. Design multi-COG access so that only one COG configures and acknowledges a given Smart Pin; the others observe with RQPIN.
+:::
+
 
 ## 3.4 The Smart Pin State Machine
 

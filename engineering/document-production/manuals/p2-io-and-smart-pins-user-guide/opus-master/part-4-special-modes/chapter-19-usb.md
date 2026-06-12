@@ -88,7 +88,7 @@ USB uses differential signaling with specific line states:
 | SE0 | Low | Low | End of Packet, Reset, Disconnect |
 | SE1 | High | High | Invalid (error condition) |
 
-**Note:** J and K meanings swap for Low Speed vs Full Speed.
+**Note:** J and K meanings swap for Low Speed vs Full Speed. Because USB uses complementary (mirrored) line signaling, the **DP/DM electrical designations can themselves be swapped by exchanging the low-speed and full-speed mode bit** — handy when PCB routing would otherwise force you to cross the differential pair.
 
 ### USB Speeds
 
@@ -110,18 +110,74 @@ The USB mode uses the smart pin registers for configuration and data:
 | Register | Function |
 |----------|----------|
 | X | USB configuration, set via WXPIN on the lower (even) pin: D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed, D[13:0]=baud rate as a 16-bit fraction of sysclk (target_Hz / clkfreq × $10000) |
-| Y | Protocol control |
-| Z | Data and 16-bit status word (read via RDPIN/RQPIN) |
+| Y | Line-state and packet output, set via WYPIN on the lower pin (see table below) |
+| Z | Receiver data + 16-bit status word, read via RDPIN/RQPIN on the lower pin (see bit layout below) |
 
-**Note:** WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
+**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
 
-### IN Flag
+#### Baud Rate — Worked Example
 
-The IN flag signals USB events that require software attention:
+The baud fraction's top two bits must be zero, so the baud rate must stay below ¼ of sysclk. For 12 Mbps (full-speed) on an 80 MHz clock:
 
-- Packet received
-- Transmission complete
-- Line state change
+```formula
+baud_fraction = 12,000,000 / 80,000,000 × $10000 = $2666
+```
+
+Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$E666** (`$C000 | $2666`).
+
+#### Y Register — Line States and Packet Output (WYPIN)
+
+Write these with WYPIN on the lower pin to drive a line state or start a packet:
+
+| WYPIN D | Action |
+|---------|--------|
+| 0 | Output IDLE (float, except an optional resistor to 3.3 V / GND) |
+| 1 | Output SE0 (drive both DP and DM low) |
+| 2 | Output K (drive the K state) |
+| 3 | Output J (J state — like IDLE, but actively driven) |
+| 4 | Output EOP (end-of-packet: SE0, SE0, J, then IDLE) |
+| $80 | SOP — start-of-packet, then bytes, with automatic EOP when the buffer empties |
+
+#### Z Register — Receiver Status Word
+
+RDPIN/RQPIN on the lower pin returns a 16-bit status word (with `RDPIN … WC`, the error flag also lands in C):
+
+| Bit(s) | Meaning |
+|--------|---------|
+| [15:8] | Last byte received |
+| [7] | Byte toggle — cleared on SOP, toggles on each byte received (use it to detect a *new* byte) |
+| [6] | Error — cleared on SOP; set on bit-unstuff error, EOP with SE0 > 3 bits, or SE1 |
+| [5] | EOP received |
+| [4] | SOP received |
+| [3] | SE1 in (illegal) |
+| [2] | SE0 in (RESET) |
+| [1] | K in (RESUME) |
+| [0] | J in (IDLE) |
+
+### IN Flag — Per-Pin Semantics
+
+The two pins carry **different** IN meanings:
+
+- **Upper (odd / DP) pin** — IN rises whenever the **output buffer empties**, signalling that the next output byte may be written (via WYPIN to the lower pin). Read it with TESTP.
+- **Lower (even / DM) pin** — IN rises on any **change in receiver status**; read the 16-bit status word with RDPIN/RQPIN.
+
+After a lower-pin status change, IN will not rise again until you acknowledge with one of WRPIN/WXPIN/WYPIN/RDPIN/AKPIN — so always acknowledge before waiting for the next event, or you will miss it.
+
+### Sending a Packet
+
+1. `WYPIN #$80` on the lower pin to emit SOP.
+2. After each **IN rise on the upper pin**, `WYPIN byte` on the lower pin to buffer the next byte.
+3. Stop sending bytes and the transmitter appends EOP automatically.
+
+Always confirm the upper pin's IN rose after each WYPIN before issuing the next one — even for a state change — because all output is paced by the baud generator and the buffer only empties at the next bit period.
+
+### Transmitter and Receiver Are Independent
+
+TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
+
+::: caution
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB Smart Pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+:::
 
 
 ## 19.5 Host vs Device Mode

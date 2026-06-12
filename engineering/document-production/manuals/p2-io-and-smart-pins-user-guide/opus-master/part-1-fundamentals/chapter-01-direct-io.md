@@ -1113,12 +1113,24 @@ All DRV/OUT/DIR/FLT instructions support operating on multiple pins simultaneous
 - D[5:0]: Base pin number (0-63)
 - D[10:6]: Number of additional pins (0-31)
 
+Bit 5 of the base-pin field is what selects the target port: a base pin in 0–31 lands the operation on Port A (the DIRA/OUTA registers), and 32–63 lands it on Port B (DIRB/OUTB). That is also why a span never crosses the 32-pin boundary — see *Wrap Behavior* below.
+
 ### Using SETQ for Span
 
 ```pasm2
               setq      #7        ' Set span to 8 pins (0 + 7 additional)
               drvh      #0        ' Drive pins 0-7 high
 ```
+
+### Using ADDPINS for Span
+
+`ADDPINS` sets the additional-pins field (D[10:6]) inline, without a preceding SETQ — convenient when the span is known at assembly time:
+
+```pasm2
+              drvh      #10 ADDPINS 7   ' Drive pins P10..P17 high (base 10 + 7 additional)
+```
+
+As with every span operation, an `ADDPINS` range cannot cross a 32-pin port boundary.
 
 ### Wrap Behavior
 

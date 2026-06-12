@@ -286,7 +286,7 @@ result := RQPIN(Pin)
 
 ### When to Use RQPIN
 
-**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times.
+**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit Smart Pin bus and collide if two COGs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-COG caution in §3.3).
 
 **Non-destructive peek:** When checking results without signaling consumption.
 
@@ -532,6 +532,8 @@ The B input is used for secondary signals (clock, quadrature channel B, etc.).
 | `P_FILT1_AB` | A and B both filtered using global filt1 settings |
 | `P_FILT2_AB` | A and B both filtered using global filt2 settings |
 | `P_FILT3_AB` | A and B both filtered using global filt3 settings |
+
+When a pin is **not** in a Smart Pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a Smart Pin.
 
 ### Example - Quadrature Encoder
 

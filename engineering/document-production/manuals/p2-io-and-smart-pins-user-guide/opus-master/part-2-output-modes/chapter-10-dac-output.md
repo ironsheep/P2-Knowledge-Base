@@ -191,6 +191,8 @@ Output pattern: 75% at $80, 25% at $81
 Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 ```
 
+> **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits you realize depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
+
 ### P_DAC_DITHER_RND (%00010)
 
 Uses pseudo-random dithering for smooth 16-bit output.

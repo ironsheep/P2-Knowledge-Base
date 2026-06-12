@@ -132,6 +132,8 @@ PUB sda_read() : state
               testp     #SDA_PIN wc       ' C = SDA state
 ```
 
+`TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where you drive a line and immediately sample it (see §1.2).
+
 **With Internal Pull-Up:**
 
 If external pull-up isn't available, use internal resistive drive:

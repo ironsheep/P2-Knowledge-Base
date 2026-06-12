@@ -179,6 +179,8 @@ Provides 16-bit DAC resolution using pseudo-random dithering of the 8-bit DAC. T
 - Hardware randomly dithers between adjacent 8-bit levels
 - Averaging over time yields 16-bit effective resolution
 
+> **The "16-bit" figure is nominal — a temporal-averaging resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution. The effective bits you actually realize depend on the low-pass filtering and settling of whatever the pin drives, so treat 16-bit as an averaged-over-time ceiling rather than a guaranteed sample-by-sample precision.
+
 ### Configuration
 
 ```spin2
@@ -273,9 +275,12 @@ Provides 16-bit DAC resolution using PWM dithering. PWM dithering is more determ
 | Aspect | PRNG Dither (%00010) | PWM Dither (%00011) |
 |--------|---------------------|---------------------|
 | Transition pattern | Random | Deterministic |
+| Transitions per 256 clocks | Up to one per clock | At most two |
 | Noise floor | Higher | Lower |
 | Spurious tones | None | One at Fclock/256 |
 | Dynamic range | Good | Better (-48dB spur) |
+
+The "at most two transitions per 256 clocks" is what gives PWM dither its lower noise floor and lower switching activity: where the PRNG mode can flip the DAC on any clock, the PWM mode confines all of a period's switching to two edges.
 
 ### Configuration
 
