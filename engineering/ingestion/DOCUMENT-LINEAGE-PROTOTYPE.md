@@ -51,6 +51,20 @@ A source's tier (in `AUTHORITATIVE-SOURCES`) propagates to everything derived fr
 YAML → the corrections register (`operations/P2KB-CORRECTION-FINDINGS.md`). On supersession, re-anchor open findings to
 the **new** edition (it may confirm, refine, or overturn them).
 
+## Source-code inputs  ‹analyzed production source — carried from old DOCUMENT-LINEAGE›
+| Source code | Origin / attribution | Produced | Trust |
+|-------------|----------------------|----------|-------|
+| `spin-interpreter/v51/Spin2_interpreter.spin2` | Parallax official (SPIN2 v51 distribution) | `spin-interpreter-v51-complete-analysis.md` → (planned) P2 Bytecode Spec | 🟢 |
+| `chip-flash-filesystem/flash_fs_v2.0.0.spin2` | **Core:** Chip Gracey · **Production enhancements:** Stephen M. Moraco (Iron Sheep Productions, LLC) — File System API, multi-COG locking, 1000+ unit tests · **Additional:** Jon McPhalen | `chip-flash-filesystem-complete-analysis.md` → 35+ production P2 patterns | 🟢 |
+
+## Planned outputs  ‹**OPEN/deferred** 2026-06-12 — still planned or stale? (see dashboard parked ideas)›
+- **P2 Bytecode Specification** (from spin-interpreter analysis) → **Binary Decoder Tool** for PNut Term integration
+- **Terminal Window Manual** (from spin2-terminal-windows + screenshots)
+- **Hardware Interface Guide** (future, V1.1+)
+
+## Visual assets (cross-cutting)  ‹carried from old DOCUMENT-LINEAGE›
+Screenshot/diagram capture feeds **all manuals**. Priorities tracked in `central-analysis/FINAL-SCREENSHOT-NEEDS-V2.md`: architecture diagrams (6, critical) · timing diagrams (8, important) · IDE screenshots (10, helpful). Edge: Screenshots → All Manuals (visual understanding).
+
 ## Maintenance
 Updated by `ingest-source`: record supersession on each new edition (augment vs re-extraction vs superseded-by-deliverable),
 and add source→output links as manuals are produced. This is the lineage half of the sacred trust chain.

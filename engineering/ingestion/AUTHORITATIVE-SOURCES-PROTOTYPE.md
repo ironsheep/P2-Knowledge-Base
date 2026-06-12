@@ -52,6 +52,21 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 | p1-propeller-manual · p1-datasheet | 🏆 | official Parallax (P1) | _(verify)_ |
 | desilva-p1-tutorial | 🟢 | community tutorial (P1) | _(verify)_ |
 
+## Hardware part numbers  ‹Parallax board SKUs — carried from old AUTHORITATIVE-SOURCES›
+| Board (source) | Part # |
+|----------------|--------|
+| p2-eval-board (Rev C) | #64000 |
+| edge-standard-module | #64000-ES |
+| edge-32mb-module | #64000-32MB |
+| edge-module-breadboard | #64020 |
+| edge-breakout-board | #64029 |
+| edge-mini-breakout | #64019 |
+
+## Admission & usage  ‹carried from old AUTHORITATIVE-SOURCES›
+**Authoritative-tier admission criteria** (all four required): (1) official Parallax documentation; (2) current/production version; (3) covers P2 (not P1) specs; (4) complete (not draft/partial). *A draft/partial official doc gets ⚠ Draft, not 🏆.*
+
+**Usage (AI consumers + developers):** treat 🏆 Authoritative as ground truth — cite without qualification, no cross-verification, conflicts resolve in its favor, generate code confidently. 🟢 Green = trusted, light verification. 🟡 Yellow = corroborate before use. All derived docs must align with Authoritative sources.
+
 ## Maintenance
 Updated by `ingest-source` on each ingestion (new source → assign a tier; edition change → re-confirm). The dashboard's
 Auth column reads tiers **from here** — manuals derive trust from this catalog, they don't re-tier. Genuine gaps (a source

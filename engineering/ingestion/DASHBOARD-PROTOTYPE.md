@@ -75,10 +75,11 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 | p2docs-github-io | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~30% _(narrative + validation report only)_ |
 
 ### P1 · (queued — bring the P1 database up to P2-level richness)  ‹DASH "P1 Sources"›
-_P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manual, possibly deSilva P1 tutorial); some already partially ingested (text+audit) → queue completes images/code + enriches._
+_P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manual, possibly deSilva P1 tutorial); some already partially ingested (text+audit) → queue completes images/code + enriches._ **Plan:** `plans/p1-sources-ingestion-plan.md`.
 | p1-propeller-manual-v1.2 | 🏆 | ✅ | ⏳ | ⏳ | ✅ | ⏳ | ~60% _(803KB text + audit; code inline; no images)_ |
 | p1-datasheet-v1.4 | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 100% _(stated; no images extracted)_ |
 | desilva-p1-tutorial | 🟢 | ✅ | ◐ | ⏳ | ⏳ | ⏳ | ~45% _(text + voice-analysis; code inline; no audit)_ |
+| p1-application-notes (AN001–015, 018–019 · 17 docs) | 🏆 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | 0% _(queued; **AN016/AN017 never published**; topics: counters / exec-time / sigma-delta ADC / VGA GUI / GPS NMEA / XBee / SD-FS / coroutines …)_ |
 
 ## Not standalone sources  ‹folders under sources/ that are NOT registry rows›
 | Folder | Why | Disposition |
@@ -105,6 +106,7 @@ _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manua
 - **Trust + source metadata** (tier / origin / conflict precedence) → `AUTHORITATIVE-SOURCES-PROTOTYPE.md` (→ `AUTHORITATIVE-SOURCES.md` at go-live)
 - **Derivation & supersession** (editions; source → KB/manual) → `DOCUMENT-LINEAGE-PROTOTYPE.md` (→ `DOCUMENT-LINEAGE.md` at go-live)
 - **Knowledge gaps & expert questions** (moving ledger — what we still don't know + who to ask) → `KNOWLEDGE-GAPS-PROTOTYPE.md` (→ `KNOWLEDGE-GAPS.md` at go-live)
+- **Central analysis hub** (cross-source Q&A, gaps, instruction/feature matrices, syntheses) → `central-analysis/` _(synthesis doc still pending)_
 
 ## Planned ingestions  (pushdown — newest intent first)  ‹DASH "Planned"›
 | When | Source | Note |
@@ -112,12 +114,14 @@ _P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manua
 | next | Smart Pins (Titus) rev 5 | canonical staged at `sources/smart-pins-titus/` (rev5 .docx, 2026-03-31, **27 reviewer comments**). **Re-extraction** replaces the lossy *PDF*-scraped prior (`smart-pins-catalog/`). **Harvest the reviewer comments + inline editor notes as credible feedback** → technical Qs to KNOWLEDGE-GAPS. Role: cross-check for IOSP guide. |
 | next | _(2nd source — TBD with user)_ | |
 | **queued** | P1 datasheet + P1 manual (+ deSilva P1?) | bring P1 DB up to P2 richness; some partially ingested → complete + enrich |
-| later | Quick Bytes | re-confirm intent — old "next 2-3 days" note was stale |
+| later | Quick Bytes | plan: `plans/QUICK-BYTES-READY-TO-EXECUTE.md`; scraper tools ready (`scrape-quick-bytes.py`, `extract-tag-taxonomy.py`, `youtube-playlist-correlator.py`); re-confirm intent (old "next 2-3 days" note stale) |
 
 ## Parked ideas to adjudicate (keep until proven meaningless)  ‹MATRIX›
 - **Enrichment axis** — narrative / style-analysis / cross-source / central-hub-link. Tracked the 2025-09 central-analysis effort (stalled). Keep as drill-down column, fold, or drop?
 - **Knowledge-domain coverage** — ✅ **un-parked** → now **Tier 2b** (by-topic lens) above.
 - **Completeness% method** — two old guesses exist (DASH 75% vs MATRIX 85%, and per-source disagree). Re-derive from passes-done at verification; bracketed for now per your note.
+- **Style / voice analysis** (per-source 4-level style profile; 2/24 done in the old matrix) — **OPEN / deferred** (2026-06-12). Likely *manual-head* metadata, not an ingestion pass. Carried-not-dropped; revisit when ready.
+- **Pipeline deliverables** (P2 Bytecode Spec, Terminal Window Manual, Hardware Interface Guide, Binary Decoder Tool — from old DOCUMENT-LINEAGE) — **OPEN / deferred** (2026-06-12): still planned or stale? Parked in DOCUMENT-LINEAGE 'planned outputs' until confirmed.
 
 ---
 _Per-source cells **scanned 2026-06-12** (read-only fan-out over all 36 folders). **Normalization findings (for go-live / verification fill):** (1) ✅ **audit-filename drift — RESOLVED (aliased):** actual audit filenames recorded in the rows; canonical `<src>-complete-extraction-audit.md` applies to new ingestions. `pnut-ts-pasm-ref` still needs a *consolidated* rollup audit (5B). (2) ✅ **Non-sources demoted:** `code-analysis` + `marketing-materials` (meta) and `pasm2-manual-development` (dev scaffold) moved out of the registry → see 'Not standalone sources'. Physical archive/relocate deferred to cleanup. (3) **Image debt** is the most common gap (most hardware rows + the P1 docs have no images extracted). (4) **Zero/un-ingested:** `hyperRam-n-hyperFlash` (raw CAD only); `smart-pins-titus` staged (= next ingestion). **Cross-source (X)** is absent on ~20 sources — the bulk of the verification fill. `INGESTION-DASHBOARD.md` + `INGESTION-AUDIT-MATRIX.md` remain live until go-live._
