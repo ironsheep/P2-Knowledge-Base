@@ -33,7 +33,7 @@ Every open finding in the correction register was resolved: **F-021, F-023, F-02
 **Authority order (by fact type):**
 
 1. **`pnut-ts` compiler** — ground truth for what assembles, error text, flag / version-gate behavior, and encoded bit patterns (EEEE-bit inspection, divide-by-zero constant oracles, fill-to-boundary probes).
-2. **`spin2_lang_ref_v55`** — Spin2 language + assembler-directive semantics (matched-compiler edition).
+2. **`spin2-v55`** — Spin2 language + assembler-directive semantics (matched-compiler edition).
 3. **Silicon Doc** (`silicon-doc/p2-documentation.txt`) — silicon encodings, bit fields, errata.
 4. **P2 Instructions CSV** (`p2-instructions-csv`, v35 Rev B/C) — per-instruction encoding, flags, timing.
 5. **P2 Datasheet** (`p2-datasheet`) — electrical / AC characteristics.
@@ -283,7 +283,7 @@ REFUTED part of finding: The finding's proposed correction targets instructions-
 - engineering/document-production/manuals/p2-assembly-language-manual/opus-master/part-ii/directives.md:63-76 (Auto-Limit Behavior section)
 - engineering/document-production/manuals/p2-assembly-language-manual/opus-master/part-ii/directives.md:112 (Pitfall note about bare ORG defaulting to $1F8)
 - engineering/document-production/manuals/p2-assembly-language-manual/opus-master/part-ii/directives.md:1010-1097 (FIT section — always shows FIT with required parameter)
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:316,323 — FIT always shown with explicit address parameter
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:316,323 — FIT always shown with explicit address parameter
 - deliverables/ai/P2/language/pasm2/org.yaml:1-37 (current state — no auto-limit, range 0-$1FF)
 - deliverables/ai/P2/language/pasm2/fit.yaml:1-34 (current state — incorrect bare FIT syntax and note)
 
@@ -319,7 +319,7 @@ REFUTED part of finding: The finding's proposed correction targets instructions-
 **Sources that proved it:**
 - pnut-ts v1.55.0 probe: /tmp/orgf_hub.spin2 (ORGH+ORGF) → exit 1: 'ORGF is not allowed in ORGH mode'; /tmp/orgf_cog.spin2 (ORG+ORGF) → exit 0 clean compile; /tmp/orgf_lut.spin2 (ORG $200 + ORGF $280) → exit 0 clean compile; /tmp/orgf_lut2.spin2 (ORG $200 + ORGF $3FF) → exit 0 clean compile
 - engineering/ingestion/sources/silicon-doc/p2-documentation.txt:12976-12980: 'ORGF / cog_address / Fill to cog_address with $00 bytes. Must be in cog mode.'
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:315: 'ORGF $040 fill to cog address $040 with zeros (no symbol allowed before ORGF)' — in DAT Cog-exec section only; no ORGF appears in the hub-exec section
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:315: 'ORGF $040 fill to cog address $040 with zeros (no symbol allowed before ORGF)' — in DAT Cog-exec section only; no ORGF appears in the hub-exec section
 - engineering/document-production/manuals/p2-assembly-language-manual/opus-master/part-ii/directives.md:138: manual already correctly says 'Target COG address to advance to (0-$1FF), filling intervening space with zeros'; :165 'ORGF is not allowed in ORGH mode'; :172 'ORGF is only valid in COG mode (after ORG), not in Hub mode'; :178 pitfall warning confirming COG-only
 - deliverables/ai/P2/language/pasm2/orgf.yaml:17 (current suspect text confirmed present): 'range: 0-$1FF (cog) or hub address'
 
@@ -338,7 +338,7 @@ REFUTED part of finding: The finding's proposed correction targets instructions-
 
 **Sources that proved it:**
 - /workspaces/P2-Knowledge-Base/engineering/ingestion/sources/spin2-v51/spin2-v51-narrative.txt:1536-1557 — Defines the two-context table: Spin2+PASM Programs (bare ORGH = $400) vs PASM-Only Programs (bare ORGH = current hub address)
-- /workspaces/P2-Knowledge-Base/engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:326-327 — v55 confirms the same two-context rule verbatim
+- /workspaces/P2-Knowledge-Base/engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:326-327 — v55 confirms the same two-context rule verbatim
 - /workspaces/P2-Knowledge-Base/deliverables/ai/P2/language/pasm2/orgh.yaml:24 — Suspect text 'Default address is $400 if not specified' confirmed present today
 - /workspaces/P2-Knowledge-Base/deliverables/ai/P2/language/spin2/assembly-directives/orgh.yaml:25,124 — 'Current location' default and matching note confirmed present today
 
@@ -359,7 +359,7 @@ REFUTED part of finding: The finding's proposed correction targets instructions-
 - pnut-ts v1.55.0 probe: ORGH $400,$100004 → error 'Hub address exceeds $100000 ceiling (m361)', exit 1 (confirmed)
 - pnut-ts v1.55.0 probe: ORGH $400,$100000 → compiled OK, exit 0 (ceiling is inclusive)
 - pnut-ts v1.55.0 probe: ORGH $FC000,$FC800 → compiled OK, exit 0 (two-param syntax confirmed)
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:322 — 'hub origin = $00400, origin limit = $100000 (both defaults)'
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:322 — 'hub origin = $00400, origin limit = $100000 (both defaults)'
 - engineering/ingestion/sources/silicon-doc/p2-documentation.txt:12962-12968 — ORGH {hub_address} definition (no ceiling mentioned, limit param absent)
 - deliverables/ai/P2/language/pasm2/orgh.yaml:10 — syntax: ORGH [address] (no limit param, no ceiling note)
 - deliverables/ai/P2/language/spin2/assembly-directives/orgh.yaml:13 — dat_block syntax: 'ORGH [address]' (no limit param, no ceiling note)
@@ -441,7 +441,7 @@ REFUTED part of finding: The finding's proposed correction targets instructions-
 **Sources that proved it:**
 - pnut-ts v1.55.0 compiler probe: bare FIT → error 'Expected a constant, unary operator, or "("' (EXIT=1); FIT $200 → compiled successfully (EXIT=0) — /tmp/fittest_bare.spin2 and /tmp/fittest_with_addr.spin2
 - engineering/ingestion/sources/spin2-v51/spin2-grammar-reference.md:295-296 — directive grammar: '"FIT" address' (address NOT in brackets, unlike ORG which has '[address]')
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:316,323 — all examples show FIT with explicit address: 'FIT $020', 'FIT $2000'
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:316,323 — all examples show FIT with explicit address: 'FIT $020', 'FIT $2000'
 
 **Why / rationale:** The pasm2/fit.yaml currently documents three fabricated claims: (1) 'syntax: FIT [address]' implies the address is optional; (2) a note 'FIT without parameter checks for cog RAM limit ($200)' claims a default behavior; (3) an example 'FIT // Default: ensure fits in cog RAM (< $200)' demonstrates a non-existent bare form. All three are refuted by pnut-ts v1.55.0 (bare FIT is a hard syntax error) and by the Spin2 v51 grammar which shows FIT address (no brackets, mandatory), contrasted with ORG [address] (optional). The spin2/assembly-directives/fit.yaml already correctly shows 'FIT limit' (mandatory). Only the pasm2/fit.yaml needs correction.
 
@@ -973,7 +973,7 @@ _Applied directly from the register's pre-confirmed evidence (Spin2 v55 conflict
 **Sources that proved it:**
 - deliverables/ai/P2/language/pasm2/hubexec.yaml:9 — value: '%0_1_0000' (confirmed present, wrong)
 - pnut-ts v1.55.0 listing probe /tmp/hubexec_check.lst — V_HUBEXEC=00000020, V_COGEXEC_NEW=00000010 (ground truth)
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:1661-1662 — %10_0000 HUBEXEC / %01_0000 COGEXEC_NEW (spec authority)
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1661-1662 — %10_0000 HUBEXEC / %01_0000 COGEXEC_NEW (spec authority)
 - deliverables/ai/P2/language/spin2/patterns/implementation/spin2_cog_management.yaml:19 — HUBEXEC value "%100000" (already correct)
 - deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml:318-319 — value "$0000_0020" / bit_pattern "%10_0000" (already correct)
 - deliverables/ai/P2/language/pasm2/coginit.yaml — no 'Bit 5' text found at line 23; line 23 is encoding: comment (no defect present in current file)
@@ -1009,7 +1009,7 @@ _Applied directly from the register's pre-confirmed evidence (Spin2 v55 conflict
 - Fix magnification_codes labels: '3x' -> '3.16x' and '31x' -> '31.6x' to match the actual physical ADC gain values (sqrt-10-spaced ladder: 1x, 3.16x, 10x, 31.6x, 100x).
 
 **Sources that proved it:**
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:1469-1473 — full ADC Input Modes table: P_ADC_3X=3.16x, P_ADC_30X=31.6x; P_ADC_31X does not exist
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1469-1473 — full ADC Input Modes table: P_ADC_3X=3.16x, P_ADC_30X=31.6x; P_ADC_31X does not exist
 - engineering/ingestion/sources/spin2-v51/spin2-v51-narrative.txt:5050 — P_ADC_3X ADC 3.16x, :5054 — P_ADC_30X ADC 31.6x
 - engineering/ingestion/sources/spin2-v51/smartpin-symbols.txt:362-381 — P_ADC_3X 3.16x, P_ADC_30X 31.6x
 
@@ -1320,7 +1320,7 @@ _Applied directly from the register's pre-confirmed evidence (Spin2 v55 conflict
 - engineering/ingestion/sources/silicon-doc/p2-documentation.txt:2521-2551 (SETQ CONSIDERATIONS — exhaustive list of companion instructions; SETXFRQ is absent)
 - engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:row 264 (SETXFRQ — 'Set streamer NCO frequency to D'; no SETQ interaction noted)
 - engineering/ingestion/sources/chip-gracey-clarifications/ — all four files searched; no mention of SETQ+SETXFRQ or 64-bit NCO frequency
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt — SETXFRQ does not appear (PASM2-only instruction)
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt — SETXFRQ does not appear (PASM2-only instruction)
 - deliverables/ai/P2/language/pasm2/setxfrq.yaml:12-17 (suspect text confirmed present)
 
 **Why / rationale:** The claim is a fabrication on two levels. First, the NCO is a 32-bit phase accumulator (silicon doc:2748: 'it adds a 32-bit frequency value into a 32-bit phase accumulator'). There is no 64-bit NCO frequency register, so 'D provides high 32 bits for 64-bit precision' is dimensionally incoherent. Second, the silicon doc's exhaustive SETQ CONSIDERATIONS section (lines 2521-2551) lists every instruction that consumes Q; SETXFRQ is absent from that list. The actual SETQ+streamer mechanism described in the silicon doc (lines 2794-2796) is SETQ before XINIT/XZERO/XCONT — which sets the NCO frequency as part of issuing a streamer command. That is a distinct, valid pattern but involves different instructions and does not provide any 64-bit precision. The proposed_snippet for example 3 above illustrates that valid SETQ+XINIT pattern as a replacement; the exact streamer_mode constant would need to be adapted to a real use case by the editor. The description fix removes only the two fabricated lines (lines 16-17 of the YAML). The frequency_formula section is separately correct (2^31 modulus) and does not need changes.
@@ -1382,8 +1382,8 @@ The finding also lists augd.yaml as an affected file but the proposed correction
 - pnut-ts v1.55.0 probe: /tmp/af182_v41.spin2 (DEBUG_MASK + debug[N], explicit {Spin2_v41}) → exit 0, Wrote .bin — compiles even at v41 gate
 - pnut-ts v1.55.0 probe: /tmp/af182_nodirective.spin2 (DEBUG_MASK + debug[0..7], no directive) → exit 0, Wrote .bin
 - pnut-ts v1.55.0 control: /tmp/af182_control_lstring.spin2 (LSTRING with {Spin2_v41}) → exit 1, error m172 — proves keyword gate enforcement works for true gated keywords
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:1027 — DEBUG_MASK table entry: no version directive mentioned
-- engineering/ingestion/sources/spin2_lang_ref_v55/spin2-v55-text.txt:38 — v46 release note: says feature 'added' in v46, does not say {Spin2_v46} directive required
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1027 — DEBUG_MASK table entry: no version directive mentioned
+- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:38 — v46 release note: says feature 'added' in v46, does not say {Spin2_v46} directive required
 - deliverables/ai/P2/language/spin2/constants/debug-mask.yaml:5-6 — minimum_version/version_directive fields present (suspect text confirmed in file)
 - deliverables/ai/P2/language/spin2/constants/debug-mask.yaml:17,124 — REQUIRES constraint present (suspect text confirmed)
 - deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml:313-315,327 — requires_version/version_directive + REQUIRES note present (suspect text confirmed)

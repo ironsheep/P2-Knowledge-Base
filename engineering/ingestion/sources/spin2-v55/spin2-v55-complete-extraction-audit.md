@@ -14,7 +14,7 @@
 |------|--------|
 | **1 — Content** | `spin2-v55-text.txt` — 204,468 chars / 1,740 lines, tables preserved as pipe-delimited rows (DOCX literal-char stream; no column-bleed). |
 | **2 — Code examples** | `assets/code-20260610/` — 952 monospace blocks; **169 substantial (≥3-line)** written; **29 compile clean** under pnut-ts v1.55.0; remainder are illustrative *fragments* (partial DAT/VAR/PUB needing object context, version-gated struct snippets missing directives) + a few prose blocks mis-swept by font detection. **Whitespace fidelity confirmed faithful from DOCX.** |
-| **3 — Images** | `assets/images-spin2_lang_ref_v55-20260610/` (24 PNG/GIF) + `image-catalog.md` — lossless from DOCX `word/media/`; **0 black/failed extractions**; each mapped to its doc heading/caption. Figures are DEBUG-display screenshots + FIELD-POINTERS diagrams. |
+| **3 — Images** | `assets/images-spin2-v55-20260610/` (24 PNG/GIF) + `image-catalog.md` — lossless from DOCX `word/media/`; **0 black/failed extractions**; each mapped to its doc heading/caption. Figures are DEBUG-display screenshots + FIELD-POINTERS diagrams. |
 | **6 — Cross-source conflict audit** | 7 delta features boundary-probed vs pnut-ts v1.55.0. See below. |
 
 ## Code-fidelity note — `...` line-continuation (verified, no loss)

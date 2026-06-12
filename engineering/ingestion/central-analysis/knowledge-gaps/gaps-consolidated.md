@@ -79,8 +79,8 @@
 ### 7. Spin2 Language ~~(70% DOCUMENTED)~~ (85% DOCUMENTED)
 **Available**: Core syntax and features
 **Missing**:
-- ~~Complete operator precedence table (16 levels)~~ ✅ RESOLVED by spin2_lang_ref_v55 (full Term/Assign-priority tables, lines 409-494)
-- ~~All floating-point operators~~ ✅ RESOLVED by spin2_lang_ref_v55 (POW/LOG2/EXP2/LOG10/EXP10/FSQRT/FABS/ROUND/TRUNC, with Floating-Point-Operator column)
+- ~~Complete operator precedence table (16 levels)~~ ✅ RESOLVED by spin2-v55 (full Term/Assign-priority tables, lines 409-494)
+- ~~All floating-point operators~~ ✅ RESOLVED by spin2-v55 (POW/LOG2/EXP2/LOG10/EXP10/FSQRT/FABS/ROUND/TRUNC, with Floating-Point-Operator column)
 - Control flow complete syntax
 - Method overhead specifications *(intentionally not documented — no verifiable interpreter clock timings)*
 - Inline assembly restrictions

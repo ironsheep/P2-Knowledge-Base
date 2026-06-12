@@ -33,7 +33,7 @@
 |--------|-----------|-------------|--------|------|-----------|--------------|
 | silicon-doc | 🏆 AUTHORITATIVE | ✅ Text | ✅ 2 dirs | ❓ Check | ✅ Complete | 95% |
 | spin2-v51 | 🏆 AUTHORITATIVE | ✅ PDF | ✅ 25 images | ✅ 32 examples | ✅ Complete | 100% (superseded by v55 for language facts) |
-| spin2_lang_ref_v55 | 🏆 AUTHORITATIVE (matched-compiler edition) | ✅ DOCX+PDF | ✅ 24 images | ✅ 169 blocks (29 clean) | ✅ Complete | 100% (delta v52→v55) |
+| spin2-v55 | 🏆 AUTHORITATIVE (matched-compiler edition) | ✅ DOCX+PDF | ✅ 24 images | ✅ 169 blocks (29 clean) | ✅ Complete | 100% (delta v52→v55) |
 | p2-datasheet | 🏆 AUTHORITATIVE | ✅ PDF | ✅ 40 images | N/A | ✅ Complete | 100% |
 | smart-pins | GREEN | ✅ PDF | ✅ 21 images+context | ✅ 98 examples | ✅ Enhanced | 100% |
 | pasm2-manual | DRAFT | ✅ In Dev | ✅ 1 dir | ❓ Check | ✅ Complete | 90% |

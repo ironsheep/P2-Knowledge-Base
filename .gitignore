@@ -234,3 +234,4 @@ engineering/document-production/manuals/p2-assembly-language-manual/opus-master/
 
 # Local-only reference material (licensed OBEX sources, etc.) — never committed
 NO-COMMIT/
+/engineering/ingestion/external-inputs/p2kb-update-requests

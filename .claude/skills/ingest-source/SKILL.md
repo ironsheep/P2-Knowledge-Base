@@ -44,7 +44,7 @@ that pass. The standing docs:
 
 ## 0. Head integration — register the element first
 
-1. **Set the pointer:** `mcp__todo-mcp__context_set key:"active_element" value:"ingestion:<src>"` (use the source's folder slug, e.g. `spin2_lang_ref_v55`).
+1. **Set the pointer:** `mcp__todo-mcp__context_set key:"active_element" value:"ingestion:<src>"` (use the source's folder slug, e.g. `spin2-v55`).
 2. **Registry check (the add-new-element gate, per `whats-next` §6):**
    - New source → add a row to `INGESTION-DASHBOARD.md` (authority level, completeness 0%, gates open); stand up `sources/<src>/`.
    - **Updated edition of an existing source** (e.g. v55 over v51) → it is a *new* source folder (`sources/<src>/`), NOT an in-place overwrite of the old one. Keep the prior edition intact for diff/lineage; mark the new row, and note the supersession in `DOCUMENT-LINEAGE.md`. The old edition's extraction stays until the new one is validated and the dashboard flips authority to it.
@@ -183,12 +183,12 @@ itself an outcome** to surface and reconcile by authority order
 | Instruction flags / encoding / WC-WZ effects | `pnut_ts` · `p2-instructions-csv` · `silicon-doc` · `pnut-ts-pasm-ref` · `chip-gracey-clarifications` |
 | Instruction timing (cog/hub, fixed/variable) | `p2-instructions-csv` · `silicon-doc` · `pnut_ts` |
 | Clock / HUBSET bit-fields, PLL | `silicon-doc` · `p2-datasheet` · `p2-spec-sheet` · `chip-gracey-clarifications` |
-| Directives (ORG/ORGF/ORGH/FIT/FILE/BYTE) | `pnut_ts` · `spin2-v51`→`spin2_lang_ref_v55` (incl. grammar reference) |
-| Spin2 methods / operators / constants | `spin2_lang_ref_v55` (matched edition) · `pnut_ts` |
-| Smart-pin modes / ADC gains | `spin2_lang_ref_v55` · `smart-pins` · `silicon-doc` |
+| Directives (ORG/ORGF/ORGH/FIT/FILE/BYTE) | `pnut_ts` · `spin2-v51`→`spin2-v55` (incl. grammar reference) |
+| Spin2 methods / operators / constants | `spin2-v55` (matched edition) · `pnut_ts` |
+| Smart-pin modes / ADC gains | `spin2-v55` · `smart-pins` · `silicon-doc` |
 | Boot / loaders (Prop_Hex, serial/flash) | `silicon-doc` · `rom-booter` · `flash-loader` |
-| CORDIC / QLOG / QEXP | `silicon-doc` · `spin2_lang_ref_v55` |
-| Counters / special registers (e.g. GETCT) | `silicon-doc` · `spin2_lang_ref_v55` · `pnut_ts` |
+| CORDIC / QLOG / QEXP | `silicon-doc` · `spin2-v55` |
+| Counters / special registers (e.g. GETCT) | `silicon-doc` · `spin2-v55` · `pnut_ts` |
 | **Language version-gating** (`{Spin2_vNN}` a feature requires) | **value established by `pnut_ts` version-keyword enforcement** (probe the boundary edition where the feature begins to compile) **+ the edition's per-symbol directive table**; **recorded in the P2KB YAML, which is the golden/canonical home for gating** (`minimum_version` / `version_directive` / `requires_version`). Manuals derive gating FROM the YAML, never invent it. |
 
 > **Edition note:** when an updated edition is ingested (v55 over v51), the

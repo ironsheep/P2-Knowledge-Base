@@ -14,7 +14,7 @@ Every document in our knowledge base has:
 
 ## Supersessions
 
-- **Spin2 language reference: v51a → v55 (2026-06-10).** `spin2_lang_ref_v55`
+- **Spin2 language reference: v51a → v55 (2026-06-10).** `spin2-v55`
   (Parallax Spin2 Documentation v55, 2026-05-07) supersedes `spin2-v51` as the
   authoritative source for **Spin2 language facts** — it is the **matched-compiler
   edition** (pnut-ts v1.55.0 is ratified against PNut v55). Ingested as a *delta*
@@ -22,7 +22,7 @@ Every document in our knowledge base has:
   lineage/diff. Delta features (`ENDIANL`/`ENDIANW`/`OFFSETOF`/`MOVBYTS`,
   structure bitfields, `NEXT`/`QUIT` levels, `DEBUG_END_SESSION`) were already
   in the KB; the audit confirmed 4 and routed 3 defects to the corrections
-  register (F-098..F-100). See `sources/spin2_lang_ref_v55/spin2-v55-complete-extraction-audit.md`.
+  register (F-098..F-100). See `sources/spin2-v55/spin2-v55-complete-extraction-audit.md`.
 
 ## Precise Source Attribution
 

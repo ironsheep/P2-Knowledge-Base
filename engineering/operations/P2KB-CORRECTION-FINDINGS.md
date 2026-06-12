@@ -1330,7 +1330,7 @@ These 72 KB-defect candidates were surfaced by the **PASM2 Assembly Language Man
 
 ## Spin2 v55 delta-ingestion conflict audit — 2026-06-10 (F-098..F-100)
 
-Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingestion/sources/spin2_lang_ref_v55/`) as a delta over the prior v51a baseline (`ingest-source` skill, first run). The v52→v55 language extensions were **already present** in the KB (ingested earlier, likely from PNut release notes), so there was **no gap-fill** — but the conflict audit (each feature gate boundary-probed against `pnut-ts v1.55.0`, the PNut-v55-ratified compiler) found three defects. ENDIANL/ENDIANW (`{Spin2_v52}`), OFFSETOF (`{Spin2_v53}`), and struct-bitfields (`{Spin2_v45}` enforced, `v54` intent) were **verified correct** — no action.
+Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingestion/sources/spin2-v55/`) as a delta over the prior v51a baseline (`ingest-source` skill, first run). The v52→v55 language extensions were **already present** in the KB (ingested earlier, likely from PNut release notes), so there was **no gap-fill** — but the conflict audit (each feature gate boundary-probed against `pnut-ts v1.55.0`, the PNut-v55-ratified compiler) found three defects. ENDIANL/ENDIANW (`{Spin2_v52}`), OFFSETOF (`{Spin2_v53}`), and struct-bitfields (`{Spin2_v45}` enforced, `v54` intent) were **verified correct** — no action.
 
 ### F-098 — `NEXT`/`QUIT` level: fabricated `NEXTN`/`QUITN` keywords + wrong range + inverted semantics + over-claimed gate  ·  `DONE` (2026-06-10)
 
@@ -1386,7 +1386,7 @@ Surfaced by ingesting **Spin2 Language Documentation v55** (`engineering/ingesti
 
 ## PASM2-audit correction sweep — 2026-06-10 (Wave 1: F-026..F-050)
 
-Each NEEDS-VERIFICATION finding was independently re-verified against the golden sources (pnut-ts boundary/assembly probes · `silicon-doc` · `p2-instructions-csv` · `spin2_lang_ref_v55` · `chip-gracey-clarifications`) by a bounded verification workflow, then hand-reviewed and applied via `yaml-knowledge-base-maintenance`. Outcome of the 25:
+Each NEEDS-VERIFICATION finding was independently re-verified against the golden sources (pnut-ts boundary/assembly probes · `silicon-doc` · `p2-instructions-csv` · `spin2-v55` · `chip-gracey-clarifications`) by a bounded verification workflow, then hand-reviewed and applied via `yaml-knowledge-base-maintenance`. Outcome of the 25:
 
 - **24 CONFIRMED + applied → DONE.** F-026 (getscp `write: D`), F-027/F-029/F-030/F-031 (clock_system.yaml HUBSET operand map fully rewritten to canonical `E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS`; CC=D[3:2]/SS=D[1:0] un-swapped; all three example literals recomputed and PASM2-compile-verified), F-028 (hubset.yaml d3_2 CC: 4 entries, 15pF moved off %01 onto %10), F-032 (ijnz note de-inverted), F-033 (jxro "streamer NCO rollover" + oneliner), F-034 (jxro/jxmt variable timing), F-035 (lockrel C = lock-was-held under WC), F-037 (locknew/lockret/locktry/lockrel variable timing), F-038 (tjf/tjz/tjnz/tjns hub clocks), F-039 (tjnz/tjns variable timing), F-040 (testb `related`), F-041 (tjf/tjz column-bleed description fragment removed), F-042 (addpix = 4 byte fields / 8:8:8:8 incl. alpha, per Silicon Doc), F-043/F-044 (addsx/addx `related` self-ref→sibling), F-045 (augd/augs SETQ-block-delta errata), F-046 (augs scope_note tightened), F-048/F-049 (calla/callb hub-exec timing 14-32 added; CSV-confirmed), F-050 (calla PTRA-only description/oneliner). **F-047** (gen-script `flags_affected` key-presence-vs-value bug) fixed in `engineering/tools/gen-pasm2-encoding-reference.py` — corrects the bogus "C,Z" column on 344 rows; takes effect on the encoding-reference regen.
 - **1 REFUTED → WONTFIX.** F-036 — LOC category `Math and Logic` matches the canonical Parallax CSV (row 431) exactly; proposed "Branch" recategorization is wrong. (Manual-side LOC categorization inconsistency is a separate manual-head issue, not a YAML defect.)
@@ -1507,3 +1507,24 @@ The gaps study (`studies/yaml-database-gaps-discovered.md`, lines ~112–118) fl
 
 ### F-114c — Debug-window findability wiring (entry-point dead-end + category)  ·  `DONE` (2026-06-11, v1.8.0 §10)
 The parent `language/spin2/statements/debug.yaml` enumerated every window in prose (`display_types:`) but its `related:` block held only **bare-prose topics** ("Display types", "Formatting functions", …) with no real links — a traversal dead-end (the original failure mode that prompted this whole audit), and it omitted SCOPE_XY entirely. **Resolution:** added SCOPE_XY to the enumeration; converted `related:` to full-path down-links to all nine window files (relocating the prose topics to `see_also:` per Sacred Rule #7 — relocated, not dropped); added reciprocal window links on `debug-commands/debug.yaml`; and registered a new `spin2.debug_displays` category in `engineering/tools/p2kb-categories.json` listing all nine files so `p2kb_find` set-browsing surfaces them.
+
+---
+
+## Shipped-YAML provenance self-sufficiency (data-set-wide) — 2026-06-12 (F-115)
+
+Surfaced during the ingestion front-door restructure (the `spin2_lang_ref_v55` → `spin2-v55` folder-rename audit). **Not a content error** — a **provenance-format** defect class: shipped YAML fields cite **working-tree paths** (`engineering/ingestion/...`, `engineering/document-production/...`) + line ranges. This violates the YAML self-sufficiency rule (shipped YAML must reference only internal KB keys + durable bibliographic citations — provenance stays in plan/commits). Working paths (a) do not resolve for a download-on-demand MCP consumer, and (b) are brittle: they had to be hand-patched when the v55 source folder was renamed in this very session.
+
+### F-115 — working-tree paths embedded in shipped-YAML provenance fields  ·  `CONFIRMED` (2026-06-12)
+
+**Scope (data-set-wide):** **42 files** under `deliverables/ai/P2/` embed an `engineering/…` working path; **25** carry it in a `source:`/`sources:` field, the rest in `source_example` / `source_listing` / `example_source` / `source_of_truth` / `primary_source` / `companion_doc` / `path` / `rom_booter_listing` / etc. Enumerate the full set before fixing:
+```
+grep -rlE "engineering/(ingestion|document-production|operations|tools)/" deliverables/ai/P2
+```
+
+**Originally surfaced (the 4 that triggered this):**
+- `language/spin2/methods/qsin.yaml:42` · `language/spin2/methods/qcos.yaml:40` — `source: "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5141-5143 …"` (trace back to the F-001 fix, which introduced the working-path provenance).
+- `language/spin2/debug-commands/pc_key.yaml:11` · `pc_mouse.yaml:11` — `source:` citing both an `engineering/ingestion/sources/spin2-v51/debug-section.txt:…` path **and** an `engineering/document-production/manuals/…/REF/…md` path.
+
+**Notable:** all **10 debug-display YAMLs shipped in v1.8.0** (`debug-displays/{term,scope,scope_xy,fft,spectro,bitmap,logic,plot,midi}.yaml:~12`) carry `source: "engineering/document-production/…"` — so the most-recent release added more instances of this class.
+
+**Proposed correction:** Replace each working-path provenance with a **durable bibliographic citation** — e.g. `source: "Parallax Spin2 Language Reference v51a — QSIN/QCOS (CORDIC methods); examples compile-verified with pnut_ts v1.55.0"`, dropping the `file:line`. Where the path was the only pointer to a host-side/manual detail, move that detail into prose, not a working path. **Fix the whole class in one sweep** (per the fix-all discipline — do not patch only the 4), via `yaml-knowledge-base-maintenance`; triggers an index regen + release. See [[feedback_yaml_self_sufficient_references]] and [[feedback_no_unsourced_claims]].
