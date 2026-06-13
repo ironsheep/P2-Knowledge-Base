@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-11",
-    "last_updated": "2026-06-11T23:03:44.808694",
+    "release_date": "2026-06-13",
+    "last_updated": "2026-06-13T04:35:34.200934",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-11T23:03:44.808694",
+    "extraction_date": "2026-06-13T04:35:34.200934",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -18383,7 +18383,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-11T23:03:44.808694",
+    "extraction_date": "2026-06-13T04:35:34.200934",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20748,7 +20748,7 @@
                 "pasm2_form": "fltl #spi_di addpins 2",
                 "spin2_form": "PINFLOAT(spi_di ADDPINS 2)",
                 "description": "Floats three contiguous pins in one instruction. If spi_di is pin 59,\nthen ADDPINS 2 means \"base + 0\", \"base + 1\", \"base + 2\" \u2192 pins 59,\n60, 61. The single instruction floats the entire 3-pin SPI bus\nsimultaneously.\n",
-                "source_example": "engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275"
+                "source_example": "Parallax P2 flash_loader.spin2 line 275"
               },
               {
                 "syntax": "DRVH #LED_BASE ADDPINS 7",
@@ -22655,7 +22655,7 @@
               "Result = length * sin(angle).",
               "Returns the Y (sine) component; QCOS returns the X (cosine) component of the same rotation."
             ],
-            "source": "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5141-5143 (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts v1.55.0",
+            "source": "Parallax Spin2 Language Reference v51a (QSIN(length, step, stepsInCircle) : y); examples compile-verified with pnut_ts v1.55.0",
             "timing": {
               "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
               "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
@@ -28063,7 +28063,7 @@
               "Result = length * cos(angle).",
               "Returns the X (cosine) component; QSIN returns the Y (sine) component of the same rotation."
             ],
-            "source": "engineering/ingestion/sources/spin2-v51/spin2-text.txt:5147-5149 (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0",
+            "source": "Parallax Spin2 Language Reference v51a (QCOS(length, step, stepsInCircle) : x); examples compile-verified with pnut_ts v1.55.0",
             "timing": {
               "description": "Uses the CORDIC solver (QROTATE). The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here.",
               "see": "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."
@@ -28835,7 +28835,7 @@
             "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. It returns any new keypress that occurred within the last ~100 ms as a\nsingle LONG written through a caller-supplied pointer. The keyboard model is\nidentical for all nine DEBUG display windows.\n",
             "documentation_source": "Spin2 v51 (debug-section.txt) + PNut v55 directive matrix",
             "documentation_level": "comprehensive",
-            "source": "engineering/ingestion/sources/spin2-v51/debug-section.txt:784-814 (PC_KEY P2-side API + key-code table); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md section 4.2 (host side: SendKeyPress 3579-3583, FormKeyDown 833-851)",
+            "source": "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code table); host-side key handling per PNut/Spin2 v55 DebugDisplayUnit.pas",
             "syntax": "PC_KEY(pointer_to_long)",
             "usage_rules": [
               "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",
@@ -28946,7 +28946,7 @@
             "description": "PC_MOUSE reads the host PC's mouse into the P2 from within a graphical DEBUG()\ndisplay. It returns the current mouse status as a 7-LONG structure written through\na caller-supplied pointer. The mechanism is identical for all nine DEBUG display\nwindows; only the reported coordinate basis differs per window.\n",
             "documentation_source": "Spin2 v51 (debug-section.txt) + PNut v55 directive matrix",
             "documentation_level": "comprehensive",
-            "source": "engineering/ingestion/sources/spin2-v51/debug-section.txt:815-852 (PC_MOUSE P2-side API + 7-long struct); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md sections 4.3-4.4 (host side: SendMousePos 3537-3577, per-window coordinate mapping)",
+            "source": "Parallax Spin2 Language Reference v51a (PC_MOUSE P2-side API + 7-long mouse struct); host-side coordinate mapping per PNut/Spin2 v55 DebugDisplayUnit.pas",
             "syntax": "PC_MOUSE(pointer_to_7_longs)",
             "usage_rules": [
               "FOR USE IN GRAPHICAL DEBUG() DISPLAYS only.",

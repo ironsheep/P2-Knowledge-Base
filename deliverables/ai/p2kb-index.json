@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-11T23:03:44.760999",
-    "total_entries": 1062,
-    "total_categories": 51,
-    "total_aliases": 1093,
-    "multi_target_aliases": 58,
+    "generated": "2026-06-13T04:35:34.158045",
+    "total_entries": 1055,
+    "total_categories": 57,
+    "total_aliases": 1309,
+    "multi_target_aliases": 62,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -638,15 +638,163 @@
       "p2kbGuidePasm2GettingStarted",
       "p2kbGuideQuickQueries",
       "p2kbGuideSpin2GettingStarted"
+    ],
+    "hardware_boards": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "hardware_modules": [
+      "p2kbHwEdge32mbModuleEdge32mbModule",
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "hardware_carriers": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier",
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout",
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "hardware_addons": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay",
+      "p2kbHwAddonAvBreakoutAddonAvBreakout",
+      "p2kbHwAddonControlBoardAddonControlBoard",
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
+      "p2kbHwAddonLedMatrixAddonLedMatrix",
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
+      "p2kbHwAddonSerialDeviceAddonSerialDevice",
+      "p2kbHwAddonSerialHostAddonSerialHost",
+      "p2kbHwButtonsBoardButtonsBoard",
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "hardware_adapters": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "hardware_reference": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix",
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet",
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison",
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ]
   },
   "aliases": {
+    "#64006 ADD-ON": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay",
+      "p2kbHwButtonsBoardButtonsBoard",
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "#64006 ADD-ON BOARD": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout",
+      "p2kbHwAddonControlBoardAddonControlBoard",
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
+      "p2kbHwAddonLedMatrixAddonLedMatrix",
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
+      "p2kbHwAddonSerialDeviceAddonSerialDevice",
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "#64006 add-on": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay",
+      "p2kbHwButtonsBoardButtonsBoard",
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds",
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "#64006 add-on board": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout",
+      "p2kbHwAddonControlBoardAddonControlBoard",
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
+      "p2kbHwAddonLedMatrixAddonLedMatrix",
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping",
+      "p2kbHwAddonSerialDeviceAddonSerialDevice",
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "4 SWITCHES 4 LEDS": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "4 switches 4 LEDs": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "64000": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "64000-ES": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "64006A": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "64006B": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "64006C": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "64006D": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "64006E": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
+    "64006F": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "64006G": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "64006H": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
+    "64019": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "64020": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "64029": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "64032": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "7-SEGMENT ADD-ON BOARD": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "7-SEGMENT DISPLAY": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "7-segment add-on board": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "7-segment display": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "8 DIP SWITCHES ADD-ON": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "8 DIP switches add-on": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "8 PUSHBUTTONS ADD-ON": [
+      "p2kbHwButtonsBoardButtonsBoard"
+    ],
+    "8 pushbuttons add-on": [
+      "p2kbHwButtonsBoardButtonsBoard"
+    ],
+    "A/V BREAKOUT BOARD": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
+    "A/V breakout board": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
     "ABS": [
       "p2kbPasm2Abs",
       "p2kbSpin2Abs"
     ],
     "ADD": [
       "p2kbPasm2Add"
+    ],
+    "ADD-ON BOARD COMPATIBILITY": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "ADDCT1": [
       "p2kbPasm2Addct1"
@@ -721,6 +869,9 @@
     "ASMCLK": [
       "p2kbPasm2Asmclk"
     ],
+    "AUDIO VIDEO BREAKOUT": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
     "AUGD": [
       "p2kbPasm2Augd"
     ],
@@ -760,8 +911,32 @@
     "BMASK": [
       "p2kbPasm2Bmask"
     ],
+    "BOARD ADAPTER COMPATIBILITY": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "BOARD COMPARISON": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "BOARD PIN MAPPING": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "BOARD SELECTION": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "BREADBOARD ADAPTER": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "BREADBOARD CARRIER": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
     "BRK": [
       "p2kbPasm2Brk"
+    ],
+    "BUTTONS AND LEDS BOARD": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "BUTTONS BOARD": [
+      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "BYTE": [
       "p2kbSpin2Byte"
@@ -800,8 +975,17 @@
     "CANVAS": [
       "p2kbSpin2Plot"
     ],
+    "CAPACITIVE TOUCH BOARD": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "CARRIER COMPATIBILITY": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
     "CARTESIAN": [
       "p2kbSpin2Plot"
+    ],
+    "CHOOSE P2 BOARD": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
     "CLKFREQ": [
       "p2kbArchClockSystem"
@@ -860,6 +1044,12 @@
     "COGSTOP": [
       "p2kbPasm2Cogstop",
       "p2kbSpin2Cogstop"
+    ],
+    "COMPARE P2 BOARDS": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "CONTROL BOARD": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
     ],
     "CRCBIT": [
       "p2kbPasm2Crcbit"
@@ -978,6 +1168,15 @@
     "DIGITAL SIGNALS": [
       "p2kbSpin2Logic"
     ],
+    "DIGITAL VIDEO OUT BOARD": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "DIP SWITCHES BOARD": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "DIP switches board": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
     "DIRC": [
       "p2kbPasm2Dirc"
     ],
@@ -1040,6 +1239,42 @@
     ],
     "DRVZ": [
       "p2kbPasm2Drvz"
+    ],
+    "DVI ADD-ON": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "DVI add-on": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "EDGE BOARD PINOUT": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "EDGE BREADBOARD": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "EDGE BREAKOUT HEADERS": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "EDGE CARRIER": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "EDGE CARRIER BOARD": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "EDGE MINI BREAKOUT": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "EDGE MODULE 32MB": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "EDGE MODULE COMPARISON": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "EDGE MODULE NO RAM": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "EDGE STANDARD BREAKOUT": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
     ],
     "ENCOD": [
       "p2kbPasm2Encod"
@@ -1159,6 +1394,39 @@
     ],
     "GETXACC": [
       "p2kbPasm2Getxacc"
+    ],
+    "GOERTZEL TOUCH BOARD": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "Goertzel touch board": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "HARDWARE COMPATIBILITY MATRIX": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "HARDWARE FEATURE COMPARISON": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "HARDWARE SELECTION GUIDE": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "HDMI ADD-ON BOARD": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "HDMI add-on board": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "HUB75 ADAPTER": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "HUB75 LED PANEL ADAPTER": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "HUB75 LED panel adapter": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "HUB75 adapter": [
+      "p2kbHwHub75AdapterHub75Adapter"
     ],
     "HUBSET": [
       "p2kbArchClockSystem",
@@ -1282,6 +1550,30 @@
     "LAYER": [
       "p2kbSpin2Plot"
     ],
+    "LED CONTROL BOARD": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "LED MATRIX ADD-ON": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "LED MATRIX BOARD": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "LED PANEL INTERFACE": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "LED control board": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "LED matrix add-on": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "LED matrix board": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "LED panel interface": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
     "LISSAJOUS": [
       "p2kbSpin2ScopeXy"
     ],
@@ -1363,6 +1655,12 @@
     ],
     "MIDI": [
       "p2kbSpin2Midi"
+    ],
+    "MINI BREAKOUT BOARD": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "MINI PROTOTYPING BOARD": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
     "MISO": [
       "p2kbArchSpiImplementationGuide"
@@ -1506,11 +1804,194 @@
     "OUTZ": [
       "p2kbPasm2Outz"
     ],
+    "P1 CHARACTER SET": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P1 ROM FONT": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P1 ROM font": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P1 character set": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P2 BOARD FEATURES TABLE": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "P2 DEV BOARD": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 DEVELOPMENT BOARD": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 EDGE 32MB MODULE": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P2 EDGE MINI BREAKOUT": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "P2 EDGE MODULE": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "P2 EDGE MODULE BREADBOARD": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "P2 EDGE MODULE WITH RAM": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P2 EDGE STANDARD BREAKOUT": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "P2 EDGE STANDARD MODULE": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "P2 EVAL 7-SEGMENT": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "P2 EVAL A/V BREAKOUT ADD-ON BOARD": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
+    "P2 EVAL BOARD": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 EVAL BUTTONS": [
+      "p2kbHwButtonsBoardButtonsBoard"
+    ],
+    "P2 EVAL CONTROL ADD-ON BOARD": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "P2 EVAL DIGITAL VIDEO OUT ADD-ON BOARD": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "P2 EVAL GOERTZEL/TOUCH SENSING ADD-ON BOARD": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "P2 EVAL LED MATRIX ADD-ON BOARD": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "P2 EVAL MINI PROTOTYPING ADD-ON BOARD": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
+    "P2 EVAL SERIAL DEVICE ADD-ON BOARD": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "P2 EVAL SERIAL HOST ADD-ON BOARD": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "P2 EVAL SWITCHES": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "P2 EVAL SWITCHES AND LEDS": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "P2 EVALUATION BOARD": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 Edge 32MB Module": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P2 Edge Mini Breakout": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "P2 Edge Module": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "P2 Edge Module Breadboard": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "P2 Edge Module with RAM": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P2 Edge Standard Breakout": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "P2 Edge standard module": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "P2 Eval 7-segment": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
+    "P2 Eval A/V Breakout Add-on Board": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
+    "P2 Eval Board": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 Eval Control Add-on Board": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "P2 Eval Digital Video Out Add-on Board": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "P2 Eval Goertzel/Touch Sensing Add-on Board": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "P2 Eval LED Matrix Add-on Board": [
+      "p2kbHwAddonLedMatrixAddonLedMatrix"
+    ],
+    "P2 Eval Mini Prototyping Add-on Board": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
+    "P2 Eval Serial Device Add-on Board": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "P2 Eval Serial Host Add-on Board": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "P2 Eval buttons": [
+      "p2kbHwButtonsBoardButtonsBoard"
+    ],
+    "P2 Eval switches": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "P2 Eval switches and LEDs": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "P2 HARDWARE BUYING GUIDE": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "P2 HARDWARE ECOSYSTEM": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "P2 board features table": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "P2 dev board": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 development board": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 evaluation board": [
+      "p2kbHwP2EvalBoardP2EvalBoard"
+    ],
+    "P2 hardware buying guide": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "P2 hardware ecosystem": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "P2-EC": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "P2-EC32MB": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "P8X32A FONT": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P8X32A font": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
     ],
     "PIANO KEYBOARD": [
       "p2kbSpin2Midi"
+    ],
+    "PIN ACCESS": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "PINCLEAR": [
       "p2kbSpin2Pinclear"
@@ -1634,6 +2115,18 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
+    "PROTO BOARD": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
+    "PROTOTYPING ADD-ON": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
+    "PSRAM EDGE MODULE": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "PSRAM edge module": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
     "PUSH": [
       "p2kbPasm2Push"
     ],
@@ -1642,6 +2135,9 @@
     ],
     "PUSHB": [
       "p2kbPasm2Pushb"
+    ],
+    "PUSHBUTTONS BOARD": [
+      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "P_BITDAC": [
       "p2kbArchSmartPins"
@@ -1811,6 +2307,12 @@
     "RFWORD": [
       "p2kbPasm2Rfword"
     ],
+    "RGB MATRIX ADAPTER": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "RGB matrix adapter": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
     "RGBEXP": [
       "p2kbPasm2Rgbexp"
     ],
@@ -1828,6 +2330,12 @@
     ],
     "ROLWORD": [
       "p2kbPasm2Rolword"
+    ],
+    "ROM FONT GLYPHS": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "ROM font glyphs": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
     "ROR": [
       "p2kbPasm2Ror"
@@ -1862,6 +2370,18 @@
     ],
     "SEND": [
       "p2kbSpin2Send"
+    ],
+    "SERIAL DEVICE ADD-ON": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "SERIAL DEVICE BOARD": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "SERIAL HOST ADD-ON": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "SERIAL HOST BOARD": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
     ],
     "SERIAL TERMINAL": [
       "p2kbSpin2Term"
@@ -1956,6 +2476,9 @@
     "SEUSSR": [
       "p2kbPasm2Seussr"
     ],
+    "SEVEN SEGMENT DISPLAY": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
     "SHL": [
       "p2kbPasm2Shl"
     ],
@@ -2016,6 +2539,12 @@
     "STALLI": [
       "p2kbPasm2Stalli"
     ],
+    "STANDARD BREAKOUT BOARD": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "STANDARD EDGE MODULE": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
     "STRCOMP": [
       "p2kbSpin2Strcomp"
     ],
@@ -2054,6 +2583,15 @@
     ],
     "SUMZ": [
       "p2kbPasm2Sumz"
+    ],
+    "SWITCHES AND LEDS BOARD": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "SWITCHES BOARD": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
+    ],
+    "SWITCHES LEDS ADD-ON": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
     ],
     "TASKCHK": [
       "p2kbSpin2Taskchk"
@@ -2130,6 +2668,9 @@
     "TJZ": [
       "p2kbPasm2Tjz"
     ],
+    "TOUCH SENSING ADD-ON": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
     "TRAJECTORY PLOT": [
       "p2kbSpin2ScopeXy"
     ],
@@ -2150,6 +2691,12 @@
     ],
     "VECTOR GRAPHICS": [
       "p2kbSpin2Plot"
+    ],
+    "VGA TEXT FONT": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "VGA text font": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
     "VSCODE_SPIN2_COMMENTS": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -2227,6 +2774,15 @@
     ],
     "WFWORD": [
       "p2kbPasm2Wfword"
+    ],
+    "WHICH BOARD": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "WHICH P2 BOARD": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "WHICH PINS": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
     "WMLONG": [
       "p2kbPasm2Wmlong"
@@ -2376,6 +2932,9 @@
     "add": [
       "p2kbPasm2Add"
     ],
+    "add-on board compatibility": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
     "addct1": [
       "p2kbPasm2Addct1"
     ],
@@ -2458,6 +3017,9 @@
     "asmclk": [
       "p2kbPasm2Asmclk"
     ],
+    "audio video breakout": [
+      "p2kbHwAddonAvBreakoutAddonAvBreakout"
+    ],
     "audio_processor": [
       "p2kbSpin2AudioProcessor"
     ],
@@ -2500,12 +3062,36 @@
     "bmask": [
       "p2kbPasm2Bmask"
     ],
+    "board adapter compatibility": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "board comparison": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "board pin mapping": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "board selection": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "breadboard adapter": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "breadboard carrier": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
     "brk": [
       "p2kbPasm2Brk"
     ],
     "buffer_management": [
       "p2kbArchBufferManagementAnalysis",
       "p2kbSpin2Spin2BufferManagement"
+    ],
+    "buttons and LEDs board": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
+    ],
+    "buttons board": [
+      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "byte": [
       "p2kbSpin2Byte"
@@ -2544,8 +3130,17 @@
     "canvas": [
       "p2kbSpin2Plot"
     ],
+    "capacitive touch board": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "carrier compatibility": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
     "cartesian": [
       "p2kbSpin2Plot"
+    ],
+    "choose P2 board": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
     "clkset": [
       "p2kbSpin2Clkset"
@@ -2603,8 +3198,14 @@
     "communication_handler": [
       "p2kbSpin2CommunicationHandler"
     ],
+    "compare P2 boards": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
     "configuration_manager": [
       "p2kbSpin2ConfigurationManager"
+    ],
+    "control board": [
+      "p2kbHwAddonControlBoardAddonControlBoard"
     ],
     "cooperative_tasking": [
       "p2kbSpin2Spin2CooperativeTasking"
@@ -2647,6 +3248,9 @@
     ],
     "digital signals": [
       "p2kbSpin2Logic"
+    ],
+    "digital video out board": [
+      "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
     ],
     "dirc": [
       "p2kbPasm2Dirc"
@@ -2713,6 +3317,36 @@
     ],
     "dual_communication": [
       "p2kbSpin2DualCommunication"
+    ],
+    "edge board pinout": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "edge breadboard": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "edge breakout headers": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "edge carrier": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "edge carrier board": [
+      "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "edge mini breakout": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "edge module 32MB": [
+      "p2kbHwEdge32mbModuleEdge32mbModule"
+    ],
+    "edge module comparison": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "edge module no RAM": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "edge standard breakout": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
     ],
     "encod": [
       "p2kbPasm2Encod"
@@ -2841,6 +3475,15 @@
     ],
     "getxacc": [
       "p2kbPasm2Getxacc"
+    ],
+    "hardware compatibility matrix": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "hardware feature comparison": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "hardware selection guide": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
     "hardware_specific_app": [
       "p2kbSpin2HardwareSpecificApp"
@@ -3054,6 +3697,12 @@
     "mergew": [
       "p2kbPasm2Mergew"
     ],
+    "mini breakout board": [
+      "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout"
+    ],
+    "mini prototyping board": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
     "mixpix": [
       "p2kbPasm2Mixpix"
     ],
@@ -3218,6 +3867,9 @@
     "piano keyboard": [
       "p2kbSpin2Midi"
     ],
+    "pin access": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
     "pin_control": [
       "p2kbSpin2Spin2PinControl"
     ],
@@ -3319,9 +3971,15 @@
     "popb": [
       "p2kbPasm2Popb"
     ],
+    "proto board": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
+    ],
     "protocol_implementation": [
       "p2kbArchProtocolImplementationAnalysis",
       "p2kbSpin2Spin2ProtocolImplementation"
+    ],
+    "prototyping add-on": [
+      "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
     "push": [
       "p2kbPasm2Push"
@@ -3331,6 +3989,9 @@
     ],
     "pushb": [
       "p2kbPasm2Pushb"
+    ],
+    "pushbuttons board": [
+      "p2kbHwButtonsBoardButtonsBoard"
     ],
     "qcos": [
       "p2kbSpin2Qcos"
@@ -3522,6 +4183,18 @@
     "sensor_reader": [
       "p2kbSpin2SensorReader"
     ],
+    "serial device add-on": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "serial device board": [
+      "p2kbHwAddonSerialDeviceAddonSerialDevice"
+    ],
+    "serial host add-on": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "serial host board": [
+      "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
     "serial terminal": [
       "p2kbSpin2Term"
     ],
@@ -3615,6 +4288,9 @@
     "seussr": [
       "p2kbPasm2Seussr"
     ],
+    "seven segment display": [
+      "p2kbHw7SegmentDisplay7SegmentDisplay"
+    ],
     "several_objects": [
       "p2kbSpin2SeveralObjects"
     ],
@@ -3681,6 +4357,12 @@
     "stalli": [
       "p2kbPasm2Stalli"
     ],
+    "standard breakout board": [
+      "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
+    ],
+    "standard edge module": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
     "state_machine": [
       "p2kbArchStateMachineAnalysis",
       "p2kbSpin2Spin2StateMachine"
@@ -3723,6 +4405,15 @@
     ],
     "sumz": [
       "p2kbPasm2Sumz"
+    ],
+    "switches LEDs add-on": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "switches and LEDs board": [
+      "p2kbHwSwitchesAndLedsSwitchesAndLeds"
+    ],
+    "switches board": [
+      "p2kbHwSwitchesBoardSwitchesBoard"
     ],
     "taskchk": [
       "p2kbSpin2Taskchk"
@@ -3799,6 +4490,9 @@
     ],
     "tjz": [
       "p2kbPasm2Tjz"
+    ],
+    "touch sensing add-on": [
+      "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
     "trajectory plot": [
       "p2kbSpin2ScopeXy"
@@ -3898,6 +4592,15 @@
     "wfword": [
       "p2kbPasm2Wfword"
     ],
+    "which P2 board": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "which board": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "which pins": [
+      "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
     "wmlong": [
       "p2kbPasm2Wmlong"
     ],
@@ -3983,38 +4686,38 @@
   "files": {
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
-      "mtime": 1779583590,
-      "sha256": "4a933747d6a75453c6ac971b2878be9e45664c96c415b061cef4298979bde7a6"
+      "mtime": 1781325191,
+      "sha256": "7dd607f5936875c7ff4382ce4b213ec95e9c986afe6945b82941b97e0d8fab04"
     },
     "p2kbArchBootPatternSelection": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml",
-      "mtime": 1779759548,
-      "sha256": "57c89eee7bc8b4f91afe4ff330a24ba7da09ca2ed65b9263fc8640ee8f75b2d7"
+      "mtime": 1781325191,
+      "sha256": "7314d43c7a3f7d2a20b231fc6201cca6a35b04e02e21de48c5253d8dbd6eb0f3"
     },
     "p2kbArchBootRomContents": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml",
-      "mtime": 1779583590,
-      "sha256": "8ba2c921792c0ae41e3e05417c8664b4b8e3c2070d7e1e692dd3aed9128ac80c"
+      "mtime": 1781325191,
+      "sha256": "5894a127d3179c9f4575f55093de54775f5e589082bad625d3865b5a7da55913"
     },
     "p2kbArchP2Monitor": {
       "path": "deliverables/ai/P2/architecture/boot-rom/p2-monitor.yaml",
-      "mtime": 1779583590,
-      "sha256": "6790a42e4e779409475c481d8af9b73e6b67eb976ab42fda8837a02cdbe0d7f4"
+      "mtime": 1781325191,
+      "sha256": "d8124f9e57b7a3e575a1fad5243fbbca0e014bd4089a2492de750b5db7f7a1a5"
     },
     "p2kbArchSdCardBoot": {
       "path": "deliverables/ai/P2/architecture/boot-rom/sd-card-boot.yaml",
-      "mtime": 1779583590,
-      "sha256": "7601a5df0d73067f5a2bbbf52da065bed8d01d3c6e26574bf293056367e248d7"
+      "mtime": 1781325191,
+      "sha256": "3fcea4dfd57334877da568dcea48b76a3c648256590fd053b0cefeeeb625960a"
     },
     "p2kbArchSpiFlashBoot": {
       "path": "deliverables/ai/P2/architecture/boot-rom/spi-flash-boot.yaml",
-      "mtime": 1779759548,
-      "sha256": "5c8f57bcf693cef7a4519d678f36b7a0e4fea8ee1500f821cee61bd3b89b4523"
+      "mtime": 1781325191,
+      "sha256": "3d7003f904ec73d48180895b94f02a11889090fc5ba15dea849ebe4be6d7470e"
     },
     "p2kbArchTaqozForth": {
       "path": "deliverables/ai/P2/architecture/boot-rom/taqoz-forth.yaml",
-      "mtime": 1779583590,
-      "sha256": "9082f8c8d71aa03b847cbd8a5e13c6cb5423de4e9cf65953f6542ef515f4730a"
+      "mtime": 1781325191,
+      "sha256": "9f23bc8c1debc4a71c7726b700e56e8ee6f096587b829a93788a0392d543a2dd"
     },
     "p2kbArchClickModuleIntegration": {
       "path": "deliverables/ai/P2/architecture/click_module_integration.yaml",
@@ -4128,8 +4831,8 @@
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
-      "mtime": 1780269492,
-      "sha256": "17d5fcfc1b959053bc4e720d83f600f17c4ebc1f74263ed50992783a4673ebf2"
+      "mtime": 1781325191,
+      "sha256": "6741b177ba8838c31f6d29a06d40e5a5ae55898356f0330c51b8f6be989d9941"
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
@@ -4203,8 +4906,8 @@
     },
     "p2kbArchSmartPin00001LongRepositoryOrDacNoise": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml",
-      "mtime": 1764449566,
-      "sha256": "49367f7a3940d6643fe8bb659196464549f0044da1800043d4ef56387f296a1c"
+      "mtime": 1781325191,
+      "sha256": "bc897cba26a59cb32307b44b84a56896e043107492b42c9d8c0c4803ad0775df"
     },
     "p2kbArchSmartPin00010Dac16bitPseudoRandomDither": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml",
@@ -4318,8 +5021,8 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1781076792,
-      "sha256": "c00cb088538c9ce498c406ee0fe8ecc2fdf3857a73b4c8fc90e1c854b6cd3b71"
+      "mtime": 1781325191,
+      "sha256": "f9d1ecc9e1526e5cdc55cff2cf87b89bc52ffe09845434b037b9c53cec72a5f8"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
@@ -4368,8 +5071,8 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1780269492,
-      "sha256": "6d8f041b5ab5e4e5b791aa00bcd1871c7a9cc1d5c4af486f106bdd5eddd1cb42"
+      "mtime": 1781325191,
+      "sha256": "cb28af6e4f0c9d85b839c1013ebd3b83d78bc5726f097009431f22757f0f4c57"
     },
     "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -4433,8 +5136,8 @@
     },
     "p2kbExampleFlashLoaderCaseStudy": {
       "path": "deliverables/ai/P2/code-examples/flash-loader-case-study.yaml",
-      "mtime": 1779759548,
-      "sha256": "a814d7ee2ac4d2d6feef73fd3d08e80ca2b68d8b5dca6575ca19b7436ca8883e"
+      "mtime": 1781325191,
+      "sha256": "6b9ff8d8d64429f7e8d4f31b788b353c50dfe8755f9c7f930c2a76ebc20e3cfe"
     },
     "p2kbExampleSmartPins001BasicIo": {
       "path": "deliverables/ai/P2/code-examples/smart-pins-001-basic-io.yaml",
@@ -5033,153 +5736,118 @@
     },
     "p2kbHw7SegmentDisplay7SegmentDisplay": {
       "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
-      "mtime": 1764449566,
-      "sha256": "d727da4e8a028e3d1242be2d1e80a9f49de2dd6cb69bcfd8580322a0cf78bb52"
+      "mtime": 1781325191,
+      "sha256": "59ee1febae6bff9fbd8cf80203893efef89fb18dde2f541f8d043b25f5509199"
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1766816757,
-      "sha256": "4995755ea31048443555ccfaea73eba74b51c49684f4c1297beaece8f1f67299"
+      "mtime": 1781325191,
+      "sha256": "5ed4f8d827fce914b23f6f6b0b340b6c1744651124242e967ead16a5e4087a0b"
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1766815250,
-      "sha256": "8e4a68e690dceeda440e06a6b557600fbe146e0d15ddac4f9851691540886b0a"
-    },
-    "p2kbHwAddonDigitalIoBoardAddonDigitalIoBoard": {
-      "path": "deliverables/ai/P2/hardware/addon-digital-io-board.yaml",
-      "mtime": 1768613644,
-      "sha256": "34db32eb0294706cebd0804fb614fcbfac69df9639f367f1dcf17f139f6232d2"
+      "mtime": 1781325191,
+      "sha256": "16694ffdeff4649619acedd3bc125b161d3a6138c87ded2a49a0f7e0ae4c0cbd"
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
-      "mtime": 1764449566,
-      "sha256": "0dc228ec69f66e48113b5de95b27d763199c8f22bfa683d217bbf74cef64236f"
+      "mtime": 1781325191,
+      "sha256": "3082ef439b4bf0906e84bd5fc13e07b7ad50359c2bf8e2e133f8c8bad6bbfa8e"
     },
     "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
       "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
-      "mtime": 1781076792,
-      "sha256": "1f9741f28ee43fb99e39451f083a273ad8ba45c7ede34cf7d060beba458fd8dc"
+      "mtime": 1781325191,
+      "sha256": "b41d0d1b98b425652052dd05d5116e6f82004e6e80c2101327a139dbb395b28e"
     },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1766815250,
-      "sha256": "794ad7a3e434348c55d882d0cd18a369c95a5534b64d9151d9707dda33a858ef"
+      "mtime": 1781325191,
+      "sha256": "bce6f169c29ac0e02ec404bd89a8ca318dca0989229c1da0faa8460bd45bf03e"
     },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
-      "mtime": 1764449566,
-      "sha256": "d7d5af754942cf7ebaf0ea9f284fab0bd4a9c1acfab5e25362ea63de5e2d1812"
+      "mtime": 1781325191,
+      "sha256": "4f1470a3f1d0918aea889cfea4202fecccc389147b81803098f25012911ef5a8"
     },
     "p2kbHwAddonSerialDeviceAddonSerialDevice": {
       "path": "deliverables/ai/P2/hardware/addon-serial-device.yaml",
-      "mtime": 1764449566,
-      "sha256": "6c58e78f0ffb810f7233f3e60b2ac69c9c70d7220f867502c4c613241ca54615"
+      "mtime": 1781325191,
+      "sha256": "047e2f0ad5a4047aa0691f594e4d757659e9c3dff9794273c8cfe254f6afa80d"
     },
     "p2kbHwAddonSerialHostAddonSerialHost": {
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
-      "mtime": 1764449566,
-      "sha256": "df7bc4c5bba201296acc227643cc473e3dea5865d9b1993be7e5c96367528ec7"
-    },
-    "p2kbHwAddonServoHeaderAddonServoHeader": {
-      "path": "deliverables/ai/P2/hardware/addon-servo-header.yaml",
-      "mtime": 1766815250,
-      "sha256": "8a24f8ba173818f2d38b2b3e24014e12bc1a2da9ef5c1da78d30ee07393629f4"
+      "mtime": 1781325191,
+      "sha256": "34155f3e4a054a9a0e4e08d8f0e0f92814cba38e7689ba4e5987fc280929e08b"
     },
     "p2kbHwButtonsBoardButtonsBoard": {
       "path": "deliverables/ai/P2/hardware/buttons_board.yaml",
-      "mtime": 1764449566,
-      "sha256": "59f08e7c64efcbb5b6d56508cb09f9877bdf91ee8edfec1456d3e5f9171299be"
-    },
-    "p2kbHwControlBoardControlBoard": {
-      "path": "deliverables/ai/P2/hardware/control_board.yaml",
-      "mtime": 1764449566,
-      "sha256": "085a84a047524010108dfeb0ddfdad88911bba6f86ac14e25fde9826f74a5640"
+      "mtime": 1781325191,
+      "sha256": "08922437acdc0f04164585e2b71ac9ffe3654b856a344c5622d2af0afc1fea4b"
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1767849756,
-      "sha256": "cdb435cba2e29e35637101226d87eba7d5d2a9c1af585d27d79b0849ec6caf03"
+      "mtime": 1781325191,
+      "sha256": "19d80d02336d2420b62594e13925d11e510e02dcba52d7408e7f6c4dbcbae12d"
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
-      "mtime": 1764449566,
-      "sha256": "ddf8b4e4a9e7209495499ec9bafe165219adf70766c5b786c71a39bad8ce821a"
+      "mtime": 1781325191,
+      "sha256": "d0c77a170cc35635d53a661de658105eb8b10b5aa43a5e7341fa83a5ff9027a6"
     },
     "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-mini-breakout.yaml",
-      "mtime": 1764449566,
-      "sha256": "7162cbf0325358c2d0d882e54fe64b6d460723a043f966de4e6ba03a50ec9912"
+      "mtime": 1781325191,
+      "sha256": "051ea57213f317834124575e9456dfa7773cd65299ca56d811de0622e1437d90"
     },
     "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-standard-breakout.yaml",
-      "mtime": 1764449566,
-      "sha256": "f840061123a1abd0f284e688430006489550785d9a5a8a1af8e2a0a5dd47af39"
+      "mtime": 1781325191,
+      "sha256": "33fe7c821fff3b1ca21546df97d8933f28ea5f65c9c8b5c433d46a014ac1a6c2"
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1767849756,
-      "sha256": "a25307cdaa2f084e878beb3981927430fad46069652b9cf1d0d78aaccbc7377b"
+      "mtime": 1781325191,
+      "sha256": "6ea6917897cde4bb33716d1ccd9dc8d1397c39311b6122b658184dded76af429"
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1764449566,
-      "sha256": "1413d199dd715d4ba8759e56f68325203484e2a8441dbd4760580209f6d8a720"
+      "mtime": 1781325191,
+      "sha256": "44944f01271debb64cc128905416f43a20c88ce84fbe24a3ef8598764ab33471"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
-      "mtime": 1766815250,
-      "sha256": "bf7910f33b7ebf4c424588b14bd5de3eac02716c8ebde1b649dfe838c398e6e6"
+      "mtime": 1781325191,
+      "sha256": "4d73e57a986484f383de22699885ed1885cf83cd5c678e2e980b3b11ba021043"
     },
     "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet": {
       "path": "deliverables/ai/P2/hardware/p1_rom_font_character_set.yaml",
-      "mtime": 1772412804,
-      "sha256": "1ca855df2370dc61bc81dd8dcada8276b011ae601fba40498b4b19b1e4633c48"
+      "mtime": 1781325191,
+      "sha256": "6b6c6e53b0001b5d9d8001f911b65cfb1a85729a814608a66e164c6af2fd1834"
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
-      "mtime": 1764449566,
-      "sha256": "13c80646058b26cde907a32afe29264bd96e95936292a4c2734172c7d5e2c214"
+      "mtime": 1781325191,
+      "sha256": "b339245baba26fe725a4347b1aeadbbedf84c063d0c08b700fc33330a63c8b0e"
     },
     "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison": {
       "path": "deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml",
-      "mtime": 1764449566,
-      "sha256": "55fc6f7fedac91e107dc693f13884d6f44e93885fcd51686cd32fe1d810441df"
+      "mtime": 1781325191,
+      "sha256": "ed8ccd58f6f01f9c8b9df9570839a36e9dc368f89cc86057876194f3ee49dc66"
     },
     "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide": {
       "path": "deliverables/ai/P2/hardware/p2-hardware-selection-guide.yaml",
-      "mtime": 1764449566,
-      "sha256": "921264f29c309a81c9e7f245ccc0215e2e291ad1698b5a3a72d22ea55eafd30b"
-    },
-    "p2kbHwP2EdgeBreadboardAdapterP2EdgeBreadboardAdapter": {
-      "path": "deliverables/ai/P2/hardware/p2_edge_breadboard_adapter.yaml",
-      "mtime": 1764449566,
-      "sha256": "90b7f1e0eff6775f78fdf9c9d32aa931ec3baee5039c496349bd41905cd5e386"
-    },
-    "p2kbHwP2EdgeMiniBreakoutP2EdgeMiniBreakout": {
-      "path": "deliverables/ai/P2/hardware/p2_edge_mini_breakout.yaml",
-      "mtime": 1764449566,
-      "sha256": "89290881dea26bf4802c6672312b4def1bd51217aad8d6338e38c46aebfd1004"
-    },
-    "p2kbHwP2EdgeModuleP2EdgeModule": {
-      "path": "deliverables/ai/P2/hardware/p2_edge_module.yaml",
-      "mtime": 1764449566,
-      "sha256": "04867cdab943efe08c8dbabd4ea3c1bf576f036c22025d06fc4be78116f97d28"
-    },
-    "p2kbHwP2EvalBoardHardwareP2EvalBoard": {
-      "path": "deliverables/ai/P2/hardware/p2_eval_board.yaml",
-      "mtime": 1764449566,
-      "sha256": "49cd733ba9bc91bf8354ddb2d731088d6ab4db13911d3c584ee035220a0ff077"
+      "mtime": 1781325191,
+      "sha256": "904f03c631fb3fd86c79f8061ebf33b89d13d5edeb444f41e17acb7e29d2026c"
     },
     "p2kbHwSwitchesAndLedsSwitchesAndLeds": {
       "path": "deliverables/ai/P2/hardware/switches_and_leds.yaml",
-      "mtime": 1764449566,
-      "sha256": "5cb3f9d225dbba7484633278a354c198050638fbb056c495187fa56afa0b5c86"
+      "mtime": 1781325191,
+      "sha256": "ed87a04a1a349335bad263ffd25ec75db23403b201ecc15a3a00ee50c2f3e9a8"
     },
     "p2kbHwSwitchesBoardSwitchesBoard": {
       "path": "deliverables/ai/P2/hardware/switches_board.yaml",
-      "mtime": 1764449566,
-      "sha256": "222fc155d16348683166c93102849a98860954f3a7ef6ccbe25051f07ac15d0f"
+      "mtime": 1781325191,
+      "sha256": "a78fc6cc796835612572d7d37572bc8a5ba00bcbed62266d954e9fc80eec1e46"
     },
     "p2kbLanguageCaseSensitivity": {
       "path": "deliverables/ai/P2/language/fundamentals/case-sensitivity.yaml",
@@ -5338,13 +6006,13 @@
     },
     "p2kbPasm2Augd": {
       "path": "deliverables/ai/P2/language/pasm2/augd.yaml",
-      "mtime": 1781076792,
-      "sha256": "bec5c4ac0f34bfb6f5669ae296785c8616c9950fba7642badd24f190c50bdea2"
+      "mtime": 1781325191,
+      "sha256": "57fe2d52935bbc7e96782ab124faac6ca979d0a2e2d25c775b161a51b89045df"
     },
     "p2kbPasm2Augs": {
       "path": "deliverables/ai/P2/language/pasm2/augs.yaml",
-      "mtime": 1781076792,
-      "sha256": "fb4c94abb030197a7d16000febdbdb74148f863fbf96f3946ebc238e10f2acf9"
+      "mtime": 1781325191,
+      "sha256": "7fde9390ffbd18d11d4d060203cfe1836b81894631e35b59ba1374413f79e5fe"
     },
     "p2kbPasm2Bitc": {
       "path": "deliverables/ai/P2/language/pasm2/bitc.yaml",
@@ -5528,8 +6196,8 @@
     },
     "p2kbPasm2CogHubExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cog_hub_execution.yaml",
-      "mtime": 1781076792,
-      "sha256": "5d91a5e8abdb719a2cc35909e7beb2dc0041f816f078f2bd6c0aac15eca1bee7"
+      "mtime": 1781325191,
+      "sha256": "d2a40536ea44ae949dd2296f7f6412b8ad2348fe280e0f53cdce973814dff06c"
     },
     "p2kbPasm2ConditionalExecution": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/conditional_execution.yaml",
@@ -5583,8 +6251,8 @@
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
-      "mtime": 1780270405,
-      "sha256": "ed73addbaa7ce1b0e5f9dc633d5bd6098284a0841512a0010d61f3b748fd7e0f"
+      "mtime": 1781325191,
+      "sha256": "9c190c60bc5ad16c562a96cf5e50b99130342c1d7bbaf611ebc7ce939e189c2a"
     },
     "p2kbPasm2SkipfBranching": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/skipf_branching.yaml",
@@ -5603,8 +6271,8 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1780269492,
-      "sha256": "cd46a80c614603f0872b77ed0174c51c22f4af221b2a7ccfb787221317bf6b40"
+      "mtime": 1781325191,
+      "sha256": "fc5443b432d2240b560f530423d69e1531fffa1b77a3a15eab275bb8360d4114"
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
@@ -5938,23 +6606,23 @@
     },
     "p2kbPasm2HaltAndFaultResponse": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/halt-and-fault-response.yaml",
-      "mtime": 1779583590,
-      "sha256": "af69177e9da89e02e1b40a4a7ed18a697916eb8b994a524fceb7168ba83821b7"
+      "mtime": 1781325191,
+      "sha256": "bc37be3477936753a91020447512f1e6aa23a4aa41e4bcb3f01e09b0a404a5a5"
     },
     "p2kbPasm2HubMemory": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/hub-memory.yaml",
-      "mtime": 1779583590,
-      "sha256": "b22783c3991e5f1a53def6358ec323a1cf3bc9a9bd906a67c7db93e79edc69f7"
+      "mtime": 1781325191,
+      "sha256": "fb22eb0478e43b63e344449fadc0f48d4729b4a60d41d167e752882f4b621d27"
     },
     "p2kbPasm2LoopControl": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/loop-control.yaml",
-      "mtime": 1779583590,
-      "sha256": "d05e5ca61d56d2579ccc7acf8d882e98283f605196a59587ec462a747b83d8e3"
+      "mtime": 1781325191,
+      "sha256": "e98b6cd9edf890ce5406f735d059753ac10cb8fc118d4a302f25bba40eedbb94"
     },
     "p2kbPasm2PinControl": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/pin-control.yaml",
-      "mtime": 1779583590,
-      "sha256": "0e9291794cb8a89e9ba7906a9f59a59e1eac79c8ba7183d6ef9dfa4c747bb96b"
+      "mtime": 1781325191,
+      "sha256": "d1f013a354f76ba1a0ba0be2cb4efdf203f1c2f13a520f9f6b4f32a0ac9f4dbc"
     },
     "p2kbPasm2RegisterOperations": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/register-operations.yaml",
@@ -5963,13 +6631,13 @@
     },
     "p2kbPasm2ScratchStorage": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/scratch-storage.yaml",
-      "mtime": 1779583590,
-      "sha256": "5aafdaac2e6a2d0130775916feaa66c1bb79f00249285dc345b8251814f2eab7"
+      "mtime": 1781325191,
+      "sha256": "843edf129d90adb131d52661834950cfae020fb5e460fdab70aacf3d0e135419"
     },
     "p2kbPasm2SelfModifyingCode": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/self-modifying-code.yaml",
-      "mtime": 1779583590,
-      "sha256": "220e1e85b0b37a15f51c993c78e96c5b59e69653ee5ba3c326141d4c9e9a78c4"
+      "mtime": 1781325191,
+      "sha256": "b5a5cc04ac5aa67f1ca159490bf3d03b7273401791293f808bdb841ef9c87e30"
     },
     "p2kbPasm2TimingControl": {
       "path": "deliverables/ai/P2/language/pasm2/idioms/timing-control.yaml",
@@ -6598,13 +7266,13 @@
     },
     "p2kbPasm2Rdfast": {
       "path": "deliverables/ai/P2/language/pasm2/rdfast.yaml",
-      "mtime": 1779583590,
-      "sha256": "cbe99ffecb8573c01ed89c76f7fc17e58c03de9732ba61829dd1c2cb0ecff0f1"
+      "mtime": 1781325191,
+      "sha256": "bdf193e7a024796fdc1bf18b5a6dba8e72e1d8946d22f02da7a9bba16874ef7e"
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
-      "mtime": 1781076792,
-      "sha256": "5c1a9f359c9244b292b134ecdf93de392b70d0c43f7a06eab85ec075524f9ec3"
+      "mtime": 1781325191,
+      "sha256": "1612a0b5afff83221ac4f76187617b197ad7d48ab2c8ae9682e2f775329ea5d2"
     },
     "p2kbPasm2Rdlut": {
       "path": "deliverables/ai/P2/language/pasm2/rdlut.yaml",
@@ -6863,8 +7531,8 @@
     },
     "p2kbPasm2Setq": {
       "path": "deliverables/ai/P2/language/pasm2/setq.yaml",
-      "mtime": 1780377153,
-      "sha256": "301846eedb0fe2854f782a366c3270beaae57e704ef3b416e68c53f37786d123"
+      "mtime": 1781325191,
+      "sha256": "63c5098c3c7ad316a36f26cfc474589e0d52910e71e3c59df76fc1c9b7cc3013"
     },
     "p2kbPasm2Setq2": {
       "path": "deliverables/ai/P2/language/pasm2/setq2.yaml",
@@ -7198,8 +7866,8 @@
     },
     "p2kbPasm2Wmlong": {
       "path": "deliverables/ai/P2/language/pasm2/wmlong.yaml",
-      "mtime": 1781076792,
-      "sha256": "fea2ddaed4d17e00b27693accb281f5906c961aa48cc3aa59bc0decfba34ed4f"
+      "mtime": 1781325191,
+      "sha256": "2ba6ce5e9dfb38aa0aff5981d546d55ed7526e6c85a1823783dcb9dbd8a8ef4b"
     },
     "p2kbPasm2Word": {
       "path": "deliverables/ai/P2/language/pasm2/word.yaml",
@@ -7223,13 +7891,13 @@
     },
     "p2kbPasm2Wrfast": {
       "path": "deliverables/ai/P2/language/pasm2/wrfast.yaml",
-      "mtime": 1779583590,
-      "sha256": "a4b85eb471ba4800891668f425939e006a83cdeb8a87cfc9d4ab73a413830a2e"
+      "mtime": 1781325191,
+      "sha256": "5e451704695652781f7d4d0c1da6cc0e83d3c6bb455ad1005a539ae92e21efad"
     },
     "p2kbPasm2Wrlong": {
       "path": "deliverables/ai/P2/language/pasm2/wrlong.yaml",
-      "mtime": 1780269492,
-      "sha256": "23e78d0f0970f1093305c679af0e66ab59e331772d010449089bef1943d0fb71"
+      "mtime": 1781325191,
+      "sha256": "3ec599b5ab16d8c37e983083ae420092e0e241b659c9fd069a9d7d5014ff617a"
     },
     "p2kbPasm2Wrlut": {
       "path": "deliverables/ai/P2/language/pasm2/wrlut.yaml",
@@ -7278,8 +7946,8 @@
     },
     "p2kbPasm2Xinit": {
       "path": "deliverables/ai/P2/language/pasm2/xinit.yaml",
-      "mtime": 1779583590,
-      "sha256": "e0109c9a8384ac84d9479abcb64c25565546a98a9f1dd5c59e5b70ec67c845e2"
+      "mtime": 1781325191,
+      "sha256": "0da898044baf9f5802935f4ec5f80bbcde7a6212c77f2ad0db1d0c44eb39c1f6"
     },
     "p2kbPasm2Xor": {
       "path": "deliverables/ai/P2/language/pasm2/xor.yaml",
@@ -7603,58 +8271,58 @@
     },
     "p2kbSpin2DbgPcKey": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_key.yaml",
-      "mtime": 1780269492,
-      "sha256": "8f75707f1858aaec346b8494bb172fc0b8b8b4930738c19ce420a0c11a3b0924"
+      "mtime": 1781325191,
+      "sha256": "6b6d063f204f1be6c53e73f647c51c0b3a1d07e99aebb33021796e2eed574891"
     },
     "p2kbSpin2DbgPcMouse": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/pc_mouse.yaml",
-      "mtime": 1780269492,
-      "sha256": "41d6928d032da87e65f39d665abc5e3f910b919655d4084f8c065625fbc4c25d"
+      "mtime": 1781325191,
+      "sha256": "4b1b91818f61b28189851821fed1c62ecb282fd67635d6239ace2f0f7b406735"
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
-      "mtime": 1781218822,
-      "sha256": "137db7166f048cd3c295ddafc1e15ee80c26d9270a08e2f83645f9e4602c461b"
+      "mtime": 1781325191,
+      "sha256": "45b06f0066018ab387988b946e391de8e56cacc9768b49536b6fb938424637bd"
     },
     "p2kbSpin2Fft": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/fft.yaml",
-      "mtime": 1781218822,
-      "sha256": "8404297e32de00962c62151e1ad28247346807d0462b1e151852bbb2a939079a"
+      "mtime": 1781325191,
+      "sha256": "efc7a4472a7a4f611bcd3d933929b83541882c6ddadb6f70ab3b3b0d7ee277c9"
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1781218822,
-      "sha256": "a8f9b6489d964938ceb2c1b215c6e52b2bdfbd752c58694b5a289a177b58cf94"
+      "mtime": 1781325191,
+      "sha256": "9d7738f345baeebbeabb29b68231fa4d8c081669ad8e0c9091e9116f355b0803"
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1781218822,
-      "sha256": "d1fa807aceed62ada1b3ccf683bc9e40ca689d2ec1c287b997cbca5aa62fe414"
+      "mtime": 1781325191,
+      "sha256": "7f4b0c57567e1401c4c0bcb13e0484d6c48215eb011b0b26d9f0427876d32fc8"
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1781218822,
-      "sha256": "5e51fe9484882e3c36bcf9cdf728a23dedf222aaa77d61b1d4fd00f25507001d"
+      "mtime": 1781325191,
+      "sha256": "e7a83f63f6c7a5774cfc0bdf8173bf85644d2bf10f1ce3fae13b7d8e80a597a6"
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
-      "mtime": 1781218822,
-      "sha256": "a3939dd9825e221ed3c69a3ce7783d2596773897e6a91b209a69217e15000596"
+      "mtime": 1781325191,
+      "sha256": "d9a1bd14a204e6cf9d833d134f2c8e3400a68e06bad4f04542718500b5c0a765"
     },
     "p2kbSpin2ScopeXy": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope_xy.yaml",
-      "mtime": 1781218822,
-      "sha256": "3a903b088d991e5641c7b0072c94a5cdceca3650700a2711dbdee5cc23ab198f"
+      "mtime": 1781325191,
+      "sha256": "69fa838b6d036f44ed7fee02e5b11c0e6157b23f20162b1132c1025fe60f747e"
     },
     "p2kbSpin2Spectro": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/spectro.yaml",
-      "mtime": 1781218822,
-      "sha256": "57e78f059601ceb14745057088de7c972e452caa28030e927fa0af8b2032880a"
+      "mtime": 1781325191,
+      "sha256": "533d0263d353b6e3d07326cdda883f39c42a221df50f39abfc2f9043278a9e51"
     },
     "p2kbSpin2Term": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/term.yaml",
-      "mtime": 1781218822,
-      "sha256": "5afda5b24a0eb2cedcd97ba58e5eaeb594d9e8d865f8eead1d15705c46221eb6"
+      "mtime": 1781325191,
+      "sha256": "57cd8451ca36b13cf76354861a9acee55da2985ff19b4867c6827d0ab0bc955b"
     },
     "p2kbSpin2BitManipulation": {
       "path": "deliverables/ai/P2/language/spin2/idioms/bit-manipulation.yaml",
@@ -8183,8 +8851,8 @@
     },
     "p2kbSpin2Qcos": {
       "path": "deliverables/ai/P2/language/spin2/methods/qcos.yaml",
-      "mtime": 1780269492,
-      "sha256": "6ae0d376a19aa77acc4b792ab436a3575be5ea4d8d42f45342c9cb3a6b6abae6"
+      "mtime": 1781325191,
+      "sha256": "56c4563743e489fcf960f0af8a2aca343bbbd798bbb46ce873674aced1abf19d"
     },
     "p2kbSpin2Qexp": {
       "path": "deliverables/ai/P2/language/spin2/methods/qexp.yaml",
@@ -8198,8 +8866,8 @@
     },
     "p2kbSpin2Qsin": {
       "path": "deliverables/ai/P2/language/spin2/methods/qsin.yaml",
-      "mtime": 1780269492,
-      "sha256": "e967d6e7b4b71260616cab858398131cb8e989828c872162c7902059112bdac9"
+      "mtime": 1781325191,
+      "sha256": "176b48f1349b0897367b8a7b2c3d545611bd979329d0782c559d64b4489e2745"
     },
     "p2kbSpin2Rdpin": {
       "path": "deliverables/ai/P2/language/spin2/methods/rdpin.yaml",
@@ -8408,8 +9076,8 @@
     },
     "p2kbSpin2OpOpADDPINS": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ADDPINS.yaml",
-      "mtime": 1779583590,
-      "sha256": "3323d36abc98de51b698cb7ad701ae561531adb2db96b347c6c9b37c6fa6cdcd"
+      "mtime": 1781325191,
+      "sha256": "acd5d1df5669d69cf983de0fdc0dcdf4e18e9381db8a4df6186fc9dff81455ca"
     },
     "p2kbSpin2OpOpBMASK": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_BMASK.yaml",
@@ -9258,8 +9926,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1781218822,
-      "sha256": "6c2357a468f0ed138e06eba1f423c997eb2c066b1cd338e8c5542a3e647a2d44"
+      "mtime": 1781325191,
+      "sha256": "1b5bba0d32cbad62c7370bdd5e49b2dbe0e533a66fa0458801ccafa3a6a9d698"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",
