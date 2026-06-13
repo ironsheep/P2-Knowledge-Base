@@ -43,7 +43,7 @@ idioms:
       - "Order of operations is load-bearing — a maintainer changing the code must understand the scratch-vs-real boundary"
       - "Best used in self-contained tight code (cog images, ISR-like sequences) where the full lifetime is visible at once"
       - "AVOID in large or evolving code where reasoning about the scratch boundary becomes brittle"
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 60, 78, 84, 286-291
+    source: "Parallax P2 flash_loader.spin2 lines 60, 78, 84, 286-291"
 
   - name: aliased_register_through_org
     pattern: |

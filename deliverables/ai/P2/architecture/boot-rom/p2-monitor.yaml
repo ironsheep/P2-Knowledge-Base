@@ -59,7 +59,7 @@ datasheet_examples:
 knowledge_gaps:
   full_command_grammar:
     status: "Beyond the 2 Datasheet examples, the complete Monitor command syntax is not documented in primary sources we have ingested"
-    chase: "Mine engineering/ingestion/sources/rom-booter/ROM_Booter.lst for the Monitor's command parser; search Parallax forums for community-documented usage"
+    chase: "Mine the Parallax P2 boot ROM listing (ROM_Booter.lst) for the Monitor's command parser; search Parallax forums for community-documented usage"
 
   modify_commands:
     status: "Datasheet states 'manipulate memory' capability but does not show modify-command syntax"

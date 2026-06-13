@@ -1,10 +1,10 @@
 # Boot ROM Contents — What Lives in the P2's 16KB Mask ROM
 # Sources:
 #   - Hardware Manual 2022-11-01 (boot ROM size and content list)
-#     via engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md
-#   - engineering/ingestion/sources/rom-booter/ (assembly listing of the ROM)
-#   - engineering/ingestion/sources/p2-datasheet/ (cross-reference)
-#   - engineering/ingestion/sources/silicon-doc/ (cross-reference)
+#     (boot ROM size/content consolidated from the Hardware Manual)
+#   - Parallax P2 boot ROM listing (ROM_Booter.lst — assembly listing of the ROM)
+#   - Parallax P2 Datasheet (cross-reference)
+#   - P2 Silicon Doc v35 (cross-reference)
 
 component: boot_rom_contents
 category: boot_rom
@@ -33,7 +33,7 @@ residents:
       selects a boot path (serial / SPI flash / SD card), and either loads
       and jumps to user code or hands off to one of the interactive
       interfaces (Monitor or TAQOZ) on the appropriate keystroke trigger.
-    source_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst (also rom_booter_v33_01j.lst)"
+    source_listing: "Parallax P2 boot ROM listing (ROM_Booter.lst; also rom_booter_v33_01j.lst)"
     canonical_entries:
       - architecture/boot-rom/_index.yaml
       - architecture/boot-rom/boot-pattern-selection.yaml
@@ -67,7 +67,7 @@ residents:
       Bootloader, Monitor, and TAQOZ — likely string handling, byte
       I/O, and similar shared helpers. Not directly callable from user
       code; documented here for completeness.
-    source_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst"
+    source_listing: "Parallax P2 boot ROM listing (ROM_Booter.lst)"
     canonical_entry: "(no dedicated entry — internal to ROM components)"
 
   character_font_data:

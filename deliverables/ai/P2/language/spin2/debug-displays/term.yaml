@@ -9,7 +9,7 @@ description: |
   holds only pixels + cursor/color state, not a readable character grid).
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.7) -- verified against DebugDisplayUnit.pas v55: TERM_Configure 2181-2221, TERM_Update 2223-2315, numeric control codes 2258-2305, SendKeyPress 3579-3583, SendMousePos 3563-3567; size consts term_colmin/rowmin=1, term_colmax/rowmax=256 @ 224-227"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (TERM display implementation: numeric control codes; size range cols/rows 1..256) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - terminal
@@ -26,6 +26,7 @@ syntax:
 configuration_directives:
   note: "Accepted in TERM_Configure (window creation)."
   TITLE: "TITLE 'string' -- title-bar text"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SIZE: "SIZE cols rows -- size in CHARACTERS (columns x rows), NOT pixels. cols 1..256 (default 40), rows 1..256 (default 20)"
   TEXTSIZE: "TEXTSIZE n -- font point size, 6..200 (default 10)"

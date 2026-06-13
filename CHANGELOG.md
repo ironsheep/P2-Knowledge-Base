@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.9.0] - 2026-06-13
+
+**Smart-pin and DEBUG accuracy, plus hardware findability**
+
+### Added
+- DEBUG string quoting: the single-quote rule for backtick display-command text (window `TITLE`, `SAVE`/layer filenames) versus the double-quote rule for data/formatter `debug()`, including the silent-failure case where a double-quoted display argument is dropped at runtime with no compile error.
+- Hardware findability: natural-language `aliases:` on every hardware entry plus category browsing for development boards, Edge modules, carriers, add-on boards, and adapters, with the board/adapter compatibility matrix surfaced as the hub.
+
+### Changed
+- Smart-pin documentation aligned with the silicon: long-repository mode writes via WXPIN; ADC X[5:4] selects SINC2 sampling / SINC2 filtering / SINC3 filtering / bitstream capture; DAC-noise behavior and the mode-summary serial/counter labels.
+
 ## [1.8.0] - 2026-06-11
 
 **DEBUG display windows: a complete PNut v55 directive reference for all nine visualizers**

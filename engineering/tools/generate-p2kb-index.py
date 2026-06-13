@@ -378,6 +378,22 @@ def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[st
                     if potential_key in files:
                         categories[full_cat_name].append(potential_key)
 
+    # Process hardware categories
+    # Hardware keys use a doubled-camelCase form (e.g. p2kbHwAddonAvBreakoutAddonAvBreakout),
+    # so resolve via the filename->key reverse lookup rather than reconstructing the key.
+    if 'hardware' in cat_defs:
+        for cat_name, cat_info in cat_defs['hardware'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"hardware_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    key = file_to_key.get(filename.lower())
+                    if key and key.startswith('p2kbHw'):
+                        categories[full_cat_name].append(key)
+
     # Remove empty categories
     categories = {k: v for k, v in categories.items() if v}
 

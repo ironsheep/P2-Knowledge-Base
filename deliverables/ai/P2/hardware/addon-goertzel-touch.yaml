@@ -1,4 +1,11 @@
 # P2 Eval Goertzel/Touch Sensing Add-on Board - Hardware Specification
+aliases:
+  - "Goertzel touch board"
+  - "touch sensing add-on"
+  - "capacitive touch board"
+  - "P2 Eval Goertzel/Touch Sensing Add-on Board"
+  - "64006G"
+  - "#64006 add-on board"
 # Part Number: 64006G
 # Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
 # Enhanced: 2025-12-27 with Goertzel circuit technical details from Quick Bytes source

@@ -1,9 +1,9 @@
 # Boot Pattern Selection — P59-P61 Pin Pattern to Boot Source Mapping
 # Sources:
 #   - Hardware Manual 2022-11-01 (boot pattern table — primary, authoritative)
-#     via engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md
-#   - engineering/ingestion/sources/edge-standard-module/ (Edge DIP-switch wiring)
-#   - engineering/ingestion/sources/edge-32mb-module/ (Edge 32MB DIP-switch wiring)
+#     (boot pattern table consolidated from the Hardware Manual)
+#   - P2 Edge Standard Module (Edge DIP-switch wiring)
+#   - P2 Edge 32MB Module (Edge 32MB DIP-switch wiring)
 
 component: boot_pattern_selection
 category: boot_rom

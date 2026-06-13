@@ -10,8 +10,7 @@ description: |
   and cross-references into the canonical KB entry for each technique.
 
 source_metadata:
-  primary_source: engineering/ingestion/sources/flash-loader/flash_loader.spin2
-  companion_doc: engineering/ingestion/sources/flash-loader/Flash-Loader-Theory-of-Operations.md
+  primary_source: "Parallax P2 flash_loader.spin2 (boot ROM flash loader source)"
   authority: "GOLDEN — compiled into every flash-boot binary; behaviors silicon-validated by production use"
   author: "Chip Gracey (Parallax)"
   size: "298 lines"

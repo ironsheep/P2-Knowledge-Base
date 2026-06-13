@@ -55,7 +55,7 @@ silicon_errata:
       RDLONG 0,ptra++      ' ptra incremented by 4 (1 long), not 16*4
     workaround: "Do not place AUGD (or ALTx/AUGS) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
     status: "Active in Rev C silicon (current production)."
-    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:196-199 (KNOWN BUGS -- 'Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
+    source: "P2 Silicon Doc v35 (KNOWN BUGS -- 'Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

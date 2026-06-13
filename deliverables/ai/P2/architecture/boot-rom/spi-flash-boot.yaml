@@ -1,10 +1,10 @@
 # SPI Flash Boot — Two-Phase Path from Power-Up to Running Application
 # Sources (primary, golden):
 #   - Hardware Manual 2022-11-01 (boot pattern, pin functions)
-#   - engineering/ingestion/sources/flash-loader/flash_loader.spin2
+#   - Parallax P2 flash_loader.spin2
 #     GOLDEN — compiled into every flash-bootable P2 binary; the ROM contract
 #     it depends on is silicon-validated by every shipping unit
-#   - engineering/ingestion/sources/rom-booter/ (ROM listing)
+#   - Parallax P2 boot ROM listing (ROM_Booter.lst)
 
 component: spi_flash_boot
 category: boot_rom
@@ -18,7 +18,7 @@ description: |
 
 # Authority — why facts here are reliable
 authority:
-  rom_behavior: "Described in Hardware Manual; assembly in ../../engineering/ingestion/sources/rom-booter/"
+  rom_behavior: "Described in Hardware Manual; assembly in the Parallax P2 boot ROM listing (ROM_Booter.lst)"
   flash_loader_behavior: |
     flash_loader.spin2 is GOLDEN source — compiled into every binary
     PNut/PNut-TS build for flash boot. Behavioral contracts it depends
@@ -99,7 +99,7 @@ phase_2_post_load_state:
 
 # Phase 3: Flash loader handoff
 phase_3_flash_loader:
-  source_of_truth: engineering/ingestion/sources/flash-loader/flash_loader.spin2
+  source_of_truth: "Parallax P2 flash_loader.spin2"
   case_study: code-examples/flash-loader-case-study.yaml
   cog_image_layout:
     total: "256 longs (the 1KB the ROM loaded)"

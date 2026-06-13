@@ -8,7 +8,7 @@ description: |
   windows; only the reported coordinate basis differs per window.
 documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
 documentation_level: comprehensive
-source: "engineering/ingestion/sources/spin2-v51/debug-section.txt:815-852 (PC_MOUSE P2-side API + 7-long struct); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md sections 4.3-4.4 (host side: SendMousePos 3537-3577, per-window coordinate mapping)"
+source: "Parallax Spin2 Language Reference v51a (PC_MOUSE P2-side API + 7-long mouse struct); host-side coordinate mapping per PNut/Spin2 v55 DebugDisplayUnit.pas"
 
 syntax: "PC_MOUSE(pointer_to_7_longs)"
 

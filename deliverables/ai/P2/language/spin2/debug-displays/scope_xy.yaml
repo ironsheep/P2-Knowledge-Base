@@ -9,7 +9,7 @@ description: |
   no holdoff, no linesize (it plots dots), no auto-ranging, and no measurement overlays.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.3) -- verified against DebugDisplayUnit.pas v55: SCOPE_XY_Configure 1386-1441, SCOPE_XY_Update 1443-1509, SCOPE_XY_Plot 1511-1545; POLAR KeyTwoPi 2728-2742; PC_MOUSE raw-pixel SendMousePos 3537-3577"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (SCOPE_XY display implementation: Configure/Update/Plot, POLAR mode; PC_MOUSE raw-pixel) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - XY oscilloscope
@@ -28,6 +28,7 @@ syntax:
 configuration_directives:
   note: "Accepted in SCOPE_XY_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'Scope_XY')"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SIZE: "SIZE n -- a SINGLE value; the display is SQUARE. Effective width = height = n*2 pixels, clamped 32..2048 (default 256 -> 512 px). (Unlike SCOPE's two-value SIZE w h.)"
   RANGE: "RANGE n -- coordinate extent, 1..$7FFFFFFF (default $7FFFFFFF). +-n on both axes (Cartesian) or 0..n radius (polar). Scale = width/2/RANGE."

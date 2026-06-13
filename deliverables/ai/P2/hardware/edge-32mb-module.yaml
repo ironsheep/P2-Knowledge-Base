@@ -1,4 +1,11 @@
 # P2 Edge 32MB Module - Hardware Specification
+aliases:
+  - "P2 Edge 32MB Module"
+  - "P2-EC32MB"
+  - "64000-ES"
+  - "edge module 32MB"
+  - "PSRAM edge module"
+  - "P2 Edge Module with RAM"
 # Part Number: P2-EC32MB / 64000-ES
 # Revision: Rev B
 # Source Document: P2-EC32MB Edge Module Rev B Guide v2.0 (May 23, 2022)

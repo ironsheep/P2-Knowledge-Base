@@ -1,4 +1,10 @@
 # P2 Eval Serial Device Add-on Board - Hardware Specification
+aliases:
+  - "serial device board"
+  - "serial device add-on"
+  - "P2 Eval Serial Device Add-on Board"
+  - "64006F"
+  - "#64006 add-on board"
 # Part Number: 64006F
 # Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
 

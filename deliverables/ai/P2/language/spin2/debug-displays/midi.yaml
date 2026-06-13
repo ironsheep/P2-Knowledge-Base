@@ -7,7 +7,7 @@ description: |
   filtering, or MIDI-file import/export.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.9, 7) -- verified against DebugDisplayUnit.pas v55: MIDI_Configure 2492-2588, MIDI_Update 2590-2643, shared input handlers 585-857 / 3537-3583; usage example debug-section.txt:3929-3933"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (MIDI display implementation: Configure/Update) + Parallax Spin2 Language Reference v51a (DEBUG displays, MIDI usage example); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - MIDI
@@ -24,6 +24,7 @@ syntax:
 configuration_directives:
   note: "Accepted in MIDI_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'MIDI')"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SIZE: "SIZE n -- key-size scalar 1..50 (default 4); pixel key size is 8 + n*4. This is NOT a pixel dimension."
   RANGE: "RANGE firstKey lastKey -- displayed MIDI note range, each 0..127 (default 21..108); lastKey is clamped to be >= firstKey."

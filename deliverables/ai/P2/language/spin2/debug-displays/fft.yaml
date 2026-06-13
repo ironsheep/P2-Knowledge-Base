@@ -9,7 +9,7 @@ description: |
   and no markers/cursors. The only window function is a fixed Hanning -- it is not selectable.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.4) -- verified against DebugDisplayUnit.pas v55: FFT_Configure 1552-1618, FFT_Update 1620-1679, channel def 1628-1638, fixed-Hanning PrepareFFT 4178-4191, FFTmax=2048 (FFTexpMax=11); PC_MOUSE raw-pixel SendMousePos 3537-3577"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (FFT display implementation: channel def, fixed-Hanning window, FFTmax=2048 / FFTexpMax=11; PC_MOUSE raw-pixel) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - spectrum
@@ -24,6 +24,7 @@ syntax:
 configuration_directives:
   note: "Accepted in FFT_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SIZE: "SIZE width height -- plot area in pixels, each 32..2048 (default 256x256)"
   SAMPLES: "SAMPLES n {first last} -- n is the FFT size, a power of two 4..2048 (default 512; values are snapped to a power of two; 2048 is the max -- there is NO 4096). Optional first/last select a displayed bin range (zoom): first 0..n/2-2 (default 0), last first+1..n/2-1 (default n/2-1)."

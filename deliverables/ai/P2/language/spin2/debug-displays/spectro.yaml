@@ -9,7 +9,7 @@ description: |
   features.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.5) -- verified against DebugDisplayUnit.pas v55: SPECTRO_Configure 1719-1790, SPECTRO_Update 1792-1834, color-mode restriction 1767-1768, TRACE bitfield 1759-1760; PC_MOUSE SendMousePos 3537-3577"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (SPECTRO display implementation: color-mode restriction, TRACE bitfield) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - spectrogram
@@ -24,6 +24,7 @@ syntax:
 configuration_directives:
   note: "Accepted in SPECTRO_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'SPECTRO')"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SAMPLES: "SAMPLES n {first last} -- n = FFT size, power of two 4..2048 (default 512). Optional first/last select a displayed bin range: first 0..n/2-2, last first+1..n/2-1."
   DEPTH: "DEPTH n -- number of time-history lines, 1..2048 (the spectrogram's time depth)"

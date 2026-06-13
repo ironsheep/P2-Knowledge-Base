@@ -233,5 +233,32 @@
       "description": "Getting started guides",
       "files": ["quick-queries", "pasm2-getting-started", "spin2-getting-started"]
     }
+  },
+
+  "hardware": {
+    "boards": {
+      "description": "P2 development and evaluation boards",
+      "files": ["p2-eval-board"]
+    },
+    "modules": {
+      "description": "P2 Edge CPU modules (plug into carriers/breakouts)",
+      "files": ["edge-32mb-module", "edge-standard-module"]
+    },
+    "carriers": {
+      "description": "Edge module carrier, breakout, and breadboard boards",
+      "files": ["edge-breadboard-carrier", "edge-mini-breakout", "edge-standard-breakout"]
+    },
+    "addons": {
+      "description": "P2 Eval add-on boards (#64006 set) and eval accessory boards",
+      "files": ["addon-av-breakout", "addon-control-board", "addon-digital-video-out", "addon-goertzel-touch", "addon-led-matrix", "addon-mini-prototyping", "addon-serial-device", "addon-serial-host", "7_segment_display", "buttons_board", "switches_and_leds", "switches_board"]
+    },
+    "adapters": {
+      "description": "Interface and peripheral adapter boards",
+      "files": ["hub75_adapter"]
+    },
+    "reference": {
+      "description": "Hardware selection, comparison, compatibility, and reference data",
+      "files": ["hardware-compatibility-matrix", "p2-hardware-feature-comparison", "p2-hardware-selection-guide", "p1_rom_font_character_set"]
+    }
   }
 }

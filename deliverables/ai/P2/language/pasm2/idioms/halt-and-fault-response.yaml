@@ -22,7 +22,7 @@ idioms:
       - "Requires a hardware reset to recover — no software-issued recovery path exists"
       - "If a working external clock IS present on XI, the chip keeps running on it — NOT a halt"
       - "This is not a HUBSET feature; it is creative exploitation of clock-source switching to a known-dead source"
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 276 (the stop label)
+    source: "Parallax P2 flash_loader.spin2 line 276 (the stop label)"
     related_instruction: language/pasm2/hubset.yaml
 
   - name: pin_float_on_fault
@@ -41,7 +41,7 @@ idioms:
       timing window.
     related_instruction: language/spin2/operators/op_ADDPINS.yaml
     related_idiom: language/pasm2/idioms/pin-control.yaml
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+    source: "Parallax P2 flash_loader.spin2 line 275"
 
   - name: float_then_halt_sequence
     pattern: |
@@ -62,7 +62,7 @@ idioms:
       loader. Use this pattern when a detected integrity failure means
       no further code should execute and no external interface should
       remain driven.
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 275-276
+    source: "Parallax P2 flash_loader.spin2 lines 275-276"
 
 related:
   - language/pasm2/hubset.yaml

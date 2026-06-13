@@ -1,4 +1,10 @@
 component: Buttons Board
+aliases:
+  - "buttons board"
+  - "pushbuttons board"
+  - "8 pushbuttons add-on"
+  - "P2 Eval buttons"
+  - "#64006 add-on"
 category: addon
 description: |
   8 pushbuttons

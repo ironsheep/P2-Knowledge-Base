@@ -1,4 +1,10 @@
 name: "P2 Hardware Feature Comparison Table"
+aliases:
+  - "hardware feature comparison"
+  - "board comparison"
+  - "compare P2 boards"
+  - "edge module comparison"
+  - "P2 board features table"
 category: "hardware_comparison"
 version: "1.0"
 last_updated: "2025-09-06"

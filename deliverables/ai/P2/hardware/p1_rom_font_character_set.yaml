@@ -1,4 +1,10 @@
 # P1 ROM Font Character Set - Complete 256-Character Reference
+aliases:
+  - "P1 ROM font"
+  - "P1 character set"
+  - "ROM font glyphs"
+  - "VGA text font"
+  - "P8X32A font"
 # Source: Parallax P1 (P8X32A) ROM, OBEX #2028 Unicode Mapping (Alex Hajnal)
 # Purpose: Reference for P2 developers reusing P1 font glyphs in VGA/TV text displays
 # Note: The P1 font ROM is frequently used in P2 projects via direct inclusion

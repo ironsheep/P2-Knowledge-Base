@@ -53,7 +53,7 @@ idioms:
       The production flash loader uses this to switch between 4 KB and
       64 KB flash erase strategies based on alignment, without paying
       branch cost in the per-block loop.
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 114-116
+    source: "Parallax P2 flash_loader.spin2 lines 114-116"
 
   - name: alttrampolines
     pattern: "altd / alts / altr"

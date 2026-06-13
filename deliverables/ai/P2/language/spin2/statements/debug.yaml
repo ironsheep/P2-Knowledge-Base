@@ -78,6 +78,30 @@ control_characters:
   - "8 - Backspace"
   - "12 - Form feed (clear screen)"
 
+string_quoting:
+  rule: |
+    The two DEBUG forms use OPPOSITE string-quote rules — a common silent-failure trap.
+    Always apply the contrast, not just one side.
+  non_backtick: |
+    Plain (data/formatter) debug, e.g. debug("temp=", udec(x)): strings use DOUBLE
+    quotes "...". A single quote ' starts a Spin2 comment here — it does NOT delimit a string.
+  backtick_display: |
+    Backtick (display) commands, e.g. debug(`BITMAP w TITLE 'My Window' SAVE 'shot'):
+    display-command text arguments (window TITLE, SAVE/layer filenames, etc.) use SINGLE
+    quotes '...'.
+  silent_failure: |
+    In a backtick display command a DOUBLE-quoted text argument is NOT recognized: the
+    display engine ignores it and the title/filename is silently lost, with NO compile
+    error. This silent failure is exactly why single quotes must be used for display text.
+  value_substitutions: |
+    Inside `(expr) value substitutions the rules revert to normal Spin2 (double-quoted
+    strings); the single-quote rule applies only to display-command text.
+  no_escape: |
+    Display strings have no escape mechanism: the first ' closes the string, so a literal
+    apostrophe cannot be embedded in a TITLE/SAVE/etc.
+  save_extension: "SAVE auto-appends .bmp — give the base name only (SAVE 'shot' produces shot.bmp)."
+  verified_against: "PNut/Spin2 compiler — backtick text emitted raw (debugTickString); host display parser recognizes only the apostrophe as a string delimiter (check_dd_str)."
+
 examples:
   - code: |
       ' Basic terminal output

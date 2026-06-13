@@ -1,4 +1,10 @@
 # P2 Eval Board - Hardware Specification
+aliases:
+  - "P2 Eval Board"
+  - "P2 evaluation board"
+  - "64000"
+  - "P2 dev board"
+  - "P2 development board"
 # Part Number: 64000
 # Revision: Rev C
 # Documentation: 64000 Propeller 2 Eval Board Rev C Guide

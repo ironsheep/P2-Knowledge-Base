@@ -2,11 +2,11 @@
 # Download-on-demand manifest for P2 Boot ROM subsystem
 # Use this file to identify which file contains the information you need
 # Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Silicon Doc v35, P2 Datasheet,
-#          ../../engineering/ingestion/sources/rom-booter/ (ROM listing),
-#          ../../engineering/ingestion/sources/flash-loader/ (golden flash loader),
-#          ../../engineering/ingestion/sources/edge-standard-module/ (Edge DIP-switch mapping),
-#          ../../engineering/ingestion/sources/edge-32mb-module/ (Edge 32MB DIP-switch mapping),
-#          ../../engineering/ingestion/sources/taqoz/ (TAQOZ preliminary research)
+#          Parallax P2 boot ROM listing (ROM_Booter.lst),
+#          Parallax P2 flash_loader.spin2 (golden flash loader),
+#          P2 Edge Standard Module (Edge DIP-switch mapping),
+#          P2 Edge 32MB Module (Edge 32MB DIP-switch mapping),
+#          TAQOZ preliminary research (tracked in the ingestion tree)
 
 component: boot_rom
 description: |

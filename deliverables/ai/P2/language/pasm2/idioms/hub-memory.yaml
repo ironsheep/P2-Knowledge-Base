@@ -78,7 +78,7 @@ idioms:
       - "SETQ count = N-1 (zero-based) — count of 0 transfers 1 long"
       - "Destination cog registers must be contiguous"
       - "Transfer is atomic from the hub's perspective once started"
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 148-151
+    source_example: "Parallax P2 flash_loader.spin2 lines 148-151"
     related_instructions:
       - language/pasm2/setq.yaml
       - language/pasm2/setq2.yaml
@@ -117,7 +117,7 @@ idioms:
       The production flash loader uses this exact pattern for the
       application copy phase. See flash-loader-case-study.yaml for
       the full sequence.
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 148-151
+    source_example: "Parallax P2 flash_loader.spin2 lines 148-151"
     related: code-examples/flash-loader-case-study.yaml
 
 related:

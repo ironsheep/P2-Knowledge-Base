@@ -63,7 +63,7 @@ idioms:
         - DJNZ: "while not zero" — loop body runs count times; UNSAFE for count=0
         - DJNF: "at least once, then while not underflowed" — loop body runs
           max(1, count) times; SAFE for count=0
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 152
+    source_example: "Parallax P2 flash_loader.spin2 line 152"
     related_instructions:
       - language/pasm2/djnf.yaml
       - language/pasm2/djnz.yaml
@@ -93,7 +93,7 @@ idioms:
       iteration branch cost makes this the fastest option for short
       bodies (1-8 instructions). The body cannot contain certain
       instructions (branches, REP itself) — see REP instruction docs.
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 58-59
+    source_example: "Parallax P2 flash_loader.spin2 lines 58-59"
     related_instruction: language/pasm2/rep.yaml
 
 related:

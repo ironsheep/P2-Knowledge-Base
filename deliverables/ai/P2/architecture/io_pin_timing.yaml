@@ -264,7 +264,7 @@ absolute_maximum_ratings:
   description: |
     Stress ratings from the P2 datasheet. Stresses beyond these can cause permanent
     damage; they are absolute stress limits, NOT operating conditions.
-  source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt:6185-6241 (Absolute Maximum Electrical Ratings table + footnote 1)"
+  source: "Parallax P2 Datasheet (Absolute Maximum Electrical Ratings table + footnote 1)"
   voltage_on_VDD_vs_GND: "-0.3 V to +2.2 V"
   voltage_on_VIO_Vxxyy_vs_GND: "-0.3 V to +4.0 V"
   voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V) -- about 3.6 V at the nominal 3.3 V I/O supply"
@@ -293,7 +293,7 @@ input_voltage_and_protection:
     caveat: "A series resistor protects the pin electrically; it does not make the pin truly '5 V tolerant.' For sustained 5 V interfacing prefer a proper level shifter or resistor divider."
   latchup_context:
     note: "The Silicon Doc reports VIO-triggered latch-up onset as early as ~4.3 V on VIO -- reinforcing that this is a 3.3 V part; do not over-drive the rails."
-    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:155-175"
+    source: "P2 Silicon Doc v35"
 
 special_timing_modes:
   synchronous_serial:

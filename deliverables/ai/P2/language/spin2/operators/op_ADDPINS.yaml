@@ -24,7 +24,7 @@ examples:
       then ADDPINS 2 means "base + 0", "base + 1", "base + 2" → pins 59,
       60, 61. The single instruction floats the entire 3-pin SPI bus
       simultaneously.
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+    source_example: "Parallax P2 flash_loader.spin2 line 275"
 
   - syntax: "DRVH #LED_BASE ADDPINS 7"
     pasm2_form: "drvh #LED_BASE addpins 7"

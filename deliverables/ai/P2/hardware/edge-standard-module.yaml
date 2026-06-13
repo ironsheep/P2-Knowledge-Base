@@ -1,4 +1,10 @@
 # P2 Edge Standard Module - Hardware Specification
+aliases:
+  - "P2 Edge Module"
+  - "P2-EC"
+  - "edge module no RAM"
+  - "standard edge module"
+  - "P2 Edge standard module"
 # Part Number: P2-EC
 # Revision: Rev D
 # Source Document: P2-EC Edge Module Rev D Product Guide v3.0 (June 3, 2022)

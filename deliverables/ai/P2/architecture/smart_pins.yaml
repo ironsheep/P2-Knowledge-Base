@@ -77,9 +77,9 @@ operating_modes:
     10010: "Time X A-highs/rises/edges"
     10011: "For X periods, count time"
     10100: "For X periods, count states"
-    10101: "For X clocks, count periods"
-    10110: "For X clocks, count states"
-    10111: "For X clocks, count time"
+    10101: "For periods in X+ clocks, count time"
+    10110: "For periods in X+ clocks, count states"
+    10111: "For periods in X+ clocks, count periods"
     
   adc_modes:
     11000: "ADC sample/filter, internal clock"
@@ -88,8 +88,8 @@ operating_modes:
     
   serial_modes:
     11011: "USB host/device (pair mode)"
-    11100: "Synchronous serial receive"
-    11101: "Synchronous serial transmit"
+    11100: "Synchronous serial transmit"
+    11101: "Synchronous serial receive"
     11110: "Asynchronous serial transmit"
     11111: "Asynchronous serial receive"
 

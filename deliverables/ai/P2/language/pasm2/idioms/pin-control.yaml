@@ -29,7 +29,7 @@ idioms:
       - "9-bit immediate operand limits ADDPINS to 7; use ##base ADDPINS N for ranges 8-31 (compiler emits AUGD)"
       - "Counting is INCLUSIVE: ADDPINS N affects N+1 pins"
     related_instruction: language/spin2/operators/op_ADDPINS.yaml
-    source_example: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 275
+    source_example: "Parallax P2 flash_loader.spin2 line 275"
 
   - name: simultaneous_multi_pin_float
     pattern: "fltl #{interface_base_pin} addpins {pin_count}"

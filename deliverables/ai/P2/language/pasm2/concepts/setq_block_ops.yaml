@@ -27,7 +27,7 @@ silicon_errata:
       RDLONG 0, ptra++        ' ptra is incremented by 4 (1 long), NOT 16*4 as anticipated
     workaround: "Keep SETQ/SETQ2 immediately adjacent to the block transfer -- place no ALTx/AUGS/AUGD between them."
     status: "Active in Rev C silicon (current production)."
-    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C, 2020_06_01) -- verbatim"
+    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C, 2020_06_01) -- verbatim"
 
 setq_instructions:
   SETQ:
@@ -233,7 +233,7 @@ special_operations:
       It does NOT extend a block-move COUNT beyond 512. SETQ/SETQ2 block transfers
       target cog register RAM or cog lookup RAM, each of which is 512 longs, so the
       maximum block transfer is 512 longs (count field = number of longs minus 1).
-    source: "engineering/ingestion/sources/silicon-doc/p2-documentation.txt:394-395, 854, 966 (cog and LUT are each 512 x 32-bit), 7169-7185 (FAST BLOCK MOVES: 'x = number of longs, minus 1')"
+    source: "P2 Silicon Doc v35 (cog and LUT are each 512 x 32-bit longs; FAST BLOCK MOVES: 'x = number of longs, minus 1')"
 
 block_fill:
   cog_fill:

@@ -124,7 +124,7 @@ large_transfer_chunking:
                 xinit   mode, #0            ' start streamer with patched count
                 waitxfi                     ' wait for chunk to complete
                 tjnz    count, #.block      ' loop until all chunks done
-  source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 250-261
+  source: "Parallax P2 flash_loader.spin2 lines 250-261"
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#

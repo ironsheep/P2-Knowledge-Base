@@ -371,7 +371,7 @@ coordination:
       setxfrq ##$2000_0000     ' streamer: 1 bit per 4 sysclks
       wxpin   #2, #SCK_PIN     ' smart pin: 2 sysclks between SCK edges
     authority: "GOLDEN — these specific values are what the production flash loader uses on every shipping P2; lockstep is silicon-validated"
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 lines 100-107, 246
+    source: "Parallax P2 flash_loader.spin2 lines 100-107, 246"
 
   alignment_pad:
     rule: |
@@ -404,7 +404,7 @@ coordination:
       bit_edge_lockstep above. Different SCK rates may need different
       pad values — verify with a logic analyzer if you change either
       WXPIN or SETXFRQ.
-    source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 259
+    source: "Parallax P2 flash_loader.spin2 line 259"
 
   multi_pin_sync:
     - "Configure all pins first"

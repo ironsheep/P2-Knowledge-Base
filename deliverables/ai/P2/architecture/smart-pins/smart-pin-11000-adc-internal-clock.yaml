@@ -8,25 +8,25 @@ brief_description: "Analog-to-digital conversion with internal clock and optiona
 detailed_description:
   operation: |
     Converts analog voltage on pin to digital values using internal clock sampling. Supports
-    multiple filtering modes: raw bitstream capture, SINC2 filtering, and SINC3 filtering.
-    Requires specific pin mode configuration (P[12:10] = %100) to enable ADC function. Can
-    configure multiple consecutive pins simultaneously for multi-channel ADC.
-  
+    four sample/filter modes: SINC2 sampling, SINC2 filtering, SINC3 filtering, and raw
+    bitstream capture. Requires specific pin mode configuration (M[12:10] = %100) to enable
+    ADC function. Can configure multiple consecutive pins simultaneously for multi-channel ADC.
+
   timing: |
     Sampling rate controlled by X register settings
-    Raw mode: New result every 32 clock periods
-    SINC2/SINC3: Configurable sample periods (power-of-2 or custom)
+    Bitstream capture (%11): new 32-bit snapshot every 32 clocks
+    SINC2 sampling (%00): power-of-2 periods only; SINC2/SINC3 filtering: configurable periods
     IN flag raised when new sample ready
     Use SETSE1 for event-driven sample capture
 
 registers:
   x_register:
     bits_5_4: |
-      Filtering mode:
-      %00 = Raw bitstream capture
-      %01 = SINC2 filtering (requires software post-processing)
-      %10 = SINC3 filtering (requires software post-processing)
-      %11 = (Reserved/unused)
+      Sample/filter mode (X[5:4]):
+      %00 = SINC2 sampling (complete conversion in hardware, power-of-2 periods only)
+      %01 = SINC2 filtering (software difference computation required)
+      %10 = SINC3 filtering (software post-processing required)
+      %11 = Bitstream capturing (raw 32-bit ADC snapshot, read every 32 clocks, LSB=oldest)
     bits_3_0: "Sample period configuration (resolution/period setting)"
   y_register:
     function: "Trigger level for scope modes (not used in basic ADC mode)"
@@ -39,7 +39,7 @@ flags:
 
 code_examples:
   - title: "Basic 8-bit ADC Reading"
-    description: "Simple ADC with raw mode sampling"
+    description: "Simple ADC with SINC2 sampling (8-bit)"
     code: |
       CON
         _clkfreq = 200_000_000
@@ -47,7 +47,7 @@ code_examples:
       
       PUB main() | adc_value
         ' Configure ADC mode: %100011 in bits 17:12, mode %11000
-        ' P[12:10] = %100 enables ADC functionality
+        ' M[12:10] = %100 enables ADC functionality
         pinstart(adc_pin, $8_C600, %00_0111, 0)  ' 8-bit resolution
         
         repeat
@@ -56,7 +56,7 @@ code_examples:
           debug("ADC: ", udec(adc_value))
       
       DAT
-      ' PASM2 example - raw bitstream capture
+      ' PASM2 example - SINC2 sampling (8-bit)
         org
         mov     dira, #$FF                       ' LED output setup
         dirl    #adc_pin                         ' Reset ADC pin
@@ -86,7 +86,7 @@ code_examples:
         mov     dira, #$FF                       ' LED output
         dirl    #adc_pin                         ' Reset ADC
         wrpin   adc_mode, #adc_pin               ' Configure mode
-        wxpin   #%01_0111, #adc_pin              ' SINC2, 8-bit
+        wxpin   #%01_0111, #adc_pin              ' SINC2 filtering at 128 clocks
         dirh    #adc_pin                         ' Enable smart pin
         setse1  #%001<<6 + adc_pin               ' Event trigger on pin IN high
       .loop
@@ -137,7 +137,7 @@ related_modes:
 configuration_constants:
   mode_constant: "P_ADC"
   binary_value: "%11000"
-  required_pin_config: "%100011_00000000_00_11000_0 (P[12:10]=%100 enables ADC)"
+  required_pin_config: "%100011_00000000_00_11000_0 (M[12:10]=%100 enables ADC)"
   
   adc_input_modes:
     - "P_ADC_GIO - Ground-referenced input"
@@ -150,15 +150,16 @@ configuration_constants:
     - "P_ADC_100X - 100x gain"
   
   x_register_modes:
-    - "%00_xxxx - Raw bitstream capture"
-    - "%01_xxxx - SINC2 filtering (software post-process required)"
+    - "%00_xxxx - SINC2 sampling (complete conversion in hardware, power-of-2 periods)"
+    - "%01_xxxx - SINC2 filtering (software difference computation required)"
     - "%10_xxxx - SINC3 filtering (software post-process required)"
+    - "%11_xxxx - Bitstream capturing (raw 32-bit ADC snapshot every 32 clocks)"
     - "Lower 4 bits control sample period/resolution"
 
 notes:
-  - "Requires P[12:10] = %100 in WRPIN configuration to enable ADC"
-  - "Raw mode provides new result every 32 system clock periods"
-  - "SINC2/SINC3 modes require software post-processing for accurate values"
+  - "Requires M[12:10] = %100 in WRPIN configuration to enable ADC"
+  - "Bitstream capture (%11) provides a new 32-bit snapshot every 32 system clock periods"
+  - "SINC2 filtering (%01) and SINC3 (%10) require software post-processing; SINC2 sampling (%00) does not"
   - "Use SETSE1 with waitse1 for event-driven sample acquisition"
   - "Multiple consecutive pins can be configured simultaneously"
   - "SINC2 post-processing: shift right by [LOG2(samples)]-1"

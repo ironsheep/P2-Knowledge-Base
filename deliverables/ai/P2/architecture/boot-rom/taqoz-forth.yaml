@@ -3,9 +3,8 @@
 #   - Silicon Doc v35 (entry sequence)
 #   - P2 Datasheet (entry sequence + dedicated section reference)
 #   - rom-booter ingestion (ROM residence)
-# Preliminary web research available at:
-#   engineering/ingestion/sources/taqoz/taqoz-web-research-preliminary.md
-#   (NOT used as a source for facts in this entry — see narrative for rationale)
+# Preliminary web research (direction-finding only, NOT a source for facts) and the
+# grounding plan for the remaining gaps are tracked in the project's ingestion tree.
 
 component: TAQOZ_Forth
 category: boot_rom_interface
@@ -54,7 +53,7 @@ author:
 knowledge_gaps:
   word_dictionary:
     status: "Not documented in primary sources we have ingested"
-    chase: "Mine engineering/ingestion/sources/rom-booter/ROM_Booter.lst for the actual ROM dictionary; verify against Peter Jakacki's TAQOZ.spin2 source"
+    chase: "Mine the Parallax P2 boot ROM listing (ROM_Booter.lst) for the actual ROM dictionary; verify against Peter Jakacki's TAQOZ.spin2 source"
 
   runtime_capabilities:
     status: "Specific operations beyond 'interactive Forth REPL' are not documented in primary sources"
@@ -85,9 +84,7 @@ external_documentation:
   taqoz_spin2_source: "Linked from the forum threads (originally on SourceForge and/or GitHub); closest available representation of the ROM build; not yet ingested into P2KB"
   community_glossary: "TAQOZ Reloaded 2.8 'Glossary of Words' — comprehensive but contains Reloaded-only words; needs filtering for the ROM subset"
 
-  local_sources_for_future_mining:
-    rom_booter_listing: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst (411KB; contains the assembled ROM image)"
-    preliminary_web_research: "engineering/ingestion/sources/taqoz/taqoz-web-research-preliminary.md (treat as direction-finding, not as a source)"
+  remaining_grounding: "ROM-dictionary / Monitor-parser / TAQOZ.spin2 grounding for the gaps above is tracked in the project's ingestion tree (not duplicated here); primary mining source is the Parallax P2 boot ROM listing (ROM_Booter.lst)."
 
 # Cross-references
 related:

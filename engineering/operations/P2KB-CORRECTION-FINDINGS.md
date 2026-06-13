@@ -273,7 +273,9 @@ The streamer audit's *enhancement* suggestions (setxfrq common-value table, extr
 
 These six findings were surfaced while auditing the **P2 Streamer Programming Guide** for production. The *manual* was corrected in the same pass (`manuals/p2-streamer-programming-guide/opus-master/streamer-body.md`); the **KB YAML** items below are staged here for a separate `yaml-knowledge-base-maintenance` pass, per the standing instruction to finish the PDF first. Full audit: `manuals/p2-streamer-programming-guide/audit/streamer-content-audit-2026-06-01.md`.
 
-### F-016 — `setxfrq.yaml` streamer-frequency formula is off by a factor of 2  ·  `CONFIRMED` (reopens a previously "RESOLVED" item)
+### F-016 — `setxfrq.yaml` streamer-frequency formula is off by a factor of 2  ·  `DONE` (2026-06-13; applied 2026-06-03)
+
+> **Status reconciled 2026-06-13.** Applied 2026-06-03 (see the APPLIED note below); re-verified still-correct on disk this pass (`setxfrq.yaml` uses `$8000_0000`/2³¹ throughout). The header was never flipped from `CONFIRMED` — fixed now.
 
 **File:** `deliverables/ai/P2/language/pasm2/setxfrq.yaml`
 
@@ -293,7 +295,9 @@ The `/2³²` form yields **double** the correct word for every rate.
 
 **Proposed correction:** Change the `setxfrq.yaml` formula to the 2³¹ form above and re-check any worked example values it carries. Reconcile with `nco-timing.yaml` (which already uses the `$8000_0000 × rate/clk` convention).
 
-### F-017 — `nco-timing.yaml` video pixel-rate table values are arithmetically wrong  ·  `CONFIRMED`
+### F-017 — `nco-timing.yaml` video pixel-rate table values are arithmetically wrong  ·  `DONE` (2026-06-13; applied 2026-06-03)
+
+> **Status reconciled 2026-06-13.** Applied 2026-06-03; re-verified on disk (`nco-timing.yaml` `vga_800x600 at_250mhz: "$147A_E148"`, the correct 40 MHz value). Header flipped from `CONFIRMED`.
 
 **File:** `deliverables/ai/P2/architecture/streamer/nco-timing.yaml` (`video_rates` section)
 
@@ -312,7 +316,9 @@ The `/2³²` form yields **double** the correct word for every rate.
 
 **Proposed correction:** Replace `nco-timing.yaml video_rates` with the values above.
 
-### F-018 — `modes-reference.yaml` mislabels the SINC2 select bit  ·  `CONFIRMED`
+### F-018 — `modes-reference.yaml` mislabels the SINC2 select bit  ·  `DONE` (2026-06-13; applied 2026-06-03)
+
+> **Status reconciled 2026-06-13.** Applied 2026-06-03; re-verified on disk (`X_DDS_GOERTZEL_SINC2 … d_19_16: "%0111 (with D[23]=1 — SINC2 select)"`). Header flipped from `CONFIRMED`.
 
 **File:** `deliverables/ai/P2/architecture/streamer/modes-reference.yaml` (X_DDS_GOERTZEL_SINC2 entry)
 
@@ -338,7 +344,9 @@ The manual was softened (dropped "33-bit", replaced "±10" with "well below ±12
 > - **"33-bit" → DROP (CONFIRMED unsourced).** The only "33-bit" in the Silicon Doc is the smart-pin Z-result bus (`p2-documentation.txt:7567`) — unrelated. The Goertzel NCO frequency is set by SETXFRQ (the canonical Goertzel example does `setxfrq freq`, `:4185`), which is 2³¹-scaled (see F-016 / F-022), not "33-bit". Remove the gloss.
 > - **"±10" → KEEP + CITE (suspicion REFUTED).** The Silicon Doc's own Goertzel example sets `ampl = sinc2 ? 10 : 127` (`:4161`, comment "small sin/cos amplitude for SINC2", `:4167`). ±10 for SINC2 / ±127 for SINC1 is correct and now citable — do NOT drop it; the manual's softened "well below ±127" can be tightened back to the canonical 10.
 
-### F-020 — `nco-timing.yaml` "31-bit phase" gloss is misleading  ·  `CONFIRMED` (minor)
+### F-020 — `nco-timing.yaml` "31-bit phase" gloss is misleading  ·  `DONE` (2026-06-13; applied 2026-06-03)
+
+> **Status reconciled 2026-06-13.** Applied 2026-06-03; re-verified on disk (`nco-timing.yaml` now reads "32-bit register, MSB masked … resolution clkfreq/2³¹"). Header flipped from `CONFIRMED`.
 
 **File:** `deliverables/ai/P2/architecture/streamer/nco-timing.yaml` (hardware note)
 
@@ -373,7 +381,7 @@ All six open streamer findings were re-verified against the **golden ingestion s
 | **F-020** | CONFIRMED | `silicon-doc-v35-facts-only.md:338` "32-bit phase accumulator" (+ `:339` MSB-mask). Reword `nco-timing.yaml` "uses 31 bits" / "resolution: 31 bits of phase" → 32-bit register, MSB masked each add as rollover flag, resolution `clkfreq/2³¹`. |
 | **F-021** | CONFIRMED — **corrected list** | The finding's 6 named symbols (`X_RFWORD_16P_4DAC4`, `X_RFWORD_16P_2DAC8`, `X_RFLONG_32P_4DAC8`, `X_16P_4DAC4_WFWORD`, `X_16P_2DAC8_WFWORD`, `X_32P_4DAC8_WFLONG`) are **already present**. Programmatic diff shows **12** genuinely-missing rows: `X_IMM_4X8_4DAC2`/`_2DAC4`/`_1DAC8`, `X_IMM_2X16_4DAC4`/`_2DAC8`, `X_IMM_1X32_4DAC8`, `X_2P_1DAC2_WFBYTE`, `X_4P_2DAC2_WFBYTE`, `X_4P_1DAC4_WFBYTE`, `X_8P_4DAC2_WFBYTE`, `X_8P_2DAC4_WFBYTE`, `X_8P_1DAC8_WFBYTE`. All 12 trace to **`spin2-v51/streamer-events-symbols.txt`** + `complete-streamer-symbols.md` (primary source). |
 
-> **APPLIED — 2026-06-03.** F-016, F-017, F-018, F-019 (split), F-020, F-021, and F-022 are **applied to the YAMLs and validated** — 4 files: `pasm2/setxfrq.yaml`, `streamer/nco-timing.yaml`, `streamer/modes-reference.yaml`, `streamer/dds-goertzel.yaml`. YAML format verify 4/4 clean; cross-ref validation 100% (0 unresolved). These are DONE; the per-finding `CONFIRMED` markers above are kept for history.
+> **APPLIED — 2026-06-03.** F-016, F-017, F-018, F-019 (split), F-020, F-021, and F-022 are **applied to the YAMLs and validated** — 4 files: `pasm2/setxfrq.yaml`, `streamer/nco-timing.yaml`, `streamer/modes-reference.yaml`, `streamer/dds-goertzel.yaml`. YAML format verify 4/4 clean; cross-ref validation 100% (0 unresolved). These were applied 2026-06-03; the per-finding headers (F-016/017/018/020) were reconciled to `DONE` on 2026-06-13 after on-disk re-verification.
 
 ### F-022 — `dds-goertzel.yaml` Goertzel-frequency formula uses 2³² (should be 2³¹)  ·  `DONE` (2026-06-03; NEW — missed by the 2026-06-01 audit)
 
@@ -1514,7 +1522,9 @@ The parent `language/spin2/statements/debug.yaml` enumerated every window in pro
 
 Surfaced during the ingestion front-door restructure (the `spin2_lang_ref_v55` → `spin2-v55` folder-rename audit). **Not a content error** — a **provenance-format** defect class: shipped YAML fields cite **working-tree paths** (`engineering/ingestion/...`, `engineering/document-production/...`) + line ranges. This violates the YAML self-sufficiency rule (shipped YAML must reference only internal KB keys + durable bibliographic citations — provenance stays in plan/commits). Working paths (a) do not resolve for a download-on-demand MCP consumer, and (b) are brittle: they had to be hand-patched when the v55 source folder was renamed in this very session.
 
-### F-115 — working-tree paths embedded in shipped-YAML provenance fields  ·  `CONFIRMED` (2026-06-12)
+### F-115 — working-tree paths embedded in shipped-YAML provenance fields  ·  `DONE` (2026-06-13)
+
+> **Applied 2026-06-13.** Swept every `engineering/…` working-tree path from shipped YAML (41 files) → durable bibliographic citations (P2 Silicon Doc v35, Spin2 v51a, Parallax P2 `flash_loader.spin2` / Datasheet / boot-ROM listing `ROM_Booter.lst`). The 11 debug-window YAMLs now cite `DebugDisplayUnit.pas` v55 instead of the manual's REF matrix. Boot-rom TAQOZ web-research + grounding relocated to the ingestion tree (`sources/taqoz/taqoz-content-gaps-and-grounding-plan.md`). Internal KB cross-refs preserved. **Verified:** `grep -rE "engineering/(ingestion|document-production|operations|tools)/" deliverables/ai/P2` = 0; 69 YAMLs parse clean; cross-ref 100%.
 
 **Scope (data-set-wide):** **42 files** under `deliverables/ai/P2/` embed an `engineering/…` working path; **25** carry it in a `source:`/`sources:` field, the rest in `source_example` / `source_listing` / `example_source` / `source_of_truth` / `primary_source` / `companion_doc` / `path` / `rom_booter_listing` / etc. Enumerate the full set before fixing:
 ```
@@ -1535,7 +1545,9 @@ grep -rlE "engineering/(ingestion|document-production|operations|tools)/" delive
 
 Surfaced by reproducing an **agent DoD failure** (agents using the MCP could not locate hardware info). Probed the live served KB: the hardware **data exists** (31 YAMLs in `deliverables/ai/P2/hardware/`, incl. a rich `hardware-compatibility-matrix.yaml` with board×carrier→pin-access) but is effectively **invisible** to agents.
 
-### F-116 — hardware YAMLs are unfindable: 0 aliases, unregistered categories, matrix hub not surfaced  ·  `CONFIRMED` (2026-06-12)
+### F-116 — hardware YAMLs are unfindable: 0 aliases, unregistered categories, matrix hub not surfaced  ·  `DONE` (2026-06-13)
+
+> **Applied 2026-06-13.** (1) Removed 5 duplicate/confused stub files (`p2_eval_board`, `p2_edge_mini_breakout`, `control_board`, `p2_edge_module`, `p2_edge_breadboard_adapter`) — content fully covered by the rich hyphenated files; the module stub was also factually wrong ("32MB HyperRAM" conflated P2-EC32MB PSRAM with the 64004-ES HyperRAM add-on). (2) Added `aliases:` to all 25 surviving hardware YAMLs (0 had them). (3) Registered 6 `hardware_*` categories in `p2kb-categories.json` **and** added the missing `hardware` handler to `generate-p2kb-index.py` (there was none). (4) Made `hardware-compatibility-matrix.yaml` the findable hub. **Verified:** index regen shows 6 hardware categories (were 0); failing probes now resolve (`edge board pinout`, `which pins`, `HUB75 adapter`, `64000`, `P2-EC32MB`, `board comparison`); cross-ref 100%. (Live `p2kb_find` MCP updates at release + restart.) Surfaced: 64006D/64006G part-number collisions → **F-121**; 64004-ES coverage gap → **F-122**.
 
 **Evidence (live MCP probe):**
 - `p2kb_find` category index = **51 categories, ZERO hardware** (all arch/pasm2/smart_pins/spin2); the 31 hardware entries are uncategorized in the browse list.
@@ -1557,7 +1569,9 @@ The board×adapter matrix **data already exists** — the gap is pure **findabil
 
 ---
 
-### F-117 — Long-repository write uses the **X** register (WXPIN), not Y (WYPIN)  ·  `CONFIRMED` (2026-06-12)
+### F-117 — Long-repository write uses the **X** register (WXPIN), not Y (WYPIN)  ·  `DONE` (2026-06-13)
+
+> **Applied 2026-06-13.** Evidence-scoped to **1 of the 3 named files**: only `smart-pin-00001-long-repository-or-dac-noise.yaml` carried the defect. `smart-pin-00010`/`00011` are DAC-dither-only files (no `repository_mode` block) and were verified correct against source — **untouched**. Fixed 00001's repository X/Y roles + every repository example WYPIN→WXPIN; DAC-noise branch left on Y (correct). **Source:** `part4-smart-pins.txt:224,227` ("WXPIN writes the long"). The deep audit also surfaced a fabricated DAC-noise Y-enable in the same file → **F-120** (fixed in the same edit).
 
 **Files:**
 - `deliverables/ai/P2/architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml`
@@ -1577,7 +1591,9 @@ The board×adapter matrix **data already exists** — the gap is pure **findabil
 
 ---
 
-### F-118 — `smart-pin-11000-adc-internal-clock.yaml` X[5:4] filter-mode encoding is inverted  ·  `CONFIRMED` (2026-06-12)
+### F-118 — `smart-pin-11000-adc-internal-clock.yaml` X[5:4] filter-mode encoding is inverted  ·  `DONE` (2026-06-13)
+
+> **Applied 2026-06-13.** Rewrote `smart-pin-11000` X[5:4] to `%00 = SINC2 sampling / %01 = SINC2 filtering / %10 = SINC3 filtering / %11 = bitstream capturing` in both the `bits_5_4` table and the `x_register_modes` list, plus the operation/timing prose, the two example comment-blocks, and the "32-clock" note that rode on the bug (the example *code* `%00_0111` was already correct = SINC2 sampling, kept). Sister `smart-pin-11001` verified already-correct → **untouched**. Also fixed `P[12:10]`→`M[12:10]` (source notation). **Source:** `p2-documentation.txt:8421` (field is X[5:4]) + mode headers `:8496/8531/8622/8737`.
 
 **File:** `deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` (`registers.x_register.bits_5_4`)
 
@@ -1598,7 +1614,9 @@ The board×adapter matrix **data already exists** — the gap is pure **findabil
 
 ---
 
-### F-119 — `smart_pins.yaml` aggregate mode-summary has two transposed mode-label pairs (sync TX/RX and count-time/count-periods)  ·  `CONFIRMED` (2026-06-12)
+### F-119 — `smart_pins.yaml` aggregate mode-summary has two transposed mode-label pairs (sync TX/RX and count-time/count-periods)  ·  `DONE` (2026-06-13)
+
+> **Applied 2026-06-13.** Un-reversed `serial_modes` `11100`→transmit / `11101`→receive and the `timing_modes` `10101`→"count time" / `10111`→"count periods"; reworded the `10101/10110/10111` group "For X clocks" → "For periods in X+ clock cycles". Swept the whole mode table against source — the rest is accurate; the file is now internally consistent (mode table ↔ OUT-mode lists at L253-254 ↔ `wxpin` blocks at L449-452 all agree). **Source:** `part4-smart-pins.txt:141-142`; `p2-documentation.txt:339-341, 353-356`.
 
 **File:** `deliverables/ai/P2/architecture/smart_pins.yaml` (the aggregate mode-summary block: `serial_modes` and `timing_modes`)
 
@@ -1620,3 +1638,58 @@ The board×adapter matrix **data already exists** — the gap is pure **findabil
 - Surfaced 2026-06-12 during the Titus↔IOSP cross-audit (RA-03 flagged the sync TX/RX reversal pointing at `p2kbArchSmartPins`; main-loop hand-verification against the Silicon Doc confirmed it lands in `smart_pins.yaml` and additionally caught the adjacent `10101/10111` transposition in the same block).
 
 **Proposed correction (`yaml-knowledge-base-maintenance`):** In `smart_pins.yaml`, swap lines 91↔92 labels (`11100`→transmit, `11101`→receive) and the line 80↔82 count-roles (`10101`→"count time", `10111`→"count periods"); reword the `10101/10110/10111` group from "For X clocks" to "For periods in X+ clock cycles" to preserve the minimum-window semantics. No code examples in this file. Sweep the file for any other mode-label mismatch against the per-mode YAMLs before closing.
+
+---
+
+## Surfaced during the 2026-06-13 YAML corrections pass (F-120..F-123)
+
+These were discovered while auditing/fixing F-115..F-119 — logged here so nothing is lost.
+
+### F-120 — `smart-pin-00001` DAC-noise mode carries a fabricated Y-register "enable" (+ wrong Z, mischaracterized X)  ·  `DONE` (2026-06-13)
+
+**File:** `deliverables/ai/P2/architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml` (`dac_noise_mode` block + examples)
+
+**What was wrong:** The DAC-noise branch claimed `y_register: "Enable/disable noise (0=off, non-zero=on)"` with an example `WYPIN(NOISE_PIN, 1) ' Enable noise`, `z_register: "Current PRNG value"`, and `x_register: "Update rate (clock divider)"`. None of that exists.
+
+**Correct (verified):** In DAC-noise mode the 8-bit DAC is fed pseudo-random data **every clock automatically** (no Y enable); X[15:0] is an **optional sample period** for IN timing (0 ⇒ max 65536-clock period, lowest switching power); RDPIN/RQPIN returns the **16-bit ADC accumulation**, not a "PRNG value".
+
+**Evidence:** Silicon Doc v35, `part4-smart-pins.txt:235-247` (%00001 DAC noise: X = optional sample period; RDPIN/RQPIN = ADC accumulation; no Y).
+
+**Resolution:** Corrected the `dac_noise_mode` register descriptions and removed the fabricated `WYPIN…'Enable noise` lines (Spin2 + PASM2 examples) in the **same edit as F-117**. Surfaced because F-117's mandate ("evidence decides per file") meant fully auditing the file, not just the repository branch.
+
+### F-121 — Add-on board roster needs authoritative per-board grounding; 2 entries look spurious (`addon-digital-io-board`, `addon-servo-header`)  ·  `TRACKED → ingestion` (2026-06-13)
+
+**Verified against source (2026-06-13):** the #64006 "P2 Eval Add-on Boards" set is **exactly 8 boards**, A–H, each unique (`p2-eval-add-on-boards-narrative.txt:18-25`): A=Control, B=Serial Host, C=LED Matrix, **D=Digital Video Out**, E=Mini Prototyping, F=Serial Device, **G=Goertzel**, H=A/V Breakout. `#64006-ES` is **not** a separate/older edition — it is the SKU for the **Complete Accessory Set** (all 8 bundled). Both the Aug-2020 (`#64006-ES`) and Aug-2025 (`#64006`) product-guide editions cover the **same 8 boards** (confirmed by user, who holds both PDFs).
+
+**What's actually wrong (not a typo — two non-existent boards):**
+- `addon-digital-io-board.yaml` (claims `64006G`) — describes "4 LEDs + 4 push-button switches," which **is the Control board (64006A)** ("four push-buttons and four blue LEDs", narrative:54). It is a **misattributed duplicate of Control**, stamped with Goertzel's number. The real Control board is already documented in `addon-control-board.yaml` (64006A).
+- `addon-servo-header.yaml` (claims `64006D`, 393 lines, created 2025-12-27) — describes "Eight 3-pin servo connectors." **No servo board exists** in the #64006 set; `64006D` is Digital Video Out (HDMI). **Fabricated entry.**
+
+The 8 real boards (incl. `addon-digital-video-out`=D and `addon-goertzel-touch`=G) are **correct**; the apparent "collisions" were these two spurious files stealing real boards' part numbers.
+
+**Resolution = cross-edition ingestion (not a pre-emptive delete).** What our agents need is an authoritative **per-individual-board pin map**, not the bundle SKU. So:
+1. **Ingest the Aug-2020 `#64006-ES` product guide** (user holds the PDF; stage into `engineering/ingestion/sources/p2-eval-add-on-boards/` alongside the already-ingested Aug-2025 `64006-P2-Eval-Add-on-Boards-Product-Guide.pdf`).
+2. **Cross-check both editions** (one primary, one cross-check, per the ingestion edition/role model) to establish the authoritative roster + per-board pin mappings.
+3. **Reconcile the `addon-*.yaml` set against that authoritative per-board map** — confirm/remove the 2 spurious entries (`digital-io-board` looks like a misattributed Control duplicate; `servo-header` has no board in the 2025 edition) and resolve the 4 part-number-less orphans (`7_segment_display`, `buttons_board`, `switches_and_leds`, `switches_board`) the same way.
+
+Do **not** delete pre-emptively — the 2020 edition may explain the two outliers. Tracked as an `ingest-source` + `yaml-knowledge-base-maintenance` task; queued in `engineering/ingestion/README.md`. Surfaced during F-116 dedup; partially diagnosed against the 2025 narrative (`p2-eval-add-on-boards-narrative.txt:18-25`).
+
+### F-122 — 64004-ES HyperRAM/HyperFlash add-on board has no standalone hardware YAML  ·  `TRACKED → ingestion` (2026-06-13)
+
+Coverage gap surfaced during F-116: the 64004-ES board (16MB HyperRAM + 32MB HyperFlash) is only referenced as a compatible add-on in `hardware/p2-eval-board.yaml`. The Product Guide PDF is now **staged + queued as the next ingestion** (`engineering/ingestion/README.md` → Planned ingestions; source folder `engineering/ingestion/sources/hyperRam-n-hyperFlash/`). Resolution is an `ingest-source` task — **do not fabricate from the raw CAD**. Tracked there; recorded here for the index.
+
+### F-123 — TAQOZ-Forth / ROM-Monitor capability detail rests partly on preliminary web research  ·  `TRACKED → ingestion` (2026-06-13)
+
+Content-confidence gap surfaced during F-115: `architecture/boot-rom/taqoz-forth.yaml` and `p2-monitor.yaml` carry capability detail not grounded in a primary source. The grounding plan (mine `ROM_Booter.lst`; verify against Peter Jakacki's `TAQOZ.spin2`; SME + forum threads) now lives in the ingestion tree: `engineering/ingestion/sources/taqoz/taqoz-content-gaps-and-grounding-plan.md`. Resolution is an `ingest-source` task. Tracked there; recorded here for the index.
+
+### F-124 — Debug-window YAMLs don't document the DEBUG string-quoting rule (single vs double — a silent-failure trap)  ·  `DONE` (2026-06-13)
+
+**Files:** `language/spin2/statements/debug.yaml` (canonical) + the 9 `debug-displays/*.yaml`.
+
+**What's wrong (gap, not a broken example):** The debug YAMLs' examples correctly show single-quoted `TITLE 'string'` / `SAVE 'name'`, but **nowhere document the rule** that the two DEBUG forms use OPPOSITE quote delimiters — and that a double-quoted text argument in a backtick display command is **silently ignored at runtime, with no compile error**. An agent generating debug code from these entries would naturally reach for double quotes (the normal Spin2 string delimiter) on a `TITLE`/`SAVE` and silently lose it.
+
+**Correct (verified):** Non-backtick `debug("x", udec(y))` → DOUBLE quotes (`'` = comment). Backtick display `` debug(`BITMAP w TITLE 'name' SAVE 'shot') `` → display-command text uses SINGLE quotes; double quotes are not recognized (silent failure). Inside `` `(expr) `` substitutions → normal Spin2 (double quotes). No escape in display strings; `SAVE` auto-appends `.bmp`.
+
+**Evidence:** PNut/Spin2 compiler — backtick text emitted raw (`debugTickString`); host display parser recognizes only the apostrophe as a string delimiter (`check_dd_str`). Source: DEBUG Statement Quoting briefing (pnut_ts_facts), brought in to improve the **P2 Debug Window Manual**. Related: F-024 (SAVE `.bmp`), F-025 (inner backtick).
+
+**Resolution (2026-06-13):** Added a `string_quoting:` section (two-forms contrast + silent-failure warning + value-substitution carve-out + no-escape + SAVE/.bmp) to the canonical `statements/debug.yaml`, and a terse single-vs-double quoting note in each of the 9 display YAMLs near their `TITLE`/`SAVE` directives. The manual's copy-paste callout is a separate (manual-head) follow-up.

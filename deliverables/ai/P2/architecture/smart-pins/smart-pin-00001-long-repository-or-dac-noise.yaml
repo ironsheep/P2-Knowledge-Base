@@ -15,21 +15,21 @@ constants:
 operation: |
   Dual-purpose mode based on low-level pin configuration:
   - Non-DAC: 32-bit repository for data sharing between cogs
-  - DAC mode (P[12:10]=%101): Outputs pseudo-random noise to DAC
+  - DAC mode (M[12:10]=%101): Outputs pseudo-random noise to DAC
 
 # Parameters - Repository Mode
 repository_mode:
-  x_register: "Not used"
-  y_register: "32-bit value to store"
-  z_register: "Reads back stored value"
-  in_flag: "High when Y written"
-  
-# Parameters - DAC Noise Mode  
+  x_register: "32-bit value to store (written by WXPIN)"
+  y_register: "Not used"
+  z_register: "Reads back stored value (RDPIN/RQPIN)"
+  in_flag: "Raised when WXPIN writes the long (DIR=1)"
+
+# Parameters - DAC Noise Mode
 dac_noise_mode:
-  x_register: "Update rate (clock divider)"
-  y_register: "Enable/disable noise (0=off, non-zero=on)"
-  z_register: "Current PRNG value"
-  requires: "P[12:10]=%101 in WRPIN mode value"
+  x_register: "Optional sample period in clocks for IN timing (0 = max 65536-clock period, lowest switching power)"
+  y_register: "Not used (8-bit DAC is fed pseudo-random data every clock automatically)"
+  z_register: "16-bit ADC accumulation from last sample period (RDPIN/RQPIN)"
+  requires: "M[12:10]=%101 in WRPIN mode value"
 
 # Complete Spin2 Example
 spin2_complete: |
@@ -49,22 +49,21 @@ spin2_complete: |
     
   PUB setup_repository() | mode
     mode := P_REPOSITORY
-    PINSTART(REPO_PIN, mode, 0, $12345678)  ' Store value
-    
+    PINSTART(REPO_PIN, mode, $12345678, 0)  ' Store value in X (xval)
+
     ' Another cog can read this
     shared_value := RDPIN(REPO_PIN)         ' Read repository
-    
+
   PUB setup_dac_noise() | mode
     ' Combine with DAC mode bits
     mode := P_DAC_NOISE | P_DAC_124R_3V | P_OE
     PINCLEAR(NOISE_PIN)
     WRPIN(NOISE_PIN, mode)
-    WXPIN(NOISE_PIN, 1000)          ' Update rate
-    WYPIN(NOISE_PIN, 1)             ' Enable noise
-    PINHIGH(NOISE_PIN)              ' Start DAC output
-    
+    WXPIN(NOISE_PIN, 1000)          ' Optional sample period (IN timing)
+    PINHIGH(NOISE_PIN)              ' Start DAC output (noise feeds automatically)
+
   PUB write_repository(value)
-    WYPIN(REPO_PIN, value)          ' Update stored value
+    WXPIN(REPO_PIN, value)          ' Update stored value
     
   PUB read_repository() : value
     value := RDPIN(REPO_PIN)        ' Read without clearing IN
@@ -86,7 +85,7 @@ pasm2_complete: |
           DIRL  pin                   ' Reset
           WRPIN repo_mode, pin        ' Configure
           DIRH  pin                   ' Enable
-          WYPIN ##$DEADBEEF, pin      ' Store value
+          WXPIN ##$DEADBEEF, pin      ' Store value
           RET
   
   ' Read from repository
@@ -100,9 +99,8 @@ pasm2_complete: |
           MOV   pin, noise_pin
           DIRL  pin
           WRPIN noise_mode, pin       ' DAC + noise mode
-          WXPIN ##1000, pin           ' Update rate
-          WYPIN #1, pin               ' Enable
-          DIRH  pin                   ' Start output
+          WXPIN ##1000, pin           ' Optional sample period (IN timing)
+          DIRH  pin                   ' Start output (noise feeds automatically)
           RET
           
   ' Variables
@@ -113,7 +111,7 @@ pasm2_complete: |
 spin2_inline: |
   PUB store_value(pin, value)
     ORG
-      WYPIN value, pin              ' Store to repository
+      WXPIN value, pin              ' Store to repository
     END
     
   PUB get_value(pin) : result
@@ -129,8 +127,8 @@ repository_use: |
   
 dac_noise_use: |
   Requires DAC mode bits in WRPIN
-  Generates white noise output
-  X controls update frequency
+  Generates white noise output (fed to DAC every clock automatically)
+  X sets an optional sample period (IN timing only)
   
 common_uses:
   - "Inter-cog communication"

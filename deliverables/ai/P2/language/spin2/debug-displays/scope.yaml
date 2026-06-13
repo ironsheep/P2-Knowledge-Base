@@ -9,7 +9,7 @@ description: |
   overlay (FFT is its own window).
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 4, 5.2) -- verified against DebugDisplayUnit.pas v55: SCOPE_Configure 1151-1207, SCOPE_Update 1209-1337, channel def 1217-1231, TRIGGER 1236-1249, SCOPE_Draw 1339-1364, SCOPE_Range 1366-1379; PC_MOUSE raw-pixel note SendMousePos 3537-3577"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (SCOPE display implementation: channel def, TRIGGER, Draw, Range; PC_MOUSE raw-pixel) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - oscilloscope
@@ -25,6 +25,7 @@ syntax:
 configuration_directives:
   note: "Accepted in SCOPE_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'Scope')"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SIZE: "SIZE width height -- pixels, each 32..2048 (default 256x256)"
   SAMPLES: "SAMPLES n -- horizontal resolution, 16..2048 (default 256)"

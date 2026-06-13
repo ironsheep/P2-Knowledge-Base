@@ -1,4 +1,11 @@
 # P2 Eval Control Add-on Board - Hardware Specification
+aliases:
+  - "control board"
+  - "LED control board"
+  - "buttons and LEDs board"
+  - "P2 Eval Control Add-on Board"
+  - "64006A"
+  - "#64006 add-on board"
 # Part Number: 64006A
 # Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
 # Enhanced: 2025-12-27 with full code-generation technical details

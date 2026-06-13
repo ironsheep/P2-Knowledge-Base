@@ -124,13 +124,39 @@ Fix any reported issues — usually broken `related:` references that need redir
 
 If you regenerated the index for validation, leave it in the working tree but unstaged. `release-yamls` will overwrite it with the post-commit regen.
 
+## 4.5 Annotate the findings register — same pass, not deferred
+
+When the work is **driven by a findings register** (`engineering/operations/P2KB-CORRECTION-FINDINGS.md`), annotating that register is **part of the fix, not a later chore.** A register whose statuses lag the YAML lies — it looks like a big pile of unfinished `CONFIRMED`s and invites re-chasing. Treating "YAML fixed" as "done" while leaving the register stale is the bug this step exists to prevent.
+
+As each finding is resolved, in the **same pass**:
+
+- **Flip its status** in the header (`CONFIRMED` / `NEEDS-VERIFICATION` → `DONE` / `WONTFIX` / `RESOLVED-INVALID`) with the date.
+- **Add a one-line applied-note** (a `>` blockquote under the header) stating what changed, the **source trace** (the golden-source `file:line` that justified it), and how it was verified.
+- **Record evidence-scoping.** Findings are weak suggestions, not instructions; if a finding named N files but only M were actually defective, say so — name which were correct + left untouched, and why. (A deep audit routinely both *narrows* a finding and *widens* the defect in the one file that was wrong.)
+- **Log any NEW defects** surfaced while auditing/fixing as their own findings (next `F-NNN`), so nothing discovered is lost.
+
+## 4.6 Archive the register when it empties (move-aside + pre-seed)
+
+When the active register reaches **all-resolved** (no open `CONFIRMED` / `NEEDS-VERIFICATION` — only `DONE` + guardrails), archive it so the active doc stays glanceable (the YAML head reads its standing state as "empty of CONFIRMED ⇒ done"):
+
+1. **Move the whole file aside** to a dated, tracked archive: `engineering/operations/archive/P2KB-CORRECTION-FINDINGS-archive-YYYY-MM-DD.md`. (git history is the deeper record; the dated file keeps the detail searchable without spelunking history.)
+2. **Pre-seed a fresh active file — NOT empty —** with:
+   - the header + status legend + authority-order preamble,
+   - **`Next finding: F-NNN`** = the archived maximum + 1, so IDs stay globally unique and continuous (findings cross-reference each other by ID),
+   - the **carry-forward guardrails**: every `WONTFIX` / `RESOLVED-INVALID` entry plus the "Verified resolved (don't re-chase)" notes — these exist to stop re-filing settled questions and are worth more kept visible than buried in the archive,
+   - a one-line **pointer to the archive**.
+3. The result is a released, near-empty register ready for the next reporting cycle.
+
+This is the same archival move as `punch-list-maintenance`, plus the register-specific carry-forward (ID continuity + guardrails). Do the archive as its **own** commit, *after* the content-corrections commit — never bundle a ~1600-line move-aside into a content diff.
+
 ## 5. Hand back
 
 Report:
 - Count of YAMLs edited
 - Count of cross-references redirected per Sacred Rule #7
+- **Register annotation** (if register-driven): findings flipped to their final status with applied-notes + source traces, and any new findings logged (§4.5) — this is part of "done," not a follow-up
 - Validator output (clean)
-- Suggested next step: invoke `release-yamls` to publish the change
+- Suggested next step: invoke `release-yamls` to publish the change (and, if the register is now all-resolved, the move-aside archival per §4.6 as its own commit)
 
 The published index is NOT regenerated in this skill. That happens in `release-yamls` AFTER the content is committed, so the index records correct git commit timestamps.
 

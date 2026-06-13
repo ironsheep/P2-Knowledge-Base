@@ -99,7 +99,7 @@ streamer_pairing:
     similarly sets up writes-to-hub, which serves streaming INPUT
     (pin → streamer → FIFO → hub). The streamer's direction is the
     INVERSE of the verb's apparent direction.
-  example_source: engineering/ingestion/sources/flash-loader/flash_loader.spin2 line 109 (RDFAST → output stream to spi_di)
+  example_source: "Parallax P2 flash_loader.spin2 line 109 (RDFAST → output stream to spi_di)"
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#

@@ -8,7 +8,7 @@ description: |
   identical for all nine DEBUG display windows.
 documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
 documentation_level: comprehensive
-source: "engineering/ingestion/sources/spin2-v51/debug-section.txt:784-814 (PC_KEY P2-side API + key-code table); engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md section 4.2 (host side: SendKeyPress 3579-3583, FormKeyDown 833-851)"
+source: "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code table); host-side key handling per PNut/Spin2 v55 DebugDisplayUnit.pas"
 
 syntax: "PC_KEY(pointer_to_long)"
 

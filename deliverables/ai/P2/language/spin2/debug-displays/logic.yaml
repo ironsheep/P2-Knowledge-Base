@@ -8,7 +8,7 @@ description: |
   timing-measurement/analysis tools.
 documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
 documentation_level: comprehensive
-source: "engineering/document-production/manuals/p2-debug-window-manual/REF/DEBUG-WINDOW-DIRECTIVE-MATRIX.md (sections 2, 3, 5.1, 7) -- verified against DebugDisplayUnit.pas v55: LOGIC_Configure 926-1032, LOGIC_Update 1034-1106, LOGIC_Draw 1108-1144, channel def 971-1005, TRIGGER 1043-1049 / detect 1078-1099, HOLDOFF 1050-1051, SetPack 4146-4156; shared input handlers 585-857, 3537-3583"
+source: "PNut/Spin2 v55 DebugDisplayUnit.pas (LOGIC display implementation: channel def, TRIGGER/detect, HOLDOFF, SetPack) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut_ts v1.55.0"
 
 aliases:
   - logic analyzer
@@ -24,6 +24,7 @@ syntax:
 configuration_directives:
   note: "Accepted in LOGIC_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title"
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
   POS: "POS left top -- window screen offset"
   SAMPLES: "SAMPLES n -- number of samples across the window, 4..2047 (default 32). A single integer -- LOGIC has NO {first last} form (that shape belongs to FFT/SPECTRO)."
   SPACING: "SPACING n -- HORIZONTAL pixel spacing between successive samples (the X-axis time base), 1..32 (default 8). This is NOT vertical channel spacing -- the per-channel vertical pitch is fixed at the font cell height."

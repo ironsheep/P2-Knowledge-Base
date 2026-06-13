@@ -1,4 +1,10 @@
 component: HUB75 Adapter
+aliases:
+  - "HUB75 adapter"
+  - "HUB75 LED panel adapter"
+  - "RGB matrix adapter"
+  - "64032"
+  - "LED panel interface"
 part_number: 64032
 p2kb_key: "p2kbHwHub75Adapter"
 category: addon

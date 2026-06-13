@@ -15,7 +15,7 @@ flags_affected:
   C: No effect
   Z: No effect
 silicon_errata:
-  block_transfer_ptrx_delta: "Do NOT place an ALTx/AUGS/AUGD between SETQ/SETQ2 and the block RDLONG/WRLONG/WMLONG that uses a PTRx expression -- the intervening instruction cancels the block-size PTRx delta (PTRx advances by +4 for one long, NOT by N*4). Keep SETQ adjacent to the transfer. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: engineering/ingestion/sources/silicon-doc/p2-documentation.txt:197-211 (KNOWN BUGS, Rev C)."
+  block_transfer_ptrx_delta: "Do NOT place an ALTx/AUGS/AUGD between SETQ/SETQ2 and the block RDLONG/WRLONG/WMLONG that uses a PTRx expression -- the intervening instruction cancels the block-size PTRx delta (PTRx advances by +4 for one long, NOT by N*4). Keep SETQ adjacent to the transfer. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C)."
 notes:
 - "XBYTE role: besides COG-RAM block transfers, SETQ arms the PERSISTENT XBYTE mode. '_RET_ SETQ #mode' (with $1FF on the call stack) sets the dispatch-table base / compression threshold / flag-write configuration that XBYTE retains for ALL subsequent bytecodes; it is armed once, not per-bytecode. SETQ2 overrides it for a single bytecode (then dispatch reverts to the SETQ mode). See architecture/xbyte_engine.yaml."
 documentation_source: original
