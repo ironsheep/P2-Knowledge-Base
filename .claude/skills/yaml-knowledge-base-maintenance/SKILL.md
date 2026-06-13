@@ -139,7 +139,7 @@ As each finding is resolved, in the **same pass**:
 
 When the active register reaches **all-resolved** (no open `CONFIRMED` / `NEEDS-VERIFICATION` — only `DONE` + guardrails), archive it so the active doc stays glanceable (the YAML head reads its standing state as "empty of CONFIRMED ⇒ done"):
 
-1. **Move the whole file aside** to a dated, tracked archive: `engineering/operations/archive/P2KB-CORRECTION-FINDINGS-archive-YYYY-MM-DD.md`. (git history is the deeper record; the dated file keeps the detail searchable without spelunking history.)
+1. **Move the whole file aside** to the established dated archive dir: `engineering/operations/correction-sweeps/YYYY-MM-DD-P2KB-CORRECTION-FINDINGS-archive.md` (the same `correction-sweeps/` home as detailed per-sweep working docs). (git history is the deeper record; the dated file keeps the detail searchable without spelunking history.)
 2. **Pre-seed a fresh active file — NOT empty —** with:
    - the header + status legend + authority-order preamble,
    - **`Next finding: F-NNN`** = the archived maximum + 1, so IDs stay globally unique and continuous (findings cross-reference each other by ID),
