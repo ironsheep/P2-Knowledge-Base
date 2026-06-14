@@ -35,7 +35,7 @@ configuration_directives:
   SIZE: "SIZE width height -- canvas size in pixels, each 32..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel scale, each axis 1..256 (default 1x1; y copies x if omitted); also the divisor applied to reported PC_MOUSE cursor coordinates"
   color_mode: "One of LUT1 LUT2 LUT4 LUT8 LUMA8/8W/8X HSV8/8W/8X RGBI8/8W/8X RGB8 HSV16/16W/16X RGB16 RGB24 -- how packed numeric data maps to pixels"
-  LUTCOLORS: "LUTCOLORS rgb24... -- palette for LUT color modes (256 longs)"
+  LUTCOLORS: "LUTCOLORS rgb24... -- palette for LUT color modes (up to 256 longs; supply as many as the LUT mode uses)"
   BACKCOLOR: "BACKCOLOR color -- background color (default Black)"
   UPDATE: "UPDATE -- enable buffered/manual-refresh mode (drawing accumulates in Bitmap[0], shown only on an explicit UPDATE directive)"
   HIDEXY: "HIDEXY -- suppress the on-screen measurement-cursor readout (does NOT disable PC_MOUSE reporting)"
@@ -44,7 +44,7 @@ display_directives:
   note: "Accepted in PLOT_Update. PLOT consumes essentially no bare numeric stream -- all geometry comes from these directives."
   color:
     color_mode: "Switch color mode mid-stream (LUT1..RGB24)"
-    LUTCOLORS: "Update the LUT palette (256 longs)"
+    LUTCOLORS: "Update the LUT palette (up to 256 longs)"
     BACKCOLOR: "Set background color"
     COLOR: "COLOR (value | named {brightness}) -- a color value OR a named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble). A COLOR issued immediately before a TEXT directive also sets the text color."
     OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255)"
@@ -69,12 +69,13 @@ display_directives:
   bitmap_layers:
     LAYER: "LAYER n 'file.bmp' -- load a BMP into layer buffer n (n 1..8; the .bmp file must exist)"
     CROP: "CROP layer (AUTO x y | left top width height {x y}) -- copy a region of a layer to the canvas (no args = full layer at 0,0)"
-    SPRITEDEF: "SPRITEDEF id xsize ysize pixels... colors... -- define a sprite: id 0..255; xsize,ysize 1..32 each; then xsize*ysize palette-index bytes (0..255); then 256 RGBA color longs"
+    SPRITEDEF: "SPRITEDEF id xsize ysize pixels... colors... -- define a sprite: id 0..255; xsize,ysize 1..32 each; then xsize*ysize palette-index bytes (0..255); then the palette colors the pixel bytes reference (RGBA $AARRGGBB longs, up to 256 -- the parser reads colors until the message ends, so supply only as many as your indices use)"
     SPRITE: "SPRITE id {orientation {scale {opacity}}} -- render a defined sprite at the current position: id 0..255; orientation 0..7 (default 0); scale 1..64 (default 1); opacity 0..255 (default current vOpacity)"
   window:
     CLEAR: "CLEAR -- clear the canvas to the background color"
     UPDATE: "UPDATE -- copy the accumulated buffer (Bitmap[0]) to screen (when in UPDATE mode)"
     SAVE: "SAVE 'name' -- write the canvas to <name>.bmp; SAVE l t w h 'name' writes a desktop region; SAVE WINDOW 'name' writes the window region"
+    CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."
@@ -97,7 +98,7 @@ examples:
       DEBUG(`Shapes SET 110 180 COLOR RED OVAL 80 50 3)     ' outlined ellipse
     description: "Filled BOX, rounded OBOX, and outlined OVAL"
   - code: |
-      ' Define and render a 2x2 sprite (full SPRITEDEF supplies 256 color longs)
+      ' Define and render a 2x2 sprite (supply only the palette entries your pixels use -- here 2 colors for indices 0,1)
       DEBUG(`PLOT Spr SIZE 128 128)
       DEBUG(`Spr SPRITEDEF 0 2 2  0 1 1 0  $00000000 $FFFF0000)
       DEBUG(`Spr SET 64 64 SPRITE 0 0 8)          ' id 0, orientation 0, scale 8x

@@ -9,74 +9,73 @@ documentation_source: Spin2 v51
 documentation_level: comprehensive
 
 syntax:
-  basic: "DEBUG(`display_type title, items...`)"
-  inline: "DEBUG(`items...`)  ' Uses default TERM display"
+  basic: "DEBUG(`DISPLAY_TYPE WindowName <config>)   ' create a named display window, then stream to it by name"
+  inline: "DEBUG(\"text\", value)   ' plain output to the default TERM -- no backtick needed"
   
 display_types:
   - name: TERM
     description: "Terminal/text display (default)"
-    usage: "DEBUG(`TERM title, variables...`)"
+    usage: "DEBUG(`TERM MyTerm), then stream by name: DEBUG(`MyTerm `(value))"
     
   - name: SCOPE
     description: "Oscilloscope display for analog signals"
-    usage: "DEBUG(`SCOPE title, channel1, channel2...`)"
+    usage: "DEBUG(`SCOPE MyScope 'Ch' AUTO), then DEBUG(`MyScope `(value))"
     
   - name: SCOPE_XY
     description: "XY / Lissajous (phase) display -- the separate XY-mode oscilloscope window"
-    usage: "DEBUG(`SCOPE_XY title, x, y...`)"
+    usage: "DEBUG(`SCOPE_XY MyXY 'XY'), then DEBUG(`MyXY `(x, y))"
     
   - name: LOGIC
     description: "Logic analyzer display for digital signals"
-    usage: "DEBUG(`LOGIC title, signals...`)"
+    usage: "DEBUG(`LOGIC MyLogic SAMPLES 64), then DEBUG(`MyLogic `(sample))"
     
   - name: PLOT
     description: "Real-time plotting display"
-    usage: "DEBUG(`PLOT title, data_points...`)"
+    usage: "DEBUG(`PLOT MyPlot SIZE 256 256), then DEBUG(`MyPlot SET 10 10 LINE 200 200)"
     
   - name: FFT
     description: "Fast Fourier Transform display"
-    usage: "DEBUG(`FFT title, samples...`)"
+    usage: "DEBUG(`FFT MyFFT 'Spectrum'), then DEBUG(`MyFFT `(sample))"
     
   - name: SPECTRO
     description: "Spectrogram display"
-    usage: "DEBUG(`SPECTRO title, frequency_data...`)"
+    usage: "DEBUG(`SPECTRO MySpec SAMPLES 512), then DEBUG(`MySpec `(sample))"
     
   - name: BITMAP
     description: "Bitmap/image display"
-    usage: "DEBUG(`BITMAP title, pixel_data...`)"
+    usage: "DEBUG(`BITMAP MyBmp SIZE 64 64 LUMA8), then DEBUG(`MyBmp `(pixel))"
     
   - name: MIDI
     description: "MIDI event display"
-    usage: "DEBUG(`MIDI title, midi_events...`)"
+    usage: "DEBUG(`MIDI MyMidi), then DEBUG(`MyMidi $90 `(key, velocity))"
+
+window_runtime_directives:
+  note: "Directives streamed to a NAMED window after creation: DEBUG(`WindowName ...). See each debug-displays/*.yaml for the per-window set."
+  CLEAR: "Clear the window contents"
+  UPDATE: "Flush buffered output (windows in UPDATE mode)"
+  SAVE: "Write the window bitmap to <name>.bmp"
+  CLOSE: "Close (free) the named window. Distinct from DEBUG(DEBUG_END_SESSION), which ends the whole DEBUG session; see language/spin2/constants/debug-end-session.yaml"
 
 formatting_functions:
+  note: "Authoritative list + the underscore rule: language/spin2/debug-commands/debug-formatters-overview.yaml. There is NO plain DEC/HEX/BIN/STR/DLONG/DWORD/DBYTE -- only the U/S-prefixed numeric forms exist. Append _ for value-only output (no 'name = ' label); append _BYTE/_WORD/_LONG for size, _ARRAY for multiple values."
   numeric:
-    - "DEC(value) - Decimal display"
-    - "HEX(value) - Hexadecimal display"
-    - "BIN(value) - Binary display"
-    - "SDEC(value) - Signed decimal"
-    - "SHEX(value) - Signed hexadecimal"
-    - "SBIN(value) - Signed binary"
-    - "UDEC(value) - Unsigned decimal"
-    - "UHEX(value) - Unsigned hexadecimal"
-    - "UBIN(value) - Unsigned binary"
-    
+    - "UDEC(value) / SDEC(value) - unsigned / signed decimal"
+    - "UHEX(value {, digits}) / SHEX(value) - unsigned / signed hexadecimal"
+    - "UBIN(value {, digits}) / SBIN(value) - unsigned / signed binary"
+    - "FDEC(value) - floating-point decimal"
   string:
-    - "ZSTR(address) - Zero-terminated string"
-    - "LSTR(address, length) - Length-specified string"
-    - "STR(string_literal) - String literal"
-    
+    - "ZSTR(address) - zero-terminated string"
+    - "LSTR(address, length) - length-specified string"
   special:
-    - "DLONG(value) - Display long value"
-    - "DWORD(value) - Display word value"
-    - "DBYTE(value) - Display byte value"
+    - "DLY(ms) - inter-update pacing delay"
+    - "PC_KEY / PC_MOUSE - read host keyboard / mouse (see debug-commands/pc_key.yaml, pc_mouse.yaml)"
     
 control_characters:
   - "13 - Carriage return (new line)"
   - "9 - Tab"
   - "10 - Line feed"
   - "8 - Backspace"
-  - "12 - Form feed (clear screen)"
+  - "0 - Clear screen and home cursor (NOTE: code 12 does NOTHING -- it is not a form feed; clear with code 0 or the CLEAR keyword)"
 
 string_quoting:
   rule: |
@@ -104,63 +103,68 @@ string_quoting:
 
 examples:
   - code: |
-      ' Basic terminal output
-      DEBUG(`"Hello World", 13`)
+      ' Basic terminal output (plain DEBUG, no backtick, double-quoted text)
+      DEBUG("Hello World", 13)
     description: "Display string with newline"
     
   - code: |
       ' Display variables with labels
-      DEBUG(`"X = ", DEC(x), "  Y = ", DEC(y), 13`)
+      DEBUG("X = ", udec_(x), "  Y = ", udec_(y), 13)
     description: "Show labeled variable values"
     
   - code: |
-      ' Oscilloscope display
-      DEBUG(`SCOPE MyScope, sensor_value, filtered_value`)
+      ' Oscilloscope: create the window, then feed samples by name
+      DEBUG(`SCOPE MyScope 'Sensor' AUTO 'Filtered' AUTO)
+      DEBUG(`MyScope `(sensor_value, filtered_value))
     description: "Display two signals on oscilloscope"
     
   - code: |
-      ' Logic analyzer with multiple signals
-      DEBUG(`LOGIC Signals, clk, data, enable, ready`)
+      ' Logic analyzer: create with named channels, then feed packed samples by name
+      DEBUG(`LOGIC Signals 'clk' 'data' 'enable' 'ready')
+      DEBUG(`Signals `(sample))
     description: "Display digital signals"
     
   - code: |
       ' Hexadecimal display with formatting
-      DEBUG(`"Register: $", UHEX(register_value, 8), 13`)
+      DEBUG("Register: $", uhex_(register_value, 8), 13)
     description: "Display hex value with fixed width"
     
   - code: |
       ' Binary display with separators
-      DEBUG(`"Flags: %", UBIN(flags, 16), 13`)
+      DEBUG("Flags: %", ubin_(flags, 16), 13)
     description: "Display binary with 16 bits"
     
   - code: |
       ' Multiple display types in program
       PUB test() | value
         value := 1000
-        DEBUG(`TERM Status, "Starting test...", 13`)
-        DEBUG(`SCOPE Waveform, value`)
-        DEBUG(`"Value = ", DEC(value), 13`)
+        DEBUG(`TERM Status)                       ' create a TERM window
+        DEBUG(`Status "Starting test...", 13)     ' feed text to it by name
+        DEBUG(`SCOPE Waveform 'V' AUTO)           ' create a SCOPE
+        DEBUG(`Waveform `(value))                 ' feed a sample by name
+        DEBUG("Value = ", udec_(value), 13)       ' plain default-terminal output
     description: "Using multiple DEBUG displays"
     
   - code: |
       ' Conditional debugging
       IF error_flag
-        DEBUG(`"ERROR: ", ZSTR(@error_message), 13`)
+        DEBUG("ERROR: ", zstr_(@error_message), 13)
     description: "Debug output based on condition"
     
   - code: |
       ' Array display
       REPEAT i FROM 0 TO 9
-        DEBUG(`"Array[", DEC(i), "] = ", DEC(array[i]), 13`)
+        DEBUG("Array[", udec_(i), "] = ", udec_(array[i]), 13)
     description: "Display array contents"
     
   - code: |
-      ' Real-time plotting
+      ' Real-time plotting of a value series (SCOPE is the time-series window; PLOT is a drawing canvas)
+      DEBUG(`SCOPE Sensor 'Value' AUTO)
       REPEAT
         sensor := read_sensor()
-        DEBUG(`PLOT Sensor, sensor`)
+        DEBUG(`Sensor `(sensor))
         WAITMS(10)
-    description: "Continuous plotting of sensor data"
+    description: "Continuous plotting of a sensor series on a SCOPE window"
 
 features:
   - "Non-blocking operation - doesn't halt program execution"
@@ -177,7 +181,7 @@ usage_notes:
   - "Each display type opens in its own window"
   - "Windows persist across program runs until closed"
   - "Use meaningful titles for multiple displays"
-  - "Backtick syntax required - regular quotes won't work"
+  - "Backtick introduces a DISPLAY command, e.g. DEBUG(`SCOPE ...); plain DEBUG(\"text\", value) needs no backtick and prints to the default TERM"
   - "Can be globally disabled with DEBUG_DISABLE directive"
   - "Performance impact is minimal when disabled"
   - "Useful for both development and field diagnostics"

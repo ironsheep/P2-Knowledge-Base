@@ -42,6 +42,7 @@ display_directives:
   CLEAR: "CLEAR -- clear the window and home the cursor to (0,0)"
   UPDATE: "UPDATE -- flush buffered output to the canvas (BitmapToCanvas)"
   SAVE: "SAVE -- write the window bitmap to <name>.bmp"
+  CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
   PC_KEY: "PC_KEY -- transmit the latched keypress LONG back to the P2 (see pc_key.yaml)"
   PC_MOUSE: "PC_MOUSE -- transmit the mouse position+buttons LONG pair back to the P2 (see pc_mouse.yaml)"
 

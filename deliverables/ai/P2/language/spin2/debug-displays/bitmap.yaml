@@ -50,6 +50,7 @@ display_directives:
   CLEAR: "CLEAR -- fill with background, reset trace position, refresh (unless in UPDATE mode)"
   UPDATE: "UPDATE -- force a canvas refresh (needed in manual-refresh mode)"
   SAVE: "SAVE {filename} | SAVE WINDOW | SAVE l t w h -- write the bitmap (or a region) to <name>.bmp"
+  CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."

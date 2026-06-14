@@ -20,6 +20,17 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.9.1] - 2026-06-14
+
+**DEBUG display directive accuracy across all nine windows**
+
+### Added
+- DEBUG display windows: per-window `CLOSE` directive documented for all nine windows (LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, PLOT, TERM, BITMAP, MIDI) and the DEBUG statement reference — closes one named window, distinct from ending the whole DEBUG session.
+
+### Changed
+- DEBUG statement reference: formatter vocabulary documented as the working set (`UDEC`/`SDEC`, `UHEX`/`SHEX`, `UBIN`/`SBIN`, `FDEC`, `ZSTR`/`LSTR`, with size and value-only variants), cross-linked to the formatters overview; examples use the create-then-feed display syntax.
+- DEBUG display directive parameters documented to the PNut v55 source: SCOPE_XY window size and POLAR `twopi` winding (0 vs −1), PLOT `SPRITEDEF`/`LUTCOLORS` palette sizing (supply the colors your pixels reference, up to 256).
+
 ## [1.9.0] - 2026-06-13
 
 **Smart-pin and DEBUG accuracy, plus hardware findability**
