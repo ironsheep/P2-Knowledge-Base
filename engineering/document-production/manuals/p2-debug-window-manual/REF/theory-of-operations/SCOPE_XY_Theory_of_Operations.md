@@ -241,7 +241,7 @@ vScale          : extended;      // Scale factor: vScale = (width/2) / vRange
 vPolar          : boolean;       // True = polar coords, False = Cartesian
 vLogScale       : boolean;       // True = logarithmic scale, False = linear
 vSamples        : integer;       // Fade buffer depth (0 = persistent, >0 = fading)
-vTwoPi          : integer;       // Full circle value for polar mode
+vTwoPi          : int64;         // Full circle value for polar mode (line 315 — NOT integer)
 vTheta          : integer;       // Angular offset for polar mode
 vLabel          : array[0..Channels - 1] of string;
 vColor          : array[0..Channels - 1] of integer;
@@ -270,6 +270,31 @@ vScale := vWidth / 2 / vRange;
 - `0`: Persistent (accumulating) display
 - `>0`: Fading display with opacity decay
 
+**vTwoPi**: Full-circle value (polar) — **`int64`** (source line 315), not `integer`.
+- Default `$100000000` = 4,294,967,296 = 2³² (set by `KeyTwoPi` line 2739 and `SetDefaults` line 2909). This value **cannot fit a signed int32** ($7FFFFFFF max), which is precisely why the source declares it `int64`. The `-1` shorthand maps to `-$100000000` (clockwise), also outside int32 range.
+- ⚠️ **TS-port note**: A JavaScript `number`-with-32-bit-op (or any int32 receiver) **corrupts** this default — `2³²` truncates/wraps to `0`, and the divisor `(y + vTheta) / vTwoPi` in the polar transform (line 1537) then divides by zero or yields nonsense. The port must hold `vTwoPi` as a `BigInt` or otherwise precision-safe 64-bit-capable path; the transform divide must preserve 53-bit-safe precision.
+
+#### Receiving types & numeric parity (TS-port contract)
+
+These are the Pascal receiver types each SCOPE_XY directive/parameter writes into — the contract a TypeScript port must honor to stay byte-identical:
+
+| Receiver | Source type | Line | TS-port requirement |
+|---|---|---|---|
+| `vTwoPi` | **int64** | 315 | BigInt / 64-bit-safe; default `$100000000` overflows int32 |
+| `opacity` (param of `SCOPE_XY_Plot`) | **byte** | 1511 | 0..255; passed as `255` (persistent) or decayed `opa` (fading) |
+| `vScale` | **extended** (float) | 348 | floating-point, not integer scaling |
+| `val` | signed-32 **integer** | 358 | the raw element value every `NextNum`/`KeyVal*` reads |
+| all other receivers (`vRange`, `vSamples`, `vRate`, `vDotSize`, `vWidth`, `vHeight`, `vTheta`, `vIndex`, `vColor[]`, …) | signed-32 **integer** | — | standard 32-bit signed |
+
+**Numeric parity notes** (divergences a naïve `number`-based port would introduce):
+
+1. **Polar transform is inlined, not shared.** SCOPE_XY computes its own polar conversion in `SCOPE_XY_Plot` — `Tf := Pi / 2 - (y + vTheta) / vTwoPi * Pi * 2;` (line 1537) — and does **not** call the shared `PolarToCartesian` helper used elsewhere. Port the inline form verbatim.
+2. **Coordinate outputs use banker's `Round`.** Lines 1522-1523, 1527-1528, 1539-1540 all use Pascal `Round`, which is **round-half-to-even** (banker's rounding) — *not* `Math.round` (round-half-up). A port using `Math.round` will diverge on exact `.5` boundaries.
+3. **`val * 2` in SIZE can overflow int32 and wrap negative** (line 1404, *before* the `Within` clamp). In Pascal the multiply wraps within 32 bits, so a large `val` can produce a negative product that the clamp then pins to the floor (32). A TS `number` does **not** wrap — it would carry the full magnitude into the clamp and pin to the ceiling (2048) instead. Documented divergence; match Pascal's wrap-then-clamp to stay identical.
+4. **Asymmetric log widening.** Cartesian-log uses `Log2(Int64(vRange) + 1)` (line 1519 — deliberate int64 widen so `vRange = $7FFFFFFF` plus 1 does not overflow), while polar-log uses `Log2(vRange)` (line 1534 — no widen, no `+1`). Preserve the asymmetry exactly; do not "normalize" the two.
+5. **`div` truncates toward zero** (e.g. `k * 255 div vSamples`, line 1499) — match with truncation, not floor, for negative results.
+6. **`UnPack` uses a *logical* shift-right** (`v := v shr vPackShift`, line 1891 in §19.1) for field extraction, then performs **signed sign-extension** only when `vPackSignx` is set (the `SIGNED` packing flag). A port must use an unsigned `>>>` for the field shift and apply sign-extension separately.
+
 ### 4.3 Display State Variables
 
 ```pascal
@@ -296,9 +321,9 @@ Accepted during `SCOPE_XY_Configure` (lines 1386–1441).
 
 | Directive | Syntax | Default | Clamped range | Pascal lines | Notes |
 |---|---|---|---|---|---|
-| `TITLE` | `TITLE 'str'` | `"Scope_XY"` | — | `1398-1399` | Window caption |
+| `TITLE` | `TITLE 'str'` | *(unverified — see note)* | — | `1398-1399` | Window caption |
 | `POS` | `POS left top` | Cascaded | Screen coords | `1400-1401` | |
-| `SIZE` | `SIZE val` | 256 (→ 512 px) | 16..1024 (→ 32..2048 px) | `1402-1406` | **One value only (square).** `vWidth = val*2; vHeight = vWidth`. |
+| `SIZE` | `SIZE val` | `vWidth = 256` (from `SetDefaults` 2884) | stored width = `Within(val*2, 32, 2048)` | `1402-1406` | **One value only (square).** `vWidth = Within(val*2, 32, 2048); vHeight = vWidth`. The clamp pins the **doubled** value to 32..2048 px; there is no 16..1024 clamp on `val` itself. |
 | `RANGE` | `RANGE n` | `$7FFFFFFF` | 1..`$7FFFFFFF` | `1407-1408` | Coordinate extent; both axes |
 | `SAMPLES` | `SAMPLES n` | `256` (from `SetDefaults` line 2886) | 0..2048 | `1409-1410` | `0` = persistent (no buffer); `>0` = fading trail depth; SCOPE_XY_Configure does NOT reset this |
 | `RATE` | `RATE n` | `1` | 1..2048 | `1411-1412` | Display update divisor |
@@ -309,9 +334,9 @@ Accepted during `SCOPE_XY_Configure` (lines 1386–1441).
 | `LOGSCALE` | `LOGSCALE` | Off (linear) | — | `1422-1423` | Logarithmic scale on both axes |
 | `HIDEXY` | `HIDEXY` | Off | — | `1424-1425` | Suppresses on-screen measurement cursor; does **not** block `PC_MOUSE` |
 | Packing | `LONGS_1BIT`…`BYTES_4BIT` | `LONGS_1BIT` | 12 modes | `1426-1427` | Sub-sample packing density |
-| *label string* | `'label' {color}` | — | up to 8 traces | `1429-1434` | One string per trace; optional RGB24 color follows |
+| *label string* | `'label' {color}` | — | up to 8 traces | `1429-1434` | One string per trace; optional RGB24 color follows. **9th+ label saturates:** `if vIndex <> Channels then Inc(vIndex)` (line 1431) caps `vIndex` at 8, so any label beyond the 8th **overwrites slot 8** (`vLabel[7]`/`vColor[7]`) rather than extending the array. |
 
-**SIZE specifics**: `SIZE` takes **one** numeric value (the half-width / radius). The window width and height are both set to `val * 2`, enforcing a square display. Minimum stored width = 32 px, maximum = `SmoothFillMax` (2048 px). Pascal: `vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax); vHeight := vWidth` (lines 1404–1405).
+**SIZE specifics**: `SIZE` takes **one** numeric value (the half-width / radius). The stored width is `Within(val * 2, 32, 2048)` — the **doubled** value is clamped to 32..2048 px; there is **no** clamp on `val` to 16..1024. Height mirrors width (`vHeight := vWidth`), enforcing a square display. The default `vWidth` is `256`, set by `SetDefaults` (line 2884) — it is **not** set in `SCOPE_XY_Configure`. So `256` is the default *width*; `512` only results from an explicit `SIZE 256` (`val*2 = 512`). Pascal: `vWidth := Within(val * 2, scope_xy_wmin, scope_xy_wmax); vHeight := vWidth` (lines 1404–1405; `scope_xy_wmin = 32`, `scope_xy_wmax = SmoothFillMax = 2048`). Note: a bare `SIZE` with no following number hits `else Continue` (line 1404), skipping the `vHeight := vWidth` mirror entirely — both dimensions keep their prior values.
 
 **POLAR specifics**: Calling `POLAR` invokes `KeyTwoPi` which sets `vPolar := True`, `vTwoPi := $100000000` (2³²), `vTheta := 0`. An optional first numeric argument overrides `vTwoPi` (pass `0` or `-1` for ±2³² default; any other value sets degrees/custom units). An optional second argument sets `vTheta` (angular offset). Examples:
 ```
@@ -425,9 +450,9 @@ end;
 
 | Parameter | Command | Default | Range | Purpose |
 |-----------|---------|---------|-------|---------|
-| Title | `TITLE 'string'` | "Scope_XY" | - | Window title |
+| Title | `TITLE 'string'` | *(unverified)* | - | Window title — see §5.2 note below |
 | Position | `POS x y` | Cascaded | Screen coords | Window position |
-| Size | `SIZE radius` | 256 | 16-1024 | Display radius (width = height = radius × 2) |
+| Size | `SIZE radius` | `vWidth = 256` (SetDefaults) | stored width `Within(val*2, 32, 2048)` | Width = height = `Within(radius × 2, 32, 2048)`; no 16..1024 clamp on radius |
 | Range | `RANGE value` | $7FFFFFFF | 1-$7FFFFFFF | Coordinate system extent |
 | Samples | `SAMPLES count` | 256 (from `SetDefaults`) | 0-2048 | Fade buffer depth (0=persistent, >0=fading); SCOPE_XY_Configure does not reset this |
 | Rate | `RATE divisor` | 1 | 1-2048 | Display update rate divisor |
@@ -438,6 +463,8 @@ end;
 | Log Scale | `LOGSCALE` | Linear | - | Enable logarithmic scaling |
 | Hide XY | `HIDEXY` | Show | - | Hide mouse coordinates |
 | Packing | `LONGS_1BIT` etc. | LONGS_1BIT | 12 modes | Data packing format |
+
+> **TITLE default provenance** — ⚠️ *unverified against earlier drafts.* `SCOPE_XY_Configure` does **not** set a title. The window caption is established at **form-create** time (line 626): `SetCaption(PChar(P2.DebugDisplayValue[1]) + ' - ' + TypeName[DisplayType])`, and `TypeName[dis_scope_xy] = 'SCOPE_XY'` (uppercase, line 132). With no `TITLE` directive the supplied caption string is empty, yielding a default caption of `' - SCOPE_XY'`. The literal **`"Scope_XY"`** (mixed-case) appearing in earlier drafts is **not** found in `SCOPE_XY_Configure` and does not match the uppercase `TypeName` constant — treat it as unverified; the verified default derives from `TypeName` at form-create, not from Configure.
 
 ### 5.3 Size Parameter Special Handling
 
@@ -1028,7 +1055,7 @@ Y_pixels := log_radius × sin(angle) × 256
 |---------|------------|---------|
 | `TITLE` | 'string' | Set window title |
 | `POS` | x y | Set window position |
-| `SIZE` | radius | Set display size (width = height = radius × 2) |
+| `SIZE` | radius | Set display size: width = height = `Within(radius × 2, 32, 2048)` px (default width 256 from SetDefaults) |
 | `RANGE` | value | Set coordinate system extent (1-$7FFFFFFF) |
 | `SAMPLES` | count | Set fade buffer depth (0=persistent, >0=fading) |
 | `RATE` | divisor | Set display update rate (1-2048) |
@@ -1871,6 +1898,8 @@ end;
 
 `val = 0` is the reset/default form (32-bit width, count=1). Non-zero `val` indexes into the `PackDef` constant array (lines 140–152), which encodes `(shift shl 8 + count)` for each of the 12 packing modes. `alt` enables bit-reversal within each sub-unit; `signx` enables sign-extension on unpack.
 
+The `alt`/`signx` booleans are set by `KeyPack` (lines 2817–2832) from optional trailing `ALT` / `SIGNED` keywords on the packing directive: `KeyPack` reads up to **two** following keys, each of which may be `key_alt` (→ `alt := True`) or `key_signed` (→ `signx := True`), then calls `SetPack(v, alt, signx)`. So a packing directive like `LONGS_8BIT SIGNED ALT` enables both flags; order is irrelevant.
+
 **NewPack Function** (lines 4158-4164):
 ```pascal
 function TDebugDisplayForm.NewPack: integer;
@@ -2163,7 +2192,7 @@ end;
 - Packing not specified → `SetPack(0, False, False)` (val=0: 32-bit, count=1, no alt/sign, line 2915)
 
 **Validation**:
-- SIZE clamped to 32-2048 (radius), resulting in 64-4096 display
+- SIZE: the **doubled** value is clamped — `vWidth := Within(val*2, 32, 2048)`; the stored width lands in 32..2048 px (there is no separate clamp on the radius `val`)
 - RANGE clamped to 1-$7FFFFFFF
 - SAMPLES clamped to 0-2048
 - RATE clamped to 1-2048

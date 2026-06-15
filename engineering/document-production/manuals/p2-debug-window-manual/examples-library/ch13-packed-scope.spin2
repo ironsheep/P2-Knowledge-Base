@@ -1,0 +1,12 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | packed, i, ch
+  debug(`SCOPE Sig SIZE 256 128 'A' 'B' LONGS_8BIT)
+  ch := 0
+  repeat
+    packed := 0
+    repeat i from 0 to 3
+      ' four 8-bit values, low byte first
+      packed := packed | ((ch++ & $FF) << (i * 8))
+    debug(`Sig `(packed))  ' one long = 4 samples
+    waitms(20)

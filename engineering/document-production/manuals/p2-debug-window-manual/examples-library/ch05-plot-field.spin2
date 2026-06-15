@@ -1,0 +1,17 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | x
+  debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
+  ' Define a 3x3 "blip" sprite once: index 1 = lit, index 0 = transparent.
+  ' Palette: entry 0 = transparent ($00......),
+  ' entry 1 = opaque cyan ($FF00FFFF).
+  debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
+
+  x := 0
+  repeat
+    debug(`Field CLEAR)  ' clear the buffered canvas
+    ' stamp the sprite at (x,128), 8x
+    debug(`Field SET `(x) 128 SPRITE 0 0 8 255)
+    debug(`Field UPDATE)                          ' present the frame
+    x := (x + 4) +// 256                          ' move right, wrap
+    waitms(20)

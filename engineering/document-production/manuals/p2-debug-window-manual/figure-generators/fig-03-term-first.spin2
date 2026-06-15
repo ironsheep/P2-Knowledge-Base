@@ -1,14 +1,18 @@
 '' fig-03-term-first.spin2  ->  fig-03-term-first.png
 '' TERM window, the simplest first terminal (Chapter 3).
 '' Run on a P2; the host writes fig-03-term-first.bmp. See README.md.
+'' Theme: white canvas, black text. NOTE: backtick-stream strings are SINGLE-quoted
+'' (double quotes are ignored by the display parser -> blank window).
 
 CON
   _clkfreq = 200_000_000
 
 PUB main()
-  ' create a 40x20 terminal named "Status" and print one line
-  debug(`TERM Status SIZE 40 20)
-  debug(`Status "Ready.")
+  ' create a 40x20 terminal named 'Status', white background, black-on-white text
+  debug(`TERM Status SIZE 40 20 BACKCOLOR WHITE COLOR BLACK WHITE)
+  ' lead with control codes: 0 = clear+home (fills BACKCOLOR), 4 = select colour pair 0.
+  ' (text came back blank with no leading code — canonical TERM feeds always lead with one.)
+  debug(`Status 0 4 'Ready.')
 
   waitms(200)                               ' let the host render the final frame
   debug(`Status save 'fig-03-term-first')              ' display area (no chrome)

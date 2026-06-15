@@ -248,12 +248,13 @@ debug(`Bus HOLDOFF 128)
 
 ## Clearing and saving
 
-Two runtime commands manage the display:
+Three runtime commands manage the display:
 
 - `` `CLEAR `` — clears the trace, empties the sample buffer (`SamplePop` returns to
   zero), resets the trigger indicator, and resets the rate counter. The window starts
   collecting fresh samples from empty.
 - `` `SAVE `` — saves the current window image to a `.bmp` file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Bus CLEAR)                  ' empty the buffer and blank the trace

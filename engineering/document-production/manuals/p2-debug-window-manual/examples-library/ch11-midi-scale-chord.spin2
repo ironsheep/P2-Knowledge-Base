@@ -1,0 +1,28 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | i, note
+  debug(`MIDI Piano SIZE 6 RANGE 48 84 CHANNEL 0)
+
+  ' --- C major scale, one note at a time, on channel 0 ---
+  ' note-on  = $90, note, velocity ;  note-off = $80, note, velocity
+  repeat i from 0 to 6
+    note := word[@scale][i]
+    debug(`Piano $90 `(note) 96)       ' note-on, velocity 96 -> key fills
+    waitms(300)
+    debug(`Piano $80 `(note) 0)        ' note-off -> key clears
+    waitms(60)
+
+  ' --- C major chord via running status: one $90, then note/vel pairs ---
+  ' C E G, all velocity 80, held together
+  debug(`Piano $90 60 80 64 80 67 80)
+  waitms(1000)
+  debug(`Piano $80 60 0 64 0 67 0)     ' release all three (running status)
+  waitms(300)
+
+  debug(`Piano CLEAR)                 ' reset every key
+
+  repeat                             ' keep the window open
+
+DAT
+scale word 60, 62, 64, 65, 67, 69, 71  ' C D E F G A B (MIDI note numbers)

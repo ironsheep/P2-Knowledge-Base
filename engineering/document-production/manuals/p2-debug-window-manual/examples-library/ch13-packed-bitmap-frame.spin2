@@ -1,0 +1,12 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | row, x, packed, bit
+  debug(`BITMAP Frame SIZE 32 16 DOTSIZE 8 LUT2 LONGS_1BIT)
+  repeat
+    repeat row from 0 to 15
+      packed := 0
+      repeat x from 0 to 31
+        bit := ((x + row) & 3) == 0  ' a diagonal stripe pattern
+        packed := packed | (bit << x)
+      debug(`Frame `(packed))  ' one long = 32 pixels of one row
+    waitms(200)

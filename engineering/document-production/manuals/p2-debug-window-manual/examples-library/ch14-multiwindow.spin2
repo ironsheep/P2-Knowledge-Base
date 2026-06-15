@@ -1,0 +1,19 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, sine, count
+  ' Two independent windows, each created by name and placed with POS.
+  debug(`SCOPE Wave POS 0 0 SIZE 400 200 'Sine' -1000 1000)
+  debug(`TERM Status POS 420 0 SIZE 40 10)
+
+  ang := 0
+  count := 0
+  repeat
+    sine := qsin(1000, ang, 256)         ' CORDIC sine, software-generated
+
+    debug(`Wave `(sine))                 ' feed the SCOPE by its name
+    debug(`Status 0 "Sample " `udec_(count) 13 "Value:  " `sdec_(sine) 13)
+
+    ang += 4
+    count += 1
+    waitms(10)

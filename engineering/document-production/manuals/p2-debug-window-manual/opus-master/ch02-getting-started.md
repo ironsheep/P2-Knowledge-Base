@@ -59,6 +59,7 @@ PUB main() | reading
   debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
   reading := 42
   debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
+  repeat                                          ' keep the window open
 ```
 
 Two `DEBUG()` statements, two distinct jobs:
@@ -150,6 +151,7 @@ CON
 PUB main()
   debug(`TERM Status SIZE 30 5)
   debug(`Status "Ready." 13)
+  repeat                         ' keep the window open
 ```
 
 ## Where to go next

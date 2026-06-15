@@ -307,8 +307,9 @@ groups — the distinction the per-window chapters and the command reference
 - **Shared commands** are the handful every window understands, covered just below.
 
 A window opens when its creation `DEBUG()` runs and stays open as long as your
-program keeps running. There is no close command: when the program ends it stops
-feeding and the window stops updating — which is why the examples end in a
+program keeps running. You can dismiss one explicitly with the shared `` `CLOSE ``
+command (below), but most programs never need to — when the program ends it stops
+feeding and the window stops updating, which is why the examples end in a
 `repeat`, to keep the program, and its windows, alive.
 
 ## Commands common across windows
@@ -322,6 +323,9 @@ after the window name, the same way you send data:
   whole window rather than just the display area. The file is a `.bmp`; the
   extension is appended automatically, so give the name *without* it (`'scope'`,
   not `'scope.bmp'`).
+- **`CLOSE`** — close one window and free it. Most programs never need this — a
+  window also stops when the program stops feeding it — but `` `CLOSE `` lets you
+  dismiss a single window explicitly while the rest of the program keeps running.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This eliminates flicker when
@@ -438,6 +442,7 @@ PUB main() | reading
   debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
   reading := 42
   debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
+  repeat                                          ' keep the window open
 ```
 
 Two `DEBUG()` statements, two distinct jobs:
@@ -529,6 +534,7 @@ CON
 PUB main()
   debug(`TERM Status SIZE 30 5)
   debug(`Status "Ready." 13)
+  repeat                         ' keep the window open
 ```
 
 ## Where to go next
@@ -774,10 +780,11 @@ PRI read_press() : v
   v := 1013
 ```
 
-Two more runtime keyword commands round out the set:
+Three more runtime keyword commands round out the set:
 
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ## A positioned dashboard
 
@@ -1119,6 +1126,7 @@ Several change configuration mid-stream; the rest manage the display.
 | `CLEAR` | — | Fill the canvas with the background color; reset position |
 | `UPDATE` | — | Refresh the display now (required in manual-update mode) |
 | `SAVE` | — | Save the current canvas image to a file on the host |
+| `CLOSE` | — | Close this window and free its resources |
 
 `SCROLL` shifts the whole canvas by a signed amount: positive `x` scrolls right,
 negative left; positive `y` scrolls down, negative up. Each argument ranges over
@@ -1649,8 +1657,11 @@ SPRITEDEF id xsize ysize pixels... colors...
 - `id` — sprite identifier, **`0`–`255`**.
 - `xsize`, `ysize` — sprite dimensions, each **`1`–`32`**.
 - `pixels` — `xsize x ysize` palette indices, one per pixel, in row order.
-- `colors` — 256 palette entries in `$AARRGGBB` form (alpha, red, green, blue),
-  where alpha `$00` is transparent and `$FF` is opaque.
+- `colors` — the palette entries the pixel bytes reference, in `$AARRGGBB` form
+  (alpha, red, green, blue), where alpha `$00` is transparent and `$FF` is opaque.
+  Supply **up to 256**, but only as many as your indices actually use — the parser
+  reads color longs until the `DEBUG()` message ends, so a sprite that uses indices
+  0 and 1 needs just two colors.
 
 `SPRITE` stamps a defined sprite at the cursor:
 
@@ -1748,7 +1759,7 @@ PUB main() | f, ballx
     waitms(20)
 ```
 
-Two more commands round out display control:
+Three more commands round out display control:
 
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
@@ -1756,6 +1767,7 @@ Two more commands round out display control:
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
   `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
   extension is added for you — do not include it).
+- `` `CLOSE `` — close this window and free its resources.
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
@@ -1809,6 +1821,8 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave COLOR $FFFFFF)
   debug(`Wave SET 256 230)
   debug(`Wave TEXT 16 'QSIN + scatter')
+
+  repeat                                         ' keep the window open
 
 PRI sine(angle, length) : result
   org
@@ -2175,12 +2189,13 @@ debug(`Bus HOLDOFF 128)
 
 ## Clearing and saving
 
-Two runtime commands manage the display:
+Three runtime commands manage the display:
 
 - `` `CLEAR `` — clears the trace, empties the sample buffer (`SamplePop` returns to
   zero), resets the trigger indicator, and resets the rate counter. The window starts
   collecting fresh samples from empty.
 - `` `SAVE `` — saves the current window image to a `.bmp` file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Bus CLEAR)                  ' empty the buffer and blank the trace
@@ -2517,12 +2532,13 @@ captured frame.
 
 ## Clearing and saving
 
-Two more runtime commands round out the set:
+Three more runtime commands round out the set:
 
 - `` `CLEAR `` — clears the display and resets the sample buffer, so the next samples
   start a fresh trace from the right edge.
 - `` `SAVE `` — saves the current display image to a `.bmp` file on the host. An
   optional filename may follow; without one, the host names the file.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Sig SAVE)    ' write the current trace to a bitmap on the PC
@@ -3084,12 +3100,13 @@ own program or notes.
 
 ## Clearing and saving
 
-Two runtime commands work in the feed stream:
+Three runtime commands work in the feed stream:
 
 - `` `CLEAR `` — erases the display and resets the sample buffer, so the next
   spectrum is built from fresh samples rather than blending with what was already
   collected.
 - `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Spectrum CLEAR)
@@ -3430,14 +3447,15 @@ choose an HSV16 mode when phase matters.
 > own configuration parser accepts only the LUMA8 and HSV16 families above. Those are
 > the modes to use here.
 
-## Runtime commands — CLEAR and SAVE
+## Runtime commands — CLEAR, SAVE, and CLOSE
 
-Two keyword commands work at runtime, sent by the window's name:
+Three keyword commands work at runtime, sent by the window's name:
 
 - `` `CLEAR `` — clears the display, resets the sample buffer (so the window waits
   for a fresh full window before drawing again), and resets the trace position to
   its starting edge.
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Wfall CLEAR)
@@ -3691,12 +3709,13 @@ not accept and would ignore as a string.
 
 ## Clearing and saving
 
-Two runtime keyword commands round out the set:
+Three runtime keyword commands round out the set:
 
 - `` `CLEAR `` — resets every key to off (clears all stored velocities) and
   redraws an empty keyboard. Use it between takes, or to recover if a Note-Off
   was missed and a key is stuck lit.
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Piano CLEAR)   ' all keys dark again
@@ -3733,6 +3752,8 @@ PUB main() | i, note
 
   debug(`Piano CLEAR)                 ' reset every key
 
+  repeat                             ' keep the window open
+
 DAT
 scale word 60, 62, 64, 65, 67, 69, 71  ' C D E F G A B (MIDI note numbers)
 ```
@@ -3759,6 +3780,8 @@ PUB main() | vel
     vel += 25
     if vel > 127
       vel := 127
+
+  repeat                              ' keep the window open
 ```
 
 ## Considerations
@@ -4910,6 +4933,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | buffered repaint |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## BITMAP — pixel display (Chapter 4)
 
@@ -4944,6 +4968,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 *BITMAP has no drawing primitives — those belong to PLOT.*
 
@@ -5007,6 +5032,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | buffered repaint trigger |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## LOGIC — logic analyzer (Chapter 6)
 
@@ -5038,6 +5064,7 @@ every window are listed once at the end.
 | `HOLDOFF` | 2–2048 |
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 *Shows raw waveforms — no built-in protocol decoding.*
 
@@ -5073,6 +5100,7 @@ every window are listed once at the end.
 | `HOLDOFF` | |
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## SCOPE_XY — XY / phase display (Chapter 8)
 
@@ -5105,6 +5133,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## FFT — frequency spectrum (Chapter 9)
 
@@ -5134,6 +5163,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## SPECTRO — spectrogram / waterfall (Chapter 10)
 
@@ -5163,6 +5193,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## MIDI — piano-keyboard display (Chapter 11)
 
@@ -5187,6 +5218,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## Commands common to every window
 
@@ -5194,6 +5226,8 @@ every window are listed once at the end.
 - `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
 - `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save the window image to a host file.
+- `` DEBUG(`Name CLOSE) `` — close and free this one window. A different action from
+  ending the whole debug session; works on all nine window types.
 
 
 # Appendix B: Packed-Data Format Reference {#appendix-b}

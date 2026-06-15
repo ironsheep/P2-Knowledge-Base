@@ -1,0 +1,18 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | mouse[7]
+  debug(`TERM Pointer SIZE 40 8 TITLE 'Mouse State')
+  repeat
+    debug(`Pointer PC_MOUSE(@mouse))
+    debug(`Pointer 0)                                 ' clear + home
+    if mouse[0] < 0
+      debug(`Pointer "Pointer outside window" 13)
+    else
+      debug(`Pointer "X: " `sdec_(mouse[0]) "  Y: " `sdec_(mouse[1]) 13)
+      debug(`Pointer "Wheel: " `sdec_(mouse[2]) 13)
+      debug(`Pointer "Buttons  L:" `sdec_(mouse[3]))
+      debug(`Pointer "  M:" `sdec_(mouse[4]) "  R:" `sdec_(mouse[5]) 13)
+      debug(`Pointer "Pixel: " `uhex_long_(mouse[6]))
+    if mouse[3]                                        ' left button down?
+      debug(`Pointer 13 "LEFT DOWN")
+    waitms(30)

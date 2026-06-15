@@ -366,9 +366,9 @@ end;
 | Parameter | Key | Type | Range | Default | Description |
 |-----------|-----|------|-------|---------|-------------|
 | **title** | key_title | string | - | "MIDI" | Window title text |
-| **pos** | key_pos | x, y, width, height | - | auto | Window position and size |
+| **pos** | key_pos | left, top | - | auto | Window position only. `KeyPos` (2712-2716) reads exactly two operands — left and top — as offsets from `DebugDisplayLeft`/`DebugDisplayTop`. Window SIZE is NOT from POS; it derives from `MidiKeySize × whitekeys` (2584-2586). |
 | **size** | key_size | integer | 1-50 | 4 | Key size multiplier |
-| **range** | key_range | first, last | 0-127 | 21-108 | Note range to display |
+| **range** | key_range | first, last | first 0-127; last firstKey..127 | 21-108 | Note range to display. `lastKey` is read only if `firstKey` was supplied, and is clamped to a dynamic lower bound `firstKey..127` (default 108) — see 2515-2519. |
 | **channel** | key_channel | integer | 0-15 | 0 | MIDI channel to monitor |
 | **color** | key_color | 2 integers | RGB24 | cyan, magenta | Active key colors (white, black) |
 
@@ -620,6 +620,40 @@ MidiVelocity[MidiNote] := -val;  // Negative velocity (release)
 **Interpretation**:
 - **Velocity > 0**: Note active, display proportional to velocity
 - **Velocity ≤ 0**: Note inactive (off or release)
+
+### 5.7 Receiving Types & Numeric Parity (TS-Port Contract)
+
+This subsection pins the receiving-side numeric semantics a TypeScript port must
+reproduce byte-for-byte.
+
+**Receiving field types** — every MIDI state/geometry field is a **signed 32-bit
+`integer`** (`MidiSize`, `MidiKeyFirst`, `MidiKeyLast`, `MidiChannel`, `MidiState`,
+`MidiNote`, and the geometry arrays). In particular:
+- `MidiVelocity[0..127]` is a **signed** `integer` array (369-376). Note-off stores
+  `-velocity` (2636), so a port MUST use a signed cell, not an unsigned byte.
+- The MIDI byte-stream value is `val and $FF` (2610) — the low 8 bits of the incoming
+  number. `val` itself is the shared signed-32 receive register (`val : integer`, 358).
+- `vOpacity` / `vPrecise` are `byte`-typed, but the MIDI path does **not** read them.
+
+**Integer-truncation parity** — all `div` in the MIDI path are Pascal `div`, which
+**truncates toward zero** (not floor, not round):
+- `vTextSize := MidiKeySize div 3` (2528).
+- Key geometry: `(MidiKeySize * (10 - tweak) + 16) div 32`, `MidiKeySize * 20 div 32`,
+  `(left + right + 1) div 2`, `(MidiKeySize * tweak + 16) div 32`, `MidiKeySize div 4`,
+  and the border `MidiKeySize div ((MidiSizeBase + MidiSizeFactor) div 2)` — all `div`.
+- Velocity fill height: `(MidiBottom[i] - r) * MidiVelocity[i] div 127` (2677) — also
+  `div`, truncating toward zero. (Inputs here are ≥ 0, so floor and truncate coincide,
+  but the port should still use truncation for fidelity.)
+
+There is **no** `Round` and **no** `shr` anywhere in the MIDI path of concern — do not
+substitute either for `div`.
+
+**Clamp & bit-filter parity**:
+- `Within(val, bottom, top)` clamps are **inclusive** on both ends (used by `KeyValWithin`
+  for `MidiSize`, `MidiKeyFirst`, `MidiKeyLast`, `MidiChannel`).
+- Channel/status filtering is purely bitwise: status reset is `val and $80 <> 0` (2611),
+  message-type test is `val and $F0` (2615-2616), and the channel filter is the exact
+  match `val and $0F = MidiChannel` (2615-2616). No range arithmetic, no masking shortcuts.
 
 ---
 
@@ -1099,7 +1133,7 @@ Note 108: C8   (highest note)
 ```
 ele_key, dis_midi,
 ele_key, key_title, ele_str, "MIDI", ele_end,
-ele_key, key_pos, ele_num, x, ele_num, y, ele_num, w, ele_num, h,
+ele_key, key_pos, ele_num, left, ele_num, top,  // position only (two operands)
 ele_key, key_size, ele_num, size,
 ele_key, key_range, ele_num, first, ele_num, last,
 ele_key, key_channel, ele_num, channel,
@@ -1472,7 +1506,7 @@ AngleTextOut(x, y, text, style, angle);
 
 **Text Direction**: Vertical, reading upward from bottom
 
-**Font Size**: `vTextSize = MidiKeySize / 3`
+**Font Size**: `vTextSize := MidiKeySize div 3` (2528 — Pascal `div`, truncating toward zero)
 
 **Example** (MidiKeySize = 24):
 - Font size = 8 points

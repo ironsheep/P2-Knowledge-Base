@@ -1,0 +1,11 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | angle, wave, noise
+  debug(`TERM Signals SIZE 40 5)
+  angle := 0
+  repeat
+    wave  := qsin(1000, angle, $1000)              ' CORDIC: a sine value
+    noise := getrnd() & $FF                        ' RNG: a noise value
+    debug(`Signals 1 "wave=" `sdec_(wave) "  noise=" `udec_(noise))
+    angle += $0040
+    waitms(50)

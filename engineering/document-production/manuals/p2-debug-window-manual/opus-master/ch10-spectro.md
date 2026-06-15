@@ -207,14 +207,15 @@ choose an HSV16 mode when phase matters.
 > own configuration parser accepts only the LUMA8 and HSV16 families above. Those are
 > the modes to use here.
 
-## Runtime commands — CLEAR and SAVE
+## Runtime commands — CLEAR, SAVE, and CLOSE
 
-Two keyword commands work at runtime, sent by the window's name:
+Three keyword commands work at runtime, sent by the window's name:
 
 - `` `CLEAR `` — clears the display, resets the sample buffer (so the window waits
   for a fresh full window before drawing again), and resets the trace position to
   its starting edge.
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Wfall CLEAR)

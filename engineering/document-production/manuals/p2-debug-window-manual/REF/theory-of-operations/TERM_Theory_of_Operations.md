@@ -233,7 +233,7 @@ Processed on every subsequent message by `TERM_Update` (lines 2223-2315).
 |-----------|--------|
 | `CLEAR` | `key_clear` — clear entire bitmap, home cursor to (0,0), set update flag (lines 2240-2246) |
 | `UPDATE` | `key_update` — immediately copy `Bitmap[0]` to canvas (`BitmapToCanvas(0)`), line 2247-2248 |
-| `SAVE` | `key_save` — save bitmap to file (`KeySave`, line 2249-2250) |
+| `SAVE` | `key_save` — save to a `.bmp` file (`KeySave`, 2839-2866). Three arg-forms: **filename** (`'name'`) saves the window bitmap (`Bitmap[1]`); **`WINDOW` `'name'`** captures the full window rectangle (`Left/Top/Width/Height`) from the desktop; **`l t w h` `'name'`** captures an explicit desktop rectangle. `.bmp` is appended automatically (2249-2250) |
 | `PC_KEY` | `key_pc_key` — transmit latched keypress LONG to P2 (`SendKeyPress`, line 2251-2252) |
 | `PC_MOUSE` | `key_pc_mouse` — transmit mouse position + buttons LONG pair to P2 (`SendMousePos`, line 2253-2254) |
 
@@ -258,8 +258,9 @@ element in the **0..13** control range or **32..255** printable range; numbers
 | `32..255` | — | Printable character — render glyph at current cursor, advance column |
 
 **String** (`ele_str`): Prints each character of the string verbatim via `TERM_Chr`
-(lines 2307-2311). Characters in the string that happen to be control-code values
-(e.g. `Chr(13)`) are passed directly to `TERM_Chr` and act as newlines.
+(lines 2307-2311). `TERM_Chr` special-cases **only** `Chr(13)` (newline); every other
+character — including `Chr(9)` (tab) and `Chr(10)` (LF) — renders as a **glyph**. The
+tab/LF handling in the numeric `case` does **not** apply on the string path (§16.7).
 
 ### Keyboard & mouse
 
@@ -340,11 +341,11 @@ end;
 | Parameter | Key | Type | Range | Default | Description |
 |-----------|-----|------|-------|---------|-------------|
 | **title** | key_title | string | - | "TERM" | Window title text |
-| **pos** | key_pos | x, y, width, height | - | auto | Window position and size |
+| **pos** | key_pos | left, top | - | auto | Window position only (offsets from `DebugDisplayLeft`/`Top`; `KeyPos` 2712-2716 reads exactly two values — no width/height, no `SetSize`) |
 | **size** | key_size | columns, rows | 1-256 | 40×20 | Terminal grid size |
 | **textsize** | key_textsize | integer | 6-200 | `FontSize` (default 10) | Font size in points (`KeyTextSize` clamp) |
 | **color** | key_color | 8 integers | RGB24 | DefaultTermColors | 8 color values (4 pairs) |
-| **backcolor** | key_backcolor | integer | RGB24 | clBlack | Window background color |
+| **backcolor** | key_backcolor | integer | RGB24 | clBlack | Window background color. The `clBlack` default is **not** set by `TERM_Configure`; it comes from `SetDefaults` (`vBackColor := DefaultBackColor`, 2880/2891; `DefaultBackColor = clBlack`, 193), which runs at form creation before `TERM_Configure` |
 | **update** | key_update | boolean | - | false | Enable buffered update mode |
 | **hidexy** | key_hidexy | boolean | - | false | Hide coordinate display |
 
@@ -1053,7 +1054,7 @@ ClientHeight := vMarginTop + vHeight + vMarginBottom;
 ```
 ele_key, dis_term,
 ele_key, key_title, ele_str, "Terminal", ele_end,
-ele_key, key_pos, ele_num, x, ele_num, y, ele_num, w, ele_num, h,
+ele_key, key_pos, ele_num, left, ele_num, top,   // window position only (two operands)
 ele_key, key_size, ele_num, cols, ele_num, rows,
 ele_key, key_textsize, ele_num, font_size,
 ele_key, key_color,
@@ -1332,7 +1333,12 @@ debug(`TERM `UPDATE)      ' Force single update
 | 10 | LF | Line Feed | New line |
 | 13 | CR | Carriage Return | New line |
 
-**Unsupported Control Codes**: 0-7, 11-12, 14-31 (ignored or treated as printable)
+**Other numeric codes 0-7, 11, 12**: handled as TERM control commands (clear,
+home, set column/row, select color pair) — see §9 — not as classic terminal control
+characters. **Codes 14-31** (and negatives, and values > 255) fall through the
+numeric `case` with no action (§16.6). Note the string-vs-numeric asymmetry: codes
+`9` (tab) and `10` (LF) act as control only via the numeric path; the same byte
+inside an `ele_str` renders as a glyph (§16.7).
 
 ### 15.3 Newline Behavior
 
@@ -1350,7 +1356,9 @@ LF (10): Converted to CR
 CRLF (13, 10): Processed as single newline
 ```
 
-**Implication**: LF and CR are equivalent; CRLF is same as single LF or CR.
+**Implication**: LF and CR are equivalent **on the numeric path**; CRLF is the same
+as a single LF or CR. This equivalence does **not** hold inside an `ele_str` — there
+only `Chr(13)` is a newline, while `Chr(10)` renders as a glyph (§16.7).
 
 ### 15.4 Comparison with Standard Terminals
 
@@ -1456,6 +1464,67 @@ SetSize(i, i, i, i);  // All margins = ChrWidth / 2
 **Example** (ChrWidth = 7):
 - Margin = 3 pixels
 - Total window = 3 + (40×7) + 3 = 286 pixels wide
+
+### 16.6 Receiving types & numeric parity (TS-port contract)
+
+The numeric control element `val` is a **signed 32-bit `integer`** (`ptr`/`val`
+declared at 357-358). The `case val of` dispatch in `TERM_Update` (2259-2305) is
+therefore a signed-32 switch, and the operands consumed by codes `2`/`3` (the
+trailing column/row number) are likewise signed-32. Two consequences a TS port must
+reproduce exactly:
+
+- **Negative values fall through with no action.** Because `val` is signed, any
+  negative number reaches none of the `case` labels (`0..13`, `32..255`) and is
+  silently dropped — not just the 14-31 gap noted elsewhere.
+- **Values > 255 also fall through with no action.** The largest label is `255`;
+  anything above it (up to `$7FFFFFFF`) matches no branch and is dropped.
+
+So the true "no-op" set is **negative ∪ 14..31 ∪ 256..$7FFFFFFF**, all silently
+ignored. The state these codes manipulate is all signed-32 `integer`:
+`vCols`/`vRows`/`vCol`/`vRow` (343-346) and `vColor[]`/`vTextColor`/`vTextBackColor`/
+`vBackColor` (311, 321-322, 317). (`vOpacity`/`vPrecise` at 341-342 are `byte`, but
+TERM never reads them.)
+
+**Parity notes for the port:**
+- **Margin `ChrWidth div 2`** (2219): Pascal `div` truncates **toward zero**. A TS
+  port must use truncating integer division (e.g. `Math.trunc(ChrWidth / 2)` or
+  `ChrWidth >> 1` for the non-negative `ChrWidth`), not `Math.floor` semantics that
+  differ for negatives.
+- **Clamps are inclusive.** The codes `2`/`3` column/row clamps go through
+  `KeyValWithin` → `Within(val, bottom, top)`, and the SIZE/TEXTSIZE config clamps go
+  through the same `Within` (GlobalUnit 222-227). `Within` returns `Minimum` when
+  `Value < Minimum` and `Maximum` when `Value > Maximum`, so both endpoints are
+  **inclusive** (`[0, vCols-1]`, `[0, vRows-1]`, `[1, 256]`, etc.).
+- **Named-color path uses logical `shl`.** `KeyColor` builds the RGBI8x value with
+  `h shl 5 or p shl 1` (2774) — Pascal `shl` on the signed-but-small operands is a
+  logical left shift; port with `<<` on unsigned/masked values.
+
+### 16.7 Control-flow and edge-case facts
+
+- **String vs numeric control-code asymmetry.** Tab expansion and newline handling
+  live **only** in the numeric `case` of `TERM_Update`: code `9` expands a tab to the
+  next 8-column stop (2291-2295) and codes `10`/`13` emit a newline (2296-2302).
+  Inside an `ele_str`, every character is routed through `TERM_Chr` (2307-2311), and
+  `TERM_Chr` special-cases **only** `Chr(13)` (2322). Therefore a `Chr(9)` embedded in
+  a string renders as a **glyph (not a tab)** and a `Chr(10)` embedded in a string
+  renders as a **glyph (not a newline)** — only `Chr(13)` acts as a newline from
+  within a string. The numeric and string paths are not equivalent for codes 9 and
+  10.
+- **Code 13 (CR) look-ahead (CRLF swallow vs push-back).** After emitting the
+  newline, code 13 runs `if NextNum then if val <> 10 then Dec(ptr)` (2298-2302). If
+  the next element is the number `10`, it is **consumed** (CRLF collapses to one
+  newline). If the next element is any **other** number, the pointer is pushed back
+  with `Dec(ptr)` so that number is re-read and processed normally. (If the next
+  element is not a number, nothing is consumed.)
+- **Backspace (code 8) row wrap.** Code 8 (2281-2290) decrements `vCol`; if `vCol`
+  goes below 0 it wraps to the **previous row's last column** (`vCol := vCols - 1;
+  Dec(vRow)`). It is a no-op only at home `(0,0)`; it never repaints the cell (cursor
+  move only — see §9.4).
+- **Column auto-wrap fires on exact equality.** The auto-wrap in `TERM_Chr` triggers
+  when `vCol = vCols` **exactly** (2340), and it is **deferred**: a glyph written at
+  the last column (`vCol = vCols - 1`) is drawn first and `vCol` is incremented to
+  `vCols`; the wrap (via `TERM_Chr(Chr(13))`) only happens on the *next* character,
+  before it is drawn.
 
 ---
 

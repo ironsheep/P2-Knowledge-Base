@@ -1,25 +1,30 @@
 '' fig-03-term-dashboard.spin2  ->  fig-03-term-dashboard.png
 '' TERM window, a fixed-layout status panel (Chapter 3).
-'' Draws the static layout + one set of values, then captures. See README.md.
+'' Theme: white canvas, dark text, blue header, green/red status pairs.
+'' Backtick-stream strings are SINGLE-quoted (double quotes render blank).
 
 CON
   _clkfreq = 200_000_000
 
 PUB main() | signal, count
-  debug(`TERM Panel SIZE 40 8)
+  ' pairs: 0 = labels (black/white), 1 = header (white/blue),
+  '        2 = ok (white/green), 3 = alert (white/red)
+  debug(`TERM Panel SIZE 40 8 BACKCOLOR WHITE COLOR BLACK WHITE WHITE BLUE WHITE GREEN WHITE RED)
 
   ' static layout: title + three fixed labels
-  debug(`Panel 0 4 "SIGNAL MONITOR")        ' clear, pair 0, title at (0,0)
-  debug(`Panel 3 2 2 0 "Sample:")           ' row 2, col 0
-  debug(`Panel 3 3 2 0 "Value :")           ' row 3, col 0
-  debug(`Panel 3 4 2 0 "State :")           ' row 4, col 0
+  debug(`Panel 0 5 ' SIGNAL MONITOR ')      ' clear, pair 1 (header), title at (0,0)
+  debug(`Panel 4 3 2 2 0 'Sample:')         ' pair 0, row 2 col 0
+  debug(`Panel 3 3 2 0 'Value :')           ' row 3, col 0
+  debug(`Panel 3 4 2 0 'State :')           ' row 4, col 0
 
   ' one representative set of values (fixed, for a stable capture)
   count  := 42
   signal := 920
-  debug(`Panel 3 2 2 8 `udec_(count) "    ")
-  debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
-  debug(`Panel 3 4 2 8 7 "HIGH " 4)         ' pair 3 (red), back to pair 0
+  ' Formatters must be embedded INSIDE the quoted string to PRINT as text; fed bare
+  ' they are taken as char/control values (42 -> '*', 920 -> nothing). v55: 'Temp = `(i)'
+  debug(`Panel 3 2 2 8 '`(count)    ')
+  debug(`Panel 3 3 2 8 '`(signal)    ')
+  debug(`Panel 3 4 2 8 7 ' HIGH ' 4)        ' pair 3 (alert), back to pair 0
 
   waitms(200)                               ' let the host render the final frame
   debug(`Panel save 'fig-03-term-dashboard')           ' display area (no chrome)

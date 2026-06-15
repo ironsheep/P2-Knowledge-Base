@@ -1,0 +1,32 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, value, needle, i, tick
+  ' Buffered gauge: redraw the whole dial + needle each frame, flicker-free.
+  debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
+  debug(`Gauge ORIGIN 200 200)            ' (0,0) at the dial center
+  debug(`Gauge POLAR 360)  ' angles in degrees; theta 0 points up
+
+  ang := 0
+  repeat
+    value  := 50 + qsin(50, ang, 360)  ' software-generated 0..100 reading
+    needle := (value * 240 / 100) - 120   ' map 0..100 -> -120..+120 degrees
+
+    debug(`Gauge CLEAR)
+
+    ' Scale: eleven radial ticks across the 240-degree sweep.
+    debug(`Gauge COLOR $404040)
+    repeat i from 0 to 10
+      tick := (i * 24) - 120
+      debug(`Gauge SET 90 `(tick) LINE 100 `(tick) 2 255)
+
+    ' Dial ring and center hub.
+    debug(`Gauge SET 0 0 CIRCLE 210 2 255)
+    debug(`Gauge COLOR $00FFFF SET 0 0 CIRCLE 12 0 255)
+
+    ' Needle: one polar line from center out to the reading's angle.
+    debug(`Gauge COLOR $FF7F00 SET 0 0 LINE 95 `(needle) 4 255)
+
+    debug(`Gauge UPDATE)                   ' present the frame
+
+    ang += 3
+    waitms(30)

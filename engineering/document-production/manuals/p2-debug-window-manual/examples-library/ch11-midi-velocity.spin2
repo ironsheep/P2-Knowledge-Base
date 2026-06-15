@@ -1,0 +1,17 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | vel
+  debug(`MIDI Keys SIZE 4 RANGE 21 108 CHANNEL 0 COLOR $00FF00 $FF7F00)
+
+  vel := 24
+  repeat 5
+    debug(`Keys $90 60 `(vel))         ' middle C on at the current velocity
+    waitms(400)
+    debug(`Keys $80 60 0)              ' off
+    waitms(150)
+    vel += 25
+    if vel > 127
+      vel := 127
+
+  repeat                              ' keep the window open

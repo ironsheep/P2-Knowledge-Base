@@ -1,0 +1,7 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | reading
+  debug(`TERM Status SIZE 30 5)  ' create a 30x5 text window named "Status"
+  reading := 42
+  debug(`Status "Reading: " `udec_(reading) 13)   ' feed it by name
+  repeat                                          ' keep the window open

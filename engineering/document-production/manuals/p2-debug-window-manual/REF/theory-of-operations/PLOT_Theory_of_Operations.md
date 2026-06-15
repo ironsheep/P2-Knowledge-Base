@@ -212,10 +212,10 @@ vPixelX      : integer;     // Current X position (relative to origin)
 vPixelY      : integer;     // Current Y position (relative to origin)
 
 // Precision control
-vPrecise     : integer;     // Precision mode: 8 = sub-pixel, 0 = pixel
+vPrecise     : byte;        // Precision mode: 8 = sub-pixel, 0 = pixel (decl 342)
 
 // Polar coordinate parameters
-vTwoPi       : integer;     // Full circle value (default: $100000000)
+vTwoPi       : int64;       // Full circle value (default: $100000000 = 2^32; decl 315 — must be int64, the default does not fit int32)
 vTheta       : integer;     // Theta offset for polar coordinates
 ```
 
@@ -238,8 +238,8 @@ vPixelX := 0;
 vPixelY := 0;
 vDotSize := 1;
 vDotSizeY := 1;
-vPlotColor := DefaultPlotColor;
-vTextColor := DefaultTextColor;
+vPlotColor := DefaultPlotColor;   // clCyan  = $00FFFF (consts 184/195)
+vTextColor := DefaultTextColor;   // clWhite = $FFFFFF (consts 187/196)
 vOpacity := $FF;
 vPrecise := 8;            // Sub-pixel precision enabled
 ```
@@ -252,7 +252,7 @@ vPrecise := 8;            // Sub-pixel precision enabled
 vPlotColor   : integer;     // Current drawing color (RGB24)
 vTextColor   : integer;     // Text color (RGB24)
 vBackColor   : integer;     // Background color (RGB24)
-vOpacity     : integer;     // Transparency (0-255, 255 = opaque)
+vOpacity     : byte;        // Transparency (0-255, 255 = opaque; decl 341 — byte, so writes are `& $FF` truncated)
 vLineSize    : integer;     // Line/dot size in pixels
 ```
 
@@ -269,7 +269,8 @@ vLineSize    : integer;     // Line/dot size in pixels
 vTextSize    : integer;     // Font size in points — default DefaultTextSize = 10
                             //   (PLOT_Configure does not set it; changed at runtime
                             //   via TEXTSIZE or the inline size of TEXT, clamp 6..200)
-vTextStyle   : integer;     // Style encoding (weight, italic, underline, alignment)
+vTextStyle   : integer;     // Style encoding (decl 340 — full signed integer; only the low bits
+                            //   weight/italic/underline/halign/valign are consumed downstream)
 vTextAngle   : integer;     // Text rotation angle (tenths of degrees: 0-3600)
 ```
 
@@ -378,7 +379,7 @@ Accepted by `PLOT_Update` (1918–2155). PLOT is the only window whose update ph
 | `BACKCOLOR` | `color` | Any color | 1932–1933 | Set background color |
 | `COLOR` | `color` | Any color | 1934–1943 | Set `vPlotColor`; if next key is `TEXT`, also sets `vTextColor` |
 | `BLACK`…`GRAY` | `{brightness}` | Brightness 0–15 | 1934–1943 | Named-color shorthand; optional brightness nibble |
-| `OPACITY` | `byte` | **0–255**; default `$FF` | 1944–1945 | Set `vOpacity` |
+| `OPACITY` | `byte` | **0–255** by byte truncation; default `$FF` | 1944–1945 | `if NextNum then vOpacity := val` — no `Within` clamp; `vOpacity` is a `byte`, so the 0–255 bound is byte truncation (`& $FF`) on store, not a parse-time clamp |
 | `PRECISE` | _(toggle)_ | Starts at 8 (on) | 1946–1947 | XOR `vPrecise` 8↔0; enables/disables sub-pixel fixed-point |
 | `LINESIZE` | `size` | — | 1948–1949 | Set `vLineSize` default for DOT/LINE |
 | `ORIGIN` | `{x y}` | — | 1950–1956 | Set coordinate origin; no args = use current `vPixelX,vPixelY` |
@@ -390,7 +391,7 @@ Accepted by `PLOT_Update` (1918–2155). PLOT is the only window whose update ph
 | `BOX` | `width height {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Filled/outlined rectangle; center = current pos |
 | `OBOX` | `width height xradius yradius {linesize {opacity}}` | linesize default 0 (filled); opacity default `vOpacity` | 2012–2036 | Rounded rectangle; center = current pos |
 | `TEXTSIZE` | `size` | — | 2037–2038 | Set default text point size (`KeyTextSize`) |
-| `TEXTSTYLE` | `style` | byte 0–255 | 2039–2040 | Set `vTextStyle` byte (weight/italic/underline/halign/valign) |
+| `TEXTSTYLE` | `style` | signed int (only low byte used) | 2039–2040 | `KeyVal(vTextStyle)` — stores full signed int; only low bits (weight/italic/underline/halign/valign) consumed downstream |
 | `TEXTANGLE` | `angle` | degrees 0–359 (Cartesian) or 0–vTwoPi (polar) | 2041–2042 | Set `vTextAngle`; calls `MakeTextAngle` for unit conversion |
 | `TEXT` | `{size {style {angle}}} 'string'` | up to 3 optional numeric overrides | 2043–2055 | Render string |
 | `LAYER` | `layer 'filename.bmp'` | layer **1–8** | 2056–2062 | Load BMP file into layer; file must exist with `.bmp` extension |
@@ -426,6 +427,49 @@ PLOT uses the **shared input model** (see Matrix §4). All nine debug-display wi
 **PLOT coordinate mapping** (lines 719–724, 3558–3561): reported x = `(ClientWidth − X) ÷ vDotSize` when `vDirX`, else `X ÷ vDotSize`; reported y = `Y ÷ vDotSizeY` when `vDirY`, else `(ClientHeight − Y) ÷ vDotSizeY`.
 
 `HIDEXY` suppresses the on-screen readout; it does **not** disable `PC_MOUSE` reporting.
+
+---
+
+## Receiving types & numeric parity / writer-level bounding (TS-port contract)
+
+> Source: `DebugDisplayUnit.pas` v55. This subsection is the authoritative contract for a faithful TypeScript port: it states the *storage type* of each receiving variable, where geometry is range-checked (at the **writer**, not the parser), and the Delphi-specific numeric behaviors that a port must reproduce.
+
+### Receiving types
+
+| Receiver | Type | Port representation | Source decl |
+|---|---|---|---|
+| `vOpacity` | `byte` | `& $FF` on store | 341 |
+| `vPrecise` | `byte` | `& $FF` on store | 342 |
+| `SpritePixels[]` | `byte` (array) | `& $FF` on store | 334 |
+| `vTwoPi` | `int64` | **BigInt** in a port (default `$100000000` = 2³² overflows int32) | 315 |
+| all other receivers (`vPlotColor`, `vTextColor`, `vBackColor`, `vLineSize`, `vTextStyle`, `vTextAngle`, `vOffsetX/Y`, `vPixelX/Y`, `vTheta`, `vDotSize/Y`, …) | `integer` | signed-32 | 313–353 |
+| `val` (the shared parse scratch) | `integer` | signed-32 | 358 |
+
+A directive that stores into a `byte` receiver (`OPACITY`, `PRECISE`, sprite pixels) is **truncated by the store**, not clamped by a `Within` check. A port must mask with `& $FF`, not range-validate.
+
+### Writer-level bounding
+
+Geometry is **not** range-checked when parsed; it is bounded inside the drawing routines:
+
+- **Thickness clamp — 128 px.** `SmoothLine` clamps the (8.8-fixed) radius via `radius1 := Min(radius, maxr shl 8)` with `maxr = 128` (3872). Line, dot, and shape outline thickness therefore saturate at 128 px regardless of the requested `linesize`.
+- **Shape dimension rejection.** `SmoothShape` `Exit`s (draws nothing) unless `xs/ys ∈ [1, SmoothFillMax]`, `xro/yro ∈ [0, SmoothFillMax shr 1]`, and `thick ≥ 0` (`SmoothFillMax` = 2048 → `xs/ys ∈ [1,2048]`, `xro/yro ∈ [0,1024]`); see guards 3606–3612. Out-of-range width/height/radius silently produces no shape.
+- **Coordinate clipping.** `SmoothFill` clips `y` to `[0, vBitmapHeight)` and trims the run to `[0, vBitmapWidth)` (3783–3792); `SmoothPlot` rejects any pixel outside the bitmap (3815). Coordinates are clipped at draw time, not rejected at parse time.
+- **OBOX corner auto-clamp.** A corner radius larger than half the side is reduced to half: `if xro shl 1 > xs then xro := xs shr 1` (and likewise `yro`), 3638.
+- **`TEXTANGLE` = `val mod 360`** in Cartesian mode (`a := val mod 360 * 10`, 3076); polar mode uses `val mod vTwoPi`.
+
+### Numeric-parity notes (Delphi → TS)
+
+- **Banker's rounding.** Delphi `Round` uses round-half-to-even. It appears in `PolarToCartesian` (`Round(Yf * rho_x)` / `Round(Xf * rho_x)`, 3069–3070) and in the gamma-corrected alpha blend in `SmoothFill` (3803) and `SmoothPlot` (3827–3829). A port must use banker's rounding here, **not** `Math.round` (round-half-up).
+- **Signed `mod`.** Pascal `mod` keeps the sign of the dividend, so a negative `TEXTANGLE` stays negative through `val mod 360`. JS `%` matches this; do not normalize to a positive residue.
+- **`shr` is logical** (unsigned) shift — use `>>>` in a port for the `shr` operations, not `>>`.
+
+### Control flow: `Break` vs `Continue` on a missing argument
+
+`PLOT_Update` is a `while NextKey do case val of` loop over the whole directive burst. Many directives `Break` on a missing required argument, which exits the **entire** `case`/`while` and **aborts every remaining directive in the update batch** — not just the current directive. Directives that `Break`-abort the batch include: `SET`, `LINE`, the shape group (`CIRCLE`/`OVAL`/`BOX`/`OBOX`), `TEXT` (missing string), `LAYER`, `CROP`, and `SPRITEDEF`. By contrast `CARTESIAN` and `SPRITE` use `Continue`, which skips only the current directive and keeps processing the rest of the burst.
+
+### COLOR-then-TEXT binding (peek + push-back)
+
+`COLOR` (and the `BLACK..GRAY` named-color shorthand) sets `vPlotColor`, then **peeks** the next key and pushes the pointer back: `if NextKey then begin Dec(ptr); if val = key_text then vTextColor := vPlotColor end` (1938–1941). So a `COLOR` immediately followed by `TEXT` binds the color to the **text** color as well; the `Dec(ptr)` leaves the `TEXT` directive intact for the next loop iteration.
 
 ---
 
@@ -499,7 +543,7 @@ end;
 |-----------|---------|---------|-------|---------|
 | Title | `TITLE 'string'` | "Plot" | - | Window title |
 | Position | `POS x y` | Cascaded | Screen coords | Window position |
-| Size | `SIZE width height` | 512 × 512 | 32–2048 | Canvas dimensions |
+| Size | `SIZE width height` | **256 × 256** | 32–2048 | Canvas dimensions (default from global `SetDefaults` 2884–2885; `PLOT_Configure` does not override) |
 | Dot Size | `DOTSIZE x {y}` | 1 × 1 | **1–256** | Pixel scaling (v55: `1891-1894`) |
 | Color mode | `LUT1`…`RGB24` | - | - | Initial color mode |
 | LUT Colors | `LUTCOLORS rgb24...` | - | 256 colors | Palette for LUT modes |
@@ -696,7 +740,7 @@ key_origin:
 
 1. **Explicit Origin**: `ORIGIN x y`
    - Sets origin to specific coordinates
-   - Example: `ORIGIN 256 256` (center of 512×512 canvas)
+   - Example: `ORIGIN 128 128` (center of the default 256×256 canvas)
 
 2. **Current Position Origin**: `ORIGIN`
    - Sets origin to current drawing position (vPixelX, vPixelY)
@@ -705,6 +749,8 @@ key_origin:
      SET 100 100
      ORIGIN          // Origin now at (100, 100)
      ```
+
+> **Partial `ORIGIN x` (no y):** `if KeyVal(vOffsetX) then KeyVal(vOffsetY)` (1950–1956). If `x` parses but `y` is absent, `vOffsetX` is updated while `vOffsetY` **retains its prior value** (the inner `KeyVal` simply fails and leaves it unchanged). It does **not** fall into the no-args branch and does **not** copy `vPixelY`.
 
 **Effect on Subsequent Commands**:
 - All drawing commands use coordinates relative to the origin
@@ -1204,7 +1250,7 @@ TEXT 12 $87 90 'Rotated'              // Size 12, bold+italic+underlined, 90° r
 
 ### 8.2 Text Style Encoding
 
-The `vTextStyle` variable encodes multiple style attributes in a single byte:
+The `vTextStyle` variable is a full signed `integer` (decl 340); the style attributes are packed into its low byte (higher bits are stored but unused):
 
 | Bits | Mask | Field | Values | Meaning |
 |------|------|-------|--------|---------|
@@ -1619,6 +1665,8 @@ end;
 - `t5`: Height
 - `t6`: Destination x
 - `t7`: Destination y
+
+> **Bounding (writer-level):** every CROP coordinate is read with `KeyValWithin`, so the source rect is clamped to the **layer bitmap** size (`PlotBitmap[t1-1].Width/.Height`, 2078–2082) and the destination is clamped to the **canvas** size (`vBitMapWidth`/`vBitmapHeight`). An out-of-range value past the first that already parsed causes a `Break`, which aborts the whole update batch (see "Receiving types & writer-level bounding" subsection).
 
 **Default Behavior**:
 ```

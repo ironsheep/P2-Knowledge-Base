@@ -205,10 +205,11 @@ PRI read_press() : v
   v := 1013
 ```
 
-Two more runtime keyword commands round out the set:
+Three more runtime keyword commands round out the set:
 
 - `` `CLEAR `` — clears the screen and homes the cursor (identical to code `0`).
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ## A positioned dashboard
 

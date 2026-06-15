@@ -42,6 +42,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | buffered repaint |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## BITMAP — pixel display (Chapter 4)
 
@@ -76,6 +77,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 *BITMAP has no drawing primitives — those belong to PLOT.*
 
@@ -139,6 +141,7 @@ every window are listed once at the end.
 | `CLEAR` | |
 | `UPDATE` | buffered repaint trigger |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## LOGIC — logic analyzer (Chapter 6)
 
@@ -170,6 +173,7 @@ every window are listed once at the end.
 | `HOLDOFF` | 2–2048 |
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 *Shows raw waveforms — no built-in protocol decoding.*
 
@@ -205,6 +209,7 @@ every window are listed once at the end.
 | `HOLDOFF` | |
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## SCOPE_XY — XY / phase display (Chapter 8)
 
@@ -237,6 +242,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## FFT — frequency spectrum (Chapter 9)
 
@@ -266,6 +272,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## SPECTRO — spectrogram / waterfall (Chapter 10)
 
@@ -295,6 +302,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## MIDI — piano-keyboard display (Chapter 11)
 
@@ -319,6 +327,7 @@ every window are listed once at the end.
 |-----------|-------|
 | `CLEAR` | |
 | `SAVE` | |
+| `CLOSE` | close + free this window |
 
 ## Commands common to every window
 
@@ -326,3 +335,5 @@ every window are listed once at the end.
 - `` DEBUG(`Name PC_MOUSE(@mousevar)) `` — host fills a 7-long array: xpos, ypos, wheel, left, middle, right (each button 0 or −1), pixel-under-cursor. See [Chapter 12](#ch-12).
 - `` DEBUG(`Name CLEAR) `` — clear the window.
 - `` DEBUG(`Name SAVE {WINDOW} 'file') `` — save the window image to a host file.
+- `` DEBUG(`Name CLOSE) `` — close and free this one window. A different action from
+  ending the whole debug session; works on all nine window types.

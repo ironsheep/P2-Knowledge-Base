@@ -1,0 +1,22 @@
+'' fig-03-term-smoke.spin2  ->  fig-03-term-smoke.bmp   (DIAGNOSTIC, not a manual figure)
+'' Purpose: isolate why the themed TERM windows (fig-03-term-first / -dashboard) captured
+'' 100% blank. This is the EXACT canonical v55 TERM idiom: a DEFAULT terminal (no custom
+'' COLOR/BACKCOLOR), text fed with a leading control code, single-quoted strings.
+''   - If THIS renders text  -> the host TERM SAVE works; our custom COLOR pairs are the bug.
+''   - If THIS is also blank -> the host's TERM SAVE capture itself is the problem (escalate).
+'' Delete this file once TERM rendering is confirmed.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  debug(`TERM Smoke SIZE 40 8 TEXTSIZE 16)        ' default colours (orange on black)
+  debug(`Smoke 1 'TERM smoke test')               ' 1 = home, then print
+  debug(`Smoke 13 'line 2: if visible, host OK')  ' 13 = new line, then print
+
+  waitms(200)                                     ' let the host render the final frame
+  debug(`Smoke save 'fig-03-term-smoke')                ' display area (no chrome)
+  debug(`Smoke save window 'fig-03-term-smoke_WDW')     ' window, incl. chrome
+  debug(`Smoke close)
+  debug("* TERM-SMOKE complete")
+  debug("DEBUG_END_SESSION")                      ' end run -> shell script runs next

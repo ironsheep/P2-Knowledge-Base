@@ -1,0 +1,28 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, signal, peak, count
+  ' A SCOPE on the left, a TERM status panel on the right.
+  ' Both are created up front, each by its own name, each placed with POS.
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256 'Signal' -1000 1000)
+  debug(`TERM Panel POS 420 0 SIZE 32 8)
+
+  ang   := 0
+  peak  := 0
+  count := 0
+
+  repeat
+    signal := qsin(1000, ang, 256)         ' software-generated waveform
+    if abs signal > peak
+      peak := abs signal                   ' track the running peak
+
+    ' Coordination is nothing more than feeding both windows
+    ' in the same loop:
+    debug(`Trace `(signal))                ' one sample to the SCOPE
+    debug(`Panel 0 "Samples: " `udec_(count) 13 ...
+          "Current: " `sdec_(signal) 13 ...
+          "Peak:    " `udec_(peak) 13)  ' a fresh status block to the TERM
+
+    ang   += 4
+    count += 1
+    waitms(10)

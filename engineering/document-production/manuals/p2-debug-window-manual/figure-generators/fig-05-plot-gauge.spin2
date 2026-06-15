@@ -1,28 +1,28 @@
 '' fig-05-plot-gauge.spin2  ->  fig-05-plot-gauge.png
 '' PLOT window, a polar needle gauge drawn once (Chapter 5).
-'' Buffered (UPDATE); needle at a fixed reading for a stable capture.
+'' Theme: white background, grey scale ticks + ring, blue hub, red needle.
+'' Named colours (raw-hex COLOR values are ignored by the display parser).
 
 CON
   _clkfreq = 200_000_000
 
 PUB main() | i, tick, needle
-  debug(`PLOT Gauge SIZE 400 400 BACKCOLOR $000000 UPDATE)
+  debug(`PLOT Gauge SIZE 400 400 BACKCOLOR WHITE UPDATE)
   debug(`Gauge ORIGIN 200 200)              ' (0,0) at the dial center
   debug(`Gauge POLAR 360)                   ' angles in degrees
   debug(`Gauge CLEAR)
 
-  ' scale: eleven radial ticks across a 240-degree sweep (-120..+120)
-  debug(`Gauge COLOR $404040)
+  ' scale: eleven SHORT radial ticks across a 240-degree sweep (-120..+120)
   repeat i from 0 to 10
     tick := (i * 24) - 120
-    debug(`Gauge SET 0 0)
-    debug(`Gauge LINE 180 `(tick) 1 255)
+    debug(`Gauge GRAY 6 SET 155 `(tick) LINE 178 `(tick) 2 255)
+
+  debug(`Gauge GRAY 3 SET 0 0 CIRCLE 360 2 255)   ' dial ring (radius 180)
+  debug(`Gauge BLUE 12 SET 0 0 CIRCLE 24 0 255)   ' hub (filled)
 
   ' needle at a fixed reading: value 75 of 100 -> +60 degrees
   needle := (75 * 240 / 100) - 120
-  debug(`Gauge COLOR $00FF00)
-  debug(`Gauge SET 0 0)
-  debug(`Gauge LINE 150 `(needle) 1 255)
+  debug(`Gauge RED 12 SET 0 0 LINE 160 `(needle) 5 255)
 
   debug(`Gauge UPDATE)
   waitms(200)                               ' let the host render the final frame

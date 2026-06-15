@@ -1,22 +1,23 @@
 '' fig-05-plot-sprite.spin2  ->  fig-05-plot-sprite.png
 '' PLOT window, sprite blitting from an INLINE sprite definition (Chapter 5).
-'' Self-contained: no host .bmp art needed (SPRITEDEF defines the sprite).
+'' Theme: white background; a 5x5 blue diamond stamped at several scales.
+'' (SPRITEDEF palette entries are $AARRGGBB longs and do render.)
 
 CON
   _clkfreq = 200_000_000
 
 PUB main()
-  debug(`PLOT Field SIZE 256 256 BACKCOLOR $000000 UPDATE)
+  debug(`PLOT Field SIZE 256 256 BACKCOLOR WHITE UPDATE)
 
-  ' a 3x3 "blip": index 1 = lit, index 0 = transparent.
-  ' palette: entry 0 = transparent ($00......), entry 1 = opaque cyan.
-  debug(`Field SPRITEDEF 0 3 3  0 1 0  1 1 1  0 1 0  $00000000 $FF00FFFF)
+  ' a 5x5 diamond: index 1 = lit, index 0 = transparent.
+  ' palette: entry 0 = transparent ($00......), entry 1 = opaque blue.
+  debug(`Field SPRITEDEF 0 5 5  0 0 1 0 0  0 1 1 1 0  1 1 1 1 1  0 1 1 1 0  0 0 1 0 0  $00000000 $FF1976D2)
 
   debug(`Field CLEAR)
-  ' stamp the sprite three times across the canvas, 8x scale
+  ' stamp the sprite three times across the canvas, varied scale/opacity
   debug(`Field SET 64 128 SPRITE 0 0 8 255)
-  debug(`Field SET 128 128 SPRITE 0 0 8 255)
-  debug(`Field SET 192 128 SPRITE 0 0 8 255)
+  debug(`Field SET 128 128 SPRITE 0 0 14 255)
+  debug(`Field SET 192 128 SPRITE 0 0 8 150)
   debug(`Field UPDATE)
 
   waitms(200)                               ' let the host render the final frame

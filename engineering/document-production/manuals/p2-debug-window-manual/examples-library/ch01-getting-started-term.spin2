@@ -1,0 +1,6 @@
+CON _clkfreq = 200_000_000
+
+PUB main()
+  debug(`TERM Status SIZE 40 20)   ' create a window named "Status"
+  debug(`Status "Ready.")          ' feed it by name
+  repeat                           ' keep the program (and window) alive

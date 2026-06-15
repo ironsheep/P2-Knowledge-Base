@@ -1,0 +1,11 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | packed, i
+  debug(`LOGIC Stream SAMPLES 256 'D0' 'D1' LONGS_1BIT)
+  repeat
+    packed := 0
+    repeat i from 0 to 31
+      ' pack 32 one-bit samples into a long
+      packed := (packed << 1) | (getrnd() & 1)
+    debug(`Stream `(packed))  ' send one long = 32 samples
+    waitms(50)

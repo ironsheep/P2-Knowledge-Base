@@ -145,12 +145,13 @@ not accept and would ignore as a string.
 
 ## Clearing and saving
 
-Two runtime keyword commands round out the set:
+Three runtime keyword commands round out the set:
 
 - `` `CLEAR `` — resets every key to off (clears all stored velocities) and
   redraws an empty keyboard. Use it between takes, or to recover if a Note-Off
   was missed and a key is stuck lit.
 - `` `SAVE `` — saves the current window image to a file on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Piano CLEAR)   ' all keys dark again
@@ -187,6 +188,8 @@ PUB main() | i, note
 
   debug(`Piano CLEAR)                 ' reset every key
 
+  repeat                             ' keep the window open
+
 DAT
 scale word 60, 62, 64, 65, 67, 69, 71  ' C D E F G A B (MIDI note numbers)
 ```
@@ -213,6 +216,8 @@ PUB main() | vel
     vel += 25
     if vel > 127
       vel := 127
+
+  repeat                              ' keep the window open
 ```
 
 ## Considerations

@@ -1,0 +1,15 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, sig
+  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512 'Signal' -1000 1000)
+  ' rising edge, trigger centered in the frame
+  debug(`Capture TRIGGER 0 -500 500 256)
+  debug(`Capture HOLDOFF 512)  ' one frame of holdoff before re-arming
+
+  ang := 0
+  repeat
+    sig := qsin(1000, ang, 256)
+    debug(`Capture `(sig))
+    ang += 3
+    waitms(2)

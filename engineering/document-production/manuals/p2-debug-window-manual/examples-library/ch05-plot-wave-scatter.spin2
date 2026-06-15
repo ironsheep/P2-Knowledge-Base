@@ -1,0 +1,52 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | x, y, angle, i, sx, sy
+
+  ' Create a 512x512 plotting canvas on a black background
+  debug(`PLOT Wave SIZE 512 512 BACKCOLOR $000000)
+
+  ' Origin at left edge, vertical center; y increases upward (flipy = 1)
+  debug(`Wave CARTESIAN 1 0)
+  debug(`Wave ORIGIN 0 256)
+
+  ' Center axis line in dim gray
+  debug(`Wave COLOR $404040)
+  debug(`Wave SET 0 0)
+  debug(`Wave LINE 511 0 1 255)
+
+  ' One cycle of a CORDIC sine wave, drawn as a connected polyline.
+  ' angle sweeps the full circle ($0000_0000..$FFFF_FFFF)
+  ' across 512 columns.
+  debug(`Wave COLOR $00FF00)
+  debug(`Wave SET 0 0)
+  repeat x from 0 to 511
+    angle := x * ($FFFF_FFFF / 511)
+    y := sine(angle, 200)                        ' amplitude 200 px
+    debug(`Wave LINE `(x) `(y) 1 255)
+
+  ' Random red scatter using the hardware RNG
+  debug(`Wave COLOR $FF0000)
+  repeat i from 0 to 99
+    sx := rnd() +// 512                           ' 0..511
+    sy := (rnd() +// 400) - 200                   ' -200..+199
+    debug(`Wave SET `(sx) `(sy))
+    debug(`Wave DOT 4 200)
+
+  ' White centered label
+  debug(`Wave COLOR $FFFFFF)
+  debug(`Wave SET 256 230)
+  debug(`Wave TEXT 16 'QSIN + scatter')
+
+  repeat                                         ' keep the window open
+
+PRI sine(angle, length) : result
+  org
+              setq      #0                        ' Y coordinate = 0
+              qrotate   length, angle  ' rotate (length, 0) by angle
+              getqy     result  ' result = length * sin(angle)
+  end
+
+PRI rnd() : r
+  org
+              getrnd    r  ' 32-bit hardware random value
+  end

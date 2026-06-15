@@ -1,0 +1,20 @@
+CON _clkfreq = 200_000_000
+
+PUB main() | key, value
+  debug(`TERM Adjust SIZE 32 6 TITLE 'Arrow Keys Adjust')
+  value := 50
+  show(value)
+  repeat
+    key := 0
+    debug(`Adjust PC_KEY(@key))
+    case key
+      3: value += 1                       ' Up arrow
+      4: value -= 1                       ' Down arrow
+      1: value -= 10                      ' Left arrow
+      2: value += 10                      ' Right arrow
+    if key
+      show(value)
+    waitms(20)
+
+PRI show(v)
+  debug(`Adjust 0 "Value: " `sdec_(v) 13 "Up/Down +/-1, Left/Right +/-10")

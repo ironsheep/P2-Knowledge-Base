@@ -1,12 +1,12 @@
 '' fig-08-scope-xy.spin2  ->  fig-08-scope-xy.png
 '' SCOPE_XY window, a Lissajous figure (Chapter 8).
-'' SAMPLES 0 = persistent, so the full curve accumulates before capture.
+'' Theme: white background, light grid, blue trace. SAMPLES 0 = persistent.
 
 CON
   _clkfreq = 200_000_000
 
 PUB main() | a, x, y, i
-  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 'XY')
+  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 COLOR WHITE GRAY DOTSIZE 4 'XY' BLUE)
 
   a := 0
   repeat i from 0 to 1999

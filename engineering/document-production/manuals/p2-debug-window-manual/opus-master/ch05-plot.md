@@ -428,8 +428,11 @@ SPRITEDEF id xsize ysize pixels... colors...
 - `id` — sprite identifier, **`0`–`255`**.
 - `xsize`, `ysize` — sprite dimensions, each **`1`–`32`**.
 - `pixels` — `xsize x ysize` palette indices, one per pixel, in row order.
-- `colors` — 256 palette entries in `$AARRGGBB` form (alpha, red, green, blue),
-  where alpha `$00` is transparent and `$FF` is opaque.
+- `colors` — the palette entries the pixel bytes reference, in `$AARRGGBB` form
+  (alpha, red, green, blue), where alpha `$00` is transparent and `$FF` is opaque.
+  Supply **up to 256**, but only as many as your indices actually use — the parser
+  reads color longs until the `DEBUG()` message ends, so a sprite that uses indices
+  0 and 1 needs just two colors.
 
 `SPRITE` stamps a defined sprite at the cursor:
 
@@ -527,7 +530,7 @@ PUB main() | f, ballx
     waitms(20)
 ```
 
-Two more commands round out display control:
+Three more commands round out display control:
 
 - `` `CLEAR `` — fill the canvas with the background color and reset it for a new
   frame. In buffered mode this clears the off-screen canvas; the cleared state
@@ -535,6 +538,7 @@ Two more commands round out display control:
 - `` `SAVE `` — save the current canvas image to a BMP file on the host. Send
   `SAVE` for a default filename, or `SAVE 'name'` to choose one (the `.bmp`
   extension is added for you — do not include it).
+- `` `CLOSE `` — close this window and free its resources.
 
 > `UPDATE` plays two roles. On the creation line it is the **flag** that turns
 > buffered mode on. At runtime, `` `UPDATE `` is the **command** that presents the
@@ -588,6 +592,8 @@ PUB main() | x, y, angle, i, sx, sy
   debug(`Wave COLOR $FFFFFF)
   debug(`Wave SET 256 230)
   debug(`Wave TEXT 16 'QSIN + scatter')
+
+  repeat                                         ' keep the window open
 
 PRI sine(angle, length) : result
   org

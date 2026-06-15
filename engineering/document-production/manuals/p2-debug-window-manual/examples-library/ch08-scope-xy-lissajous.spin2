@@ -1,0 +1,13 @@
+CON _clkfreq = 100_000_000
+
+PUB main() | ph, x, y
+  ' SIZE 256 -> 512x512 plot; RANGE 1000 -> axes span -1000..+1000;
+  ' SAMPLES 0 -> persistent (the whole figure accumulates)
+  debug(`SCOPE_XY Lissajous SIZE 256 RANGE 1000 SAMPLES 0 'XY')
+  ph := 0
+  repeat
+    x := QSIN(1000, ph, 360)        ' amplitude 1000, fills the range
+    y := QSIN(1000, ph * 3, 360)    ' three times the X frequency
+    debug(`Lissajous `(x, y))       ' one (x, y) point per pass
+    ph += 1
+    waitms(5)

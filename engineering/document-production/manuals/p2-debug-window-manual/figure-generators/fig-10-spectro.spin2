@@ -1,22 +1,28 @@
 '' fig-10-spectro.spin2  ->  fig-10-spectro.png
 '' SPECTRO window, a rising-tone chirp waterfall (Chapter 10).
-'' Feeds 48 blocks of an upward sweep to fill the history, then captures.
+'' Theme: LUMA8W maps low energy to WHITE and high energy to blue -> light waterfall.
 
 CON
   _clkfreq = 200_000_000
 
-PUB main() | i, phase, ainc, sample
-  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 RATE 512 TRACE 8 LUMA8X)
+PUB main() | i, bin, p0, p1, p2
+  ' Low RANGE so the tone saturates to strong blue. One FFT line per 512-sample block;
+  ' sweep one bin per line (solid diagonal) over 240 blocks (fills the 256-deep waterfall).
+  ' Three adjacent tones (bin, bin+1, bin+2) widen the streak to ~3 px for print presence.
+  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE 500 RATE 512 LUMA8W BLUE)
 
-  phase := 0
-  ainc  := 30_000                            ' starting phase step (low tone)
+  p0 := 0
+  p1 := 0
+  p2 := 0
+  bin := 10                                  ' start at FFT bin 10 (low tone)
 
-  repeat 48                                  ' 48 blocks -> a diagonal streak
-    repeat i from 1 to 512                    ' one FFT window of samples
-      sample := sine(2000, phase)
-      phase += ainc
-      debug(`Chirp `(sample))
-    ainc += 20_000                           ' next block: a higher tone
+  repeat 240                                 ' 240 lines -> a solid rising diagonal
+    repeat i from 1 to 512                    ' one FFT window of samples = one line
+      debug(`Chirp `(qsin(1000, p0, $1_0000) + qsin(1000, p1, $1_0000) + qsin(1000, p2, $1_0000)))
+      p0 += bin       * 128                   ' bin b -> phase step b * (65536/512)
+      p1 += (bin + 1) * 128                   ' +1 bin  (widens the streak)
+      p2 += (bin + 2) * 128                   ' +2 bins
+    bin += 1                                  ' rise one FFT bin per line
 
   waitms(200)                               ' let the host render the final frame
   debug(`Chirp save 'fig-10-spectro')                ' display area (no chrome)
@@ -24,10 +30,3 @@ PUB main() | i, phase, ainc, sample
   debug(`Chirp close)
   debug("* SPECTRO complete")
   debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
-
-PRI sine(amp, angle) : y
-  ' amp * sin(angle) via the CORDIC; angle spans one full circle.
-  org
-    qrotate amp, angle
-    getqy   y
-  end

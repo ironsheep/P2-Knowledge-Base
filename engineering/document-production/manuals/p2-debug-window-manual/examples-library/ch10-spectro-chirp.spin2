@@ -1,0 +1,29 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | i, phase, ainc, sample
+  ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
+  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 ...
+         RATE 512 TRACE 8 LUMA8X)
+
+  phase := 0
+  ainc  := 30_000              ' starting phase step (a low tone)
+
+  repeat
+    ' Feed one FFT window of samples (512), then raise the frequency.
+    repeat i from 1 to 512
+      sample := sine(2000, phase)
+      phase += ainc            ' advance the synthesized tone
+      debug(`Chirp `(sample))
+    ainc += 20_000  ' next block is a higher tone -> diagonal streak
+    if ainc > 1_000_000
+      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
+      ainc := 30_000
+
+PRI sine(amp, angle) : y
+  ' amp * sin(angle), via the CORDIC.
+  ' angle $0000_0000..$FFFF_FFFF spans one full circle.
+  org
+    qrotate amp, angle         ' X = amp, Y = 0 (no SETQ)
+    getqy   y                  ' Y result = amp * sin(angle)
+  end

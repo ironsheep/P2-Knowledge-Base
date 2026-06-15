@@ -1,0 +1,20 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  coginit(COGEXEC_NEW, @blink, 0)  ' launch the PASM program in its own cog
+  repeat                                  ' keep the Spin2 cog alive
+
+DAT
+              org
+blink
+              debug(`SCOPE Wave SIZE 400 200 'Ramp' 0 255)
+.loop
+              add       value, #4        ' advance a software ramp
+              and       value, #$FF
+              ' feed the window with the register's value
+              debug(`Wave `(value))
+              waitx     ##2_000_000
+              jmp       #.loop
+
+value         long      0

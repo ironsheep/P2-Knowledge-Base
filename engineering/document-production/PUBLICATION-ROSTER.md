@@ -156,15 +156,15 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-15 00:45  PUBLISH   p2-debug-window-manual           (v1.9.1 re-audit build; 4 figures still placeholder)
+2026-06-12 18:39  PLATFORM  templates/p2kb-platform-content.sty       (a149b8e — ::: tip/caution callouts)
+2026-06-12 18:39  PLATFORM  filters/p2kb-platform-code-coloring.lua   (a149b8e — ::: tip/caution callouts)
 2026-06-10 23:41  PUBLISH   p2-streamer-programming-guide    (v1.0.0 — clickable index added)
 2026-06-10 23:35  PUBLISH   p2-pasm-desilva-style            (v3.0.0, 172pp — egg-beater Ch2 diagram fixed)
 2026-06-10 23:33  PUBLISH   p2-single-step-debugger-manual   (regression rebuild on the latest platform)
 2026-06-10 23:32  PUBLISH   p2-assembly-language-manual      (v3.0.0, 492pp — migrated off the bespoke fork onto the platform)
 2026-06-09 23:39  PUBLISH   p2-io-and-smart-pins-user-guide
 2026-06-09 22:50  PLATFORM  filters/p2kb-platform-figures.lua
-2026-06-09 21:08  PLATFORM  templates/p2kb-platform-content.sty
-2026-06-09 20:56  PUBLISH   p2-debug-window-manual
-2026-06-09 20:39  PLATFORM  filters/p2kb-platform-code-coloring.lua
 2026-06-08 08:32  PLATFORM  templates/p2kb-platform-foundation.sty
 2026-06-08 08:32  PLATFORM  filters/p2kb-platform-pagination.lua
 2026-06-07 06:58  PLATFORM  templates/p2kb-platform-diagrams.sty
@@ -173,16 +173,21 @@ that PDF was generated. This ledger is the detector.
 
 **Currently out of date (read off the list above):**
 
-**Regeneration wave 2026-06-10 — four rebuilt on the latest templates; two remain.**
+**Regeneration status (updated 2026-06-15).** A previously-unrecorded 2026-06-12
+platform edit (`a149b8e` — `content.sty` + `code-coloring.lua`, advisory callouts) now
+sits ABOVE the 2026-06-10 rebuild wave, so those four are technically behind it (the
+callout change is cosmetic for manuals that use no `::: tip` / `::: caution` blocks — a
+regen wave is due but low-urgency for them). Only `p2-debug-window-manual` was built on
+top of the 06-12 platform.
 
 | Manual | Status | Notes |
 |--------|--------|----------------------------------------------------|
-| `p2-assembly-language-manual` | ✅ current | migrated + rebuilt **v3.0.0** today on the latest platform (492pp) |
-| `p2-pasm-desilva-style` | ✅ current | rebuilt **v3.0.0** today (egg-beater Ch2 diagram fixed, 172pp) |
-| `p2-streamer-programming-guide` | ✅ current | rebuilt **v1.0.0** today (clickable index added) |
-| `p2-single-step-debugger-manual` | ✅ current | regression rebuild today on the latest platform |
-| `p2-io-and-smart-pins-user-guide` | ⏳ to regenerate | **one of the two remaining** for this wave (last built 2026-06-09) |
-| `p2-debug-window-manual` | ⏳ to regenerate | **one of the two remaining** — also behind `figures.lua` / `content.sty` |
+| `p2-debug-window-manual` | ✅ current | rebuilt **2026-06-15** on the latest platform (incl. 06-12 `content.sty` + `code-coloring.lua`); 4 figures still placeholder |
+| `p2-assembly-language-manual` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (492pp); predates the 06-12 platform edit |
+| `p2-pasm-desilva-style` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (172pp); predates the 06-12 platform edit |
+| `p2-streamer-programming-guide` | ⏳ behind 06-12 | rebuilt v1.0.0 on 06-10; predates the 06-12 platform edit |
+| `p2-single-step-debugger-manual` | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 platform edit |
+| `p2-io-and-smart-pins-user-guide` | ⏳ to regenerate | last built 2026-06-09; behind `figures.lua` + the 06-12 edit |
 | `p2-layout-torture-test` | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
 
 **Maintenance discipline (must be honored or the ledger lies):** `prepare-manual`

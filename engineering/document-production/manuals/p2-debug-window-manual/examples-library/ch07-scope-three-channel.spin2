@@ -1,0 +1,28 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, sine, tri, dir, noise
+  ' Three stacked channels: fixed -1000..1000 range,
+  ' 100px tall, offset by 'base'
+  debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2 ...
+    'Sine'  -1000 1000 100   0 0 $00FF00 ...
+    'Tri'   -1000 1000 100 100 0 $FF0000 ...
+    'Noise' -1000 1000 100 200 0 $00AAFF)
+
+  ang := 0
+  tri := -1000
+  dir := 40
+
+  repeat
+    ' CORDIC sine, amplitude 1000, 256 steps/cycle
+    sine  := qsin(1000, ang, 256)
+    tri   += dir                           ' ramp up/down for a triangle
+    if tri >= 1000 or tri <= -1000
+      dir := -dir
+    noise := (GETRND() // 2001) - 1000     ' random in -1000..1000
+
+    ' one set: three values, in channel order
+    debug(`Waves `(sine) `(tri) `(noise))
+
+    ang += 4
+    waitms(5)                              ' your loop sets the time scale

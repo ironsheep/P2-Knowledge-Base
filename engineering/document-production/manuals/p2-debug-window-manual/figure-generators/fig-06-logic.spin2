@@ -1,41 +1,41 @@
 '' fig-06-logic.spin2  ->  fig-06-logic.png
 '' LOGIC window, software-SPI bus traffic (Chapter 6).
-'' Feeds ~10 bytes to fill the 200-sample window, then captures.
+'' Theme: white background, light grid, named channel colours. Free-run (no TRIGGER)
+'' so the trace always draws. Backtick strings single-quoted; named COLOR values.
 
 CON
   _clkfreq = 100_000_000
 
 PUB main() | tx_byte, i, cs, clk, mosi, b
-  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 'CS' $00FFFF 'CLK' $00FF00 'MOSI' $FFFF00)
-  debug(`SPIbus TRIGGER $1 $0 32)           ' align to CS going low
+  ' LOGIC declares its channels ON the creation line (unlike SCOPE/FFT, whose
+  ' channel-defs are a separate feed). v55 grammar: "If no names are given, a single
+  ' group of 32 channels will be established" — that fallback was the 32-channel bug.
+  ' Names-only gives three single-bit channels with default (distinct) colours.
+  debug(`LOGIC SPIbus TITLE 'Software SPI' SAMPLES 200 SPACING 3 COLOR WHITE GRAY 'CS' 'CLK' 'MOSI')
 
   tx_byte := $A5
   repeat b from 0 to 9                       ' ~10 bytes fills the window
-    ' idle: CS high, CLK low
     cs := 1
     clk := 0
     mosi := 0
     emit(cs, clk, mosi)
     emit(cs, clk, mosi)
 
-    ' start frame: assert CS low
-    cs := 0
+    cs := 0                                  ' assert CS low (start frame)
     emit(cs, clk, mosi)
 
-    ' clock out 8 bits, MSB first (mode 0)
-    repeat i from 7 to 0
+    repeat i from 7 to 0                      ' clock out 8 bits, MSB first (mode 0)
       mosi := (tx_byte >> i) & 1
       clk := 0
       emit(cs, clk, mosi)                    ' present data, clock low
       clk := 1
       emit(cs, clk, mosi)                    ' rising edge
 
-    ' end frame: release CS
-    clk := 0
+    clk := 0                                  ' release CS (end frame)
     cs := 1
     emit(cs, clk, mosi)
 
-    tx_byte := (tx_byte + 1) & $FF           ' next byte
+    tx_byte := (tx_byte + 1) & $FF
 
   waitms(200)                               ' let the host render the final frame
   debug(`SPIbus save 'fig-06-logic')                 ' display area (no chrome)

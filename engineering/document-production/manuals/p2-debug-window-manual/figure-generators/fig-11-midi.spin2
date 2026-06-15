@@ -1,12 +1,14 @@
 '' fig-11-midi.spin2  ->  fig-11-midi.png
 '' MIDI window, a piano keyboard (Chapter 11).
-'' Plays a C-major scale, then holds a C-major chord and captures it lit.
+'' Theme: blue/red lit-key colours. Plays a C-major scale, then holds a C-major
+'' chord and captures it lit.
 
 CON
   _clkfreq = 200_000_000
 
 PUB main() | i, note
-  debug(`MIDI Piano SIZE 6 RANGE 48 84 CHANNEL 0)
+  ' COLOR onWhite onBlack = lit-key colours (white keys blue, black keys red)
+  debug(`MIDI Piano SIZE 6 RANGE 48 84 CHANNEL 0 COLOR BLUE RED)
 
   ' play a C-major scale, one note at a time (visual warm-up)
   repeat i from 0 to 6

@@ -1,0 +1,11 @@
+CON _clkfreq = 200_000_000
+
+CON
+  DEBUG_PIN_TX = 62
+  DEBUG_PIN_RX = 63
+  DEBUG_BAUD   = 2_000_000
+
+PUB main()
+  debug(`TERM Status SIZE 30 5)
+  debug(`Status "Ready." 13)
+  repeat                         ' keep the window open

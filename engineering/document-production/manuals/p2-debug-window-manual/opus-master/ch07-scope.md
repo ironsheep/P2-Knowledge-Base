@@ -217,12 +217,13 @@ captured frame.
 
 ## Clearing and saving
 
-Two more runtime commands round out the set:
+Three more runtime commands round out the set:
 
 - `` `CLEAR `` — clears the display and resets the sample buffer, so the next samples
   start a fresh trace from the right edge.
 - `` `SAVE `` — saves the current display image to a `.bmp` file on the host. An
   optional filename may follow; without one, the host names the file.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Sig SAVE)    ' write the current trace to a bitmap on the PC

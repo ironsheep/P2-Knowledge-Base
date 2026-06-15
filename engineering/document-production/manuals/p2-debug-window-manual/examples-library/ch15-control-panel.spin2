@@ -1,0 +1,49 @@
+{Spin2_v50}
+CON _clkfreq = 200_000_000
+
+PUB main() | m[7], key, value, dirty, lastL
+  debug(`PLOT Ctrl SIZE 300 140 POS 200 200 BACKCOLOR $202020 HIDEXY UPDATE)
+  value := 50
+  dirty := true                              ' force the first draw
+  lastL := 0
+
+  repeat
+    ' Poll both inputs; each is the LAST command in its statement.
+    key := 0
+    debug(`Ctrl PC_KEY(@key))
+    debug(`Ctrl PC_MOUSE(@m))
+
+    case key                                 ' keyboard: arrows nudge
+      1: value -= 5                           ' Left  arrow
+         dirty := true
+      2: value += 5                           ' Right arrow
+         dirty := true
+
+    if m[3] and not lastL                     ' left-button press edge
+      if in_box(m[0], m[1], 25, 45, 75, 95)
+        value -= 5
+        dirty := true
+      if in_box(m[0], m[1], 225, 45, 275, 95)
+        value += 5
+        dirty := true
+    lastL := m[3]
+
+    value := 0 #> value <# 100                ' clamp to range
+
+    if dirty
+      draw(value)
+      debug(`Ctrl UPDATE)
+      dirty := false
+    waitms(20)
+
+' Bounding-box hit test: true when (x,y) is inside the rectangle.
+PRI in_box(x, y, x1, y1, x2, y2) : hit
+  hit := (x >= x1) and (x <= x2) and (y >= y1) and (y <= y2)
+
+PRI draw(v) | len
+  debug(`Ctrl CLEAR)
+  debug(`Ctrl COLOR $C04040 SET 50 70 BOX 50 50 0 255)   ' minus button
+  debug(`Ctrl COLOR $40C040 SET 250 70 BOX 50 50 0 255)  ' plus button
+  len := 1 + v * 150 / 100                    ' value 0..100 -> bar length
+  debug(`Ctrl COLOR $4080FF)
+  debug(`Ctrl SET `(75 + len / 2, 70) BOX `(len, 24, 0, 255))

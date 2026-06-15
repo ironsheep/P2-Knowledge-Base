@@ -1,0 +1,12 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | x
+  debug(`TERM Inline SIZE 30 6)
+  x := 0
+  repeat
+    org
+                add       x, #1
+                debug(`Inline 0 "x = " `udec_(x) 13)
+    end
+    waitms(500)

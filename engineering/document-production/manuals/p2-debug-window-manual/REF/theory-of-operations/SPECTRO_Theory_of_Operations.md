@@ -236,13 +236,13 @@ Accepted in `SPECTRO_Configure` (lines 1719–1790). All are optional; defaults 
 |---|---|---|---|---|
 | `TITLE 'str'` | string | window title | `"SPECTRO"` | 1737-1738 |
 | `POS left top` | two integers | window position | auto | 1739-1740 |
-| `SAMPLES n {first last}` | n = FFT size; optional first/last bin | n clamped to nearest power-of-2 in 4..2048; first ∈ [0, n/2−2], last ∈ [first+1, n/2−1] | 512 (bins 0..255) | 1741-1750 |
-| `DEPTH n` | integer | 1..2048 (time-history lines) | *varies by trace* | 1751-1752 |
+| `SAMPLES n {first last}` | n = FFT size; optional first/last bin | n clamped to nearest power-of-2 in 4..2048; first ∈ [0, n/2−2], last ∈ [first+1, n/2−1]. `if not NextNum then Continue` (1743) — a bare `SAMPLES` with no number **skips the directive entirely** (no reset of first/last). The `last` bin is read **only if** the `first` value was consumed (`if KeyValWithin(FFTfirst,…) then KeyValWithin(FFTlast,…)`, 1748-1749). | 512 (bins 0..255) | 1741-1750 |
+| `DEPTH n` | integer | 1..2048 (time-history lines) | 256 (writes `vWidth`; fixed default from `SetDefaults`, 2884 — the W/H swap at 1782-1787 is a separate transform) | 1751-1752 |
 | `MAG n` | integer | 0..11 (2^n magnitude multiplier) | 0 | 1753-1754 |
 | `RANGE n` | integer | 1..$7FFFFFFF | $7FFFFFFF | 1755-1756 |
 | `RATE n` | integer | 1..2048 samples per display update | samples÷8 | 1757-1758 |
-| `TRACE n` | integer | 0..15 (bits 0-2 = direction, bit 3 = scroll) | 15 ($F) | 1759-1760 |
-| `DOTSIZE x {y}` | 1 or 2 integers | each 1..16 | 1, 1 | 1761-1765 |
+| `TRACE n` | integer | stored raw (unclamped) via `KeyVal(vTrace)`; effective 0..15 via the `$F` mask (bits 0-2 = direction, bit 3 = scroll) applied in `SetTrace` (`vTrace := Path and $F`, 2979) | 15 ($F) | 1759-1760 |
+| `DOTSIZE x {y}` | 1 or 2 integers | each 1..16. If `x` is consumed (`KeyValWithin(vDotSize,1,16)` true, 1762), `vDotSizeY` first **defaults to `vDotSize`** (1764), then an **optional** second value re-clamps it (1765). With no `x`, the directive is a no-op. | 1, 1 | 1761-1765 |
 | color-mode | one keyword | **RESTRICTED:** `LUMA8`, `LUMA8W`, `LUMA8X`, `HSV16`, `HSV16W`, `HSV16X` only (line 1767) | `LUMA8X` | 1767-1768 |
 | `LOGSCALE` | none | enable log-magnitude display | off | 1769-1770 |
 | `HIDEXY` | none | suppress on-screen measurement cursor | off | 1771-1772 |
@@ -252,6 +252,18 @@ Accepted in `SPECTRO_Configure` (lines 1719–1790). All are optional; defaults 
 16-bit HSV families — `key_luma8..key_luma8x` and `key_hsv16..key_hsv16x`.
 The broader LUT, RGBI, RGB8, HSV8, RGB16, RGB24 families present in other
 windows are **not** accepted here.
+
+**Color-mode sub-argument** (`KeyColorMode`, 2785-2804): each color-mode keyword may
+take an optional `vColorTune` sub-argument, but the accepted form differs by family:
+
+- **LUMA8 family** (`key_luma8..key_luma8x`): the sub-arg may be either a **color
+  keyword** (`key_orange..key_gray`, stored as `val − key_orange`) **or** a **number**
+  (`KeyVal(vColorTune)`). A following key that is not a color keyword is pushed back
+  (`Dec(ptr)`) and not consumed.
+- **HSV16 family** (`key_hsv16..key_hsv16x`): the sub-arg is a **number only**
+  (`KeyVal(vColorTune)`); no keyword form.
+
+If no sub-argument is present, `vColorTune` keeps its prior value.
 
 ### Display / data directives
 
@@ -372,7 +384,7 @@ begin
 
   // Set form metrics
   vHeight := FFTlast - FFTfirst + 1;  // Height = frequency bin count
-  if vTrace and $4 = 0 then           // If horizontal trace
+  if vTrace and $4 = 0 then           // Swap when bit 2 clear (0-3, 8-11)
   begin
     i := vWidth;
     vWidth := vHeight;                // Swap width/height
@@ -388,13 +400,13 @@ end;
 | Parameter | Key | Type | Range | Default | Description |
 |-----------|-----|------|-------|---------|-------------|
 | **title** | key_title | string | - | "SPECTRO" | Window title text |
-| **pos** | key_pos | x, y, width, height | - | auto | Window position and size |
+| **pos** | key_pos | left, top | - | auto | Window position (two integers: left, top — offsets from DebugDisplayLeft/Top). `KeyPos` (2712-2716) reads exactly two values; no width/height. |
 | **samples** | key_samples | integer | 4-2048 (power-of-2) | 512 | FFT size (also accepts bin range) |
-| **depth** | key_depth | integer | 1-2048 | varies | Time history depth (vertical pixels) |
+| **depth** | key_depth | integer | 1-2048 | 256 | Time history depth. Writes `vWidth` (1751-1752); default is the fixed **256** inherited from `SetDefaults` (2884). The width/height swap (`vTrace and $4`, 1782-1787) is a separate post-loop transform, not a default. |
 | **mag** | key_mag | integer | 0-11 | 0 | Magnitude bit-shift (2^mag multiplier) |
 | **range** | key_range | integer | 1-$7FFFFFFF | $7FFFFFFF | Maximum magnitude for scaling |
 | **rate** | key_rate | integer | 1-2048 | samples/8 | Display update rate (samples per update) |
-| **trace** | key_trace | integer | 0-15 | 15 | Trace direction and scroll mode |
+| **trace** | key_trace | integer | stored raw (unclamped); effective 0..15 via `$F` mask | 15 | `KeyVal(vTrace)` (1760) stores the value unclamped; the 0..15 window comes only from `vTrace := Path and $F` in `SetTrace` (2979) |
 | **dotsize** | key_dotsize | integer(s) | 1-16 | 1 | Pixel scaling (X, optional Y) |
 | **colormode** | key_luma8..key_luma8x, key_hsv16..key_hsv16x | enum | restricted set (line 1767) | key_luma8x | Color encoding mode |
 | **logscale** | key_logscale | boolean | - | false | Logarithmic magnitude scaling |
@@ -406,7 +418,7 @@ end;
 **Key Logic** (lines 1781-1787):
 ```pascal
 vHeight := FFTlast - FFTfirst + 1;  // Frequency bin count
-if vTrace and $4 = 0 then           // Horizontal trace modes (0-3)
+if vTrace and $4 = 0 then           // Swap when bit 2 is clear
 begin
   i := vWidth;
   vWidth := vHeight;                // Swap dimensions
@@ -415,8 +427,13 @@ end;
 ```
 
 **Trace Mode and Dimensions**:
-- **Trace 0-3** (horizontal scrolling): Width = frequency bins, Height = time depth
-- **Trace 4-7** (vertical scrolling): Width = time depth, Height = frequency bins
+
+The swap predicate is `vTrace and $4 = 0` — it tests **bit 2 only**, so the scroll
+bit (bit 3) is irrelevant. Swap occurs for `vTrace` values 0-3 **and** 8-11; no swap
+for 4-7 **and** 12-15.
+
+- **Trace 0-3 and 8-11** (bit 2 clear): Width = frequency bins, Height = time depth (swapped)
+- **Trace 4-7 and 12-15** (bit 2 set): Width = time depth, Height = frequency bins (no swap)
 
 **Example**: 512-point FFT, depth=300, trace=0
 - FFT bins: 0-255 (256 bins)
@@ -1571,8 +1588,8 @@ Time between updates = R / fs (seconds)
 | Aspect | FFT Display | SPECTRO Display |
 |--------|-------------|-----------------|
 | **Visualization** | Single snapshot | Time-scrolling waterfall |
-| **Horizontal axis** | Frequency | Frequency (trace 0-3) or Time (trace 4-7) |
-| **Vertical axis** | Magnitude | Time (trace 0-3) or Frequency (trace 4-7) |
+| **Horizontal axis** | Frequency | Frequency (bit 2 clear: trace 0-3, 8-11) or Time (bit 2 set: trace 4-7, 12-15) |
+| **Vertical axis** | Magnitude | Time (bit 2 clear: trace 0-3, 8-11) or Frequency (bit 2 set: trace 4-7, 12-15) |
 | **Magnitude encoding** | Y-position (line graph) | Color intensity (heat map) |
 | **Time history** | None (single frame) | Configurable depth |
 | **Scrolling** | No | Yes (8 directions) |
@@ -1716,6 +1733,42 @@ if vColorMode in [key_hsv16..key_hsv16x] then
 ```
 
 **Result**: Lower 8 bits = magnitude, upper 8 bits = phase angle (hue).
+
+### 17.6 Receiving Types & Numeric Parity (TS-port Contract)
+
+This subsection captures the exact Pascal numeric semantics a TypeScript port must
+reproduce. Getting any of these wrong produces silently divergent pixels.
+
+**Receiving field types**:
+
+- Every receiving configuration field (`vWidth`, `vHeight`, `vRange`, `vRate`,
+  `vTrace`, `vDotSize`, `vDotSizeY`, `FFTexp`, `FFTmag`, `FFTfirst`, `FFTlast`,
+  `vColorTune`, …) is a **signed 32-bit `integer`** (`DebugDisplayUnit.pas` 284-313)
+  and therefore **wraps** on overflow.
+- The shared scan cursor `val` is likewise signed 32-bit `integer` (line 358); all
+  `Key*` helpers read from it.
+- `vTrace` is stored **raw** by `KeyVal(vTrace)` (1760, unclamped) and only later
+  reduced to 0..15 by the `$F` mask in `SetTrace` (2979).
+- `SPECTRO_Draw` uses a local **int64** `v` (1839) and deliberate `Int64()`
+  widening (1849) so the log-scale intermediates do not overflow 32 bits — the
+  receiving fields stay 32-bit, but this one render-loop accumulator is 64-bit by
+  design.
+
+**Parity notes** (operation-by-operation):
+
+| Operation | Source | Pascal semantics | TS port must use |
+|---|---|---|---|
+| RATE default `vRate := vSamples div 8` | 1778 | Pascal `div` = integer divide, **truncate toward zero** | `Math.trunc(vSamples / 8)`, not `>>` blindly (operands are non-negative here, but keep trunc semantics) |
+| SAMPLES snap `Trunc(Log2(Within(val,4,FFTmax)))` | 1744 | `Trunc` truncates **toward zero** (down, for positive) | `Math.trunc(Math.log2(...))` |
+| Log-scale `Round(Log2(Int64(v)+1)/Log2(Int64(vRange)+1)*vRange)` | 1849 | Delphi `Round` = **banker's rounding** (round-half-to-even) | banker's-round helper, **not** `Math.round` |
+| Linear scale `Round(v*fScale)` | 1850 | Delphi `Round` = **banker's rounding** | banker's-round helper, **not** `Math.round` |
+| `Within(value, min, max)` | GlobalUnit.pas 222-227 | **saturating** clamp (returns min/max), never wraps or errors | clamp, not modulo/throw |
+| `shr` (e.g. phase `FFTangle[x] shr 16`) | 1852 | **logical** right shift (unsigned fill) | `>>>`, not `>>` |
+| `UnPack` sign extension | 4166-4170 | **signed** sign-extension when `vPackSignx` and MSB set | replicate sign bit into the high bits |
+
+> Delphi's `Round` is the dominant trap: it rounds halves to the nearest **even**
+> value, so e.g. `Round(0.5)=0` and `Round(2.5)=2`, whereas `Math.round(0.5)=1` and
+> `Math.round(2.5)=3`. Both `SPECTRO_Draw` scaling steps (1849-1850) depend on this.
 
 ---
 

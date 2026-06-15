@@ -163,8 +163,9 @@ groups — the distinction the per-window chapters and the command reference
 - **Shared commands** are the handful every window understands, covered just below.
 
 A window opens when its creation `DEBUG()` runs and stays open as long as your
-program keeps running. There is no close command: when the program ends it stops
-feeding and the window stops updating — which is why the examples end in a
+program keeps running. You can dismiss one explicitly with the shared `` `CLOSE ``
+command (below), but most programs never need to — when the program ends it stops
+feeding and the window stops updating, which is why the examples end in a
 `repeat`, to keep the program, and its windows, alive.
 
 ## Commands common across windows
@@ -178,6 +179,9 @@ after the window name, the same way you send data:
   whole window rather than just the display area. The file is a `.bmp`; the
   extension is appended automatically, so give the name *without* it (`'scope'`,
   not `'scope.bmp'`).
+- **`CLOSE`** — close one window and free it. Most programs never need this — a
+  window also stops when the program stops feeding it — but `` `CLOSE `` lets you
+  dismiss a single window explicitly while the rest of the program keeps running.
 - **`UPDATE`** — control buffered repainting. A window placed in update mode (by
   adding `UPDATE` to its creation line) does not redraw as data arrives; it
   repaints only when you feed it the `UPDATE` command. This eliminates flicker when

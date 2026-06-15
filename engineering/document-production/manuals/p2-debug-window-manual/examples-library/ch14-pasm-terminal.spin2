@@ -1,0 +1,18 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  coginit(COGEXEC_NEW, @counter, 0)
+  repeat
+
+DAT
+              org
+counter
+              debug(`TERM Mon SIZE 30 8)
+.loop
+              add       n, #1
+              debug(`Mon 0 "count = " `uhex_long_(n) 13)
+              waitx     ##50_000_000
+              jmp       #.loop
+
+n             long      0

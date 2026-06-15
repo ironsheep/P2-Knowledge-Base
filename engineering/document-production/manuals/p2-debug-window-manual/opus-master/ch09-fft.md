@@ -208,12 +208,13 @@ own program or notes.
 
 ## Clearing and saving
 
-Two runtime commands work in the feed stream:
+Three runtime commands work in the feed stream:
 
 - `` `CLEAR `` — erases the display and resets the sample buffer, so the next
   spectrum is built from fresh samples rather than blending with what was already
   collected.
 - `` `SAVE 'name' `` — saves the current window image to `name.bmp` on the host.
+- `` `CLOSE `` — closes this window and frees its resources.
 
 ```spin2
 debug(`Spectrum CLEAR)

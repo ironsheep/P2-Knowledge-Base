@@ -270,6 +270,7 @@ Several change configuration mid-stream; the rest manage the display.
 | `CLEAR` | — | Fill the canvas with the background color; reset position |
 | `UPDATE` | — | Refresh the display now (required in manual-update mode) |
 | `SAVE` | — | Save the current canvas image to a file on the host |
+| `CLOSE` | — | Close this window and free its resources |
 
 `SCROLL` shifts the whole canvas by a signed amount: positive `x` scrolls right,
 negative left; positive `y` scrolls down, negative up. Each argument ranges over
