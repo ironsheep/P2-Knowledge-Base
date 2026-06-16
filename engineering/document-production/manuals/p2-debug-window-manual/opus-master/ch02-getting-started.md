@@ -15,9 +15,12 @@ Two things, and nothing else:
 - **A PC running `pnut_term_ts`**, the host application that compiles your program,
   programs the P2, and opens the DEBUG display windows.
 
-The compiler is `pnut_ts`. The host application that opens the display windows is
-`pnut_term_ts`. Those are the only two tools you interact with. Every example in
-this manual runs on a bare board with the USB cable as its only connection.
+The compiler is `pnut_ts`, and the host application that opens the display windows
+is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
+windows are also hosted by **PNut** and by the **Spin Tools IDE**, so the examples
+work in those environments too — just confirm your environment runs the DEBUG link
+at 2 Mbaud (see [Chapter 13](#ch-13)). Every example in this manual runs on a bare
+board with the USB cable as its only connection.
 
 ## Compiling with debugging
 

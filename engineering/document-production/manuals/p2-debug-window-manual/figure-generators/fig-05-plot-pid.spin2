@@ -2,7 +2,7 @@
 '' PLOT window, a PID control-loop strip chart (Chapter 5).
 '' A PI controller drives a first-order process; the chart shows the setpoint,
 '' the process variable's overshoot-and-settle, and the controller output.
-'' Fully synthetic, no hardware. Theme: black background, named trace colours.
+'' Fully synthetic, no hardware. Theme: light background, dark high-contrast traces.
 
 CON
   _clkfreq = 200_000_000
@@ -12,7 +12,7 @@ VAR
   long spH[STEPS], pvH[STEPS], ctlH[STEPS]
 
 PUB main() | t, sp, pv, ctl, err, integ
-  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $E8E8E8)
   debug(`Loop ORIGIN 0 10)                ' baseline at bottom; y up (default)
 
   ' run the control loop, recording every step
@@ -30,12 +30,12 @@ PUB main() | t, sp, pv, ctl, err, integ
 
   ' draw the three traces (set colour, then draw the polyline)
   debug(`Loop CLEAR)
-  debug(`Loop COLOR $808080)
-  trace(@ctlH)                            ' controller output (context)
-  debug(`Loop COLOR $00AAFF)
-  trace(@spH)                             ' setpoint
-  debug(`Loop COLOR $00FF00)
-  trace(@pvH)                             ' process variable
+  debug(`Loop COLOR $606060)
+  trace(@ctlH)                            ' controller output (context, dark gray)
+  debug(`Loop COLOR $0050C0)
+  trace(@spH)                             ' setpoint (blue)
+  debug(`Loop COLOR $008000)
+  trace(@pvH)                             ' process variable (green)
 
   waitms(200)
   debug(`Loop save 'fig-05-plot-pid')
@@ -47,4 +47,4 @@ PUB main() | t, sp, pv, ctl, err, integ
 PRI trace(p) | t
   debug(`Loop SET 0 `(long[p][0] * 3))    ' y: scale 0..100 -> 0..300 px
   repeat t from 1 to STEPS-1
-    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 2 255)

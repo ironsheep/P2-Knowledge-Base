@@ -268,9 +268,8 @@ running program — and for **transaction and event logging**, a running record 
 what happened and when.
 
 **On an embedded project**, you reach for it to show per-cog load and stack
-high-water marks, to inspect a peripheral's registers live, to report boot and POST
-status, to keep running fault and event counters, or to print a state machine's
-current state as it advances.
+high-water marks, to inspect a peripheral's registers live, to keep running fault
+and event counters, or to print a state machine's current state as it advances.
 
 **Bandwidth fit:** text and status panels update at human-readable rates — a few
 times a second is plenty — so TERM sits far inside the link budget; there is no

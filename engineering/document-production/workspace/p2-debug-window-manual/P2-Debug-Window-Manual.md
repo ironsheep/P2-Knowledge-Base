@@ -274,16 +274,19 @@ A number in the feed stream is interpreted one of two ways, and you control whic
   `FDEC_` (floating point), and `` `#(x) `` to send the character whose code is `x`.
   If `x` holds 25, then `` `udec_(x) `` puts the two characters `2` and `5` into the
   stream.
-- A **bare number** — one not wrapped in a formatter — is a *command code*. The
-  window reads it as an instruction, not as text to display.
+- A **bare number** — one not wrapped in a formatter — is *raw input* the window
+  interprets in its own way: in a TERM window it is a **command code** (cursor,
+  color, and control); in the graphing windows it is a **data value** (a sample to
+  plot). Either way it is not shown as the literal digits.
 
 This is why a terminal treats a bare `13` as a newline rather than printing the
 digits "13": `13` is a command code. To show the number thirteen, you would send
 `` `udec_(13) `` or the literal string `"13"`. Carry this rule into every chapter:
 
-> **To display a number, format it. To issue a command, send it bare.**
-> `` `udec_(temp) `` shows the value of `temp`; a bare `13` is a command code, not
-> the text "13".
+> **To display a number, format it. Send it bare and the window takes it as raw
+> input** — a command code in TERM, a plotted data value in the graphing windows.
+> `` `udec_(temp) `` shows the value of `temp`; a bare `13` in TERM is a command
+> code, not the text "13".
 
 Each window assigns its own meaning to its command codes and to its raw data
 values — what a number does in a TERM window (cursor and color control) is not what
@@ -358,9 +361,12 @@ you reach for these display windows.
 
 ## Tooling, in one line
 
-These windows are hosted by **`pnut_term_ts`**, the host application that opens and
-draws them. You produce a program that drives them by compiling with **`pnut_ts`**
-using the `-d` (debug) option. [Chapter 2](#ch-2) walks through installing and running both.
+These windows are hosted by **`pnut_term_ts`**, the host application this manual
+uses throughout to open and draw them. The same DEBUG display windows are also
+hosted by **PNut** and by the **Spin Tools IDE** — all three environments open and
+draw them, so the examples work in any of them. You produce a program that drives
+them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+[Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates
 
@@ -396,6 +402,14 @@ You do not need any of these to get started — but knowing the budget exists, a
 that these three strategies live within it, is what keeps the later chapters
 honest about which uses a given window can really serve.
 
+**One discipline follows from the link being serial: sending output is not free.**
+Each `DEBUG()` call shifts its bytes out one at a time, and the cog waits while it
+does — even at 2 Mbaud that is thousands of clocks per message. Keep `DEBUG()` out
+of time-critical regions: a debug call inside a tight timing loop distorts the very
+timing you are trying to observe. When you must watch a fast path, capture into a
+buffer at full speed and dump it once afterward (the capture-and-dump strategy
+above) rather than printing from inside the loop.
+
 ## Where to go next
 
 Read **[Chapter 2](#ch-2)** for setup — installing the tools and getting your first window
@@ -423,9 +437,12 @@ Two things, and nothing else:
 - **A PC running `pnut_term_ts`**, the host application that compiles your program,
   programs the P2, and opens the DEBUG display windows.
 
-The compiler is `pnut_ts`. The host application that opens the display windows is
-`pnut_term_ts`. Those are the only two tools you interact with. Every example in
-this manual runs on a bare board with the USB cable as its only connection.
+The compiler is `pnut_ts`, and the host application that opens the display windows
+is `pnut_term_ts`; this manual uses that pair throughout. The same DEBUG display
+windows are also hosted by **PNut** and by the **Spin Tools IDE**, so the examples
+work in those environments too — just confirm your environment runs the DEBUG link
+at 2 Mbaud (see [Chapter 13](#ch-13)). Every example in this manual runs on a bare
+board with the USB cable as its only connection.
 
 ## Compiling with debugging
 
@@ -868,9 +885,8 @@ running program — and for **transaction and event logging**, a running record 
 what happened and when.
 
 **On an embedded project**, you reach for it to show per-cog load and stack
-high-water marks, to inspect a peripheral's registers live, to report boot and POST
-status, to keep running fault and event counters, or to print a state machine's
-current state as it advances.
+high-water marks, to inspect a peripheral's registers live, to keep running fault
+and event counters, or to print a state machine's current state as it advances.
 
 **Bandwidth fit:** text and status panels update at human-readable rates — a few
 times a second is plenty — so TERM sits far inside the link budget; there is no
@@ -4533,8 +4549,13 @@ reads both input devices, using nothing but the debug link and a bare P2 board.
 # Chapter 13: Packed Data — Compact High-Rate Transfers {#ch-13}
 
 Every element you send to a window travels over the `DEBUG()` serial link. That
-link is finite — by default the P2 transmits debug output on pin P62 at 2 Mbaud in
-8-N-1 format. When your data is *small* — single bits from a logic capture, 8-bit
+link is finite. The P2 transmits debug output on pin P62 in 8-N-1 format at the
+rate set by the `DEBUG_BAUD` symbol, which defaults to `DOWNLOAD_BAUD` — **2 Mbaud**.
+`pnut_term_ts` is certified at 2 Mbaud, so keep the link there: set `DEBUG_BAUD`
+explicitly only if you have changed `DOWNLOAD_BAUD` or your clock requires it, and
+do not drop the DEBUG link to a slow rate such as 115200 — debugging needs the
+bandwidth. (If you drive the windows from the Spin Tools IDE, confirm it runs at
+2 Mbaud.) When your data is *small* — single bits from a logic capture, 8-bit
 samples from a scope trace — sending one value per element wastes the link: a
 1-bit sample carried as a full long spends 32 bits of wire to convey one bit of
 information.
@@ -4805,6 +4826,14 @@ its right — clear of a 400-pixel-wide SCOPE.
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 
+If you declare several windows **without** `POS`, `pnut_term_ts` places them for
+you — it offsets each new window from the base display position rather than opening
+them all on top of each other. That is enough to get started, but the arrangement is
+automatic, not one you chose. To capture a layout you *do* like, **drag a window**:
+while you move it, its title bar shows the window's current `left,top` in pixels.
+Read those numbers off and encode them into `POS` on that window's creation line,
+and your chosen arrangement reappears on every run.
+
 ### Feeding each window in your loop
 
 Once the windows exist, you feed them by name, one statement at a time. A loop that
@@ -4838,20 +4867,32 @@ target; nothing about the SCOPE feed affects the TERM feed or vice versa.
 
 ## Coordinating windows is just your code
 
-There is **no cross-window command**. Nothing you send to one window reaches
-another, and there is no broadcast, no "all windows" target, no synchronization
-group, no shared timestamp, no overlay or picture-in-picture between windows. The
-parser routes each backtick statement to exactly the one window its name
-identifies, and that is the whole model.
+There is **no cross-window *interaction***. Nothing you send to one window changes
+what another shows, and there is no wildcard "all windows" target, no
+synchronization group, no shared timestamp, no overlay or picture-in-picture
+between windows. What you *can* do is address several windows by name in a single
+feed (below); beyond that, the parser routes each backtick statement to the window
+names it carries, and that is the whole model.
 
 What looks like coordination is simply your program feeding related data to several
 windows in the same loop. If you want the SCOPE and the TERM to show the same
 moment, you send to both in the same iteration — as the example above does. The
 "synchronization" is the structure of your loop, not a feature of the windows.
 
-The same is true of one piece of data going to two places: you can feed the same
-value to more than one window by sending it in two statements. There is no single
-statement that fans out to multiple windows; you write the second feed yourself.
+Sending one piece of data to several windows *does* have a built-in shortcut: list
+more than one instance name after the backtick, and the same elements go to all of
+them in a single statement. This works when the windows interpret the data the same
+way — typically windows of the same type, or a shared directive such as `CLEAR` or
+`SAVE`:
+
+```spin2
+debug(`ScopeA ScopeB `(sample))    ' same sample to both SCOPEs
+debug(`ScopeA ScopeB CLEAR)        ' one CLEAR clears both
+```
+
+When the windows need *different* data — a raw sample to a SCOPE and a formatted
+line to a TERM — there is no fan-out; you write each feed yourself, in the same loop
+iteration so they show the same moment:
 
 ```spin2
 debug(`Wave `(sine))                    ' the SCOPE gets the sample

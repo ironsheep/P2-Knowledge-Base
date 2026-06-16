@@ -41,6 +41,14 @@ its right — clear of a 400-pixel-wide SCOPE.
 > `CON` block when you want to nudge the whole arrangement without editing each
 > `POS`. They default to `0`.
 
+If you declare several windows **without** `POS`, `pnut_term_ts` places them for
+you — it offsets each new window from the base display position rather than opening
+them all on top of each other. That is enough to get started, but the arrangement is
+automatic, not one you chose. To capture a layout you *do* like, **drag a window**:
+while you move it, its title bar shows the window's current `left,top` in pixels.
+Read those numbers off and encode them into `POS` on that window's creation line,
+and your chosen arrangement reappears on every run.
+
 ### Feeding each window in your loop
 
 Once the windows exist, you feed them by name, one statement at a time. A loop that
@@ -74,20 +82,32 @@ target; nothing about the SCOPE feed affects the TERM feed or vice versa.
 
 ## Coordinating windows is just your code
 
-There is **no cross-window command**. Nothing you send to one window reaches
-another, and there is no broadcast, no "all windows" target, no synchronization
-group, no shared timestamp, no overlay or picture-in-picture between windows. The
-parser routes each backtick statement to exactly the one window its name
-identifies, and that is the whole model.
+There is **no cross-window *interaction***. Nothing you send to one window changes
+what another shows, and there is no wildcard "all windows" target, no
+synchronization group, no shared timestamp, no overlay or picture-in-picture
+between windows. What you *can* do is address several windows by name in a single
+feed (below); beyond that, the parser routes each backtick statement to the window
+names it carries, and that is the whole model.
 
 What looks like coordination is simply your program feeding related data to several
 windows in the same loop. If you want the SCOPE and the TERM to show the same
 moment, you send to both in the same iteration — as the example above does. The
 "synchronization" is the structure of your loop, not a feature of the windows.
 
-The same is true of one piece of data going to two places: you can feed the same
-value to more than one window by sending it in two statements. There is no single
-statement that fans out to multiple windows; you write the second feed yourself.
+Sending one piece of data to several windows *does* have a built-in shortcut: list
+more than one instance name after the backtick, and the same elements go to all of
+them in a single statement. This works when the windows interpret the data the same
+way — typically windows of the same type, or a shared directive such as `CLEAR` or
+`SAVE`:
+
+```spin2
+debug(`ScopeA ScopeB `(sample))    ' same sample to both SCOPEs
+debug(`ScopeA ScopeB CLEAR)        ' one CLEAR clears both
+```
+
+When the windows need *different* data — a raw sample to a SCOPE and a formatted
+line to a TERM — there is no fan-out; you write each feed yourself, in the same loop
+iteration so they show the same moment:
 
 ```spin2
 debug(`Wave `(sine))                    ' the SCOPE gets the sample

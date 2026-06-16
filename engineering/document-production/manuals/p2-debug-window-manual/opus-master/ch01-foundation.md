@@ -130,16 +130,19 @@ A number in the feed stream is interpreted one of two ways, and you control whic
   `FDEC_` (floating point), and `` `#(x) `` to send the character whose code is `x`.
   If `x` holds 25, then `` `udec_(x) `` puts the two characters `2` and `5` into the
   stream.
-- A **bare number** — one not wrapped in a formatter — is a *command code*. The
-  window reads it as an instruction, not as text to display.
+- A **bare number** — one not wrapped in a formatter — is *raw input* the window
+  interprets in its own way: in a TERM window it is a **command code** (cursor,
+  color, and control); in the graphing windows it is a **data value** (a sample to
+  plot). Either way it is not shown as the literal digits.
 
 This is why a terminal treats a bare `13` as a newline rather than printing the
 digits "13": `13` is a command code. To show the number thirteen, you would send
 `` `udec_(13) `` or the literal string `"13"`. Carry this rule into every chapter:
 
-> **To display a number, format it. To issue a command, send it bare.**
-> `` `udec_(temp) `` shows the value of `temp`; a bare `13` is a command code, not
-> the text "13".
+> **To display a number, format it. Send it bare and the window takes it as raw
+> input** — a command code in TERM, a plotted data value in the graphing windows.
+> `` `udec_(temp) `` shows the value of `temp`; a bare `13` in TERM is a command
+> code, not the text "13".
 
 Each window assigns its own meaning to its command codes and to its raw data
 values — what a number does in a TERM window (cursor and color control) is not what
@@ -214,9 +217,12 @@ you reach for these display windows.
 
 ## Tooling, in one line
 
-These windows are hosted by **`pnut_term_ts`**, the host application that opens and
-draws them. You produce a program that drives them by compiling with **`pnut_ts`**
-using the `-d` (debug) option. [Chapter 2](#ch-2) walks through installing and running both.
+These windows are hosted by **`pnut_term_ts`**, the host application this manual
+uses throughout to open and draw them. The same DEBUG display windows are also
+hosted by **PNut** and by the **Spin Tools IDE** — all three environments open and
+draw them, so the examples work in any of them. You produce a program that drives
+them by compiling with **`pnut_ts`** using the `-d` (debug) option.
+[Chapter 2](#ch-2) walks through installing and running both.
 
 ## A note on high data rates
 
@@ -251,6 +257,14 @@ reach for one of three strategies for living within the budget:
 You do not need any of these to get started — but knowing the budget exists, and
 that these three strategies live within it, is what keeps the later chapters
 honest about which uses a given window can really serve.
+
+**One discipline follows from the link being serial: sending output is not free.**
+Each `DEBUG()` call shifts its bytes out one at a time, and the cog waits while it
+does — even at 2 Mbaud that is thousands of clocks per message. Keep `DEBUG()` out
+of time-critical regions: a debug call inside a tight timing loop distorts the very
+timing you are trying to observe. When you must watch a fast path, capture into a
+buffer at full speed and dump it once afterward (the capture-and-dump strategy
+above) rather than printing from inside the loop.
 
 ## Where to go next
 
