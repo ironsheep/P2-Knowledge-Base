@@ -44,7 +44,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | `10` | Font size; the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
-| `BACKCOLOR` | `rgb` | black | The window background color |
+| `BACKCOLOR` | `rgb` | black | The canvas background — the fill used for clear and scroll (not the per-character background) |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 
@@ -176,8 +176,10 @@ PUB log_loop() | n
 There are no ANSI escape sequences and no text attributes (bold, underline,
 blink). Positioning and color are done entirely with the command codes above. Line
 feed (`10`) and carriage return (`13`) both mean "newline," and a CR+LF pair counts
-as one newline — so text copied from a host that uses either convention behaves
-the same.
+as one newline. This holds when the newline is sent as a bare command number;
+inside a quoted string only CR (`13`) breaks the line, while `Chr(9)` and `Chr(10)`
+render as glyphs — so text pasted into a string literal will not treat its line
+feeds as newlines.
 
 ## Controlling updates
 

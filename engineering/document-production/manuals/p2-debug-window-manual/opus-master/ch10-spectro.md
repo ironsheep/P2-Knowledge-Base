@@ -50,7 +50,7 @@ The configuration keywords for the creation line:
 | `TITLE` | `'text'` | `SPECTRO` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SAMPLES` | `count` | `512` | FFT size; a power of two, **4–2048** |
-| `DEPTH` | `pixels` | varies | Time-history depth (the scrolling dimension), **1–2048** |
+| `DEPTH` | `pixels` | `256` | Time-history depth (the scrolling dimension), **1–2048** |
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
 | `TRACE` | `mode` | `15` | Scroll direction and scroll-enable (see "Scroll direction") |

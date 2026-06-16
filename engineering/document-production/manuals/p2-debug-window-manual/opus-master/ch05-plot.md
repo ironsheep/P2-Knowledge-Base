@@ -329,7 +329,8 @@ COLOR rgb
 The argument is a `$RRGGBB` value — for example `COLOR $FF0000` is red,
 `COLOR $00FF00` is green, `COLOR $0000FF` is blue. Named colors (`RED`, `GREEN`,
 `BLUE`, `WHITE`, `BLACK`, `CYAN`, `MAGENTA`, `YELLOW`, `ORANGE`, `GRAY`) are also
-accepted in the command stream.
+accepted in the command stream. Until you set `COLOR`, the default draw color is
+cyan (`$00FFFF`) and the default text color is white (`$FFFFFF`).
 
 `BACKCOLOR rgb` sets the background fill — the color `CLEAR` paints the canvas
 with. It is most often set on the creation line.
@@ -341,8 +342,9 @@ own:
 OPACITY byte
 ```
 
-The value is clamped to `0`–`255`, where `255` is fully opaque and lower values
-blend the primitive with whatever is already on the canvas. A per-primitive
+The value is a byte `0`–`255` (values outside that range wrap to their low 8 bits,
+so they are not saturated), where `255` is fully opaque and lower values blend the
+primitive with whatever is already on the canvas. A per-primitive
 `opacity` argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest)
 overrides this default for that one primitive.
 
@@ -374,10 +376,9 @@ sprite with a single command, which avoids re-issuing the geometry that built it
 LAYER layer 'filename.bmp'
 ```
 
-`LAYER` loads a Windows BMP file from the host into one of the eight layers. The
-file must be **24-bit, uncompressed (BI_RGB), with no alpha channel**; one BMP pixel
-maps to one canvas pixel with no scaling, so author the image at the exact pixel size
-you will display it.
+`LAYER` loads a Windows BMP file from the host into one of the eight layers; one
+BMP pixel maps to one canvas pixel with no scaling, so author the image at the exact
+pixel size you will display it. A 24-bit, uncompressed BMP is the safe choice.
 
 - `layer` — the layer index, **`1`–`8`** (there is no layer 0).
 - `filename` — a path to a file that must exist on the host and must end in
@@ -406,9 +407,9 @@ CROP layer left top width height {x y}
   canvas. The destination defaults to (`left`, `top`) and can be overridden with
   the optional trailing (`x`, `y`).
 
-The copy is a pixel-for-pixel block transfer with no scaling, and it is **opaque** —
-there is no transparency, so each `CROP` overwrites its destination rectangle
-completely. That is why there is no separate "clear": you *erase by restoring* —
+The copy is a pixel-for-pixel block transfer with no scaling, and in the default
+pixel format it is an **opaque** block copy, so each `CROP` overwrites its
+destination rectangle completely. That is why there is no separate "clear": you *erase by restoring* —
 copy clean background back over a region (the second form) or repaint the whole scene
 (the first form). [Chapter 15](#ch-15) builds the sprite-sheet panel technique on
 these three idioms.

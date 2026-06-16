@@ -77,10 +77,12 @@ A mode keyword may be followed by either or both of two optional keywords:
 - **`SIGNED`** — the host sign-extends each unpacked value. Without it, values are
   unsigned (the left column above); with it, they take the right column's signed
   range. Use it when your packed fields represent signed quantities.
-- **`ALT`** — the host reverses the order of the bits, double-bits, or nibbles
-  **within each byte** of the element, end-to-end. This helps when your source data
-  has its sub-byte fields in the opposite order from what the display expects — most
-  often bitmap data composed in a standard pixel format.
+- **`ALT`** — the host swaps **adjacent same-width fields** throughout the element:
+  neighbouring bits (0↔1, 2↔3, …), or 2-bit pairs, or nibbles, depending on the
+  mode's field width — a butterfly swap of neighbours across the whole long, not a
+  within-byte or end-to-end reversal. This helps when your source data has its
+  sub-field order swapped from what the display expects — most often bitmap data
+  composed in a standard pixel format.
 
 ```spin2
 ' two signed 16-bit values per long

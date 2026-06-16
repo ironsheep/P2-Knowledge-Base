@@ -44,13 +44,13 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | — | Canvas size in pixels; each is **1–2048** |
+| `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
 | `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
 | `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
-| `LUTCOLORS` | up to 256 `rgb` | grayscale | Define the palette for the LUT modes |
+| `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
-| `RATE` | `count` | full canvas | Pixels written between display refreshes |
+| `RATE` | `count` | one scan line | Pixels written between display refreshes |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | off | Packed pixel format (see "Packed pixel data") |
 | `UPDATE` | — | off | Enables manual update mode (see "Control commands") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
@@ -82,8 +82,8 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without defining a palette, the default palette is grayscale (entry 0 black,
-entry 255 white).
+mode without defining a palette, the palette is uninitialized and LUT-mode pixels
+render as garbage — you must supply one with `LUTCOLORS`.
 
 **Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
 color you pick with a color-tune keyword:
@@ -237,8 +237,8 @@ a whole number of pixels; otherwise a value's pixels can straddle a line boundar
 ### Random-access writes with SET
 
 When you do not want to stream, `SET` positions the pixel cursor directly. It takes
-an X and a Y (each clamped to the canvas bounds) and cancels any scrolling on the
-active pattern. The next pixel value you send lands at that position:
+an X and a Y (each must lie within the canvas bounds — an out-of-range coordinate
+is ignored, not clamped) and cancels any scrolling on the active pattern. The next pixel value you send lands at that position:
 
 ```spin2
 PUB main() | x, y, v
@@ -290,7 +290,9 @@ flicker-free updates — write an entire frame, then show it at once.
 
 `RATE` tunes the automatic-update cadence: the display refreshes once every `count`
 pixels. A small count repaints often (smoother, slower); a large count repaints
-rarely (faster, choppier). The default is one full canvas of pixels.
+rarely (faster, choppier). The default is one scan line — `width` pixels for
+horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
+(`width × height`).
 
 `SAVE` writes the current canvas to an image file on the host running
 `pnut_term_ts`.

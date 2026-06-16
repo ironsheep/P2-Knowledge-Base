@@ -46,9 +46,9 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Scope_XY` | The window's title-bar caption |
+| `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
 | `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square |
+| `SIZE` | `radius` | `256×256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256×256 (the default is a 256-pixel width, not a radius) |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |

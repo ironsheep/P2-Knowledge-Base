@@ -75,7 +75,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
 | `LINESIZE` | `width` | `3` | Line width (**−32–32**; negative draws filled bars) |
-| `TEXTSIZE` | `points` | `10` | Label font size |
+| `TEXTSIZE` | `points` | font (≈11) | Label font size; defaults to the window font (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |

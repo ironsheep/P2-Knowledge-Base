@@ -81,7 +81,7 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `lo hi` | Manual range: value at the bottom and top of the trace area | full 32-bit range |
 | `tall` | Vertical span of the trace, in pixels | full window height |
 | `base` | Vertical offset of the trace, in pixels | `0` |
-| `grid` | Grid spacing (accepted but not rendered by SCOPE) | `0` |
+| `grid` | Grid flags: 4-bit mask — bit0 baseline line, bit1 top line, bit2 min-value label, bit3 max-value label | `0` (off) |
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
 The first label after `SCOPE` becomes channel 0, the next becomes channel 1, and so
@@ -96,7 +96,8 @@ debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 ...
 
 Each channel here has a fixed range of −1000 to 1000, is 100 pixels tall, and is
 offset vertically by `base` (0, 100, 200) so the three traces stack instead of
-overlapping. The `grid` argument is `0`, and the last value is the trace color.
+overlapping. The `grid` argument is `0` (no grid lines or value labels), and the
+last value is the trace color.
 
 > The arguments are positional. To set `color`, you must supply the arguments before
 > it. If you want auto-ranging *and* a specific color, give `AUTO` followed by the

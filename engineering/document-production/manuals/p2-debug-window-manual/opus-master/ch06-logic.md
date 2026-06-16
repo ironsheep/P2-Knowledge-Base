@@ -226,8 +226,8 @@ debug(`Bus TRIGGER 0 0)            ' disable trigger (free-running)
 ```
 
 You issue `TRIGGER` as a runtime command after the window exists; it is not a
-creation-line keyword. The trigger only evaluates once the 2048-sample buffer has
-filled.
+creation-line keyword. The trigger only evaluates once the displayed window of
+samples (the `SAMPLES` count) has filled.
 
 ### Holdoff
 
@@ -389,8 +389,8 @@ trigger, and decode-in-code approach shows a live bus.
   each channel's bit (or field) lands at the right offset: channel 0 at bit 0, the
   next channel at the bits above it. A range channel consumes a contiguous field.
 - **The buffer is 2048 samples, shared, circular.** `SAMPLES` chooses how many are
-  drawn (4–2047). The full buffer always holds the most recent 2048 samples, so a
-  trigger can show context that extends beyond what is on screen.
+  drawn (4–2047) — and only that many are ever marked valid, so the trigger
+  evaluates and displays within the `SAMPLES` window, not the full 2048-deep buffer.
 - **Trigger fires on an edge, not a level.** It must first see a non-matching sample,
   then a matching one. A signal already sitting at the match value will not trigger
   until it leaves and returns. Use `HOLDOFF` to keep a busy signal from

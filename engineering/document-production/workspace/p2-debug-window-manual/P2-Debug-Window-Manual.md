@@ -644,7 +644,7 @@ The configuration keywords you can add to the creation line:
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
 | `TEXTSIZE` | `points` | `10` | Font size; the window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
-| `BACKCOLOR` | `rgb` | black | The window background color |
+| `BACKCOLOR` | `rgb` | black | The canvas background — the fill used for clear and scroll (not the per-character background) |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
 
@@ -776,8 +776,10 @@ PUB log_loop() | n
 There are no ANSI escape sequences and no text attributes (bold, underline,
 blink). Positioning and color are done entirely with the command codes above. Line
 feed (`10`) and carriage return (`13`) both mean "newline," and a CR+LF pair counts
-as one newline — so text copied from a host that uses either convention behaves
-the same.
+as one newline. This holds when the newline is sent as a bare command number;
+inside a quoted string only CR (`13`) breaks the line, while `Chr(9)` and `Chr(10)`
+render as glyphs — so text pasted into a string literal will not treat its line
+feeds as newlines.
 
 ## Controlling updates
 
@@ -944,13 +946,13 @@ The configuration keywords you can add to the creation line:
 |---------|-----------|---------|--------------|
 | `TITLE` | `'text'` | `BITMAP` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
-| `SIZE` | `width height` | — | Canvas size in pixels; each is **1–2048** |
+| `SIZE` | `width height` | `256 256` | Canvas size in pixels; each is **1–2048** |
 | `DOTSIZE` | `x [y]` | `1 1` | Pixel magnification for sparse mode; each is **1–256** |
 | `SPARSE` | `color` | off | Enable sparse mode; sets the grid-border color |
 | *color mode* | (varies) | `RGB24` | One of the 19 color-mode keywords (see below) |
-| `LUTCOLORS` | up to 256 `rgb` | grayscale | Define the palette for the LUT modes |
+| `LUTCOLORS` | up to 256 `rgb` | (none) | Define the palette for the LUT modes |
 | `TRACE` | `mode` | `0` | Scan/scroll pattern, **0–15** (see "Trace patterns") |
-| `RATE` | `count` | full canvas | Pixels written between display refreshes |
+| `RATE` | `count` | one scan line | Pixels written between display refreshes |
 | `LONGS_1BIT` … `BYTES_4BIT` | — | off | Packed pixel format (see "Packed pixel data") |
 | `UPDATE` | — | off | Enables manual update mode (see "Control commands") |
 | `HIDEXY` | — | off | Hides the coordinate readout |
@@ -982,8 +984,8 @@ The modes fall into four families:
 | `LUT8` | 8 | 256 | byte → entry 0–255 |
 
 `RGB24` is the window's default color mode — not a LUT mode. If you select a LUT
-mode without defining a palette, the default palette is grayscale (entry 0 black,
-entry 255 white).
+mode without defining a palette, the palette is uninitialized and LUT-mode pixels
+render as garbage — you must supply one with `LUTCOLORS`.
 
 **Luminance and RGB-intensity modes** — 8-bit value mapped against a single tint
 color you pick with a color-tune keyword:
@@ -1137,8 +1139,8 @@ a whole number of pixels; otherwise a value's pixels can straddle a line boundar
 ### Random-access writes with SET
 
 When you do not want to stream, `SET` positions the pixel cursor directly. It takes
-an X and a Y (each clamped to the canvas bounds) and cancels any scrolling on the
-active pattern. The next pixel value you send lands at that position:
+an X and a Y (each must lie within the canvas bounds — an out-of-range coordinate
+is ignored, not clamped) and cancels any scrolling on the active pattern. The next pixel value you send lands at that position:
 
 ```spin2
 PUB main() | x, y, v
@@ -1190,7 +1192,9 @@ flicker-free updates — write an entire frame, then show it at once.
 
 `RATE` tunes the automatic-update cadence: the display refreshes once every `count`
 pixels. A small count repaints often (smoother, slower); a large count repaints
-rarely (faster, choppier). The default is one full canvas of pixels.
+rarely (faster, choppier). The default is one scan line — `width` pixels for
+horizontal patterns, `height` for vertical; `RATE -1` selects a full canvas
+(`width × height`).
 
 `SAVE` writes the current canvas to an image file on the host running
 `pnut_term_ts`.
@@ -1644,7 +1648,8 @@ COLOR rgb
 The argument is a `$RRGGBB` value — for example `COLOR $FF0000` is red,
 `COLOR $00FF00` is green, `COLOR $0000FF` is blue. Named colors (`RED`, `GREEN`,
 `BLUE`, `WHITE`, `BLACK`, `CYAN`, `MAGENTA`, `YELLOW`, `ORANGE`, `GRAY`) are also
-accepted in the command stream.
+accepted in the command stream. Until you set `COLOR`, the default draw color is
+cyan (`$00FFFF`) and the default text color is white (`$FFFFFF`).
 
 `BACKCOLOR rgb` sets the background fill — the color `CLEAR` paints the canvas
 with. It is most often set on the creation line.
@@ -1656,8 +1661,9 @@ own:
 OPACITY byte
 ```
 
-The value is clamped to `0`–`255`, where `255` is fully opaque and lower values
-blend the primitive with whatever is already on the canvas. A per-primitive
+The value is a byte `0`–`255` (values outside that range wrap to their low 8 bits,
+so they are not saturated), where `255` is fully opaque and lower values blend the
+primitive with whatever is already on the canvas. A per-primitive
 `opacity` argument (the last argument of `DOT`, `LINE`, `CIRCLE`, and the rest)
 overrides this default for that one primitive.
 
@@ -1689,10 +1695,9 @@ sprite with a single command, which avoids re-issuing the geometry that built it
 LAYER layer 'filename.bmp'
 ```
 
-`LAYER` loads a Windows BMP file from the host into one of the eight layers. The
-file must be **24-bit, uncompressed (BI_RGB), with no alpha channel**; one BMP pixel
-maps to one canvas pixel with no scaling, so author the image at the exact pixel size
-you will display it.
+`LAYER` loads a Windows BMP file from the host into one of the eight layers; one
+BMP pixel maps to one canvas pixel with no scaling, so author the image at the exact
+pixel size you will display it. A 24-bit, uncompressed BMP is the safe choice.
 
 - `layer` — the layer index, **`1`–`8`** (there is no layer 0).
 - `filename` — a path to a file that must exist on the host and must end in
@@ -1721,9 +1726,9 @@ CROP layer left top width height {x y}
   canvas. The destination defaults to (`left`, `top`) and can be overridden with
   the optional trailing (`x`, `y`).
 
-The copy is a pixel-for-pixel block transfer with no scaling, and it is **opaque** —
-there is no transparency, so each `CROP` overwrites its destination rectangle
-completely. That is why there is no separate "clear": you *erase by restoring* —
+The copy is a pixel-for-pixel block transfer with no scaling, and in the default
+pixel format it is an **opaque** block copy, so each `CROP` overwrites its
+destination rectangle completely. That is why there is no separate "clear": you *erase by restoring* —
 copy clean background back over a region (the second form) or repaint the whole scene
 (the first form). [Chapter 15](#ch-15) builds the sprite-sheet panel technique on
 these three idioms.
@@ -2343,8 +2348,8 @@ debug(`Bus TRIGGER 0 0)            ' disable trigger (free-running)
 ```
 
 You issue `TRIGGER` as a runtime command after the window exists; it is not a
-creation-line keyword. The trigger only evaluates once the 2048-sample buffer has
-filled.
+creation-line keyword. The trigger only evaluates once the displayed window of
+samples (the `SAMPLES` count) has filled.
 
 ### Holdoff
 
@@ -2506,8 +2511,8 @@ trigger, and decode-in-code approach shows a live bus.
   each channel's bit (or field) lands at the right offset: channel 0 at bit 0, the
   next channel at the bits above it. A range channel consumes a contiguous field.
 - **The buffer is 2048 samples, shared, circular.** `SAMPLES` chooses how many are
-  drawn (4–2047). The full buffer always holds the most recent 2048 samples, so a
-  trigger can show context that extends beyond what is on screen.
+  drawn (4–2047) — and only that many are ever marked valid, so the trigger
+  evaluates and displays within the `SAMPLES` window, not the full 2048-deep buffer.
 - **Trigger fires on an edge, not a level.** It must first see a non-matching sample,
   then a matching one. A signal already sitting at the match value will not trigger
   until it leaves and returns. Use `HOLDOFF` to keep a busy signal from
@@ -2620,7 +2625,7 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `lo hi` | Manual range: value at the bottom and top of the trace area | full 32-bit range |
 | `tall` | Vertical span of the trace, in pixels | full window height |
 | `base` | Vertical offset of the trace, in pixels | `0` |
-| `grid` | Grid spacing (accepted but not rendered by SCOPE) | `0` |
+| `grid` | Grid flags: 4-bit mask — bit0 baseline line, bit1 top line, bit2 min-value label, bit3 max-value label | `0` (off) |
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
 The first label after `SCOPE` becomes channel 0, the next becomes channel 1, and so
@@ -2635,7 +2640,8 @@ debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 ...
 
 Each channel here has a fixed range of −1000 to 1000, is 100 pixels tall, and is
 offset vertically by `base` (0, 100, 200) so the three traces stack instead of
-overlapping. The `grid` argument is `0`, and the last value is the trace color.
+overlapping. The `grid` argument is `0` (no grid lines or value labels), and the
+last value is the trace color.
 
 > The arguments are positional. To set `color`, you must supply the arguments before
 > it. If you want auto-ranging *and* a specific color, give `AUTO` followed by the
@@ -3037,9 +3043,9 @@ The configuration keywords you can add to the creation line:
 
 | Keyword | Arguments | Default | What it sets |
 |---------|-----------|---------|--------------|
-| `TITLE` | `'text'` | `Scope_XY` | The window's title-bar caption |
+| `TITLE` | `'text'` | `- SCOPE_XY` | The window's title-bar caption (with no `TITLE`, the caption is `<name> - SCOPE_XY`) |
 | `POS` | `left top` | cascaded | Screen position of the window, in pixels |
-| `SIZE` | `radius` | `128` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square |
+| `SIZE` | `radius` | `256×256` | Display **radius** in pixels; the plot is `2*radius` wide and tall, and always square. With no `SIZE`, the plot is 256×256 (the default is a 256-pixel width, not a radius) |
 | `RANGE` | `value` | `$7FFFFFFF` | Symmetric coordinate extent: the plot spans `-value` to `+value` on both axes (in polar mode, `0` to `value` for the radius) |
 | `SAMPLES` | `count` | `256` | Persistence depth: how many recent points are kept and faded. `0` means infinite persistence — points accumulate and never fade |
 | `RATE` | `divisor` | `1` | Plot one display update per this many samples received |
@@ -3337,7 +3343,7 @@ The configuration keywords you can add to the creation line:
 | `RATE` | `count` | one per buffer | Redraw every `count` samples (**1–2048**) |
 | `DOTSIZE` | `radius` | `0` | Dot radius in pixels (**0–32**) |
 | `LINESIZE` | `width` | `3` | Line width (**−32–32**; negative draws filled bars) |
-| `TEXTSIZE` | `points` | `10` | Label font size |
+| `TEXTSIZE` | `points` | font (≈11) | Label font size; defaults to the window font (**6–200**) |
 | `COLOR` | `back grid` | black/grey | Background color, then grid/frame color (`$RRGGBB`) |
 | `LOGSCALE` | — | off | Logarithmic (log2-based) amplitude scaling |
 | `HIDEXY` | — | off | Hides the coordinate readout |
@@ -3683,7 +3689,7 @@ The configuration keywords for the creation line:
 | `TITLE` | `'text'` | `SPECTRO` | The window's title-bar text |
 | `POS` | `left top` | auto | Screen position of the window, in pixels |
 | `SAMPLES` | `count` | `512` | FFT size; a power of two, **4–2048** |
-| `DEPTH` | `pixels` | varies | Time-history depth (the scrolling dimension), **1–2048** |
+| `DEPTH` | `pixels` | `256` | Time-history depth (the scrolling dimension), **1–2048** |
 | `RANGE` | `value` | `$7FFFFFFF` | Magnitude ceiling — the bin magnitude that maps to full color, **1–$7FFFFFFF** |
 | `RATE` | `samples` | `SAMPLES`/8 | Samples taken in between display updates, **1–2048** |
 | `TRACE` | `mode` | `15` | Scroll direction and scroll-enable (see "Scroll direction") |
@@ -4601,10 +4607,12 @@ A mode keyword may be followed by either or both of two optional keywords:
 - **`SIGNED`** — the host sign-extends each unpacked value. Without it, values are
   unsigned (the left column above); with it, they take the right column's signed
   range. Use it when your packed fields represent signed quantities.
-- **`ALT`** — the host reverses the order of the bits, double-bits, or nibbles
-  **within each byte** of the element, end-to-end. This helps when your source data
-  has its sub-byte fields in the opposite order from what the display expects — most
-  often bitmap data composed in a standard pixel format.
+- **`ALT`** — the host swaps **adjacent same-width fields** throughout the element:
+  neighbouring bits (0↔1, 2↔3, …), or 2-bit pairs, or nibbles, depending on the
+  mode's field width — a butterfly swap of neighbours across the whole long, not a
+  within-byte or end-to-end reversal. This helps when your source data has its
+  sub-field order swapped from what the display expects — most often bitmap data
+  composed in a standard pixel format.
 
 ```spin2
 ' two signed 16-bit values per long
