@@ -640,7 +640,7 @@ default**. "color" = named color (§7.1) or numeric-through-color-mode.
 | *(Update)* `TEXTSIZE`/`TEXTSTYLE`/`TEXTANGLE` | n · int |
 | *(Update)* `LAYER` | n · int **1..8**; `'file.bmp'` (must exist) |
 | *(Update)* `CROP` | layer **1..8**; (`AUTO` x y \| left top width height {x y}) |
-| *(Update)* `SPRITEDEF` | id **0..255**; xsize **1..32**; ysize **1..32**; then **xsize·ysize pixel bytes** (each byte indexes this sprite's palette) followed by **up to 256 palette colors** (rgb-through-color-mode). The palette loop is `for i := 0 to 255 do if not KeyVal(...) then Break`, so it reads color longs only until the message ends — supply just the entries your indices reference — `2090-2100` |
+| *(Update)* `SPRITEDEF` | id **0..255**; xsize **1..32**; ysize **1..32**; then **xsize·ysize pixel bytes** (each byte indexes this sprite's palette) followed by **256 palette colors** (rgb-through-color-mode) — `2090-2100` |
 | *(Update)* `SPRITE` | id **0..255** {orient **0..7** {scale **1..64** {opacity **0..255**}}} |
 | *(Update)* `POLAR` | {twoPi · `int64`, theta · int} via same `KeyTwoPi` (2135-2136; −1 ⇒ `−$100000000`, 0 ⇒ `+$100000000`, else literal) | `CARTESIAN` {flipY {flipX} · bool} |
 
@@ -712,12 +712,12 @@ past 2⁵³. Do not add range checks the source does not have.
 
 Delphi `Round` uses **round-half-to-even (banker's rounding)**; JS `Math.round`
 rounds half **up**. They disagree on exact `.5` ties (e.g. `Round(2.5)=2`,
-`Math.round(2.5)=3`). There are dozens of `Round` call sites; the highest-risk
+`Math.round(2.5)=3`). There are **51** `Round` call sites; the highest-risk
 ones for visible divergence are:
 
 | Site(s) | What it rounds | Lines |
 |---|---|---|
-| Gamma alpha-blend (`SmoothFill`/`SmoothPlot`/`SmoothPixel`) | per-channel gamma-corrected blend result | 3803, 3827-3829, 4009-4011 |
+| Gamma alpha-blend (`MixColors`/`SmoothFill`/`SmoothPlot`/`SmoothPixel`) | per-channel gamma-corrected blend result | 3418-3420, 3803, 3827-3829, 4009-4011 |
 | SCOPE plot scale | x/y pixel from sample × scale | 1358-1359 |
 | FFT log/scale | log-magnitude and y pixel | 1699, 1701 |
 | SPECTRO log/scale | log-magnitude and intensity | 1849-1850 |
@@ -756,6 +756,8 @@ port must use 64-bit (BigInt or a checked 53-bit path) there and **only** there:
 
 | Line | Widened expression (why) |
 |---|---|
+| 683 | `Log2(Int64(vRange) + 1)` — mouse-readout polar-log path, same `+1` overflow guard as 1519 |
+| 705 | `Log2(Int64(vRange) + 1)` — mouse-readout polar-log path, same `+1` overflow guard as 1519 |
 | 1123 | `Int64(1) shl vLogicBits[j] - 1` — mask build can need bit 32 |
 | 1352 | `Abs(Int64(vHigh[j]) - Int64(vLow[j]))` — difference of two 32-bit signeds |
 | 1519 | `Log2(Int64(vRange) + 1)` — `vRange` up to `$7FFFFFFF`, `+1` overflows int32 |

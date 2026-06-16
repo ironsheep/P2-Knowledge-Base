@@ -1552,8 +1552,8 @@ vRate parameter:
 ```pascal
 function TDebugDisplayForm.RateCycle: boolean;
 begin
-  vRateCount := vRateCount + 1;
-  if vRateCount >= vRate then
+  Inc(vRateCount);
+  if vRateCount = vRate then
   begin
     vRateCount := 0;
     Result := True;
@@ -1930,16 +1930,17 @@ PackDef[key_longs_2bit]  = 0 shl 16 +  2 shl 8 + 16    // sign=0, shift=2, count
 **Encoding** (decoded by `SetPack`, lines 4146–4156):
 - Bits 0-7: `vPackCount` — sample count per packed value
 - Bits 8-15: `vPackShift` — bits per sample (right-shift amount)
-- Bit 16: sign-extend flag (0 = unsigned; set to 1 by the `SIGNED` modifier keyword)
+- Bit 16: unused placeholder, hard-coded `0` for every `PackDef` entry (lines 140–152) and never read for sign. Sign-extension is conveyed instead via the `signx` boolean parameter to `SetPack` (lines 4146–4156), which `KeyPack` (lines 2825–2831) sets from the `SIGNED` keyword. See §19.1.
 
 **NewPack Function**:
 ```pascal
 function TDebugDisplayForm.NewPack: integer;
 begin
-  if vPackAlt and not (NextNum and NextNum) then Exit;    // Alt mode: 2 nums per pack
-  if not NextNum then Exit;
   Result := val;
-  if vPackSignx then Result := SignExtend(Result);         // Sign-extend if needed
+  // ALT mode: reverse nibble/byte/word ordering
+  if vPackAlt and (vPackShift <= 1) then Result := Result shr 1 and $55555555 or Result shl 1 and $AAAAAAAA;
+  if vPackAlt and (vPackShift <= 2) then Result := Result shr 2 and $33333333 or Result shl 2 and $CCCCCCCC;
+  if vPackAlt and (vPackShift <= 4) then Result := Result shr 4 and $0F0F0F0F or Result shl 4 and $F0F0F0F0;
 end;
 ```
 
@@ -1947,9 +1948,10 @@ end;
 ```pascal
 function TDebugDisplayForm.UnPack(var v: integer): integer;
 begin
-  Result := v and vPackMask;                   // Extract bits
-  if vPackSignx then Result := SignExtend(Result);
-  v := v shr vPackShift;                       // Shift for next sample
+  Result := v and vPackMask;                                        // Extract low bits
+  v := v shr vPackShift;                                            // Shift for next sample
+  if vPackSignx and (Result shr (vPackShift - 1) and 1 = 1) then
+    Result := Result or ($FFFFFFFF xor vPackMask);                  // Sign-extend
 end;
 ```
 

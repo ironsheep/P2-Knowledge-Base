@@ -1062,15 +1062,14 @@ note_in_octave = note % 12
 
 **Example**:
 ```
-Note 60: 60/12 = 5, 60%12 = 0 → C5 (Middle C)
-Note 69: 69/12 = 5, 69%12 = 9 → A5 (440 Hz)
-Note 21: 21/12 = 1, 21%12 = 9 → A1 (A0 in piano naming)
+Note 60: 60/12 = 5, 60%12 = 0 → C4 (Middle C)
+Note 69: 69/12 = 5, 69%12 = 9 → A4 (440 Hz)
+Note 21: 21/12 = 1, 21%12 = 9 → A0
 ```
 
 **Note Naming Convention**:
-- **MIDI**: C5 = middle C (note 60)
-- **Piano**: C4 = middle C (note 60)
-- **This implementation**: Uses MIDI numbering
+- **Scientific pitch (C4 = middle C, note 60)**: this document's convention; consistent with A0 = note 21 and A4 = 440 Hz (note 69)
+- **This implementation**: The source labels keys with the raw MIDI note number only (`IntToStr(i)`); pitch names are documentation convention
 
 ### 11.2 Octave Pattern
 
@@ -1087,12 +1086,14 @@ note := i mod 12;
 black := note in [1, 3, 6, 8, 10];
 ```
 
-**Layout**:
+**Layout** (octave label = note/12 - 1, so note 0 = C-1 and note 60 = C4):
 ```
-Octave 0: C0, C#0, D0, D#0, E0, F0, F#0, G0, G#0, A0, A#0, B0
-Octave 1: C1, C#1, D1, D#1, E1, F1, F#1, G1, G#1, A1, A#1, B1
+Octave -1: C-1, C#-1, D-1, D#-1, E-1, F-1, F#-1, G-1, G#-1, A-1, A#-1, B-1   (notes 0-11)
+Octave  0: C0,  C#0,  D0,  D#0,  E0,  F0,  F#0,  G0,  G#0,  A0,  A#0,  B0     (notes 12-23, A0 = note 21)
 ...
-Octave 10: C10, C#10, D10, D#10, E10, F10, F#10, G10
+Octave  4: C4,  C#4,  D4,  D#4,  E4,  F4,  F#4,  G4,  G#4,  A4,  A#4,  B4     (notes 60-71, C4 = note 60)
+...
+Octave  9: C9,  C#9,  D9,  D#9,  E9,  F9,  F#9,  G9                            (notes 120-127)
 ```
 
 ### 11.3 Standard Piano Range

@@ -271,7 +271,7 @@ vTextSize    : integer;     // Font size in points — default DefaultTextSize =
                             //   via TEXTSIZE or the inline size of TEXT, clamp 6..200)
 vTextStyle   : integer;     // Style encoding (decl 340 — full signed integer; only the low bits
                             //   weight/italic/underline/halign/valign are consumed downstream)
-vTextAngle   : integer;     // Text rotation angle (tenths of degrees: 0-3600)
+vTextAngle   : integer;     // Text rotation angle (tenths of degrees; stored 0-3590, MakeTextAngle = (val mod 360)*10)
 ```
 
 **Style Encoding** (vTextStyle bit fields):
@@ -285,7 +285,7 @@ vTextAngle   : integer;     // Text rotation angle (tenths of degrees: 0-3600)
 | 6-7 | $C0 | 0-3 | Vertical alignment: 0/1=center, 2=top, 3=bottom |
 
 **Text Angle Units**:
-- Stored in tenths of degrees (0-3600 = 0-360°)
+- Stored in tenths of degrees (0-3590; one full turn = 3600 maps to 0)
 - Windows expects angle in tenths of degrees
 - Polar mode converts vTwoPi units to degrees
 

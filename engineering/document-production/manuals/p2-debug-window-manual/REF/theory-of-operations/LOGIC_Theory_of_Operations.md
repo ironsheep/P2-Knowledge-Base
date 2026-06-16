@@ -1703,11 +1703,17 @@ Total: ~800 bytes
 
 **Display Bitmaps**:
 ```
-Typical size: 256×256 pixels × 4 bytes (RGBA) = 256 KB
-Bitmap[0] + Bitmap[1] = 512 KB
+Bitmap size = vWidth × vHeight × 4 bytes (RGBA), per bitmap × 2 bitmaps
+  vWidth  = vSamples × vSpacing
+  vHeight = vLogicIndex × ChrHeight
 ```
+Bitmap memory is size-dependent: the window dimensions are computed at runtime
+from the sample count, spacing, channel count, and text metrics, so there is no
+single fixed byte figure. (`SetDefaults` seeds `vWidth`/`vHeight` to 256, but
+`LOGIC_Configure` overwrites them per the formulas above.)
 
-**Total**: ~520 KB (typical configuration)
+**Fixed cost**: the only fixed allocation is the 8 KB `LogicSampleBuff`
+(2048 × 4 bytes); the display bitmaps scale with the window size.
 
 ### 13.2 Rendering Performance
 
@@ -2435,8 +2441,7 @@ reading `LogicSampleBuff[(SamplePtr-k-1) and 2047]` and shifting/masking out tha
 channel's bits. The outer loop repeats per channel (line 1116 `while j < vLogicIndex`),
 so the buffer is re-scanned once per channel.
 
-**Footprint:** the buffer is 8 KB (2048 × 4 bytes), trivially cache-resident — far
-smaller than the fabricated 256 KB figure.
+**Footprint:** the buffer is 8 KB (2048 × 4 bytes), trivially cache-resident.
 
 ---
 
@@ -2622,7 +2627,7 @@ it leaves no on-screen marker. (Channel labels and the frame are drawn by
 **Rendering Cost Factors**:
 - Number of channels (vIndex)
 - Number of samples displayed (vSamples)
-- Line thickness (vDotSize)
+- Line thickness (vLineSize) and dot size (vDotSize)
 - Anti-aliasing overhead
 
 **Typical Performance** (32 channels, 512 samples, thickness=4):
@@ -2634,7 +2639,7 @@ Frame rate: 20-100 Hz
 **Optimization Strategies**:
 1. Reduce vSamples (horizontal resolution)
 2. Reduce vSpacing (vertical spacing)
-3. Use smaller vDotSize (line thickness)
+3. Use smaller vLineSize (line thickness) / vDotSize (dot size)
 4. Apply rate limiting (reduce update frequency)
 5. Disable unused channels
 
@@ -3069,7 +3074,7 @@ The **LOGIC** display window is a comprehensive digital logic analyzer for the P
 
 **Strengths**:
 - Efficient for digital signal visualization
-- Low memory usage (8 KB sample buffer + ~520 KB display)
+- Low memory usage (8 KB sample buffer + display bitmaps scale with window size)
 - Flexible data packing (32× bandwidth reduction)
 - Edge-sensitive trigger reduces false triggers
 

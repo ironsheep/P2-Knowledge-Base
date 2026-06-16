@@ -625,7 +625,7 @@ vCol := 0;     // Return to column 0
 
 **Bottom Row Case** (scroll required):
 ```pascal
-// Copy all rows up one line (row 1→0, 2→1, ..., 18→17)
+// Copy all rows up one line (row 1→0, 2→1, ..., 19→18)
 CopyRect(destination, source);
 
 // Clear bottom row

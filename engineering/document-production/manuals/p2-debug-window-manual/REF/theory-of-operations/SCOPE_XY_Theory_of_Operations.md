@@ -682,7 +682,7 @@ SCOPE_XY supports two display modes: **Persistent** and **Fading**.
 
 ### 7.1 Persistent Mode
 
-**Activation**: `SAMPLES 0` (default)
+**Activation**: `SAMPLES 0` (explicit — *not* the default; the default is 256 → fading, per SetDefaults line 2886)
 
 **Behavior**:
 - Points accumulate on display
