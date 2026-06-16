@@ -33,11 +33,6 @@ The repository is organized into two main trees:
 - `01-fundamentals/` - Getting started with P2
 - `p1-to-p2-migration-framework.md` - For P1 developers
 
-### `/deliverables/reference/`
-**Purpose**: Authoritative technical reference
-- `architecture-overview.md` - P2 hardware architecture
-- `pasm2-essentials.md` - Core instruction set reference
-
 ---
 
 ## 🛠️ ENGINEERING TREE
