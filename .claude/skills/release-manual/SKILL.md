@@ -34,7 +34,7 @@ Per manual being released:
    absorbed `PLATFORM` lines.
 4. **Enclosing-doc audit**: grep for stale version/date refs elsewhere; surface, don't edit.
 5. **Hand off git**: suggest the `git add` / `commit` / `tag` (and push, which activates the
-   `?raw=1` download links). Do NOT execute.
+   `raw.githubusercontent.com` download links). Do NOT execute.
 
 The phases below are the full form of each of these steps.
 
@@ -162,13 +162,16 @@ links). Use `mcp__filesystem__edit_file`; preserve surrounding prose exactly.
   *<Month Year> - Community Review Edition* | [Changelog](DOCs/<slug>-changelog.md)
   ```
 - **Force-download PDF links.** A plain `DOCs/x.pdf` link opens GitHub's blob viewer (which
-  can't render a PDF). Use the raw URL so the browser downloads it:
-  `https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/<PDF>?raw=1`
+  can't render a PDF). Use the **`raw.githubusercontent.com`** URL so the browser downloads it
+  (the older `github.com/.../blob/...?raw=1` form does NOT reliably download — the repo moved
+  off it; match whatever the sibling entries currently use):
+  `https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/<PDF>`
   (org/repo/branch from `git remote`; this repo = `ironsheep/P2-Knowledge-Base`, `main`).
-  Note to the user: **`?raw=1` links only resolve after the push** (the PDF must be on the
-  remote) — until then they 404.
+  Note to the user: **these links only resolve after the push** (the file must be on the
+  remote) — until then they 404. The same `raw.githubusercontent.com` form is used for any
+  binary download bundle (e.g. a source/example ZIP).
 - Keep changelog links relative (`DOCs/<slug>-changelog.md`) — markdown renders fine in the
-  blob view; only the binary PDFs need `?raw=1`.
+  blob view; only the binary downloads (PDF/ZIP) need the `raw.githubusercontent.com` URL.
 - If a "new release" was listed as upcoming, **remove it from the upcoming section** so it
   isn't duplicated (and prune any stale legacy "Coming Soon" list).
 
@@ -222,8 +225,8 @@ git add deliverables/documents/README.md \
 git commit -m "Release <slug> vX.Y.Z"
 git tag -a <slug>-vX.Y.Z -m "<Manual Name> vX.Y.Z"
 ```
-Tell the user: review the diff, then run these; **the push activates the `?raw=1` download
-links**; tagging gives `audit-changelog` a baseline for the next release. If Phase 4 surfaced
+Tell the user: review the diff, then run these; **the push activates the
+`raw.githubusercontent.com` download links**; tagging gives `audit-changelog` a baseline for the next release. If Phase 4 surfaced
 candidates, tell them to decide on those before committing so the release is captured in one
 logical commit.
 
