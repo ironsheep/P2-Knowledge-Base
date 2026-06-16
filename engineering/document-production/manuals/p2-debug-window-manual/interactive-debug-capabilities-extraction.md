@@ -1,6 +1,6 @@
-# JonnyMac Interactive Debug Capabilities - Complete Extraction
+# Interactive Debug Capabilities - Complete Extraction
 
-**Source**: JonnyMac's undocumented debug examples (`jpnnyMac-examples/`)
+**Source**: the undocumented debug examples (`jpnnyMac-examples/`)
 **Discovery Date**: 2025-09-14
 **Significance**: Revolutionary interactive debug capabilities completely missing from SPIN-2 v5.1
 
@@ -8,7 +8,7 @@
 
 ## 🚀 **MAJOR BREAKTHROUGH DISCOVERY**
 
-JonnyMac has reverse-engineered **advanced interactive BITMAP debugging capabilities** that transform debug windows from passive displays into **interactive graphical applications**. This represents the most significant gap between documented and actual P2 debug capabilities.
+Advanced interactive BITMAP debugging capabilities have been reverse-engineered that transform debug windows from passive displays into **interactive graphical applications**. This represents the most significant gap between documented and actual P2 debug capabilities.
 
 ---
 
@@ -54,15 +54,15 @@ JonnyMac has reverse-engineered **advanced interactive BITMAP debugging capabili
 ' High-precision needle positioning using CORDIC
 x1 := qcos(190<<8, aval-1400, 3600)
 y1 := qsin(190<<8, aval-1400, 3600)
-debug(`amp set `(160<<8, 225<<8))      ' Fixed-point coordinates
+debug(`amp set `(160<<8, 225<<8)) ' Fixed-point coordinates
 debug(`amp line `(x1+160<<8, y1+225<<8))
 
 ' Multi-layer digit display with decimal points
-debug(`amp crop 1 `(n*45, y2, 45, 60, x1, 161))  ' Source digit from sprite sheet
+debug(`amp crop 1 `(n*45, y2, 45, 60, x1, 161)) ' Source digit from sprite sheet
 ```
 
 **Applications**:
-- Motor control dashboards  
+- Motor control dashboards
 - Sensor monitoring displays
 - Real-time parameter visualization
 - Professional instrumentation emulation
@@ -74,13 +74,13 @@ debug(`amp crop 1 `(n*45, y2, 45, 60, x1, 161))  ' Source digit from sprite shee
 **Key Techniques**:
 ```spin2
 ' Dynamic layer selection based on data
-img := value.[bit] + 1 + (ledcolor * value.[bit])  ' Calculate layer: off/red/green
-debug(`panel crop `(img, x, y, 50, 50))           ' Update specific LED
+img := value.[bit] + 1 + (ledcolor * value.[bit]) ' Calculate layer: off/red/green
+debug(`panel crop `(img, x, y, 50, 50)) ' Update specific LED
 ```
 
 **Applications**:
 - Binary data visualization
-- Multi-channel status displays  
+- Multi-channel status displays
 - Real-time bit pattern monitoring
 - Hardware register visualization
 
@@ -92,13 +92,13 @@ debug(`panel crop `(img, x, y, 50, 50))           ' Update specific LED
 ```spin2
 ' Mouse click detection on specific regions
 if (lbutton)
-  if (ypos >= 129) && (ypos <= 179)
-    case xpos
-      265..285 : toggle_bit(0)     ' Precise click zones for each switch
+ if (ypos >= 129) && (ypos <= 179)
+ case xpos
+ 265..285 : toggle_bit(0) ' Precise click zones for each switch
 
 ' Multi-radix display with sprite-based digits
-x2 := d * 33                       ' Locate digit in sprite sheet
-debug(`switches crop 3 `(x2, 0, 33, 50, x1, 28))  ' Place digit from sheet
+x2 := d * 33 ' Locate digit in sprite sheet
+debug(`switches crop 3 `(x2, 0, 33, 50, x1, 28)) ' Place digit from sheet
 ```
 
 **Applications**:
@@ -114,12 +114,12 @@ debug(`switches crop 3 `(x2, 0, 33, 50, x1, 28))  ' Place digit from sheet
 **Key Techniques**:
 ```spin2
 ' Button state visualization
-debug(`ps2 crop `(btnslo.[0]+1, 255, 163, 30, 19))  ' Layer 1=off, 2=on
+debug(`ps2 crop `(btnslo.[0]+1, 255, 163, 30, 19)) ' Layer 1=off, 2=on
 
 ' Real-time text overlays
 debug(`ps2 textstyle %11110000 color black text 14 '`(lx))
 
-' Dynamic circle positioning for analog sticks  
+' Dynamic circle positioning for analog sticks
 debug(`ps2 set `(238-28+lx, 254-28+ly))
 debug(`ps2 circle 15)
 ```
@@ -137,9 +137,9 @@ debug(`ps2 circle 15)
 **Key Techniques**:
 ```spin2
 ' Sprite-based digit rendering with leading zero suppression
-if (i == 0) || (value)                               ' Show digit?
-  x2 := d * 44                                       ' Locate in sprite sheet
-  debug(`panel crop 3 `(x2, 0, 44, 54, x1, 53))      ' Place from sheet
+if (i == 0) || (value) ' Show digit?
+ x2 := d * 44 ' Locate in sprite sheet
+ debug(`panel crop 3 `(x2, 0, 44, 54, x1, 53)) ' Place from sheet
 ```
 
 **Applications**:
@@ -158,7 +158,7 @@ if (i == 0) || (value)                               ' Show digit?
 - **Sprite sheet extraction** - Copy portions of images to create animations
 - **State-driven visualization** - Automatic graphic selection based on values
 
-### **High-Precision Graphics**  
+### **High-Precision Graphics**
 - **Fixed-point coordinates** - Sub-pixel positioning accuracy
 - **CORDIC integration** - Hardware-accelerated trigonometry for graphics
 - **Precise line rendering** - Fractional pixel line widths
@@ -176,7 +176,7 @@ if (i == 0) || (value)                               ' Show digit?
 
 ### **Pattern 1: Interactive Instrument Creation**
 1. **Design background graphic** with instrument layout
-2. **Create sprite sheets** for all possible states/values  
+2. **Create sprite sheets** for all possible states/values
 3. **Implement layer system** for state visualization
 4. **Add PC input handling** for interactive control
 5. **Update display** using selective CROP operations
@@ -190,7 +190,7 @@ if (i == 0) || (value)                               ' Show digit?
 
 ### **Pattern 3: Interactive Development Tools**
 1. **Define clickable regions** for parameter control
-2. **Implement mouse detection** for user interaction  
+2. **Implement mouse detection** for user interaction
 3. **Create visual feedback** for user actions
 4. **Update calculations** based on user input
 5. **Display results** with professional graphics
@@ -205,7 +205,7 @@ if (i == 0) || (value)                               ' Show digit?
 - **Sprite positioning** - Fast copy operations vs. drawing
 - **Minimal data transfer** - Small CROP operations vs. full redraws
 
-### **Interaction Responsiveness**  
+### **Interaction Responsiveness**
 - **Real-time input polling** - PC_KEY/PC_MOUSE zero-latency
 - **Immediate visual feedback** - Graphics update on same frame
 - **Precise click detection** - Pixel-level accuracy for controls
@@ -218,28 +218,28 @@ if (i == 0) || (value)                               ' Show digit?
 ### **Layer Management Strategy**
 ```spin2
 ' Setup phase - load all required images
-debug(`window layer 1 'background.bmp')     ' Base graphics
-debug(`window layer 2 'elements_off.bmp')   ' Default state  
-debug(`window layer 3 'elements_on.bmp')    ' Active state
-debug(`window layer 4 'digits.bmp')         ' Text/numbers
+debug(`window layer 1 'background.bmp') ' Base graphics
+debug(`window layer 2 'elements_off.bmp') ' Default state
+debug(`window layer 3 'elements_on.bmp') ' Active state
+debug(`window layer 4 'digits.bmp') ' Text/numbers
 ```
 
 ### **Efficient Update Pattern**
 ```spin2
 ' Runtime - selective updates only
-debug(`window crop 1 region_x region_y region_w region_h)  ' Clear area
-debug(`window crop 3 src_x src_y src_w src_h dst_x dst_y)   ' Place new graphic
-debug(`window update)                                      ' Refresh display
+debug(`window crop 1 region_x region_y region_w region_h) ' Clear area
+debug(`window crop 3 src_x src_y src_w src_h dst_x dst_y) ' Place new graphic
+debug(`window update) ' Refresh display
 ```
 
 ### **PC Input Integration Pattern**
 ```spin2
 ' Polling loop for user interaction
-debug(`window `pc_mouse(@xpos))           ' Get current mouse state
-if (lbutton)                             ' Process mouse clicks
-  ' Determine clicked region and respond
-if (key := PC_KEY())                     ' Process keyboard input
-  ' Handle shortcuts and mode changes
+debug(`window `pc_mouse(@xpos)) ' Get current mouse state
+if (lbutton) ' Process mouse clicks
+ ' Determine clicked region and respond
+if (key := PC_KEY) ' Process keyboard input
+ ' Handle shortcuts and mode changes
 ```
 
 ---
@@ -255,7 +255,7 @@ if (key := PC_KEY())                     ' Process keyboard input
 ### **Development Workflow Integration**
 - **Live parameter tuning** - Adjust values while code runs
 - **Visual debugging** - See data relationships graphically
-- **Interactive testing** - Control system via mouse/keyboard  
+- **Interactive testing** - Control system via mouse/keyboard
 - **Professional presentation** - Client-ready debugging displays
 
 ---
@@ -264,7 +264,7 @@ if (key := PC_KEY())                     ' Process keyboard input
 
 **CRITICAL**: These interactive capabilities represent the **most significant advancement** in P2 debug window usage. They transform debug windows from:
 - ❌ **Passive data display** → ✅ **Interactive development environments**
-- ❌ **Text-based debugging** → ✅ **Professional graphical interfaces**  
+- ❌ **Text-based debugging** → ✅ **Professional graphical interfaces**
 - ❌ **One-way information** → ✅ **Bidirectional control systems**
 
 **Manual Requirements**:

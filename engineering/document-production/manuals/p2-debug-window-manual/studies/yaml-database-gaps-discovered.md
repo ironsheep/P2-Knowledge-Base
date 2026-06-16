@@ -11,8 +11,8 @@
 ### **Priority 1: AI Download-on-Demand Impact**
 Gaps that prevent AI from generating working debug code without human intervention
 
-### **Priority 2: Novel Technique Documentation** 
-Advanced patterns (like JonnyMac discoveries) needing dedicated YAML files
+### **Priority 2: Novel Technique Documentation**
+Advanced patterns (like layer-system techniques) needing dedicated YAML files
 
 ### **Priority 3: Missing Parameter Specifications**
 Incomplete command/parameter documentation affecting code generation
@@ -38,13 +38,13 @@ Incomplete command/parameter documentation affecting code generation
 
 ### **CRITICAL PRIORITY GAPS** (Prevent AI from using major features)
 
-#### **Gap: JonnyMac Layer System Commands**
+#### **Gap: Layer System Commands**
 **Window Type**: PLOT
 **Impact**: AI cannot use revolutionary sprite-based graphics system
 **Missing Information**: LAYER, CROP commands and all parameters
 **Suggested Solution**: Create plot-layers.yaml with complete specification
 **Priority**: CRITICAL - 20× performance improvement unavailable
-**Discovery Context**: JonnyMac examples show undocumented capabilities
+**Discovery Context**: examples show undocumented capabilities
 
 #### **Gap: PC Input Integration for Graphics Windows**
 **Window Type**: PLOT, BITMAP
@@ -52,7 +52,7 @@ Incomplete command/parameter documentation affecting code generation
 **Missing Information**: pc_key, pc_mouse integration with graphics windows
 **Suggested Solution**: Add interactive_commands section to plot.yaml and bitmap.yaml
 **Priority**: CRITICAL - Bidirectional debugging unavailable
-**Discovery Context**: JonnyMac interactive examples
+**Discovery Context**: interactive examples
 
 ### **HIGH PRIORITY GAPS** (Block important functionality)
 
@@ -107,7 +107,7 @@ Incomplete command/parameter documentation affecting code generation
 **Missing Information**: <<8 coordinate scaling, CARTESIAN command
 **Suggested Solution**: Add precision_graphics section to plot.yaml
 **Priority**: HIGH - Professional graphics require this
-**Discovery Context**: JonnyMac gauge examples
+**Discovery Context**: gauge examples
 
 #### **Gap: MIDI Display Mode Specifications**
 **Window Type**: MIDI
@@ -133,7 +133,7 @@ Incomplete command/parameter documentation affecting code generation
 - **Total gaps discovered**: 45 → 41 (4 were incorrect assumptions)
 - **Features that DON'T EXIST**: 4 (protocol decode, SCOPE measurements, FFT measurements)
 - **Features ALREADY DOCUMENTED**: 1 (SPRITEDEF/SPRITE for PLOT)
-- **CRITICAL priority**: 2 (JonnyMac system, PC input graphics) 
+- **CRITICAL priority**: 2 (system, PC input graphics)
 - **HIGH priority for AI capability**: 10 → 6 (removed non-existent features)
 - **MEDIUM priority**: 18
 - **LOW priority**: 15
@@ -143,7 +143,7 @@ Incomplete command/parameter documentation affecting code generation
 ## 🎯 **TOP RECOMMENDATIONS FOR KNOWLEDGE BASE IMPROVEMENT**
 
 ### **Immediate Action Required** (Would unlock major capabilities)
-1. **Document JonnyMac Layer System** - Revolutionary 20× performance gain
+1. **Document Layer System** - Revolutionary 20× performance gain
 2. **Add PC Input to Graphics Windows** - Enables interactive debugging
 3. ~~Create protocol-decoders.yaml~~ - **REMOVED: Feature doesn't exist**
 4. ~~Document all measurement commands~~ - **REMOVED: Features don't exist**
@@ -165,7 +165,7 @@ Incomplete command/parameter documentation affecting code generation
 
 **If all CRITICAL and HIGH priority gaps were addressed:**
 - AI could generate 95% working debug code without human intervention
-- JonnyMac patterns would become accessible (20× performance improvement)
+- layer patterns would become accessible (20× performance improvement)
 - Interactive debugging would be fully supported
 - ~~Protocol analysis would be automated~~ - **NOT POSSIBLE: Feature doesn't exist**
 - ~~Professional instrumentation creation would be possible~~ - **LIMITED: No auto measurements**

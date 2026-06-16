@@ -28,9 +28,9 @@ DEBUG(`TERM Control TITLE 'Controls' POS 0 0 SIZE 300 600)
 DEBUG(`[VISUAL] Display TITLE 'Display' POS 310 0 SIZE 900 600)
 
 REPEAT
-  key := PC_KEY()  ' Get control input
-  update_parameters(key)
-  update_visual_display()
+ key := PC_KEY ' Get control input
+ update_parameters(key)
+ update_visual_display
 ```
 
 #### **SCOPE + FFT**
@@ -42,16 +42,16 @@ REPEAT
 ```spin2
 ' Shared buffer for both domains
 VAR
-  long sample_buffer[2048]
+ long sample_buffer[2048]
 
-PUB dual_domain()
-  DEBUG(`SCOPE Time TITLE 'Waveform' POS 0 0 SIZE 800 300)
-  DEBUG(`FFT Freq TITLE 'Spectrum' POS 0 310 SIZE 800 300)
-  
-  REPEAT
-    capture_samples(@sample_buffer, 2048)
-    DEBUG(`Time SCOPE @sample_buffer 2048)
-    DEBUG(`Freq FFT @sample_buffer)
+PUB dual_domain
+ DEBUG(`SCOPE Time TITLE 'Waveform' POS 0 0 SIZE 800 300)
+ DEBUG(`FFT Freq TITLE 'Spectrum' POS 0 310 SIZE 800 300)
+
+ REPEAT
+ capture_samples(@sample_buffer, 2048)
+ DEBUG(`Time SCOPE @sample_buffer 2048)
+ DEBUG(`Freq FFT @sample_buffer)
 ```
 
 #### **LOGIC + SCOPE**
@@ -62,18 +62,18 @@ PUB dual_domain()
 
 ```spin2
 ' Synchronized mixed-signal capture
-PUB mixed_signal()
-  configure_common_trigger()
-  
-  REPEAT
-    wait_for_trigger()
-    capture_digital_and_analog()  ' Atomic capture
-    display_synchronized()
+PUB mixed_signal
+ configure_common_trigger
+
+ REPEAT
+ wait_for_trigger
+ capture_digital_and_analog ' Atomic capture
+ display_synchronized
 ```
 
 ### **Tier 2: Advanced Combinations** (Professional Use)
 
-#### **PLOT + JonnyMac Layers + PC Input**
+#### **PLOT + Layers + PC Input**
 **Pattern**: Interactive instrumentation
 **Performance**: Layer system enables 60 FPS
 **Memory**: Layers cached in host memory
@@ -84,12 +84,12 @@ PUB mixed_signal()
 DEBUG(`PLOT Gauge TITLE 'Interactive Gauge' SIZE 400 400)
 DEBUG(`Gauge LAYER 0 'gauge_face.bmp')
 DEBUG(`Gauge LAYER 1 'needle_sprites.bmp')
-DEBUG(`Gauge `pc_mouse(@mx))  ' Enable mouse
+DEBUG(`Gauge `pc_mouse(@mx)) ' Enable mouse
 
 REPEAT
-  IF lbutton
-    value := mouse_to_value(mx, my)
-    update_gauge_needle(value)
+ IF lbutton
+ value := mouse_to_value(mx, my)
+ update_gauge_needle(value)
 ```
 
 #### **FFT + SPECTRO + SCOPE**
@@ -160,58 +160,58 @@ REPEAT
 ```spin2
 ' CORRECT: Shared buffer pattern
 VAR
-  long shared_buffer[2048]
-  long buffer_lock
+ long shared_buffer[2048]
+ long buffer_lock
 
-PUB multi_window_share()
-  REPEAT
-    IF NOT buffer_lock
-      buffer_lock := TRUE
-      capture_data(@shared_buffer, 2048)
-      
-      ' Multiple windows use same data
-      DEBUG(`Window1 PROCESS @shared_buffer)
-      DEBUG(`Window2 PROCESS @shared_buffer)
-      
-      buffer_lock := FALSE
+PUB multi_window_share
+ REPEAT
+ IF NOT buffer_lock
+ buffer_lock := TRUE
+ capture_data(@shared_buffer, 2048)
+
+ ' Multiple windows use same data
+ DEBUG(`Window1 PROCESS @shared_buffer)
+ DEBUG(`Window2 PROCESS @shared_buffer)
+
+ buffer_lock := FALSE
 ```
 
 ### **Trigger Synchronization**
 
 ```spin2
 ' Synchronized trigger for multiple windows
-PUB synchronized_capture() | trigger_armed
-  
-  ' Configure all windows with same trigger
-  DEBUG(`SCOPE MyScope TRIGGER 1650 RISING)
-  DEBUG(`LOGIC MyLogic TRIGGER %00001111 %11111111)
-  
-  trigger_armed := TRUE
-  
-  REPEAT UNTIL trigger_detected()
-  
-  ' Capture all simultaneously
-  capture_all_windows()
+PUB synchronized_capture | trigger_armed
+
+ ' Configure all windows with same trigger
+ DEBUG(`SCOPE MyScope TRIGGER 1650 RISING)
+ DEBUG(`LOGIC MyLogic TRIGGER %00001111 %11111111)
+
+ trigger_armed := TRUE
+
+ REPEAT UNTIL trigger_detected
+
+ ' Capture all simultaneously
+ capture_all_windows
 ```
 
 ### **Processing Pipeline**
 
 ```spin2
 ' Pipeline pattern for data flow
-PUB processing_pipeline()
-  
-  REPEAT
-    ' Stage 1: Capture
-    capture_raw_data(@raw_buffer)
-    
-    ' Stage 2: Process
-    perform_fft(@raw_buffer, @fft_buffer)
-    extract_features(@fft_buffer, @features)
-    
-    ' Stage 3: Display
-    DEBUG(`Scope RAW @raw_buffer)
-    DEBUG(`FFT SPECTRUM @fft_buffer)
-    DEBUG(`TERM FEATURES @features)
+PUB processing_pipeline
+
+ REPEAT
+ ' Stage 1: Capture
+ capture_raw_data(@raw_buffer)
+
+ ' Stage 2: Process
+ perform_fft(@raw_buffer, @fft_buffer)
+ extract_features(@fft_buffer, @features)
+
+ ' Stage 3: Display
+ DEBUG(`Scope RAW @raw_buffer)
+ DEBUG(`FFT SPECTRUM @fft_buffer)
+ DEBUG(`TERM FEATURES @features)
 ```
 
 ---
@@ -222,42 +222,42 @@ PUB processing_pipeline()
 
 ```spin2
 VAR
-  long frame_counter
-  long window_ready[8]
+ long frame_counter
+ long window_ready[8]
 
-PUB synchronized_display()
-  
-  REPEAT
-    frame_counter++
-    
-    ' All windows wait for frame
-    REPEAT UNTIL frame_counter // 4 == 0
-    
-    ' Update all windows together
-    update_all_windows()
-    
-    ' Mark completion
-    REPEAT i FROM 0 TO 7
-      window_ready[i] := TRUE
+PUB synchronized_display
+
+ REPEAT
+ frame_counter++
+
+ ' All windows wait for frame
+ REPEAT UNTIL frame_counter // 4 == 0
+
+ ' Update all windows together
+ update_all_windows
+
+ ' Mark completion
+ REPEAT i FROM 0 TO 7
+ window_ready[i] := TRUE
 ```
 
 ### **Event-Driven Coordination**
 
 ```spin2
-PUB event_driven() | event
-  
-  REPEAT
-    event := wait_for_event()
-    
-    CASE event
-      EVENT_TRIGGER:
-        capture_all_windows()
-        
-      EVENT_THRESHOLD:
-        highlight_all_windows()
-        
-      EVENT_COMPLETE:
-        save_all_window_data()
+PUB event_driven | event
+
+ REPEAT
+ event := wait_for_event
+
+ CASE event
+ EVENT_TRIGGER:
+ capture_all_windows
+
+ EVENT_THRESHOLD:
+ highlight_all_windows
+
+ EVENT_COMPLETE:
+ save_all_window_data
 ```
 
 ---
@@ -267,58 +267,58 @@ PUB event_driven() | event
 ### **Template 1: Complete Instrument Suite**
 
 ```spin2
-PUB professional_instrument()
-  ' Control panel
-  DEBUG(`TERM Control TITLE 'Instrument Control' POS 0 0 SIZE 300 800)
-  
-  ' Time domain
-  DEBUG(`SCOPE Waveform TITLE 'Oscilloscope' POS 310 0 SIZE 600 300)
-  
-  ' Frequency domain
-  DEBUG(`FFT Spectrum TITLE 'Spectrum Analyzer' POS 310 310 SIZE 600 300)
-  
-  ' Digital signals
-  DEBUG(`LOGIC Digital TITLE 'Logic Analyzer' POS 920 0 SIZE 600 300)
-  
-  ' Measurements
-  DEBUG(`PLOT Measurements TITLE 'Trends' POS 920 310 SIZE 600 300)
+PUB professional_instrument
+ ' Control panel
+ DEBUG(`TERM Control TITLE 'Instrument Control' POS 0 0 SIZE 300 800)
+
+ ' Time domain
+ DEBUG(`SCOPE Waveform TITLE 'Oscilloscope' POS 310 0 SIZE 600 300)
+
+ ' Frequency domain
+ DEBUG(`FFT Spectrum TITLE 'Spectrum Analyzer' POS 310 310 SIZE 600 300)
+
+ ' Digital signals
+ DEBUG(`LOGIC Digital TITLE 'Logic Analyzer' POS 920 0 SIZE 600 300)
+
+ ' Measurements
+ DEBUG(`PLOT Measurements TITLE 'Trends' POS 920 310 SIZE 600 300)
 ```
 
 ### **Template 2: Audio Engineering Workstation**
 
 ```spin2
-PUB audio_workstation()
-  ' Waveform
-  DEBUG(`SCOPE Wave TITLE 'Waveform' POS 0 0 SIZE 800 200)
-  
-  ' Spectrum
-  DEBUG(`FFT Spectrum TITLE 'Spectrum' POS 0 210 SIZE 400 300)
-  
-  ' Spectrogram
-  DEBUG(`SPECTRO Spectro TITLE 'Spectrogram' POS 410 210 SIZE 400 300)
-  
-  ' Phase
-  DEBUG(`SCOPE_XY Phase TITLE 'Stereo Field' POS 820 0 SIZE 300 300)
-  
-  ' Controls
-  DEBUG(`TERM Mix TITLE 'Mixer' POS 820 310 SIZE 300 200)
+PUB audio_workstation
+ ' Waveform
+ DEBUG(`SCOPE Wave TITLE 'Waveform' POS 0 0 SIZE 800 200)
+
+ ' Spectrum
+ DEBUG(`FFT Spectrum TITLE 'Spectrum' POS 0 210 SIZE 400 300)
+
+ ' Spectrogram
+ DEBUG(`SPECTRO Spectro TITLE 'Spectrogram' POS 410 210 SIZE 400 300)
+
+ ' Phase
+ DEBUG(`SCOPE_XY Phase TITLE 'Stereo Field' POS 820 0 SIZE 300 300)
+
+ ' Controls
+ DEBUG(`TERM Mix TITLE 'Mixer' POS 820 310 SIZE 300 200)
 ```
 
 ### **Template 3: Embedded System Debugger**
 
 ```spin2
-PUB embedded_debugger()
-  ' Code execution
-  DEBUG(`TERM Console TITLE 'Debug Console' POS 0 0 SIZE 600 400)
-  
-  ' Protocol analyzer
-  DEBUG(`LOGIC Protocol TITLE 'Bus Activity' POS 610 0 SIZE 600 200)
-  
-  ' Power monitoring
-  DEBUG(`SCOPE Power TITLE 'Power Rails' POS 610 210 SIZE 600 200)
-  
-  ' Memory view
-  DEBUG(`BITMAP Memory TITLE 'Memory Map' POS 0 410 SIZE 1210 200)
+PUB embedded_debugger
+ ' Code execution
+ DEBUG(`TERM Console TITLE 'Debug Console' POS 0 0 SIZE 600 400)
+
+ ' Protocol analyzer
+ DEBUG(`LOGIC Protocol TITLE 'Bus Activity' POS 610 0 SIZE 600 200)
+
+ ' Power monitoring
+ DEBUG(`SCOPE Power TITLE 'Power Rails' POS 610 210 SIZE 600 200)
+
+ ' Memory view
+ DEBUG(`BITMAP Memory TITLE 'Memory Map' POS 0 410 SIZE 1210 200)
 ```
 
 ---
@@ -334,13 +334,13 @@ DEBUG(`PLOT Response TITLE 'System Response')
 DEBUG(`TERM Tuning TITLE 'PID Parameters')
 
 REPEAT
-  ' Adjust parameters via PC input
-  IF PC_KEY() == "+"
-    kp += 0.1
-    
-  ' See immediate response change
-  output := pid_calculate(setpoint, actual, kp, ki, kd)
-  DEBUG(`Response PLOT output)
+ ' Adjust parameters via PC input
+ IF PC_KEY == "+"
+ kp += 0.1
+
+ ' See immediate response change
+ output := pid_calculate(setpoint, actual, kp, ki, kd)
+ DEBUG(`Response PLOT output)
 ```
 
 ### **Pattern 2: Multi-Domain Correlation**
@@ -385,7 +385,7 @@ DEBUG(`BITMAP Display TITLE 'OLED Emulator' SIZE 128 64 MONO)
 
 ## 🔴 **CRITICAL DISCOVERIES**
 
-### **Discovery 1: JonnyMac Layer System is Revolutionary**
+### **Discovery 1: Layer System is Revolutionary**
 - Transforms PLOT from simple plotter to professional instrumentation
 - 20× performance improvement over traditional drawing
 - Enables 60 FPS interactive graphics
@@ -424,7 +424,7 @@ DEBUG(`BITMAP Display TITLE 'OLED Emulator' SIZE 128 64 MONO)
 ### **Emphasize Unique P2 Advantages**
 
 1. PC input integration (not found elsewhere)
-2. JonnyMac layer system (revolutionary efficiency)
+2. layer system (revolutionary efficiency)
 3. 9 window types (most systems have 2-3)
 4. Hardware acceleration (CORDIC for graphics)
 

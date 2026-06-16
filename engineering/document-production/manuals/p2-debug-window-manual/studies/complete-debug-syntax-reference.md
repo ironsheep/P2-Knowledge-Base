@@ -10,8 +10,8 @@
 
 ### **Window Creation**
 ```spin2
-DEBUG(`WINDOW_TYPE)                           ' Default window
-DEBUG(`WINDOW_TYPE InstanceName)              ' Named instance
+DEBUG(`WINDOW_TYPE) ' Default window
+DEBUG(`WINDOW_TYPE InstanceName) ' Named instance
 ```
 
 ### **Common Configuration Parameters**
@@ -26,13 +26,13 @@ DEBUG(`WINDOW_TYPE InstanceName)              ' Named instance
 ### **Color Specifications**
 ```spin2
 ' Named colors with brightness (0-15)
-COLOR `(RED15)        ' Brightest red
-COLOR `(GREEN8)       ' Medium green
-COLOR `(BLUE0)        ' Darkest blue
+COLOR `(RED15) ' Brightest red
+COLOR `(GREEN8) ' Medium green
+COLOR `(BLUE0) ' Darkest blue
 
 ' RGB values
-COLOR `($FF6B00)      ' 24-bit RGB
-COLOR `($F800)        ' 16-bit RGB565
+COLOR `($FF6B00) ' 24-bit RGB
+COLOR `($F800) ' 16-bit RGB565
 
 ' Available base colors
 BLACK, WHITE, RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA, ORANGE, GRAY
@@ -62,8 +62,8 @@ DEBUG(`TERM MyTerm TITLE 'Console' POS 100 50 SIZE 80 25 TEXTSIZE 12)
 
 ### **PC Input Commands** (P2 Unique)
 ```spin2
-key := PC_KEY()                      ' Read keyboard, returns scan code or 0
-x, y, buttons := PC_MOUSE()          ' Read mouse position and buttons
+key := PC_KEY ' Read keyboard, returns scan code or 0
+x, y, buttons := PC_MOUSE ' Read mouse position and buttons
 ```
 
 ### **Text Formatting**
@@ -108,8 +108,8 @@ DEBUG(`BITMAP MyBmp TITLE 'Graphics' SIZE 320 240 RGB16 ZOOM 2)
 
 ### **Data Streaming**
 ```spin2
-DEBUG(`MyBmp `uhex_(pixel_data))     ' Stream pixel data
-DEBUG(`MyBmp DUMP @buffer size)      ' Dump buffer
+DEBUG(`MyBmp `uhex_(pixel_data)) ' Stream pixel data
+DEBUG(`MyBmp DUMP @buffer size) ' Dump buffer
 ```
 
 ---
@@ -129,7 +129,7 @@ DEBUG(`PLOT MyPlot TITLE 'Data' SIZE 640 480 SAMPLES 256)
 | `GRID` | `GRID on/off` | Toggle grid |
 | `LEGEND` | `LEGEND 'Series1' 'Series2'` | Add legend |
 
-### **🚀 JonnyMac Layer Commands** (Revolutionary Discovery)
+### **🚀 Layer Commands** (Revolutionary Discovery)
 | Command | Syntax | Purpose |
 |---------|--------|---------|
 | `LAYER` | `LAYER n 'file.bmp'` | Load image to layer |
@@ -137,7 +137,7 @@ DEBUG(`PLOT MyPlot TITLE 'Data' SIZE 640 480 SAMPLES 256)
 | `CROP` | `CROP n x y w h` | Show portion at position |
 | `CROP` | `CROP n sx sy sw sh dx dy` | Copy region to destination |
 
-### **🚀 JonnyMac Interactive Commands**
+### **🚀 Interactive Commands**
 | Command | Syntax | Purpose |
 |---------|--------|---------|
 | `SET` | `SET \`(x<<8, y<<8)` | Fixed-point position |
@@ -358,7 +358,7 @@ DEBUG(`MIDI MyMIDI TITLE 'MIDI Monitor' SIZE 800 400 CHANNELS 16)
 ### **Data Input**
 - Direct: `NOTE`, `XY`, `PIXEL`
 - Array: `PLOT @data`, `FFT @buffer`
-- Stream: `\`uhex_()`, `SPECTRO data`
+- Stream: `\`uhex_`, `SPECTRO data`
 - Pins: `PINS start count`
 
 ### **Triggering**
@@ -378,12 +378,12 @@ DEBUG(`MIDI MyMIDI TITLE 'MIDI Monitor' SIZE 800 400 CHANNELS 16)
 - Scale: `LOGSCALE`, `RANGE`
 
 ### **PC Interaction** (P2 Unique)
-- Keyboard: `PC_KEY()`
-- Mouse: `PC_MOUSE()`, `\`pc_mouse(@x)`
+- Keyboard: `PC_KEY`
+- Mouse: `PC_MOUSE`, `\`pc_mouse(@x)`
 - Bidirectional: Input affects P2 program
 
 ### **Advanced Features**
-- Layers: `LAYER`, `CROP` (JonnyMac)
+- Layers: `LAYER`, `CROP`
 - Fixed-point: `SET \`(x<<8, y<<8)`
 - Protocol: `DECODE protocol channel`
 - Window functions: `WINDOW type`
@@ -420,7 +420,7 @@ DEBUG(`MIDI MyMIDI TITLE 'MIDI Monitor' SIZE 800 400 CHANNELS 16)
 ## 🚀 **UNIQUE P2 FEATURES SUMMARY**
 
 1. **PC Input Integration** - Bidirectional debugging unique to P2
-2. **JonnyMac Layer System** - Sprite-based graphics acceleration
+2. **Layer System** - Sprite-based graphics acceleration
 3. **Named Instances** - Multiple windows of same type
 4. **CORDIC Acceleration** - Hardware math for graphics/FFT
 5. **32 Logic Channels** - More than typical USB analyzers

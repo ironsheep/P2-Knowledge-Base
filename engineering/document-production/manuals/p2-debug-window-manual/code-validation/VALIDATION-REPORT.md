@@ -89,7 +89,7 @@ python3 extract-examples.py
 ## Technical Achievements
 
 ### Revolutionary Features Validated
-1. **JonnyMac's Layer System** - Sprite-based debugging compiles perfectly
+1. **the Layer System** - Sprite-based debugging compiles perfectly
 2. **PC Input Integration** - Bidirectional debugging code verified
 3. **Packed Data Formats** - All compression modes compile correctly
 4. **CROP Commands** - Selective update syntax validated

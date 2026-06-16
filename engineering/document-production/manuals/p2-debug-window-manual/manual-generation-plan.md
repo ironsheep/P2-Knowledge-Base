@@ -11,7 +11,7 @@
 ### **PHASE 1: COMPREHENSIVE STUDY PHASE** (~11 hours)
 **Objective**: Master all 9 debug window types before writing any manual content
 
-### **PHASE 2: MANUAL GENERATION PHASE** (~55 hours)  
+### **PHASE 2: MANUAL GENERATION PHASE** (~55 hours)
 **Objective**: Create professional manual from solid knowledge foundation
 
 **Total Project Investment**: ~66 hours of focused work
@@ -32,7 +32,7 @@
 - Integration syntax with other windows
 - Parameter validation and ranges
 
-#### **2. Capability Deep Dive** (20 minutes)  
+#### **2. Capability Deep Dive** (20 minutes)
 - Parameter interactions and combinations
 - Performance characteristics and limitations
 - Unique features vs other window types
@@ -61,7 +61,7 @@
 
 **Required contents per study**:
 - ✅ **Complete Command Inventory** - Every available command with parameters
-- ✅ **Parameter Matrix** - Ranges, interactions, validation rules  
+- ✅ **Parameter Matrix** - Ranges, interactions, validation rules
 - ✅ **Performance Characteristics** - Update rates, memory usage, limitations
 - ✅ **Application Scenario Catalog** - When/why to use this window type
 - ✅ **Integration Pattern Library** - How to combine with other windows/hardware
@@ -71,7 +71,7 @@
 **Window types to study**:
 1. **TERM** - Text output, PC input, cursor control, formatting
 2. **BITMAP** - Static graphics, image display, basic drawing
-3. **PLOT** - Interactive graphics, layered composition, JonnyMac patterns
+3. **PLOT** - Interactive graphics, layered composition, layer patterns
 4. **LOGIC** - Digital signal analysis, multi-channel timing
 5. **SCOPE** - Waveform capture, oscilloscope functionality
 6. **SCOPE_XY** - X-Y plotting, phase relationships, Lissajous patterns
@@ -145,7 +145,7 @@
 
 **Updates required**:
 - Incorporate all Phase 1 discoveries and gap findings
-- Reflect JonnyMac interactive pattern integration
+- Reflect interactive pattern integration
 - Update chapter structure based on comprehensive capability understanding
 - Finalize "Discovery Guide" voice with technical depth
 - Add example quality standards and validation requirements
@@ -156,11 +156,11 @@
 
 **Chapter 1: Beyond Basic DEBUG - The Vision Gap**
 - The Debug Iceberg Effect and capability discovery
-- Real development scenarios where text debugging fails  
+- Real development scenarios where text debugging fails
 - Visual Evidence Methodology and P2's unique advantages
 - Foundation for progressive capability building
 
-**Chapter 2: Terminal Mastery - Interactive Text Debugging**  
+**Chapter 2: Terminal Mastery - Interactive Text Debugging**
 - PC Input Integration - bidirectional communication patterns
 - Advanced Cursor Control and professional formatting
 - Interactive menu systems and real-time dashboards
@@ -177,7 +177,7 @@
 **Chapter 4: Layer Composition System - Sprite-Based Debugging**
 - The Layer Revolution - multi-image composition system
 - Sprite sheet techniques and professional graphics management
-- CROP command mastery for selective display and updates  
+- CROP command mastery for selective display and updates
 - State-driven visualization and data-responsive graphics
 
 **Chapter 5: PC Input Integration - Bidirectional Debug Control**
@@ -213,7 +213,7 @@
 - Timing verification workflows and multi-pin coordination
 - Logic analyzer replacement patterns and professional debugging
 
-**Chapter 10: Waveform Analysis - SCOPE and SCOPE_XY Windows**  
+**Chapter 10: Waveform Analysis - SCOPE and SCOPE_XY Windows**
 - Analog signal debugging scenarios and oscilloscope functionality
 - PWM and control system analysis applications
 - Phase relationships and X-Y plotting for system analysis
@@ -232,7 +232,7 @@
 - Performance management across multiple debug outputs
 - Professional development environment complete setups
 
-**Chapter 13: PASM Assembly Integration**  
+**Chapter 13: PASM Assembly Integration**
 - Assembly debug patterns and low-level system visualization
 - Hardware register monitoring and multi-COG coordination
 - Performance analysis and assembly optimization with visuals
@@ -246,7 +246,7 @@
 
 **Quality standards per example**:
 - **Immediately Executable** - Copy/paste and run on P2 hardware
-- **Real Problem Solving** - Addresses actual development challenges  
+- **Real Problem Solving** - Addresses actual development challenges
 - **Progressive Complexity** - Basic → intermediate → advanced within chapters
 - **Performance Optimized** - Demonstrates efficient P2 resource usage
 - **Professional Quality** - Production-ready code suitable for client projects
@@ -260,7 +260,7 @@
 
 **Appendix B: Packed Data Format Reference**
 - Complete compression format specifications with examples
-- Performance characteristics and selection guidelines  
+- Performance characteristics and selection guidelines
 - Integration patterns with different window types
 
 **Appendix C: Performance Optimization Guide**
@@ -268,7 +268,7 @@
 - Resource management and multi-window coordination
 - Professional debugging environment optimization
 
-**Appendix D: Professional Examples Library** 
+**Appendix D: Professional Examples Library**
 - Complete working examples for every major pattern
 - Template applications for common debugging scenarios
 - Integration examples showing complete workflows
@@ -281,7 +281,7 @@
 
 - **Comprehensive Coverage**: All 9 window types thoroughly studied and documented
 - **Complete Syntax Mastery**: Every available command and parameter understood
-- **Application Vision**: Clear scenarios identified for when to use each capability  
+- **Application Vision**: Clear scenarios identified for when to use each capability
 - **Knowledge Base Validation**: Gaps identified and prioritized for improvement
 - **Integration Understanding**: Cross-window patterns and coordination strategies documented
 
@@ -301,7 +301,7 @@
 - Performance claims validated through actual measurements
 - Integration patterns verified through multi-window testing
 
-### **Practical Applicability**  
+### **Practical Applicability**
 - Every example solves actual development problems
 - Professional workflows applicable to real projects
 - Client-ready debugging demonstrations included
@@ -327,7 +327,7 @@
 ### **Phase 2: Manual Generation Phase** (~55 hours)
 - **Chapter Creation**: 28 hours (2 hours average × 14 chapters)
 - **Example Development and Testing**: 15 hours
-- **Integration Verification**: 5 hours  
+- **Integration Verification**: 5 hours
 - **Polish, Revision, and Quality Assurance**: 7 hours
 
 ### **Total Project Investment**: ~66 hours

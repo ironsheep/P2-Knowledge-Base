@@ -14,7 +14,7 @@ Creating a comprehensive practical guide to P2's Debug Window system - the built
 - **Bridge the capability gap** - users know basics but miss the sophisticated possibilities
 
 ### Core Problem This Manual Solves
-**The "Iceberg Effect"**: Developers use basic `DEBUG()` syntax but remain unaware of:
+**The "Iceberg Effect"**: Developers use basic `DEBUG` syntax but remain unaware of:
 - 9 specialized window types with rich parameter systems
 - Advanced visualization capabilities hiding in plain sight
 - PASM assembly debugging possibilities
@@ -118,26 +118,26 @@ This section formalizes the No Handwaving Principle into a systematic verificati
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│           DEBUG WINDOW CLAIM VERIFICATION CHECKLIST             │
+│ DEBUG WINDOW CLAIM VERIFICATION CHECKLIST │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. What am I claiming? (capability/syntax/parameter/visual)    │
-│                                                                 │
-│  2. Which source should contain this?                           │
-│     □ Spin2 v5.1 Reference: command syntax, parameters          │
-│     □ Phase 1 Studies: discovered capabilities, patterns        │
-│     □ Pascal Source: internal behavior, PC integration          │
-│     □ Direct Testing: visual behavior, limits, performance      │
-│                                                                 │
-│  3. Can I prove this claim?                                     │
-│     □ Screenshot showing the behavior                           │
-│     □ Code example that demonstrates it                         │
-│     □ Documentation citation                                    │
-│                                                                 │
-│  4. Am I speculating from similar systems?                      │
-│     □ If YES → DON'T WRITE IT                                   │
-│     □ Mark as "not found" if feature doesn't exist              │
-│                                                                 │
+│ │
+│ 1. What am I claiming? (capability/syntax/parameter/visual) │
+│ │
+│ 2. Which source should contain this? │
+│ □ Spin2 v5.1 Reference: command syntax, parameters │
+│ □ Phase 1 Studies: discovered capabilities, patterns │
+│ □ Pascal Source: internal behavior, PC integration │
+│ □ Direct Testing: visual behavior, limits, performance │
+│ │
+│ 3. Can I prove this claim? │
+│ □ Screenshot showing the behavior │
+│ □ Code example that demonstrates it │
+│ □ Documentation citation │
+│ │
+│ 4. Am I speculating from similar systems? │
+│ □ If YES → DON'T WRITE IT │
+│ □ Mark as "not found" if feature doesn't exist │
+│ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -167,12 +167,12 @@ For comprehensive post-write audit procedures, see:
 #### 0. Per-Window Theory of Operations — authoritative grounding source ("the Bible")
 **Location**: `./REF/theory-of-operations/` (this manual's folder)
 - Nine source-derived theory-of-operations documents, one per window type: TERM,
-  BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI. **Current as of PNut v55.**
+ BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI. **Current as of PNut v55.**
 - Cover data structures, configuration, update/rendering, command protocols, color
-  systems, and performance — derived from the PNut implementation.
+ systems, and performance — derived from the PNut implementation.
 - **This is the primary grounding source for the periodic audit** (Dimensions A, B,
-  #1, #5, C). Where a manual claim conflicts with the relevant window's theory-of-
-  operations, the theory-of-operations wins.
+ #1, #5, C). Where a manual claim conflicts with the relevant window's theory-of-
+ operations, the theory-of-operations wins.
 
 #### 1. SPIN-2 Language Reference Manual v5.1 (Primary Technical Foundation)
 **Location**: `engineering/ingestion/sources/spin2-v51/` (relocated 2025-09; the former
@@ -190,7 +190,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 #### 2. Phase 1 Comprehensive Window Studies (Revolutionary Discoveries)
 **Location**: `/engineering/document-production/manuals/p2-debug-window-manual/studies/`
 - **12 comprehensive study documents** covering all 9 window types
-- **JonnyMac's Layer System Discovery**: 20× performance improvement through sprite-based updates
+- **the Layer System Discovery**: 20× performance improvement through sprite-based updates
 - **PC Input Integration**: Bidirectional debugging unique to P2
 - **CROP Command Mastery**: Selective display updates for efficiency
 - **45 YAML Knowledge Gaps**: Documented and prioritized for AI capability enhancement
@@ -218,7 +218,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 #### Phase 1: Systematic Discovery ✅ COMPLETED
 1. **Cataloged all 9 debug window types** - TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, MIDI
 2. **Extracted SPIN-2 v5.1 minimal examples** as baseline reference points
-3. **Parameter matrix exploration** - Discovered JonnyMac patterns, CROP commands, layer system
+3. **Parameter matrix exploration** - Discovered layer patterns, CROP commands, layer system
 4. **Pattern extraction from source code** - Revolutionary 20× performance improvements found
 5. **Developed complementary examples** - Software-only demonstrations for accessibility
 6. **PASM debugging integration** - Assembly-level debug capabilities documented
@@ -228,7 +228,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 #### Phase 2: Manual Generation (CURRENT PHASE)
 1. **Generate chapters using Opus 4.1** - Leveraging Phase 1 discoveries
 2. **Create 50+ working examples** - All pnut_ts validated
-3. **Document JonnyMac patterns** - Layer system, CROP commands
+3. **Document layer patterns** - Layer system, CROP commands
 4. **Document PLOT sprites** - SPRITEDEF/SPRITE commands with 0-255 IDs, 1-32 pixel dimensions
 5. **Include PC input integration** - Mouse and keyboard debug control
 6. **Build professional workflows** - Multi-window coordination patterns
@@ -237,7 +237,7 @@ files: `debug-displays-complete-catalog.md`, `debug-section.txt`,
 #### Phase 3: Quality Validation
 1. **Test all examples** with pnut_ts compiler
 2. **Verify debug outputs** match discovered behaviors
-3. **Validate JonnyMac techniques** for performance claims
+3. **Validate layer techniques** for performance claims
 4. **Check cross-references** to Phase 1 studies
 5. **Ensure minimal hardware philosophy** throughout
 
@@ -273,19 +273,19 @@ Author all content per that guide; its §3 (rules), §4 (debug-domain content ru
 
 **Implementation Pattern:**
 1. **Problem**: Start with a debugging challenge
-   - *Template*: "Your LEDs aren't blinking correctly..."
-   
+ - *Template*: "Your LEDs aren't blinking correctly..."
+
 2. **Debug Tool**: Introduce the specific debug capability
-   - *Template*: "The DEBUG instruction lets us monitor..."
-   
+ - *Template*: "The DEBUG instruction lets us monitor..."
+
 3. **Apply**: Show the debug tool solving the problem
-   - *Template*: "Adding DEBUG statements reveals..."
-   
+ - *Template*: "Adding DEBUG statements reveals..."
+
 4. **Interpret**: Explain what the debug output means
-   - *Template*: "The pattern shows that..."
-   
+ - *Template*: "The pattern shows that..."
+
 5. **Solve**: Use debug insights to fix the issue
-   - *Template*: "Adjusting the timing resolves..."
+ - *Template*: "Adjusting the timing resolves..."
 
 ## 📚 Content Requirements
 
@@ -315,7 +315,7 @@ When encountering out-of-scope topics:
 Here's how to monitor Smart Pin state changes:
 [debug example]
 
-📚 **For Smart Pin Configuration**: See Smart Pins Manual Chapter 5 for 
+📚 **For Smart Pin Configuration**: See Smart Pins Manual Chapter 5 for
 proper Smart Pin setup and operation details.
 ```
 
@@ -418,14 +418,14 @@ DEBUG: Timing delta = 2 clocks
 - **Software simulation**: Protocol patterns, sensor networks, control systems
 - **Learning focus**: Debug techniques and visualization concepts
 
-**Level 1: Built-in Hardware Only** 
+**Level 1: Built-in Hardware Only**
 - **P2 board resources**: LED1, LED2 for binary visualization
 - **Simple demonstrations**: PWM visualization, binary patterns, state indication
 - **Interactive examples**: PC mouse/keyboard control of LED patterns
 
 **Level 2: Minimal External Components** (Optional)
 - **Single wire connections**: Simple switches, basic sensors
-- **Clear documentation**: Exact wiring diagrams and component specifications  
+- **Clear documentation**: Exact wiring diagrams and component specifications
 - **Alternative provided**: Software simulation version always included
 
 **Level 3: Advanced Projects** (Reference Only)
@@ -438,14 +438,14 @@ DEBUG: Timing delta = 2 clocks
 **Rich Scenarios from Simple Sources**:
 ```spin2
 ' Motor control analysis - no motor required!
-PRI simulate_motor_system()
-  repeat
-    ' Software-generated encoder feedback
-    encoder_pos := (encoder_pos + pwm_duty/100) & $FFFF
-    ' Simulated load variation  
-    load_torque := GETRND() & $FF
-    ' Debug with multiple windows
-    DEBUG(`motor_scope SCOPE_XY `(pwm_duty) `(encoder_pos))
+PRI simulate_motor_system
+ repeat
+ ' Software-generated encoder feedback
+ encoder_pos := (encoder_pos + pwm_duty/100) & $FFFF
+ ' Simulated load variation
+ load_torque := GETRND & $FF
+ ' Debug with multiple windows
+ DEBUG(`motor_scope SCOPE_XY `(pwm_duty) `(encoder_pos))
 ```
 
 **Educational Benefits**:
@@ -478,20 +478,20 @@ PRI simulate_motor_system()
 **Show the problem FIRST, then the debug solution:**
 ```pasm2
 ' PROBLEM: LED blinks too fast
-        drvh    #56
-        waitx   #1000      ' Intended 1ms delay
-        drvl    #56
-        waitx   #1000
-        jmp     #$-4
+ drvh #56
+ waitx #1000 ' Intended 1ms delay
+ drvl #56
+ waitx #1000
+ jmp #$-4
 
 ' DEBUG SOLUTION: Monitor actual timing
-        drvh    #56
-        debug   "LED ON at ", udec_(getct())
-        waitx   #1000
-        drvl    #56  
-        debug   "LED OFF at ", udec_(getct())
-        waitx   #1000
-        jmp     #$-8
+ drvh #56
+ debug "LED ON at ", udec_(getct)
+ waitx #1000
+ drvl #56
+ debug "LED OFF at ", udec_(getct)
+ waitx #1000
+ jmp #$-8
 ```
 
 ### The "Before and After" Pattern
@@ -590,9 +590,9 @@ data commands → control commands → one compilable example → when-to-use/co
 
 ### Part I — Foundation
 1. **The DEBUG Display Windows** — the shared create-by-name/feed-by-name model, the nine
-   windows, the values-vs-command-codes rule, the boundary with the single-step debugger.
+ windows, the values-vs-command-codes rule, the boundary with the single-step debugger.
 2. **Getting Started** — tooling (`pnut_ts -d`, `pnut_term_ts`), your first window, the
-   no-hardware philosophy, optional DEBUG configuration symbols.
+ no-hardware philosophy, optional DEBUG configuration symbols.
 
 ### Part II — The Windows (one chapter each, simplest to richest)
 3. **TERM** · 4. **BITMAP** · 5. **PLOT** · 6. **LOGIC** · 7. **SCOPE** · 8. **SCOPE_XY** ·
@@ -633,13 +633,13 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 ### Debug Output Standards
 ```pasm2
 ' GOOD: Consistent debug formatting
-        debug   "Timer: ", udec_(timer_value), " Status: ", uhex_(status)
+ debug "Timer: ", udec_(timer_value), " Status: ", uhex_(status)
 
 ' GOOD: Clear debug labels
-        debug   "COG", udec_(cogid()), ": Starting main loop"
+ debug "COG", udec_(cogid), ": Starting main loop"
 
-' BAD: Unclear debug output  
-        debug   udec_(x)        ' What is x? When does this print?
+' BAD: Unclear debug output
+ debug udec_(x) ' What is x? When does this print?
 ```
 
 ### Example Verification Process
@@ -712,7 +712,7 @@ A: Command Reference · B: Packed-Data Format Reference · C: Color and Coordina
 
 ## Source Material Integration
 - Official P2 debug documentation
-- Community debug examples and patterns  
+- Community debug examples and patterns
 - Proven debug workflows from other projects
 - Advanced debug techniques from expert developers
 
@@ -728,14 +728,14 @@ code line wider than the budget below.
 
 - **Max code columns (K): 76**
 - **Code-box style / font:** the shared platform code-box family (`p2kb-platform-content.sty`
-  — ```` ```spin2 ```` / ```` ```pasm2 ```` colored boxes), Latin Modern Mono at the box's
-  code size with the `numbers=left` gutter. Debug Window is a **twin** that, as of the
-  2026-06-07 platform-stack migration, consumes the platform code-box stack unchanged
-  (identical page margins `left/right=1in`, `IOSPBlock left=30pt,right=10pt`, same code
-  `Verbatim`), so it **inherits the platform reference K = 76** rather than measuring its own.
+ — ```` ```spin2 ```` / ```` ```pasm2 ```` colored boxes), Latin Modern Mono at the box's
+ code size with the `numbers=left` gutter. Debug Window is a **twin** that, as of the
+ 2026-06-07 platform-stack migration, consumes the platform code-box stack unchanged
+ (identical page margins `left/right=1in`, `IOSPBlock left=30pt,right=10pt`, same code
+ `Verbatim`), so it **inherits the platform reference K = 76** rather than measuring its own.
 - **Provenance:** K calibrated on the layout-torture-test instrument's case-2.2 column ruler
-  (see `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget) and shared by
-  every twin on the platform stack.
+ (see `manuals/p2-layout-torture-test/creation-guide.md` → Code Line Budget) and shared by
+ every twin on the platform stack.
 
 ---
 
@@ -746,5 +746,5 @@ code line wider than the budget below.
 - **Status**: Phase 2 Manual Generation Ready
 - **Phase 1**: ✅ COMPLETED - 12 comprehensive window studies
 - **Phase 2**: 🚧 IN PROGRESS - Opus 4.1 manual generation
-- **Major Discoveries**: JonnyMac Layer System (20× performance), PC Input Integration, CROP Commands
+- **Major Discoveries**: Layer System (20× performance), PC Input Integration, CROP Commands
 - **Next Step**: Generate chapters 1-14 using Opus 4.1
