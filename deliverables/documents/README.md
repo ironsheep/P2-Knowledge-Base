@@ -28,7 +28,7 @@ Because these documents are AI-assisted, the issues you may encounter differ fro
 
 ## Documents in Community Review
 
-Three documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
+Four documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
 ### [P2 Assembly Language Reference Manual](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf?raw=1)
 **Complete PASM2 Instruction Set Documentation** — *Version 3.0.0*
@@ -51,19 +51,21 @@ The complete reference for the P2 streamer — the DMA-like engine that moves da
 
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-streamer-programming-guide-changelog.md)
 
+### [P2 Debug Window Manual](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/P2-Debug-Window-Manual.pdf?raw=1)
+**See What Your Program Is Doing — Nine Display Windows for the Propeller 2** — *Version 1.0.0*
+
+The complete guide to the P2's nine DEBUG display windows — TERM, BITMAP, PLOT, LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, and MIDI. Documents every window's directives, parameters, ranges, and defaults, with a worked, software-only example in each chapter — thermal heatmap, PID strip-chart, glitch capture, motor run-up, and more — that runs on a bare P2 board with no wiring. Integration chapters cover packed-data high-rate transfer, multiple windows and PASM debugging, host keyboard and mouse input, and live control and status panels. Includes a downloadable example library of 32 compile-clean Spin2 programs.
+
+*June 2026 - Community Review Edition* | [Changelog](DOCs/p2-debug-window-manual-changelog.md) | [Example Library (ZIP)](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/p2-debug-window-manual-src-260616.zip?raw=1)
+
 ## Also in the Pipeline
 
-Three further manuals are in production and will open for community review as they complete:
+Two further manuals are in production and will open for community review as they complete:
 
 ### P2 Single-Step Debugger Manual
 **Observe and Control Your Running P2 Code** — *coming soon*
 
 A practical guide to single-stepping P2 code — pausing and resuming a running program, inspecting values and timing, and driving the debugger from the host.
-
-### P2 Debug Window Manual
-**See What Your Program Is Doing — Nine Display Windows for the Propeller 2** — *coming soon*
-
-A guide to the P2's nine debug display windows — scope, logic, plot, terminal, and more — for visualizing what your program is doing in real time.
 
 ### P2 I/O & Smart Pins User Guide
 **Complete P2 Pin I/O and Smart Pin Reference** — *coming soon*

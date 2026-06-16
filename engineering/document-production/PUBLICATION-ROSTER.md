@@ -43,7 +43,7 @@ that does not ride the shared stack.
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | ✅ | ⏳ | ✅ | | | | migrated 2026-06-09 onto the shared platform stack (twin migration: `.latex`→platform + empty `p2kb-iosp-local`; content already correct fences); proven on forge daemon (387pp, clean log; gained continuation markers + numbered captions/LoF); production bundle prepared. Uses the shared common cover (`book-artwork.png`, identical across all manuals). Awaiting Stephen's technical + asset review; "Blue Book" reference |
 | P2 Assembly Language Reference | `p2-assembly-language-manual` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v3.0.0 (2026-06-10)** — migrated off the bespoke `p2kb-pasm2-*` fork onto the shared platform stack (`p2kb-pasm2-local` overlay + 5 platform lua filters + 2 local entry filters); content re-certified vs the current P2KB and rebuilt clean (492pp). chip review outstanding |
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay, 5 platform lua filters). **v3.0.0 (2026-06-10) release** — absorbs the content-accuracy re-audit (~33 latent errors fixed vs the current P2KB: two inverted LOCKTRY spin-locks, an inverted SKIP table, a fabricated SETSE edge mode, etc.) and the Ch2 egg-beater diagram fix; regenerated clean (172pp). Audit record: local `audit/content-reaudit-2026-06-10.md`. chip review outstanding. **DEFERRED to final wrap-up (both REQUIRED, not release-blocking):** (1) repair the "P1 COG" image `\CogAnatomyDiagram` (Ch2 "COG Anatomy 101", `opus-master` ~L557); (2) `pnut-ts` compile-cert re-audit of ALL built-in code examples (use `-d` for DEBUG blocks). |
-| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ⏳ | ✅ | | | | awaiting screenshots — 5/10 hero figures + TERM captures still placeholders |
+| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.0 (2026-06-16)** — initial community-review release; all figures captured; 32-demo example library bundled (source ZIP) |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
 | P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content + streamer-local/-diagrams); awaiting chip + community review |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
@@ -156,8 +156,8 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-16 21:45  PUBLISH   p2-debug-window-manual           (v1.0.0, 159pp — initial community-review release)
 2026-06-16 20:47  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (0ddf83f — stop bolding English-collision words: adds/byte/word/long)
-2026-06-15 00:45  PUBLISH   p2-debug-window-manual           (v1.9.1 re-audit build; 4 figures still placeholder)
 2026-06-12 18:39  PLATFORM  templates/p2kb-platform-content.sty       (a149b8e — ::: tip/caution callouts)
 2026-06-12 18:39  PLATFORM  filters/p2kb-platform-code-coloring.lua   (a149b8e — ::: tip/caution callouts)
 2026-06-10 23:41  PUBLISH   p2-streamer-programming-guide    (v1.0.0 — clickable index added)
@@ -183,7 +183,7 @@ top of the 06-12 platform.
 
 | Manual | Status | Notes |
 |--------|--------|----------------------------------------------------|
-| `p2-debug-window-manual` | ✅ current | rebuilt **2026-06-15** on the latest platform (incl. 06-12 `content.sty` + `code-coloring.lua`); 4 figures still placeholder |
+| `p2-debug-window-manual` | ✅ current | **v1.0.0 released 2026-06-16** for community review; all figures captured; built on the latest platform (incl. 06-16 `mnemonic-bold.lua`) |
 | `p2-assembly-language-manual` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (492pp); predates the 06-12 platform edit |
 | `p2-pasm-desilva-style` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (172pp); predates the 06-12 platform edit |
 | `p2-streamer-programming-guide` | ⏳ behind 06-12 | rebuilt v1.0.0 on 06-10; predates the 06-12 platform edit |

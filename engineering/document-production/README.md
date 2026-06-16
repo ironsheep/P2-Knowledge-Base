@@ -28,7 +28,7 @@ table still carry the older "shape" and await a separate refresh.)*
 | P2 I/O & Smart Pins User Guide | `p2-io-and-smart-pins-user-guide` | 🟢 draft (387pp), platform-migrated; **awaiting Stephen's technical + asset review** ("Blue Book") |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | 🟢 draft, platform stack; **cover repaired 2026-06-12**; in technical review (chip + community) |
 | P2 Streamer Programming Guide | `p2-streamer-programming-guide` | 🟢 draft, platform stack; awaiting chip + community review |
-| P2 Debug Window Manual | `p2-debug-window-manual` | 🟡 draft; **awaiting screenshots** (5/10 hero figures + TERM captures still placeholders) |
+| P2 Debug Window Manual | `p2-debug-window-manual` | ✅ **v1.0.0 released 2026-06-16** (community review); all figures captured; 32-demo example library bundled |
 
 ## In development / parked · Instruments · Orphaned (see roster for detail)
 
