@@ -156,7 +156,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
-2026-06-16 21:45  PUBLISH   p2-debug-window-manual           (v1.0.0, 159pp — initial community-review release)
+2026-06-16 22:39  PUBLISH   p2-debug-window-manual           (v1.0.0, 159pp — initial community-review release)
 2026-06-16 20:47  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (0ddf83f — stop bolding English-collision words: adds/byte/word/long)
 2026-06-12 18:39  PLATFORM  templates/p2kb-platform-content.sty       (a149b8e — ::: tip/caution callouts)
 2026-06-12 18:39  PLATFORM  filters/p2kb-platform-code-coloring.lua   (a149b8e — ::: tip/caution callouts)
