@@ -193,8 +193,8 @@ read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
 
 ### Where you'd use this
 
-In computer science and computer engineering, host input turns a debug window into
-a **human-in-the-loop control surface** — interactive parameter adjustment and
+In computer science and computer engineering, host input turns a DEBUG display
+window into a **human-in-the-loop control surface** — interactive parameter adjustment and
 manual test rigs you drive by hand while the program runs.
 
 **On an embedded project**, you reach for it to tune PID gains live, to nudge a

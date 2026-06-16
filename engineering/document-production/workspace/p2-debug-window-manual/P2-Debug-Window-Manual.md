@@ -3723,7 +3723,7 @@ debug(`Wfall `(sample))
 Internally the window stores samples in a circular buffer. It does nothing visible
 until it has collected a full `SAMPLES` window; from then on it runs an FFT over the
 most recent `SAMPLES` samples whenever the rate counter says it is time, and plots
-the result as one line. You simply keep feeding samples; the window decides when to
+the result as one line. You keep feeding samples; the window decides when to
 transform and draw.
 
 You can send several samples in one `DEBUG` call by listing them, and you can pack
@@ -4477,8 +4477,8 @@ read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
 
 ### Where you'd use this
 
-In computer science and computer engineering, host input turns a debug window into
-a **human-in-the-loop control surface** — interactive parameter adjustment and
+In computer science and computer engineering, host input turns a DEBUG display
+window into a **human-in-the-loop control surface** — interactive parameter adjustment and
 manual test rigs you drive by hand while the program runs.
 
 **On an embedded project**, you reach for it to tune PID gains live, to nudge a
@@ -5055,7 +5055,7 @@ frame, the P2 issues a short sequence of *position* and *copy* commands; it neve
 rasterizes a glyph or shades a pixel itself. Buffered (double-buffered) mode presents
 each finished frame at once, so the display does not flicker. And because the same
 window reads input, a picture becomes a control surface with no added hardware. A
-working panel is typically a few dozen lines of Spin2.
+working panel is a few dozen lines of Spin2.
 
 This chapter covers two jobs. For **status displays** there is a spectrum of three
 techniques — positioned text, vector drawing, and sprite-sheet blitting — and the

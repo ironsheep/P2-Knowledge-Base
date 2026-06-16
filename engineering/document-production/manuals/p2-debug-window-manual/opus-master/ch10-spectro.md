@@ -90,7 +90,7 @@ debug(`Wfall `(sample))
 Internally the window stores samples in a circular buffer. It does nothing visible
 until it has collected a full `SAMPLES` window; from then on it runs an FFT over the
 most recent `SAMPLES` samples whenever the rate counter says it is time, and plots
-the result as one line. You simply keep feeding samples; the window decides when to
+the result as one line. You keep feeding samples; the window decides when to
 transform and draw.
 
 You can send several samples in one `DEBUG` call by listing them, and you can pack

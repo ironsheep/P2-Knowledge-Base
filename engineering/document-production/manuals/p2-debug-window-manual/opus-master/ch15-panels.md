@@ -17,7 +17,7 @@ frame, the P2 issues a short sequence of *position* and *copy* commands; it neve
 rasterizes a glyph or shades a pixel itself. Buffered (double-buffered) mode presents
 each finished frame at once, so the display does not flicker. And because the same
 window reads input, a picture becomes a control surface with no added hardware. A
-working panel is typically a few dozen lines of Spin2.
+working panel is a few dozen lines of Spin2.
 
 This chapter covers two jobs. For **status displays** there is a spectrum of three
 techniques — positioned text, vector drawing, and sprite-sheet blitting — and the
