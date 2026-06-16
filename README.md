@@ -26,13 +26,9 @@ Comprehensive guide on using this knowledge base with AI systems, including exam
 
 ## 🎯 Find What You Need
 
-### PDF Manuals (Community Review)
-**[→ Generated Documents](deliverables/documents/)**
-P2 Assembly Language Reference Manual and P2 Assembly Programming tutorial available for community technical review.
-
-### For AI Systems & Code Generation
-**→ AI Reference Documentation**
-(Work in progress) Complete P2 instruction set, architecture details, and code patterns optimized for LLM consumption. Structured for accurate code generation with comprehensive examples and constraints.
+### 📄 PDF Manuals — Community Review
+**[→ Browse the document catalog](deliverables/documents/)**
+Released manuals for community technical review — each with a description and a direct PDF download.
 
 ## About the Propeller 2
 
