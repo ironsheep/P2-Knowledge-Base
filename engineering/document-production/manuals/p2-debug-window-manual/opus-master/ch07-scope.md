@@ -195,8 +195,10 @@ middle of the signal.
 The `offset` argument places the trigger point within the displayed window, measured
 in samples from `0` to `SAMPLES-1`:
 
-- `0` puts the trigger at the **right** edge — you see only what happens after the event.
-- `SAMPLES-1` puts it at the **left** edge — you see the lead-up *to* the event (pre-trigger).
+- `0` puts the trigger at the **right** edge — it tests the newest sample, so you see
+  the lead-up *to* the event (pre-trigger history).
+- `SAMPLES-1` puts it at the **left** edge — it tests the oldest sample, so you see
+  what happens *after* the event (post-trigger).
 - `SAMPLES/2` (the default) centers it, showing equal time before and after.
 
 The trigger is evaluated only once the buffer holds a full `SAMPLES` worth of data,
