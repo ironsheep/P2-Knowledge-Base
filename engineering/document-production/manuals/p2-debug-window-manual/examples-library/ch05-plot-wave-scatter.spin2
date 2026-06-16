@@ -5,8 +5,7 @@ PUB main() | x, y, angle, i, sx, sy
   ' Create a 512x512 plotting canvas on a black background
   debug(`PLOT Wave SIZE 512 512 BACKCOLOR $000000)
 
-  ' Origin at left edge, vertical center; y increases upward (flipy = 1)
-  debug(`Wave CARTESIAN 1 0)
+  ' Origin at left edge, vertical center; y increases upward (the default)
   debug(`Wave ORIGIN 0 256)
 
   ' Center axis line in dim gray

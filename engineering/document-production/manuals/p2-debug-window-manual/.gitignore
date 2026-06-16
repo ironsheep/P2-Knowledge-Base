@@ -1,0 +1,5 @@
+# Raw DEBUG-window capture intermediates (pnut-term-ts / PNut .bmp dumps).
+# These are large binaries; only the converted .png assets in
+# workspace/.../assets/ are tracked. Never commit the .bmp captures.
+figure-generators/screenshots/
+figure-generators/screenshots-PNut-windows/

@@ -1,0 +1,20 @@
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, n, sig
+  debug(`SCOPE Glitch SIZE 512 256 SAMPLES 512)
+  debug(`Glitch 'Signal' -1000 1000)
+  ' arm on the quiet signal, fire on the spike (fire >= arm -> rising)
+  debug(`Glitch TRIGGER 0 200 800 256)   ' centered: see before and after
+  debug(`Glitch HOLDOFF 512)
+
+  ang := 0
+  n   := 0
+  repeat
+    sig := qsin(300, ang, 256)           ' clean signal, well inside range
+    if n // 233 == 0                     ' a rare, occasional fault
+      sig := 950                         ' one out-of-range sample
+    debug(`Glitch `(sig))
+    ang += 5
+    n   += 1
+    waitms(1)

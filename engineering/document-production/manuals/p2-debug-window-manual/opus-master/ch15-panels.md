@@ -275,6 +275,25 @@ Click the window to give it focus, then click a button or use the arrow keys. Th
 press edge rather than every poll while the button is held. The `dirty` flag means the
 panel sits idle — polling but not redrawing — until an input changes the value.
 
+### Where you'd use this
+
+In computer science and computer engineering, the panel techniques are for building
+**live dashboards and operator consoles** — a composed instrument face that reads a
+system at a glance — and **interactive control and tuning panels**, the
+human-in-the-loop surfaces of a bring-up rig.
+
+**On an embedded project**, you reach for them to build a one-screen status console
+for a running machine, a tuning panel with on-screen buttons and live readouts, or
+a hardware-in-the-loop test rig you drive while the firmware runs.
+
+**Bandwidth fit:** a panel of readouts and controls updates at human rates and fits
+the link easily; only a panel fed by a fast *sample stream* needs the packed feeds
+noted below.
+
+**Extension (real hardware):** wire the panel's readouts to real sensor values and
+its buttons to real outputs, and the same composed face becomes the machine's
+actual operator interface.
+
 ## Considerations — choosing a technique
 
 - **Use the lightest technique that does the job.** Textual or tabular status → a TERM

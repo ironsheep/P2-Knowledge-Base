@@ -21,7 +21,7 @@ commands that position, scroll, clear, and save the canvas.
 \begin{figure}[H]
 \centering
 \screenshotfig[width=0.50\linewidth]{inbox/assets/fig-04-bitmap.png}
-\caption{The BITMAP window showing a CORDIC-generated plasma field.}
+\caption{The BITMAP window showing a synthetic 32×24 thermal-array heatmap.}
 \end{figure}
 ```
 
@@ -297,45 +297,85 @@ rarely (faster, choppier). The default is one full canvas of pixels.
 
 ## A complete example
 
-This program animates a plasma field. It computes each pixel's color from two
-CORDIC sinusoids (`QSIN`) and an animation counter, sends a full 128×128 frame in
-`RGB24`, and uses manual-update mode so each frame appears whole. No external
-hardware is involved — the image is generated entirely in software.
+This program animates a **thermal-array heatmap**. A 32×24 grid stands in for a
+thermopile sensor like the MLX90640 — the kind of low-resolution infrared array
+you would point at a board to find a hot component, or at a doorway to count
+people. Each cell holds a temperature; the program renders a slowly drifting warm
+spot over a cool background. No hardware is involved — the temperatures are
+computed in software — but the data has exactly the shape a real array would
+produce.
+
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel block
+with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
+built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
+bright (hot):
 
 ```spin2
 CON
   _clkfreq = 200_000_000
+  COLS = 32                                ' a 32x24 thermopile array
+  ROWS = 24                                '   (MLX90640-class)
 
-PUB main() | x, y, frame, v
+PUB main() | x, y, ang, cx, cy
 
-  ' 128x128 canvas, full-color mode, manual update for flicker-free frames
-  debug(`BITMAP Plasma SIZE 128 128 RGB24 UPDATE)
+  ' 32x24 grid: each cell a 12px block with grid border; temperature -> tint
+  debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
-  frame := 0
+  ang := 0
   repeat
-    ' TRACE 0 (the default) lays pixels along the top line left-to-right,
-    ' wrapping down one line at a time, so one full pass paints the canvas.
-    debug(`Plasma CLEAR)
-    repeat y from 0 to 127
-      repeat x from 0 to 127
-        v := plasma(x, y, frame)
-        debug(`Plasma `(v))
-    debug(`Plasma UPDATE)
-    frame += 4
+    ' the warm spot drifts slowly across the array
+    cx := 16 + qsin(10, ang, 256)
+    cy := 12 + qsin(7, ang*2, 256)
+    debug(`Heat CLEAR)
+    repeat y from 0 to ROWS-1
+      repeat x from 0 to COLS-1
+        debug(`Heat `(cell(x, y, cx, cy)))
+    debug(`Heat UPDATE)
+    ang += 3
+    waitms(250)                            ' ~4 fps, like a real thermopile
 
-PRI plasma(x, y, t) : rgb | r, g, b
-  ' Two CORDIC sinusoids drive the red and green channels; their
-  ' combination drives blue. All values land in 0..255.
-  r := (qsin(127, x*3 + t, 256) + 128) & $FF
-  g := (qsin(127, y*3 - t, 256) + 128) & $FF
-  b := (qsin(127, (x+y)*2 + t, 256) + 128) & $FF
-  rgb := (r << 16) | (g << 8) | b
+PRI cell(x, y, cx, cy) : temp | dx, dy, d2
+  ' synthetic temperature: a warm peak at (cx,cy) over a cool ambient
+  dx := x - cx
+  dy := y - cy
+  d2 := dx*dx + dy*dy
+  temp := (220 - d2*3) #> 0                 ' peak falls off with distance
+  temp := (temp + 30) <# 255                ' add ambient, clamp to a byte
 ```
 
-Each frame: `CLEAR` resets the canvas and the pixel position to the top-left corner,
-the nested loops stream 16,384 pixels in raster order under the default trace, and
-`UPDATE` paints the finished frame in one step. Incrementing `frame` shifts the
-sinusoids so the field drifts from one frame to the next.
+Each frame: `CLEAR` resets the canvas, the nested loops stream all 768 cell values
+in raster order under the default trace, and `UPDATE` paints the finished frame at
+once. Moving the spot's center (`cx`, `cy`) each pass makes the hot region drift.
+
+The size of this image is the lesson. A 32×24 array is 768 values; even sent as a
+full byte each and refreshed a few times a second, that is only a couple of
+kilobytes per second — comfortably inside the debug link's budget
+([Chapter 1](#ch-1)). A small, slow sensor grid is exactly the kind of "image" the
+link carries well. A live *camera* frame is the opposite case: 320×240 in `RGB24`
+is about 230 KB, more than a second of link, so video would crawl in at well under
+one frame per second. When your image is a sensor field of tens or hundreds of
+cells at a few Hz, BITMAP is the right window; when it is full-motion video, it is
+not.
+
+### Where you'd use this
+
+In computer science and computer engineering, the BITMAP window is for **computer
+vision and framebuffer visualization** — seeing the pixels a program produced or
+consumed — and for **2D scalar-field visualization**, where a grid of values is
+clearest as a colored field rather than a table of numbers.
+
+**On an embedded project**, you reach for it to show a thermal-array heatmap (as
+here), to preview an LED-matrix framebuffer before it goes to the panel, to
+visualize a capacitive-touch grid, or to map signal strength or occupancy across a
+grid of sensors.
+
+**Bandwidth fit:** small or slow grids — sensor arrays, LED matrices, touch grids,
+a few hundred to a few thousand cells at a few Hz — stream comfortably; live camera
+video does not fit and is out.
+
+**Extension (real hardware):** replace the synthetic `cell` temperatures with a
+real I²C read from an MLX90640 (or any sensor grid) into the same per-cell values,
+and the heatmap shows live infrared.
 
 ## Considerations
 
@@ -363,9 +403,11 @@ sinusoids so the field drifts from one frame to the next.
 
 ## Try it
 
-Start with the plasma example. Then switch its color mode: change `RGB24` to `HSV16`
-and feed each pixel an 8-bit hue and 8-bit value computed from the same sinusoids —
-the field becomes a smooth hue sweep with far less computation per pixel. Next, make
-it a chart recorder: set `TRACE 8`, send one row of pixels per pass instead of a full
-frame, and watch the field scroll down the canvas. You will have exercised creation
-config, two color modes, a scrolling trace, and manual updates in a single program.
+Start with the heatmap example. First widen the temperature range or move the spot
+faster and watch the tint track it. Then switch the color mode: change `LUMA8 RED`
+to `HSV16` and feed each cell a hue computed from its temperature — cool cells blue,
+hot cells red — for the classic rainbow thermal palette. Next, make a different
+kind of display: drop `SPARSE`/`DOTSIZE`, set `SIZE 128 128` and `TRACE 8`, and send
+one row of values per pass to turn the window into a scrolling chart recorder. You
+will have exercised creation config, two color modes, sparse and full canvases, a
+scrolling trace, and manual updates in a single program.

@@ -258,6 +258,25 @@ fields never scroll or interfere — the panel reads like a fixed instrument fac
 > Overprinting replaces only the characters you send, so without padding, printing
 > `9` over `123` leaves `923`.
 
+### Where you'd use this
+
+In computer science and computer engineering, the TERM window is the everyday tool
+for **systems telemetry and observability** — surfacing the internal state of a
+running program — and for **transaction and event logging**, a running record of
+what happened and when.
+
+**On an embedded project**, you reach for it to show per-cog load and stack
+high-water marks, to inspect a peripheral's registers live, to report boot and POST
+status, to keep running fault and event counters, or to print a state machine's
+current state as it advances.
+
+**Bandwidth fit:** text and status panels update at human-readable rates — a few
+times a second is plenty — so TERM sits far inside the link budget; there is no
+high-rate case to temper.
+
+**Extension (real hardware):** swap the synthetic `qsin` reading for a real sensor
+or register read, and the same panel reports live values.
+
 ## Considerations
 
 - **Pick the grid to the job.** A status panel might be `40 10`; a scrolling log

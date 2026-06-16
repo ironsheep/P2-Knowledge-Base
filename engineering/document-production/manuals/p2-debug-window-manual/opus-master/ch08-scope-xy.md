@@ -210,6 +210,25 @@ a comet sweeping around a circle:
     y := QSIN(800, ph, 360)         ' QSIN gives the Y leg -> a circle
 ```
 
+### Where you'd use this
+
+In computer science and computer engineering, SCOPE_XY is the tool for **I/Q
+constellations** — the QAM and PSK symbol clouds of digital communications — and
+for **phase-plane and dynamical-systems work**, where a system's state is read from
+the shape its two variables trace.
+
+**On an embedded project**, you reach for it to plot a quadrature encoder's A and B
+channels as an XY circle (smart-pin captured), to watch a motor's d–q / FOC vector,
+to see a PLL pull an ellipse into a line as it locks, or to read an accelerometer's
+X–Y tilt as a moving point.
+
+**Bandwidth fit:** decimated or low-rate pairs draw cleanly; a full-rate I/Q stream
+does not fit the link and is out — sample down to a rate the link carries.
+
+**Extension (real hardware):** feed real `(x, y)` pairs — two ADC channels, the
+encoder's A/B counts, the accelerometer's two axes — in place of the synthetic
+sines, and the figure shows the live relationship.
+
 ## Considerations
 
 - **`SIZE` is a radius; `RANGE` is a symmetric extent.** A `SIZE 256 RANGE 1000`

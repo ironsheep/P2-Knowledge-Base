@@ -175,6 +175,23 @@ So a single-bit logic capture at the highest rate uses `LONGS_1BIT` (32×). A sc
 sampling a signed 16-bit ADC-style value uses `LONGS_16BIT SIGNED` (2×). A
 four-level (2-bit) bitmap uses `LONGS_2BIT` (16×).
 
+### Where you'd use this
+
+Packing is not a window; it is the **headroom mechanism** the rest of the manual
+leans on. You reach for it the moment a window cannot keep up with the data — when
+a fast sample stream would saturate the 2 Mbaud link ([Chapter 1](#ch-1)).
+
+The concrete case is a **high-rate burst** you have captured in a tight PASM loop —
+a triggered scope frame, a logic-analyzer capture, a block destined for the FFT —
+and now have to move over the slow link. Sending one long per sample wastes three
+or more bytes on values only a few bits wide; packing them (up to 32 samples per
+long) is what lets the dump fit. This is the readout half of the **capture-and-dump**
+strategy ([Chapter 7](#ch-7)): capture fast, pack tight, dump once.
+
+**Bandwidth fit:** packing multiplies how much *fits*, not how fast the link runs —
+it buys headroom, not an order of magnitude. When even packed data outruns the
+link, capture a finite burst and dump it rather than trying to stream live.
+
 ## Considerations
 
 - **Maximum compression is 32×.** `LONGS_1BIT` is the densest mode. There is no

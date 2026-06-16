@@ -191,6 +191,24 @@ Move the mouse over the window and the position updates; move outside and the
 program reports it from the negative `xpos`. Press the left button and the buttons
 read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
 
+### Where you'd use this
+
+In computer science and computer engineering, host input turns a debug window into
+a **human-in-the-loop control surface** — interactive parameter adjustment and
+manual test rigs you drive by hand while the program runs.
+
+**On an embedded project**, you reach for it to tune PID gains live, to nudge a
+setpoint, to jog an actuator by hand, or to trigger and label a calibration
+capture — all without recompiling, using the host keyboard and mouse as a temporary
+control panel.
+
+**Bandwidth fit:** input is polled a few tens of times a second; it is negligible
+against the link budget.
+
+**Extension (real hardware):** the same `PC_KEY` / `PC_MOUSE` polling that reads the
+host here can hand its values to real outputs — drive a smart-pin PWM from a tuned
+gain, step a motor from an arrow key — turning the panel into live control.
+
 ## Considerations
 
 - **The model is polling, not interrupts.** Nothing is pushed to your program; you

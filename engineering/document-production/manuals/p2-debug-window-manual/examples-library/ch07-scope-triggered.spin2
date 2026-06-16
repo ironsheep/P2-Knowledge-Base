@@ -2,7 +2,9 @@ CON
   _clkfreq = 200_000_000
 
 PUB main() | ang, sig
-  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512 'Signal' -1000 1000)
+  ' SCOPE takes its channel declaration as a feed to the window name
+  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512)
+  debug(`Capture 'Signal' -1000 1000)
   ' rising edge, trigger centered in the frame
   debug(`Capture TRIGGER 0 -500 500 256)
   debug(`Capture HOLDOFF 512)  ' one frame of holdoff before re-arming

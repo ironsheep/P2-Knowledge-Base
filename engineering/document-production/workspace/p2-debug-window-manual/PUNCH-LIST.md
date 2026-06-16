@@ -180,14 +180,36 @@ escape-script `{width=}` fix. Daemon left RUNNING.
 
 The screenshot-capture pipeline (`screenshot-capture/`, run on a P2 with `pnut-ts`
 compile + `pnut-term-ts -r` run; each example `SAVE`s its own window; `CLOSE` makes it
-hands-off) works end-to-end. **5 of 10 hero figures render correctly and are in the
-manual; 5 are placeholders pending these fixes:**
+hands-off) works end-to-end.
 
-**Captured & in the manual (real images):**
-`fig-04-bitmap` (plasma) · `fig-05-plot-gauge` · `fig-05-plot-sprite` · `fig-06-logic`
-(8-ch counter) · `fig-11-midi` (keyboard; see note).
+### Capture queue — dw-examples sprint (2026-06-15)
 
-**Placeholders pending — two root causes to solve:**
+**All generators below are final and compile `pnut-ts -d` clean (verified 2026-06-15).
+Stephen captures in PNut (ground truth) → drops `*_WDW.bmp` in `figure-generators/screenshots/`
+→ I reconvert BMP→PNG into `workspace/.../assets/` and reassemble.** Existing BMPs in
+`screenshots/` are dated Jun 13–14 and are STALE for the changed/new figures below.
+
+Changed / new this sprint (generator final, awaiting first canonical capture):
+- `fig-04-bitmap` — **CHANGED** plasma → 32×24 thermal heatmap (fixed centre spot, deterministic).
+- `fig-05-plot-pid` — **NEW** PI control-loop strip chart (setpoint / PV / controller traces).
+- `fig-07-scope-glitch` — **NEW** rare-glitch capture (separate-feed channel, TRIGGER + HOLDOFF).
+
+Generator-fixed earlier (#56), still awaiting re-capture:
+- `fig-03-term-dashboard` — fixed (formatters now in quoted strings).
+- `fig-06-logic` — fixed (channels on creation line).
+- `fig-09-fft` — fixed (`SAMPLES 1024 0 320`).
+- `fig-11-midi` — PNut correct; was a `pnut-term-ts` host bug (term-ts under repair) — capture once term-ts matches PNut.
+
+No recapture needed (unchanged or visually identical):
+- `fig-10-spectro` — prose reframed chirp → motor run-up, but the image is the same rising
+  diagonal streak; existing capture stays valid (window name Chirp→RunUp only changes the
+  in-window title, not the figure we ship).
+- `fig-05-plot-gauge`, `fig-05-plot-sprite`, `fig-07-scope`, `fig-08-scope-xy` — untouched this sprint.
+
+---
+
+**Historical root-cause notes (early-June capture attempts — kept for context; the
+generator fixes above address the channel-def and text-render issues seen here):**
 
 1. **Channel-config windows ignore the channel definition.**
    - `fig-07-scope` — shows "Channel 0" at 0–255 (my `'Wave' lo hi` range had no effect),
@@ -220,4 +242,27 @@ manual; 5 are placeholders pending these fixes:**
 
 ## Other
 
-- (none yet)
+- **SCOPE channel-def idiom — FLAG (raised 2026-06-15, dw-examples #61).** The golden
+  source (`REF/theory-of-operations/SCOPE_Theory_of_Operations.md`, Example 3, from
+  `DebugDisplayUnit.pas` `SCOPE_Configure`) documents channel defs **on the creation
+  line**, but the empirical PNut capture for `fig-07-scope` only rendered correctly with
+  the channel def as a **separate feed** to the window name (creation-line def drew an
+  empty "Channel 0" plot). PNut is ground truth for what we ship, so the **new** ch07
+  acquisition examples (recast one-shot `Capture` + new `Glitch`) and the new generator
+  `fig-07-scope-glitch.spin2` use the **separate-feed** form. **ch09 FFT already uses
+  the separate-feed form throughout** (config-only creation line, then a `'label' ...`
+  feed to the window; its `Dual` example shows the multi-channel feed with `...`
+  continuation — the house pattern), so FFT needed no change and confirms multi-channel
+  separate-feed is the intended idiom. **ch10 SPECTRO has no quoted channel-def** (single
+  channel) so it is unaffected. Left UNCHANGED in ch07 (still creation-line, matching the
+  REF source): the top single-channel `Sig 'Wave' AUTO` example, the three-channel
+  `Waves` example, and the "Channels are declared as elements" teaching section — an
+  in-chapter inconsistency (new acquisition examples are separate-feed; these three are
+  creation-line). **TO RECONCILE once a round-trip confirms SCOPE's creation-line
+  behavior**: if creation-line truly fails for SCOPE (as the figure work observed and as
+  FFT's pattern implies), rewrite those three ch07 spots to separate-feed to match ch09;
+  if it actually works (REF source says it does), the new examples can stay separate-feed
+  as the taught idiom but the inconsistency should be called out, not left silent.
+  Source/PNut conflict is worth a deliberate confirming capture: does SCOPE's creation-
+  line channel-def truly fail, or did the original fig-07 failure come from a `...`
+  line-continuation artifact?

@@ -1,0 +1,37 @@
+'' fig-07-scope-glitch.spin2  ->  fig-07-scope-glitch.png
+'' SCOPE window capturing a rare out-of-range glitch with a TRIGGER (Chapter 7).
+'' The capture-and-dump pattern: a clean low-amplitude signal occasionally throws
+'' one out-of-range spike; the trigger arms on the quiet signal and fires on the
+'' spike, freezing a frame with the glitch centered (lead-up + aftermath visible).
+'' Theme: white background, light grid, blue trace. Named colours.
+''
+'' NOTE: the channel def is a SEPARATE feed to the window name. A channel-def on
+'' the SCOPE creation line is ignored by the host (it drew an empty/Channel-0
+'' plot), so every canonical capture declares the channel as its own feed.
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, n, sig
+  debug(`SCOPE Glitch SIZE 512 256 SAMPLES 512 COLOR WHITE GRAY)
+  debug(`Glitch 'Signal' -1000 1000 200 20 0 BLUE)   ' name lo hi tall base grid colour
+  debug(`Glitch TRIGGER 0 200 800 256)               ' arm low, fire high -> rising, centered
+  debug(`Glitch HOLDOFF 512)                         ' hold one full frame once it fires
+
+  ang := 0
+  n   := 0
+  repeat 1500                              ' long enough to fill the buffer + fire on a spike
+    sig := qsin(300, ang, 256)             ' clean signal, well inside range
+    if n // 233 == 0                       ' a rare, occasional fault
+      sig := 950                           ' one out-of-range sample
+    debug(`Glitch `(sig))
+    ang += 5
+    n   += 1
+    waitms(1)
+
+  waitms(200)                              ' let the host render the final (frozen) frame
+  debug(`Glitch save 'fig-07-scope-glitch')          ' display area (no chrome)
+  debug(`Glitch save window 'fig-07-scope-glitch_WDW') ' window, incl. chrome
+  debug(`Glitch close)
+  debug("* SCOPE glitch complete")
+  debug("DEBUG_END_SESSION")             ' end run -> shell script runs next

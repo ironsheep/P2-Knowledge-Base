@@ -220,12 +220,37 @@ using the `-d` (debug) option. [Chapter 2](#ch-2) walks through installing and r
 
 ## A note on high data rates
 
-The `DEBUG()` link carries every element you send over a serial connection, so the
-rate at which a window can be fed is bounded by that link. When you need to push
-data fast — capturing a high-speed signal, for instance — the streaming windows
-accept **packed-data modes** that unpack many samples from each long you send,
-moving far more data per `DEBUG()` statement. Packed-data modes are covered in
-[Chapter 13](#ch-13); you do not need them to get started.
+The `DEBUG()` link carries every element you send — every sample, pixel, and
+value — over a single serial connection, so **the link is the budget.** At the
+2 Mbaud the tool uses, 8N1 framing costs about 10 bits per byte, so the wire
+moves roughly **200 KB/s of raw bytes**, and after the `DEBUG()` command and
+formatting overhead you can count on **~100–150 KB/s of actual payload**.
+Everything a window shows has to fit through that.
+
+Most debugging fits comfortably: text, status panels, sensors read at a few Hz
+to a few kHz, and interactive controls all sit well under the budget. What does
+*not* fit is a live high-bandwidth stream — full-motion video, or a full-rate
+ADC, RF, or audio feed. A single 320×240 color frame is already about 230 KB,
+more than a second's worth of link, so streaming video live is off the table.
+
+When the data you care about is faster than the link, you do not give up — you
+reach for one of three strategies for living within the budget:
+
+- **Pack** — use the streaming windows' **packed-data modes**, which unpack many
+  samples from each long you send, moving several times more data per `DEBUG()`
+  statement. Packing buys headroom, not an order of magnitude. Covered in
+  [Chapter 13](#ch-13).
+- **Decimate** — send only 1-in-N samples for a live, always-updating view of a
+  slowly-evolving signal. You trade detail for a continuous trend you can watch
+  in real time. Detailed in [Chapter 7](#ch-7).
+- **Capture and dump** — let a tight PASM loop fill a buffer at full speed, then
+  dump that buffer once over the slow link when a trigger fires. The capture runs
+  at the P2's speed, not the link's; the link only carries the readout once.
+  Detailed in [Chapter 7](#ch-7).
+
+You do not need any of these to get started — but knowing the budget exists, and
+that these three strategies live within it, is what keeps the later chapters
+honest about which uses a given window can really serve.
 
 ## Where to go next
 

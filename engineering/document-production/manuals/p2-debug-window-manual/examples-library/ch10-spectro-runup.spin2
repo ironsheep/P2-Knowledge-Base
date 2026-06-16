@@ -3,21 +3,21 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 ...
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 ...
          RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
-  ainc  := 30_000              ' starting phase step (a low tone)
+  ainc  := 30_000              ' shaft frequency at rest (a low tone)
 
   repeat
-    ' Feed one FFT window of samples (512), then raise the frequency.
+    ' Feed one 512-sample FFT window at the current speed, then accelerate.
     repeat i from 1 to 512
       sample := sine(2000, phase)
-      phase += ainc            ' advance the synthesized tone
-      debug(`Chirp `(sample))
-    ainc += 20_000  ' next block is a higher tone -> diagonal streak
+      phase += ainc            ' advance the synthesized vibration tone
+      debug(`RunUp `(sample))
+    ainc += 20_000  ' the motor speeds up -> higher tone -> diagonal streak
     if ainc > 1_000_000
-      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
+      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
       ainc := 30_000
 
 PRI sine(amp, angle) : y

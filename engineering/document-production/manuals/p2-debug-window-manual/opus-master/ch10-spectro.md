@@ -28,7 +28,7 @@ runtime commands.
 \begin{figure}[H]
 \centering
 \screenshotfig[width=0.65\linewidth]{inbox/assets/fig-10-spectro.png}
-\caption{The SPECTRO window as a rising-tone spectrogram waterfall.}
+\caption{The SPECTRO window as a motor run-up: rising vibration frequency draws a diagonal streak down the waterfall.}
 \end{figure}
 ```
 
@@ -225,13 +225,15 @@ debug(`Wfall SAVE)
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`
 samples refill the buffer before anything new is drawn.
 
-## A complete software-only example: a frequency sweep
+## A complete software-only example: a motor run-up
 
-This program needs no wiring. It synthesizes its own signal with the CORDIC: a sine
-tone whose frequency climbs block by block. Each block of 512 samples is one tone;
-the next block is a higher tone. Fed to a downward-scrolling SPECTRO, the rising
-pitch draws a **diagonal streak** down the waterfall — frequency increasing across
-successive lines.
+This program needs no wiring. It synthesizes a signal that stands in for the
+**vibration of a motor as it runs up to speed**. A spinning motor vibrates most
+strongly at its shaft-rotation frequency; as it accelerates from rest to full
+speed, that tone climbs. We make exactly that with the CORDIC: a sine tone whose
+frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
+vibration draws a **diagonal streak** down the waterfall — the run-up captured as
+a picture.
 
 ```spin2
 CON
@@ -239,21 +241,21 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 ...
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 ...
          RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
-  ainc  := 30_000              ' starting phase step (a low tone)
+  ainc  := 30_000              ' shaft frequency at rest (a low tone)
 
   repeat
-    ' Feed one FFT window of samples (512), then raise the frequency.
+    ' Feed one 512-sample FFT window at the current speed, then accelerate.
     repeat i from 1 to 512
       sample := sine(2000, phase)
-      phase += ainc            ' advance the synthesized tone
-      debug(`Chirp `(sample))
-    ainc += 20_000  ' next block is a higher tone -> diagonal streak
+      phase += ainc            ' advance the synthesized vibration tone
+      debug(`RunUp `(sample))
+    ainc += 20_000  ' the motor speeds up -> higher tone -> diagonal streak
     if ainc > 1_000_000
-      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
+      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
       ainc := 30_000
 
 PRI sine(amp, angle) : y
@@ -267,14 +269,36 @@ PRI sine(amp, angle) : y
 
 `sine()` uses **QROTATE** to rotate the point (amp, 0) by `angle`; **GETQY** returns
 the Y component, which is `amp x sin(angle)`. Stepping `phase` by `ainc` each sample
-produces a tone whose frequency is set by `ainc`; raising `ainc` after every 512-
-sample block steps the tone up, and the waterfall records the climb as a diagonal.
-The Hanning window is applied inside the FFT automatically; you supply only the
-samples.
+produces a tone whose frequency is set by `ainc` — the stand-in for shaft speed;
+raising `ainc` after every 512-sample block accelerates the motor, and the
+waterfall records the climb as a diagonal. The Hanning window is applied inside the
+FFT automatically; you supply only the samples.
 
-To see steady lines instead of a diagonal, hold `ainc` constant — the same frequency
-every block draws a straight vertical streak (with `TRACE 8`). To see a transient,
-feed a burst of one frequency surrounded by silence.
+Hold `ainc` constant and the motor runs at a steady speed — the same frequency
+every block draws a straight vertical streak (with `TRACE 8`). A structural
+resonance the machine passes through on its way up shows as a bright spot where the
+climbing tone crosses that fixed frequency — exactly the resonance-crossing a
+machine-health engineer watches for during run-up and coast-down.
+
+### Where you'd use this
+
+In computer science and computer engineering, SPECTRO is the tool for **spectral
+monitoring over time** — watching how a signal's frequency content evolves — in
+narrowband RF and communications and in acoustics and speech analysis.
+
+**On an embedded project**, its natural home is **machine-health monitoring**:
+trending a motor or bearing's vibration spectrum so you can see a fault band grow,
+watching resonance crossings during run-up and coast-down (as here), or following a
+narrowband or voice signal over time.
+
+**Bandwidth fit:** vibration and acoustic monitoring live at sub-10 kHz and play
+out over seconds to minutes — low sample rate, long duration — which is exactly
+what the link and the waterfall want. A full-rate RF or music spectrum does not fit
+and is out.
+
+**Extension (real hardware):** replace the synthetic `sine()` with real samples
+from an accelerometer or microphone — read an ADC or I²S input in the feed loop —
+and the waterfall shows live machine vibration.
 
 ## Considerations
 
@@ -299,13 +323,14 @@ feed a burst of one frequency surrounded by silence.
 
 ## Try it
 
-Start from the sweep example. Then:
+Start from the run-up example. Then:
 
 1. **Switch axes.** Change `TRACE 8` to `TRACE 12` and watch the waterfall scroll
    sideways with frequency up the side.
-2. **Add a second tone.** Sum a second `sine()` at a fixed frequency into each
-   sample so a steady horizontal line sits alongside the moving diagonal — toggle it
-   on and off per block to see it appear and vanish:
+2. **Add a second source.** Sum a second `sine()` at a fixed frequency into each
+   sample so a steady horizontal line — a second machine running at constant speed —
+   sits alongside the moving diagonal; toggle it on and off per block to see it
+   appear and vanish:
 
    ```spin2
    sample := sine(1500, p1)

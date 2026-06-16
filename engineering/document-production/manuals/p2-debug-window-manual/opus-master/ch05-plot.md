@@ -69,16 +69,16 @@ system, which you control with `ORIGIN`, `CARTESIAN`, and `POLAR`.
 
 ### Cartesian mode
 
-Cartesian is the default. Out of the box the origin is the top-left corner,
-**x increases rightward, and y increases downward** — the screen convention. You
-change that with `CARTESIAN`:
+Cartesian is the default. Out of the box the origin is the bottom-left corner,
+**x increases rightward, and y increases upward** — the mathematical convention.
+You change that with `CARTESIAN`:
 
 ```debug-update
 CARTESIAN {flipy {flipx}}
 ```
 
-- `flipy` — `0` leaves y increasing downward (default); `1` makes y increase
-  **upward**, the mathematical convention.
+- `flipy` — `0` leaves y increasing upward (default, the mathematical
+  convention); `1` flips y to increase **downward**, the screen convention.
 - `flipx` — `0` leaves x increasing rightward (default); `1` makes x increase
   **leftward**.
 
@@ -106,7 +106,6 @@ draw a figure in its own local coordinates and place it anywhere.
 PUB main()
   debug(`PLOT Centered SIZE 512 512)
   debug(`Centered ORIGIN 256 256)        ' (0,0) is now the canvas center
-  debug(`Centered CARTESIAN 1 0)         ' y up, x right
   debug(`Centered SET 100 100 DOT 6 255) ' a dot up-and-right of center
 ```
 
@@ -547,11 +546,14 @@ Three more commands round out display control:
 
 ## A complete worked example
 
-This program needs no wiring — it generates all of its own data on the P2. It
-plots one cycle of a sine wave from the CORDIC engine as a connected polyline,
-overlays a random scatter of dots from the hardware RNG, and labels the result.
-The origin is moved to the left-center and the y-axis flipped up so the wave sits
-around a center line, the mathematical convention.
+This first program is a **tour of the drawing primitives** — it exercises the
+polyline, the scatter, text, and the coordinate system so you can see each one
+work, with no wiring and all of its own data generated on the P2. It plots one
+cycle of a sine wave from the CORDIC engine as a connected polyline, overlays a
+random scatter of dots from the hardware RNG, and labels the result. The origin is
+moved to the left-center so the wave sits around a center line — y already
+increases upward in the default coordinate system. The two worked instruments that
+follow put these same primitives to work on real tasks.
 
 ```spin2
 CON _clkfreq = 200_000_000
@@ -561,8 +563,7 @@ PUB main() | x, y, angle, i, sx, sy
   ' Create a 512x512 plotting canvas on a black background
   debug(`PLOT Wave SIZE 512 512 BACKCOLOR $000000)
 
-  ' Origin at left edge, vertical center; y increases upward (flipy = 1)
-  debug(`Wave CARTESIAN 1 0)
+  ' Origin at left edge, vertical center; y increases upward (the default)
   debug(`Wave ORIGIN 0 256)
 
   ' Center axis line in dim gray
@@ -674,6 +675,95 @@ value your program computes and the needle follows.
 > Buffered mode (`UPDATE` on the creation line) keeps the gauge smooth: the whole
 > dial is redrawn off-screen each frame, then shown at once. Without it you would see
 > the needle erase-and-redraw flicker.
+
+## A worked instrument: a control-loop strip chart
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.75\linewidth]{inbox/assets/fig-05-plot-pid.png}
+\caption{A PID control loop on the PLOT window: setpoint, the process variable's overshoot-and-settle, and the controller output.}
+\end{figure}
+```
+
+A strip chart — several values traced against time — is how you watch a control
+loop behave while you tune it. This program runs a complete loop in software: a
+**PI controller** driving a simulated **first-order process**, with nothing wired
+up. The setpoint steps up and then back down; the process variable chases it,
+overshoots, and settles; the controller output is the effort that drives it there.
+Plotting all three together is exactly what you do on the bench to choose P, I, and
+D gains.
+
+The loop is an honest little simulation. Each step computes the error, accumulates
+it for the integral term, forms the controller output (clamped, like a real
+actuator), and advances a first-order process model toward that output. The three
+histories are then drawn as three polylines across the canvas:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  STEPS = 256
+
+VAR
+  long spH[STEPS], pvH[STEPS], ctlH[STEPS]
+
+PUB main() | t, sp, pv, ctl, err, integ
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`Loop ORIGIN 0 10)              ' baseline at bottom; y up (default)
+
+  repeat                               ' re-run the experiment continuously
+    pv := 0
+    integ := 0
+    repeat t from 0 to STEPS-1
+      sp := (t < 128) ? 70 : 30        ' setpoint steps up then down
+      err := sp - pv
+      integ += err
+      ctl := (err*2 + integ/32) #> 0 <# 100   ' PI control, clamp 0..100
+      pv += (ctl - pv) / 10            ' first-order process lag
+      spH[t] := sp
+      pvH[t] := pv
+      ctlH[t] := ctl
+
+    debug(`Loop CLEAR)
+    debug(`Loop COLOR $808080)
+    trace(@ctlH)                       ' controller output (gray)
+    debug(`Loop COLOR $00AAFF)
+    trace(@spH)                        ' setpoint (blue)
+    debug(`Loop COLOR $00FF00)
+    trace(@pvH)                        ' process variable (green)
+    waitms(500)
+
+PRI trace(p) | t
+  debug(`Loop SET 0 `(long[p][0] * 3))    ' value 0..100 -> 0..300 px
+  repeat t from 1 to STEPS-1
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)
+```
+
+`trace` draws one history array as a connected polyline: it `SET`s the cursor to
+the first point, then issues a `LINE` to each following point, scaling the 0–100
+value range to the canvas height. Each pass re-runs the whole experiment and
+redraws all three traces together. Raise the proportional gain (the `*2`) or change
+the integral divisor (`/32`) and the overshoot and settling time shift exactly as a
+real loop's would — the chart *is* the tuning feedback.
+
+### Where you'd use this
+
+In computer science and computer engineering, the PLOT window is the canvas for
+**control-systems work** — watching a loop respond and tuning it — and for general
+**instrumentation and data visualization**, where you build the exact gauge, chart,
+or figure your data calls for.
+
+**On an embedded project**, you reach for it to plot a PID strip chart while tuning
+a motor or thermal loop (as here), to trace a battery's charge curve, to plot raw
+ADC against engineering units during a calibration, or to build a servo or RPM dial
+like the gauge above.
+
+**Bandwidth fit:** these are all low-rate — readings and traces updating at tens to
+a few hundred points per second — and sit comfortably inside the link budget.
+
+**Extension (real hardware):** replace the simulated process model with a real
+measured value (an ADC read, a sensor sample) and the simulated `ctl` with your
+actual control output, and the same strip chart shows a live loop.
 
 ## Considerations
 

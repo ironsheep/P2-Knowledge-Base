@@ -239,9 +239,10 @@ naturally narrow; for full-range FFT input it is rarely needed.
 ## A complete example: a multi-tone spectrum, no hardware
 
 This program needs nothing but a P2 board and the host. It synthesizes a signal
-in software — three sine tones summed, plus a little noise — and feeds it to the
-FFT window so you can see the three tones as three spikes and the noise as a low
-floor beneath them.
+in software — three sine tones summed (think of them as a fundamental and two
+harmonics of a vibrating machine), plus a little noise — and feeds it to the FFT
+window so you can see the three tones as three spikes and the noise as a low floor
+beneath them.
 
 The tones come from the CORDIC `qsin` operator. Each tone has its own phase
 accumulator; adding a fixed increment to a phase each sample sets that tone's
@@ -295,6 +296,28 @@ Change an increment and watch the corresponding spike slide along the axis.
 > one, read an ADC-configured smart pin in the sample loop and feed its value in
 > place of the `qsin` sum. Everything else — the window, the channel, the
 > redraw — stays the same.
+
+### Where you'd use this
+
+In computer science and computer engineering, the FFT window is the tool for
+**audio and DSP analysis** — measuring harmonics, total harmonic distortion, and
+noise floors — and for **condition monitoring**, identifying the frequencies a
+machine or circuit is producing.
+
+**On an embedded project**, you reach for it to find a motor or bearing's vibration
+signature, to measure power-line harmonics and THD, to hunt an EMI noise source by
+its frequency, or to identify a mechanical or electrical resonance. The three
+synthetic tones above stand in for exactly that kind of content — real components
+such as a fundamental and two harmonics.
+
+**Bandwidth fit:** vibration and harmonic work lives at low sample rates, where a
+buffered block transforms cleanly — an ideal fit. Live full-rate audio is tempered:
+feed it in buffered or decimated blocks rather than as a continuous stream (see
+[Chapter 7](#ch-7)).
+
+**Extension (real hardware):** read an ADC-configured smart pin in the sample loop
+and feed its value in place of the `qsin` sum — the window, channel, and redraw
+stay the same.
 
 ## Considerations
 

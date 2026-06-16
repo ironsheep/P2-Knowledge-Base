@@ -364,12 +364,37 @@ using the `-d` (debug) option. [Chapter 2](#ch-2) walks through installing and r
 
 ## A note on high data rates
 
-The `DEBUG()` link carries every element you send over a serial connection, so the
-rate at which a window can be fed is bounded by that link. When you need to push
-data fast — capturing a high-speed signal, for instance — the streaming windows
-accept **packed-data modes** that unpack many samples from each long you send,
-moving far more data per `DEBUG()` statement. Packed-data modes are covered in
-[Chapter 13](#ch-13); you do not need them to get started.
+The `DEBUG()` link carries every element you send — every sample, pixel, and
+value — over a single serial connection, so **the link is the budget.** At the
+2 Mbaud the tool uses, 8N1 framing costs about 10 bits per byte, so the wire
+moves roughly **200 KB/s of raw bytes**, and after the `DEBUG()` command and
+formatting overhead you can count on **~100–150 KB/s of actual payload**.
+Everything a window shows has to fit through that.
+
+Most debugging fits comfortably: text, status panels, sensors read at a few Hz
+to a few kHz, and interactive controls all sit well under the budget. What does
+*not* fit is a live high-bandwidth stream — full-motion video, or a full-rate
+ADC, RF, or audio feed. A single 320×240 color frame is already about 230 KB,
+more than a second's worth of link, so streaming video live is off the table.
+
+When the data you care about is faster than the link, you do not give up — you
+reach for one of three strategies for living within the budget:
+
+- **Pack** — use the streaming windows' **packed-data modes**, which unpack many
+  samples from each long you send, moving several times more data per `DEBUG()`
+  statement. Packing buys headroom, not an order of magnitude. Covered in
+  [Chapter 13](#ch-13).
+- **Decimate** — send only 1-in-N samples for a live, always-updating view of a
+  slowly-evolving signal. You trade detail for a continuous trend you can watch
+  in real time. Detailed in [Chapter 7](#ch-7).
+- **Capture and dump** — let a tight PASM loop fill a buffer at full speed, then
+  dump that buffer once over the slow link when a trigger fires. The capture runs
+  at the P2's speed, not the link's; the link only carries the readout once.
+  Detailed in [Chapter 7](#ch-7).
+
+You do not need any of these to get started — but knowing the budget exists, and
+that these three strategies live within it, is what keeps the later chapters
+honest about which uses a given window can really serve.
 
 ## Where to go next
 
@@ -833,6 +858,25 @@ fields never scroll or interfere — the panel reads like a fixed instrument fac
 > Overprinting replaces only the characters you send, so without padding, printing
 > `9` over `123` leaves `923`.
 
+### Where you'd use this
+
+In computer science and computer engineering, the TERM window is the everyday tool
+for **systems telemetry and observability** — surfacing the internal state of a
+running program — and for **transaction and event logging**, a running record of
+what happened and when.
+
+**On an embedded project**, you reach for it to show per-cog load and stack
+high-water marks, to inspect a peripheral's registers live, to report boot and POST
+status, to keep running fault and event counters, or to print a state machine's
+current state as it advances.
+
+**Bandwidth fit:** text and status panels update at human-readable rates — a few
+times a second is plenty — so TERM sits far inside the link budget; there is no
+high-rate case to temper.
+
+**Extension (real hardware):** swap the synthetic `qsin` reading for a real sensor
+or register read, and the same panel reports live values.
+
 ## Considerations
 
 - **Pick the grid to the job.** A status panel might be `40 10`; a scrolling log
@@ -877,7 +921,7 @@ commands that position, scroll, clear, and save the canvas.
 \begin{figure}[H]
 \centering
 \screenshotfig[width=0.50\linewidth]{inbox/assets/fig-04-bitmap.png}
-\caption{The BITMAP window showing a CORDIC-generated plasma field.}
+\caption{The BITMAP window showing a synthetic 32×24 thermal-array heatmap.}
 \end{figure}
 ```
 
@@ -1153,45 +1197,85 @@ rarely (faster, choppier). The default is one full canvas of pixels.
 
 ## A complete example
 
-This program animates a plasma field. It computes each pixel's color from two
-CORDIC sinusoids (`QSIN`) and an animation counter, sends a full 128×128 frame in
-`RGB24`, and uses manual-update mode so each frame appears whole. No external
-hardware is involved — the image is generated entirely in software.
+This program animates a **thermal-array heatmap**. A 32×24 grid stands in for a
+thermopile sensor like the MLX90640 — the kind of low-resolution infrared array
+you would point at a board to find a hot component, or at a doorway to count
+people. Each cell holds a temperature; the program renders a slowly drifting warm
+spot over a cool background. No hardware is involved — the temperatures are
+computed in software — but the data has exactly the shape a real array would
+produce.
+
+The canvas is only 32×24 logical cells, so each is magnified to a 12-pixel block
+with `DOTSIZE` and `SPARSE` (the magnified, low-resolution display the window is
+built for). `LUMA8 RED` maps each cell's 8-bit temperature from dark (cool) to
+bright (hot):
 
 ```spin2
 CON
   _clkfreq = 200_000_000
+  COLS = 32                                ' a 32x24 thermopile array
+  ROWS = 24                                '   (MLX90640-class)
 
-PUB main() | x, y, frame, v
+PUB main() | x, y, ang, cx, cy
 
-  ' 128x128 canvas, full-color mode, manual update for flicker-free frames
-  debug(`BITMAP Plasma SIZE 128 128 RGB24 UPDATE)
+  ' 32x24 grid: each cell a 12px block with grid border; temperature -> tint
+  debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
 
-  frame := 0
+  ang := 0
   repeat
-    ' TRACE 0 (the default) lays pixels along the top line left-to-right,
-    ' wrapping down one line at a time, so one full pass paints the canvas.
-    debug(`Plasma CLEAR)
-    repeat y from 0 to 127
-      repeat x from 0 to 127
-        v := plasma(x, y, frame)
-        debug(`Plasma `(v))
-    debug(`Plasma UPDATE)
-    frame += 4
+    ' the warm spot drifts slowly across the array
+    cx := 16 + qsin(10, ang, 256)
+    cy := 12 + qsin(7, ang*2, 256)
+    debug(`Heat CLEAR)
+    repeat y from 0 to ROWS-1
+      repeat x from 0 to COLS-1
+        debug(`Heat `(cell(x, y, cx, cy)))
+    debug(`Heat UPDATE)
+    ang += 3
+    waitms(250)                            ' ~4 fps, like a real thermopile
 
-PRI plasma(x, y, t) : rgb | r, g, b
-  ' Two CORDIC sinusoids drive the red and green channels; their
-  ' combination drives blue. All values land in 0..255.
-  r := (qsin(127, x*3 + t, 256) + 128) & $FF
-  g := (qsin(127, y*3 - t, 256) + 128) & $FF
-  b := (qsin(127, (x+y)*2 + t, 256) + 128) & $FF
-  rgb := (r << 16) | (g << 8) | b
+PRI cell(x, y, cx, cy) : temp | dx, dy, d2
+  ' synthetic temperature: a warm peak at (cx,cy) over a cool ambient
+  dx := x - cx
+  dy := y - cy
+  d2 := dx*dx + dy*dy
+  temp := (220 - d2*3) #> 0                 ' peak falls off with distance
+  temp := (temp + 30) <# 255                ' add ambient, clamp to a byte
 ```
 
-Each frame: `CLEAR` resets the canvas and the pixel position to the top-left corner,
-the nested loops stream 16,384 pixels in raster order under the default trace, and
-`UPDATE` paints the finished frame in one step. Incrementing `frame` shifts the
-sinusoids so the field drifts from one frame to the next.
+Each frame: `CLEAR` resets the canvas, the nested loops stream all 768 cell values
+in raster order under the default trace, and `UPDATE` paints the finished frame at
+once. Moving the spot's center (`cx`, `cy`) each pass makes the hot region drift.
+
+The size of this image is the lesson. A 32×24 array is 768 values; even sent as a
+full byte each and refreshed a few times a second, that is only a couple of
+kilobytes per second — comfortably inside the debug link's budget
+([Chapter 1](#ch-1)). A small, slow sensor grid is exactly the kind of "image" the
+link carries well. A live *camera* frame is the opposite case: 320×240 in `RGB24`
+is about 230 KB, more than a second of link, so video would crawl in at well under
+one frame per second. When your image is a sensor field of tens or hundreds of
+cells at a few Hz, BITMAP is the right window; when it is full-motion video, it is
+not.
+
+### Where you'd use this
+
+In computer science and computer engineering, the BITMAP window is for **computer
+vision and framebuffer visualization** — seeing the pixels a program produced or
+consumed — and for **2D scalar-field visualization**, where a grid of values is
+clearest as a colored field rather than a table of numbers.
+
+**On an embedded project**, you reach for it to show a thermal-array heatmap (as
+here), to preview an LED-matrix framebuffer before it goes to the panel, to
+visualize a capacitive-touch grid, or to map signal strength or occupancy across a
+grid of sensors.
+
+**Bandwidth fit:** small or slow grids — sensor arrays, LED matrices, touch grids,
+a few hundred to a few thousand cells at a few Hz — stream comfortably; live camera
+video does not fit and is out.
+
+**Extension (real hardware):** replace the synthetic `cell` temperatures with a
+real I²C read from an MLX90640 (or any sensor grid) into the same per-cell values,
+and the heatmap shows live infrared.
 
 ## Considerations
 
@@ -1219,12 +1303,14 @@ sinusoids so the field drifts from one frame to the next.
 
 ## Try it
 
-Start with the plasma example. Then switch its color mode: change `RGB24` to `HSV16`
-and feed each pixel an 8-bit hue and 8-bit value computed from the same sinusoids —
-the field becomes a smooth hue sweep with far less computation per pixel. Next, make
-it a chart recorder: set `TRACE 8`, send one row of pixels per pass instead of a full
-frame, and watch the field scroll down the canvas. You will have exercised creation
-config, two color modes, a scrolling trace, and manual updates in a single program.
+Start with the heatmap example. First widen the temperature range or move the spot
+faster and watch the tint track it. Then switch the color mode: change `LUMA8 RED`
+to `HSV16` and feed each cell a hue computed from its temperature — cool cells blue,
+hot cells red — for the classic rainbow thermal palette. Next, make a different
+kind of display: drop `SPARSE`/`DOTSIZE`, set `SIZE 128 128` and `TRACE 8`, and send
+one row of values per pass to turn the window into a scrolling chart recorder. You
+will have exercised creation config, two color modes, sparse and full canvases, a
+scrolling trace, and manual updates in a single program.
 
 
 # Chapter 5: The PLOT Window — Vector Drawing Canvas {#ch-5}
@@ -1298,16 +1384,16 @@ system, which you control with `ORIGIN`, `CARTESIAN`, and `POLAR`.
 
 ### Cartesian mode
 
-Cartesian is the default. Out of the box the origin is the top-left corner,
-**x increases rightward, and y increases downward** — the screen convention. You
-change that with `CARTESIAN`:
+Cartesian is the default. Out of the box the origin is the bottom-left corner,
+**x increases rightward, and y increases upward** — the mathematical convention.
+You change that with `CARTESIAN`:
 
 ```debug-update
 CARTESIAN {flipy {flipx}}
 ```
 
-- `flipy` — `0` leaves y increasing downward (default); `1` makes y increase
-  **upward**, the mathematical convention.
+- `flipy` — `0` leaves y increasing upward (default, the mathematical
+  convention); `1` flips y to increase **downward**, the screen convention.
 - `flipx` — `0` leaves x increasing rightward (default); `1` makes x increase
   **leftward**.
 
@@ -1335,7 +1421,6 @@ draw a figure in its own local coordinates and place it anywhere.
 PUB main()
   debug(`PLOT Centered SIZE 512 512)
   debug(`Centered ORIGIN 256 256)        ' (0,0) is now the canvas center
-  debug(`Centered CARTESIAN 1 0)         ' y up, x right
   debug(`Centered SET 100 100 DOT 6 255) ' a dot up-and-right of center
 ```
 
@@ -1776,11 +1861,14 @@ Three more commands round out display control:
 
 ## A complete worked example
 
-This program needs no wiring — it generates all of its own data on the P2. It
-plots one cycle of a sine wave from the CORDIC engine as a connected polyline,
-overlays a random scatter of dots from the hardware RNG, and labels the result.
-The origin is moved to the left-center and the y-axis flipped up so the wave sits
-around a center line, the mathematical convention.
+This first program is a **tour of the drawing primitives** — it exercises the
+polyline, the scatter, text, and the coordinate system so you can see each one
+work, with no wiring and all of its own data generated on the P2. It plots one
+cycle of a sine wave from the CORDIC engine as a connected polyline, overlays a
+random scatter of dots from the hardware RNG, and labels the result. The origin is
+moved to the left-center so the wave sits around a center line — y already
+increases upward in the default coordinate system. The two worked instruments that
+follow put these same primitives to work on real tasks.
 
 ```spin2
 CON _clkfreq = 200_000_000
@@ -1790,8 +1878,7 @@ PUB main() | x, y, angle, i, sx, sy
   ' Create a 512x512 plotting canvas on a black background
   debug(`PLOT Wave SIZE 512 512 BACKCOLOR $000000)
 
-  ' Origin at left edge, vertical center; y increases upward (flipy = 1)
-  debug(`Wave CARTESIAN 1 0)
+  ' Origin at left edge, vertical center; y increases upward (the default)
   debug(`Wave ORIGIN 0 256)
 
   ' Center axis line in dim gray
@@ -1903,6 +1990,95 @@ value your program computes and the needle follows.
 > Buffered mode (`UPDATE` on the creation line) keeps the gauge smooth: the whole
 > dial is redrawn off-screen each frame, then shown at once. Without it you would see
 > the needle erase-and-redraw flicker.
+
+## A worked instrument: a control-loop strip chart
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.75\linewidth]{inbox/assets/fig-05-plot-pid.png}
+\caption{A PID control loop on the PLOT window: setpoint, the process variable's overshoot-and-settle, and the controller output.}
+\end{figure}
+```
+
+A strip chart — several values traced against time — is how you watch a control
+loop behave while you tune it. This program runs a complete loop in software: a
+**PI controller** driving a simulated **first-order process**, with nothing wired
+up. The setpoint steps up and then back down; the process variable chases it,
+overshoots, and settles; the controller output is the effort that drives it there.
+Plotting all three together is exactly what you do on the bench to choose P, I, and
+D gains.
+
+The loop is an honest little simulation. Each step computes the error, accumulates
+it for the integral term, forms the controller output (clamped, like a real
+actuator), and advances a first-order process model toward that output. The three
+histories are then drawn as three polylines across the canvas:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  STEPS = 256
+
+VAR
+  long spH[STEPS], pvH[STEPS], ctlH[STEPS]
+
+PUB main() | t, sp, pv, ctl, err, integ
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`Loop ORIGIN 0 10)              ' baseline at bottom; y up (default)
+
+  repeat                               ' re-run the experiment continuously
+    pv := 0
+    integ := 0
+    repeat t from 0 to STEPS-1
+      sp := (t < 128) ? 70 : 30        ' setpoint steps up then down
+      err := sp - pv
+      integ += err
+      ctl := (err*2 + integ/32) #> 0 <# 100   ' PI control, clamp 0..100
+      pv += (ctl - pv) / 10            ' first-order process lag
+      spH[t] := sp
+      pvH[t] := pv
+      ctlH[t] := ctl
+
+    debug(`Loop CLEAR)
+    debug(`Loop COLOR $808080)
+    trace(@ctlH)                       ' controller output (gray)
+    debug(`Loop COLOR $00AAFF)
+    trace(@spH)                        ' setpoint (blue)
+    debug(`Loop COLOR $00FF00)
+    trace(@pvH)                        ' process variable (green)
+    waitms(500)
+
+PRI trace(p) | t
+  debug(`Loop SET 0 `(long[p][0] * 3))    ' value 0..100 -> 0..300 px
+  repeat t from 1 to STEPS-1
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)
+```
+
+`trace` draws one history array as a connected polyline: it `SET`s the cursor to
+the first point, then issues a `LINE` to each following point, scaling the 0–100
+value range to the canvas height. Each pass re-runs the whole experiment and
+redraws all three traces together. Raise the proportional gain (the `*2`) or change
+the integral divisor (`/32`) and the overshoot and settling time shift exactly as a
+real loop's would — the chart *is* the tuning feedback.
+
+### Where you'd use this
+
+In computer science and computer engineering, the PLOT window is the canvas for
+**control-systems work** — watching a loop respond and tuning it — and for general
+**instrumentation and data visualization**, where you build the exact gauge, chart,
+or figure your data calls for.
+
+**On an embedded project**, you reach for it to plot a PID strip chart while tuning
+a motor or thermal loop (as here), to trace a battery's charge curve, to plot raw
+ADC against engineering units during a calibration, or to build a servo or RPM dial
+like the gauge above.
+
+**Bandwidth fit:** these are all low-rate — readings and traces updating at tens to
+a few hundred points per second — and sit comfortably inside the link budget.
+
+**Extension (real hardware):** replace the simulated process model with a real
+measured value (an ADC read, a sensor sample) and the simulated `ctl` with your
+actual control output, and the same strip chart shows a live loop.
 
 ## Considerations
 
@@ -2272,6 +2448,54 @@ repeat
   debug(`Counter `(value++ & $FF))
 ```
 
+## Acquisition: software-paced sampling and transition capture
+
+The LOGIC window sits comfortably inside the link budget ([Chapter 1](#ch-1)),
+because digital debugging rarely needs a continuous full-rate stream. Two
+logic-specific habits keep it that way.
+
+**Software-paced — one sample per event.** You do not have to sample a bus on
+every system-clock tick. The SPI example above sends one sample each time a line
+*changes* — idle, CS low, each clock edge — not one per clock cycle. Driving the
+window from your protocol's own events, rather than a free-running sample clock,
+is what keeps a bring-up trace small enough to stream live: a few hundred samples
+frame an entire transaction.
+
+**Transition + timestamp capture.** When you do need to record a fast bus, store
+*transitions*, not samples. Each time a watched line changes, capture the new
+line state together with a timestamp (from `GETCT` or a free-running counter) and
+keep only those pairs. An idle bus then costs nothing while idle and a single
+entry per edge when it moves — far less than one sample per clock. The pairs pack
+tightly ([Chapter 13](#ch-13)), and you reconstruct the timing from the
+timestamps on the host. This is how a logic analyzer records minutes of a sparse
+bus without a giant buffer.
+
+The mechanics underneath a fast capture — a circular buffer filled in a tight PASM
+loop, an arm/trigger/freeze cycle, dumping one frozen frame over the slow link —
+are shared with SCOPE; the acquisition section of [Chapter 7](#ch-7) develops them
+once. LOGIC's trigger (above) arms and fires on a bit pattern the same way.
+
+### Where you'd use this
+
+In computer science and computer engineering, the LOGIC window is the tool for
+**protocol engineering** — bringing up and verifying a serial bus — and for
+**debugging concurrent systems**, where what matters is the *timing relationship*
+between several digital signals.
+
+**On an embedded project**, you reach for it during bit-banged-driver bring-up
+(does the clock idle in the right state, is data sampled on the correct edge —
+CPOL/CPHA), to check chip-select and bus-arbitration timing, to watch inter-cog
+signalling and lock hand-offs, and to confirm setup-and-hold against a datasheet's
+timing diagram.
+
+**Bandwidth fit:** software-paced traces and buffered bursts stream comfortably;
+continuously monitoring a *fast* live bus does not fit, and is the case the
+capture strategies above exist to handle.
+
+**Extension (real hardware):** replace the simulated lines with real pin reads —
+sample the actual port bits into each sample value — and the same channels,
+trigger, and decode-in-code approach shows a live bus.
+
 ## Considerations
 
 - **The window shows waveforms; you decode in code.** LOGIC renders logic levels. Any
@@ -2583,17 +2807,42 @@ PUB main() | ang, sine, tri, dir, noise
     waitms(5)                              ' your loop sets the time scale
 ```
 
-To turn the same display into a **triggered capture**, declare one channel and add a
-trigger. The window then waits for the signal to rise through 0 (armed below −500,
-fired at or above 500 — `fire` >= `arm`, so rising) and freezes a 512-sample frame
-with the trigger point centered:
+## Acquisition: catching a fast event over a slow link
+
+[Chapter 1](#ch-1) named the debt plainly: every sample you send crosses the
+2 Mbaud debug link, so a *continuous* full-rate stream of a fast signal will not
+fit. The SCOPE window is still the right tool for fast signals — you just stop
+streaming them live and use the two techniques every bench oscilloscope uses
+instead. Both are fully synthetic here; neither needs hardware.
+
+### Capture and dump — full fidelity, one window per trigger
+
+The **capture-and-dump** strategy ([Chapter 1](#ch-1)) decouples the measurement
+from the link. A tight loop — in PASM when you need full speed — fills a
+**circular buffer at the P2's own sample rate**, overwriting oldest with newest,
+while it tests a trigger condition on every pass: a level crossing, a bus
+pattern, an out-of-range fault. When the trigger fires, you **freeze the buffer
+and dump it once** over the link — the pre-trigger samples already captured plus a
+post-trigger tail. The fidelity of what you caught is set by **how fast your loop
+runs and how deep your buffer is, not by the link**, which only carries the one
+readout. You see one frame per trigger and are blind between events; that is the
+price of full detail, and it is exactly the oscilloscope's *arm → acquire →
+trigger → freeze → read out* model.
+
+The SCOPE window models this directly: a `TRIGGER` holds the display on the event
+and freezes the frame. Recasting the free-running display as a **one-shot
+capture** is one line of setup. Here the window waits for the signal to rise past
+500 (armed below at −500, fired at or above 500 — `fire` >= `arm`, so rising) and
+freezes a 512-sample frame with the trigger point centered:
 
 ```spin2
 CON
   _clkfreq = 200_000_000
 
 PUB main() | ang, sig
-  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512 'Signal' -1000 1000)
+  ' SCOPE takes its channel declaration as a feed to the window name
+  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512)
+  debug(`Capture 'Signal' -1000 1000)
   ' rising edge, trigger centered in the frame
   debug(`Capture TRIGGER 0 -500 500 256)
   debug(`Capture HOLDOFF 512)  ' one frame of holdoff before re-arming
@@ -2605,6 +2854,108 @@ PUB main() | ang, sig
     ang += 3
     waitms(2)
 ```
+
+The trigger and the buffer belong to the acquisition, not to the link. In a real
+high-rate capture you would move that arm-and-test loop into PASM so it runs at
+full speed, and only the frozen frame would ever cross the wire.
+
+#### Worked example: catch a rare glitch
+
+This is the capture-and-dump pattern end to end, fully synthetic. A clean,
+low-amplitude signal — it stands in for any quiet line you are watching —
+occasionally throws a single out-of-range spike. A `TRIGGER` set well above the
+clean signal's range arms on the quiet signal and fires the moment a spike
+crosses it, freezing a 512-sample frame with the glitch centered, its lead-up to
+the left and its aftermath to the right:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, n, sig
+  debug(`SCOPE Glitch SIZE 512 256 SAMPLES 512)
+  debug(`Glitch 'Signal' -1000 1000)
+  ' arm on the quiet signal, fire on the spike (fire >= arm -> rising)
+  debug(`Glitch TRIGGER 0 200 800 256)   ' centered: see before and after
+  debug(`Glitch HOLDOFF 512)
+
+  ang := 0
+  n   := 0
+  repeat
+    sig := qsin(300, ang, 256)           ' clean signal, well inside range
+    if n // 233 == 0                     ' a rare, occasional fault
+      sig := 950                         ' one out-of-range sample
+    debug(`Glitch `(sig))
+    ang += 5
+    n   += 1
+    waitms(1)
+```
+
+The display free-runs on the quiet signal until a spike crosses 800; then it
+locks, showing the glitch at the center of the frame with the clean signal before
+and after it. `HOLDOFF` keeps it from re-arming until you have had a full frame to
+read the captured event.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.80\linewidth]{inbox/assets/fig-07-scope-glitch.png}
+\caption{A rare out-of-range glitch frozen by a SCOPE trigger, shown with its lead-up and aftermath.}
+\end{figure}
+```
+
+### Decimate — a live trend, at the cost of detail
+
+When you want a *continuous* view of a slowly-evolving signal rather than a frozen
+event, **decimate** ([Chapter 1](#ch-1)): send only one sample in every N. The
+window updates forever; you have traded resolution for a live trend. The naive
+form — take every Nth sample — carries a trap any instrument engineer will warn
+you about: a narrow spike that lands between the kept samples simply disappears,
+and a periodic signal can alias into a slower phantom.
+
+```spin2
+' naive: keep 1 in 8 -- a one-cycle spike between samples is lost
+if n // 8 == 0
+  debug(`Trend `(sig))
+```
+
+The honest fix is **min/max (peak) decimation**: over each group of N samples keep
+both the smallest and the largest, and send both. A one-cycle spike now survives,
+because it lands as the group's min or max even though you never sent that exact
+sample:
+
+```spin2
+' peak decimation: keep the extremes of each group of 8
+lo := lo <# sig                          ' running min (<# = limit max)
+hi := hi #> sig                          ' running max (#> = limit min)
+if n // 8 == 7
+  debug(`Trend `(lo) `(hi))              ' two traces preserve the spike
+  lo := POSX                             ' reset for the next group
+  hi := NEGX
+```
+
+Decimation is always-on but lossy; capture-and-dump is perfect but episodic.
+**Choose by whether you are watching a *trend* or hunting an *event*.**
+
+### Where you'd use this
+
+In computer science and computer engineering, the SCOPE window is the everyday
+tool for **DSP work** — inspecting a waveform, the response of a filter, the
+settling of a control loop — and for **power and control electronics**, where the
+shape of a signal in time is the measurement.
+
+**On an embedded project**, you reach for it to watch an ADC capture, a PWM edge
+or duty cycle, supply ripple or inrush at power-on (a triggered one-shot),
+contact bounce on a switch, or an intermittent fault line — the glitch-capture
+pattern above.
+
+**Bandwidth fit:** low-rate live signals stream comfortably; a fast transient is
+caught as a triggered one-shot; a *continuous* high-rate analog stream does not
+fit, and is the case the acquisition strategies above exist to handle.
+
+**Extension (real hardware):** replace the synthetic `qsin`/spike source with a
+real sampled input — read an ADC or a smart pin in the loop — and the same
+channel, trigger, and capture code shows the live signal.
 
 ## Considerations
 
@@ -2849,6 +3200,25 @@ a comet sweeping around a circle:
     x := QCOS(800, ph, 360)         ' QCOS gives the X leg
     y := QSIN(800, ph, 360)         ' QSIN gives the Y leg -> a circle
 ```
+
+### Where you'd use this
+
+In computer science and computer engineering, SCOPE_XY is the tool for **I/Q
+constellations** — the QAM and PSK symbol clouds of digital communications — and
+for **phase-plane and dynamical-systems work**, where a system's state is read from
+the shape its two variables trace.
+
+**On an embedded project**, you reach for it to plot a quadrature encoder's A and B
+channels as an XY circle (smart-pin captured), to watch a motor's d–q / FOC vector,
+to see a PLL pull an ellipse into a line as it locks, or to read an accelerometer's
+X–Y tilt as a moving point.
+
+**Bandwidth fit:** decimated or low-rate pairs draw cleanly; a full-rate I/Q stream
+does not fit the link and is out — sample down to a rate the link carries.
+
+**Extension (real hardware):** feed real `(x, y)` pairs — two ADC channels, the
+encoder's A/B counts, the accelerometer's two axes — in place of the synthetic
+sines, and the figure shows the live relationship.
 
 ## Considerations
 
@@ -3131,9 +3501,10 @@ naturally narrow; for full-range FFT input it is rarely needed.
 ## A complete example: a multi-tone spectrum, no hardware
 
 This program needs nothing but a P2 board and the host. It synthesizes a signal
-in software — three sine tones summed, plus a little noise — and feeds it to the
-FFT window so you can see the three tones as three spikes and the noise as a low
-floor beneath them.
+in software — three sine tones summed (think of them as a fundamental and two
+harmonics of a vibrating machine), plus a little noise — and feeds it to the FFT
+window so you can see the three tones as three spikes and the noise as a low floor
+beneath them.
 
 The tones come from the CORDIC `qsin` operator. Each tone has its own phase
 accumulator; adding a fixed increment to a phase each sample sets that tone's
@@ -3187,6 +3558,28 @@ Change an increment and watch the corresponding spike slide along the axis.
 > one, read an ADC-configured smart pin in the sample loop and feed its value in
 > place of the `qsin` sum. Everything else — the window, the channel, the
 > redraw — stays the same.
+
+### Where you'd use this
+
+In computer science and computer engineering, the FFT window is the tool for
+**audio and DSP analysis** — measuring harmonics, total harmonic distortion, and
+noise floors — and for **condition monitoring**, identifying the frequencies a
+machine or circuit is producing.
+
+**On an embedded project**, you reach for it to find a motor or bearing's vibration
+signature, to measure power-line harmonics and THD, to hunt an EMI noise source by
+its frequency, or to identify a mechanical or electrical resonance. The three
+synthetic tones above stand in for exactly that kind of content — real components
+such as a fundamental and two harmonics.
+
+**Bandwidth fit:** vibration and harmonic work lives at low sample rates, where a
+buffered block transforms cleanly — an ideal fit. Live full-rate audio is tempered:
+feed it in buffered or decimated blocks rather than as a continuous stream (see
+[Chapter 7](#ch-7)).
+
+**Extension (real hardware):** read an ADC-configured smart pin in the sample loop
+and feed its value in place of the `qsin` sum — the window, channel, and redraw
+stay the same.
 
 ## Considerations
 
@@ -3268,7 +3661,7 @@ runtime commands.
 \begin{figure}[H]
 \centering
 \screenshotfig[width=0.65\linewidth]{inbox/assets/fig-10-spectro.png}
-\caption{The SPECTRO window as a rising-tone spectrogram waterfall.}
+\caption{The SPECTRO window as a motor run-up: rising vibration frequency draws a diagonal streak down the waterfall.}
 \end{figure}
 ```
 
@@ -3465,13 +3858,15 @@ debug(`Wfall SAVE)
 Use `` `CLEAR `` to start a new capture cleanly — after it, the next `SAMPLES`
 samples refill the buffer before anything new is drawn.
 
-## A complete software-only example: a frequency sweep
+## A complete software-only example: a motor run-up
 
-This program needs no wiring. It synthesizes its own signal with the CORDIC: a sine
-tone whose frequency climbs block by block. Each block of 512 samples is one tone;
-the next block is a higher tone. Fed to a downward-scrolling SPECTRO, the rising
-pitch draws a **diagonal streak** down the waterfall — frequency increasing across
-successive lines.
+This program needs no wiring. It synthesizes a signal that stands in for the
+**vibration of a motor as it runs up to speed**. A spinning motor vibrates most
+strongly at its shaft-rotation frequency; as it accelerates from rest to full
+speed, that tone climbs. We make exactly that with the CORDIC: a sine tone whose
+frequency rises block by block. Fed to a downward-scrolling SPECTRO, the rising
+vibration draws a **diagonal streak** down the waterfall — the run-up captured as
+a picture.
 
 ```spin2
 CON
@@ -3479,21 +3874,21 @@ CON
 
 PUB main() | i, phase, ainc, sample
   ' One scrolling spectrogram, 512-point FFT, 256 lines of history.
-  debug(`SPECTRO Chirp SAMPLES 512 DEPTH 256 RANGE $40000 ...
+  debug(`SPECTRO RunUp SAMPLES 512 DEPTH 256 RANGE $40000 ...
          RATE 512 TRACE 8 LUMA8X)
 
   phase := 0
-  ainc  := 30_000              ' starting phase step (a low tone)
+  ainc  := 30_000              ' shaft frequency at rest (a low tone)
 
   repeat
-    ' Feed one FFT window of samples (512), then raise the frequency.
+    ' Feed one 512-sample FFT window at the current speed, then accelerate.
     repeat i from 1 to 512
       sample := sine(2000, phase)
-      phase += ainc            ' advance the synthesized tone
-      debug(`Chirp `(sample))
-    ainc += 20_000  ' next block is a higher tone -> diagonal streak
+      phase += ainc            ' advance the synthesized vibration tone
+      debug(`RunUp `(sample))
+    ainc += 20_000  ' the motor speeds up -> higher tone -> diagonal streak
     if ainc > 1_000_000
-      debug(`Chirp CLEAR)      ' wrap: clear and restart the sweep
+      debug(`RunUp CLEAR)      ' reached top speed: clear and run up again
       ainc := 30_000
 
 PRI sine(amp, angle) : y
@@ -3507,14 +3902,36 @@ PRI sine(amp, angle) : y
 
 `sine()` uses **QROTATE** to rotate the point (amp, 0) by `angle`; **GETQY** returns
 the Y component, which is `amp x sin(angle)`. Stepping `phase` by `ainc` each sample
-produces a tone whose frequency is set by `ainc`; raising `ainc` after every 512-
-sample block steps the tone up, and the waterfall records the climb as a diagonal.
-The Hanning window is applied inside the FFT automatically; you supply only the
-samples.
+produces a tone whose frequency is set by `ainc` — the stand-in for shaft speed;
+raising `ainc` after every 512-sample block accelerates the motor, and the
+waterfall records the climb as a diagonal. The Hanning window is applied inside the
+FFT automatically; you supply only the samples.
 
-To see steady lines instead of a diagonal, hold `ainc` constant — the same frequency
-every block draws a straight vertical streak (with `TRACE 8`). To see a transient,
-feed a burst of one frequency surrounded by silence.
+Hold `ainc` constant and the motor runs at a steady speed — the same frequency
+every block draws a straight vertical streak (with `TRACE 8`). A structural
+resonance the machine passes through on its way up shows as a bright spot where the
+climbing tone crosses that fixed frequency — exactly the resonance-crossing a
+machine-health engineer watches for during run-up and coast-down.
+
+### Where you'd use this
+
+In computer science and computer engineering, SPECTRO is the tool for **spectral
+monitoring over time** — watching how a signal's frequency content evolves — in
+narrowband RF and communications and in acoustics and speech analysis.
+
+**On an embedded project**, its natural home is **machine-health monitoring**:
+trending a motor or bearing's vibration spectrum so you can see a fault band grow,
+watching resonance crossings during run-up and coast-down (as here), or following a
+narrowband or voice signal over time.
+
+**Bandwidth fit:** vibration and acoustic monitoring live at sub-10 kHz and play
+out over seconds to minutes — low sample rate, long duration — which is exactly
+what the link and the waterfall want. A full-rate RF or music spectrum does not fit
+and is out.
+
+**Extension (real hardware):** replace the synthetic `sine()` with real samples
+from an accelerometer or microphone — read an ADC or I²S input in the feed loop —
+and the waterfall shows live machine vibration.
 
 ## Considerations
 
@@ -3539,13 +3956,14 @@ feed a burst of one frequency surrounded by silence.
 
 ## Try it
 
-Start from the sweep example. Then:
+Start from the run-up example. Then:
 
 1. **Switch axes.** Change `TRACE 8` to `TRACE 12` and watch the waterfall scroll
    sideways with frequency up the side.
-2. **Add a second tone.** Sum a second `sine()` at a fixed frequency into each
-   sample so a steady horizontal line sits alongside the moving diagonal — toggle it
-   on and off per block to see it appear and vanish:
+2. **Add a second source.** Sum a second `sine()` at a fixed frequency into each
+   sample so a steady horizontal line — a second machine running at constant speed —
+   sits alongside the moving diagonal; toggle it on and off per block to see it
+   appear and vanish:
 
    ```spin2
    sample := sine(1500, p1)
@@ -3783,6 +4201,26 @@ PUB main() | vel
 
   repeat                              ' keep the window open
 ```
+
+### Where you'd use this
+
+The honest answer is narrow: the MIDI window is for **music technology and MIDI
+protocol work**. Its job is to show Note-On / Note-Off activity on a keyboard, and
+that is the whole of it.
+
+**On an embedded project**, that means debugging a synth or sequencer engine you
+are writing, verifying the note output of a MIDI controller, or visualizing a
+generative-music algorithm as it plays.
+
+**Bandwidth fit:** MIDI is a slow, event-driven stream — comfortably inside the
+link with room to spare.
+
+**Extension (real hardware):** feed real MIDI bytes from a UART smart pin into the
+window in place of the hardcoded notes, and it shows a live instrument's playing.
+
+**If you are not building MIDI software, this is not your window.** Status values
+belong in TERM ([Chapter 3](#ch-3)), a changing value in PLOT ([Chapter 5](#ch-5)),
+and digital event timing in LOGIC ([Chapter 6](#ch-6)).
 
 ## Considerations
 
@@ -4037,6 +4475,24 @@ Move the mouse over the window and the position updates; move outside and the
 program reports it from the negative `xpos`. Press the left button and the buttons
 read `-1` (shown as `-1` by `` `sdec_ ``), and the `LEFT DOWN` line appears.
 
+### Where you'd use this
+
+In computer science and computer engineering, host input turns a debug window into
+a **human-in-the-loop control surface** — interactive parameter adjustment and
+manual test rigs you drive by hand while the program runs.
+
+**On an embedded project**, you reach for it to tune PID gains live, to nudge a
+setpoint, to jog an actuator by hand, or to trigger and label a calibration
+capture — all without recompiling, using the host keyboard and mouse as a temporary
+control panel.
+
+**Bandwidth fit:** input is polled a few tens of times a second; it is negligible
+against the link budget.
+
+**Extension (real hardware):** the same `PC_KEY` / `PC_MOUSE` polling that reads the
+host here can hand its values to real outputs — drive a smart-pin PWM from a tuned
+gain, step a motor from an arrow key — turning the panel into live control.
+
 ## Considerations
 
 - **The model is polling, not interrupts.** Nothing is pushed to your program; you
@@ -4242,6 +4698,23 @@ the most of them.
 So a single-bit logic capture at the highest rate uses `LONGS_1BIT` (32×). A scope
 sampling a signed 16-bit ADC-style value uses `LONGS_16BIT SIGNED` (2×). A
 four-level (2-bit) bitmap uses `LONGS_2BIT` (16×).
+
+### Where you'd use this
+
+Packing is not a window; it is the **headroom mechanism** the rest of the manual
+leans on. You reach for it the moment a window cannot keep up with the data — when
+a fast sample stream would saturate the 2 Mbaud link ([Chapter 1](#ch-1)).
+
+The concrete case is a **high-rate burst** you have captured in a tight PASM loop —
+a triggered scope frame, a logic-analyzer capture, a block destined for the FFT —
+and now have to move over the slow link. Sending one long per sample wastes three
+or more bytes on values only a few bits wide; packing them (up to 32 samples per
+long) is what lets the dump fit. This is the readout half of the **capture-and-dump**
+strategy ([Chapter 7](#ch-7)): capture fast, pack tight, dump once.
+
+**Bandwidth fit:** packing multiplies how much *fits*, not how fast the link runs —
+it buys headroom, not an order of magnitude. When even packed data outruns the
+link, capture a finite burst and dump it rather than trying to stream live.
 
 ## Considerations
 
@@ -4839,6 +5312,25 @@ Click the window to give it focus, then click a button or use the arrow keys. Th
 `lastL` variable holds the previous left-button state so a click fires once on the
 press edge rather than every poll while the button is held. The `dirty` flag means the
 panel sits idle — polling but not redrawing — until an input changes the value.
+
+### Where you'd use this
+
+In computer science and computer engineering, the panel techniques are for building
+**live dashboards and operator consoles** — a composed instrument face that reads a
+system at a glance — and **interactive control and tuning panels**, the
+human-in-the-loop surfaces of a bring-up rig.
+
+**On an embedded project**, you reach for them to build a one-screen status console
+for a running machine, a tuning panel with on-screen buttons and live readouts, or
+a hardware-in-the-loop test rig you drive while the firmware runs.
+
+**Bandwidth fit:** a panel of readouts and controls updates at human rates and fits
+the link easily; only a panel fed by a fast *sample stream* needs the packed feeds
+noted below.
+
+**Extension (real hardware):** wire the panel's readouts to real sensor values and
+its buttons to real outputs, and the same composed face becomes the machine's
+actual operator interface.
 
 ## Considerations — choosing a technique
 

@@ -1,32 +1,37 @@
 '' fig-04-bitmap.spin2  ->  fig-04-bitmap.png
-'' BITMAP window, full-color plasma painted one full pass (Chapter 4).
-'' Buffered (UPDATE) so the captured frame is whole. See README.md.
+'' BITMAP window, a synthetic thermal-array heatmap (Chapter 4).
+'' A 32x24 grid stands in for a thermopile array (MLX90640-class); each cell is
+'' magnified to a block (SPARSE + DOTSIZE) and tinted by temperature with LUMA8 RED
+'' (dark = cool, bright = hot). Buffered (UPDATE) so the captured frame is whole.
+'' Fully synthetic, no hardware. Hot spot fixed at centre for a deterministic figure.
 
 CON
   _clkfreq = 200_000_000
+  COLS = 32
+  ROWS = 24
 
-PUB main() | x, y, v
-  ' 128x128 true-color canvas, manual update for a flicker-free frame
-  debug(`BITMAP Plasma SIZE 128 128 RGB24 UPDATE)
-  debug(`Plasma CLEAR)
+PUB main() | x, y, cx, cy
+  debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
+  debug(`Heat CLEAR)
 
-  ' one full pass paints every pixel (TRACE 0: left-to-right, top-down)
-  repeat y from 0 to 127
-    repeat x from 0 to 127
-      v := plasma(x, y, 64)                 ' fixed frame 64 for determinism
-      debug(`Plasma `(v))
-  debug(`Plasma UPDATE)
+  cx := 16                                  ' hot spot centred, fixed (determinism)
+  cy := 12
+  repeat y from 0 to ROWS-1
+    repeat x from 0 to COLS-1
+      debug(`Heat `(cell(x, y, cx, cy)))
+  debug(`Heat UPDATE)
 
   waitms(200)                               ' let the host render the final frame
-  debug(`Plasma save 'fig-04-bitmap')                ' display area (no chrome)
-  debug(`Plasma save window 'fig-04-bitmap_WDW')     ' window, incl. chrome
-  debug(`Plasma close)
+  debug(`Heat save 'fig-04-bitmap')                  ' display area (no chrome)
+  debug(`Heat save window 'fig-04-bitmap_WDW')       ' window, incl. chrome
+  debug(`Heat close)
   debug("* BITMAP complete")
   debug("DEBUG_END_SESSION")                ' end run -> shell script runs next
 
-PRI plasma(x, y, t) : rgb | r, g, b
-  ' two CORDIC sinusoids drive R and G; their sum drives B. All 0..255.
-  r := (qsin(127, x*3 + t, 256) + 128) & $FF
-  g := (qsin(127, y*3 - t, 256) + 128) & $FF
-  b := (qsin(127, (x+y)*2 + t, 256) + 128) & $FF
-  rgb := (r << 16) | (g << 8) | b
+PRI cell(x, y, cx, cy) : temp | dx, dy, d2
+  ' synthetic temperature: a warm peak at (cx,cy) over a cool ambient
+  dx := x - cx
+  dy := y - cy
+  d2 := dx*dx + dy*dy
+  temp := (220 - d2*3) #> 0                  ' peak falls off with distance
+  temp := (temp + 30) <# 255                 ' add ambient, clamp to a byte

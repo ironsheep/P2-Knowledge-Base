@@ -220,6 +220,26 @@ PUB main() | vel
   repeat                              ' keep the window open
 ```
 
+### Where you'd use this
+
+The honest answer is narrow: the MIDI window is for **music technology and MIDI
+protocol work**. Its job is to show Note-On / Note-Off activity on a keyboard, and
+that is the whole of it.
+
+**On an embedded project**, that means debugging a synth or sequencer engine you
+are writing, verifying the note output of a MIDI controller, or visualizing a
+generative-music algorithm as it plays.
+
+**Bandwidth fit:** MIDI is a slow, event-driven stream — comfortably inside the
+link with room to spare.
+
+**Extension (real hardware):** feed real MIDI bytes from a UART smart pin into the
+window in place of the hardcoded notes, and it shows a live instrument's playing.
+
+**If you are not building MIDI software, this is not your window.** Status values
+belong in TERM ([Chapter 3](#ch-3)), a changing value in PLOT ([Chapter 5](#ch-5)),
+and digital event timing in LOGIC ([Chapter 6](#ch-6)).
+
 ## Considerations
 
 - **Only Note-On and Note-Off are recognized.** The parser acts on `$9n` and

@@ -1,7 +1,7 @@
 '' fig-05-plot-gauge.spin2  ->  fig-05-plot-gauge.png
 '' PLOT window, a polar needle gauge drawn once (Chapter 5).
 '' Theme: white background, grey scale ticks + ring, blue hub, red needle.
-'' Named colours (raw-hex COLOR values are ignored by the display parser).
+'' Named colours used here; COLOR also accepts raw $RRGGBB values (both render).
 
 CON
   _clkfreq = 200_000_000

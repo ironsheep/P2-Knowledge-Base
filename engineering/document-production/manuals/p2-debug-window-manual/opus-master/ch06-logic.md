@@ -331,6 +331,54 @@ repeat
   debug(`Counter `(value++ & $FF))
 ```
 
+## Acquisition: software-paced sampling and transition capture
+
+The LOGIC window sits comfortably inside the link budget ([Chapter 1](#ch-1)),
+because digital debugging rarely needs a continuous full-rate stream. Two
+logic-specific habits keep it that way.
+
+**Software-paced — one sample per event.** You do not have to sample a bus on
+every system-clock tick. The SPI example above sends one sample each time a line
+*changes* — idle, CS low, each clock edge — not one per clock cycle. Driving the
+window from your protocol's own events, rather than a free-running sample clock,
+is what keeps a bring-up trace small enough to stream live: a few hundred samples
+frame an entire transaction.
+
+**Transition + timestamp capture.** When you do need to record a fast bus, store
+*transitions*, not samples. Each time a watched line changes, capture the new
+line state together with a timestamp (from `GETCT` or a free-running counter) and
+keep only those pairs. An idle bus then costs nothing while idle and a single
+entry per edge when it moves — far less than one sample per clock. The pairs pack
+tightly ([Chapter 13](#ch-13)), and you reconstruct the timing from the
+timestamps on the host. This is how a logic analyzer records minutes of a sparse
+bus without a giant buffer.
+
+The mechanics underneath a fast capture — a circular buffer filled in a tight PASM
+loop, an arm/trigger/freeze cycle, dumping one frozen frame over the slow link —
+are shared with SCOPE; the acquisition section of [Chapter 7](#ch-7) develops them
+once. LOGIC's trigger (above) arms and fires on a bit pattern the same way.
+
+### Where you'd use this
+
+In computer science and computer engineering, the LOGIC window is the tool for
+**protocol engineering** — bringing up and verifying a serial bus — and for
+**debugging concurrent systems**, where what matters is the *timing relationship*
+between several digital signals.
+
+**On an embedded project**, you reach for it during bit-banged-driver bring-up
+(does the clock idle in the right state, is data sampled on the correct edge —
+CPOL/CPHA), to check chip-select and bus-arbitration timing, to watch inter-cog
+signalling and lock hand-offs, and to confirm setup-and-hold against a datasheet's
+timing diagram.
+
+**Bandwidth fit:** software-paced traces and buffered bursts stream comfortably;
+continuously monitoring a *fast* live bus does not fit, and is the case the
+capture strategies above exist to handle.
+
+**Extension (real hardware):** replace the simulated lines with real pin reads —
+sample the actual port bits into each sample value — and the same channels,
+trigger, and decode-in-code approach shows a live bus.
+
 ## Considerations
 
 - **The window shows waveforms; you decode in code.** LOGIC renders logic levels. Any

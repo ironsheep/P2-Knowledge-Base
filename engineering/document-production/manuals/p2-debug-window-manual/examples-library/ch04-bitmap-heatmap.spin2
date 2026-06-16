@@ -1,0 +1,30 @@
+CON
+  _clkfreq = 200_000_000
+  COLS = 32                                ' a 32x24 thermopile array
+  ROWS = 24                                '   (MLX90640-class)
+
+PUB main() | x, y, ang, cx, cy
+
+  ' 32x24 grid: each cell a 12px block with grid border; temperature -> tint
+  debug(`BITMAP Heat SIZE 32 24 DOTSIZE 12 SPARSE GRAY LUMA8 RED UPDATE)
+
+  ang := 0
+  repeat
+    ' the warm spot drifts slowly across the array
+    cx := 16 + qsin(10, ang, 256)
+    cy := 12 + qsin(7, ang*2, 256)
+    debug(`Heat CLEAR)
+    repeat y from 0 to ROWS-1
+      repeat x from 0 to COLS-1
+        debug(`Heat `(cell(x, y, cx, cy)))
+    debug(`Heat UPDATE)
+    ang += 3
+    waitms(250)                            ' ~4 fps, like a real thermopile
+
+PRI cell(x, y, cx, cy) : temp | dx, dy, d2
+  ' synthetic temperature: a warm peak at (cx,cy) over a cool ambient
+  dx := x - cx
+  dy := y - cy
+  d2 := dx*dx + dy*dy
+  temp := (220 - d2*3) #> 0                 ' peak falls off with distance
+  temp := (temp + 30) <# 255                ' add ambient, clamp to a byte

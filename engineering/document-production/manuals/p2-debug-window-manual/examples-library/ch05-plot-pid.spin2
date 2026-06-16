@@ -1,0 +1,37 @@
+CON
+  _clkfreq = 200_000_000
+  STEPS = 256
+
+VAR
+  long spH[STEPS], pvH[STEPS], ctlH[STEPS]
+
+PUB main() | t, sp, pv, ctl, err, integ
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`Loop ORIGIN 0 10)              ' baseline at bottom; y up (default)
+
+  repeat                               ' re-run the experiment continuously
+    pv := 0
+    integ := 0
+    repeat t from 0 to STEPS-1
+      sp := (t < 128) ? 70 : 30        ' setpoint steps up then down
+      err := sp - pv
+      integ += err
+      ctl := (err*2 + integ/32) #> 0 <# 100   ' PI control, clamp 0..100
+      pv += (ctl - pv) / 10            ' first-order process lag
+      spH[t] := sp
+      pvH[t] := pv
+      ctlH[t] := ctl
+
+    debug(`Loop CLEAR)
+    debug(`Loop COLOR $808080)
+    trace(@ctlH)                       ' controller output (gray)
+    debug(`Loop COLOR $00AAFF)
+    trace(@spH)                        ' setpoint (blue)
+    debug(`Loop COLOR $00FF00)
+    trace(@pvH)                        ' process variable (green)
+    waitms(500)
+
+PRI trace(p) | t
+  debug(`Loop SET 0 `(long[p][0] * 3))    ' value 0..100 -> 0..300 px
+  repeat t from 1 to STEPS-1
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)

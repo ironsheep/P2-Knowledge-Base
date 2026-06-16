@@ -1,0 +1,50 @@
+'' fig-05-plot-pid.spin2  ->  fig-05-plot-pid.png
+'' PLOT window, a PID control-loop strip chart (Chapter 5).
+'' A PI controller drives a first-order process; the chart shows the setpoint,
+'' the process variable's overshoot-and-settle, and the controller output.
+'' Fully synthetic, no hardware. Theme: black background, named trace colours.
+
+CON
+  _clkfreq = 200_000_000
+  STEPS = 256
+
+VAR
+  long spH[STEPS], pvH[STEPS], ctlH[STEPS]
+
+PUB main() | t, sp, pv, ctl, err, integ
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`Loop ORIGIN 0 10)                ' baseline at bottom; y up (default)
+
+  ' run the control loop, recording every step
+  pv    := 0
+  integ := 0
+  repeat t from 0 to STEPS-1
+    sp    := (t < 128) ? 70 : 30          ' setpoint: step up, then back down
+    err   := sp - pv
+    integ += err
+    ctl   := (err*2 + integ/32) #> 0 <# 100   ' PI control; actuator clamps 0..100
+    pv    += (ctl - pv) / 10                   ' first-order process (lag)
+    spH[t]  := sp
+    pvH[t]  := pv
+    ctlH[t] := ctl
+
+  ' draw the three traces (set colour, then draw the polyline)
+  debug(`Loop CLEAR)
+  debug(`Loop COLOR $808080)
+  trace(@ctlH)                            ' controller output (context)
+  debug(`Loop COLOR $00AAFF)
+  trace(@spH)                             ' setpoint
+  debug(`Loop COLOR $00FF00)
+  trace(@pvH)                             ' process variable
+
+  waitms(200)
+  debug(`Loop save 'fig-05-plot-pid')
+  debug(`Loop save window 'fig-05-plot-pid_WDW')
+  debug(`Loop close)
+  debug("* PLOT PID complete")
+  debug("DEBUG_END_SESSION")
+
+PRI trace(p) | t
+  debug(`Loop SET 0 `(long[p][0] * 3))    ' y: scale 0..100 -> 0..300 px
+  repeat t from 1 to STEPS-1
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)

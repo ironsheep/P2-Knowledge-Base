@@ -268,17 +268,42 @@ PUB main() | ang, sine, tri, dir, noise
     waitms(5)                              ' your loop sets the time scale
 ```
 
-To turn the same display into a **triggered capture**, declare one channel and add a
-trigger. The window then waits for the signal to rise through 0 (armed below −500,
-fired at or above 500 — `fire` >= `arm`, so rising) and freezes a 512-sample frame
-with the trigger point centered:
+## Acquisition: catching a fast event over a slow link
+
+[Chapter 1](#ch-1) named the debt plainly: every sample you send crosses the
+2 Mbaud debug link, so a *continuous* full-rate stream of a fast signal will not
+fit. The SCOPE window is still the right tool for fast signals — you just stop
+streaming them live and use the two techniques every bench oscilloscope uses
+instead. Both are fully synthetic here; neither needs hardware.
+
+### Capture and dump — full fidelity, one window per trigger
+
+The **capture-and-dump** strategy ([Chapter 1](#ch-1)) decouples the measurement
+from the link. A tight loop — in PASM when you need full speed — fills a
+**circular buffer at the P2's own sample rate**, overwriting oldest with newest,
+while it tests a trigger condition on every pass: a level crossing, a bus
+pattern, an out-of-range fault. When the trigger fires, you **freeze the buffer
+and dump it once** over the link — the pre-trigger samples already captured plus a
+post-trigger tail. The fidelity of what you caught is set by **how fast your loop
+runs and how deep your buffer is, not by the link**, which only carries the one
+readout. You see one frame per trigger and are blind between events; that is the
+price of full detail, and it is exactly the oscilloscope's *arm → acquire →
+trigger → freeze → read out* model.
+
+The SCOPE window models this directly: a `TRIGGER` holds the display on the event
+and freezes the frame. Recasting the free-running display as a **one-shot
+capture** is one line of setup. Here the window waits for the signal to rise past
+500 (armed below at −500, fired at or above 500 — `fire` >= `arm`, so rising) and
+freezes a 512-sample frame with the trigger point centered:
 
 ```spin2
 CON
   _clkfreq = 200_000_000
 
 PUB main() | ang, sig
-  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512 'Signal' -1000 1000)
+  ' SCOPE takes its channel declaration as a feed to the window name
+  debug(`SCOPE Capture SIZE 512 256 SAMPLES 512)
+  debug(`Capture 'Signal' -1000 1000)
   ' rising edge, trigger centered in the frame
   debug(`Capture TRIGGER 0 -500 500 256)
   debug(`Capture HOLDOFF 512)  ' one frame of holdoff before re-arming
@@ -290,6 +315,108 @@ PUB main() | ang, sig
     ang += 3
     waitms(2)
 ```
+
+The trigger and the buffer belong to the acquisition, not to the link. In a real
+high-rate capture you would move that arm-and-test loop into PASM so it runs at
+full speed, and only the frozen frame would ever cross the wire.
+
+#### Worked example: catch a rare glitch
+
+This is the capture-and-dump pattern end to end, fully synthetic. A clean,
+low-amplitude signal — it stands in for any quiet line you are watching —
+occasionally throws a single out-of-range spike. A `TRIGGER` set well above the
+clean signal's range arms on the quiet signal and fires the moment a spike
+crosses it, freezing a 512-sample frame with the glitch centered, its lead-up to
+the left and its aftermath to the right:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | ang, n, sig
+  debug(`SCOPE Glitch SIZE 512 256 SAMPLES 512)
+  debug(`Glitch 'Signal' -1000 1000)
+  ' arm on the quiet signal, fire on the spike (fire >= arm -> rising)
+  debug(`Glitch TRIGGER 0 200 800 256)   ' centered: see before and after
+  debug(`Glitch HOLDOFF 512)
+
+  ang := 0
+  n   := 0
+  repeat
+    sig := qsin(300, ang, 256)           ' clean signal, well inside range
+    if n // 233 == 0                     ' a rare, occasional fault
+      sig := 950                         ' one out-of-range sample
+    debug(`Glitch `(sig))
+    ang += 5
+    n   += 1
+    waitms(1)
+```
+
+The display free-runs on the quiet signal until a spike crosses 800; then it
+locks, showing the glitch at the center of the frame with the clean signal before
+and after it. `HOLDOFF` keeps it from re-arming until you have had a full frame to
+read the captured event.
+
+```{=latex}
+\begin{figure}[H]
+\centering
+\screenshotfig[width=0.80\linewidth]{inbox/assets/fig-07-scope-glitch.png}
+\caption{A rare out-of-range glitch frozen by a SCOPE trigger, shown with its lead-up and aftermath.}
+\end{figure}
+```
+
+### Decimate — a live trend, at the cost of detail
+
+When you want a *continuous* view of a slowly-evolving signal rather than a frozen
+event, **decimate** ([Chapter 1](#ch-1)): send only one sample in every N. The
+window updates forever; you have traded resolution for a live trend. The naive
+form — take every Nth sample — carries a trap any instrument engineer will warn
+you about: a narrow spike that lands between the kept samples simply disappears,
+and a periodic signal can alias into a slower phantom.
+
+```spin2
+' naive: keep 1 in 8 -- a one-cycle spike between samples is lost
+if n // 8 == 0
+  debug(`Trend `(sig))
+```
+
+The honest fix is **min/max (peak) decimation**: over each group of N samples keep
+both the smallest and the largest, and send both. A one-cycle spike now survives,
+because it lands as the group's min or max even though you never sent that exact
+sample:
+
+```spin2
+' peak decimation: keep the extremes of each group of 8
+lo := lo <# sig                          ' running min (<# = limit max)
+hi := hi #> sig                          ' running max (#> = limit min)
+if n // 8 == 7
+  debug(`Trend `(lo) `(hi))              ' two traces preserve the spike
+  lo := POSX                             ' reset for the next group
+  hi := NEGX
+```
+
+Decimation is always-on but lossy; capture-and-dump is perfect but episodic.
+**Choose by whether you are watching a *trend* or hunting an *event*.**
+
+### Where you'd use this
+
+In computer science and computer engineering, the SCOPE window is the everyday
+tool for **DSP work** — inspecting a waveform, the response of a filter, the
+settling of a control loop — and for **power and control electronics**, where the
+shape of a signal in time is the measurement.
+
+**On an embedded project**, you reach for it to watch an ADC capture, a PWM edge
+or duty cycle, supply ripple or inrush at power-on (a triggered one-shot),
+contact bounce on a switch, or an intermittent fault line — the glitch-capture
+pattern above.
+
+**Bandwidth fit:** low-rate live signals stream comfortably; a fast transient is
+caught as a triggered one-shot; a *continuous* high-rate analog stream does not
+fit, and is the case the acquisition strategies above exist to handle.
+
+**Extension (real hardware):** replace the synthetic `qsin`/spike source with a
+real sampled input — read an ADC or a smart pin in the loop — and the same
+channel, trigger, and capture code shows the live signal.
 
 ## Considerations
 

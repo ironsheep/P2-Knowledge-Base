@@ -35,9 +35,11 @@ name **without** an extension; the directive appends `.bmp` automatically
 | `fig-03-term-dashboard.png` | TERM     | `fig-03-term-dashboard.spin2` |
 | `fig-04-bitmap.png`         | BITMAP   | `fig-04-bitmap.spin2` |
 | `fig-05-plot-gauge.png`     | PLOT     | `fig-05-plot-gauge.spin2` |
+| `fig-05-plot-pid.png`       | PLOT     | `fig-05-plot-pid.spin2` |
 | `fig-05-plot-sprite.png`    | PLOT     | `fig-05-plot-sprite.spin2` |
 | `fig-06-logic.png`          | LOGIC    | `fig-06-logic.spin2` |
 | `fig-07-scope.png`          | SCOPE    | `fig-07-scope.spin2` |
+| `fig-07-scope-glitch.png`   | SCOPE    | `fig-07-scope-glitch.spin2` |
 | `fig-08-scope-xy.png`       | SCOPE_XY | `fig-08-scope-xy.spin2` |
 | `fig-09-fft.png`            | FFT      | `fig-09-fft.spin2` |
 | `fig-10-spectro.png`        | SPECTRO  | `fig-10-spectro.spin2` |
