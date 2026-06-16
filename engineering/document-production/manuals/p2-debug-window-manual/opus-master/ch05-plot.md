@@ -709,7 +709,7 @@ VAR
   long spH[STEPS], pvH[STEPS], ctlH[STEPS]
 
 PUB main() | t, sp, pv, ctl, err, integ
-  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $000000)
+  debug(`PLOT Loop SIZE 512 320 BACKCOLOR $E8E8E8)
   debug(`Loop ORIGIN 0 10)              ' baseline at bottom; y up (default)
 
   repeat                               ' re-run the experiment continuously
@@ -726,18 +726,18 @@ PUB main() | t, sp, pv, ctl, err, integ
       ctlH[t] := ctl
 
     debug(`Loop CLEAR)
-    debug(`Loop COLOR $808080)
-    trace(@ctlH)                       ' controller output (gray)
-    debug(`Loop COLOR $00AAFF)
+    debug(`Loop COLOR $606060)
+    trace(@ctlH)                       ' controller output (dark gray)
+    debug(`Loop COLOR $0050C0)
     trace(@spH)                        ' setpoint (blue)
-    debug(`Loop COLOR $00FF00)
+    debug(`Loop COLOR $008000)
     trace(@pvH)                        ' process variable (green)
     waitms(500)
 
 PRI trace(p) | t
   debug(`Loop SET 0 `(long[p][0] * 3))    ' value 0..100 -> 0..300 px
   repeat t from 1 to STEPS-1
-    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 1 255)
+    debug(`Loop LINE `(t*2) `(long[p][t] * 3) 2 255)
 ```
 
 `trace` draws one history array as a connected polyline: it `SET`s the cursor to
