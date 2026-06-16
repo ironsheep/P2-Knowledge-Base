@@ -65,9 +65,9 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 This project uses dual licensing:
 
 - **Code and Data** (YAML, Python, scripts): [MIT License](LICENSE)
-- **Documentation** (manuals, PDFs, guides): [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+- **Documentation** (manuals, PDFs, guides): [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
-Copyright © 2025 Iron Sheep Productions, LLC and Parallax Inc.
+Copyright © 2025–2026 Iron Sheep Productions, LLC and Parallax Inc.
 
 See individual files for specific licensing. Propeller 2, P2, and Parallax are trademarks of Parallax Inc.
 
