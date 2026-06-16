@@ -5191,8 +5191,8 @@ on the P2. You author the look as Windows BMP files, load them once into the PLO
 window's eight off-screen **layers**, and build each frame by **copying rectangles**
 out of those layers onto the canvas with `CROP`. The P2 issues only copy commands and
 a little arithmetic; all the pixels were drawn in an image editor. This is the
-sprite-sheet (blitting) model, and it is the technique behind Jon McPhalen's
-("JonnyMac") DEBUG instrument panels.
+sprite-sheet (blitting) model — the technique behind the richest DEBUG instrument
+panels.
 
 > **Requires `{Spin2_v50}`.** The `LAYER`, `CROP`, and sprite commands are V50
 > additions. The source file's first line must be `{Spin2_v50}` (or later), compiled
@@ -5239,7 +5239,7 @@ There are two ways to pack visual state into the artwork. Most panels use both:
   readout works, and it yields unlimited values from one small image.
 
 A layer may be larger than the window; the area below the visible canvas is free
-off-screen storage. JonnyMac's analog meter stacks five color copies of its digit
+off-screen storage. One analog-meter design stacks five color copies of its digit
 font below the gauge in the *same* layer and selects color by source Y — the window
 shows only the top, and the rest is a palette the code samples from.
 
