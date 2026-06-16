@@ -72,6 +72,7 @@ local ambiguous_words = {
   ["word"] = true,
   ["byte"] = true,
   ["add"] = true,
+  ["adds"] = true,
   ["test"] = true,
   ["call"] = true,
   ["fit"] = true,
@@ -173,7 +174,8 @@ local function is_english_context(word, prev_word, next_word, suffix)
     if next == "instruction" or next == "directive" or next == "data" then
       return false
     end
-    return false
+    -- Default: "long" in prose is the adjective/noun (long time, a long, etc.)
+    return true
   end
 
   -- "word" as noun: "the word", "a word", "word value"
@@ -188,7 +190,8 @@ local function is_english_context(word, prev_word, next_word, suffix)
     if next == "instruction" or next == "directive" then
       return false
     end
-    return false
+    -- Default: "word" in prose is the noun (a word, the word, word value)
+    return true
   end
 
   -- "byte" as noun/adjective: "the byte", "a byte", "byte value", "BYTE-level"
@@ -209,7 +212,8 @@ local function is_english_context(word, prev_word, next_word, suffix)
     if next == "instruction" or next == "directive" then
       return false
     end
-    return false
+    -- Default: "byte" in prose is the noun/adjective (a byte, byte order, style byte)
+    return true
   end
 
   -- "add" as verb: "add to", "add the", "to add", "will add"
@@ -220,6 +224,14 @@ local function is_english_context(word, prev_word, next_word, suffix)
     end
     -- Otherwise, "add" in prose is almost always the verb
     -- The instruction ADD is typically written as `ADD` in code or "the ADD instruction"
+    return true
+  end
+
+  -- "adds" as verb: "adds two", "adds the", "X adds Y" (mirrors "add")
+  if w == "adds" then
+    if next == "instruction" or next == "performs" or next == "operation" then
+      return false
+    end
     return true
   end
 
