@@ -30,21 +30,21 @@ Because these documents are AI-assisted, the issues you may encounter differ fro
 
 Four documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
-### [P2 Assembly Language Reference Manual](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf?raw=1)
+### [P2 Assembly Language Reference Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf)
 **Complete PASM2 Instruction Set Documentation** — *Version 3.0.0*
 
 The definitive reference for P2 assembly language programming. Documents all PASM2 instructions with accurate syntax, encoding tables, behavior descriptions, and practical examples. Organized alphabetically for quick lookup, with comprehensive coverage of directives, special registers, and predefined constants. Includes architectural foundation chapters on execution models, instruction formats, flags, timing, and hardware integration.
 
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-assembly-language-manual-changelog.md)
 
-### [P2 Assembly Programming](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/P2-PASM-deSilva-Style.pdf?raw=1)
+### [P2 Assembly Programming](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-PASM-deSilva-Style.pdf)
 **A Human-Centered Approach to Parallel Processing** — *Version 3.0.0*
 
 This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutorial, bringing the same approachable, hands-on teaching style to the Propeller 2. Starting with a blinking LED and progressing through COG architecture, hub memory, CORDIC math, Smart Pins, and multi-COG coordination, this manual makes PASM2 genuinely enjoyable to learn. Written with the philosophy: "Learn by doing, celebrate progress, have fun!"
 
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md)
 
-### [P2 Streamer Programming Guide](https://github.com/ironsheep/P2-Knowledge-Base/blob/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf?raw=1)
+### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
 **Comprehensive Reference for the Propeller 2 Streamer** — *Version 1.0.0*
 
 The complete reference for the P2 streamer — the DMA-like engine that moves data between hub RAM, pins, and DACs. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
