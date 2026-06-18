@@ -20,6 +20,21 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.10.0] - 2026-06-18
+
+**DEBUG display feed idioms and smart-pin example sequencing, hardware-verified**
+
+### Added
+- DEBUG display windows: window placement is optional — omit `POS` to let the display host auto-arrange windows without overlap; supply `POS` only for a fixed position.
+- TERM: value display documented — substitute a value's decimal text into single-quoted window text with `` `(value) ``.
+- LOGIC: `HOLDOFF` semantics documented — initial value, counter reset on a supplied count, and the bare-form no-op.
+- MIDI: a velocity-0 Note-On does not release a key in this window; send an explicit Note-Off.
+- Smart pin %00101 (transition output): a non-zero Y drives that many transitions; Y=0 holds the pin idle.
+
+### Changed
+- DEBUG display windows: channel and trigger setup (SCOPE, FFT) is a one-time configuration message sent after the window is created, separate from the create line.
+- Smart-pin examples: unified initialization order across all modes — configure, enable, then operate (`WYPIN` follows enable).
+
 ## [1.9.1] - 2026-06-14
 
 **DEBUG display directive accuracy across all nine windows**
