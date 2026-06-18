@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0\par}
+{\large\color{blue}Version 3.0.1\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -4630,13 +4630,21 @@ Every Smart Pin follows the same configuration pattern. This is **the most impor
 ' Step 2: CONFIGURE the mode
         wrpin   mode, pin       ' What should this pin do?
 
-' Step 3: SET parameters
+' Step 3: SET the X parameter
         wxpin   x_value, pin    ' Mode-specific parameter X
-        wypin   y_value, pin    ' Mode-specific parameter Y
 
 ' Step 4: ENABLE the pin
         dirh    pin             ' Start the magic!
+
+' Step 5: WRITE Y / data -- AFTER enable!
+        wypin   y_value, pin    ' Mode-specific parameter Y
 ```
+
+Why is `wypin` last, *after* `dirh`? For the trigger and serial modes the Y
+value is held at zero during reset, so a `wypin` written before `dirh` is simply
+lost. Writing Y after enabling is the one ordering that works for *every* mode --
+so make it your habit. (For pure value modes the order doesn't matter, but one
+rule is easier to remember than two.)
 
 ::: sidetrack
 **Why DIRL First?**
@@ -4843,8 +4851,8 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 1. **DIRL** pin — Reset the pin first
 2. **WRPIN** mode, pin — Set the operating mode
 3. **WXPIN** x, pin — Set X parameter
-4. **WYPIN** y, pin — Set Y parameter
-5. **DIRH** pin — Enable the Smart Pin
+4. **DIRH** pin — Enable the Smart Pin
+5. **WYPIN** y, pin — Write Y / data (after enable)
 
 **Common Modes:**
 
@@ -4862,7 +4870,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 - **RDPIN** = Read data FROM Smart Pin (clears IN)
 - **TESTP** = Check if IN flag set
 
-**Golden Rule:** DIRL before WRPIN, DIRH after WXPIN/WYPIN
+**Golden Rule:** DIRL before WRPIN · WXPIN before DIRH · WYPIN (data) after DIRH
 :::
 
 ## Your Turn

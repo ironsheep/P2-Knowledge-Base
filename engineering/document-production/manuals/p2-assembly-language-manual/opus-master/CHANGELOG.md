@@ -1,5 +1,13 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.0.1 (2026-06-18)
+
+**Smart-pin accuracy refresh** — aligned with the latest hardware-verified Knowledge Base.
+
+### Changed
+- Smart-pin setup (§WRPIN): the sequence enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
+- Appendix F: configuration-word field labels follow the Silicon Doc — `M` for bits 20–8, `S` for the 5-bit operating-mode selector.
+
 ## v3.0.0 (2026-06-10)
 
 **Full content re-audit on the shared presentation platform** — every checkable claim re-verified against the current P2 Knowledge Base, with figures, tables, and code rendered on the common manual platform.

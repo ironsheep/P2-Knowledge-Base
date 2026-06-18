@@ -749,9 +749,11 @@ WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 
 The standard configuration sequence is:
 1. DIRL pin — Reset smart pin (required)
 2. WRPIN mode, pin — Configure smart pin mode
-3. WXPIN x, pin — Set X parameter
-4. WYPIN y, pin — Set Y parameter
-5. DIRH pin — Enable smart pin
+3. WXPIN x, pin — Set X parameter (setup)
+4. DIRH pin — Enable smart pin
+5. WYPIN y, pin — Set Y parameter (operate, after enable)
+
+Write the Y parameter *after* raising DIRH. The trigger modes (pulse %00100, transition %00101) and the serial modes hold Y at 0 during reset, so a WYPIN issued before DIRH never takes effect; writing Y after enable is the one order that is correct for every mode.
 
 WRPIN #0, pin clears all smart pin configuration.
 

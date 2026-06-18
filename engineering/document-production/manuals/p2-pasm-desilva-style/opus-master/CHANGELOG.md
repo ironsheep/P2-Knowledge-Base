@@ -1,5 +1,12 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.1 (2026-06-18)
+
+**Smart-pin accuracy refresh** — aligned with the latest hardware-verified Knowledge Base.
+
+### Changed
+- The Smart Pin recipe (Ch 14) enables the pin (DIRH) before writing the Y parameter (WYPIN) — the one ordering correct for every mode, and the ordering the trigger and serial modes require.
+
 ## v3.0.0 (2026-06-10)
 
 **Content re-audit on the shared presentation platform** — every technical claim re-verified against the current P2 Knowledge Base, delivered on the common P2 manual presentation platform.

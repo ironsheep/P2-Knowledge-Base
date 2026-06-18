@@ -7,7 +7,7 @@ PASM2 provides an extensive set of predefined constants for configuring the P2's
 Each SmartPin is configured through a 32-bit mode word with the following structure:
 
 ```
-Bits [31..0] = %AAAA_BBBB_FFF_PPPPPPPPPPPPP_TT_MMMMM_0
+Bits [31..0] = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
 ```
 
 | Field | Bits | Purpose |
@@ -15,9 +15,9 @@ Bits [31..0] = %AAAA_BBBB_FFF_PPPPPPPPPPPPP_TT_MMMMM_0
 | AAAA | 31-28 | A input selector (polarity and source) |
 | BBBB | 27-24 | B input selector (polarity and source) |
 | FFF | 23-21 | A/B input logic and filter settings |
-| P | 20-8 | Low-level pin mode and parameters |
+| M | 20-8 | Low-level pin mode and parameters |
 | TT | 7-6 | DIR/OUT control mode |
-| MMMMM | 5-1 | Smart pin operating mode (0-31) |
+| SSSSS | 5-1 | Smart pin operating mode (0-31) |
 | 0 | 0 | Reserved (must be 0) |
 
 Constants are combined using OR operations to build the complete configuration:
