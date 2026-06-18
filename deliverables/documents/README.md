@@ -26,6 +26,14 @@ Because these documents are AI-assisted, the issues you may encounter differ fro
 
 **Your expertise is essential.** This review process depends on practitioners who know the Propeller 2 to catch what automated validation cannot. If something looks wrong, seems incomplete, or contradicts your experience — **[report it via the Issues page](https://github.com/ironsheep/P2-Knowledge-Base/issues)**.
 
+## How These Documents Are Built — and Why You Can Trust Them
+
+Two short companion reads go deeper on the questions every reviewer asks:
+
+**[Why You Can Trust What's in These Manuals](WHY-YOU-CAN-TRUST-THESE-MANUALS.md)** — how a fact gets *into* a manual and how we check it. Jump to: [checked against the silicon](WHY-YOU-CAN-TRUST-THESE-MANUALS.md#checked-against-the-silicon) · [we audit our own work](WHY-YOU-CAN-TRUST-THESE-MANUALS.md#we-audit-our-own-work) · [when you report a problem, it ships](WHY-YOU-CAN-TRUST-THESE-MANUALS.md#when-you-report-a-problem-it-ships).
+
+**[How These Manuals Are Made — and How They Stack Up](HOW-THESE-MANUALS-ARE-MADE.md)** — the craft, measured honestly against how the best reference manuals in the world are produced. Jump to: [the bar we measured against](HOW-THESE-MANUALS-ARE-MADE.md#the-bar-how-the-best-reference-manuals-get-made) · [where we go past a printed book](HOW-THESE-MANUALS-ARE-MADE.md#where-we-go-past-what-a-printed-book-can-do) · [where we don't match them yet](HOW-THESE-MANUALS-ARE-MADE.md#where-we-dont-match-them-yet).
+
 ## Documents in Community Review
 
 Four documents are available now for community technical review. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
@@ -45,9 +53,9 @@ This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutori
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md)
 
 ### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
-**Comprehensive Reference for the Propeller 2 Streamer** — *Version 1.0.0*
+**A Guide to the Propeller 2 Streamer — Its Modes and Function** — *Version 1.0.0*
 
-The complete reference for the P2 streamer — the DMA-like engine that moves data between hub RAM, pins, and DACs. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
+An introduction to the P2 streamer — the DMA-like engine that moves data between hub RAM, pins, and DACs — built to make a genuinely tricky part of the chip make sense. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
 
 *June 2026 - Community Review Edition* | [Changelog](DOCs/p2-streamer-programming-guide-changelog.md)
 

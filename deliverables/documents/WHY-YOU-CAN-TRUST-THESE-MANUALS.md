@@ -1,0 +1,174 @@
+# Why You Can Trust What's in These Manuals
+
+We're handing the community a stack of P2 manuals and asking you to lean on them
+while you work. That's a real ask, and we don't take it lightly. These are
+AI-assisted drafts guided by human direction, and the P2 community runs the full
+range on that — from "show me" to "no thanks, not for me" — and every bit of that
+skepticism is fair. AI is very good at writing something that *reads* correct and is
+quietly wrong, and a reference manual is exactly the place where that would hurt you.
+
+So this page doesn't ask you to take our word for anything. It lays out how a fact
+gets *into* one of these manuals, how we check it, and — just as important — what
+happens when we get one wrong. The short version: every claim traces back to a
+trusted source or to **real silicon**, we audit our own drafts the way we'd audit a
+stranger's, and we say plainly what we don't yet know. Here's the whole chain.
+
+## The trust chain
+
+Everything we publish rides one chain, and the rule is that each link must preserve
+the truth of the one before it:
+
+> **Trusted Sources → Trusted Knowledge Base → Trusted Manuals → You**
+
+The sources are of two kinds. There's the **documentary** record — the Parallax
+Silicon Doc, the datasheets, and Chip's own PNut compiler source. And there's the
+**empirical** record — code we write, compile, and *run on a real P2*, where the chip
+itself tells us what's true. When those two ever disagree,
+the silicon wins. It sits at the top of the chain on purpose, and further down you'll
+see what happened the times it spoke up.
+
+From the sources we build a structured knowledge base, and from that knowledge base
+we derive the manuals. The manuals are never the first place a fact is written down —
+they're the *last*, downstream of a source we can point to.
+
+## Where the facts come from
+
+Before a source is allowed to ground anything, it's catalogued and rated. We keep an
+authoritative-sources list that tags every source with a trust tier and a reason for
+that tier, and a documented order of precedence for when sources conflict (hardware
+first, then the compiler, then the Silicon Doc, then datasheets, then community
+lore). A claim inherits the trust of wherever it came from, and we keep the lineage so
+we can always walk it back.
+
+We also keep an honest ledger of **what's missing** — the questions the documentation
+doesn't answer, the corners nobody has nailed down yet. That ledger ships as part of
+the work rather than being quietly papered over, because "we don't know this yet" is
+itself a fact you can use, and pretending otherwise is how a manual loses your trust
+for good.
+
+## Checked against the silicon
+
+This is the part we're proudest of, and it's the part most documentation can't offer.
+
+Every code example we ship is run through `pnut_ts` and has to compile clean before it
+goes in the book. And `pnut_ts` isn't some third-party tool we're trusting on faith —
+it's a careful, hand-built port of Chip's own PNut compiler, written alongside the chip's
+designer himself by studying PNut's original source and re-implementing it line by line.
+It's **100% binary-compatible with PNut**, and hundreds of tests certify that it produces
+byte-for-byte identical output on every platform. So checking a program against `pnut_ts`
+is, for all practical purposes, checking it against Chip's own compiler. For the
+debug-window code, that compile is run with the flag that actually evaluates the
+`DEBUG()` directives, so the compiler is checking the part that matters, not skipping
+past it.
+
+But compiling clean is only the floor. For the **Debug Window Manual** we go all the
+way: a program is compiled clean, then it's taken to real hardware through PNut-Term-TS
+and *actually run*, and the screen it produces is captured and brought back into the
+manual. So the thermal heatmap, the PID strip-chart, the glitch capture, the motor
+run-up you see in those chapters are **not mockups or hand-drawn diagrams — they are
+the actual output of the exact program printed on the page.** Code in, real picture
+out, both in front of you. That's about as close to "see it for yourself" as a book
+gets.
+
+And it isn't only the examples that are grounded that deeply — the window *descriptions*
+are too. For the Debug Window Manual we went through Chip's PNut compiler itself and
+documented every facet of all nine windows straight from it — every directive, parameter,
+range, and default — verifying each against the compiler as we went. That verified study
+became part of the knowledge base, and from there it strengthened the manual. So what the
+book tells you about a window doesn't come from a second-hand account or someone's memory
+of how it works; it traces straight back to the code that actually implements it.
+
+And when we say silicon outranks the page, we mean it has *changed* the page. Running
+tests on a real P2 has corrected our own knowledge base and even corrected one of our
+own already-released manuals — we hold our own published work to the same chip-level
+check as everything else. We keep the accepted tests and their results as a permanent,
+versioned record of empirical findings, so those corrections are evidence you can
+check, not claims you have to believe.
+
+A fair note while we're being straight with you: not every manual is example-driven,
+and that's by design (more on that in the companion "how these are made" page). Where
+a manual carries code, that code is compiled; where a manual's whole job is to
+*explain a capability* rather than drill it, it leans on description. We try to always
+be clear about which is which.
+
+## We audit our own work
+
+We assume our own drafts contain mistakes, and we go looking for them with a real
+methodology — not a quick reread. We learned to the hard way.
+
+When we first put our earliest manuals — the Assembly Reference and the deSilva
+tutorial — into the community's hands, we were too eager. A few sharp-eyed readers came
+back almost immediately with things that were flat-out wrong: errors that should never
+have shipped. We turned the fixes around fast — but the fixes weren't the real win. The
+real win was that those early eyes forced us to build the auditing discipline we use
+today, so that whole *class* of mistake can't reach you the way it did again — not in a
+new manual, and not in an update to an old one. It was painful at the time, and it was
+probably the best thing that could have happened to this project. If you were one of
+those readers: thank you — this is partly your doing.
+
+The cheapest mistake to fix is the one you never write, so the first pass is at
+*writing* time: a fact gets verified against its source before it goes on the page,
+not after. Then, after the fact, every claim is extracted and cross-checked against
+the primary sources and sorted into verified, modified, unverified, or — the one that
+matters most — **fabricated**. We've caught our own fabrications and our own confident
+little errors this way, on manuals we'd otherwise have been happy with. Those finds
+don't get buried; they go into a corrections register that tracks each one from
+"found" to "fixed."
+
+We also let other people's work challenge ours. On our smart-pin material, for
+instance, we wrote our own document straight from the hard sources — the Silicon Doc,
+the datasheets, the compiler — and then used Jon Titus's community smart-pin study —
+published as a Google Doc, carrying its readers' own inline comments and annotations on
+specific passages — as an independent set of *questions* to interrogate what we'd
+written. None of it was taken on faith: each claim, and each reader observation, was
+tested back against the hard sources and, where it mattered, against real silicon. What
+held up, we incorporated; what didn't, we were able to disprove — including reader
+observations that simply didn't survive the chip. Outside knowledge is genuinely
+welcome here, but it earns its place by passing the same checks as everything else.
+
+That's the honest shape of this work: the audits aren't proof we're never wrong,
+they're proof that being wrong gets *caught and recorded* here instead of shipping
+silently.
+
+## What we refuse to claim
+
+Part of trust is discipline about what you *won't* say. A few standing rules:
+
+- **No unsourced claims.** If we can't point to where it came from, it doesn't go in.
+- **No numbers that quietly drift.** We don't publish compiler bytecode values or
+  interpreter clock-timings that change from one tool release to the next and would
+  silently rot into wrong — we describe the behavior instead.
+- **We keep provenance.** Authorship, copyright, and who-figured-this-out stay
+  attached; that chain of credit is part of how you judge a source, so we don't strip
+  it.
+
+Small thing you'll notice: we say **COG**, not "CPU." The community treats the COG as
+the computer, and matching how *you* think about the chip is part of getting it right.
+
+## When you report a problem, it ships
+
+Here's the question every reviewer is really asking: *if I find something wrong, will
+it actually get fixed — or rot in a backlog?*
+
+Because the manuals derive from one shared knowledge base, a correction usually lands
+in **one** place and propagates out from there, and the corrections register tracks it
+the whole way. That means turnaround is fast, and it means we can deliver in *phases*.
+The Streamer guide is a good example: it exists to introduce a part of the P2 that was
+genuinely hard to get your arms around, and it's deliberately an early, lightweight
+delivery — if the community tells us per-mode examples would help, we can add them and
+push the guide back out again without rebuilding anything. Your feedback isn't a
+suggestion box; it's the next edition.
+
+## The short of it
+
+These are **review editions** on purpose. They're grounded deeply and checked hard,
+and they'll still miss in their own particular ways — the kind of thing automated
+checks can't catch but a practitioner spots in a heartbeat. Everything above is what
+lets us hand them to you with a straight face: a traceable source or real silicon
+behind every claim, our own work audited the way we'd audit anyone's, plain talk about
+what we don't know, and a fast path from your report to a fixed page.
+
+That last link in the chain is you. Read hard, push back, and tell us what you find —
+every report you send makes the next release of these manuals better. I look forward to seeing what you turn up.
+
+-Stephen
