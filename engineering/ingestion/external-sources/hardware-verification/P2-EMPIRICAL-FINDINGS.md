@@ -26,13 +26,17 @@ error); single-quoted text renders. *Proof:* `test1-term-string-quoting` — sin
 body displayed in full; both double-quoted bodies were blank. *Date:* 2026-06-17 (real P2,
 Stephen). *Grounds:* F-136; `term.yaml`, `statements/debug.yaml`, `ch03-term.md`.
 
-### EF-002 · A formatted value fed to a named TERM arrives as a RAW byte — `CONFIRMED`
+### EF-002 · A value-only FORMATTER fed to a named TERM renders as a glyph; use `` `(value) `` for text — `CONFIRMED`
 `` `udec_(value) `` into a NAMED TERM renders a single raw-byte glyph (char = the value),
 not decimal text — and a bare formatter between text (`SDEC(x)`) showed nothing. The
-formatter (`udec_`/`sdec_`) is a *plain-`debug()`* feature; a backtick named feed has only
-single-quoted text + control codes + `` `(expr) `` substitution, no formatter slot.
-*Proof:* `test1` W3 (nothing) + W4 (glyph char 42). *Date:* 2026-06-17. *Grounds:* F-136
-(labeled-value idiom — open: see ledger note below).
+trailing-underscore value-only formatters (`udec_`/`sdec_`/`uhex_`) emit a *numeric data
+element* — the form the graphical windows (SCOPE/LOGIC/FFT) consume as a data point — so a
+TERM renders that number as a character glyph (value 42 → `*`). The value-to-TEXT path in a
+named feed is **`` `(expr) `` substitution** (short for SDEC_): `` debug(`MyTerm 'count =
+`(n)') ``. *Proof:* `test1` W3 (nothing) + W4 (glyph char 42). *Corroborated by docs:* Spin2
+v55 `spin2-v55-text.txt` L1090 + the canonical named-TERM example L1299 `` debug(`MyTerm 1
+'Temp = `(i)') ``. *Date:* 2026-06-17 (test); resolved 2026-06-18. *Grounds:* F-136 — DONE
+(`term.yaml`, `ch03-term.md`).
 
 ### EF-003 · A SCOPE channel-def on the CREATE line prevents window creation — `CONFIRMED`
 SCOPE channel/trigger config MUST be a separate message AFTER create. With six windows
@@ -111,11 +115,16 @@ init order).
 
 ## Open / pending empirical questions
 
-- **Labeled value in a named TERM (F-136 sub-item).** EF-002 shows two formatter forms fail
-  in a named TERM. One combo is still untested: single-quoted text **+** a bare formatter
-  (`` `MyTerm 'T:', sdec_(x) ``). The backtick grammar (no formatter slot) implies it also
-  fails → the resolution is likely "named TERMs don't format; use plain `debug()` for
-  formatted/labeled output." Settle, then finish `term.yaml` ex2 + `ch03-term.md`.
+- *(none currently)*
+
+### Resolved
+- **Labeled value in a named TERM (F-136 sub-item) — RESOLVED 2026-06-18.** Settled from the
+  v55 doc, no further probe needed: a named TERM **does** display a value's decimal text —
+  via `` `(value) `` substitution (short for SDEC_), e.g. `` debug(`MyTerm 'T: `(x)') ``
+  (v55 `spin2-v55-text.txt` L1090 + canonical example L1299). The earlier guess ("named
+  TERMs don't format; use plain `debug()`") was wrong: EF-002's glyph result is the
+  *value-only formatter* feeding a numeric data element, NOT proof that values can't be
+  shown as text. `term.yaml` ex2 + `ch03-term.md` finished accordingly (see EF-002, F-136).
 
 ---
 
