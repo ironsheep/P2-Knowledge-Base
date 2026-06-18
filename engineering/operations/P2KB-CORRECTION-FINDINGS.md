@@ -11,7 +11,7 @@
 
 **Authority order for P2 language facts:** the `pnut_ts` compiler (ground truth for what compiles) → the Spin2 v51 documentation (`engineering/ingestion/sources/spin2-v51/`) → the Silicon Doc. The KB YAML must match these.
 
-**Next finding ID: `F-140`**
+**Next finding ID: `F-141`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -59,6 +59,13 @@
 > a smaller set were genuine defects (→ `DONE`); and three NEW writing-debug-statement defects
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
+
+### F-140 — `architecture/smart_pins.yaml` OVERVIEW still teaches the OLD init order (WYPIN before DIRH); F-139 swept the per-mode files but missed the overview — `DONE`
+> **Logged + DONE 2026-06-18.** Surfaced while auditing the **PASM2 Reference + DeSilva** manuals for smart-pin staleness — the manuals had inherited the old order, and the trail led back to this overview page. F-135/F-139 ratified the universal order **Reset → Setup (WRPIN/WXPIN) → Enable (DIRH) → Operate (WYPIN)** (WYPIN *after* enable; hardware-verified EF-011) and corrected the per-mode `architecture/smart-pins/smart-pin-*.yaml` files — but the **overview** `smart_pins.yaml` was not updated. Its `critical_requirements.reset_before_configure.correct_sequence` (pasm2 **and** spin2) and `live_update_behavior.what_needs_reset.procedure` both still showed `…WXPIN → WYPIN → DIRH` (WYPIN before enable). It was even internally inconsistent with the file's OWN `live_update_behavior` ("once configured, DIR can be raised high … after that you may feed it new data via WXPIN/WYPIN").
+> **FIX APPLIED 2026-06-18:** `correct_sequence` reordered to WYPIN-after-DIRH (pasm2 + spin2; the spin2 form was switched from `PINSTART(pin,mode,x,y)` — which writes Y before raising DIR and is unsafe for the trigger modes — to the explicit safe sequence) with a `note:` explaining why; the `procedure` line corrected to `DIRL → WRPIN/WXPIN → DIRH → WYPIN`. YAML valid + crossref clean. **Ships next YAML release** (published v1.10.0 index does not yet carry it).
+- **Where:** `deliverables/ai/P2/architecture/smart_pins.yaml` (`critical_requirements…correct_sequence`; `live_update_behavior…procedure`).
+- **Authority:** ledger EF-011 (hardware-ratified universal order); the corrected per-mode `smart-pin-00100/00101-*.yaml`; Silicon Doc (trigger-mode Y is held 0 during reset).
+- **Origin:** PASM2/DeSilva smart-pin staleness audit, 2026-06-18 — see each manual's `audit/smartpin-debug-staleness-audit-2026-06-18.md`.
 
 ### F-138 — ch09 "Creating an FFT window" inline minimal example renders NOTHING (declares no channel) — `DONE (manual)`
 > **Logged + DONE 2026-06-17.** Surfaced when `test2c-fft-baseline.spin2` (the inline snippet copied verbatim) showed a BLANK FFT window on BOTH PNut-Term-TS and real PNut (Stephen). Root cause: the minimal example feeds samples to an FFT window with **no channel declared** — with zero channels there is nowhere for samples to land, so nothing renders (chapter prose: a channel is declared by sending a string label; fed samples distribute across declared channels). Every *rendered* example already declares a channel — `figure-generators/fig-09-fft.spin2` (made the figure) and `examples-library/ch09-fft-spectrum.spin2` (bundled demo) both do — so the manual's demos are fine; **only the inline teaching snippet (prose, never a rendered demo) omitted it.** **Distinct from F-137** (that is create-line channel-defs *breaking*; this is the snippet having *no* channel at all). The snippet also used `getct()` as the sine angle, which aliases to broadband noise even when rendered.

@@ -100,15 +100,26 @@ critical_requirements:
       **CRITICAL**: Smart pins MUST be reset (DIR=0) before any configuration.
       This ensures the smart pin is in a known state and prevents conflicts.
     correct_sequence:
+      note: |
+        Order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate (WYPIN).
+        Write Y with WYPIN AFTER raising DIR. The trigger modes (pulse %00100,
+        transition %00101) and the serial modes hold Y at 0 during reset, so a
+        WYPIN issued before DIRH never takes effect; writing Y after enable is the
+        one order correct for EVERY mode (and order-safe for the value modes).
+        PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for
+        the trigger modes -- use the explicit sequence below for those.
       pasm2:
-        - "DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)"
+        - "DIRL  pin         ' Reset smart pin (DIR=0) -- REQUIRED before WRPIN"
         - "WRPIN mode, pin   ' Configure smart pin mode"
-        - "WXPIN x, pin      ' Set X parameter"
-        - "WYPIN y, pin      ' Set Y parameter"
+        - "WXPIN x, pin      ' Set X parameter (setup)"
         - "DIRH  pin         ' Enable smart pin (DIR=1)"
+        - "WYPIN y, pin      ' Operate: write Y AFTER enable"
       spin2:
-        - "PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)"
-        - "PINSTART(pin, mode, x, y)  ' Configure and enable (includes reset)"
+        - "PINCLEAR(pin)        ' Reset pin (DIR=0, WRPIN=0)"
+        - "WRPIN(pin, mode)     ' Configure smart pin mode"
+        - "WXPIN(pin, x)        ' Set X parameter (setup)"
+        - "DIRH(pin)            ' Enable smart pin (DIR=1)"
+        - "WYPIN(pin, y)        ' Operate: write Y AFTER enable"
     consequences_of_skipping:
       - "Unpredictable smart pin behavior"
       - "Configuration conflicts between old and new settings"
@@ -401,7 +412,7 @@ live_update_behavior:
     After that, you may feed it new data via WXPIN/WYPIN."
   what_needs_reset:
     wrpin_changes: "Mode (%SSSSS), input routing (AAAA/BBBB), filtering (FFF), TT bits, M bits"
-    procedure: "DIRL pin → WRPIN/WXPIN/WYPIN → DIRH pin"
+    procedure: "DIRL pin → WRPIN/WXPIN → DIRH pin → WYPIN pin (write Y after enable; required for trigger/serial modes, safe for all)"
   what_works_while_running:
     wypin: "Primary runtime interaction — load data, trigger operations, update parameters"
     wxpin: "Changes timing/configuration for next cycle (mode-specific side effects)"
