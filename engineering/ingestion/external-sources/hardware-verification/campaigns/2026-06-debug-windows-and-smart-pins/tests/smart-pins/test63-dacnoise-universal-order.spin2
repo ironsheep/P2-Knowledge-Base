@@ -1,0 +1,58 @@
+'' =============================================================================
+''  test63  --  universal init-order ratification, mode %00001 (DAC noise)
+'' =============================================================================
+''  WIRING-FREE: drives ONE pin and counts its OWN IN-flag events (DAC-noise
+''  raises IN once per sample period). NO external hardware. Covers the DAC
+''  category (a non-trigger mode where WYPIN enables output).
+''
+''  A/B: OLD order (WYPIN before enable) vs NEW/universal order (enable, then
+''  WYPIN).
+''    OLD=0,NEW>0 -> universal REQUIRED ; OLD>0,NEW>0 -> SAFE ; NEW=0 -> FAIL
+''  Build: pnut-ts -d test63-dacnoise-universal-order.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TEST_PIN = 32
+  WINDOW   = _clkfreq / 10
+
+PUB main() | cOld, cNew
+  debug("=== test63  DAC noise %00001  -- universal init-order ratification ===")
+  cOld := run(false)
+  cNew := run(true)
+  if cNew > 0 and cOld == 0
+    debug("test63 DACnoise: PASS-REQUIRED  universal order NEEDED (old produced nothing).  old=", udec(cOld), " new=", udec(cNew))
+  elseif cNew > 0 and cOld > 0
+    debug("test63 DACnoise: PASS-SAFE  both orders work; universal order is safe.  old=", udec(cOld), " new=", udec(cNew))
+  else
+    debug("test63 DACnoise: FAIL  universal order produced NO output.  old=", udec(cOld), " new=", udec(cNew))
+  repeat
+
+PRI run(enable_first) : c
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
+  WXPIN(TEST_PIN, 0)                  ' X=0 -> 65536-clock sample period
+  if enable_first
+    PINHIGH(TEST_PIN)
+    WYPIN(TEST_PIN, 1)                ' enable noise
+  else
+    WYPIN(TEST_PIN, 1)
+    PINHIGH(TEST_PIN)
+  c := count_in(TEST_PIN, WINDOW)
+  PINCLEAR(TEST_PIN)
+
+PRI count_in(pin, clocks) : count | deadline, now
+  count := 0
+  org
+    getct   deadline
+    add     deadline, clocks
+    akpin   pin
+.loop testp  pin           wc
+    if_nc jmp #.chk
+    add     count, #1
+    akpin   pin
+.chk  getct  now
+    sub     now, deadline   wc
+    if_c  jmp #.loop
+  end

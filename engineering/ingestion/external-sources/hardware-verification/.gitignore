@@ -1,0 +1,7 @@
+# Hardware-verification evidence: track tests (.spin2) + analysis (.md);
+# do NOT track regenerable binaries or multi-MB raw captures.
+*.bin
+usb-traffic*.log
+# Small DEBUG result logs are quoted into the campaign READMEs (tracked).
+# If a raw debug log must be kept as a receipt, un-ignore it explicitly:
+#   !campaigns/<name>/results/<file>.log

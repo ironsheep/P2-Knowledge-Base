@@ -1,0 +1,108 @@
+'' =====================================================================
+'' test3-smartpin-00101-y0-continuous.spin2   --   verifies finding F-135
+''
+'' QUESTION: in smart-pin mode %00101 (Transition Output), does writing
+'' Y = 0 produce CONTINUOUS transitions (as the YAML claims), or does it
+'' leave the pin idle (as both primary sources imply)?
+''
+'' >>> TWO JUMPER WIRES REQUIRED (all within P0..P7): <<<
+''         P0 --> P2        and        P1 --> P3
+''
+'' Phase 0 = RIG TEST: drive P0/P1 as plain GPIO and confirm P2/P3 follow,
+''   BEFORE any smart-pin setup. If a jumper is missing/wrong the program
+''   says so and HALTS -- so a wiring fault can never be misread as a
+''   smart-pin result.
+'' Phase 1 = the actual %00101 Y=0 test (only runs if the rig passes):
+''   P0 = transition out, Y = 0    (the disputed "continuous" claim)
+''   P1 = transition out, Y = 2000 (control: toggles a while, then stops)
+''
+'' All TERM text is SINGLE-quoted (finding F-136: double-quoted text is
+'' silently dropped).
+'' =====================================================================
+
+CON
+  _clkfreq = 10_000_000              ' slow clock so transitions are easy to catch
+  XPER     = 50_000                  ' base period (~5 ms): pin toggles every 5 ms
+
+PUB main() | t0, t1, r0, r1
+  DEBUG(`TERM M POS 0 0 SIZE 56 12 TITLE 'F-135  smart-pin %00101  Y=0 test')
+  DEBUG(`M 0)                                              ' clear + home
+  DEBUG(`M 'JUMPERS:  P0 --> P2    and    P1 --> P3')
+  DEBUG(`M 2 0 3 1 'Phase 0 = rig test (verify jumpers first)')
+  DEBUG(`M 2 0 3 2 'Phase 1 = smart-pin %00101 Y=0 test')
+  DEBUG(`M 2 0 3 3 '--------------------------------------------------')
+
+  ' ---- Phase 0: RIG TEST (plain GPIO loopback, no smart pins yet) ----
+  r0 := jumper_ok(0, 2)
+  r1 := jumper_ok(1, 3)
+  DEBUG(`M 2 0 3 5)
+  if r0
+    DEBUG(`M 'RIG  P0->P2 : OK  ')
+  else
+    DEBUG(`M 'RIG  P0->P2 : FAIL')
+  DEBUG(`M 2 0 3 6)
+  if r1
+    DEBUG(`M 'RIG  P1->P3 : OK  ')
+  else
+    DEBUG(`M 'RIG  P1->P3 : FAIL')
+  if not (r0 and r1)
+    DEBUG(`M 2 0 3 8 'RIG FAILED -- fix the jumpers, then re-run.  (halted)')
+    repeat                                                ' stop; never run Phase 1 on a bad rig
+
+  ' ---- Phase 1: the %00101 Y=0 test (rig is proven good) ----
+  start_transition(0, XPER, 0)                            ' P0: Y = 0
+  start_transition(1, XPER, 2000)                         ' P1: Y = 2000 (control)
+  repeat
+    t0 := toggling(2)                                     ' P2 reads back P0
+    t1 := toggling(3)                                     ' P3 reads back P1
+    DEBUG(`M 2 0 3 8)
+    if t0
+      DEBUG(`M 'P0 Y=0   : TOGGLING -> Y=0 IS continuous    ')
+    else
+      DEBUG(`M 'P0 Y=0   : STATIC   -> Y=0 is idle/stopped  ')
+    DEBUG(`M 2 0 3 9)
+    if t1
+      DEBUG(`M 'P1 Y=2000: TOGGLING (control still running) ')
+    else
+      DEBUG(`M 'P1 Y=2000: STATIC   (control burst done)    ')
+
+PRI jumper_ok(a, b) : ok
+  ' BIDIRECTIONAL rig check: the wire must conduct both ways, so drive each end
+  ' and confirm the other follows. Catches a dead/stuck pin or a mis-wired jumper
+  ' that a one-way check would pass.
+  ok := dir_ok(a, b) and dir_ok(b, a)
+
+PRI dir_ok(outpin, inpin) : ok
+  ' drive outpin high then low as plain GPIO; confirm inpin follows both levels
+  pinclear(inpin)                                         ' inpin = plain hi-Z input
+  pinclear(outpin)
+  pinhigh(outpin)                                         ' drive high
+  waitms(2)
+  ok := (pinread(inpin) == 1)
+  pinlow(outpin)                                          ' drive low
+  waitms(2)
+  ok := ok and (pinread(inpin) == 0)
+  pinclear(outpin)                                        ' leave both clean for Phase 1
+  pinclear(inpin)
+
+PRI toggling(pin) : changed | first, mark
+  ' returns 1 if the pin changes state at least once within a ~300 ms window
+  first   := pinread(pin)
+  changed := 0
+  mark    := getct()
+  repeat until (getct() - mark) > (clkfreq / 3)           ' ~300 ms window
+    if pinread(pin) <> first
+      changed := 1
+      quit
+
+PRI start_transition(pin, xp, edges)
+  ' Configure while DIR=0 (held in reset), ENABLE (DIR high), THEN write Y.
+  ' Silicon doc lines 166-168: configure with DIR low, then "feed new data via
+  ' WXPIN/WYPIN" after enabling; %00101 toggling is triggered by the Y-write.
+  ' (NOTE: the suspect YAML writes WYPIN BEFORE enabling -- if that is what fails
+  '  to toggle, the YAML's init sequence is a second defect to record.)
+  pinclear(pin)
+  wrpin(pin, P_TRANSITION | P_OE)
+  wxpin(pin, xp)
+  pinhigh(pin)                     ' enable the smart pin (DIR high) FIRST
+  wypin(pin, edges)                ' THEN write Y -> triggers transition output

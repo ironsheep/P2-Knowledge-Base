@@ -1,0 +1,33 @@
+'' =============================================================================
+''  test2d  --  the PROPOSED corrected ch09 "Creating an FFT window" minimal
+''  example. Validates the fix for the misleading inline snippet (L59-65).
+'' =============================================================================
+''  The published inline snippet renders NOTHING because (a) it declares no
+''  channel -- with zero channels, fed samples have nowhere to land (chapter
+''  prose L110-140) -- and (b) it uses getct() as the sine angle, which aliases
+''  to broadband noise even when it does render.
+''
+''  This is the proposed REPLACEMENT, mirroring the PROVEN fig-09-fft.spin2
+''  recipe (which made the published figure): LOGSCALE + full-scale 1000 + a
+''  phase accumulator on a clean bin. The fig generator's own note warns that
+''  full-scale $7FFF_FFFF "made peaks vanish" -- so 1000 is deliberate.
+''
+''    * Renders a single clear peak  -> the corrected snippet is good; apply to
+''      ch09 (and verify the prose tweak). F-138 fix proven.
+''    * Blank or no visible peak      -> recipe still off; investigate before edit.
+''
+''  Build: pnut-ts -d test2d-fft-with-channel.spin2
+'' =============================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | phase, s
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE)   ' create the window
+  debug(`Spectrum 'Signal' 0 1000 256 0 1 $00FF00)          ' declare one channel (covered next section)
+  phase := 0
+  repeat
+    repeat 1024
+      s := qsin(1000, phase, $1_0000)                       ' a sample
+      phase += 3072                                          ' steady tone -> a clear peak (bin 48)
+      debug(`Spectrum `(s))                                 ' feed it by name

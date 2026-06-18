@@ -1,0 +1,63 @@
+'' =============================================================================
+''  test60  --  universal init-order ratification, mode %00100 (pulse/cycle out)
+'' =============================================================================
+''  WIRING-FREE: drives ONE pin (TEST_PIN) and counts that pin's OWN IN-flag
+''  events (a pulse burst raises IN on completion). NO external hardware.
+''
+''  A/B per mode: OLD order (WYPIN before enable) vs NEW/universal order
+''  (enable, THEN WYPIN):
+''    OLD=0, NEW>0 -> universal order REQUIRED here (old order produces nothing)
+''    OLD>0, NEW>0 -> both orders work; universal order is SAFE
+''    NEW=0        -> universal order FAILED for this mode (investigate)
+''
+''  Pulse is a trigger mode (Y-write starts it, Y held 0 during reset), so we
+''  EXPECT PASS-REQUIRED.  Build: pnut-ts -d test60-pulse-universal-order.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TEST_PIN = 32
+  WINDOW   = _clkfreq / 10            ' ~100 ms event window
+  PERIOD   = 50_000                   ' slow base period so the burst spans the window
+  NPULSE   = 8
+
+PUB main() | cOld, cNew
+  debug("=== test60  pulse %00100  -- universal init-order ratification ===")
+  cOld := run(false)                  ' OLD order: WYPIN before enable
+  cNew := run(true)                   ' NEW order: enable, then WYPIN
+  if cNew > 0 and cOld == 0
+    debug("test60 pulse: PASS-REQUIRED  universal order NEEDED (old produced nothing).  old=", udec(cOld), " new=", udec(cNew))
+  elseif cNew > 0 and cOld > 0
+    debug("test60 pulse: PASS-SAFE  both orders work; universal order is safe.  old=", udec(cOld), " new=", udec(cNew))
+  else
+    debug("test60 pulse: FAIL  universal order produced NO output.  old=", udec(cOld), " new=", udec(cNew))
+  repeat
+
+PRI run(enable_first) : c
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_PULSE | P_OE)
+  WXPIN(TEST_PIN, ((PERIOD / 2) << 16) | PERIOD)   ' high-compare = half, base period
+  if enable_first
+    PINHIGH(TEST_PIN)                               ' enable FIRST
+    WYPIN(TEST_PIN, NPULSE)                         ' THEN Y (universal)
+  else
+    WYPIN(TEST_PIN, NPULSE)                         ' Y first (old)
+    PINHIGH(TEST_PIN)
+  c := count_in(TEST_PIN, WINDOW)
+  PINCLEAR(TEST_PIN)
+
+PRI count_in(pin, clocks) : count | deadline, now
+  count := 0
+  org
+    getct   deadline
+    add     deadline, clocks
+    akpin   pin
+.loop testp  pin           wc
+    if_nc jmp #.chk
+    add     count, #1
+    akpin   pin
+.chk  getct  now
+    sub     now, deadline   wc
+    if_c  jmp #.loop
+  end

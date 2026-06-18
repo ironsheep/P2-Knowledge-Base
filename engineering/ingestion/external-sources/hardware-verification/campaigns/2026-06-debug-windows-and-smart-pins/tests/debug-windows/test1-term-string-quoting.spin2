@@ -1,0 +1,45 @@
+'' =====================================================================
+'' test1-term-string-quoting.spin2   --   verifies finding F-136
+''
+'' QUESTION: in a backtick DEBUG to a named TERM window, which literal
+'' string form actually PRINTS its body text to the terminal?
+''   - double quotes  "..."
+''   - single quotes  '...'
+''   - the comma+formatter idiom our term.yaml example ships
+''   - the space + backtick-formatter idiom our manual ch03 ships
+''
+'' WHY THIS NEEDS HARDWARE: a wrong form COMPILES CLEAN and then fails
+'' SILENTLY at runtime (no compile error, the text is just dropped).
+''
+'' HOW TO READ IT: each window's TITLE is single-quoted (config phase) so
+'' the TITLE BAR text should appear on every window. The BODY line is the
+'' test -- note which windows show their body text and which are blank.
+'' =====================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | value
+  value := 42
+
+  ' W1 -- pure DOUBLE-quoted literal body
+  DEBUG(`TERM W1_dbl POS 0   0 SIZE 44 4 TITLE 'W1 double-quoted')
+  DEBUG(`W1_dbl "W1 BODY via DOUBLE quotes -- visible?", 13)
+
+  ' W2 -- pure SINGLE-quoted literal body
+  DEBUG(`TERM W2_sgl POS 0 130 SIZE 44 4 TITLE 'W2 single-quoted')
+  DEBUG(`W2_sgl 'W2 BODY via SINGLE quotes -- visible?')
+
+  ' W3 -- the idiom shipped in debug-displays/term.yaml example 2
+  '        (comma-separated, bare formatter, double-quoted strings)
+  DEBUG(`TERM W3_yaml POS 0 260 SIZE 44 4 TITLE 'W3 term.yaml idiom')
+  DEBUG(`W3_yaml "W3 value=", udec_(value), " end", 13)
+
+  ' W4 -- the idiom shipped in the manual chapter ch03-term.md
+  '        (space-separated, backtick-prefixed formatter)
+  DEBUG(`TERM W4_man POS 0 390 SIZE 44 4 TITLE 'W4 manual idiom')
+  DEBUG(`W4_man "W4 value=" `udec_(value) " end")
+
+  ' keep the program (and its windows) alive
+  repeat
+    waitms(1000)

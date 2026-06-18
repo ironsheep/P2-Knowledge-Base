@@ -1,0 +1,63 @@
+'' =============================================================================
+''  test62  --  universal init-order ratification, mode %11110 (async serial TX)
+'' =============================================================================
+''  WIRING-FREE: drives ONE pin and counts its OWN IN-flag events (async TX
+''  raises IN when a byte finishes transmitting / buffer goes ready). NO wiring.
+''
+''  A/B: OLD order (WYPIN-byte before enable) vs NEW/universal order (enable,
+''  THEN WYPIN-byte). For async TX, WYPIN loads the data byte (canonically done
+''  after setup), so this checks the serial category.
+''    OLD=0,NEW>0 -> universal REQUIRED ; OLD>0,NEW>0 -> SAFE ; NEW=0 -> FAIL
+''
+''  Slow baud (bit period 50000 clocks) so a 10-bit frame (~2.5 ms) lands inside
+''  the event window.  WXPIN: X[31:16]=clocks/bit, X[4:0]=bits-1 (7 => 8 bits).
+''  Build: pnut-ts -d test62-asynctx-universal-order.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TEST_PIN = 32
+  WINDOW   = _clkfreq / 10
+  BITPER   = 50_000                   ' slow clocks-per-bit so a frame spans the window
+  TXBYTE   = $55                      ' arbitrary data byte
+
+PUB main() | cOld, cNew
+  debug("=== test62  async TX %11110  -- universal init-order ratification ===")
+  cOld := run(false)
+  cNew := run(true)
+  if cNew > 0 and cOld == 0
+    debug("test62 asyncTX: PASS-REQUIRED  universal order NEEDED (old produced nothing).  old=", udec(cOld), " new=", udec(cNew))
+  elseif cNew > 0 and cOld > 0
+    debug("test62 asyncTX: PASS-SAFE  both orders work; universal order is safe.  old=", udec(cOld), " new=", udec(cNew))
+  else
+    debug("test62 asyncTX: FAIL  universal order produced NO output.  old=", udec(cOld), " new=", udec(cNew))
+  repeat
+
+PRI run(enable_first) : c
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_ASYNC_TX | P_OE)
+  WXPIN(TEST_PIN, (BITPER << 16) | 7) ' clocks/bit in [31:16], 8 data bits (N-1=7)
+  if enable_first
+    PINHIGH(TEST_PIN)
+    WYPIN(TEST_PIN, TXBYTE)
+  else
+    WYPIN(TEST_PIN, TXBYTE)
+    PINHIGH(TEST_PIN)
+  c := count_in(TEST_PIN, WINDOW)
+  PINCLEAR(TEST_PIN)
+
+PRI count_in(pin, clocks) : count | deadline, now
+  count := 0
+  org
+    getct   deadline
+    add     deadline, clocks
+    akpin   pin
+.loop testp  pin           wc
+    if_nc jmp #.chk
+    add     count, #1
+    akpin   pin
+.chk  getct  now
+    sub     now, deadline   wc
+    if_c  jmp #.loop
+  end

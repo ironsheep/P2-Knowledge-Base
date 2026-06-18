@@ -1,0 +1,59 @@
+'' =====================================================================
+'' test2-createline-vs-config.spin2   --   verifies finding F-137
+''
+'' QUESTION: for SCOPE and FFT, can a CHANNEL DEFINITION ride on the
+'' window-create line, or must it be sent as a separate one-time
+'' CONFIGURATION message after the window is created?
+''
+'' MODEL UNDER TEST (Stephen's 3 phases):
+''   1) window create   2) one-time configuration (channels/triggers)
+''   3) looping data updates
+'' Theory docs say SCOPE/FFT parse KEYS ONLY on create, so the channel
+'' def belongs in phase 2 (its own message). LOGIC and SCOPE_XY are the
+'' opposite -- their channel/label config rides the create line.
+''
+'' WHY HARDWARE: an ignored create-line channel def COMPILES CLEAN and is
+'' then silently dropped (or the create itself is ignored).
+''
+'' HOW TO READ IT -- compare each INLINE window to its SPLIT twin:
+''   SCOPE/FFT: if *_in shows the same labelled, -1000..1000 ranged
+''     channel as *_sp, create-line works. If *_in is missing, unlabelled,
+''     or wrongly ranged while *_sp is correct -> create-line is dropped.
+''   LOGIC/SCOPE_XY (controls): their *_in windows SHOULD show their
+''     channel/label correctly (create-line is valid for these).
+'' =====================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | v, cnt
+  ' ---- SCOPE: channel def on the CREATE line (one message) ----
+  DEBUG(`SCOPE SC_in POS 0   0 SIZE 230 110 SAMPLES 256 'SC inline' -1000 1000)
+  ' ---- SCOPE: create (keys only), THEN channel def as its own message ----
+  DEBUG(`SCOPE SC_sp POS 250 0 SIZE 230 110 SAMPLES 256)
+  DEBUG(`SC_sp 'SC split' -1000 1000)
+
+  ' ---- FFT: channel label on the CREATE line ----
+  DEBUG(`FFT FF_in POS 0   140 SIZE 230 110 SAMPLES 256 'FF inline')
+  ' ---- FFT: create (keys only), THEN label as its own message ----
+  DEBUG(`FFT FF_sp POS 250 140 SIZE 230 110 SAMPLES 256)
+  DEBUG(`FF_sp 'FF split')
+
+  ' ---- CONTROLS: windows whose channel/label config IS create-line ----
+  ' LOGIC channel def on the create line (expected to work):
+  DEBUG(`LOGIC LG_in POS 0 280 SAMPLES 128 'LG inline' 1)
+  ' SCOPE_XY label on the create line (expected to work):
+  DEBUG(`SCOPE_XY XY_in POS 250 280 SIZE 110 RANGE 1000 'XY inline')
+
+  ' ---- phase 3: loop the SAME data into every window ----
+  cnt := 0
+  repeat
+    v := (cnt // 200) * 10 - 1000          ' sawtooth -1000 .. ~990
+    DEBUG(`SC_in `(v))
+    DEBUG(`SC_sp `(v))
+    DEBUG(`FF_in `(v))
+    DEBUG(`FF_sp `(v))
+    DEBUG(`LG_in `(cnt))
+    DEBUG(`XY_in `(v, v))
+    cnt++
+    waitms(2)
