@@ -29,7 +29,7 @@ configuration_directives:
   note: "Accepted in SCOPE_XY_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'Scope_XY')"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE n -- a SINGLE value; the display is SQUARE. Effective width = height = n*2 pixels, clamped 32..2048. Default window is 256x256 px when SIZE is omitted (e.g. SIZE 128 -> 256 px). (Unlike SCOPE's two-value SIZE w h.)"
   RANGE: "RANGE n -- coordinate extent, 1..$7FFFFFFF (default $7FFFFFFF). +-n on both axes (Cartesian) or 0..n radius (polar). Scale = width/2/RANGE."
   SAMPLES: "SAMPLES n -- persistence control, 0..2048 (default 256). 0 = persistent accumulating display (no buffer); >0 = fading trail of depth n (opacity decays opa = 255 - k*255/n)."

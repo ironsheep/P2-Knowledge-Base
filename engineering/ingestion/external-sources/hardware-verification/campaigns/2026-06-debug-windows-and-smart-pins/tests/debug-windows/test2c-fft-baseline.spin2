@@ -1,0 +1,25 @@
+'' =============================================================================
+''  test2c  --  MINIMAL FFT baseline (the ch09-fft.md published example, verbatim)
+'' =============================================================================
+''  Purpose: isolate WHO is at fault for the empty FFT windows. This is one FFT
+''  window fed by the manual's own documented idiom -- no labels, no second
+''  window, no scaling, no POS. Nothing of mine.
+''
+''    * If THIS shows a spectrum  -> the host's FFT works; my two-window test2b
+''      has a specific bug, and I'll fix that.
+''    * If THIS shows NOTHING     -> PNut-Term-TS is not rendering FFT windows
+''      (a host issue, like the earlier window-registration bug) -- the Spin2 is
+''      correct (it's the manual's own example). Route to the pnut-term-ts agent.
+''
+''  Build: pnut-ts -d test2c-fft-baseline.spin2
+'' =============================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | s
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024)   ' create the window
+  repeat
+    repeat 1024
+      s := qsin(20_000, getct(), $1_0000)          ' a sample (manual's idiom)
+      debug(`Spectrum `(s))                         ' feed it by name

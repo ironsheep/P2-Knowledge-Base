@@ -78,8 +78,8 @@ spin2_complete: |
     PINCLEAR(DAC_PIN)
     WRPIN(DAC_PIN, mode)
     WXPIN(DAC_PIN, SAMPLE_PERIOD)  ' Must be multiple of 256
-    WYPIN(DAC_PIN, $8000)          ' Mid-scale initial
-    PINHIGH(DAC_PIN)               ' Enable DAC
+    PINHIGH(DAC_PIN)               ' Enable FIRST (universal init order)
+    WYPIN(DAC_PIN, $8000)          ' THEN write Y: mid-scale initial
     
   PUB output_sine(angle) | value16
     ' Output sine wave value
@@ -121,8 +121,8 @@ pasm2_complete: |
           WRPIN dac_mode, pin       ' Configure mode
           MOV   x, sample_period
           WXPIN x, pin              ' Set period (multiple of 256)
-          WYPIN ##$8000, pin        ' Mid-scale initial
-          DIRH  pin                 ' Enable DAC
+          DIRH  pin                 ' Enable FIRST (universal init order)
+          WYPIN ##$8000, pin        ' THEN write Y: mid-scale initial
           RET
   
   ' Output value synchronized with IN

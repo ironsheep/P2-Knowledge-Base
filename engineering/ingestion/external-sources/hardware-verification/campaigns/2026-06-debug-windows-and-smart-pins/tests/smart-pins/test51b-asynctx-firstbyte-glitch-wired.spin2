@@ -1,0 +1,142 @@
+'' =============================================================================
+''  test51b  --  RA-19: async-TX FIRST-byte glitch, over a REAL WIRED loopback.
+'' =============================================================================
+''  Supersedes test51 for this question. test51 used the INTERNAL relative-pin
+''  read (P_MINUS1_A) AND the universal init order (PINHIGH before WYPIN) -- the
+''  latter pre-idles the line high, which is itself the $FF-preclear fix, so the
+''  glitch could never appear. NOT-OBSERVED there was inconclusive.
+''
+''  This test fixes both flaws:
+''    * REAL WIRE:  TX on P0, RX on P2, jumpered P0 --> P2 (test3/test4 rig).
+''      A genuine async receiver latches the ACTUAL line -- it can see an
+''      electrical first-frame glitch the internal digital read cannot.
+''    * ISOLATE THE FIRST BYTE:  the universal init order (DIRH enable, THEN
+''      WYPIN) is held CONSTANT in every trial, so we are no longer testing the
+''      init-order bug (test62 already settled that). The ONLY variables are:
+''        - how long the line idles after enable before the FIRST byte goes out
+''        - whether a $FF "settling" frame is sent first (the documented fix)
+''
+''  >>> ONE JUMPER WIRE REQUIRED (within P0..P7): <<<
+''          P0 --> P2
+''
+''  Phase 0 = RIG TEST: drive P0 as plain GPIO and confirm P2 follows (both
+''    levels, both directions) BEFORE any smart-pin setup. HALT on a bad rig so
+''    a wiring fault can never be misread as a glitch result.
+''  Phase 1 = the RA-19 trials (only if the rig passes). Each trial does a fresh
+''    cold enable of TX (universal order) and reports the RAW 32-bit RDPIN plus
+''    the MSB-justified byte (RDPIN >> 24), so a bit-shifted/framing glitch shows
+''    up as a wrong RAW value, not just a wrong byte.
+''
+''  Verdict (printed):
+''    RIG-FAIL    : the wire/protocol can't round-trip even a settled byte.
+''    CONFIRMED   : an immediate first byte is corrupt AND a fix (settle or $FF
+''                  preclear) makes it clean -> the glitch is real; fix works.
+''    NOT-OBSERVED: every cold first byte arrived clean on the real wire -> strong
+''                  negative; the manual should not assert the glitch as a rule.
+''    INCONCLUSIVE: see the raw table.
+''
+''  Output is plain DEBUG() text (iosp-suite convention -- it lands in the debug
+''  log to paste back). Value-only hex uses the TRAILING-UNDERSCORE directives
+''  (uhex_long_ / uhex_byte_) so there is no "name = value" label noise -- the
+''  lesson from test51, where uhex() printed the doubled "sanity=$sanity = $A5".
+''  Universal init order throughout (finding F-135).
+''  Build: pnut-ts -d test51b-asynctx-firstbyte-glitch-wired.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TX_PIN   = 0                        ' transmit (wired to P2)
+  RX_PIN   = 2                        ' receive  (reads the wire from P0)
+  BITPER   = 20_000                   ' clocks/bit (~100 us/bit; ~1 ms/frame)
+  TESTBYTE = $A5                      ' 1010_0101 -- alternating, stresses framing
+
+PUB main() | sane, raw_im, by_im, raw_st, by_st, raw_pc, by_pc, raw_01, by_01
+  debug("=== test51b  RA-19  async-TX first-byte glitch (wired P0->P2) ===")
+
+  ' ---- Phase 0: RIG TEST (plain GPIO loopback, no smart pins yet) ----
+  if not jumper_ok(TX_PIN, RX_PIN)
+    debug("RA-19 RIG-FAIL: P0->P2 jumper bad -- fix the wire, then re-run. (halted)")
+    repeat
+  debug("RIG  P0->P2 : OK")
+
+  ' ---- Phase 1: the first-byte trials (rig proven good) ----
+  ' Each trial: fresh cold enable, universal order; vary settle / preclear.
+  raw_st := trial(50, false, TESTBYTE)             ' baseline: long settle  -> clean
+  by_st  := (raw_st >> 24) & $FF
+  raw_im := trial(0,  false, TESTBYTE)             ' the glitch window: immediate first byte
+  by_im  := (raw_im >> 24) & $FF
+  raw_pc := trial(0,  true,  TESTBYTE)             ' fix: $FF preclear, then the byte
+  by_pc  := (raw_pc >> 24) & $FF
+  raw_01 := trial(0,  false, $01)                  ' pattern: $01 (LSB-first sensitive)
+  by_01  := (raw_01 >> 24) & $FF
+  sane   := by_st                                  ' settled byte is the sanity gate
+
+  debug("sent $A5 (and $01) | raw32 = full RDPIN word, byte = raw>>24")
+  debug("settled  $A5 : raw=$", uhex_long_(raw_st), "  byte=$", uhex_byte_(by_st))
+  debug("immediate$A5 : raw=$", uhex_long_(raw_im), "  byte=$", uhex_byte_(by_im))
+  debug("preclear $A5 : raw=$", uhex_long_(raw_pc), "  byte=$", uhex_byte_(by_pc))
+  debug("immediate$01 : raw=$", uhex_long_(raw_01), "  byte=$", uhex_byte_(by_01))
+
+  if sane <> TESTBYTE
+    debug("RA-19: RIG-FAIL  settled byte did not round-trip -- result not meaningful.")
+  elseif (by_im <> TESTBYTE or by_01 <> $01) and (by_pc == TESTBYTE)
+    debug("RA-19: CONFIRMED  first byte corrupt without preclear; $FF preclear fixes it.")
+  elseif by_im == TESTBYTE and by_01 == $01 and by_pc == TESTBYTE
+    debug("RA-19: NOT-OBSERVED  every cold first byte arrived clean on the real wire.")
+  else
+    debug("RA-19: INCONCLUSIVE  see the raw table above.")
+  repeat
+
+PRI trial(settle_ms, do_preclear, b) : raw | junk
+  ' One cold first-byte trial over the real wire, UNIVERSAL init order throughout.
+  '   settle_ms  : idle time after enable before the FIRST byte (0 = immediate)
+  '   do_preclear: send a $FF "settling" frame first, then the byte under test
+  rx_enable()                                          ' RX listening first
+  tx_enable()                                          ' fresh cold TX enable (DIRH, then WYPIN)
+  if settle_ms > 0
+    waitms(settle_ms)                                  ' let the line idle high
+  if do_preclear
+    WYPIN(TX_PIN, $FF)                                 ' settle the line with a full frame
+    waitms(5)
+    if PINREAD(RX_PIN)
+      junk := RDPIN(RX_PIN)                            ' discard the received $FF
+  WYPIN(TX_PIN, b)                                     ' the FIRST real byte
+  waitms(5)                                            ' let the frame complete + RX latch
+  if PINREAD(RX_PIN)
+    raw := RDPIN(RX_PIN)                               ' full 32-bit receive word
+  else
+    raw := $FFFF_FFFF                                  ' sentinel: nothing received
+  PINCLEAR(TX_PIN)
+  PINCLEAR(RX_PIN)
+
+PRI tx_enable()
+  ' Universal order: reset -> setup -> ENABLE -> (caller does WYPIN).
+  PINCLEAR(TX_PIN)                                     ' reset / float the smart pin (DIR low)
+  WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
+  WXPIN(TX_PIN, (BITPER << 16) | 7)                    ' 8 data bits
+  PINHIGH(TX_PIN)                                      ' enable (DIR high) -> line idles high NOW
+
+PRI rx_enable()
+  ' Async RX reads its OWN pin input -- the wire carries P0's signal to P2.
+  PINCLEAR(RX_PIN)                                     ' reset / float (DIR low)
+  WRPIN(RX_PIN, P_ASYNC_RX)                            ' no P_OE: input only; own-pin A-input
+  WXPIN(RX_PIN, (BITPER << 16) | 7)
+  PINHIGH(RX_PIN)                                      ' enable RX (input only)
+
+PRI jumper_ok(a, b) : ok
+  ' BIDIRECTIONAL rig check: drive each end as plain GPIO, confirm the other
+  ' follows both levels. Catches a dead pin or a mis-wired jumper.
+  ok := dir_ok(a, b) and dir_ok(b, a)
+
+PRI dir_ok(outpin, inpin) : ok
+  PINCLEAR(inpin)
+  PINCLEAR(outpin)
+  PINHIGH(outpin)
+  waitms(2)
+  ok := (PINREAD(inpin) == 1)
+  PINLOW(outpin)
+  waitms(2)
+  ok := ok and (PINREAD(inpin) == 0)
+  PINCLEAR(outpin)
+  PINCLEAR(inpin)

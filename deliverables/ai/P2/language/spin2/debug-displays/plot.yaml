@@ -31,7 +31,7 @@ configuration_directives:
   note: "Accepted in PLOT_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- screen position"
+  POS: "POS left top -- OPTIONAL window screen position. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE width height -- canvas size in pixels, each 32..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel scale, each axis 1..256 (default 1x1; y copies x if omitted); also the divisor applied to reported PC_MOUSE cursor coordinates"
   color_mode: "One of LUT1 LUT2 LUT4 LUT8 LUMA8/8W/8X HSV8/8W/8X RGBI8/8W/8X RGB8 HSV16/16W/16X RGB16 RGB24 -- how packed numeric data maps to pixels"
@@ -47,7 +47,7 @@ display_directives:
     LUTCOLORS: "Update the LUT palette (up to 256 longs)"
     BACKCOLOR: "Set background color"
     COLOR: "COLOR (value | named {brightness}) -- a color value OR a named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble). A COLOR issued immediately before a TEXT directive also sets the text color."
-    OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255)"
+    OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255). The 0..255 bound is byte truncation on store, NOT a saturating clamp: a value > 255 WRAPS mod 256 (e.g. OPACITY 300 -> 44), it does not clip to 255. Same wrap applies to the inline opacity arg on DOT/LINE/shape directives."
     PRECISE: "PRECISE -- toggle sub-pixel coordinates (8.8 fixed-point, coords shifted <<8). Starts ON by default; each PRECISE toggles it."
     LINESIZE: "LINESIZE n -- stroke width for subsequent strokes"
   geometry:

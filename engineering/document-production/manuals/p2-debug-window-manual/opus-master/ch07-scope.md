@@ -35,8 +35,9 @@ declarations follow on the same line:
 
 ```spin2
 PUB main() | ang
-  ' create, one auto-ranging channel
-  debug(`SCOPE Sig SIZE 400 200 'Wave' AUTO)
+  ' create the window, then declare one auto-ranging channel (separate message)
+  debug(`SCOPE Sig SIZE 400 200)
+  debug(`Sig 'Wave' AUTO)
   ang := 0
   repeat
     debug(`Sig `(qsin(1000, ang, 256)))         ' feed it by name
@@ -84,12 +85,14 @@ The window reads the label, then reads the optional numeric arguments **in order
 | `grid` | Grid flags: 4-bit mask — bit0 baseline line, bit1 top line, bit2 min-value label, bit3 max-value label | `0` (off) |
 | `color` | Trace color, `$RRGGBB` | next from the default palette |
 
-The first label after `SCOPE` becomes channel 0, the next becomes channel 1, and so
-on, up to eight. So this declares three channels:
+The first label declares channel 0, the next channel 1, and so on, up to eight.
+Send the channel declarations as a **separate message after creating the window** —
+a channel declaration placed on the create line prevents the window from being
+created. So this declares three channels:
 
 ```spin2
-debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 ...
-  'Sine'  -1000 1000 100   0 0 $00FF00 ...
+debug(`SCOPE Waves SIZE 512 300 SAMPLES 256)
+debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
   'Tri'   -1000 1000 100 100 0 $FF0000 ...
   'Noise' -1000 1000 100 200 0 $00AAFF)
 ```
@@ -247,8 +250,8 @@ CON
 PUB main() | ang, sine, tri, dir, noise
   ' Three stacked channels: fixed -1000..1000 range,
   ' 100px tall, offset by 'base'
-  debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2 ...
-    'Sine'  -1000 1000 100   0 0 $00FF00 ...
+  debug(`SCOPE Waves SIZE 512 300 SAMPLES 256 LINESIZE 2)
+  debug(`Waves 'Sine'  -1000 1000 100   0 0 $00FF00 ...
     'Tri'   -1000 1000 100 100 0 $FF0000 ...
     'Noise' -1000 1000 100 200 0 $00AAFF)
 

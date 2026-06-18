@@ -53,15 +53,19 @@ carries unique information. Bin 0 is the DC (zero-frequency) component and bin
 
 You create and configure the window in a single `DEBUG` statement. The first
 token after the backtick is the window type (`FFT`); the second is a name you
-choose. You feed it afterward by that name:
+choose. Before it will display anything you must declare at least one channel —
+covered in the next section — and then feed it samples by that name:
 
 ```spin2
-PUB main() | s
-  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024)   ' create the window
+PUB main() | phase, s
+  debug(`FFT Spectrum SIZE 512 256 SAMPLES 1024 LOGSCALE) ' create the window
+  debug(`Spectrum 'Signal' 0 1000 256 0 1 $00FF00)        ' declare one channel
+  phase := 0
   repeat
     repeat 1024
-      s := qsin(20000, getct(), $1_0000)           ' a sample
-      debug(`Spectrum `(s))                         ' feed it by name
+      s := qsin(1000, phase, $1_0000)                     ' a sample
+      phase += 3072                                        ' steady tone -> a clear peak
+      debug(`Spectrum `(s))                                ' feed it by name
 ```
 
 The configuration keywords you can add to the creation line:

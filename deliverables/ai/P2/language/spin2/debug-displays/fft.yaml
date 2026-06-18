@@ -18,14 +18,15 @@ aliases:
   - DEBUG FFT
 
 syntax:
-  create: "DEBUG(`FFT MyFFT <config directives> <channel-def strings>)"
+  create: "DEBUG(`FFT MyFFT <config directives>)   ' config keys ONLY on the create line"
+  channel_setup: "DEBUG(`MyFFT <channel-def strings>)   ' SEPARATE message after create -- declare at least one channel before streaming, or the window displays nothing"
   update: "DEBUG(`MyFFT <sample longs / directives>)   ' reference the window by name"
 
 configuration_directives:
   note: "Accepted in FFT_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE width height -- plot area in pixels, each 32..2048 (default 256x256)"
   SAMPLES: "SAMPLES n {first last} -- n is the FFT size, a power of two 4..2048 (default 512; values are snapped to a power of two; 2048 is the max -- there is NO 4096). Optional first/last select a displayed bin range (zoom): first 0..n/2-2 (default 0), last first+1..n/2-1 (default n/2-1)."
   RATE: "RATE n -- redraw every n new sample sets, 1..2048 (default = SAMPLES)"
@@ -38,7 +39,7 @@ configuration_directives:
   packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes) -- sub-samples packed per transmitted long/word/byte"
 
 channel_definition:
-  note: "Up to 8 channels, each defined by a quoted string in FFT_Update before streaming."
+  note: "Up to 8 channels, each defined by a quoted string. The channel-def(s) MUST be sent as a SEPARATE message AFTER the create line (handled by FFT_Update, before streaming). With NO channel declared the window displays nothing -- create with config keys only, then send the channel-def(s)."
   grammar: "'label' {mag {high {tall {base {grid {color}}}}}}"
   fields:
     mag: "magnitude right-shift divisor, 0..11 (default 0)"
@@ -65,16 +66,18 @@ input:
 examples:
   - code: |
       ' Single-channel audio spectrum, 512-point FFT, log scale
-      DEBUG(`FFT Audio SAMPLES 512 LOGSCALE 'Spectrum')
+      DEBUG(`FFT Audio SAMPLES 512 LOGSCALE)   ' create (config keys only)
+      DEBUG(`Audio 'Spectrum')                 ' declare channel 0 (separate message)
       REPEAT
         DEBUG(`Audio `(sample))
-    description: "512-point magnitude spectrum on a log scale"
+    description: "512-point magnitude spectrum on a log scale (channel declared after create)"
   - code: |
       ' Vertical-bar spectrum (negative LINESIZE = bars), zoom to low bins
-      DEBUG(`FFT Vib SAMPLES 1024 256 LINESIZE -2 'Accel')
+      DEBUG(`FFT Vib SAMPLES 1024 256 LINESIZE -2)   ' create
+      DEBUG(`Vib 'Accel')                            ' declare channel 0 (separate message)
       REPEAT
         DEBUG(`Vib `(accel))
-    description: "Bar-mode spectrum with a displayed bin range (zoom)"
+    description: "Bar-mode spectrum with a displayed bin range (zoom); channel declared after create"
 
 not_supported:
   - "No measurements -- no THD, SNR, bandwidth, peak-frequency detection, or harmonic analysis (these do not exist in the P2 FFT)."

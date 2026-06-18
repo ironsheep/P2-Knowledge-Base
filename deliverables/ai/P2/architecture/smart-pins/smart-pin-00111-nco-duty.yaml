@@ -64,8 +64,8 @@ spin2_complete: |
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, 1000)            ' 1000 clock base period
-    WYPIN(pin, y_value)         ' Set duty cycle
-    PINHIGH(pin)
+    PINHIGH(pin)                ' Enable FIRST (universal init order)
+    WYPIN(pin, y_value)         ' THEN set duty cycle
     
   PUB servo_pulse(us_width) | mode, y_value, period
     ' 20ms period, variable pulse width
@@ -78,8 +78,8 @@ spin2_complete: |
     PINCLEAR(PWM_PIN)
     WRPIN(PWM_PIN, mode)
     WXPIN(PWM_PIN, period)
-    WYPIN(PWM_PIN, y_value)
-    PINHIGH(PWM_PIN)
+    PINHIGH(PWM_PIN)            ' Enable FIRST (universal init order)
+    WYPIN(PWM_PIN, y_value)     ' THEN set duty
     
   PUB led_dimmer(brightness) | mode, y_value
     ' LED brightness control (0-255)
@@ -90,8 +90,8 @@ spin2_complete: |
     PINCLEAR(PWM_PIN)
     WRPIN(PWM_PIN, mode)
     WXPIN(PWM_PIN, 256)         ' Fast PWM for LEDs
-    WYPIN(PWM_PIN, y_value)
-    PINHIGH(PWM_PIN)
+    PINHIGH(PWM_PIN)            ' Enable FIRST (universal init order)
+    WYPIN(PWM_PIN, y_value)     ' THEN set duty
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -114,8 +114,8 @@ pasm2_complete: |
           MUL   y_value, ##$28F5C29   ' × (2^32/100)
           SHL   y_value, #2
           
-          WYPIN y_value, pin
-          DIRH  pin
+          DIRH  pin                  ' Enable FIRST (universal init order)
+          WYPIN y_value, pin         ' THEN set duty
           RET
   
   ' Ramp duty cycle
@@ -124,10 +124,10 @@ pasm2_complete: |
           DIRL  pin
           WRPIN nco_duty_mode, pin
           WXPIN #1000, pin
-          
+          DIRH  pin                  ' Enable ONCE before the loop (universal init order)
+
           MOV   y_value, #0
-  .loop   WYPIN y_value, pin
-          DIRH  pin
+  .loop   WYPIN y_value, pin         ' update duty each step (operate)
           WAITX ##100_000
           ADD   y_value, ##$01000000
           TJNZ  y_value, #.loop      ' Until wrap

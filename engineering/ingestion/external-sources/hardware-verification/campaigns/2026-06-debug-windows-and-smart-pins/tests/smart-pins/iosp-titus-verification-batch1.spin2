@@ -1,0 +1,144 @@
+'' =============================================================================
+''  IOSP User Guide -- Titus cross-audit EMPIRICAL VERIFICATION suite, Batch 1
+'' =============================================================================
+''  Self-contained. NO external hardware, NO wiring. Each test drives ONE smart
+''  pin and observes that same pin's OWN behavior, then DEBUG-prints a verdict.
+''  Run on any P2, open the DEBUG terminal, paste the output back.
+''
+''  Batch 1 (observe own behavior -- no internal signal routing needed):
+''    RA-06  Does WRPIN #0 reset a RUNNING smart pin with NO DIR cycle?
+''    RA-12  NCO frequency with Y=0 -- continuous output, or none?
+''    RA-17  DAC-noise (%00001) with X=0 -- is the sample period 65536 clocks?
+''
+''  Build (DEBUG must be compiled in):
+''    pnut-ts -d iosp-titus-verification-batch1.spin2
+''
+''  Mechanism note: for a smart pin, TESTP/PINREAD return the smart pin's IN
+''  *event flag* (not the raw pin level), so these tests observe the IN-flag
+''  EVENT stream (NCO raises IN on each cycle; DAC-noise on each sample period),
+''  acknowledging with AKPIN to re-arm. The clock rate does not affect verdicts:
+''  RA-06/RA-12 test presence/absence of events; RA-17 measures a period in
+''  CLOCKS (65536 regardless of MHz). All wait loops are bounded -- a pin that
+''  never raises IN yields count 0 / period 0 (inconclusive), never a hang.
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000          ' P2 Eval/Edge default crystal -- adjust to your board
+  _clkfreq = 200_000_000         ' exact value not critical (see header)
+
+  TEST_PIN  = 32                 ' any free smart pin; no wiring required
+  WINDOW    = _clkfreq / 10      ' ~100 ms event-counting window
+
+  ' Slow NCO so IN events are easy to count.
+  ' X=1 -> Fout = Fclk * Y / 2^32.  Y=42950 -> ~2 kHz at 200 MHz (exact rate moot).
+  NCO_Y     = 42950
+
+PUB main()
+  debug("=== P2 IOSP Titus-audit verification -- Batch 1 ===")
+  test_ra06_wrpin0_reset()
+  test_ra12_nco_y_zero()
+  test_ra17_dacnoise_x_zero()
+  debug("=== Batch 1 complete ===")
+  repeat
+
+' Count smart-pin IN events on `pin` over `clocks` system clocks (AKPIN re-arms
+' after each). Bounded by the clock window, so it always returns.
+PRI count_in_events(pin, clocks) : count | deadline, now
+  count := 0
+  org
+    getct   deadline
+    add     deadline, clocks
+    akpin   pin
+.loop testp  pin           wc        ' C = pin IN flag (smart-pin event)
+    if_nc jmp #.chk
+    add     count, #1
+    akpin   pin                      ' acknowledge -> re-arm for next event
+.chk  getct  now
+    sub     now, deadline   wc       ' C=1 while now < deadline (still in window)
+    if_c  jmp #.loop
+  end
+
+'' ---- RA-06: WRPIN #0 resets a running smart pin without a DIR cycle? --------
+PUB test_ra06_wrpin0_reset() | c1, c2
+  ' Start a slow NCO (smart pin running, DIR=1). It raises IN every cycle.
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_NCO_FREQ | P_OE)
+  WXPIN(TEST_PIN, 1)
+  PINHIGH(TEST_PIN)                                 ' enable FIRST (universal order)
+  WYPIN(TEST_PIN, NCO_Y)                            ' THEN write Y
+  c1 := count_in_events(TEST_PIN, WINDOW)          ' expect > 0 (running)
+
+  ' Reset with WRPIN #0 and NO DIR cycle. Then force OUT low (PINLOW touches
+  ' OUT only; DIR stays 1 -> no DIR cycle). If the smart pin truly reset, the
+  ' pin is now normal I/O held low -> IN reads level 0 -> 0 events. If a DIR
+  ' cycle were still required, the NCO keeps running (OUT override) -> events>0.
+  WRPIN(TEST_PIN, 0)
+  PINLOW(TEST_PIN)
+  c2 := count_in_events(TEST_PIN, WINDOW)          ' 0 => reset took effect w/o DIR cycle
+
+  PINCLEAR(TEST_PIN)
+  if c1 > 0 and c2 == 0
+    debug("RA-06  PASS: WRPIN #0 reset a RUNNING pin with NO DIR cycle.  running=", udec(c1), " after=", udec(c2))
+  else
+    debug("RA-06  RESULT: running=", udec(c1), " after=", udec(c2), "   (after>0 => a DIR cycle IS required)")
+
+'' ---- RA-12: NCO frequency with Y=0 -- output, or none? ----------------------
+PUB test_ra12_nco_y_zero() | c0, cN
+  ' Y = 0 : accumulator never advances -> Z[31] never flips -> no IN events.
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_NCO_FREQ | P_OE)
+  WXPIN(TEST_PIN, 1)
+  PINHIGH(TEST_PIN)                                 ' enable FIRST (universal order)
+  WYPIN(TEST_PIN, 0)                                ' THEN write Y=0
+  c0 := count_in_events(TEST_PIN, WINDOW)          ' expect 0 if Y=0 => static
+
+  ' Control: Y nonzero on the SAME pin must produce events (proves pin is alive)
+  WYPIN(TEST_PIN, NCO_Y)
+  cN := count_in_events(TEST_PIN, WINDOW)          ' expect > 0
+
+  PINCLEAR(TEST_PIN)
+  if c0 == 0 and cN > 0
+    debug("RA-12  PASS: NCO Y=0 produces NO output (static).  Y=0 events=", udec(c0), "  control(Y>0)=", udec(cN))
+  else
+    debug("RA-12  RESULT: Y=0 events=", udec(c0), "  control(Y>0)=", udec(cN), "   (Y=0 events>0 => continuous output)")
+
+'' ---- RA-17: DAC-noise (%00001) with X=0 -- sample period = 65536 clocks? -----
+PUB test_ra17_dacnoise_x_zero() | period
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_DAC_NOISE | P_DAC_124R_3V | P_OE)
+  WXPIN(TEST_PIN, 0)                               ' X[15:0]=0 -> period should be 65536
+  PINHIGH(TEST_PIN)                                 ' enable FIRST (universal order)
+  WYPIN(TEST_PIN, 1)                               ' THEN write Y (enable noise)
+  period := dac_noise_period(TEST_PIN)
+  PINCLEAR(TEST_PIN)
+  if period >= 65000 and period <= 66072
+    debug("RA-17  PASS: DAC-noise X=0 sample period = ", udec(period), " clocks (~65536 expected)")
+  elseif period == 0
+    debug("RA-17  INCONCLUSIVE: no IN flag seen (period=0). DAC-noise IN may not pulse as expected.")
+  else
+    debug("RA-17  RESULT: measured period = ", udec(period), " clocks  (65536 expected)")
+
+' Clocks between two consecutive IN-flag periods. Returns 0 if no IN flag fires
+' within a generous budget (so the test can never hang).
+PRI dac_noise_period(pin) : clocks | t1, t2, n
+  clocks := 0
+  org
+    akpin   pin
+    mov     n, ##8_000_000
+.w0 testp   pin           wc
+    if_c  jmp #.g0
+    djnz    n, #.w0
+    jmp     #.done                  ' timed out -> clocks stays 0
+.g0 akpin   pin
+    getct   t1
+    mov     n, ##8_000_000
+.w1 testp   pin           wc
+    if_c  jmp #.g1
+    djnz    n, #.w1
+    jmp     #.done                  ' timed out
+.g1 akpin   pin
+    getct   t2
+    sub     t2, t1
+    mov     clocks, t2
+.done
+  end

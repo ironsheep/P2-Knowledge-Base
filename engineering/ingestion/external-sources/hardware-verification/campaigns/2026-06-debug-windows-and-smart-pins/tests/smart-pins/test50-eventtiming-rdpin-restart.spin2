@@ -1,0 +1,66 @@
+'' =============================================================================
+''  test50  --  RA-24: does RDPIN acknowledge AUTO-RESTART an event-timing
+''  measurement?  (mode %10010 = "time X A-input rises")
+'' =============================================================================
+''  WIRING-FREE via INTERNAL routing: an NCO on SRC_PIN generates a continuous
+''  edge stream; the event-timer on TMR_PIN takes its A-input from the +1
+''  adjacent pin (SRC_PIN) using P_PLUS1_A -- no jumper. (Verified A-input
+''  encoding: %x001 = "relative +1 pin's read state", P_PLUS1_A = $1000_0000.)
+''
+''  Test: let the timer accumulate X rises (raises IN), RDPIN to read Z and
+''  acknowledge, then WITHOUT reconfiguring see whether a SECOND measurement
+''  completes. If it does, RDPIN auto-restarted the measurement (RA-24 true).
+''
+''  Failure modes are SAFE: a routing/observation problem yields meas1 ok=0 ->
+''  INCONCLUSIVE (never a false CONFIRMED).
+''  Build: pnut-ts -d test50-eventtiming-rdpin-restart.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TMR_PIN  = 32                       ' event-timer; reads its +1 neighbor as A-input
+  SRC_PIN  = 33                       ' NCO edge source (TMR_PIN + 1)
+  NCO_Y    = 42_950                   ' ~2 kHz edge stream at 200 MHz (X=1)
+  X_RISES  = 1000                     ' rises to accumulate per measurement
+
+PUB main() | ok1, z1, ok2, z2
+  debug("=== test50  RA-24  event-timing %10010 RDPIN auto-restart (internal NCO source) ===")
+
+  ' edge source: NCO driving its own output so the neighbor can read it
+  PINCLEAR(SRC_PIN)
+  WRPIN(SRC_PIN, P_NCO_FREQ | P_OE)
+  WXPIN(SRC_PIN, 1)
+  PINHIGH(SRC_PIN)                            ' enable (universal order)
+  WYPIN(SRC_PIN, NCO_Y)
+
+  ' event timer: mode %10010, A-input from +1 pin, count X rises (Y[1:0]=%01)
+  PINCLEAR(TMR_PIN)
+  WRPIN(TMR_PIN, P_PLUS1_A | (%10010 << 1))  ' A-in=+1 neighbor; SSSSS field (bits 5:1)
+  WXPIN(TMR_PIN, X_RISES)
+  PINHIGH(TMR_PIN)                            ' enable (universal order)
+  WYPIN(TMR_PIN, %01)                         ' rise sensitivity
+
+  ok1 := wait_in(TMR_PIN)
+  z1  := RDPIN(TMR_PIN)                       ' read measurement + ACK (should auto-restart)
+  ok2 := wait_in(TMR_PIN)                     ' 2nd measurement only if auto-restarted
+  z2  := RDPIN(TMR_PIN)
+
+  PINCLEAR(SRC_PIN)
+  PINCLEAR(TMR_PIN)
+  debug("test50: meas1 ok=", udec(ok1), " Z1=", udec(z1), "   meas2 ok=", udec(ok2), " Z2=", udec(z2))
+  if ok1 and ok2
+    debug("test50 RA-24: CONFIRMED  RDPIN acknowledge AUTO-RESTARTS the measurement (2nd arrived).")
+  elseif ok1
+    debug("test50 RA-24: NOT-CONFIRMED  no 2nd measurement after RDPIN (no auto-restart).")
+  else
+    debug("test50 RA-24: INCONCLUSIVE  first measurement never completed (check NCO/routing).")
+  repeat
+
+' Poll the smart-pin IN flag (PINREAD returns the IN event flag for a smart
+' pin). Bounded so it can never hang; returns 1 if IN seen, 0 on timeout.
+PRI wait_in(pin) : ok | n
+  repeat 200_000_000
+    if PINREAD(pin)
+      return 1
+  return 0

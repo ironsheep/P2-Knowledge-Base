@@ -1,0 +1,32 @@
+'' =============================================================================
+''  test2b  --  F-137 FFT detail (rebuilt on the manual's proven FFT idiom)
+'' =============================================================================
+''  The earlier version showed nothing because it added LOGSCALE + an aggressive
+''  channel scale + a custom CORDIC sine. This uses the ch09-fft.md idiom: just
+''  create + feed qsin() samples by name (no channel-def needed to render). A
+''  deterministic sine (512-sample phase step) puts a clear peak at bin 4.
+''
+''  Only difference between the two windows is the channel LABEL placement:
+''    FF_in = label 'FF inline' ON the create line
+''    FF_sp = create plain, then 'FF split' as its OWN message
+''  Both should render the SAME spectrum; the question is whether FF_in's
+''  create-line label appears (vs FF_sp's separately-sent label).
+''
+''  No POS -- PNut-Term-TS auto-places. Build: pnut-ts -d test2b-fft-createline.spin2
+'' =============================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main() | phase, s
+  debug(`FFT FF_in SIZE 400 200 SAMPLES 512 'FF inline')   ' label on create line
+  debug(`FFT FF_sp SIZE 400 200 SAMPLES 512)               ' create plain
+  debug(`FF_sp 'FF split')                                 ' label as its own message
+
+  phase := 0
+  repeat
+    repeat 512
+      s := qsin(20_000, phase, $1_0000)                    ' 20k-amplitude sine
+      phase += 512                                         ' 128 samples/cycle -> peak at bin 4
+      debug(`FF_in `(s))
+      debug(`FF_sp `(s))

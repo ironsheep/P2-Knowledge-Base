@@ -26,7 +26,7 @@ configuration_directives:
   note: "Accepted in BITMAP_Configure (window creation)."
   TITLE: "TITLE 'string' -- window caption"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE w h -- pixels, each 1..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel magnification, each 1..256 (default 1x1; y copies x). Client size = w*x by h*y."
   SPARSE: "SPARSE color -- grid-border color for the magnified-pixel view (named/RGB24); -1 = off"

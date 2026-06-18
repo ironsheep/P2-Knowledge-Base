@@ -17,6 +17,7 @@ so lookups resolve. Genuine gaps (a source with no ID/tier) are surfaced, never 
 | `spin2-v51` | spin2-v51a · "Spin2 Documentation v51" |
 | `smart-pins-titus` | "Smart Pins (Titus)" · SPTutTItus · "Smart Pins rev 5" |
 | `smart-pins` | "P2 SmartPins" · smart-pins community doc |
+| `hardware-verification` | "empirical evidence" · "hardware tests" · `external-sources/hardware-verification` |
 | _…seed the rest during the research pass…_ | |
 
 ## Trust tiers (existing mechanism — adopted as-is)
@@ -29,13 +30,14 @@ so lookups resolve. Genuine gaps (a source with no ID/tier) are surfaced, never 
 | ⚠️ Draft/Partial | Official but incomplete / not fully vetted | trusted on what it covers; flag the gaps |
 
 ## Conflict-resolution precedence (authority order)
-`pnut_ts` compiler (matched edition) → Silicon Doc → P2 datasheet / spec-sheet → instructions-CSV → community / cross-check,
+**hardware-verification** (a clean run on real P2 silicon — empirical ground truth; see `external-sources/hardware-verification/`) → `pnut_ts` compiler (matched edition) → Silicon Doc → P2 datasheet / spec-sheet → instructions-CSV → community / cross-check,
 with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `ingest-source` §4 corroboration matrix)_
 
 ## Per-source trust assignments  ‹seeded — re-ground in the research pass›
 | Source | Tier | Origin / rationale | Edition |
 |--------|------|--------------------|---------|
 | silicon-doc | 🏆 | Chip Gracey — P2 architecture reference | v35 _(verify)_ |
+| hardware-verification | 🏆 | **empirical** — the chip's own behavior, proven by test (`external-sources/hardware-verification/`) | running ledger |
 | Spin2 Language Reference | 🏆 | Parallax/Chip — language spec; matched-compiler edition | v55 |
 | pnut-ts-pasm-ref | 🏆 | matched compiler — ratified authority for PASM | _(verify)_ |
 | chip-gracey-clarifications | 🏆 | direct from the chip designer | — |

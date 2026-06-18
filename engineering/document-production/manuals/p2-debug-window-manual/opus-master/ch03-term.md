@@ -32,7 +32,7 @@ You feed the window afterward by that name:
 ```spin2
 PUB main()
   debug(`TERM Status SIZE 40 20)     ' create a 40x20 window named "Status"
-  debug(`Status "Ready.")            ' feed it by name
+  debug(`Status 'Ready.')            ' feed it by name
 ```
 
 The configuration keywords you can add to the creation line:
@@ -55,11 +55,11 @@ gives you a classic 80-column console.
 ## Sending text
 
 Once the window exists, everything you send by its name is rendered at the cursor,
-left to right, top to bottom. You can send string literals and you can send the
-value of a variable:
+left to right, top to bottom. You can send a text string and you can substitute the
+value of a variable into the line:
 
 ```spin2
-debug(`Status "Temperature: " `udec_(temp) " C")
+debug(`Status 'Temperature: `(temp) C')
 ```
 
 ```{=latex}
@@ -72,14 +72,24 @@ debug(`Status "Temperature: " `udec_(temp) " C")
 
 Two things are happening here, and the difference matters:
 
-- A **quoted string** is printed as-is.
-- `` `udec_(temp) `` prints the *decimal text* of `temp` — if `temp` holds 25, the
-  window shows the characters `25`. Use the formatters (`` `udec_ ``, `` `uhex_ ``,
-  `` `sdec_ ``, and so on) whenever you want to display a number.
+- **Text is single-quoted.** Inside a backtick feed, a string literal must use
+  single quotes (`'...'`). This is the one rule that trips everyone up: a
+  *double*-quoted string compiles without error but is **silently dropped at
+  runtime** — the text simply never appears. Single quotes only.
+- `` `(temp) `` substitutes the *decimal text* of `temp` into the line — if `temp`
+  holds 25, the window shows the characters `25`. `` `(value) `` is how you display
+  a number's text in a TERM (it is shorthand for signed decimal).
+
+> **Don't reach for `` `udec_() `` here.** The trailing-underscore formatters
+> (`` `udec_ ``, `` `sdec_ ``, `` `uhex_ ``) feed a *numeric data element* — the form
+> the graphical windows (SCOPE, LOGIC, FFT) consume as a data point. Send one to a
+> TERM and the number is rendered as a single **character glyph** (value 42 prints
+> `*`, not `42`). In a TERM, display a value with `` `(value) `` substitution.
 
 There is a second, lower-level way numbers reach the window — as **command codes** —
-and that is the next section. The rule to carry with you: *to display a number,
-format it with a backtick formatter; to issue a command, send a bare number.*
+and that is the next section. The rule to carry with you: *to display a value, put
+`` `(value) `` inside your single-quoted text; to issue a command, send a bare
+number.*
 
 ## Command codes
 
@@ -102,18 +112,21 @@ So to clear the screen and print a heading at row 2, column 5:
 
 ```spin2
 debug(`Status 0)                 ' clear + home
-debug(`Status 3 2 2 5 "Heading") ' set row 2, set column 5, then print
+debug(`Status 3 2 2 5 'Heading') ' set row 2, set column 5, then print
 ```
 
 Read `3 2 2 5` as two commands: `3 2` (set row to 2) and `2 5` (set column to 5).
 To position with a variable instead of a literal, send the value with `` `() ``:
 
 ```spin2
-debug(`Status 3 `(line) 2 `(indent) "Positioned")
+debug(`Status 3 `(line) 2 `(indent) 'Positioned')
 ```
 
-`` `(line) `` sends the *value* of `line` as the command argument — distinct from
-`` `udec_(line) ``, which would print it as visible digits.
+Here `` `(line) `` supplies the *value* of `line` as the argument to the `3` (set
+row) command. It is the same `` `(value) `` substitution you use to display a
+number — the window interprets it as a command argument because a command code
+(`3`) precedes it. Position first, then print: the `'Positioned'` text lands at the
+cursor you just set.
 
 ## Color
 
@@ -128,8 +141,8 @@ You select the active pair at runtime with codes `4`–`7`. The defaults are:
 | 3 | `7` | Black | Lime |
 
 ```spin2
-debug(`Status 4 "normal" 13)     ' pair 0: orange on black
-debug(`Status 6 "ok" 13)         ' pair 2: lime on black
+debug(`Status 4 'normal' 13)     ' pair 0: orange on black
+debug(`Status 6 'ok' 13)         ' pair 2: lime on black
 ```
 
 To choose your own colors, set all eight values (four pairs, foreground then
@@ -164,7 +177,7 @@ PUB log_loop() | n
   debug(`TERM Events SIZE 80 25)
   n := 0
   repeat
-    debug(`Events `udec_(n) ": event" 13)   ' scrolls once it fills
+    debug(`Events '`(n): event' 13)         ' scrolls once it fills
     n += 1
     waitms(200)
 ```
@@ -196,8 +209,8 @@ PUB dashboard() | temp, press
     temp := read_temp()
     press := read_press()
     debug(`Panel 0)                       ' clear (off-screen)
-    debug(`Panel "Temp:  " `udec_(temp) " C" 13)
-    debug(`Panel "Press: " `udec_(press) " mb" 13)
+    debug(`Panel 'Temp:  `(temp) C' 13)
+    debug(`Panel 'Press: `(press) mb' 13)
     debug(`Panel UPDATE)                  ' repaint once, flicker-free
     waitms(250)
 
@@ -227,10 +240,10 @@ PUB main() | ang, signal, count
   debug(`TERM Panel SIZE 40 8)
 
   ' Draw the static layout once: a title and three fixed labels.
-  debug(`Panel 0 4 "SIGNAL MONITOR")     ' clear, pair 0, title at (0,0)
-  debug(`Panel 3 2 2 0 "Sample:")        ' row 2, col 0
-  debug(`Panel 3 3 2 0 "Value :")        ' row 3, col 0
-  debug(`Panel 3 4 2 0 "State :")        ' row 4, col 0
+  debug(`Panel 0 4 'SIGNAL MONITOR')     ' clear, pair 0, title at (0,0)
+  debug(`Panel 3 2 2 0 'Sample:')        ' row 2, col 0
+  debug(`Panel 3 3 2 0 'Value :')        ' row 3, col 0
+  debug(`Panel 3 4 2 0 'State :')        ' row 4, col 0
 
   ang := 0
   count := 0
@@ -240,13 +253,13 @@ PUB main() | ang, signal, count
     ' Overprint only the value fields, each at a fixed (row, col). Trailing
     ' spaces pad to a fixed width so a shorter value erases a
     ' longer old one.
-    debug(`Panel 3 2 2 8 `udec_(count) "    ")
-    debug(`Panel 3 3 2 8 `sdec_(signal) "    ")
+    debug(`Panel 3 2 2 8 '`(count)    ')
+    debug(`Panel 3 3 2 8 '`(signal)    ')
     if abs signal > 800
-      debug(`Panel 3 4 2 8 7 "HIGH " 4)  ' pair 3 (red), then back to pair 0
+      debug(`Panel 3 4 2 8 7 'HIGH ' 4)  ' pair 3 (red), then back to pair 0
     else
       ' pair 2 (lime), then back to pair 0
-      debug(`Panel 3 4 2 8 6 "ok   " 4)
+      debug(`Panel 3 4 2 8 6 'ok   ' 4)
 
     ang   += 4
     count += 1
@@ -286,9 +299,11 @@ or register read, and the same panel reports live values.
   it off — real-time drawing is simpler and the per-character cost is negligible.
 - **Tabs are fixed at every 8 columns.** For arbitrary alignment, position
   explicitly with the `2` (set column) command instead.
-- **Display values with formatters, issue commands with bare numbers.** This is the
-  single most common mistake: `` `udec_(x) `` shows the number; a bare `13` is a
-  newline, not the text "13".
+- **Use single quotes, and substitute values with `` `(value) ``.** The two most
+  common mistakes both fail silently: double-quoted text is dropped (use `'...'`),
+  and a value displayed with `` `udec_(x) `` arrives as a character glyph, not its
+  digits (use `` `(x) ``). And remember a bare `13` is a newline command, not the
+  text "13".
 
 ## Try it
 

@@ -1,0 +1,60 @@
+'' =============================================================================
+''  test61  --  universal init-order ratification, mode %00110 (NCO frequency)
+'' =============================================================================
+''  WIRING-FREE: drives ONE pin and counts its OWN IN-flag events (NCO raises IN
+''  on every accumulator overflow). NO external hardware.
+''
+''  A/B: OLD order (WYPIN before enable) vs NEW/universal order (enable, then
+''  WYPIN). For NCO, Y is the frequency increment (a config value, NOT a reset-
+''  cleared trigger), so we EXPECT PASS-SAFE (both orders work) -- which is the
+''  whole point: the universal order is safe for non-trigger modes too.
+''    OLD=0,NEW>0 -> universal REQUIRED ; OLD>0,NEW>0 -> SAFE ; NEW=0 -> FAIL
+''  Build: pnut-ts -d test61-nco-universal-order.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TEST_PIN = 32
+  WINDOW   = _clkfreq / 10
+  NCO_Y    = 42_950                   ' ~2 kHz at 200 MHz with X=1 (exact rate moot)
+
+PUB main() | cOld, cNew
+  debug("=== test61  NCO_FREQ %00110  -- universal init-order ratification ===")
+  cOld := run(false)
+  cNew := run(true)
+  if cNew > 0 and cOld == 0
+    debug("test61 NCO: PASS-REQUIRED  universal order NEEDED (old produced nothing).  old=", udec(cOld), " new=", udec(cNew))
+  elseif cNew > 0 and cOld > 0
+    debug("test61 NCO: PASS-SAFE  both orders work; universal order is safe.  old=", udec(cOld), " new=", udec(cNew))
+  else
+    debug("test61 NCO: FAIL  universal order produced NO output.  old=", udec(cOld), " new=", udec(cNew))
+  repeat
+
+PRI run(enable_first) : c
+  PINCLEAR(TEST_PIN)
+  WRPIN(TEST_PIN, P_NCO_FREQ | P_OE)
+  WXPIN(TEST_PIN, 1)                  ' base period 1 clock
+  if enable_first
+    PINHIGH(TEST_PIN)
+    WYPIN(TEST_PIN, NCO_Y)
+  else
+    WYPIN(TEST_PIN, NCO_Y)
+    PINHIGH(TEST_PIN)
+  c := count_in(TEST_PIN, WINDOW)
+  PINCLEAR(TEST_PIN)
+
+PRI count_in(pin, clocks) : count | deadline, now
+  count := 0
+  org
+    getct   deadline
+    add     deadline, clocks
+    akpin   pin
+.loop testp  pin           wc
+    if_nc jmp #.chk
+    add     count, #1
+    akpin   pin
+.chk  getct  now
+    sub     now, deadline   wc
+    if_c  jmp #.loop
+  end

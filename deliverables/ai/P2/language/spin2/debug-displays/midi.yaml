@@ -25,7 +25,7 @@ configuration_directives:
   note: "Accepted in MIDI_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'MIDI')"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE n -- key-size scalar 1..50 (default 4); pixel key size is 8 + n*4. This is NOT a pixel dimension."
   RANGE: "RANGE firstKey lastKey -- displayed MIDI note range, each 0..127 (default 21..108); lastKey is clamped to be >= firstKey."
   CHANNEL: "CHANNEL n -- MIDI channel to display, 0..15 (default 0). This is an exact channel filter: 0 means channel-0-only, NOT an 'all channels' mode."
@@ -33,7 +33,7 @@ configuration_directives:
 
 display_directives:
   note: "Accepted in MIDI_Update."
-  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. Running status is honored. (n = channel nibble.)"
+  midi_byte_stream: "Standard MIDI bytes. Note-On ($9n, note, velocity) lights a key colored by velocity; Note-Off ($8n, note, 0) releases it. Running status is honored. (n = channel nibble.) NOTE: a velocity-0 Note-On ($9n, note, 0) does NOT release the key in this window -- the common 'velocity-0 = note-off' idiom is not honored here; send an explicit Note-Off ($8n) to release."
   CLEAR: "CLEAR -- clear the keyboard (reset all 128 key velocities to 0 and redraw)"
   SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
   CLOSE: "CLOSE -- close (free) this named window. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"

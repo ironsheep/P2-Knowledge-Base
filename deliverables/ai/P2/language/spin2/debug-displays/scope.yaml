@@ -19,14 +19,15 @@ aliases:
   - SCOPE
 
 syntax:
-  create: "DEBUG(`SCOPE MyScope <config directives> <channel-def strings>)"
+  create: "DEBUG(`SCOPE MyScope <config directives>)   ' config keys ONLY on the create line"
+  channel_setup: "DEBUG(`MyScope <channel-def strings> {TRIGGER...} {HOLDOFF...})   ' SEPARATE message after create -- a channel-def on the create line prevents the window from being created"
   update: "DEBUG(`MyScope <sample longs / directives>)   ' reference the window by name"
 
 configuration_directives:
   note: "Accepted in SCOPE_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'Scope')"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE width height -- pixels, each 32..2048 (default 256x256)"
   SAMPLES: "SAMPLES n -- horizontal resolution, 16..2048 (default 256)"
   RATE: "RATE n -- draw-rate divisor, 1..2048 (default 1)"
@@ -38,7 +39,7 @@ configuration_directives:
   packed: "Packing mode LONGS_1BIT..BYTES_4BIT (12 modes; default LONGS_1BIT) -- how many sub-samples are packed per transmitted long/word/byte"
 
 channel_definition:
-  note: "Up to 8 channels, each defined by a quoted string in SCOPE_Update before streaming."
+  note: "Up to 8 channels, each defined by a quoted string. The channel-def(s) MUST be sent as a SEPARATE message AFTER the create line (handled by SCOPE_Update, before streaming). A channel-def placed ON the create line prevents the window from being created -- create with config keys only, then send the channel-def(s)."
   grammar: "'label' (AUTO | lo hi) {tall} {base} {grid} {color}"
   fields:
     label: "channel name string"
@@ -51,7 +52,7 @@ channel_definition:
 display_directives:
   note: "Accepted in SCOPE_Update (streaming to the named window)."
   numeric_data: "Sample longs -- the analog sample stream plotted as waveforms."
-  TRIGGER: "TRIGGER channel (AUTO | arm fire) {offset} -- level-based trigger. channel -1..7 (-1 = free-run); AUTO auto-computes levels, or arm/fire are explicit level thresholds; offset 0..SAMPLES-1 (default SAMPLES/2). This is a level arm/fire trigger only -- not edge/window/external modes."
+  TRIGGER: "TRIGGER channel (AUTO | arm fire) {offset} -- level-based trigger. channel -1..7 (-1 = free-run); AUTO auto-computes levels, or arm/fire are explicit level thresholds; offset 0..SAMPLES-1 (default SAMPLES/2). The offset is read back from the NEWEST sample at the RIGHT edge (the trace runs oldest-left -> newest-right), so the edge mapping is counter-intuitive: offset 0 = trigger at the RIGHT edge, showing the lead-up TO the trigger (pre-trigger view); offset SAMPLES-1 = trigger at the LEFT edge, showing what happens AFTER the trigger (post-trigger view); offset SAMPLES/2 = trigger centered. This is a level arm/fire trigger only -- not edge/window/external modes."
   HOLDOFF: "HOLDOFF n -- minimum samples between triggers, 2..2048 (default SAMPLES)"
   CLEAR: "CLEAR -- clear the bitmap and reset sample/rate counters"
   SAVE: "SAVE {filename} -- write the window bitmap to <name>.bmp"
@@ -66,24 +67,27 @@ input:
 
 examples:
   - code: |
-      ' Single auto-ranged channel, streamed by window name
-      DEBUG(`SCOPE MyScope SIZE 400 200 SAMPLES 256 'Signal' AUTO)
+      ' Single auto-ranged channel. Create with config only, THEN declare the channel.
+      DEBUG(`SCOPE MyScope SIZE 400 200 SAMPLES 256)   ' create (config keys only)
+      DEBUG(`MyScope 'Signal' AUTO)                    ' declare channel 0 (separate message)
       REPEAT
         DEBUG(`MyScope `(value))
-    description: "Single auto-ranging analog channel"
+    description: "Single auto-ranging analog channel (channel declared after create)"
   - code: |
       ' Two channels with explicit vertical ranges
-      DEBUG(`SCOPE Cmp SAMPLES 256 'Raw' -2000 2000 'Filtered' -2000 2000)
+      DEBUG(`SCOPE Cmp SAMPLES 256)                       ' create
+      DEBUG(`Cmp 'Raw' -2000 2000 'Filtered' -2000 2000) ' declare both channels (separate message)
       REPEAT
         DEBUG(`Cmp `(raw) `(filt))
-    description: "Dual channel with fixed ranges"
+    description: "Dual channel with fixed ranges (channels declared after create)"
   - code: |
       ' Level trigger on channel 0 with holdoff
-      DEBUG(`SCOPE Trg SAMPLES 256 'Ch0' -1000 1000)
-      DEBUG(`Trg TRIGGER 0 AUTO HOLDOFF 128)
+      DEBUG(`SCOPE Trg SAMPLES 256)            ' create
+      DEBUG(`Trg 'Ch0' -1000 1000)            ' declare channel 0 (separate message)
+      DEBUG(`Trg TRIGGER 0 AUTO HOLDOFF 128)  ' configure the trigger (separate message)
       REPEAT
         DEBUG(`Trg `(adc))
-    description: "Auto level trigger with holdoff"
+    description: "Auto level trigger with holdoff (channel + trigger declared after create)"
 
 not_supported:
   - "No automatic measurements -- no peak-to-peak, RMS, frequency, period, duty cycle, or rise/fall time (these do not exist in the P2 SCOPE)."

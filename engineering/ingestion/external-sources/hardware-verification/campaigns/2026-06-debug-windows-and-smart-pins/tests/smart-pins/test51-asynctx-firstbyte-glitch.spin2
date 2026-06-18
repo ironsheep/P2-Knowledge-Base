@@ -1,0 +1,67 @@
+'' =============================================================================
+''  test51  --  RA-19: async-TX FIRST-byte low glitch, and the $FF-preclear
+''  workaround.
+'' =============================================================================
+''  WIRING-FREE via INTERNAL loopback: TX on TX_PIN (P_OE), RX on RX_PIN with
+''  its A-input taken from the -1 neighbor (TX_PIN) via P_MINUS1_A -- no jumper.
+''  (Verified: %x111 = "relative -1 pin's read state"; P_MINUS1_A.)
+''  Async RX data is MSB-justified -> byte = RDPIN >> 24 (32-8).
+''
+''  Procedure (each trial re-enables TX fresh, to reproduce the first-byte
+''  condition):
+''    sanity      : with a settled line a byte MUST round-trip (validates rig)
+''    no-preclear : send $A5 as the very first frame (glitch suspected)
+''    with-$FF    : send $FF first (settle), then $A5 (should be clean)
+''
+''  Safe failure modes: RIG-FAIL / INCONCLUSIVE -- never a false CONFIRMED.
+''  Build: pnut-ts -d test51-asynctx-firstbyte-glitch.spin2
+'' =============================================================================
+
+CON
+  _xtlfreq = 20_000_000
+  _clkfreq = 200_000_000
+  TX_PIN   = 32
+  RX_PIN   = 33                       ' reads TX_PIN (-1) internally
+  BITPER   = 20_000                   ' clocks/bit (~100 us/bit; ~1 ms/frame)
+  TESTBYTE = $A5
+
+PUB main() | sanity, got_no, got_yes
+  debug("=== test51  RA-19  async-TX first-byte glitch (internal TX->RX loopback) ===")
+  sanity  := trial(true,  TESTBYTE)   ' settled line -> rig check
+  got_no  := trial(false, TESTBYTE)   ' first frame, NO preclear
+  got_yes := trial(true,  TESTBYTE)   ' first frame, WITH $FF preclear
+  debug("test51: sent=$A5  sanity=$", uhex(sanity), "  no-preclear=$", uhex(got_no), "  with-preclear=$", uhex(got_yes))
+  if sanity <> TESTBYTE
+    debug("test51 RA-19: RIG-FAIL  loopback did not round-trip a byte even when settled -- routing/timing; result not meaningful.")
+  elseif got_no <> TESTBYTE and got_yes == TESTBYTE
+    debug("test51 RA-19: CONFIRMED  first byte CORRUPTED without preclear; $FF preclear fixes it.")
+  elseif got_no == TESTBYTE and got_yes == TESTBYTE
+    debug("test51 RA-19: NOT-OBSERVED  first byte arrived clean even without preclear.")
+  else
+    debug("test51 RA-19: INCONCLUSIVE  see raw values above.")
+  repeat
+
+PRI trial(preclear, b) : rx | junk
+  PINCLEAR(RX_PIN)
+  PINCLEAR(TX_PIN)
+  ' RX: async receive, A-input from the -1 neighbor (TX_PIN)
+  WRPIN(RX_PIN, P_ASYNC_RX | P_MINUS1_A)
+  WXPIN(RX_PIN, (BITPER << 16) | 7)
+  PINHIGH(RX_PIN)                              ' enable RX (input only)
+  ' TX: async transmit
+  WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
+  WXPIN(TX_PIN, (BITPER << 16) | 7)
+  PINHIGH(TX_PIN)                              ' enable (universal order)
+  if preclear
+    WYPIN(TX_PIN, $FF)                         ' settle the line first
+    waitms(5)                                  ' let the $FF frame complete
+    if PINREAD(RX_PIN)
+      junk := RDPIN(RX_PIN)                     ' discard the received $FF
+  WYPIN(TX_PIN, b)                             ' the byte under test
+  waitms(5)                                    ' let its frame complete + RX receive
+  if PINREAD(RX_PIN)
+    rx := (RDPIN(RX_PIN) >> 24) & $FF
+  else
+    rx := $FFF                                 ' sentinel: nothing received
+  PINCLEAR(TX_PIN)
+  PINCLEAR(RX_PIN)

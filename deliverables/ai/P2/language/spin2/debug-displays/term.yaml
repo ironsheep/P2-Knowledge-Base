@@ -27,7 +27,7 @@ configuration_directives:
   note: "Accepted in TERM_Configure (window creation)."
   TITLE: "TITLE 'string' -- title-bar text"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
-  POS: "POS left top -- window screen offset"
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS to let the DEBUG display host auto-place the window; PNut-Term-TS auto-arranges multiple windows so they don't overlap -- preferred for multi-window layouts. Supply POS only for a specific position."
   SIZE: "SIZE cols rows -- size in CHARACTERS (columns x rows), NOT pixels. cols 1..256 (default 40), rows 1..256 (default 20)"
   TEXTSIZE: "TEXTSIZE n -- font point size, 6..200 (default 10)"
   COLOR: "COLOR c0..c7 -- up to 8 RGB24 values = 4 text/background pairs (pair0=c0,c1 .. pair3=c6,c7). Default pairs: ORANGE/BLACK, BLACK/ORANGE, LIME/BLACK, BLACK/LIME"
@@ -37,6 +37,7 @@ configuration_directives:
 
 display_directives:
   note: "Accepted in TERM_Update (streaming to the named window)."
+  value_display: "To show a value's DECIMAL TEXT in a named TERM, substitute it into single-quoted text with `(expr) -- e.g. DEBUG(`MyTerm 'count = `(n)'). `(expr) is short for SDEC_ (signed decimal). This is the ONLY value-to-text path in a named feed. The value-only formatters (`udec_(x)/`sdec_(x)/`uhex_(x), trailing underscore) emit a NUMERIC DATA ELEMENT meant for the graphical windows (SCOPE/LOGIC/FFT); fed to a TERM that number renders as a single character glyph (e.g. value 42 -> '*'), NOT as the text \"42\". The comma+formatter form DEBUG(`MyTerm \"x=\", SDEC(x)) is the PLAIN default-terminal idiom and does not apply to a named feed. Hardware-confirmed: hardware-verification ledger EF-001 (single-quote required) + EF-002 (formatter -> glyph); v55 doc canonical example DEBUG(`MyTerm 1 'Temp = `(i)')."
   named_colors: "BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY {brightness} -- set text foreground; an immediately following named color sets the text background. Optional 0..15 brightness nibble."
   BACKCOLOR: "BACKCOLOR color -- runtime: sets the text BACKGROUND only (differs from config BACKCOLOR which is the canvas fill)"
   CLEAR: "CLEAR -- clear the window and home the cursor to (0,0)"
@@ -76,16 +77,18 @@ examples:
       DEBUG("System initialized", 13)
     description: "Simplest case -- the default DEBUG terminal"
   - code: |
-      ' Create a named 40x20 terminal, then stream text by name
+      ' Create a named 40x20 terminal, then stream a labeled value by name.
+      ' In a named feed the display text is SINGLE-quoted, and a value is
+      ' substituted as decimal TEXT with `(expr); code 13 = newline.
       DEBUG(`TERM MyTerm SIZE 40 20 TEXTSIZE 12)
-      DEBUG(`MyTerm "Temperature: ", SDEC(temp), " C", 13)
-    description: "Named terminal with a labeled value and newline"
+      DEBUG(`MyTerm 1 'Temperature: `(temp) C' 13)
+    description: "Named terminal, labeled value. The value is shown with `(expr) substitution (decimal text; short for SDEC_), NOT comma-separated SDEC()/double-quoted text -- that is the PLAIN default-terminal idiom (example 1) and is silently dropped in a named feed. Do NOT use a value-only formatter like `udec_() here either: those feed a numeric data element (for the graphical SCOPE/LOGIC/FFT windows) that a TERM renders as a raw character glyph. See value_display below."
   - code: |
       ' Clear + home with code 0, position the cursor, select a color pair
       DEBUG(`TERM Stat SIZE 30 10)
       DEBUG(`Stat 0)                       ' code 0 clears and homes (NOT 12)
-      DEBUG(`Stat 3, 2, 4, "Row 2, pair 0", 13)
-    description: "Cursor positioning (code 3 = set row) and color-pair select (code 4)"
+      DEBUG(`Stat 3, 2, 4, 'Row 2, pair 0', 13)
+    description: "Cursor positioning (code 3 = set row) and color-pair select (code 4). Backtick display text uses SINGLE quotes."
 
 not_supported:
   - "Code 12 does NOT clear the screen (it does nothing) -- use 0 or CLEAR. This was a serial-terminal carry-over error."
