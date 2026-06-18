@@ -19,7 +19,7 @@ display_types:
     
   - name: SCOPE
     description: "Oscilloscope display for analog signals"
-    usage: "DEBUG(`SCOPE MyScope 'Ch' AUTO), then DEBUG(`MyScope `(value))"
+    usage: "DEBUG(`SCOPE MyScope), then DEBUG(`MyScope 'Ch' AUTO) to declare the channel (SEPARATE message -- a channel-def on the create line prevents creation), then DEBUG(`MyScope `(value))"
     
   - name: SCOPE_XY
     description: "XY / Lissajous (phase) display -- the separate XY-mode oscilloscope window"
@@ -35,7 +35,7 @@ display_types:
     
   - name: FFT
     description: "Fast Fourier Transform display"
-    usage: "DEBUG(`FFT MyFFT 'Spectrum'), then DEBUG(`MyFFT `(sample))"
+    usage: "DEBUG(`FFT MyFFT), then DEBUG(`MyFFT 'Spectrum') to declare the channel (SEPARATE message -- with no channel declared the window shows nothing), then DEBUG(`MyFFT `(sample))"
     
   - name: SPECTRO
     description: "Spectrogram display"
@@ -101,6 +101,14 @@ string_quoting:
   save_extension: "SAVE auto-appends .bmp — give the base name only (SAVE 'shot' produces shot.bmp)."
   verified_against: "PNut/Spin2 compiler — backtick text emitted raw (debugTickString); host display parser recognizes only the apostrophe as a string delimiter (check_dd_str)."
 
+window_placement:
+  pos_optional: |
+    The POS directive (window screen offset/position) is OPTIONAL on every display
+    window. Omit POS to let the DEBUG display host auto-place the window. PNut-Term-TS
+    auto-arranges multiple windows so they do not overlap, so omitting POS is the
+    preferred approach for multi-window layouts; supply POS only when you need a
+    specific on-screen position.
+
 examples:
   - code: |
       ' Basic terminal output (plain DEBUG, no backtick, double-quoted text)
@@ -139,8 +147,9 @@ examples:
       PUB test() | value
         value := 1000
         DEBUG(`TERM Status)                       ' create a TERM window
-        DEBUG(`Status "Starting test...", 13)     ' feed text to it by name
-        DEBUG(`SCOPE Waveform 'V' AUTO)           ' create a SCOPE
+        DEBUG(`Status 'Starting test...', 13)     ' feed text by name (SINGLE quotes)
+        DEBUG(`SCOPE Waveform)                    ' create a SCOPE
+        DEBUG(`Waveform 'V' AUTO)                 ' declare the channel (separate message)
         DEBUG(`Waveform `(value))                 ' feed a sample by name
         DEBUG("Value = ", udec_(value), 13)       ' plain default-terminal output
     description: "Using multiple DEBUG displays"

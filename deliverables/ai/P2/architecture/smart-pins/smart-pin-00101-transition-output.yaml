@@ -29,6 +29,7 @@ y_register:
   Y[31:0]: "Transition count (edges, not cycles)"
   behavior: "Non-zero starts toggling, decrements each edge"
   note: "Y=2 creates one complete cycle"
+  y_zero: "Y=0 leaves the pin idle (no transitions). It does NOT generate a continuous wave -- for a free-running square wave use an NCO mode (%00110/%00111)."
 
 z_register: "Not used"
 
@@ -50,42 +51,30 @@ spin2_complete: |
     TX_PIN = 41  ' Sync serial TX companion
     
   PUB main()
-    ' Generate clock for sync serial
+    ' Generate a fixed number of clock transitions
     generate_clock(CLK_PIN, 1000, 16)   ' 16 transitions
-    
-    ' Continuous square wave
-    continuous_square(CLK_PIN, 100)     ' 100 clock period
-    
+    ' For a CONTINUOUS square wave use an NCO mode (%00110/%00111), NOT %00101 --
+    ' see related. In %00101, Y=0 leaves the pin idle; it does NOT free-run.
+
   PUB generate_clock(pin, period, transitions) | mode
     mode := P_TRANSITION | P_OE
-    
+
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, period)              ' Transition period
-    WYPIN(pin, transitions)         ' Number of edges
-    PINHIGH(pin)                    ' Enable
-    
-  PUB continuous_square(pin, period) | mode
-    ' Generate continuous square wave
-    mode := P_TRANSITION | P_OE
-    
-    PINCLEAR(pin)
-    WRPIN(pin, mode)
-    WXPIN(pin, period/2)            ' Half period for 50% duty
-    WYPIN(pin, 0)                   ' 0 = continuous
-    PINHIGH(pin)
-    
+    PINHIGH(pin)                    ' Enable FIRST (universal init order)
+    WYPIN(pin, transitions)         ' THEN write Y -> triggers the transitions
+
   PUB sync_serial_clock() | mode
     ' Clock for synchronous serial modes
     mode := P_TRANSITION | P_OE
-    
+
     PINCLEAR(CLK_PIN)
     WRPIN(CLK_PIN, mode)
     WXPIN(CLK_PIN, 100)             ' Bit period
-    ' Sync with TX pin setup
-    PINHIGH(TX_PIN)                 ' Enable TX first
-    WYPIN(CLK_PIN, 16)              ' 8 bits = 16 transitions
-    PINHIGH(CLK_PIN)                ' Start clock
+    PINHIGH(TX_PIN)                 ' Enable the TX data pin
+    PINHIGH(CLK_PIN)                ' Enable the clock pin FIRST
+    WYPIN(CLK_PIN, 16)              ' THEN trigger: 8 bits = 16 transitions
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -102,22 +91,15 @@ pasm2_complete: |
           DIRL  pin                   ' Reset
           WRPIN trans_mode, pin       ' Configure
           WXPIN period, pin           ' Set period
-          WYPIN count, pin            ' Set transitions
-          DIRH  pin                   ' Start
+          DIRH  pin                   ' Enable FIRST (universal init order)
+          WYPIN count, pin            ' THEN write Y -> triggers the transitions
   .wait   TESTP pin WC                ' Test IN
     IF_NC JMP   #.wait              ' Wait for completion
           RET
-  
-  ' Continuous square wave
-  continuous
-          MOV   pin, clk_pin
-          DIRL  pin
-          WRPIN trans_mode, pin
-          WXPIN #50, pin              ' 50 clock half-period
-          WYPIN #0, pin               ' 0 = continuous
-          DIRH  pin
-          RET
-  
+
+  ' For a CONTINUOUS square wave use an NCO mode (%00110/%00111), not %00101 --
+  ' see related. Writing Y=0 here leaves the pin idle; it does NOT free-run.
+
   ' Synchronized clocking for serial
   sync_clock
           MOV   pin, #41              ' TX pin
@@ -126,13 +108,13 @@ pasm2_complete: |
           WRPIN ##P_SYNC_TX | P_OE, pin
           WXPIN #%1_00111, pin        ' 8-bit
           DIRH  pin
-          
+
           MOV   pin, clk_pin
           DIRL  pin
           WRPIN trans_mode, pin
           WXPIN #100, pin             ' Bit period
-          WYPIN #16, pin              ' 16 edges for 8 bits
-          DIRH  pin
+          DIRH  pin                   ' Enable FIRST (universal init order)
+          WYPIN #16, pin              ' THEN trigger: 16 edges for 8 bits
           RET
   
   ' Variables
@@ -147,8 +129,8 @@ spin2_inline: |
       DIRL  pin
       WRPIN ##P_TRANSITION | P_OE, pin
       WXPIN #2, pin                 ' Fast toggle
-      WYPIN edges, pin
-      DIRH  pin
+      DIRH  pin                     ' Enable FIRST (universal init order)
+      WYPIN edges, pin              ' THEN write Y -> triggers the transitions
     END
 
 # Key Points
@@ -157,10 +139,12 @@ transition_counting: |
   2 transitions = 1 complete cycle
   Odd count leaves pin in opposite state
 
-continuous_mode: |
-  Y=0 generates continuous transitions
-  No IN flag in continuous mode
-  Runs until pin disabled
+init_order: |
+  Universal smart-pin init order: reset (PINCLEAR/DIRL) -> setup (WRPIN/WXPIN)
+  -> ENABLE (PINHIGH/DIRH) -> OPERATE (WYPIN). For trigger modes like %00101 the
+  Y-write MUST come AFTER enable -- Y is held 0 during reset, so writing Y while
+  still disabled never triggers. NOTE: pinstart() writes Y before raising DIR, so
+  it is UNSAFE for the trigger modes (%00100/%00101); use the explicit sequence.
 
 synchronization: |
   Perfect for clock generation

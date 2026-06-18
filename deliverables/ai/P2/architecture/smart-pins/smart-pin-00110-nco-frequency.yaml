@@ -63,8 +63,8 @@ spin2_complete: |
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, 1)               ' Base period = 1 (max resolution)
-    WYPIN(pin, y_value)         ' Set frequency
-    PINHIGH(pin)                ' Enable NCO
+    PINHIGH(pin)                ' Enable FIRST (universal init order)
+    WYPIN(pin, y_value)         ' THEN set frequency
     
   PRI calc_nco_value(freq_hz, x_div) : y_value
     ' Use QFRAC for accurate calculation
@@ -79,8 +79,8 @@ spin2_complete: |
     PINCLEAR(NCO_PIN)
     WRPIN(NCO_PIN, mode)        ' NCO + DAC output
     WXPIN(NCO_PIN, 1)           ' Base = 1
-    WYPIN(NCO_PIN, y_value)
-    PINHIGH(NCO_PIN)
+    PINHIGH(NCO_PIN)            ' Enable FIRST (universal init order)
+    WYPIN(NCO_PIN, y_value)     ' THEN set frequency
     
   PUB phase_locked_outputs() | mode, y_val
     ' Two NCOs with 90° phase offset
@@ -91,16 +91,16 @@ spin2_complete: |
     PINCLEAR(48)
     WRPIN(48, mode)
     WXPIN(48, $0000_0001)       ' Phase = 0
-    WYPIN(48, y_val)
-    
-    ' Second pin - 90° phase  
+
+    ' Second pin - 90° phase
     PINCLEAR(49)
     WRPIN(49, mode)
     WXPIN(49, $4000_0001)       ' Phase = 90° (0x4000 = 1/4)
+
+    PINHIGH(48)                 ' Enable both pins...
+    PINHIGH(49)                 ' ...together (universal order: enable before WYPIN)
+    WYPIN(48, y_val)            ' THEN set frequency on both (phase set by WXPIN above)
     WYPIN(49, y_val)
-    
-    PINHIGH(48)
-    PINHIGH(49)                 ' Start together
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -123,8 +123,8 @@ pasm2_complete: |
           GETQX y_value               ' Get fraction
           
           WXPIN #1, pin               ' Base period = 1
-          WYPIN y_value, pin          ' Set frequency
-          DIRH  pin                   ' Enable
+          DIRH  pin                   ' Enable FIRST (universal init order)
+          WYPIN y_value, pin          ' THEN set frequency
           RET
   
   ' Sweep frequency
@@ -133,10 +133,10 @@ pasm2_complete: |
           DIRL  pin
           WRPIN nco_mode, pin
           WXPIN #1, pin
-          
+          DIRH  pin                   ' Enable ONCE before the loop (universal init order)
+
           MOV   y_value, start_freq
-  .loop   WYPIN y_value, pin
-          DIRH  pin
+  .loop   WYPIN y_value, pin          ' update frequency each step (operate)
           WAITX ##10_000_000          ' 50ms @ 200MHz
           ADD   y_value, step_size
           CMP   y_value, end_freq WC

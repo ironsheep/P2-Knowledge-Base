@@ -73,8 +73,8 @@ spin2_complete: |
     PINCLEAR(DAC_PIN)
     WRPIN(DAC_PIN, mode)
     WXPIN(DAC_PIN, 1)           ' Immediate updates (no IN cycling)
-    WYPIN(DAC_PIN, $8000)       ' Mid-scale initial value
-    PINHIGH(DAC_PIN)            ' Enable DAC
+    PINHIGH(DAC_PIN)            ' Enable FIRST (universal init order)
+    WYPIN(DAC_PIN, $8000)       ' THEN write Y: mid-scale initial value
     
   PUB output_dac(value16)
     WYPIN(DAC_PIN, value16)     ' Output 16-bit value
@@ -86,9 +86,9 @@ spin2_complete: |
     PINCLEAR(DAC_PIN)
     WRPIN(DAC_PIN, mode)
     WXPIN(DAC_PIN, 1000)       ' 1000 clock sample period
-    WYPIN(DAC_PIN, $8000)       ' Mid-scale
-    PINWRITE(DAC_PIN, 1)        ' OUT=1 enables ADC
-    PINHIGH(DAC_PIN)            ' Enable
+    PINWRITE(DAC_PIN, 1)        ' OUT=1 enables ADC (set before enable)
+    PINHIGH(DAC_PIN)            ' Enable FIRST (universal init order)
+    WYPIN(DAC_PIN, $8000)       ' THEN write Y: mid-scale
     
   PUB read_loading() : adc_value
     ' Read ADC accumulation (requires OUT=1)
@@ -109,8 +109,8 @@ pasm2_complete: |
           DIRL  pin                   ' Reset (captures Y)
           WRPIN dac_mode, pin         ' Configure mode
           WXPIN #1, pin               ' Immediate updates
-          WYPIN ##$8000, pin          ' Mid-scale initial
-          DIRH  pin                   ' Enable DAC
+          DIRH  pin                   ' Enable FIRST (universal init order)
+          WYPIN ##$8000, pin          ' THEN write Y: mid-scale initial
           RET
   
   ' Output 16-bit value

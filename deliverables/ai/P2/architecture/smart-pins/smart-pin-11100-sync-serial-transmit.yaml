@@ -74,9 +74,9 @@ spin2_complete: |
     PINCLEAR(TX_PIN)
     WRPIN(TX_PIN, mode)
     WXPIN(TX_PIN, %0_00111)                  ' Continuous, 8-bit
-    WYPIN(TX_PIN, first_data)                ' Prime shifter
-    PINHIGH(TX_PIN)                          ' Enable
-    WYPIN(TX_PIN, second_data)               ' Load buffer
+    PINHIGH(TX_PIN)                          ' Enable FIRST (universal init order)
+    WYPIN(TX_PIN, first_data)                ' Prime shifter (after enable)
+    WYPIN(TX_PIN, second_data)               ' Load buffer (double-buffered, gapless)
     
     REPEAT
       IF PINREAD(TX_PIN) & $8000_0000        ' Check IN flag

@@ -63,8 +63,8 @@ spin2_complete: |
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
     WXPIN(PULSE_PIN, width_clocks) ' X[31:16]=0 for continuous high
-    WYPIN(PULSE_PIN, count)         ' Number of pulses
-    PINHIGH(PULSE_PIN)              ' Enable
+    PINHIGH(PULSE_PIN)              ' Enable FIRST (universal init order)
+    WYPIN(PULSE_PIN, count)         ' THEN trigger: number of pulses
     
     ' Wait for completion
     REPEAT UNTIL PINREAD(PULSE_PIN) & $8000_0000
@@ -76,8 +76,8 @@ spin2_complete: |
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
     WXPIN(PULSE_PIN, period)       
-    WYPIN(PULSE_PIN, cycles)       
-    PINHIGH(PULSE_PIN)
+    PINHIGH(PULSE_PIN)             ' Enable FIRST (universal init order)
+    WYPIN(PULSE_PIN, cycles)       ' THEN trigger
     
   PUB custom_pattern() | mode, pattern
     ' Generate 0-0-1 pattern
@@ -87,8 +87,8 @@ spin2_complete: |
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
     WXPIN(PULSE_PIN, pattern)       ' 0-0-1 repeating
-    WYPIN(PULSE_PIN, 100)           ' 100 repetitions
-    PINHIGH(PULSE_PIN)
+    PINHIGH(PULSE_PIN)              ' Enable FIRST (universal init order)
+    WYPIN(PULSE_PIN, 100)           ' THEN trigger: 100 repetitions
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -107,8 +107,8 @@ pasm2_complete: |
           MOV   x, width              ' Base period
           SHL   x, #16               ' X[31:16] = 0 (continuous)
           WXPIN x, pin               ' Set timing
-          WYPIN count, pin           ' Set count
-          DIRH  pin                  ' Start
+          DIRH  pin                  ' Enable FIRST (universal init order)
+          WYPIN count, pin           ' THEN trigger: set count
   .wait   TESTP pin WC               ' Test IN
     IF_NC JMP   #.wait             ' Wait for completion
           RET
@@ -124,8 +124,8 @@ pasm2_complete: |
           SHL   x, #16              ' To X[31:16]
           OR    x, period           ' X = period | (period/2 << 16)
           WXPIN x, pin
-          WYPIN ##1000, pin         ' 1000 cycles
-          DIRH  pin
+          DIRH  pin                 ' Enable FIRST (universal init order)
+          WYPIN ##1000, pin         ' THEN trigger: 1000 cycles
           RET
   
   ' Variables
@@ -143,8 +143,8 @@ spin2_inline: |
       DIRL  pin
       WRPIN ##P_PULSE | P_OE, pin
       WXPIN width_clocks, pin       ' Width, X[31:16]=0
-      WYPIN #1, pin                 ' Single pulse
-      DIRH  pin
+      DIRH  pin                     ' Enable FIRST (universal init order)
+      WYPIN #1, pin                 ' THEN trigger: single pulse
     END
 
 # Key Points
