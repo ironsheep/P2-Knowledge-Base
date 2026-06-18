@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-06-14T23:46:58.877325",
+    "generated": "2026-06-18T23:12:49.131863",
     "total_entries": 1055,
     "total_categories": 57,
     "total_aliases": 1309,
@@ -4911,33 +4911,33 @@
     },
     "p2kbArchSmartPin00010Dac16bitPseudoRandomDither": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml",
-      "mtime": 1764449566,
-      "sha256": "9407a1fb30d1e3034db6f24d494b47471f8e7487e9379995dd90896992702557"
+      "mtime": 1781760573,
+      "sha256": "c4e9b8e9fb80b38b35d1c6bf0edabcc718b2e2cdfdcec5ff5cdb344b91cbda4b"
     },
     "p2kbArchSmartPin00011Dac16bitPwmDither": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml",
-      "mtime": 1764449566,
-      "sha256": "d215478bfad149afdc2ad958ece2b0164be7adabbd2252746a38e4ed3c672d6f"
+      "mtime": 1781760573,
+      "sha256": "366409ace2a5d3ed0e6fa12064f459fffedb4319cba5b35251df66a526946bea"
     },
     "p2kbArchSmartPin00100PulseCycleOutput": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00100-pulse-cycle-output.yaml",
-      "mtime": 1764449566,
-      "sha256": "3648a6dbf2a13c39f44014672fa565a980f1d55962f5e09653fcd86d71e5c0ab"
+      "mtime": 1781760573,
+      "sha256": "e33ea156a7d5512f32c54610a792551c86537b4a9c3af285740b2e6c1cbaf105"
     },
     "p2kbArchSmartPin00101TransitionOutput": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00101-transition-output.yaml",
-      "mtime": 1779583590,
-      "sha256": "de2786bd9ae4284a025cccaf335b58d7666413bb56adce945cd1161644c9c3ca"
+      "mtime": 1781760573,
+      "sha256": "48a16e908e473e5630a6af875ad546459c63d9a44986642deeed15c5586d87a1"
     },
     "p2kbArchSmartPin00110NcoFrequency": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00110-nco-frequency.yaml",
-      "mtime": 1764449566,
-      "sha256": "49f0c656d51e839f8e412224fc12c8fe512da7af6afa0668861ca129fb324bf9"
+      "mtime": 1781760573,
+      "sha256": "7871a070b6d1d825607b5cf4b661078fc594688deea556d8113ef42927fa9103"
     },
     "p2kbArchSmartPin00111NcoDuty": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00111-nco-duty.yaml",
-      "mtime": 1764449566,
-      "sha256": "cd2b3f001509ef1ed6c3cafda10be54f7059c5a48a3e39ec4b8ac60c67af7bb3"
+      "mtime": 1781760573,
+      "sha256": "e663f4d957e31a09670d882c16359cfd5ab5d0a1ba14f7d30b0a747b5e03f704"
     },
     "p2kbArchSmartPin01000PwmTriangle": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-01000-pwm-triangle.yaml",
@@ -5041,8 +5041,8 @@
     },
     "p2kbArchSmartPin11100SyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml",
-      "mtime": 1769041891,
-      "sha256": "37bf560ead863f9c77f886646e2f88c737e81d5f1a31f2e3080dbd559f6779fb"
+      "mtime": 1781760573,
+      "sha256": "788da2626207f25d724c418f78660e25abe3b90916de95137fc7779a0be44ade"
     },
     "p2kbArchSmartPin11101SyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
@@ -8281,48 +8281,48 @@
     },
     "p2kbSpin2Bitmap": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/bitmap.yaml",
-      "mtime": 1781480661,
-      "sha256": "d83deecd791a08b5e66ada73b01ad0aafd6a34019a72de87784d88dc2b15e312"
+      "mtime": 1781760573,
+      "sha256": "2b2f86b1ec8f0ab066ce6ce1556c94845825b501e0eae1e14dad627b06adf525"
     },
     "p2kbSpin2Fft": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/fft.yaml",
-      "mtime": 1781480661,
-      "sha256": "95b3b98b87bf21ae77608b9371e3ba799ad3fe0915647ad93860a40c52ab275a"
+      "mtime": 1781760573,
+      "sha256": "3b5bc6aaf06b32820acf27146bcc7936b259ac96c958ed90b34b83bc6aff474b"
     },
     "p2kbSpin2Logic": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/logic.yaml",
-      "mtime": 1781480661,
-      "sha256": "1e601087f6d861d406bfc4f98a24e695a033142f2a38e726e71f4b6a3cc927c6"
+      "mtime": 1781760573,
+      "sha256": "5952441f037a49ab891215fec189991a98173fb2185b089fcaa95739b3ad15c0"
     },
     "p2kbSpin2Midi": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/midi.yaml",
-      "mtime": 1781480661,
-      "sha256": "3e2ee25dcf8504d09eaaa88de917bdb8f68d6e39dd347efe1f1b4721d1df46e6"
+      "mtime": 1781760573,
+      "sha256": "775225f32101e526e8b0d8638e7e59f5f679f63cdc61ee5a257f2ac4d5035c55"
     },
     "p2kbSpin2Plot": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/plot.yaml",
-      "mtime": 1781480661,
-      "sha256": "ad2979abea345be78bb2f60043d3742f02c4091fd9fb13994e1100b573ed37b5"
+      "mtime": 1781760573,
+      "sha256": "e0c9e3aa0c7267ead04dbaa7cec5f0e75dec83832821f3b8f7c1c5d2de26c04a"
     },
     "p2kbSpin2Scope": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope.yaml",
-      "mtime": 1781480661,
-      "sha256": "3a4629182b84fb4518a2f4d604cc799fb93e8f420a2a74e29a4559bb654f54fb"
+      "mtime": 1781760573,
+      "sha256": "3958e5dcf54f577c4362471018ae4d2b533795a8c44687c23e4b6ce8e9f0f6c4"
     },
     "p2kbSpin2ScopeXy": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/scope_xy.yaml",
-      "mtime": 1781480661,
-      "sha256": "70d819dce8627efe1c26b6a2b6c2b906718a8676403ae3b8c8f3f6e071b5bf1b"
+      "mtime": 1781760573,
+      "sha256": "805d6666c075280a2bc06b5752645e1cdea08e5f4819572019646826e642b9f8"
     },
     "p2kbSpin2Spectro": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/spectro.yaml",
-      "mtime": 1781480661,
-      "sha256": "6fe9f0687c98828ecdeea19cd69b6f3e86688a7d2da94af1bc99ded87652e576"
+      "mtime": 1781760573,
+      "sha256": "dc4c48f1d55a019360bd04177092303e2d87e7ee3dc6f1bfa3e4b8bc253a3b84"
     },
     "p2kbSpin2Term": {
       "path": "deliverables/ai/P2/language/spin2/debug-displays/term.yaml",
-      "mtime": 1781480661,
-      "sha256": "f09d0b25e453b1cab4a3fbd2019a8c99c0c9ecc556311bd314108e88a7b66af7"
+      "mtime": 1781823801,
+      "sha256": "c65d9cfee817c042b9401191a5fb6536f025b127a41f7cdab40ef29c7c61d6b5"
     },
     "p2kbSpin2BitManipulation": {
       "path": "deliverables/ai/P2/language/spin2/idioms/bit-manipulation.yaml",
@@ -9926,8 +9926,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1781480661,
-      "sha256": "09a8cc5b1c3bf8f9bc4ef0af8eb41c400d9b62c1a95ee5185336171aefa0caed"
+      "mtime": 1781760573,
+      "sha256": "1ceacd1017b08cdbd783e75768d26718b202d1a89411ee111c6fedda2e54e9f0"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",
