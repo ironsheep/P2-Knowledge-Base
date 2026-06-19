@@ -154,10 +154,10 @@ None of that is hypothetical — it's how the last stretch of work actually went
   about some of the windows. So we bolstered the knowledge base — which made the manual
   better and left the database stronger for the next person, human or AI, who comes
   asking.
-- **The smart-pin work** is running the same loop right now. As we cross-check that
-  material against Jon Titus's community study and its readers' comments, the gaps and
-  questions that surface get verified against the hard sources and folded into the
-  knowledge base — and from there back into the manuals. Because that new material lands
+- **The smart-pin work** is running the same loop right now. As we ratify Jon Titus's
+  community study against the hard sources — and weigh its readers' comments the same
+  way — the gaps and questions that surface get folded into the knowledge base, and from
+  there back into the manuals. Because that new material lands
   *after* some manuals were already written, we then go back and re-audit the older ones
   against the improved base, and re-release the ones that need it rather than leave them
   behind.

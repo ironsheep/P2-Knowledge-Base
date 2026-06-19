@@ -115,16 +115,37 @@ little errors this way, on manuals we'd otherwise have been happy with. Those fi
 don't get buried; they go into a corrections register that tracks each one from
 "found" to "fixed."
 
-We also let other people's work challenge ours. On our smart-pin material, for
-instance, we wrote our own document straight from the hard sources — the Silicon Doc,
-the datasheets, the compiler — and then used Jon Titus's community smart-pin study —
-published as a Google Doc, carrying its readers' own inline comments and annotations on
-specific passages — as an independent set of *questions* to interrogate what we'd
-written. None of it was taken on faith: each claim, and each reader observation, was
-tested back against the hard sources and, where it mattered, against real silicon. What
-held up, we incorporated; what didn't, we were able to disprove — including reader
-observations that simply didn't survive the chip. Outside knowledge is genuinely
-welcome here, but it earns its place by passing the same checks as everything else.
+Some of the most valuable material in our smart-pin manuals came in from outside,
+through **Jon Titus** — a well-respected name in embedded computing — who wrote a
+generous, tutorial-grade study of the P2's smart pins and shared it openly with the
+community, readers' inline comments and all. It's a genuinely good piece of work: it
+walks all thirty-two smart-pin modes with the *how and why*, worked calculations,
+complete runnable examples, and timing diagrams. We didn't hold it at arm's length, and
+we didn't merely audit our own draft against it — we accepted his document *into* our
+process as a first-class source, to be ratified, broadened, and carried forward into
+formal manuals.
+
+Ratifying it meant running every code example through `pnut_ts`, Chip's own compiler,
+and holding every claim against the Silicon Doc and, where it mattered, against real
+silicon. Most of it held up beautifully. A few things didn't — including one bit-field
+table Jon's own readers had already questioned and the chip confirmed wrong, and a
+handful of reader observations that simply didn't survive silicon — and those we
+corrected and marked rather than passed along. Broadening it meant re-casting the
+material for the people who'll actually use it: where a mode was written as a raw
+bit-pattern we rewrote it with the compiler's named constants (`P_DAC_NOISE`, `P_PULSE`,
+and the rest) so the code shows what it's doing; where he taught in assembly we
+re-expressed the same capability in Spin2 — the language most P2 users reach for first —
+with the PASM2 kept alongside; and where his study left a corner thin, we filled it from
+the primary sources.
+
+We also made one deliberate departure. His study follows the natural reference order —
+mode %00000 straight through %11111 — exactly right for a document you look things up
+in. Our manuals have a different job, bringing a reader along, so we organized the same
+ground as a learning progression: fundamentals first, then output modes, then input
+modes, then the special cases. Same material, ordered to teach rather than to index.
+Through all of it, Jon's name stays on what he contributed — accepting a serious
+author's work, verifying it, and presenting it clearly is how we honor it here, not the
+opposite of it.
 
 That's the honest shape of this work: the audits aren't proof we're never wrong,
 they're proof that being wrong gets *caught and recorded* here instead of shipping
