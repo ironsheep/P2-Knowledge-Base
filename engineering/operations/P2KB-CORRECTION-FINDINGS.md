@@ -11,7 +11,7 @@
 
 **Authority order for P2 language facts:** the `pnut_ts` compiler (ground truth for what compiles) → the Spin2 v51 documentation (`engineering/ingestion/sources/spin2-v51/`) → the Silicon Doc. The KB YAML must match these.
 
-**Next finding ID: `F-141`**
+**Next finding ID: `F-154`**
 
 **Archive:** findings F-001..F-124 (all `DONE` / closed) live in
 `engineering/operations/correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`.
@@ -59,6 +59,56 @@
 > a smaller set were genuine defects (→ `DONE`); and three NEW writing-debug-statement defects
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
+
+## Internal-consistency audit batch (2026-06-18) — F-141…F-153
+
+> **Origin:** full KB-wide internal-consistency sweep (6-way fan-out + hand-verification of the
+> top findings) requested after F-140. **Dominant pattern = the F-140 archetype:** stale
+> **overview / concept / pattern / hardware-hub** files that were NOT re-synced when their
+> **detail pages** were corrected. In every adjudicated case the **detail page (+ Silicon Doc /
+> v55 / hardware ledger) is correct** and the overview/concept/pattern is the drift. Statuses are
+> `CONFIRMED` (cited authority); ★ = I personally re-verified against the Silicon Doc this pass.
+> Re-confirm each at fix time per §4.5.
+
+### F-141 — `architecture/smart_pin_patterns.yaml` carries 3 wrong smart-pin register-roles (stale; skipped by the F-135–F-140 sweep) — `CONFIRMED`
+- **Repository value via WYPIN (L219)** — should be **WXPIN** (X holds the long; `smart-pin-00001-*.yaml` + Silicon `part4-smart-pins.txt` L224-226). · **Basic-ADC "trigger conversion" via WYPIN (L142/L151)** — ADC samples **continuously** once enabled; no WYPIN trigger (`smart-pin-11000-*.yaml`; Silicon L66/L73/L124). · **Quadrature counter "clear" via `WYPIN #0` (L175)** — zeroed by **pulsing DIR low** (`smart-pin-01011-*.yaml`; Silicon L550). Plus value-mode examples use WYPIN-before-DIRH (order-safe, cosmetic).
+- **Fix:** reconcile `smart_pin_patterns.yaml` to the per-mode files (repository→WXPIN, drop ADC WYPIN-trigger, quadrature→DIR-low) + adopt the universal init order.
+
+### F-142 — `language/pasm2/wrpin.yaml` STILL teaches WYPIN-before-DIRH (the F-140 bug, surviving in the instruction page) — `CONFIRMED ★`
+- `wrpin.yaml` `critical_requirement.sequence` (L30-35) **and** the PWM example (L45-53, `WYPIN #50` at L51 before `DIRH` at L53) both order WYPIN before enable. Contradicts the corrected `architecture/smart_pins.yaml` (F-140) + EF-011. **Fix:** reorder to `…WXPIN → DIRH → WYPIN` + the trigger/serial note (same fix as F-140).
+
+### F-143 — `architecture/cordic.yaml` overview contradicts the (correct) CORDIC instruction pages — `CONFIRMED ★ (QFRAC)`
+- **QFRAC = "fractional multiply" (L45-50) — WRONG, it is a DIVIDE** (`qfrac.yaml`; Silicon L7336 "Divide {D:0} by S"; grouped with QDIV at L2534). **CRITICAL.** · QSQRT "32→16-bit" (L52-56) — actually **64-bit** input, 32-bit root (`qsqrt.yaml`). · QMUL `signed: true` (L30-36) — QMUL is **unsigned** (`qmul.yaml`; Silicon L7304). · CORDIC latency "54 clocks" — **55** (pipeline depth 54; Silicon "fifty-five clocks later"). **Fix:** correct `cordic.yaml` to the instruction pages.
+
+### F-144 — `architecture/interrupts.yaml` has interrupt PRIORITY inverted + a wrong source-ID table — `CONFIRMED ★ (priority)`
+- **Priority: file says INT3 highest / INT1 lowest — INVERTED.** Silicon `part3-interrupts.txt` L73/L77/L189: **INT1 highest, INT3 lowest** (matches `cog.yaml`). · **`interrupt_sources_detail` (codes 9-15) shifted/fabricated** (e.g. invents "SELH edge" sources) vs the correct table in `event_system.yaml` + `streamer/overview.yaml` + Silicon L86-100 (8=pattern,9=FIFO,10=streamer-ready,11=streamer-out,12=NCO,13=LUT$1FF,14=ATN,15=CORDIC). **Fix:** rewrite `interrupts.yaml` priority + source table to Silicon.
+
+### F-145 — `language/pasm2/concepts/basic-io.yaml` transposes OUTA/OUTB/INA/INB register addresses — `CONFIRMED`
+- File: OUTA=$1FE, OUTB=$1FF, INA=$1FC, INB=$1FD. Correct (Silicon L939-947; `system-registers/dira-dirb-registers.yaml`; canonical map): **OUTA=$1FC, OUTB=$1FD, INA=$1FE, INB=$1FF** — the OUT and IN blocks are swapped. **Fix:** correct the four addresses.
+
+### F-146 — `language/spin2/concepts/operators.yaml` carries P1 semantics + inverted precedence claims — `CONFIRMED`
+- **`~` / `~~` documented as P1 "sign-extend" (L280-286)** — in P2 they are **post-clear / post-set** (`special-symbols/~.yaml`, `~~.yaml`; v55 operator table). · **Anti-pattern precedence claims inverted (L201-217):** claims C-style "compare binds tighter than `&`" and "`+` binds tighter than `<<`"; P2 is the opposite (`&` tighter than `==`, `<<` tighter than `+` — `precedence.yaml` + v55). **Fix:** rewrite both to P2 semantics.
+
+### F-147 — addressing concept files contradict the instruction pages — `CONFIRMED`
+- `concepts/addressing_modes.yaml` (L16-18): **AUGS/AUGD split by WIDTH** (20-bit vs 32-bit) — actually split by **FIELD** (AUGS=Src, AUGD=Dest; both yield 32-bit literals — `augs.yaml`/`augd.yaml`; Silicon part3-end L166-175). · `concepts/register_indirection.yaml` (L45): **ALTR = D+base+index (3-term)** — actually **(S+D) & $1FF (2-term)**, like ALTS/ALTD (`altr.yaml`; Silicon L1013-1016). **Fix:** correct both concept files.
+
+### F-148 — `drvrnd/fltrnd/dirrnd` + `*not` pin files mis-state the WCZ flag source as "original" bit — `CONFIRMED`
+- Their `flags_affected`/prose say C,Z = the **original** OUT/DIR bit (before modification); the plain siblings (`drvh/drvc/…`) + the same files' structured fields + the instruction CSV say C,Z = the **(new) OUT/DIR bit**. "original" is bled-over BIT-family wording. **Fix:** align the `*rnd`/`*not` flag wording to the family.
+
+### F-149 — `language/spin2/statements/debug.yaml` examples STILL put a SCOPE channel-def on the CREATE line (the F-137 bug, surviving in 2 examples) — `CONFIRMED`
+- Examples at L125 `` DEBUG(`SCOPE MyScope 'Sensor' AUTO 'Filtered' AUTO) `` and L171 `` DEBUG(`SCOPE Sensor 'Value' AUTO) `` contradict the **same file's** usage prose (L22) + `scope.yaml` + EF-003 (a channel-def on the SCOPE create line prevents window creation). **Fix:** split into create-then-config-message form (same as F-137).
+
+### F-150 — `language/spin2/patterns/implementation/spin2_pin_control.yaml` reverses smart-pin method arg order — `CONFIRMED`
+- Uses `wrpin(mode, pin)` / `wxpin(x, pin)` / `wypin(y, pin)` (**value-first**); the method pages + v55 + `pinstart.yaml` all specify **PinField first**: `WRPIN(pin, mode)` etc. Compiler can't catch it (positional). **Fix:** swap args pin-first throughout the pattern.
+
+### F-151 — hardware HUB files stale vs the corrected Edge module detail pages (flash/PSRAM) — `CONFIRMED`
+- **P2-EC flash:** `feature-comparison`/`selection-guide`/`compatibility-matrix` say **4MB**; `edge-standard-module.yaml` (+ on-board W25Q128, 128 Mbit) says **16MB**. · **P2-EC32MB:** hubs say "32MB **flash**, 0MB PSRAM"; `edge-32mb-module.yaml` says **16MB flash + 32MB PSRAM** (the "32MB" is PSRAM). · `compatibility-matrix` 32MB-module pin-efficiency row ("30%") uses an unsupportable denominator. **Fix:** re-sync the 3 hub files to the module detail pages. (Detail pages = authority; same root cause as HW corrections.)
+
+### F-152 — `TASKRESUME` is a fabricated keyword; the real Spin2 keyword is `TASKCONT` — `CONFIRMED`
+- `methods/taskresume.yaml` documents `TASKRESUME(TaskID)`, cross-referenced by `taskhalt/taskstop/taskspin.yaml`. `pnut-ts -d`: `TASKCONT(3)` compiles, `TASKRESUME(3)` errors. v55 history (L39) + keyword-gating table (L149) = **TASKCONT** (v47). Uniform across the cluster (so internally consistent but factually wrong). **Fix:** rename to TASKCONT (stub-don't-delete per supersession convention) + fix cross-refs.
+
+### F-153 — minor internal inconsistencies (batch) — `CONFIRMED / LOW`
+- `rdfast.yaml` L84 "block size 0 = max **16384 longs**" vs `architecture/fifo.yaml` "16384 **blocks**" (= 262,144 longs) — `rdfast` off by 16× (Silicon L6675). · `jnxmt.yaml`/`jnxro.yaml` `timing.type: fixed` while carrying `clocks: 2 or 4` (self-contradiction; twins say `variable`). · set-only jumps (`jfbw/jqmt/jxmt/jxrl`) oneliner "flag set **or clear**" vs their own "if set" description. · `concepts/setq_block_ops.yaml` L360 `common_errors` says "SETQ for LUT, SETQ2 for cog" — backwards vs the rest of the file. · `operators/precedence.yaml` absolute level numbers drift from v55 (relative order preserved) + `ADDBITS`/`ADDPINS` missing. · `debug-displays/plot.yaml` L51/L130 PRECISE "starts ON" vs v55 "disabled" default. · `p2-architecture-mental-model.yaml` + `cog.yaml` CORDIC latency "54" vs the 55-clock authority (see F-143). · `term.yaml` default color "LIME" vs v55 "GREEN" (cosmetic — settled RESOLVED-INVALID in F-128; the constant IS clLime). · `statements/debug.yaml` `documentation_source: v51` provenance staleness.
 
 ### F-140 — `architecture/smart_pins.yaml` OVERVIEW still teaches the OLD init order (WYPIN before DIRH); F-139 swept the per-mode files but missed the overview — `DONE`
 > **Logged + DONE 2026-06-18.** Surfaced while auditing the **PASM2 Reference + DeSilva** manuals for smart-pin staleness — the manuals had inherited the old order, and the trail led back to this overview page. F-135/F-139 ratified the universal order **Reset → Setup (WRPIN/WXPIN) → Enable (DIRH) → Operate (WYPIN)** (WYPIN *after* enable; hardware-verified EF-011) and corrected the per-mode `architecture/smart-pins/smart-pin-*.yaml` files — but the **overview** `smart_pins.yaml` was not updated. Its `critical_requirements.reset_before_configure.correct_sequence` (pasm2 **and** spin2) and `live_update_behavior.what_needs_reset.procedure` both still showed `…WXPIN → WYPIN → DIRH` (WYPIN before enable). It was even internally inconsistent with the file's OWN `live_update_behavior` ("once configured, DIR can be raised high … after that you may feed it new data via WXPIN/WYPIN").
