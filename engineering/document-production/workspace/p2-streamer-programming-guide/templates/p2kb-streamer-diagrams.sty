@@ -36,10 +36,12 @@
   \draw[iospflow] (fifo)--(shift);
   \draw[iospflow] (shift)--(lut);
   \draw[iospflow] (lut)--(pins);
-  % DAC output below the pin output
-  \node[iospkey, below=10mm of pins, text width=20mm] (dac) {DAC Channels\\X0--X3};
+  % DAC channels are an analog conversion stage that emerges ON pins (DAC mode),
+  % not a separate output terminal -- so they flow INTO Pins.
+  \node[iospbox, below=10mm of pins, text width=22mm] (dac) {DAC Channels\\X0--X3\\{\scriptsize (analog)}};
   \draw[iospflow] (lut.south) |- (dac.west);
-  \node[wlbl, right=8mm of dac] {DAC0--DAC3};
+  \draw[iospflow] (dac.north) -- (pins.south);
+  \node[wlbl, right=8mm of dac, align=center] {on DAC-mode\\pins};
   % NCO timing feeds the shifter from below
   \node[iospbox, below=16mm of shift, text width=18mm] (nco) {NCO\\{\scriptsize 32-bit}};
   \node[wlbl, left=10mm of nco] (sx) {SETXFRQ};

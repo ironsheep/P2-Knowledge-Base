@@ -110,6 +110,41 @@
 ### F-153 — minor internal inconsistencies (batch) — `CONFIRMED / LOW`
 - `rdfast.yaml` L84 "block size 0 = max **16384 longs**" vs `architecture/fifo.yaml` "16384 **blocks**" (= 262,144 longs) — `rdfast` off by 16× (Silicon L6675). · `jnxmt.yaml`/`jnxro.yaml` `timing.type: fixed` while carrying `clocks: 2 or 4` (self-contradiction; twins say `variable`). · set-only jumps (`jfbw/jqmt/jxmt/jxrl`) oneliner "flag set **or clear**" vs their own "if set" description. · `concepts/setq_block_ops.yaml` L360 `common_errors` says "SETQ for LUT, SETQ2 for cog" — backwards vs the rest of the file. · `operators/precedence.yaml` absolute level numbers drift from v55 (relative order preserved) + `ADDBITS`/`ADDPINS` missing. · `debug-displays/plot.yaml` L51/L130 PRECISE "starts ON" vs v55 "disabled" default. · `p2-architecture-mental-model.yaml` + `cog.yaml` CORDIC latency "54" vs the 55-clock authority (see F-143). · `term.yaml` default color "LIME" vs v55 "GREEN" (cosmetic — settled RESOLVED-INVALID in F-128; the constant IS clLime). · `statements/debug.yaml` `documentation_source: v51` provenance staleness.
 
+## Streamer grounding-audit drift (2026-06-19) — F-154…F-158
+
+> **Origin:** the exhaustive grounding audit of the **Streamer Programming Guide**
+> (`engineering/document-production/manuals/p2-streamer-programming-guide/audit/streamer-grounding-audit-2026-06-19.md`)
+> surfaced 4 derived-YAML drift items. Per the trust chain (Silicon Doc = primary), the
+> manual's **v1.0.1** fix is grounded directly in Silicon; **these YAML edits fold into the
+> next yaml-head sweep (v1.10.1)** alongside F-141…F-153 (Stephen's call 2026-06-19). All
+> `value`/`encoding` fields are correct — the errors are in `description:` text only.
+
+### F-154 — `language/spin2/symbols/streamer-symbols.yaml` description text transposes pin↔DAC-channel counts — `CONFIRMED ★`
+- For the immediate / RFBYTE-direct / WFBYTE-capture symbol families, the `description:` reads the **DAC-channel count as the pin count** and drops the true pin count. E.g. `X_RFBYTE_8P_1DAC8` (L159) says "→ 1 pin, 8 DAC"; Silicon `part2-pixel-ops.txt` L182 decodes it `RFBYTE -> 8-pin + 1-DAC8` = **8 pins, 1 DAC channel, 8 DAC bits**. The symbol token is `<N>P_<M>DAC<B>` (N=pins, M=DAC channels, B=DAC bits). The sibling `architecture/streamer/modes-reference.yaml` L194 already has it right ("8 pins, 8 DAC bits") — **the two YAMLs disagree**. **Root cause of manual findings H-4 + M-1.**
+- **Authority:** Silicon `part2-pixel-ops.txt` L175–209; symbol-name grammar. **Fix:** rewrite every transposed `description:` to "N pins, M DAC ch × B bits" (encodings untouched).
+
+### F-155 — `architecture/streamer/pin-selection.yaml` `%101` group labelled "24 pins"; it is 32 — `CONFIRMED`
+- L35 `%101` `description: "Wrap-around (24 pins)"`, but its own `pins:` field is `"7..0, 63..40"` = 8 + 24 = **32 pins** (and the `%110` row correctly says "32 pins"). Manual §4.5 is already right. **Authority:** the row's own `pins:` field; Silicon pin-group def. **Fix:** "24 pins" → "32 pins".
+
+### F-156 — `architecture/streamer/dds-goertzel.yaml` bitstream-sum range "−3..+3" — `RESOLVED-INVALID`
+> **AUDIT FINDING INVERTED — VERIFIED 2026-06-19.** The audit (and this finding as first
+> logged) claimed the range should be **−4..+4** ("1–4 ADC pins × ±1"). **Silicon overrules
+> this:** `part2-more-content.txt` L227-228 (= `p2-documentation.txt` L4094-4095) states the
+> sine/cosine values are "multiplied by the bitstream sum (**an integer from -3 to +3**)."
+> The −4..+4 reasoning missed Silicon L177-179 (`p2-documentation.txt` L3999-4001): "*For
+> cases of two or four input channels summed together, the sum is always even, so it is
+> shifted right by one bit*." Effective multiplier magnitudes: 1 pin → ±1; 2 pins → ±2÷2 = ±1;
+> 3 pins → ±3; 4 pins → ±4÷2 = ±2. Max magnitude = **3** (the 3-pin case) ⇒ Silicon's −3..+3.
+> The YAML `dds-goertzel.yaml:46` "−3..+3" is **correct**; the manual §10.2 "−3 to +3" is
+> **correct**. **No edit** to either. Manual finding **M-5 is likewise withdrawn.** (The
+> audit's "L403–405" citation pointed at the wrong location; the real text is the lines above.)
+
+### F-157 — `language/pasm2/setxfrq.yaml` 2³¹ vs 2³² NCO basis (re-verify of F-016) — `RESOLVED-INVALID`
+> **VERIFIED CLEAN 2026-06-19.** `setxfrq.yaml` uses the 2³¹ ($8000_0000) basis consistently — `description` L13-14, `frequency_formula` L48-52, and an explicit L52 note: "the multiplier is $8000_0000 (2^31), not 2^32 (Silicon Doc v35 SETXFRQ). nco-timing.yaml uses the same convention." F-016's concern is fully resolved; no edit. (SETCFRQ — the *colorspace* NCO — legitimately stays 2³².)
+
+### F-158 — `architecture/streamer/modes-reference.yaml` `selection_guide` recommends a 4-pin mode for 1-pin SPI — `CONFIRMED ★`
+- `selection_guide.spi_output` (L346) recommends **`X_IMM_8X4_1DAC4 + X_ALT_ON`** for SPI output, but Silicon `part2-pixel-ops.txt` decodes `X_IMM_8X4_1DAC4` (mode %0110, D[19:16]=%0100) as a **4-pin** mode ("imm 8×4 → 4-pin + 1-DAC4 … 4 out"). One-pin SPI needs a **1-pin** immediate mode — **`X_IMM_32X1_1DAC1`** ("imm 32×1 → 1-pin + 1-DAC1 … 1 out"; count = number of bits). Surfaced as manual finding L-7; the manual's SPI examples (§13, §16.1) were corrected to `X_IMM_32X1_1DAC1` this pass, grounded in Silicon (the manual must not diverge from the KB on a guess, but here the *primary* source overrides the drifted KB). **Authority:** Silicon `part2-pixel-ops.txt` immediate-mode table. **Fix:** set `spi_output` to `X_IMM_32X1_1DAC1 + X_ALT_ON`; also re-check the IMM-family pin counts (same transposition as F-154/DRIFT-1 — `X_IMM_8X4_1DAC4` is 4-pin, not the "1-pin" the derived tables imply).
+
 ### F-140 — `architecture/smart_pins.yaml` OVERVIEW still teaches the OLD init order (WYPIN before DIRH); F-139 swept the per-mode files but missed the overview — `DONE`
 > **Logged + DONE 2026-06-18.** Surfaced while auditing the **PASM2 Reference + DeSilva** manuals for smart-pin staleness — the manuals had inherited the old order, and the trail led back to this overview page. F-135/F-139 ratified the universal order **Reset → Setup (WRPIN/WXPIN) → Enable (DIRH) → Operate (WYPIN)** (WYPIN *after* enable; hardware-verified EF-011) and corrected the per-mode `architecture/smart-pins/smart-pin-*.yaml` files — but the **overview** `smart_pins.yaml` was not updated. Its `critical_requirements.reset_before_configure.correct_sequence` (pasm2 **and** spin2) and `live_update_behavior.what_needs_reset.procedure` both still showed `…WXPIN → WYPIN → DIRH` (WYPIN before enable). It was even internally inconsistent with the file's OWN `live_update_behavior` ("once configured, DIR can be raised high … after that you may feed it new data via WXPIN/WYPIN").
 > **FIX APPLIED 2026-06-18:** `correct_sequence` reordered to WYPIN-after-DIRH (pasm2 + spin2; the spin2 form was switched from `PINSTART(pin,mode,x,y)` — which writes Y before raising DIR and is unsafe for the trigger modes — to the explicit safe sequence) with a `note:` explaining why; the `procedure` line corrected to `DIRL → WRPIN/WXPIN → DIRH → WYPIN`. YAML valid + crossref clean. **Ships next YAML release** (published v1.10.0 index does not yet carry it).

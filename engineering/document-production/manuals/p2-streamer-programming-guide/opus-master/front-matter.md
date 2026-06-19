@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large June 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0\par}
+{\large\color{blue}Version 1.0.1\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -170,9 +170,11 @@ This reference serves developers implementing high-speed I/O on the Propeller 2.
 
 ## Enhancement Markers
 
-- ⚠️ **Pitfall:** Common mistakes with non-obvious consequences
-- 💡 **Tip:** Non-obvious techniques or optimizations
-- 🔧 **Hardware:** Silicon-level details affecting usage
+Three colored callout boxes set "things to know" apart from the running text:
+
+- **CAUTION** (amber) — common mistakes with non-obvious consequences
+- **TIP** (teal) — non-obvious techniques or optimizations
+- **HARDWARE** (graphite) — silicon-level details affecting usage
 
 ```{=latex}
 \clearpage

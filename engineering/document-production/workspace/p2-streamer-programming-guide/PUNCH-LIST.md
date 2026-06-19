@@ -3,6 +3,15 @@
 Outstanding work items for the Streamer Guide. Sweep completed items into a dated
 archive section at closeout.
 
+> **2026-06-19 — v1.0.1 content-fix cycle in progress** (grounding audit
+> `audit/streamer-grounding-audit-2026-06-19.md`; plan
+> `engineering/planning/streamer-grounding-audit-fix-plan-2026-06-19.md`). That cycle
+> covers **content only** (code-compile sweep, pin/DAC table transposition, semantics,
+> LOW polish) and a single Forge render to verify those fixes landed.
+> **The visual review below — diagram render-audit, Tier-3 candidates, emoji
+> render-watch — is DEFERRED PAST v1.0.1 as a separate visual pass (Stephen, 2026-06-19).**
+> The "after next Forge build" trigger does NOT mean the v1.0.1 build.
+
 ---
 
 ## Tier-3 diagrams (candidates — awaiting per-item approval)

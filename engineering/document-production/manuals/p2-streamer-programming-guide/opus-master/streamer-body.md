@@ -172,7 +172,9 @@ phase = (phase & $7FFF_FFFF) + frequency
 3. If the new MSB is set, a "rollover" occurs
 4. On rollover, the streamer advances to the next data element
 
-🔧 **Hardware:** The phase accumulator is a 32-bit register. Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2³¹`.
+::: hardware
+**The phase accumulator is a 32-bit register.** Its most-significant bit is masked off before each addition and used as the rollover flag, so 31 bits accumulate the phase. Frequency resolution is therefore `clock_frequency / 2³¹`.
+:::
 
 ```{=latex}
 \DiagNcoRollover
@@ -188,16 +190,20 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 
 **Common Values:**
 
-| Rate Ratio | Frequency Value | At 250 MHz | At 300 MHz |
-|------------|-----------------|------------|------------|
-| 1:1 | `$8000_0000` | 250 MHz | 300 MHz |
-| 1:2 | `$4000_0000` | 125 MHz | 150 MHz |
-| 1:3 | `$2AAA_AAAB` | 83.3 MHz | 100 MHz |
-| 1:4 | `$2000_0000` | 62.5 MHz | 75 MHz |
-| 1:5 | `$1999_999A` | 50 MHz | 60 MHz |
-| 1:10 | `$0CCC_CCCD` | 25 MHz | 30 MHz |
+| Rate Ratio | Frequency Word | Exact? |
+|------------|----------------|--------|
+| 1:1 | `$8000_0000` | exact |
+| 1:2 | `$4000_0000` | exact |
+| 1:4 | `$2000_0000` | exact |
+| 1:8 | `$1000_0000` | exact |
+| 1:3 | `$2AAA_AAAB` | rounded (+1) |
+| 1:10 | `$0CCC_CCCD` | rounded (+1) |
 
-⚠️ **Pitfall — round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). This exactness is also what eliminates per-pixel jitter — see [§3.4](#sec-3-4) for choosing a rate around it. [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
+
+::: caution
+**Round up, and never let the value reach zero.** Truncating `$8000_0000 × rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the Silicon Doc's **+1 convention**: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+:::
 
 ## 3.3 Setting NCO Frequency {#sec-3-3}
 
@@ -219,17 +225,43 @@ The `+1` is the rounding-up habit from the pitfall above: `$0CCC_CCCC` is the tr
 
 The **SETQ** method allows changing frequency atomically with a new command.
 
-## 3.4 Pixel Rate Examples
+## 3.4 Choosing a Pixel Rate {#sec-3-4}
 
-| Application | Pixel Rate | At 250 MHz | At 300 MHz | At 320 MHz |
-|-------------|------------|------------|------------|------------|
-| VGA 640×480 | 25.175 MHz | `$0CE3_BCD3` | `$0ABD_C805` | `$0A11_EB85` |
-| VGA 800×600 | 40 MHz | `$147A_E148` | `$1111_1111` | `$1000_0000` |
-| VGA 1024×768 | 65 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
+Two facts decide this, and the first is counter-intuitive:
 
-Each value is `round($8000_0000 × pixel_rate / clock_frequency)` — the closest achievable NCO word for that rate at that clock.
+1. **The average pixel clock is essentially exact at any sysclk.** The NCO word is 31-bit, so its resolution is `sysclk / 2³¹` ≈ 0.12 Hz at 250 MHz. The error in the *average* output rate is under ~0.01 ppm — far below any monitor's tolerance. Frequency accuracy is **not** what you tune.
+2. **Per-pixel jitter is what varies.** Each pixel lasts a whole number of sysclk cycles. When `sysclk ÷ pixel_clock` is an integer, every pixel is identical — **no jitter**. When it is not, pixel widths swing by ±1 sysclk cycle around the ideal (the average still comes out exact). So the rule is: **pick a sysclk that is an integer multiple of the pixel clock.**
 
-⚠️ **Pitfall:** Exact VGA pixel rates rarely divide evenly into P2 clock frequencies. The values above are the nearest achievable rate; monitors tolerate small variations.
+The jitter-free sysclks below are the integer multiples the P2 PLL can actually produce from a 20 MHz crystal. The last column is the penalty for ignoring the rule and just running 250 MHz.
+
+| Mode | Pixel clock | Jitter-free sysclks (× pixel clock) | At 250 MHz |
+|------|-------------|-------------------------------------|------------|
+| VGA 640×480 | 25.175 MHz | none on a 20 MHz crystal — see note | use 25.0 MHz pixel → 10.000 cyc/px, no jitter |
+| 480p 720×480 | 27.0 MHz | 270 (×10), 297 (×11), 324 (×12) | 9.26 cyc/px → ~11% jitter |
+| SVGA 800×600 | 40.0 MHz | 160 / 200 / 240 / 280 / 320 (×4–×8) | 6.25 cyc/px → ~16% jitter |
+| XGA 1024×768 | 65.0 MHz | 130 / 195 / 260 / 325 (×2–×5) | 3.85 cyc/px → ~26% jitter |
+| 720p 1280×720 | 74.25 MHz | 148.5 (×2), 297 (×4) | 3.37 cyc/px → ~30% jitter |
+
+> **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
+
+The SETXFRQ word for any combination is `round($8000_0000 × pixel_clock / sysclk)` — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
+
+```formula
+Example 1 — integer ratio: SVGA 800×600, 40 MHz pixel @ 320 MHz
+  word     = round($8000_0000 × 40 / 320) = $8000_0000/8 = $1000_0000
+  achieved = 320 × $1000_0000 / $8000_0000 = 40.000 MHz   (exact)
+  cyc/px   = 320 / 40 = 8.000   -> no jitter
+
+Example 2 — non-integer ratio: VGA 640×480, 25.175 MHz @ 250 MHz
+  word     = round($8000_0000 × 25.175 / 250) = $0CE3_BCD3
+  achieved = 250 × $0CE3_BCD3 / $8000_0000 = 25.175 MHz   (<0.01 ppm)
+  cyc/px   = 250 / 25.175 = 9.93   -> ±1-cycle jitter (~10% of pixel)
+  remedy   = 25.0 MHz @ 250 = 10.000 cyc/px   -> no jitter
+```
+
+::: tip
+The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk ÷ pixel_clock` a whole number and every pixel is the same width.
+:::
 
 # Chapter 4: Command Structure {#ch-4}
 
@@ -255,6 +287,8 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 | `%1100`-`%1111` | Capture | Pins | DACs/WRFAST |
 | `%1111` | ADC | ADC | DACs/WRFAST |
 | `%1111_x111` | DDS/Goertzel | LUT | DACs + Analysis |
+
+> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Within that config field, bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
 
 ## 4.3 DAC Routing Field D[27:24]
 
@@ -305,9 +339,13 @@ Specifies the number of NCO rollovers before the command completes.
 
 **XCONT** and **XZERO** buffer a command that executes on the final rollover of the current command. **XCONT** preserves NCO phase; **XZERO** resets it.
 
-💡 **Tip:** Use **XZERO** at video line boundaries to prevent phase drift accumulation across lines.
+::: tip
+Use **XZERO** at video line boundaries to prevent phase drift accumulation across lines.
+:::
 
-⚠️ **Pitfall:** Issuing **XCONT** or **XZERO** when no command is active causes unpredictable behavior. Use **XINIT** to start the streamer initially.
+::: caution
+**XCONT and XZERO are for seamless command-to-command continuity, not for starting the streamer.** They wait for the current command's final NCO rollover; if the streamer is already idle (count = 0) there is no wait and the command runs immediately — and XCONT begins with whatever phase remains in the accumulator rather than a known zero. Use **XINIT** to start the streamer from a clean, phase-zeroed state.
+:::
 
 # Part II: Mode Reference
 
@@ -345,20 +383,20 @@ The S operand provides index values into the LUT. LUT data drives pins and DACs.
 
 The S operand drives pins and DACs directly without LUT lookup.
 
-| Mode | Symbol | Pins | DAC Channels |
-|------|--------|------|--------------|
-| `%0100` | `X_IMM_32X1_1DAC1` | 1 | 1 |
-| `%0101` | `X_IMM_16X2_2DAC1` | 2 | 1 |
-| `%0101` | `X_IMM_16X2_1DAC2` | 1 | 2 |
-| `%0110` | `X_IMM_8X4_4DAC1` | 4 | 1 |
-| `%0110` | `X_IMM_8X4_2DAC2` | 2 | 2 |
-| `%0110` | `X_IMM_8X4_1DAC4` | 1 | 4 |
-| `%0110` | `X_IMM_4X8_4DAC2` | 4 | 2 |
-| `%0110` | `X_IMM_4X8_2DAC4` | 2 | 4 |
-| `%0110` | `X_IMM_4X8_1DAC8` | 1 | 8 |
-| `%0110` | `X_IMM_2X16_4DAC4` | 4 | 4 |
-| `%0111` | `X_IMM_2X16_2DAC8` | 2 | 8 |
-| `%0111` | `X_IMM_1X32_4DAC8` | 4 | 8 |
+| Mode | Symbol | Pins | DAC Channels | DAC Bits |
+|------|--------|------|--------------|----------|
+| `%0100` | `X_IMM_32X1_1DAC1` | 1 | 1 | 1 |
+| `%0101` | `X_IMM_16X2_2DAC1` | 2 | 2 | 1 |
+| `%0101` | `X_IMM_16X2_1DAC2` | 2 | 1 | 2 |
+| `%0110` | `X_IMM_8X4_4DAC1` | 4 | 4 | 1 |
+| `%0110` | `X_IMM_8X4_2DAC2` | 4 | 2 | 2 |
+| `%0110` | `X_IMM_8X4_1DAC4` | 4 | 1 | 4 |
+| `%0110` | `X_IMM_4X8_4DAC2` | 8 | 4 | 2 |
+| `%0110` | `X_IMM_4X8_2DAC4` | 8 | 2 | 4 |
+| `%0110` | `X_IMM_4X8_1DAC8` | 8 | 1 | 8 |
+| `%0110` | `X_IMM_2X16_4DAC4` | 16 | 4 | 4 |
+| `%0111` | `X_IMM_2X16_2DAC8` | 16 | 2 | 8 |
+| `%0111` | `X_IMM_1X32_4DAC8` | 32 | 4 | 8 |
 
 **D[19:16] Field:** Mode variant selector
 
@@ -367,15 +405,17 @@ The S operand drives pins and DACs directly without LUT lookup.
 **Example:**
 
 ```pasm2
-' Output 8 bytes to 1 pin, 8 bits each (serial)
-        xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON + pin<<17 + 8, ##$12345678
+' Output 4 bytes to an 8-pin group, 8 bits each
+        xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON + pin<<17 + 4, ##$12345678
 ```
 
 # Chapter 6: RDFAST Modes {#ch-6}
 
 RDFAST modes are the workhorse of the streamer. Where immediate modes carry a single fixed value, these stream a continuous flow of data out of hub memory — a framebuffer, an audio clip, a bitmap — onto the pins or DACs. This is what you use for anything longer than a few elements. The data arrives through the FIFO, which must be primed with **RDFAST** before the streamer command runs.
 
-⚠️ **Pitfall:** RDFAST modes require FIFO setup before the streamer command. Without **RDFAST** initialization, the FIFO contains undefined data.
+::: caution
+**Run RDFAST before any RDFAST streamer command.** It primes the cog's hub FIFO to *deliver* data (hub → streamer); until it does, the FIFO is not pointed at your buffer and the streamer pulls undefined data. The same FIFO handles the opposite direction via WRFAST (Chapter 8), so a cog streams one way at a time.
+:::
 
 ## 6.1 RDFAST → LUT → Pins/DACs {#sec-6-1}
 
@@ -406,20 +446,20 @@ Hub data serves as LUT index values.
 
 Hub data drives pins and DACs directly.
 
-| Mode | Symbol | Hub Read | Pins | DAC Bits |
-|------|--------|----------|------|----------|
-| `%1000` | `X_RFBYTE_1P_1DAC1` | RFBYTE | 1 | 1 |
-| `%1001` | `X_RFBYTE_2P_2DAC1` | RFBYTE | 2 | 1 |
-| `%1001` | `X_RFBYTE_2P_1DAC2` | RFBYTE | 1 | 2 |
-| `%1010` | `X_RFBYTE_4P_4DAC1` | RFBYTE | 4 | 1 |
-| `%1010` | `X_RFBYTE_4P_2DAC2` | RFBYTE | 2 | 2 |
-| `%1010` | `X_RFBYTE_4P_1DAC4` | RFBYTE | 1 | 4 |
-| `%1010` | `X_RFBYTE_8P_4DAC2` | RFBYTE | 4 | 2 |
-| `%1010` | `X_RFBYTE_8P_2DAC4` | RFBYTE | 2 | 4 |
-| `%1010` | `X_RFBYTE_8P_1DAC8` | RFBYTE | 1 | 8 |
-| `%1010` | `X_RFWORD_16P_4DAC4` | RFWORD | 4 | 4 |
-| `%1011` | `X_RFWORD_16P_2DAC8` | RFWORD | 2 | 8 |
-| `%1011` | `X_RFLONG_32P_4DAC8` | RFLONG | 4 | 8 |
+| Mode | Symbol | Hub Read | Pins | DAC Channels | DAC Bits |
+|------|--------|----------|------|--------------|----------|
+| `%1000` | `X_RFBYTE_1P_1DAC1` | RFBYTE | 1 | 1 | 1 |
+| `%1001` | `X_RFBYTE_2P_2DAC1` | RFBYTE | 2 | 2 | 1 |
+| `%1001` | `X_RFBYTE_2P_1DAC2` | RFBYTE | 2 | 1 | 2 |
+| `%1010` | `X_RFBYTE_4P_4DAC1` | RFBYTE | 4 | 4 | 1 |
+| `%1010` | `X_RFBYTE_4P_2DAC2` | RFBYTE | 4 | 2 | 2 |
+| `%1010` | `X_RFBYTE_4P_1DAC4` | RFBYTE | 4 | 1 | 4 |
+| `%1010` | `X_RFBYTE_8P_4DAC2` | RFBYTE | 8 | 4 | 2 |
+| `%1010` | `X_RFBYTE_8P_2DAC4` | RFBYTE | 8 | 2 | 4 |
+| `%1010` | `X_RFBYTE_8P_1DAC8` | RFBYTE | 8 | 1 | 8 |
+| `%1010` | `X_RFWORD_16P_4DAC4` | RFWORD | 16 | 4 | 4 |
+| `%1011` | `X_RFWORD_16P_2DAC8` | RFWORD | 16 | 2 | 8 |
+| `%1011` | `X_RFLONG_32P_4DAC8` | RFLONG | 32 | 4 | 8 |
 
 **Example:**
 
@@ -435,13 +475,15 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 
 ## 7.1 RGB Format Modes
 
-| Mode | Symbol | Hub Read | Format | Bits |
-|------|--------|----------|--------|------|
-| `%1011_0010` | `X_RFBYTE_LUMA8` | RFBYTE | Luminance | 8 |
-| `%1011_0011` | `X_RFBYTE_RGBI8` | RFBYTE | RGBI | 2:2:2:2 |
-| `%1011_0100` | `X_RFBYTE_RGB8` | RFBYTE | RGB | 3:3:2 |
-| `%1011_0101` | `X_RFWORD_RGB16` | RFWORD | RGB | 5:6:5 |
-| `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB | 8:8:8 |
+| Mode | Symbol | Hub Read | Format | Bytes/px |
+|------|--------|----------|--------|----------|
+| `%1011_0010` | `X_RFBYTE_LUMA8` | RFBYTE | Luminance 8 | 1 |
+| `%1011_0011` | `X_RFBYTE_RGBI8` | RFBYTE | RGBI 2:2:2:2 | 1 |
+| `%1011_0100` | `X_RFBYTE_RGB8` | RFBYTE | RGB 3:3:2 | 1 |
+| `%1011_0101` | `X_RFWORD_RGB16` | RFWORD | RGB 5:6:5 | 2 |
+| `%1011_0110` | `X_RFLONG_RGB24` | RFLONG | RGB 8:8:8 | 4 |
+
+**Memory is usually the deciding factor.** A framebuffer is `width × height × bytes/px`, and it shares the P2's **512 KB hub RAM** with your code. A full 640×480 frame is **300 KB** at 1 byte/px (fits), **600 KB** at 2 bytes/px, and **1.2 MB** at 4 bytes/px (neither fits). So full-screen video on a 512 KB P2 generally uses a **1-byte format** (RGB8, RGBI8, or LUMA8); RGB16 and RGB24 suit smaller regions, sprites, or boards with external PSRAM.
 
 ## 7.2 Color Format Details
 
@@ -462,38 +504,43 @@ Video is the streamer's headline act, and it earns its own family of modes becau
 ## 7.3 RGB Mode Example
 
 ```pasm2
-' VGA 640×480 RGB16 output
+' VGA 640×480 RGB16 output (assumes 250 MHz sysclk)
         rdfast  ##640*480*2/64, ##framebuffer
         setxfrq ##$0CCC_CCCC+1                    ' 25 MHz pixel rate
 
-        xcont   ##X_RFWORD_RGB16 | X_PINS_ON | ...
-                  X_DACS_3_2_1_0 + base<<17 + 640, #0
+        mov     cmd, ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0
+        add     cmd, ##base<<17 + 640
+        xcont   cmd, #0
 ```
 
-💡 **Tip:** RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory efficiency for most video applications.
+::: tip
+RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory efficiency for most video applications.
+:::
 
 # Chapter 8: WRFAST Input Modes {#ch-8}
 
 Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a COG into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
-⚠️ **Pitfall:** Initialize the write FIFO with **WRFAST** before issuing capture commands.
+::: caution
+**Run WRFAST before any capture command.** It primes that same hub FIFO to *receive* data (streamer → hub); until it does, captured data has no valid destination. This is the exact mirror of RDFAST (Chapter 6) — one FIFO, opposite direction.
+:::
 
 ## 8.1 Pin Capture Modes
 
-| Mode | Symbol | Pins | DAC Bits | Hub Write |
-|------|--------|------|----------|-----------|
-| `%1100` | `X_1P_1DAC1_WFBYTE` | 1 | 1 | WFBYTE |
-| `%1101` | `X_2P_2DAC1_WFBYTE` | 2 | 1 | WFBYTE |
-| `%1101` | `X_2P_1DAC2_WFBYTE` | 1 | 2 | WFBYTE |
-| `%1110` | `X_4P_4DAC1_WFBYTE` | 4 | 1 | WFBYTE |
-| `%1110` | `X_4P_2DAC2_WFBYTE` | 2 | 2 | WFBYTE |
-| `%1110` | `X_4P_1DAC4_WFBYTE` | 1 | 4 | WFBYTE |
-| `%1110` | `X_8P_4DAC2_WFBYTE` | 4 | 2 | WFBYTE |
-| `%1110` | `X_8P_2DAC4_WFBYTE` | 2 | 4 | WFBYTE |
-| `%1110` | `X_8P_1DAC8_WFBYTE` | 1 | 8 | WFBYTE |
-| `%1110` | `X_16P_4DAC4_WFWORD` | 4 | 4 | WFWORD |
-| `%1111` | `X_16P_2DAC8_WFWORD` | 2 | 8 | WFWORD |
-| `%1111` | `X_32P_4DAC8_WFLONG` | 4 | 8 | WFLONG |
+| Mode | Symbol | Pins | DAC Channels | DAC Bits | Hub Write |
+|------|--------|------|--------------|----------|-----------|
+| `%1100` | `X_1P_1DAC1_WFBYTE` | 1 | 1 | 1 | WFBYTE |
+| `%1101` | `X_2P_2DAC1_WFBYTE` | 2 | 2 | 1 | WFBYTE |
+| `%1101` | `X_2P_1DAC2_WFBYTE` | 2 | 1 | 2 | WFBYTE |
+| `%1110` | `X_4P_4DAC1_WFBYTE` | 4 | 4 | 1 | WFBYTE |
+| `%1110` | `X_4P_2DAC2_WFBYTE` | 4 | 2 | 2 | WFBYTE |
+| `%1110` | `X_4P_1DAC4_WFBYTE` | 4 | 1 | 4 | WFBYTE |
+| `%1110` | `X_8P_4DAC2_WFBYTE` | 8 | 4 | 2 | WFBYTE |
+| `%1110` | `X_8P_2DAC4_WFBYTE` | 8 | 2 | 4 | WFBYTE |
+| `%1110` | `X_8P_1DAC8_WFBYTE` | 8 | 1 | 8 | WFBYTE |
+| `%1110` | `X_16P_4DAC4_WFWORD` | 16 | 4 | 4 | WFWORD |
+| `%1111` | `X_16P_2DAC8_WFWORD` | 16 | 2 | 8 | WFWORD |
+| `%1111` | `X_32P_4DAC8_WFLONG` | 32 | 4 | 8 | WFLONG |
 
 **D[23] = %w:** Must be 1 to enable WRFAST writes
 
@@ -533,12 +580,15 @@ ADC modes are the analog cousin of the pin-capture modes in the previous chapter
 
 ' Capture 1024 ADC samples
         wrfast  #0, ##adc_buffer
-        xinit   ##X_1ADC8_0P_1DAC8_WFBYTE | ...
-                  X_WRITE_ON + adc_pin<<17 + 1024, #0
+        mov     cmd, ##X_1ADC8_0P_1DAC8_WFBYTE | X_WRITE_ON
+        add     cmd, ##adc_pin<<17 + 1024
+        xinit   cmd, #0
         waitxfi
 ```
 
-🔧 **Hardware:** ADC readings are 8-bit values. For higher resolution, use smart pin ADC modes with post-processing.
+::: hardware
+**ADC readings are 8-bit values.** For higher resolution, use smart pin ADC modes with post-processing.
+:::
 
 # Chapter 10: DDS/Goertzel Mode {#ch-10}
 
@@ -550,6 +600,8 @@ This is the streamer's cleverest mode, and it does two things at once (Chapter 1
 |------|--------|--------|
 | `%1111_0ppp_p111` | `X_DDS_GOERTZEL_SINC1` | SINC1 |
 | `%1111_1ppp_p111` | `X_DDS_GOERTZEL_SINC2` | SINC2 |
+
+Both variants share the same mode and config bits; **bit D[23]** alone selects the filter — `0` = SINC1, `1` = SINC2.
 
 ## 10.2 Operation
 
@@ -584,14 +636,14 @@ cos_acc += cos × m
 The LUT must contain 512 entries with signed sine/cosine values:
 
 ```spin2
-' Build sine/cosine table
+' Build the sine/cosine table in a hub array, then bulk-load it to LUT
 repeat i from 0 to 511
   cos, sin := polxy(127, i << 23)
   t.byte[3] := sin          ' Sine for Goertzel
   t.byte[2] := cos          ' Cosine for Goertzel
   t.byte[1] := 0            ' Unused
   t.byte[0] := sin          ' Optional DAC output
-  wrlut(t, i)
+  sine_table[i] := t        ' loaded to LUT in §17.1 via SETQ2+RDLONG
 ```
 
 ## 10.4 SINC1 vs SINC2 {#sec-10-4}
@@ -603,7 +655,9 @@ repeat i from 0 to 511
 | Selectivity | Broader | Sharper |
 | Max amplitude | ±127 (full signed byte) | ±10 (prevents overflow) |
 
-⚠️ **Pitfall:** SINC2 double-integrates, so its accumulators grow far faster than SINC1's. Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
+::: caution
+**SINC2 double-integrates, so its accumulators grow far faster than SINC1's.** Scale the LUT waveform amplitude to about ±10 (the value the Silicon Doc's Goertzel example uses for SINC2) to prevent accumulator overflow.
+:::
 
 ## 10.5 Reading Results {#sec-10-5}
 
@@ -624,7 +678,9 @@ To detect frequency F at clock rate CLK:
 frequency = $8000_0000 × F / CLK
 ```
 
-🔧 **Hardware:** The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2³¹`, about 0.12 Hz at 250 MHz.
+::: hardware
+**The Goertzel NCO uses the same SETXFRQ scaling as every streamer mode** — the multiplier is `$8000_0000` (2³¹), because the NCO masks its MSB each clock. Resolution is `clock_frequency / 2³¹`, about 0.12 Hz at 250 MHz.
+:::
 
 # Part III: Configuration Reference
 
@@ -671,7 +727,9 @@ DAC channels drive pins based on the pin's two LSBs:
 | DAC2 | `%xxxx10` | 2, 6, 10, 14, 18... |
 | DAC3 | `%xxxx11` | 3, 7, 11, 15, 19... |
 
-🔧 **Hardware:** Each DAC channel can only drive pins matching its channel number in the two LSBs. This is a silicon constraint, not a configuration option.
+::: hardware
+**Each DAC channel can only drive pins matching its channel number in the two LSBs.** This is a silicon constraint, not a configuration option.
+:::
 
 ## 11.3 Common DAC Configurations
 
@@ -701,18 +759,24 @@ A streamer command also has to say *which* pins it drives or samples, and that i
 
 ## 12.1 Pin Group Selection {#sec-12-1}
 
-The %ppp field in D[22:20] selects the 32-pin block:
+The %ppp field in D[22:20] selects the 32-pin window the streamer drives or samples. The window's **base pin is `%ppp × 8`**, and it always spans **32 consecutive pins** from there — wrapping past pin 63 back to pin 0 once the base climbs high enough.
 
-| %ppp | Pin Range | Use Case |
-|------|-----------|----------|
-| `%000` | 31..0 | Lower pins |
-| `%001` | 39..8 | Mid-lower pins |
-| `%010` | 47..16 | Middle pins |
-| `%011` | 55..24 | Mid-upper pins |
-| `%100` | 63..32 | Upper pins |
-| `%101` | 7..0, 63..40 | Wrap-around |
-| `%110` | 15..0, 63..48 | Wrap-around |
-| `%111` | 23..0, 63..56 | Wrap-around |
+| %ppp | Base | Pin Range (always 32 pins) | Window |
+|------|------|----------------------------|--------|
+| `%000` | 0 | 31..0 | low pins |
+| `%001` | 8 | 39..8 | shifted up 8 |
+| `%010` | 16 | 47..16 | middle |
+| `%011` | 24 | 55..24 | shifted up 24 |
+| `%100` | 32 | 63..32 | high pins |
+| `%101` | 40 | 63..40, 7..0 | wrap (24 + 8) |
+| `%110` | 48 | 63..48, 15..0 | wrap (16 + 16) |
+| `%111` | 56 | 63..56, 23..0 | wrap (8 + 24) |
+
+The **wrap-around groups (%101–%111)** place a 32-pin window that straddles the top and bottom of the pin field — useful when the pins for one function sit at both ends of the chip (for example a peripheral wired across 63..40 and 7..0).
+
+::: caution
+**A wrap-around range is still 32 pins, not fewer.** "`63..40, 7..0`" reads as two fragments but means pins 63 down to 40 (24 pins) *plus* 7 down to 0 (8 pins) = **32 total**. Don't mistake the split notation for a smaller window.
+:::
 
 ## 12.2 Sub-Pin Selection {#sec-12-2}
 
@@ -760,7 +824,9 @@ The %a bit in D[16] controls bit ordering for 1/2/4-bit modes:
 | 0 | LSB first (default) | `X_ALT_OFF` |
 | 1 | MSB first | `X_ALT_ON` |
 
-💡 **Tip:** Use MSB-first (`X_ALT_ON`) for SPI protocols that transmit MSB first.
+::: tip
+Use MSB-first (`X_ALT_ON`) for SPI protocols that transmit MSB first.
+:::
 
 # Chapter 13: Programming Constants
 
@@ -781,12 +847,12 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 
 | Symbol | Value | Description |
 |--------|-------|-------------|
-| `X_IMM_32X1_1DAC1` | `%0100 << 28` | 32×1-bit direct |
+| `X_IMM_32X1_1DAC1` | `%0100 << 28` | 32×1-bit, 1-pin |
 | `X_IMM_16X2_2DAC1` | `%0101 << 28` | 16×2-bit, 2-pin |
-| `X_IMM_16X2_1DAC2` | `%0101 << 28 + 2<<16` | 16×2-bit, 1-pin |
+| `X_IMM_16X2_1DAC2` | `%0101 << 28 + 2<<16` | 16×2-bit, 2-pin |
 | `X_IMM_8X4_4DAC1` | `%0110 << 28` | 8×4-bit, 4-pin |
-| `X_IMM_8X4_2DAC2` | `%0110 << 28 + 2<<16` | 8×4-bit, 2-pin |
-| `X_IMM_8X4_1DAC4` | `%0110 << 28 + 4<<16` | 8×4-bit, 1-pin |
+| `X_IMM_8X4_2DAC2` | `%0110 << 28 + 2<<16` | 8×4-bit, 4-pin |
+| `X_IMM_8X4_1DAC4` | `%0110 << 28 + 4<<16` | 8×4-bit, 4-pin |
 
 **RDFAST → Pins/DACs:**
 
@@ -815,7 +881,7 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 | Symbol | Value | Description |
 |--------|-------|-------------|
 | `X_DDS_GOERTZEL_SINC1` | `%1111 << 28 + 7<<16` | SINC1 filter |
-| `X_DDS_GOERTZEL_SINC2` | `%1111 << 28 + $87<<16` | SINC2 filter |
+| `X_DDS_GOERTZEL_SINC2` | `%1111 << 28 + 7<<16 + 1<<23` | SINC2 (D[23]=1) |
 
 ## 13.2 Control Symbols
 
@@ -858,7 +924,7 @@ Build complete commands by combining symbols:
 mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + vga_base<<17 + 640
 
 ' SPI byte output (MSB first)
-mode := X_IMM_8X4_1DAC4 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
+mode := X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
 
 ' Goertzel analysis (differential DAC)
 mode := X_DDS_GOERTZEL_SINC1 | X_DACS_0N0_0N0 + adc_pin<<17 + cycles
@@ -912,9 +978,11 @@ Because the streamer runs on its own, your code needs a way to ask *where it is 
 
 ## 14.3 Event Clearing
 
-Events clear automatically on:
-- **XINIT**, **XCONT**, **XZERO** execution
+The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), and **EVENT_XRO** (12) — clear automatically on:
+- **XINIT**, **XCONT**, **XZERO** execution (these instructions re-arm the events)
 - **POLL**, **WAIT**, or **J** instruction execution for that event
+
+**EVENT_XRL** (13, LUT address $1FF read) is the exception: it is **not** re-armed by XINIT/XCONT/XZERO. It clears only on cog start or on its own poll/wait/jump (POLLXRL/WAITXRL/JXRL/JNXRL).
 
 ## 14.4 Synchronization Patterns
 
@@ -934,14 +1002,16 @@ Events clear automatically on:
 
 **Video line timing:**
 ```pasm2
-line:   xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
+line    xzero   m_sync, sync_data   ' Sync pulse (phase zeroed)
         xcont   m_back, #0          ' Back porch
         xcont   m_visible, #0       ' Visible pixels
         xcont   m_front, #0         ' Front porch
         jmp     #line
 ```
 
-💡 **Tip:** Use **XZERO** at line start to prevent phase accumulation errors over many lines.
+::: tip
+Use **XZERO** at line start to prevent phase accumulation errors over many lines.
+:::
 
 # Part IV: Applications
 
@@ -980,20 +1050,20 @@ The non-visible intervals — front porch, sync, back porch, and whole blank lin
 
 ```pasm2
 DAT             org
-                setxfrq pixfreq                   ' 25 MHz pixel NCO
+                setxfrq pixfreq                   ' 25.175 MHz pixel NCO
                                                   ' (2^31-scaled)
                 mov     vsync_pin, ##VGA_BASE + 4 ' VSYNC: a separate
                                                   ' digital pin
                 drvc    vsync_pin                 ' establish initial
                                                   ' VSYNC level
 
-field:          mov     y, #10                    ' vertical front porch
+vfield          mov     y, #10                    ' vertical front porch
                                                   ' (lines)
                 call    #blank
                 rdfast  #0, ##framebuffer         ' visible pixels stream
                                                   ' from the FIFO
                 mov     y, #480                   ' visible lines
-line:           call    #hsync
+line            call    #hsync
                 xcont   m_visible, #0             ' 640 RGB pixels
                                                   ' (pipeline: Chapter 7)
                 djnz    y, #line
@@ -1004,16 +1074,17 @@ line:           call    #hsync
                 mov     y, #2                     ' vertical sync (lines)
                 call    #blank
                 drvnot  vsync_pin                 ' VSYNC inactive
-                jmp     #field
+                jmp     #vfield
 
 ' One non-visible line: horizontal sync, then a flat blank level
-blank:          call    #hsync
+blank           call    #hsync
                 xcont   m_blank, #0
           _ret_ djnz    y, #blank
 
-' Horizontal sync: porches hold blank (#0);
-' the sync interval holds sync (#1)
-hsync:          xcont   m_front, #0               ' 16px front porch
+' Horizontal sync drives the immediate S operand (the streamed DAC level):
+' #0 = blank (0 V); #1 is a PLACEHOLDER sync level — replace #0/#1 with
+' your hardware's calibrated blank and sync DAC values.
+hsync           xcont   m_front, #0               ' 16px front porch
                 xcont   m_sync,  #1               ' 96px hsync pulse
           _ret_ xcont   m_back,  #0               ' 48px back porch
 
@@ -1027,12 +1098,12 @@ m_blank         long    $7F01_0000 + 800
 ' X_RFWORD_RGB16 | X_PINS_ON
 m_visible       long    $B085_0000 + 640
 
-pixfreq         long    $0CCC_CCCD                ' 25 MHz at 250 MHz clock
+pixfreq         long    $0CE3_BCD3                ' 25.175 MHz @ 250 MHz
 vsync_pin       res     1
 y               res     1
 ```
 
-> Verified against Eric R. Smith's VGA driver (Parallax OBEX #2847): sync and blanking are immediate DAC-level streams, and vertical sync is a direct pin toggle.
+> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847), which drives sync and blanking through the streamer's DAC outputs.
 
 ## 15.2 HDMI/DVI Output {#sec-15-2}
 
@@ -1057,7 +1128,9 @@ HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
                 setxfrq ##$0CCC_CCCC+1
 ```
 
-🔧 **Hardware:** HDMI requires the colorspace converter in DVI mode. The converter generates TMDS encoding automatically from RGB data.
+::: hardware
+**HDMI requires the colorspace converter in DVI mode.** The converter generates TMDS encoding automatically from RGB data.
+:::
 
 ## 15.3 Composite Video {#sec-15-3}
 
@@ -1081,7 +1154,7 @@ Composite video uses the colorspace converter to generate NTSC or PAL signals.
 
 # Chapter 16: High-Speed Serial (SPI) {#ch-16}
 
-Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and the two stay locked together for transfers far faster than a software bit-bang.
+Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and — both being driven from the same system clock — they run at matched rates for transfers far faster than a software bit-bang.
 
 ## 16.1 SPI Output with Streamer
 
@@ -1092,7 +1165,7 @@ The streamer outputs SPI data while a smart pin generates the clock.
 ```pasm2
                 ' Configure clock pin as transition counter
                 wrpin   ##P_TRANSITION + P_OE, #spi_clk
-                wxpin   ##2, #spi_clk           ' 2 transitions per bit
+                wxpin   ##2, #spi_clk           ' base period in clocks
                 drvl    #spi_clk
 
                 ' NCO at half clock rate
@@ -1102,29 +1175,27 @@ The streamer outputs SPI data while a smart pin generates the clock.
 **Single Byte Transfer:**
 
 ```pasm2
-spi_byte:       xinit   bmode, pa               ' Output 8 bits
+spi_byte        mov     bmode, ##X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON
+                add     bmode, ##spi_do<<17 + 8
+                xinit   bmode, pa               ' Output 8 bits
                 wypin   #16, #spi_clk           ' 16 clock transitions
           _ret_ waitxfi
-
-bmode           long    X_IMM_8X4_1DAC4 | X_PINS_ON | ...
-                        X_ALT_ON + spi_do<<17 + 8
 ```
 
 **Bulk Transfer:**
 
 ```pasm2
-spi_block:      rdfast  #0, ptra                ' Point to data
+spi_block       rdfast  #0, ptra                ' Point to data
+                mov     rmode, ##X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON
+                add     rmode, ##spi_do<<17 + 256*8
                 xinit   rmode, #0               ' Stream 256 bytes
                 wypin   ##256*8*2, #spi_clk     ' Clock transitions
           _ret_ waitxfi
-
-rmode           long    X_RFBYTE_1P_1DAC1 | X_PINS_ON | ...
-                        X_ALT_ON + spi_do<<17 + 256*8
 ```
 
 ## 16.2 Coordinating with WAITXFI
 
-The **WAITXFI** instruction synchronizes streamer completion with clock generation:
+The **WAITXFI** instruction blocks only until the streamer finishes — it has no knowledge of the smart-pin clock. Check the clock's completion separately (e.g. `TESTP` on the clock pin):
 
 ```pasm2
                 xinit   mode, data
@@ -1133,7 +1204,9 @@ The **WAITXFI** instruction synchronizes streamer completion with clock generati
                 testp   #clk_pin wc             ' Verify clock done
 ```
 
-⚠️ **Pitfall:** The smart pin clock and streamer operate independently. Verify both complete before starting the next transfer.
+::: caution
+**The smart pin clock and streamer operate independently.** Verify both complete before starting the next transfer.
+:::
 
 # Chapter 17: Signal Processing {#ch-17}
 
@@ -1165,8 +1238,9 @@ Goertzel analysis detects specific frequencies in ADC input.
 
 ```pasm2
 ' Calculate NCO frequency for target (2^31-scaled for the NCO)
-detect:
-                qfrac   target_freq, clkfreq    ' QFRAC = 2^32 × target/clk
+                rdlong  clkf, #$44              ' clkfreq from hub $44
+detect
+                qfrac   target_freq, clkf       ' QFRAC = 2^32 × target/clk
                 getqx   xfrq
                 shr     xfrq, #1                ' halve to the NCO's
                                                 ' 2^31 scaling
@@ -1207,7 +1281,8 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
                 rdlong  0, ##waveform_table
 
                 ' Set output frequency (2^31-scaled for the NCO)
-                qfrac   output_freq, clkfreq    ' QFRAC = 2^32 × output/clk
+                rdlong  clkf, #$44              ' clkfreq from hub $44
+                qfrac   output_freq, clkf       ' QFRAC = 2^32 × output/clk
                 getqx   xfrq
                 shr     xfrq, #1                ' halve to the NCO's
                                                 ' 2^31 scaling
@@ -1217,7 +1292,9 @@ DDS synthesizes arbitrary waveforms at precise frequencies.
                 xinit   dds_mode, #0
 ```
 
-💡 **Tip:** The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the 512 entries at the programmed rate.
+::: tip
+The LUT can contain any waveform shape—sine, square, triangle, or arbitrary samples. The NCO steps through the 512 entries at the programmed rate.
+:::
 
 # Chapter 18: Integration Patterns
 
@@ -1232,7 +1309,7 @@ Use two buffers to allow simultaneous rendering and display:
                 mov     display_buf, ##buffer_a
                 mov     render_buf, ##buffer_b
 
-frame_loop:     ' Start displaying current buffer
+frame_loop      ' Start displaying current buffer
                 rdfast  ##frame_size/64, display_buf
 
                 ' Render to other buffer while displaying
@@ -1263,9 +1340,10 @@ Complex video systems span multiple COGs:
 ' COG 1: Signal line complete
                 wrlong  #1, ##line_done_flag
 
-' COG 2: Wait for line complete
-wait_line:      rdlong  temp, ##line_done_flag wz
+' COG 2: Wait for line complete, then clear the flag (handshake)
+wait_line       rdlong  temp, ##line_done_flag wz
         if_z    jmp     #wait_line
+                wrlong  #0, ##line_done_flag    ' clear for next line
 ```
 
 ## 18.3 Streamer + Smart Pin Coordination {#sec-18-3}
@@ -1283,9 +1361,9 @@ Many applications combine streamer I/O with smart pin timing:
 **Pattern: Smart pin trigger for streamer**
 
 ```pasm2
-                akpin   #trigger_pin            ' Acknowledge
-wait_trigger:   testp   #trigger_pin wc
+wait_trigger    testp   #trigger_pin wc         ' wait for the event
         if_nc   jmp     #wait_trigger
+                akpin   #trigger_pin            ' acknowledge it
                 xinit   capture_mode, #0        ' Start capture
 ```
 
@@ -1301,51 +1379,51 @@ The appendices are lookup material: the complete mode-encoding table, the symbol
 | `%0001` | `%bbbb` | IMM 16×2 → LUT | `X_IMM_16X2_LUT` |
 | `%0010` | `%bbbb` | IMM 8×4 → LUT | `X_IMM_8X4_LUT` |
 | `%0011` | `%bbbb` | IMM 4×8 → LUT | `X_IMM_4X8_LUT` |
-| `%0100` | `%0000` | IMM 32×1 direct | `X_IMM_32X1_1DAC1` |
-| `%0101` | `%0000` | IMM 16×2, 2-pin | `X_IMM_16X2_2DAC1` |
-| `%0101` | `%0010` | IMM 16×2, 1-pin | `X_IMM_16X2_1DAC2` |
-| `%0110` | `%0000` | IMM 8×4, 4-pin | `X_IMM_8X4_4DAC1` |
-| `%0110` | `%0010` | IMM 8×4, 2-pin | `X_IMM_8X4_2DAC2` |
-| `%0110` | `%0100` | IMM 8×4, 1-pin | `X_IMM_8X4_1DAC4` |
-| `%0110` | `%0110` | IMM 4×8, 4-pin 2-DAC | `X_IMM_4X8_4DAC2` |
-| `%0110` | `%0111` | IMM 4×8, 2-pin 4-DAC | `X_IMM_4X8_2DAC4` |
-| `%0110` | `%1110` | IMM 4×8, 1-pin 8-DAC | `X_IMM_4X8_1DAC8` |
-| `%0110` | `%1111` | IMM 2×16, 4-pin 4-DAC | `X_IMM_2X16_4DAC4` |
-| `%0111` | `%0000` | IMM 2×16, 2-pin 8-DAC | `X_IMM_2X16_2DAC8` |
-| `%0111` | `%0001` | IMM 1×32, 4-pin 8-DAC | `X_IMM_1X32_4DAC8` |
+| `%0100` | `%0000` | IMM 32×1 → 1-pin + 1-DAC1 | `X_IMM_32X1_1DAC1` |
+| `%0101` | `%0000` | IMM 16×2 → 2-pin + 2-DAC1 | `X_IMM_16X2_2DAC1` |
+| `%0101` | `%0010` | IMM 16×2 → 2-pin + 1-DAC2 | `X_IMM_16X2_1DAC2` |
+| `%0110` | `%0000` | IMM 8×4 → 4-pin + 4-DAC1 | `X_IMM_8X4_4DAC1` |
+| `%0110` | `%0010` | IMM 8×4 → 4-pin + 2-DAC2 | `X_IMM_8X4_2DAC2` |
+| `%0110` | `%0100` | IMM 8×4 → 4-pin + 1-DAC4 | `X_IMM_8X4_1DAC4` |
+| `%0110` | `%0110` | IMM 4×8 → 8-pin + 4-DAC2 | `X_IMM_4X8_4DAC2` |
+| `%0110` | `%0111` | IMM 4×8 → 8-pin + 2-DAC4 | `X_IMM_4X8_2DAC4` |
+| `%0110` | `%1110` | IMM 4×8 → 8-pin + 1-DAC8 | `X_IMM_4X8_1DAC8` |
+| `%0110` | `%1111` | IMM 2×16 → 16-pin + 4-DAC4 | `X_IMM_2X16_4DAC4` |
+| `%0111` | `%0000` | IMM 2×16 → 16-pin + 2-DAC8 | `X_IMM_2X16_2DAC8` |
+| `%0111` | `%0001` | IMM 1×32 → 32-pin + 4-DAC8 | `X_IMM_1X32_4DAC8` |
 | `%0111` | `%001a` | RFLONG 32×1 → LUT | `X_RFLONG_32X1_LUT` |
 | `%0111` | `%010a` | RFLONG 16×2 → LUT | `X_RFLONG_16X2_LUT` |
 | `%0111` | `%011a` | RFLONG 8×4 → LUT | `X_RFLONG_8X4_LUT` |
 | `%0111` | `%1000` | RFLONG 4×8 → LUT | `X_RFLONG_4X8_LUT` |
-| `%1000` | `%pppp` | RFBYTE, 1-pin | `X_RFBYTE_1P_1DAC1` |
-| `%1001` | `%ppp0` | RFBYTE, 2-pin | `X_RFBYTE_2P_2DAC1` |
-| `%1001` | `%ppp0`+2 | RFBYTE, 2-pin 2-DAC | `X_RFBYTE_2P_1DAC2` |
-| `%1010` | `%pp00` | RFBYTE, 4-pin | `X_RFBYTE_4P_4DAC1` |
-| `%1010` | `%pp00`+2 | RFBYTE, 4-pin 2-DAC | `X_RFBYTE_4P_2DAC2` |
-| `%1010` | `%pp00`+4 | RFBYTE, 4-pin 4-DAC | `X_RFBYTE_4P_1DAC4` |
-| `%1010` | `%p000`+6 | RFBYTE, 8-pin 2-DAC | `X_RFBYTE_8P_4DAC2` |
-| `%1010` | `%p000`+7 | RFBYTE, 8-pin 4-DAC | `X_RFBYTE_8P_2DAC4` |
-| `%1010` | `%p000`+$E | RFBYTE, 8-pin 8-DAC | `X_RFBYTE_8P_1DAC8` |
-| `%1010` | `%1111` | RFWORD, 16-pin | `X_RFWORD_16P_4DAC4` |
-| `%1011` | `%0000` | RFWORD, 16-pin | `X_RFWORD_16P_2DAC8` |
-| `%1011` | `%0001` | RFLONG, 32-pin | `X_RFLONG_32P_4DAC8` |
+| `%1000` | `%pppp` | RFBYTE → 1-pin + 1-DAC1 | `X_RFBYTE_1P_1DAC1` |
+| `%1001` | `%ppp0` | RFBYTE → 2-pin + 2-DAC1 | `X_RFBYTE_2P_2DAC1` |
+| `%1001` | `%ppp0`+2 | RFBYTE → 2-pin + 1-DAC2 | `X_RFBYTE_2P_1DAC2` |
+| `%1010` | `%pp00` | RFBYTE → 4-pin + 4-DAC1 | `X_RFBYTE_4P_4DAC1` |
+| `%1010` | `%pp00`+2 | RFBYTE → 4-pin + 2-DAC2 | `X_RFBYTE_4P_2DAC2` |
+| `%1010` | `%pp00`+4 | RFBYTE → 4-pin + 1-DAC4 | `X_RFBYTE_4P_1DAC4` |
+| `%1010` | `%p000`+6 | RFBYTE → 8-pin + 4-DAC2 | `X_RFBYTE_8P_4DAC2` |
+| `%1010` | `%p000`+7 | RFBYTE → 8-pin + 2-DAC4 | `X_RFBYTE_8P_2DAC4` |
+| `%1010` | `%p000`+$E | RFBYTE → 8-pin + 1-DAC8 | `X_RFBYTE_8P_1DAC8` |
+| `%1010` | `%1111` | RFWORD → 16-pin + 4-DAC4 | `X_RFWORD_16P_4DAC4` |
+| `%1011` | `%0000` | RFWORD → 16-pin + 2-DAC8 | `X_RFWORD_16P_2DAC8` |
+| `%1011` | `%0001` | RFLONG → 32-pin + 4-DAC8 | `X_RFLONG_32P_4DAC8` |
 | `%1011` | `%0010` | RFBYTE LUMA8 | `X_RFBYTE_LUMA8` |
 | `%1011` | `%0011` | RFBYTE RGBI8 | `X_RFBYTE_RGBI8` |
 | `%1011` | `%0100` | RFBYTE RGB8 | `X_RFBYTE_RGB8` |
 | `%1011` | `%0101` | RFWORD RGB16 | `X_RFWORD_RGB16` |
 | `%1011` | `%0110` | RFLONG RGB24 | `X_RFLONG_RGB24` |
-| `%1100` | `%pppp` | 1-pin → WFBYTE | `X_1P_1DAC1_WFBYTE` |
-| `%1101` | `%ppp0` | 2-pin → WFBYTE | `X_2P_2DAC1_WFBYTE` |
-| `%1101` | `%ppp0`+2 | 1-pin 2-DAC → WFBYTE | `X_2P_1DAC2_WFBYTE` |
-| `%1110` | `%pp00` | 4-pin → WFBYTE | `X_4P_4DAC1_WFBYTE` |
-| `%1110` | `%pp00`+2 | 2-pin 2-DAC → WFBYTE | `X_4P_2DAC2_WFBYTE` |
-| `%1110` | `%pp00`+4 | 1-pin 4-DAC → WFBYTE | `X_4P_1DAC4_WFBYTE` |
-| `%1110` | `%p000`+6 | 4-pin 2-DAC → WFBYTE | `X_8P_4DAC2_WFBYTE` |
-| `%1110` | `%p000`+7 | 2-pin 4-DAC → WFBYTE | `X_8P_2DAC4_WFBYTE` |
-| `%1110` | `%p000`+$E | 1-pin 8-DAC → WFBYTE | `X_8P_1DAC8_WFBYTE` |
-| `%1110` | `%1111` | 16-pin → WFWORD | `X_16P_4DAC4_WFWORD` |
-| `%1111` | `%0000` | 16-pin → WFWORD | `X_16P_2DAC8_WFWORD` |
-| `%1111` | `%0001` | 32-pin → WFLONG | `X_32P_4DAC8_WFLONG` |
+| `%1100` | `%pppp` | 1-pin + 1-DAC1 → WFBYTE | `X_1P_1DAC1_WFBYTE` |
+| `%1101` | `%ppp0` | 2-pin + 2-DAC1 → WFBYTE | `X_2P_2DAC1_WFBYTE` |
+| `%1101` | `%ppp0`+2 | 2-pin + 1-DAC2 → WFBYTE | `X_2P_1DAC2_WFBYTE` |
+| `%1110` | `%pp00` | 4-pin + 4-DAC1 → WFBYTE | `X_4P_4DAC1_WFBYTE` |
+| `%1110` | `%pp00`+2 | 4-pin + 2-DAC2 → WFBYTE | `X_4P_2DAC2_WFBYTE` |
+| `%1110` | `%pp00`+4 | 4-pin + 1-DAC4 → WFBYTE | `X_4P_1DAC4_WFBYTE` |
+| `%1110` | `%p000`+6 | 8-pin + 4-DAC2 → WFBYTE | `X_8P_4DAC2_WFBYTE` |
+| `%1110` | `%p000`+7 | 8-pin + 2-DAC4 → WFBYTE | `X_8P_2DAC4_WFBYTE` |
+| `%1110` | `%p000`+$E | 8-pin + 1-DAC8 → WFBYTE | `X_8P_1DAC8_WFBYTE` |
+| `%1110` | `%1111` | 16-pin + 4-DAC4 → WFWORD | `X_16P_4DAC4_WFWORD` |
+| `%1111` | `%0000` | 16-pin + 2-DAC8 → WFWORD | `X_16P_2DAC8_WFWORD` |
+| `%1111` | `%0001` | 32-pin + 4-DAC8 → WFLONG | `X_32P_4DAC8_WFLONG` |
 | `%1111` | `%0010` | 1 ADC → WFBYTE | `X_1ADC8_0P_1DAC8_WFBYTE` |
 | `%1111` | `%0011` | 1 ADC + 8-pin → WFWORD | `X_1ADC8_8P_2DAC8_WFWORD` |
 | `%1111` | `%0100` | 2 ADC → WFWORD | `X_2ADC8_0P_2DAC8_WFWORD` |
@@ -1418,6 +1496,7 @@ X_DACS_X_X_1_0  X_DACS_1_0_X_X    X_DACS_1N1_0N0    X_DACS_3_2_1_0
 | Resolution | Pixel Rate | At 250 MHz | At 300 MHz | At 320 MHz |
 |------------|------------|------------|------------|------------|
 | 640×480 | 25.175 MHz | `$0CE3_BCD3` | `$0ABD_C805` | `$0A11_EB85` |
+| 720×480 | 27.000 MHz | `$0DD2_F1AA` | `$0B85_1EB8` | `$0ACC_CCCD` |
 | 800×600 | 40.000 MHz | `$147A_E148` | `$1111_1111` | `$1000_0000` |
 | 1024×768 | 65.000 MHz | `$2147_AE14` | `$1BBB_BBBC` | `$1A00_0000` |
 | 1280×720 | 74.250 MHz | `$2604_1893` | `$1FAE_147B` | `$1DB3_3333` |
