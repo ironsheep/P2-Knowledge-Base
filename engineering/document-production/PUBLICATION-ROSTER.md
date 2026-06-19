@@ -45,7 +45,7 @@ that does not ride the shared stack.
 | DeSilva PASM2 Tutorial | `p2-pasm-desilva-style` | ✅ | 🔄 | ✅ | ⏳ | ✅ | ✅ | migrated 2026-06-09 onto the shared platform stack (code divisions→fences in opus-master, `p2kb-desilva-local` overlay, 5 platform lua filters). **v3.0.0 (2026-06-10) release** — absorbs the content-accuracy re-audit (~33 latent errors fixed vs the current P2KB: two inverted LOCKTRY spin-locks, an inverted SKIP table, a fabricated SETSE edge mode, etc.) and the Ch2 egg-beater diagram fix; regenerated clean (172pp). Audit record: local `audit/content-reaudit-2026-06-10.md`. chip review outstanding. **DEFERRED to final wrap-up (both REQUIRED, not release-blocking):** (1) repair the "P1 COG" image `\CogAnatomyDiagram` (Ch2 "COG Anatomy 101", `opus-master` ~L557); (2) `pnut-ts` compile-cert re-audit of ALL built-in code examples (use `-d` for DEBUG blocks). |
 | P2 Debug Window Manual | `p2-debug-window-manual` | ✅ | ✅ | ✅ | | ✅ | ✅ | **v1.0.0 (2026-06-16)** — initial community-review release; all figures captured; 32-demo example library bundled (source ZIP) |
 | P2 Single-Step Debugger Manual | `p2-single-step-debugger-manual` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content/diagrams); awaiting chip + community review |
-| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ⏳ | | on shared platform stack (foundation/content + streamer-local/-diagrams); awaiting chip + community review |
+| P2 Streamer Programming Guide | `p2-streamer-programming-guide` | ✅ | ✅ | ✅ | ⏳ | ✅ | ✅ | **v1.0.1 (2026-06-19)** released as community-review edition — grounding-audit corrections + §3.5 clock-accuracy section + emoji→fenced callouts; platform-unification pilot. chip review outstanding |
 | AI Privacy Guide | `ai-privacy-guide` | ✅ | ✅ | — | ✅ | ✅ | ✅ | released; both reviews complete; presentation-class (rides pristine `p2kb-foundation.sty`) |
 
 **Slug** is the one folder name each manual uses across all three trees —
@@ -156,6 +156,7 @@ that PDF was generated. This ledger is the detector.
 > migration on 2026-06-10 (v3.0.0) and now appears in the ledger like the others.
 
 ```
+2026-06-19 20:44  PUBLISH   p2-streamer-programming-guide    (v1.0.1, 71pp — grounding-audit fixes + §3.5 clock accuracy + fenced callouts)
 2026-06-19 20:41  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (do not bold the English verb "fit" — subject-pronoun + article-object contexts)
 2026-06-19 19:10  PLATFORM  templates/p2kb-platform-content.sty       (add HardwareBlock graphite callout)
 2026-06-19 19:10  PLATFORM  filters/p2kb-platform-code-coloring.lua   (map ::: hardware -> HardwareBlock)
@@ -163,7 +164,6 @@ that PDF was generated. This ledger is the detector.
 2026-06-16 20:47  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (0ddf83f — stop bolding English-collision words: adds/byte/word/long)
 2026-06-12 18:39  PLATFORM  templates/p2kb-platform-content.sty       (a149b8e — ::: tip/caution callouts)
 2026-06-12 18:39  PLATFORM  filters/p2kb-platform-code-coloring.lua   (a149b8e — ::: tip/caution callouts)
-2026-06-10 23:41  PUBLISH   p2-streamer-programming-guide    (v1.0.0 — clickable index added)
 2026-06-10 23:35  PUBLISH   p2-pasm-desilva-style            (v3.0.0, 172pp — egg-beater Ch2 diagram fixed)
 2026-06-10 23:33  PUBLISH   p2-single-step-debugger-manual   (regression rebuild on the latest platform)
 2026-06-10 23:32  PUBLISH   p2-assembly-language-manual      (v3.0.0, 492pp — migrated off the bespoke fork onto the platform)
@@ -189,7 +189,7 @@ top of the 06-12 platform.
 | `p2-debug-window-manual` | ✅ current | **v1.0.0 released 2026-06-16** for community review; all figures captured; built on the latest platform (incl. 06-16 `mnemonic-bold.lua`) |
 | `p2-assembly-language-manual` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (492pp); predates the 06-12 platform edit |
 | `p2-pasm-desilva-style` | ⏳ behind 06-12 | rebuilt v3.0.0 on 06-10 (172pp); predates the 06-12 platform edit |
-| `p2-streamer-programming-guide` | ⏳ behind 06-12 | rebuilt v1.0.0 on 06-10; predates the 06-12 platform edit |
+| `p2-streamer-programming-guide` | ✅ current | **v1.0.1 released 2026-06-19** (71pp); built on the latest platform (incl. 06-19 HardwareBlock + fit fix) |
 | `p2-single-step-debugger-manual` | ⏳ behind 06-12 | regression rebuild 06-10; predates the 06-12 platform edit |
 | `p2-io-and-smart-pins-user-guide` | ⏳ to regenerate | last built 2026-06-09; behind `figures.lua` + the 06-12 edit |
 | `p2-layout-torture-test` | ⏳ stale (instrument) | behind several platform files + `diagrams.sty` |
