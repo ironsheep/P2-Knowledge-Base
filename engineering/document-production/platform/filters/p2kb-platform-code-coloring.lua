@@ -308,11 +308,13 @@ function Div(div)
     return result
 
   -- ===== ADVISORY CALLOUTS (prose) =====
-  -- ::: tip      -> TipBlock     (teal, helpful shortcut / optimization)
-  -- ::: caution  -> CautionBlock (amber, hazard / gotcha to avoid)
-  -- Both wrap PROSE content (rendered normally by Pandoc) between the box
-  -- begin/end; the TIP / CAUTION title bar comes from the box definition in
-  -- p2kb-platform-content.sty, so nothing is injected here. Platform standard.
+  -- ::: tip      -> TipBlock      (teal, helpful shortcut / optimization)
+  -- ::: caution  -> CautionBlock  (amber, hazard / gotcha to avoid)
+  -- ::: hardware -> HardwareBlock (graphite, silicon-level detail affecting usage)
+  -- All wrap PROSE content (rendered normally by Pandoc) between the box
+  -- begin/end; the TIP / CAUTION / HARDWARE title bar comes from the box
+  -- definition in p2kb-platform-content.sty, so nothing is injected here.
+  -- Platform standard.
   elseif classes:includes("tip") then
     local result = {pandoc.RawBlock('latex', '\\begin{TipBlock}')}
     for _, block in ipairs(div.content) do
@@ -327,6 +329,14 @@ function Div(div)
       table.insert(result, block)
     end
     table.insert(result, pandoc.RawBlock('latex', '\\end{CautionBlock}'))
+    return result
+
+  elseif classes:includes("hardware") then
+    local result = {pandoc.RawBlock('latex', '\\begin{HardwareBlock}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{HardwareBlock}'))
     return result
 
   -- ===== DESILVA PEDAGOGICAL ELEMENTS =====

@@ -305,24 +305,29 @@
 }
 
 % ==================== ADVISORY CALLOUTS (prose, not code) ====================
-% Two PROSE advisory boxes that set "things to know" apart from running text --
+% Three PROSE advisory boxes that set "things to know" apart from running text --
 % the reader skims for these:
-%   Tip     = teal,  a helpful shortcut / optimization ("you can also ...")
-%   Caution = amber, a hazard / gotcha to avoid ("watch out: ...")
+%   Tip      = teal,     a helpful shortcut / optimization ("you can also ...")
+%   Caution  = amber,    a hazard / gotcha to avoid ("watch out: ...")
+%   Hardware = graphite, a silicon-level detail affecting usage ("the chip ...") --
+%              neutral (informational, NOT a warning), so a cool/metallic tone
 % Deliberately distinct from the code/reference families: these hold PROSE (a
 % filled box like the code listings, but the content is text, not Verbatim),
 % carry a TEXT title bar (TIP / CAUTION -- NOT an emoji glyph: color-emoji fonts
 % are not guaranteed in the xelatex pipeline) and are breakable with the same
 % continuation markers. They use two otherwise-unused hues so they never collide
 % with the language palette (Spin2 blue / PASM2 green) or the muted reference
-% family. Emitted by the platform filter from ::: tip and ::: caution fenced
-% divs. Platform standard -- shared by all publications; a manual that never
-% uses the fence is unaffected. Caution's title bar uses black text on amber
-% (the real-world caution convention + needed contrast); Tip uses white on teal.
+% family. Emitted by the platform filter from ::: tip, ::: caution and
+% ::: hardware fenced divs. Platform standard -- shared by all publications; a
+% manual that never uses the fence is unaffected. Caution's title bar uses black
+% text on amber (the real-world caution convention + needed contrast); Tip uses
+% white on teal; Hardware uses white on graphite.
 \definecolor{iosp-tip-bg}{HTML}{E0F2F1}          % Light teal
 \definecolor{iosp-tip-border}{HTML}{00897B}      % Teal border
 \definecolor{iosp-caution-bg}{HTML}{FFF8E1}      % Light amber
 \definecolor{iosp-caution-border}{HTML}{F9A825}  % Amber border
+\definecolor{iosp-hardware-bg}{HTML}{E8EDF0}     % Light cool grey-blue
+\definecolor{iosp-hardware-border}{HTML}{37474F} % Deep graphite (silicon)
 
 \newtcolorbox{TipBlock}{%
   enhanced, breakable, contmarkers,
@@ -340,6 +345,15 @@
   rounded corners, left=12pt, right=10pt, top=8pt, bottom=8pt,
   before skip=15pt, after skip=15pt,
   coltitle=black, fonttitle=\sffamily\bfseries\small, title={CAUTION}
+}
+
+\newtcolorbox{HardwareBlock}{%
+  enhanced, breakable, contmarkers,
+  colback=iosp-hardware-bg, colframe=iosp-hardware-border, colbacktitle=iosp-hardware-border,
+  boxrule=2pt, leftrule=4pt, rightrule=0.5pt, toprule=0.5pt, bottomrule=0.5pt,
+  rounded corners, left=12pt, right=10pt, top=8pt, bottom=8pt,
+  before skip=15pt, after skip=15pt,
+  coltitle=white, fonttitle=\sffamily\bfseries\small, title={HARDWARE}
 }
 
 % ==================== REFERENCE BLOCKS (non-language notation) ====================
