@@ -909,6 +909,7 @@ Many modes send data to the DAC channels, but none of them say *which* channels,
 | `%1111` | X3 | X2 | X1 | X0 | `X_DACS_3_2_1_0` |
 
 **Legend:**
+
 - `--` = No override (SETDACS value used)
 - `!` = One's complement (inverted)
 - `X0`-`X3` = Streamer data channels
@@ -1176,6 +1177,7 @@ Because the streamer runs on its own, your code needs a way to ask *where it is 
 ## 14.3 Event Clearing
 
 The three streamer-command events — **EVENT_XMT** (10), **EVENT_XFI** (11), and **EVENT_XRO** (12) — clear automatically on:
+
 - **XINIT**, **XCONT**, **XZERO** execution (these instructions re-arm the events)
 - **POLL**, **WAIT**, or **J** instruction execution for that event
 
@@ -1223,6 +1225,7 @@ Part IV puts the pieces together into real applications, beginning with the stre
 VGA uses analog RGB on DAC channels, with **separate** horizontal and vertical sync. The streamer drives the analog levels: the horizontal-sync level rides the streamer's immediate operand, while vertical sync is a plain pin toggle.
 
 **Hardware Requirements:**
+
 - Three DAC pins for R, G, B, plus one DAC pin for the horizontal-sync level
 - One additional digital pin for vertical sync (toggled directly, not streamed)
 - Resistor DAC network or direct DAC output
@@ -1307,6 +1310,7 @@ y               res     1
 HDMI uses TMDS encoding via the colorspace converter. Requires 10× pixel clock.
 
 **Hardware Requirements:**
+
 - Eight pins in sequence for TMDS pairs
 - 1 mA pin drive strength
 - System clock = 10 × pixel clock
@@ -1705,6 +1709,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: No Output on Pins
 
 **Check:**
+
 1. D[23] = 1 (`X_PINS_ON` included in mode)
 2. Pin group %ppp selects correct pins
 3. Sub-pin selection matches target pins
@@ -1713,6 +1718,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: Corrupted Data from RDFAST
 
 **Check:**
+
 1. **RDFAST** executed before streamer command
 2. Buffer address aligned to 64-byte boundary for wrap mode
 3. Buffer size matches FIFO configuration
@@ -1721,6 +1727,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: Streamer Stops Unexpectedly
 
 **Check:**
+
 1. Count field D[15:0] not zero
 2. Command buffer has pending command (**XCONT**/**XZERO** issued)
 3. No **XINIT #0,#0** executed
@@ -1728,6 +1735,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: Phase Drift in Video
 
 **Check:**
+
 1. Use **XZERO** at line boundaries
 2. NCO frequency matches pixel rate exactly
 3. Total pixels per line equals timing specification
@@ -1735,6 +1743,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: DAC Output Incorrect
 
 **Check:**
+
 1. %dddd field selects correct routing
 2. DAC channel matches pin LSBs
 3. Pin configured for DAC mode
@@ -1742,6 +1751,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ## Symptom: Goertzel Results Invalid
 
 **Check:**
+
 1. LUT contains signed sine/cosine values
 2. ADC pin configured for ADC mode
 3. Sample count adequate for frequency resolution
