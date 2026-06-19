@@ -276,14 +276,16 @@ local function is_english_context(word, prev_word, next_word, suffix)
     return false
   end
 
-  -- "fit" as verb: "fit in", "to fit", "will fit", "does fit"
+  -- "fit" as verb: "fit in", "to fit", "will fit", "does fit", "you fit"
   if w == "fit" then
     if prev == "to" or prev == "will" or prev == "can" or prev == "could" or
        prev == "would" or prev == "should" or prev == "must" or prev == "does" or
-       prev == "do" or prev == "did" or prev == "doesn" then
+       prev == "do" or prev == "did" or prev == "doesn" or
+       prev == "you" or prev == "we" or prev == "they" or prev == "i" then
       return true
     end
-    if next == "in" or next == "into" or next == "within" or next == "the" then
+    if next == "in" or next == "into" or next == "within" or next == "the" or
+       next == "a" or next == "an" then
       return true
     end
     if next == "directive" or next == "statement" then
