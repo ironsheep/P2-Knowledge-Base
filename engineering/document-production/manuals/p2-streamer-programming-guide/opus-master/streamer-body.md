@@ -263,6 +263,20 @@ Example 2 — non-integer ratio: VGA 640×480, 25.175 MHz @ 250 MHz
 The achieved pixel clock is essentially exact at **any** sysclk — what you manage is per-pixel jitter, not frequency error. Make `sysclk ÷ pixel_clock` a whole number and every pixel is the same width.
 :::
 
+## 3.5 Clock Accuracy and Jitter {#sec-3-5}
+
+Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-to-pixel *ratio* and is the same no matter how precise your oscillator is. **Absolute accuracy** — how close the pixel clock sits to its exact nominal frequency, and how steadily it holds — is set entirely by the reference crystal: the PLL only multiplies it (`sysclk = crystal × M / (D×P)`) and the NCO adds under 0.01 ppm, so your pixel clock is **no more accurate than your crystal**.
+
+If you build on a Parallax **P2 Edge module**, this is already handled for you.
+
+::: hardware
+**The P2 Edge modules carry a 20 MHz TCXO rated ±0.5 ppm** (temperature-compensated). Every clock the P2 derives is referenced to it, so your pixel clocks, sample rates, and color subcarriers come out accurate to ~0.5 ppm and hold that across temperature — with no effort on your part. The module guide calls it "higher precision than most applications require," which makes the Edge a safe default for accurate-timing work as well as general projects.
+:::
+
+On an **externally designed board** the P2 runs from whatever crystal you fit, and the PLL can only multiply that reference — it cannot make the clock more accurate than its source. A general-purpose crystal is typically tens of ppm, with additional drift over temperature, and that error flows straight through to every streamer rate.
+
+For most video this is a non-issue: monitors absorb thousands of ppm of pixel-clock error — the same tolerance that makes §3.4's 25.0-for-25.175 substitution invisible. It bites only when the *absolute* frequency is the deliverable: NTSC/PAL composite **colorburst** (a few ppm before the hue drifts), precise audio sample rates, or long-running timing. **So if you are designing a custom board for video — composite especially — choose the crystal with this in mind, or fit a TCXO; an Edge module gives you that precision out of the box.**
+
 # Chapter 4: Command Structure {#ch-4}
 
 A streamer command is a single value — the D operand — that packs together every choice from Chapter 1's four questions: what mode, where the data goes, which pins, and how long to run. This chapter lays that packed word out field by field, then introduces the small set of instructions (XINIT, XCONT, XZERO) that start and chain commands.
@@ -1570,6 +1584,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 \indexletter{C}
 ```
 
+- Clock accuracy: [3.5](#sec-3-5)
 - Colorspace converter: [15.2](#sec-15-2), [15.3](#sec-15-3)
 - Command structure: [Chapter 4](#ch-4)
 - Count field: [4.6](#sec-4-6)
@@ -1596,7 +1611,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 \indexletter{F}
 ```
 
-- Frequency calculation: [3.2](#sec-3-2), [Appendix C](#app-c)
+- Frequency calculation: [3.2](#sec-3-2), [3.4](#sec-3-4), [Appendix C](#app-c)
 
 ```{=latex}
 \indexletter{G}
@@ -1617,6 +1632,12 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 ```
 
 - Immediate modes: [Chapter 5](#ch-5)
+
+```{=latex}
+\indexletter{J}
+```
+
+- Jitter (per-pixel): [3.4](#sec-3-4), [3.5](#sec-3-5)
 
 ```{=latex}
 \indexletter{L}
@@ -1640,11 +1661,18 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 - NCO: [Chapter 3](#ch-3)
 
 ```{=latex}
+\indexletter{O}
+```
+
+- Oscillator (TCXO): [3.5](#sec-3-5)
+
+```{=latex}
 \indexletter{P}
 ```
 
 - Pin group selection: [12.1](#sec-12-1)
 - Pin selection: [Chapter 12](#ch-12)
+- Pixel rate: [3.4](#sec-3-4)
 
 ```{=latex}
 \indexletter{R}
@@ -1670,6 +1698,7 @@ Values are `round($8000_0000 × pixel_rate / clock_frequency)`.
 \indexletter{T}
 ```
 
+- TCXO: [3.5](#sec-3-5)
 - Troubleshooting: [Appendix D](#app-d)
 
 ```{=latex}
