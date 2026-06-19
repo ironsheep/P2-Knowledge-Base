@@ -3493,7 +3493,7 @@ August 2025
 www.ironsheepproductions.com
 
 Special thanks to:
-- Jon Titus for the original Smart Pins documentation
+- Jon Titus for his *Propeller 2 Smart Pin Supplementary Documentation*, whose examples and explanations enriched this tutorial
 - Chip Gracey for the P2 architecture
 - The Parallax community for validation and feedback
 

@@ -35,7 +35,7 @@ See sibling files:
 | Smart Pins catalog | `/engineering/ingestion/smart-pins-catalog/ingestionSources/` |
 | P_ constants | `/engineering/ingestion/sources/spin2-v51/smartpin-symbols.txt` |
 | Silicon documentation | `/engineering/ingestion/sources/silicon/` |
-| John Titus extracts | `mode-*/john-titus-extract.md` |
+| Jon Titus extracts | `mode-*/john-titus-extract.md` |
 
 ## Status
 
