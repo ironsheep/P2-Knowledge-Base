@@ -38,4 +38,4 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 category: Event
-oneliner: Jump if FIFO interface block wrap event flag is set or clear
+oneliner: Jump if FIFO interface block wrap event flag is set

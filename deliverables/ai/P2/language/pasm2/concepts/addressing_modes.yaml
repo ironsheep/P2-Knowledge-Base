@@ -13,14 +13,13 @@ modes:
     syntax: "#value"
     encoding: S field contains literal value
     range:
-      - 9-bit: #0 to #511 (most instructions)
-      - 20-bit: ##0 to ##$FFFFF (augmented with AUGS)
-      - 32-bit: ##$0 to ##$FFFFFFFF (augmented with AUGD)
+      - 9-bit: #0 to #511 (literal fits the instruction's 9-bit S or D field)
+      - 32-bit: ##$0 to ##$FFFFFFFF (full 32-bit literal via an augment prefix)
     examples:
       - MOV reg, #42          ' 9-bit immediate
-      - MOV reg, ##1000       ' 20-bit immediate (AUGS prefix added)
-      - MOV reg, ##$12345678  ' 32-bit immediate (AUGD prefix added)
-    notes: "## automatically inserts AUGx instruction"
+      - MOV reg, ##1000       ' 32-bit Src immediate (AUGS prefix added)
+      - MOV reg, ##$12345678  ' 32-bit Src immediate (AUGS prefix added)
+    notes: "## forms a full 32-bit literal. The split between AUGS and AUGD is by FIELD, not width: AUGS augments a literal in the Src field, AUGD a literal in the Dest field — both yield a full 32-bit literal (23 augment bits + 9 field bits)."
 
   register_direct:
     syntax: "register"

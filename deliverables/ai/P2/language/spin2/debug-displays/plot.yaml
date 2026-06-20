@@ -48,7 +48,7 @@ display_directives:
     BACKCOLOR: "Set background color"
     COLOR: "COLOR (value | named {brightness}) -- a color value OR a named color BLACK WHITE ORANGE BLUE GREEN CYAN RED MAGENTA YELLOW GRAY (named colors except BLACK/WHITE accept an optional 0-15 brightness nibble). A COLOR issued immediately before a TEXT directive also sets the text color."
     OPACITY: "OPACITY n -- alpha for subsequent drawing, 0..255 (default 255). The 0..255 bound is byte truncation on store, NOT a saturating clamp: a value > 255 WRAPS mod 256 (e.g. OPACITY 300 -> 44), it does not clip to 255. Same wrap applies to the inline opacity arg on DOT/LINE/shape directives."
-    PRECISE: "PRECISE -- toggle sub-pixel coordinates (8.8 fixed-point, coords shifted <<8). Starts ON by default; each PRECISE toggles it."
+    PRECISE: "PRECISE -- toggle sub-pixel coordinates (8.8 fixed-point, coords shifted <<8). Disabled (OFF) by default; each PRECISE toggles it."
     LINESIZE: "LINESIZE n -- stroke width for subsequent strokes"
   geometry:
     ORIGIN: "ORIGIN {x y} -- set drawing origin (no args = use current position)"
@@ -127,7 +127,7 @@ notes:
   - "PLOT is the only DEBUG window whose update phase is a full vector/raster drawing command set."
   - "UPDATE in the config turns the window into buffered mode; drawing accumulates in Bitmap[0] and is copied to screen only on an explicit UPDATE directive."
   - "Named colors other than BLACK/WHITE accept an optional 0-15 brightness nibble."
-  - "PRECISE controls 8.8 fixed-point sub-pixel coordinates (coords shifted <<8); it is a toggle and starts ON."
+  - "PRECISE controls 8.8 fixed-point sub-pixel coordinates (coords shifted <<8); it is a toggle and starts OFF (disabled by default)."
   - "OBOX is a ROUNDED rectangle (xradius/yradius corners), not merely an outlined one; for all shapes linesize 0 draws filled."
   - "LAYER/CROP/SPRITEDEF/SPRITE share PLOT's single PLOT_Update dispatch and current-position/opacity state -- they are not a separable subsystem and are documented here, not in a separate file."
 

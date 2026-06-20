@@ -1,65 +1,24 @@
 method: TASKRESUME
 type: method
 category: Task Operations
+status: invalid_keyword
 
-requires_version: "Spin2_v47"
-version_directive: "{Spin2_v47}"
+aliases:
+  - "TASKRESUME"
 
 description: |
-  Resume a task that was previously halted with TASKHALT. The task continues 
-  execution from where it was paused, with all state preserved. Also known as 
-  TASKCONT in some documentation.
-  REQUIRES: {Spin2_v47} or later version directive at start of source file.
-syntax: "TASKRESUME(TaskID)"
-parameters:
-  - name: "TaskID"
-    type: "integer"
-    description: "Task ID to resume (0-31)"
-returns:
-  type: "void"
-  description: "No return value"
-examples:
-  - code: |
-      {Spin2_v47}                              ' REQUIRED directive
-      PUB main()
-        TASKRESUME(3)                          ' Resume task 3
-    description: "Resume single task"
-  - code: |
-      {Spin2_v47}                              ' REQUIRED directive
-      PUB synchronized_start()
-        TASKHALT(worker1)
-        TASKHALT(worker2)
-        prepare_data()
-        TASKRESUME(worker1)
-        TASKRESUME(worker2)
-    description: "Synchronized task resumption"
-  - code: |
-      {Spin2_v47}                              ' REQUIRED directive
-      PUB flow_control()
-        if not buffer_full
-          TASKRESUME(producer_task)
-    description: "Resume producer when buffer has space"
-notes:
-  - "REQUIRES {Spin2_v47} or later at start of source file"
-  - "Resumes task halted with TASKHALT"
-  - "Task continues from where it was halted"
-  - "All state preserved during halt"
-  - "No effect if task not halted"
-  - "Also called TASKCONT in some docs"
-  - "Part of cooperative multitasking"
-timing:
-  execution_model: |
-    Spin2 methods execute via the bytecode interpreter. The interpreter is
-    engineered to run at minimum cost. We do not publish a clock count for
-    this method because we do not have a verifiable measurement (no clean
-    single-PASM-instruction backing to cite).
+  TASKRESUME is NOT a valid Spin2 keyword. It does not compile
+  (pnut_ts: "Expected an instruction or variable").
+
+  The real keyword for continuing a halted task is TASKCONT (introduced in
+  {Spin2_v47}). This stub exists only to redirect lookups of the invalid name
+  to the correct method.
+
+redirect_to: language/spin2/methods/taskcont.yaml
+
+see_also:
+  - "TASKCONT — the correct keyword (language/spin2/methods/taskcont.yaml)"
 
 related:
+  - TASKCONT
   - TASKHALT
-  - TASKSPIN
-  - TASKSTOP
-  - TASKCHK
-see_also:
-  - "Task synchronization"
-  - "Task resumption"
-  - "Cooperative multitasking"

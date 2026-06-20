@@ -81,7 +81,7 @@ timing:
 related:
   - TASKSTOP
   - TASKHALT
-  - TASKRESUME
+  - TASKCONT
   - TASKCHK
 see_also:
   - "Cooperative multitasking"

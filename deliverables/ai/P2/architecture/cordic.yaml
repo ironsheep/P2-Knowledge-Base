@@ -29,11 +29,11 @@ critical_usage_pattern:
 operations:
   multiply:
     instruction: "QMUL"
-    operation: "32×32 → 64-bit multiply"
-    signed: true
+    operation: "32×32 → 64-bit unsigned multiply"
+    signed: false
     unsigned: true
-    setup: "QMUL D,S/# - multiply D by S"
-    result: "64-bit product in {X,Y}"
+    setup: "QMUL D,S/# - multiply D by S (both unsigned)"
+    result: "64-bit product in {X,Y} (GETQX=low 32, GETQY=high 32)"
     
   divide:
     instruction: "QDIV"
@@ -42,18 +42,18 @@ operations:
     result: "Quotient in X, remainder in Y"
     notes: "SETQ provides upper 32 bits of 64-bit dividend"
     
-  fractional_multiply:
+  fractional_divide:
     instruction: "QFRAC"
-    operation: "32×32 → 32-bit fractional result"
-    setup: "QFRAC D,S/# - fractional multiply"
-    result: "Upper 32 bits of 64-bit product in X"
-    usage: "Fixed-point arithmetic"
+    operation: "64÷32 → 32-bit fractional quotient (unsigned DIVIDE, not a multiply)"
+    setup: "QFRAC D,S/# - divide {D, SETQ-or-0} by S (D is the upper 32 bits of the numerator)"
+    result: "32-bit fractional quotient in X (remainder via GETQY)"
+    usage: "Fixed-point / fractional arithmetic (integer part in D, fraction in SETQ)"
     
   square_root:
     instruction: "QSQRT"
-    operation: "32-bit → 16-bit square root"
-    setup: "QSQRT D,#0"
-    result: "16-bit root in X[15:0]"
+    operation: "64-bit → 32-bit square root (unsigned)"
+    setup: "QSQRT D,S - input is the 64-bit value {S, D} (S = upper 32, D = lower 32)"
+    result: "32-bit root in X (via GETQX)"
     
   rotate:
     instruction: "QROTATE"

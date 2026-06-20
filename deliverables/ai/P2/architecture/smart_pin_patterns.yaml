@@ -101,8 +101,8 @@ pwm_patterns:
       ' Configure PWM with base period
       wrpin   ##P_PWM_SAWTOOTH | P_OE, pwm_pin
       wxpin   pwm_frame_ticks, pwm_pin ' Frame period
-      wypin   #0, pwm_pin              ' Initial duty = 0
-      dirh    pwm_pin
+      dirh    pwm_pin                  ' Enable smart pin
+      wypin   #0, pwm_pin              ' Initial duty = 0 (Y after enable)
       
       ' Update duty cycle
       wxpin   duty_value, pwm_pin      ' New duty
@@ -121,8 +121,8 @@ pwm_patterns:
       ' 16-bit resolution from 8-bit DAC
       wrpin   ##P_DAC_DITHER_PWM, dac_pin
       wxpin   #256, dac_pin            ' Dither period
-      wypin   value_16bit, dac_pin     ' 16-bit value
-      dirh    dac_pin
+      dirh    dac_pin                  ' Enable smart pin
+      wypin   value_16bit, dac_pin     ' 16-bit value (Y after enable)
     source: audio_output
 
 adc_patterns:
@@ -137,9 +137,8 @@ adc_patterns:
       waitx   ##2000                   ' Wait for cal
       rdpin   gnd_level, adc_pin       ' Read ground level
       
-      wrpin   ##P_ADC_VIO, adc_pin     ' VIO calibration  
-      wypin   #0, adc_pin               ' Trigger
-      waitx   ##2000
+      wrpin   ##P_ADC_VIO, adc_pin     ' VIO calibration
+      waitx   ##2000                   ' ADC samples continuously once enabled
       rdpin   vio_level, adc_pin       ' Read VIO level
       
       ' Calculate scale factor
@@ -148,8 +147,7 @@ adc_patterns:
     measurement: |
       ' Normal ADC reading
       wrpin   ##P_ADC_1X, adc_pin      ' Normal mode
-      wypin   #1, adc_pin              ' Trigger conversion
-      waitx   #100                     ' Conversion time
+      waitx   #100                     ' ADC samples continuously; wait one period
       rdpin   raw_value, adc_pin
       
       ' Apply calibration
@@ -171,8 +169,9 @@ encoder_patterns:
       ' Read position
       rdpin   position, encoder_pin_a  ' Get count
       
-      ' Reset position
-      wypin   #0, encoder_pin_a        ' Clear counter
+      ' Reset position — pulse DIR low to zero the counter
+      dirl    encoder_pin_a            ' Zero count
+      dirh    encoder_pin_a            ' Re-enable encoder
     source: motor_control
 
 timing_patterns:
@@ -198,8 +197,8 @@ timing_patterns:
       ' Count rising edges in time window
       wrpin   ##P_COUNT_RISES, freq_pin
       wxpin   ##80_000_000, freq_pin  ' 1 second at 80MHz
-      wypin   #0, freq_pin             ' Start counting
-      dirh    freq_pin
+      dirh    freq_pin                 ' Enable smart pin
+      wypin   #0, freq_pin             ' Start counting (Y after enable)
       
       ' Read count after window
       waitx   ##80_000_000
@@ -215,9 +214,9 @@ repository_patterns:
       wrpin   ##P_REPOSITORY, repo_pin
       dirh    repo_pin
       
-      ' COG A writes data
-      wypin   data_value, repo_pin
-      
+      ' COG A writes data (X holds the 32-bit repository long)
+      wxpin   data_value, repo_pin
+
       ' COG B reads data
       rdpin   received, repo_pin
     source: multi_cog_communication

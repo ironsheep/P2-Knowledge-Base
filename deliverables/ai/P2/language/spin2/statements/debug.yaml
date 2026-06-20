@@ -121,8 +121,9 @@ examples:
     description: "Show labeled variable values"
     
   - code: |
-      ' Oscilloscope: create the window, then feed samples by name
-      DEBUG(`SCOPE MyScope 'Sensor' AUTO 'Filtered' AUTO)
+      ' Oscilloscope: create the window, declare channels, then feed samples by name
+      DEBUG(`SCOPE MyScope)                          ' create the window
+      DEBUG(`MyScope 'Sensor' AUTO 'Filtered' AUTO)  ' declare channels (separate message)
       DEBUG(`MyScope `(sensor_value, filtered_value))
     description: "Display two signals on oscilloscope"
     
@@ -168,7 +169,8 @@ examples:
     
   - code: |
       ' Real-time plotting of a value series (SCOPE is the time-series window; PLOT is a drawing canvas)
-      DEBUG(`SCOPE Sensor 'Value' AUTO)
+      DEBUG(`SCOPE Sensor)              ' create the window
+      DEBUG(`Sensor 'Value' AUTO)      ' declare the channel (separate message)
       REPEAT
         sensor := read_sensor()
         DEBUG(`Sensor `(sensor))

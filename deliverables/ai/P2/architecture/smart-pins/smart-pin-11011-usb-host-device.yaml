@@ -19,16 +19,49 @@ detailed_description:
     IN flag signals USB events
 
 registers:
+  # All WXPIN/WYPIN/RDPIN for USB are issued on the LOWER (even / DM) pin.
+  # Silicon Doc p2-documentation.txt:8886-9006.
   x_register:
-    function: "USB configuration and timing parameters"
+    function: "USB mode + baud rate, set via WXPIN on the lower (even) pin"
+    D_15: "1 = host, 0 = device"
+    D_14: "1 = full-speed (12 Mbps), 0 = low-speed (1.5 Mbps)"
+    D_13_0: "baud = 16-bit fraction of sysclk (baud_hz / sysclk_hz * $10000); the two MSBs must be 0, so baud < sysclk/4"
+    example: "WXPIN ##$E666, lowerpin  ' host + full-speed + 12 MHz baud @ 80 MHz sysclk"
   y_register:
-    function: "USB protocol control settings"
+    function: "Line-state / packet command, set via WYPIN on the lower (even) pin"
+    D_values:
+      - "0   = output IDLE (float pins)"
+      - "1   = output SE0 (drive both DP and DM low)"
+      - "2   = output K"
+      - "3   = output J (driven, like IDLE but driven)"
+      - "4   = output EOP (SE0, SE0, J, then IDLE)"
+      - "$80 = SOP (start-of-packet; then buffer bytes, automatic EOP when the buffer empties)"
+    packet_send: "WYPIN #$80, then after each IN rise on the upper (odd) pin do WYPIN byte; always confirm the upper pin's IN rose before issuing the next WYPIN"
   z_register:
-    function: "USB data and status information"
+    function: "16-bit receiver status word, read via RDPIN/RQPIN on the lower (even) pin (error flag -> C)"
+    bits:
+      - "[31:16] unused ($0000)"
+      - "[15:8]  byte — last byte received"
+      - "[7] byte toggle — cleared on SOP, toggled on each byte received"
+      - "[6] error — cleared on SOP; set on bit-unstuff error, EOP SE0 > 3 bits, or SE1"
+      - "[5] EOP in — cleared on SOP or 7+ bits of J/K, set on EOP"
+      - "[4] SOP in — cleared on EOP or 7+ bits of J/K, set on SOP"
+      - "[3] SE1 in (illegal) — cleared on !SE1, set on 1+ bits of SE1"
+      - "[2] SE0 in (RESET) — cleared on !SE0, set on 1+ bits of SE0"
+      - "[1] K in (RESUME) — cleared on !K, set on 7+ bits of K"
+      - "[0] J in (IDLE) — cleared on !J, set on 7+ bits of J"
 
 flags:
-  in_flag: "USB event notification"
+  in_flag_odd_dp: "Upper (odd / DP) pin: IN raised when the output buffer empties (a new TX byte can be written via WYPIN to the lower pin). No WXPIN/WYPIN are used on this pin."
+  in_flag_even_dm: "Lower (even / DM) pin: IN raised on any change in receiver status; a WRPIN/WXPIN/WYPIN/RDPIN/AKPIN is required before IN can re-raise for the next change."
+  c_flag: "On RDPIN/RQPIN of the lower pin, C = receiver error flag"
   out_override: "OUT signals overridden for USB differential control"
+
+open_questions:
+  # Silicon covers the register/byte-level interface above. These remain
+  # Chip-gated (expert queue) — not stated in any primary source:
+  - "Receiver analog front-end detail beyond the digital status bits (e.g. any scope-style filter taps / thresholds)"
+  - "Exact electrical thresholds of the J / K / SE0 / SE1 line-state detectors"
 
 code_examples:
   - title: "USB Pin Pair Configuration"

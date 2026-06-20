@@ -65,24 +65,24 @@ control_registers:
     bits: "Bit 0=P32, bit 31=P63"
     
   outa:
-    address: "$1FE"
+    address: "$1FC"
     controls: "Output state for P31-P0"
     effect: "When DIR=1, pin drives this state"
     state_0: "Drive low (0V)"
     state_1: "Drive high (3.3V)"
     
   outb:
-    address: "$1FF"
+    address: "$1FD"
     controls: "Output state for P63-P32"
     
   ina:
-    address: "$1FC"
+    address: "$1FE"
     controls: "Read state of P31-P0"
     read_only: true
     reflects: "Actual pin voltage level"
     
   inb:
-    address: "$1FD"
+    address: "$1FF"
     controls: "Read state of P63-P32"
     read_only: true
 

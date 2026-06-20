@@ -189,6 +189,13 @@ configuration_constants:
       - "X[4:0] = 7 → 8-bit word (standard 8-bit data)"
       - "X[4:0] = 8 → 9-bit word (8 data + parity)"
 
+gotchas:
+  first_byte_low_glitch:
+    symptom: "The first byte transmitted after the smart pin is enabled may briefly glitch the line low before the proper start bit."
+    workaround: "Right after enabling, issue one harmless WYPIN of $FF (an all-ones frame) to pre-clear the transmitter, then send real data."
+    attribution: "Community-reported (credited to Ray Rodrick)."
+    status: "NEEDS-HW-CONFIRM — not in any primary source and not compile-verifiable (runtime/pin behavior); queued for IOSP hardware verification Batch 2 (RA-19)."
+
 notes:
   - "OUT signal automatically overridden in this mode"
   - "Start bit (0) and stop bit (1) added automatically by hardware"

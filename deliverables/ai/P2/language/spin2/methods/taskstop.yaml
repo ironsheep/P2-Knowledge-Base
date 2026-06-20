@@ -58,7 +58,7 @@ timing:
 related:
   - TASKSPIN
   - TASKHALT
-  - TASKRESUME
+  - TASKCONT
   - TASKCHK
 see_also:
   - "Task termination"

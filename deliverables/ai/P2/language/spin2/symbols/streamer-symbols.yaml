@@ -32,62 +32,62 @@ immediate_direct_modes:
   - symbol: X_IMM_32X1_1DAC1
     value: "$4000_0000"
     encoding: "%0100 << 28"
-    description: "32×1-bit immediate → 1 pin"
+    description: "32×1-bit immediate → 1 pin, 1 DAC ch × 1 bit"
     
   - symbol: X_IMM_16X2_2DAC1
     value: "$5000_0000"
     encoding: "%0101 << 28"
-    description: "16×2-bit immediate → 2 pins"
+    description: "16×2-bit immediate → 2 pins, 2 DAC ch × 1 bit"
     
   - symbol: X_IMM_16X2_1DAC2
     value: "$5002_0000"
     encoding: "%0101 << 28 + 2<<16"
-    description: "16×2-bit immediate → 1 pin, 2 DAC"
+    description: "16×2-bit immediate → 2 pins, 1 DAC ch × 2 bits"
     
   - symbol: X_IMM_8X4_4DAC1
     value: "$6000_0000"
     encoding: "%0110 << 28"
-    description: "8×4-bit immediate → 4 pins"
+    description: "8×4-bit immediate → 4 pins, 4 DAC ch × 1 bit"
     
   - symbol: X_IMM_8X4_2DAC2
     value: "$6002_0000"
     encoding: "%0110 << 28 + 2<<16"
-    description: "8×4-bit immediate → 2 pins, 2 DAC"
+    description: "8×4-bit immediate → 4 pins, 2 DAC ch × 2 bits"
     
   - symbol: X_IMM_8X4_1DAC4
     value: "$6004_0000"
     encoding: "%0110 << 28 + 4<<16"
-    description: "8×4-bit immediate → 1 pin, 4 DAC"
+    description: "8×4-bit immediate → 4 pins, 1 DAC ch × 4 bits"
     
   - symbol: X_IMM_4X8_4DAC2
     value: "$6006_0000"
     encoding: "%0110 << 28 + 6<<16"
-    description: "4×8-bit immediate → 4 pins, 2 DAC"
+    description: "4×8-bit immediate → 8 pins, 4 DAC ch × 2 bits"
     
   - symbol: X_IMM_4X8_2DAC4
     value: "$6007_0000"
     encoding: "%0110 << 28 + 7<<16"
-    description: "4×8-bit immediate → 2 pins, 4 DAC"
+    description: "4×8-bit immediate → 8 pins, 2 DAC ch × 4 bits"
     
   - symbol: X_IMM_4X8_1DAC8
     value: "$600E_0000"
     encoding: "%0110 << 28 + $E<<16"
-    description: "4×8-bit immediate → 1 pin, 8 DAC"
+    description: "4×8-bit immediate → 8 pins, 1 DAC ch × 8 bits"
     
   - symbol: X_IMM_2X16_4DAC4
     value: "$600F_0000"
     encoding: "%0110 << 28 + $F<<16"
-    description: "2×16-bit immediate → 4 pins, 4 DAC"
+    description: "2×16-bit immediate → 16 pins, 4 DAC ch × 4 bits"
     
   - symbol: X_IMM_2X16_2DAC8
     value: "$7000_0000"
     encoding: "%0111 << 28"
-    description: "2×16-bit immediate → 2 pins, 8 DAC"
+    description: "2×16-bit immediate → 16 pins, 2 DAC ch × 8 bits"
     
   - symbol: X_IMM_1X32_4DAC8
     value: "$7001_0000"
     encoding: "%0111 << 28 + 1<<16"
-    description: "1×32-bit immediate → 4 pins, 8 DAC"
+    description: "1×32-bit immediate → 32 pins, 4 DAC ch × 8 bits"
 
 # Mode symbols - RDFAST → LUT
 rdfast_lut_modes:
@@ -116,62 +116,62 @@ rdfast_direct_modes:
   - symbol: X_RFBYTE_1P_1DAC1
     value: "$8000_0000"
     encoding: "%1000 << 28"
-    description: "RFBYTE → 1 pin"
+    description: "RFBYTE → 1 pin, 1 DAC ch × 1 bit"
     
   - symbol: X_RFBYTE_2P_2DAC1
     value: "$9000_0000"
     encoding: "%1001 << 28"
-    description: "RFBYTE → 2 pins"
+    description: "RFBYTE → 2 pins, 2 DAC ch × 1 bit"
     
   - symbol: X_RFBYTE_2P_1DAC2
     value: "$9002_0000"
     encoding: "%1001 << 28 + 2<<16"
-    description: "RFBYTE → 1 pin, 2 DAC"
+    description: "RFBYTE → 2 pins, 1 DAC ch × 2 bits"
     
   - symbol: X_RFBYTE_4P_4DAC1
     value: "$A000_0000"
     encoding: "%1010 << 28"
-    description: "RFBYTE → 4 pins"
+    description: "RFBYTE → 4 pins, 4 DAC ch × 1 bit"
     
   - symbol: X_RFBYTE_4P_2DAC2
     value: "$A002_0000"
     encoding: "%1010 << 28 + 2<<16"
-    description: "RFBYTE → 2 pins, 2 DAC"
+    description: "RFBYTE → 4 pins, 2 DAC ch × 2 bits"
     
   - symbol: X_RFBYTE_4P_1DAC4
     value: "$A004_0000"
     encoding: "%1010 << 28 + 4<<16"
-    description: "RFBYTE → 1 pin, 4 DAC"
+    description: "RFBYTE → 4 pins, 1 DAC ch × 4 bits"
     
   - symbol: X_RFBYTE_8P_4DAC2
     value: "$A006_0000"
     encoding: "%1010 << 28 + 6<<16"
-    description: "RFBYTE → 4 pins, 2 DAC"
+    description: "RFBYTE → 8 pins, 4 DAC ch × 2 bits"
     
   - symbol: X_RFBYTE_8P_2DAC4
     value: "$A007_0000"
     encoding: "%1010 << 28 + 7<<16"
-    description: "RFBYTE → 2 pins, 4 DAC"
+    description: "RFBYTE → 8 pins, 2 DAC ch × 4 bits"
     
   - symbol: X_RFBYTE_8P_1DAC8
     value: "$A00E_0000"
     encoding: "%1010 << 28 + $E<<16"
-    description: "RFBYTE → 1 pin, 8 DAC"
+    description: "RFBYTE → 8 pins, 1 DAC ch × 8 bits"
     
   - symbol: X_RFWORD_16P_4DAC4
     value: "$A00F_0000"
     encoding: "%1010 << 28 + $F<<16"
-    description: "RFWORD → 4 pins, 4 DAC"
+    description: "RFWORD → 16 pins, 4 DAC ch × 4 bits"
     
   - symbol: X_RFWORD_16P_2DAC8
     value: "$B000_0000"
     encoding: "%1011 << 28"
-    description: "RFWORD → 2 pins, 8 DAC"
+    description: "RFWORD → 16 pins, 2 DAC ch × 8 bits"
     
   - symbol: X_RFLONG_32P_4DAC8
     value: "$B001_0000"
     encoding: "%1011 << 28 + 1<<16"
-    description: "RFLONG → 4 pins, 8 DAC"
+    description: "RFLONG → 32 pins, 4 DAC ch × 8 bits"
 
 # Mode symbols - RGB Video
 rgb_video_modes:
@@ -205,62 +205,62 @@ capture_modes:
   - symbol: X_1P_1DAC1_WFBYTE
     value: "$C000_0000"
     encoding: "%1100 << 28"
-    description: "1 pin → WFBYTE"
+    description: "1 pin, 1 DAC ch × 1 bit → WFBYTE"
     
   - symbol: X_2P_2DAC1_WFBYTE
     value: "$D000_0000"
     encoding: "%1101 << 28"
-    description: "2 pins → WFBYTE"
+    description: "2 pins, 2 DAC ch × 1 bit → WFBYTE"
     
   - symbol: X_2P_1DAC2_WFBYTE
     value: "$D002_0000"
     encoding: "%1101 << 28 + 2<<16"
-    description: "1 pin, 2 DAC → WFBYTE"
+    description: "2 pins, 1 DAC ch × 2 bits → WFBYTE"
     
   - symbol: X_4P_4DAC1_WFBYTE
     value: "$E000_0000"
     encoding: "%1110 << 28"
-    description: "4 pins → WFBYTE"
+    description: "4 pins, 4 DAC ch × 1 bit → WFBYTE"
     
   - symbol: X_4P_2DAC2_WFBYTE
     value: "$E002_0000"
     encoding: "%1110 << 28 + 2<<16"
-    description: "2 pins, 2 DAC → WFBYTE"
+    description: "4 pins, 2 DAC ch × 2 bits → WFBYTE"
     
   - symbol: X_4P_1DAC4_WFBYTE
     value: "$E004_0000"
     encoding: "%1110 << 28 + 4<<16"
-    description: "1 pin, 4 DAC → WFBYTE"
+    description: "4 pins, 1 DAC ch × 4 bits → WFBYTE"
     
   - symbol: X_8P_4DAC2_WFBYTE
     value: "$E006_0000"
     encoding: "%1110 << 28 + 6<<16"
-    description: "4 pins, 2 DAC → WFBYTE"
+    description: "8 pins, 4 DAC ch × 2 bits → WFBYTE"
     
   - symbol: X_8P_2DAC4_WFBYTE
     value: "$E007_0000"
     encoding: "%1110 << 28 + 7<<16"
-    description: "2 pins, 4 DAC → WFBYTE"
+    description: "8 pins, 2 DAC ch × 4 bits → WFBYTE"
     
   - symbol: X_8P_1DAC8_WFBYTE
     value: "$E00E_0000"
     encoding: "%1110 << 28 + $E<<16"
-    description: "1 pin, 8 DAC → WFBYTE"
+    description: "8 pins, 1 DAC ch × 8 bits → WFBYTE"
     
   - symbol: X_16P_4DAC4_WFWORD
     value: "$E00F_0000"
     encoding: "%1110 << 28 + $F<<16"
-    description: "4 pins, 4 DAC → WFWORD"
+    description: "16 pins, 4 DAC ch × 4 bits → WFWORD"
     
   - symbol: X_16P_2DAC8_WFWORD
     value: "$F000_0000"
     encoding: "%1111 << 28"
-    description: "2 pins, 8 DAC → WFWORD"
+    description: "16 pins, 2 DAC ch × 8 bits → WFWORD"
     
   - symbol: X_32P_4DAC8_WFLONG
     value: "$F001_0000"
     encoding: "%1111 << 28 + 1<<16"
-    description: "4 pins, 8 DAC → WFLONG"
+    description: "32 pins, 4 DAC ch × 8 bits → WFLONG"
 
 # Mode symbols - ADC
 adc_modes:

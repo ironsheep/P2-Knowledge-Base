@@ -82,7 +82,7 @@ notes:
 
 related:
   - language/spin2/methods/taskhalt.yaml
-  - language/spin2/methods/taskresume.yaml
+  - language/spin2/methods/taskcont.yaml
   - language/spin2/methods/taskchk.yaml
   - language/spin2/constants/newtask.yaml
   - language/spin2/constants/thistask.yaml

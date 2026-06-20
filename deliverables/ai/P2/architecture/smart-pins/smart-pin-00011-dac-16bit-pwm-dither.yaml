@@ -24,6 +24,11 @@ operation: |
   Better dynamic range than pseudo-random, but adds Fclock/256 tone at -48dB.
   Maximum 2 transitions per 256 clocks (vs random transitions).
 
+accuracy_caveat: |
+  The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
+  the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
+  averaged over time (Silicon Doc part4-smart-pins.txt).
+
 # Parameters
 x_register:
   function: "Sample period in clocks"

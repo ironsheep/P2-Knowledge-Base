@@ -35,4 +35,4 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 category: Event
-oneliner: Jump if streamer LUT RAM rollover event flag set or clear
+oneliner: Jump if streamer LUT RAM rollover event flag set

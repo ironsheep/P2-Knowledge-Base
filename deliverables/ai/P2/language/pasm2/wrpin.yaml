@@ -24,6 +24,32 @@ description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge sm
 flags_affected:
   C: No effect
   Z: No effect
+d_operand_format:
+  # Silicon Doc part4-smart-pins.txt:6-47
+  layout: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  fields:
+    AAAA: "'A' input selector (see input_selectors)"
+    BBBB: "'B' input selector (see input_selectors)"
+    FFF: "A/B input logic/filter combining (000 = A,B straight-through)"
+    M: "13-bit low-level pin control + smart-pin mode"
+    TT: "DAC/output mode"
+    SSSSS: "DAC/output value or pin-output bit selection"
+input_selectors:
+  # Silicon Doc part4-smart-pins.txt:13-36. AAAA and BBBB share this encoding.
+  description: |
+    A smart pin's A and B inputs can be routed from a NEIGHBORING pin's read
+    state, which is how SPI-style "clock from the adjacent pin" wiring works
+    (the predefined P_PLUS1_B / P_MINUS1_B / ... routing labels).
+  bit3_invert: "leading bit — 0xxx = true input (default), 1xxx = inverted"
+  source_select:   # low 3 bits
+    x000: "this pin's read state (default)"
+    x001: "relative +1 pin's read state"
+    x010: "relative +2 pin's read state"
+    x011: "relative +3 pin's read state"
+    x100: "this pin's OUT bit (driven by cogs)"
+    x101: "relative -3 pin's read state"
+    x110: "relative -2 pin's read state"
+    x111: "relative -1 pin's read state"
 critical_requirement:
   reset_before_configure: true
   description: Smart pin MUST be reset (DIR=0) before any WRPIN configuration
@@ -31,8 +57,12 @@ critical_requirement:
   - 'DIRL pin       '' REQUIRED: Reset smart pin (DIR=0)'
   - WRPIN mode, pin ' Configure smart pin mode
   - WXPIN x, pin    ' Set X parameter
-  - WYPIN y, pin    ' Set Y parameter
   - DIRH pin       ' Enable smart pin (DIR=1)
+  - WYPIN y, pin    ' Set Y parameter (AFTER enable)
+  note: 'Universal init order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate
+    (WYPIN): WYPIN comes AFTER DIRH. Mandatory for the trigger modes %00100/%00101 (a
+    WYPIN issued before enable is lost); consistent and safe for all other modes.
+    Hardware-verified (EF-011).'
   consequence_of_skipping: Unpredictable behavior, configuration conflicts, or smart
     pin malfunction
 usage_notes:
@@ -48,9 +78,9 @@ examples:
 
     WXPIN ##$100_0100, #16   '' Set period and frame
 
-    WYPIN #50, #16           '' Set duty cycle
-
     DIRH  #16                '' Enable smart pin
+
+    WYPIN #50, #16           '' Set duty cycle (after enable)
 
     '
 - description: Clear smart pin configuration
@@ -82,3 +112,15 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.512736'
 category: Smart Pin
 oneliner: Set mode of smart pins S[10:6]+S[5:0]
+aliases:
+  - "WRPIN"
+  - "smart pin input selector"
+  - "A input selector"
+  - "B input selector"
+  - "relative pin routing"
+  - "clock from adjacent pin"
+  - "P_PLUS1_B"
+  - "P_MINUS1_B"
+related:
+  - architecture/smart_pin_patterns.yaml
+  - architecture/smart_pins.yaml

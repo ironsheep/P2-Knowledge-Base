@@ -11,7 +11,7 @@
 - **Ingest completeness:** mature ~18 (≥90% + audit, **incl. Titus rev5 ✅**) · partial ~8 (40–89%) · minimal/not-started ~6 (incl. hyperRam un-ingested)  ‹scanned 2026-06-12›
 - **Open questions:** **8** in the gap ledger (G-001..008, all Smart-Pins/Titus) · **3** routed to an expert (Q-001..003)  ‹rolled up from KNOWLEDGE-GAPS›
 - **Latest ingested:** **Smart Pins (Titus) rev 5** (2026-06-12 re-extraction, 🟡 cross-check) · prior authoritative: Spin2 Language Reference @ **v55** ‹LIN›
-- **What's next:** **Smart Pins manual certification audit** (spot-check it didn't inherit Titus's swapped x101/x111) → then **F-116/F-115 YAML round** (incl. G-001 WRPIN selector add) · _(2nd ingestion source TBD)_  ‹Titus rev5 ✅ 2026-06-12›
+- **What's next:** **Smart Pins manual certification audit** (spot-check it didn't inherit Titus's swapped x101/x111) · _(next ingestion source TBD — HyperRAM/HyperFlash #64004-ES + #64006-ES Add-on roster staged)_  ‹Titus rev5 ✅ 2026-06-12 · YAML v1.10.1 sweep ✅ 2026-06-20 (G-001 WRPIN selector shipped)›
 - **Why track this:** qualified inputs feed the YAML KB → **download-on-demand (MCP)** → agents writing P1/P2 code their models were never trained on. Input trust + completeness propagate straight to agent reliability.
 
 ## Tier 2 — Source registry (by category — categories preserved from existing trackers)

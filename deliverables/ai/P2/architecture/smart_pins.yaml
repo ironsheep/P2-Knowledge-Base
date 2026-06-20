@@ -295,6 +295,7 @@ x_y_z_registers:
     width: "32 bits"
     usage: "Result/accumulator"
     read_via: "RDPIN/RQPIN instructions"
+    reset_preload: "Z is preloaded during reset (DIR=0); the value is mode-specific — e.g. $00000001 for the state/timing measurement modes (%10000/%10001/%10010) and $00000000 for period-counting (%10011). See the per-mode pages."
 
 in_flag:
   purpose: "Signals operation complete"

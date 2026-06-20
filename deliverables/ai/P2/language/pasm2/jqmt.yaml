@@ -35,4 +35,4 @@ flags_affected:
   C: No effect
   Z: No effect
 category: Event
-oneliner: Jump if CORDIC-read-but-empty event flag set or clear
+oneliner: Jump if CORDIC-read-but-empty event flag set

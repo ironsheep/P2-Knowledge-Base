@@ -26,7 +26,7 @@ comparison_categories:
 edge_modules:
   p2_ec_standard:
     part_number: "P2-EC"
-    flash_memory: "4MB"
+    flash_memory: "16MB"
     psram_memory: "0MB"
     crystal_frequency: "20MHz"
     voltage_regulation: "Integrated 3.3V"
@@ -41,8 +41,8 @@ edge_modules:
     
   p2_ec_32mb:
     part_number: "P2-EC32MB"
-    flash_memory: "32MB"
-    psram_memory: "0MB"
+    flash_memory: "16MB"
+    psram_memory: "32MB"
     crystal_frequency: "20MHz"
     voltage_regulation: "Integrated 3.3V"
     dimensions: "27×40mm"
@@ -57,7 +57,7 @@ edge_modules:
 development_boards:
   p2_eval_board:
     part_number: "64000-ES"
-    flash_memory: "4MB (with P2-EC)"
+    flash_memory: "16MB (with P2-EC)"
     psram_memory: "0MB"
     crystal_frequency: "20MHz"
     voltage_regulation: "Multiple rails (1.8V, 3.3V, 5V)"
@@ -231,9 +231,9 @@ feature_matrix:
     cordic_solver: "Available on all platforms"
     
   memory_comparison:
-    p2_ec_standard: "4MB Flash, 512KB RAM"
-    p2_ec_32mb: "32MB Flash, 512KB RAM"
-    note: "RAM is internal P2 specification"
+    p2_ec_standard: "16MB Flash, 512KB hub RAM (no PSRAM)"
+    p2_ec_32mb: "16MB Flash + 32MB PSRAM, 512KB hub RAM"
+    note: "Hub RAM is internal to the P2; both modules carry the same 16MB boot flash. The P2-EC32MB's distinguishing feature is its 32MB external PSRAM."
     
   connectivity_options:
     programming_interfaces:
@@ -347,7 +347,7 @@ summary_recommendations:
   
 notes:
   - "All configurations provide complete P2 functionality (8 COGs, 64 Smart Pins, CORDIC)"
-  - "Edge module choice (4MB vs 32MB) depends on program size requirements"
+  - "Edge module choice depends on whether you need PSRAM: both carry 16MB flash, but only the P2-EC32MB adds 32MB PSRAM"
   - "Add-on boards require P2 Eval Board for full functionality"
   - "Breakout boards offer maximum flexibility but require external programming setup"
   - "Educational progression: Eval Board → Standard Breakout → Mini Breakout → Custom carrier"

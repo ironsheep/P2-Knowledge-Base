@@ -199,22 +199,26 @@ common_patterns:
     code: "a :=: b  ' a and b are swapped"
 
 anti_patterns:
-  - anti_pattern: "precedence_mistake_bitwise_compare"
+  - anti_pattern: "c_precedence_assumption_bitwise_compare"
     severity: "common_bug"
-    description: "Comparison binds tighter than bitwise AND"
+    description: |
+      P2 differs from C: bitwise AND '&' (precedence level 4) binds TIGHTER than
+      equality '==' (level 13). So 'flags & MASK == EXPECTED' already groups as
+      '(flags & MASK) == EXPECTED' — no parentheses needed.
     wrong: |
-      if flags & MASK == EXPECTED    ' Compares MASK to EXPECTED first!
+      if flags & (MASK == EXPECTED)  ' Mis-port from C (where '==' binds tighter)
     correct: |
-      if (flags & MASK) == EXPECTED  ' Parentheses fix precedence
+      if flags & MASK == EXPECTED    ' P2: '&' first => (flags & MASK) == EXPECTED
 
-  - anti_pattern: "precedence_mistake_shift_add"
+  - anti_pattern: "c_precedence_assumption_shift_add"
     severity: "common_bug"
-    description: "Add binds tighter than shift"
+    description: |
+      P2 differs from C: shift '<<' (precedence level 3) binds TIGHTER than add
+      '+' (level 9). So 'value << 2 + 1' groups as '(value << 2) + 1'.
     wrong: |
-      result := value << 2 + 1       ' Adds 1 then shifts!
+      result := value << (2 + 1)     ' Mis-port from C (=> value << 3)
     correct: |
-      result := (value << 2) + 1     ' Shift then add (if intended)
-      result := value << (2 + 1)     ' Add then shift (if intended)
+      result := value << 2 + 1       ' P2: '<<' first => (value << 2) + 1
 
   - anti_pattern: "signed_comparison_for_addresses"
     severity: "logic_error"
@@ -278,12 +282,16 @@ special_operators:
       value := ?? // 100       ' Random 0-99
 
   - operator: "~"
-    description: "Sign extend from bit 7 (byte to long)"
-    example: "$FF~ becomes $FFFF_FFFF"
+    description: "Post-clear (postfix) - return variable's value, then clear it to 0"
+    example: |
+      x := flag~     ' x gets flag's value, then flag becomes 0
+    note: "P2 Spin2 semantics; not P1 sign-extend. For sign-extend use SIGNX."
 
   - operator: "~~"
-    description: "Sign extend from bit 15 (word to long)"
-    example: "$FFFF~~ becomes $FFFF_FFFF"
+    description: "Post-set (postfix) - return variable's value, then set it to -1 (all bits, TRUE)"
+    example: |
+      x := flag~~    ' x gets flag's value, then flag becomes -1
+    note: "P2 Spin2 semantics; not P1 sign-extend. For sign-extend use SIGNX."
 
   - operator: "@"
     description: "Address of variable in hub"

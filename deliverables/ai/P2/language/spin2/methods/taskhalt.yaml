@@ -7,7 +7,7 @@ version_directive: "{Spin2_v47}"
 
 description: |
   Temporarily halt/pause a running task. The task's state and stack are 
-  preserved, and execution can be resumed later with TASKRESUME (or TASKCONT). 
+  preserved, and execution can be resumed later with TASKCONT.
   Use THISTASK (-1) to halt the currently executing task.
   REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "TASKHALT(TaskID)"
@@ -24,7 +24,7 @@ examples:
       PUB critical_section()
         TASKHALT(3)                            ' Pause task 3
         do_critical_work()
-        TASKRESUME(3)                          ' Resume task 3
+        TASKCONT(3)                            ' Continue task 3
     description: "Pause and resume task"
   - code: |
       {Spin2_v47}                              ' REQUIRED directive
@@ -43,7 +43,7 @@ notes:
   - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Task is paused, not terminated"
   - "State and stack preserved"
-  - "Use TASKRESUME to continue"
+  - "Use TASKCONT to continue"
   - "Task won't execute until resumed"
   - "Useful for synchronization"
   - "Different from TASKSTOP (which terminates)"
@@ -55,7 +55,7 @@ timing:
     single-PASM-instruction backing to cite).
 
 related:
-  - TASKRESUME
+  - TASKCONT
   - TASKSTOP
   - TASKSPIN
   - TASKCHK

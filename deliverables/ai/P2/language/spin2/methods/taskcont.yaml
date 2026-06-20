@@ -1,0 +1,71 @@
+method: TASKCONT
+type: method
+category: Task Operations
+
+aliases:
+  - "TASKCONT"
+  - "task continue"
+  - "resume task"
+  - "continue task"
+  - "TASKRESUME"          # common-but-invalid name; see taskresume.yaml stub
+
+requires_version: "Spin2_v47"
+version_directive: "{Spin2_v47}"
+
+description: |
+  Continue a task that was previously halted with TASKHALT. The task resumes
+  execution from where it was paused, with all state preserved.
+  REQUIRES: {Spin2_v47} or later version directive at start of source file.
+syntax: "TASKCONT(TaskID)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID to continue (0-31)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB main()
+        TASKCONT(3)                            ' Continue task 3
+    description: "Continue single task"
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB synchronized_start()
+        TASKHALT(worker1)
+        TASKHALT(worker2)
+        prepare_data()
+        TASKCONT(worker1)
+        TASKCONT(worker2)
+    description: "Synchronized task continuation"
+  - code: |
+      {Spin2_v47}                              ' REQUIRED directive
+      PUB flow_control()
+        if not buffer_full
+          TASKCONT(producer_task)
+    description: "Continue producer when buffer has space"
+notes:
+  - "REQUIRES {Spin2_v47} or later at start of source file"
+  - "Continues a task halted with TASKHALT"
+  - "Task continues from where it was halted"
+  - "All state preserved during halt"
+  - "No effect if task not halted"
+  - "Part of cooperative multitasking"
+  - "The name TASKRESUME (seen in some older notes) does not compile — the keyword is TASKCONT"
+timing:
+  execution_model: |
+    Spin2 methods execute via the bytecode interpreter. The interpreter is
+    engineered to run at minimum cost. We do not publish a clock count for
+    this method because we do not have a verifiable measurement (no clean
+    single-PASM-instruction backing to cite).
+
+related:
+  - TASKHALT
+  - TASKSPIN
+  - TASKSTOP
+  - TASKCHK
+see_also:
+  - "Task synchronization"
+  - "Task continuation"
+  - "Cooperative multitasking"

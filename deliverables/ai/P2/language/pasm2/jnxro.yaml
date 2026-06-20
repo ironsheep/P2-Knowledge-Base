@@ -11,7 +11,7 @@ parameters:
   for absolute addressing.'
 timing:
   cycles: 2
-  type: fixed
+  type: variable
 encoding:
 - bits: EEEE 1011110 01I 000011100 SSSSSSSSS
   write: —

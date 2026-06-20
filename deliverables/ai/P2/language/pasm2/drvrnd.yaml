@@ -29,7 +29,7 @@ description: >-
   within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not
   cross the port boundary.
 
-  If the WCZ effect is specified, the C and Z flags are updated to the original
+  If the WCZ effect is specified, the C and Z flags are updated to the
   state of OUTA / OUTB's base bit, identified by Dest.
 result: >-
   The I/O pins described by Dest are set to the output direction and each output
@@ -40,8 +40,8 @@ parameters:
   level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original OUTx base bit (original state before modification)
-  Z: Set to original OUTx base bit (original state before modification)
+  C: Set to OUT bit state
+  Z: Set to OUT bit state
 syntax_variants:
 - DRVRND {#}Dest {WCZ}
 timing:
@@ -50,8 +50,8 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011110
   write: DIRx + OUTx
-  c: Original OUTx base bit
-  z: Original OUTx base bit
+  c: OUT bit
+  z: OUT bit
   clocks: '2'
   notes: New DIRx state is not data-forwarded; next pipelined instruction sees old state
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

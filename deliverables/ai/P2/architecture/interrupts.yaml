@@ -19,9 +19,9 @@ architecture:
   
   priority_scheme:
     highest: "Debug interrupt (special)"
-    level_3: "Interrupt 3 (highest normal priority)"
+    level_1: "Interrupt 1 (highest normal priority)"
     level_2: "Interrupt 2 (medium priority)"
-    level_1: "Interrupt 1 (lowest priority)"
+    level_3: "Interrupt 3 (lowest normal priority)"
     lowest: "Main code (non-interrupt)"
   
   shadow_registers:
@@ -231,36 +231,36 @@ interrupt_sources_detail:
     description: "Smart pin event 4"
   
   - source_id: "%1000"
-    name: "PAT-match"
-    description: "Pin pattern matches PAT register"
-  
+    name: "PAT-event"
+    description: "Pin pattern match or mismatch (PAT register event)"
+
   - source_id: "%1001"
-    name: "PAT-mismatch"
-    description: "Pin pattern doesn't match PAT"
-  
+    name: "FIFO-event"
+    description: "Hub FIFO interface event"
+
   - source_id: "%1010"
-    name: "FBW-wrap"
-    description: "Hub FIFO block wrap"
-  
+    name: "XMT-streamer-ready"
+    description: "Streamer ready for a new command (event 10)"
+
   - source_id: "%1011"
-    name: "XMT-empty"
-    description: "Streamer transmit buffer empty"
-  
+    name: "XFI-streamer-done"
+    description: "Streamer finished, no pending command (event 11)"
+
   - source_id: "%1100"
-    name: "Any-edge-SELH"
-    description: "Any edge on selected pins"
-  
+    name: "XRO-NCO-rollover"
+    description: "Streamer NCO rollover occurred (event 12)"
+
   - source_id: "%1101"
-    name: "POS-edge-SELH"
-    description: "Positive edge on selected pins"
-  
+    name: "XRL-LUT-$1FF"
+    description: "Streamer read LUT address $1FF (event 13)"
+
   - source_id: "%1110"
-    name: "NEG-edge-SELH"
-    description: "Negative edge on selected pins"
-  
-  - source_id: "%1111"
     name: "ATN-event"
-    description: "Attention from other COG"
+    description: "Attention (ATN) from another COG"
+
+  - source_id: "%1111"
+    name: "QMT-CORDIC-done"
+    description: "CORDIC operation complete (solver empty)"
 
 programming_patterns:
   - pattern: "timer_interrupt"
@@ -295,25 +295,25 @@ programming_patterns:
     description: "Multiple priority interrupts"
     code: |
       ' Setup three-level interrupts
-              MOV     IJMP1, #low_pri_isr
-              MOV     IJMP2, #med_pri_isr  
-              MOV     IJMP3, #high_pri_isr
+              MOV     IJMP1, #int1_isr    ' INT1 = highest priority
+              MOV     IJMP2, #int2_isr  
+              MOV     IJMP3, #int3_isr    ' INT3 = lowest priority
               
               SETINT1 #%0001              ' Timer
               SETINT2 #%0100              ' Pin event
-              SETINT3 #%1111              ' ATN event
+              SETINT3 #%1110              ' ATN event (source 14)
               
       ' ISRs can interrupt each other based on priority
-      low_pri_isr:
-              ' Can be interrupted by INT2 or INT3
+      int1_isr:
+              ' INT1 - highest; cannot be interrupted by INT2 or INT3
               RETI1
               
-      med_pri_isr:
-              ' Can be interrupted by INT3 only
+      int2_isr:
+              ' INT2 - can be interrupted by INT1 only
               RETI2
               
-      high_pri_isr:
-              ' Cannot be interrupted
+      int3_isr:
+              ' INT3 - lowest; can be interrupted by INT1 or INT2
               RETI3
 
   - pattern: "critical_section"

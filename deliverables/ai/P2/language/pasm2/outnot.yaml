@@ -8,18 +8,18 @@ description: >-
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
   the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
   the base should be affected (1-31).
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
+  If the WCZ effect is specified, the C and Z flags are updated to the state
   of OUTA / OUTB's base bit, identified by Dest.
 result: >-
   The I/O pin output level bit(s), described by Dest, are toggled to their opposite
-  state(s); the rest are left as-is. Z = original OUT bit state.
+  state(s); the rest are left as-is. Z = OUT bit state.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to toggle to the opposite output level.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original OUT bit state
-  Z: Set to original OUT bit state
+  C: Set to OUT bit state
+  Z: Set to OUT bit state
 syntax_variants:
 - OUTNOT {#}Dest {WCZ}
 timing:

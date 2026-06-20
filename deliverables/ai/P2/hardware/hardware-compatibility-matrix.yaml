@@ -338,9 +338,9 @@ upgrade_paths:
       
   memory_upgrades:
     standard_to_32mb:
-      from: "P2-EC (4MB Flash)"
-      to: "P2-EC32MB (32MB Flash)"
-      compatibility: "Same physical footprint and pinout"
+      from: "P2-EC (16MB Flash, no PSRAM)"
+      to: "P2-EC32MB (16MB Flash + 32MB PSRAM)"
+      compatibility: "Same physical footprint; upper I/O pins (P40-P57) become dedicated to PSRAM"
       applications: "Graphics, audio, data logging"
       
   carrier_progression:

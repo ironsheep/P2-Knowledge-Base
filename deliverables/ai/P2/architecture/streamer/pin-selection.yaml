@@ -32,7 +32,7 @@ pin_groups:
       
     - ppp: "%101"
       pins: "7..0, 63..40"
-      description: "Wrap-around (24 pins)"
+      description: "Wrap-around (32 pins)"
       
     - ppp: "%110"
       pins: "15..0, 63..48"

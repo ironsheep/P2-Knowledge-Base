@@ -81,7 +81,7 @@ related_instructions:
 - FBLOCK: Wait for FIFO block wrap
 notes:
 - D[31]=1 for no-wait mode (doesn't stall for FIFO fill)
-- Block size 0 means maximum (16384 longs)
+- Block size is in 64-byte units; 0 means maximum (16384 blocks = 262,144 longs)
 - FIFO automatically wraps at block boundary
 - Critical for high-throughput data processing
 

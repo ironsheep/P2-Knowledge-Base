@@ -4,12 +4,15 @@ description: "Spin2 operator evaluation order (1=highest priority)"
 category: "Language Rules"
 
 precedence_table:
+  # Level numbers follow the Spin2 v55 "Term Priority" column (1 = highest).
+  # v55 reserves level 12 for the unary !! / NOT form, so the binary chain
+  # skips from 11 to 13.
   - level: 1
-    operators: ["++", "--", "??"]
-    type: "Var-modify"
-    note: "Pre/post inc/dec/random"
+    operators: ["++", "--", "??", "\\", "~", "~~", "@", "@@", "^@", "#"]
+    type: "Var-modify / Address"
+    note: "Pre/post inc-dec, random, post-clear/set, address-of (postfix var!, var!! are also priority 1)"
   - level: 2
-    operators: ["!", "NOT", "-", "ABS", "||", "^^", "ENCOD", "DECOD", "ONES", "SQRT", "QLOG", "QEXP"]
+    operators: ["!", "NOT", "-", "ABS", "FABS", "ENCOD", "DECOD", "BMASK", "ONES", "SQRT", "FSQRT", "QLOG", "QEXP"]
     type: "Unary"
     note: "Single operand operations"
   - level: 3
@@ -18,66 +21,66 @@ precedence_table:
     note: "Bit manipulation"
   - level: 4
     operators: ["&"]
-    type: "Binary AND"
+    type: "Bitwise AND"
   - level: 5
     operators: ["^"]
-    type: "Binary XOR"
+    type: "Bitwise XOR"
   - level: 6
     operators: ["|"]
-    type: "Binary OR"
+    type: "Bitwise OR"
   - level: 7
-    operators: ["*", "*."]
-    type: "Multiply"
+    operators: ["*", "*.", "/", "/.", "+/", "//", "+//", "SCA", "SCAS", "FRAC"]
+    type: "Multiply/Divide/Scale"
+    note: "Signed/float/unsigned multiply, divide, modulus, scale — one priority in v55"
   - level: 8
-    operators: ["/", "/.", "//", "+/"]
-    type: "Divide"
-    note: "Div/float/mod/unsigned"
+    operators: ["+", "+.", "-", "-."]
+    type: "Add/Subtract"
+    note: "Integer and floating-point add/subtract — one priority in v55"
   - level: 9
-    operators: ["+", "+."]
-    type: "Add"
-  - level: 10
-    operators: ["-", "-."]
-    type: "Subtract"
-  - level: 11
     operators: ["#>", "<#"]
     type: "Limit"
     note: "Max/min"
-  - level: 12
-    operators: ["<", "+<", ">", "+>", "<=", "+<=", ">=", "+>=", "<=>", "+<=>"]
-    type: "Compare"
-    note: "Signed/unsigned"
+  - level: 10
+    operators: ["ADDBITS", "ADDPINS"]
+    type: "Bitfield/Pinfield"
+    note: "Make bitfield (x | y<<5) / pinfield (x | y<<6)"
+  - level: 11
+    operators: ["<", "+<", ">", "+>", "<=", "+<=", ">=", "+>=", "<=>", "+<=>", "==", "<>"]
+    type: "Compare/Equality"
+    note: "Signed/unsigned comparison and (in)equality — all one priority in v55"
   - level: 13
-    operators: ["==", "<>", "===", "<>>"]
-    type: "Equality"
-    note: "Logical/bitwise"
-  - level: 14
     operators: ["&&", "AND", "!&&"]
     type: "Logical AND"
+  - level: 14
+    operators: ["^^", "XOR"]
+    type: "Logical XOR"
   - level: 15
-    operators: ["||", "OR", "XOR", "!||"]
+    operators: ["||", "OR", "!||"]
     type: "Logical OR"
   - level: 16
     operators: ["?", ":"]
     type: "Ternary"
     note: "PUB/PRI only"
   - level: 17
-    operators: [":=", "+=", "-=", "*=", "/=", "//=", "+/=", "#>=", "<#=", "&=", "|=", "^=", ">>=", "<<=", "SAR=", "ROR=", "ROL=", "REV=", "ZEROX=", "SIGNX=", "AND=", "OR=", "XOR="]
+    operators: [":=", "+=", "-=", "*=", "/=", "//=", "+/=", "+//=", "#>=", "<#=", "&=", "|=", "^=", ">>=", "<<=", "SAR=", "ROR=", "ROL=", "REV=", "ZEROX=", "SIGNX=", "ADDBITS=", "ADDPINS=", "AND=", "OR=", "XOR="]
     type: "Assignment"
     note: "PUB/PRI only (lowest priority)"
 
 examples:
   - code: "x := a + b * c"
     evaluation: "x := a + (b * c)"
-    reason: "Multiply (7) before Add (9)"
+    reason: "Multiply (7) before Add (8)"
   - code: "x := a & b | c"
     evaluation: "x := (a & b) | c"
     reason: "AND (4) before OR (6)"
   - code: "x := !a && b || c"
     evaluation: "x := ((!a) && b) || c"
-    reason: "Unary (2), Logical AND (14), Logical OR (15)"
+    reason: "Unary (2), Logical AND (13), Logical OR (15)"
 
 notes:
-  - "Lower numbers = higher priority (execute first)"
+  - "Lower numbers = higher priority (execute first); numbering follows Spin2 v55"
+  - "v55 groups *, / at one priority (7); +, - at one (8); all comparisons/equality at one (11)"
+  - "Level 12 is reserved in v55 for the unary !! / NOT form"
   - "Assignment operators have lowest priority"
   - "Ternary and assignment only in PUB/PRI blocks"
   - "Use parentheses to override default precedence"

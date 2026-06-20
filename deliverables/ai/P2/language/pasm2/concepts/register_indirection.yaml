@@ -42,7 +42,7 @@ altx_instructions:
   ALTR:
     function: "Substitute result destination"
     syntax: "ALTR index_reg, #base"
-    operation: "Result_D = D + base + index_reg[8:0]"
+    operation: "Result_D = base + index_reg[8:0]"   # (S + D) & $1FF, like ALTS/ALTD
     range: "9-bit result (0-511)"
     examples:
       - |

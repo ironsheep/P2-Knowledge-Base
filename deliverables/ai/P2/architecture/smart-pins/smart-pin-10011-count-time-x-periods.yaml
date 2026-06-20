@@ -26,6 +26,7 @@ registers:
     bits_31_2: "Unused"
   z_register:
     function: "Total accumulated time for X periods in clocks"
+    reset_value: "$00000000 during reset (DIR=0) — note this period-counting mode preloads 0, unlike the %10000/%10001/%10010 state/timing modes which preload $00000001; IN is low (Silicon part4-smart-pins.txt)"
 
 flags:
   in_flag: "Raised after X periods complete"

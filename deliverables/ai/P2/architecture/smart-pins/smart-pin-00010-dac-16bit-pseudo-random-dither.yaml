@@ -23,6 +23,11 @@ operation: |
   Dithers between adjacent DAC levels every clock to achieve 16-bit
   resolution averaged over time. No fixed period required.
 
+accuracy_caveat: |
+  The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
+  the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
+  averaged over time (Silicon Doc part4-smart-pins.txt).
+
 # Parameters
 x_register:
   function: "Sample period in clocks"

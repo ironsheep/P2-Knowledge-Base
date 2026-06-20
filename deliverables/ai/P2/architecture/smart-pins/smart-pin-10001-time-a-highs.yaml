@@ -25,6 +25,7 @@ registers:
     function: "Not used in this mode"
   z_register:
     function: "Duration of previous high state in clocks (max $80000000)"
+    reset_value: "$00000001 during reset (DIR=0); IN is low (Silicon part4-smart-pins.txt)"
 
 flags:
   in_flag: "Raised on high-to-low transition"

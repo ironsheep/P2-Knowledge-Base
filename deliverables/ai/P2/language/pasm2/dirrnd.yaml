@@ -25,7 +25,7 @@ description: >-
   within the same 32-pin group (DIRA or DIRB); it will not cross the port
   boundary.
 
-  If the WCZ effect is specified, the C and Z flags are updated to the original
+  If the WCZ effect is specified, the C and Z flags are updated to the
   state of DIRA / DIRB's base bit, identified by Dest.
 result: >-
   The I/O pin direction bit(s), described by Dest, are each set randomly low or
@@ -35,8 +35,8 @@ parameters:
   identifies the I/O pin(s) to set randomly to input or output.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original DIRx base bit (original state before modification)
-  Z: Set to original DIRx base bit (original state before modification)
+  C: Set to DIR bit state
+  Z: Set to DIR bit state
 syntax_variants:
 - DIRRND {#}Dest {WCZ}
 timing:
@@ -45,8 +45,8 @@ timing:
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000110
   write: DIRx
-  c: Original DIRx base bit
-  z: Original DIRx base bit
+  c: DIR bit
+  z: DIR bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive

@@ -60,19 +60,19 @@ decision_tree:
         mounting: "Through-hole headers or breadboard mounting"
         
     production_ready:
-      question: "Do you need the extra flash memory?"
+      question: "Do you need PSRAM (32MB of external RAM beyond the 512KB hub)?"
       large_programs:
         recommendation: "P2 Edge Mini Breakout + P2-EC32MB"
         part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC32MB"]
         rationale: "Production-ready form factor with maximum memory"
         cost_estimate: "$80-120"
-        memory: "32MB Flash for large applications"
+        memory: "16MB Flash + 32MB PSRAM"
       standard_programs:
         recommendation: "P2 Edge Mini Breakout + P2-EC"
         part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC"]
         rationale: "Cost-effective production solution"
         cost_estimate: "$50-70"
-        memory: "4MB Flash sufficient for most applications"
+        memory: "16MB Flash (no PSRAM) sufficient for most applications"
 
 application_specific_guides:
   audio_video_projects:
@@ -175,11 +175,11 @@ budget_optimization_strategies:
 
 memory_sizing_guide:
   program_size_estimates:
-    simple_projects: "< 100KB - P2-EC (4MB) sufficient"
-    moderate_projects: "100KB - 1MB - P2-EC (4MB) sufficient"
-    complex_projects: "1MB - 4MB - P2-EC (4MB) adequate"
-    very_large_projects: "> 4MB - P2-EC32MB (32MB) required"
-    data_logging: "Heavy data storage - P2-EC32MB (32MB) recommended"
+    simple_projects: "< 100KB - P2-EC (16MB flash) sufficient"
+    moderate_projects: "100KB - 1MB - P2-EC (16MB flash) sufficient"
+    complex_projects: "1MB - 16MB - P2-EC (16MB flash) adequate"
+    very_large_data: "Runtime data beyond the 512KB hub RAM - P2-EC32MB (adds 32MB PSRAM)"
+    data_logging: "Large in-RAM data sets - P2-EC32MB (32MB PSRAM)"
     
   memory_upgrade_decision:
     cost_difference: "$30-50 between P2-EC and P2-EC32MB"
@@ -237,8 +237,8 @@ common_mistakes_to_avoid:
     solution: "Consider final application requirements from the start"
     
   memory_miscalculation:
-    mistake: "Choosing 4MB when application clearly needs more"
-    solution: "Estimate program size early, upgrade memory if uncertain"
+    mistake: "Choosing the no-PSRAM P2-EC when the application needs RAM beyond the 512KB hub"
+    solution: "Estimate runtime RAM needs early; choose P2-EC32MB (32MB PSRAM) if uncertain"
 
 upgrade_and_expansion_paths:
   natural_progression:
@@ -266,7 +266,7 @@ decision_summary:
     1: "New to P2 development? → Choose P2 Eval Board"
     2: "Need integrated programming? → Choose P2 Eval Board"
     3: "Size/cost critical? → Choose appropriate breakout board"
-    4: "Large programs/data? → Choose P2-EC32MB memory option"
+    4: "Need RAM beyond the 512KB hub? → Choose P2-EC32MB (32MB PSRAM) memory option"
     5: "Specific I/O needs? → Add relevant add-on boards"
   
   cannot_go_wrong_choice: "P2 Eval Board with P2-EC standard - provides complete development capability with expansion options and reasonable cost"

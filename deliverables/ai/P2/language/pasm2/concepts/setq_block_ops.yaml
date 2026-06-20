@@ -357,7 +357,7 @@ debugging:
   common_errors:
     off_by_one: "Using count instead of count-1"
     boundary_cross: "Transfer across cog/LUT boundary"
-    wrong_prefix: "SETQ for LUT, SETQ2 for cog"
+    wrong_prefix: "Swapping prefixes — SETQ2 is for LUT, SETQ for cog/hub"
     lut_addressing: "Using $200 instead of 0 with SETQ2"
 
 best_practices:

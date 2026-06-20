@@ -186,3 +186,22 @@ returns corrected bodies (F-143 QFRAC, G-001 selector) · no stale-cache false-f
   happens when the Smart Pins manual resumes, on top of this released KB.
 - **Findability:** every file touched gets a findability glance (aliases/categories)
   per the continual-improvement mandate, not just G-001.
+
+---
+
+## § Section ↔ task cross-reference
+
+Sprint tag: **`yaml-v1.10.1`** · element: P2KB YAML set · foundation commit `6f001d9`.
+
+| Plan § | Deliverable | Task | seq |
+| ------ | ----------- | ---- | --- |
+| §1 | Entry & register reconciliation (close #55) | «#79» | 6 |
+| §2a | ★critical corrections — F-142/143/144/145/154/158 | «#80» | 7 |
+| §2b | Remaining corrections — F-141/146/147/148/149/150/151/152/153/155 | «#81» | 8 |
+| §3 | Confirmable additions — G-001/002/003 | «#82» | 9 |
+| §4 | Gated additions — G-004/005 | «#83» | 10 |
+| §5 | Dashboards & related docs (no manuals) | «#84» | 11 |
+| §6 | Release v1.10.1 (release-yamls Path B) | «#85» | 12 |
+
+*(8 `iosp` tasks set to `paused` at task-gen — different element, per the entry-check
+decision; resume them when the Smart Pins manual work restarts.)*

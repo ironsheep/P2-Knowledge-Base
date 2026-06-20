@@ -20,6 +20,25 @@ PDF manuals ship independently from the repo's semver. Each manual carries its o
 
 ---
 
+## [1.10.1] - 2026-06-20
+
+**Smart Pin reference depth and language accuracy, with new silicon-grounded detail**
+
+### Added
+- WRPIN: A/B input-selector encoding documented — relative-pin routing (±1..±3), own-OUT-bit select, and invert, the basis for clock-from-adjacent-pin wiring.
+- USB host/device (%11011): full register layer documented — WXPIN config word, WYPIN line-state commands, the 16-bit receiver status word, and per-pin IN semantics.
+- Smart-pin timing modes (%10000–%10011): the DIR=0 `Z` preload value is documented for each.
+- DAC dither modes (%00010/%00011): the nominal, time-averaged nature of the 16-bit output is documented.
+- Async serial transmit (%11110): the first-byte line-state behavior is documented with its pre-clear workaround.
+- TASKCONT: task-continuation method documented.
+
+### Changed
+- Smart-pin usage patterns aligned with the per-mode register reference (repository, ADC, quadrature, initialization order).
+- CORDIC, interrupt, and addressing-mode references aligned with the silicon documentation.
+- Operator and precedence references aligned with Spin2 v55 (post-clear/post-set operators, ADDBITS/ADDPINS, P2 precedence ordering).
+- Streamer pin-group and DEBUG SCOPE/PLOT references aligned with the silicon documentation.
+- Edge module flash and PSRAM details aligned across the hardware comparison, selection, and compatibility references.
+
 ## [1.10.0] - 2026-06-18
 
 **DEBUG display feed idioms and smart-pin example sequencing, hardware-verified**

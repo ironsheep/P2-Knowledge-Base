@@ -26,7 +26,7 @@ description: >-
   the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port
   boundary.
 
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
+  If the WCZ effect is specified, the C and Z flags are updated to the state
   of OUTA / OUTB's base bit, identified by Dest.
 result: >-
   The I/O pins described by Dest are set to the input direction and to their

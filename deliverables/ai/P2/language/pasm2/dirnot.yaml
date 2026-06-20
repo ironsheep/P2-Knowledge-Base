@@ -23,7 +23,7 @@ description: >-
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
+  If the WCZ effect is specified, the C and Z flags are updated to the state
   of DIRA / DIRB's base bit, identified by Dest.
 result: The I/O pin direction bit(s), described by Dest, are toggled to their opposite
   state(s); the rest are left as-is.

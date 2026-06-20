@@ -27,6 +27,7 @@ registers:
     bits_31_3: "Unused"
   z_register:
     function: "Clock count (event timing) or clocks since last event (timeout)"
+    reset_value: "$00000001 during reset (DIR=0); also reloaded to $00000001 when an event restarts the timeout window; IN is low (Silicon part4-smart-pins.txt)"
 
 flags:
   in_flag: "Raised when X events complete or timeout occurs"

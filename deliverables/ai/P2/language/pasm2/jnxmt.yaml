@@ -14,7 +14,7 @@ flags_affected:
   Z: No effect
 timing:
   cycles: 2
-  type: fixed
+  type: variable
 encoding:
 - bits: EEEE 1011110 01I 000011010 SSSSSSSSS
   write: —
