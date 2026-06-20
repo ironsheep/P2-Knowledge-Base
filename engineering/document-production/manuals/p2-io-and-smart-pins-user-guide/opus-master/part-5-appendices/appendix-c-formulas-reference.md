@@ -198,7 +198,7 @@ voltage_mv = (sample × 3300) / full_scale
 - For 8-bit: full_scale = 255
 - For 14-bit: full_scale = 16383
 
-ADC resolution spans roughly **2 to 18 bits** depending on mode and sample period: SINC2 Sampling reaches 14-bit, while SINC3 Filtering with a long enough period (and the externally-clocked delta-sigma path) goes higher — up to ~18 ENOB. Use `full_scale = 2^bits − 1` for the resolution you actually configured.
+ADC resolution spans roughly **2 to 18 bits** depending on mode and sample period: SINC2 Sampling reaches 14-bit, while SINC3 Filtering with a long enough period (and the externally-clocked delta-sigma path) goes higher — up to ~18 ENOB. Use `full_scale = 2^bits - 1` for the resolution you actually configured.
 
 **Worked Example (8-bit ADC reading 128):**
 ```formula

@@ -141,7 +141,7 @@ Write these with WYPIN on the lower pin to drive a line state or start a packet:
 
 #### Z Register — Receiver Status Word
 
-RDPIN/RQPIN on the lower pin returns a 16-bit status word (with `RDPIN … WC`, the error flag also lands in C):
+RDPIN/RQPIN on the lower pin returns a 16-bit status word (with `RDPIN ... WC`, the error flag also lands in C):
 
 | Bit(s) | Meaning |
 |--------|---------|

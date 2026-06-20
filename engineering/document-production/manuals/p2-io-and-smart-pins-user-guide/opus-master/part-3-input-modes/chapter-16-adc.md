@@ -185,7 +185,7 @@ SINC3 provides better dynamic response than SINC2, doubling the effective bits f
 > **Two things the post-processing must get right.**
 >
 > - **Warm-up.** The difference math depends on a valid prior accumulator state, so the filter is only accurate **from the second period for SINC2, and from the third period for SINC3.** Discard the first reading (SINC2) or the first two (SINC3) after starting.
-> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) − 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
+> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) - 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
 
 ### Bitstream Capture Mode (%11)
 
