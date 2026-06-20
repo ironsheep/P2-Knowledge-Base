@@ -91,7 +91,7 @@ Duty cycle = (X[15:0] - X[31:16]) / X[15:0]
 CON
   PULSE_PIN = 10
   BASE_PERIOD = 1000                      ' 1000 clocks per cycle
-  LOW_TIME = 500                          ' X[31:16] compare: 500 low, 500 high (50% duty)
+  LOW_TIME = 500                          ' X[31:16]: 500 lo, 500 hi (50%)
   CYCLE_COUNT = 10                        ' Generate 10 pulses
 
 PUB generate_pulses() | ack

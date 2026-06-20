@@ -1127,7 +1127,7 @@ Bit 5 of the base-pin field is what selects the target port: a base pin in 0–3
 `ADDPINS` sets the additional-pins field (D[10:6]) inline, without a preceding SETQ — convenient when the span is known at assembly time:
 
 ```pasm2
-              drvh      #10 ADDPINS 7   ' Drive pins P10..P17 high (base 10 + 7 additional)
+              drvh      #10 ADDPINS 7   ' P10..P17 high (base 10 + 7)
 ```
 
 As with every span operation, an `ADDPINS` range cannot cross a 32-pin port boundary.

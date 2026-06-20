@@ -58,8 +58,9 @@ PUB configure_usb_pins() | baud
   ' Configure as USB pair with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
   ' WXPIN on the LOWER pin sets USB mode + baud:
-  '   D[15]=1 host / 0 device  D[14]=1 full-speed / 0 low-speed  D[13:0]=baud fraction
-  baud := 12_000_000 / (clkfreq / $10000)         ' full-speed (12 Mbps) fraction of sysclk
+  '   D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed
+  '   D[13:0]=baud fraction
+  baud := 12_000_000 / (clkfreq / $10000)  ' full-speed 12 Mbps
   WXPIN(USB_DM, $4000 | baud)                      ' device, full-speed
   PINHIGH(USB_DM)
   PINHIGH(USB_DP)
@@ -266,7 +267,7 @@ PUB configure_usb() | baud
   ' Configure USB mode with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
 
-  ' Set USB mode + baud on the lower pin (D[15]=0 device, D[14]=1 full-speed)
+  ' Set USB mode + baud on lower pin (D[15]=0 device, D[14]=1 full-speed)
   baud := 12_000_000 / (clkfreq / $10000)
   WXPIN(USB_DM, $4000 | baud)
 
@@ -305,7 +306,7 @@ handle_usb_event
               ret
 
 usb_mode      long      P_USB_PAIR | P_OE
-usb_cfg       long      $4000 | ($10000 * 12 / 200)  ' device, full-speed, 12 Mbps @ 200 MHz
+usb_cfg       long      $4000 | ($10000 * 12 / 200)  ' device FS @ 200MHz
 usb_data      res       1
 ```
 
@@ -373,7 +374,7 @@ Implementing USB requires:
 
 ```spin2
 WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' device, full-speed
+WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' full-speed
 PINHIGH(even_pin)                               ' Enable DM
 PINHIGH(even_pin+1)                             ' Enable DP
 ```

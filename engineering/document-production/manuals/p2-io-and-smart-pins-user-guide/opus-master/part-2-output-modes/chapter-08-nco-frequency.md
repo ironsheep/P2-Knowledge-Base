@@ -171,7 +171,7 @@ CON
 PUB nco_duty(duty_percent) | y_value
   ' In NCO_DUTY, Y sets the duty cycle directly: duty = Y / 2^32.
   ' (Base period is 1 clock, so Z accumulates Y every clock.)
-  y_value := duty_percent frac 100        ' 50 -> $8000_0000, 25 -> $4000_0000
+  y_value := duty_percent frac 100        ' 50->$8000_0000, 25->$4000_0000
 
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_DUTY | P_OE)
