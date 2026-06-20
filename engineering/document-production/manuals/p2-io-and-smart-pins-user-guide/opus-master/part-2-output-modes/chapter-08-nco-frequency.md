@@ -47,6 +47,8 @@ On each base period (every X[15:0] clocks):
 
 The output toggles when Z[31] changes, creating a square wave.
 
+Writing **Y = 0** produces no output: with nothing added to Z each period, Z[31] never changes and the pin holds static. A free-running waveform requires a non-zero Y.
+
 ### Frequency Formula
 
 ```formula

@@ -132,7 +132,7 @@ PUB setup_noise_dac()
 
 | X[15:0] | Behavior |
 |---------|----------|
-| 0 | 65,536 clocks (minimizes switching power) |
+| 0 | 65,536 clocks (longest sample period) |
 | N | IN raised every N clocks |
 
 **Note:** The DAC outputs noise continuously regardless of sample period. The sample period only affects when IN is raised.

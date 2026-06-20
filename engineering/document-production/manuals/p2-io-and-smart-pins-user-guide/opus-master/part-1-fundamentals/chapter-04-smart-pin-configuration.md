@@ -684,5 +684,7 @@ PINFLOAT(pin)
 WRPIN(pin, 0)
 ```
 
+`WRPIN(pin, 0)` clears a smart pin to `P_NORMAL` **at any time, including while it is running** — no `DIRL`/`DIRH` cycle is required. The reset-before-configure rule (§4.2) applies when *changing* to another active mode; returning to direct I/O with `#0` takes effect immediately.
+
 
 *This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*

@@ -338,6 +338,8 @@ In timeout mode:
 - Timeout raises IN and restarts timer
 - Z always contains clocks since last event
 
+In event-timing mode (Y[2]=0), reading the result with `RDPIN`/`RQPIN` acknowledges the measurement and **auto-restarts** it — the next read returns the interval to the following event. No explicit re-arm is needed for back-to-back measurements.
+
 
 ## 13.5 Input Signal Routing
 
