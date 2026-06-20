@@ -176,8 +176,17 @@ In order (each step depends on the previous):
    - **Runnable example fails** → STOP, fix in **opus-master** source, re-run. Never stage runnable code that does not compile.
    - **Illustrative fragment** (a single line, or a block that references out-of-scope symbols defined in the surrounding program) → not standalone-compilable by design; certify it is *syntactically* valid (wrap it minimally and compile if in doubt). A long line is shortened with the **legal Spin2 line continuation `...`** at a logical boundary (verified: compiles to the identical value — confirm via the P2KB MCP / a `pnut-ts` round-trip) or, for a comment overflow, by **moving the comment above** the instruction OR **splitting it** with the continuation comment aligned to the inline `'` column — **never** by a typeset wrap.
    - This gate is the compile half of code quality; Step 4 is the width half. Both pass before staging.
-6. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
-7. **Escape** the markdown into outbound:
+6. **Inline-code ASCII gate.** xelatex's `listings` renders inline code spans (`` `like this` ``) as `\lstinline`, which **aborts the build on ANY non-ASCII character** ("! Undefined control sequence") — a U+2212 MINUS, U+2026 ELLIPSIS, smart quote, etc. that crept in from an editor/paste. The pandoc→`.tex` step still succeeds, so this only fails after a full Forge round-trip — exactly the wasted cycle this gate prevents. Audit the **opus-master source** (same files as Step 4):
+   ```bash
+   # multi-file: pass the chapter tree;  single-file: .../opus-master/<DocName>.md
+   python3 engineering/tools/validation/audit-inline-code-ascii.py \
+       engineering/document-production/manuals/<slug>/opus-master/part-*/*.md
+   ```
+   - **Clean (exit 0)** — proceed.
+   - **Violations (exit 1)** — STOP. Relay the located `file:line:col` list; fix in **opus-master** by replacing each char with its ASCII form (`-` for U+2212 minus, `...` for U+2026 ellipsis, plain `'`/`"` for smart quotes) or moving it out of the code span. Re-assemble and re-run. Do not escape/stage with violations outstanding.
+   - SCOPE is **inline only**, on purpose: fenced code BLOCKS become `lstlisting`, which tolerates the intentional non-ASCII this stack uses (`×`, `→`, `µ`, `°` in formula/diagram blocks) — flagging those would be false positives. Only `\lstinline` is strict.
+7. **Apply version bump** to `request.json` if confirmed (use `mcp__filesystem__edit_file`).
+8. **Escape** the markdown into outbound:
    ```bash
    cd workspace/<slug>
    ../../../tools/conversion/latex-escape-all.sh \
@@ -185,7 +194,7 @@ In order (each step depends on the previous):
        ../../outbound/<slug>/<DocName>.md
    ```
    The escape script creates its own backup of the workspace source — that's expected, harmless.
-8. **Stage changed aux files** confirmed in Step 5:
+9. **Stage changed aux files** confirmed in Step 5:
    ```bash
    cp workspace/<slug>/templates/<file> outbound/<slug>/        # FLAT — no templates/ subdir
    cp workspace/<slug>/filters/<file>   outbound/<slug>/        # FLAT — no filters/ subdir
@@ -193,7 +202,7 @@ In order (each step depends on the previous):
    ```
    **Always** run that `request.json` copy on a document switch (the Step 4 check), even with no git change — otherwise Forge builds with the previous document's directive.
    For asset changes: `cp workspace/<slug>/assets/<file> outbound/<slug>/assets/` (the `assets/` subdir IS used in outbound).
-9. **Stage the shared platform files — ONLY the ones whose hash changed** (per the Step-4 content-hash diff). Usually this list is **empty** → stage nothing here. Copy each changed file from `platform/`, FLAT into outbound:
+10. **Stage the shared platform files — ONLY the ones whose hash changed** (per the Step-4 content-hash diff). Usually this list is **empty** → stage nothing here. Copy each changed file from `platform/`, FLAT into outbound:
    ```bash
    # ONLY for each platform file whose live md5 != stored md5 (Step 4):
    cp engineering/document-production/platform/templates/p2kb-platform-<changed>.sty outbound/<slug>/
