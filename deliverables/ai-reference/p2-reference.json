@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-06-18",
-    "last_updated": "2026-06-18T23:12:49.175570",
+    "release_date": "2026-06-20",
+    "last_updated": "2026-06-20T18:51:52.765943",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-06-18T23:12:49.175570",
+    "extraction_date": "2026-06-20T18:51:52.765943",
     "categories": {
       "Math and Logic": {
         "count": 110,
@@ -6854,7 +6854,7 @@
             "result": "",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable"
             },
             "flags_affected": {
               "C": "No effect",
@@ -7702,7 +7702,7 @@
             "mnemonic": "JQMT",
             "syntax": "JQMT    {#}S",
             "brief_description": "",
-            "oneliner": "Jump if CORDIC-read-but-empty event flag set or clear",
+            "oneliner": "Jump if CORDIC-read-but-empty event flag set",
             "encoding": [
               {
                 "bits": "EEEE 1011110 01I 000001111 SSSSSSSSS",
@@ -8867,7 +8867,7 @@
             "mnemonic": "JXMT",
             "syntax": "JXMT    {#}S",
             "brief_description": "",
-            "oneliner": "Jump if streamer empty event flag set or clear",
+            "oneliner": "Jump if streamer empty event flag set",
             "encoding": [
               {
                 "bits": "EEEE 1011110 01I 000001010 SSSSSSSSS",
@@ -9115,7 +9115,7 @@
             "mnemonic": "JFBW",
             "syntax": "JFBW    {#}S",
             "brief_description": "",
-            "oneliner": "Jump if FIFO interface block wrap event flag is set or clear",
+            "oneliner": "Jump if FIFO interface block wrap event flag is set",
             "encoding": [
               {
                 "bits": "EEEE 1011110 01I 000001001 SSSSSSSSS",
@@ -9218,7 +9218,7 @@
             "mnemonic": "JXRL",
             "syntax": "JXRL    {#}S",
             "brief_description": "",
-            "oneliner": "Jump if streamer LUT RAM rollover event flag set or clear",
+            "oneliner": "Jump if streamer LUT RAM rollover event flag set",
             "encoding": [
               {
                 "bits": "EEEE 1011110 01I 000001101 SSSSSSSSS",
@@ -10042,7 +10042,7 @@
             "result": "",
             "timing": {
               "cycles": 2,
-              "type": "fixed"
+              "type": "variable"
             },
             "flags_affected": {
               "C": "No effect",
@@ -10289,21 +10289,21 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010110",
                 "write": "DIRx + OUTx",
-                "c": "Original OUTx base bit",
-                "z": "Original OUTx base bit",
+                "c": "OUT bit",
+                "z": "OUT bit",
                 "clocks": "2",
                 "notes": "New DIRx state is not data-forwarded; next pipelined instruction sees old state"
               }
             ],
-            "description": "FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nFLTRND achieves the same effect as two instructions-- DIRL followed by OUTRND.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nFLTRND achieves the same effect as two instructions-- DIRL followed by OUTRND.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and each output level is set randomly low or high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUTx base bit state",
-              "Z": "Set to original OUTx base bit state"
+              "C": "Set to OUT bit state",
+              "Z": "Set to OUT bit state"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and with output level(s) set randomly to low or high.",
@@ -10665,7 +10665,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "DRVNOT sets the I/O pin(s) designated by Dest to the output direction and toggles their output level(s) to the opposite state. All other pins are left unchanged. This instruction achieves the same effect as two instructions-- OUTNOT followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "DRVNOT sets the I/O pin(s) designated by Dest to the output direction and toggles their output level(s) to the opposite state. All other pins are left unchanged. This instruction achieves the same effect as two instructions-- OUTNOT followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
@@ -10960,7 +10960,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of DIRA / DIRB's base bit, identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
@@ -11064,15 +11064,15 @@
                 "clocks": "2"
               }
             ],
-            "description": "OUTNOT alters the output level register's bit(s) designated by Dest to their inverse state (toggles them). All other bits are left unchanged. Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31). If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.",
-            "result": "The I/O pin output level bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is. Z = original OUT bit state.",
+            "description": "OUTNOT alters the output level register's bit(s) designated by Dest to their inverse state (toggles them). All other bits are left unchanged. Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31). If the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
+            "result": "The I/O pin output level bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is. Z = OUT bit state.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to OUT bit state",
+              "Z": "Set to OUT bit state"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle to the opposite output level.",
@@ -11405,7 +11405,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions-- DIRL followed by OUTNOT.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions-- DIRL followed by OUTNOT.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to their opposite output level(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
@@ -11650,21 +11650,21 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011110",
                 "write": "DIRx + OUTx",
-                "c": "Original OUTx base bit",
-                "z": "Original OUTx base bit",
+                "c": "OUT bit",
+                "z": "OUT bit",
                 "clocks": "2",
                 "notes": "New DIRx state is not data-forwarded; next pipelined instruction sees old state"
               }
             ],
-            "description": "DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nDRVRND achieves the same effect as two instructions-- OUTRND followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nDRVRND achieves the same effect as two instructions-- OUTRND followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and each output level is set randomly low or high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUTx base bit (original state before modification)",
-              "Z": "Set to original OUTx base bit (original state before modification)"
+              "C": "Set to OUT bit state",
+              "Z": "Set to OUT bit state"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and with output level(s) set randomly to low or high.",
@@ -11814,20 +11814,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000110",
                 "write": "DIRx",
-                "c": "Original DIRx base bit",
-                "z": "Original DIRx base bit",
+                "c": "DIR bit",
+                "z": "DIR bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRRND alters the direction register's bit(s) designated by Dest to be random low and high (input and output), based on bit(s) from the Xoroshiro128** PRNG. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRRND alters the direction register's bit(s) designated by Dest to be random low and high (input and output), based on bit(s) from the Xoroshiro128** PRNG. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of DIRA / DIRB's base bit, identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original DIRx base bit (original state before modification)",
-              "Z": "Set to original DIRx base bit (original state before modification)"
+              "C": "Set to DIR bit state",
+              "Z": "Set to DIR bit state"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set randomly to input or output.",
@@ -17341,7 +17341,10 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "architecture/smart_pin_patterns.yaml",
+              "architecture/smart_pins.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -18383,7 +18386,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-06-18T23:12:49.175570",
+    "extraction_date": "2026-06-20T18:51:52.765943",
     "categories": {
       "keywords": {
         "count": 37,
@@ -20818,7 +20821,7 @@
         }
       },
       "methods": {
-        "count": 102,
+        "count": 103,
         "elements": {
           "GETCRC": {
             "method": "GETCRC",
@@ -21144,6 +21147,70 @@
               "Scientific notation"
             ],
             "oneliner": "Compute 10^x for floating-point exponent (requires Spin2_v51)"
+          },
+          "TASKCONT": {
+            "method": "TASKCONT",
+            "type": "method",
+            "category": "Task Operations",
+            "aliases": [
+              "TASKCONT",
+              "task continue",
+              "resume task",
+              "continue task",
+              "TASKRESUME"
+            ],
+            "requires_version": "Spin2_v47",
+            "version_directive": "{Spin2_v47}",
+            "description": "Continue a task that was previously halted with TASKHALT. The task resumes\nexecution from where it was paused, with all state preserved.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
+            "syntax": "TASKCONT(TaskID)",
+            "parameters": [
+              {
+                "name": "TaskID",
+                "type": "integer",
+                "description": "Task ID to continue (0-31)"
+              }
+            ],
+            "returns": {
+              "type": "void",
+              "description": "No return value"
+            },
+            "examples": [
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB main()\n  TASKCONT(3)                            ' Continue task 3\n",
+                "description": "Continue single task"
+              },
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB synchronized_start()\n  TASKHALT(worker1)\n  TASKHALT(worker2)\n  prepare_data()\n  TASKCONT(worker1)\n  TASKCONT(worker2)\n",
+                "description": "Synchronized task continuation"
+              },
+              {
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB flow_control()\n  if not buffer_full\n    TASKCONT(producer_task)\n",
+                "description": "Continue producer when buffer has space"
+              }
+            ],
+            "notes": [
+              "REQUIRES {Spin2_v47} or later at start of source file",
+              "Continues a task halted with TASKHALT",
+              "Task continues from where it was halted",
+              "All state preserved during halt",
+              "No effect if task not halted",
+              "Part of cooperative multitasking",
+              "The name TASKRESUME (seen in some older notes) does not compile \u2014 the keyword is TASKCONT"
+            ],
+            "timing": {
+              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
+            },
+            "related": [
+              "TASKHALT",
+              "TASKSPIN",
+              "TASKSTOP",
+              "TASKCHK"
+            ],
+            "see_also": [
+              "Task synchronization",
+              "Task continuation",
+              "Cooperative multitasking"
+            ]
           },
           "GETCT": {
             "method": "GETCT",
@@ -22974,7 +23041,7 @@
             "category": "Task Operations",
             "requires_version": "Spin2_v47",
             "version_directive": "{Spin2_v47}",
-            "description": "Temporarily halt/pause a running task. The task's state and stack are \npreserved, and execution can be resumed later with TASKRESUME (or TASKCONT). \nUse THISTASK (-1) to halt the currently executing task.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
+            "description": "Temporarily halt/pause a running task. The task's state and stack are \npreserved, and execution can be resumed later with TASKCONT.\nUse THISTASK (-1) to halt the currently executing task.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "TASKHALT(TaskID)",
             "parameters": [
               {
@@ -22989,7 +23056,7 @@
             },
             "examples": [
               {
-                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB critical_section()\n  TASKHALT(3)                            ' Pause task 3\n  do_critical_work()\n  TASKRESUME(3)                          ' Resume task 3\n",
+                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB critical_section()\n  TASKHALT(3)                            ' Pause task 3\n  do_critical_work()\n  TASKCONT(3)                            ' Continue task 3\n",
                 "description": "Pause and resume task"
               },
               {
@@ -23005,7 +23072,7 @@
               "REQUIRES {Spin2_v47} or later at start of source file",
               "Task is paused, not terminated",
               "State and stack preserved",
-              "Use TASKRESUME to continue",
+              "Use TASKCONT to continue",
               "Task won't execute until resumed",
               "Useful for synchronization",
               "Different from TASKSTOP (which terminates)"
@@ -23014,7 +23081,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "TASKRESUME",
+              "TASKCONT",
               "TASKSTOP",
               "TASKSPIN",
               "TASKCHK"
@@ -24593,7 +24660,7 @@
             "related": [
               "TASKSPIN",
               "TASKHALT",
-              "TASKRESUME",
+              "TASKCONT",
               "TASKCHK"
             ],
             "see_also": [
@@ -24949,57 +25016,18 @@
             "method": "TASKRESUME",
             "type": "method",
             "category": "Task Operations",
-            "requires_version": "Spin2_v47",
-            "version_directive": "{Spin2_v47}",
-            "description": "Resume a task that was previously halted with TASKHALT. The task continues \nexecution from where it was paused, with all state preserved. Also known as \nTASKCONT in some documentation.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
-            "syntax": "TASKRESUME(TaskID)",
-            "parameters": [
-              {
-                "name": "TaskID",
-                "type": "integer",
-                "description": "Task ID to resume (0-31)"
-              }
+            "status": "invalid_keyword",
+            "aliases": [
+              "TASKRESUME"
             ],
-            "returns": {
-              "type": "void",
-              "description": "No return value"
-            },
-            "examples": [
-              {
-                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB main()\n  TASKRESUME(3)                          ' Resume task 3\n",
-                "description": "Resume single task"
-              },
-              {
-                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB synchronized_start()\n  TASKHALT(worker1)\n  TASKHALT(worker2)\n  prepare_data()\n  TASKRESUME(worker1)\n  TASKRESUME(worker2)\n",
-                "description": "Synchronized task resumption"
-              },
-              {
-                "code": "{Spin2_v47}                              ' REQUIRED directive\nPUB flow_control()\n  if not buffer_full\n    TASKRESUME(producer_task)\n",
-                "description": "Resume producer when buffer has space"
-              }
-            ],
-            "notes": [
-              "REQUIRES {Spin2_v47} or later at start of source file",
-              "Resumes task halted with TASKHALT",
-              "Task continues from where it was halted",
-              "All state preserved during halt",
-              "No effect if task not halted",
-              "Also called TASKCONT in some docs",
-              "Part of cooperative multitasking"
-            ],
-            "timing": {
-              "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
-            },
-            "related": [
-              "TASKHALT",
-              "TASKSPIN",
-              "TASKSTOP",
-              "TASKCHK"
-            ],
+            "description": "TASKRESUME is NOT a valid Spin2 keyword. It does not compile\n(pnut_ts: \"Expected an instruction or variable\").\n\nThe real keyword for continuing a halted task is TASKCONT (introduced in\n{Spin2_v47}). This stub exists only to redirect lookups of the invalid name\nto the correct method.\n",
+            "redirect_to": "language/spin2/methods/taskcont.yaml",
             "see_also": [
-              "Task synchronization",
-              "Task resumption",
-              "Cooperative multitasking"
+              "TASKCONT \u2014 the correct keyword (language/spin2/methods/taskcont.yaml)"
+            ],
+            "related": [
+              "TASKCONT",
+              "TASKHALT"
             ]
           },
           "PINWRITE": {
@@ -26091,7 +26119,7 @@
             "related": [
               "TASKSTOP",
               "TASKHALT",
-              "TASKRESUME",
+              "TASKCONT",
               "TASKCHK"
             ],
             "see_also": [
@@ -28203,7 +28231,7 @@
             ],
             "related": [
               "language/spin2/methods/taskhalt.yaml",
-              "language/spin2/methods/taskresume.yaml",
+              "language/spin2/methods/taskcont.yaml",
               "language/spin2/methods/taskchk.yaml",
               "language/spin2/constants/newtask.yaml",
               "language/spin2/constants/thistask.yaml"
@@ -29906,11 +29934,11 @@
       }
     },
     "statistics": {
-      "total_elements": 276,
+      "total_elements": 277,
       "by_category": {
         "keywords": 37,
         "operators": 78,
-        "methods": 102,
+        "methods": 103,
         "registers": 18,
         "assembly_directives": 12,
         "debug_commands": 13,
