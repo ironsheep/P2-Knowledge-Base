@@ -132,7 +132,7 @@ This guide would not exist without the contributions of many individuals and org
 
 **The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the Smart Pin modes and identified critical details worth documenting.
 
-**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* (Parallax Inc., 2020), whose detailed Smart Pin mode descriptions informed many examples in this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
+**Jon Titus** for the *Propeller 2 Smart Pin Supplementary Documentation* — a commenting-enabled Google Doc that supplements the Silicon Documentation with examples and further explanation — whose detailed Smart Pin mode descriptions informed and enriched much of this guide. Titus is also the historical designer of the 1974 Mark-8, one of the world's earliest personal hobbyist microcomputers.
 
 This guide is a community-developed resource, created to make the P2's Smart Pin system more accessible to developers at all skill levels.
 
@@ -221,8 +221,8 @@ PINL(PIN)                 ' Enable Smart Pin
 **PASM2 Example:**
 ```pasm2
 ' Example description
-              wrpin     pin, ##mode_value   ' Configuration step
-              wxpin     pin, ##x_value      ' Parameter setting
+              wrpin     ##mode_value, pin   ' Configuration step
+              wxpin     ##x_value, pin      ' Parameter setting
               drvl      pin                 ' Enable Smart Pin
 ```
 
@@ -335,12 +335,12 @@ Each cog maintains its own set of pin control registers:
 
 | Register | Cog Address | Function |
 |----------|-------------|----------|
-| DIRA | $1FE | Output enable bits for P0..P31 (active high) |
-| DIRB | $1FF | Output enable bits for P32..P63 (active high) |
-| OUTA | (shared) | Output state bits for P0..P31 |
-| OUTB | (shared) | Output state bits for P32..P63 |
-| INA | (shared) | Input state bits for P0..P31 |
-| INB | (shared) | Input state bits for P32..P63 |
+| DIRA | $1FA | Output enable bits for P0..P31 (active high) |
+| DIRB | $1FB | Output enable bits for P32..P63 (active high) |
+| OUTA | $1FC | Output state bits for P0..P31 |
+| OUTB | $1FD | Output state bits for P32..P63 |
+| INA | $1FE | Input state bits for P0..P31 |
+| INB | $1FF | Input state bits for P32..P63 |
 
 ### The Three-State Model
 
@@ -545,7 +545,7 @@ Drives pin to the current state of the C flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to C flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -572,7 +572,7 @@ Drives pin to the inverse of the C flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !C (inverted C flag)
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -599,7 +599,7 @@ Drives pin to the current state of the Z flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to Z flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -626,7 +626,7 @@ Drives pin to the inverse of the Z flag.
 
 1. Set DIR bit for pin D to 1 (output mode)
 2. Set OUT bit for pin D to !Z (inverted Z flag)
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -770,7 +770,7 @@ Sets output state to the C flag value without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to C flag value
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -789,7 +789,7 @@ Sets output state to the inverse of C flag without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to !C
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -808,7 +808,7 @@ Sets output state to the Z flag value without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to Z flag value
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -827,7 +827,7 @@ Sets output state to the inverse of Z flag without changing direction.
 **Operation:**
 
 1. Set OUT bit for pin D to !Z
-2. Set Z flag to the new OUT bit state
+2. With WCZ, set C and Z flags to the prior OUT bit state
 3. DIR is unchanged
 
 **Timing:** 2 clock cycles
@@ -957,7 +957,7 @@ Sets direction based on C flag.
 **Operation:**
 
 1. Set DIR bit for pin D to C flag value
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -975,7 +975,7 @@ Sets direction based on inverse of C flag.
 **Operation:**
 
 1. Set DIR bit for pin D to !C
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -993,7 +993,7 @@ Sets direction based on Z flag.
 **Operation:**
 
 1. Set DIR bit for pin D to Z flag value
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -1011,7 +1011,7 @@ Sets direction based on inverse of Z flag.
 **Operation:**
 
 1. Set DIR bit for pin D to !Z
-2. Set Z flag to the new DIR bit state
+2. With WCZ, set C and Z flags to the prior DIR bit state
 
 **Timing:** 2 clock cycles
 
@@ -1132,7 +1132,7 @@ Floats pin and sets output register to C flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to C flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -1151,7 +1151,7 @@ Floats pin and sets output register to inverse of C flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !C
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -1170,7 +1170,7 @@ Floats pin and sets output register to Z flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to Z flag value
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -1189,7 +1189,7 @@ Floats pin and sets output register to inverse of Z flag.
 
 1. Set DIR bit for pin D to 0 (float)
 2. Set OUT bit for pin D to !Z
-3. Set Z flag to the new OUT bit state
+3. With WCZ, set C and Z flags to the prior OUT bit state
 
 **Timing:** 2 clock cycles
 
@@ -1437,12 +1437,24 @@ All DRV/OUT/DIR/FLT instructions support operating on multiple pins simultaneous
 - D[5:0]: Base pin number (0-63)
 - D[10:6]: Number of additional pins (0-31)
 
+Bit 5 of the base-pin field is what selects the target port: a base pin in 0–31 lands the operation on Port A (the DIRA/OUTA registers), and 32–63 lands it on Port B (DIRB/OUTB). That is also why a span never crosses the 32-pin boundary — see *Wrap Behavior* below.
+
 ### Using SETQ for Span
 
 ```pasm2
               setq      #7        ' Set span to 8 pins (0 + 7 additional)
               drvh      #0        ' Drive pins 0-7 high
 ```
+
+### Using ADDPINS for Span
+
+`ADDPINS` sets the additional-pins field (D[10:6]) inline, without a preceding SETQ — convenient when the span is known at assembly time:
+
+```pasm2
+              drvh      #10 ADDPINS 7   ' P10..P17 high (base 10 + 7)
+```
+
+As with every span operation, an `ADDPINS` range cannot cross a 32-pin port boundary.
 
 ### Wrap Behavior
 
@@ -1456,34 +1468,34 @@ Span operations wrap within the same 32-pin port. Pins 0-31 (Port A) and 32-63 (
 | **DRVH** | Drive high | 1 | 1 | C/Z=OUT |
 | **DRVL** | Drive low | 1 | 0 | C/Z=OUT |
 | **DRVNOT** | Drive toggle | 1 | toggle | C/Z=OUT |
-| **DRVC** | Drive to C | 1 | C | Z=OUT |
-| **DRVNC** | Drive to !C | 1 | !C | Z=OUT |
-| **DRVZ** | Drive to Z | 1 | Z | Z=OUT |
-| **DRVNZ** | Drive to !Z | 1 | !Z | Z=OUT |
+| **DRVC** | Drive to C | 1 | C | C/Z=OUT |
+| **DRVNC** | Drive to !C | 1 | !C | C/Z=OUT |
+| **DRVZ** | Drive to Z | 1 | Z | C/Z=OUT |
+| **DRVNZ** | Drive to !Z | 1 | !Z | C/Z=OUT |
 | **DRVRND** | Drive random | 1 | rnd | C/Z=OUT |
 | **OUTH** | Output high | - | 1 | C/Z=OUT |
 | **OUTL** | Output low | - | 0 | C/Z=OUT |
 | **OUTNOT** | Output toggle | - | toggle | C/Z=OUT |
-| **OUTC** | Output to C | - | C | Z=OUT |
-| **OUTNC** | Output to !C | - | !C | Z=OUT |
-| **OUTZ** | Output to Z | - | Z | Z=OUT |
-| **OUTNZ** | Output to !Z | - | !Z | Z=OUT |
+| **OUTC** | Output to C | - | C | C/Z=OUT |
+| **OUTNC** | Output to !C | - | !C | C/Z=OUT |
+| **OUTZ** | Output to Z | - | Z | C/Z=OUT |
+| **OUTNZ** | Output to !Z | - | !Z | C/Z=OUT |
 | **OUTRND** | Output random | - | rnd | C/Z=OUT |
 | **DIRH** | Direction output | 1 | - | C/Z=DIR |
 | **DIRL** | Direction input | 0 | - | C/Z=DIR |
 | **DIRNOT** | Direction toggle | toggle | - | C/Z=DIR |
-| **DIRC** | Direction to C | C | - | Z=DIR |
-| **DIRNC** | Direction to !C | !C | - | Z=DIR |
-| **DIRZ** | Direction to Z | Z | - | Z=DIR |
-| **DIRNZ** | Direction to !Z | !Z | - | Z=DIR |
+| **DIRC** | Direction to C | C | - | C/Z=DIR |
+| **DIRNC** | Direction to !C | !C | - | C/Z=DIR |
+| **DIRZ** | Direction to Z | Z | - | C/Z=DIR |
+| **DIRNZ** | Direction to !Z | !Z | - | C/Z=DIR |
 | **DIRRND** | Direction random | rnd | - | C/Z=DIR |
 | **FLTH** | Float, out high | 0 | 1 | C/Z=OUT |
 | **FLTL** | Float, out low | 0 | 0 | C/Z=OUT |
 | **FLTNOT** | Float, toggle out | 0 | toggle | C/Z=OUT |
-| **FLTC** | Float, out to C | 0 | C | Z=OUT |
-| **FLTNC** | Float, out to !C | 0 | !C | Z=OUT |
-| **FLTZ** | Float, out to Z | 0 | Z | Z=OUT |
-| **FLTNZ** | Float, out to !Z | 0 | !Z | Z=OUT |
+| **FLTC** | Float, out to C | 0 | C | C/Z=OUT |
+| **FLTNC** | Float, out to !C | 0 | !C | C/Z=OUT |
+| **FLTZ** | Float, out to Z | 0 | Z | C/Z=OUT |
+| **FLTNZ** | Float, out to !Z | 0 | !Z | C/Z=OUT |
 | **FLTRND** | Float, out random | 0 | rnd | C/Z=OUT |
 | **TESTP** | Test pin | - | - | C/Z=pin |
 | **TESTPN** | Test pin negated | - | - | C/Z=!pin |
@@ -1566,7 +1578,7 @@ DAT           org
 
 # Chapter 2: Enhanced Direct I/O - Low-Level Pin Modes {#ch2}
 
-Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [4:0] = %00000 (`P_NORMAL`).
+Enhanced Direct I/O extends basic pin control with configurable drive strength, input conditioning, and basic analog capabilities—all without entering Smart Pin modes. These features are configured via WRPIN using P_ constants with mode bits [5:1] = %00000 (`P_NORMAL`).
 
 ## 2.1 Overview
 
@@ -1591,7 +1603,7 @@ WRPIN(pin, P_constant1 | P_constant2 | ...)
 
 **PASM2:**
 ```pasm2
-              wrpin     pin, ##(P_constant1 | P_constant2)
+              wrpin     ##(P_constant1 | P_constant2), pin
 ```
 
 ### The P_ Constant Architecture
@@ -1603,11 +1615,12 @@ P_ constants are 32-bit values where specific bit fields control different aspec
 | 31:28 | AAAA | A input selection and polarity |
 | 27:24 | BBBB | B input selection and polarity |
 | 23:21 | FFF | A,B input logic / filter selection |
-| 20:12 | MMMMMMMMM | Low-level pin mode and sub-mode |
-| 11:10 | TT | DIR/OUT control (P_OE, P_BITDAC) |
-| 9:5 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
+| 20:8 | MMMMMMMMMMMMM | Low-level pin control (drive, input mode, DAC/ADC) |
+| 7:6 | TT | DIR/OUT control (P_OE, P_BITDAC) |
+| 5:1 | SSSSS | Smart Pin mode (00000 = P_NORMAL) |
+| 0 | — | Always 0 |
 
-When mode bits [9:5] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
+When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced characteristics from other bit fields.
 
 ## 2.2 Drive Strength
 
@@ -1617,7 +1630,7 @@ The P2 provides configurable drive strength for both high-side (driving to VIO) 
 
 Select one drive-high constant. These control the high-side output driver.
 
-| Constant | Bits[17:15] | Drive | Current/Impedance | Use Case |
+| Constant | Bits[13:11] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
 | `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
 | `P_HIGH_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting, protection |
@@ -1632,7 +1645,7 @@ Select one drive-high constant. These control the high-side output driver.
 
 Select one drive-low constant. These control the low-side output driver.
 
-| Constant | Bits[14:12] | Drive | Current/Impedance | Use Case |
+| Constant | Bits[10:8] | Drive | Current/Impedance | Use Case |
 |----------|-------------|-------|-------------------|----------|
 | `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~100Ω | Standard digital, LEDs |
 | `P_LOW_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting |
@@ -1841,12 +1854,12 @@ Basic DAC modes provide digital-to-analog conversion without Smart Pin modes. Th
 
 **DAC Value Encoding:**
 
-The 8-bit DAC value is encoded in bits [19:12] of the WRPIN configuration:
+The 8-bit DAC value is encoded in bits [15:8] of the WRPIN configuration:
 
 ```spin2
 ' Set pin to output DAC level
 ' dac_value: 0-255 (0V to peak voltage)
-dac_config := P_DAC_990R_3V | (dac_value << 12)
+dac_config := P_DAC_990R_3V | (dac_value << 8)
 WRPIN(pin, dac_config)
 PINH(pin)                                 ' Enable output
 ```
@@ -1868,7 +1881,7 @@ CON
 
 PUB main()
   ' Output ~1.65V (half of 3.3V)
-  WRPIN(DAC_PIN, P_DAC_990R_3V | (DAC_MIDPOINT << 12))
+  WRPIN(DAC_PIN, P_DAC_990R_3V | (DAC_MIDPOINT << 8))
   PINH(DAC_PIN)                           ' Enable DAC output
 ```
 
@@ -1887,12 +1900,12 @@ Level comparison modes compare the input voltage to a programmable 8-bit thresho
 
 **Level Encoding:**
 
-The 8-bit comparison level is encoded in bits [19:12]:
+The 8-bit comparison level is encoded in bits [15:8]:
 
 ```spin2
 ' Compare pin A input to threshold level
 ' level: 0-255 (0V to VIO)
-level_config := P_LEVEL_A | (level << 12)
+level_config := P_LEVEL_A | (level << 8)
 WRPIN(pin, level_config)
 ```
 
@@ -2035,7 +2048,7 @@ CON
   
 PUB set_voltage(level) | config
   ' Output analog voltage proportional to level (0-255)
-  config := P_DAC_990R_3V | (level << 12)
+  config := P_DAC_990R_3V | (level << 8)
   WRPIN(DAC_PIN, config)
   PINH(DAC_PIN)                           ' Enable output
 ```
@@ -2044,19 +2057,19 @@ PUB set_voltage(level) | config
 
 ```pasm2
 ' Open-drain configuration
-              wrpin sda_pin, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), sda_pin
               drvh      sda_pin              ' Release line (floats high)
 
 ' Internal pull-up button
-              wrpin btn_pin, ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+              wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
               drvh      btn_pin                ' Enable pull-up
 
 ' Current-source LED
-              wrpin     led_pin, ##(P_HIGH_1MA | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1MA | P_LOW_FAST), led_pin
               drvh      led_pin                ' LED on at 1mA
 
 ' DAC output (1.65V = 128 at 3.3V range)
-              wrpin     dac_pin, ##(P_DAC_990R_3V | (128 << 12))
+              wrpin     ##(P_DAC_990R_3V | (128 << 8)), dac_pin
               dirh      dac_pin                ' Enable DAC
 ```
 
@@ -2073,7 +2086,7 @@ WRPIN(pin, 0)                             ' Same effect
 
 **PASM2:**
 ```pasm2
-              wrpin     pin, #0           ' Reset to P_NORMAL
+              wrpin     #0, pin           ' Reset to P_NORMAL
 ```
 
 This clears all enhanced configuration and Smart Pin modes, returning the pin to basic Direct I/O operation.
@@ -2145,7 +2158,7 @@ Between these interactions, the Smart Pin runs autonomously.
 
 ## 3.2 The Three-Register Model
 
-Every Smart Pin has three internal 32-bit registers that control its operation:
+Every Smart Pin has four 32-bit registers: a mode-configuration register written by WRPIN (the mode-control word, see §3.5), plus the three parameter/result registers—X, Y, and Z—described here. The mode register establishes *what* the pin does; X, Y, and Z carry the data it works with:
 
 ### X Register - Configuration and Parameters
 
@@ -2242,6 +2255,10 @@ This timing matters in tight polling loops.
 
 The **RQPIN** (read quiet) instruction reads the Z register without acknowledging. This allows multiple COGs to read the same Smart Pin's result without interfering with each other. Only one COG should acknowledge; others can use RQPIN to observe.
 
+::: caution
+**Multi-COG bus collisions.** Every COG reaches each Smart Pin over a shared 34-bit bus for write data and acknowledgment, and the Smart Pin **OR**s the incoming buses from all COGs together — the same way DIR and OUT bits are OR'd before reaching a pin. So if two or more COGs issue **WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN** to the *same* Smart Pin simultaneously, their bus data collides and corrupts. **RQPIN is the lone exception** — it does not use the acknowledge bus, so any number of COGs may RQPIN the same Smart Pin at once. Design multi-COG access so that only one COG configures and acknowledges a given Smart Pin; the others observe with RQPIN.
+:::
+
 
 ## 3.4 The Smart Pin State Machine
 
@@ -2260,7 +2277,7 @@ When DIR=0, the Smart Pin is held in reset:
 - Registers are initialized to mode-specific values
 - Configuration instructions (WRPIN/WXPIN/WYPIN) are accepted
 
-**Important:** Always configure a Smart Pin while DIR=0. Configuring while DIR=1 can cause unpredictable behavior.
+**Important:** Always issue WRPIN (mode/routing configuration) while DIR=0 — changing the mode word while the pin is running (DIR=1) can cause unpredictable behavior. WXPIN and WYPIN are different: they are the normal runtime update path and work freely while the Smart Pin is running (DIR=1).
 
 ### State 2: Configured
 
@@ -2319,7 +2336,7 @@ To completely disable and return to normal mode:
 
 ### Mode Selection via WRPIN
 
-The Smart Pin mode is selected by bits [9:5] of the WRPIN D operand. With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
+The Smart Pin mode is selected by bits [5:1] of the WRPIN D operand (bit 0 is always 0). With 5 bits, there are 32 possible modes (0-31, or %00000 through %11111).
 
 | Mode Bits | Category |
 |-----------|----------|
@@ -2356,7 +2373,7 @@ Inter-COG data sharing (Repository) and USB.
 
 Smart Pin configuration is layered. Multiple aspects combine to define complete behavior:
 
-### Layer 1: Smart Pin Mode (bits [9:5])
+### Layer 1: Smart Pin Mode (bits [5:1])
 
 Selects which of the 32 modes is active. Each mode defines fundamental behavior (PWM, ADC, serial, etc.).
 
@@ -2379,7 +2396,7 @@ Selects input sources:
 - Input polarity: true or inverted
 - Input logic: pass, AND, OR, XOR, or filter
 
-### Layer 4: DIR/OUT Control (bits [11:10])
+### Layer 4: DIR/OUT Control (bits [7:6])
 
 The TT bits control output behavior:
 
@@ -2497,7 +2514,7 @@ Smart Pins provide autonomous I/O operations through:
 1. **Three registers** (X, Y, Z) for configuration, input, and results
 2. **The IN bit** for event signaling
 3. **A state machine** progressing from disabled through configured to running
-4. **32 modes** selected by bits [9:5] of WRPIN
+4. **32 modes** selected by bits [5:1] of WRPIN
 5. **Layered configuration** combining mode, pin settings, input routing, and output control
 
 The key insight: once configured and enabled, Smart Pins operate independently. The COG is free to perform other work, interacting with the Smart Pin only to read results or update parameters.
@@ -2602,7 +2619,7 @@ WRPIN(pin, P_NCO_FREQ | P_OE)           ' NCO mode with output enable
 
 **PASM2 - Configure NCO frequency mode:**
 ```pasm2
-              wrpin     pin, ##(P_NCO_FREQ | P_OE)
+              wrpin     ##(P_NCO_FREQ | P_OE), pin
 ```
 
 **Spin2 - Configure with drive strength:**
@@ -2656,7 +2673,7 @@ WXPIN(pin, base_period)                  ' X = base_period
 
 **PASM2 - Set base period with frame count:**
 ```pasm2
-              wxpin     pin, x_value   ' X[15:0] = base, X[31:16] = frame
+              wxpin     x_value, pin   ' X[15:0] = base, X[31:16] = frame
 ```
 
 
@@ -2706,7 +2723,7 @@ WYPIN(pin, duty_value)                   ' Y = duty cycle
 
 **PASM2 - Send serial data:**
 ```pasm2
-              wypin     tx_pin, data      ' Y = data to transmit
+              wypin     data, tx_pin      ' Y = data to transmit
 ```
 
 
@@ -2793,7 +2810,7 @@ result := RQPIN(Pin)
 
 ### When to Use RQPIN
 
-**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times.
+**Multi-COG observation:** When multiple COGs need to read the same Smart Pin's result, only one should use RDPIN; others use RQPIN to avoid acknowledging multiple times. This matters because WRPIN/WXPIN/WYPIN/RDPIN/AKPIN all share the OR'd 34-bit Smart Pin bus and collide if two COGs issue them to the same pin at once — RQPIN is the one access that does not use that bus (see the multi-COG caution in §3.3).
 
 **Non-destructive peek:** When checking results without signaling consumption.
 
@@ -2867,7 +2884,7 @@ WRPIN(pin, mode | P_OE | ...)          ' Set mode and options
 ```
 
 ```pasm2
-              wrpin     #pin, ##(mode | P_OE)
+              wrpin     ##(mode | P_OE), #pin
 ```
 
 ### Step 3: Set Parameters (WXPIN)
@@ -2877,7 +2894,7 @@ WXPIN(pin, x_value)                      ' Set X register
 ```
 
 ```pasm2
-              wxpin     #pin, x_value
+              wxpin     x_value, #pin
 ```
 
 ### Step 4: Set Data/Secondary Parameters (WYPIN) - If Needed
@@ -2887,7 +2904,7 @@ WYPIN(pin, y_value)                      ' Set Y register
 ```
 
 ```pasm2
-              wypin     #pin, y_value
+              wypin     y_value, #pin
 ```
 
 ### Step 5: Enable Smart Pin
@@ -2932,9 +2949,9 @@ PUB setup_nco() | y_value
 **PASM2:**
 ```pasm2
               dirl      #OUT_PIN          ' Step 1: Reset
-              wrpin     #OUT_PIN, ##(P_NCO_FREQ | P_OE)   ' Step 2: Mode
-              wxpin     #OUT_PIN, #1      ' Step 3: Base period = 1
-              wypin     #OUT_PIN, y_val   ' Step 4: Frequency
+              wrpin     ##(P_NCO_FREQ | P_OE), #OUT_PIN   ' Step 2: Mode
+              wxpin     #1, #OUT_PIN      ' Step 3: Base period = 1
+              wypin     y_val, #OUT_PIN   ' Step 4: Frequency
               drvl      #OUT_PIN          ' Step 5: Enable
 ```
 
@@ -3035,10 +3052,12 @@ The B input is used for secondary signals (clock, quadrature channel B, etc.).
 | `P_AND_AB` | A AND B, B |
 | `P_OR_AB` | A OR B, B |
 | `P_XOR_AB` | A XOR B, B |
-| `P_FILT0_AB` | Filter 0 applied |
-| `P_FILT1_AB` | Filter 1 applied |
-| `P_FILT2_AB` | Filter 2 applied |
-| `P_FILT3_AB` | Filter 3 applied |
+| `P_FILT0_AB` | A and B both filtered using global filt0 settings |
+| `P_FILT1_AB` | A and B both filtered using global filt1 settings |
+| `P_FILT2_AB` | A and B both filtered using global filt2 settings |
+| `P_FILT3_AB` | A and B both filtered using global filt3 settings |
+
+When a pin is **not** in a Smart Pin mode, the A result produced here (after this logic and any filtering) is what drives the pin's IN signal. So these combinations — and the `P_FILTx_AB` options — also shape the value an ordinary `TESTP`/IN read sees on a plain direct-I/O pin, not just the input to a Smart Pin.
 
 ### Example - Quadrature Encoder
 
@@ -3080,7 +3099,7 @@ The S operand (pin number) can include a span:
 
 ```pasm2
               setq      #7                ' 8 pins total (base + 7)
-              wrpin     #0, mode_value    ' Configure pins 0-7
+              wrpin     mode_value, #0    ' Configure pins 0-7
 ```
 
 ### Span Wrap Behavior
@@ -3188,6 +3207,8 @@ PINCLEAR(pin)                             ' Reset to P_NORMAL
 PINFLOAT(pin)
 WRPIN(pin, 0)
 ```
+
+`WRPIN(pin, 0)` clears a smart pin to `P_NORMAL` **at any time, including while it is running** — no `DIRL`/`DIRH` cycle is required. The reset-before-configure rule (§4.2) applies when *changing* to another active mode; returning to direct I/O with `#0` takes effect immediately.
 
 
 *This chapter covers the mechanics of Smart Pin configuration. For specific mode behaviors, see the mode chapters in Parts II-IV. For common usage patterns and debugging, see Chapter 5.*
@@ -3354,9 +3375,9 @@ WYPIN(1, duty_1)
 
 ```pasm2
               setq      #7                ' 8 pins
-              wrpin     #0, ##(P_PWM_TRIANGLE | P_OE)
+              wrpin     ##(P_PWM_TRIANGLE | P_OE), #0
               setq      #7
-              wxpin     #0, x_value
+              wxpin     x_value, #0
               setq      #7
               drvl      #0                ' Enable all 8
 ```
@@ -3760,7 +3781,7 @@ PUB led_off()
 ```
 
 ```pasm2
-              wrpin     #LED_PIN, ##(P_HIGH_1K5 | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1K5 | P_LOW_FAST), #LED_PIN
               drvh      #LED_PIN          ' LED on
               drvl      #LED_PIN          ' LED off
 ```
@@ -3807,7 +3828,7 @@ PUB sda_read() : state
 
 ```pasm2
 ' Open-drain configuration
-              wrpin #SDA_PIN, ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
+              wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), #SDA_PIN
               
 ' Drive low
               drvl      #SDA_PIN
@@ -3818,6 +3839,8 @@ PUB sda_read() : state
 ' Read
               testp     #SDA_PIN wc       ' C = SDA state
 ```
+
+`TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where you drive a line and immediately sample it (see §1.2).
 
 **With Internal Pull-Up:**
 
@@ -3993,7 +4016,7 @@ The 3-clock output latency is a fixed pipeline delay — it sets *when* each edg
 **Tight loop toggle:**
 ```pasm2
               drvnot    #pin              ' 2 cycles
-              jmp       #$-1              ' 4 cycles (2 for JMP)
+              jmp       #$-1              ' 4 cycles (taken branch)
 ```
 Period: 6 cycles = 30 ns → ~33 MHz maximum at 200 MHz sysclk.
 
@@ -4044,7 +4067,7 @@ CON
 
 DAT           org
 
-              wrpin     #56, ##(P_HIGH_1MA | P_LOW_FAST)
+              wrpin     ##(P_HIGH_1MA | P_LOW_FAST), #56
 
 .loop         drvh      #56
               waitx     half_sec
@@ -4174,7 +4197,7 @@ P_PULSE generates a specified number of pulse cycles. Each cycle consists of a p
 | Register | Field | Purpose |
 |----------|-------|---------|
 | X[15:0] | Base period | Total cycle length in clock cycles |
-| X[31:16] | Compare value | Threshold for high vs low output |
+| X[31:16] | Compare value | Output HIGH while counter > this; numerically the LOW-time clocks |
 | Y[31:0] | Cycle count | Number of cycles to generate |
 
 ### Output Behavior
@@ -4199,9 +4222,9 @@ For X[15:0] = 4, X[31:16] = 2, Y = 3:
 The duty cycle is determined by the compare value relative to the base period:
 
 ```formula
-High time = X[31:16] clocks
-Low time  = X[15:0] - X[31:16] clocks
-Duty cycle = X[31:16] / X[15:0]
+High time = X[15:0] - X[31:16] clocks
+Low time  = X[31:16] clocks
+Duty cycle = (X[15:0] - X[31:16]) / X[15:0]
 ```
 
 **Special cases:**
@@ -4216,13 +4239,13 @@ Duty cycle = X[31:16] / X[15:0]
 CON
   PULSE_PIN = 10
   BASE_PERIOD = 1000                      ' 1000 clocks per cycle
-  HIGH_TIME = 500                         ' 500 clocks high (50% duty)
+  LOW_TIME = 500                          ' X[31:16]: 500 lo, 500 hi (50%)
   CYCLE_COUNT = 10                        ' Generate 10 pulses
 
 PUB generate_pulses() | ack
   PINFLOAT(PULSE_PIN)                     ' Reset
   WRPIN(PULSE_PIN, P_PULSE | P_OE)        ' Configure mode
-  WXPIN(PULSE_PIN, BASE_PERIOD | (HIGH_TIME << 16))  ' Set timing
+  WXPIN(PULSE_PIN, BASE_PERIOD | (LOW_TIME << 16))  ' Set timing
   PINLOW(PULSE_PIN)                       ' Enable
   
   WYPIN(PULSE_PIN, CYCLE_COUNT)           ' Trigger: generate 10 pulses
@@ -4235,11 +4258,11 @@ PUB generate_pulses() | ack
 **PASM2:**
 ```pasm2
               dirl      #PULSE_PIN
-              wrpin     #PULSE_PIN, ##(P_PULSE | P_OE)
-              wxpin     #PULSE_PIN, ##(BASE_PERIOD | (HIGH_TIME << 16))
+              wrpin     ##(P_PULSE | P_OE), #PULSE_PIN
+              wxpin     ##(BASE_PERIOD | (LOW_TIME << 16)), #PULSE_PIN
               drvl      #PULSE_PIN
               
-              wypin     #PULSE_PIN, #CYCLE_COUNT     ' Trigger
+              wypin     #CYCLE_COUNT, #PULSE_PIN     ' Trigger
               
 .wait         testp     #PULSE_PIN wc
         if_nc jmp       #.wait
@@ -4311,11 +4334,11 @@ PUB generate_transitions() | ack
 **PASM2:**
 ```pasm2
               dirl      #TRANS_PIN
-              wrpin     #TRANS_PIN, ##(P_TRANSITION | P_OE)
-              wxpin     #TRANS_PIN, #EDGE_PERIOD
+              wrpin     ##(P_TRANSITION | P_OE), #TRANS_PIN
+              wxpin     #EDGE_PERIOD, #TRANS_PIN
               drvl      #TRANS_PIN
               
-              wypin     #TRANS_PIN, #EDGE_COUNT
+              wypin     #EDGE_COUNT, #TRANS_PIN
               
 .wait         testp     #TRANS_PIN wc
         if_nc jmp       #.wait
@@ -4362,15 +4385,16 @@ WRPIN(pin, P_PULSE | P_OE | P_INVERT_OUT)
 For P_PULSE:
 ```formula
 Pulse period = X[15:0] × (1 / sysclk)
-High time = X[31:16] × (1 / sysclk)
+High time = (X[15:0] - X[31:16]) × (1 / sysclk)
 ```
 
 **Example at 200 MHz:**
 ```formula
 X[15:0] = 2000, X[31:16] = 500
-Period = 2000 / 200MHz = 10 µs
-High time = 500 / 200MHz = 2.5 µs
-Duty cycle = 25%
+Period    = 2000 / 200MHz = 10 µs
+High time = (2000 - 500) / 200MHz = 7.5 µs
+Low time  = 500 / 200MHz = 2.5 µs
+Duty cycle = 1500 / 2000 = 75%
 ```
 
 ### Transition Period Calculation
@@ -4497,13 +4521,13 @@ DAT           org
 
 ' Setup
               dirl      #STEP_PIN
-              wrpin     #STEP_PIN, ##(P_PULSE | P_OE)
-              wxpin     #STEP_PIN, ##(STEP_PERIOD | (STEP_HIGH << 16))
+              wrpin     ##(P_PULSE | P_OE), #STEP_PIN
+              wxpin     ##(STEP_PERIOD | (STEP_HIGH << 16)), #STEP_PIN
               drvl      #STEP_PIN
 
 ' Generate steps as needed
 step_loop
-              wypin     #STEP_PIN, steps_needed
+              wypin     steps_needed, #STEP_PIN
               
 .wait         testp     #STEP_PIN wc
         if_nc jmp       #.wait
@@ -4531,7 +4555,7 @@ result        long      0
 | Parameter | Register | Range | Notes |
 |-----------|----------|-------|-------|
 | Base period | X[15:0] | 1-65535 | Clocks per cycle |
-| Compare value | X[31:16] | 0-65535 | High threshold |
+| Compare value | X[31:16] | 0-65535 | Output HIGH when counter > this (low-time clocks) |
 | Cycle count | Y[31:0] | 1-2³² | Pulses to generate |
 
 ### P_TRANSITION Configuration
@@ -4601,6 +4625,8 @@ On each base period (every X[15:0] clocks):
 
 The output toggles when Z[31] changes, creating a square wave.
 
+Writing **Y = 0** produces no output: with nothing added to Z each period, Z[31] never changes and the pin holds static. A free-running waveform requires a non-zero Y.
+
 ### Frequency Formula
 
 ```formula
@@ -4661,9 +4687,9 @@ PUB nco_frequency(freq_hz) | y_value
 **PASM2:**
 ```pasm2
               dirl      #NCO_PIN
-              wrpin     #NCO_PIN, ##(P_NCO_FREQ | P_OE)
-              wxpin     #NCO_PIN, #1              ' Base period = 1
-              wypin     #NCO_PIN, freq_y          ' Frequency value
+              wrpin     ##(P_NCO_FREQ | P_OE), #NCO_PIN
+              wxpin     #1, #NCO_PIN              ' Base period = 1
+              wypin     freq_y, #NCO_PIN          ' Frequency value
               drvl      #NCO_PIN
 ```
 
@@ -4695,7 +4721,7 @@ P_NCO_DUTY generates a frequency with variable duty cycle. The output reflects t
 
 ### Duty Cycle Control
 
-In P_NCO_DUTY, the duty cycle is controlled by the relationship between Y and the accumulator:
+In P_NCO_DUTY, Y sets the duty cycle directly — the accumulator (Z) is incremented by Y each base period, and the output is high for one base period on every overflow, so the fraction of high time is Y / 2³²:
 
 - Larger Y values → Higher duty cycle
 - Smaller Y values → Lower duty cycle
@@ -4720,16 +4746,30 @@ CON
   _clkfreq = 200_000_000
   NCO_PIN = 10
 
-PUB nco_duty(freq_hz, duty_percent) | y_value
-  ' Y controls both frequency and duty
-  ' For specific duty at specific frequency, adjust Y
-  y_value := (freq_hz FRAC _clkfreq) * duty_percent / 50
-  
+PUB nco_duty(duty_percent) | y_value
+  ' In NCO_DUTY, Y sets the duty cycle directly: duty = Y / 2^32.
+  ' (Base period is 1 clock, so Z accumulates Y every clock.)
+  y_value := duty_percent frac 100        ' 50->$8000_0000, 25->$4000_0000
+
   PINFLOAT(NCO_PIN)
   WRPIN(NCO_PIN, P_NCO_DUTY | P_OE)
   WXPIN(NCO_PIN, 1)
   WYPIN(NCO_PIN, y_value)
   PINLOW(NCO_PIN)
+```
+
+### Worked Example: Fixed Pulse Width, Variable Period
+
+Because the output is high for exactly one base period on each overflow, P_NCO_DUTY is also a clean way to produce a **fixed-width pulse at an adjustable period** — X sets the pulse width, Y sets the period.
+
+Suppose Fclk = 25 MHz and you want a 1 µs pulse repeating every 18 µs:
+
+- Base period X = 25 clocks (= 1 µs at 25 MHz) — the high time is one base period, so 1 µs.
+- The pin overflows (emits a pulse) once every 18 base periods (18 µs), so Y = 2³² / 18.
+
+```formula
+X = Fclk × t_pulse           = 25 MHz × 1 µs  = 25
+Y = 2³² × t_pulse / t_period = 2³² × 1 / 18   = 238,609,294 ($0E38_E38E)
 ```
 
 
@@ -4848,6 +4888,10 @@ Actual freq = 21475 × 200,000,000 / 4,294,967,296 = 1000.0076 Hz
 Error = 0.00076%
 ```
 
+::: caution
+**The average frequency is exact; individual periods are not.** Rounding Y bounds only the long-term *average* — the integer accumulator still quantizes each cycle to a whole number of base periods, and the leftover fraction accumulates and occasionally lengthens (or shortens) one period by a single base period. For the fixed-pulse example in §8.3 (Y = 2³²/18, true value 238,609,294.222), the average period is 18 µs, but the dropped .222 surfaces as a rare ~19 µs period roughly every 1,073 s. Invisible for most timing; for jitter-sensitive work (precise pulse trains, sampling clocks) budget for it, or choose X/Y so the fraction is zero.
+:::
+
 ### Frequency Resolution Table
 
 | sysclk | Resolution (X=1) |
@@ -4925,15 +4969,15 @@ DAT           org
 
 ' Setup NCO at 1 kHz
               dirl      #NCO_PIN
-              wrpin     #NCO_PIN, ##(P_NCO_FREQ | P_OE)
-              wxpin     #NCO_PIN, #1
-              wypin     #NCO_PIN, y_start
+              wrpin     ##(P_NCO_FREQ | P_OE), #NCO_PIN
+              wxpin     #1, #NCO_PIN
+              wypin     y_start, #NCO_PIN
               drvl      #NCO_PIN
 
 ' Sweep frequency upward
 sweep_loop
               add       y_current, y_step
-              wypin     #NCO_PIN, y_current
+              wypin     y_current, #NCO_PIN
               waitx     sweep_delay
               cmp       y_current, y_end wc
         if_c  jmp       #sweep_loop
@@ -5055,8 +5099,8 @@ At each base period:
 
 | Register | Field | Purpose |
 |----------|-------|---------|
-| X[15:0] | Base period | Clock cycles per counter update (1-65535) |
-| X[31:16] | Frame period | Counter range (1-65535) |
+| X[15:0] | Base period | Clock cycles per counter update (1-65536; 0 selects 65536) |
+| X[31:16] | Frame period | Counter range (1-65536; a field value of 0 selects 65536) |
 | Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
 
 ### Timing Formulas
@@ -5155,7 +5199,7 @@ PWM Period = Frame Period × Base Period
 | Register | Field | Purpose |
 |----------|-------|---------|
 | X[15:0] | Base period | Clock cycles per counter update |
-| X[31:16] | Frame period | Counter range (1-65535) |
+| X[31:16] | Frame period | Counter range (1-65536; a field value of 0 selects 65536) |
 | Y[15:0] | Duty value | 0 (always low) to frame period (always high) |
 
 ### Timing Formulas
@@ -5242,6 +5286,8 @@ P_PWM_SMPS generates PWM output for switch-mode power supply control with voltag
 2. At frame end, wait for A-input to go low (voltage sag)
 3. When A goes low, start new cycle, capture Y, raise IN
 4. During cycle, if B-input goes high, force output low for remainder
+
+The **IN flag rising marks the cycle boundary** — the instant a fresh Y is captured for the new cycle. That makes IN the synchronization cue for software: wait on (or poll) IN before writing the next duty value with WYPIN, and your update lands cleanly on the upcoming cycle instead of mid-pulse.
 
 ### Block Diagram
 
@@ -5333,7 +5379,7 @@ P_PWM_SMPS is designed for autonomous operation. After initial configuration wit
 
 ### Updating Y Register
 
-All PWM modes capture Y[15:0] at the start of each frame. To change duty cycle:
+Triangle and sawtooth PWM modes capture Y[15:0] at the start of each frame. (SMPS mode is event-driven: it captures Y[15:0] after the frame period completes *and* the A-input goes low — not at a fixed clock boundary.) To change duty cycle:
 
 **Spin2:**
 ```spin2
@@ -5779,6 +5825,8 @@ Lower byte: $40 (64 of 256)
 Output pattern: 75% at $80, 25% at $81
 Average = 0.75 × 128 + 0.25 × 129 = 128.25 ≈ $80.40
 ```
+
+> **"16-bit" here is nominal — a *temporal-averaging* resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution, so the effective bits you realize depend on the low-pass filtering and settling of whatever the pin drives. Treat 16-bit as the averaged-over-time ceiling, not a guaranteed per-sample precision. (For pseudo-random *noise* output — mode %00001 — see §18.3.)
 
 ### P_DAC_DITHER_RND (%00010)
 
@@ -6915,9 +6963,9 @@ WRPIN(pin, P_SCHMITT_A)
 
 **Hysteresis behavior:**
 
-- Rising edge threshold: ~1.8V
-- Falling edge threshold: ~1.4V
-- Hysteresis: ~0.4V
+- Rising edge threshold: ~1.65V
+- Falling edge threshold: ~1.35V
+- Hysteresis: ~0.3V (300 mV)
 
 **Use when:**
 
@@ -7455,6 +7503,8 @@ P_STATE_TICKS continuously measures the duration of each logic state (both high 
 | C flag | Previous state (1=was high, 0=was low) |
 | IN flag | Raised on every transition |
 
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0**. Software that reads Z before the first transition therefore gets 1, never a zero — which keeps a naive `period / Z` calculation from dividing by zero on the first window.
+
 ### Reading Measurements
 
 **Spin2:**
@@ -7548,6 +7598,8 @@ P_HIGH_TICKS measures only the duration of high states. On each high-to-low tran
 | Z | Duration of previous high state (clocks) |
 | IN flag | Raised on high-to-low transition |
 
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** — the same divide-by-zero-safe initial value as the other timing modes. (Z also saturates at $8000_0000; bit 31 doubles as the overflow indicator, which is why the read examples mask with `$7FFF_FFFF`.)
+
 ### Pulse Width Measurement
 
 **Spin2:**
@@ -7622,6 +7674,8 @@ P_EVENTS_TICKS operates in two modes controlled by Y[2]:
 
 - **Event timing (Y[2]=0)**: Measures time for X events to occur
 - **Timeout detection (Y[2]=1)**: Detects when no event occurs within X clocks
+
+On reset (DIR=0), IN is low and **Z is preloaded to $0000_0001, not 0** in both sub-modes — the same divide-by-zero-safe initial value used by the other timing modes.
 
 ### Event Type Selection
 
@@ -7732,6 +7786,8 @@ In timeout mode:
 - Event resets timer and Z to 1
 - Timeout raises IN and restarts timer
 - Z always contains clocks since last event
+
+In event-timing mode (Y[2]=0), reading the result with `RDPIN`/`RQPIN` acknowledges the measurement and **auto-restarts** it — the next read returns the interval to the following event. No explicit re-arm is needed for back-to-back measurements.
 
 
 ## 13.5 Input Signal Routing
@@ -8102,6 +8158,8 @@ PUB zero_position()
 .read         rdpin     position, #ENC_A    ' Get position
 ```
 
+> **The raw count is 4× the detent count.** A quadrature encoder produces four transitions per detent (two on A, two on B), and this mode counts all of them — so the signed Z value advances by ±4 per click. Reading Z directly (as `read_position()` does) gives the full 4×-resolution count, which is what you want for fine positioning. When you need *detents*, divide by four while preserving the sign with an arithmetic shift right by 2 — `RDPIN(ENC_A) ~> 2` in Spin2, or `sar position, #2` in PASM2 — not a plain unsigned shift, which would corrupt negative (reverse) counts.
+
 ### Velocity Measurement (Periodic Mode)
 
 ```spin2
@@ -8397,6 +8455,9 @@ For modes using two inputs (A and B):
 | P_MINUS2_B | Pin - 2 |
 | P_PLUS3_B | Pin + 3 |
 | P_MINUS3_B | Pin - 3 |
+| P_OUTBIT_B | This pin's own OUT bit (software-driven) |
+
+`P_OUTBIT_B` (and the matching `P_OUTBIT_A`) routes the input from the pin's **OUT register bit** rather than a physical pin — so a COG can gate or step the counter purely in software, by writing OUT, with no external signal and no adjacent pin tied up. Useful for a software-controlled gate (e.g. enabling P_REG_UP counting for a measured interval) or for self-test.
 
 ### Input Conditioning
 
@@ -8639,7 +8700,7 @@ WXPIN(pin, 200_000_000)                    ' X = sysclk
 All counting modes when DIR=0:
 
 - IN = low
-- Z = initial adder value (0, 1, or -1 depending on input state)
+- Z = initial adder value: 0 or +1 for unidirectional counters; bidirectional modes (quadrature, up/down) can also load -1, accounting for any edge coincident with reset
 - Counter ready to start on DIR=1
 
 
@@ -8686,7 +8747,7 @@ All period measurement modes use Y[1:0] to select A/B input trigger combinations
 | %10 | A-edge to B-rise | Any A transition to B rising |
 | %11 | A-edge to B-edge | Any transition to any transition (maximum sensitivity) |
 
-**Note:** B-input can be set to the same pin as A-input for single-pin cycle measurement using ``.
+**Note:** The B-input reads the same pin as the A-input *by default* (when no `P_PLUSn_B` / `P_MINUSn_B` routing modifier is applied) — exactly what single-pin cycle measurement needs. No special constant is required.
 
 
 ## 15.2 Period-Based Modes (Measure X Periods)
@@ -8797,6 +8858,8 @@ PUB measure_duty() | total_time, high_time, duty_percent
 - %10011: "Measure time for exactly X periods"
 - %10101: "Measure time for all periods within X clocks"
 
+Because the window stretches to the end of the period already in progress, **Z reports the *actual* elapsed clocks — always ≥ X, never exactly X.** Use Z, not the nominal X, as the time term in your math. That is also what makes concurrent measurement exact: run %10101, %10110, and %10111 together on the same signal with the same X, and because all three close on the same period-aligned window, frequency (`periods / Z`) and duty (`high / Z`) stay mutually consistent (see §15.4).
+
 **Configuration:**
 ```spin2
 ' Measure periods within 100ms window
@@ -8861,6 +8924,15 @@ period_count := RDPIN(pin)
 ' For 1-second window, period_count = frequency in Hz
 frequency := period_count
 ```
+
+### Restart and Acknowledge
+
+These modes restart automatically: a new measurement begins on the next trigger after the window completes, so you do not re-arm them by hand. How you *read* the result decides whether the IN flag is cleared:
+
+- **RDPIN** reads Z **and acknowledges** — it clears IN, so the next completed window can raise it again. Use RDPIN as your once-per-window read.
+- **RQPIN** reads Z **quietly** — it does *not* clear IN. Use it to peek mid-stream without disturbing the IN-driven cadence; the matching RDPIN still does the acknowledge.
+
+Reading with RDPIN each time IN rises gives you exactly one fresh result per window, in lock-step with the hardware.
 
 
 ## 15.4 Combined Measurements
@@ -9208,7 +9280,7 @@ PUB oscillator_calibration() | measured, error_ppm, periods
 
 | Modifier | Function |
 |----------|----------|
-|  | Use A-input for both A and B (single pin) |
+| (default) | B reads the same pin as A — single-pin measurement |
 | P_PLUS1_B | Use next pin as B-input |
 | P_MINUS1_B | Use previous pin as B-input |
 | P_FILT1_AB | Add input filtering |
@@ -9425,6 +9497,11 @@ SINC3 provides better dynamic response than SINC2, doubling the effective bits f
               ' x now contains the sample
 ```
 
+> **Two things the post-processing must get right.**
+>
+> - **Warm-up.** The difference math depends on a valid prior accumulator state, so the filter is only accurate **from the second period for SINC2, and from the third period for SINC3.** Discard the first reading (SINC2) or the first two (SINC3) after starting.
+> - **Normalization.** To right-justify the differenced result, apply a final right-shift sized to the sample count: `LOG2(samples) - 1` bits for SINC2, `LOG2(samples)` bits for SINC3 (e.g. 128 samples → 6 for SINC2). The shift tracks the sample period, so it changes whenever you change X.
+
 ### Bitstream Capture Mode (%11)
 
 Captures raw ADC bitstream for custom processing algorithms.
@@ -9463,7 +9540,10 @@ PUB external_adc_init()
 
 ### Custom Sample Periods
 
-Use WYPIN to override the power-of-2 period from X[3:0]:
+Use WYPIN to override the power-of-2 period from X[3:0] with an arbitrary value in **Y[13:0]**:
+
+> The WYPIN override only applies when **X[5:4] > %00** — i.e. in SINC2 Filtering, SINC3 Filtering, or Bitstream modes. In **SINC2 Sampling (X[5:4] = %00)** the period is fixed by X[3:0] and WYPIN has no effect, so a non-power-of-2 rate there requires one of the filtering modes instead.
+
 
 ```spin2
 WRPIN(ADC_PIN, P_ADC_EXT | P_PLUS1_B)
@@ -9514,8 +9594,9 @@ PUB scope_init(trigger_config)
 ### X Register: Trigger Configuration
 
 ```layout
-X[15:8]: Trigger level (0-252, multiples of 4)
-X[7:0]: Arm level (0-252, multiples of 4)
+X[15:10]: B (trigger) value, 6-bit MSB-justified (0-252, step 4)
+X[7:2]:   A (arm) value, 6-bit MSB-justified (0-252, step 4)
+X[1:0]:   Filter: %00 = 68-tap Tukey, %01 = 45-tap Tukey, %1x = 28-tap Hann
 ```
 
 The hysteretic trigger works as follows:
@@ -10690,7 +10771,7 @@ PUB setup_noise_dac()
 
 | X[15:0] | Behavior |
 |---------|----------|
-| 0 | 65,536 clocks (minimizes switching power) |
+| 0 | 65,536 clocks (longest sample period) |
 | N | IN raised every N clocks |
 
 **Note:** The DAC outputs noise continuously regardless of sample period. The sample period only affects when IN is raised.
@@ -10736,6 +10817,8 @@ Provides 16-bit DAC resolution using pseudo-random dithering of the 8-bit DAC. T
 - Y[15:0] sets the desired 16-bit output value
 - Hardware randomly dithers between adjacent 8-bit levels
 - Averaging over time yields 16-bit effective resolution
+
+> **The "16-bit" figure is nominal — a temporal-averaging resolution, not absolute accuracy.** The hardware DAC is 8-bit (256 levels); dithering trades time for amplitude resolution. The effective bits you actually realize depend on the low-pass filtering and settling of whatever the pin drives, so treat 16-bit as an averaged-over-time ceiling rather than a guaranteed sample-by-sample precision.
 
 ### Configuration
 
@@ -10831,9 +10914,12 @@ Provides 16-bit DAC resolution using PWM dithering. PWM dithering is more determ
 | Aspect | PRNG Dither (%00010) | PWM Dither (%00011) |
 |--------|---------------------|---------------------|
 | Transition pattern | Random | Deterministic |
+| Transitions per 256 clocks | Up to one per clock | At most two |
 | Noise floor | Higher | Lower |
 | Spurious tones | None | One at Fclock/256 |
 | Dynamic range | Good | Better (-48dB spur) |
+
+The "at most two transitions per 256 clocks" is what gives PWM dither its lower noise floor and lower switching activity: where the PRNG mode can flip the DAC on any clock, the PWM mode confines all of a period's switching to two edges.
 
 ### Configuration
 
@@ -11088,8 +11174,8 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 
 | Register | Write | Read |
 |----------|-------|------|
-| X | Not used | - |
-| Y via WXPIN | Store value | - |
+| X via WXPIN | Store value | - |
+| Y | Not used | - |
 | Z via RDPIN | - | Retrieve value |
 
 **DAC Dither Modes:**
@@ -11167,11 +11253,16 @@ CON
   USB_DM = 56                                   ' D- on even pin
   USB_DP = 57                                   ' D+ on odd pin (DM+1)
 
-PUB configure_usb_pins()
+PUB configure_usb_pins() | baud
   ' Configure as USB pair with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  ' WXPIN on the LOWER pin sets USB mode + baud:
+  '   D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed
+  '   D[13:0]=baud fraction
+  baud := 12_000_000 / (clkfreq / $10000)  ' full-speed 12 Mbps
+  WXPIN(USB_DM, $4000 | baud)                      ' device, full-speed
+  PINHIGH(USB_DM)
+  PINHIGH(USB_DP)
 ```
 
 ### Output Control
@@ -11197,7 +11288,7 @@ USB uses differential signaling with specific line states:
 | SE0 | Low | Low | End of Packet, Reset, Disconnect |
 | SE1 | High | High | Invalid (error condition) |
 
-**Note:** J and K meanings swap for Low Speed vs Full Speed.
+**Note:** J and K meanings swap for Low Speed vs Full Speed. Because USB uses complementary (mirrored) line signaling, the **DP/DM electrical designations can themselves be swapped by exchanging the low-speed and full-speed mode bit** — handy when PCB routing would otherwise force you to cross the differential pair.
 
 ### USB Speeds
 
@@ -11218,19 +11309,75 @@ The USB mode uses the smart pin registers for configuration and data:
 
 | Register | Function |
 |----------|----------|
-| X | USB configuration parameters |
-| Y | Protocol control |
-| Z | Data and status |
+| X | USB configuration, set via WXPIN on the lower (even) pin: D[15]=1 host / 0 device, D[14]=1 full-speed / 0 low-speed, D[13:0]=baud rate as a 16-bit fraction of sysclk (target_Hz / clkfreq × $10000) |
+| Y | Line-state and packet output, set via WYPIN on the lower pin (see table below) |
+| Z | Receiver data + 16-bit status word, read via RDPIN/RQPIN on the lower pin (see bit layout below) |
 
-**Note:** Detailed register bit assignments require reference to USB implementation examples and Parallax documentation, as the silicon documentation is limited.
+**All Smart Pin access happens on the lower (even/DM) pin** — WXPIN, WYPIN, and RDPIN/RQPIN are all issued there. The upper (odd/DP) pin takes no WXPIN/WYPIN; software only reads its IN flag (with TESTP). WXPIN **must** be issued on the lower pin to establish host/device, speed, and baud rate *before* raising DIR. (Source: Silicon Doc v35, USB host/device mode.)
 
-### IN Flag
+#### Baud Rate — Worked Example
 
-The IN flag signals USB events that require software attention:
+The baud fraction's top two bits must be zero, so the baud rate must stay below ¼ of sysclk. For 12 Mbps (full-speed) on an 80 MHz clock:
 
-- Packet received
-- Transmission complete
-- Line state change
+```formula
+baud_fraction = 12,000,000 / 80,000,000 × $10000 = $2666
+```
+
+Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$E666** (`$C000 | $2666`).
+
+#### Y Register — Line States and Packet Output (WYPIN)
+
+Write these with WYPIN on the lower pin to drive a line state or start a packet:
+
+| WYPIN D | Action |
+|---------|--------|
+| 0 | Output IDLE (float, except an optional resistor to 3.3 V / GND) |
+| 1 | Output SE0 (drive both DP and DM low) |
+| 2 | Output K (drive the K state) |
+| 3 | Output J (J state — like IDLE, but actively driven) |
+| 4 | Output EOP (end-of-packet: SE0, SE0, J, then IDLE) |
+| $80 | SOP — start-of-packet, then bytes, with automatic EOP when the buffer empties |
+
+#### Z Register — Receiver Status Word
+
+RDPIN/RQPIN on the lower pin returns a 16-bit status word (with `RDPIN ... WC`, the error flag also lands in C):
+
+| Bit(s) | Meaning |
+|--------|---------|
+| [15:8] | Last byte received |
+| [7] | Byte toggle — cleared on SOP, toggles on each byte received (use it to detect a *new* byte) |
+| [6] | Error — cleared on SOP; set on bit-unstuff error, EOP with SE0 > 3 bits, or SE1 |
+| [5] | EOP received |
+| [4] | SOP received |
+| [3] | SE1 in (illegal) |
+| [2] | SE0 in (RESET) |
+| [1] | K in (RESUME) |
+| [0] | J in (IDLE) |
+
+### IN Flag — Per-Pin Semantics
+
+The two pins carry **different** IN meanings:
+
+- **Upper (odd / DP) pin** — IN rises whenever the **output buffer empties**, signalling that the next output byte may be written (via WYPIN to the lower pin). Read it with TESTP.
+- **Lower (even / DM) pin** — IN rises on any **change in receiver status**; read the 16-bit status word with RDPIN/RQPIN.
+
+After a lower-pin status change, IN will not rise again until you acknowledge with one of WRPIN/WXPIN/WYPIN/RDPIN/AKPIN — so always acknowledge before waiting for the next event, or you will miss it.
+
+### Sending a Packet
+
+1. `WYPIN #$80` on the lower pin to emit SOP.
+2. After each **IN rise on the upper pin**, `WYPIN byte` on the lower pin to buffer the next byte.
+3. Stop sending bytes and the transmitter appends EOP automatically.
+
+Always confirm the upper pin's IN rose after each WYPIN before issuing the next one — even for a state change — because all output is paced by the baud generator and the buffer only empties at the next bit period.
+
+### Transmitter and Receiver Are Independent
+
+TX and RX have separate state machines; only the baud generator is shared. Note that the **receiver also sees all local transmit output** — your own transmitted bytes appear in the RX status stream, so software must account for that loopback.
+
+::: caution
+**FPGA boards lack the built-in USB resistors.** The ASIC P2 has the 1.5 kΩ and 15 kΩ resistors built into the USB Smart Pins; a P2 emulated on an FPGA does **not** — fit them yourself on the DP and DM lines.
+:::
 
 
 ## 19.5 Host vs Device Mode
@@ -11311,17 +11458,21 @@ CON
   USB_DM = 56
   USB_DP = 57
 
-PUB configure_usb()
+PUB configure_usb() | baud
   ' Reset both pins
-  DIRL(USB_DM)
-  DIRL(USB_DP)
+  PINFLOAT(USB_DM)
+  PINFLOAT(USB_DP)
 
   ' Configure USB mode with output enabled
   WRPIN(USB_DM, P_USB_PAIR | P_OE)
 
+  ' Set USB mode + baud on lower pin (D[15]=0 device, D[14]=1 full-speed)
+  baud := 12_000_000 / (clkfreq / $10000)
+  WXPIN(USB_DM, $4000 | baud)
+
   ' Enable the USB pair
-  DIRH(USB_DM)
-  DIRH(USB_DP)
+  PINHIGH(USB_DM)
+  PINHIGH(USB_DP)
 ```
 
 ### PASM2 Configuration
@@ -11333,8 +11484,9 @@ DAT           org
               dirl      #USB_DM
               dirl      #USB_DP
 
-              ' Configure USB mode
+              ' Configure USB mode + baud (lower pin)
               wrpin     usb_mode, #USB_DM
+              wxpin     usb_cfg, #USB_DM
 
               ' Enable USB pair
               dirh      #USB_DM
@@ -11353,6 +11505,7 @@ handle_usb_event
               ret
 
 usb_mode      long      P_USB_PAIR | P_OE
+usb_cfg       long      $4000 | ($10000 * 12 / 200)  ' device FS @ 200MHz
 usb_data      res       1
 ```
 
@@ -11420,8 +11573,9 @@ Implementing USB requires:
 
 ```spin2
 WRPIN(even_pin, P_USB_PAIR | P_OE)              ' Configure with output
-DIRH(even_pin)                                  ' Enable DM
-DIRH(even_pin+1)                                ' Enable DP
+WXPIN(even_pin, $4000 | (12_000_000 / (clkfreq / $10000)))  ' full-speed
+PINHIGH(even_pin)                               ' Enable DM
+PINHIGH(even_pin+1)                             ' Enable DP
 ```
 
 ### Key Points
@@ -11981,14 +12135,14 @@ X = ((sysclk × 65536 / baud_rate) & $FFFFFC00) | data_bits
 
 - `X[31:16]`: Integer bit period in clocks
 - `X[15:10]`: Fractional adjustment (1/64 clock)
-- `X[4:0]`: Number of data bits (1-32)
+- `X[4:0]`: Data-bit count, encoded as N−1 (write 0–31 to select 1–32 bits; e.g. write 7 for an 8-bit word)
 - `baud_rate`: Desired baud rate in bits/second
 
 **Worked Example (115200 baud at 200 MHz):**
 ```formula
 X[31:16] = 200,000,000 / 115,200 = 1736 clocks/bit
 bit_period = 1736 × 65536 = 113,770,496
-X = ($06C8_0000 | 8) = $06C8_0008  (8 data bits)
+X = ($06C8_0000 | 7) = $06C8_0007  (8 data bits: field = N-1 = 7)
 ```
 
 
@@ -12044,6 +12198,8 @@ voltage_mv = (sample × 3300) / full_scale
 - For 8-bit: full_scale = 255
 - For 14-bit: full_scale = 16383
 
+ADC resolution spans roughly **2 to 18 bits** depending on mode and sample period: SINC2 Sampling reaches 14-bit, while SINC3 Filtering with a long enough period (and the externally-clocked delta-sigma path) goes higher — up to ~18 ENOB. Use `full_scale = 2^bits - 1` for the resolution you actually configured.
+
 **Worked Example (8-bit ADC reading 128):**
 ```formula
 voltage_mv = (128 × 3300) / 255 = 1655 mV
@@ -12097,6 +12253,8 @@ voltage = (DAC_value / 65536) × V_full_scale
 ```formula
 voltage = (32768 / 65536) × 3.3V = 1.65V
 ```
+
+> **The 16-bit DAC is nominal — a temporal-averaging figure, not absolute accuracy.** The hardware DAC is 8-bit (256 levels ≈ 12.9 mV/step at 3.3 V); the dithered modes reach 16-bit *averaged over time*, so the µV/LSB values above are the ideal step size, not guaranteed accuracy. Real effective bits depend on output low-pass filtering and load (see §18.4).
 
 
 ### Voltage to DAC Value
@@ -12413,12 +12571,13 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Events Ticks | P_EVENTS_TICKS | N events / timeout | 1 clock | Configurable | Yes | Medium | Frequency, watchdog |
 | Quadrature | P_QUADRATURE | Position/velocity | 4x encoder | Every edge | Yes | Low | Encoder |
 | Count Highs | P_COUNT_HIGHS | Gated edges | 32-bit | Configurable | Yes | Low | Freq counter |
-| Count Rises | P_COUNT_RISES | Up/down edges | 32-bit | Configurable | Yes | Low | Step/direction |
-| Count Edges | P_COUNT_RISES | Edge count | 32-bit | Configurable | Yes | Low | Event counter |
+| Count Up/Down | P_REG_UP_DOWN | Up/down by B direction | 32-bit | Configurable | Yes | Low | Step/direction |
+| Count Edges | P_COUNT_RISES | Edge/rise count | 32-bit | Configurable | Yes | Low | Event counter |
 | High Clocks | P_HIGH_TICKS | High time sum | 32-bit | Configurable | Yes | Low | Duty cycle |
 | Periods Ticks | P_PERIODS_TICKS | N period time | 1 clock | N periods | Yes | Medium | Precision freq |
 | Periods Highs | P_PERIODS_HIGHS | N period high | 1 clock | N periods | Yes | Medium | Duty cycle |
 | Counter Ticks | P_COUNTER_TICKS | Time in window | 1 clock | Time window | Yes | Medium | Freq measurement |
+| Counter Highs | P_COUNTER_HIGHS | High time in window | 1 clock | Time window | Yes | Medium | Duty in window |
 | Counter Periods | P_COUNTER_PERIODS | Periods in window | 1 period | Time window | Yes | Low | Freq counter |
 | ADC | P_ADC | Voltage | 8-14 bits | kHz to MHz | Yes | Medium | Analog sensor |
 | ADC Scope | P_ADC_SCOPE | 4-ch capture | 8 bits | Triggered | Triggered | High | Oscilloscope |
@@ -12532,7 +12691,7 @@ This appendix provides comparison matrices to help select the appropriate Smart 
 | Pins | 1 (RX) | 1 (Data), clock from adjacent |
 | Bits per frame | 1-32 | 1-32 |
 | Clock routing | N/A | P_PLUS1_B etc. required |
-| Data justification | Right | Left |
+| Data justification | Left (MSB at Z[31]) | Left (MSB at Z[31]) |
 | Best for | RS-232, debug | SPI slave, shift in |
 
 ### Serial Speed Comparison
@@ -13356,7 +13515,7 @@ PINH(pin)
 
 **16-bit PRNG dithered DAC**
 
-Provides 16-bit DAC resolution using pseudo-random dithering between adjacent 8-bit levels.
+Provides nominal 16-bit DAC resolution (averaged over time) using pseudo-random dithering between adjacent 8-bit levels. The hardware DAC is 8-bit; real precision depends on output filtering — see §18.4.
 :::
 
 ### Register Usage
@@ -13865,6 +14024,8 @@ Measures duration of each state. IN raised on every transition with previous sta
 | C flag | Previous state (1=was high) |
 | IN | Every transition |
 
+On reset (DIR=0), Z starts at **$0000_0001** (not 0), and Z saturates at **$8000_0000**.
+
 ### Key Constants
 ```spin2
 P_STATE_TICKS | P_SCHMITT_A
@@ -13898,6 +14059,8 @@ Measures duration of high pulses. IN raised on high-to-low transition.
 | Y | Not used |
 | Z | Duration of previous high (clocks) |
 | IN | High-to-low transition |
+
+On reset (DIR=0), Z starts at **$0000_0001** (not 0). Z saturates at $8000_0000, and bit 31 doubles as the overflow flag — which is why the example masks the result with `$7FFF_FFFF`.
 
 ### Key Constants
 ```spin2
@@ -13968,9 +14131,11 @@ Measures total clock cycles for X signal periods.
 | Register | Function |
 |----------|----------|
 | X | Number of periods to measure |
-| Y[1:0] | Trigger type |
+| Y[1:0] | A→B event pair: %00 = A-rise→B-rise, %01 = A-rise→B-edge, %10 = A-edge→B-rise, %11 = A-edge→B-edge |
 | Z | Total clocks for all periods |
 | IN | Measurement complete |
+
+This is a **two-input** mode — each period is measured from an A-input event to a B-input event, so B-input routing is required (set B to the same pin as A for single-pin cycle measurement). On reset (DIR=0), Z starts at **$0000_0000** — note that the period-counting modes reset Z to 0, unlike the state/timing modes (%10000–%10010), which reset to $0000_0001. Z saturates at $8000_0000.
 
 ### Key Constants
 ```spin2
