@@ -1,6 +1,10 @@
 services:
   dev:
-    image: mcr.microsoft.com/devcontainers/python:3.12
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Name the built image so Docker reuses cached layers across rebuilds.
+    image: p2-knowledge-base-dev:local
     volumes:
       - ..:/workspaces/P2-Knowledge-Base:cached
       - todo-mcp-data:/home/vscode/.local/share/todo-mcp
