@@ -132,8 +132,8 @@ them are required for a new document.
 
 | # | Pass | Output | Primary tooling (current) |
 |---|------|--------|---------------------------|
-| 1 | **Content** — text, tables, structure, lineage | `<src>-text.txt` + curated `complete-*.md` summaries | **DOCX** (literal char stream; clean tables) |
-| 2 | **Code examples** — extract → validate → catalog | `assets/code-<date>/` + `CODE-EXAMPLE-EXTRACTION-MATRIX.md` row | **DOCX** extract + **`pnut_ts`** validate (PDF fallback) |
+| 1 | **Content** — text, tables, structure, lineage | `<src>-text.txt` + curated `complete-*.md` summaries | **DOCX** (literal char stream; clean tables); **PDF-only → `pdf2md`** (docling: recovered tables + fenced code), **`camelot` lattice** for a stubborn ruled table |
+| 2 | **Code examples** — extract → validate → catalog | `assets/code-<date>/` + `CODE-EXAMPLE-EXTRACTION-MATRIX.md` row | **DOCX** extract + **`pnut_ts`** validate; **PDF-only fallback → `pdf-layout`** (preserves column/indent for code listings) then `pnut_ts` |
 | 3 | **Images / visual catalog** — extract → quality-check → catalog → consumer registry | `assets/images-<src>-<date>/` + `image-catalog.md` + `INGESTION-IMAGE-EXTRACTION-MATRIX.md` row | **DOCX media** + **`image-tools-mcp`** (PyMuPDF fallback) |
 | 4 | **Post-processing** — relationship matrices, specialized extractions (timing tables, narratives), pattern library | central-analysis matrices | analysis |
 | 5 | **Validation** — section-by-section completeness | `<src>-extraction-audit.md` validation results | `ingestion-audit-protocol.md` 5-pass |
@@ -144,7 +144,10 @@ them are required for a new document.
 
 **Pick the format per pass on evidence, gated by a validator — never by a
 hardcoded "always use X" rule.** With current tooling, **DOCX is primary for
-all three extraction passes**; PDF and PyMuPDF are *fallbacks*, not gates.
+all three extraction passes**; the PDF path is a *fallback*, not a gate — but
+when a source is **PDF-only** (no `.docx` — e.g. board Product Guides), reach
+for the modern PDF toolkit, not the old PyMuPDF-only path (see the PDF-only
+ladder below).
 
 - **Content (pass 1) → DOCX.** A `.docx` is a zip; `word/document.xml` is the
   literal character stream with real table structure. This avoids the
@@ -178,6 +181,22 @@ all three extraction passes**; PDF and PyMuPDF are *fallbacks*, not gates.
   "black image / full-page capture / false success" failure class at the
   source. Fall back to PyMuPDF + coordinate-rescue only for assets not present
   in the DOCX (e.g. a figure that was a linked image).
+- **PDF-only source ladder (no `.docx`).** When the source ships only as a PDF
+  (most board Product Guides, datasheets), the DOCX paths above don't apply —
+  use the baked-in PDF toolkit (`/opt/pdf-tools/README.md`) instead of the old
+  PyMuPDF-only fallback. Most KB PDFs are digitally generated, so **skip OCR
+  unless a page is actually scanned**:
+  - **Content + tables (pass 1) → `pdf2md`** (docling) as the default — it
+    recovers real tables and fenced code. For a stubborn *ruled* table (board
+    pin maps, electrical specs), `camelot --pages all --format csv lattice
+    <file.pdf>` extracts it surgically to CSV.
+  - **Code listings (pass 2) → `pdf-layout`**, which preserves column/indent
+    layout for whitespace-sensitive PASM2/Spin2, then validate with `pnut_ts`
+    exactly as the DOCX path does.
+  - **Images (pass 3) → PyMuPDF/`pdfimages`** for raster extraction, then the
+    same `image-tools-mcp` catalog + quality gate as above.
+  - **Scanned page (rare here) → `pdf-ocr <in.pdf> <out.pdf>`** first, then run
+    `pdf2md` on the OCR'd output.
 
 ```bash
 # Extract DOCX media (pass 3 inputs) and inspect:
