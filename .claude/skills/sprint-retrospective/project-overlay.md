@@ -6,11 +6,14 @@ Applies additively to the central `sprint-retrospective` skill. Overrides the
 
 ## Why this overlay exists
 
-The central skill treats `feedback_skill_evolution_candidates.md` as a buffer of
-*candidate* refinements awaiting promotion. In practice that let learnings land
-in the buffer and **never get operationalized** — the buffer became a write-only
-graveyard (surfaced in the 2026-06-11 debug-window-v55 retrospective: the
-`baseline-health` and crossref-field-type entries had no skill home at all).
+Central's §5 now *triages* `feedback_skill_evolution_candidates.md`
+(Addressed / Deferred / Closed-no-change, with `APPLIED` auto-Addressed) — but it
+still stops at *candidate awaiting confirmation*: nothing operationalizes a
+rule-sized learning in the same retrospective, and there is no certification
+step. That gap is what let earlier learnings land in the buffer and **never get
+operationalized** — a write-only graveyard (surfaced in the 2026-06-11
+debug-window-v55 retrospective: the `baseline-health` and crossref-field-type
+entries had no skill home at all).
 
 The fix: a learning earns its way to central by **proving itself locally first**,
 not by sounding good in a note.
@@ -24,9 +27,10 @@ When the retrospective identifies a methodology learning, classify it and act:
    `project-overlay.md` (create the overlay if absent), in the same retrospective.
    Do **not** merely log it. If no project home exists for the central skill,
    the act of creating `.claude/skills/<skill>/project-overlay.md` IS the adoption.
-2. **Build-sized** (a new skill or a non-trivial design effort): tag it
-   `PROPOSAL` and park it as backlog. It is **not** a certified candidate and
-   must not masquerade as adopted.
+2. **Build-sized** (a new skill or a non-trivial design effort): central
+   already parks these for a future sprint (don't build during retrospective) —
+   here, tag it `PROPOSAL` so it cannot masquerade as an adopted/certified
+   candidate.
 3. **Then** record it in `feedback_skill_evolution_candidates.md` using the
    project entry shape below — as a *locally-adopted, promotion-pending* rule,
    not a wish.
@@ -73,3 +77,11 @@ it first.
 - **Proposal** — build-sized; parked as backlog, not certified. Keep, tagged.
 - **Closed-no-change** — decided not to act; delete with a one-line rationale in
   the retrospective doc.
+
+> **Relation to central's `APPLIED` state.** When a `Promote` entry's central
+> edit lands via the promotion close-out (`SKILLS-RECONCILE.md` §3), central
+> marks the buffer entry `APPLIED`; the next retrospective then auto-Addresses
+> and deletes it (central §5). So this overlay's `Promote → keep until the edit
+> lands, then delete` is that same lifecycle, expressed in the project's
+> certification vocabulary — `APPLIED` is the central-side stamp on a `Promote`
+> entry whose edit has shipped.

@@ -1,15 +1,17 @@
 # P2-Knowledge-Base overlay — plan-to-tasks
 
-> **DRAFT (pre-brainstorm, 2026-06-05).** Depends on the Work Type Routing
-> brainstorm; will be dialed in after.
+> **Status (2026-06-22).** Work Type Routing model adopted; `PLAN_DIR` resolved
+> to the unified dir (below). No open dependencies.
 
-## Augments Step 0a — resolving the per-head `PLAN_DIR` sentinel
+## Augments Step 0a — `PLAN_DIR` is a single unified dir
 
-`PLAN_DIR` is a per-head routing sentinel. Identify the head/element the
-plan belongs to and resolve the plan location from
-`.claude/skills/HEAD-DISPATCH-DRAFT.md` before reading/writing plan
-artifacts. Target homes marked `TBD` there → ask {{USER_NAME}} rather than
-guess.
+`PLAN_DIR` resolved to **one shared directory for all engineering heads** —
+`engineering/planning/` (decided 2026-06-11; supersedes the former per-head
+sentinel). Write plan artifacts there regardless of head, and name the
+head/element in the filename so the single dir stays navigable; the archive is
+`PLAN_ARCHIVE_DIR` (`engineering/history/sprints/`). The *other* per-head
+sentinels (`BUILD_VERSION_*`, `PUNCH_LIST_DOC`, …) still resolve via
+`.claude/skills/HEAD-DISPATCH-DRAFT.md`.
 
 ## Note — per-task detail artifacts stay off
 

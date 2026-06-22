@@ -1,15 +1,18 @@
 # P2-Knowledge-Base overlay — sprint-start
 
-> **DRAFT (pre-brainstorm, 2026-06-05).** Depends on the Work Type Routing
-> brainstorm; will be dialed in after.
+> **Status (2026-06-22).** Work Type Routing model adopted; `PLAN_DIR` resolved
+> to the unified dir. Per-head version/punch-list/spec homes that remain `TBD`
+> are resolved per element via `HEAD-DISPATCH-DRAFT.md`.
 
 ## Augments Step 0a — establish the head before resolving sentinels
 
 A sprint here targets **one element of one head** (a manual, the P2KB YAML
 set, or an ingestion source). Establish the head/element first, then
-resolve every per-head sentinel (`PLAN_DIR`, `BUILD_VERSION_*`,
-`PUNCH_LIST_DOC`, `RELEASE_NOTES_DOC`, `SPEC_DOC`) for that element via
-`.claude/skills/HEAD-DISPATCH-DRAFT.md`. Record the resolved head/element
+resolve every per-head sentinel (`BUILD_VERSION_*`, `PUNCH_LIST_DOC`,
+`RELEASE_NOTES_DOC`, `SPEC_DOC`) for that element via
+`.claude/skills/HEAD-DISPATCH-DRAFT.md`. (`PLAN_DIR` is no longer per-head —
+it resolved to a single unified dir, `engineering/planning/`, on 2026-06-11.)
+Record the resolved head/element
 in the sprint context so downstream skills (`plan-to-tasks`,
 `baseline-health`, `build-wrapup`, `sprint-closeout`) resolve to the same
 element.

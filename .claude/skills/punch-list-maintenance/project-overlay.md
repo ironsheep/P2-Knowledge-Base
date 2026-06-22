@@ -1,8 +1,10 @@
 # P2-Knowledge-Base overlay — punch-list-maintenance
 
-> **DRAFT (pre-brainstorm, 2026-06-05).** Per-head punch-list homes are
-> still `TBD` in the dispatch table; this will be dialed in after the Work
-> Type Routing brainstorm and the punch-list relocation cleanup.
+> **Status (2026-06-22).** The Work Type Routing model is adopted (multi-head
+> dispatch + `whats-next` front door). Still open: per-manual and per-ingestion
+> punch-list homes remain `TBD` in `HEAD-DISPATCH-DRAFT.md`, and the punch-list
+> relocation cleanup is recorded as separable debt in `skill-conventions.md`.
+> (The YAML head's punch list is resolved: `P2KB-CORRECTION-FINDINGS.md`.)
 
 ## Augments Step 0a — resolving the per-head `PUNCH_LIST_DOC` sentinel
 

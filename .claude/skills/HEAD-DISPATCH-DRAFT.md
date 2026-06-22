@@ -51,7 +51,7 @@ pass) — resolution rule **TBD** (brainstorm).
 | `BUILD_VERSION_LOCATION` | the manual's `CHANGELOG.md` (+ `deliverables/documents/README.md` version line) | P2KB YAML set version — **TBD where it lives** | **N/A — version-less** |
 | `BUILD_VERSION_KEY` | latest version heading in the CHANGELOG | **TBD** | **N/A** |
 | `BUILD_VERSION_EXAMPLE` | e.g. `2.3.0` | **TBD** | **N/A** |
-| `PLAN_DIR` | co-located with the manual (manual folder) — **exact subpath TBD** | YAML-set plan home — **TBD** | co-located with the ingestion source — **TBD** |
+| `PLAN_DIR` | **RESOLVED — single unified dir `engineering/planning/` for all heads** (decided 2026-06-11; supersedes the former per-head sentinel; name the head/element in the filename) | ditto | ditto |
 | `PUNCH_LIST_DOC` | the manual's punch list — **location TBD per manual** | `engineering/operations/P2KB-CORRECTION-FINDINGS.md` | the source's `README.md` (ingestion dashboard) row + `sources/<src>/<src>-complete-extraction-audit.md` |
 | `RELEASE_NOTES_DOC` | the manual's `CHANGELOG.md` | P2KB YAML release notes — **TBD** | **N/A — uses completeness dashboard** |
 | `SPEC_DOC` | the manual's `creation-guide.md` (candidate) | **TBD** | **N/A — gates + dashboard instead** |

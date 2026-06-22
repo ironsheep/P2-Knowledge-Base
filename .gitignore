@@ -62,6 +62,7 @@ import/
 .claude/*
 !.claude/skills
 !.claude/skill-conventions.md
+!.claude/skills-reconciled.md
 CLAUDE.md
 .ai-manifest.json
 COMMUNITY-REVIEW-ANNOUNCEMENT.md

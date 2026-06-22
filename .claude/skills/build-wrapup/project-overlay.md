@@ -1,7 +1,9 @@
 # P2-Knowledge-Base overlay — build-wrapup
 
-> **DRAFT (pre-brainstorm, 2026-06-05).** Depends on the Work Type Routing
-> brainstorm (the YAML head's version/release-notes homes are `TBD`).
+> **Status (2026-06-22).** The Work Type Routing model is adopted (multi-head
+> dispatch + `whats-next` front door). Still open: the **YAML head's version /
+> release-notes homes are `TBD`** in `HEAD-DISPATCH-DRAFT.md` — resolve with
+> {{USER_NAME}} when a YAML-head wrap-up needs them.
 
 ## Augments Step 0a — resolving per-head `BUILD_VERSION_*` and `RELEASE_NOTES_DOC`
 

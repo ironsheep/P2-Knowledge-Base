@@ -1,16 +1,16 @@
 # P2-Knowledge-Base overlay — sprint-plan
 
-> **DRAFT (pre-brainstorm, 2026-06-05).** The per-head section depends on
-> the Work Type Routing brainstorm and will be dialed in after.
+> **Status (2026-06-22).** Work Type Routing model adopted; `PLAN_DIR` resolved
+> to the unified dir (below). No open dependencies.
 
-## Augments Step 0a — resolving the per-head `PLAN_DIR` sentinel
+## Augments Step 0a — `PLAN_DIR` is a single unified dir
 
-`PLAN_DIR` is a per-head routing sentinel. Before writing the plan doc,
-identify the head/element under sprint and resolve the plan location from
-`.claude/skills/HEAD-DISPATCH-DRAFT.md` (manual → co-located with the
-manual; YAML set → its own home; ingestion → with the source). Several
-target homes are still `TBD` in that table — when you hit one, ask
-{{USER_NAME}} rather than guessing a location.
+`PLAN_DIR` resolved to **one shared directory for all engineering heads** —
+`engineering/planning/` (decided 2026-06-11; supersedes the former per-head
+sentinel). Write the plan doc there regardless of head, naming the
+head/element in the filename. The *other* per-head sentinels
+(`BUILD_VERSION_*`, `PUNCH_LIST_DOC`, …) still resolve via
+`.claude/skills/HEAD-DISPATCH-DRAFT.md`.
 
 ## Augments §plan-authoring — flag design decisions before large YAML changes
 
