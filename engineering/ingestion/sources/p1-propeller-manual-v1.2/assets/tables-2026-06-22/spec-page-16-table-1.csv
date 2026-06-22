@@ -1,0 +1,14 @@
+"Table 1-2: Specifications",""
+"Model","P8X32A"
+"Power Requirements","3.3 volts DC.  (Max current draw must be limited to 300 mA)."
+"External Clock Speed","DC to 80 MHz (4 MHz to 8 MHz with Clock PLL running)"
+"System Clock Speed","DC to 80 MHz"
+"Internal RC Oscillator","12 MHz or 20 kHz (approximate; may range from 8 MHz – 20 MHz, 
+or 13 kHz – 33 kHz, respectively)"
+"Main RAM/ROM","64 K bytes; 32 KB RAM + 32 KB ROM"
+"Cog RAM","512 x 32 bits each"
+"RAM/ROM Organization","Main RAM: Long (32-bit), Word (16-bit), or Byte (8-bit) addressable 
+Cog RAM: Long (32-bit) addressable only"
+"I/O pins","32 CMOS signals with VDD/2 input threshold."
+"Current Source/Sink per I/O","40 mA"
+"Current Draw @ 3.3 vdc, 70 °F","500 µA per MIPS (MIPS = Freq in MHz / 4 * Number of Active Cogs)"

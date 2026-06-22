@@ -17,6 +17,16 @@
 > pipeline below is the **fallback** for PDF-only sources or assets not embedded
 > in the DOCX.
 
+> **PDF-only refinement 2026-06-22 (P1 Propeller Manual, 399 pp).** For a PDF-only source, the PyMuPDF/
+> `pdfimages` raster path below **silently misses vector figures** — block diagrams, memory maps, and timing
+> diagrams are vector line-art, not raster XObjects. On the P1 Manual, `pdfimages` recovered only **7 unique
+> rasters out of 163 objects** (the rest a repeated decorative badge); all 14 real figures were vector.
+> **Correct PDF-only figure workflow:** `pdftoppm` page-render (200 dpi) → crop the figure region (PIL) →
+> `image-tools-mcp` OCR + quality-gate. Use `pdfimages` only when figures are confirmed genuine rasters
+> (photos, bitmaps, screenshots). Certified case: `sources/p1-propeller-manual-v1.2/` (image-catalog.md +
+> extraction-audit.md). Note: `pdf2md`/docling can OOM on large docs at low RAM — use `camelot lattice` for
+> ruled tables.
+
 ## Overview
 Advanced systematic workflow for extracting, documenting, and enriching images from source documents with **coordinate-aware rescue system** to handle failed extractions and ensure 100% success rate.
 
