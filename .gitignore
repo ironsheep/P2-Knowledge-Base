@@ -39,6 +39,9 @@ backups/
 # Roving central-skills staging area (carried between repos; not project-versioned)
 central-skills-staging/
 
+# Parallel ingestion-wave staging (transient; map agents stage here, ingest-wrap-reduce promotes + tears down)
+engineering/ingestion/_staging/
+
 # Log files
 *.log
 
