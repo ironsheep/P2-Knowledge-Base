@@ -42,6 +42,7 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 | pnut-ts-pasm-ref | 🏆 | matched compiler — ratified authority for PASM | _(verify)_ |
 | chip-gracey-clarifications | 🏆 | direct from the chip designer | — |
 | p2-datasheet · p2-spec-sheet | 🏆 | official Parallax hardware specs | _(verify)_ |
+| p2-hardware-manual | 🏆 | official Parallax — **P2X8C4M64P Hardware Manual** (release, not draft). Core hardware reference. Prior extraction 2025-08-15; newer `.docx` staged for refresh. **Aliases:** Hardware Manual, P2X8C4M64P, P2 hardware reference. | Nov-2022 |
 | Edge modules · eval board · add-on boards | 🏆 | official Parallax product guides | _(verify)_ |
 | HyperRAM/HyperFlash Add-on (#64004-ES) | 🏆 | official Parallax product guide (board Rev A, Open Source Hardware CC BY-SA 4.0). Ingested 2026-06-22 via forced OCR (corrupt PDF text layer); pin map triple-validated. **Aliases:** 64004-ES, HyperRAM, HyperFlash, HyperBUS, hyper memory add-on. | Guide v1.0 (2019) |
 | parallax-wx-wifi · p2-wx-adapter · propplug-rev-e · universal-motor-driver | 🏆 | official Parallax peripherals | _(verify)_ |
