@@ -29,6 +29,7 @@ later supersession can re-open it if it overturns the answer.
 | G-006 | Smart Pins / NCO | Is `Y=0` valid for NCO (%00110/00111) — continuous output or none? NCO quantization jitter (fractional-add → rare long periods). | OPEN | | smart-pins-titus rev5 (#8,#17) | |
 | G-007 | Smart Pins / ADC | %11000/11001 ADC modes: relationship to STREAMERS; "digital filters in digital mode"; external SDM-ADC use (TI AMC1035/1303). | OPEN | | smart-pins-titus rev5 (#7,#12,#23) | |
 | G-008 | Smart Pins / WRPIN | Per-pin **Pin-Electrical** choices + full WRPIN mode-register bit-field map belong in the docs (reviewer cites evanh's bit-layout doc). | OPEN | | smart-pins-titus rev5 (#19) | |
+| G-009 | Hardware / 64004-ES | HyperRAM/HyperFlash datasheet **part numbers + URLs are OCR-transcribed** (corrupt PDF text layer forced OCR) → transcription risk: HyperRAM `IS66WVH16M8BLL-100B1LI` / `issi.com/WW/pdf/66-67WVH16M8ALL-BLL.pdf`; HyperFlash `IS26KL256S-DABL100` / `issi.com/WW/pdf/26KS-KL128S-256S-512S.pdf`. Confirm exact strings vs ISSI datasheets / the 64004-ES product page before they reach published YAML. | OPEN | _verify vs ISSI datasheets / Parallax 64004-ES product page_ | hyperRam-n-hyperFlash ingestion (2026-06-22) | |
 
 > **Format heritage (from the study):** three prior representations worth carrying — resolution-status tags +
 > per-question source-check list (`questions-remaining.md`), strikethrough before/after (`gaps-consolidated.md`),

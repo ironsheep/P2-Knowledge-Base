@@ -43,12 +43,13 @@ with `chip-gracey-clarifications` the tiebreaker on flag & semantics. _(from `in
 | chip-gracey-clarifications | 🏆 | direct from the chip designer | — |
 | p2-datasheet · p2-spec-sheet | 🏆 | official Parallax hardware specs | _(verify)_ |
 | Edge modules · eval board · add-on boards | 🏆 | official Parallax product guides | _(verify)_ |
+| HyperRAM/HyperFlash Add-on (#64004-ES) | 🏆 | official Parallax product guide (board Rev A, Open Source Hardware CC BY-SA 4.0). Ingested 2026-06-22 via forced OCR (corrupt PDF text layer); pin map triple-validated. **Aliases:** 64004-ES, HyperRAM, HyperFlash, HyperBUS, hyper memory add-on. | Guide v1.0 (2019) |
 | parallax-wx-wifi · p2-wx-adapter · propplug-rev-e · universal-motor-driver | 🏆 | official Parallax peripherals | _(verify)_ |
 | p2-instructions-csv · p2-qa-spreadsheet | 🏆/🟢 | Parallax instruction data | _(verify)_ |
 | PASM2 Manual (Parallax) | ⚠️ Draft/Partial | official but preliminary / not fully vetted | Nov-2022 |
 | smart-pins | 🟢 | community-validated smart-pins documentation | _(verify)_ |
 | Smart Pins (Titus) | 🟡 | community (Jon Titus), not Parallax — **cross-check** role. Ingested rev5 2026-06-12: corroborates the mode taxonomy, but a WRPIN bit-field table here was **demonstrably wrong** (x101/x111 swapped vs silicon-doc, caught in peer review #21) — **never an encoding/bit-field authority**; use for technique/app-note color only. | rev 5 |
-| hyperRam-n-hyperFlash · iron-sheep-compiler | 🟢 | validated / Iron Sheep production | _(verify)_ |
+| iron-sheep-compiler | 🟢 | validated / Iron Sheep production | _(verify)_ |
 | taqoz · quick-bytes-code · p2docs-github-io · marketing-materials | 🟡 | community / informal | _(verify)_ |
 | p1-propeller-manual · p1-datasheet | 🏆 | official Parallax (P1) | _(verify)_ |
 | desilva-p1-tutorial | 🟢 | community tutorial (P1) | _(verify)_ |

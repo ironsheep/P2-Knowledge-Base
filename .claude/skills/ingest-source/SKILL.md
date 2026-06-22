@@ -185,7 +185,8 @@ ladder below).
   (most board Product Guides, datasheets), the DOCX paths above don't apply —
   use the baked-in PDF toolkit (`/opt/pdf-tools/README.md`) instead of the old
   PyMuPDF-only fallback. Most KB PDFs are digitally generated, so **skip OCR
-  unless a page is actually scanned**:
+  unless a page is actually scanned _or the text layer is corrupt_** (see the
+  corrupt-text-layer note below):
   - **Content + tables (pass 1) → `pdf2md`** (docling) as the default — it
     recovers real tables and fenced code. For a stubborn *ruled* table (board
     pin maps, electrical specs), `camelot --pages all --format csv lattice
@@ -197,6 +198,19 @@ ladder below).
     same `image-tools-mcp` catalog + quality gate as above.
   - **Scanned page (rare here) → `pdf-ocr <in.pdf> <out.pdf>`** first, then run
     `pdf2md` on the OCR'd output.
+  - **Corrupt text layer = a scanned page (certified on #64004-ES, 2026-06-22).**
+    A Google-Docs / Quartz / "Print-to-PDF" export can carry a **broken ToUnicode
+    CMap** — the text stream decodes to a cipher (e.g. "BXV WUanVacWionV" for
+    "Bus transactions", "FHDWXUHV" for "FEATURES"), often on only part of the
+    doc. `pdftotext` and default `pdf2md` both trust that stream and emit garbled
+    text. **Detect** with a quick `pdftotext -f 1 -l 1 <pdf> -` sample; if it
+    looks ciphered/garbled, **force OCR**: `docling --force-ocr --ocr-engine
+    rapidocr --to md --output <dir> <pdf>` (reads rendered pixels, ignores the
+    broken stream). Forced OCR adds its own noise (lost spaces, `O`↔`0`, `l`↔`I`,
+    fragile part numbers) — **cross-check fact-bearing fields** (pin maps,
+    part numbers) against a second signal (the table from the broken stream
+    decodes consistently; a mechanical/pad drawing; the schematic) and flag any
+    residual OCR-risk strings as a gap.
 
 ```bash
 # Extract DOCX media (pass 3 inputs) and inspect:
