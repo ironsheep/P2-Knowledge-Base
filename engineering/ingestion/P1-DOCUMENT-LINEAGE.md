@@ -11,7 +11,7 @@ agents writing P1 code + P1→P2 migration guides.
 | Source | Relationship | Note |
 |--------|--------------|------|
 | P1 Propeller Manual v1.2 | base | the architecture/language spine |
-| P1 Propeller Manual v1.1 Supp/Errata | **correction layer over** v1.2 | errata wins on corrected points (authority order) |
+| P1 Propeller Manual v1.1 Supp/Errata | **v1.1→v1.2 changelog** (NOT a layer over v1.2) | ⚠️ Corrects the charter §1 assumption: this doc *tracks the changes that produced v1.2 from v1.1* (verified from its own header). v1.2 **already incorporates** all of it — so it does NOT supersede our v1.2 corpus. Ingested 2026-06-22 as a **QA checklist** (all ~35 items confirmed present in the v1.2 extraction, 0 defects) + v1.1→v1.2 provenance. No `F-P1-` corrections. |
 | P1 Datasheet v1.4.0 | base | hardware/electrical |
 | XBee Tutorial errata v1.0 | correction layer over | XBee Tutorial v1.0.1 |
 | (prior P1 manual extraction, text-only) | superseded by | the backbone re-extraction (§0.6 re-extraction — archive prior) |

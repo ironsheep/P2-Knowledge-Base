@@ -8,15 +8,15 @@
 ## Tier 1 — At a glance
 - **Logical sources:** 8 rows (incl. the App Notes collection = 17 docs) · all P1.
 - **By authority:** 🏆 7 · 🟢 1 (deSilva).
-- **Bootstrap phase:** scaffolding built; **backbone re-extracted (2026-06-22)** — P1 Manual v1.2 done (content/code/images/tables/audit + gap-ledger seeded + P1→P2 edges); next = **errata, then wave the tail**.
+- **Bootstrap phase:** scaffolding built; **backbone + errata done (2026-06-22)** — P1 Manual v1.2 fully extracted; errata confirmed it's the v1.1→v1.2 changelog (all items already in v1.2, 0 defects). Next = **wave the tail**.
 - **Validator:** flexspin (community-tier) — **pending install**; P1 code is documentary-extracted, marked `code_validated:false` until then (charter §3). A one-time validation sweep flips the flags once installed.
-- **What's next:** ingest the **P1 Propeller Manual Errata v1.1 Supp** (correction layer over the backbone), then fan out the tail (datasheet completion, deSilva, PE Labs, XBee, 17 app notes).
+- **What's next:** **wave the tail** — datasheet completion, deSilva, PE Labs, XBee (+errata), 17 app notes — via `ingest-conductor` → `ingest-wrap-reduce` against the now-populated frame.
 
 ## Registry  (passes: **C** content · **K** code · **I** images · **A** audit · **X** cross-source · 🏆/🟢 auth)
 | Source | Auth | C | K | I | A | X | Cmpl* | Mode for the campaign |
 |--------|------|---|---|---|---|---|-------|------------------------|
 | p1-propeller-manual-v1.2 | 🏆 | ✅ | ◐ | ✅ | ✅ | ◐ | ~90% _(full text+Ch1 facts+tables; 14 figs; 72 code ex `code_validated:false`; gaps G-P1-001..006 + P1→P2 edges. Pending: flexspin sweep + per-symbol Ch2/Ch3 structuring → YAML head)_ | **re-extracted 2026-06-22 ✓** |
-| p1-propeller-manual-errata-v1.1 | 🏆 | ⏳ | — | ⏳ | ⏳ | ⏳ | 0% _(correction layer — outranks base Manual on corrected points)_ | new (with the backbone) |
+| p1-propeller-manual-errata-v1.1 | 🏆 | ✅ | — | — | ✅ | ✅ | 100% _(2026-06-22: 8pp; it's the **v1.1→v1.2 changelog**, NOT a layer over v1.2 — all ~35 items confirmed already in the v1.2 extraction, 0 defects; QA + provenance only, no corrections)_ | done ✓ |
 | p1-datasheet-v1.4 | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | ~100% text _(no images)_ | completion (images/cross-source) |
 | desilva-p1-tutorial | 🟢 | ✅ | ◐ | ⏳ | ⏳ | ⏳ | ~45% _(text + voice-analysis; no audit)_ | completion |
 | p1-pe-labs-fundamentals-v1.2 | 🏆 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | 0% | new (wave) |
