@@ -6,7 +6,7 @@
 > Per-source cells **scanned 2026-06-12**. Registry grounded in `sources/` on disk. _Went live 2026-06-12 (was the quad prototype); folds the former INGESTION-DASHBOARD + INGESTION-AUDIT-MATRIX._
 
 ## Tier 1 — At a glance
-- **Sources:** 38 folders on disk → **33 logical sources** · 30 P2 · 3 P1  ‹+2 folders 2026-06-22: **p2-hardware-manual** (un-mis-filed from p2-eval-board → now a distinct logical source, +1) and **TAQOZ-Forth-Bitbashers-Guide** (the authoritative `.docx` for the existing `taqoz` logical source — folds in, not +1). v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
+- **Sources:** 38 folders on disk → **33 logical sources** · 30 P2 · **P1 now tracked separately** → `P1-INGESTION-DASHBOARD.md`  ‹+2 folders 2026-06-22: **p2-hardware-manual** (un-mis-filed from p2-eval-board → now a distinct logical source, +1) and **TAQOZ-Forth-Bitbashers-Guide** (the authoritative `.docx` for the existing `taqoz` logical source — folds in, not +1). v51a = lineage; code-analysis + marketing-materials = meta; pasm2-manual-development = dev scaffold›
 - **By authority:** 🏆 23 · 🟢 6 · 🟡 4  ‹33 logical sources; p2-hardware-manual added 🏆; v51a lineage + 3 non-source folders excluded; hyperRam promoted 🟢→🏆 on ingestion›
 - **Ingest completeness:** mature ~19 (≥90% + audit, **incl. Titus rev5 ✅, HyperRAM #64004-ES ✅**) · partial ~8 (40–89%) · minimal/not-started ~5  ‹scanned 2026-06-12; HyperRAM ingested 2026-06-22›
 - **Open questions:** **9** in the gap ledger (G-001..008 Smart-Pins/Titus + **G-009** 64004-ES part-numbers) · **3** routed to an expert (Q-001..003)  ‹rolled up from KNOWLEDGE-GAPS›
@@ -92,15 +92,9 @@ _Boards share a 12-pin header (8 I/O + power/ground); ×8 headers = all 64 pins.
 |--------|------|---|---|---|---|---|-------|
 | p2docs-github-io | 🟡 | ◐ | — | — | ⏳ | ⏳ | ~30% _(narrative + validation report only)_ |
 
-### P1 · (queued — bring the P1 database up to P2-level richness)  ‹DASH "P1 Sources"›
-_P1 = first Propeller, P2 = second. 2–3 core P1 docs queued (datasheet + manual, possibly deSilva P1 tutorial); some already partially ingested (text+audit) → queue completes images/code + enriches._ **Plan:** `plans/p1-sources-ingestion-plan.md`.
-
-| Source | Auth | C | K | I | A | X | Cmpl* |
-|--------|------|---|---|---|---|---|-------|
-| p1-propeller-manual-v1.2 | 🏆 | ✅ | ⏳ | ⏳ | ✅ | ⏳ | ~60% _(803KB text + audit; code inline; no images)_ |
-| p1-datasheet-v1.4 | 🏆 | ✅ | — | ⏳ | ✅ | ⏳ | 100% _(stated; no images extracted)_ |
-| desilva-p1-tutorial | 🟢 | ✅ | ◐ | ⏳ | ⏳ | ⏳ | ~45% _(text + voice-analysis; code inline; no audit)_ |
-| p1-application-notes (AN001–015, 018–019 · 17 docs) | 🏆 | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | 0% _(queued; **AN016/AN017 never published**; topics: counters / exec-time / sigma-delta ADC / VGA GUI / GPS NMEA / XBee / SD-FS / coroutines …)_ |
+### P1 · (separate corpus — bootstrap in progress 2026-06-22)  ‹DASH "P1 Sources"›
+_P1 = first Propeller. The P1 corpus now has its **own dashboard + quad** (namespaced `G-P1-/Q-P1-/F-P1-`), stood up by the P1 bootstrap — it is **no longer tracked inline here.**_
+**→ `P1-INGESTION-DASHBOARD.md`** (registry) · `P1-AUTHORITATIVE-SOURCES.md` · `P1-DOCUMENT-LINEAGE.md` · `P1-KNOWLEDGE-GAPS.md` · `operations/P1-CORRECTION-FINDINGS.md`. Bootstrap design: `plans/P1-KB-BOOTSTRAP-CHARTER.md` · source list: `plans/p1-sources-ingestion-plan.md` · KB target: `deliverables/ai/P1/`.
 
 ## Not standalone sources  ‹folders under sources/ that are NOT registry rows›
 | Folder | Why | Disposition |

@@ -1,6 +1,6 @@
 # P1 Knowledge Base — Bootstrap Charter
 
-**Created:** 2026-06-22 · **Status:** DRAFT for review · **Scope:** one-time stand-up of the entire P1
+**Created:** 2026-06-22 · **Status:** APPROVED — **scaffolding BUILT 2026-06-22** (Phase 1 done; backbone ingestion next) · **Scope:** one-time stand-up of the entire P1
 (Propeller 1) knowledge base — PASM1 + Spin1 — spanning ~15 source ingestions.
 **Sits above:** `p1-sources-ingestion-plan.md` (that is the *source inventory*; this is the *how-we-stand-up-the-corpus* layer).
 **End target:** a P1 YAML KB at `deliverables/ai/P1/`, parallel to the mature `deliverables/ai/P2/`.
@@ -101,6 +101,5 @@ Keep P1 self-contained; do **not** intermix with the P2 registers:
 ## 8. Open decisions (inputs needed to finalize)
 1. **P1 compiler** — ✅ **DECIDED: flexspin** (community-tier, §3). Install pending the **linux-arm64** binary/source
    drop into `REF-TOOLS-NO-COMMIT/`; wired via `postCreateCommand` (NO-COMMIT, survives rebuilds).
-2. **Dashboard placement** — a standalone `P1-INGESTION-DASHBOARD.md`, or a delimited P1 section inside the
-   existing `engineering/ingestion/README.md`? (Recommend standalone for blast-radius separation, linked from the main dashboard.)
-3. **Corrections routing** — a separate `P1-CORRECTION-FINDINGS.md`, or `F-P1-` entries in the existing register? (Recommend separate, consistent with §4.)
+2. **Dashboard placement** — ✅ **RESOLVED: standalone** `engineering/ingestion/P1-INGESTION-DASHBOARD.md` (built); the main `README.md` P1 section now points to it.
+3. **Corrections routing** — ✅ **RESOLVED: separate** `engineering/operations/P1-CORRECTION-FINDINGS.md` (built, `F-P1-` IDs).
