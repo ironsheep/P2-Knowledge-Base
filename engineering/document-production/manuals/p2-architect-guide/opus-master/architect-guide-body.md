@@ -526,17 +526,645 @@ thought, and it's what the final chapter is about.
 
 # Thinking in P2 (Functional Decomposition)
 
-<!-- TASK #96 (plan §5). The EARNED capstone. Formal space-vs-time thesis as the
-RATIONALE → the forces → the first-contact procedure → ONE worked derivation.
-Warmth STAYS, rigor RISES, glibness → 0. LOAD-BEARING ANTI-PRESCRIPTION PRINCIPLE:
-teaches the METHOD of deriving an architecture, NEVER prescribes an outcome. The
-robot-dog derivation is a DEMONSTRATION explicitly framed as ONE machine's answer.
-SOURCES (golden home — derives, never drifts): deliverables/ai/P2/architecture/
-decomposition/ — all 12 entries. Any authoring-time theory improvement lands in the
-YAML FIRST, then renders here. Weave ::: p1note sidebars where the new-in-P2 fabric
-changes the decomposition. -->
+You can already write a P2 program. You can launch a COG, drive a pin, share data
+through hub, and choose Spin2 or PASM2 for a given job. That's the hard part of getting
+started, and it's behind you. What's left is the part that turns a working program into a
+*good* design: looking at a whole problem and deciding what goes on which COG in the first
+place — how to carve the machine into the right set of cooperating pieces. You're ready
+for that now, and this chapter is about how it's done.
 
-> **[Chapter 3 — authored in task #96.]**
+We're going to do something different from the first two chapters. Up to here we've
+*described* the chip. Now we're going to *reason* about it. Functional decomposition — the
+craft of cutting a system into parts — is a real engineering discipline with decades of
+literature behind it, and we're going to treat it that way: carefully, and without
+pretending it's easy. The good news is that the P2 makes the reasoning unusually concrete.
+On a lot of processors, "how should I structure this?" is a matter of taste. On the P2, as
+you'll see, the structure is mostly *derived* — the hardware and the timing hand you most
+of the answer, if you know how to ask.
+
+One thing before we start, and it matters enough that it shapes the whole chapter: **there
+is no single right answer that this chapter can hand you.** Every machine is different, so
+every good decomposition is different. What you can learn — what generalizes — is the
+*method* for deriving one. So that's what we'll teach: the forces that do the cutting, the
+order to apply them in, and the way to judge the result. Late in the chapter we'll watch
+the whole method run on one example machine, start to finish. Read that example to see the
+moves, never to copy the answer — your machine will give a different, equally sound shape.
+
+## Computing in space, not just in time
+
+Start with the idea that makes the rest of this chapter worth the effort. It's the one we
+quietly planted back in Chapter 1, when we said each COG just keeps running its own job,
+independently. Here's where we cash it in.
+
+There are two very different ways a chip can compute. A conventional microcontroller
+computes **in time**: one core runs a sequence of instructions, one after another, and the
+way it does more is by going faster or by slicing that one core into time-shared pieces.
+An FPGA sits at the opposite pole — it computes **in space**: you lay out function as
+actual parallel hardware, many things happening physically at once, with no single
+instruction stream at all. These aren't just two speeds; they're two fundamentally
+different shapes of computation.
+
+The Propeller 2 lives between them, and closer to the spatial side than you might expect.
+Its eight independent, deterministic COGs and its sixty-four programmable smart pins form
+what's best described as a **coarse-grained spatial fabric**: not the fine-grained sea of
+logic gates an FPGA gives you, but a modest number of real, parallel computing elements you
+can assign function to, each running its one job continuously. Decomposed well, a P2 design
+behaves like spatial hardware — parallel pipelines whose throughput is set by the *rate*
+data flows, not by how many instructions any one stage runs. Decomposed badly, the very
+same silicon collapses back into a slow sequential machine: one COG doing everything in
+turn while the other seven idle.
+
+That sentence is the reason this chapter exists. The whole discipline of P2 decomposition
+is, at bottom, the practice of keeping your design on the *spatial* side of that line — of
+spreading function across the fabric instead of funnelling it back through a single core
+out of habit. Everything that follows is in service of that.
+
+> **[Figure — the space↔time spectrum: a temporal single-core MCU at one end, a spatial
+> FPGA at the other, and the P2 placed between them as a "coarse-grained spatial fabric"
+> of 8 COGs + 64 smart pins. Logged for the visual pass (PUNCH-LIST).]**
+
+::: p1note
+**P1 note — the idea is old, the room is new.** If you've built P1 designs, you've been
+thinking spatially all along: dedicating a COG to a job and letting it run is exactly this
+mindset, and the original Propeller pioneered it. What the P2 changes is how *much* fabric
+you have to lay function onto. Smart pins can now absorb an entire bit-banged protocol that
+used to cost you a whole COG; the CORDIC and the streamer take on work that used to live in
+COG code; the hub is sixteen times larger. The instinct transfers intact — you have
+far more space to spread into, and more reason to.
+:::
+
+The deep treatment of this space-versus-time framing — including an honest account of what
+the P2 borrows from FPGA thinking and, just as importantly, what it *doesn't* — is in
+Appendix A. Here, the thesis is enough: **the P2 computes in space when you let it, and
+decomposition is how you let it.**
+
+## Object shape is derived, not chosen
+
+Here's the central move of the whole chapter, stated plainly: on the P2, the shape of your
+object set is not a matter of taste picked from a menu. It is *derived* by reconciling a
+small number of physical and architectural forces. Change the buses, the deadlines, or the
+data rates, and the correct object set changes with them. A good decomposition is therefore
+an *answer to constraints*, not a style choice.
+
+That distinction has a practical payoff. If decompositions were chosen by taste, the most
+you could do is collect examples and imitate the nearest one. Because they're derived, you
+can learn the forces that do the deriving — and then produce a sound design for a machine
+you have never seen before, because you're reasoning from its wiring rather than
+pattern-matching to something you saw once. Reasoning from the forces generalizes;
+copying an example doesn't.
+
+It helps to separate two things that are easy to blur together. The **objects** you can
+build with — a top-level application, a device driver, a semantic driver, a policy layer, a
+buffer, a coordinator — are your *vocabulary*: the nouns. The **forces** are the *grammar*:
+the rules that decide which nouns to instantiate, how many of each, and where the
+boundaries between them fall. A vocabulary list tells you what words exist; only a grammar
+tells you how to build a correct sentence you've never spoken before. This chapter is about
+the grammar. (The vocabulary — the object archetypes — has its own reference in the
+knowledge base; we'll lean on it but not re-list it here.)
+
+### Two axes, co-designed
+
+Classical software decomposition works on a single axis, and it's a purely logical one:
+split behavior into modules, and judge the cuts by **cohesion** (do the things inside a
+module truly belong together?) and **coupling** (how much has to cross between modules?).
+That axis is real and we'll use it — it rests on decades of solid work, which Appendix B
+points you to.
+
+The P2 adds a *second* axis, a physical one: **allocation onto a finite, heterogeneous
+resource lattice** — eight COGs, sixty-four smart pins, one shared CORDIC, sixteen locks, a
+bounded amount of hub bandwidth, adjacent-COG LUT sharing, the streamer. And here is the
+insight that makes the P2 special to design for: *that physical axis is not only a
+constraint — it's a decomposition tool in its own right.* A COG is the strongest
+encapsulation boundary the silicon offers: private memory, deterministic timing, no
+interference from its neighbors. A smart pin can *delete an entire software module* by
+absorbing its function into hardware. So "where does this boundary go?" and "what hardware
+runs it?" are not two questions asked in sequence — they're one decision, made together.
+
+The two axes are co-designed, and they keep each other honest. A boundary chosen on the
+logical axis that ignores the lattice gives you an elegant module that can't actually run —
+no COG free to host it, or the hub saturated feeding it. A boundary chosen on the physical
+axis that ignores cohesion gives you a COG that owns three unrelated jobs and is impossible
+to test. You reconcile both. When they genuinely conflict, the resource budget — an
+artifact we'll build later in the chapter — is what decides.
+
+### The failure this prevents
+
+It's worth naming the mistake all of this exists to prevent, because it's the natural thing
+to do and it looks fine right up until it doesn't. Call it the **flat device list**: every
+chip gets a driver, every driver is a sibling reachable from `main()`, and the shape was
+chosen by analogy to some example rather than derived from how the hardware is actually
+wired. It compiles. It even runs during single-COG bring-up. Then it fails — as
+intermittent, timing-dependent, nearly-undebuggable flakiness — the first moment the
+derivation it skipped would have forbidden the cut. We'll see exactly how that happens when
+we meet Force 1. The cure is to derive the shape instead of guessing it, and that's what the
+forces are for.
+
+## The forces that do the cutting
+
+Four forces do the work. Three of them are **primary** — they cut the object set
+horizontally, deciding who owns what and how the pieces relate. The fourth is **emergent**:
+it falls out vertically, once the first three have drawn the structure. We'll take them one
+at a time, and we'll lead each with the *question it asks*, because that question — asked of
+your own machine — is the technique you're meant to carry away. The robot dog and the I²C
+buses you'll see are illustrations of a force in motion, never a rule to transplant.
+
+A word on emphasis before we start: for each force, the *why* matters more than the *what*.
+An engineer who knows why a force exists on the P2 specifically will generalize it to
+hardware we never imagined; one who memorizes a rule will eventually meet the case the rule
+didn't cover and apply it wrongly. So we'll dwell on the reasons.
+
+### Force 1 — Who owns this wire?
+
+The first force asks a **correctness** question, not a style one. Of the four, it's the only
+one that can make your program flatly *wrong* rather than merely inelegant, so it goes first.
+
+The question is: for each serialized, stateful hardware resource — an I²C bus, a one-wire
+LED chain, a smart pin in the middle of a transaction — *which single COG owns it?* And the
+answer the force insists on is: exactly one. One owner per resource, and the object boundary
+traces the **wire**, not your feature list.
+
+The reason is physical, and it comes straight out of the silicon. P2 pin outputs are
+OR'd together — there is no hardware referee arbitrating who gets the pin. If two COGs both
+drive the same SDA and SCL lines, they don't take polite turns; their outputs combine, and
+a bus transaction — which is a multi-step sequence (start, address, acknowledge, data, stop)
+that assumes a single agent in charge — is corrupted. This isn't "a race you might lose." A
+bus is a stateful protocol, and a stateful protocol with two uncoordinated drivers is
+*guaranteed* to break. The chip gives you sixteen locks and atomic single-long hub access to
+coordinate shared *data* — but a lock can't un-corrupt a half-issued I²C frame. The clean
+coordination is therefore *structural*: make the resource un-shareable by giving it a single
+owning object in a single COG. The hardware's lack of a referee is precisely *why* ownership
+has to be explicit and singular in your software.
+
+So Force 1 makes the primary cut, and it's usually a COG boundary. Group the devices by
+which wire they sit on and what timing that wire has to meet; give each group one owning COG
+and one transport object. And notice what decides the *shape* of that transport — it's the
+sharing topology, not the protocol. Several devices sharing one bus inside one COG want a
+single shared transport with one configuration that the device drivers call into. One device
+alone on its own bus wants a self-contained transport with nothing to coordinate. You can end
+up with the *same protocol implemented twice with two different state models* — and that's
+correct, because how many things share the wire, not which protocol it is, decided the shape.
+
+⚠️ **Watch out:** the flat device list is this force ignored. The moment two COGs touch one
+bus, you get silent corruption that presents as flaky hardware — intermittent, timing-
+dependent, and miserable to debug from the symptom, because the symptom is three layers away
+from the cause. A design that picks its shape from *how many devices exist* rather than *who
+shares a wire* has this failure built in from the start.
+
+::: p1note
+**P1 note — same as P1, and just as strict.** Single ownership of a serialized resource was
+already the rule on the P1, for the same reason: its pins, too, gave you no hardware
+arbiter. If you internalized "one COG owns the bus" on the P1, that instinct is exactly
+right here — the P2 hasn't relaxed it. What the P2 adds (next force but one) is a way to
+move some of those resources off COGs entirely.
+:::
+
+The fuller treatment of resource ownership — including the cases where a "shared bus"
+default breaks down — lives in the decomposition layer of the knowledge base; the P2
+coordination mechanisms themselves (locks, atomic access, COG attention) are in the
+*P2 Assembly Language Manual*.
+
+### Force 2 — What does each seam promise?
+
+Once Force 1 has scattered work across several COGs, those COGs have to exchange data. The
+second force asks: for each place where two COGs meet — each *seam* — *what does the
+exchange promise?* Does the sender wait for the receiver? Does the receiver always see the
+freshest value, or every value? Who depends on whom?
+
+That promise is called the **contract** for the seam, and choosing it *is* a decomposition
+decision, because the coupling you can tolerate determines where the boundary goes. A few
+contracts you'll reach for: a *blocking call*, where the caller waits on the callee's
+worst-case latency (tight coupling); a *latest-wins mailbox*, a single slot where the
+producer never waits and the consumer always reads the newest value (decoupled completely);
+a *ring buffer*, which decouples the two rates while preserving every sample; *published
+telemetry*, where one writer puts values in hub and any number of readers take them with no
+lock at all. Each contract names a different dependency direction, and choosing it draws the
+boundary.
+
+Why is this a *design* act on the P2 rather than a detail? Because the P2 has no operating
+system underneath you — no message queue, no IPC layer, nothing imposing a coordination
+mechanism. Inter-COG coordination is whatever *you* build out of hub RAM, atomic single-long
+access, the sixteen locks, and COG-attention signalling. That absence is a feature: it means
+you choose the exact coupling your timing budget allows, with nothing forced on you. An
+engineer who thinks "there's no free message queue here — I am *choosing* the coupling"
+designs the seam deliberately. One who reaches for a blocking call out of habit quietly
+throws away the determinism the chip just gave them, by making a fast loop wait on a slow
+one.
+
+#### One seam, three planes
+
+Here's the part that sharpens Force 2 from a single choice into a real tool. Every seam
+between two COGs is really *three* relationships superimposed, and each wants its own
+mechanism:
+
+- The **data plane** — bulk, rate-defined movement. Its concerns are throughput, buffering,
+  and back-pressure; its tools are the streamer, the hub FIFO, burst transfers. Get it wrong
+  and you *waste bandwidth* — visible, and recoverable.
+- The **control plane** — commands and state. Low-rate but correctness-critical: atomicity,
+  ordering, who is allowed to write what. Its tools are hub mailboxes, locks, single-writer
+  ownership of each shared long. Get it wrong and you *corrupt state* — an intermittent race.
+- The **event plane** — signalling and urgency. Its concerns are latency and priority; its
+  tools are COG-attention signalling, the event system, or deliberate polling. Get it wrong
+  and you *miss a deadline* — and that one stays silent until the field.
+
+Notice they're ranked by the cost of getting them wrong, and you spend your design care in
+the inverse order: an event-plane mistake is the most expensive and the hardest to see, so
+it deserves the most thought. The signature way to use the chip badly is to build all three
+planes on one mechanism — polling a hub flag (a control-plane tool) to deliver an urgent
+event (an event-plane need), or pushing bulk data through mailbox words (control-plane)
+instead of the streaming path (data-plane). Naming the three planes is what lets you catch
+that conflation in your own design before it ships.
+
+There's one small discipline from the control plane worth carrying away by name, because it
+recurs everywhere on the P2: when you publish a multi-field update through hub, write the
+payload first and bump the signalling counter *last*. Because a single-long write is atomic,
+a reader that watches that counter can never catch a torn, half-written value — the
+publish-last ordering makes a lockless hand-off safe. It costs nothing and it removes a
+whole category of glitch.
+
+The failure modes Force 2 prevents are two: blocking calls between COGs that quietly
+*serialize* a system that was meant to run in parallel, and multi-long structures written by
+one COG and read mid-update by another, producing torn reads that look like glitches. Both
+fixes are structural — choose the contract deliberately, and publish atomically. The deep
+treatment of inter-COG contracts and the coordination primitives is in the *P2 Assembly
+Language Manual*.
+
+### Force 3 — Where do two cadences meet?
+
+The third force is the one a beginner's instinct most often misses, because it corresponds to
+nothing you can point at. There's no chip for it and no line item in a parts list.
+
+Devices live in different **time domains**. An LED chain wants nanosecond-precise bit timing;
+a set of servos wants a smooth fifty-hertz stream; a voice recognizer is polled lazily and
+stretches the clock when it feels like it; a battery reading is meaningful about once a
+second; an ultrasonic echo is a one-shot event that happens when it happens. The question
+Force 3 asks is: *where does data cross from one cadence to another* — and what has to sit at
+that crossing to reconcile the rates?
+
+Because whenever data crosses a cadence boundary, *something must adapt the rate*, and that
+adapter is a distinct responsibility — so it's a distinct object. The P2 positively
+encourages you to put different time domains on different COGs and smart pins; that's what
+eight deterministic cores and sixty-four autonomous pins are *for*. But the instant you do,
+you've created the software equivalent of a clock-domain crossing — the same problem
+hardware engineers handle deliberately at the boundary between two clocks — and, like its
+hardware namesake, it produces glitches if you don't handle it on purpose. (The literature
+has an exact name for a chip shaped like this — *globally asynchronous, locally synchronous* —
+and Appendix B points you to it.)
+
+Two kinds of adapter fall out, and they're worth telling apart:
+
+- A **sampler or buffer**, where a fast producer and a slow consumer meet. The rule for
+  picking which is a question about the consumer: does it need *every* sample, or only the
+  *freshest*? Every sample means a buffer; only the freshest means a latest-wins slot. That choice is
+  the whole design of the adapter.
+- A **slew or easing engine**, where a discrete intent has to become a continuous stream. A
+  command like "stand" or "walk" is a *step* — it arrives once. A servo physically cannot take
+  a step; it needs a smooth, accelerated-then-decelerated trajectory at its own frame rate.
+  The thing that turns the one into the other — the *ramp* — is a responsibility distinct from
+  both the policy that knows *what* to do and the driver that knows *how* to talk to the chip.
+  Pulling the ramp out of both is what keeps both of them clean.
+
+And there's a third situation that belongs to this force, where it collides with Force 1 in a
+way worth seeing. Suppose several devices share *one* bus but want *different* cadences —
+servos at fifty hertz, an IMU at a hundred, a battery at one. Force 3 says "different cadences
+want separating," but Force 1 flatly forbids splitting the bus across COGs. They can't both
+win by cutting. The resolution isn't a second COG on the bus — it's **cooperative tasks
+within the single owning COG**: several small routines sharing that one COG and that one bus,
+each running at its own cadence and yielding at transaction boundaries so the bus stays
+coherent. That's a first-class decomposition tool for "shared resource, multiple rates," and
+it's the kind of answer you only find by holding two forces in tension instead of applying one
+in isolation.
+
+⚠️ **Watch out:** ignore the rate adapters and you get two classic embedded bugs. Skip the
+sampler and a slow consumer back-pressures a fast producer (or a fast producer floods a slow
+consumer) — dropped frames, stalls, torn state. Skip the slew and your servos *snap* to
+position instead of moving, drawing current spikes and mechanical shock, because a step went
+straight to the actuator with no ramp between intent and motion.
+
+::: p1note
+**P1 note — new room to cross into.** Rate adaptation was always a concern, but the P2 hands
+you far more places to put a time domain — sixty-four smart pins that each hold their own
+cadence autonomously, where the P1 had thirty-two plain pins and often a spare COG pressed
+into bit-banging. That's a gift, but it's also *more cadence boundaries to cross*: every time
+you push a job out to a smart pin, you've created a crossing back to the COG that needs an
+adapter. The fabric got wider; mind the seams between its cells.
+:::
+
+The implementation patterns for samplers, easing engines, and cooperative tasking live in the
+Spin2 pattern library; the smart-pin modes that let a pin hold its own time domain are in the
+*I/O & Smart Pins User Guide*.
+
+### Force 4 — How high does each piece sit?
+
+The first three forces are horizontal: they decide which COG owns what, and how the pieces
+talk across the gaps. The fourth is the *vertical* consequence that falls out once they've
+drawn the structure — which is why we call it emergent rather than primary. It answers the
+question every programmer eventually asks: *how much code goes in one object?*
+
+The honest answer is not a line count and not a component count. It's this: **split where the
+unit changes, or where the axis of change changes.** Stack the objects within an ownership
+domain so that each tier does exactly one unit conversion and changes for exactly one reason.
+The canonical stack climbs from *bits on a wire*, to *device registers*, to *physical units*
+(millimeters, degrees, millivolts), to *behavior*. Each tier speaks a different unit than the one below it, and
+that change of unit is the seam.
+
+The principle underneath is an old and durable one — Parnas's *information hiding*: decompose
+around the things that change independently, not around processing steps. Two pieces of code
+that will *always* change together for the same reason belong in one object. Two that change
+for different reasons — a new chip versus a new behavior — belong in different objects, even
+when they sit in the same call chain. A line-count rule would never produce a clean
+four-tier device stack; the unit-conversion rule produces it automatically, because each unit
+boundary is exactly a place where the code above and below it change for different reasons.
+
+On the P2 this force negotiates against a hard limit, and you should know it's there: COG-
+local memory is *tiny* — 512 longs of register RAM, of which 496 are usable for PASM code and
+data. Unlimited layering isn't free; each tier boundary costs a call and a little state. So the
+default is one tier per unit conversion, with an explicit escape: when a COG is genuinely tight
+on memory, fold two adjacent tiers together — but say so, and never fold two tiers that change
+for *different* reasons just to save space, because that quietly rebuilds the monolith you were
+avoiding.
+
+That monolith — or worse, a "driver" that mixes register pokes with behavior logic, so that
+swapping the IMU chip forces you to re-test the walk cycle — is the failure Force 4 prevents.
+When tiers that change for different reasons are fused, every change ripples across unrelated
+concerns, and the clean place you *would* have tested at is gone.
+
+### Reconciling the forces
+
+Here's the thing the four-forces list can hide: the real skill isn't applying each force, it's
+*reconciling* them, because they pull against each other and against plain simplicity. You've
+already seen one tension — Force 1 says "one COG per bus," Force 3 says "different cadences want
+separating," and when three cadences share one bus, the resolution is cooperative tasks inside
+the one owner. There are more like it. Force 2's instinct to decouple every seam reconciles
+against simplicity — not every hand-off needs a ring buffer; a latest-wins slot is usually
+enough. Force 4's instinct to layer everything reconciles against that tiny COG memory — deep
+stacks cost RAM and per-call overhead you may not have.
+
+None of these tensions has a formula. What you do is hold the forces together, let them argue,
+and let the *hardware and the hardest deadline win* — those are the two things you can't
+negotiate with. That habit of reconciliation, more than any single rule, is what separates a
+design that fits the chip from one that fights it.
+
+## The objects that guard the whole machine
+
+The four forces build a clean structural tree: who owns what, how the branches talk, what
+adapts between cadences, how deep each branch layers. But a real machine needs some objects that
+don't live *in* that tree — they live *across* it. They're driven by concerns that don't respect
+the ownership hierarchy, and if you only ever apply Forces 1–4, you end up with a tidy tree and
+nowhere to put the supervisor, the translator, or the calibration data. Naming these cross-cutting
+concerns is what keeps them from getting smeared across everything. There are five that recur:
+
+- **A safety override.** Some authority has to be able to override the whole machine — a
+  low-battery cutoff, a watchdog, an emergency stop — and a fault in one place has to be
+  contained so it can't cascade. This wants an explicit, privileged supervisor sitting *above*
+  the policy layer, able to suppress it.
+- **An external-interface translator.** When you integrate a subsystem that has its *own*
+  vocabulary — a sensor's command codes, a vendor's frame format — put a translation object at
+  the boundary so that external naming never leaks inward. The outside vocabulary changes on
+  someone else's schedule; quarantine it behind one seam and a vendor change touches one object
+  instead of your whole codebase.
+- **A configuration store.** Separate what varies *per physical unit* — trim offsets, pin maps,
+  per-board personality — from what's fixed *by design*. Identical firmware should run on every
+  unit you build; the per-unit constants belong in data, not sprinkled through your drivers.
+- **Testability seams.** Shape the objects so each one can be exercised *standalone on real
+  hardware* before the whole is assembled. On embedded work you can't single-step a servo; you
+  bring hardware up one layer at a time. The seam you can test at is the seam you should cut at —
+  and the need to observe a layer often reveals a boundary you'd otherwise have fused.
+- **A lifecycle sequencer.** Objects have a *temporal* dependency graph: power and rails before
+  buses, a chip awake before you actuate it, COGs launched in a safe order. Someone has to own
+  that sequence.
+
+There's a reason several of these have to be *explicit* on the P2 specifically rather than
+emergent. COGs are independent — which is wonderful, because a hung COG won't drag the others
+down, but also means a hung COG won't stop driving its pins on its own, and means init ordering
+*isn't* implied by your call structure the way it is in a single-threaded program, because COGs
+launch concurrently. The chip gives you deterministic, isolated cores; these cross-cutting
+objects are how you reimpose whole-machine guarantees — safety, ordering, calibration — back on
+top of that isolation. You can't assume they'll fall out of the design. You place them on
+purpose, and you place them *after* the structural tree is drawn, because where each one goes
+depends on the tree it's guarding.
+
+💡 **Tip:** when you think you're done, go down this list of five and ask "where does each of
+these live in my design?" — and if one genuinely isn't needed (no external vocabulary, so no
+translator), say so out loud. An omission you *named* is a decision; an omission you didn't
+notice is a bug waiting in the field.
+
+## Keeping a budget
+
+Everything so far has been about drawing boundaries. This section is about a number that tells
+you when you've drawn them wrong.
+
+The P2's resource lattice is *finite*, and you should treat that as a design invariant rather than
+a thing you discover at the end. There are eight COGs, sixty-four smart pins, sixteen locks, one
+shared CORDIC, a bounded hub bandwidth, LUT sharing only between adjacent COG pairs, and 512 longs
+of memory per COG. None of those is negotiable. So a useful habit is to keep a **resource budget** —
+an allocation table you fill in *as you derive*, not a report you write afterward — listing which
+COG owns which timing domain, which pins run which mode, where each lock goes, how much hub traffic
+you're generating, and how much of each finite thing remains. A blank row in that table is a
+resource you forgot to account for.
+
+The budget earns its keep through one sharp signal. **"Running out of COGs" is the P2's concrete way
+of telling you the design is too *coupled*.** When the lattice can't hold your proposed allocation,
+the boundaries are wrong — not the chip. So when you run short, the move is to *re-cut, not cram*:
+look for a funnel COG that's quietly doing several jobs, a protocol a smart pin could absorb to free
+a COG, or a seam whose coupling is so high it shouldn't have been cut where it was. There's an honest
+escape — when every COG genuinely owns one irreducible real-time job and nothing can be absorbed, the
+design is at capacity, and the answer is to reduce *scope* or move a concern off-chip, not to
+time-slice a real-time job onto a shared COG. But reach for that escape last, after you've tried to
+re-cut. Most "out of COGs" is too-coupled in disguise.
+
+## Judging the cut
+
+You can now *propose* a decomposition. The last piece of the method is how to *judge* one — to look at
+two candidate cuts and say, with more than a feeling, which is better. This is the part most worth
+slowing down for, because it turns "that seems cleaner" into something you can actually check.
+
+Three tools, in increasing sharpness:
+
+**Coupling, as a countable integer.** On the P2, the coupling between two COGs is physical and
+*countable* — it stops being a vibe. Across any boundary you draw, count the longs that cross it per
+unit time, the fields that share an invariant (data that must change together to stay correct), and
+the locks held across the cut. Minimize that number. Two candidate cuts can be compared directly by
+their counts, and the lower one wins unless cohesion argues otherwise.
+
+**Connascence — the sharpest tool.** Two pieces of code are *connascent* if changing one forces a
+change in the other to stay correct. It comes in *static* forms, visible right in the source (two
+sides agreeing on a name, a type, a field order), and *dynamic* forms, true only at runtime (two
+sides agreeing on execution order, on timing, on a value relationship). The governing rule is:
+maximize connascence *inside* a boundary, minimize what *crosses* it, and *convert* the strong dynamic
+forms into weak static ones right at the seam. On the P2 the dangerous case is specific and worth
+memorizing: **dynamic connascence that crosses a COG boundary** — a timing assumption, an
+execution-order assumption, a shared runtime value — because the hardware will faithfully express it as
+*jitter and races*. The publish-last discipline from Force 2 is exactly this conversion in action: it
+takes a dynamic execution-order dependency between two COGs and makes it safe by construction.
+
+**Back-pressure, as a min-cut.** Put the two together and you can state precisely what a good boundary
+*is*. Every boundary carries a back-pressure equal to the connascence forced to cross it times the cost
+of the channel that carries it — and on the P2 the channel cost is concrete (a mailbox's hub traffic, a
+lock's contention, an attention signal's latency). A good boundary is a **min-cut**: the cohesion you
+gain inside each piece exceeds the back-pressure across the cut. That gives you a crisp objective to aim
+at instead of an aesthetic — draw the boundary where the things that must stay together stay together,
+and the least, weakest connascence crosses the cheapest channel. If a cut isn't a min-cut, that's your
+signal that one of the forces placed a boundary wrong, and you redraw it.
+
+These three — coupling, connascence, back-pressure — rest on a body of design literature older than
+the P2; Appendix B names the sources so you can go deeper when a problem outgrows this chapter.
+
+## The first-contact procedure
+
+We now have the forces, the cross-cutting objects, the budget, and the way to judge a result. The last
+thing you need is the *order* to apply them in — because the forces are orthogonal, but the work isn't:
+some choices depend on earlier ones (you can't pick a seam's contract before you know where the COG
+boundaries are). Here is the routine to run the first time you meet a hardware mix, before you write a
+single object. Think of it as a method you *adapt*, not a script you obey — the spine steps always run,
+and the others state when you can skip them.
+
+The procedure deliberately *inverts* the classic top-down approach. You don't start from the data model.
+You start from the **hardware edge and the timing budget**, and let the structure fall out of them:
+
+1. **Enumerate the wires.** What buses, timing-critical pins, and discrete signals exist? List the
+   serialized resources. *(Always runs — everything downstream depends on it.)*
+2. **Triage against the smart pins.** For each peripheral, can a smart pin absorb its protocol entirely
+   in hardware — PWM, serial, quadrature, an ADC or DAC, edge counting? The ones a pin can own drop out
+   of the COG-cadence problem completely. This is the physical axis used as a tool: a smart pin *deletes*
+   a software module. *(Skip for a protocol no pin mode covers — a multi-byte I²C transaction stays a
+   software-owned resource.)*
+3. **Assign owners.** Group the survivors by bus and timing budget, and give each group exactly one
+   owning COG and one transport object. Let the sharing topology pick the transport's shape — shared
+   singleton for a shared bus, self-contained instance for a sole device. *(Always runs — this COG map
+   gates every later choice.)*
+4. **List the cadences.** At what rate does each device want service, and where do two rates meet? This
+   surfaces the rate-domain boundaries and the discrete-to-continuous paths. *(Skip only if everything
+   runs at one shared cadence with no easing path.)*
+5. **Resolve same-bus rate conflicts.** Is any single bus serving multiple cadences? If so, the answer is
+   cooperative tasks *within* the owning COG, not a second COG on the bus. *(Skip when no bus serves
+   multiple cadences.)*
+6. **Draw the seams.** For each inter-COG edge, what coupling does the deadline allow — and design its
+   data, control, and event planes separately. *(Skip for a single-COG design with no seams.)*
+7. **Layer each branch.** Within each ownership domain, how many distinct unit conversions are there?
+   One tier each. *(Collapse tiers where COG memory is tight — and say so.)*
+8. **Place the cross-cutting objects.** Where do the safety override, the translator, the configuration,
+   the test seams, and the sequencer go? *(Name the ones a given machine doesn't need, so the omission is
+   a decision.)*
+9. **Reconcile.** Where do two forces disagree, and does the result fit the budget? *(Always runs — the
+   reconciliation against the hardest deadline is what makes the output sound.)*
+
+One more property worth knowing: the procedure is **fractal**. After the top-level pass, you can run the
+very same routine *inside* a COG that owns a bus — it has its own internal cadences, its own seams between
+cooperative tasks, its own layers. Apply it at whatever altitude you're working.
+
+When you're done, you hold two things: the object-and-COG set, and the resource budget that proves it
+fits. Judge it with the three tools from the last section before you commit a line of code.
+
+## Watching the method run: a walking robot
+
+Let's watch the whole method run, once, end to end, on a single machine — a small walking robot, a
+quadruped "dog." Before we start, the one thing that matters most about this section: **this is one
+machine's answer, shown to make the method visible — it is not a template.** Your machine will be
+different, so the object set you derive will be different. Read for the *moves* — which force fires at
+each step and why — never for the result. If you ever catch yourself copying a boundary from here into a
+design of your own, stop, and run the procedure against *your* wiring instead. That's the whole point of
+having a method rather than a catalogue.
+
+Here's the only input we start from — the hardware, nothing else:
+
+- **I²C bus 1** carries a multi-channel servo/PWM controller, an IMU, and a battery ADC — all behind a
+  hard ~50 Hz motion deadline.
+- **I²C bus 2** carries a single voice-recognition module that clock-stretches and is polled slowly.
+- **Three discrete signals**: an addressable LED chain (timing-exact serial), a buzzer, and an ultrasonic
+  range sensor (a one-shot ping and echo).
+
+Nothing about the object set is given. We *derive* it, by walking the procedure.
+
+**Steps 1–2 — enumerate, then triage.** The serialized resources are the two I²C buses and the three
+discrete pins. Now triage against the smart pins: the LED chain (precise serial framing), the buzzer
+(tone), and the ultrasonic ping-and-echo (pulse timing) each map to an autonomous smart-pin mode — the
+pin can own the protocol, so no COG bit-bangs any of them. The two I²C buses are multi-byte stateful
+protocols; they survive triage and need software owners. *Three peripherals just left the COG-cadence
+problem entirely* — that's the physical axis deleting work for us.
+
+**Step 3 — assign owners.** Bus 1 has three devices behind one timing budget, so it gets one owning COG
+and a *single shared transport* that three register-level chip drivers call into. Bus 2 has one device, so
+it gets a *different* owning COG and a *self-contained transport* with nothing to coordinate. The discrete
+smart pins are owned by whichever COG already owns their timing domain. Notice the same protocol — I²C —
+ended up with two different transport shapes, decided entirely by sharing topology.
+
+**Steps 4–5 — cadences, and the same-bus conflict.** Bus 1 serves three cadences at once: servos near
+50 Hz, the IMU near 100 Hz, the battery near 1 Hz. Force 1 won't let us split that bus across COGs, and
+Force 3 won't let us pretend the cadences are the same. So the resolution is three *cooperative tasks
+inside the bus-1 COG* — a sense task, a motion task, a slower dispatch task — each running at its own
+cadence and yielding at bus-transaction boundaries. We also flag one discrete-to-continuous path: a "walk"
+command has to become a smooth servo trajectory, so a slew engine is going to be needed.
+
+**Step 6 — draw the seams, per plane.** The orchestrator-to-motion seam is a *control-plane* link: a
+latest-wins command mailbox with a sequence/acknowledge handshake, arguments written first and the
+sequence counter bumped last, so a torn read is impossible without a lock. Motion-to-everyone is a
+*data/telemetry* link: lock-free published telemetry — attitude, battery, mode, leg angles — sitting in
+atomic single longs with one writer and any number of lockless readers. Inbound device events (a finished
+ping, a recognized word) are an *event-plane* link: a value plus a bumped freshness counter that the slow
+poll edge-detects. Nothing blocks anywhere — the 50 Hz loop never waits on the orchestrator, and the
+orchestrator never waits on a device.
+
+**Step 7 — layer the motion branch.** It splits by unit conversion into four tiers: the PWM-chip register
+driver (changes if the chip changes); then servo pulse-width and channel semantics (changes if the wiring
+changes); then leg inverse-kinematics, foot-XYZ to joint-degrees (changes if the leg geometry changes); then
+the gait and pose policy (changes if the behavior changes). A line-count rule would never have produced that
+stack; the unit-conversion rule produced it on its own.
+
+**Step 8 — place the cross-cutting objects.** A critical-battery hard-halt latch sits above policy and
+suppresses *all* motion regardless of intent (safety). A voice-vocabulary-to-internal-command map sits at
+the edge, separate from both the recognizer driver and the policy (translation). A per-joint trim store the
+drivers read but never hard-code (configuration). A bring-up test per layer — bus scan, then chip, then
+servo-center, then leg IK, then gait (testability). And the top-level orchestrator owns the launch order and
+wakes the PWM chip from sleep before any servo write (lifecycle). None of these is a node in the tree; each
+guards or spans it.
+
+**Step 9 — reconcile against budget and deadline.** Tally the lattice for this machine:
+
+| Resource | This machine uses | Of the limit |
+|----------|-------------------|--------------|
+| COGs | orchestrator, bus-1 body-control, bus-2/IO — about three | 8 |
+| Smart pins | the LED chain, buzzer, ultrasonic — three | 64 |
+| Locks | none — telemetry is single-writer atomic publish | 16 |
+| CORDIC | one shared engine, uncontended at this scale | one shared |
+| Hub bandwidth | modest — mailbox words, no bulk streaming | egg-beater rotation |
+
+It fits, with COGs to spare, and nothing forces a re-cut. Now judge it with the three tools: coupling is
+*low* — telemetry crosses as atomic longs, with no shared invariant and no locks — and the one dynamic
+connascence that crosses a COG boundary (execution order on the command mailbox) was already tamed to static
+by the publish-last discipline. This is a min-cut.
+
+> **[Figure — the derived object-and-COG map for the example robot: bus-1 control COG with its three
+> cooperative tasks and four-tier motion stack, the bus-2/IO COG, the orchestrator, the smart-pin-owned
+> discrete signals, and the seams between them labeled by plane. Logged for the visual pass (PUNCH-LIST).]**
+
+Now step back and notice what just happened — and especially what *didn't*. We never started from a parts
+list and reached for the nearest matching template. We started from the *wires and the timing*, ran the
+forces in order, and the object set *fell out*. Three things appeared that no catalogue could have handed
+us: the two I²C transports are the same protocol with different state models, decided by sharing topology;
+the rate adapters — the in-COG cooperative tasks and the slew engine — correspond to no chip and no feature,
+they fell out of rate *mismatches*; and the cross-cutting objects had nowhere to live until the tree was
+drawn, then each took a definite place. Run that same routine on *your* machine and you'll get a different
+object set, equally sound. The shape is the routine's output, not its input.
+
+## Where this leaves you
+
+You came into this chapter able to write a P2 program. You leave it able to *design* one — to look at a
+machine you've never seen, start from its wires and its deadlines, and derive a sound set of cooperating
+objects across the fabric, then judge that set against a crisp objective rather than a feeling. That's the
+skill that keeps you on the spatial side of the line we drew at the start: function spread across the chip,
+not funnelled back through one core.
+
+A closing word on how to hold all this. The forces, the procedure, and the judging tools are the method;
+the robot dog was only the method made visible. The richest, most complete treatment of this material —
+every force in full, the reference canon behind each judgment tool, more worked detail than a single chapter
+can carry — lives in the decomposition layer of the P2 knowledge base, which is the golden home for this
+theory and the place to go when a real design pushes past what we covered here. Appendix A takes up the
+space-versus-time thesis in depth, with an honest accounting of what the P2 borrows from FPGA thinking and
+what it doesn't; Appendix B is the reading list behind the whole discipline; and the glossary and the
+"where to next" map point you into the reference manuals for every part you'll actually program.
+
+You have the picture, you can put it to work, and now you can think in P2. That's the guide. The rest is
+yours to build.
 
 # Appendix A — Computing in Space and Time (Why We Borrow FPGA Language)
 

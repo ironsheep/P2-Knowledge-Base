@@ -20,7 +20,14 @@ section collects them for the visual pass once the draft is reviewed.
     central hub, ring of 64 smart pins on the outside.
   - **Ch1, §Memory** — the three memory tiers: private COG RAM + LUT beside each
     processor, shared hub in the middle.
-  - *(Ch2/Ch3 figure placeholders appended as those chapters are authored.)*
+  - **Ch2 (Putting It to Work)** — no figure placeholders (code-driven chapter).
+  - **Ch3 (Thinking in P2), §"Computing in space, not just in time"** — the space↔time
+    spectrum: a temporal single-core MCU at one end, a spatial FPGA at the other, the P2
+    between them as a coarse-grained spatial fabric of 8 COGs + 64 smart pins.
+  - **Ch3, §"Watching the method run: a walking robot"** — the derived object-and-COG map
+    for the example robot: bus-1 control COG (its three cooperative tasks + four-tier
+    motion stack), the bus-2/IO COG, the orchestrator, the smart-pin-owned discrete
+    signals, and the inter-COG seams labeled by plane (data/control/event).
 - [ ] **Emoji / marker glyph render-watch** — if any ⚠️/💡/🔧-style markers are used,
       confirm they render on the first Forge build (family-consistent fallback to
       symbol macros if they box).
