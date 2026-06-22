@@ -56,9 +56,34 @@ deliberately earned. **The "spatial-computing fabric" thesis is itself meta — 
 | 2 | **Putting It to Work** | the basics of doing | *use* the features — launch a cog, drive a pin, the Spin2-vs-PASM2 choice, the object/run-time model, hub sharing, boot/run. Comfort through doing; this is the "rich feature intro+use" chapter. | Spin2 v55, PASM2 manual, Smart Pins/Streamer guides |
 | 3 | **Thinking in P2 — Functional Decomposition** | the capstone (advanced) | *now* the spatial-computing thesis (space vs time) + the forces (resource ownership/timing, data-flow contracts, rate adaptation, emergent altitude) + the **first-contact procedure** + ONE worked derivation. **Teaches the METHOD of deriving an architecture — never prescribes one.** | the decomposition YAML layer (its golden home) |
 
-Front matter: the thesis + how to read (audiences/paths). Back matter: glossary (from
-`decomposition-glossary.yaml`) + a "where to go next" map into the reference manuals. (P1→P2 migration is
-woven as sidebars, not an appendix — §9.)
+Front matter: the thesis + how to read (audiences/paths) + the accessible MCU↔FPGA hook (§5.1). Back matter:
+glossary (from `decomposition-glossary.yaml`) · a "where to go next" map into the reference manuals ·
+**Appendix A — Computing in Space and Time: Why We Borrow FPGA Language** · **Appendix B — Further Reading on
+Functional Decomposition**. (P1→P2 migration is woven as sidebars, not an appendix — §9.)
+
+### 5.1 The space/time (MCU↔FPGA) framing — placement
+The P2 straddles the microprocessor and FPGA design spaces; the deep "why" is that **an MCU computes in time,
+an FPGA computes in space, and the P2 is a coarse-grained spatial fabric** (already formalized in
+`architecture/decomposition/spatial-computing.yaml`). This framing lives in **three** places, by altitude:
+- **Front-matter hook (accessible):** "you know microcontrollers; you've heard of FPGAs; the P2 lives in the
+  gap between them." Familiar landmarks, concrete — fits comfort-first, no abstraction.
+- **Ch3 (teaching):** the formal space-vs-time thesis as the rationale for the decomposition forces.
+- **Appendix A (formalization + reference):** the temporal→spatial spectrum, an honest *what-transfers /
+  what-doesn't* (P2 is coarse-grained, still software, no place-and-route — we borrow the *mindset*, not the
+  claim of being an FPGA), and the **FPGA-terminology table** (term · FPGA-domain meaning · P2 mapping · where
+  the mapping is loose) for the vocabulary already load-bearing in our KB (spatial, fabric, pipeline, dataflow,
+  lattice, back-pressure, latency/throughput, systolic, coarse-grained).
+
+### 5.2 Appendix B — Further Reading on Functional Decomposition
+Organized along the decomposition layer's **two axes**, because each needs a different body of theory:
+- **Logical** (how to cut behavior): Parnas (information hiding); Constantine & Yourdon, *Structured Design*
+  (coupling/cohesion); Page-Jones — the canon already cited in `decomposition-method.yaml`.
+- **Physical / concurrent** (placing it on communicating processors): Hoare's **CSP** and the **transputer /
+  Occam** lineage — *more apt for the P2 than generic structured-design texts*, because the P2 is that model
+  reborn (multiple identical deterministic processors, message-passing via hub mailboxes, no shared-state
+  preemption); optionally Kung on systolic arrays for the dataflow/pipeline side.
+Each entry carries a one-line "why it's relevant to P2." **Every citation (author/title/year) is verified
+before publish** — marked NEEDS-VERIFICATION until checked (§12). A short correct list beats an impressive wrong one.
 
 > **Reading paths** (one slim book, four audiences): newcomer = 1→2, then 3 when ready; P1 vet = follow the
 > "P1 note:" sidebars through 1, then 3; working dev = straight to 3, 1–2 as reference.
@@ -168,6 +193,10 @@ by the link-out discipline (§2).
   machine's answer.
 - **Too-meta-too-fast** — guard the comfort-first ascent (§5): the spatial thesis and forces stay in Ch3;
   Chs 1–2 must not drift into abstraction.
+- **Hallucinated citations (Appendix B)** — a reading list is the easiest place to invent a source. Every
+  entry's author/title/year is **verified before publish**; marked NEEDS-VERIFICATION until checked. Trust chain.
+- **FPGA overclaim (Appendix A)** — never let the borrowed vocabulary imply the P2 *is* an FPGA; the
+  what-transfers/what-doesn't column is the guard (we borrow the mindset, not the claim).
 
 ## 13. Production logistics
 - **Home:** `engineering/document-production/manuals/p2-architect-guide/` (this charter) → opus-master, audit,

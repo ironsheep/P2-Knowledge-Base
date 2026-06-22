@@ -38,7 +38,7 @@ by a strict link-out discipline (it orients, then points to the deep manuals; it
    "P1 note:" sidebars).
 3. **Working P2 dev** — can write a cog; wants the decomposition discipline so parallel silicon doesn't get
    used as a slow sequential machine.
-4. **AI code-generating agent** — served the same understanding via the lightweight on-demand KB YAML (§5.5).
+4. **AI code-generating agent** — served the same understanding via the lightweight on-demand KB YAML (§5.7).
 
 **Assumed knowledge:** general embedded/microcontroller literacy and a programming background. **Not** assumed:
 any prior P2 (or P1) experience. Chapters 1–2 build the background; Chapter 3 assumes the reader has it.
@@ -63,7 +63,8 @@ any prior P2 (or P1) experience. Chapters 1–2 build the background; Chapter 3 
 FRONT MATTER
 ├── Title page
 ├── How to read this guide (the four readers + reading paths)
-└── The thesis, stated once, plainly
+├── The thesis, stated once, plainly
+└── The MCU↔FPGA hook (accessible: "the P2 lives in the gap between them")
 
 CHAPTER 1 — Meet the Propeller 2            (the territory, concretely)
    the parts you can picture, and what each does — NO abstraction yet
@@ -78,7 +79,9 @@ CHAPTER 3 — Thinking in P2: Functional Decomposition   (the capstone, earned)
 
 BACK MATTER
 ├── Glossary (from decomposition-glossary.yaml)
-└── Where to go next — the map into the reference manuals
+├── Where to go next — the map into the reference manuals
+├── Appendix A — Computing in Space and Time: Why We Borrow FPGA Language
+└── Appendix B — Further Reading on Functional Decomposition
 
 (woven throughout: "P1 note:" sidebars for migrating P1 veterans)
 ```
@@ -159,6 +162,10 @@ Any Ch3 claim the YAML doesn't support is a finding (route to the corrections/ga
   am I prescribing what to build?"* The worked example must stay labeled as one machine's answer.
 - **Link-out gate:** review every section against *"am I duplicating Spin2 v55 / the Blue Book / PASM2 manual?"*
   If yes, cut to an orientation + a link.
+- **Citation gate (Appendix B):** every reading-list entry's author/title/year is verified against a real
+  source before publish — marked NEEDS-VERIFICATION until checked. Never ship an unverified or invented citation.
+- **FPGA-overclaim gate (Appendix A):** the borrowed vocabulary must never imply the P2 *is* an FPGA; the
+  what-transfers/what-doesn't treatment is mandatory wherever the spatial framing appears.
 
 ---
 
@@ -187,7 +194,32 @@ method is the takeaway." Distilled core in-chapter; link to the YAML for the ful
 Short, optional, in-context margin/callout boxes for migrating P1 veterans: "same as P1," "changed from P1," or
 "new in P2." A newcomer can ignore them; a P1 vet can navigate by them. Sourced from the P1→P2 delta catalogue.
 
-### 5.5 Dual-target relationship (manual ⇄ YAML)
+### 5.5 Appendix A — Computing in Space and Time: Why We Borrow FPGA Language
+Formalizes the design-domain positioning and justifies the borrowed vocabulary. Three parts:
+1. **The temporal→spatial spectrum** — pure-temporal MCU (one instruction stream in time) → P2 (coarse-grained
+   spatial fabric: 8 cogs + 64 smart pins as sustained concurrent concerns) → pure-spatial FPGA (function as
+   synthesized hardware). State plainly that the P2 *straddles* the MCU and FPGA design spaces.
+2. **What transfers / what doesn't** — a two-column honesty table. Transfers: concurrent sustained functions,
+   partition by dataflow, rate/throughput thinking, edge processing, allocation onto a fixed resource fabric
+   (the root of Ch3's "resource lattice"). Doesn't: coarse- vs fine-grained, still deterministic software not
+   synthesized logic, no place-and-route/timing-closure. **Never imply the P2 *is* an FPGA** (§4.4 gate).
+3. **Terminology table** — `term · FPGA-domain meaning · how it applies to the P2 · where the mapping is loose`,
+   for the vocabulary already load-bearing in the KB: spatial, fabric, pipeline, dataflow, lattice,
+   back-pressure, latency/throughput, systolic, coarse-grained.
+Source: `architecture/decomposition/spatial-computing.yaml` + the decomposition layer's actual vocabulary.
+
+### 5.6 Appendix B — Further Reading on Functional Decomposition
+A short, curated list organized along the decomposition layer's **two axes**, each entry with a one-line
+"why it's relevant to P2":
+- **Logical** (cutting behavior): Parnas (information hiding); Constantine & Yourdon, *Structured Design*
+  (coupling/cohesion); Page-Jones — the canon already cited in `decomposition-method.yaml`.
+- **Physical / concurrent** (placing it on communicating processors): Hoare's CSP; the transputer/Occam
+  lineage (the model the P2 revives — identical deterministic processors, mailbox message-passing); optionally
+  Kung on systolic arrays.
+**Every citation (author/title/year) verified before publish** — NEEDS-VERIFICATION until checked (§4.4). A
+short correct list beats an impressive wrong one.
+
+### 5.7 Dual-target relationship (manual ⇄ YAML)
 The manual and the AI-facing YAML target the *same understanding*, shaped per medium — **not** a 1:1 mirror.
 The YAML stays **lightweight, granular, on-demand** (the MCP fetches it on a single thread so an agent's context
 doesn't congest); the manual is the warm human narrative. Authoring keeps them *conceptually* in lockstep

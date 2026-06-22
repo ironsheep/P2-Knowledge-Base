@@ -146,6 +146,13 @@ on your machine and you'll get a different, equally sound shape."*
 
 ---
 
+### 5.5 The appendices (reference register)
+The back-matter appendices drop to a **precise reference register** — lower warmth, factual, scannable (the
+"dictionary" voice is appropriate here). **Appendix A** (space/time + FPGA terminology) states the spectrum and
+the terminology table flatly, and **always carries the what-transfers/what-doesn't honesty** — never let the
+borrowed words imply the P2 *is* an FPGA. **Appendix B** (further reading) is a terse annotated list; every
+citation is real and verified (NEEDS-VERIFICATION until checked), each with a one-line "why it's relevant to P2."
+
 ## 6. Quality Checklist
 **Warmth & altitude**
 - [ ] Chs 1–2 read as welcoming; no abstraction that doesn't yet help the newcomer
