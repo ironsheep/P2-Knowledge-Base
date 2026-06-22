@@ -1,0 +1,186 @@
+# P2 Architect's Guide — Planning Charter (rich-planning phase)
+
+**Status:** DRAFT planning charter · 2026-06-22 · **provisional slug** `p2-architect-guide`
+**Phase:** rich planning — specify identity, scope, chapter architecture, voice, source-map, and the
+open design decisions. This precedes the formal `creation-guide.md` + `voice-guide.md` (which this spawns).
+**Title (D1, approved):** *The P2 Architect's Guide — Thinking in Cogs, Pins, and Forces* (name tension noted §11)
+
+> **Origin.** Came out of reading the P1 Propeller Manual's structure during its ingestion (backbone done
+> 2026-06-22). The P1 manual got architecture orientation "for free" as Ch1 of one book; P2's richness forced
+> a split into many topic manuals (PASM2, Spin2 v55, Smart Pins, Streamer, Debug) — which removed the place
+> where the subsystems are introduced *in relation to each other*. This manual is that missing layer.
+
+---
+
+## 1. The thesis (one sentence)
+**The P2 is a coarse-grained *spatial* computing fabric, and this guide teaches a developer — and an AI agent —
+how to *think* in it: hold the architecture as a mental model, turn it into a running program, and derive a
+sound object/cog decomposition from physical forces rather than taste.**
+
+## 2. What this is — and emphatically is NOT
+- **IS:** the **orientation + design-reasoning layer** that sits *above* the reference manuals and ties the
+  subsystems together. A *slim* manual (no length cap — content-driven, kept brief by link-out; D5), not a comprehensive reference.
+- **IS NOT:**
+  - a Spin2 reference — that's the **Spin2 Language Reference v55** (excellent; we do not replace or duplicate it).
+  - a PASM2 reference — that's the **P2 Assembly Language Manual**.
+  - a per-subsystem deep dive — those are the **Smart Pins / Streamer / Debug** guides.
+  - a re-spec of the silicon — that's **Chip Gracey's Silicon Doc** (a spec, not a teaching doc).
+  - a learn-PASM tutorial — that's **DeSilva**.
+- **Discipline:** every place a subsystem is introduced, the guide **orients then links out** ("smart pins do
+  X — the 32 modes are in the Blue Book"). Link-out, never duplicate. This boundary is the manual's contract.
+
+## 3. Why this is a unique community contribution ("why us")
+The community has the Silicon Doc (dense spec), deep topic manuals, and scattered forum lore. **No one is
+producing a curated, trust-chain-verified "how to think in P2."** We can — because we have the cross-source-
+verified KB behind it, *and* we have just built the P1→P2 delta catalogue, so this guide can also serve the
+large P1-veteran community migrating to P2. The capstone (functional decomposition as a *spatial-computing
+discipline*) is a genuinely original framing no existing P2 document offers.
+
+## 4. Target audiences (four, dual-served)
+1. **Newcomer with MCU background** — needs the mental model before any manual makes sense (the on-ramp).
+2. **P1 veteran migrating to P2** — knows cogs/hub; needs "what's the same, what's new" (smart pins, CORDIC,
+   streamer, events) — leverages our P1→P2 delta work (§9).
+3. **Working P2 dev** — can write a cog; wants the *decomposition discipline* to stop building accidental
+   sequential machines on parallel silicon (the capstone, Ch3).
+4. **AI code-generating agent** — served the same orientation via the KB YAML (dual-rendering, §8).
+
+## 5. The altitude arc — chapter architecture (~3 chapters; a GUIDED ASCENT)
+**Pedagogical spine (Stephen, 2026-06-22):** comfort first, abstraction last. Less-experienced engineers must
+feel at home with the P2 before we ask them to think like architects. So Chs 1–2 are concrete and welcoming —
+introduce and *use* the individual features; Ch3 (the meta / experienced-engineer lens) comes last and is
+deliberately earned. **The "spatial-computing fabric" thesis is itself meta — it anchors Ch3, NOT Ch1.**
+
+| Ch | Title (working) | Altitude | Purpose | Defers to |
+|----|-----------------|----------|---------|-----------|
+| 1 | **Meet the Propeller 2** | the territory, concretely | warm, feature-first mental model: the parts you can picture — 8 cogs, pins, hub, smart pins, CORDIC, streamer/FIFO, events, memory/boot, clock — and what each *does*. Build intuition through features, NOT abstraction. (Quietly seed one idea: "each cog just keeps running, independently" — Ch3 cashes it in.) *Orient, don't spec.* | Silicon Doc, datasheet, the topic manuals |
+| 2 | **Putting It to Work** | the basics of doing | *use* the features — launch a cog, drive a pin, the Spin2-vs-PASM2 choice, the object/run-time model, hub sharing, boot/run. Comfort through doing; this is the "rich feature intro+use" chapter. | Spin2 v55, PASM2 manual, Smart Pins/Streamer guides |
+| 3 | **Thinking in P2 — Functional Decomposition** | the capstone (advanced) | *now* the spatial-computing thesis (space vs time) + the forces (resource ownership/timing, data-flow contracts, rate adaptation, emergent altitude) + the **first-contact procedure** + ONE worked derivation. **Teaches the METHOD of deriving an architecture — never prescribes one.** | the decomposition YAML layer (its golden home) |
+
+Front matter: the thesis + how to read (audiences/paths). Back matter: glossary (from
+`decomposition-glossary.yaml`) + a "where to go next" map into the reference manuals. (P1→P2 migration is
+woven as sidebars, not an appendix — §9.)
+
+> **Reading paths** (one slim book, four audiences): newcomer = 1→2, then 3 when ready; P1 vet = follow the
+> "P1 note:" sidebars through 1, then 3; working dev = straight to 3, 1–2 as reference.
+
+> **⚠️ Ch3 anti-prescription principle (load-bearing, Stephen 2026-06-22).** The final decomposition is
+> **unique to every project** — we **cannot and must not prescribe outcomes**. Ch3 teaches *techniques for
+> thinking* (the forces + the first-contact procedure); the reader/agent then *derives* their own. This is the
+> decomposition layer's own thesis: understand the forces → derive a sound architecture for a machine you've
+> never seen; have only the catalogue → you can only pattern-match. **The robot-dog derivation is a
+> DEMONSTRATION of the method running on one machine, explicitly NOT a template** — framed "your machine will
+> derive a different, equally sound answer." The chapter's takeaway is the *method*, never the example's object set.
+
+## 6. Source map (trust-chain grounding — nothing invented)
+| Chapter | Primary sources (already in-repo) |
+|---------|-----------------------------------|
+| Ch1 | `deliverables/ai/P2/architecture/` — `p2-architecture-mental-model.yaml` (the AI-facing half, **already written**), `cog.yaml`, `hub.yaml`, `cordic.yaml`, `streamer/`, `event_system.yaml`, `interrupts.yaml`, `clock_system.yaml`, `boot-rom/`, `locks.yaml`, `lookup_ram.yaml`, `fifo.yaml`, `xbyte_engine.yaml`; Silicon Doc v35; P2 datasheet |
+| Ch2 | `guides/spin2-getting-started.yaml`, `guides/pasm2-getting-started.yaml`; `serial_loader.yaml` / `boot-rom/`; `language/` YAML |
+| Ch3 | `architecture/decomposition/` — **all 12 entries** (`decomposition-method`, `first-contact-procedure`, `resource-ownership`, `data-flow-contracts`, `rate-adaptation`, `altitude-layering`, `cross-cutting-forces`, `resource-budget`, `spatial-computing`, `evaluation-vocabulary`, `decomposition-glossary`, `worked-derivation-robot-dog`) |
+| Migration appendix | `engineering/ingestion/P1-DOCUMENT-LINEAGE.md` (P1↔P2 edges) + `central-analysis/p1-p2-comparison/P1-P2-FEATURE-COMPARISON.md` |
+
+## 7. The capstone fidelity rule (load-bearing)
+Chapter 3 **teaches** the decomposition theory; the **YAML layer remains its golden/canonical home**. The
+manual derives from the YAML and must not drift from it. Treat any Ch3 claim the YAML doesn't support as a
+finding (route to corrections/gaps), and any improvement discovered while writing as a YAML update first,
+then rendered in the manual. Same trust-chain discipline as every other manual (verify against the KB, never
+assert independently). This keeps the human and machine renderings conceptually in lockstep.
+
+**And — Ch3 teaches METHOD, not OUTCOMES (§5 anti-prescription principle).** Decomposition is unique per
+project; the chapter must never read as "do it this way." It hands the reader the forces + the first-contact
+procedure and a single *demonstration* (robot dog), explicitly framed as one machine's answer, not a pattern
+to copy. If a draft starts to feel like a recipe, that's a defect.
+
+## 8. Dual-target rendering — RESOLVED (D4)
+**Dual-target, separately SHAPED — not a 1:1 mirror.** The human manual (warm narrative) and the AI-facing
+YAML target the *same understanding* but are shaped for their consumption modes:
+- **Manual:** the warm, guided-ascent narrative for humans.
+- **YAML:** **lightweight, granular, on-demand files** the MCP download-on-demand system fetches on a single
+  thread, so a consuming agent doesn't congest its conversational context. (The decomposition layer already
+  is exactly this shape; the Ch1 mental-model + getting-started YAMLs largely exist too.)
+- **Relationship:** siblings from one source understanding, each idiomatic to its medium — NOT mechanically
+  synced identical prose. The YAML stays the agent-facing canonical form for the reasoning (golden home, §7);
+  the manual is the human face. Authoring keeps them *conceptually* in lockstep without forcing prose parity.
+
+## 9. P1→P2 migration thread — woven sidebars (D3)
+We just produced the P1→P2 delta catalogue. Fold it in as **woven "P1 note:" sidebars** through the chapters
+(not a back-matter appendix): same (8 cogs, hub round-robin, locks), changed (hub egg-beater, clock setup,
+64 pins), new-in-P2 (smart pins, CORDIC, streamer, events/interrupts, LUT, XBYTE). Sidebars let a P1 vet
+navigate by "what's different" in-context, while a newcomer can ignore them. Uniquely ours; directly serves
+the existing P1 community. Source: `P1-DOCUMENT-LINEAGE.md` edges + `P1-P2-FEATURE-COMPARISON.md`.
+
+## 10. Voice & tone (the "how to voice it" half)
+
+### 10.1 Positioning — where we post on the spectrum
+Two reference points bracket us, each "going too far" for our purpose:
+- **DeSilva** — high warmth, **high persona**, discursive: a *campfire story* with a strong narrator. Too
+  playful / too much character / too digressive for a doc that must also carry real rigor.
+- **Spin2 v55 & PASM2 reference** — low warmth, max density, zero persona: a *dictionary*. Nothing welcoming,
+  no mental model.
+
+**We post here: high warmth · LOW persona · content-driven density — a mentor's guided tour.** Not a campfire
+story, not a dictionary. The warmth comes from *clarity and care* (a senior dev explaining the chip at a
+whiteboard), **not** from adopting a character. Density is set by the material (D5: no length cap), kept brief
+by the link-out discipline (§2).
+
+### 10.2 The voice MODULATES by altitude (the core move)
+- **Chs 1–2 (comfort):** maximally warm, reassuring, encouraging. Assume intelligence, not P2 experience.
+  "Here's the intuition; here's why it's nice." The job is to make a newcomer feel *at home* with the P2.
+- **Ch3 (capstone):** the warmth **stays** (never cold), but **rigor rises and glibness drops to zero.**
+  Functional decomposition is a serious framework — we honor it by being *careful and precise*, carrying the
+  rigor through the worked derivation (rigor you can *follow*, not rigor that lectures). The shift the reader
+  feels is "you're ready for this now," never "buckle up, it gets hard." **And never prescriptive** (§5/§7) —
+  we teach how to think, we don't hand down answers.
+- The early chapters **earn the trust** that lets the reader follow into the harder terrain. Never condescend
+  early; never turn glib late.
+
+### 10.3 Standing rules
+- **Terminology:** "COG" not "CPU" (community treats the COG as the computer); canonical P2 terms; show code
+  *constants* not arithmetic values; instruction/bit-field formatting per platform standards. Inherit the
+  shared `repo-voice-profile.md` + platform voice; this guide layers the orientation register on top.
+- **What we DON'T do:** no exhaustive enumeration (link out), no marketing, no undocumented roadmap claims,
+  no unsourced performance numbers, **no prescribed decompositions**.
+
+## 11. Design decisions — RESOLVED (Stephen, 2026-06-22)
+- **D1 — Name:** ✅ *The P2 Architect's Guide — Thinking in Cogs, Pins, and Forces.* ⚠️ *Open tension:*
+  "Architect's" leans advanced and slightly cuts against the welcoming goal; held as **aspirational** ("this
+  guide makes you a P2 architect"), with the warm Ch1 + subtitle doing the welcoming. Revisit only if it
+  reads as a gate.
+- **D2 — Three chapters:** ✅ keep three; **decomposition is LAST and earned**; Chs 1–2 are the rich,
+  concrete, comfort-building feature intro+use (§5).
+- **D3 — P1 migration:** ✅ **woven "P1 note:" sidebars** (not an appendix) — better for migrating P1 vets.
+- **D4 — Dual-target, reshaped for YAML:** ✅ lightweight, granular, on-demand YAML + warm human manual; same
+  understanding, two shapes; not a 1:1 mirror (§8).
+- **D5 — No length cap:** ✅ content sets length; brief but useful; link-out keeps it slim.
+- **D6 — Capstone depth:** ✅ distilled core + **the robot-dog worked derivation** (as a *demonstration*, not a
+  template — §5 anti-prescription) + link to the YAML for the full treatment.
+
+## 12. Risks & quality gates
+- **Scope creep into reference territory** — the link-out contract (§2) is the guard; review every section
+  for "am I duplicating Spin2 v55 / the Blue Book?"
+- **Drift from the decomposition YAML** (§7) — Ch3 changes start in the YAML.
+- **Staying slim** — the length cap (D5) is a feature; resist completeness.
+- **Hallucination prevention** — same content-verification protocol as other manuals' creation-guides; every
+  claim traces to the KB / Silicon Doc / datasheet.
+- **Prescription creep in Ch3** (§5/§7/§10) — the gravest content risk. Decomposition is unique per project;
+  if any Ch3 passage reads as "do it this way" or the robot dog reads as a template, that's a defect. Gate:
+  every Ch3 section must teach a *technique for deriving*, and the worked example must stay labeled as one
+  machine's answer.
+- **Too-meta-too-fast** — guard the comfort-first ascent (§5): the spatial thesis and forces stay in Ch3;
+  Chs 1–2 must not drift into abstraction.
+
+## 13. Production logistics
+- **Home:** `engineering/document-production/manuals/p2-architect-guide/` (this charter) → opus-master, audit,
+  creation-guide, voice-guide once locked.
+- **Roster:** added to PUBLICATION-ROSTER.md **In development** (provisional name) — keeps the every-folder-in-
+  roster invariant; promote to Live on release.
+- **Platform:** ride the shared `p2kb-platform-*` stack + thin local overlay (consistent with the unification
+  effort); shared common cover.
+
+## 14. Next steps
+1. ✅ D1–D6 resolved (§11), pedagogy spine + anti-prescription + voice gradient locked.
+2. **NEXT:** draft the formal `creation-guide.md` + `voice-guide.md` from this charter (house format) —
+   creation-guide carries the chapter specs + source map + verification protocol; voice-guide carries §10
+   (positioning, altitude gradient, the warm-but-not-glib / not-prescriptive rules).
+3. Then opus-master authoring Ch1→Ch3, each verified against its source-map and (Ch3) the decomposition YAML,
+   with the anti-prescription gate (§12) applied to every Ch3 section.

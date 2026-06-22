@@ -63,6 +63,7 @@ promoted. Reconcile conventions against this roster at promotion.
 | Publication | Workspace | State |
 |-------------|-----------|-------|
 | Spin2 Reference Manual | `workspace/spin2-reference-manual/` | parked; may go forward |
+| P2 Architect's Guide *(provisional name)* | `manuals/p2-architect-guide/` | **planning** (2026-06-22) — slim orientation + functional-decomposition guide; the layer above the reference manuals. Charter: `manuals/p2-architect-guide/PLANNING.md`. Not yet a workspace/opus-master. |
 
 ## Instruments (not publications)
 
