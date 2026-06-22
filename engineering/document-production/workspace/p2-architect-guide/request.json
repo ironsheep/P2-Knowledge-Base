@@ -1,0 +1,31 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Architect-Guide.md",
+      "output": "P2-Architect-Guide.pdf",
+      "template": "p2kb-architect-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination",
+        "p2kb-architect-local"
+      ],
+      "metadata": {
+        "title": "The P2 Architect's Guide",
+        "subtitle": "Thinking in Cogs, Pins, and Forces",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "v0.1.0",
+        "date": "June 2026"
+      }
+    }
+  ]
+}

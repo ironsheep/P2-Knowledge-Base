@@ -63,7 +63,7 @@ promoted. Reconcile conventions against this roster at promotion.
 | Publication | Workspace | State |
 |-------------|-----------|-------|
 | Spin2 Reference Manual | `workspace/spin2-reference-manual/` | parked; may go forward |
-| P2 Architect's Guide *(provisional name)* | `manuals/p2-architect-guide/` | **planning** (2026-06-22) — slim orientation + functional-decomposition guide; the layer above the reference manuals. Charter: `manuals/p2-architect-guide/PLANNING.md`. Not yet a workspace/opus-master. |
+| P2 Architect's Guide *(provisional name)* | `manuals/p2-architect-guide/` + `workspace/p2-architect-guide/` | **in development — workspace stood up** (2026-06-22, v0.1.0) — slim orientation + functional-decomposition guide; the layer above the reference manuals. First manual born directly on the unified `p2kb-platform-*` stack. Charter: `manuals/p2-architect-guide/PLANNING.md`; build sprint: `engineering/planning/P2-ARCHITECT-GUIDE-FIRSTDRAFT-SPRINT-PLAN.md`. |
 
 ## Instruments (not publications)
 
