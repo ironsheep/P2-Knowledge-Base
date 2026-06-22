@@ -295,15 +295,234 @@ we'll launch a COG, drive a pin, and see how a real P2 program is actually shape
 
 # Putting It to Work
 
-<!-- TASK #95 (plan §4). USE the features; build comfort through doing. Still warm
-comfort register. SOURCES: deliverables/ai/P2/guides/spin2-getting-started.yaml,
-pasm2-getting-started.yaml; serial_loader.yaml / boot-rom/; deliverables/ai/P2/language/.
-PRIOR-ART / link-out: PASM2 Part I chapter-01-execution-model.md, chapter-06-address-modes.md.
-Launch a cog; drive a pin; the Spin2-vs-PASM2 DECISION (not a tutorial); object /
-run-time model; hub sharing; boot/run. Short pnut_ts-verified examples; link out for
-depth. Weave ::: p1note sidebars (hub egg-beater, clock setup, 64 pins). -->
+Now that you can picture the chip, let's use it. This chapter is about *doing* — by
+the end you'll have driven a pin, launched a second COG, shared data between COGs, and
+made the one decision every P2 program makes (Spin2 or PASM2?). The point isn't to
+teach you the whole language — the reference manuals do that, and we'll point you to
+them — it's to make the chip feel like something you can actually program. We'll keep
+the examples short, and every one of them compiles.
 
-> **[Chapter 2 — authored in task #95.]**
+A note before we start: P2 programs are written in **Spin2**, the P2's high-level
+language, and **PASM2**, its assembly language. Even a "pure assembly" program lives
+inside a Spin2 file structure. You don't need to know either language in depth to
+follow along — the examples are small and commented, and the goal is the *shape* of a
+P2 program, not its syntax.
+
+## Your first program: drive a pin
+
+Here is a complete, working P2 program. It blinks an LED.
+
+```spin2
+CON
+  _clkfreq = 200_000_000        ' system clock: 200 MHz
+  LED      = 56                 ' the pin our LED is on
+
+PUB main()
+  repeat                        ' do this forever
+    pinhigh(LED)                ' LED on
+    waitms(250)                 ' wait a quarter second
+    pinlow(LED)                 ' LED off
+    waitms(250)
+```
+
+That's the whole thing. A few things worth noticing, because they're true of every P2
+program:
+
+- The `CON` block holds **constants**. `_clkfreq` is the one constant you'll almost
+  always set — it tells the chip how fast to run (here, 200 MHz), and everything
+  time-related, like `waitms`, is measured against it. Giving the pin a name (`LED`)
+  instead of scattering the number `56` through your code is the habit we'll keep.
+- Execution starts at the **first `PUB` method** — here, `main`. That's the entry
+  point; the chip runs it on COG 0 when your program loads.
+- `pinhigh`, `pinlow`, and `waitms` are built-in Spin2 methods. Driving a pin really
+  is that direct — name the pin, set it high or low.
+
+💡 **Tip:** You don't load this onto the chip by hand — your development tool
+(PropellerTool, *pnut*, or the VS Code extension) compiles it and sends it over. For
+now, just read it as "this is what a P2 program looks like."
+
+::: p1note
+**P1 note — changed in P2:** Setting the clock is familiar, but simpler and more
+flexible on the P2: one `_clkfreq` constant near the top of your program, and the
+compiler works out the PLL settings for you. And pin numbers now run 0–63, not 0–31 —
+there are twice as many to reach for.
+:::
+
+## Adding a second COG
+
+A blinking LED uses one COG and ignores the other seven. The moment that matters is
+when you give a job to a COG of its own. You do that with `cogspin` — it takes a
+method to run, hands it to an available COG, and that COG starts running it *alongside*
+the one you're already on.
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  LED_A    = 56
+  LED_B    = 57
+
+VAR
+  long stack[64]                ' work space for the second COG
+
+PUB main() | cog
+  cog := cogspin(NEWCOG, blink(LED_A, 250), @stack)   ' hand the job to another COG
+  blink(LED_B, 1000)            ' this COG keeps the slower blink for itself
+
+PRI blink(pin, ms)
+  repeat
+    pintoggle(pin)
+    waitms(ms)
+```
+
+When this runs, **two COGs are blinking at once** — one COG flips `LED_A` four times a
+second, the other flips `LED_B` once a second, and neither one waits on the other.
+That's the P2's whole personality in five lines: when you want something to happen in
+parallel, you don't reach for a timer interrupt or a scheduler — you hand the job to a
+COG and let it run.
+
+Three details that generalize:
+
+- `NEWCOG` means "any free COG" — you usually don't care which one. `cogspin` returns
+  the COG number it actually used (or −1 if all eight were busy).
+- The new COG needs a little **stack** space in hub to work with; that's the
+  `long stack[64]` we hand it with `@stack` (the `@` means "the address of").
+- `blink` is written once and used by both COGs. A `PUB` method is the public face of
+  your code; a `PRI` method is private to the object. That `PUB`/`PRI` split *is* the
+  P2's run-time model in miniature, which we'll come back to.
+
+## Sharing data between COGs
+
+Independent COGs still need to talk. The simplest way is the hub: because hub memory is
+shared, a variable that lives there is visible to every COG. One COG writes it, another
+reads it — a mailbox.
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  LED      = 56
+
+VAR
+  long stack[64]
+  long count                    ' a hub variable — every COG can see it
+
+PUB main()
+  cogspin(NEWCOG, ticker(@count), @stack)   ' worker updates count in hub
+  repeat
+    if count & 1                ' read what the worker left for us
+      pinhigh(LED)
+    else
+      pinlow(LED)
+
+PRI ticker(p)
+  repeat
+    long[p]++                   ' bump the shared value in hub
+    waitms(100)
+```
+
+Here one COG does nothing but increment `count` ten times a second, and the other COG
+watches `count` and lights the LED on odd values. Neither COG calls the other; they
+just agree on a spot in hub memory. Single hub reads and writes are *atomic* — a COG
+always sees a whole value, never half-written — so this simple mailbox is safe. When a
+hand-off is more than one value, or several COGs might write at once, the P2 gives you
+**locks** (the 16 hardware locks from Chapter 1) to guard the exchange. The
+*P2 Assembly Language Manual* covers the coordination patterns in depth.
+
+::: p1note
+**P1 note — changed in P2:** Sharing through hub variables works just as it did on the
+P1, and locks are still how you guard a multi-step exchange. What changed underneath is
+the egg-beater hub access from Chapter 1: hand-offs and block transfers move faster and
+stay just as predictable.
+:::
+
+## Spin2 or PASM2? A decision, not a syntax tour
+
+Every P2 program makes one architectural choice, sometimes many times: should this
+piece of work be written in **Spin2** or **PASM2**? It helps to see it as a spectrum of
+three options, not a binary.
+
+- **Spin2** is the high-level language: objects, methods, expressions, easy to write
+  and to read. It runs as interpreted bytecode, so it's slower than assembly, but your
+  program can be large because the bytecodes live in the roomy hub. Reach for Spin2 for
+  application logic, coordination, setup, and anything not on a tight timing budget.
+- **PASM2** is native assembly: it runs at the deterministic two-clocks-per-instruction
+  speed from Chapter 1, with cycle-exact timing. Reach for a dedicated PASM2 COG when a
+  job must be fast and precise — a video driver, a bit-banged protocol, a tight control
+  loop.
+- **Inline PASM2** sits between them: a short burst of assembly dropped right inside a
+  Spin2 method, for when you need native speed for a moment without dedicating a whole
+  COG to it.
+
+That middle option looks like this — the same toggle, but done with one native
+instruction:
+
+```spin2
+CON
+  _clkfreq = 200_000_000
+  LED      = 56
+
+PUB main()
+  repeat
+    toggleFast(LED)
+    waitms(250)
+
+PRI toggleFast(pin)
+  org
+    drvnot  pin                 ' one native instruction, full speed
+  end
+```
+
+The `org … end` block is real PASM2 running inside a Spin2 method. You don't need to
+read assembly to take the point: the P2 lets you stay in comfortable Spin2 for most of
+a program and drop to the metal exactly where it pays off.
+
+The honest guidance is the one most experienced P2 developers converge on: **write the
+application in Spin2, and give the time-critical jobs their own PASM2 COGs.** A typical
+P2 program uses both, and that's not a compromise — it's the intended shape. For the
+full languages, the *Spin2 Language Reference* and the *P2 Assembly Language Manual*
+are the deep references; this guide only wants you to know *which* tool fits *which*
+job.
+
+## Objects and the run-time model
+
+A P2 program is built from **objects**. An object is a file with its own constants,
+variables, and methods; you pull one in with an `OBJ` block and call its methods
+through a name:
+
+```
+OBJ
+  serial : "jm_fullduplexserial"   ' a driver object, by filename
+
+PUB main()
+  serial.start(63, 62, 115_200)    ' call one of its methods
+```
+
+That's how you use the community's drivers and your own: each object minds its own data
+and exposes methods, and your top-level object wires them together. It's the same
+mental model as the `PUB`/`PRI` split you've already seen — public methods are the
+object's interface, private ones are its internals — scaled up to whole files. The
+*Spin2 Language Reference* is the place for the full object model (instances, arrays of
+objects, parameter passing).
+
+## How it boots and runs
+
+You've now seen the run model without us naming it. When the P2 powers up, the boot ROM
+from Chapter 1 loads your program and starts your **first `PUB` method on COG 0**. From
+there, *your* code is in charge: COG 0 runs your top object's `main`, and it launches
+whatever other COGs the design needs with `cogspin` (for Spin2) or its assembly cousin
+`coginit` (for a dedicated PASM2 COG). There's no operating system underneath deciding
+what runs — the COGs you start are the COGs that run, exactly as you arranged them.
+
+That is the entire run-time story: boot loads you, COG 0 starts your `main`, and your
+program spreads itself across as many of the eight COGs as it needs.
+
+## Where this leaves us
+
+You can now read and shape a real P2 program: set the clock, drive a pin, launch a COG,
+share data through hub, choose Spin2 or PASM2 for a given job, and compose objects. That
+is genuinely enough to build things. What it doesn't yet tell you is *how to decide what
+goes on which COG* in the first place — how to look at a whole problem and carve it into
+the right set of cooperating pieces. That decision is where the P2 rewards a little real
+thought, and it's what the final chapter is about.
 
 # Thinking in P2 (Functional Decomposition)
 
