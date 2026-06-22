@@ -40,11 +40,12 @@ eliminated the v3.0 black-image/false-success failure class at the source.
 - **Detailed OCR done (4):** image12, image16, image18, image4 — one per major diagram
   family (I/O timing, NCO register-value, encoder, PWM-parameter). These carry the
   **checkable register/timing values** used in pass-6 cross-validation.
-- **OCR enhancement debt (17):** remaining timing waveforms. OCR is noisy on dense
-  waveform glyphs (raster `0`→`@`, tick marks → `|`); low value-per-effort for pure
-  waveforms with few register labels. Queued as image-enhancement debt; not blocking
-  (Titus is a 🟡 cross-check source — its figures corroborate, they are not the primary
-  authority for any published fact).
+- **OCR enhancement debt (17): WON'T-DO** (closed 2026-06-22). Remaining timing waveforms.
+  OCR is noisy on dense waveform glyphs (raster `0`→`@`, tick marks → `|`); low
+  value-per-effort for pure waveforms with few register labels. **Titus is DETUNED** —
+  superseded by the IOSP "Blue Book" manual, which carries our own generated figures, so
+  Titus's figures are never published; they only corroborate (🟡 cross-check). No further
+  OCR investment.
 
 ## Pass-6 cross-validation hooks (figure content → evidence)
 - **image16 (NCO):** X[31:16] step sequence $0000→$E060 (increment $5010) — corroborate
