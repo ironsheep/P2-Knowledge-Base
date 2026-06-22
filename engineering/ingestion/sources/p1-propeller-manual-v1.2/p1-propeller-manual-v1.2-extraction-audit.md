@@ -14,13 +14,18 @@ uses the current PDF toolkit to capture prose, code, **vector figures**, and **r
 |------|-----------|--------|
 | Content (prose) | `pdf-layout` (pdftotext -layout) | ✅ complete, clean, indent-preserving; 399 pp / 14,574 lines. Text layer verified non-ciphered (no OCR needed). |
 | Content (tables) | `camelot lattice` (`--format csv/markdown`) | ✅ clean ruled-table → structured extraction (Specs, CLK reg, pins, instruction tables). Minor cell-merge artifacts on a few. |
-| Content (high-fidelity md) | `pdf2md` (docling) | ❌ **OOM** on 399 pp at ~2 GB free RAM; no page-range flag in this build. **Superseded by camelot for tables** — docling not needed here. |
+| Content (high-fidelity md) | `pdf2md` (docling, `--no-ocr --table-mode accurate`) | ✅ **completed ~19 min for 399 pp** → `p1-propeller-manual-v1.2-docling.md` (5 MB; 2,190 table rows, 1,080 headings; CLK bit-field tables cleaner than camelot's). **Correction:** earlier in this session I mis-recorded docling as "OOM" — it did NOT OOM; my first two attempts were killed by a self-matching `pkill`. docling works here, just slow → run it in the background. No page-range flag in this build (whole-doc only). |
 | Code | `pdf-layout` → (flexspin deferred) | ✅ extraction faithful (indent + inline comments intact); validation pending flexspin. |
 | Images | `pdfimages` → **page-render + crop + image-tools-mcp** | ✅ — but `pdfimages` found only **7 unique rasters / 163 objects** (figures are vector). Page-render+crop captured all 14 figures; image-tools-mcp OCR + quality-gate confirmed. |
 
-**Methodology finding (routed to Pass 7 / methodology docs):** for diagram-heavy P1/P2 source PDFs,
-raster XObject extraction (`pdfimages`/PyMuPDF) is the wrong default — it silently misses vector line-art.
-Page-render+crop is the correct figure workflow. `image-extraction-methodology.md` still assumes raster-first.
+**Methodology findings (routed to Pass 7 / methodology docs):**
+1. For diagram-heavy P1/P2 source PDFs, raster XObject extraction (`pdfimages`/PyMuPDF) is the wrong default
+   — it silently misses vector line-art. Page-render+crop is the correct figure workflow.
+   (`image-extraction-methodology.md` still assumes raster-first.)
+2. `pdf2md`/docling is the **best structured full-doc tool** (prose + real markdown tables) but **slow
+   (~19 min/399 pp on CPU)** — launch it in the background early; `--no-ocr` when the text layer is clean.
+   It does **not** OOM (earlier "OOM" was a self-inflicted-`pkill` misdiagnosis, corrected here). `camelot
+   lattice` remains the fast path for a few targeted ruled tables.
 
 ## Section-by-section completeness
 | Part | Pages | Captured | Depth |

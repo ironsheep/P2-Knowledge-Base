@@ -24,8 +24,9 @@
 > **Correct PDF-only figure workflow:** `pdftoppm` page-render (200 dpi) → crop the figure region (PIL) →
 > `image-tools-mcp` OCR + quality-gate. Use `pdfimages` only when figures are confirmed genuine rasters
 > (photos, bitmaps, screenshots). Certified case: `sources/p1-propeller-manual-v1.2/` (image-catalog.md +
-> extraction-audit.md). Note: `pdf2md`/docling can OOM on large docs at low RAM — use `camelot lattice` for
-> ruled tables.
+> extraction-audit.md). Note: `pdf2md`/docling gives the best structured full-doc markdown (prose + tables)
+> but is slow (~19 min/399 pp) — run it in the background; `camelot lattice` is the fast path for a few
+> targeted ruled tables.
 
 ## Overview
 Advanced systematic workflow for extracting, documenting, and enriching images from source documents with **coordinate-aware rescue system** to handle failed extractions and ensure 100% success rate.
