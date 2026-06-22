@@ -16,6 +16,11 @@ section collects them for the visual pass once the draft is reviewed.
       placeholders after the chapters are authored; list each here with its
       chapter + within-chapter location, then build TikZ `\Diag*` macros in
       `templates/p2kb-architect-diagrams.sty` (model: the Streamer diagrams stack).
+  - **Ch1 (Meet the P2), opener** — "the whole chip at a glance": 8 COGs around a
+    central hub, ring of 64 smart pins on the outside.
+  - **Ch1, §Memory** — the three memory tiers: private COG RAM + LUT beside each
+    processor, shared hub in the middle.
+  - *(Ch2/Ch3 figure placeholders appended as those chapters are authored.)*
 - [ ] **Emoji / marker glyph render-watch** — if any ⚠️/💡/🔧-style markers are used,
       confirm they render on the first Forge build (family-consistent fallback to
       symbol macros if they box).
