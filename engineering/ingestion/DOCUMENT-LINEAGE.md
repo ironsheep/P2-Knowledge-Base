@@ -25,6 +25,7 @@ must preserve fidelity; this doc is the map of those links.
 | Debug Window User Guide | spin2 (DEBUG) · _(verify)_ | _(verify)_ |
 | P2 Assembly Programming (deSilva-style) | authored · silicon-doc · pnut-ts | — |
 | `hardware/addon-hyperram-hyperflash.yaml` _(to author — F-122)_ | **hyperRam-n-hyperFlash** (#64004-ES Product Guide, ingested 2026-06-22) | board schematic (Rev A, title-block only) |
+| `hardware/addon-*.yaml` ×8 _(to rebuild — F-121)_ | **p2-eval-add-on-boards** per-board docs `boards/addon-*.md` (2025 `#64006`, ingested 2026-06-22) | 2020 `#64006-ES` set edition (cross-edition, forced-OCR) |
 | **YAML KB** (`deliverables/ai/P2`) | all qualified sources | _(re-ground)_ |
 | _(future)_ P1 outputs | p1-propeller-manual · p1-datasheet | desilva-p1-tutorial |
 
