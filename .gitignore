@@ -42,6 +42,9 @@ central-skills-staging/
 # Parallel ingestion-wave staging (transient; map agents stage here, ingest-wrap-reduce promotes + tears down)
 engineering/ingestion/_staging/
 
+# Reference tools staged into the container but never versioned (e.g. flexspin binary)
+REF-TOOLS-NO-COMMIT/
+
 # Log files
 *.log
 

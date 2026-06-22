@@ -27,26 +27,39 @@ P1 is a mature product; its documentary sources are golden:
 ## 2. Authority order (conflict resolution)
 ```
 empirical P1 hardware test (reserved; none yet)
-  → [P1 compiler validator — PENDING, §3]
-  → P1 Propeller Manual errata (correction layer)
-  → P1 Propeller Manual v1.2
-  → P1 Datasheet v1.4
-  → Parallax app notes / tutorials
+  → P1 Propeller Manual errata (correction layer)   [golden]
+  → P1 Propeller Manual v1.2                          [golden]
+  → P1 Datasheet v1.4                                 [golden]
+  → Parallax app notes / tutorials                    [golden, narrower]
+  → flexspin compile-check  (community compiler — see §3)
   → deSilva / community
   → (designer Chip Gracey settles the residue)
 ```
 Note the **errata outranks the base Manual** on any point it corrects.
 
-## 3. The P1 code validator — PENDING (graceful degradation)
-**Environment check (2026-06-22):** only `pnut-ts` (P2) is installed — **no P1 compiler, no Java.**
-- **Candidates:** (a) **Spin Tools IDE** headless — P1+P2 capable but **Java** (would need Java added to the
-  devcontainer); (b) **flexspin** — CLI-native, compiles P1+P2, already used elsewhere in the fleet, no GUI/Java
-  dependency. Decision deferred to Stephen's investigation.
-- **Degradation rule (so the campaign never blocks):** extract + catalog all P1 code **now**, marking each
-  example `code_validated: false (pending P1 compiler)`. **When a headless P1 compiler is confirmed**, run a
-  one-time **validation sweep** over all extracted P1 code (mirroring the `pnut_ts -d` discipline) and flip the
-  flags. Until then, P1 code is *documentary-extracted, not compiler-verified* — and the dashboard's `K` cell
-  reflects that honestly.
+> **Key difference from P2.** In P2 the *ratified* `pnut_ts` tops the documentary sources — where the compiler
+> and a doc disagree, the compiler wins. **P1 is inverted:** its validator (`flexspin`) is a **community
+> compiler, less trusted than the golden Parallax docs.** So flexspin confirms code *compiles*, but where it
+> would imply a semantic that contradicts the Manual/errata/datasheet, **the golden docs win.** flexspin sits
+> *below* the documentary spine, not above it.
+
+## 3. The P1 code validator — `flexspin` (DECIDED), community-tier
+**Chosen:** **flexspin** (CLI-native, compiles P1+P2, no Java/GUI dependency, fleet-proven). It is the P1
+analog of `pnut_ts` *mechanically*, but **not in trust:** flexspin is a **community compiler, less trusted than
+`pnut_ts` and below the golden P1 docs** (§2). Its job is a **compile-check** — does the extracted code build? —
+and to catch malformed extractions. It is **not** a semantic authority: a flexspin result never overrides the
+Manual/errata/datasheet on what a feature *means*; a flexspin-vs-doc disagreement is a finding to resolve by §2,
+usually doc-wins.
+
+- **Install status (2026-06-22):** environment has only `pnut-ts` (P2); **no P1 compiler, no Java.** Container is
+  **linux-aarch64** → need a **flexspin linux-arm64 build**. Staged (NO-COMMIT) in `REF-TOOLS-NO-COMMIT/`;
+  install path = a `postCreateCommand` line that copies it from the bind-mounted dir to `~/.local/bin` (survives
+  rebuilds without committing the binary — unlike the committed `pnut-ts` zip). _Awaiting the binary/source drop._
+- **Degradation rule (so the campaign never blocks):** until flexspin is installed, extract + catalog P1 code
+  marking each `code_validated: false (pending flexspin)`; once installed, run a one-time **validation sweep**
+  over all extracted P1 code and flip the flags. The dashboard `K` cell reflects validated-vs-extracted honestly.
+- **Provenance to record:** because flexspin is community-tier, every flexspin-validated example carries that the
+  check was flexspin (not a ratified Parallax tool) — so trust is never overstated downstream.
 
 ## 4. Register architecture — separate P1 files, namespaced IDs (RECOMMENDED)
 Keep P1 self-contained; do **not** intermix with the P2 registers:
@@ -86,8 +99,8 @@ Keep P1 self-contained; do **not** intermix with the P2 registers:
    **first real certification** of the wave skills (a 10+ document batch — exactly their purpose).
 
 ## 8. Open decisions (inputs needed to finalize)
-1. **P1 compiler** — Spin Tools IDE (headless, needs Java in the container) vs flexspin (CLI-native, fleet-used)
-   vs accept documentary-only for now. (Charter works regardless — §3.)
+1. **P1 compiler** — ✅ **DECIDED: flexspin** (community-tier, §3). Install pending the **linux-arm64** binary/source
+   drop into `REF-TOOLS-NO-COMMIT/`; wired via `postCreateCommand` (NO-COMMIT, survives rebuilds).
 2. **Dashboard placement** — a standalone `P1-INGESTION-DASHBOARD.md`, or a delimited P1 section inside the
    existing `engineering/ingestion/README.md`? (Recommend standalone for blast-radius separation, linked from the main dashboard.)
 3. **Corrections routing** — a separate `P1-CORRECTION-FINDINGS.md`, or `F-P1-` entries in the existing register? (Recommend separate, consistent with §4.)
